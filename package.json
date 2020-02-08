@@ -1,9 +1,9 @@
 {
-  "name": "gdal",
-  "version": "0.9.9",
-  "description": "Bindings to GDAL (Geospatial Data Abstraction Library)",
+  "name": "gdal-next",
+  "version": "1.0.0",
+  "description": "Bindings to GDAL (Geospatial Data Abstraction Library) [Fork]",
   "license": "Apache-2.0",
-  "url": "http://github.com/naturalatlas/node-gdal",
+  "url": "http://github.com/contra/node-gdal-next",
   "main": "./lib/gdal.js",
   "keywords": [
     "gdal",
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/naturalatlas/node-gdal.git"
+    "url": "git://github.com/contra/node-gdal-next.git"
   },
   "author": {
     "name": "Brandon Reavis",
