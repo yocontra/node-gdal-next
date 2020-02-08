@@ -12,14 +12,14 @@ else
 fi
 
 # set up directory
-mkdir gdal2
-cd gdal2
+mkdir gdal-trunk
+cd gdal2-trunk
 
 # download trunk (http://trac.osgeo.org/gdal/browser/trunk)
 svn checkout https://svn.osgeo.org/gdal/trunk/gdal gdal --non-interactive --trust-server-cert
 cd gdal
 
 # compile and install
-./configure --with-png=internal --with-jpeg=internal --with-geotiff=internal --with-libtiff=internal
+./configure --with-png=internal --with-jpeg=internal --with-geotiff=internal --with-libtiff=internal --with-sqlite3=internal
 make
 sudo make install

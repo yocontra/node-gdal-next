@@ -60,6 +60,7 @@
 			"./gyp-formats/zlib.gyp:libgdal_zlib_frmt",
 			"./gyp-formats/jpeg.gyp:libgdal_jpeg_frmt",
 			"./gyp-formats/png.gyp:libgdal_png_frmt",
+			"./gyp-formats/mbtiles.gyp:libgdal_mbtiles_frmt",
 			"./gyp-formats/ogr_shape.gyp:libgdal_ogr_shape_frmt",
 			"./gyp-formats/ogr_vrt.gyp:libgdal_ogr_vrt_frmt",
 			"./gyp-formats/ogr_avc.gyp:libgdal_ogr_avc_frmt",
@@ -96,10 +97,14 @@
 			"./gyp-formats/ogr_sxf.gyp:libgdal_ogr_sxf_frmt",
 			"./gyp-formats/ogr_ntf.gyp:libgdal_ogr_ntf_frmt",
 			"./gyp-formats/ogr_xplane.gyp:libgdal_ogr_xplane_frmt",
-			"./gyp-formats/ogr_wasp.gyp:libgdal_ogr_wasp_frmt"
+			"./gyp-formats/ogr_wasp.gyp:libgdal_ogr_wasp_frmt",
+			"./gyp-formats/ogr_sqlite.gyp:libgdal_ogr_sqlite_frmt",
+			"./gyp-formats/ogr_gpkg.gyp:libgdal_ogr_gpkg_frmt",
+			"./gyp-formats/ogr_mvt.gyp:libgdal_ogr_mvt_frmt",
+			"./gyp-formats/ogr_osm.gyp:libgdal_ogr_osm_frmt"
 		],
 		"gdal_format_defs": [
-			"GDAL_FORMATS=gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm sdts raw dted mem jdem envisat elas fit vrt usgsdem l1b nitf bmp pcidsk airsar rs2 ilwis rmf leveller sgi srtmhgt idrisi gsg ingr ers jaxapalsar dimap gff cosar pds adrg coasp tsx terragen blx til r northwood saga xyz hf2 kmlsuperoverlay ctg e00grid zmap ngsgeoid iris map zlib jpeg png ",
+			"GDAL_FORMATS=gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm sdts raw dted mem jdem envisat elas fit vrt usgsdem l1b nitf bmp pcidsk airsar rs2 ilwis rmf leveller sgi srtmhgt idrisi gsg ingr ers jaxapalsar dimap gff cosar pds adrg coasp tsx terragen blx til r northwood saga xyz hf2 kmlsuperoverlay ctg e00grid zmap ngsgeoid iris map zlib jpeg png mbtiles ",
 			"FRMT_gtiff=1",
 			"FRMT_hfa=1",
 			"FRMT_aigrid=1",
@@ -159,6 +164,7 @@
 			"FRMT_zlib=1",
 			"FRMT_jpeg=1",
 			"FRMT_png=1",
+			"FRMT_mbtiles=1",
 			"SHAPE_ENABLED=1",
 			"VRT_ENABLED=1",
 			"AVC_ENABLED=1",
@@ -196,7 +202,11 @@
 			"SXF_ENABLED=1",
 			"NTF_ENABLED=1",
 			"XPLANE_ENABLED=1",
-			"WASP_ENABLED=1"
+			"WASP_ENABLED=1",
+			"SQLITE_ENABLED=1",
+			"GPKG_ENABLED=1",
+			"MVT_ENABLED=1",
+			"OSM_ENABLED=1"
 		]
 	}
 }

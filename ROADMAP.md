@@ -4,7 +4,6 @@
 - Update the test and build matrix to support every node version >= 10
   - Get all of the tests passing for these versions
   - Get prebuilt binaries published for these versions
-- Add GPKG support (possible now that the dependencies are updated)
 
 # v2.0.0
 
@@ -12,6 +11,7 @@
   - Normalize the build system for this package to match more recent native modules like node-sqlite
 - Automate the yuidoc publishing
 - Build out an async API
+- Add a streaming API for parsing files
 - Find a way to keep the dependency source code out of the repository to reduce noise
 - Reduce the number of manual patching done in the gdal format gyp files
 - Automate dependency updates and prebuilt binaries for new node releases

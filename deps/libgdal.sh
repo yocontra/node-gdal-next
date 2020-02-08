@@ -45,13 +45,13 @@ GDAL_FORMATS="gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm
 	idrisi gsg ingr ers jaxapalsar dimap gff cosar pds adrg
 	coasp tsx terragen blx til r northwood saga xyz hf2
 	kmlsuperoverlay ctg e00grid zmap ngsgeoid iris map zlib
-	jpeg png
+	jpeg png mbtiles
 	${OPT_GDAL_FORMATS:-}"
 
 OGR_FORMATS="shape vrt avc geojson mem mitab kml gpx aeronavfaa
 	bna dxf csv edigeo geoconcept georss gml gmt gpsbabel gtm htf
 	idrisi dgn openair openfilegdb pds pgdump rec s57 sdts segukooa
-	segy sua svg sxf ntf xplane wasp"
+	segy sua svg sxf ntf xplane wasp sqlite gpkg mvt osm"
 
 mkdir -p $dir_formats_gyp
 

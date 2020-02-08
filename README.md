@@ -2,14 +2,17 @@
 
 This project is a fork of https://github.com/naturalatlas/node-gdal that:
 
-- Updates dependencies
+- Updates native dependencies (GDAL/PROJ/GEOS)
 - Updates the build system for newer versions of node
-- Modernizes the project a bit for newer versions of node
-- Provides prebuilt versions
+- Adds support for more formats
+  - GPKG, sqlite, OSM, MBTiles, MVT
+- Modernizes the JS for newer versions of node
+- Provides prebuilt versions for node 10+
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
 # node-gdal-next
+
 [![NPM version](http://img.shields.io/npm/v/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
 [![Installs](http://img.shields.io/npm/dm/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
 [![Build Status](https://travis-ci.org/contra/node-gdal-next.svg)](https://travis-ci.org/contra/node-gdal-next)
@@ -31,26 +34,29 @@ $ npm install gdal-next --build-from-source --shared_gdal
 ## Sample Usage
 
 #### Raster
-```js
-var gdal = require("gdal-next");
-var dataset = gdal.open("sample.tif");
 
-console.log("number of bands: " + dataset.bands.count());
-console.log("width: " + dataset.rasterSize.x);
-console.log("height: " + dataset.rasterSize.y);
-console.log("geotransform: " + dataset.geoTransform);
-console.log("srs: " + (dataset.srs ? dataset.srs.toWKT() : 'null'));
+```js
+const gdal = require("gdal-next")
+const dataset = gdal.open("sample.tif")
+
+console.log("number of bands: " + dataset.bands.count())
+console.log("width: " + dataset.rasterSize.x)
+console.log("height: " + dataset.rasterSize.y)
+console.log("geotransform: " + dataset.geoTransform)
+console.log("srs: " + (dataset.srs ? dataset.srs.toWKT() : 'null'))
 ```
-#### Vector
-```js
-var gdal = require("gdal-next");
-var dataset = gdal.open("sample.shp");
-var layer = dataset.layers.get(0);
 
-console.log("number of features: " + layer.features.count());
-console.log("fields: " + layer.fields.getNames());
-console.log("extent: " + JSON.stringify(layer.extent));
-console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'));
+#### Vector
+
+```js
+const gdal = require("gdal-next")
+const dataset = gdal.open("sample.shp")
+const layer = dataset.layers.get(0)
+
+console.log("number of features: " + layer.features.count())
+console.log("fields: " + layer.fields.getNames())
+console.log("extent: " + JSON.stringify(layer.extent))
+console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
 ```
 
 ## Notes
@@ -58,7 +64,8 @@ console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'));
 - This binding is *not* async, so it will block node's event loop. Be very careful (or avoid) using it in server code. We recommended using tools like [worker-farm](https://www.npmjs.com/package/worker-farm) to push expensive operations to a seperate process.
 
 ## Bundled Drivers
-`AAIGrid`, `ACE2`, `ADRG`, `AIG`, `AVCBin`, `AVCE00`, `AeronavFAA`, `AirSAR`, `BLX`, `BMP`, `BNA`, `BT`, `CEOS`, `COASP`, `COSAR`, `CPG`, `CSV`, `CTG`, `CTable2`, `DGN`, `DIMAP`, `DIPEx`, `DOQ1`, `DOQ2`, `DTED`, `DXF`, `E00GRID`, `ECRGTOC`, `EDIGEO`, `EHdr`, `EIR`, `ELAS`, `ENVI`, `ERS`, `ESAT`, `ESRI Shapefile`, `MapInfo File`, `FAST`, `FIT`, `FujiBAS`, `GFF`, `GML`, `GPSBabel`, `GPSTrackMaker`, `GPX`, `GRASSASCIIGrid`, `GS7BG`, `GSAG`, `GSBG`, `GSC`, `GTX`, `GTiff`, `GenBin`, `GeoJSON`, `GeoRSS`, `Geoconcept`, `HF2`, `HFA`, `HTF`, `IDA`, `ILWIS`, `INGR`, `IRIS`, `ISIS2`, `ISIS3`, `Idrisi`, `JAXAPALSAR`, `JDEM`, `JPEG`, `KMLSUPEROVERLAY`, `KML`, `KRO`, `L1B`, `LAN`, `LCP`, `LOSLAS`, `Leveller`, `MAP`, `MEM`, `MFF2`, `MFF`, `Memory`, `NDF`, `NGSGEOID`, `NITF`, `NTv2`, `NWT_GRC`, `NWT_GRD`, `OGR_GMT`, `OGR_PDS`, `OGR_SDTS`, `OGR_VRT`, `OpenAir`, `OpenFileGDB`, `PAux`, `PCIDSK`, `PDS`, `PGDUMP`, `PNG`, `PNM`, `REC`, `RMF`, `ROI_PAC`, `RPFTOC`, `RS2`, `RST`, `R`, `S57`, `SAGA`, `SAR_CEOS`, `SDTS`, `SEGUKOOA`, `SEGY`, `SGI`, `SNODAS`, `SRP`, `SRTMHGT`, `SUA`, `SVG`, `SXF`, `TIL`, `TSX`, `Terragen`, `UK .NTF`, `USGSDEM`, `VICAR`, `VRT`, `WAsP`, `XPM`, `XPlane`, `XYZ`, `ZMap`
+
+`AAIGrid`, `ACE2`, `ADRG`, `AIG`, `AVCBin`, `AVCE00`, `AeronavFAA`, `AirSAR`, `BLX`, `BMP`, `BNA`, `BT`, `CEOS`, `COASP`, `COSAR`, `CPG`, `CSV`, `CTG`, `CTable2`, `DGN`, `DIMAP`, `DIPEx`, `DOQ1`, `DOQ2`, `DTED`, `DXF`, `E00GRID`, `ECRGTOC`, `EDIGEO`, `EHdr`, `EIR`, `ELAS`, `ENVI`, `ERS`, `ESAT`, `ESRI Shapefile`, `MapInfo File`, `MBTiles`, `FAST`, `FIT`, `FujiBAS`, `GFF`, `GML`, `GPSBabel`, `GPSTrackMaker`, `GPX`, `GRASSASCIIGrid`, `GS7BG`, `GSAG`, `GSBG`, `GSC`, `GTX`, `GTiff`, `GenBin`, `GeoJSON`, `GeoRSS`, `Geoconcept`, `GPKG`, `HF2`, `HFA`, `HTF`, `IDA`, `ILWIS`, `INGR`, `IRIS`, `ISIS2`, `ISIS3`, `Idrisi`, `JAXAPALSAR`, `JDEM`, `JPEG`, `KMLSUPEROVERLAY`, `KML`, `KRO`, `L1B`, `LAN`, `LCP`, `LOSLAS`, `Leveller`, `MAP`, `MEM`, `MFF2`, `MFF`, `Memory`, `MVT`, `NDF`, `NGSGEOID`, `NITF`, `NTv2`, `NWT_GRC`, `NWT_GRD`, `OGR_GMT`, `OGR_PDS`, `OGR_SDTS`, `OGR_VRT`, `OSM`, `OpenAir`, `OpenFileGDB`, `PAux`, `PCIDSK`, `PDS`, `PGDUMP`, `PNG`, `PNM`, `REC`, `RMF`, `ROI_PAC`, `RPFTOC`, `RS2`, `RST`, `R`, `S57`, `SAGA`, `SAR_CEOS`, `SDTS`, `SEGUKOOA`, `SEGY`, `SGI`, `SNODAS`, `SQLite`, `SRP`, `SRTMHGT`, `SUA`, `SVG`, `SXF`, `TIL`, `TSX`, `Terragen`, `UK .NTF`, `USGSDEM`, `VICAR`, `VRT`, `WAsP`, `XPM`, `XPlane`, `XYZ`, `ZMap`
 
 ## Contributors
 

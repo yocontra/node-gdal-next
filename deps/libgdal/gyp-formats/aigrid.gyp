@@ -10,7 +10,7 @@
 				"../gdal/frmts/aigrid/aigccitt.c",
 				"../gdal/frmts/aigrid/aigdataset.cpp",
 				"../gdal/frmts/aigrid/aigopen.c",
-				"../gdal/frmts/aigrid/aitest.c",
+				# "../gdal/frmts/aigrid/aitest.c",
 				"../gdal/frmts/aigrid/gridlib.c"
 			],
 			"include_dirs": [
