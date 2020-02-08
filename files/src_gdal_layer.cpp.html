@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/gdal_layer.cpp - node-gdal</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/lucid.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="node-gdal" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/GDALLogoColor.svg/200px-GDALLogoColor.svg.png" style="max-height: 65%;" title="node-gdal">
+            node-gdal
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.0.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Constants (CPL Error Codes)", "classes/Constants (CPL Error Levels)", "classes/Constants (DCAP)", "classes/Constants (DMD)", "classes/Constants (GCI)", "classes/Constants (GDT)", "classes/Constants (GRA)", "classes/Constants (ODsC)", "classes/Constants (OFT)", "classes/Constants (OJ)", "classes/Constants (OLC)", "classes/Constants (wkbByteOrder)", "classes/Constants (wkbGeometryType)", "classes/Constants (wkbVariant)", "classes/gdal", "classes/gdal.CoordinateTransformation", "classes/gdal.Dataset", "classes/gdal.DatasetBands", "classes/gdal.DatasetLayers", "classes/gdal.Driver", "classes/gdal.Envelope", "classes/gdal.Envelope3D", "classes/gdal.Feature", "classes/gdal.FeatureDefn", "classes/gdal.FeatureDefnFields", "classes/gdal.FeatureFields", "classes/gdal.FieldDefn", "classes/gdal.GDALDrivers", "classes/gdal.Geometry", "classes/gdal.GeometryCollection", "classes/gdal.GeometryCollectionChildren", "classes/gdal.Layer", "classes/gdal.LayerFeatures", "classes/gdal.LayerFields", "classes/gdal.LinearRing", "classes/gdal.LineString", "classes/gdal.LineStringPoints", "classes/gdal.MultiLineString", "classes/gdal.MultiPoint", "classes/gdal.MultiPolygon", "classes/gdal.Point", "classes/gdal.Polygon", "classes/gdal.PolygonRings", "classes/gdal.RasterBand", "classes/gdal.RasterBandOverviews", "classes/gdal.RasterBandPixels", "classes/gdal.SpatialReference"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Constants (CPL Error Codes).html">Constants (CPL Error Codes)</a></li>
+                <li><a href="../classes/Constants (CPL Error Levels).html">Constants (CPL Error Levels)</a></li>
+                <li><a href="../classes/Constants (DCAP).html">Constants (DCAP)</a></li>
+                <li><a href="../classes/Constants (DMD).html">Constants (DMD)</a></li>
+                <li><a href="../classes/Constants (GCI).html">Constants (GCI)</a></li>
+                <li><a href="../classes/Constants (GDT).html">Constants (GDT)</a></li>
+                <li><a href="../classes/Constants (GRA).html">Constants (GRA)</a></li>
+                <li><a href="../classes/Constants (ODsC).html">Constants (ODsC)</a></li>
+                <li><a href="../classes/Constants (OFT).html">Constants (OFT)</a></li>
+                <li><a href="../classes/Constants (OJ).html">Constants (OJ)</a></li>
+                <li><a href="../classes/Constants (OLC).html">Constants (OLC)</a></li>
+                <li><a href="../classes/Constants (wkbByteOrder).html">Constants (wkbByteOrder)</a></li>
+                <li><a href="../classes/Constants (wkbGeometryType).html">Constants (wkbGeometryType)</a></li>
+                <li><a href="../classes/Constants (wkbVariant).html">Constants (wkbVariant)</a></li>
+                <li><a href="../classes/gdal.html">gdal</a></li>
+                <li><a href="../classes/gdal.CoordinateTransformation.html">gdal.CoordinateTransformation</a></li>
+                <li><a href="../classes/gdal.Dataset.html">gdal.Dataset</a></li>
+                <li><a href="../classes/gdal.DatasetBands.html">gdal.DatasetBands</a></li>
+                <li><a href="../classes/gdal.DatasetLayers.html">gdal.DatasetLayers</a></li>
+                <li><a href="../classes/gdal.Driver.html">gdal.Driver</a></li>
+                <li><a href="../classes/gdal.Envelope.html">gdal.Envelope</a></li>
+                <li><a href="../classes/gdal.Envelope3D.html">gdal.Envelope3D</a></li>
+                <li><a href="../classes/gdal.Feature.html">gdal.Feature</a></li>
+                <li><a href="../classes/gdal.FeatureDefn.html">gdal.FeatureDefn</a></li>
+                <li><a href="../classes/gdal.FeatureDefnFields.html">gdal.FeatureDefnFields</a></li>
+                <li><a href="../classes/gdal.FeatureFields.html">gdal.FeatureFields</a></li>
+                <li><a href="../classes/gdal.FieldDefn.html">gdal.FieldDefn</a></li>
+                <li><a href="../classes/gdal.GDALDrivers.html">gdal.GDALDrivers</a></li>
+                <li><a href="../classes/gdal.Geometry.html">gdal.Geometry</a></li>
+                <li><a href="../classes/gdal.GeometryCollection.html">gdal.GeometryCollection</a></li>
+                <li><a href="../classes/gdal.GeometryCollectionChildren.html">gdal.GeometryCollectionChildren</a></li>
+                <li><a href="../classes/gdal.Layer.html">gdal.Layer</a></li>
+                <li><a href="../classes/gdal.LayerFeatures.html">gdal.LayerFeatures</a></li>
+                <li><a href="../classes/gdal.LayerFields.html">gdal.LayerFields</a></li>
+                <li><a href="../classes/gdal.LinearRing.html">gdal.LinearRing</a></li>
+                <li><a href="../classes/gdal.LineString.html">gdal.LineString</a></li>
+                <li><a href="../classes/gdal.LineStringPoints.html">gdal.LineStringPoints</a></li>
+                <li><a href="../classes/gdal.MultiLineString.html">gdal.MultiLineString</a></li>
+                <li><a href="../classes/gdal.MultiPoint.html">gdal.MultiPoint</a></li>
+                <li><a href="../classes/gdal.MultiPolygon.html">gdal.MultiPolygon</a></li>
+                <li><a href="../classes/gdal.Point.html">gdal.Point</a></li>
+                <li><a href="../classes/gdal.Polygon.html">gdal.Polygon</a></li>
+                <li><a href="../classes/gdal.PolygonRings.html">gdal.PolygonRings</a></li>
+                <li><a href="../classes/gdal.RasterBand.html">gdal.RasterBand</a></li>
+                <li><a href="../classes/gdal.RasterBandOverviews.html">gdal.RasterBandOverviews</a></li>
+                <li><a href="../classes/gdal.RasterBandPixels.html">gdal.RasterBandPixels</a></li>
+                <li><a href="../classes/gdal.SpatialReference.html">gdal.SpatialReference</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
+        </div>
+        <div class="span9">
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>src/gdal_layer.cpp <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+
+#include &quot;gdal_common.hpp&quot;
+#include &quot;gdal_layer.hpp&quot;
+#include &quot;gdal_feature.hpp&quot;
+#include &quot;gdal_feature_defn.hpp&quot;
+#include &quot;gdal_field_defn.hpp&quot;
+#include &quot;gdal_spatial_reference.hpp&quot;
+#include &quot;gdal_dataset.hpp&quot;
+#include &quot;gdal_geometry.hpp&quot;
+#include &quot;collections/layer_features.hpp&quot;
+#include &quot;collections/layer_fields.hpp&quot;
+
+#include &lt;stdlib.h&gt;
+#include &lt;sstream&gt;
+
+namespace node_gdal {
+
+Nan::Persistent&lt;FunctionTemplate&gt; Layer::constructor;
+ObjectCache&lt;OGRLayer, Layer&gt; Layer::cache;
+
+void Layer::Initialize(Local&lt;Object&gt; target)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(Layer::New);
+	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+	lcons-&gt;SetClassName(Nan::New(&quot;Layer&quot;).ToLocalChecked());
+
+	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+	Nan::SetPrototypeMethod(lcons, &quot;getExtent&quot;, getExtent);
+	Nan::SetPrototypeMethod(lcons, &quot;setAttributeFilter&quot;, setAttributeFilter);
+	Nan::SetPrototypeMethod(lcons, &quot;setSpatialFilter&quot;, setSpatialFilter);
+	Nan::SetPrototypeMethod(lcons, &quot;getSpatialFilter&quot;, getSpatialFilter);
+	Nan::SetPrototypeMethod(lcons, &quot;testCapability&quot;, testCapability);
+	Nan::SetPrototypeMethod(lcons, &quot;flush&quot;, syncToDisk);
+
+	ATTR_DONT_ENUM(lcons, &quot;ds&quot;, dsGetter, READ_ONLY_SETTER);
+	ATTR_DONT_ENUM(lcons, &quot;_uid&quot;, uidGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;srs&quot;, srsGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;features&quot;, featuresGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;fields&quot;, fieldsGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;name&quot;, nameGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;geomType&quot;, geomTypeGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;geomColumn&quot;, geomColumnGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;fidColumn&quot;, fidColumnGetter, READ_ONLY_SETTER);
+
+	Nan::Set(target, Nan::New(&quot;Layer&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+
+	constructor.Reset(lcons);
+}
+
+Layer::Layer(OGRLayer *layer)
+	: Nan::ObjectWrap(),
+	  uid(0),
+	  this_(layer),
+	  parent_ds(0)
+{
+	LOG(&quot;Created layer [%p]&quot;, layer);
+}
+
+Layer::Layer()
+	: Nan::ObjectWrap(),
+	  uid(0),
+	  this_(0),
+	  parent_ds(0)
+{
+}
+
+Layer::~Layer()
+{
+	dispose();
+}
+
+void Layer::dispose()
+{
+	if (this_) {
+
+		LOG(&quot;Disposing layer [%p]&quot;, this_);
+
+		ptr_manager.dispose(uid);
+
+		LOG(&quot;Disposed layer [%p]&quot;, this_);
+		this_ = NULL;
+	}
+};
+
+/**
+ * A representation of a layer of simple vector features, with access methods.
+ *
+ * @class gdal.Layer
+ */
+NAN_METHOD(Layer::New)
+{
+	Nan::HandleScope scope;
+
+	if (!info.IsConstructCall()) {
+		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+		return;
+	}
+
+	if (info[0]-&gt;IsExternal()) {
+		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+		void* ptr = ext-&gt;Value();
+		Layer *f = static_cast&lt;Layer *&gt;(ptr);
+		f-&gt;Wrap(info.This());
+
+		Local&lt;Value&gt; features = LayerFeatures::New(info.This());
+		Nan::SetPrivate(info.This(), Nan::New(&quot;features_&quot;).ToLocalChecked(), features);
+
+		Local&lt;Value&gt; fields = LayerFields::New(info.This());
+		Nan::SetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked(), fields);
+
+		info.GetReturnValue().Set(info.This());
+		return;
+	} else {
+		Nan::ThrowError(&quot;Cannot create layer directly. Create with dataset instead.&quot;);
+		return;
+	}
+
+	info.GetReturnValue().Set(info.This());
+}
+
+#if GDAL_VERSION_MAJOR &gt;= 2
+Local&lt;Value&gt; Layer::New(OGRLayer *raw, GDALDataset *raw_parent)
+#else
+Local&lt;Value&gt; Layer::New(OGRLayer *raw, OGRDataSource *raw_parent)
+#endif
+{
+	Nan::EscapableHandleScope scope;
+	return scope.Escape(Layer::New(raw, raw_parent, false));
+}
+
+#if GDAL_VERSION_MAJOR &gt;= 2
+Local&lt;Value&gt; Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set)
+#else
+Local&lt;Value&gt; Layer::New(OGRLayer *raw, OGRDataSource *raw_parent, bool result_set)
+#endif
+{
+	Nan::EscapableHandleScope scope;
+
+	if (!raw) {
+		return scope.Escape(Nan::Null());
+	}
+	if (cache.has(raw)) {
+		return scope.Escape(cache.get(raw));
+	}
+
+	Layer *wrapped = new Layer(raw);
+
+	Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+	Local&lt;Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(Layer::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+
+	cache.add(raw, obj);
+
+	//add reference to datasource so datasource doesnt get GC&#x27;ed while layer is alive
+	Local&lt;Object&gt; ds;
+	#if GDAL_VERSION_MAJOR &gt;= 2
+		if (Dataset::dataset_cache.has(raw_parent)) {
+			ds = Dataset::dataset_cache.get(raw_parent);
+		}
+	#else
+		if (Dataset::datasource_cache.has(raw_parent)) {
+			ds = Dataset::datasource_cache.get(raw_parent);
+		}
+	#endif
+		else {
+			LOG(&quot;Layer&#x27;s parent dataset disappeared from cache (layer = %p, dataset = %p)&quot;, raw, raw_parent);
+			Nan::ThrowError(&quot;Layer&#x27;s parent dataset disappeared from cache&quot;);
+			return scope.Escape(Nan::Undefined());
+			//ds = Dataset::New(raw_parent); //should never happen
+		}
+
+	long parent_uid = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(ds)-&gt;uid;
+	
+	wrapped-&gt;uid = ptr_manager.add(raw, parent_uid, result_set);
+	wrapped-&gt;parent_ds = raw_parent;
+	Nan::SetPrivate(obj, Nan::New(&quot;ds_&quot;).ToLocalChecked(), ds);
+
+	return scope.Escape(obj);
+}
+
+NAN_METHOD(Layer::toString)
+{
+	Nan::HandleScope scope;
+
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;this_) {
+		info.GetReturnValue().Set(Nan::New(&quot;Null layer&quot;).ToLocalChecked());
+		return;
+	}
+
+	std::ostringstream ss;
+	ss &lt;&lt; &quot;Layer (&quot; &lt;&lt; layer-&gt;this_-&gt;GetName() &lt;&lt; &quot;)&quot;;
+
+	info.GetReturnValue().Set(SafeString::New(ss.str().c_str()));
+}
+
+/**
+ * Flush pending changes to disk.
+ *
+ * @throws Error
+ * @method flush
+ */
+NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(Layer, syncToDisk, SyncToDisk);
+
+/**
+ * Determines if the dataset supports the indicated operation.
+ *
+ * @method testCapability
+ * @param {string} capability (see {{#crossLink &quot;Constants (OLC)&quot;}}capability list{{/crossLink}})
+ * @return {Boolean}
+ */
+NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM(Layer, testCapability, Boolean, TestCapability, &quot;capability&quot;);
+
+/**
+ * Fetch the extent of this layer.
+ *
+ * @throws Error
+ * @method getExtent
+ * @param {Boolean} [force=true]
+ * @return {gdal.Envelope} Bounding envelope
+ */
+NAN_METHOD(Layer::getExtent)
+{
+	Nan::HandleScope scope;
+
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+
+	int force = 1;
+	NODE_ARG_BOOL_OPT(0, &quot;force&quot;, force);
+
+	OGREnvelope *envelope = new OGREnvelope();
+	OGRErr err = layer-&gt;this_-&gt;GetExtent(envelope, force);
+	if(err) {
+		Nan::ThrowError(&quot;Can&#x27;t get layer extent without computing it&quot;);
+		return;
+	}
+
+	Local&lt;Object&gt; obj = Nan::New&lt;Object&gt;();
+	Nan::Set(obj, Nan::New(&quot;minX&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(envelope-&gt;MinX));
+	Nan::Set(obj, Nan::New(&quot;maxX&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(envelope-&gt;MaxX));
+	Nan::Set(obj, Nan::New(&quot;minY&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(envelope-&gt;MinY));
+	Nan::Set(obj, Nan::New(&quot;maxY&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(envelope-&gt;MaxY));
+
+	delete envelope;
+
+	info.GetReturnValue().Set(obj);
+}
+
+/**
+ * This method returns the current spatial filter for this layer.
+ *
+ * @throws Error
+ * @method getSpatialFilter
+ * @return {gdal.Geometry}
+ */
+NAN_METHOD(Layer::getSpatialFilter)
+{
+	Nan::HandleScope scope;
+
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+
+	info.GetReturnValue().Set(Geometry::New(layer-&gt;this_-&gt;GetSpatialFilter(), false));
+}
+
+/**
+ * This method sets the geometry to be used as a spatial filter when fetching
+ * features via the &#x60;layer.features.next()&#x60; method. Only features that geometrically
+ * intersect the filter geometry will be returned.
+ *
+ * Alernatively you can pass it envelope bounds as individual arguments.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * layer.setSpatialFilter(geometry);
+ * layer.setSpatialFilter(minX, minY, maxX, maxY);&#x60;&#x60;&#x60;
+ *
+ * @throws Error
+ * @method setSpatialFilter
+ * @param {gdal.Geometry} filter
+ */
+NAN_METHOD(Layer::setSpatialFilter)
+{
+	Nan::HandleScope scope;
+
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+
+	if(info.Length() == 1) {
+		Geometry *filter = NULL;
+		NODE_ARG_WRAPPED_OPT(0, &quot;filter&quot;, Geometry, filter);
+
+		if(filter) {
+			layer-&gt;this_-&gt;SetSpatialFilter(filter-&gt;get());
+		} else {
+			layer-&gt;this_-&gt;SetSpatialFilter(NULL);
+		}
+	} else if(info.Length() == 4) {
+		double minX, minY, maxX, maxY;
+		NODE_ARG_DOUBLE(0, &quot;minX&quot;, minX);
+		NODE_ARG_DOUBLE(1, &quot;minY&quot;, minY);
+		NODE_ARG_DOUBLE(2, &quot;maxX&quot;, maxX);
+		NODE_ARG_DOUBLE(3, &quot;maxY&quot;, maxY);
+
+		layer-&gt;this_-&gt;SetSpatialFilterRect(minX, minY, maxX, maxY);
+	} else {
+		Nan::ThrowError(&quot;Invalid number of arguments&quot;);
+		return;
+	}
+
+	return;
+}
+
+/**
+ * Sets the attribute query string to be used when fetching features via the
+ * &#x60;layer.features.next()&#x60; method. Only features for which the query evaluates as
+ * &#x60;true&#x60; will be returned.
+ *
+ * The query string should be in the format of an SQL WHERE clause. For instance
+ * &quot;population &gt; 1000000 and population &lt; 5000000&quot; where &#x60;population&#x60; is an
+ * attribute in the layer. The query format is normally a restricted form of
+ * SQL WHERE clause as described in the &quot;WHERE&quot; section of the [OGR SQL
+ * tutorial](http://www.gdal.org/ogr_sql.html). In some cases (RDBMS backed
+ * drivers) the native capabilities of the database may be used to interprete
+ * the WHERE clause in which case the capabilities will be broader than those
+ * of OGR SQL.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * layer.setAttributeFilter(&#x27;population &gt; 1000000 and population &lt; 5000000&#x27;);&#x60;&#x60;&#x60;
+ *
+ * @throws Error
+ * @method setAttributeFilter
+ * @param {String} filter
+ */
+NAN_METHOD(Layer::setAttributeFilter)
+{
+	Nan::HandleScope scope;
+
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+
+	std::string filter = &quot;&quot;;
+	NODE_ARG_OPT_STR(0, &quot;filter&quot;, filter);
+
+	OGRErr err;
+	if(filter.empty()){
+		err = layer-&gt;this_-&gt;SetAttributeFilter(NULL);
+	} else {
+		err = layer-&gt;this_-&gt;SetAttributeFilter(filter.c_str());
+	}
+
+	if (err) {
+		NODE_THROW_OGRERR(err);
+		return;
+	}
+
+	return;
+}
+
+/*
+NAN_METHOD(Layer::getLayerDefn)
+{
+	Nan::HandleScope scope;
+
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object already destroyed&quot;);
+		return;
+	}
+
+	info.GetReturnValue().Set(FeatureDefn::New(layer-&gt;this_-&gt;GetLayerDefn(), false));
+}*/
+
+/**
+ * @readOnly
+ * @attribute ds
+ * @type {gdal.Dataset}
+ */
+NAN_GETTER(Layer::dsGetter)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;ds_&quot;).ToLocalChecked()).ToLocalChecked());
+}
+
+/**
+ * @readOnly
+ * @attribute srs
+ * @type {gdal.SpatialReference}
+ */
+NAN_GETTER(Layer::srsGetter)
+{
+	Nan::HandleScope scope;
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(SpatialReference::New(layer-&gt;this_-&gt;GetSpatialRef(), false));
+}
+
+/**
+ * @readOnly
+ * @attribute name
+ * @type {String}
+ */
+NAN_GETTER(Layer::nameGetter)
+{
+	Nan::HandleScope scope;
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(SafeString::New(layer-&gt;this_-&gt;GetName()));
+}
+
+/**
+ * @readOnly
+ * @attribute geomColumn
+ * @type {String}
+ */
+NAN_GETTER(Layer::geomColumnGetter)
+{
+	Nan::HandleScope scope;
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(SafeString::New(layer-&gt;this_-&gt;GetGeometryColumn()));
+}
+
+/**
+ * @readOnly
+ * @attribute fidColumn
+ * @type {String}
+ */
+NAN_GETTER(Layer::fidColumnGetter)
+{
+	Nan::HandleScope scope;
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(SafeString::New(layer-&gt;this_-&gt;GetFIDColumn()));
+}
+
+/**
+ * @readOnly
+ * @attribute geomType
+ * @type {Integer} (see {{#crossLink &quot;Constants (wkb)&quot;}}geometry types{{/crossLink}})
+ */
+NAN_GETTER(Layer::geomTypeGetter)
+{
+	Nan::HandleScope scope;
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	if (!layer-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Layer object has already been destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(layer-&gt;this_-&gt;GetGeomType()));
+}
+
+/**
+ * @readOnly
+ * @attribute features
+ * @type {gdal.LayerFeatures}
+ */
+NAN_GETTER(Layer::featuresGetter)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;features_&quot;).ToLocalChecked()).ToLocalChecked());
+}
+
+/**
+ * @readOnly
+ * @attribute fields
+ * @type {gdal.LayerFields}
+ */
+NAN_GETTER(Layer::fieldsGetter)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked()).ToLocalChecked());
+}
+
+NAN_GETTER(Layer::uidGetter)
+{
+	Nan::HandleScope scope;
+	Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info.This());
+	info.GetReturnValue().Set(Nan::New((int)layer-&gt;uid));
+}
+
+} // namespace node_gdal
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

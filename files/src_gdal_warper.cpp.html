@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/gdal_warper.cpp - node-gdal</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/lucid.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="node-gdal" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/GDALLogoColor.svg/200px-GDALLogoColor.svg.png" style="max-height: 65%;" title="node-gdal">
+            node-gdal
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.0.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Constants (CPL Error Codes)", "classes/Constants (CPL Error Levels)", "classes/Constants (DCAP)", "classes/Constants (DMD)", "classes/Constants (GCI)", "classes/Constants (GDT)", "classes/Constants (GRA)", "classes/Constants (ODsC)", "classes/Constants (OFT)", "classes/Constants (OJ)", "classes/Constants (OLC)", "classes/Constants (wkbByteOrder)", "classes/Constants (wkbGeometryType)", "classes/Constants (wkbVariant)", "classes/gdal", "classes/gdal.CoordinateTransformation", "classes/gdal.Dataset", "classes/gdal.DatasetBands", "classes/gdal.DatasetLayers", "classes/gdal.Driver", "classes/gdal.Envelope", "classes/gdal.Envelope3D", "classes/gdal.Feature", "classes/gdal.FeatureDefn", "classes/gdal.FeatureDefnFields", "classes/gdal.FeatureFields", "classes/gdal.FieldDefn", "classes/gdal.GDALDrivers", "classes/gdal.Geometry", "classes/gdal.GeometryCollection", "classes/gdal.GeometryCollectionChildren", "classes/gdal.Layer", "classes/gdal.LayerFeatures", "classes/gdal.LayerFields", "classes/gdal.LinearRing", "classes/gdal.LineString", "classes/gdal.LineStringPoints", "classes/gdal.MultiLineString", "classes/gdal.MultiPoint", "classes/gdal.MultiPolygon", "classes/gdal.Point", "classes/gdal.Polygon", "classes/gdal.PolygonRings", "classes/gdal.RasterBand", "classes/gdal.RasterBandOverviews", "classes/gdal.RasterBandPixels", "classes/gdal.SpatialReference"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Constants (CPL Error Codes).html">Constants (CPL Error Codes)</a></li>
+                <li><a href="../classes/Constants (CPL Error Levels).html">Constants (CPL Error Levels)</a></li>
+                <li><a href="../classes/Constants (DCAP).html">Constants (DCAP)</a></li>
+                <li><a href="../classes/Constants (DMD).html">Constants (DMD)</a></li>
+                <li><a href="../classes/Constants (GCI).html">Constants (GCI)</a></li>
+                <li><a href="../classes/Constants (GDT).html">Constants (GDT)</a></li>
+                <li><a href="../classes/Constants (GRA).html">Constants (GRA)</a></li>
+                <li><a href="../classes/Constants (ODsC).html">Constants (ODsC)</a></li>
+                <li><a href="../classes/Constants (OFT).html">Constants (OFT)</a></li>
+                <li><a href="../classes/Constants (OJ).html">Constants (OJ)</a></li>
+                <li><a href="../classes/Constants (OLC).html">Constants (OLC)</a></li>
+                <li><a href="../classes/Constants (wkbByteOrder).html">Constants (wkbByteOrder)</a></li>
+                <li><a href="../classes/Constants (wkbGeometryType).html">Constants (wkbGeometryType)</a></li>
+                <li><a href="../classes/Constants (wkbVariant).html">Constants (wkbVariant)</a></li>
+                <li><a href="../classes/gdal.html">gdal</a></li>
+                <li><a href="../classes/gdal.CoordinateTransformation.html">gdal.CoordinateTransformation</a></li>
+                <li><a href="../classes/gdal.Dataset.html">gdal.Dataset</a></li>
+                <li><a href="../classes/gdal.DatasetBands.html">gdal.DatasetBands</a></li>
+                <li><a href="../classes/gdal.DatasetLayers.html">gdal.DatasetLayers</a></li>
+                <li><a href="../classes/gdal.Driver.html">gdal.Driver</a></li>
+                <li><a href="../classes/gdal.Envelope.html">gdal.Envelope</a></li>
+                <li><a href="../classes/gdal.Envelope3D.html">gdal.Envelope3D</a></li>
+                <li><a href="../classes/gdal.Feature.html">gdal.Feature</a></li>
+                <li><a href="../classes/gdal.FeatureDefn.html">gdal.FeatureDefn</a></li>
+                <li><a href="../classes/gdal.FeatureDefnFields.html">gdal.FeatureDefnFields</a></li>
+                <li><a href="../classes/gdal.FeatureFields.html">gdal.FeatureFields</a></li>
+                <li><a href="../classes/gdal.FieldDefn.html">gdal.FieldDefn</a></li>
+                <li><a href="../classes/gdal.GDALDrivers.html">gdal.GDALDrivers</a></li>
+                <li><a href="../classes/gdal.Geometry.html">gdal.Geometry</a></li>
+                <li><a href="../classes/gdal.GeometryCollection.html">gdal.GeometryCollection</a></li>
+                <li><a href="../classes/gdal.GeometryCollectionChildren.html">gdal.GeometryCollectionChildren</a></li>
+                <li><a href="../classes/gdal.Layer.html">gdal.Layer</a></li>
+                <li><a href="../classes/gdal.LayerFeatures.html">gdal.LayerFeatures</a></li>
+                <li><a href="../classes/gdal.LayerFields.html">gdal.LayerFields</a></li>
+                <li><a href="../classes/gdal.LinearRing.html">gdal.LinearRing</a></li>
+                <li><a href="../classes/gdal.LineString.html">gdal.LineString</a></li>
+                <li><a href="../classes/gdal.LineStringPoints.html">gdal.LineStringPoints</a></li>
+                <li><a href="../classes/gdal.MultiLineString.html">gdal.MultiLineString</a></li>
+                <li><a href="../classes/gdal.MultiPoint.html">gdal.MultiPoint</a></li>
+                <li><a href="../classes/gdal.MultiPolygon.html">gdal.MultiPolygon</a></li>
+                <li><a href="../classes/gdal.Point.html">gdal.Point</a></li>
+                <li><a href="../classes/gdal.Polygon.html">gdal.Polygon</a></li>
+                <li><a href="../classes/gdal.PolygonRings.html">gdal.PolygonRings</a></li>
+                <li><a href="../classes/gdal.RasterBand.html">gdal.RasterBand</a></li>
+                <li><a href="../classes/gdal.RasterBandOverviews.html">gdal.RasterBandOverviews</a></li>
+                <li><a href="../classes/gdal.RasterBandPixels.html">gdal.RasterBandPixels</a></li>
+                <li><a href="../classes/gdal.SpatialReference.html">gdal.SpatialReference</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
+        </div>
+        <div class="span9">
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>src/gdal_warper.cpp <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+#include &quot;gdal_warper.hpp&quot;
+#include &quot;utils/warp_options.hpp&quot;
+#include &quot;gdal_common.hpp&quot;
+#include &quot;gdal_spatial_reference.hpp&quot;
+#include &quot;gdal_dataset.hpp&quot;
+
+namespace node_gdal {
+
+
+void Warper::Initialize(Local&lt;Object&gt; target)
+{
+	Nan::SetMethod(target, &quot;reprojectImage&quot;, reprojectImage);
+	Nan::SetMethod(target, &quot;suggestedWarpOutput&quot;, suggestedWarpOutput);
+}
+
+/**
+ * GDALReprojectImage() method with a ChunkAndWarpImage replaced with ChunkAndWarpMulti
+ */
+CPLErr GDALReprojectImageMulti( GDALDatasetH hSrcDS, const char *pszSrcWKT,
+                    GDALDatasetH hDstDS, const char *pszDstWKT,
+                    GDALResampleAlg eResampleAlg,
+                    double dfWarpMemoryLimit,
+                    double dfMaxError,
+                    GDALProgressFunc pfnProgress, void *pProgressArg,
+                    GDALWarpOptions *psOptions )
+
+{
+    GDALWarpOptions *psWOptions;
+
+/* -------------------------------------------------------------------- */
+/*      Setup a reprojection based transformer.                         */
+/* -------------------------------------------------------------------- */
+    void *hTransformArg;
+
+    hTransformArg = 
+        GDALCreateGenImgProjTransformer( hSrcDS, pszSrcWKT, hDstDS, pszDstWKT, 
+                                         TRUE, 1000.0, 0 );
+
+    if( hTransformArg == NULL )
+        return CE_Failure;
+
+/* -------------------------------------------------------------------- */
+/*      Create a copy of the user provided options, or a defaulted      */
+/*      options structure.                                              */
+/* -------------------------------------------------------------------- */
+    if( psOptions == NULL )
+        psWOptions = GDALCreateWarpOptions();
+    else
+        psWOptions = GDALCloneWarpOptions( psOptions );
+
+    psWOptions-&gt;eResampleAlg = eResampleAlg;
+
+/* -------------------------------------------------------------------- */
+/*      Set transform.                                                  */
+/* -------------------------------------------------------------------- */
+    if( dfMaxError &gt; 0.0 )
+    {
+        psWOptions-&gt;pTransformerArg = 
+            GDALCreateApproxTransformer( GDALGenImgProjTransform, 
+                                         hTransformArg, dfMaxError );
+
+        psWOptions-&gt;pfnTransformer = GDALApproxTransform;
+    }
+    else
+    {
+        psWOptions-&gt;pfnTransformer = GDALGenImgProjTransform;
+        psWOptions-&gt;pTransformerArg = hTransformArg;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Set file and band mapping.                                      */
+/* -------------------------------------------------------------------- */
+    int  iBand;
+
+    psWOptions-&gt;hSrcDS = hSrcDS;
+    psWOptions-&gt;hDstDS = hDstDS;
+
+    if( psWOptions-&gt;nBandCount == 0 )
+    {
+        psWOptions-&gt;nBandCount = MIN(GDALGetRasterCount(hSrcDS),
+                                     GDALGetRasterCount(hDstDS));
+        
+        psWOptions-&gt;panSrcBands = (int *) 
+            CPLMalloc(sizeof(int) * psWOptions-&gt;nBandCount);
+        psWOptions-&gt;panDstBands = (int *) 
+            CPLMalloc(sizeof(int) * psWOptions-&gt;nBandCount);
+
+        for( iBand = 0; iBand &lt; psWOptions-&gt;nBandCount; iBand++ )
+        {
+            psWOptions-&gt;panSrcBands[iBand] = iBand+1;
+            psWOptions-&gt;panDstBands[iBand] = iBand+1;
+        }
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Set source nodata values if the source dataset seems to have    */
+/*      any. Same for target nodata values                              */
+/* -------------------------------------------------------------------- */
+    for( iBand = 0; iBand &lt; psWOptions-&gt;nBandCount; iBand++ )
+    {
+        GDALRasterBandH hBand = GDALGetRasterBand( hSrcDS, iBand+1 );
+        int             bGotNoData = FALSE;
+        double          dfNoDataValue;
+
+        if (GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand)
+        {
+            psWOptions-&gt;nSrcAlphaBand = iBand + 1;
+        }
+
+        dfNoDataValue = GDALGetRasterNoDataValue( hBand, &amp;bGotNoData );
+        if( bGotNoData )
+        {
+            if( psWOptions-&gt;padfSrcNoDataReal == NULL )
+            {
+                int  ii;
+
+                psWOptions-&gt;padfSrcNoDataReal = (double *) 
+                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+                psWOptions-&gt;padfSrcNoDataImag = (double *) 
+                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+
+                for( ii = 0; ii &lt; psWOptions-&gt;nBandCount; ii++ )
+                {
+                    psWOptions-&gt;padfSrcNoDataReal[ii] = -1.1e20;
+                    psWOptions-&gt;padfSrcNoDataImag[ii] = 0.0;
+                }
+            }
+
+            psWOptions-&gt;padfSrcNoDataReal[iBand] = dfNoDataValue;
+        }
+
+        // Deal with target band
+        hBand = GDALGetRasterBand( hDstDS, iBand+1 );
+        if (hBand &amp;&amp; GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand)
+        {
+            psWOptions-&gt;nDstAlphaBand = iBand + 1;
+        }
+
+        dfNoDataValue = GDALGetRasterNoDataValue( hBand, &amp;bGotNoData );
+        if( bGotNoData )
+        {
+            if( psWOptions-&gt;padfDstNoDataReal == NULL )
+            {
+                int  ii;
+
+                psWOptions-&gt;padfDstNoDataReal = (double *) 
+                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+                psWOptions-&gt;padfDstNoDataImag = (double *) 
+                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+
+                for( ii = 0; ii &lt; psWOptions-&gt;nBandCount; ii++ )
+                {
+                    psWOptions-&gt;padfDstNoDataReal[ii] = -1.1e20;
+                    psWOptions-&gt;padfDstNoDataImag[ii] = 0.0;
+                }
+            }
+
+            psWOptions-&gt;padfDstNoDataReal[iBand] = dfNoDataValue;
+        }
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Set the progress function.                                      */
+/* -------------------------------------------------------------------- */
+    if( pfnProgress != NULL )
+    {
+        psWOptions-&gt;pfnProgress = pfnProgress;
+        psWOptions-&gt;pProgressArg = pProgressArg;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Create a warp options based on the options.                     */
+/* -------------------------------------------------------------------- */
+    GDALWarpOperation  oWarper;
+    CPLErr eErr;
+
+    eErr = oWarper.Initialize( psWOptions );
+
+    if( eErr == CE_None )
+        eErr = oWarper.ChunkAndWarpMulti( 0, 0, 
+                                          GDALGetRasterXSize(hDstDS),
+                                          GDALGetRasterYSize(hDstDS) );
+
+/* -------------------------------------------------------------------- */
+/*      Cleanup.                                                        */
+/* -------------------------------------------------------------------- */
+    GDALDestroyGenImgProjTransformer( hTransformArg );
+
+    if( dfMaxError &gt; 0.0 )
+        GDALDestroyApproxTransformer( psWOptions-&gt;pTransformerArg );
+        
+    GDALDestroyWarpOptions( psWOptions );
+
+    return eErr;
+}
+
+/**
+ * Reprojects a dataset.
+ *
+ * @throws Error
+ * @method reprojectImage
+ * @static
+ * @for gdal
+ * @param {object} options
+ * @param {gdal.Dataset} options.src
+ * @param {gdal.Dataset} options.dst
+ * @param {gdal.SpatialReference} options.s_srs
+ * @param {gdal.SpatialReference} options.t_srs
+ * @param {String} [options.resampling] Resampling algorithm ({{#crossLink &quot;Constants (GRA)&quot;}}available options{{/crossLink}})
+ * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel coordinates. Use CoordinateTransformation to convert between georeferenced coordinates and pixel coordinates
+ * @param {Integer[]} [options.srcBands]
+ * @param {Integer[]} [options.dstBands]
+ * @param {Integer} [options.srcAlphaBand]
+ * @param {Integer} [options.dstAlphaBand]
+ * @param {Number} [options.srcNodata]
+ * @param {Number} [options.dstNodata]
+ * @param {Integer} [options.memoryLimit]
+ * @param {Number} [options.maxError]
+ * @param {Boolean} [options.multi]
+ * @param {string[]|object} [options.options] Warp options (see: [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ */
+NAN_METHOD(Warper::reprojectImage)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; obj;
+	Local&lt;Value&gt; prop;
+
+	WarpOptions options;
+	GDALWarpOptions* opts;
+	std::string s_srs_str;
+	std::string t_srs_str;
+	SpatialReference* s_srs;
+	SpatialReference* t_srs;
+	double maxError = 0;
+
+	NODE_ARG_OBJECT(0, &quot;Warp options&quot;, obj);
+
+	if(options.parse(obj)){
+		return; // error parsing options object
+	} else {
+		opts = options.get();
+	}
+	if(!opts-&gt;hDstDS){
+		Nan::ThrowTypeError(&quot;dst Dataset must be provided&quot;);
+		return;
+	}
+
+	NODE_WRAPPED_FROM_OBJ(obj, &quot;s_srs&quot;, SpatialReference, s_srs);
+	NODE_WRAPPED_FROM_OBJ(obj, &quot;t_srs&quot;, SpatialReference, t_srs);
+	NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;maxError&quot;, maxError);
+
+	char *s_srs_wkt, *t_srs_wkt;
+	if(s_srs-&gt;get()-&gt;exportToWkt(&amp;s_srs_wkt)){
+		Nan::ThrowError(&quot;Error converting s_srs to WKT&quot;);
+		return;
+	}
+	if(t_srs-&gt;get()-&gt;exportToWkt(&amp;t_srs_wkt)){
+		CPLFree(s_srs_wkt);
+		Nan::ThrowError(&quot;Error converting t_srs to WKT&quot;);
+		return;
+	}
+
+	CPLErr err;
+
+	if(options.useMultithreading()){
+		err = GDALReprojectImageMulti(opts-&gt;hSrcDS, s_srs_wkt, opts-&gt;hDstDS, t_srs_wkt, opts-&gt;eResampleAlg, opts-&gt;dfWarpMemoryLimit, maxError, NULL, NULL, opts);
+	} else {
+		err = GDALReprojectImage(opts-&gt;hSrcDS, s_srs_wkt, opts-&gt;hDstDS, t_srs_wkt, opts-&gt;eResampleAlg, opts-&gt;dfWarpMemoryLimit, maxError, NULL, NULL, opts);
+	}
+	
+	CPLFree(s_srs_wkt);
+	CPLFree(t_srs_wkt);
+
+	if(err) {
+		NODE_THROW_CPLERR(err);
+		return;
+	}
+
+	return;
+}
+
+/**
+ * Used to determine the bounds and resolution of the output virtual file which
+ * should be large enough to include all the input image.
+ *
+ * @throws Error
+ * @method suggestedWarpOutput
+ * @static
+ * @for gdal
+ * @param {object} options Warp options
+ * @param {gdal.Dataset} options.src
+ * @param {gdal.SpatialReference} options.s_srs
+ * @param {gdal.SpatialReference} options.t_srs
+ * @param {Number} [options.maxError=0]
+ * @return {Object} An object containing &#x60;&quot;rasterSize&quot;&#x60; and &#x60;&quot;geoTransform&quot;&#x60; properties.
+ */
+NAN_METHOD(Warper::suggestedWarpOutput)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; obj;
+	Local&lt;Value&gt; prop;
+
+	Dataset* ds;
+	SpatialReference* s_srs;
+	SpatialReference* t_srs;
+	double maxError = 0;
+	double geotransform[6];
+	int w = 0, h = 0;
+
+	NODE_ARG_OBJECT(0, &quot;Warp options&quot;, obj);
+
+	if(Nan::HasOwnProperty(obj, Nan::New(&quot;src&quot;).ToLocalChecked()).FromMaybe(false)){
+		prop = Nan::Get(obj, Nan::New(&quot;src&quot;).ToLocalChecked()).ToLocalChecked();
+		if(prop-&gt;IsObject() &amp;&amp; !prop-&gt;IsNull() &amp;&amp; Nan::New(Dataset::constructor)-&gt;HasInstance(prop)){
+			ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(prop.As&lt;Object&gt;());
+			if(!ds-&gt;getDataset()){
+				#if GDAL_VERSION_MAJOR &lt; 2
+				if(ds-&gt;getDatasource()) {
+					Nan::ThrowError(&quot;src dataset must be a raster dataset&quot;);
+					return;
+				}
+				#endif
+				Nan::ThrowError(&quot;src dataset already closed&quot;);
+				return;
+			}
+		} else {
+			Nan::ThrowTypeError(&quot;src property must be a Dataset object&quot;);
+			return;
+		}
+	} else {
+		Nan::ThrowError(&quot;src dataset must be provided&quot;);
+		return;
+	}
+
+	NODE_WRAPPED_FROM_OBJ(obj, &quot;s_srs&quot;, SpatialReference, s_srs);
+	NODE_WRAPPED_FROM_OBJ(obj, &quot;t_srs&quot;, SpatialReference, t_srs);
+	NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;maxError&quot;, maxError);
+
+	char *s_srs_wkt, *t_srs_wkt;
+	if(s_srs-&gt;get()-&gt;exportToWkt(&amp;s_srs_wkt)){
+		Nan::ThrowError(&quot;Error converting s_srs to WKT&quot;);
+		return;
+	}
+	if(t_srs-&gt;get()-&gt;exportToWkt(&amp;t_srs_wkt)){
+		CPLFree(s_srs_wkt);
+		Nan::ThrowError(&quot;Error converting t_srs to WKT&quot;);
+		return;
+	}
+
+
+
+	void *hTransformArg;
+	void *hGenTransformArg = GDALCreateGenImgProjTransformer(ds-&gt;getDataset(), s_srs_wkt, NULL, t_srs_wkt, TRUE, 1000.0, 0 );
+	
+	if(!hGenTransformArg) {
+		CPLFree(s_srs_wkt);
+		CPLFree(t_srs_wkt);
+		Nan::ThrowError(CPLGetLastErrorMsg());
+		return;
+	}
+
+	GDALTransformerFunc pfnTransformer;
+
+	if(maxError &gt; 0.0){
+		hTransformArg = GDALCreateApproxTransformer( GDALGenImgProjTransform, hGenTransformArg, maxError );
+		pfnTransformer = GDALApproxTransform;
+
+		if(!hTransformArg) {
+			CPLFree(s_srs_wkt);
+			CPLFree(t_srs_wkt);
+			GDALDestroyGenImgProjTransformer(hGenTransformArg);
+			Nan::ThrowError(CPLGetLastErrorMsg());
+			return;
+		}
+	} else {
+		hTransformArg = hGenTransformArg;
+		pfnTransformer = GDALGenImgProjTransform;
+	}
+
+	CPLErr err = GDALSuggestedWarpOutput(ds-&gt;getDataset(), pfnTransformer, hTransformArg, geotransform, &amp;w, &amp;h);
+
+
+	CPLFree(s_srs_wkt);
+	CPLFree(t_srs_wkt);
+	GDALDestroyGenImgProjTransformer(hGenTransformArg);
+	if(maxError &gt; 0.0){
+		GDALDestroyApproxTransformer(hTransformArg);
+	}
+
+	if(err) {
+		NODE_THROW_CPLERR(err);
+		return;
+	}
+
+	Local&lt;Array&gt; result_geotransform = Nan::New&lt;Array&gt;();
+	Nan::Set(result_geotransform, 0, Nan::New&lt;Number&gt;(geotransform[0]));
+	Nan::Set(result_geotransform, 1, Nan::New&lt;Number&gt;(geotransform[1]));
+	Nan::Set(result_geotransform, 2, Nan::New&lt;Number&gt;(geotransform[2]));
+	Nan::Set(result_geotransform, 3, Nan::New&lt;Number&gt;(geotransform[3]));
+	Nan::Set(result_geotransform, 4, Nan::New&lt;Number&gt;(geotransform[4]));
+	Nan::Set(result_geotransform, 5, Nan::New&lt;Number&gt;(geotransform[5]));
+
+	Local&lt;Object&gt; result_size = Nan::New&lt;Object&gt;();
+	Nan::Set(result_size, Nan::New(&quot;x&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(w));
+	Nan::Set(result_size, Nan::New(&quot;y&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(h));
+
+	Local&lt;Object&gt; result = Nan::New&lt;Object&gt;();
+	Nan::Set(result, Nan::New(&quot;rasterSize&quot;).ToLocalChecked(), result_size);
+	Nan::Set(result, Nan::New(&quot;geoTransform&quot;).ToLocalChecked(), result_geotransform);
+
+	info.GetReturnValue().Set(result);
+}
+
+
+} //node_gdal namespace
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/collections/feature_fields.cpp - node-gdal</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/lucid.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="node-gdal" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/GDALLogoColor.svg/200px-GDALLogoColor.svg.png" style="max-height: 65%;" title="node-gdal">
+            node-gdal
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.0.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Constants (CPL Error Codes)", "classes/Constants (CPL Error Levels)", "classes/Constants (DCAP)", "classes/Constants (DMD)", "classes/Constants (GCI)", "classes/Constants (GDT)", "classes/Constants (GRA)", "classes/Constants (ODsC)", "classes/Constants (OFT)", "classes/Constants (OJ)", "classes/Constants (OLC)", "classes/Constants (wkbByteOrder)", "classes/Constants (wkbGeometryType)", "classes/Constants (wkbVariant)", "classes/gdal", "classes/gdal.CoordinateTransformation", "classes/gdal.Dataset", "classes/gdal.DatasetBands", "classes/gdal.DatasetLayers", "classes/gdal.Driver", "classes/gdal.Envelope", "classes/gdal.Envelope3D", "classes/gdal.Feature", "classes/gdal.FeatureDefn", "classes/gdal.FeatureDefnFields", "classes/gdal.FeatureFields", "classes/gdal.FieldDefn", "classes/gdal.GDALDrivers", "classes/gdal.Geometry", "classes/gdal.GeometryCollection", "classes/gdal.GeometryCollectionChildren", "classes/gdal.Layer", "classes/gdal.LayerFeatures", "classes/gdal.LayerFields", "classes/gdal.LinearRing", "classes/gdal.LineString", "classes/gdal.LineStringPoints", "classes/gdal.MultiLineString", "classes/gdal.MultiPoint", "classes/gdal.MultiPolygon", "classes/gdal.Point", "classes/gdal.Polygon", "classes/gdal.PolygonRings", "classes/gdal.RasterBand", "classes/gdal.RasterBandOverviews", "classes/gdal.RasterBandPixels", "classes/gdal.SpatialReference"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Constants (CPL Error Codes).html">Constants (CPL Error Codes)</a></li>
+                <li><a href="../classes/Constants (CPL Error Levels).html">Constants (CPL Error Levels)</a></li>
+                <li><a href="../classes/Constants (DCAP).html">Constants (DCAP)</a></li>
+                <li><a href="../classes/Constants (DMD).html">Constants (DMD)</a></li>
+                <li><a href="../classes/Constants (GCI).html">Constants (GCI)</a></li>
+                <li><a href="../classes/Constants (GDT).html">Constants (GDT)</a></li>
+                <li><a href="../classes/Constants (GRA).html">Constants (GRA)</a></li>
+                <li><a href="../classes/Constants (ODsC).html">Constants (ODsC)</a></li>
+                <li><a href="../classes/Constants (OFT).html">Constants (OFT)</a></li>
+                <li><a href="../classes/Constants (OJ).html">Constants (OJ)</a></li>
+                <li><a href="../classes/Constants (OLC).html">Constants (OLC)</a></li>
+                <li><a href="../classes/Constants (wkbByteOrder).html">Constants (wkbByteOrder)</a></li>
+                <li><a href="../classes/Constants (wkbGeometryType).html">Constants (wkbGeometryType)</a></li>
+                <li><a href="../classes/Constants (wkbVariant).html">Constants (wkbVariant)</a></li>
+                <li><a href="../classes/gdal.html">gdal</a></li>
+                <li><a href="../classes/gdal.CoordinateTransformation.html">gdal.CoordinateTransformation</a></li>
+                <li><a href="../classes/gdal.Dataset.html">gdal.Dataset</a></li>
+                <li><a href="../classes/gdal.DatasetBands.html">gdal.DatasetBands</a></li>
+                <li><a href="../classes/gdal.DatasetLayers.html">gdal.DatasetLayers</a></li>
+                <li><a href="../classes/gdal.Driver.html">gdal.Driver</a></li>
+                <li><a href="../classes/gdal.Envelope.html">gdal.Envelope</a></li>
+                <li><a href="../classes/gdal.Envelope3D.html">gdal.Envelope3D</a></li>
+                <li><a href="../classes/gdal.Feature.html">gdal.Feature</a></li>
+                <li><a href="../classes/gdal.FeatureDefn.html">gdal.FeatureDefn</a></li>
+                <li><a href="../classes/gdal.FeatureDefnFields.html">gdal.FeatureDefnFields</a></li>
+                <li><a href="../classes/gdal.FeatureFields.html">gdal.FeatureFields</a></li>
+                <li><a href="../classes/gdal.FieldDefn.html">gdal.FieldDefn</a></li>
+                <li><a href="../classes/gdal.GDALDrivers.html">gdal.GDALDrivers</a></li>
+                <li><a href="../classes/gdal.Geometry.html">gdal.Geometry</a></li>
+                <li><a href="../classes/gdal.GeometryCollection.html">gdal.GeometryCollection</a></li>
+                <li><a href="../classes/gdal.GeometryCollectionChildren.html">gdal.GeometryCollectionChildren</a></li>
+                <li><a href="../classes/gdal.Layer.html">gdal.Layer</a></li>
+                <li><a href="../classes/gdal.LayerFeatures.html">gdal.LayerFeatures</a></li>
+                <li><a href="../classes/gdal.LayerFields.html">gdal.LayerFields</a></li>
+                <li><a href="../classes/gdal.LinearRing.html">gdal.LinearRing</a></li>
+                <li><a href="../classes/gdal.LineString.html">gdal.LineString</a></li>
+                <li><a href="../classes/gdal.LineStringPoints.html">gdal.LineStringPoints</a></li>
+                <li><a href="../classes/gdal.MultiLineString.html">gdal.MultiLineString</a></li>
+                <li><a href="../classes/gdal.MultiPoint.html">gdal.MultiPoint</a></li>
+                <li><a href="../classes/gdal.MultiPolygon.html">gdal.MultiPolygon</a></li>
+                <li><a href="../classes/gdal.Point.html">gdal.Point</a></li>
+                <li><a href="../classes/gdal.Polygon.html">gdal.Polygon</a></li>
+                <li><a href="../classes/gdal.PolygonRings.html">gdal.PolygonRings</a></li>
+                <li><a href="../classes/gdal.RasterBand.html">gdal.RasterBand</a></li>
+                <li><a href="../classes/gdal.RasterBandOverviews.html">gdal.RasterBandOverviews</a></li>
+                <li><a href="../classes/gdal.RasterBandPixels.html">gdal.RasterBandPixels</a></li>
+                <li><a href="../classes/gdal.SpatialReference.html">gdal.SpatialReference</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
+        </div>
+        <div class="span9">
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>src/collections/feature_fields.cpp <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+#include &quot;../gdal_common.hpp&quot;
+#include &quot;../gdal_feature.hpp&quot;
+#include &quot;../utils/fast_buffer.hpp&quot;
+#include &quot;feature_fields.hpp&quot;
+
+namespace node_gdal {
+
+Nan::Persistent&lt;FunctionTemplate&gt; FeatureFields::constructor;
+
+void FeatureFields::Initialize(Local&lt;Object&gt; target)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(FeatureFields::New);
+	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+	lcons-&gt;SetClassName(Nan::New(&quot;FeatureFields&quot;).ToLocalChecked());
+
+	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+	Nan::SetPrototypeMethod(lcons, &quot;toObject&quot;, toObject);
+	Nan::SetPrototypeMethod(lcons, &quot;toArray&quot;, toArray);
+	Nan::SetPrototypeMethod(lcons, &quot;count&quot;, count);
+	Nan::SetPrototypeMethod(lcons, &quot;get&quot;, get);
+	Nan::SetPrototypeMethod(lcons, &quot;getNames&quot;, getNames);
+	Nan::SetPrototypeMethod(lcons, &quot;set&quot;, set);
+	Nan::SetPrototypeMethod(lcons, &quot;reset&quot;, reset);
+	Nan::SetPrototypeMethod(lcons, &quot;indexOf&quot;, indexOf);
+
+	ATTR_DONT_ENUM(lcons, &quot;feature&quot;, featureGetter, READ_ONLY_SETTER);
+
+	Nan::Set(target, Nan::New(&quot;FeatureFields&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+
+	constructor.Reset(lcons);
+}
+
+FeatureFields::FeatureFields()
+	: Nan::ObjectWrap()
+{}
+
+FeatureFields::~FeatureFields()
+{}
+
+/**
+ * An encapsulation of all field data that makes up a {{#crossLink &quot;gdal.Feature&quot;}}Feature{{/crossLink}}.
+ *
+ * @class gdal.FeatureFields
+ */
+NAN_METHOD(FeatureFields::New)
+{
+	Nan::HandleScope scope;
+
+	if (!info.IsConstructCall()) {
+		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+		return;
+	}
+	if (info[0]-&gt;IsExternal()) {
+		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+		void* ptr = ext-&gt;Value();
+		FeatureFields *f =  static_cast&lt;FeatureFields *&gt;(ptr);
+		f-&gt;Wrap(info.This());
+		info.GetReturnValue().Set(info.This());
+		return;
+	} else {
+		Nan::ThrowError(&quot;Cannot create FeatureFields directly&quot;);
+		return;
+	}
+}
+
+Local&lt;Value&gt; FeatureFields::New(Local&lt;Value&gt; layer_obj)
+{
+	Nan::EscapableHandleScope scope;
+
+	FeatureFields *wrapped = new FeatureFields();
+
+	v8::Local&lt;v8::Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+	v8::Local&lt;v8::Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(FeatureFields::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+	Nan::SetPrivate(obj, Nan::New(&quot;parent_&quot;).ToLocalChecked(), layer_obj);
+
+	return scope.Escape(obj);
+}
+
+NAN_METHOD(FeatureFields::toString)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::New(&quot;FeatureFields&quot;).ToLocalChecked());
+}
+
+inline bool setField(OGRFeature* f, int field_index, Local&lt;Value&gt; val){
+	if (val-&gt;IsInt32()) {
+		f-&gt;SetField(field_index, Nan::To&lt;int32_t&gt;(val).ToChecked());
+	} else if (val-&gt;IsNumber()) {
+		f-&gt;SetField(field_index, Nan::To&lt;double&gt;(val).ToChecked());
+	} else if (val-&gt;IsString()) {
+		std::string str = *Nan::Utf8String(val);
+		f-&gt;SetField(field_index, str.c_str());
+	} else if(val-&gt;IsNull() || val-&gt;IsUndefined()) {
+		f-&gt;UnsetField(field_index);
+	} else {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Sets feature field(s).
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * // most-efficient, least flexible. requires you to know the ordering of the fields:
+ * feature.fields.set([&#x27;Something&#x27;]);
+ * feature.fields.set(0, &#x27;Something&#x27;);
+ *
+ * // most flexible.
+ * feature.fields.set({name: &#x27;Something&#x27;});
+ * feature.fields.set(&#x27;name&#x27;, &#x27;Something&#x27;);
+ * &#x60;&#x60;&#x60;
+ *
+ * @method set
+ * @throws Error
+ * @param {String|Integer} key Field name or index
+ * @param {mixed} value
+ */
+NAN_METHOD(FeatureFields::set)
+{
+	Nan::HandleScope scope;
+	int field_index;
+	unsigned int i, n, n_fields_set;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	if(info.Length() == 1) {
+		if(info[0]-&gt;IsArray()) {
+			//set([])
+			Local&lt;Array&gt; values = info[0].As&lt;Array&gt;();
+
+			n = f-&gt;get()-&gt;GetFieldCount();
+			if(values-&gt;Length() &lt; n) {
+				n = values-&gt;Length();
+			}
+
+			for (i = 0; i &lt; n; i++) {
+				Local&lt;Value&gt; val = Nan::Get(values, i).ToLocalChecked();
+				if(setField(f-&gt;get(), i, val)){
+					Nan::ThrowError(&quot;Unsupported type of field value&quot;);
+					return;
+				}
+			}
+
+			info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(n));
+			return;
+		} else if (info[0]-&gt;IsObject()) {
+			//set({})
+			Local&lt;Object&gt; values = info[0].As&lt;Object&gt;();
+
+			n = f-&gt;get()-&gt;GetFieldCount();
+			n_fields_set = 0;
+
+			for (i = 0; i &lt; n; i++) {
+				//iterate through field names from field defn,
+				//grabbing values from passed object, if not undefined
+
+				OGRFieldDefn* field_def = f-&gt;get()-&gt;GetFieldDefnRef(i);
+
+				const char* field_name = field_def-&gt;GetNameRef();
+
+				field_index = f-&gt;get()-&gt;GetFieldIndex(field_name);
+
+				//skip value if field name doesnt exist
+				//both in the feature definition and the passed object
+				if (field_index == -1 || !Nan::HasOwnProperty(values, Nan::New(field_name).ToLocalChecked()).FromMaybe(false)) {
+					continue;
+				}
+
+				Local&lt;Value&gt; val = Nan::Get(values, Nan::New(field_name).ToLocalChecked()).ToLocalChecked();
+				if (setField(f-&gt;get(), field_index, val)) {
+					Nan::ThrowError(&quot;Unsupported type of field value&quot;);
+					return;
+				}
+
+				n_fields_set++;
+			}
+
+			info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(n_fields_set));
+			return;
+		} else {
+			Nan::ThrowError(&quot;Method expected an object or array&quot;);
+			return;
+		}
+
+	} else if(info.Length() == 2) {
+		//set(name|index, value)
+		ARG_FIELD_ID(0, f-&gt;get(), field_index);
+
+		//set field value
+		if (setField(f-&gt;get(), field_index, info[1])) {
+			Nan::ThrowError(&quot;Unsupported type of field value&quot;);
+			return;
+		}
+
+		info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(1));
+		return;
+	} else {
+		Nan::ThrowError(&quot;Invalid number of arguments&quot;);
+		return;
+	}
+}
+
+/**
+ * Resets all fields.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * feature.fields.reset();&#x60;&#x60;&#x60;
+ *
+ * @method reset
+ * @throws Error
+ * @param {Object} [values]
+ * @param {mixed} value
+ */
+NAN_METHOD(FeatureFields::reset)
+{
+	Nan::HandleScope scope;
+	int field_index;
+	unsigned int i, n;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	n = f-&gt;get()-&gt;GetFieldCount();
+
+	if (info.Length() == 0) {
+		for (i = 0; i &lt; n; i++) {
+			f-&gt;get()-&gt;UnsetField(i);
+		}
+		info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(n));
+		return;
+	}
+
+	if (!info[0]-&gt;IsObject()) {
+		Nan::ThrowError(&quot;fields must be an object&quot;);
+		return;
+	}
+
+	Local&lt;Object&gt; values = info[0].As&lt;Object&gt;();
+
+	for (i = 0; i &lt; n; i++) {
+		//iterate through field names from field defn,
+		//grabbing values from passed object
+
+		OGRFieldDefn* field_def = f-&gt;get()-&gt;GetFieldDefnRef(i);
+
+		const char* field_name = field_def-&gt;GetNameRef();
+
+		field_index = f-&gt;get()-&gt;GetFieldIndex(field_name);
+		if(field_index == -1) continue;
+
+		Local&lt;Value&gt; val = Nan::Get(values, Nan::New(field_name).ToLocalChecked()).ToLocalChecked();
+		if(setField(f-&gt;get(), field_index, val)){
+			Nan::ThrowError(&quot;Unsupported type of field value&quot;);
+			return;
+		}
+	}
+
+	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(n));
+}
+
+/**
+ * Returns the number of fields.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * feature.fields.count();&#x60;&#x60;&#x60;
+ *
+ * @method count
+ * @return {Integer}
+ */
+NAN_METHOD(FeatureFields::count)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(f-&gt;get()-&gt;GetFieldCount()));
+}
+
+/**
+ * Returns the index of a field, given its name.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * var index = feature.fields.indexOf(&#x27;field&#x27;);&#x60;&#x60;&#x60;
+ *
+ * @method indexOf
+ * @param {String} name
+ * @return {Integer} Index or, &#x60;-1&#x60; if it cannot be found.
+ */
+NAN_METHOD(FeatureFields::indexOf)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	std::string name(&quot;&quot;);
+	NODE_ARG_STR(0, &quot;field name&quot;, name);
+
+	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(f-&gt;get()-&gt;GetFieldIndex(name.c_str())));
+}
+
+/**
+ * Outputs the field data as a pure JS object.
+ *
+ * @throws Error
+ * @method toObject
+ * @return {Object}
+ */
+NAN_METHOD(FeatureFields::toObject)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	Local&lt;Object&gt; obj = Nan::New&lt;Object&gt;();
+
+	int n = f-&gt;get()-&gt;GetFieldCount();
+	for(int i = 0; i &lt; n; i++) {
+
+		//get field name
+		OGRFieldDefn *field_def = f-&gt;get()-&gt;GetFieldDefnRef(i);
+		const char *key = field_def-&gt;GetNameRef();
+		if (!key) {
+			Nan::ThrowError(&quot;Error getting field name&quot;);
+			return;
+		}
+
+		//get field value
+		Local&lt;Value&gt; val = FeatureFields::get(f-&gt;get(), i);
+		if (val.IsEmpty()) {
+			return; //get method threw an exception
+		}
+
+		Nan::Set(obj, Nan::New(key).ToLocalChecked(), val);
+	}
+	info.GetReturnValue().Set(obj);
+}
+
+/**
+ * Outputs the field values as a pure JS array.
+ *
+ * @throws Error
+ * @method toArray
+ * @return {Array}
+ */
+NAN_METHOD(FeatureFields::toArray)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	int n = f-&gt;get()-&gt;GetFieldCount();
+	Local&lt;Array&gt; array = Nan::New&lt;Array&gt;(n);
+
+	for(int i = 0; i &lt; n; i++) {
+		//get field value
+		Local&lt;Value&gt; val = FeatureFields::get(f-&gt;get(), i);
+		if (val.IsEmpty()) {
+			return; //get method threw an exception
+		}
+
+		Nan::Set(array, i, val);
+	}
+	info.GetReturnValue().Set(array);
+}
+
+Local&lt;Value&gt; FeatureFields::get(OGRFeature *f, int field_index)
+{
+	//#throws : caller must check if return_val.IsEmpty() and bail out if true
+	Nan::EscapableHandleScope scope;
+
+	if(!f-&gt;IsFieldSet(field_index)) return scope.Escape(Nan::Null());
+
+	OGRFieldDefn *field_def = f-&gt;GetFieldDefnRef(field_index);
+	switch(field_def-&gt;GetType()) {
+		case OFTInteger:
+			return scope.Escape(Nan::New&lt;Integer&gt;(f-&gt;GetFieldAsInteger(field_index)));
+		#if defined(GDAL_VERSION_MAJOR) &amp;&amp; (GDAL_VERSION_MAJOR &gt;= 2)
+		case OFTInteger64:
+			return scope.Escape(Nan::New&lt;Number&gt;(f-&gt;GetFieldAsInteger64(field_index)));
+		#endif
+		case OFTReal:
+			return scope.Escape(Nan::New&lt;Number&gt;(f-&gt;GetFieldAsDouble(field_index)));
+		case OFTString:
+			return scope.Escape(SafeString::New(f-&gt;GetFieldAsString(field_index)));
+		case OFTIntegerList:
+			return scope.Escape(getFieldAsIntegerList(f, field_index));
+		case OFTRealList:
+			return scope.Escape(getFieldAsDoubleList(f, field_index));
+		case OFTStringList:
+			return scope.Escape(getFieldAsStringList(f, field_index));
+		case OFTBinary:
+			return scope.Escape(getFieldAsBinary(f, field_index));
+		case OFTDate:
+		case OFTTime:
+		case OFTDateTime:
+			return scope.Escape(getFieldAsDateTime(f, field_index));
+		default:
+			Nan::ThrowError(&quot;Unsupported field type&quot;);
+			return scope.Escape(Nan::Undefined());
+	}
+}
+
+/**
+ * Returns a field&#x27;s value.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * value = feature.fields.get(0);
+ * value = feature.fields.get(&#x27;field&#x27;);&#x60;&#x60;&#x60;
+ *
+ * @method get
+ * @param {String|Integer} key Feature name or index.
+ * @return {mixed|Undefined}
+ */
+NAN_METHOD(FeatureFields::get)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	if (info.Length() &lt; 1) {
+		Nan::ThrowError(&quot;Field index or name must be given&quot;);
+		return;
+	}
+
+	int field_index;
+	ARG_FIELD_ID(0, f-&gt;get(), field_index);
+
+	Local&lt;Value&gt; result = FeatureFields::get(f-&gt;get(), field_index);
+
+	if(result.IsEmpty()) {
+		return;
+	} else {
+		info.GetReturnValue().Set(result);
+		return;
+	}
+}
+
+/**
+ * Returns a list of field name.
+ *
+ * @method getNames
+ * @throws Error
+ * @return {Array} List of field names.
+ */
+NAN_METHOD(FeatureFields::getNames)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Feature *f = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(parent);
+	if (!f-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	int n = f-&gt;get()-&gt;GetFieldCount();
+	Local&lt;Array&gt; result = Nan::New&lt;Array&gt;(n);
+
+	for(int i = 0; i &lt; n; i++) {
+
+		//get field name
+		OGRFieldDefn *field_def = f-&gt;get()-&gt;GetFieldDefnRef(i);
+		const char *field_name = field_def-&gt;GetNameRef();
+		if (!field_name) {
+			Nan::ThrowError(&quot;Error getting field name&quot;);
+			return;
+		}
+		Nan::Set(result, i, Nan::New(field_name).ToLocalChecked());
+	}
+
+	info.GetReturnValue().Set(result);
+}
+
+Local&lt;Value&gt; FeatureFields::getFieldAsIntegerList(OGRFeature* feature, int field_index)
+{
+	Nan::EscapableHandleScope scope;
+
+	int count_of_values = 0;
+
+	const int *values = feature-&gt;GetFieldAsIntegerList(field_index, &amp;count_of_values);
+
+	Local&lt;Array&gt; return_array = Nan::New&lt;Array&gt;(count_of_values);
+
+	for (int index = 0; index &lt; count_of_values; index++) {
+		Nan::Set(return_array, index, Nan::New&lt;Integer&gt;(values[index]));
+	}
+
+	return scope.Escape(return_array);
+}
+
+
+Local&lt;Value&gt; FeatureFields::getFieldAsDoubleList(OGRFeature* feature, int field_index)
+{
+	Nan::EscapableHandleScope scope;
+
+	int count_of_values = 0;
+
+	const double *values = feature-&gt;GetFieldAsDoubleList(field_index, &amp;count_of_values);
+
+	Local&lt;Array&gt; return_array = Nan::New&lt;Array&gt;(count_of_values);
+
+	for (int index = 0; index &lt; count_of_values; index++) {
+		Nan::Set(return_array, index, Nan::New&lt;Number&gt;(values[index]));
+	}
+
+	return scope.Escape(return_array);
+}
+
+
+Local&lt;Value&gt; FeatureFields::getFieldAsStringList(OGRFeature* feature, int field_index)
+{
+	Nan::EscapableHandleScope scope;
+	char **values = feature-&gt;GetFieldAsStringList(field_index);
+
+	int count_of_values = CSLCount(values);
+
+	Local&lt;Array&gt; return_array = Nan::New&lt;Array&gt;(count_of_values);
+
+	for (int index = 0; index &lt; count_of_values; index++) {
+		Nan::Set(return_array, index, SafeString::New(values[index]));
+	}
+
+	return scope.Escape(return_array);
+}
+
+
+Local&lt;Value&gt; FeatureFields::getFieldAsBinary(OGRFeature* feature, int field_index)
+{
+	Nan::EscapableHandleScope scope;
+
+	int count_of_bytes = 0;
+
+	unsigned char *data = (unsigned char*) feature-&gt;GetFieldAsBinary(field_index, &amp;count_of_bytes);
+
+	if (count_of_bytes &gt; 0) {
+		return scope.Escape(FastBuffer::New(data, count_of_bytes));
+	}
+
+	return scope.Escape(Nan::Undefined());
+}
+
+
+Local&lt;Value&gt; FeatureFields::getFieldAsDateTime(OGRFeature* feature, int field_index)
+{
+	Nan::EscapableHandleScope scope;
+
+	int year, month, day, hour, minute, second, timezone;
+
+	year = month = day = hour = minute = second = timezone = 0;
+
+	int result = feature-&gt;GetFieldAsDateTime(field_index, &amp;year, &amp;month,
+				 &amp;day, &amp;hour, &amp;minute, &amp;second, &amp;timezone);
+
+	if (result == TRUE) {
+		Local&lt;Object&gt; hash = Nan::New&lt;Object&gt;();
+
+		if (year) {
+			Nan::Set(hash, Nan::New(&quot;year&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(year));
+		}
+		if (month) {
+			Nan::Set(hash, Nan::New(&quot;month&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(month));
+		}
+		if (day) {
+			Nan::Set(hash, Nan::New(&quot;day&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(day));
+		}
+		if (hour) {
+			Nan::Set(hash, Nan::New(&quot;hour&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(hour));
+		}
+		if (minute) {
+			Nan::Set(hash, Nan::New(&quot;minute&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(minute));
+		}
+		if (second) {
+			Nan::Set(hash, Nan::New(&quot;second&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(second));
+		}
+		if (timezone) {
+			Nan::Set(hash, Nan::New(&quot;timezone&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(timezone));
+		}
+
+		return scope.Escape(hash);
+	} else {
+		return scope.Escape(Nan::Undefined());
+	}
+}
+
+/**
+ * Parent feature
+ *
+ * @readOnly
+ * @attribute feature
+ * @type {gdal.Feature}
+ */
+NAN_GETTER(FeatureFields::featureGetter)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked());
+}
+
+} // namespace node_gdal
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

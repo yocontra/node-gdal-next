@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/gdal_feature.cpp - node-gdal</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/lucid.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="node-gdal" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/GDALLogoColor.svg/200px-GDALLogoColor.svg.png" style="max-height: 65%;" title="node-gdal">
+            node-gdal
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.0.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Constants (CPL Error Codes)", "classes/Constants (CPL Error Levels)", "classes/Constants (DCAP)", "classes/Constants (DMD)", "classes/Constants (GCI)", "classes/Constants (GDT)", "classes/Constants (GRA)", "classes/Constants (ODsC)", "classes/Constants (OFT)", "classes/Constants (OJ)", "classes/Constants (OLC)", "classes/Constants (wkbByteOrder)", "classes/Constants (wkbGeometryType)", "classes/Constants (wkbVariant)", "classes/gdal", "classes/gdal.CoordinateTransformation", "classes/gdal.Dataset", "classes/gdal.DatasetBands", "classes/gdal.DatasetLayers", "classes/gdal.Driver", "classes/gdal.Envelope", "classes/gdal.Envelope3D", "classes/gdal.Feature", "classes/gdal.FeatureDefn", "classes/gdal.FeatureDefnFields", "classes/gdal.FeatureFields", "classes/gdal.FieldDefn", "classes/gdal.GDALDrivers", "classes/gdal.Geometry", "classes/gdal.GeometryCollection", "classes/gdal.GeometryCollectionChildren", "classes/gdal.Layer", "classes/gdal.LayerFeatures", "classes/gdal.LayerFields", "classes/gdal.LinearRing", "classes/gdal.LineString", "classes/gdal.LineStringPoints", "classes/gdal.MultiLineString", "classes/gdal.MultiPoint", "classes/gdal.MultiPolygon", "classes/gdal.Point", "classes/gdal.Polygon", "classes/gdal.PolygonRings", "classes/gdal.RasterBand", "classes/gdal.RasterBandOverviews", "classes/gdal.RasterBandPixels", "classes/gdal.SpatialReference"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Constants (CPL Error Codes).html">Constants (CPL Error Codes)</a></li>
+                <li><a href="../classes/Constants (CPL Error Levels).html">Constants (CPL Error Levels)</a></li>
+                <li><a href="../classes/Constants (DCAP).html">Constants (DCAP)</a></li>
+                <li><a href="../classes/Constants (DMD).html">Constants (DMD)</a></li>
+                <li><a href="../classes/Constants (GCI).html">Constants (GCI)</a></li>
+                <li><a href="../classes/Constants (GDT).html">Constants (GDT)</a></li>
+                <li><a href="../classes/Constants (GRA).html">Constants (GRA)</a></li>
+                <li><a href="../classes/Constants (ODsC).html">Constants (ODsC)</a></li>
+                <li><a href="../classes/Constants (OFT).html">Constants (OFT)</a></li>
+                <li><a href="../classes/Constants (OJ).html">Constants (OJ)</a></li>
+                <li><a href="../classes/Constants (OLC).html">Constants (OLC)</a></li>
+                <li><a href="../classes/Constants (wkbByteOrder).html">Constants (wkbByteOrder)</a></li>
+                <li><a href="../classes/Constants (wkbGeometryType).html">Constants (wkbGeometryType)</a></li>
+                <li><a href="../classes/Constants (wkbVariant).html">Constants (wkbVariant)</a></li>
+                <li><a href="../classes/gdal.html">gdal</a></li>
+                <li><a href="../classes/gdal.CoordinateTransformation.html">gdal.CoordinateTransformation</a></li>
+                <li><a href="../classes/gdal.Dataset.html">gdal.Dataset</a></li>
+                <li><a href="../classes/gdal.DatasetBands.html">gdal.DatasetBands</a></li>
+                <li><a href="../classes/gdal.DatasetLayers.html">gdal.DatasetLayers</a></li>
+                <li><a href="../classes/gdal.Driver.html">gdal.Driver</a></li>
+                <li><a href="../classes/gdal.Envelope.html">gdal.Envelope</a></li>
+                <li><a href="../classes/gdal.Envelope3D.html">gdal.Envelope3D</a></li>
+                <li><a href="../classes/gdal.Feature.html">gdal.Feature</a></li>
+                <li><a href="../classes/gdal.FeatureDefn.html">gdal.FeatureDefn</a></li>
+                <li><a href="../classes/gdal.FeatureDefnFields.html">gdal.FeatureDefnFields</a></li>
+                <li><a href="../classes/gdal.FeatureFields.html">gdal.FeatureFields</a></li>
+                <li><a href="../classes/gdal.FieldDefn.html">gdal.FieldDefn</a></li>
+                <li><a href="../classes/gdal.GDALDrivers.html">gdal.GDALDrivers</a></li>
+                <li><a href="../classes/gdal.Geometry.html">gdal.Geometry</a></li>
+                <li><a href="../classes/gdal.GeometryCollection.html">gdal.GeometryCollection</a></li>
+                <li><a href="../classes/gdal.GeometryCollectionChildren.html">gdal.GeometryCollectionChildren</a></li>
+                <li><a href="../classes/gdal.Layer.html">gdal.Layer</a></li>
+                <li><a href="../classes/gdal.LayerFeatures.html">gdal.LayerFeatures</a></li>
+                <li><a href="../classes/gdal.LayerFields.html">gdal.LayerFields</a></li>
+                <li><a href="../classes/gdal.LinearRing.html">gdal.LinearRing</a></li>
+                <li><a href="../classes/gdal.LineString.html">gdal.LineString</a></li>
+                <li><a href="../classes/gdal.LineStringPoints.html">gdal.LineStringPoints</a></li>
+                <li><a href="../classes/gdal.MultiLineString.html">gdal.MultiLineString</a></li>
+                <li><a href="../classes/gdal.MultiPoint.html">gdal.MultiPoint</a></li>
+                <li><a href="../classes/gdal.MultiPolygon.html">gdal.MultiPolygon</a></li>
+                <li><a href="../classes/gdal.Point.html">gdal.Point</a></li>
+                <li><a href="../classes/gdal.Polygon.html">gdal.Polygon</a></li>
+                <li><a href="../classes/gdal.PolygonRings.html">gdal.PolygonRings</a></li>
+                <li><a href="../classes/gdal.RasterBand.html">gdal.RasterBand</a></li>
+                <li><a href="../classes/gdal.RasterBandOverviews.html">gdal.RasterBandOverviews</a></li>
+                <li><a href="../classes/gdal.RasterBandPixels.html">gdal.RasterBandPixels</a></li>
+                <li><a href="../classes/gdal.SpatialReference.html">gdal.SpatialReference</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
+        </div>
+        <div class="span9">
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>src/gdal_feature.cpp <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+
+#include &quot;gdal_common.hpp&quot;
+#include &quot;gdal_feature.hpp&quot;
+#include &quot;gdal_feature_defn.hpp&quot;
+#include &quot;gdal_geometry.hpp&quot;
+#include &quot;gdal_field_defn.hpp&quot;
+#include &quot;gdal_layer.hpp&quot;
+#include &quot;collections/feature_fields.hpp&quot;
+
+namespace node_gdal {
+
+Nan::Persistent&lt;FunctionTemplate&gt; Feature::constructor;
+
+void Feature::Initialize(Local&lt;Object&gt; target)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(Feature::New);
+	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+	lcons-&gt;SetClassName(Nan::New(&quot;Feature&quot;).ToLocalChecked());
+
+	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+	Nan::SetPrototypeMethod(lcons, &quot;getGeometry&quot;, getGeometry);
+	//Nan::SetPrototypeMethod(lcons, &quot;setGeometryDirectly&quot;, setGeometryDirectly);
+	Nan::SetPrototypeMethod(lcons, &quot;setGeometry&quot;, setGeometry);
+	// Nan::SetPrototypeMethod(lcons, &quot;stealGeometry&quot;, stealGeometry);
+	Nan::SetPrototypeMethod(lcons, &quot;clone&quot;, clone);
+	//Nan::SetPrototypeMethod(lcons, &quot;equals&quot;, equals);
+	//Nan::SetPrototypeMethod(lcons, &quot;getFieldDefn&quot;, getFieldDefn); (use defn.fields.get() instead)
+	Nan::SetPrototypeMethod(lcons, &quot;setFrom&quot;, setFrom);
+
+	//Note: We should let node GC handle destroying features when they arent being used
+	//TODO: Give node more info on the amount of memory a feature is using
+	//      Nan::AdjustExternalMemory()
+	//Nan::SetPrototypeMethod(lcons, &quot;destroy&quot;, destroy);
+
+	ATTR(lcons, &quot;fields&quot;, fieldsGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;defn&quot;, defnGetter, READ_ONLY_SETTER);
+	ATTR(lcons, &quot;fid&quot;, fidGetter, fidSetter);
+
+	Nan::Set(target, Nan::New(&quot;Feature&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+
+	constructor.Reset(lcons);
+}
+
+Feature::Feature(OGRFeature *feature)
+	: Nan::ObjectWrap(),
+	  this_(feature),
+	  owned_(true)
+{
+	LOG(&quot;Created Feature[%p]&quot;, feature);
+}
+
+Feature::Feature()
+	: Nan::ObjectWrap(),
+	  this_(0),
+	  owned_(true)
+{
+}
+
+Feature::~Feature()
+{
+	dispose();
+}
+
+void Feature::dispose()
+{
+	if(this_) {
+		LOG(&quot;Disposing Feature [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
+		if(owned_) OGRFeature::DestroyFeature(this_);
+		LOG(&quot;Disposed Feature [%p]&quot;, this_);
+		this_ = NULL;
+	}
+}
+
+/**
+ * A simple feature, including geometry and attributes. Its fields and geometry type is defined by the given definition.
+ *
+ * &#x60;&#x60;&#x60;
+ * //create layer and specify geometry type
+ * var layer = dataset.layers.create(&#x27;mylayer&#x27;, null, gdal.Point);
+ *
+ * //setup fields for the given layer
+ * layer.fields.add(new gdal.FieldDefn(&#x27;elevation&#x27;, gdal.OFTInteger));
+ * layer.fields.add(new gdal.FieldDefn(&#x27;name&#x27;, gdal.OFTString));
+ *
+ * //create feature using layer definition and then add it to the layer
+ * var feature = new gdal.Feature(layer);
+ * feature.fields.set(&#x27;elevation&#x27;, 13775);
+ * feature.fields.set(&#x27;name&#x27;, &#x27;Grand Teton&#x27;);
+ * feature.setGeometry(new gdal.Point(43.741208, -110.802414));
+ * layer.features.add(feature);&#x60;&#x60;&#x60;
+ *
+ * @constructor
+ * @class gdal.Feature
+ * @param {gdal.Layer|gdal.FeatureDefn} definition
+ */
+NAN_METHOD(Feature::New)
+{
+	Nan::HandleScope scope;
+	Feature* f;
+
+	if (!info.IsConstructCall()) {
+		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+		return;
+	}
+
+	if (info[0]-&gt;IsExternal()) {
+		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+		void* ptr = ext-&gt;Value();
+		f = static_cast&lt;Feature *&gt;(ptr);
+
+	} else {
+
+		if (info.Length() &lt; 1) {
+			Nan::ThrowError(&quot;Constructor expects Layer or FeatureDefn object&quot;);
+			return;
+		}
+
+		OGRFeatureDefn *def;
+
+		if (IS_WRAPPED(info[0], Layer)) {
+			Layer *layer = Nan::ObjectWrap::Unwrap&lt;Layer&gt;(info[0].As&lt;Object&gt;());
+			if (!layer-&gt;isAlive()) {
+				Nan::ThrowError(&quot;Layer object already destroyed&quot;);
+				return;
+			}
+			def = layer-&gt;get()-&gt;GetLayerDefn();
+		} else if(IS_WRAPPED(info[0], FeatureDefn)) {
+			FeatureDefn *feature_def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info[0].As&lt;Object&gt;());
+			if (!feature_def-&gt;isAlive()) {
+				Nan::ThrowError(&quot;FeatureDefn object already destroyed&quot;);
+				return;
+			}
+			def = feature_def-&gt;get();
+		} else {
+			Nan::ThrowError(&quot;Constructor expects Layer or FeatureDefn object&quot;);
+			return;
+		}
+
+		OGRFeature *ogr_f = new OGRFeature(def);
+		f = new Feature(ogr_f);
+	}
+
+	Local&lt;Value&gt; fields = FeatureFields::New(info.This());
+	Nan::SetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked(), fields);
+
+	f-&gt;Wrap(info.This());
+	info.GetReturnValue().Set(info.This());
+}
+
+Local&lt;Value&gt; Feature::New(OGRFeature *feature)
+{
+	Nan::EscapableHandleScope scope;
+	return scope.Escape(Feature::New(feature, true));
+}
+
+Local&lt;Value&gt; Feature::New(OGRFeature *feature, bool owned)
+{
+	Nan::EscapableHandleScope scope;
+
+	if (!feature) {
+		return scope.Escape(Nan::Null());
+	}
+
+	Feature *wrapped = new Feature(feature);
+	wrapped-&gt;owned_ = owned;
+	Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+	Local&lt;Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(Feature::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+	return scope.Escape(obj);
+}
+
+NAN_METHOD(Feature::toString)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::New(&quot;Feature&quot;).ToLocalChecked());
+}
+
+/**
+ * Returns the geometry of the feature.
+ *
+ * @method getGeometry
+ * @return {gdal.Geometry}
+ */
+NAN_METHOD(Feature::getGeometry)
+{
+	Nan::HandleScope scope;
+
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	OGRGeometry* geom = feature-&gt;this_-&gt;GetGeometryRef();
+	if (!geom) {
+		info.GetReturnValue().Set(Nan::Null());
+		return;
+	}
+
+
+	info.GetReturnValue().Set(Geometry::New(geom, false));
+}
+
+/**
+ * Returns the definition of a particular field at an index.
+ *
+ * @method getFieldDefn
+ * @param {Integer} index Field index (0-based)
+ * @return {gdal.FieldDefn}
+ */
+NAN_METHOD(Feature::getFieldDefn)
+{
+	Nan::HandleScope scope;
+	int field_index;
+	NODE_ARG_INT(0, &quot;field index&quot;, field_index);
+
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	if (field_index &lt; 0 || field_index &gt;= feature-&gt;this_-&gt;GetFieldCount()) {
+		Nan::ThrowError(&quot;Invalid field index&quot;);
+		return;
+	}
+
+	info.GetReturnValue().Set(FieldDefn::New(feature-&gt;this_-&gt;GetFieldDefnRef(field_index), false));
+}
+
+//NODE_WRAPPED_METHOD_WITH_RESULT(Feature, stealGeometry, Geometry, StealGeometry);
+
+/**
+ * Sets the feature&#x27;s geometry.
+ *
+ * @throws Error
+ * @method setGeometry
+ * @param {gdal.Geometry} geometry
+ */
+NAN_METHOD(Feature::setGeometry)
+{
+	Nan::HandleScope scope;
+
+	Geometry *geom = NULL;
+	NODE_ARG_WRAPPED_OPT(0, &quot;geometry&quot;, Geometry, geom);
+
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	OGRErr err = feature-&gt;this_-&gt;SetGeometry(geom ? geom-&gt;get() : NULL);
+	if(err){
+		NODE_THROW_OGRERR(err);
+	} 
+
+	return;
+}
+
+
+/**
+ * Determines if the features are the same.
+ *
+ * @method equals
+ * @param {gdal.Feature} feature
+ * @return {Boolean} &#x60;true&#x60; if the features are the same, &#x60;false&#x60; if different
+ */
+NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Feature, equals, Boolean, Equal, Feature, &quot;feature&quot;);
+
+/**
+ * Clones the feature.
+ *
+ * @method clone
+ * @return {gdal.Feature}
+ */
+NAN_METHOD(Feature::clone)
+{
+	Nan::HandleScope scope;
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(Feature::New(feature-&gt;this_-&gt;Clone()));
+}
+
+/**
+ * Releases the feature from memory.
+ *
+ * @method destroy
+ */
+NAN_METHOD(Feature::destroy)
+{
+	Nan::HandleScope scope;
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+	feature-&gt;dispose();
+	return;
+}
+
+/**
+ * Set one feature from another. Overwrites the contents of this feature
+ * from the geometry and attributes of another.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * var feature1 = new gdal.Feature(defn);
+ * var feature2 = new gdal.Feature(defn);
+ * feature1.setGeometry(new gdal.Point(5, 10));
+ * feature1.fields.set([5, &#x27;test&#x27;, 3.14]);
+ * feature2.setFrom(feature1);&#x60;&#x60;&#x60;
+ *
+ * @throws Error
+ * @method setFrom
+ * @param {gdal.Feature} feature
+ * @param {Array} [*index_map] Array of the indices (integers) of the feature&#x27;s fields stored at the corresponding index of the source feature&#x27;s fields. A value of -1 should be used to ignore the source&#x27;s field. The array should not be &#x60;null&#x60; and be as long as the number of fields in the source feature.
+ * @param {Boolean} [forgiving=true] &#x60;true&#x60; if the operation should continue despite lacking output fields matching some of the source fields.
+ */
+NAN_METHOD(Feature::setFrom)
+{
+	Nan::HandleScope scope;
+	Feature *other_feature;
+	int forgiving = 1;
+	Local&lt;Array&gt; index_map;
+	OGRErr err = 0;
+
+	NODE_ARG_WRAPPED(0, &quot;feature&quot;, Feature, other_feature);
+
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+
+	if (info.Length() &lt;= 2) {
+		NODE_ARG_BOOL_OPT(1, &quot;forgiving&quot;, forgiving);
+
+		err = feature-&gt;this_-&gt;SetFrom(other_feature-&gt;this_, forgiving ? TRUE : FALSE);
+	} else {
+		NODE_ARG_ARRAY(1, &quot;index map&quot;, index_map);
+		NODE_ARG_BOOL_OPT(2, &quot;forgiving&quot;, forgiving);
+
+		if (index_map-&gt;Length() &lt; 1) {
+			Nan::ThrowError(&quot;index map must contain at least 1 index&quot;);
+			return;
+		}
+
+		int *index_map_ptr = new int[index_map-&gt;Length()];
+
+		for (unsigned index = 0; index &lt; index_map-&gt;Length(); index++) {
+			Local&lt;Value&gt; field_index(Nan::Get(index_map, Nan::New&lt;Integer&gt;(index)).ToLocalChecked());
+
+			if (!field_index-&gt;IsUint32()) {
+				delete [] index_map_ptr;
+				Nan::ThrowError(&quot;index map must contain only integer values&quot;);
+				return;
+			}
+
+			int val = (int)Nan::To&lt;uint32_t&gt;(field_index).ToChecked(); //todo: validate index? perhaps ogr already does this and throws an error
+
+			index_map_ptr[index] = val;
+		}
+
+		err = feature-&gt;this_-&gt;SetFrom(other_feature-&gt;this_, index_map_ptr, forgiving ? TRUE : FALSE);
+
+		delete [] index_map_ptr;
+	}
+
+	if(err) {
+		NODE_THROW_OGRERR(err);
+		return;
+	}
+	return;
+}
+
+/**
+ * @readOnly
+ * @attribute fields
+ * @type {gdal.FeatureFields}
+ */
+NAN_GETTER(Feature::fieldsGetter)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked()).ToLocalChecked());
+}
+
+/**
+ * @attribute fid
+ * @type {Number}
+ */
+NAN_GETTER(Feature::fidGetter)
+{
+	Nan::HandleScope scope;
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(Nan::New&lt;Number&gt;(feature-&gt;this_-&gt;GetFID()));
+}
+
+/**
+ * @readOnly
+ * @attribute defn
+ * @type {gdal.FeatureDefn}
+ */
+NAN_GETTER(Feature::defnGetter)
+{
+	Nan::HandleScope scope;
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+	info.GetReturnValue().Set(FeatureDefn::New(feature-&gt;this_-&gt;GetDefnRef(), false));
+}
+
+NAN_SETTER(Feature::fidSetter)
+{
+	Nan::HandleScope scope;
+	Feature *feature = Nan::ObjectWrap::Unwrap&lt;Feature&gt;(info.This());
+	if (!feature-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Feature object already destroyed&quot;);
+		return;
+	}
+	if(!value-&gt;IsInt32()){
+		Nan::ThrowError(&quot;fid must be an integer&quot;);
+		return;
+	}
+	feature-&gt;this_-&gt;SetFID(Nan::To&lt;int64_t&gt;(value).ToChecked());
+}
+
+} // namespace node_gdal
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

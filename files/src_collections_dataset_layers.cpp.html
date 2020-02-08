@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/collections/dataset_layers.cpp - node-gdal</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/lucid.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="node-gdal" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/GDALLogoColor.svg/200px-GDALLogoColor.svg.png" style="max-height: 65%;" title="node-gdal">
+            node-gdal
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.0.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Constants (CPL Error Codes)", "classes/Constants (CPL Error Levels)", "classes/Constants (DCAP)", "classes/Constants (DMD)", "classes/Constants (GCI)", "classes/Constants (GDT)", "classes/Constants (GRA)", "classes/Constants (ODsC)", "classes/Constants (OFT)", "classes/Constants (OJ)", "classes/Constants (OLC)", "classes/Constants (wkbByteOrder)", "classes/Constants (wkbGeometryType)", "classes/Constants (wkbVariant)", "classes/gdal", "classes/gdal.CoordinateTransformation", "classes/gdal.Dataset", "classes/gdal.DatasetBands", "classes/gdal.DatasetLayers", "classes/gdal.Driver", "classes/gdal.Envelope", "classes/gdal.Envelope3D", "classes/gdal.Feature", "classes/gdal.FeatureDefn", "classes/gdal.FeatureDefnFields", "classes/gdal.FeatureFields", "classes/gdal.FieldDefn", "classes/gdal.GDALDrivers", "classes/gdal.Geometry", "classes/gdal.GeometryCollection", "classes/gdal.GeometryCollectionChildren", "classes/gdal.Layer", "classes/gdal.LayerFeatures", "classes/gdal.LayerFields", "classes/gdal.LinearRing", "classes/gdal.LineString", "classes/gdal.LineStringPoints", "classes/gdal.MultiLineString", "classes/gdal.MultiPoint", "classes/gdal.MultiPolygon", "classes/gdal.Point", "classes/gdal.Polygon", "classes/gdal.PolygonRings", "classes/gdal.RasterBand", "classes/gdal.RasterBandOverviews", "classes/gdal.RasterBandPixels", "classes/gdal.SpatialReference"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Constants (CPL Error Codes).html">Constants (CPL Error Codes)</a></li>
+                <li><a href="../classes/Constants (CPL Error Levels).html">Constants (CPL Error Levels)</a></li>
+                <li><a href="../classes/Constants (DCAP).html">Constants (DCAP)</a></li>
+                <li><a href="../classes/Constants (DMD).html">Constants (DMD)</a></li>
+                <li><a href="../classes/Constants (GCI).html">Constants (GCI)</a></li>
+                <li><a href="../classes/Constants (GDT).html">Constants (GDT)</a></li>
+                <li><a href="../classes/Constants (GRA).html">Constants (GRA)</a></li>
+                <li><a href="../classes/Constants (ODsC).html">Constants (ODsC)</a></li>
+                <li><a href="../classes/Constants (OFT).html">Constants (OFT)</a></li>
+                <li><a href="../classes/Constants (OJ).html">Constants (OJ)</a></li>
+                <li><a href="../classes/Constants (OLC).html">Constants (OLC)</a></li>
+                <li><a href="../classes/Constants (wkbByteOrder).html">Constants (wkbByteOrder)</a></li>
+                <li><a href="../classes/Constants (wkbGeometryType).html">Constants (wkbGeometryType)</a></li>
+                <li><a href="../classes/Constants (wkbVariant).html">Constants (wkbVariant)</a></li>
+                <li><a href="../classes/gdal.html">gdal</a></li>
+                <li><a href="../classes/gdal.CoordinateTransformation.html">gdal.CoordinateTransformation</a></li>
+                <li><a href="../classes/gdal.Dataset.html">gdal.Dataset</a></li>
+                <li><a href="../classes/gdal.DatasetBands.html">gdal.DatasetBands</a></li>
+                <li><a href="../classes/gdal.DatasetLayers.html">gdal.DatasetLayers</a></li>
+                <li><a href="../classes/gdal.Driver.html">gdal.Driver</a></li>
+                <li><a href="../classes/gdal.Envelope.html">gdal.Envelope</a></li>
+                <li><a href="../classes/gdal.Envelope3D.html">gdal.Envelope3D</a></li>
+                <li><a href="../classes/gdal.Feature.html">gdal.Feature</a></li>
+                <li><a href="../classes/gdal.FeatureDefn.html">gdal.FeatureDefn</a></li>
+                <li><a href="../classes/gdal.FeatureDefnFields.html">gdal.FeatureDefnFields</a></li>
+                <li><a href="../classes/gdal.FeatureFields.html">gdal.FeatureFields</a></li>
+                <li><a href="../classes/gdal.FieldDefn.html">gdal.FieldDefn</a></li>
+                <li><a href="../classes/gdal.GDALDrivers.html">gdal.GDALDrivers</a></li>
+                <li><a href="../classes/gdal.Geometry.html">gdal.Geometry</a></li>
+                <li><a href="../classes/gdal.GeometryCollection.html">gdal.GeometryCollection</a></li>
+                <li><a href="../classes/gdal.GeometryCollectionChildren.html">gdal.GeometryCollectionChildren</a></li>
+                <li><a href="../classes/gdal.Layer.html">gdal.Layer</a></li>
+                <li><a href="../classes/gdal.LayerFeatures.html">gdal.LayerFeatures</a></li>
+                <li><a href="../classes/gdal.LayerFields.html">gdal.LayerFields</a></li>
+                <li><a href="../classes/gdal.LinearRing.html">gdal.LinearRing</a></li>
+                <li><a href="../classes/gdal.LineString.html">gdal.LineString</a></li>
+                <li><a href="../classes/gdal.LineStringPoints.html">gdal.LineStringPoints</a></li>
+                <li><a href="../classes/gdal.MultiLineString.html">gdal.MultiLineString</a></li>
+                <li><a href="../classes/gdal.MultiPoint.html">gdal.MultiPoint</a></li>
+                <li><a href="../classes/gdal.MultiPolygon.html">gdal.MultiPolygon</a></li>
+                <li><a href="../classes/gdal.Point.html">gdal.Point</a></li>
+                <li><a href="../classes/gdal.Polygon.html">gdal.Polygon</a></li>
+                <li><a href="../classes/gdal.PolygonRings.html">gdal.PolygonRings</a></li>
+                <li><a href="../classes/gdal.RasterBand.html">gdal.RasterBand</a></li>
+                <li><a href="../classes/gdal.RasterBandOverviews.html">gdal.RasterBandOverviews</a></li>
+                <li><a href="../classes/gdal.RasterBandPixels.html">gdal.RasterBandPixels</a></li>
+                <li><a href="../classes/gdal.SpatialReference.html">gdal.SpatialReference</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
+        </div>
+        <div class="span9">
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>src/collections/dataset_layers.cpp <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+#include &quot;../gdal_common.hpp&quot;
+#include &quot;../gdal_dataset.hpp&quot;
+#include &quot;../gdal_layer.hpp&quot;
+#include &quot;../gdal_spatial_reference.hpp&quot;
+#include &quot;dataset_layers.hpp&quot;
+#include &quot;../utils/string_list.hpp&quot;
+
+namespace node_gdal {
+
+Nan::Persistent&lt;FunctionTemplate&gt; DatasetLayers::constructor;
+
+void DatasetLayers::Initialize(Local&lt;Object&gt; target)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(DatasetLayers::New);
+	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+	lcons-&gt;SetClassName(Nan::New(&quot;DatasetLayers&quot;).ToLocalChecked());
+
+	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+	Nan::SetPrototypeMethod(lcons, &quot;count&quot;, count);
+	Nan::SetPrototypeMethod(lcons, &quot;create&quot;, create);
+	Nan::SetPrototypeMethod(lcons, &quot;copy&quot;, copy);
+	Nan::SetPrototypeMethod(lcons, &quot;get&quot;, get);
+	Nan::SetPrototypeMethod(lcons, &quot;remove&quot;, remove);
+
+	ATTR_DONT_ENUM(lcons, &quot;ds&quot;, dsGetter, READ_ONLY_SETTER);
+
+	Nan::Set(target, Nan::New(&quot;DatasetLayers&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+
+	constructor.Reset(lcons);
+}
+
+DatasetLayers::DatasetLayers()
+	: Nan::ObjectWrap()
+{}
+
+DatasetLayers::~DatasetLayers()
+{}
+
+/**
+ * An encapsulation of a {{#crossLink &quot;gdal.Dataset&quot;}}Dataset{{/crossLink}}&#x27;s vector layers.
+ *
+ * &#x60;&#x60;&#x60;
+ * var layers = dataset.layers;&#x60;&#x60;&#x60;
+ *
+ * @class gdal.DatasetLayers
+ */
+NAN_METHOD(DatasetLayers::New)
+{
+	Nan::HandleScope scope;
+
+	if (!info.IsConstructCall()) {
+		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+		return;
+	}
+	if (info[0]-&gt;IsExternal()) {
+		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+		void* ptr = ext-&gt;Value();
+		DatasetLayers *f =  static_cast&lt;DatasetLayers *&gt;(ptr);
+		f-&gt;Wrap(info.This());
+		info.GetReturnValue().Set(info.This());
+		return;
+	} else {
+		Nan::ThrowError(&quot;Cannot create DatasetLayers directly&quot;);
+		return;
+	}
+}
+
+Local&lt;Value&gt; DatasetLayers::New(Local&lt;Value&gt; ds_obj)
+{
+	Nan::EscapableHandleScope scope;
+
+	DatasetLayers *wrapped = new DatasetLayers();
+
+	v8::Local&lt;v8::Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+	v8::Local&lt;v8::Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(DatasetLayers::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+
+	Nan::SetPrivate(obj, Nan::New(&quot;parent_&quot;).ToLocalChecked(), ds_obj);
+
+	return scope.Escape(obj);
+}
+
+NAN_METHOD(DatasetLayers::toString)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::New(&quot;DatasetLayers&quot;).ToLocalChecked());
+}
+
+/**
+ * Returns the layer with the given name or identifier.
+ *
+ * @method get
+ * @param {String|Integer} key Layer name or ID.
+ * @return {gdal.Layer}
+ */
+NAN_METHOD(DatasetLayers::get)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Dataset *ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(parent);
+	
+	if (!ds-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Dataset object has already been destroyed&quot;);
+		return;
+	}
+
+	#if GDAL_VERSION_MAJOR &gt;= 2
+		GDALDataset *raw = ds-&gt;getDataset();
+	#else
+		OGRDataSource *raw = ds-&gt;getDatasource(); 
+		if(!ds-&gt;uses_ogr) {
+			info.GetReturnValue().Set(Nan::Null());
+			return;
+		}
+	#endif
+
+	if(info.Length() &lt; 1) {
+		Nan::ThrowError(&quot;method must be given integer or string&quot;);
+		return;
+	}
+
+	OGRLayer *lyr;
+
+	if(info[0]-&gt;IsString()) {
+		std::string layer_name = *Nan::Utf8String(info[0]);
+		lyr = raw-&gt;GetLayerByName(layer_name.c_str());
+	} else if(info[0]-&gt;IsNumber()) {
+		lyr = raw-&gt;GetLayer(Nan::To&lt;int64_t&gt;(info[0]).ToChecked());
+	} else {
+		Nan::ThrowTypeError(&quot;method must be given integer or string&quot;);
+		return;
+	}
+
+	info.GetReturnValue().Set(Layer::New(lyr, raw));
+}
+
+/**
+ * Adds a new layer.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * dataset.layers.create(&#x27;layername&#x27;, null, gdal.Point);
+ * &#x60;&#x60;&#x60;
+ * 
+ * @method create
+ * @throws Error
+ * @param {String} name Layer name
+ * @param {gdal.SpatialReference|null} srs Layer projection
+ * @param {Integer|Function} geomType Geometry type or constructor ({{#crossLink &quot;Constants (wkbGeometryType)&quot;}}see geometry types{{/crossLink}})
+ * @param {string[]|object} creation_options driver-specific layer creation options
+ * @return {gdal.Layer}
+ */
+NAN_METHOD(DatasetLayers::create)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Dataset *ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(parent);
+	
+	if (!ds-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Dataset object has already been destroyed&quot;);
+		return;
+	}
+
+	#if GDAL_VERSION_MAJOR &gt;= 2
+		GDALDataset *raw = ds-&gt;getDataset();
+	#else
+		OGRDataSource *raw = ds-&gt;getDatasource();
+		if(!ds-&gt;uses_ogr) {
+			Nan::ThrowError(&quot;Dataset does not support creating layers&quot;);
+			return;
+		}
+	#endif
+
+	std::string layer_name;
+	SpatialReference *spatial_ref = NULL;
+	OGRwkbGeometryType geom_type = wkbUnknown;
+	StringList options;
+
+	NODE_ARG_STR(0, &quot;layer name&quot;, layer_name);
+	NODE_ARG_WRAPPED_OPT(1, &quot;spatial reference&quot;, SpatialReference, spatial_ref);
+	NODE_ARG_ENUM_OPT(2, &quot;geometry type&quot;, OGRwkbGeometryType, geom_type);
+	if(info.Length() &gt; 3 &amp;&amp; options.parse(info[3])){
+		return; //error parsing string list
+	}
+
+	OGRSpatialReference *srs = NULL;
+	if(spatial_ref) srs = spatial_ref-&gt;get();
+
+	OGRLayer *layer = raw-&gt;CreateLayer(layer_name.c_str(),
+					  srs,
+					  geom_type,
+					  options.get());
+
+	if (layer) {
+		info.GetReturnValue().Set(Layer::New(layer, raw, false));
+		return;
+	} else {
+		Nan::ThrowError(&quot;Error creating layer&quot;);
+		return;
+	}
+}
+
+/**
+ * Returns the number of layers.
+ *
+ * @method count
+ * @return {Integer}
+ */
+NAN_METHOD(DatasetLayers::count)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Dataset *ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(parent);
+	
+	if (!ds-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Dataset object has already been destroyed&quot;);
+		return;
+	}
+
+	#if GDAL_VERSION_MAJOR &gt;= 2
+		GDALDataset *raw = ds-&gt;getDataset();
+	#else
+		OGRDataSource *raw = ds-&gt;getDatasource();
+		if(!ds-&gt;uses_ogr) {
+			info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(0));
+			return;
+		}
+	#endif
+
+	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(raw-&gt;GetLayerCount()));
+}
+
+/**
+ * Copies a layer.
+ *
+ * @method copy
+ * @param {String} src_lyr_name
+ * @param {String} dst_lyr_name
+ * @param {object|string[]} [options=null] layer creation options
+ * @return {gdal.Layer}
+ */
+NAN_METHOD(DatasetLayers::copy)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Dataset *ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(parent);
+	
+	if (!ds-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Dataset object has already been destroyed&quot;);
+		return;
+	}
+
+	#if GDAL_VERSION_MAJOR &gt;= 2
+		GDALDataset *raw = ds-&gt;getDataset();
+	#else
+		OGRDataSource *raw = ds-&gt;getDatasource();
+		if(!ds-&gt;uses_ogr) {
+			Nan::ThrowError(&quot;Dataset does not support copying layers&quot;);
+			return;
+		}
+	#endif
+
+	Layer *layer_to_copy;
+	std::string new_name = &quot;&quot;;
+	StringList options;
+
+	NODE_ARG_WRAPPED(0, &quot;layer to copy&quot;, Layer, layer_to_copy);
+	NODE_ARG_STR(1, &quot;new layer name&quot;, new_name);
+	if(info.Length() &gt; 2 &amp;&amp; options.parse(info[2])){
+		return; //error parsing string list
+	}
+
+	OGRLayer *layer = raw-&gt;CopyLayer(layer_to_copy-&gt;get(),
+										   new_name.c_str(),
+										   options.get());
+
+	if (layer) {
+		info.GetReturnValue().Set(Layer::New(layer, raw));
+		return;
+	} else {
+		Nan::ThrowError(&quot;Error copying layer&quot;);
+		return;
+	}
+}
+
+/**
+ * Removes a layer.
+ *
+ * @method remove
+ * @throws Error
+ * @param {Integer} index
+ */
+NAN_METHOD(DatasetLayers::remove)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; parent = Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked().As&lt;Object&gt;();
+	Dataset *ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(parent);
+	
+	if (!ds-&gt;isAlive()) {
+		Nan::ThrowError(&quot;Dataset object has already been destroyed&quot;);
+		return;
+	}
+
+	#if GDAL_VERSION_MAJOR &gt;= 2
+		GDALDataset *raw = ds-&gt;getDataset();
+	#else
+		OGRDataSource *raw = ds-&gt;getDatasource();
+		if(!ds-&gt;uses_ogr) {
+			Nan::ThrowError(&quot;Dataset does not support removing layers&quot;);
+			return;
+		}
+	#endif
+
+	int i;
+	NODE_ARG_INT(0, &quot;layer index&quot;, i);
+	OGRErr err = raw-&gt;DeleteLayer(i);
+	if(err) {
+		NODE_THROW_OGRERR(err);
+		return;
+	}
+
+	return;
+}
+
+/**
+ * Parent dataset
+ *
+ * @readOnly
+ * @attribute ds
+ * @type {gdal.Dataset}
+ */
+NAN_GETTER(DatasetLayers::dsGetter)
+{
+	Nan::HandleScope scope;
+	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;parent_&quot;).ToLocalChecked()).ToLocalChecked());
+}
+
+} // namespace node_gdal
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>
