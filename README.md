@@ -1,6 +1,6 @@
 # Fork Notes
 
-This project is a fork of https://github.com/naturalatlas/node-gdal - all it does is update dependencies, update the build system for newer versions of node, and provide prebuilt versions.
+This project is a fork of https://github.com/naturalatlas/node-gdal - all it does is update dependencies, update the build system for newer versions of node, and provide prebuilt versions. See the [ROADMAP](ROADMAP.md) for more info about the future of this fork.
 
 # node-gdal-next
 [![NPM version](http://img.shields.io/npm/v/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
