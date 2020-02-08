@@ -16,7 +16,7 @@ See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All t
 [![NPM version](http://img.shields.io/npm/v/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
 [![Installs](http://img.shields.io/npm/dm/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
 [![Build Status](https://travis-ci.org/contra/node-gdal-next.svg)](https://travis-ci.org/contra/node-gdal-next)
-[<img src="https://ci.appveyor.com/api/projects/status/mo06c2r5opdwak95?svg=true" height="20" alt="" />](https://ci.appveyor.com/project/contra/node-gdal-next)
+[<img src="https://ci.appveyor.com/api/projects/status/8u9qlfu2cjor4idi?svg=true" height="20" alt="" />](https://ci.appveyor.com/project/contra/node-gdal-next)
 
 Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native [GDAL](http://www.gdal.org/) binding. GDAL [3.0.2](https://trac.osgeo.org/gdal/wiki/Release/3.0.2-News) ([GEOS](http://trac.osgeo.org/geos/) [3.8.0](https://github.com/libgeos/geos/releases/tag/3.8.0), [Proj](http://trac.osgeo.org/proj/) [6.2.1](https://github.com/OSGeo/PROJ/releases/tag/6.2.1)) comes bundled, so node-gdal will work straight out of the box. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
 
