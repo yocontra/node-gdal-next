@@ -1,7 +1,7 @@
 # v1.0.0
 
 - Finish updating dependencies (one test is failing)
-- Define clearly which versions of node are supported, and make sure they are all in the test matrix
+- Update the test and build matrix to support every node version >= 10
   - Get all of the tests passing for these versions
   - Get prebuilt binaries published for these versions
 - Add GPKG support (possible now that the dependencies are updated)
