@@ -1,5 +1,5 @@
 {
-	"name": "node-gdal",
+	"name": "node-gdal-next",
 	"description": "Node.js bindings for GDAL (Geospatial Data Abstraction Library) [Fork]",
 	"version": "1.0.0",
 	"url": "https://github.com/contra/node-gdal-next",
