@@ -10,7 +10,7 @@
 
 - Switch from nan to N-API
   - Normalize the build system for this package to match more recent native modules like node-sqlite
-- Update the yuidoc generation (using super old dependencies)
+- Automate the yuidoc publishing
 - Build out an async API
 - Find a way to keep the dependency source code out of the repository to reduce noise
 - Reduce the number of manual patching done in the gdal format gyp files
