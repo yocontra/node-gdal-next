@@ -9,6 +9,8 @@
 # v2.0.0
 
 - Switch from nan to N-API
+- Update the yuidoc generate
+- Build out an async API
 - Find a way to keep the dependency source code out of the repository to reduce noise
 - Reduce the number of manual patching done in the gdal format gyp files
 - Automate dependency updates and prebuilt binaries for new node releases
