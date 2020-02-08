@@ -46,7 +46,7 @@ test-shared: clean-test build-shared
 	@make clean-test
 
 test-syntax:
-	npm run test-syntax
+	npm run lint
 
 test-concurrent: clean-test
 	node ./node_modules/.bin/_mocha \

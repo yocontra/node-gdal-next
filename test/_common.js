@@ -1,17 +1,17 @@
-var gdal = require('../lib/gdal.js');
+const gdal = require('../lib/gdal.js')
 
 // gc tracing
 try {
-	gdal.startLogging(__dirname + '/artifacts/log.txt');
+  gdal.startLogging(`${__dirname}/artifacts/log.txt`)
 } catch (e) {
-	/* ignore */
+  /* ignore */
 }
 
 // seg fault handler
-var SegfaultHandler;
+let SegfaultHandler
 try {
-	SegfaultHandler = require('segfault-handler');
-	SegfaultHandler.registerHandler();
+  SegfaultHandler = require('segfault-handler')
+  SegfaultHandler.registerHandler()
 } catch (err) {
-	/* ignore */
+  /* ignore */
 }

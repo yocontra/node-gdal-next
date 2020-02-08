@@ -10,4 +10,4 @@ $ make release version=0.9.1
 $ npm publish
 ```
 
-Afterwards just click the "Draft a New Release" button [here](https://github.com/naturalatlas/node-gdal/releases), select the tag, and type in the version and some notes and that should do it.
+Afterwards just click the "Draft a New Release" button [here](https://github.com/contra/node-gdal-next/releases), select the tag, and type in the version and some notes and that should do it.

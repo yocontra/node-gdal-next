@@ -1,14 +1,14 @@
-var gdal = require('../lib/gdal.js');
-var path = require('path');
-var assert = require('assert');
+const gdal = require('../lib/gdal.js')
+const path = require('path')
+const assert = require('assert')
 
-describe('Open', function() {
-	afterEach(gc);
+describe('Open', () => {
+  afterEach(gc)
 
-	it('should throw when invalid file', function() {
-		var filename = path.join(__dirname, 'data/invalid');
-		assert.throws(function() {
-			gdal.open(filename);
-		}, /Error opening dataset/);
-	});
-});
+  it('should throw when invalid file', () => {
+    const filename = path.join(__dirname, 'data/invalid')
+    assert.throws(() => {
+      gdal.open(filename)
+    }, /Error opening dataset/)
+  })
+})

@@ -1,5 +1,5 @@
 /**
- * This [node-gdal](https://github.com/naturalatlas/node-gdal) binding for
+ * This [node-gdal](https://github.com/contra/node-gdal-next) binding for
  * Node.js provides a feature-complete way of reading, writing, and manipulating
  * geospatial data (raster and vector) using [GDAL](http://www.gdal.org/).
  * ```
@@ -11,8 +11,8 @@
  * });
  * ```
  *
- * <iframe src="http://ghbtns.com/github-btn.html?user=naturalatlas&repo=node-gdal&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="90" height="20" style="margin-top:20px"></iframe>
- * <iframe src="http://ghbtns.com/github-btn.html?user=naturalatlas&repo=node-gdal&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
+ * <iframe src="http://ghbtns.com/github-btn.html?user=contra&repo=node-gdal-next&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="90" height="20" style="margin-top:20px"></iframe>
+ * <iframe src="http://ghbtns.com/github-btn.html?user=contra&repo=node-gdal-next&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe>
  *
  * @class gdal
  */
@@ -1193,4 +1193,4 @@ namespace node_gdal {
 
 } // namespace node_gdal
 
-NODE_MODULE(NODE_GYP_MODULE_NAME, node_gdal::Init)
+NODE_MODULE(NODE_GYP_MODULE_NAME, node_gdal::Init);
