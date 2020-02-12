@@ -59,7 +59,7 @@ describe('gdal', () => {
         assert.isFalse(feature.getGeometry().isEmpty())
       })
     })
-    it('should accept an array of fixed levels', () => {
+    it.skip('should accept an array of fixed levels', () => {
       const levels = [ 53, 43, 193 ].sort()
 
       gdal.contourGenerate({
