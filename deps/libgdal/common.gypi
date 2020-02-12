@@ -50,6 +50,7 @@
 		"conditions": [
 			["OS == 'win'", {
 				"include_dirs": ["./arch/win"],
+				"defines": [ "NOMINMAX" ],
 				"VCCLCompilerTool": {
 					"DebugInformationFormat": "0"
 				},
