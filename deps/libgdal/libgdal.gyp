@@ -202,6 +202,7 @@
 					"sources": [
 						"gdal/port/cpl_odbc.cpp"
 					],
+					"defines": [ "NOMINMAX" ],
 					"link_settings": {
 						"libraries": [
 							"-lws2_32.lib",
