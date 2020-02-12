@@ -72,6 +72,8 @@
 			],
 			"include_dirs": [
 				"../gdal/frmts/zlib",
+				"../gdal/frmts/jpeg",
+				"../gdal/frmts/jpeg/libjpeg",
 				"../gdal/frmts/gtiff",
 				"../gdal/frmts/gtiff/libtiff",
 				"../gdal/frmts/gtiff/libgeotiff",
