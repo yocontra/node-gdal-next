@@ -39,7 +39,7 @@
 		],
 		"link_settings": {
 			"ldflags": [
-				"-Wl,-z,defs"
+				"-Wl,-z,now"
 			]
 		},
 		"configurations": {
