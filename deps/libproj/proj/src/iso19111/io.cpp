@@ -1997,6 +1997,74 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
     // do that before buildEllipsoid() so that esriStyle_ can be set
     auto name = stripQuotes(nodeP->children()[0]);
+
+    const auto identifyFromName = [&](const std::string &l_name) {
+        if (dbContext_) {
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto res = authFactory->createObjectsFromName(
+                l_name,
+                {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, true,
+                1);
+            if (!res.empty()) {
+                bool foundDatumName = false;
+                const auto &refDatum = res.front();
+                if (metadata::Identifier::isEquivalentName(
+                        l_name.c_str(), refDatum->nameStr().c_str())) {
+                    foundDatumName = true;
+                } else if (refDatum->identifiers().size() == 1) {
+                    const auto &id = refDatum->identifiers()[0];
+                    const auto aliases =
+                        authFactory->databaseContext()->getAliases(
+                            *id->codeSpace(), id->code(), refDatum->nameStr(),
+                            "geodetic_datum", std::string());
+                    for (const auto &alias : aliases) {
+                        if (metadata::Identifier::isEquivalentName(
+                                l_name.c_str(), alias.c_str())) {
+                            foundDatumName = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundDatumName) {
+                    properties.set(IdentifiedObject::NAME_KEY,
+                                   refDatum->nameStr());
+                    if (!properties.get(Identifier::CODESPACE_KEY) &&
+                        refDatum->identifiers().size() == 1) {
+                        const auto &id = refDatum->identifiers()[0];
+                        auto identifiers = ArrayOfBaseObject::create();
+                        identifiers->add(Identifier::create(
+                            id->code(), PropertyMap()
+                                            .set(Identifier::CODESPACE_KEY,
+                                                 *id->codeSpace())
+                                            .set(Identifier::AUTHORITY_KEY,
+                                                 *id->codeSpace())));
+                        properties.set(IdentifiedObject::IDENTIFIERS_KEY,
+                                       identifiers);
+                    }
+                    return true;
+                }
+            } else {
+                // Get official name from database if AUTHORITY is present
+                auto &idNode = nodeP->lookForChild(WKTConstants::AUTHORITY);
+                if (!isNull(idNode)) {
+                    try {
+                        auto id = buildId(idNode, true, false);
+                        auto authFactory2 = AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext_), *id->codeSpace());
+                        auto dbDatum =
+                            authFactory2->createGeodeticDatum(id->code());
+                        properties.set(IdentifiedObject::NAME_KEY,
+                                       dbDatum->nameStr());
+                        return true;
+                    } catch (const std::exception &) {
+                    }
+                }
+            }
+        }
+        return false;
+    };
+
     if (name == "WGS_1984") {
         properties.set(IdentifiedObject::NAME_KEY,
                        GeodeticReferenceFrame::EPSG_6326->nameStr());
@@ -2013,6 +2081,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             tableNameForAlias = "geodetic_datum";
         }
 
+        bool setNameAndId = true;
         if (dbContext_ && tableNameForAlias) {
             std::string outTableName;
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
@@ -2020,7 +2089,14 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             auto officialName = authFactory->getOfficialNameFromAlias(
                 name, tableNameForAlias, "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
-            if (!officialName.empty()) {
+            if (officialName.empty()) {
+                // For the case of "D_GDA2020" where there is no D_GDA2020 ESRI
+                // alias, so just try without the D_ prefix.
+                const auto nameWithoutDPrefix = name.substr(2);
+                if (identifyFromName(nameWithoutDPrefix)) {
+                    setNameAndId = false; // already done in identifyFromName()
+                }
+            } else {
                 if (primeMeridian->nameStr() !=
                     PrimeMeridian::GREENWICH->nameStr()) {
                     auto nameWithPM =
@@ -2033,76 +2109,21 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             }
         }
 
-        properties.set(IdentifiedObject::NAME_KEY, name);
-        if (!authNameFromAlias.empty()) {
-            auto identifiers = ArrayOfBaseObject::create();
-            identifiers->add(Identifier::create(
-                codeFromAlias,
-                PropertyMap()
-                    .set(Identifier::CODESPACE_KEY, authNameFromAlias)
-                    .set(Identifier::AUTHORITY_KEY, authNameFromAlias)));
-            properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
+        if (setNameAndId) {
+            properties.set(IdentifiedObject::NAME_KEY, name);
+            if (!authNameFromAlias.empty()) {
+                auto identifiers = ArrayOfBaseObject::create();
+                identifiers->add(Identifier::create(
+                    codeFromAlias,
+                    PropertyMap()
+                        .set(Identifier::CODESPACE_KEY, authNameFromAlias)
+                        .set(Identifier::AUTHORITY_KEY, authNameFromAlias)));
+                properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
+            }
         }
     } else if (name.find('_') != std::string::npos) {
         // Likely coming from WKT1
-        if (dbContext_) {
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
-            auto res = authFactory->createObjectsFromName(
-                name, {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
-                true, 1);
-            bool foundDatumName = false;
-            if (!res.empty()) {
-                const auto &refDatum = res.front();
-                if (metadata::Identifier::isEquivalentName(
-                        name.c_str(), refDatum->nameStr().c_str())) {
-                    foundDatumName = true;
-                    properties.set(IdentifiedObject::NAME_KEY,
-                                   refDatum->nameStr());
-                    if (!properties.get(Identifier::CODESPACE_KEY) &&
-                        refDatum->identifiers().size() == 1) {
-                        const auto &id = refDatum->identifiers()[0];
-                        auto identifiers = ArrayOfBaseObject::create();
-                        identifiers->add(Identifier::create(
-                            id->code(), PropertyMap()
-                                            .set(Identifier::CODESPACE_KEY,
-                                                 *id->codeSpace())
-                                            .set(Identifier::AUTHORITY_KEY,
-                                                 *id->codeSpace())));
-                        properties.set(IdentifiedObject::IDENTIFIERS_KEY,
-                                       identifiers);
-                    }
-                }
-            } else {
-                // Get official name from database if AUTHORITY is present
-                auto &idNode = nodeP->lookForChild(WKTConstants::AUTHORITY);
-                if (!isNull(idNode)) {
-                    try {
-                        auto id = buildId(idNode, true, false);
-                        auto authFactory2 = AuthorityFactory::create(
-                            NN_NO_CHECK(dbContext_), *id->codeSpace());
-                        auto dbDatum =
-                            authFactory2->createGeodeticDatum(id->code());
-                        foundDatumName = true;
-                        properties.set(IdentifiedObject::NAME_KEY,
-                                       dbDatum->nameStr());
-                    } catch (const std::exception &) {
-                    }
-                }
-            }
-
-            if (!foundDatumName) {
-                std::string outTableName;
-                std::string authNameFromAlias;
-                std::string codeFromAlias;
-                auto officialName = authFactory->getOfficialNameFromAlias(
-                    name, "geodetic_datum", std::string(), true, outTableName,
-                    authNameFromAlias, codeFromAlias);
-                if (!officialName.empty()) {
-                    properties.set(IdentifiedObject::NAME_KEY, officialName);
-                }
-            }
-        }
+        identifyFromName(name);
     }
 
     auto ellipsoid = buildEllipsoid(ellipsoidNode);
@@ -3524,7 +3545,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
                 propertiesParameter.set(Identifier::CODESPACE_KEY,
                                         Identifier::EPSG);
-            } else if (paramMapping) {
+            } else if (mapping && paramMapping) {
                 for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
                     if (mapping->params[idx] == paramMapping) {
                         foundParameters[idx] = true;
@@ -4540,7 +4561,7 @@ class JSONParser {
     static Measure getMeasure(const json &j);
 
     IdentifierNNPtr buildId(const json &j, bool removeInverseOf);
-    ObjectDomainPtr buildObjectDomain(const json &j);
+    static ObjectDomainPtr buildObjectDomain(const json &j);
     PropertyMap buildProperties(const json &j, bool removeInverseOf = false);
 
     GeographicCRSNNPtr buildGeographicCRS(const json &j);
@@ -8734,22 +8755,43 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
             } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
                 value = 1;
-            } else {
-                // For omerc, if gamma is missing, the default value is
-                // alpha
-                if (step.name == "omerc" && proj_name == "gamma") {
-                    paramValue = &getParamValue(step, "alpha");
-                    if (!paramValue->empty()) {
-                        value = getAngularValue(*paramValue);
+            }
+            // For omerc, if gamma is missing, the default value is
+            // alpha
+            else if (step.name == "omerc" && proj_name == "gamma") {
+                paramValue = &getParamValue(step, "alpha");
+                if (!paramValue->empty()) {
+                    value = getAngularValue(*paramValue);
+                }
+            } else if (step.name == "krovak") {
+                if (param->epsg_code ==
+                    EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
+                    value = 30.28813975277777776;
+                } else if (
+                    param->epsg_code ==
+                    EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
+                    value = 78.5;
+                }
+            } else if (step.name == "cea" && proj_name == "lat_ts") {
+                paramValue = &getParamValueK(step);
+                if (!paramValue->empty()) {
+                    bool hasError = false;
+                    const double k = getNumericValue(*paramValue, &hasError);
+                    if (hasError) {
+                        throw ParsingException("invalid value for k/k_0");
                     }
-                } else if (step.name == "krovak") {
-                    if (param->epsg_code ==
-                        EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
-                        value = 30.28813975277777776;
-                    } else if (
-                        param->epsg_code ==
-                        EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
-                        value = 78.5;
+                    if (k >= 0 && k <= 1) {
+                        const double es =
+                            geogCRS->ellipsoid()->squaredEccentricity();
+                        if (es < 0 || es == 1) {
+                            throw ParsingException("Invalid flattening");
+                        }
+                        value =
+                            Angle(acos(k * sqrt((1 - es) / (1 - k * k * es))),
+                                  UnitOfMeasure::RADIAN)
+                                .convertToUnit(UnitOfMeasure::DEGREE);
+                    } else {
+                        throw ParsingException("k/k_0 should be in [0,1]");
                     }
                 }
             }
@@ -9057,7 +9099,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     auto projCRS = dynamic_cast<ProjectedCRS *>(crs);
                     if (projCRS) {
                         // Override with easting northing order
-                        const auto &conv = projCRS->derivingConversionRef();
+                        const auto conv = projCRS->derivingConversion();
                         if (conv->method()->getEPSGCode() !=
                             EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
                             return ProjectedCRS::create(

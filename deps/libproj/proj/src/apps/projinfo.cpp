@@ -78,7 +78,7 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation|ellipsoid] "
+        << "usage: projinfo [-o formats] [-k crs|operation|datum|ellipsoid] "
            "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
@@ -87,7 +87,8 @@ static void usage() {
         << "                [--spatial-test contains|intersects]" << std::endl
         << "                [--crs-extent-use none|both|intersection|smallest]"
         << std::endl
-        << "                [--grid-check none|discard_missing|sort] "
+        << "                [--grid-check "
+           "none|discard_missing|sort|known_available] "
            "[--show-superseded]"
         << std::endl
         << "                [--pivot-crs always|if_no_direct_transformation|"
@@ -97,8 +98,9 @@ static void usage() {
         << std::endl
         << "                [--identify] [--3d]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
-        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
-        << std::endl;
+        << "                --searchpaths | --remote-data | "
+           "{object_definition} |"
+        << "                (-s {srs_def} -t {srs_def})" << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
@@ -184,6 +186,9 @@ static BaseObjectNNPtr buildObject(
         } else if (kind == "ellipsoid" && tokens.size() == 2) {
             auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
+        } else if (kind == "datum" && tokens.size() == 2) {
+            auto urn = "urn:ogc:def:datum:" + tokens[0] + "::" + tokens[1];
+            obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
             if (l_user_string.size() > 2 && l_user_string[0] == '"' &&
@@ -205,6 +210,59 @@ static BaseObjectNNPtr buildObject(
                         }
                     }
                 }
+            } else if (dbContext && !kind.empty() && kind != "crs" &&
+                       l_user_string.find(':') == std::string::npos) {
+                std::vector<AuthorityFactory::ObjectType> allowedTypes;
+                if (kind == "operation")
+                    allowedTypes.push_back(
+                        AuthorityFactory::ObjectType::COORDINATE_OPERATION);
+                else if (kind == "ellipsoid")
+                    allowedTypes.push_back(
+                        AuthorityFactory::ObjectType::ELLIPSOID);
+                else if (kind == "datum")
+                    allowedTypes.push_back(AuthorityFactory::ObjectType::DATUM);
+                constexpr size_t limitResultCount = 10;
+                auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                        std::string());
+                for (int pass = 0; pass <= 1; ++pass) {
+                    const bool approximateMatch = (pass == 1);
+                    auto res = factory->createObjectsFromName(
+                        l_user_string, allowedTypes, approximateMatch,
+                        limitResultCount);
+                    if (res.size() == 1) {
+                        obj = res.front().as_nullable();
+                    } else {
+                        for (const auto &l_obj : res) {
+                            if (Identifier::isEquivalentName(
+                                    l_obj->nameStr().c_str(),
+                                    l_user_string.c_str())) {
+                                obj = l_obj.as_nullable();
+                                break;
+                            }
+                        }
+                        if (obj) {
+                            break;
+                        }
+                    }
+                    if (res.size() > 1) {
+                        std::string msg("several objects matching this name: ");
+                        bool first = true;
+                        for (const auto &l_obj : res) {
+                            if (msg.size() > 200) {
+                                msg += ", ...";
+                                break;
+                            }
+                            if (!first) {
+                                msg += ", ";
+                            }
+                            first = false;
+                            msg += l_obj->nameStr();
+                        }
+                        std::cerr << context << ": " << msg << std::endl;
+                        std::exit(1);
+                    }
+                }
+
             } else {
                 obj =
                     createFromUserInput(l_user_string, dbContext).as_nullable();
@@ -498,7 +556,7 @@ static void outputObject(
     auto op = dynamic_cast<CoordinateOperation *>(obj.get());
     if (op && dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
         try {
-            auto setGrids = op->gridsNeeded(dbContext);
+            auto setGrids = op->gridsNeeded(dbContext, false);
             bool firstWarning = true;
             for (const auto &grid : setGrids) {
                 if (!grid.available) {
@@ -514,6 +572,7 @@ static void outputObject(
                         if (!grid.url.empty()) {
                             std::cout << " at " << grid.url;
                         }
+                        std::cout << ", or on CDN";
                     } else if (!grid.url.empty()) {
                         std::cout << " Can be obtained at " << grid.url;
                     }
@@ -528,8 +587,9 @@ static void outputObject(
 
 // ---------------------------------------------------------------------------
 
-static void outputOperationSummary(const CoordinateOperationNNPtr &op,
-                                   const DatabaseContextPtr &dbContext) {
+static void outputOperationSummary(
+    const CoordinateOperationNNPtr &op, const DatabaseContextPtr &dbContext,
+    CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse) {
     auto ids = op->identifiers();
     if (!ids.empty()) {
         std::cout << *(ids[0]->codeSpace()) << ":" << ids[0]->code();
@@ -575,10 +635,16 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op,
 
     if (dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
         try {
-            auto setGrids = op->gridsNeeded(dbContext);
+            auto setGrids = op->gridsNeeded(dbContext, false);
             for (const auto &grid : setGrids) {
                 if (!grid.available) {
                     std::cout << ", at least one grid missing";
+                    if (gridAvailabilityUse ==
+                            CoordinateOperationContext::GridAvailabilityUse::
+                                KNOWN_AVAILABLE &&
+                        !grid.packageName.empty()) {
+                        std::cout << " on the system, but available on CDN";
+                    }
                     break;
                 }
             }
@@ -675,7 +741,7 @@ static void outputOperations(
     }
     if (summary) {
         for (const auto &op : list) {
-            outputOperationSummary(op, dbContext);
+            outputOperationSummary(op, dbContext, gridAvailabilityUse);
         }
     } else {
         bool first = true;
@@ -686,11 +752,9 @@ static void outputOperations(
             }
             first = false;
             std::cout << "-------------------------------------" << std::endl;
-            std::cout << "Operation n"
-                         "\xC2\xB0"
-                      << (i + 1) << ":" << std::endl
+            std::cout << "Operation No. " << (i + 1) << ":" << std::endl
                       << std::endl;
-            outputOperationSummary(op, dbContext);
+            outputOperationSummary(op, dbContext, gridAvailabilityUse);
             std::cout << std::endl;
             outputObject(dbContext, op, allowUseIntermediateCRS, outputOpt);
         }
@@ -723,7 +787,9 @@ int main(int argc, char **argv) {
         CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST;
     bool buildBoundCRSToWGS84 = false;
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse =
-        CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
+        proj_context_is_network_enabled(nullptr)
+            ? CoordinateOperationContext::GridAvailabilityUse::KNOWN_AVAILABLE
+            : CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS =
         CoordinateOperationContext::IntermediateCRSUse::
             IF_NO_DIRECT_TRANSFORMATION;
@@ -863,6 +929,8 @@ int main(int argc, char **argv) {
                 objectKind = "operation";
             } else if (ci_equal(kind, "ellipsoid")) {
                 objectKind = "ellipsoid";
+            } else if (ci_equal(kind, "datum")) {
+                objectKind = "datum";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;
@@ -936,6 +1004,9 @@ int main(int argc, char **argv) {
             } else if (ci_equal(value, "sort")) {
                 gridAvailabilityUse = CoordinateOperationContext::
                     GridAvailabilityUse::USE_FOR_SORTING;
+            } else if (ci_equal(value, "known_available")) {
+                gridAvailabilityUse = CoordinateOperationContext::
+                    GridAvailabilityUse::KNOWN_AVAILABLE;
             } else {
                 std::cerr << "Unrecognized value for option --grid-check: "
                           << value << std::endl;
@@ -987,6 +1058,34 @@ int main(int argc, char **argv) {
             outputOpt.strict = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
+        } else if (ci_equal(arg, "--searchpaths")) {
+#ifdef _WIN32
+            constexpr char delim = ';';
+#else
+            constexpr char delim = ':';
+#endif
+            const auto paths = split(proj_info().searchpath, delim);
+            for (const auto &path : paths) {
+                std::cout << path << std::endl;
+            }
+            std::exit(0);
+        } else if (ci_equal(arg, "--remote-data")) {
+#ifdef CURL_ENABLED
+            if (proj_context_is_network_enabled(nullptr)) {
+                std::cout << "Status: enabled" << std::endl;
+                std::cout << "URL: " << pj_context_get_url_endpoint(nullptr)
+                          << std::endl;
+            } else {
+                std::cout << "Status: disabled" << std::endl;
+                std::cout << "Reason: not enabled in proj.ini or "
+                             "PROJ_NETWORK=ON not specified"
+                          << std::endl;
+            }
+#else
+            std::cout << "Status: disabled" << std::endl;
+            std::cout << "Reason: build without Curl support" << std::endl;
+#endif
+            std::exit(0);
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {

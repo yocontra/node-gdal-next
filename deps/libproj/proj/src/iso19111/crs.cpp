@@ -730,6 +730,10 @@ CRSNNPtr CRS::normalizeForVisualization() const {
  * The candidate CRSs are either hard-coded, or looked in the database when
  * authorityFactory is not null.
  *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
+ *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing
  * confidence.
@@ -1647,6 +1651,10 @@ static bool hasCodeCompatibleOfAuthorityFactory(
  *
  * The candidate CRSs are either hard-coded, or looked in the database when
  * authorityFactory is not null.
+ *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
  *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match:
@@ -2746,6 +2754,10 @@ bool VerticalCRS::_isEquivalentTo(
  * The candidate CRSs are looked in the database when
  * authorityFactory is not null.
  *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
+ *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match.
  * 100% means that the name of the reference entry
@@ -3444,23 +3456,33 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                                              bool axisSpecFound) const {
     const auto &axisList = d->coordinateSystem()->axisList();
     const auto &unit = axisList[0]->unit();
+    const auto *zUnit = axisList.size() == 3 ? &(axisList[2]->unit()) : nullptr;
     if (!unit._isEquivalentTo(common::UnitOfMeasure::METRE,
-                              util::IComparable::Criterion::EQUIVALENT)) {
+                              util::IComparable::Criterion::EQUIVALENT) ||
+        (zUnit &&
+         !zUnit->_isEquivalentTo(common::UnitOfMeasure::METRE,
+                                 util::IComparable::Criterion::EQUIVALENT))) {
         auto projUnit = unit.exportToPROJString();
         const double toSI = unit.conversionToSI();
         if (!formatter->getCRSExport()) {
             formatter->addStep("unitconvert");
             formatter->addParam("xy_in", "m");
-            if (!formatter->omitZUnitConversion())
+            if (zUnit)
                 formatter->addParam("z_in", "m");
+
             if (projUnit.empty()) {
                 formatter->addParam("xy_out", toSI);
-                if (!formatter->omitZUnitConversion())
-                    formatter->addParam("z_out", toSI);
             } else {
                 formatter->addParam("xy_out", projUnit);
-                if (!formatter->omitZUnitConversion())
-                    formatter->addParam("z_out", projUnit);
+            }
+            if (zUnit) {
+                auto projZUnit = zUnit->exportToPROJString();
+                const double zToSI = zUnit->conversionToSI();
+                if (projZUnit.empty()) {
+                    formatter->addParam("z_out", zToSI);
+                } else {
+                    formatter->addParam("z_out", projZUnit);
+                }
             }
         } else {
             if (projUnit.empty()) {
@@ -3528,6 +3550,10 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
  *
  * The candidate CRSs are either hard-coded, or looked in the database when
  * authorityFactory is not null.
+ *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
  *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing
@@ -3702,6 +3728,15 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         res.emplace_back(crsNN, eqName ? 90 : 70);
                     } else if (crs->nameStr() == thisName &&
                                CRS::getPrivate()->implicitCS_ &&
+                               coordinateSystem()
+                                   ->axisList()[0]
+                                   ->unit()
+                                   ._isEquivalentTo(
+                                       crs->coordinateSystem()
+                                           ->axisList()[0]
+                                           ->unit(),
+                                       util::IComparable::Criterion::
+                                           EQUIVALENT) &&
                                l_baseCRS->_isEquivalentTo(
                                    crs->baseCRS().get(),
                                    util::IComparable::Criterion::
@@ -3880,6 +3915,28 @@ ProjectedCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+InvalidCompoundCRSException::InvalidCompoundCRSException(const char *message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidCompoundCRSException::InvalidCompoundCRSException(
+    const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidCompoundCRSException::~InvalidCompoundCRSException() = default;
+
+// ---------------------------------------------------------------------------
+
+InvalidCompoundCRSException::InvalidCompoundCRSException(
+    const InvalidCompoundCRSException &) = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct CompoundCRS::Private {
     std::vector<CRSNNPtr> components_{};
 };
@@ -3930,9 +3987,67 @@ CompoundCRS::componentReferenceSystems() PROJ_PURE_DEFN {
  * At minimum the name should be defined.
  * @param components the component CRS of the CompoundCRS.
  * @return new CompoundCRS.
+ * @throw InvalidCompoundCRSException
  */
 CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
                                      const std::vector<CRSNNPtr> &components) {
+
+    if (components.size() < 2) {
+        throw InvalidCompoundCRSException(
+            "compound CRS should have at least 2 components");
+    }
+
+    auto comp0 = components[0].get();
+    auto comp0Bound = dynamic_cast<const BoundCRS *>(comp0);
+    if (comp0Bound) {
+        comp0 = comp0Bound->baseCRS().get();
+    }
+    auto comp0Geog = dynamic_cast<const GeographicCRS *>(comp0);
+    auto comp0Proj = dynamic_cast<const ProjectedCRS *>(comp0);
+    auto comp0Eng = dynamic_cast<const EngineeringCRS *>(comp0);
+
+    auto comp1 = components[1].get();
+    auto comp1Bound = dynamic_cast<const BoundCRS *>(comp1);
+    if (comp1Bound) {
+        comp1 = comp1Bound->baseCRS().get();
+    }
+    auto comp1Vert = dynamic_cast<const VerticalCRS *>(comp1);
+    auto comp1Eng = dynamic_cast<const EngineeringCRS *>(comp1);
+    // Loose validation based on
+    // http://docs.opengeospatial.org/as/18-005r4/18-005r4.html#34
+    bool ok = false;
+    if ((comp0Geog && comp0Geog->coordinateSystem()->axisList().size() == 2 &&
+         (comp1Vert ||
+          (comp1Eng &&
+           comp1Eng->coordinateSystem()->axisList().size() == 1))) ||
+        (comp0Proj && comp0Proj->coordinateSystem()->axisList().size() == 2 &&
+         (comp1Vert ||
+          (comp1Eng &&
+           comp1Eng->coordinateSystem()->axisList().size() == 1))) ||
+        (comp0Eng && comp0Eng->coordinateSystem()->axisList().size() <= 2 &&
+         comp1Vert)) {
+        // Spatial compound coordinate reference system
+        ok = true;
+    } else {
+        bool isComp0Spatial = comp0Geog || comp0Proj || comp0Eng ||
+                              dynamic_cast<const GeodeticCRS *>(comp0) ||
+                              dynamic_cast<const VerticalCRS *>(comp0);
+        if (isComp0Spatial && dynamic_cast<const TemporalCRS *>(comp1)) {
+            // Spatio-temporal compound coordinate reference system
+            ok = true;
+        } else if (isComp0Spatial &&
+                   dynamic_cast<const ParametricCRS *>(comp1)) {
+            // Spatio-parametric compound coordinate reference system
+            ok = true;
+        }
+    }
+    if (!ok) {
+        throw InvalidCompoundCRSException(
+            "components of the compound CRS do not belong to one of the "
+            "allowed combinations of "
+            "http://docs.opengeospatial.org/as/18-005r4/18-005r4.html#34");
+    }
+
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
     compoundCRS->assignSelf(compoundCRS);
     compoundCRS->setProperties(properties);
@@ -4049,6 +4164,10 @@ bool CompoundCRS::_isEquivalentTo(
  *
  * The candidate CRSs are looked in the database when
  * authorityFactory is not null.
+ *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
  *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing

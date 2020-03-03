@@ -45,6 +45,8 @@
 #include "proj/internal/lru_cache.hpp"
 #include "proj/internal/tracing.hpp"
 
+#include "sqlite3_utils.hpp"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -278,9 +280,7 @@ struct DatabaseContext::Private {
     void registerFunctions();
 
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    std::string thisNamePtr_{};
-    sqlite3_vfs *vfs_{};
-    bool createCustomVFS();
+    std::unique_ptr<SQLite3VFS> vfs_{};
 #endif
 
     Private(const Private &) = delete;
@@ -297,13 +297,6 @@ DatabaseContext::Private::~Private() {
     assert(recLevel_ == 0);
 
     closeDB();
-
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    if (vfs_) {
-        sqlite3_vfs_unregister(vfs_);
-        delete vfs_;
-    }
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -499,104 +492,12 @@ void DatabaseContext::Private::cache(const std::string &code,
 
 // ---------------------------------------------------------------------------
 
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-
-typedef int (*ClosePtr)(sqlite3_file *);
-
-static int VFSClose(sqlite3_file *file) {
-    sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
-    assert(defaultVFS);
-    ClosePtr defaultClosePtr;
-    std::memcpy(&defaultClosePtr,
-                reinterpret_cast<char *>(file) + defaultVFS->szOsFile,
-                sizeof(ClosePtr));
-    void *methods = const_cast<sqlite3_io_methods *>(file->pMethods);
-    int ret = defaultClosePtr(file);
-    std::free(methods);
-    return ret;
-}
-
-// No-lock implementation
-static int VSFLock(sqlite3_file *, int) { return SQLITE_OK; }
-
-static int VSFUnlock(sqlite3_file *, int) { return SQLITE_OK; }
-
-static int VFSOpen(sqlite3_vfs *vfs, const char *name, sqlite3_file *file,
-                   int flags, int *outFlags) {
-    sqlite3_vfs *defaultVFS = static_cast<sqlite3_vfs *>(vfs->pAppData);
-    int ret = defaultVFS->xOpen(defaultVFS, name, file, flags, outFlags);
-    if (ret == SQLITE_OK) {
-        ClosePtr defaultClosePtr = file->pMethods->xClose;
-        assert(defaultClosePtr);
-        sqlite3_io_methods *methods = static_cast<sqlite3_io_methods *>(
-            std::malloc(sizeof(sqlite3_io_methods)));
-        if (!methods) {
-            file->pMethods->xClose(file);
-            return SQLITE_NOMEM;
-        }
-        memcpy(methods, file->pMethods, sizeof(sqlite3_io_methods));
-        methods->xClose = VFSClose;
-        methods->xLock = VSFLock;
-        methods->xUnlock = VSFUnlock;
-        file->pMethods = methods;
-        // Save original xClose pointer at end of file structure
-        std::memcpy(reinterpret_cast<char *>(file) + defaultVFS->szOsFile,
-                    &defaultClosePtr, sizeof(ClosePtr));
-    }
-    return ret;
-}
-
-static int VFSAccess(sqlite3_vfs *vfs, const char *zName, int flags,
-                     int *pResOut) {
-    sqlite3_vfs *defaultVFS = static_cast<sqlite3_vfs *>(vfs->pAppData);
-    // Do not bother stat'ing for journal or wal files
-    if (std::strstr(zName, "-journal") || std::strstr(zName, "-wal")) {
-        *pResOut = false;
-        return SQLITE_OK;
-    }
-    return defaultVFS->xAccess(defaultVFS, zName, flags, pResOut);
-}
-
-// ---------------------------------------------------------------------------
-
-bool DatabaseContext::Private::createCustomVFS() {
-
-    sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
-    assert(defaultVFS);
-
-    std::ostringstream buffer;
-    buffer << this;
-    thisNamePtr_ = buffer.str();
-
-    vfs_ = new sqlite3_vfs();
-    vfs_->iVersion = 1;
-    vfs_->szOsFile = defaultVFS->szOsFile + sizeof(ClosePtr);
-    vfs_->mxPathname = defaultVFS->mxPathname;
-    vfs_->zName = thisNamePtr_.c_str();
-    vfs_->pAppData = defaultVFS;
-    vfs_->xOpen = VFSOpen;
-    vfs_->xDelete = defaultVFS->xDelete;
-    vfs_->xAccess = VFSAccess;
-    vfs_->xFullPathname = defaultVFS->xFullPathname;
-    vfs_->xDlOpen = defaultVFS->xDlOpen;
-    vfs_->xDlError = defaultVFS->xDlError;
-    vfs_->xDlSym = defaultVFS->xDlSym;
-    vfs_->xDlClose = defaultVFS->xDlClose;
-    vfs_->xRandomness = defaultVFS->xRandomness;
-    vfs_->xSleep = defaultVFS->xSleep;
-    vfs_->xCurrentTime = defaultVFS->xCurrentTime;
-    vfs_->xGetLastError = defaultVFS->xGetLastError;
-    vfs_->xCurrentTimeInt64 = defaultVFS->xCurrentTimeInt64;
-    return sqlite3_vfs_register(vfs_, false) == SQLITE_OK;
-}
-
-#endif // ENABLE_CUSTOM_LOCKLESS_VFS
-
-// ---------------------------------------------------------------------------
-
 void DatabaseContext::Private::open(const std::string &databasePath,
                                     PJ_CONTEXT *ctx) {
-    setPjCtxt(ctx ? ctx : pj_get_default_ctx());
+    if (!ctx) {
+        ctx = pj_get_default_ctx();
+    }
+    setPjCtxt(ctx);
     std::string path(databasePath);
     if (path.empty()) {
         path.resize(2048);
@@ -608,18 +509,23 @@ void DatabaseContext::Private::open(const std::string &databasePath,
         }
     }
 
-    if (
+    std::string vfsName;
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-        !createCustomVFS() ||
+    if (ctx->custom_sqlite3_vfs_name.empty()) {
+        vfs_ = SQLite3VFS::create(false, true, true);
+        if (vfs_ == nullptr) {
+            throw FactoryException("Open of " + path + " failed");
+        }
+        vfsName = vfs_->name();
+    } else
 #endif
-        sqlite3_open_v2(path.c_str(), &sqlite_handle_,
+    {
+        vfsName = ctx->custom_sqlite3_vfs_name;
+    }
+    if (sqlite3_open_v2(path.c_str(), &sqlite_handle_,
                         SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX,
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-                        thisNamePtr_.c_str()
-#else
-                        nullptr
-#endif
-                            ) != SQLITE_OK ||
+                        vfsName.empty() ? nullptr : vfsName.c_str()) !=
+            SQLITE_OK ||
         !sqlite_handle_) {
         throw FactoryException("Open of " + path + " failed");
     }
@@ -1021,14 +927,14 @@ bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
-                                      std::string &fullFilename,
-                                      std::string &packageName,
-                                      std::string &url, bool &directDownload,
-                                      bool &openLicense,
-                                      bool &gridAvailable) const {
+bool DatabaseContext::lookForGridInfo(
+    const std::string &projFilename, bool considerKnownGridsAsAvailable,
+    std::string &fullFilename, std::string &packageName, std::string &url,
+    bool &directDownload, bool &openLicense, bool &gridAvailable) const {
     Private::GridInfoCache info;
-    if (d->getGridInfoFromCache(projFilename, info)) {
+    const std::string key(projFilename +
+                          (considerKnownGridsAsAvailable ? "true" : "false"));
+    if (d->getGridInfoFromCache(key, info)) {
         fullFilename = info.fullFilename;
         packageName = info.packageName;
         url = info.url;
@@ -1044,16 +950,20 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     openLicense = false;
     directDownload = false;
 
-    fullFilename.resize(2048);
-    if (d->pjCtxt() == nullptr) {
-        d->setPjCtxt(pj_get_default_ctx());
+    if (considerKnownGridsAsAvailable) {
+        fullFilename = projFilename;
+    } else {
+        fullFilename.resize(2048);
+        if (d->pjCtxt() == nullptr) {
+            d->setPjCtxt(pj_get_default_ctx());
+        }
+        int errno_before = proj_context_errno(d->pjCtxt());
+        gridAvailable =
+            pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
+                         fullFilename.size() - 1) != 0;
+        proj_context_errno_set(d->pjCtxt(), errno_before);
+        fullFilename.resize(strlen(fullFilename.c_str()));
     }
-    int errno_before = proj_context_errno(d->pjCtxt());
-    gridAvailable =
-        pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
-                     fullFilename.size() - 1) != 0;
-    proj_context_errno_set(d->pjCtxt(), errno_before);
-    fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
         d->run("SELECT "
@@ -1067,8 +977,8 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
                "FROM grid_alternatives "
                "LEFT JOIN grid_packages ON "
                "grid_alternatives.package_name = grid_packages.package_name "
-               "WHERE proj_grid_name = ?",
-               {projFilename});
+               "WHERE proj_grid_name = ? OR old_proj_grid_name = ?",
+               {projFilename, projFilename});
     bool ret = !res.empty();
     if (ret) {
         const auto &row = res.front();
@@ -1076,6 +986,11 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
         url = row[1].empty() ? std::move(row[2]) : std::move(row[1]);
         openLicense = (row[3].empty() ? row[4] : row[3]) == "1";
         directDownload = (row[5].empty() ? row[6] : row[5]) == "1";
+
+        if (considerKnownGridsAsAvailable &&
+            (!packageName.empty() || (!url.empty() && openLicense))) {
+            gridAvailable = true;
+        }
 
         info.fullFilename = fullFilename;
         info.packageName = packageName;
@@ -1085,7 +1000,7 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     }
     info.gridAvailable = gridAvailable;
     info.found = ret;
-    d->cache(projFilename, info);
+    d->cache(key, info);
     return ret;
 }
 
@@ -1097,6 +1012,30 @@ bool DatabaseContext::isKnownName(const std::string &name,
     sql += replaceAll(tableName, "\"", "\"\"");
     sql += "\" WHERE name = ? LIMIT 1";
     return !d->run(sql, {name}).empty();
+}
+// ---------------------------------------------------------------------------
+
+std::string
+DatabaseContext::getProjGridName(const std::string &oldProjGridName) {
+    auto res = d->run("SELECT proj_grid_name FROM grid_alternatives WHERE "
+                      "old_proj_grid_name = ?",
+                      {oldProjGridName});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res.front()[0];
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DatabaseContext::getOldProjGridName(const std::string &gridName) {
+    auto res = d->run("SELECT old_proj_grid_name FROM grid_alternatives WHERE "
+                      "proj_grid_name = ?",
+                      {gridName});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res.front()[0];
 }
 
 // ---------------------------------------------------------------------------
@@ -1324,8 +1263,8 @@ struct AuthorityFactory::Private {
         return AuthorityFactory::create(context_, auth_name);
     }
 
-    bool
-    rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op);
+    bool rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op,
+                                  bool considerKnownGridsAsAvailable);
 
     UnitOfMeasure createUnitOfMeasure(const std::string &auth_name,
                                       const std::string &code);
@@ -1452,8 +1391,10 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
 // ---------------------------------------------------------------------------
 
 bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
-    const operation::CoordinateOperationNNPtr &op) {
-    for (const auto &gridDesc : op->gridsNeeded(context())) {
+    const operation::CoordinateOperationNNPtr &op,
+    bool considerKnownGridsAsAvailable) {
+    for (const auto &gridDesc :
+         op->gridsNeeded(context(), considerKnownGridsAsAvailable)) {
         if (!gridDesc.available) {
             return true;
         }
@@ -2581,7 +2522,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                 pj_add_type_crs_if_needed(text_definition), d->context());
             auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(obj.get());
             if (projCRS) {
-                const auto &conv = projCRS->derivingConversionRef();
+                const auto conv = projCRS->derivingConversion();
                 auto newConv =
                     (conv->nameStr() == "unnamed")
                         ? operation::Conversion::create(
@@ -2602,10 +2543,9 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                     boundCRS->baseCRS().get());
                 if (projCRS) {
                     auto newBoundCRS = crs::BoundCRS::create(
-                        crs::ProjectedCRS::create(
-                            props, projCRS->baseCRS(),
-                            projCRS->derivingConversionRef(),
-                            projCRS->coordinateSystem()),
+                        crs::ProjectedCRS::create(props, projCRS->baseCRS(),
+                                                  projCRS->derivingConversion(),
+                                                  projCRS->coordinateSystem()),
                         boundCRS->hubCRS(), boundCRS->transformation());
                     return NN_NO_CHECK(
                         util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(
@@ -3449,7 +3389,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSCode, const std::string &targetCRSCode) const {
     return createFromCoordinateReferenceSystemCodes(
         d->authority(), sourceCRSCode, d->authority(), targetCRSCode, false,
-        false, false);
+        false, false, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -3478,6 +3418,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param considerKnownGridsAsAvailable Whether known grids should be considered
+ * as available (typically when network is enabled).
  * @param discardSuperseded Whether cordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param tryReverseOrder whether to search in the reverse order too (and thus
@@ -3498,8 +3440,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded, bool tryReverseOrder,
-    bool reportOnlyIntersectingTransformations,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
+    bool tryReverseOrder, bool reportOnlyIntersectingTransformations,
     const metadata::ExtentPtr &intersectingExtent1,
     const metadata::ExtentPtr &intersectingExtent2) const {
 
@@ -3510,6 +3452,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     cacheKey += targetCRSCode;
     cacheKey += (usePROJAlternativeGridNames ? '1' : '0');
     cacheKey += (discardIfMissingGrid ? '1' : '0');
+    cacheKey += (considerKnownGridsAsAvailable ? '1' : '0');
     cacheKey += (discardSuperseded ? '1' : '0');
     cacheKey += (tryReverseOrder ? '1' : '0');
     cacheKey += (reportOnlyIntersectingTransformations ? '1' : '0');
@@ -3748,7 +3691,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
                     target_crs_code != targetCRSCode))) {
             op = op->inverse();
         }
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
@@ -3813,6 +3757,8 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param considerKnownGridsAsAvailable Whether known grids should be considered
+ * as available (typically when network is enabled).
  * @param discardSuperseded Whether cordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param intermediateCRSAuthCodes List of (auth_name, code) of CRS that can be
@@ -3841,7 +3787,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
     const std::vector<std::pair<std::string, std::string>>
         &intermediateCRSAuthCodes,
     ObjectType allowedIntermediateObjectType,
@@ -4289,7 +4235,8 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
     std::vector<operation::CoordinateOperationNNPtr> list;
     for (const auto &op : listTmp) {
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
@@ -4307,7 +4254,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     const std::string &sourceCRSCode, const crs::CRSNNPtr &targetCRS,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded, const std::vector<std::string> &allowedAuthorities,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
+    const std::vector<std::string> &allowedAuthorities,
     const metadata::ExtentPtr &intersectingExtent1,
     const metadata::ExtentPtr &intersectingExtent2) const {
 
@@ -4332,56 +4280,29 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
 
     // For some reason, filtering on v1.deprecated and v2.deprecated kills
     // performance
-    std::string sqlProlog("SELECT v1.table_name as table1, "
-                          "v1.auth_name AS auth_name1, v1.code AS code1, "
-                          "v1.deprecated AS deprecated1, "
-                          "v2.table_name as table2, "
-                          "v2.auth_name AS auth_name2, v2.code AS code2, "
-                          "v2.deprecated AS deprecated2, "
-                          "a1.south_lat AS south_lat1, "
-                          "a1.west_lon AS west_lon1, "
-                          "a1.north_lat AS north_lat1, "
-                          "a1.east_lon AS east_lon1, "
-                          "a2.south_lat AS south_lat2, "
-                          "a2.west_lon AS west_lon2, "
-                          "a2.north_lat AS north_lat2, "
-                          "a2.east_lon AS east_lon2 ");
-    if (discardSuperseded) {
-        sqlProlog += ", ss1.replacement_auth_name AS replacement_auth_name1, "
-                     "ss1.replacement_code AS replacement_code1, "
-                     "ss2.replacement_auth_name AS replacement_auth_name2, "
-                     "ss2.replacement_code AS replacement_code2 ";
-    }
-    sqlProlog += "FROM coordinate_operation_view v1 "
-                 "JOIN coordinate_operation_view v2 "
-                 "JOIN geodetic_crs g_source "
-                 "JOIN geodetic_crs g_v1s "
-                 "JOIN geodetic_crs g_v1t "
-                 "JOIN geodetic_crs g_v2s "
-                 "JOIN geodetic_crs g_v2t "
-                 "JOIN geodetic_crs g_target "
-                 "ON g_v1s.auth_name = v1.source_crs_auth_name "
-                 "AND g_v1s.code = v1.source_crs_code "
-                 "AND g_v1t.auth_name = v1.target_crs_auth_name "
-                 "AND g_v1t.code = v1.target_crs_code "
-                 "AND g_v2s.auth_name = v2.source_crs_auth_name "
-                 "AND g_v2s.code = v2.source_crs_code "
-                 "AND g_v2t.auth_name = v2.target_crs_auth_name "
-                 "AND g_v2t.code = v2.target_crs_code ";
-
-    const std::string joinSupersession(
-        "LEFT JOIN supersession ss1 ON "
-        "ss1.superseded_table_name = v1.table_name AND "
-        "ss1.superseded_auth_name = v1.auth_name AND "
-        "ss1.superseded_code = v1.code AND "
-        "ss1.superseded_table_name = ss1.replacement_table_name "
-        "LEFT JOIN supersession ss2 ON "
-        "ss2.superseded_table_name = v2.table_name AND "
-        "ss2.superseded_auth_name = v2.auth_name AND "
-        "ss2.superseded_code = v2.code AND "
-        "ss2.superseded_table_name = ss2.replacement_table_name ");
+    const std::string sqlProlog("SELECT v1.table_name as table1, "
+                                "v1.auth_name AS auth_name1, v1.code AS code1, "
+                                "v1.deprecated AS deprecated1, "
+                                "v2.table_name as table2, "
+                                "v2.auth_name AS auth_name2, v2.code AS code2, "
+                                "v2.deprecated AS deprecated2 "
+                                "FROM coordinate_operation_view v1 "
+                                "JOIN coordinate_operation_view v2 "
+                                "JOIN geodetic_crs g_source "
+                                "JOIN geodetic_crs g_v1s "
+                                "JOIN geodetic_crs g_v1t "
+                                "JOIN geodetic_crs g_v2s "
+                                "JOIN geodetic_crs g_v2t "
+                                "JOIN geodetic_crs g_target "
+                                "ON g_v1s.auth_name = v1.source_crs_auth_name "
+                                "AND g_v1s.code = v1.source_crs_code "
+                                "AND g_v1t.auth_name = v1.target_crs_auth_name "
+                                "AND g_v1t.code = v1.target_crs_code "
+                                "AND g_v2s.auth_name = v2.source_crs_auth_name "
+                                "AND g_v2s.code = v2.source_crs_code "
+                                "AND g_v2t.auth_name = v2.target_crs_auth_name "
+                                "AND g_v2t.code = v2.target_crs_code ");
     const std::string joinArea(
-        (discardSuperseded ? joinSupersession : std::string()) +
         "JOIN area a1 ON v1.area_of_use_auth_name = a1.auth_name "
         "AND v1.area_of_use_code = a1.code "
         "JOIN area a2 ON v2.area_of_use_auth_name = a2.auth_name "
@@ -4394,8 +4315,13 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     additionalWhere +=
         "WHERE g_source.auth_name = ? AND g_source.code = ? "
         "AND g_target.auth_name = ? AND g_target.code = ? "
-        "AND intersects_bbox(south_lat1, west_lon1, north_lat1, east_lon1, "
-        "south_lat2, west_lon2, north_lat2, east_lon2) = 1 ";
+        "AND intersects_bbox("
+        "a1.south_lat, a1.west_lon, a1.north_lat, a1.east_lon, "
+        "a2.south_lat, a2.west_lon, a2.north_lat, a2.east_lon) = 1 ";
+
+#if 0
+    // While those additonal constraints are correct, they are found to
+    // kill performance. So enforce them as post-processing
 
     if (!allowedAuthorities.empty()) {
         additionalWhere += "AND v1.auth_name IN (";
@@ -4410,7 +4336,7 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
                 additionalWhere += ',';
             additionalWhere += '?';
         }
-        additionalWhere += ')';
+        additionalWhere += ") ";
         for (const auto &allowedAuthority : allowedAuthorities) {
             params.emplace_back(allowedAuthority);
         }
@@ -4423,6 +4349,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         params.emplace_back(d->authority());
         params.emplace_back(d->authority());
     }
+#endif
+
     for (const auto &extent : {intersectingExtent1, intersectingExtent2}) {
         if (extent) {
             const auto &geogExtent = extent->geographicElements();
@@ -4438,10 +4366,10 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
                     if (south_lat != -90.0 || west_lon != -180.0 ||
                         north_lat != 90.0 || east_lon != 180.0) {
                         additionalWhere +=
-                            "AND intersects_bbox(south_lat1, "
-                            "west_lon1, north_lat1, east_lon1, ?, ?, ?, ?) AND "
-                            "intersects_bbox(south_lat2, west_lon2, "
-                            "north_lat2, east_lon2, ?, ?, ?, ?) ";
+                            "AND intersects_bbox(a1.south_lat, a1.west_lon, "
+                            "a1.north_lat, a1.east_lon, ?, ?, ?, ?) AND "
+                            "intersects_bbox(a2.south_lat, a2.west_lon, "
+                            "a2.north_lat, a2.east_lon, ?, ?, ?, ?)  ";
                         params.emplace_back(south_lat);
                         params.emplace_back(west_lon);
                         params.emplace_back(north_lat);
@@ -4479,53 +4407,192 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     auto res = d->run(sql + additionalWhere, params);
     // fprintf(stderr, "after\n");
 
-    const auto filterOutSuperseded = [](SQLResultSet &&resultSet) {
-        std::set<std::pair<std::string, std::string>> setTransf1;
-        std::set<std::pair<std::string, std::string>> setTransf2;
+    const auto filterDeprecatedAndNotMatchingAuth =
+        [&](SQLResultSet &&resultSet) {
+
+            SQLResultSet filteredResultSet;
+            for (const auto &row : resultSet) {
+                const auto &deprecated1 = row[3];
+                const auto &deprecated2 = row[7];
+                if (deprecated1 == "1" || deprecated2 == "1") {
+                    continue;
+                }
+                const auto &auth_name1 = row[1];
+                const auto &auth_name2 = row[5];
+                if (d->hasAuthorityRestriction()) {
+                    if (auth_name1 != d->authority() ||
+                        auth_name2 != d->authority()) {
+                        continue;
+                    }
+                }
+                if (!allowedAuthorities.empty()) {
+                    {
+                        bool found = false;
+                        for (const auto &auth : allowedAuthorities) {
+                            if (auth_name1 == auth) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            continue;
+                        }
+                    }
+                    {
+                        bool found = false;
+                        for (const auto &auth : allowedAuthorities) {
+                            if (auth_name2 == auth) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            continue;
+                        }
+                    }
+                }
+
+                filteredResultSet.emplace_back(row);
+            }
+            return filteredResultSet;
+        };
+
+    const auto filterOutSuperseded = [&](SQLResultSet &&resultSet) {
+        std::set<std::pair<std::string, std::string>> setTransf;
+        std::string findSupersededSql("SELECT superseded_table_name, "
+                                      "superseded_auth_name, superseded_code, "
+                                      "replacement_auth_name, replacement_code "
+                                      "FROM supersession WHERE ");
+        bool findSupersededFirstWhere = true;
+        ListOfParams findSupersededParams;
+
+        std::set<std::string> setAlreadyAsked;
+        const auto keyMapSupersession = [](
+            const std::string &table_name, const std::string &auth_name,
+            const std::string &code) { return table_name + auth_name + code; };
+
         for (const auto &row : resultSet) {
-            // table1
+            const auto &table1 = row[0];
             const auto &auth_name1 = row[1];
             const auto &code1 = row[2];
-            const auto &deprecated1 = row[3];
-            // table2
+            const auto key1 = keyMapSupersession(table1, auth_name1, code1);
+            if (setAlreadyAsked.find(key1) == setAlreadyAsked.end()) {
+                setAlreadyAsked.insert(key1);
+                if (!findSupersededFirstWhere)
+                    findSupersededSql += " OR ";
+                findSupersededFirstWhere = false;
+                findSupersededSql +=
+                    "(superseded_table_name = ? AND replacement_table_name = "
+                    "superseded_table_name AND superseded_auth_name = ? AND "
+                    "superseded_code = ?)";
+                findSupersededParams.push_back(table1);
+                findSupersededParams.push_back(auth_name1);
+                findSupersededParams.push_back(code1);
+            }
+
+            const auto &table2 = row[4];
             const auto &auth_name2 = row[5];
             const auto &code2 = row[6];
-            const auto &deprecated2 = row[7];
-            if (deprecated1 == "1" || deprecated2 == "1") {
-                continue;
+            const auto key2 = keyMapSupersession(table2, auth_name2, code2);
+            if (setAlreadyAsked.find(key2) == setAlreadyAsked.end()) {
+                setAlreadyAsked.insert(key2);
+                if (!findSupersededFirstWhere)
+                    findSupersededSql += " OR ";
+                findSupersededFirstWhere = false;
+                findSupersededSql +=
+                    "(superseded_table_name = ? AND replacement_table_name = "
+                    "superseded_table_name AND superseded_auth_name = ? AND "
+                    "superseded_code = ?)";
+                findSupersededParams.push_back(table2);
+                findSupersededParams.push_back(auth_name2);
+                findSupersededParams.push_back(code2);
             }
-            setTransf1.insert(
+
+            setTransf.insert(
                 std::pair<std::string, std::string>(auth_name1, code1));
-            setTransf2.insert(
+            setTransf.insert(
                 std::pair<std::string, std::string>(auth_name2, code2));
         }
+
+        std::map<std::string, std::vector<std::pair<std::string, std::string>>>
+            mapSupersession;
+
+        if (!findSupersededParams.empty()) {
+            const auto resSuperseded =
+                d->run(findSupersededSql, findSupersededParams);
+            for (const auto &row : resSuperseded) {
+                const auto &superseded_table_name = row[0];
+                const auto &superseded_auth_name = row[1];
+                const auto &superseded_code = row[2];
+                const auto &replacement_auth_name = row[3];
+                const auto &replacement_code = row[4];
+                mapSupersession[keyMapSupersession(superseded_table_name,
+                                                   superseded_auth_name,
+                                                   superseded_code)]
+                    .push_back(std::pair<std::string, std::string>(
+                        replacement_auth_name, replacement_code));
+            }
+        }
+
         SQLResultSet filteredResultSet;
         for (const auto &row : resultSet) {
-            const auto &replacement_auth_name1 = row[16];
-            const auto &replacement_code1 = row[17];
-            const auto &replacement_auth_name2 = row[18];
-            const auto &replacement_code2 = row[19];
-            if (!replacement_auth_name1.empty() &&
-                setTransf1.find(std::pair<std::string, std::string>(
-                    replacement_auth_name1, replacement_code1)) !=
-                    setTransf1.end()) {
-                // Skip transformations that are superseded by others that got
-                // returned in the result set.
-                continue;
+            const auto &table1 = row[0];
+            const auto &auth_name1 = row[1];
+            const auto &code1 = row[2];
+            const auto &table2 = row[4];
+            const auto &auth_name2 = row[5];
+            const auto &code2 = row[6];
+
+            auto iter1 = mapSupersession.find(
+                keyMapSupersession(table1, auth_name1, code1));
+            if (iter1 != mapSupersession.end()) {
+                bool foundReplacement = false;
+                for (const auto &replacement : iter1->second) {
+                    const auto &replacement_auth_name = replacement.first;
+                    const auto &replacement_code = replacement.second;
+                    if (setTransf.find(std::pair<std::string, std::string>(
+                            replacement_auth_name, replacement_code)) !=
+                        setTransf.end()) {
+                        // Skip transformations that are superseded by others
+                        // that got
+                        // returned in the result set.
+                        foundReplacement = true;
+                        break;
+                    }
+                }
+                if (foundReplacement) {
+                    continue;
+                }
             }
-            if (!replacement_auth_name2.empty() &&
-                setTransf2.find(std::pair<std::string, std::string>(
-                    replacement_auth_name2, replacement_code2)) !=
-                    setTransf2.end()) {
-                // Skip transformations that are superseded by others that got
-                // returned in the result set.
-                continue;
+
+            auto iter2 = mapSupersession.find(
+                keyMapSupersession(table2, auth_name2, code2));
+            if (iter2 != mapSupersession.end()) {
+                bool foundReplacement = false;
+                for (const auto &replacement : iter2->second) {
+                    const auto &replacement_auth_name = replacement.first;
+                    const auto &replacement_code = replacement.second;
+                    if (setTransf.find(std::pair<std::string, std::string>(
+                            replacement_auth_name, replacement_code)) !=
+                        setTransf.end()) {
+                        // Skip transformations that are superseded by others
+                        // that got
+                        // returned in the result set.
+                        foundReplacement = true;
+                        break;
+                    }
+                }
+                if (foundReplacement) {
+                    continue;
+                }
             }
+
             filteredResultSet.emplace_back(row);
         }
         return filteredResultSet;
     };
 
+    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
     }
@@ -4536,14 +4603,10 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         const auto &table1 = row[0];
         const auto &auth_name1 = row[1];
         const auto &code1 = row[2];
-        const auto &deprecated1 = row[3];
         const auto &table2 = row[4];
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
-        const auto &deprecated2 = row[7];
-        if (deprecated1 == "1" || deprecated2 == "1") {
-            continue;
-        }
+
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(
                            code1, true, usePROJAlternativeGridNames, table1);
@@ -4624,6 +4687,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
     res = d->run(sql + additionalWhere, params);
     // fprintf(stderr, "after\n");
+
+    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
     }
@@ -4631,14 +4696,10 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         const auto &table1 = row[0];
         const auto &auth_name1 = row[1];
         const auto &code1 = row[2];
-        const auto &deprecated1 = row[3];
         const auto &table2 = row[4];
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
-        const auto &deprecated2 = row[7];
-        if (deprecated1 == "1" || deprecated2 == "1") {
-            continue;
-        }
+
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(
                            code1, true, usePROJAlternativeGridNames, table1);
@@ -4719,6 +4780,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
     res = d->run(sql + additionalWhere, params);
     // fprintf(stderr, "after\n");
+
+    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
     }
@@ -4726,14 +4789,10 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         const auto &table1 = row[0];
         const auto &auth_name1 = row[1];
         const auto &code1 = row[2];
-        const auto &deprecated1 = row[3];
         const auto &table2 = row[4];
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
-        const auto &deprecated2 = row[7];
-        if (deprecated1 == "1" || deprecated2 == "1") {
-            continue;
-        }
+
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(
                            code1, true, usePROJAlternativeGridNames, table1);
@@ -4814,6 +4873,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
     res = d->run(sql + additionalWhere, params);
     // fprintf(stderr, "after\n");
+
+    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
     }
@@ -4821,14 +4882,10 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         const auto &table1 = row[0];
         const auto &auth_name1 = row[1];
         const auto &code1 = row[2];
-        const auto &deprecated1 = row[3];
         const auto &table2 = row[4];
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
-        const auto &deprecated2 = row[7];
-        if (deprecated1 == "1" || deprecated2 == "1") {
-            continue;
-        }
+
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(
                            code1, true, usePROJAlternativeGridNames, table1);
@@ -4890,7 +4947,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
 
     std::vector<operation::CoordinateOperationNNPtr> list;
     for (const auto &op : listTmp) {
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
@@ -5248,13 +5306,12 @@ static void addToListString(std::string &out, const char *in) {
     out += in;
 }
 
-static void addToListStringWithOR(std::string &out, const char *in) {
+static void addToListStringWithOR(std::string &out, const std::string &in) {
     if (!out.empty()) {
         out += " OR ";
     }
     out += in;
 }
-
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -5291,8 +5348,9 @@ AuthorityFactory::createObjectsFromName(
     }
 
     std::string sql(
-        "SELECT table_name, auth_name, code, name, deprecated FROM object_view "
-        "WHERE ");
+        "SELECT table_name, auth_name, code, name, deprecated, is_alias FROM ("
+        "SELECT table_name, auth_name, code, name, deprecated, 0 as is_alias "
+        "FROM object_view WHERE ");
     if (deprecated) {
         sql += "deprecated = 1 AND ";
     }
@@ -5306,108 +5364,141 @@ AuthorityFactory::createObjectsFromName(
         params.emplace_back(d->authority());
     }
 
-    if (allowedObjectTypes.empty()) {
-        sql += "table_name IN ("
-               "'prime_meridian','ellipsoid','geodetic_datum',"
-               "'vertical_datum','geodetic_crs','projected_crs',"
-               "'vertical_crs','compound_crs','conversion',"
-               "'helmert_transformation','grid_transformation',"
-               "'other_transformation','concatenated_operation'"
-               ")";
-    } else {
-        std::string tableNameList;
-        std::string otherConditions;
-        for (const auto type : allowedObjectTypes) {
-            switch (type) {
-            case ObjectType::PRIME_MERIDIAN:
-                addToListString(tableNameList, "'prime_meridian'");
-                break;
-            case ObjectType::ELLIPSOID:
-                addToListString(tableNameList, "'ellipsoid'");
-                break;
-            case ObjectType::DATUM:
-                addToListString(tableNameList,
-                                "'geodetic_datum','vertical_datum'");
-                break;
-            case ObjectType::GEODETIC_REFERENCE_FRAME:
-                addToListString(tableNameList, "'geodetic_datum'");
-                break;
-            case ObjectType::VERTICAL_REFERENCE_FRAME:
-                addToListString(tableNameList, "'vertical_datum'");
-                break;
-            case ObjectType::CRS:
-                addToListString(tableNameList, "'geodetic_crs','projected_crs',"
-                                               "'vertical_crs','compound_crs'");
-                break;
-            case ObjectType::GEODETIC_CRS:
-                addToListString(tableNameList, "'geodetic_crs'");
-                break;
-            case ObjectType::GEOCENTRIC_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = " GEOCENTRIC_SINGLE_QUOTED
-                                      " AND "
-                                      "type = " GEOCENTRIC_SINGLE_QUOTED ")");
-                break;
-            case ObjectType::GEOGRAPHIC_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = 'geodetic_crs' AND "
-                                      "type IN (" GEOG_2D_SINGLE_QUOTED
-                                      "," GEOG_3D_SINGLE_QUOTED "))");
-                break;
-            case ObjectType::GEOGRAPHIC_2D_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = 'geodetic_crs' AND "
-                                      "type = " GEOG_2D_SINGLE_QUOTED ")");
-                break;
-            case ObjectType::GEOGRAPHIC_3D_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = 'geodetic_crs' AND "
-                                      "type = " GEOG_3D_SINGLE_QUOTED ")");
-                break;
-            case ObjectType::PROJECTED_CRS:
-                addToListString(tableNameList, "'projected_crs'");
-                break;
-            case ObjectType::VERTICAL_CRS:
-                addToListString(tableNameList, "'vertical_crs'");
-                break;
-            case ObjectType::COMPOUND_CRS:
-                addToListString(tableNameList, "'compound_crs'");
-                break;
-            case ObjectType::COORDINATE_OPERATION:
-                addToListString(tableNameList,
-                                "'conversion','helmert_transformation',"
-                                "'grid_transformation','other_transformation',"
-                                "'concatenated_operation'");
-                break;
-            case ObjectType::CONVERSION:
-                addToListString(tableNameList, "'conversion'");
-                break;
-            case ObjectType::TRANSFORMATION:
-                addToListString(tableNameList,
-                                "'helmert_transformation',"
-                                "'grid_transformation','other_transformation'");
-                break;
-            case ObjectType::CONCATENATED_OPERATION:
-                addToListString(tableNameList, "'concatenated_operation'");
-                break;
+    const auto getTableNameConstraint = [&allowedObjectTypes](
+        const std::string &colName) {
+        if (allowedObjectTypes.empty()) {
+            return colName + " IN ("
+                             "'prime_meridian','ellipsoid','geodetic_datum',"
+                             "'vertical_datum','geodetic_crs','projected_crs',"
+                             "'vertical_crs','compound_crs','conversion',"
+                             "'helmert_transformation','grid_transformation',"
+                             "'other_transformation','concatenated_operation'"
+                             ")";
+        } else {
+            std::string tableNameList;
+            std::string otherConditions;
+            for (const auto type : allowedObjectTypes) {
+                switch (type) {
+                case ObjectType::PRIME_MERIDIAN:
+                    addToListString(tableNameList, "'prime_meridian'");
+                    break;
+                case ObjectType::ELLIPSOID:
+                    addToListString(tableNameList, "'ellipsoid'");
+                    break;
+                case ObjectType::DATUM:
+                    addToListString(tableNameList,
+                                    "'geodetic_datum','vertical_datum'");
+                    break;
+                case ObjectType::GEODETIC_REFERENCE_FRAME:
+                    addToListString(tableNameList, "'geodetic_datum'");
+                    break;
+                case ObjectType::VERTICAL_REFERENCE_FRAME:
+                    addToListString(tableNameList, "'vertical_datum'");
+                    break;
+                case ObjectType::CRS:
+                    addToListString(tableNameList,
+                                    "'geodetic_crs','projected_crs',"
+                                    "'vertical_crs','compound_crs'");
+                    break;
+                case ObjectType::GEODETIC_CRS:
+                    addToListString(tableNameList, "'geodetic_crs'");
+                    break;
+                case ObjectType::GEOCENTRIC_CRS:
+                    addToListStringWithOR(
+                        otherConditions,
+                        "(" + colName + " = " GEOCENTRIC_SINGLE_QUOTED " AND "
+                                        "type = " GEOCENTRIC_SINGLE_QUOTED ")");
+                    break;
+                case ObjectType::GEOGRAPHIC_CRS:
+                    addToListStringWithOR(otherConditions,
+                                          "(" + colName +
+                                              " = 'geodetic_crs' AND "
+                                              "type IN (" GEOG_2D_SINGLE_QUOTED
+                                              "," GEOG_3D_SINGLE_QUOTED "))");
+                    break;
+                case ObjectType::GEOGRAPHIC_2D_CRS:
+                    addToListStringWithOR(
+                        otherConditions,
+                        "(" + colName + " = 'geodetic_crs' AND "
+                                        "type = " GEOG_2D_SINGLE_QUOTED ")");
+                    break;
+                case ObjectType::GEOGRAPHIC_3D_CRS:
+                    addToListStringWithOR(
+                        otherConditions,
+                        "(" + colName + " = 'geodetic_crs' AND "
+                                        "type = " GEOG_3D_SINGLE_QUOTED ")");
+                    break;
+                case ObjectType::PROJECTED_CRS:
+                    addToListString(tableNameList, "'projected_crs'");
+                    break;
+                case ObjectType::VERTICAL_CRS:
+                    addToListString(tableNameList, "'vertical_crs'");
+                    break;
+                case ObjectType::COMPOUND_CRS:
+                    addToListString(tableNameList, "'compound_crs'");
+                    break;
+                case ObjectType::COORDINATE_OPERATION:
+                    addToListString(
+                        tableNameList,
+                        "'conversion','helmert_transformation',"
+                        "'grid_transformation','other_transformation',"
+                        "'concatenated_operation'");
+                    break;
+                case ObjectType::CONVERSION:
+                    addToListString(tableNameList, "'conversion'");
+                    break;
+                case ObjectType::TRANSFORMATION:
+                    addToListString(
+                        tableNameList,
+                        "'helmert_transformation',"
+                        "'grid_transformation','other_transformation'");
+                    break;
+                case ObjectType::CONCATENATED_OPERATION:
+                    addToListString(tableNameList, "'concatenated_operation'");
+                    break;
+                }
             }
-        }
-        if (!tableNameList.empty()) {
-            sql += "((table_name IN (";
-            sql += tableNameList;
-            sql += "))";
-            if (!otherConditions.empty()) {
-                sql += " OR ";
-                sql += otherConditions;
+            std::string l_sql;
+            if (!tableNameList.empty()) {
+                l_sql = "((" + colName + " IN (";
+                l_sql += tableNameList;
+                l_sql += "))";
+                if (!otherConditions.empty()) {
+                    l_sql += " OR ";
+                    l_sql += otherConditions;
+                }
+                l_sql += ')';
+            } else if (!otherConditions.empty()) {
+                l_sql = "(";
+                l_sql += otherConditions;
+                l_sql += ')';
             }
-            sql += ')';
-        } else if (!otherConditions.empty()) {
-            sql += "(";
-            sql += otherConditions;
-            sql += ')';
+            return l_sql;
         }
+    };
+
+    sql += getTableNameConstraint("table_name");
+
+    sql += " UNION SELECT ov.table_name AS table_name, "
+           "ov.auth_name AS auth_name, "
+           "ov.code AS code, a.alt_name AS name, "
+           "ov.deprecated AS deprecated, 1 as is_alias FROM object_view ov "
+           "JOIN alias_name a ON ov.table_name = a.table_name AND "
+           "ov.auth_name = a.auth_name AND ov.code = a.code WHERE ";
+    if (deprecated) {
+        sql += "ov.deprecated = 1 AND ";
     }
-    sql += " ORDER BY deprecated, length(name), name";
+    if (!approximateMatch) {
+        sql += "a.alt_name LIKE ? AND ";
+        params.push_back(searchedNameWithoutDeprecated);
+    }
+    if (d->hasAuthorityRestriction()) {
+        sql += "ov.auth_name = ? AND ";
+        params.emplace_back(d->authority());
+    }
+    sql += getTableNameConstraint("ov.table_name");
+
+    sql += ") ORDER BY deprecated, is_alias, length(name), name";
     if (limitResultCount > 0 &&
         limitResultCount <
             static_cast<size_t>(std::numeric_limits<int>::max()) &&
@@ -5417,6 +5508,7 @@ AuthorityFactory::createObjectsFromName(
     }
 
     std::list<common::IdentifiedObjectNNPtr> res;
+    std::set<std::pair<std::string, std::string>> setIdentified;
 
     // Querying geodetic datum is a super hot path when importing from WKT1
     // so cache results.
@@ -5444,6 +5536,12 @@ AuthorityFactory::createObjectsFromName(
             for (const auto &row : listOfRow) {
                 const auto &auth_name = row[1];
                 const auto &code = row[2];
+                const auto key =
+                    std::pair<std::string, std::string>(auth_name, code);
+                if (setIdentified.find(key) != setIdentified.end()) {
+                    continue;
+                }
+                setIdentified.insert(key);
                 auto factory = d->createFactory(auth_name);
                 res.emplace_back(factory->createGeodeticDatum(code));
                 if (limitResultCount > 0 && res.size() == limitResultCount) {
@@ -5469,6 +5567,12 @@ AuthorityFactory::createObjectsFromName(
 
                     const auto &auth_name = row[1];
                     const auto &code = row[2];
+                    const auto key =
+                        std::pair<std::string, std::string>(auth_name, code);
+                    if (setIdentified.find(key) != setIdentified.end()) {
+                        continue;
+                    }
+                    setIdentified.insert(key);
                     auto factory = d->createFactory(auth_name);
                     res.emplace_back(factory->createGeodeticDatum(code));
                     if (limitResultCount > 0 &&
@@ -5504,6 +5608,12 @@ AuthorityFactory::createObjectsFromName(
             const auto &table_name = row[0];
             const auto &auth_name = row[1];
             const auto &code = row[2];
+            const auto key =
+                std::pair<std::string, std::string>(auth_name, code);
+            if (setIdentified.find(key) != setIdentified.end()) {
+                continue;
+            }
+            setIdentified.insert(key);
             const auto &deprecatedStr = row[4];
             if (isFirst) {
                 firstIsDeprecated = deprecatedStr == "1";
@@ -5751,7 +5861,9 @@ static std::string buildSqlLookForAuthNameCode(
 
     std::set<std::string> authorities;
     for (const auto &crs : list) {
-        const auto &ids = crs.first->identifiers();
+        auto boundCRS = dynamic_cast<crs::BoundCRS *>(crs.first.get());
+        const auto &ids = boundCRS ? boundCRS->baseCRS()->identifiers()
+                                   : crs.first->identifiers();
         if (!ids.empty()) {
             authorities.insert(*(ids[0]->codeSpace()));
         }
@@ -5770,7 +5882,9 @@ static std::string buildSqlLookForAuthNameCode(
         params.emplace_back(auth_name);
         bool firstGeodCRSForAuth = true;
         for (const auto &crs : list) {
-            const auto &ids = crs.first->identifiers();
+            auto boundCRS = dynamic_cast<crs::BoundCRS *>(crs.first.get());
+            const auto &ids = boundCRS ? boundCRS->baseCRS()->identifiers()
+                                       : crs.first->identifiers();
             if (!ids.empty() && *(ids[0]->codeSpace()) == auth_name) {
                 if (!firstGeodCRSForAuth) {
                     sql += ',';

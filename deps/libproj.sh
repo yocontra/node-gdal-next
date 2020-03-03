@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libproj"
 
-PROJ_VERSION=6.3.0
+PROJ_VERSION=7.0.0
 dir_proj=./proj
 
 #

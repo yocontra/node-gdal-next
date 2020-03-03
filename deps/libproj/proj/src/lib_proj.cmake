@@ -1,24 +1,23 @@
+message(STATUS "Configuring proj library:")
+
 ##############################################
 ### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
 ##############################################
-colormsg(_HIBLUE_ "Configuring proj library:")
-message(STATUS "")
 
-# default config, shared on unix and static on Windows
-if(UNIX)
-  set(BUILD_LIBPROJ_SHARED_DEFAULT ON)
+# Support older option, to be removed by PROJ 8.0
+if(DEFINED BUILD_LIBPROJ_SHARED)
+  message(DEPRECATION
+    "BUILD_LIBPROJ_SHARED has been replaced with BUILD_SHARED_LIBS")
+  set(BUILD_SHARED_LIBS ${BUILD_LIBPROJ_SHARED})
 endif()
+
+# default config is shared, except static on Windows
+set(BUILD_SHARED_LIBS_DEFAULT ON)
 if(WIN32)
-  set(BUILD_LIBPROJ_SHARED_DEFAULT OFF)
+  set(BUILD_SHARED_LIBS_DEFAULT OFF)
 endif()
-option(BUILD_LIBPROJ_SHARED
-  "Build libproj library shared." ${BUILD_LIBPROJ_SHARED_DEFAULT})
-if(BUILD_LIBPROJ_SHARED)
-  set(PROJ_LIBRARY_TYPE SHARED)
-else()
-  set(PROJ_LIBRARY_TYPE STATIC)
-endif()
-
+option(BUILD_SHARED_LIBS
+  "Build PROJ library shared." ${BUILD_SHARED_LIBS_DEFAULT})
 
 option(USE_THREAD "Build libproj with thread/mutex support " ON)
 if(NOT USE_THREAD)
@@ -35,36 +34,20 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
     "required by USE_THREAD option")
 endif()
 
-option(ENABLE_LTO
-  "Build library with LTO/IPO optimization (if available)." OFF)
-if(ENABLE_LTO)
-  # Determine ENABLE_LTO_METHOD to either "flag" or "property"
-  if(CMAKE_C_COMPILER_ID STREQUAL "Intel"
-      AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(ENABLE_LTO_METHOD "property")
-  elseif(CMAKE_VERSION VERSION_LESS 3.9)
-    # Maual checks required
-    if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-      include(CheckCXXSourceCompiles)
-      set(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
-      check_cxx_source_compiles("int main(){ return 0; }"
-        COMPILER_SUPPORTS_FLTO_FLAG)
-    else()
-      include(CheckCXXCompilerFlag)
-      check_cxx_compiler_flag("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
-    endif()
-    set(ENABLE_LTO_METHOD "flag")
-    if(NOT COMPILER_SUPPORTS_FLTO_FLAG)
-      set(ENABLE_LTO OFF)
-    endif()
-  else()  # CMake v3.9
-    cmake_policy(SET CMP0069 NEW)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT ENABLE_LTO)
-    set(ENABLE_LTO_METHOD "property")
-  endif()
+# Support older option, to be removed by PROJ 8.0
+if(DEFINED ENABLE_LTO)
+  message(DEPRECATION "ENABLE_LTO has been replaced with ENABLE_IPO")
+  set(ENABLE_IPO ${ENABLE_LTO})
 endif()
-boost_report_value(ENABLE_LTO)
+
+option(ENABLE_IPO
+  "Build library with interprocedural optimization (if available)." OFF)
+if(ENABLE_IPO)
+  cmake_policy(SET CMP0069 NEW)
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT ENABLE_IPO)
+endif()
+print_variable(ENABLE_IPO)
 
 
 ##############################################
@@ -187,6 +170,7 @@ set(SRC_LIBPROJ_CONVERSIONS
   conversions/geoc.cpp
   conversions/geocent.cpp
   conversions/noop.cpp
+  conversions/set.cpp
   conversions/unitconvert.cpp
 )
 
@@ -198,6 +182,7 @@ set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/horner.cpp
   transformations/molodensky.cpp
   transformations/vgridshift.cpp
+  transformations/xyzgridshift.cpp
 )
 
 set(SRC_LIBPROJ_ISO19111
@@ -219,8 +204,6 @@ set(SRC_LIBPROJ_CORE
   4D_api.cpp
   aasincos.cpp
   adjlon.cpp
-  apply_gridshift.cpp
-  apply_vgridshift.cpp
   auth.cpp
   ctx.cpp
   datum_set.cpp
@@ -234,28 +217,19 @@ set(SRC_LIBPROJ_CORE
   fileapi.cpp
   fwd.cpp
   gauss.cpp
-  gc_reader.cpp
   geocent.cpp
   geocent.h
   geodesic.c
-  gridcatalog.cpp
-  gridinfo.cpp
-  gridlist.cpp
   init.cpp
   initcache.cpp
   internal.cpp
   inv.cpp
-  jniproj.cpp
   list.cpp
   log.cpp
   malloc.cpp
   mlfn.cpp
   msfn.cpp
   mutex.cpp
-  nad_cvt.cpp
-  nad_init.cpp
-  nad_intr.cpp
-  open_lib.cpp
   param.cpp
   phi2.cpp
   pipeline.cpp
@@ -286,6 +260,13 @@ set(SRC_LIBPROJ_CORE
   proj_json_streaming_writer.hpp
   proj_json_streaming_writer.cpp
   tracing.cpp
+  grids.hpp
+  grids.cpp
+  filemanager.hpp
+  filemanager.cpp
+  networkfilemanager.cpp
+  sqlite3_utils.hpp
+  sqlite3_utils.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
@@ -321,26 +302,6 @@ source_group("CMake Files" FILES CMakeLists.txt)
 add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
 
 #################################################
-## java wrapping with jni
-#################################################
-option(JNI_SUPPORT "Build support of java/jni wrapping for proj library" OFF)
-find_package(JNI QUIET)
-if(JNI_SUPPORT AND NOT JNI_FOUND)
-  message(FATAL_ERROR "jni support is required but jni is not found")
-endif()
-boost_report_value(JNI_SUPPORT)
-if(JNI_SUPPORT)
-  set(SRC_LIBPROJ_CORE
-    ${SRC_LIBPROJ_CORE} jniproj.cpp)
-  set(HEADERS_LIBPROJ
-    ${HEADERS_LIBPROJ} org_proj4_PJ.h)
-  source_group("Source Files\\JNI" FILES ${SRC_LIBPROJ_JNI})
-  add_definitions(-DJNI_ENABLED)
-  include_directories(${JNI_INCLUDE_DIRS})
-  boost_report_value(JNI_INCLUDE_DIRS)
-endif()
-
-#################################################
 ## targets: libproj and proj_config.h
 #################################################
 set(ALL_LIBPROJ_SOURCES
@@ -353,13 +314,12 @@ set(ALL_LIBPROJ_SOURCES
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ})
 
 # Core targets configuration
-string(TOLOWER "${PROJECT_INTERN_NAME}" PROJECTNAMEL)
+string(TOLOWER "${PROJECT_NAME}" PROJECTNAMEL)
 set(PROJ_CORE_TARGET ${PROJECTNAMEL})
 proj_target_output_name(${PROJ_CORE_TARGET} PROJ_CORE_TARGET_OUTPUT_NAME)
 
 add_library(
   ${PROJ_CORE_TARGET}
-  ${PROJ_LIBRARY_TYPE}
   ${ALL_LIBPROJ_SOURCES}
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
@@ -368,6 +328,10 @@ target_compile_options(${PROJ_CORE_TARGET}
   PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
 )
+
+if(MSVC OR MINGW)
+    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DNOMINMAX)
+endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to stop the
 # compiler from ignoring parentheses in expressions like (a + b) + c and from
@@ -384,39 +348,32 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
     PROPERTIES COMPILE_FLAGS ${FP_PRECISE})
 endif()
 
-if(ENABLE_LTO)
-  if(ENABLE_LTO_METHOD STREQUAL "property")
-    set_property(TARGET ${PROJ_CORE_TARGET}
-      PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  elseif(ENABLE_LTO_METHOD STREQUAL "flag")
-    # pre-CMake 3.9 workaround
-    target_compile_options(${PROJ_CORE_TARGET} PRIVATE -flto)
-  endif()
+if(ENABLE_IPO)
+  set_property(TARGET ${PROJ_CORE_TARGET}
+    PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
-  target_include_directories(${PROJ_CORE_TARGET} INTERFACE
-    $<INSTALL_INTERFACE:${INCLUDEDIR}>)
-endif()
+target_include_directories(${PROJ_CORE_TARGET} INTERFACE
+  $<INSTALL_INTERFACE:${INCLUDEDIR}>)
 
 if(WIN32)
   set_target_properties(${PROJ_CORE_TARGET}
     PROPERTIES
-    VERSION "${${PROJECT_INTERN_NAME}_BUILD_VERSION}"
+    VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     OUTPUT_NAME "${PROJ_CORE_TARGET_OUTPUT_NAME}"
     ARCHIVE_OUTPUT_NAME "${PROJ_CORE_TARGET}"
     CLEAN_DIRECT_OUTPUT 1)
 elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
   set_target_properties(${PROJ_CORE_TARGET}
     PROPERTIES
-    VERSION "${${PROJECT_INTERN_NAME}_BUILD_VERSION}"
+    VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     INSTALL_NAME_DIR ${PROJ_INSTALL_NAME_DIR}
     CLEAN_DIRECT_OUTPUT 1)
 else()
   set_target_properties(${PROJ_CORE_TARGET}
     PROPERTIES
-    VERSION "${${PROJECT_INTERN_NAME}_BUILD_VERSION}"
-    SOVERSION "${${PROJECT_INTERN_NAME}_API_VERSION}"
+    VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
+    SOVERSION "${${PROJECT_NAME}_API_VERSION}"
     CLEAN_DIRECT_OUTPUT 1)
 endif()
 
@@ -435,15 +392,31 @@ if(UNIX)
   if(M_LIB)
     target_link_libraries(${PROJ_CORE_TARGET} -lm)
   endif()
+  find_library(DL_LIB dl)
+  if(M_LIB)
+    target_link_libraries(${PROJ_CORE_TARGET} -ldl)
+  endif()
 endif()
 if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
   target_link_libraries(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-include_directories(${SQLITE3_INCLUDE_DIR})
+target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_INCLUDE_DIR})
 target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
 
-if(MSVC AND BUILD_LIBPROJ_SHARED)
+if(TIFF_ENABLED)
+  target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DTIFF_ENABLED)
+  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${TIFF_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
+endif()
+
+if(CURL_ENABLED)
+  target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DCURL_ENABLED)
+  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${CURL_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
+endif()
+
+if(MSVC AND BUILD_SHARED_LIBS)
   target_compile_definitions(${PROJ_CORE_TARGET}
     PRIVATE PROJ_MSVC_DLL_EXPORT=1)
 endif()
@@ -466,7 +439,7 @@ endif()
 ##############################################
 # Core configuration summary
 ##############################################
-boost_report_value(PROJ_CORE_TARGET)
-boost_report_value(PROJ_CORE_TARGET_OUTPUT_NAME)
-boost_report_value(PROJ_LIBRARY_TYPE)
-boost_report_value(PROJ_LIBRARIES)
+print_variable(PROJ_CORE_TARGET)
+print_variable(PROJ_CORE_TARGET_OUTPUT_NAME)
+print_variable(BUILD_SHARED_LIBS)
+print_variable(PROJ_LIBRARIES)

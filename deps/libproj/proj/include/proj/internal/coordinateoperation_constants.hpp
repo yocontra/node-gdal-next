@@ -513,7 +513,7 @@ static const ParamMapping paramViewpointHeight = {
 static const ParamMapping *const paramsVerticalPerspective[] = {
     &paramLatTopoOrigin,
     &paramLonTopoOrigin,
-    &paramHeightTopoOrigin,
+    &paramHeightTopoOrigin, // unsupported by PROJ right now
     &paramViewpointHeight,
     &paramFalseEasting,  // PROJ addition
     &paramFalseNorthing, // PROJ addition
@@ -584,6 +584,9 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {EPSG_NAME_METHOD_BONNE, EPSG_CODE_METHOD_BONNE, "Bonne", "bonne", nullptr,
      paramsBonne},
+
+    {PROJ_WKT2_NAME_METHOD_COMPACT_MILLER, 0, "Compact_Miller", "comill",
+     nullptr, paramsLonNatOrigin},
 
     {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
      EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
@@ -697,6 +700,12 @@ static const MethodMapping projectionMethodMappings[] = {
     {PROJ_WKT2_NAME_METHOD_MOLLWEIDE, 0, "Mollweide", "moll", nullptr,
      paramsLonNatOrigin},
 
+    {PROJ_WKT2_NAME_METHOD_NATURAL_EARTH, 0, "Natural_Earth", "natearth",
+     nullptr, paramsLonNatOrigin},
+
+    {PROJ_WKT2_NAME_METHOD_NATURAL_EARTH_II, 0, "Natural_Earth_II", "natearth2",
+     nullptr, paramsLonNatOrigin},
+
     {EPSG_NAME_METHOD_NZMG, EPSG_CODE_METHOD_NZMG, "New_Zealand_Map_Grid",
      "nzmg", nullptr, paramsNatOrigin},
 
@@ -708,6 +717,9 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {EPSG_NAME_METHOD_ORTHOGRAPHIC, EPSG_CODE_METHOD_ORTHOGRAPHIC,
      "Orthographic", "ortho", nullptr, paramsNatOrigin},
+
+    {PROJ_WKT2_NAME_METHOD_PATTERSON, 0, "Patterson", "patterson", nullptr,
+     paramsLonNatOrigin},
 
     {EPSG_NAME_METHOD_AMERICAN_POLYCONIC, EPSG_CODE_METHOD_AMERICAN_POLYCONIC,
      "Polyconic", "poly", nullptr, paramsNatOrigin},
@@ -728,6 +740,9 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC, 0, "Stereographic", "stere", nullptr,
      paramsObliqueStereo},
+
+    {PROJ_WKT2_NAME_METHOD_TIMES, 0, "Times", "times", nullptr,
+     paramsLonNatOrigin},
 
     {PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN, 0, "VanDerGrinten", "vandg", "R_A",
      paramsLonNatOrigin},
@@ -860,6 +875,7 @@ static const struct MethodNameCode {
     METHOD_NAME_CODE(GEOGRAPHIC3D_OFFSETS), METHOD_NAME_CODE(VERTICAL_OFFSET),
     METHOD_NAME_CODE(NTV2), METHOD_NAME_CODE(NTV1), METHOD_NAME_CODE(NADCON),
     METHOD_NAME_CODE(VERTCON),
+    METHOD_NAME_CODE(GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN),
 };
 
 #define PARAM_NAME_CODE(method)                                                \
@@ -920,6 +936,7 @@ static const struct ParamNameCode {
     PARAM_NAME_CODE(ORDINATE_1_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_2_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_3_EVAL_POINT),
+    PARAM_NAME_CODE(GEOCENTRIC_TRANSLATION_FILE),
 };
 
 static const ParamMapping paramUnitConversionScalar = {
@@ -1129,6 +1146,15 @@ static const ParamMapping paramLatitudeLongitudeDifferenceFile = {
 static const ParamMapping *const paramsNTV2[] = {
     &paramLatitudeLongitudeDifferenceFile, nullptr};
 
+static const ParamMapping paramGeocentricTranslationFile = {
+    EPSG_NAME_PARAMETER_GEOCENTRIC_TRANSLATION_FILE,
+    EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping
+    *const paramsGeocentricTranslationGridInterpolationIGN[] = {
+        &paramGeocentricTranslationFile, nullptr};
+
 static const ParamMapping paramLatitudeDifferenceFile = {
     EPSG_NAME_PARAMETER_LATITUDE_DIFFERENCE_FILE,
     EPSG_CODE_PARAMETER_LATITUDE_DIFFERENCE_FILE, nullptr,
@@ -1288,11 +1314,17 @@ static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_NTV1, EPSG_CODE_METHOD_NTV1, nullptr, nullptr, nullptr,
      paramsNTV2},
 
+    {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN,
+     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN, nullptr,
+     nullptr, nullptr, paramsGeocentricTranslationGridInterpolationIGN},
+
     {EPSG_NAME_METHOD_NADCON, EPSG_CODE_METHOD_NADCON, nullptr, nullptr,
      nullptr, paramsNADCON},
 
     {EPSG_NAME_METHOD_VERTCON, EPSG_CODE_METHOD_VERTCON, nullptr, nullptr,
      nullptr, paramsVERTCON},
+    {EPSG_NAME_METHOD_VERTCON_OLDNAME, EPSG_CODE_METHOD_VERTCON, nullptr,
+     nullptr, nullptr, paramsVERTCON},
 };
 
 // end of anonymous namespace
