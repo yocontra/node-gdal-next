@@ -6,16 +6,13 @@ SET EL=0
 
 ECHO =========== %~f0 ===========
 
-:: default to VS2019
-IF /I "%msvs_toolset%"=="" SET msvs_toolset=142
-SET VCVARSALL=C:\Program Files (x86)\Microsoft Visual Studio %msvs_toolset%.0\VC\vcvarsall.bat
-IF /I "%msvs_toolset%"=="142" SET MSVSVERSION=2019
+:: default to VS2015
+IF /I "%msvs_toolset%"=="" SET msvs_toolset=14
 IF /I "%msvs_toolset%"=="14" SET MSVSVERSION=2015
 IF /I "%msvs_toolset%"=="12" SET MSVSVERSION=2013
 
 ECHO msvs_toolset^: %msvs_toolset%
 ECHO MSVSVERSION^: %MSVSVERSION%
-ECHO VCVARSALL^: "%VCVARSALL%"
 
 IF /I "%APPVEYOR%"=="True" powershell Install-Product node %nodejs_version% %PLATFORM%
 IF %ERRORLEVEL% NEQ 0 ECHO could not install requested node version && GOTO ERROR
@@ -23,10 +20,20 @@ IF %ERRORLEVEL% NEQ 0 ECHO could not install requested node version && GOTO ERRO
 :: use 64 bit python if platform is 64 bit
 IF /I "%PLATFORM%"=="x64" set PATH=C:\Python27-x64;%PATH%
 
-ECHO activating VS command prompt...
-ECHO "%VCVARSALL%"
-IF /I %platform% == x64 CALL "%VCVARSALL%" amd64
-IF /I %platform% == x86 CALL "%VCVARSALL%" x86
+ECHO activating VS command prompt
+:: NOTE this call makes the x64 -> X64
+IF /I "%platform%"=="x64" ECHO x64 && CALL "C:\Program Files (x86)\Microsoft Visual Studio %msvs_toolset%.0\VC\vcvarsall.bat" amd64
+IF /I "%platform%"=="x86" ECHO x86 && CALL "C:\Program Files (x86)\Microsoft Visual Studio %msvs_toolset%.0\VC\vcvarsall.bat" x86
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+ECHO using compiler^: && CALL cl
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+ECHO using MSBuild^: && CALL msbuild /version && ECHO.
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+powershell Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ECHO available node.exe^:
 where node
@@ -36,7 +43,7 @@ ECHO available npm^:
 where npm
 CALL npm -v
 ECHO building ...
-:: --msvs_version=2019 is passed along to node-gyp here
+:: --msvs_version=2015 is passed along to node-gyp here
 CALL npm install --build-from-source --msvs_version=%MSVSVERSION% --loglevel=http --node_shared=true
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CALL npm test
