@@ -1,4 +1,4 @@
-os: Visual Studio 2019
+os: Visual Studio 2015
 
 platform:
   - x86
@@ -8,30 +8,30 @@ environment:
   matrix:
     # x64
     - nodejs_version: 10
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x64
     - nodejs_version: 11
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x64
     - nodejs_version: 12
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x64
     - nodejs_version: 13
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x64
 
     # x86
     - nodejs_version: 10
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x86
     - nodejs_version: 11
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x86
     - nodejs_version: 12
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x86
     - nodejs_version: 13
-      msvs_toolset: 142
+      msvs_toolset: 14
       platform: x86
 
 install:
