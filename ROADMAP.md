@@ -9,6 +9,7 @@
 
 - Switch from nan to N-API
   - Normalize the build system for this package to match more recent native modules like node-sqlite
+- Switch off of G++ to Clang for all CI work
 - Automate the yuidoc publishing
 - Build out an async API
 - Add a streaming API for parsing files
