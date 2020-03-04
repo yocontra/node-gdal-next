@@ -35,7 +35,7 @@ environment:
       platform: x86
 
 install:
-  - CALL "scripts\windows-ci.bat"
+  - scripts\windows-ci.bat
 
 build: OFF
 test: OFF
