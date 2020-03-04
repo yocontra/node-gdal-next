@@ -17,7 +17,8 @@
 			],
 			"conditions": [
 				["OS == 'win'", {
-					"include_dirs": ["./arch/win/src"]
+					"include_dirs": ["./arch/win/src"],
+					"defines": [ "NOMINMAX" ]
 				}, {
 					"include_dirs": ["./arch/unix/src"]
 				}]
