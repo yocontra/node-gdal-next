@@ -11,6 +11,7 @@
 			"sources": [
 				"./gdal/apps/ogr2ogr_lib.cpp",
 				"./gdal/apps/gdalbuildvrt_lib.cpp",
+				"./gdal/apps/commonutils.cpp",
 				"./gdal/frmts/gdalallregister.cpp",
 				"./gdal/frmts/derived/deriveddataset.cpp",
 				"./gdal/frmts/derived/derivedlist.c",
@@ -94,6 +95,7 @@
 				"./gdal/ogr/ogrsf_frmts/generic/ogrlayerdecorator.cpp",
 
 				'<!@(python ../glob-files.py "./gdal/alg/*.cpp")',
+				'<!@(python ../glob-files.py "./gdal/alg/*.c")',
 				'<!@(python ../glob-files.py "./gdal/gcore/*.cpp")',
 				'<!@(python ../glob-files.py "./gdal/gcore/mdreader/*.cpp")',
 
