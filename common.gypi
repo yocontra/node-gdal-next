@@ -37,7 +37,7 @@
 				}
 			}],
 			["OS == 'win'", {
-				"defines": [ "NOMINMAX" ]
+				"defines": [ "NOMINMAX", "WIN32" ]
 			}]
 		],
 		"link_settings": {
