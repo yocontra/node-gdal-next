@@ -8,8 +8,8 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/ogr/ogrsf_frmts/sxf/ogrsxfdatasource.cpp",
-				"../gdal/ogr/ogrsf_frmts/sxf/ogrsxfdriver.cpp",
-				"../gdal/ogr/ogrsf_frmts/sxf/ogrsxflayer.cpp"
+				"../gdal/ogr/ogrsf_frmts/sxf/ogrsxflayer.cpp",
+				"../gdal/ogr/ogrsf_frmts/sxf/ogrsxfdriver.cpp"
 			],
 			"include_dirs": [
 				"../gdal/ogr/ogrsf_frmts/sxf"

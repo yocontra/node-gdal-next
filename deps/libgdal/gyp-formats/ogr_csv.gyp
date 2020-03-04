@@ -8,8 +8,8 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/ogr/ogrsf_frmts/csv/ogrcsvdatasource.cpp",
-				"../gdal/ogr/ogrsf_frmts/csv/ogrcsvdriver.cpp",
-				"../gdal/ogr/ogrsf_frmts/csv/ogrcsvlayer.cpp"
+				"../gdal/ogr/ogrsf_frmts/csv/ogrcsvlayer.cpp",
+				"../gdal/ogr/ogrsf_frmts/csv/ogrcsvdriver.cpp"
 			],
 			"include_dirs": [
 				"../gdal/ogr/ogrsf_frmts/csv"

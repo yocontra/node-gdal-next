@@ -8,8 +8,8 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/ogr/ogrsf_frmts/aeronavfaa/ograeronavfaadatasource.cpp",
-				"../gdal/ogr/ogrsf_frmts/aeronavfaa/ograeronavfaadriver.cpp",
-				"../gdal/ogr/ogrsf_frmts/aeronavfaa/ograeronavfaalayer.cpp"
+				"../gdal/ogr/ogrsf_frmts/aeronavfaa/ograeronavfaalayer.cpp",
+				"../gdal/ogr/ogrsf_frmts/aeronavfaa/ograeronavfaadriver.cpp"
 			],
 			"include_dirs": [
 				"../gdal/ogr/ogrsf_frmts/aeronavfaa"

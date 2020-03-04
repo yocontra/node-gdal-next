@@ -8,8 +8,8 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/ogr/ogrsf_frmts/georss/ogrgeorssdatasource.cpp",
-				"../gdal/ogr/ogrsf_frmts/georss/ogrgeorssdriver.cpp",
-				"../gdal/ogr/ogrsf_frmts/georss/ogrgeorsslayer.cpp"
+				"../gdal/ogr/ogrsf_frmts/georss/ogrgeorsslayer.cpp",
+				"../gdal/ogr/ogrsf_frmts/georss/ogrgeorssdriver.cpp"
 			],
 			"include_dirs": [
 				"../gdal/ogr/ogrsf_frmts/georss"

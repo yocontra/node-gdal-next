@@ -176,6 +176,7 @@
 			],
 			"include_dirs": [
 				"./gdal/alg",
+				"./gdal/apps",
 				"./gdal/gcore",
 				"./gdal/port",
 				"./gdal/frmts",

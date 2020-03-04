@@ -8,11 +8,16 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/frmts/iso8211/ddffield.cpp",
-				"../gdal/frmts/iso8211/ddffielddefn.cpp",
-				"../gdal/frmts/iso8211/ddfmodule.cpp",
+				"../gdal/frmts/iso8211/timetest.cpp",
+				"../gdal/frmts/iso8211/8211dump.cpp",
 				"../gdal/frmts/iso8211/ddfrecord.cpp",
 				"../gdal/frmts/iso8211/ddfsubfielddefn.cpp",
-				"../gdal/frmts/iso8211/ddfutils.cpp"
+				"../gdal/frmts/iso8211/mkcatalog.cpp",
+				"../gdal/frmts/iso8211/8211view.cpp",
+				"../gdal/frmts/iso8211/ddfutils.cpp",
+				"../gdal/frmts/iso8211/8211createfromxml.cpp",
+				"../gdal/frmts/iso8211/ddfmodule.cpp",
+				"../gdal/frmts/iso8211/ddffielddefn.cpp"
 			],
 			"include_dirs": [
 				"../gdal/frmts/iso8211"
