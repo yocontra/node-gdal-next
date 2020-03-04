@@ -193,8 +193,7 @@
 				"./gdal/ogr/ogrsf_frmts/mem",
 				"./gdal/ogr/ogrsf_frmts/geojson",
 				"./gdal/frmts/jpeg/libjpeg",
-				"./gdal/alg/marching_squares",
-				"./gdal/alg/internal_libqhull",
+				"./gdal/alg/marching_squares"
 			],
 			"dependencies": [
 				'<@(gdal_format_gyps)'
