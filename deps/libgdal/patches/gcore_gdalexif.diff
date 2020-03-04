@@ -1,5 +1,5 @@
---- gdal/gcore/gdalexif.cpp.orig	2019-05-05 05:47:58.000000000 -0400
-+++ gdal/gcore/gdalexif.cpp	2019-06-18 15:19:30.000000000 -0400
+--- libgdal/gdal/gcore/gdalexif.cpp.orig	2019-05-05 05:47:58.000000000 -0400
++++ libgdal/gdal/gcore/gdalexif.cpp	2019-06-18 15:19:30.000000000 -0400
 @@ -457,6 +457,7 @@
  /*                                                                      */
  /*      Extract all entry from a IFD                                    */

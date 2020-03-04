@@ -34,6 +34,9 @@ patch $dir_gdal/ogr/ogrsf_frmts/shape/dbfopen.c < patches/ogrsf_frmts_shape_dbfo
 patch $dir_gdal/ogr/ogrsf_frmts/shape/sbnsearch.c < patches/ogrsf_frmts_shape_sbnsearch.diff
 patch $dir_gdal/frmts/blx/blx.c < patches/frmts_blx_blxc.diff # missing cpl_port.h
 patch $dir_gdal/frmts/sdts/sdts2shp.cpp < patches/frmts_sdts_switches.diff # bad syntax
+patch $dir_gdal/port/cpl_vsil_win32.cpp < patches/cpl_vsil_win32.diff # missing stdlib for win32
+patch $dir_gdal/port/cpl_vsil_stdin.cpp < patches/cpl_vsil_stdin.diff # missing stdlib for win32
+patch $dir_gdal/port/cpl_vsil_stdout.cpp < patches/cpl_vsil_stdout.diff # missing stdlib for win32
 
 #
 # create format gyps

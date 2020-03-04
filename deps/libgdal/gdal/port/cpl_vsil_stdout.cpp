@@ -41,6 +41,7 @@
 
 #ifdef WIN32
 #include <io.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #endif
 

@@ -1,0 +1,9 @@
+--- libgdal/gdal/port/cpl_vsil_win32.cpp	2020-01-28 05:18:51.000000000 -0500
++++ libgdal/gdal/port/cpl_vsil_win32.new.cpp	2020-03-04 00:50:31.000000000 -0500
+@@ -41,6 +41,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <io.h>
++#include <stdlib.h>
+ #include <fcntl.h>
+ #include <direct.h>
