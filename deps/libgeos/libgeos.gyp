@@ -24,8 +24,7 @@
 			],
 			"conditions": [
 				["OS == 'win'", {
-					"include_dirs": ["./arch/win"],
-					"defines": [ "NOMINMAX" ]
+					"include_dirs": ["./arch/win"]
 				}, {
 					"include_dirs": ["./arch/unix"]
 				}]

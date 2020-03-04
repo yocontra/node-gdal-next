@@ -29,6 +29,10 @@
 #define NOMINMAX
 #endif
 
+#ifndef TTMATH_NOASM
+#define TTMATH_NOASM
+#endif
+
 #include <float.h>
 
 // We need M_PI, but on MSVC you need to define _USE_MATH_DEFINES before
