@@ -41,7 +41,7 @@ CPL_CVSID("$Id: cpl_vsil_win32.cpp c39d156816d937c3139360b11786c769aeabd21e 2018
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <io.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <direct.h>
 

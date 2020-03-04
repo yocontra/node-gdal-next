@@ -49,7 +49,7 @@
 
 #ifdef WIN32
 #include <io.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <fcntl.h>
 #endif
 
