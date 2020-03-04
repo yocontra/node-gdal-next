@@ -30,7 +30,7 @@
 #endif
 
 #ifndef TTMATH_NOASM
-#define TTMATH_NOASM
+#define TTMATH_NOASM 1
 #endif
 
 #include <float.h>
