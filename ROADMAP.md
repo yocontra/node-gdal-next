@@ -1,10 +1,3 @@
-# v1.0.0
-
-- Finish updating dependencies (one test is failing)
-- Update the test and build matrix to support every node version >= 10
-  - Get all of the tests passing for these versions
-  - Get prebuilt binaries published for these versions
-
 # v2.0.0
 
 - Switch from nan to N-API
