@@ -13,7 +13,7 @@ fi
 
 # set up directory
 mkdir gdal-trunk
-cd gdal2-trunk
+cd gdal-trunk
 
 # download trunk (http://trac.osgeo.org/gdal/browser/trunk)
 svn checkout https://svn.osgeo.org/gdal/trunk/gdal gdal --non-interactive --trust-server-cert
