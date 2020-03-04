@@ -76,7 +76,7 @@
 				"./gdal/ogr/ogr_api.cpp",
 				"./gdal/ogr/ogr2gmlgeometry.cpp",
 				"./gdal/ogr/gml2ogrgeometry.cpp",
-				"./gdal/ogr/generate_encoding_table.c",
+				# "./gdal/ogr/generate_encoding_table.c",
 				"./gdal/ogr/ogrsf_frmts/generic/ogr_gensql.cpp",
 				"./gdal/ogr/ogrsf_frmts/generic/ogremulatedtransaction.cpp",
 				"./gdal/ogr/ogrsf_frmts/generic/ogr_miattrind.cpp",
