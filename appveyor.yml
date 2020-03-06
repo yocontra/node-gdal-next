@@ -8,8 +8,12 @@ matrix:
   fast_finish: true
 
 environment:
+  # Prebuild S3 keys
+  node_pre_gyp_accessKeyId:
+    secure: fA8ogg68+lo8W2gqdyINqRWGCRmpnXuP7ZhqxALG38I=
+  node_pre_gyp_secretAccessKey:
+    secure: jepVHzuEjGj5OSmBYDBBC/fj7fp2DhkBob7rHLvPKza4CyZUGP7y6WxO/6XLO0e7
   matrix:
-    # x64
     - nodejs_version: 10
       msvs_toolset: 14
     - nodejs_version: 11
