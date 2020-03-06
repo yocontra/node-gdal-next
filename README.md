@@ -8,6 +8,7 @@ This project is a fork of https://github.com/naturalatlas/node-gdal that:
   - GPKG, sqlite, OSM, MBTiles, MVT
 - Modernizes the JS for newer versions of node
 - Provides prebuilt versions for node 10+
+- Adds `Geometry.fromJSON` to parse GeoJSON easily
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
