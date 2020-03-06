@@ -2,13 +2,11 @@
 
 This project is a fork of https://github.com/naturalatlas/node-gdal that:
 
-- Updates native dependencies (GDAL/PROJ/GEOS)
-- Updates the build system for newer versions of node
+- Updates native dependencies (GDAL/PROJ/GEOS) to latest versions
+- Updates the build system/JS/prebuilds for newer versions of node
 - Adds support for more formats
   - GPKG, sqlite, OSM, MBTiles, MVT
-- Modernizes the JS for newer versions of node
-- Provides prebuilt versions for node 10+
-- Adds `Geometry.fromJSON` to parse GeoJSON easily
+- Adds `Geometry.fromGeoJson` to parse GeoJSON easily
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 

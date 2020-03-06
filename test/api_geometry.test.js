@@ -101,14 +101,16 @@ describe('gdal.Geometry', () => {
       assert.equal(point2d.y, 2)
     })
   })
-  describe('fromGeoJson()', () => {
-    it('should return valid result', () => {
-      const point2d = gdal.Geometry.fromGeoJson({ type: 'Point', coordinates: [ 2, 1 ] })
-      assert.equal(point2d.wkbType, gdal.wkbPoint)
-      assert.equal(point2d.x, 2)
-      assert.equal(point2d.y, 1)
+  if (parseFloat(gdal.version) >= 2.3) {
+    describe('fromGeoJson()', () => {
+      it('should return valid result', () => {
+        const point2d = gdal.Geometry.fromGeoJson({ type: 'Point', coordinates: [ 2, 1 ] })
+        assert.equal(point2d.wkbType, gdal.wkbPoint)
+        assert.equal(point2d.x, 2)
+        assert.equal(point2d.y, 1)
+      })
     })
-  })
+  }
   describe('getConstructor()', () => {
     //  wkbUnknown = 0, wkbPoint = 1, wkbLineString = 2, wkbPolygon = 3,
     //  wkbMultiPoint = 4, wkbMultiLineString = 5, wkbMultiPolygon = 6, wkbGeometryCollection = 7,

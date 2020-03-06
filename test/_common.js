@@ -1,5 +1,7 @@
 const gdal = require('../lib/gdal.js')
 
+console.log('GDAL Version:', gdal.version)
+
 // gc tracing
 try {
   gdal.startLogging(`${__dirname}/artifacts/log.txt`)

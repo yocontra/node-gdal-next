@@ -898,6 +898,10 @@ NAN_METHOD(Geometry::createFromWkb)
  */
 NAN_METHOD(Geometry::createFromGeoJson)
 {
+	#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR <= 2 && GDAL_VERSION_MINOR < 3)
+	Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
+	return;
+	#endif
 	Nan::HandleScope scope;
 
 	Local<Object> geo_obj;
@@ -908,7 +912,7 @@ NAN_METHOD(Geometry::createFromGeoJson)
 	Nan::JSON NanJSON;
 	Nan::MaybeLocal<String> result = NanJSON.Stringify(geo_obj);
 	if (result.IsEmpty()) {
-	  Nan::ThrowError("Invalid GeoJSON!");
+	  Nan::ThrowError("Invalid GeoJSON");
 		return;
 	}
 	Local<String> stringified = result.ToLocalChecked();
