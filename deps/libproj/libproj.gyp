@@ -25,9 +25,6 @@
 			"dependencies": [
 				"../libsqlite/libsqlite.gyp:libsqlite"
 			],
-			"defines": [
-			  'PROJ_LIB="<(module_path)/../../../deps/libproj/proj/data"'
-			],
 			"xcode_settings": {
 				"GCC_ENABLE_CPP_RTTI": "YES",
 				"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
