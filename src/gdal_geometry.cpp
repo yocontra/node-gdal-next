@@ -898,11 +898,11 @@ NAN_METHOD(Geometry::createFromWkb)
  */
 NAN_METHOD(Geometry::createFromGeoJson)
 {
+	Nan::HandleScope scope;
 	#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR <= 2 && GDAL_VERSION_MINOR < 3)
 	Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
 	return;
-	#endif
-	Nan::HandleScope scope;
+	#else
 
 	Local<Object> geo_obj;
 	NODE_ARG_OBJECT(0, "geojson", geo_obj);
@@ -920,6 +920,7 @@ NAN_METHOD(Geometry::createFromGeoJson)
 
 	OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val.c_str());
 	info.GetReturnValue().Set(Geometry::New(geom, true));
+	#endif
 }
 
 /**
