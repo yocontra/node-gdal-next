@@ -10,6 +10,11 @@ This project is a fork of https://github.com/naturalatlas/node-gdal that:
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
+### Breaking Changes
+
+- With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
+longitude second. If you don't want to make large code changes, you can replace code like `gdal.SpatialReference.fromEPSG(4326)` with `gdal.SpatialReference.fromProj4('+init=epsg:4326')`
+
 # node-gdal-next
 
 [![NPM version](http://img.shields.io/npm/v/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
