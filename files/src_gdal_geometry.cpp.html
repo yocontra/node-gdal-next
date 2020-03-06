@@ -136,7 +136,6 @@
 #include &quot;gdal_multipoint.hpp&quot;
 #include &quot;gdal_multilinestring.hpp&quot;
 #include &quot;gdal_multipolygon.hpp&quot;
-
 #include &quot;utils/fast_buffer.hpp&quot;
 
 #include &lt;node_buffer.h&gt;
@@ -159,6 +158,7 @@ void Geometry::Initialize(Local&lt;Object&gt; target)
 	//Nan::SetMethod(constructor, &quot;fromWKBType&quot;, Geometry::create);
 	Nan::SetMethod(lcons, &quot;fromWKT&quot;, Geometry::createFromWkt);
 	Nan::SetMethod(lcons, &quot;fromWKB&quot;, Geometry::createFromWkb);
+	Nan::SetMethod(lcons, &quot;fromGeoJson&quot;, Geometry::createFromGeoJson);
 	Nan::SetMethod(lcons, &quot;getName&quot;, Geometry::getName);
 	Nan::SetMethod(lcons, &quot;getConstructor&quot;, Geometry::getConstructor);
 
@@ -1010,6 +1010,36 @@ NAN_METHOD(Geometry::createFromWkb)
 		return;
 	}
 
+	info.GetReturnValue().Set(Geometry::New(geom, true));
+}
+
+/**
+ * Creates a Geometry from a GeoJSON string.
+ *
+ * @static
+ * @method fromGeoJson
+ * @param {Object} geojson
+ * @return gdal.Geometry
+ */
+NAN_METHOD(Geometry::createFromGeoJson)
+{
+	Nan::HandleScope scope;
+
+	Local&lt;Object&gt; geo_obj;
+	NODE_ARG_OBJECT(0, &quot;geojson&quot;, geo_obj);
+
+	// goes to text to pass it in, there isn&#x27;t a performant way to
+	// go from v8 JSON -&gt; CPLJSON anyways
+	Nan::JSON NanJSON;
+	Nan::MaybeLocal&lt;String&gt; result = NanJSON.Stringify(geo_obj);
+	if (result.IsEmpty()) {
+	  Nan::ThrowError(&quot;Invalid GeoJSON!&quot;);
+		return;
+	}
+	Local&lt;String&gt; stringified = result.ToLocalChecked();
+	std::string val = *Nan::Utf8String(stringified);
+
+	OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val.c_str());
 	info.GetReturnValue().Set(Geometry::New(geom, true));
 }
 

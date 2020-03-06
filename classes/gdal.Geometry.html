@@ -197,6 +197,7 @@
 			<strong>Static Methods</strong>
 			<ul>
 				<li><a href="#method-create"><span class="im">gdal.Geometry.create</span>(<span class="ia">type</span>)</a></li>
+				<li><a href="#method-fromGeoJson"><span class="im">gdal.Geometry.fromGeoJson</span>(<span class="ia">geojson</span>)</a></li>
 				<li><a href="#method-fromWKB"><span class="im">gdal.Geometry.fromWKB</span>(<span class="ia">wkb</span><span class="ia">srs</span>)</a></li>
 				<li><a href="#method-fromWKT"><span class="im">gdal.Geometry.fromWKT</span>(<span class="ia">wkt</span><span class="ia">srs</span>)</a></li>
 				<li><a href="#method-getConstructor"><span class="im">gdal.Geometry.getConstructor</span>(<span class="ia">type</span>)</a></li>
@@ -1645,7 +1646,7 @@
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/lib_gdal.js.html#l229"><code>lib&#x2F;gdal.js:229</code></a>
+		<a href="../files/lib_gdal.js.html#l237"><code>lib&#x2F;gdal.js:237</code></a>
 		</p>
 
 
@@ -2078,7 +2079,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_geometry.cpp.html#l986"><code>src&#x2F;gdal_geometry.cpp:986</code></a>
+        <a href="../files/src_gdal_geometry.cpp.html#l1016"><code>src&#x2F;gdal_geometry.cpp:1016</code></a>
         </p>
 
 
@@ -2107,7 +2108,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_geometry.cpp.html#l974"><code>src&#x2F;gdal_geometry.cpp:974</code></a>
+        <a href="../files/src_gdal_geometry.cpp.html#l1004"><code>src&#x2F;gdal_geometry.cpp:1004</code></a>
         </p>
 
 
@@ -2136,7 +2137,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_geometry.cpp.html#l937"><code>src&#x2F;gdal_geometry.cpp:937</code></a>
+        <a href="../files/src_gdal_geometry.cpp.html#l967"><code>src&#x2F;gdal_geometry.cpp:967</code></a>
         </p>
 
 
@@ -2164,7 +2165,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_geometry.cpp.html#l909"><code>src&#x2F;gdal_geometry.cpp:909</code></a>
+        <a href="../files/src_gdal_geometry.cpp.html#l939"><code>src&#x2F;gdal_geometry.cpp:939</code></a>
         </p>
 
 
@@ -2193,7 +2194,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_geometry.cpp.html#l962"><code>src&#x2F;gdal_geometry.cpp:962</code></a>
+        <a href="../files/src_gdal_geometry.cpp.html#l992"><code>src&#x2F;gdal_geometry.cpp:992</code></a>
         </p>
 
 
@@ -2222,7 +2223,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_geometry.cpp.html#l949"><code>src&#x2F;gdal_geometry.cpp:949</code></a>
+        <a href="../files/src_gdal_geometry.cpp.html#l979"><code>src&#x2F;gdal_geometry.cpp:979</code></a>
         </p>
 
 
@@ -2266,7 +2267,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_geometry.cpp.html#l891"><code>src&#x2F;gdal_geometry.cpp:891</code></a>
+		<a href="../files/src_gdal_geometry.cpp.html#l921"><code>src&#x2F;gdal_geometry.cpp:921</code></a>
 		</p>
 
 
@@ -2287,6 +2288,64 @@ object, and the actual SRS of the geometry will be ignored.</p>
 
 					<div class="param-description"><p>WKB geometry type (<a href="../classes/Constants (wkbGeometryType).html" class="crosslink">available options</a>)</p>
 </div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+					<p>gdal.Geometry</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-fromGeoJson" class="method item">
+	<div class="method-signature">
+	<span class="name"><code>gdal.Geometry.fromGeoJson</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>geojson</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type"></span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/src_gdal_geometry.cpp.html#l891"><code>src&#x2F;gdal_geometry.cpp:891</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Creates a Geometry from a GeoJSON string.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">geojson</code>
+						<span class="type">Object</span>
+
+
 
 				</li>
 			</ul>
@@ -2464,7 +2523,7 @@ object, and the actual SRS of the geometry will be ignored.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_geometry.cpp.html#l1033"><code>src&#x2F;gdal_geometry.cpp:1033</code></a>
+		<a href="../files/src_gdal_geometry.cpp.html#l1063"><code>src&#x2F;gdal_geometry.cpp:1063</code></a>
 		</p>
 
 
@@ -2525,7 +2584,7 @@ given WKB geometry type.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_geometry.cpp.html#l1050"><code>src&#x2F;gdal_geometry.cpp:1050</code></a>
+		<a href="../files/src_gdal_geometry.cpp.html#l1080"><code>src&#x2F;gdal_geometry.cpp:1080</code></a>
 		</p>
 
 
