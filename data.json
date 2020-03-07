@@ -4828,7 +4828,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 921,
+            "line": 926,
             "description": "Creates an empty Geometry from a WKB type.",
             "static": 1,
             "itemtype": "method",
@@ -4847,7 +4847,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 939,
+            "line": 944,
             "itemtype": "attribute",
             "name": "srs",
             "type": "gdal.SpatialReference",
@@ -4855,7 +4855,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 967,
+            "line": 972,
             "readonly": "",
             "itemtype": "attribute",
             "name": "name",
@@ -4864,7 +4864,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 979,
+            "line": 984,
             "description": "See {{#crossLink \"Constants (wkbGeometryType)\"}}wkbGeometryTypes{{/crossLink}}.",
             "readonly": "",
             "itemtype": "attribute",
@@ -4874,7 +4874,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 992,
+            "line": 997,
             "readonly": "",
             "itemtype": "attribute",
             "name": "wkbSize",
@@ -4883,7 +4883,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 1004,
+            "line": 1009,
             "readonly": "",
             "itemtype": "attribute",
             "name": "dimension",
@@ -4892,7 +4892,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 1016,
+            "line": 1021,
             "itemtype": "attribute",
             "name": "coordinateDimension",
             "type": "Integer",
@@ -4900,7 +4900,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 1063,
+            "line": 1068,
             "description": "Returns the Geometry subclass that matches the\ngiven WKB geometry type.",
             "static": 1,
             "itemtype": "method",
@@ -4919,7 +4919,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 1080,
+            "line": 1085,
             "description": "Returns the Geometry subclass name that matches the\ngiven WKB geometry type.",
             "static": 1,
             "itemtype": "method",
