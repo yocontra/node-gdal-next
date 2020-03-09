@@ -16,7 +16,7 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - g++-4.8
+    - g++-6
     - libc6-dev # for libiconv which is needed by libgdal
 
 matrix:
@@ -80,7 +80,7 @@ matrix:
     - env: NODE_NVM_VERSION="10" TARGET=TRUNK
 
 before_install:
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8 CXXFLAGS=-std=c++11 CC=gcc-4.8; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-6 CXXFLAGS=-std=c++11 CC=gcc-6; fi
   - COMMIT_MESSAGE=$(git show -s --format=%B $TRAVIS_COMMIT | tr -d '\n')
   - PUBLISH_BINARY=false
   - if test "${COMMIT_MESSAGE#*'[publish binary]'}" != "$COMMIT_MESSAGE" && test "${TRAVIS_BRANCH}" == "master" && test "${TRAVIS_PULL_REQUEST}" == "false"; then PUBLISH_BINARY=true; fi;
