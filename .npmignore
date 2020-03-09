@@ -1,3 +1,17 @@
+*.md
+Makefile
+AUTHORS
+yuidoc.json
+.editorconfig
+.eslintrc.json
+*.yml
+scripts
+test
+examples
+build
+node_modules
+yuidocs
+
 deps/libgdal/gdal*.tar.gz
 deps/libgeos/geos*.tar.bz2
 deps/libproj/proj*.tar.gz
@@ -5,6 +19,8 @@ deps/libexpat/expat*.tar.gz
 deps/libsqlite/sqlite*.tar.gz
 lib/binding
 
+deps/libgdal/patches
+deps/libgdal/gyp-templates
 deps/libgdal/gdal/wince
 deps/libgdal/gdal/swig
 deps/libgdal/gdal/vb6
