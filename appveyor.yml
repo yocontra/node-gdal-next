@@ -22,6 +22,8 @@ environment:
       msvs_toolset: 14
     - nodejs_version: 13
       msvs_toolset: 14
+    - nodejs_version: 14
+      msvs_toolset: 14
 
 install:
   - .\scripts\winci.bat
