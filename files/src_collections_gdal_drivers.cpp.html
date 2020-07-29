@@ -123,175 +123,170 @@
 
 <div class="file">
     <pre class="prettyprint linenums">
+#include &quot;gdal_drivers.hpp&quot;
 #include &quot;../gdal_common.hpp&quot;
 #include &quot;../gdal_driver.hpp&quot;
-#include &quot;gdal_drivers.hpp&quot;
 
 namespace node_gdal {
 
 Nan::Persistent&lt;FunctionTemplate&gt; GDALDrivers::constructor;
 
-void GDALDrivers::Initialize(Local&lt;Object&gt; target)
-{
-	Nan::HandleScope scope;
+void GDALDrivers::Initialize(Local&lt;Object&gt; target) {
+  Nan::HandleScope scope;
 
-	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(GDALDrivers::New);
-	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
-	lcons-&gt;SetClassName(Nan::New(&quot;GDALDrivers&quot;).ToLocalChecked());
+  Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(GDALDrivers::New);
+  lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+  lcons-&gt;SetClassName(Nan::New(&quot;GDALDrivers&quot;).ToLocalChecked());
 
-	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
-	Nan::SetPrototypeMethod(lcons, &quot;count&quot;, count);
-	Nan::SetPrototypeMethod(lcons, &quot;get&quot;, get);
-	Nan::SetPrototypeMethod(lcons, &quot;getNames&quot;, getNames);
+  Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+  Nan::SetPrototypeMethod(lcons, &quot;count&quot;, count);
+  Nan::SetPrototypeMethod(lcons, &quot;get&quot;, get);
+  Nan::SetPrototypeMethod(lcons, &quot;getNames&quot;, getNames);
 
-	GDALAllRegister();
-	#if GDAL_VERSION_MAJOR &lt; 2
-	OGRRegisterAll();
-	#endif
+  GDALAllRegister();
+#if GDAL_VERSION_MAJOR &lt; 2
+  OGRRegisterAll();
+#endif
 
-	Nan::Set(target, Nan::New(&quot;GDALDrivers&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
-	
-	constructor.Reset(lcons);
+  Nan::Set(target, Nan::New(&quot;GDALDrivers&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+
+  constructor.Reset(lcons);
 }
 
-GDALDrivers::GDALDrivers()
-	: Nan::ObjectWrap()
-{}
+GDALDrivers::GDALDrivers() : Nan::ObjectWrap() {
+}
 
-GDALDrivers::~GDALDrivers()
-{}
+GDALDrivers::~GDALDrivers() {
+}
 
 /**
- * An collection of all {{#crossLink &quot;gdal.Driver&quot;}}drivers{{/crossLink}} registered with GDAL.
+ * An collection of all {{#crossLink &quot;gdal.Driver&quot;}}drivers{{/crossLink}}
+ * registered with GDAL.
  *
  * @class gdal.GDALDrivers
  */
-NAN_METHOD(GDALDrivers::New)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(GDALDrivers::New) {
+  Nan::HandleScope scope;
 
-	if (!info.IsConstructCall()) {
-		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
-		return;
-	}
-	if (info[0]-&gt;IsExternal()) {
-		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
-		void* ptr = ext-&gt;Value();
-		GDALDrivers *f =  static_cast&lt;GDALDrivers *&gt;(ptr);
-		f-&gt;Wrap(info.This());
-		info.GetReturnValue().Set(info.This());
-		return;
-	} else {
-		Nan::ThrowError(&quot;Cannot create GDALDrivers directly&quot;);
-		return;
-	}
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+    return;
+  }
+  if (info[0]-&gt;IsExternal()) {
+    Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+    void *ptr = ext-&gt;Value();
+    GDALDrivers *f = static_cast&lt;GDALDrivers *&gt;(ptr);
+    f-&gt;Wrap(info.This());
+    info.GetReturnValue().Set(info.This());
+    return;
+  } else {
+    Nan::ThrowError(&quot;Cannot create GDALDrivers directly&quot;);
+    return;
+  }
 }
 
-Local&lt;Value&gt; GDALDrivers::New()
-{
-	Nan::EscapableHandleScope scope;
+Local&lt;Value&gt; GDALDrivers::New() {
+  Nan::EscapableHandleScope scope;
 
-	GDALDrivers *wrapped = new GDALDrivers();
+  GDALDrivers *wrapped = new GDALDrivers();
 
-	v8::Local&lt;v8::Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
-	v8::Local&lt;v8::Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(GDALDrivers::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+  v8::Local&lt;v8::Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+  v8::Local&lt;v8::Object&gt; obj =
+    Nan::NewInstance(Nan::GetFunction(Nan::New(GDALDrivers::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
 
-	return scope.Escape(obj);
+  return scope.Escape(obj);
 }
 
-NAN_METHOD(GDALDrivers::toString)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::New(&quot;GDALDrivers&quot;).ToLocalChecked());
+NAN_METHOD(GDALDrivers::toString) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New(&quot;GDALDrivers&quot;).ToLocalChecked());
 }
 
 /**
  * Returns a driver with the specified name.
  *
- * Note: Prior to GDAL2.x there is a separate driver for vector VRTs and raster VRTs.
- *       Use &#x60;&quot;VRT:vector&quot;&#x60; to fetch the vector VRT driver and &#x60;&quot;VRT:raster&quot;&#x60; to fetch the raster VRT driver.
- * 
+ * Note: Prior to GDAL2.x there is a separate driver for vector VRTs and raster
+ * VRTs. Use &#x60;&quot;VRT:vector&quot;&#x60; to fetch the vector VRT driver and &#x60;&quot;VRT:raster&quot;&#x60; to
+ * fetch the raster VRT driver.
+ *
  * @method get
  * @param {Integer|string} index 0-based index or driver name
  * @return {gdal.Driver}
  */
-NAN_METHOD(GDALDrivers::get)
-{
-	Nan::HandleScope scope;
-	
-	#if GDAL_VERSION_MAJOR &lt; 2
-	OGRSFDriver *ogr_driver;
-	#endif
+NAN_METHOD(GDALDrivers::get) {
+  Nan::HandleScope scope;
 
-	GDALDriver *gdal_driver;
+#if GDAL_VERSION_MAJOR &lt; 2
+  OGRSFDriver *ogr_driver;
+#endif
 
-	if (info.Length() == 0) {
-		Nan::ThrowError(&quot;Either driver name or index must be provided&quot;);
-		return;
-	}
+  GDALDriver *gdal_driver;
 
-	if(info[0]-&gt;IsString()){
-		//try getting OGR driver first, and then GDAL driver if it fails
-		//A driver named &quot;VRT&quot; exists for both GDAL and OGR, so if building
-		//with &lt;2.0 require user to specify which driver to pick
-		std::string name = *Nan::Utf8String(info[0]);
+  if (info.Length() == 0) {
+    Nan::ThrowError(&quot;Either driver name or index must be provided&quot;);
+    return;
+  }
 
-		#if GDAL_VERSION_MAJOR &lt; 2
-		if(name == &quot;VRT&quot;) {
-			Nan::ThrowError(&quot;Name \&quot;VRT\&quot; is ambiguous before GDAL 2.0. Use VRT:raster or VRT:vector instead&quot;);
-			return;
-		}
-		ogr_driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverByName(name.c_str());
-		if(ogr_driver) {
-			info.GetReturnValue().Set(Driver::New(ogr_driver));
-			return;
-		}
-		#endif
+  if (info[0]-&gt;IsString()) {
+    // try getting OGR driver first, and then GDAL driver if it fails
+    // A driver named &quot;VRT&quot; exists for both GDAL and OGR, so if building
+    // with &lt;2.0 require user to specify which driver to pick
+    std::string name = *Nan::Utf8String(info[0]);
 
-		if(name == &quot;VRT:vector&quot;) {
-			#if GDAL_VERSION_MAJOR &lt; 2
-			ogr_driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverByName(&quot;VRT&quot;);
-			if(ogr_driver) {
-				info.GetReturnValue().Set(Driver::New(ogr_driver));
-				return;
-			}
-			#else
-				name = &quot;VRT&quot;;
-			#endif
-		}
+#if GDAL_VERSION_MAJOR &lt; 2
+    if (name == &quot;VRT&quot;) {
+      Nan::ThrowError(&quot;Name \&quot;VRT\&quot; is ambiguous before GDAL 2.0. Use VRT:raster or VRT:vector instead&quot;);
+      return;
+    }
+    ogr_driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverByName(name.c_str());
+    if (ogr_driver) {
+      info.GetReturnValue().Set(Driver::New(ogr_driver));
+      return;
+    }
+#endif
 
-		if (name == &quot;VRT:raster&quot;) {
-			name = &quot;VRT&quot;;
-		}
-		gdal_driver = GetGDALDriverManager()-&gt;GetDriverByName(name.c_str());
-		if(gdal_driver) {
-			info.GetReturnValue().Set(Driver::New(gdal_driver));
-			return;
-		}
+    if (name == &quot;VRT:vector&quot;) {
+#if GDAL_VERSION_MAJOR &lt; 2
+      ogr_driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverByName(&quot;VRT&quot;);
+      if (ogr_driver) {
+        info.GetReturnValue().Set(Driver::New(ogr_driver));
+        return;
+      }
+#else
+      name = &quot;VRT&quot;;
+#endif
+    }
 
-	} else if(info[0]-&gt;IsNumber()) {
-		int i = static_cast&lt;int&gt;(Nan::To&lt;int64_t&gt;(info[0]).ToChecked());
+    if (name == &quot;VRT:raster&quot;) { name = &quot;VRT&quot;; }
+    gdal_driver = GetGDALDriverManager()-&gt;GetDriverByName(name.c_str());
+    if (gdal_driver) {
+      info.GetReturnValue().Set(Driver::New(gdal_driver));
+      return;
+    }
 
-		gdal_driver = GetGDALDriverManager()-&gt;GetDriver(i);
-		if(gdal_driver) {
-			info.GetReturnValue().Set(Driver::New(gdal_driver));
-			return;
-		}
+  } else if (info[0]-&gt;IsNumber()) {
+    int i = static_cast&lt;int&gt;(Nan::To&lt;int64_t&gt;(info[0]).ToChecked());
 
-		#if GDAL_VERSION_MAJOR &lt; 2
-		i -= GetGDALDriverManager()-&gt;GetDriverCount();
-		ogr_driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriver(i);
-		if(ogr_driver) {
-			info.GetReturnValue().Set(Driver::New(ogr_driver));
-			return;
-		}
-		#endif
-	} else {
-		Nan::ThrowError(&quot;Argument must be string or integer&quot;);
-		return;
-	}
+    gdal_driver = GetGDALDriverManager()-&gt;GetDriver(i);
+    if (gdal_driver) {
+      info.GetReturnValue().Set(Driver::New(gdal_driver));
+      return;
+    }
 
-	info.GetReturnValue().Set(Nan::Null());
+#if GDAL_VERSION_MAJOR &lt; 2
+    i -= GetGDALDriverManager()-&gt;GetDriverCount();
+    ogr_driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriver(i);
+    if (ogr_driver) {
+      info.GetReturnValue().Set(Driver::New(ogr_driver));
+      return;
+    }
+#endif
+  } else {
+    Nan::ThrowError(&quot;Argument must be string or integer&quot;);
+    return;
+  }
+
+  info.GetReturnValue().Set(Nan::Null());
 }
 
 /**
@@ -300,41 +295,39 @@ NAN_METHOD(GDALDrivers::get)
  * @method getNames
  * @return {string[]}
  */
-NAN_METHOD(GDALDrivers::getNames)
-{
-	Nan::HandleScope scope;
-	int gdal_count = GetGDALDriverManager()-&gt;GetDriverCount();
-	int i, ogr_count = 0;
-	std::string name;
+NAN_METHOD(GDALDrivers::getNames) {
+  Nan::HandleScope scope;
+  int gdal_count = GetGDALDriverManager()-&gt;GetDriverCount();
+  int i, ogr_count = 0;
+  std::string name;
 
-	#if GDAL_VERSION_MAJOR &lt; 2
-		ogr_count = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverCount();
-	#endif
+#if GDAL_VERSION_MAJOR &lt; 2
+  ogr_count = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverCount();
+#endif
 
-	int n = gdal_count + ogr_count;
+  int n = gdal_count + ogr_count;
 
-	Local&lt;Array&gt; driver_names = Nan::New&lt;Array&gt;(n);
+  Local&lt;Array&gt; driver_names = Nan::New&lt;Array&gt;(n);
 
-	for (i = 0; i &lt; gdal_count; ++i) {
-		GDALDriver *driver = GetGDALDriverManager()-&gt;GetDriver(i);
-		name = driver-&gt;GetDescription();
-		#if GDAL_VERSION_MAJOR &lt; 2
-		if(name == &quot;VRT&quot;) name = &quot;VRT:raster&quot;;
-		#endif
-		Nan::Set(driver_names, i, SafeString::New(name.c_str()));
-	}
+  for (i = 0; i &lt; gdal_count; ++i) {
+    GDALDriver *driver = GetGDALDriverManager()-&gt;GetDriver(i);
+    name = driver-&gt;GetDescription();
+#if GDAL_VERSION_MAJOR &lt; 2
+    if (name == &quot;VRT&quot;) name = &quot;VRT:raster&quot;;
+#endif
+    Nan::Set(driver_names, i, SafeString::New(name.c_str()));
+  }
 
+#if GDAL_VERSION_MAJOR &lt; 2
+  for (; i &lt; n; ++i) {
+    OGRSFDriver *driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriver(i - gdal_count);
+    name = driver-&gt;GetName();
+    if (name == &quot;VRT&quot;) name = &quot;VRT:vector&quot;;
+    Nan::Set(driver_names, i, SafeString::New(name.c_str()));
+  }
+#endif
 
-	#if GDAL_VERSION_MAJOR &lt; 2
-	for (; i &lt; n; ++i) {
-		OGRSFDriver *driver = OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriver(i - gdal_count);
-		name = driver-&gt;GetName();
-		if(name == &quot;VRT&quot;) name = &quot;VRT:vector&quot;;
-		Nan::Set(driver_names, i, SafeString::New(name.c_str()));
-	}
-	#endif
-	
-	info.GetReturnValue().Set(driver_names);
+  info.GetReturnValue().Set(driver_names);
 }
 
 /**
@@ -343,17 +336,16 @@ NAN_METHOD(GDALDrivers::getNames)
  * @method count
  * @return {Integer}
  */
-NAN_METHOD(GDALDrivers::count)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(GDALDrivers::count) {
+  Nan::HandleScope scope;
 
-	int count = GetGDALDriverManager()-&gt;GetDriverCount();
+  int count = GetGDALDriverManager()-&gt;GetDriverCount();
 
-	#if GDAL_VERSION_MAJOR &lt; 2
-	count += OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverCount();
-	#endif
+#if GDAL_VERSION_MAJOR &lt; 2
+  count += OGRSFDriverRegistrar::GetRegistrar()-&gt;GetDriverCount();
+#endif
 
-	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(count));
+  info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(count));
 }
 
 } // namespace node_gdal

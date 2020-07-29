@@ -209,7 +209,7 @@
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l343"><code>src&#x2F;gdal_rasterband.cpp:343</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l331"><code>src&#x2F;gdal_rasterband.cpp:331</code></a>
 		</p>
 
 
@@ -218,9 +218,9 @@
 
 	<div class="description"><p>Computes image statistics.</p>
 <p>Returns the minimum, maximum, mean and standard deviation of all pixel values
-in this band. If approximate statistics are sufficient, the <code>allow_approximation</code>
-argument can be set to <code>true</code> in which case overviews, or a subset of image tiles
-may be used in computing the statistics.</p>
+in this band. If approximate statistics are sufficient, the
+<code>allow_approximation</code> argument can be set to <code>true</code> in which case overviews,
+or a subset of image tiles may be used in computing the statistics.</p>
 </div>
 
 		<div class="params">
@@ -232,7 +232,8 @@ may be used in computing the statistics.</p>
 						<span class="type">Boolean</span>
 
 
-					<div class="param-description"><p>If <code>true</code> statistics may be computed based on overviews or a subset of all tiles.</p>
+					<div class="param-description"><p>If <code>true</code> statistics may be computed
+based on overviews or a subset of all tiles.</p>
 </div>
 
 				</li>
@@ -244,7 +245,8 @@ may be used in computing the statistics.</p>
 
 			<div class="returns-description">
 						<span class="type">Object</span>:
-					<p>Statistics containing <code>"min"</code>, <code>"max"</code>, <code>"mean"</code>, <code>"std_dev"</code> properties.</p>
+					<p>Statistics containing <code>"min"</code>, <code>"max"</code>, <code>"mean"</code>,
+<code>"std_dev"</code> properties.</p>
 
 			</div>
 		</div>
@@ -271,7 +273,7 @@ may be used in computing the statistics.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l204"><code>src&#x2F;gdal_rasterband.cpp:204</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l196"><code>src&#x2F;gdal_rasterband.cpp:196</code></a>
 		</p>
 
 
@@ -323,7 +325,7 @@ may be used in computing the statistics.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l241"><code>src&#x2F;gdal_rasterband.cpp:241</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l232"><code>src&#x2F;gdal_rasterband.cpp:232</code></a>
 		</p>
 
 
@@ -372,7 +374,7 @@ may be used in computing the statistics.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l179"><code>src&#x2F;gdal_rasterband.cpp:179</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l167"><code>src&#x2F;gdal_rasterband.cpp:167</code></a>
 		</p>
 
 
@@ -403,7 +405,7 @@ may be used in computing the statistics.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l215"><code>src&#x2F;gdal_rasterband.cpp:215</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l207"><code>src&#x2F;gdal_rasterband.cpp:207</code></a>
 		</p>
 
 
@@ -441,7 +443,7 @@ may be used in computing the statistics.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l186"><code>src&#x2F;gdal_rasterband.cpp:186</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l174"><code>src&#x2F;gdal_rasterband.cpp:174</code></a>
 		</p>
 
 
@@ -452,10 +454,14 @@ may be used in computing the statistics.</p>
 <p>The result will be a bitwise OR-ed set of status flags with the following
 available definitions that may be extended in the future:</p>
 <ul>
-<li><code>GMF_ALL_VALID</code> (<code>0x01</code>): There are no invalid pixels, all mask values will be 255. When used this will normally be the only flag set.</li>
-<li><code>GMF_PER_DATASET</code> (<code>0x02</code>): The mask band is shared between all bands on the dataset.</li>
-<li><code>GMF_ALPHA</code> (<code>0x04</code>): The mask band is actually an alpha band and may have values other than 0 and 255.</li>
-<li><code>GMF_NODATA</code> (<code>0x08</code>): Indicates the mask is actually being generated from nodata values. (mutually exclusive of <code>GMF_ALPHA</code>)</li>
+<li><code>GMF_ALL_VALID</code> (<code>0x01</code>): There are no invalid pixels, all mask values
+will be 255. When used this will normally be the only flag set.</li>
+<li><code>GMF_PER_DATASET</code> (<code>0x02</code>): The mask band is shared between all bands on
+the dataset.</li>
+<li><code>GMF_ALPHA</code> (<code>0x04</code>): The mask band is actually an alpha band and may
+have values other than 0 and 255.</li>
+<li><code>GMF_NODATA</code> (<code>0x08</code>): Indicates the mask is actually being generated
+from nodata values. (mutually exclusive of <code>GMF_ALPHA</code>)</li>
 </ul>
 </div>
 
@@ -492,7 +498,7 @@ available definitions that may be extended in the future:</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l424"><code>src&#x2F;gdal_rasterband.cpp:424</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l412"><code>src&#x2F;gdal_rasterband.cpp:412</code></a>
 		</p>
 
 
@@ -546,7 +552,7 @@ available definitions that may be extended in the future:</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l292"><code>src&#x2F;gdal_rasterband.cpp:292</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l278"><code>src&#x2F;gdal_rasterband.cpp:278</code></a>
 		</p>
 
 
@@ -555,9 +561,9 @@ available definitions that may be extended in the future:</p>
 
 	<div class="description"><p>Fetch image statistics.</p>
 <p>Returns the minimum, maximum, mean and standard deviation of all pixel values
-in this band. If approximate statistics are sufficient, the <code>allow_approximation</code>
-argument can be set to <code>true</code> in which case overviews, or a subset of image tiles
-may be used in computing the statistics.</p>
+in this band. If approximate statistics are sufficient, the
+<code>allow_approximation</code> argument can be set to <code>true</code> in which case overviews,
+or a subset of image tiles may be used in computing the statistics.</p>
 </div>
 
 		<div class="params">
@@ -569,7 +575,8 @@ may be used in computing the statistics.</p>
 						<span class="type">Boolean</span>
 
 
-					<div class="param-description"><p>If <code>true</code> statistics may be computed based on overviews or a subset of all tiles.</p>
+					<div class="param-description"><p>If <code>true</code> statistics may be computed
+based on overviews or a subset of all tiles.</p>
 </div>
 
 				</li>
@@ -578,7 +585,8 @@ may be used in computing the statistics.</p>
 						<span class="type">Boolean</span>
 
 
-					<div class="param-description"><p>If <code>false</code> statistics will only be returned if it can be done without rescanning the image.</p>
+					<div class="param-description"><p>If <code>false</code> statistics will only be returned if it can
+be done without rescanning the image.</p>
 </div>
 
 				</li>
@@ -590,7 +598,8 @@ may be used in computing the statistics.</p>
 
 			<div class="returns-description">
 						<span class="type">Object</span>:
-					<p>Statistics containing <code>"min"</code>, <code>"max"</code>, <code>"mean"</code>, <code>"std_dev"</code> properties.</p>
+					<p>Statistics containing <code>"min"</code>, <code>"max"</code>, <code>"mean"</code>,
+<code>"std_dev"</code> properties.</p>
 
 			</div>
 		</div>
@@ -626,7 +635,7 @@ may be used in computing the statistics.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_rasterband.cpp.html#l388"><code>src&#x2F;gdal_rasterband.cpp:388</code></a>
+		<a href="../files/src_gdal_rasterband.cpp.html#l377"><code>src&#x2F;gdal_rasterband.cpp:377</code></a>
 		</p>
 
 
@@ -697,7 +706,7 @@ min/max/mean/standard deviation statistics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l545"><code>src&#x2F;gdal_rasterband.cpp:545</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l527"><code>src&#x2F;gdal_rasterband.cpp:527</code></a>
         </p>
 
 
@@ -726,7 +735,7 @@ min/max/mean/standard deviation statistics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l767"><code>src&#x2F;gdal_rasterband.cpp:767</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l740"><code>src&#x2F;gdal_rasterband.cpp:740</code></a>
         </p>
 
 
@@ -755,14 +764,15 @@ min/max/mean/standard deviation statistics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l797"><code>src&#x2F;gdal_rasterband.cpp:797</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l769"><code>src&#x2F;gdal_rasterband.cpp:769</code></a>
         </p>
 
 
     </div>
 
     <div class="description">
-        <p>Color interpretation mode (<a href="../classes/Constants (GCI).html" class="crosslink">see GCI constants</a>).</p>
+        <p>Color interpretation mode (<a href="../classes/Constants (GCI).html" class="crosslink">see GCI
+constants</a>).</p>
 
     </div>
 
@@ -785,14 +795,15 @@ min/max/mean/standard deviation statistics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l701"><code>src&#x2F;gdal_rasterband.cpp:701</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l676"><code>src&#x2F;gdal_rasterband.cpp:676</code></a>
         </p>
 
 
     </div>
 
     <div class="description">
-        <p>Pixel data type (<a href="../classes/Constants (GDT).html" class="crosslink">see GDT constants</a>) used for this band.</p>
+        <p>Pixel data type (<a href="../classes/Constants (GDT).html" class="crosslink">see GDT
+constants</a>) used for this band.</p>
 
     </div>
 
@@ -815,7 +826,7 @@ min/max/mean/standard deviation statistics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l504"><code>src&#x2F;gdal_rasterband.cpp:504</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l487"><code>src&#x2F;gdal_rasterband.cpp:487</code></a>
         </p>
 
 
@@ -845,7 +856,7 @@ min/max/mean/standard deviation statistics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l446"><code>src&#x2F;gdal_rasterband.cpp:446</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l433"><code>src&#x2F;gdal_rasterband.cpp:433</code></a>
         </p>
 
 
@@ -874,7 +885,7 @@ min/max/mean/standard deviation statistics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l743"><code>src&#x2F;gdal_rasterband.cpp:743</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l717"><code>src&#x2F;gdal_rasterband.cpp:717</code></a>
         </p>
 
 
@@ -908,7 +919,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l479"><code>src&#x2F;gdal_rasterband.cpp:479</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l463"><code>src&#x2F;gdal_rasterband.cpp:463</code></a>
         </p>
 
 
@@ -937,7 +948,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l591"><code>src&#x2F;gdal_rasterband.cpp:591</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l571"><code>src&#x2F;gdal_rasterband.cpp:571</code></a>
         </p>
 
 
@@ -967,7 +978,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l570"><code>src&#x2F;gdal_rasterband.cpp:570</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l551"><code>src&#x2F;gdal_rasterband.cpp:551</code></a>
         </p>
 
 
@@ -996,7 +1007,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l652"><code>src&#x2F;gdal_rasterband.cpp:652</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l629"><code>src&#x2F;gdal_rasterband.cpp:629</code></a>
         </p>
 
 
@@ -1025,7 +1036,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l612"><code>src&#x2F;gdal_rasterband.cpp:612</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l591"><code>src&#x2F;gdal_rasterband.cpp:591</code></a>
         </p>
 
 
@@ -1055,7 +1066,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l457"><code>src&#x2F;gdal_rasterband.cpp:457</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l443"><code>src&#x2F;gdal_rasterband.cpp:443</code></a>
         </p>
 
 
@@ -1084,7 +1095,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l468"><code>src&#x2F;gdal_rasterband.cpp:468</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l453"><code>src&#x2F;gdal_rasterband.cpp:453</code></a>
         </p>
 
 
@@ -1113,7 +1124,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l723"><code>src&#x2F;gdal_rasterband.cpp:723</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l698"><code>src&#x2F;gdal_rasterband.cpp:698</code></a>
         </p>
 
 
@@ -1142,7 +1153,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l632"><code>src&#x2F;gdal_rasterband.cpp:632</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l610"><code>src&#x2F;gdal_rasterband.cpp:610</code></a>
         </p>
 
 
@@ -1172,7 +1183,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l523"><code>src&#x2F;gdal_rasterband.cpp:523</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l506"><code>src&#x2F;gdal_rasterband.cpp:506</code></a>
         </p>
 
 
@@ -1201,7 +1212,7 @@ data efficiently.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_rasterband.cpp.html#l679"><code>src&#x2F;gdal_rasterband.cpp:679</code></a>
+        <a href="../files/src_gdal_rasterband.cpp.html#l655"><code>src&#x2F;gdal_rasterband.cpp:655</code></a>
         </p>
 
 

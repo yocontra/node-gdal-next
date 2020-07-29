@@ -124,199 +124,167 @@
 <div class="file">
     <pre class="prettyprint linenums">
 #include &quot;gdal_warper.hpp&quot;
-#include &quot;utils/warp_options.hpp&quot;
 #include &quot;gdal_common.hpp&quot;
-#include &quot;gdal_spatial_reference.hpp&quot;
 #include &quot;gdal_dataset.hpp&quot;
+#include &quot;gdal_spatial_reference.hpp&quot;
+#include &quot;utils/warp_options.hpp&quot;
 
 namespace node_gdal {
 
-
-void Warper::Initialize(Local&lt;Object&gt; target)
-{
-	Nan::SetMethod(target, &quot;reprojectImage&quot;, reprojectImage);
-	Nan::SetMethod(target, &quot;suggestedWarpOutput&quot;, suggestedWarpOutput);
+void Warper::Initialize(Local&lt;Object&gt; target) {
+  Nan::SetMethod(target, &quot;reprojectImage&quot;, reprojectImage);
+  Nan::SetMethod(target, &quot;suggestedWarpOutput&quot;, suggestedWarpOutput);
 }
 
 /**
- * GDALReprojectImage() method with a ChunkAndWarpImage replaced with ChunkAndWarpMulti
+ * GDALReprojectImage() method with a ChunkAndWarpImage replaced with
+ * ChunkAndWarpMulti
  */
-CPLErr GDALReprojectImageMulti( GDALDatasetH hSrcDS, const char *pszSrcWKT,
-                    GDALDatasetH hDstDS, const char *pszDstWKT,
-                    GDALResampleAlg eResampleAlg,
-                    double dfWarpMemoryLimit,
-                    double dfMaxError,
-                    GDALProgressFunc pfnProgress, void *pProgressArg,
-                    GDALWarpOptions *psOptions )
+CPLErr GDALReprojectImageMulti(
+  GDALDatasetH hSrcDS,
+  const char *pszSrcWKT,
+  GDALDatasetH hDstDS,
+  const char *pszDstWKT,
+  GDALResampleAlg eResampleAlg,
+  double dfWarpMemoryLimit,
+  double dfMaxError,
+  GDALProgressFunc pfnProgress,
+  void *pProgressArg,
+  GDALWarpOptions *psOptions)
 
 {
-    GDALWarpOptions *psWOptions;
+  GDALWarpOptions *psWOptions;
 
-/* -------------------------------------------------------------------- */
-/*      Setup a reprojection based transformer.                         */
-/* -------------------------------------------------------------------- */
-    void *hTransformArg;
+  /* -------------------------------------------------------------------- */
+  /*      Setup a reprojection based transformer.                         */
+  /* -------------------------------------------------------------------- */
+  void *hTransformArg;
 
-    hTransformArg = 
-        GDALCreateGenImgProjTransformer( hSrcDS, pszSrcWKT, hDstDS, pszDstWKT, 
-                                         TRUE, 1000.0, 0 );
+  hTransformArg = GDALCreateGenImgProjTransformer(hSrcDS, pszSrcWKT, hDstDS, pszDstWKT, TRUE, 1000.0, 0);
 
-    if( hTransformArg == NULL )
-        return CE_Failure;
+  if (hTransformArg == NULL) return CE_Failure;
 
-/* -------------------------------------------------------------------- */
-/*      Create a copy of the user provided options, or a defaulted      */
-/*      options structure.                                              */
-/* -------------------------------------------------------------------- */
-    if( psOptions == NULL )
-        psWOptions = GDALCreateWarpOptions();
-    else
-        psWOptions = GDALCloneWarpOptions( psOptions );
+  /* -------------------------------------------------------------------- */
+  /*      Create a copy of the user provided options, or a defaulted      */
+  /*      options structure.                                              */
+  /* -------------------------------------------------------------------- */
+  if (psOptions == NULL)
+    psWOptions = GDALCreateWarpOptions();
+  else
+    psWOptions = GDALCloneWarpOptions(psOptions);
 
-    psWOptions-&gt;eResampleAlg = eResampleAlg;
+  psWOptions-&gt;eResampleAlg = eResampleAlg;
 
-/* -------------------------------------------------------------------- */
-/*      Set transform.                                                  */
-/* -------------------------------------------------------------------- */
-    if( dfMaxError &gt; 0.0 )
-    {
-        psWOptions-&gt;pTransformerArg = 
-            GDALCreateApproxTransformer( GDALGenImgProjTransform, 
-                                         hTransformArg, dfMaxError );
+  /* -------------------------------------------------------------------- */
+  /*      Set transform.                                                  */
+  /* -------------------------------------------------------------------- */
+  if (dfMaxError &gt; 0.0) {
+    psWOptions-&gt;pTransformerArg = GDALCreateApproxTransformer(GDALGenImgProjTransform, hTransformArg, dfMaxError);
 
-        psWOptions-&gt;pfnTransformer = GDALApproxTransform;
+    psWOptions-&gt;pfnTransformer = GDALApproxTransform;
+  } else {
+    psWOptions-&gt;pfnTransformer = GDALGenImgProjTransform;
+    psWOptions-&gt;pTransformerArg = hTransformArg;
+  }
+
+  /* -------------------------------------------------------------------- */
+  /*      Set file and band mapping.                                      */
+  /* -------------------------------------------------------------------- */
+  int iBand;
+
+  psWOptions-&gt;hSrcDS = hSrcDS;
+  psWOptions-&gt;hDstDS = hDstDS;
+
+  if (psWOptions-&gt;nBandCount == 0) {
+    psWOptions-&gt;nBandCount = MIN(GDALGetRasterCount(hSrcDS), GDALGetRasterCount(hDstDS));
+
+    psWOptions-&gt;panSrcBands = (int *)CPLMalloc(sizeof(int) * psWOptions-&gt;nBandCount);
+    psWOptions-&gt;panDstBands = (int *)CPLMalloc(sizeof(int) * psWOptions-&gt;nBandCount);
+
+    for (iBand = 0; iBand &lt; psWOptions-&gt;nBandCount; iBand++) {
+      psWOptions-&gt;panSrcBands[iBand] = iBand + 1;
+      psWOptions-&gt;panDstBands[iBand] = iBand + 1;
     }
-    else
-    {
-        psWOptions-&gt;pfnTransformer = GDALGenImgProjTransform;
-        psWOptions-&gt;pTransformerArg = hTransformArg;
-    }
+  }
 
-/* -------------------------------------------------------------------- */
-/*      Set file and band mapping.                                      */
-/* -------------------------------------------------------------------- */
-    int  iBand;
+  /* -------------------------------------------------------------------- */
+  /*      Set source nodata values if the source dataset seems to have    */
+  /*      any. Same for target nodata values                              */
+  /* -------------------------------------------------------------------- */
+  for (iBand = 0; iBand &lt; psWOptions-&gt;nBandCount; iBand++) {
+    GDALRasterBandH hBand = GDALGetRasterBand(hSrcDS, iBand + 1);
+    int bGotNoData = FALSE;
+    double dfNoDataValue;
 
-    psWOptions-&gt;hSrcDS = hSrcDS;
-    psWOptions-&gt;hDstDS = hDstDS;
+    if (GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand) { psWOptions-&gt;nSrcAlphaBand = iBand + 1; }
 
-    if( psWOptions-&gt;nBandCount == 0 )
-    {
-        psWOptions-&gt;nBandCount = MIN(GDALGetRasterCount(hSrcDS),
-                                     GDALGetRasterCount(hDstDS));
-        
-        psWOptions-&gt;panSrcBands = (int *) 
-            CPLMalloc(sizeof(int) * psWOptions-&gt;nBandCount);
-        psWOptions-&gt;panDstBands = (int *) 
-            CPLMalloc(sizeof(int) * psWOptions-&gt;nBandCount);
+    dfNoDataValue = GDALGetRasterNoDataValue(hBand, &amp;bGotNoData);
+    if (bGotNoData) {
+      if (psWOptions-&gt;padfSrcNoDataReal == NULL) {
+        int ii;
 
-        for( iBand = 0; iBand &lt; psWOptions-&gt;nBandCount; iBand++ )
-        {
-            psWOptions-&gt;panSrcBands[iBand] = iBand+1;
-            psWOptions-&gt;panDstBands[iBand] = iBand+1;
+        psWOptions-&gt;padfSrcNoDataReal = (double *)CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+        psWOptions-&gt;padfSrcNoDataImag = (double *)CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+
+        for (ii = 0; ii &lt; psWOptions-&gt;nBandCount; ii++) {
+          psWOptions-&gt;padfSrcNoDataReal[ii] = -1.1e20;
+          psWOptions-&gt;padfSrcNoDataImag[ii] = 0.0;
         }
-    }
+      }
 
-/* -------------------------------------------------------------------- */
-/*      Set source nodata values if the source dataset seems to have    */
-/*      any. Same for target nodata values                              */
-/* -------------------------------------------------------------------- */
-    for( iBand = 0; iBand &lt; psWOptions-&gt;nBandCount; iBand++ )
-    {
-        GDALRasterBandH hBand = GDALGetRasterBand( hSrcDS, iBand+1 );
-        int             bGotNoData = FALSE;
-        double          dfNoDataValue;
-
-        if (GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand)
-        {
-            psWOptions-&gt;nSrcAlphaBand = iBand + 1;
-        }
-
-        dfNoDataValue = GDALGetRasterNoDataValue( hBand, &amp;bGotNoData );
-        if( bGotNoData )
-        {
-            if( psWOptions-&gt;padfSrcNoDataReal == NULL )
-            {
-                int  ii;
-
-                psWOptions-&gt;padfSrcNoDataReal = (double *) 
-                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
-                psWOptions-&gt;padfSrcNoDataImag = (double *) 
-                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
-
-                for( ii = 0; ii &lt; psWOptions-&gt;nBandCount; ii++ )
-                {
-                    psWOptions-&gt;padfSrcNoDataReal[ii] = -1.1e20;
-                    psWOptions-&gt;padfSrcNoDataImag[ii] = 0.0;
-                }
-            }
-
-            psWOptions-&gt;padfSrcNoDataReal[iBand] = dfNoDataValue;
-        }
-
-        // Deal with target band
-        hBand = GDALGetRasterBand( hDstDS, iBand+1 );
-        if (hBand &amp;&amp; GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand)
-        {
-            psWOptions-&gt;nDstAlphaBand = iBand + 1;
-        }
-
-        dfNoDataValue = GDALGetRasterNoDataValue( hBand, &amp;bGotNoData );
-        if( bGotNoData )
-        {
-            if( psWOptions-&gt;padfDstNoDataReal == NULL )
-            {
-                int  ii;
-
-                psWOptions-&gt;padfDstNoDataReal = (double *) 
-                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
-                psWOptions-&gt;padfDstNoDataImag = (double *) 
-                    CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
-
-                for( ii = 0; ii &lt; psWOptions-&gt;nBandCount; ii++ )
-                {
-                    psWOptions-&gt;padfDstNoDataReal[ii] = -1.1e20;
-                    psWOptions-&gt;padfDstNoDataImag[ii] = 0.0;
-                }
-            }
-
-            psWOptions-&gt;padfDstNoDataReal[iBand] = dfNoDataValue;
-        }
+      psWOptions-&gt;padfSrcNoDataReal[iBand] = dfNoDataValue;
     }
 
-/* -------------------------------------------------------------------- */
-/*      Set the progress function.                                      */
-/* -------------------------------------------------------------------- */
-    if( pfnProgress != NULL )
-    {
-        psWOptions-&gt;pfnProgress = pfnProgress;
-        psWOptions-&gt;pProgressArg = pProgressArg;
+    // Deal with target band
+    hBand = GDALGetRasterBand(hDstDS, iBand + 1);
+    if (hBand &amp;&amp; GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand) { psWOptions-&gt;nDstAlphaBand = iBand + 1; }
+
+    dfNoDataValue = GDALGetRasterNoDataValue(hBand, &amp;bGotNoData);
+    if (bGotNoData) {
+      if (psWOptions-&gt;padfDstNoDataReal == NULL) {
+        int ii;
+
+        psWOptions-&gt;padfDstNoDataReal = (double *)CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+        psWOptions-&gt;padfDstNoDataImag = (double *)CPLMalloc(sizeof(double) * psWOptions-&gt;nBandCount);
+
+        for (ii = 0; ii &lt; psWOptions-&gt;nBandCount; ii++) {
+          psWOptions-&gt;padfDstNoDataReal[ii] = -1.1e20;
+          psWOptions-&gt;padfDstNoDataImag[ii] = 0.0;
+        }
+      }
+
+      psWOptions-&gt;padfDstNoDataReal[iBand] = dfNoDataValue;
     }
+  }
 
-/* -------------------------------------------------------------------- */
-/*      Create a warp options based on the options.                     */
-/* -------------------------------------------------------------------- */
-    GDALWarpOperation  oWarper;
-    CPLErr eErr;
+  /* -------------------------------------------------------------------- */
+  /*      Set the progress function.                                      */
+  /* -------------------------------------------------------------------- */
+  if (pfnProgress != NULL) {
+    psWOptions-&gt;pfnProgress = pfnProgress;
+    psWOptions-&gt;pProgressArg = pProgressArg;
+  }
 
-    eErr = oWarper.Initialize( psWOptions );
+  /* -------------------------------------------------------------------- */
+  /*      Create a warp options based on the options.                     */
+  /* -------------------------------------------------------------------- */
+  GDALWarpOperation oWarper;
+  CPLErr eErr;
 
-    if( eErr == CE_None )
-        eErr = oWarper.ChunkAndWarpMulti( 0, 0, 
-                                          GDALGetRasterXSize(hDstDS),
-                                          GDALGetRasterYSize(hDstDS) );
+  eErr = oWarper.Initialize(psWOptions);
 
-/* -------------------------------------------------------------------- */
-/*      Cleanup.                                                        */
-/* -------------------------------------------------------------------- */
-    GDALDestroyGenImgProjTransformer( hTransformArg );
+  if (eErr == CE_None) eErr = oWarper.ChunkAndWarpMulti(0, 0, GDALGetRasterXSize(hDstDS), GDALGetRasterYSize(hDstDS));
 
-    if( dfMaxError &gt; 0.0 )
-        GDALDestroyApproxTransformer( psWOptions-&gt;pTransformerArg );
-        
-    GDALDestroyWarpOptions( psWOptions );
+  /* -------------------------------------------------------------------- */
+  /*      Cleanup.                                                        */
+  /* -------------------------------------------------------------------- */
+  GDALDestroyGenImgProjTransformer(hTransformArg);
 
-    return eErr;
+  if (dfMaxError &gt; 0.0) GDALDestroyApproxTransformer(psWOptions-&gt;pTransformerArg);
+
+  GDALDestroyWarpOptions(psWOptions);
+
+  return eErr;
 }
 
 /**
@@ -331,8 +299,11 @@ CPLErr GDALReprojectImageMulti( GDALDatasetH hSrcDS, const char *pszSrcWKT,
  * @param {gdal.Dataset} options.dst
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {String} [options.resampling] Resampling algorithm ({{#crossLink &quot;Constants (GRA)&quot;}}available options{{/crossLink}})
- * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel coordinates. Use CoordinateTransformation to convert between georeferenced coordinates and pixel coordinates
+ * @param {String} [options.resampling] Resampling algorithm ({{#crossLink
+ * &quot;Constants (GRA)&quot;}}available options{{/crossLink}})
+ * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel
+ * coordinates. Use CoordinateTransformation to convert between georeferenced
+ * coordinates and pixel coordinates
  * @param {Integer[]} [options.srcBands]
  * @param {Integer[]} [options.dstBands]
  * @param {Integer} [options.srcAlphaBand]
@@ -342,67 +313,87 @@ CPLErr GDALReprojectImageMulti( GDALDatasetH hSrcDS, const char *pszSrcWKT,
  * @param {Integer} [options.memoryLimit]
  * @param {Number} [options.maxError]
  * @param {Boolean} [options.multi]
- * @param {string[]|object} [options.options] Warp options (see: [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {string[]|object} [options.options] Warp options (see:
+ * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
  */
-NAN_METHOD(Warper::reprojectImage)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(Warper::reprojectImage) {
+  Nan::HandleScope scope;
 
-	Local&lt;Object&gt; obj;
-	Local&lt;Value&gt; prop;
+  Local&lt;Object&gt; obj;
+  Local&lt;Value&gt; prop;
 
-	WarpOptions options;
-	GDALWarpOptions* opts;
-	std::string s_srs_str;
-	std::string t_srs_str;
-	SpatialReference* s_srs;
-	SpatialReference* t_srs;
-	double maxError = 0;
+  WarpOptions options;
+  GDALWarpOptions *opts;
+  std::string s_srs_str;
+  std::string t_srs_str;
+  SpatialReference *s_srs;
+  SpatialReference *t_srs;
+  double maxError = 0;
 
-	NODE_ARG_OBJECT(0, &quot;Warp options&quot;, obj);
+  NODE_ARG_OBJECT(0, &quot;Warp options&quot;, obj);
 
-	if(options.parse(obj)){
-		return; // error parsing options object
-	} else {
-		opts = options.get();
-	}
-	if(!opts-&gt;hDstDS){
-		Nan::ThrowTypeError(&quot;dst Dataset must be provided&quot;);
-		return;
-	}
+  if (options.parse(obj)) {
+    return; // error parsing options object
+  } else {
+    opts = options.get();
+  }
+  if (!opts-&gt;hDstDS) {
+    Nan::ThrowTypeError(&quot;dst Dataset must be provided&quot;);
+    return;
+  }
 
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;s_srs&quot;, SpatialReference, s_srs);
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;t_srs&quot;, SpatialReference, t_srs);
-	NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;maxError&quot;, maxError);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;s_srs&quot;, SpatialReference, s_srs);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;t_srs&quot;, SpatialReference, t_srs);
+  NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;maxError&quot;, maxError);
 
-	char *s_srs_wkt, *t_srs_wkt;
-	if(s_srs-&gt;get()-&gt;exportToWkt(&amp;s_srs_wkt)){
-		Nan::ThrowError(&quot;Error converting s_srs to WKT&quot;);
-		return;
-	}
-	if(t_srs-&gt;get()-&gt;exportToWkt(&amp;t_srs_wkt)){
-		CPLFree(s_srs_wkt);
-		Nan::ThrowError(&quot;Error converting t_srs to WKT&quot;);
-		return;
-	}
+  char *s_srs_wkt, *t_srs_wkt;
+  if (s_srs-&gt;get()-&gt;exportToWkt(&amp;s_srs_wkt)) {
+    Nan::ThrowError(&quot;Error converting s_srs to WKT&quot;);
+    return;
+  }
+  if (t_srs-&gt;get()-&gt;exportToWkt(&amp;t_srs_wkt)) {
+    CPLFree(s_srs_wkt);
+    Nan::ThrowError(&quot;Error converting t_srs to WKT&quot;);
+    return;
+  }
 
-	CPLErr err;
+  CPLErr err;
 
-	if(options.useMultithreading()){
-		err = GDALReprojectImageMulti(opts-&gt;hSrcDS, s_srs_wkt, opts-&gt;hDstDS, t_srs_wkt, opts-&gt;eResampleAlg, opts-&gt;dfWarpMemoryLimit, maxError, NULL, NULL, opts);
-	} else {
-		err = GDALReprojectImage(opts-&gt;hSrcDS, s_srs_wkt, opts-&gt;hDstDS, t_srs_wkt, opts-&gt;eResampleAlg, opts-&gt;dfWarpMemoryLimit, maxError, NULL, NULL, opts);
-	}
-	
-	CPLFree(s_srs_wkt);
-	CPLFree(t_srs_wkt);
+  if (options.useMultithreading()) {
+    err = GDALReprojectImageMulti(
+      opts-&gt;hSrcDS,
+      s_srs_wkt,
+      opts-&gt;hDstDS,
+      t_srs_wkt,
+      opts-&gt;eResampleAlg,
+      opts-&gt;dfWarpMemoryLimit,
+      maxError,
+      NULL,
+      NULL,
+      opts);
+  } else {
+    err = GDALReprojectImage(
+      opts-&gt;hSrcDS,
+      s_srs_wkt,
+      opts-&gt;hDstDS,
+      t_srs_wkt,
+      opts-&gt;eResampleAlg,
+      opts-&gt;dfWarpMemoryLimit,
+      maxError,
+      NULL,
+      NULL,
+      opts);
+  }
 
-	if(err) {
-		NODE_THROW_CPLERR(err);
-		return;
-	}
+  CPLFree(s_srs_wkt);
+  CPLFree(t_srs_wkt);
 
-	return;
+  if (err) {
+    NODE_THROW_CPLERR(err);
+    return;
+  }
+
+  return;
 }
 
 /**
@@ -418,128 +409,123 @@ NAN_METHOD(Warper::reprojectImage)
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
  * @param {Number} [options.maxError=0]
- * @return {Object} An object containing &#x60;&quot;rasterSize&quot;&#x60; and &#x60;&quot;geoTransform&quot;&#x60; properties.
+ * @return {Object} An object containing &#x60;&quot;rasterSize&quot;&#x60; and &#x60;&quot;geoTransform&quot;&#x60;
+ * properties.
  */
-NAN_METHOD(Warper::suggestedWarpOutput)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(Warper::suggestedWarpOutput) {
+  Nan::HandleScope scope;
 
-	Local&lt;Object&gt; obj;
-	Local&lt;Value&gt; prop;
+  Local&lt;Object&gt; obj;
+  Local&lt;Value&gt; prop;
 
-	Dataset* ds;
-	SpatialReference* s_srs;
-	SpatialReference* t_srs;
-	double maxError = 0;
-	double geotransform[6];
-	int w = 0, h = 0;
+  Dataset *ds;
+  SpatialReference *s_srs;
+  SpatialReference *t_srs;
+  double maxError = 0;
+  double geotransform[6];
+  int w = 0, h = 0;
 
-	NODE_ARG_OBJECT(0, &quot;Warp options&quot;, obj);
+  NODE_ARG_OBJECT(0, &quot;Warp options&quot;, obj);
 
-	if(Nan::HasOwnProperty(obj, Nan::New(&quot;src&quot;).ToLocalChecked()).FromMaybe(false)){
-		prop = Nan::Get(obj, Nan::New(&quot;src&quot;).ToLocalChecked()).ToLocalChecked();
-		if(prop-&gt;IsObject() &amp;&amp; !prop-&gt;IsNull() &amp;&amp; Nan::New(Dataset::constructor)-&gt;HasInstance(prop)){
-			ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(prop.As&lt;Object&gt;());
-			if(!ds-&gt;getDataset()){
-				#if GDAL_VERSION_MAJOR &lt; 2
-				if(ds-&gt;getDatasource()) {
-					Nan::ThrowError(&quot;src dataset must be a raster dataset&quot;);
-					return;
-				}
-				#endif
-				Nan::ThrowError(&quot;src dataset already closed&quot;);
-				return;
-			}
-		} else {
-			Nan::ThrowTypeError(&quot;src property must be a Dataset object&quot;);
-			return;
-		}
-	} else {
-		Nan::ThrowError(&quot;src dataset must be provided&quot;);
-		return;
-	}
+  if (Nan::HasOwnProperty(obj, Nan::New(&quot;src&quot;).ToLocalChecked()).FromMaybe(false)) {
+    prop = Nan::Get(obj, Nan::New(&quot;src&quot;).ToLocalChecked()).ToLocalChecked();
+    if (prop-&gt;IsObject() &amp;&amp; !prop-&gt;IsNull() &amp;&amp; Nan::New(Dataset::constructor)-&gt;HasInstance(prop)) {
+      ds = Nan::ObjectWrap::Unwrap&lt;Dataset&gt;(prop.As&lt;Object&gt;());
+      if (!ds-&gt;getDataset()) {
+#if GDAL_VERSION_MAJOR &lt; 2
+        if (ds-&gt;getDatasource()) {
+          Nan::ThrowError(&quot;src dataset must be a raster dataset&quot;);
+          return;
+        }
+#endif
+        Nan::ThrowError(&quot;src dataset already closed&quot;);
+        return;
+      }
+    } else {
+      Nan::ThrowTypeError(&quot;src property must be a Dataset object&quot;);
+      return;
+    }
+  } else {
+    Nan::ThrowError(&quot;src dataset must be provided&quot;);
+    return;
+  }
 
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;s_srs&quot;, SpatialReference, s_srs);
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;t_srs&quot;, SpatialReference, t_srs);
-	NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;maxError&quot;, maxError);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;s_srs&quot;, SpatialReference, s_srs);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;t_srs&quot;, SpatialReference, t_srs);
+  NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;maxError&quot;, maxError);
 
-	char *s_srs_wkt, *t_srs_wkt;
-	if(s_srs-&gt;get()-&gt;exportToWkt(&amp;s_srs_wkt)){
-		Nan::ThrowError(&quot;Error converting s_srs to WKT&quot;);
-		return;
-	}
-	if(t_srs-&gt;get()-&gt;exportToWkt(&amp;t_srs_wkt)){
-		CPLFree(s_srs_wkt);
-		Nan::ThrowError(&quot;Error converting t_srs to WKT&quot;);
-		return;
-	}
+  char *s_srs_wkt, *t_srs_wkt;
+  if (s_srs-&gt;get()-&gt;exportToWkt(&amp;s_srs_wkt)) {
+    Nan::ThrowError(&quot;Error converting s_srs to WKT&quot;);
+    return;
+  }
+  if (t_srs-&gt;get()-&gt;exportToWkt(&amp;t_srs_wkt)) {
+    CPLFree(s_srs_wkt);
+    Nan::ThrowError(&quot;Error converting t_srs to WKT&quot;);
+    return;
+  }
 
+  void *hTransformArg;
+  void *hGenTransformArg =
+    GDALCreateGenImgProjTransformer(ds-&gt;getDataset(), s_srs_wkt, NULL, t_srs_wkt, TRUE, 1000.0, 0);
 
+  if (!hGenTransformArg) {
+    CPLFree(s_srs_wkt);
+    CPLFree(t_srs_wkt);
+    Nan::ThrowError(CPLGetLastErrorMsg());
+    return;
+  }
 
-	void *hTransformArg;
-	void *hGenTransformArg = GDALCreateGenImgProjTransformer(ds-&gt;getDataset(), s_srs_wkt, NULL, t_srs_wkt, TRUE, 1000.0, 0 );
-	
-	if(!hGenTransformArg) {
-		CPLFree(s_srs_wkt);
-		CPLFree(t_srs_wkt);
-		Nan::ThrowError(CPLGetLastErrorMsg());
-		return;
-	}
+  GDALTransformerFunc pfnTransformer;
 
-	GDALTransformerFunc pfnTransformer;
+  if (maxError &gt; 0.0) {
+    hTransformArg = GDALCreateApproxTransformer(GDALGenImgProjTransform, hGenTransformArg, maxError);
+    pfnTransformer = GDALApproxTransform;
 
-	if(maxError &gt; 0.0){
-		hTransformArg = GDALCreateApproxTransformer( GDALGenImgProjTransform, hGenTransformArg, maxError );
-		pfnTransformer = GDALApproxTransform;
+    if (!hTransformArg) {
+      CPLFree(s_srs_wkt);
+      CPLFree(t_srs_wkt);
+      GDALDestroyGenImgProjTransformer(hGenTransformArg);
+      Nan::ThrowError(CPLGetLastErrorMsg());
+      return;
+    }
+  } else {
+    hTransformArg = hGenTransformArg;
+    pfnTransformer = GDALGenImgProjTransform;
+  }
 
-		if(!hTransformArg) {
-			CPLFree(s_srs_wkt);
-			CPLFree(t_srs_wkt);
-			GDALDestroyGenImgProjTransformer(hGenTransformArg);
-			Nan::ThrowError(CPLGetLastErrorMsg());
-			return;
-		}
-	} else {
-		hTransformArg = hGenTransformArg;
-		pfnTransformer = GDALGenImgProjTransform;
-	}
+  CPLErr err = GDALSuggestedWarpOutput(ds-&gt;getDataset(), pfnTransformer, hTransformArg, geotransform, &amp;w, &amp;h);
 
-	CPLErr err = GDALSuggestedWarpOutput(ds-&gt;getDataset(), pfnTransformer, hTransformArg, geotransform, &amp;w, &amp;h);
+  CPLFree(s_srs_wkt);
+  CPLFree(t_srs_wkt);
+  GDALDestroyGenImgProjTransformer(hGenTransformArg);
+  if (maxError &gt; 0.0) { GDALDestroyApproxTransformer(hTransformArg); }
 
+  if (err) {
+    NODE_THROW_CPLERR(err);
+    return;
+  }
 
-	CPLFree(s_srs_wkt);
-	CPLFree(t_srs_wkt);
-	GDALDestroyGenImgProjTransformer(hGenTransformArg);
-	if(maxError &gt; 0.0){
-		GDALDestroyApproxTransformer(hTransformArg);
-	}
+  Local&lt;Array&gt; result_geotransform = Nan::New&lt;Array&gt;();
+  Nan::Set(result_geotransform, 0, Nan::New&lt;Number&gt;(geotransform[0]));
+  Nan::Set(result_geotransform, 1, Nan::New&lt;Number&gt;(geotransform[1]));
+  Nan::Set(result_geotransform, 2, Nan::New&lt;Number&gt;(geotransform[2]));
+  Nan::Set(result_geotransform, 3, Nan::New&lt;Number&gt;(geotransform[3]));
+  Nan::Set(result_geotransform, 4, Nan::New&lt;Number&gt;(geotransform[4]));
+  Nan::Set(result_geotransform, 5, Nan::New&lt;Number&gt;(geotransform[5]));
 
-	if(err) {
-		NODE_THROW_CPLERR(err);
-		return;
-	}
+  Local&lt;Object&gt; result_size = Nan::New&lt;Object&gt;();
+  Nan::Set(result_size, Nan::New(&quot;x&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(w));
+  Nan::Set(result_size, Nan::New(&quot;y&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(h));
 
-	Local&lt;Array&gt; result_geotransform = Nan::New&lt;Array&gt;();
-	Nan::Set(result_geotransform, 0, Nan::New&lt;Number&gt;(geotransform[0]));
-	Nan::Set(result_geotransform, 1, Nan::New&lt;Number&gt;(geotransform[1]));
-	Nan::Set(result_geotransform, 2, Nan::New&lt;Number&gt;(geotransform[2]));
-	Nan::Set(result_geotransform, 3, Nan::New&lt;Number&gt;(geotransform[3]));
-	Nan::Set(result_geotransform, 4, Nan::New&lt;Number&gt;(geotransform[4]));
-	Nan::Set(result_geotransform, 5, Nan::New&lt;Number&gt;(geotransform[5]));
+  Local&lt;Object&gt; result = Nan::New&lt;Object&gt;();
+  Nan::Set(result, Nan::New(&quot;rasterSize&quot;).ToLocalChecked(), result_size);
+  Nan::Set(result, Nan::New(&quot;geoTransform&quot;).ToLocalChecked(), result_geotransform);
 
-	Local&lt;Object&gt; result_size = Nan::New&lt;Object&gt;();
-	Nan::Set(result_size, Nan::New(&quot;x&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(w));
-	Nan::Set(result_size, Nan::New(&quot;y&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(h));
-
-	Local&lt;Object&gt; result = Nan::New&lt;Object&gt;();
-	Nan::Set(result, Nan::New(&quot;rasterSize&quot;).ToLocalChecked(), result_size);
-	Nan::Set(result, Nan::New(&quot;geoTransform&quot;).ToLocalChecked(), result_geotransform);
-
-	info.GetReturnValue().Set(result);
+  info.GetReturnValue().Set(result);
 }
 
-
-} //node_gdal namespace
+} // namespace node_gdal
 
     </pre>
 </div>

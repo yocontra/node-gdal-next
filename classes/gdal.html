@@ -137,8 +137,13 @@ dataset.layers.get(0).features.forEach(function(feature) {
     console.log(feature.getGeometry().toJSON());
 });
 </code></pre>
-<p><iframe src="http://ghbtns.com/github-btn.html?user=contra&repo=node-gdal-next&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="90" height="20" style="margin-top:20px"></iframe>
-<iframe src="http://ghbtns.com/github-btn.html?user=contra&repo=node-gdal-next&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="200" height="20"></iframe></p>
+<p><iframe
+src="http://ghbtns.com/github-btn.html?user=contra&repo=node-gdal-next&type=watch&count=true"
+allowtransparency="true" frameborder="0" scrolling="0" width="90" height="20"
+style="margin-top:20px"></iframe> <iframe
+src="http://ghbtns.com/github-btn.html?user=contra&repo=node-gdal-next&type=fork&count=true"
+allowtransparency="true" frameborder="0" scrolling="0" width="200"
+height="20"></iframe></p>
 
 </div>
 
@@ -176,7 +181,8 @@ dataset.layers.get(0).features.forEach(function(feature) {
 				<li><a href="#method-open"><span class="im">gdal.open</span>(<span class="ia">path</span><span class="ia">mode</span><span class="ia">drivers</span><span class="ia">x_size</span><span class="ia">y_size</span><span class="ia">band_count</span><span class="ia">data_type</span><span class="ia">creation_options</span>)</a></li>
 				<li><a href="#method-polygonize"><span class="im">gdal.polygonize</span>(<span class="ia">options</span>)</a></li>
 				<li><a href="#method-quiet"><span class="im">gdal.quiet</span>()</a></li>
-				<li><a href="#method-reprojectImage"><span class="im">gdal.reprojectImage</span>(<span class="ia">options</span>)</a></li>
+				<li><a href="#method-reprojectImage"><span class="im">gdal.reprojectImage</span>(<span class="ia">options</span><span class="ia">[options.options] Warp options (see:
+[reference]</span>)</a></li>
 				<li><a href="#method-sieveFilter"><span class="im">gdal.sieveFilter</span>(<span class="ia">options</span>)</a></li>
 				<li><a href="#method-suggestedWarpOutput"><span class="im">gdal.suggestedWarpOutput</span>(<span class="ia">options</span>)</a></li>
 				<li><a href="#method-verbose"><span class="im">gdal.verbose</span>()</a></li>
@@ -205,7 +211,7 @@ dataset.layers.get(0).features.forEach(function(feature) {
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l265"><code>src&#x2F;node_gdal.cpp:265</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l258"><code>src&#x2F;node_gdal.cpp:258</code></a>
         </p>
 
 
@@ -231,7 +237,7 @@ dataset.layers.get(0).features.forEach(function(feature) {
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l1142"><code>src&#x2F;node_gdal.cpp:1142</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l1201"><code>src&#x2F;node_gdal.cpp:1201</code></a>
         </p>
 
 
@@ -259,7 +265,7 @@ will be null or an object containing three properties: "number",
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l1132"><code>src&#x2F;node_gdal.cpp:1132</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l1191"><code>src&#x2F;node_gdal.cpp:1191</code></a>
         </p>
 
 
@@ -294,7 +300,7 @@ will be null or an object containing three properties: "number",
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l88"><code>src&#x2F;node_gdal.cpp:88</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l93"><code>src&#x2F;node_gdal.cpp:93</code></a>
         </p>
 
 
@@ -349,7 +355,7 @@ will be null or an object containing three properties: "number",
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_algorithms.cpp.html#l181"><code>src&#x2F;gdal_algorithms.cpp:181</code></a>
+		<a href="../files/src_gdal_algorithms.cpp.html#l207"><code>src&#x2F;gdal_algorithms.cpp:207</code></a>
 		</p>
 
 
@@ -576,7 +582,7 @@ will be null or an object containing three properties: "number",
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_algorithms.cpp.html#l59"><code>src&#x2F;gdal_algorithms.cpp:59</code></a>
+		<a href="../files/src_gdal_algorithms.cpp.html#l61"><code>src&#x2F;gdal_algorithms.cpp:61</code></a>
 		</p>
 
 
@@ -585,9 +591,9 @@ will be null or an object containing three properties: "number",
 
 	<div class="description"><p>Create vector contours from raster DEM.</p>
 <p>This algorithm will generate contour vectors for the input raster band on the
-requested set of contour levels. The vector contours are written to the passed
-in vector layer. Also, a NODATA value may be specified to identify pixels
-that should not be considered in contour line generation.</p>
+requested set of contour levels. The vector contours are written to the
+passed in vector layer. Also, a NODATA value may be specified to identify
+pixels that should not be considered in contour line generation.</p>
 </div>
 
 		<div class="params">
@@ -620,7 +626,9 @@ that should not be considered in contour line generation.</p>
 									<span class="type">Number</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>The "offset" relative to which contour intervals are applied. This is normally zero, but could be different. To generate 10m contours at 5, 15, 25, ... the offset would be 5.</p>
+								<div class="param-description"><p>The "offset" relative to which contour
+intervals are applied. This is normally zero, but could be different. To
+generate 10m contours at 5, 15, 25, ... the offset would be 5.</p>
 </div>
 
 							</li>
@@ -629,7 +637,8 @@ that should not be considered in contour line generation.</p>
 									<span class="type">Number</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>The elevation interval between contours generated.</p>
+								<div class="param-description"><p>The elevation interval between
+contours generated.</p>
 </div>
 
 							</li>
@@ -638,7 +647,8 @@ that should not be considered in contour line generation.</p>
 									<span class="type">Number[]</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>A list of fixed contour levels at which contours should be generated. Overrides interval/base options if set.</p>
+								<div class="param-description"><p>A list of fixed contour levels at
+which contours should be generated. Overrides interval/base options if set.</p>
 </div>
 
 							</li>
@@ -647,7 +657,9 @@ that should not be considered in contour line generation.</p>
 									<span class="type">Number</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>The value to use as a "nodata" value. That is, a pixel value which should be ignored in generating contours as if the value of the pixel were not known.</p>
+								<div class="param-description"><p>The value to use as a "nodata" value. That
+is, a pixel value which should be ignored in generating contours as if the
+value of the pixel were not known.</p>
 </div>
 
 							</li>
@@ -656,7 +668,8 @@ that should not be considered in contour line generation.</p>
 									<span class="type">Integer</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>A field index to indicate where a unique id should be written for each feature (contour) written.</p>
+								<div class="param-description"><p>A field index to indicate where a unique
+id should be written for each feature (contour) written.</p>
 </div>
 
 							</li>
@@ -665,7 +678,8 @@ that should not be considered in contour line generation.</p>
 									<span class="type">Integer</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>A field index to indicate where the elevation value of the contour should be written.</p>
+								<div class="param-description"><p>A field index to indicate where the
+elevation value of the contour should be written.</p>
 </div>
 
 							</li>
@@ -706,7 +720,7 @@ that should not be considered in contour line generation.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal.hpp.html#l114"><code>src&#x2F;gdal.hpp:114</code></a>
+		<a href="../files/src_gdal.hpp.html#l111"><code>src&#x2F;gdal.hpp:111</code></a>
 		</p>
 
 
@@ -752,7 +766,8 @@ that should not be considered in contour line generation.</p>
 
 			<div class="returns-description">
 						<span class="type">String</span>:
-					<p>A string nndnn'nn.nn'"L where n is a number and L is either N or E</p>
+					<p>A string nndnn'nn.nn'"L where n is a number and L is either
+N or E</p>
 
 			</div>
 		</div>
@@ -779,7 +794,7 @@ that should not be considered in contour line generation.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_algorithms.cpp.html#l19"><code>src&#x2F;gdal_algorithms.cpp:19</code></a>
+		<a href="../files/src_gdal_algorithms.cpp.html#l18"><code>src&#x2F;gdal_algorithms.cpp:18</code></a>
 		</p>
 
 
@@ -821,7 +836,8 @@ that should not be considered in contour line generation.</p>
 									<code class="param-name">searchDist</code>
 									<span class="type">Number</span>
 
-								<div class="param-description"><p>The maximum distance (in pixels) that the algorithm will search out for values to interpolate.</p>
+								<div class="param-description"><p>The maximum distance (in pixels) that the
+algorithm will search out for values to interpolate.</p>
 </div>
 
 							</li>
@@ -830,7 +846,9 @@ that should not be considered in contour line generation.</p>
 									<span class="type">Integer</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>The number of 3x3 average filter smoothing iterations to run after the interpolation to dampen artifacts.</p>
+								<div class="param-description"><p>The number of 3x3 average
+filter smoothing iterations to run after the interpolation to dampen
+artifacts.</p>
 </div>
 
 							</li>
@@ -1020,7 +1038,7 @@ that should not be considered in contour line generation.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_algorithms.cpp.html#l230"><code>src&#x2F;gdal_algorithms.cpp:230</code></a>
+		<a href="../files/src_gdal_algorithms.cpp.html#l255"><code>src&#x2F;gdal_algorithms.cpp:255</code></a>
 		</p>
 
 
@@ -1070,7 +1088,9 @@ provided to determine which pixels are eligible for processing.</p>
 									<code class="param-name">pixValField</code>
 									<span class="type">Integer</span>
 
-								<div class="param-description"><p>The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.</p>
+								<div class="param-description"><p>The attribute field index indicating the
+feature attribute into which the pixel value of the polygon should be
+written.</p>
 </div>
 
 							</li>
@@ -1079,7 +1099,9 @@ provided to determine which pixels are eligible for processing.</p>
 									<span class="type">Integer</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.</p>
+								<div class="param-description"><p>Either 4 indicating that diagonal
+pixels are not considered directly adjacent for polygon membership purposes
+or 8 indicating they are.</p>
 </div>
 
 							</li>
@@ -1088,7 +1110,8 @@ provided to determine which pixels are eligible for processing.</p>
 									<span class="type">Boolean</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>Use floating point buffers instead of int buffers.</p>
+								<div class="param-description"><p>Use floating point buffers instead
+of int buffers.</p>
 </div>
 
 							</li>
@@ -1114,7 +1137,7 @@ provided to determine which pixels are eligible for processing.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_node_gdal.cpp.html#l1159"><code>src&#x2F;node_gdal.cpp:1159</code></a>
+		<a href="../files/src_node_gdal.cpp.html#l1219"><code>src&#x2F;node_gdal.cpp:1219</code></a>
 		</p>
 
 
@@ -1136,6 +1159,10 @@ provided to determine which pixels are eligible for processing.</p>
 				<li class="arg">
 						<code>options</code>
 				</li>
+				<li class="arg">
+						<code>[options.options] Warp options (see:
+[reference]</code>
+				</li>
 			</ul><span class="paren">)</span>
 		</div>
 	</div>
@@ -1148,7 +1175,7 @@ provided to determine which pixels are eligible for processing.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_warper.cpp.html#l197"><code>src&#x2F;gdal_warper.cpp:197</code></a>
+		<a href="../files/src_gdal_warper.cpp.html#l165"><code>src&#x2F;gdal_warper.cpp:165</code></a>
 		</p>
 
 
@@ -1211,7 +1238,9 @@ provided to determine which pixels are eligible for processing.</p>
 									<span class="type"><a href="../classes/gdal.Geometry.html" class="crosslink">gdal.Geometry</a></span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>Must be in src dataset pixel coordinates. Use CoordinateTransformation to convert between georeferenced coordinates and pixel coordinates</p>
+								<div class="param-description"><p>Must be in src dataset pixel
+coordinates. Use CoordinateTransformation to convert between georeferenced
+coordinates and pixel coordinates</p>
 </div>
 
 							</li>
@@ -1287,16 +1316,17 @@ provided to determine which pixels are eligible for processing.</p>
 								<div class="param-description"></div>
 
 							</li>
-							<li class="param">
-									<code class="param-name optional">[options] Warp options (see: [reference]</code>
-									<span class="type">String[] |  Object</span>
-									<span class="flag optional" title="This parameter is optional.">optional</span>
+						</ul>
+				</li>
+				<li class="param">
+						<code class="param-name">[options.options] Warp options (see:
+[reference]</code>
+						<span class="type">String[] |  Object</span>
 
-								<div class="param-description"><p>(<a href="http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08">http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08</a>))</p>
+
+					<div class="param-description"><p>(<a href="http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08">http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08</a>))</p>
 </div>
 
-							</li>
-						</ul>
 				</li>
 			</ul>
 		</div>
@@ -1324,7 +1354,7 @@ provided to determine which pixels are eligible for processing.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_algorithms.cpp.html#l133"><code>src&#x2F;gdal_algorithms.cpp:133</code></a>
+		<a href="../files/src_gdal_algorithms.cpp.html#l154"><code>src&#x2F;gdal_algorithms.cpp:154</code></a>
 		</p>
 
 
@@ -1356,7 +1386,8 @@ provided to determine which pixels are eligible for processing.</p>
 									<code class="param-name">dst</code>
 									<span class="type"><a href="../classes/gdal.RasterBand.html" class="crosslink">gdal.RasterBand</a></span>
 
-								<div class="param-description"><p>Output raster band. It may be the same as src band to update the source in place.</p>
+								<div class="param-description"><p>Output raster band. It may be the same
+as src band to update the source in place.</p>
 </div>
 
 							</li>
@@ -1365,7 +1396,8 @@ provided to determine which pixels are eligible for processing.</p>
 									<span class="type"><a href="../classes/gdal.RasterBand.html" class="crosslink">gdal.RasterBand</a></span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.</p>
+								<div class="param-description"><p>All pixels in the mask band with a
+value other than zero will be considered suitable for inclusion in polygons.</p>
 </div>
 
 							</li>
@@ -1373,7 +1405,8 @@ provided to determine which pixels are eligible for processing.</p>
 									<code class="param-name">threshold</code>
 									<span class="type">Number</span>
 
-								<div class="param-description"><p>Raster polygons with sizes smaller than this will be merged into their largest neighbour.</p>
+								<div class="param-description"><p>Raster polygons with sizes smaller than
+this will be merged into their largest neighbour.</p>
 </div>
 
 							</li>
@@ -1382,7 +1415,9 @@ provided to determine which pixels are eligible for processing.</p>
 									<span class="type">Integer</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.</p>
+								<div class="param-description"><p>Either 4 indicating that diagonal
+pixels are not considered directly adjacent for polygon membership purposes
+or 8 indicating they are.</p>
 </div>
 
 							</li>
@@ -1417,7 +1452,7 @@ provided to determine which pixels are eligible for processing.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_warper.cpp.html#l283"><code>src&#x2F;gdal_warper.cpp:283</code></a>
+		<a href="../files/src_gdal_warper.cpp.html#l274"><code>src&#x2F;gdal_warper.cpp:274</code></a>
 		</p>
 
 
@@ -1480,7 +1515,8 @@ should be large enough to include all the input image.</p>
 
 			<div class="returns-description">
 						<span class="type">Object</span>:
-					<p>An object containing <code>"rasterSize"</code> and <code>"geoTransform"</code> properties.</p>
+					<p>An object containing <code>"rasterSize"</code> and <code>"geoTransform"</code>
+properties.</p>
 
 			</div>
 		</div>
@@ -1501,7 +1537,7 @@ should be large enough to include all the input image.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_node_gdal.cpp.html#l1168"><code>src&#x2F;node_gdal.cpp:1168</code></a>
+		<a href="../files/src_node_gdal.cpp.html#l1228"><code>src&#x2F;node_gdal.cpp:1228</code></a>
 		</p>
 
 

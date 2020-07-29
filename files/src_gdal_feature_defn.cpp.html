@@ -124,60 +124,50 @@
 <div class="file">
     <pre class="prettyprint linenums">
 
-#include &quot;gdal_common.hpp&quot;
 #include &quot;gdal_feature_defn.hpp&quot;
-#include &quot;gdal_field_defn.hpp&quot;
 #include &quot;collections/feature_defn_fields.hpp&quot;
+#include &quot;gdal_common.hpp&quot;
+#include &quot;gdal_field_defn.hpp&quot;
 
 namespace node_gdal {
 
 Nan::Persistent&lt;FunctionTemplate&gt; FeatureDefn::constructor;
 
-void FeatureDefn::Initialize(Local&lt;Object&gt; target)
-{
-	Nan::HandleScope scope;
+void FeatureDefn::Initialize(Local&lt;Object&gt; target) {
+  Nan::HandleScope scope;
 
-	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(FeatureDefn::New);
-	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
-	lcons-&gt;SetClassName(Nan::New(&quot;FeatureDefn&quot;).ToLocalChecked());
+  Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(FeatureDefn::New);
+  lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+  lcons-&gt;SetClassName(Nan::New(&quot;FeatureDefn&quot;).ToLocalChecked());
 
-	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
-	Nan::SetPrototypeMethod(lcons, &quot;clone&quot;, clone);
+  Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+  Nan::SetPrototypeMethod(lcons, &quot;clone&quot;, clone);
 
-	ATTR(lcons, &quot;name&quot;, nameGetter, READ_ONLY_SETTER);
-	ATTR(lcons, &quot;fields&quot;, fieldsGetter, READ_ONLY_SETTER);
-	ATTR(lcons, &quot;styleIgnored&quot;, styleIgnoredGetter, styleIgnoredSetter);
-	ATTR(lcons, &quot;geomIgnored&quot;, geomIgnoredGetter, geomIgnoredSetter);
-	ATTR(lcons, &quot;geomType&quot;, geomTypeGetter, geomTypeSetter);
+  ATTR(lcons, &quot;name&quot;, nameGetter, READ_ONLY_SETTER);
+  ATTR(lcons, &quot;fields&quot;, fieldsGetter, READ_ONLY_SETTER);
+  ATTR(lcons, &quot;styleIgnored&quot;, styleIgnoredGetter, styleIgnoredSetter);
+  ATTR(lcons, &quot;geomIgnored&quot;, geomIgnoredGetter, geomIgnoredSetter);
+  ATTR(lcons, &quot;geomType&quot;, geomTypeGetter, geomTypeSetter);
 
-	Nan::Set(target, Nan::New(&quot;FeatureDefn&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New(&quot;FeatureDefn&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
-	constructor.Reset(lcons);
+  constructor.Reset(lcons);
 }
 
-FeatureDefn::FeatureDefn(OGRFeatureDefn *def)
-	: Nan::ObjectWrap(),
-	  this_(def),
-	  owned_(true)
-{
-	LOG(&quot;Created FeatureDefn [%p]&quot;, def);
+FeatureDefn::FeatureDefn(OGRFeatureDefn *def) : Nan::ObjectWrap(), this_(def), owned_(true) {
+  LOG(&quot;Created FeatureDefn [%p]&quot;, def);
 }
 
-FeatureDefn::FeatureDefn()
-	: Nan::ObjectWrap(),
-	  this_(0),
-	  owned_(true)
-{
+FeatureDefn::FeatureDefn() : Nan::ObjectWrap(), this_(0), owned_(true) {
 }
 
-FeatureDefn::~FeatureDefn()
-{
-	if(this_) {
-		LOG(&quot;Disposing FeatureDefn [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
-		if(owned_) this_-&gt;Release();
-		this_ = NULL;
-		LOG(&quot;Disposed FeatureDefn [%p]&quot;, this_);
-	}
+FeatureDefn::~FeatureDefn() {
+  if (this_) {
+    LOG(&quot;Disposing FeatureDefn [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
+    if (owned_) this_-&gt;Release();
+    this_ = NULL;
+    LOG(&quot;Disposed FeatureDefn [%p]&quot;, this_);
+  }
 }
 
 /**
@@ -186,76 +176,70 @@ FeatureDefn::~FeatureDefn()
  * @constructor
  * @class gdal.FeatureDefn
  */
-NAN_METHOD(FeatureDefn::New)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *f;
+NAN_METHOD(FeatureDefn::New) {
+  Nan::HandleScope scope;
+  FeatureDefn *f;
 
-	if (!info.IsConstructCall()) {
-		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
-		return;
-	}
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+    return;
+  }
 
-	if (info[0]-&gt;IsExternal()) {
-		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
-		void* ptr = ext-&gt;Value();
-		f = static_cast&lt;FeatureDefn *&gt;(ptr);
-	} else {
-		if (info.Length() != 0) {
-			Nan::ThrowError(&quot;FeatureDefn constructor doesn&#x27;t take any arguments&quot;);
-			return;
-		}
-		f = new FeatureDefn(new OGRFeatureDefn());
-		f-&gt;this_-&gt;Reference();
-	}
+  if (info[0]-&gt;IsExternal()) {
+    Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+    void *ptr = ext-&gt;Value();
+    f = static_cast&lt;FeatureDefn *&gt;(ptr);
+  } else {
+    if (info.Length() != 0) {
+      Nan::ThrowError(&quot;FeatureDefn constructor doesn&#x27;t take any arguments&quot;);
+      return;
+    }
+    f = new FeatureDefn(new OGRFeatureDefn());
+    f-&gt;this_-&gt;Reference();
+  }
 
-	Local&lt;Value&gt; fields = FeatureDefnFields::New(info.This());
-	Nan::SetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked(), fields);
+  Local&lt;Value&gt; fields = FeatureDefnFields::New(info.This());
+  Nan::SetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked(), fields);
 
-	f-&gt;Wrap(info.This());
-	info.GetReturnValue().Set(info.This());
+  f-&gt;Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-Local&lt;Value&gt; FeatureDefn::New(OGRFeatureDefn *def)
-{
-	Nan::EscapableHandleScope scope;
-	return scope.Escape(FeatureDefn::New(def, false));
+Local&lt;Value&gt; FeatureDefn::New(OGRFeatureDefn *def) {
+  Nan::EscapableHandleScope scope;
+  return scope.Escape(FeatureDefn::New(def, false));
 }
 
-Local&lt;Value&gt; FeatureDefn::New(OGRFeatureDefn *def, bool owned)
-{
-	Nan::EscapableHandleScope scope;
+Local&lt;Value&gt; FeatureDefn::New(OGRFeatureDefn *def, bool owned) {
+  Nan::EscapableHandleScope scope;
 
-	if (!def) {
-		return scope.Escape(Nan::Null());
-	}
+  if (!def) { return scope.Escape(Nan::Null()); }
 
-	//make a copy of featuredefn owned by a layer
-	// + no need to track when a layer is destroyed
-	// + no need to throw errors when a method trys to modify an owned read-only featuredefn
-	// - is slower
+  // make a copy of featuredefn owned by a layer
+  // + no need to track when a layer is destroyed
+  // + no need to throw errors when a method trys to modify an owned read-only
+  // featuredefn
+  // - is slower
 
-	//TODO: cloning maybe unnecessary if reference counting is done right.
-	//      def-&gt;Reference(); def-&gt;Release();
+  // TODO: cloning maybe unnecessary if reference counting is done right.
+  //      def-&gt;Reference(); def-&gt;Release();
 
-	if (!owned) {
-		def = def-&gt;Clone();
-	}
+  if (!owned) { def = def-&gt;Clone(); }
 
-	FeatureDefn *wrapped = new FeatureDefn(def);
-	wrapped-&gt;owned_ = true;
-	def-&gt;Reference();
+  FeatureDefn *wrapped = new FeatureDefn(def);
+  wrapped-&gt;owned_ = true;
+  def-&gt;Reference();
 
-	Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
-	Local&lt;Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(FeatureDefn::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+  Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+  Local&lt;Object&gt; obj =
+    Nan::NewInstance(Nan::GetFunction(Nan::New(FeatureDefn::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
 
-	return scope.Escape(obj);
+  return scope.Escape(obj);
 }
 
-NAN_METHOD(FeatureDefn::toString)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::New(&quot;FeatureDefn&quot;).ToLocalChecked());
+NAN_METHOD(FeatureDefn::toString) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New(&quot;FeatureDefn&quot;).ToLocalChecked());
 }
 
 /**
@@ -264,11 +248,10 @@ NAN_METHOD(FeatureDefn::toString)
  * @method clone
  * @return {gdal.FeatureDefn}
  */
-NAN_METHOD(FeatureDefn::clone)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	info.GetReturnValue().Set(FeatureDefn::New(def-&gt;this_-&gt;Clone()));
+NAN_METHOD(FeatureDefn::clone) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  info.GetReturnValue().Set(FeatureDefn::New(def-&gt;this_-&gt;Clone()));
 }
 
 /**
@@ -276,46 +259,43 @@ NAN_METHOD(FeatureDefn::clone)
  * @attribute name
  * @type {String}
  */
-NAN_GETTER(FeatureDefn::nameGetter)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	info.GetReturnValue().Set(SafeString::New(def-&gt;this_-&gt;GetName()));
+NAN_GETTER(FeatureDefn::nameGetter) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  info.GetReturnValue().Set(SafeString::New(def-&gt;this_-&gt;GetName()));
 }
 
 /**
- * WKB geometry type ({{#crossLink &quot;Constants (wkbGeometryType)&quot;}}see table{{/crossLink}})
+ * WKB geometry type ({{#crossLink &quot;Constants (wkbGeometryType)&quot;}}see
+ * table{{/crossLink}})
  *
  * @attribute geomType
  * @type {Integer}
  */
-NAN_GETTER(FeatureDefn::geomTypeGetter)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(def-&gt;this_-&gt;GetGeomType()));
+NAN_GETTER(FeatureDefn::geomTypeGetter) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(def-&gt;this_-&gt;GetGeomType()));
 }
 
 /**
  * @attribute geomIgnored
  * @type {Boolean}
  */
-NAN_GETTER(FeatureDefn::geomIgnoredGetter)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	info.GetReturnValue().Set(Nan::New&lt;Boolean&gt;(def-&gt;this_-&gt;IsGeometryIgnored()));
+NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  info.GetReturnValue().Set(Nan::New&lt;Boolean&gt;(def-&gt;this_-&gt;IsGeometryIgnored()));
 }
 
 /**
  * @attribute styleIgnored
  * @type {Boolean}
  */
-NAN_GETTER(FeatureDefn::styleIgnoredGetter)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	info.GetReturnValue().Set(Nan::New&lt;Boolean&gt;(def-&gt;this_-&gt;IsStyleIgnored()));
+NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  info.GetReturnValue().Set(Nan::New&lt;Boolean&gt;(def-&gt;this_-&gt;IsStyleIgnored()));
 }
 
 /**
@@ -323,43 +303,39 @@ NAN_GETTER(FeatureDefn::styleIgnoredGetter)
  * @attribute fields
  * @type {gdal.FeatureDefnFields}
  */
-NAN_GETTER(FeatureDefn::fieldsGetter)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked()).ToLocalChecked());
+NAN_GETTER(FeatureDefn::fieldsGetter) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;fields_&quot;).ToLocalChecked()).ToLocalChecked());
 }
 
-NAN_SETTER(FeatureDefn::geomTypeSetter)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	if(!value-&gt;IsInt32()){
-		Nan::ThrowError(&quot;geomType must be an integer&quot;);
-		return;
-	}
-	def-&gt;this_-&gt;SetGeomType(OGRwkbGeometryType(Nan::To&lt;int64_t&gt;(value).ToChecked()));
+NAN_SETTER(FeatureDefn::geomTypeSetter) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  if (!value-&gt;IsInt32()) {
+    Nan::ThrowError(&quot;geomType must be an integer&quot;);
+    return;
+  }
+  def-&gt;this_-&gt;SetGeomType(OGRwkbGeometryType(Nan::To&lt;int64_t&gt;(value).ToChecked()));
 }
 
-NAN_SETTER(FeatureDefn::geomIgnoredSetter)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	if(!value-&gt;IsBoolean()){
-		Nan::ThrowError(&quot;geomIgnored must be a boolean&quot;);
-		return;
-	}
-	def-&gt;this_-&gt;SetGeometryIgnored(Nan::To&lt;int64_t&gt;(value).ToChecked());
+NAN_SETTER(FeatureDefn::geomIgnoredSetter) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  if (!value-&gt;IsBoolean()) {
+    Nan::ThrowError(&quot;geomIgnored must be a boolean&quot;);
+    return;
+  }
+  def-&gt;this_-&gt;SetGeometryIgnored(Nan::To&lt;int64_t&gt;(value).ToChecked());
 }
 
-NAN_SETTER(FeatureDefn::styleIgnoredSetter)
-{
-	Nan::HandleScope scope;
-	FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
-	if(!value-&gt;IsBoolean()){
-		Nan::ThrowError(&quot;styleIgnored must be a boolean&quot;);
-		return;
-	}
-	def-&gt;this_-&gt;SetStyleIgnored(Nan::To&lt;int64_t&gt;(value).ToChecked());
+NAN_SETTER(FeatureDefn::styleIgnoredSetter) {
+  Nan::HandleScope scope;
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap&lt;FeatureDefn&gt;(info.This());
+  if (!value-&gt;IsBoolean()) {
+    Nan::ThrowError(&quot;styleIgnored must be a boolean&quot;);
+    return;
+  }
+  def-&gt;this_-&gt;SetStyleIgnored(Nan::To&lt;int64_t&gt;(value).ToChecked());
 }
 
 } // namespace node_gdal

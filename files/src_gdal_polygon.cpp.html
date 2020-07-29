@@ -124,10 +124,10 @@
 <div class="file">
     <pre class="prettyprint linenums">
 
-#include &quot;gdal_common.hpp&quot;
-#include &quot;gdal_geometry.hpp&quot;
 #include &quot;gdal_polygon.hpp&quot;
 #include &quot;collections/polygon_rings.hpp&quot;
+#include &quot;gdal_common.hpp&quot;
+#include &quot;gdal_geometry.hpp&quot;
 
 #include &lt;stdlib.h&gt;
 
@@ -135,54 +135,41 @@ namespace node_gdal {
 
 Nan::Persistent&lt;FunctionTemplate&gt; Polygon::constructor;
 
-void Polygon::Initialize(Local&lt;Object&gt; target)
-{
-	Nan::HandleScope scope;
+void Polygon::Initialize(Local&lt;Object&gt; target) {
+  Nan::HandleScope scope;
 
-	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(Polygon::New);
-	lcons-&gt;Inherit(Nan::New(Geometry::constructor));
-	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
-	lcons-&gt;SetClassName(Nan::New(&quot;Polygon&quot;).ToLocalChecked());
+  Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(Polygon::New);
+  lcons-&gt;Inherit(Nan::New(Geometry::constructor));
+  lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+  lcons-&gt;SetClassName(Nan::New(&quot;Polygon&quot;).ToLocalChecked());
 
-	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
-	Nan::SetPrototypeMethod(lcons, &quot;getArea&quot;, getArea);
+  Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+  Nan::SetPrototypeMethod(lcons, &quot;getArea&quot;, getArea);
 
-	ATTR(lcons, &quot;rings&quot;, ringsGetter, READ_ONLY_SETTER);
+  ATTR(lcons, &quot;rings&quot;, ringsGetter, READ_ONLY_SETTER);
 
-	Nan::Set(target, Nan::New(&quot;Polygon&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New(&quot;Polygon&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
-	constructor.Reset(lcons);
+  constructor.Reset(lcons);
 }
 
-Polygon::Polygon(OGRPolygon *geom)
-	: Nan::ObjectWrap(),
-	  this_(geom),
-	  owned_(true),
-	  size_(0)
-{
-	LOG(&quot;Created Polygon [%p]&quot;, geom);
+Polygon::Polygon(OGRPolygon *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+  LOG(&quot;Created Polygon [%p]&quot;, geom);
 }
 
-Polygon::Polygon()
-	: Nan::ObjectWrap(),
-	  this_(NULL),
-	  owned_(true),
-	  size_(0)
-{
+Polygon::Polygon() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
 }
 
-
-Polygon::~Polygon()
-{
-	if(this_) {
-		LOG(&quot;Disposing Polygon [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
-		if (owned_) {
-			OGRGeometryFactory::destroyGeometry(this_);
-			Nan::AdjustExternalMemory(-size_);
-		}
-		LOG(&quot;Disposed Polygon [%p]&quot;, this_);
-		this_ = NULL;
-	}
+Polygon::~Polygon() {
+  if (this_) {
+    LOG(&quot;Disposing Polygon [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
+    if (owned_) {
+      OGRGeometryFactory::destroyGeometry(this_);
+      Nan::AdjustExternalMemory(-size_);
+    }
+    LOG(&quot;Disposed Polygon [%p]&quot;, this_);
+    this_ = NULL;
+  }
 }
 
 /**
@@ -192,74 +179,68 @@ Polygon::~Polygon()
  * @class gdal.Polygon
  * @extends gdal.Geometry
  */
-NAN_METHOD(Polygon::New)
-{
-	Nan::HandleScope scope;
-	Polygon *f;
+NAN_METHOD(Polygon::New) {
+  Nan::HandleScope scope;
+  Polygon *f;
 
-	if (!info.IsConstructCall()) {
-		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
-		return;
-	}
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+    return;
+  }
 
-	if (info[0]-&gt;IsExternal()) {
-		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
-		void* ptr = ext-&gt;Value();
-		f = static_cast&lt;Polygon *&gt;(ptr);
+  if (info[0]-&gt;IsExternal()) {
+    Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+    void *ptr = ext-&gt;Value();
+    f = static_cast&lt;Polygon *&gt;(ptr);
 
-	} else {
-		if (info.Length() != 0) {
-			Nan::ThrowError(&quot;Polygon constructor doesn&#x27;t take any arguments&quot;);
-			return;
-		}
-		f = new Polygon(new OGRPolygon());
-	}
+  } else {
+    if (info.Length() != 0) {
+      Nan::ThrowError(&quot;Polygon constructor doesn&#x27;t take any arguments&quot;);
+      return;
+    }
+    f = new Polygon(new OGRPolygon());
+  }
 
-	Local&lt;Value&gt; rings = PolygonRings::New(info.This());
-	Nan::SetPrivate(info.This(), Nan::New(&quot;rings_&quot;).ToLocalChecked(), rings);
+  Local&lt;Value&gt; rings = PolygonRings::New(info.This());
+  Nan::SetPrivate(info.This(), Nan::New(&quot;rings_&quot;).ToLocalChecked(), rings);
 
-	f-&gt;Wrap(info.This());
-	info.GetReturnValue().Set(info.This());
+  f-&gt;Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-Local&lt;Value&gt; Polygon::New(OGRPolygon *geom)
-{
-	Nan::EscapableHandleScope scope;
-	return scope.Escape(Polygon::New(geom, true));
+Local&lt;Value&gt; Polygon::New(OGRPolygon *geom) {
+  Nan::EscapableHandleScope scope;
+  return scope.Escape(Polygon::New(geom, true));
 }
 
-Local&lt;Value&gt; Polygon::New(OGRPolygon *geom, bool owned)
-{
-	Nan::EscapableHandleScope scope;
+Local&lt;Value&gt; Polygon::New(OGRPolygon *geom, bool owned) {
+  Nan::EscapableHandleScope scope;
 
-	if (!geom) {
-		return scope.Escape(Nan::Null());
-	}
+  if (!geom) { return scope.Escape(Nan::Null()); }
 
-	//make a copy of geometry owned by a feature
-	// + no need to track when a feature is destroyed
-	// + no need to throw errors when a method trys to modify an owned read-only geometry
-	// - is slower
+  // make a copy of geometry owned by a feature
+  // + no need to track when a feature is destroyed
+  // + no need to throw errors when a method trys to modify an owned read-only
+  // geometry
+  // - is slower
 
-	if (!owned) {
-		geom = static_cast&lt;OGRPolygon*&gt;(geom-&gt;clone());
-	}
+  if (!owned) { geom = static_cast&lt;OGRPolygon *&gt;(geom-&gt;clone()); }
 
-	Polygon *wrapped = new Polygon(geom);
-	wrapped-&gt;owned_ = true;
+  Polygon *wrapped = new Polygon(geom);
+  wrapped-&gt;owned_ = true;
 
-	UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
+  UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
 
-	Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
-	Local&lt;Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(Polygon::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+  Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+  Local&lt;Object&gt; obj =
+    Nan::NewInstance(Nan::GetFunction(Nan::New(Polygon::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
 
-	return scope.Escape(obj);
+  return scope.Escape(obj);
 }
 
-NAN_METHOD(Polygon::toString)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::New(&quot;Polygon&quot;).ToLocalChecked());
+NAN_METHOD(Polygon::toString) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New(&quot;Polygon&quot;).ToLocalChecked());
 }
 
 /**
@@ -276,10 +257,9 @@ NODE_WRAPPED_METHOD_WITH_RESULT(Polygon, getArea, Number, get_Area);
  * @attribute rings
  * @type {gdal.PolygonRings}
  */
-NAN_GETTER(Polygon::ringsGetter)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;rings_&quot;).ToLocalChecked()).ToLocalChecked());
+NAN_GETTER(Polygon::ringsGetter) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New(&quot;rings_&quot;).ToLocalChecked()).ToLocalChecked());
 }
 
 } // namespace node_gdal

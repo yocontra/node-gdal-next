@@ -124,150 +124,133 @@
 <div class="file">
     <pre class="prettyprint linenums">
 
-#include &quot;gdal_common.hpp&quot;
 #include &quot;gdal_field_defn.hpp&quot;
+#include &quot;gdal_common.hpp&quot;
 #include &quot;utils/field_types.hpp&quot;
 
 namespace node_gdal {
 
 Nan::Persistent&lt;FunctionTemplate&gt; FieldDefn::constructor;
 
-void FieldDefn::Initialize(Local&lt;Object&gt; target)
-{
-	Nan::HandleScope scope;
+void FieldDefn::Initialize(Local&lt;Object&gt; target) {
+  Nan::HandleScope scope;
 
-	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(FieldDefn::New);
-	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
-	lcons-&gt;SetClassName(Nan::New(&quot;FieldDefn&quot;).ToLocalChecked());
+  Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(FieldDefn::New);
+  lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+  lcons-&gt;SetClassName(Nan::New(&quot;FieldDefn&quot;).ToLocalChecked());
 
-	ATTR(lcons, &quot;name&quot;, nameGetter, nameSetter);
-	ATTR(lcons, &quot;type&quot;, typeGetter, typeSetter);
-	ATTR(lcons, &quot;justification&quot;, justificationGetter, justificationSetter);
-	ATTR(lcons, &quot;width&quot;, widthGetter, widthSetter);
-	ATTR(lcons, &quot;precision&quot;, precisionGetter, precisionSetter);
-	ATTR(lcons, &quot;ignored&quot;, ignoredGetter, ignoredSetter);
+  ATTR(lcons, &quot;name&quot;, nameGetter, nameSetter);
+  ATTR(lcons, &quot;type&quot;, typeGetter, typeSetter);
+  ATTR(lcons, &quot;justification&quot;, justificationGetter, justificationSetter);
+  ATTR(lcons, &quot;width&quot;, widthGetter, widthSetter);
+  ATTR(lcons, &quot;precision&quot;, precisionGetter, precisionSetter);
+  ATTR(lcons, &quot;ignored&quot;, ignoredGetter, ignoredSetter);
 
-	Nan::Set(target, Nan::New(&quot;FieldDefn&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New(&quot;FieldDefn&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
-	constructor.Reset(lcons);
+  constructor.Reset(lcons);
 }
 
-FieldDefn::FieldDefn(OGRFieldDefn *def)
-	: Nan::ObjectWrap(),
-	  this_(def),
-	  owned_(false)
-{
-	LOG(&quot;Created FieldDefn [%p]&quot;, def);
+FieldDefn::FieldDefn(OGRFieldDefn *def) : Nan::ObjectWrap(), this_(def), owned_(false) {
+  LOG(&quot;Created FieldDefn [%p]&quot;, def);
 }
 
-FieldDefn::FieldDefn()
-	: Nan::ObjectWrap(),
-	  this_(0),
-	  owned_(false)
-{
+FieldDefn::FieldDefn() : Nan::ObjectWrap(), this_(0), owned_(false) {
 }
 
-FieldDefn::~FieldDefn()
-{
-	if(this_){
-		LOG(&quot;Disposing FieldDefn [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
-		if(owned_) delete this_;
-		LOG(&quot;Disposed FieldDefn [%p]&quot;, this_);
-		this_ = NULL;
-	}
+FieldDefn::~FieldDefn() {
+  if (this_) {
+    LOG(&quot;Disposing FieldDefn [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
+    if (owned_) delete this_;
+    LOG(&quot;Disposed FieldDefn [%p]&quot;, this_);
+    this_ = NULL;
+  }
 }
-
 
 /**
  * @constructor
  * @class gdal.FieldDefn
  * @param {String} name Field name
- * @param {String} type Data type (see {{#crossLink &quot;Constants (OFT)&quot;}}OFT constants{{/crossLink}})
+ * @param {String} type Data type (see {{#crossLink &quot;Constants (OFT)&quot;}}OFT
+ * constants{{/crossLink}})
  */
-NAN_METHOD(FieldDefn::New)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(FieldDefn::New) {
+  Nan::HandleScope scope;
 
-	if (!info.IsConstructCall()) {
-		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
-		return;
-	}
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+    return;
+  }
 
-	if (info[0]-&gt;IsExternal()) {
-		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
-		void* ptr = ext-&gt;Value();
-		FieldDefn *f = static_cast&lt;FieldDefn *&gt;(ptr);
-		f-&gt;Wrap(info.This());
-		info.GetReturnValue().Set(info.This());
-		return;
-	} else {
-		std::string field_name(&quot;&quot;);
-		std::string type_name(&quot;string&quot;);
+  if (info[0]-&gt;IsExternal()) {
+    Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+    void *ptr = ext-&gt;Value();
+    FieldDefn *f = static_cast&lt;FieldDefn *&gt;(ptr);
+    f-&gt;Wrap(info.This());
+    info.GetReturnValue().Set(info.This());
+    return;
+  } else {
+    std::string field_name(&quot;&quot;);
+    std::string type_name(&quot;string&quot;);
 
-		NODE_ARG_STR(0, &quot;field name&quot;, field_name);
-		NODE_ARG_STR(1, &quot;field type&quot;, type_name);
+    NODE_ARG_STR(0, &quot;field name&quot;, field_name);
+    NODE_ARG_STR(1, &quot;field type&quot;, type_name);
 
-		int field_type = getFieldTypeByName(type_name);
-		if (field_type &lt; 0) {
-			Nan::ThrowError(&quot;Unrecognized field type&quot;);
-			return;
-		}
+    int field_type = getFieldTypeByName(type_name);
+    if (field_type &lt; 0) {
+      Nan::ThrowError(&quot;Unrecognized field type&quot;);
+      return;
+    }
 
-		FieldDefn* def = new FieldDefn(new OGRFieldDefn(field_name.c_str(), static_cast&lt;OGRFieldType&gt;(field_type)));
-		def-&gt;owned_ = true;
-		def-&gt;Wrap(info.This());
-	}
+    FieldDefn *def = new FieldDefn(new OGRFieldDefn(field_name.c_str(), static_cast&lt;OGRFieldType&gt;(field_type)));
+    def-&gt;owned_ = true;
+    def-&gt;Wrap(info.This());
+  }
 
-	info.GetReturnValue().Set(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-Local&lt;Value&gt; FieldDefn::New(OGRFieldDefn *def)
-{
-	Nan::EscapableHandleScope scope;
-	return scope.Escape(FieldDefn::New(def, false));
+Local&lt;Value&gt; FieldDefn::New(OGRFieldDefn *def) {
+  Nan::EscapableHandleScope scope;
+  return scope.Escape(FieldDefn::New(def, false));
 }
 
-Local&lt;Value&gt; FieldDefn::New(OGRFieldDefn *def, bool owned)
-{
-	Nan::EscapableHandleScope scope;
+Local&lt;Value&gt; FieldDefn::New(OGRFieldDefn *def, bool owned) {
+  Nan::EscapableHandleScope scope;
 
-	if (!def) {
-		return scope.Escape(Nan::Null());
-	}
+  if (!def) { return scope.Escape(Nan::Null()); }
 
-	//make a copy of fielddefn owned by a featuredefn
-	// + no need to track when a featuredefn is destroyed
-	// + no need to throw errors when a method trys to modify an owned read-only fielddefn
-	// - is slower
+  // make a copy of fielddefn owned by a featuredefn
+  // + no need to track when a featuredefn is destroyed
+  // + no need to throw errors when a method trys to modify an owned read-only
+  // fielddefn
+  // - is slower
 
-	if (!owned) {
-		def = new OGRFieldDefn(def);
-	}
+  if (!owned) { def = new OGRFieldDefn(def); }
 
-	FieldDefn *wrapped = new FieldDefn(def);
-	wrapped-&gt;owned_ = true;
+  FieldDefn *wrapped = new FieldDefn(def);
+  wrapped-&gt;owned_ = true;
 
-	v8::Local&lt;v8::Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
-	v8::Local&lt;v8::Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(FieldDefn::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+  v8::Local&lt;v8::Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+  v8::Local&lt;v8::Object&gt; obj =
+    Nan::NewInstance(Nan::GetFunction(Nan::New(FieldDefn::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
 
-	return scope.Escape(obj);
+  return scope.Escape(obj);
 }
 
-NAN_METHOD(FieldDefn::toString)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::New(&quot;FieldDefn&quot;).ToLocalChecked());
+NAN_METHOD(FieldDefn::toString) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New(&quot;FieldDefn&quot;).ToLocalChecked());
 }
 
 /**
  * @attribute name
  * @type {String}
  */
-NAN_GETTER(FieldDefn::nameGetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	info.GetReturnValue().Set(SafeString::New(def-&gt;this_-&gt;GetNameRef()));
+NAN_GETTER(FieldDefn::nameGetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  info.GetReturnValue().Set(SafeString::New(def-&gt;this_-&gt;GetNameRef()));
 }
 
 /**
@@ -276,158 +259,146 @@ NAN_GETTER(FieldDefn::nameGetter)
  * @attribute type
  * @type {String}
  */
-NAN_GETTER(FieldDefn::typeGetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	info.GetReturnValue().Set(SafeString::New(getFieldTypeName(def-&gt;this_-&gt;GetType())));
+NAN_GETTER(FieldDefn::typeGetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  info.GetReturnValue().Set(SafeString::New(getFieldTypeName(def-&gt;this_-&gt;GetType())));
 }
 
 /**
  * @attribute ignored
  * @type {Boolean}
  */
-NAN_GETTER(FieldDefn::ignoredGetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	info.GetReturnValue().Set(Nan::New&lt;Boolean&gt;(def-&gt;this_-&gt;IsIgnored()));
+NAN_GETTER(FieldDefn::ignoredGetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  info.GetReturnValue().Set(Nan::New&lt;Boolean&gt;(def-&gt;this_-&gt;IsIgnored()));
 }
 
 /**
- * Field justification (see {{#crossLink &quot;Constants (OJ)&quot;}}OJ constants{{/crossLink}})
+ * Field justification (see {{#crossLink &quot;Constants (OJ)&quot;}}OJ
+ * constants{{/crossLink}})
  *
  * @attribute justification
  * @type {String}
  */
-NAN_GETTER(FieldDefn::justificationGetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	OGRJustification justification = def-&gt;this_-&gt;GetJustify();
-	if (justification == OJRight) { 
-		info.GetReturnValue().Set(Nan::New(&quot;Right&quot;).ToLocalChecked());
-		return;
-	}
-	if (justification == OJLeft) {
-		info.GetReturnValue().Set(Nan::New(&quot;Left&quot;).ToLocalChecked());
-		return;
-	}
-	info.GetReturnValue().Set(Nan::Undefined());
+NAN_GETTER(FieldDefn::justificationGetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  OGRJustification justification = def-&gt;this_-&gt;GetJustify();
+  if (justification == OJRight) {
+    info.GetReturnValue().Set(Nan::New(&quot;Right&quot;).ToLocalChecked());
+    return;
+  }
+  if (justification == OJLeft) {
+    info.GetReturnValue().Set(Nan::New(&quot;Left&quot;).ToLocalChecked());
+    return;
+  }
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 /**
  * @attribute width
  * @type {Integer}
  */
-NAN_GETTER(FieldDefn::widthGetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(def-&gt;this_-&gt;GetWidth()));
+NAN_GETTER(FieldDefn::widthGetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(def-&gt;this_-&gt;GetWidth()));
 }
 
 /**
  * @attribute precision
  * @type {Integer}
  */
-NAN_GETTER(FieldDefn::precisionGetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(def-&gt;this_-&gt;GetPrecision()));
+NAN_GETTER(FieldDefn::precisionGetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(def-&gt;this_-&gt;GetPrecision()));
 }
 
-NAN_SETTER(FieldDefn::nameSetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	if(!value-&gt;IsString()){
-		Nan::ThrowError(&quot;Name must be string&quot;);
-		return;
-	}
-	std::string name = *Nan::Utf8String(value);
-	def-&gt;this_-&gt;SetName(name.c_str());
+NAN_SETTER(FieldDefn::nameSetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  if (!value-&gt;IsString()) {
+    Nan::ThrowError(&quot;Name must be string&quot;);
+    return;
+  }
+  std::string name = *Nan::Utf8String(value);
+  def-&gt;this_-&gt;SetName(name.c_str());
 }
 
-NAN_SETTER(FieldDefn::typeSetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	if(!value-&gt;IsString()){
-		Nan::ThrowError(&quot;type must be a string&quot;);
-		return;
-	}
-	std::string name = *Nan::Utf8String(value);
-	int type = getFieldTypeByName(name.c_str());
-	if(type &lt; 0){
-		Nan::ThrowError(&quot;Unrecognized field type&quot;);
-	} else {
-		def-&gt;this_-&gt;SetType(OGRFieldType(type));
-	}
-
+NAN_SETTER(FieldDefn::typeSetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  if (!value-&gt;IsString()) {
+    Nan::ThrowError(&quot;type must be a string&quot;);
+    return;
+  }
+  std::string name = *Nan::Utf8String(value);
+  int type = getFieldTypeByName(name.c_str());
+  if (type &lt; 0) {
+    Nan::ThrowError(&quot;Unrecognized field type&quot;);
+  } else {
+    def-&gt;this_-&gt;SetType(OGRFieldType(type));
+  }
 }
 
-NAN_SETTER(FieldDefn::justificationSetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+NAN_SETTER(FieldDefn::justificationSetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
 
+  OGRJustification justification;
+  std::string str = *Nan::Utf8String(value);
+  if (value-&gt;IsString()) {
+    if (str == &quot;Left&quot;) {
+      justification = OJLeft;
+    } else if (str == &quot;Right&quot;) {
+      justification = OJRight;
+    } else if (str == &quot;Undefined&quot;) {
+      justification = OJUndefined;
+    } else {
+      Nan::ThrowError(&quot;Unrecognized justification&quot;);
+      return;
+    }
+  } else if (value-&gt;IsNull() || value-&gt;IsUndefined()) {
+    justification = OJUndefined;
+  } else {
+    Nan::ThrowError(&quot;justification must be a string or undefined&quot;);
+    return;
+  }
 
-	OGRJustification justification;
-	std::string str = *Nan::Utf8String(value);
-	if(value-&gt;IsString()){
-		if(str == &quot;Left&quot;) {
-			justification = OJLeft;
-		} else if (str == &quot;Right&quot;) {
-			justification = OJRight;
-		} else if (str == &quot;Undefined&quot;) {
-			justification = OJUndefined;
-		} else {
-			Nan::ThrowError(&quot;Unrecognized justification&quot;);
-			return;
-		}
-	} else if (value-&gt;IsNull() || value-&gt;IsUndefined()){
-		justification = OJUndefined;
-	} else {
-		Nan::ThrowError(&quot;justification must be a string or undefined&quot;);
-		return;
-	}
-
-	def-&gt;this_-&gt;SetJustify(justification);
+  def-&gt;this_-&gt;SetJustify(justification);
 }
 
-NAN_SETTER(FieldDefn::widthSetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	if(!value-&gt;IsInt32()){
-		Nan::ThrowError(&quot;width must be an integer&quot;);
-		return;
-	}
-	def-&gt;this_-&gt;SetWidth(Nan::To&lt;int64_t&gt;(value).ToChecked());
+NAN_SETTER(FieldDefn::widthSetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  if (!value-&gt;IsInt32()) {
+    Nan::ThrowError(&quot;width must be an integer&quot;);
+    return;
+  }
+  def-&gt;this_-&gt;SetWidth(Nan::To&lt;int64_t&gt;(value).ToChecked());
 }
 
-NAN_SETTER(FieldDefn::precisionSetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	if(!value-&gt;IsInt32()){
-		Nan::ThrowError(&quot;precision must be an integer&quot;);
-		return;
-	}
-	def-&gt;this_-&gt;SetPrecision(Nan::To&lt;int64_t&gt;(value).ToChecked());
+NAN_SETTER(FieldDefn::precisionSetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  if (!value-&gt;IsInt32()) {
+    Nan::ThrowError(&quot;precision must be an integer&quot;);
+    return;
+  }
+  def-&gt;this_-&gt;SetPrecision(Nan::To&lt;int64_t&gt;(value).ToChecked());
 }
 
-NAN_SETTER(FieldDefn::ignoredSetter)
-{
-	Nan::HandleScope scope;
-	FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
-	if(!value-&gt;IsBoolean()){
-		Nan::ThrowError(&quot;ignored must be a boolean&quot;);
-		return;
-	}
-	def-&gt;this_-&gt;SetIgnored(Nan::To&lt;int64_t&gt;(value).ToChecked());
+NAN_SETTER(FieldDefn::ignoredSetter) {
+  Nan::HandleScope scope;
+  FieldDefn *def = Nan::ObjectWrap::Unwrap&lt;FieldDefn&gt;(info.This());
+  if (!value-&gt;IsBoolean()) {
+    Nan::ThrowError(&quot;ignored must be a boolean&quot;);
+    return;
+  }
+  def-&gt;this_-&gt;SetIgnored(Nan::To&lt;int64_t&gt;(value).ToChecked());
 }
 
 } // namespace node_gdal

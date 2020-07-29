@@ -124,8 +124,8 @@
 <div class="file">
     <pre class="prettyprint linenums">
 
-#include &quot;gdal_common.hpp&quot;
 #include &quot;gdal_spatial_reference.hpp&quot;
+#include &quot;gdal_common.hpp&quot;
 #include &quot;utils/string_list.hpp&quot;
 
 namespace node_gdal {
@@ -133,182 +133,166 @@ namespace node_gdal {
 Nan::Persistent&lt;FunctionTemplate&gt; SpatialReference::constructor;
 ObjectCache&lt;OGRSpatialReference, SpatialReference&gt; SpatialReference::cache;
 
-void SpatialReference::Initialize(Local&lt;Object&gt; target)
-{
-	Nan::HandleScope scope;
+void SpatialReference::Initialize(Local&lt;Object&gt; target) {
+  Nan::HandleScope scope;
 
-	Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(SpatialReference::New);
-	lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
-	lcons-&gt;SetClassName(Nan::New(&quot;SpatialReference&quot;).ToLocalChecked());
+  Local&lt;FunctionTemplate&gt; lcons = Nan::New&lt;FunctionTemplate&gt;(SpatialReference::New);
+  lcons-&gt;InstanceTemplate()-&gt;SetInternalFieldCount(1);
+  lcons-&gt;SetClassName(Nan::New(&quot;SpatialReference&quot;).ToLocalChecked());
 
-	Nan::SetMethod(lcons, &quot;fromUserInput&quot;, fromUserInput);
-	Nan::SetMethod(lcons, &quot;fromWKT&quot;, fromWKT);
-	Nan::SetMethod(lcons, &quot;fromProj4&quot;, fromProj4);
-	Nan::SetMethod(lcons, &quot;fromEPSG&quot;, fromEPSG);
-	Nan::SetMethod(lcons, &quot;fromEPSGA&quot;, fromEPSGA);
-	Nan::SetMethod(lcons, &quot;fromESRI&quot;, fromESRI);
-	Nan::SetMethod(lcons, &quot;fromWMSAUTO&quot;, fromWMSAUTO);
-	Nan::SetMethod(lcons, &quot;fromXML&quot;, fromXML);
-	Nan::SetMethod(lcons, &quot;fromURN&quot;, fromURN);
-	Nan::SetMethod(lcons, &quot;fromCRSURL&quot;, fromCRSURL);
-	Nan::SetMethod(lcons, &quot;fromURL&quot;, fromURL);
-	Nan::SetMethod(lcons, &quot;fromMICoordSys&quot;, fromMICoordSys);
+  Nan::SetMethod(lcons, &quot;fromUserInput&quot;, fromUserInput);
+  Nan::SetMethod(lcons, &quot;fromWKT&quot;, fromWKT);
+  Nan::SetMethod(lcons, &quot;fromProj4&quot;, fromProj4);
+  Nan::SetMethod(lcons, &quot;fromEPSG&quot;, fromEPSG);
+  Nan::SetMethod(lcons, &quot;fromEPSGA&quot;, fromEPSGA);
+  Nan::SetMethod(lcons, &quot;fromESRI&quot;, fromESRI);
+  Nan::SetMethod(lcons, &quot;fromWMSAUTO&quot;, fromWMSAUTO);
+  Nan::SetMethod(lcons, &quot;fromXML&quot;, fromXML);
+  Nan::SetMethod(lcons, &quot;fromURN&quot;, fromURN);
+  Nan::SetMethod(lcons, &quot;fromCRSURL&quot;, fromCRSURL);
+  Nan::SetMethod(lcons, &quot;fromURL&quot;, fromURL);
+  Nan::SetMethod(lcons, &quot;fromMICoordSys&quot;, fromMICoordSys);
 
-	Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
-	Nan::SetPrototypeMethod(lcons, &quot;toWKT&quot;, exportToWKT);
-	Nan::SetPrototypeMethod(lcons, &quot;toPrettyWKT&quot;, exportToPrettyWKT);
-	Nan::SetPrototypeMethod(lcons, &quot;toProj4&quot;, exportToProj4);
-	Nan::SetPrototypeMethod(lcons, &quot;toXML&quot;, exportToXML);
+  Nan::SetPrototypeMethod(lcons, &quot;toString&quot;, toString);
+  Nan::SetPrototypeMethod(lcons, &quot;toWKT&quot;, exportToWKT);
+  Nan::SetPrototypeMethod(lcons, &quot;toPrettyWKT&quot;, exportToPrettyWKT);
+  Nan::SetPrototypeMethod(lcons, &quot;toProj4&quot;, exportToProj4);
+  Nan::SetPrototypeMethod(lcons, &quot;toXML&quot;, exportToXML);
 
-	Nan::SetPrototypeMethod(lcons, &quot;clone&quot;, clone);
-	Nan::SetPrototypeMethod(lcons, &quot;cloneGeogCS&quot;, cloneGeogCS);
-	Nan::SetPrototypeMethod(lcons, &quot;setWellKnownGeogCS&quot;, setWellKnownGeogCS);
-	Nan::SetPrototypeMethod(lcons, &quot;morphToESRI&quot;, morphToESRI);
-	Nan::SetPrototypeMethod(lcons, &quot;morphFromESRI&quot;, morphFromESRI);
-	Nan::SetPrototypeMethod(lcons, &quot;EPSGTreatsAsLatLong&quot;, EPSGTreatsAsLatLong);
-	Nan::SetPrototypeMethod(lcons, &quot;EPSGTreatsAsNorthingEasting&quot;, EPSGTreatsAsNorthingEasting);
-	Nan::SetPrototypeMethod(lcons, &quot;getLinearUnits&quot;, getLinearUnits);
-	Nan::SetPrototypeMethod(lcons, &quot;getAngularUnits&quot;, getAngularUnits);
-	Nan::SetPrototypeMethod(lcons, &quot;isGeographic&quot;, isGeographic);
-	Nan::SetPrototypeMethod(lcons, &quot;isGeocentric&quot;, isGeocentric);
-	Nan::SetPrototypeMethod(lcons, &quot;isProjected&quot;, isProjected);
-	Nan::SetPrototypeMethod(lcons, &quot;isLocal&quot;, isLocal);
-	Nan::SetPrototypeMethod(lcons, &quot;isVectical&quot;, isVertical);
-	Nan::SetPrototypeMethod(lcons, &quot;isCompound&quot;, isCompound);
-	Nan::SetPrototypeMethod(lcons, &quot;isSameGeogCS&quot;, isSameGeogCS);
-	Nan::SetPrototypeMethod(lcons, &quot;isSameVertCS&quot;, isSameVertCS);
-	Nan::SetPrototypeMethod(lcons, &quot;isSame&quot;, isSame);
-	Nan::SetPrototypeMethod(lcons, &quot;getAuthorityName&quot;, getAuthorityName);
-	Nan::SetPrototypeMethod(lcons, &quot;getAuthorityCode&quot;, getAuthorityCode);
-	Nan::SetPrototypeMethod(lcons, &quot;getAttrValue&quot;, getAttrValue);
-	Nan::SetPrototypeMethod(lcons, &quot;autoIdentifyEPSG&quot;, autoIdentifyEPSG);
-	Nan::SetPrototypeMethod(lcons, &quot;validate&quot;, validate);
+  Nan::SetPrototypeMethod(lcons, &quot;clone&quot;, clone);
+  Nan::SetPrototypeMethod(lcons, &quot;cloneGeogCS&quot;, cloneGeogCS);
+  Nan::SetPrototypeMethod(lcons, &quot;setWellKnownGeogCS&quot;, setWellKnownGeogCS);
+  Nan::SetPrototypeMethod(lcons, &quot;morphToESRI&quot;, morphToESRI);
+  Nan::SetPrototypeMethod(lcons, &quot;morphFromESRI&quot;, morphFromESRI);
+  Nan::SetPrototypeMethod(lcons, &quot;EPSGTreatsAsLatLong&quot;, EPSGTreatsAsLatLong);
+  Nan::SetPrototypeMethod(lcons, &quot;EPSGTreatsAsNorthingEasting&quot;, EPSGTreatsAsNorthingEasting);
+  Nan::SetPrototypeMethod(lcons, &quot;getLinearUnits&quot;, getLinearUnits);
+  Nan::SetPrototypeMethod(lcons, &quot;getAngularUnits&quot;, getAngularUnits);
+  Nan::SetPrototypeMethod(lcons, &quot;isGeographic&quot;, isGeographic);
+  Nan::SetPrototypeMethod(lcons, &quot;isGeocentric&quot;, isGeocentric);
+  Nan::SetPrototypeMethod(lcons, &quot;isProjected&quot;, isProjected);
+  Nan::SetPrototypeMethod(lcons, &quot;isLocal&quot;, isLocal);
+  Nan::SetPrototypeMethod(lcons, &quot;isVectical&quot;, isVertical);
+  Nan::SetPrototypeMethod(lcons, &quot;isCompound&quot;, isCompound);
+  Nan::SetPrototypeMethod(lcons, &quot;isSameGeogCS&quot;, isSameGeogCS);
+  Nan::SetPrototypeMethod(lcons, &quot;isSameVertCS&quot;, isSameVertCS);
+  Nan::SetPrototypeMethod(lcons, &quot;isSame&quot;, isSame);
+  Nan::SetPrototypeMethod(lcons, &quot;getAuthorityName&quot;, getAuthorityName);
+  Nan::SetPrototypeMethod(lcons, &quot;getAuthorityCode&quot;, getAuthorityCode);
+  Nan::SetPrototypeMethod(lcons, &quot;getAttrValue&quot;, getAttrValue);
+  Nan::SetPrototypeMethod(lcons, &quot;autoIdentifyEPSG&quot;, autoIdentifyEPSG);
+  Nan::SetPrototypeMethod(lcons, &quot;validate&quot;, validate);
 
-	Nan::Set(target, Nan::New(&quot;SpatialReference&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New(&quot;SpatialReference&quot;).ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
-	constructor.Reset(lcons);
+  constructor.Reset(lcons);
 }
 
-SpatialReference::SpatialReference(OGRSpatialReference *srs)
-	: Nan::ObjectWrap(),
-	  this_(srs),
-	  owned_(false)
-{
-	LOG(&quot;Created SpatialReference [%p]&quot;, srs);
+SpatialReference::SpatialReference(OGRSpatialReference *srs) : Nan::ObjectWrap(), this_(srs), owned_(false) {
+  LOG(&quot;Created SpatialReference [%p]&quot;, srs);
 }
 
-SpatialReference::SpatialReference()
-	: Nan::ObjectWrap(),
-	  this_(0),
-	  owned_(false)
-{
+SpatialReference::SpatialReference() : Nan::ObjectWrap(), this_(0), owned_(false) {
 }
 
-SpatialReference::~SpatialReference()
-{
-	dispose();
+SpatialReference::~SpatialReference() {
+  dispose();
 }
 
-void SpatialReference::dispose()
-{
-	if (this_) {
-		LOG(&quot;Disposing SpatialReference [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
-		cache.erase(this_);
-		if (owned_) {
-			//Decrements the reference count by one, and destroy if zero.
-			this_-&gt;Release();
-		}
-		LOG(&quot;Disposed SpatialReference [%p]&quot;, this_);
-		this_ = NULL;
-	}
+void SpatialReference::dispose() {
+  if (this_) {
+    LOG(&quot;Disposing SpatialReference [%p] (%s)&quot;, this_, owned_ ? &quot;owned&quot; : &quot;unowned&quot;);
+    cache.erase(this_);
+    if (owned_) {
+      // Decrements the reference count by one, and destroy if zero.
+      this_-&gt;Release();
+    }
+    LOG(&quot;Disposed SpatialReference [%p]&quot;, this_);
+    this_ = NULL;
+  }
 }
 
 /**
- * This class respresents a OpenGIS Spatial Reference System, and contains methods
- * for converting between this object organization and well known text (WKT)
- * format.
+ * This class respresents a OpenGIS Spatial Reference System, and contains
+ * methods for converting between this object organization and well known text
+ * (WKT) format.
  *
  * @constructor
  * @class gdal.SpatialReference
  * @param {String} [wkt]
  */
-NAN_METHOD(SpatialReference::New)
-{
-	Nan::HandleScope scope;
-	SpatialReference *f;
-	OGRSpatialReference *srs;
-	std::string wkt(&quot;&quot;);
+NAN_METHOD(SpatialReference::New) {
+  Nan::HandleScope scope;
+  SpatialReference *f;
+  OGRSpatialReference *srs;
+  std::string wkt(&quot;&quot;);
 
-	if (!info.IsConstructCall()) {
-		Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
-		return;
-	}
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError(&quot;Cannot call constructor as function, you need to use &#x27;new&#x27; keyword&quot;);
+    return;
+  }
 
-	if (info[0]-&gt;IsExternal()) {
-		Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
-		void* ptr = ext-&gt;Value();
-		f = static_cast&lt;SpatialReference *&gt;(ptr);
-		f-&gt;Wrap(info.This());
-	} else {
-		NODE_ARG_OPT_STR(0, &quot;wkt&quot;, wkt);
-		//sets reference count to one
-		srs = new OGRSpatialReference(wkt.empty() ? 0 : wkt.c_str());
-		if (!wkt.empty()) {
-			char* wkt_c = (char*) wkt.c_str();
-			int err = srs-&gt;importFromWkt(&amp;wkt_c);
-			if (err) {
-				NODE_THROW_OGRERR(err);
-				return;
-			}
-		}
-		f = new SpatialReference(srs);
-		f-&gt;owned_ = true;
-		f-&gt;Wrap(info.This());
+  if (info[0]-&gt;IsExternal()) {
+    Local&lt;External&gt; ext = info[0].As&lt;External&gt;();
+    void *ptr = ext-&gt;Value();
+    f = static_cast&lt;SpatialReference *&gt;(ptr);
+    f-&gt;Wrap(info.This());
+  } else {
+    NODE_ARG_OPT_STR(0, &quot;wkt&quot;, wkt);
+    // sets reference count to one
+    srs = new OGRSpatialReference(wkt.empty() ? 0 : wkt.c_str());
+    if (!wkt.empty()) {
+      char *wkt_c = (char *)wkt.c_str();
+      int err = srs-&gt;importFromWkt(&amp;wkt_c);
+      if (err) {
+        NODE_THROW_OGRERR(err);
+        return;
+      }
+    }
+    f = new SpatialReference(srs);
+    f-&gt;owned_ = true;
+    f-&gt;Wrap(info.This());
 
-		cache.add(srs, info.This());
-	}
+    cache.add(srs, info.This());
+  }
 
-	info.GetReturnValue().Set(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
-Local&lt;Value&gt; SpatialReference::New(OGRSpatialReference *srs)
-{
-	Nan::EscapableHandleScope scope;
-	return scope.Escape(SpatialReference::New(srs, false));
+Local&lt;Value&gt; SpatialReference::New(OGRSpatialReference *srs) {
+  Nan::EscapableHandleScope scope;
+  return scope.Escape(SpatialReference::New(srs, false));
 }
 
-Local&lt;Value&gt; SpatialReference::New(OGRSpatialReference *raw, bool owned)
-{
-	Nan::EscapableHandleScope scope;
+Local&lt;Value&gt; SpatialReference::New(OGRSpatialReference *raw, bool owned) {
+  Nan::EscapableHandleScope scope;
 
-	if (!raw) {
-		return scope.Escape(Nan::Null());
-	}
-	if (cache.has(raw)) {
-		return scope.Escape(cache.get(raw));
-	}
+  if (!raw) { return scope.Escape(Nan::Null()); }
+  if (cache.has(raw)) { return scope.Escape(cache.get(raw)); }
 
-	//make a copy of spatialreference owned by a layer, feature, etc
-	// + no need to track when a layer is destroyed
-	// + no need to throw errors when a method trys to modify an owned read-only srs
-	// - is slower
+  // make a copy of spatialreference owned by a layer, feature, etc
+  // + no need to track when a layer is destroyed
+  // + no need to throw errors when a method trys to modify an owned read-only
+  // srs
+  // - is slower
 
-	OGRSpatialReference* cloned_srs = raw-&gt;Clone();
+  OGRSpatialReference *cloned_srs = raw-&gt;Clone();
 
-	SpatialReference *wrapped = new SpatialReference(cloned_srs);
-	wrapped-&gt;owned_ = true;
-	Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
-	Local&lt;Object&gt; obj = Nan::NewInstance(Nan::GetFunction(Nan::New(SpatialReference::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
+  SpatialReference *wrapped = new SpatialReference(cloned_srs);
+  wrapped-&gt;owned_ = true;
+  Local&lt;Value&gt; ext = Nan::New&lt;External&gt;(wrapped);
+  Local&lt;Object&gt; obj =
+    Nan::NewInstance(Nan::GetFunction(Nan::New(SpatialReference::constructor)).ToLocalChecked(), 1, &amp;ext)
+      .ToLocalChecked();
 
-	cache.add(cloned_srs, raw, obj);
+  cache.add(cloned_srs, raw, obj);
 
-	return scope.Escape(obj);
+  return scope.Escape(obj);
 }
 
-NAN_METHOD(SpatialReference::toString)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::New(&quot;SpatialReference&quot;).ToLocalChecked());
+NAN_METHOD(SpatialReference::toString) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New(&quot;SpatialReference&quot;).ToLocalChecked());
 }
 
 /**
@@ -317,7 +301,8 @@ NAN_METHOD(SpatialReference::toString)
  * @method setWellKnownGeogCS
  * @param {String} name
  */
-NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_STRING_PARAM(SpatialReference, setWellKnownGeogCS, SetWellKnownGeogCS, &quot;input&quot;);
+NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_STRING_PARAM(
+  SpatialReference, setWellKnownGeogCS, SetWellKnownGeogCS, &quot;input&quot;);
 
 /**
  * Convert in place to ESRI WKT format.
@@ -353,8 +338,8 @@ NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(SpatialReference, morphFromESRI, morphFro
 NODE_WRAPPED_METHOD_WITH_RESULT(SpatialReference, EPSGTreatsAsLatLong, Boolean, EPSGTreatsAsLatLong);
 
 /**
- * This method returns &#x60;true&#x60; if EPSG feels this projected coordinate system should
- * be treated as having northing/easting coordinate ordering.
+ * This method returns &#x60;true&#x60; if EPSG feels this projected coordinate system
+ * should be treated as having northing/easting coordinate ordering.
  *
  * @method EPSGTreatsAsNorthingEasting
  * @return {Boolean}
@@ -416,7 +401,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT(SpatialReference, isCompound, Boolean, IsCompoun
  * @param {gdal.SpatialReference} srs
  * @return {Boolean}
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(SpatialReference, isSameGeogCS, Boolean, IsSameGeogCS, SpatialReference, &quot;srs&quot;);
+NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  SpatialReference, isSameGeogCS, Boolean, IsSameGeogCS, SpatialReference, &quot;srs&quot;);
 
 /**
  * Do the VertCS&#x27;es match?
@@ -425,7 +411,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(SpatialReference, isSameGeogCS, 
  * @param {gdal.SpatialReference} srs
  * @return {Boolean}
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(SpatialReference, isSameVertCS, Boolean, IsSameVertCS, SpatialReference, &quot;srs&quot;);
+NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  SpatialReference, isSameVertCS, Boolean, IsSameVertCS, SpatialReference, &quot;srs&quot;);
 
 /**
  * Do these two spatial references describe the same system?
@@ -450,11 +437,10 @@ NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(SpatialReference, autoIdentifyEPSG, AutoI
  * @method clone
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::clone)
-{
-	Nan::HandleScope scope;
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
-	info.GetReturnValue().Set(SpatialReference::New(srs-&gt;this_-&gt;Clone()));
+NAN_METHOD(SpatialReference::clone) {
+  Nan::HandleScope scope;
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  info.GetReturnValue().Set(SpatialReference::New(srs-&gt;this_-&gt;Clone()));
 }
 
 /**
@@ -463,49 +449,50 @@ NAN_METHOD(SpatialReference::clone)
  * @method cloneGeogCS
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::cloneGeogCS)
-{
-	Nan::HandleScope scope;
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
-	info.GetReturnValue().Set(SpatialReference::New(srs-&gt;this_-&gt;CloneGeogCS()));
+NAN_METHOD(SpatialReference::cloneGeogCS) {
+  Nan::HandleScope scope;
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  info.GetReturnValue().Set(SpatialReference::New(srs-&gt;this_-&gt;CloneGeogCS()));
 }
 
 /**
  * Get the authority name for a node. The most common authority is &quot;EPSG&quot;.
  *
  * @method getAuthorityName
- * @param {string} target_key The partial or complete path to the node to get an authority from. ie. &#x60;&quot;PROJCS&quot;&#x60;, &#x60;&quot;GEOGCS&quot;&#x60;, &quot;&#x60;GEOGCS|UNIT&quot;&#x60; or &#x60;null&#x60; to search for an authority node on the root element.
+ * @param {string} target_key The partial or complete path to the node to get an
+ * authority from. ie. &#x60;&quot;PROJCS&quot;&#x60;, &#x60;&quot;GEOGCS&quot;&#x60;, &quot;&#x60;GEOGCS|UNIT&quot;&#x60; or &#x60;null&#x60; to
+ * search for an authority node on the root element.
  * @return {string}
  */
-NAN_METHOD(SpatialReference::getAuthorityName)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::getAuthorityName) {
+  Nan::HandleScope scope;
 
-	std::string key = &quot;&quot;;
-	NODE_ARG_OPT_STR(0, &quot;target key&quot;, key);
+  std::string key = &quot;&quot;;
+  NODE_ARG_OPT_STR(0, &quot;target key&quot;, key);
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
 
-	info.GetReturnValue().Set(SafeString::New(srs-&gt;this_-&gt;GetAuthorityName(key.length() ? key.c_str() : NULL)));
+  info.GetReturnValue().Set(SafeString::New(srs-&gt;this_-&gt;GetAuthorityName(key.length() ? key.c_str() : NULL)));
 }
 
 /**
  * Get the authority code for a node.
  *
  * @method getAuthorityCode
- * @param {string} target_key The partial or complete path to the node to get an authority from. ie. &#x60;&quot;PROJCS&quot;&#x60;, &#x60;&quot;GEOGCS&quot;&#x60;, &quot;&#x60;GEOGCS|UNIT&quot;&#x60; or &#x60;null&#x60; to search for an authority node on the root element.
+ * @param {string} target_key The partial or complete path to the node to get an
+ * authority from. ie. &#x60;&quot;PROJCS&quot;&#x60;, &#x60;&quot;GEOGCS&quot;&#x60;, &quot;&#x60;GEOGCS|UNIT&quot;&#x60; or &#x60;null&#x60; to
+ * search for an authority node on the root element.
  * @return {string}
  */
-NAN_METHOD(SpatialReference::getAuthorityCode)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::getAuthorityCode) {
+  Nan::HandleScope scope;
 
-	std::string key = &quot;&quot;;
-	NODE_ARG_OPT_STR(0, &quot;target key&quot;, key);
+  std::string key = &quot;&quot;;
+  NODE_ARG_OPT_STR(0, &quot;target key&quot;, key);
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
 
-	info.GetReturnValue().Set(SafeString::New(srs-&gt;this_-&gt;GetAuthorityCode(key.length() ? key.c_str() : NULL)));
+  info.GetReturnValue().Set(SafeString::New(srs-&gt;this_-&gt;GetAuthorityCode(key.length() ? key.c_str() : NULL)));
 }
 
 /**
@@ -515,53 +502,52 @@ NAN_METHOD(SpatialReference::getAuthorityCode)
  * @method toWKT
  * @return {string}
  */
-NAN_METHOD(SpatialReference::exportToWKT)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::exportToWKT) {
+  Nan::HandleScope scope;
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
-	char* str;
-	Local&lt;Value&gt; result;
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  char *str;
+  Local&lt;Value&gt; result;
 
-	int err = srs-&gt;this_-&gt;exportToWkt(&amp;str);
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
-	result = SafeString::New(str);
-	CPLFree(str);
+  int err = srs-&gt;this_-&gt;exportToWkt(&amp;str);
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
+  result = SafeString::New(str);
+  CPLFree(str);
 
-	info.GetReturnValue().Set(result);
+  info.GetReturnValue().Set(result);
 }
 
 /**
- * Convert this SRS into a a nicely formatted WKT string for display to a person.
+ * Convert this SRS into a a nicely formatted WKT string for display to a
+ * person.
  *
  * @throws Error
  * @method toPrettyWKT
  * @param {Boolean} [simplify=false]
  * @return {string}
  */
-NAN_METHOD(SpatialReference::exportToPrettyWKT)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::exportToPrettyWKT) {
+  Nan::HandleScope scope;
 
-	int simplify = 0;
-	NODE_ARG_BOOL_OPT(0, &quot;simplify&quot;, simplify);
+  int simplify = 0;
+  NODE_ARG_BOOL_OPT(0, &quot;simplify&quot;, simplify);
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
-	char* str;
-	Local&lt;Value&gt; result;
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  char *str;
+  Local&lt;Value&gt; result;
 
-	int err = srs-&gt;this_-&gt;exportToPrettyWkt(&amp;str, simplify);
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
-	result = SafeString::New(str);
-	CPLFree(str);
+  int err = srs-&gt;this_-&gt;exportToPrettyWkt(&amp;str, simplify);
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
+  result = SafeString::New(str);
+  CPLFree(str);
 
-	info.GetReturnValue().Set(result);
+  info.GetReturnValue().Set(result);
 }
 
 /**
@@ -571,28 +557,27 @@ NAN_METHOD(SpatialReference::exportToPrettyWKT)
  * @method toProj4
  * @return {string}
  */
-NAN_METHOD(SpatialReference::exportToProj4)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::exportToProj4) {
+  Nan::HandleScope scope;
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
-	char* str;
-	Local&lt;Value&gt; result;
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  char *str;
+  Local&lt;Value&gt; result;
 
-	int err = srs-&gt;this_-&gt;exportToProj4(&amp;str);
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  int err = srs-&gt;this_-&gt;exportToProj4(&amp;str);
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	if(str){
-		result = Nan::New(CPLString(str).Trim().c_str()).ToLocalChecked();
-	} else {
-		result = Nan::Null();
-	}
-	CPLFree(str);
+  if (str) {
+    result = Nan::New(CPLString(str).Trim().c_str()).ToLocalChecked();
+  } else {
+    result = Nan::Null();
+  }
+  CPLFree(str);
 
-	info.GetReturnValue().Set(result);
+  info.GetReturnValue().Set(result);
 }
 
 /**
@@ -602,23 +587,22 @@ NAN_METHOD(SpatialReference::exportToProj4)
  * @method toXML
  * @return {string}
  */
-NAN_METHOD(SpatialReference::exportToXML)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::exportToXML) {
+  Nan::HandleScope scope;
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
-	char* str;
-	Local&lt;Value&gt; result;
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  char *str;
+  Local&lt;Value&gt; result;
 
-	int err = srs-&gt;this_-&gt;exportToXML(&amp;str);
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
-	result = SafeString::New(str);
-	CPLFree(str);
+  int err = srs-&gt;this_-&gt;exportToXML(&amp;str);
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
+  result = SafeString::New(str);
+  CPLFree(str);
 
-	info.GetReturnValue().Set(result);
+  info.GetReturnValue().Set(result);
 }
 
 /**
@@ -629,16 +613,15 @@ NAN_METHOD(SpatialReference::exportToXML)
  * @param {Integer} [attr_index=0]
  * @return {string}
  */
-NAN_METHOD(SpatialReference::getAttrValue)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::getAttrValue) {
+  Nan::HandleScope scope;
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
-	std::string node_name(&quot;&quot;);
-	int child = 0;
-	NODE_ARG_STR(0, &quot;node name&quot;, node_name);
-	NODE_ARG_INT_OPT(1, &quot;child&quot;, child);
-	info.GetReturnValue().Set(SafeString::New(srs-&gt;this_-&gt;GetAttrValue(node_name.c_str(), child)));
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  std::string node_name(&quot;&quot;);
+  int child = 0;
+  NODE_ARG_STR(0, &quot;node name&quot;, node_name);
+  NODE_ARG_INT_OPT(1, &quot;child&quot;, child);
+  info.GetReturnValue().Set(SafeString::New(srs-&gt;this_-&gt;GetAttrValue(node_name.c_str(), child)));
 }
 
 /**
@@ -650,22 +633,21 @@ NAN_METHOD(SpatialReference::getAttrValue)
  * @param {String} wkt
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromWKT)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromWKT) {
+  Nan::HandleScope scope;
 
-	std::string wkt(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;wkt&quot;, wkt);
-	char* str = (char*) wkt.c_str();
+  std::string wkt(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;wkt&quot;, wkt);
+  char *str = (char *)wkt.c_str();
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromWkt(&amp;str);
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromWkt(&amp;str);
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -677,21 +659,20 @@ NAN_METHOD(SpatialReference::fromWKT)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromProj4)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromProj4) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;input&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;input&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromProj4(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromProj4(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -711,21 +692,20 @@ NAN_METHOD(SpatialReference::fromProj4)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromWMSAUTO)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromWMSAUTO) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;input&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;input&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromWMSAUTO(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromWMSAUTO(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -737,21 +717,20 @@ NAN_METHOD(SpatialReference::fromWMSAUTO)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromXML)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromXML) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;xml&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;xml&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromXML(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromXML(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -767,21 +746,20 @@ NAN_METHOD(SpatialReference::fromXML)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromURN)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromURN) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;input&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;input&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromURN(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromURN(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -797,21 +775,20 @@ NAN_METHOD(SpatialReference::fromURN)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromCRSURL)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromCRSURL) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;url&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;url&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromCRSURL(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromCRSURL(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -825,21 +802,20 @@ NAN_METHOD(SpatialReference::fromCRSURL)
  * @param {String} url
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromURL)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromURL) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;url&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;url&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromUrl(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromUrl(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -851,21 +827,20 @@ NAN_METHOD(SpatialReference::fromURL)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromMICoordSys)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromMICoordSys) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;input&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;input&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromMICoordSys(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromMICoordSys(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -880,21 +855,20 @@ NAN_METHOD(SpatialReference::fromMICoordSys)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromUserInput)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromUserInput) {
+  Nan::HandleScope scope;
 
-	std::string input(&quot;&quot;);
-	NODE_ARG_STR(0, &quot;input&quot;, input);
+  std::string input(&quot;&quot;);
+  NODE_ARG_STR(0, &quot;input&quot;, input);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;SetFromUserInput(input.c_str());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;SetFromUserInput(input.c_str());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -910,31 +884,30 @@ NAN_METHOD(SpatialReference::fromUserInput)
  * @param {String} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromEPSG)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromEPSG) {
+  Nan::HandleScope scope;
 
-	int epsg;
-	NODE_ARG_INT(0, &quot;epsg&quot;, epsg);
+  int epsg;
+  NODE_ARG_INT(0, &quot;epsg&quot;, epsg);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromEPSG(epsg);
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromEPSG(epsg);
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
  * Initialize from EPSG GCS or PCS code.
  *
- * This method is similar to &#x60;fromEPSG()&#x60; except that EPSG preferred axis ordering
- * *will* be applied for geographic and projected coordinate systems. EPSG normally
- * defines geographic coordinate systems to use lat/long, and also there are also
- * a few projected coordinate systems that use northing/easting order contrary
- * to typical GIS use).
+ * This method is similar to &#x60;fromEPSG()&#x60; except that EPSG preferred axis
+ * ordering *will* be applied for geographic and projected coordinate systems.
+ * EPSG normally defines geographic coordinate systems to use lat/long, and also
+ * there are also a few projected coordinate systems that use northing/easting
+ * order contrary to typical GIS use).
  *
  * @example
  * &#x60;&#x60;&#x60;
@@ -946,29 +919,36 @@ NAN_METHOD(SpatialReference::fromEPSG)
  * @param {Integer} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromEPSGA)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromEPSGA) {
+  Nan::HandleScope scope;
 
-	int epsg;
-	NODE_ARG_INT(0, &quot;epsg&quot;, epsg);
+  int epsg;
+  NODE_ARG_INT(0, &quot;epsg&quot;, epsg);
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromEPSGA(epsg);
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromEPSGA(epsg);
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
  * Import coordinate system from ESRI .prj format(s).
  *
- * This function will read the text loaded from an ESRI .prj file, and translate it into an OGRSpatialReference definition. This should support many (but by no means all) old style (Arc/Info 7.x) .prj files, as well as the newer pseudo-OGC WKT .prj files. Note that new style .prj files are in OGC WKT format, but require some manipulation to correct datum names, and units on some projection parameters. This is addressed within importFromESRI() by an automatical call to morphFromESRI().
+ * This function will read the text loaded from an ESRI .prj file, and translate
+ * it into an OGRSpatialReference definition. This should support many (but by
+ * no means all) old style (Arc/Info 7.x) .prj files, as well as the newer
+ * pseudo-OGC WKT .prj files. Note that new style .prj files are in OGC WKT
+ * format, but require some manipulation to correct datum names, and units on
+ * some projection parameters. This is addressed within importFromESRI() by an
+ * automatical call to morphFromESRI().
  *
- * Currently only GEOGRAPHIC, UTM, STATEPLANE, GREATBRITIAN_GRID, ALBERS, EQUIDISTANT_CONIC, TRANSVERSE (mercator), POLAR, MERCATOR and POLYCONIC projections are supported from old style files.
+ * Currently only GEOGRAPHIC, UTM, STATEPLANE, GREATBRITIAN_GRID, ALBERS,
+ * EQUIDISTANT_CONIC, TRANSVERSE (mercator), POLAR, MERCATOR and POLYCONIC
+ * projections are supported from old style files.
  *
  * @static
  * @throws Error
@@ -976,29 +956,28 @@ NAN_METHOD(SpatialReference::fromEPSGA)
  * @param {string[]} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromESRI)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::fromESRI) {
+  Nan::HandleScope scope;
 
-	StringList list;
+  StringList list;
 
-	if(info.Length() &lt; 1) {
-		Nan::ThrowError(&quot;input string list must be provided&quot;);
-		return;
-	}
+  if (info.Length() &lt; 1) {
+    Nan::ThrowError(&quot;input string list must be provided&quot;);
+    return;
+  }
 
-	if(list.parse(info[0])) {
-		return; //error parsing string list
-	}
+  if (list.parse(info[0])) {
+    return; // error parsing string list
+  }
 
-	OGRSpatialReference *srs = new OGRSpatialReference();
-	int err = srs-&gt;importFromESRI(list.get());
-	if (err) {
-		NODE_THROW_OGRERR(err);
-		return;
-	}
+  OGRSpatialReference *srs = new OGRSpatialReference();
+  int err = srs-&gt;importFromESRI(list.get());
+  if (err) {
+    NODE_THROW_OGRERR(err);
+    return;
+  }
 
-	info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  info.GetReturnValue().Set(SpatialReference::New(srs, true));
 }
 
 /**
@@ -1007,20 +986,19 @@ NAN_METHOD(SpatialReference::fromESRI)
  * @method getLinearUnits
  * @return {Object} An object containing &#x60;value&#x60; and &#x60;unit&#x60; properties.
  */
-NAN_METHOD(SpatialReference::getLinearUnits)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::getLinearUnits) {
+  Nan::HandleScope scope;
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
 
-	char* unit_name;
-	double units = srs-&gt;this_-&gt;GetLinearUnits(&amp;unit_name);
+  char *unit_name;
+  double units = srs-&gt;this_-&gt;GetLinearUnits(&amp;unit_name);
 
-	Local&lt;Object&gt; result = Nan::New&lt;Object&gt;();
-	Nan::Set(result, Nan::New(&quot;value&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(units));
-	Nan::Set(result, Nan::New(&quot;units&quot;).ToLocalChecked(), SafeString::New(unit_name));
+  Local&lt;Object&gt; result = Nan::New&lt;Object&gt;();
+  Nan::Set(result, Nan::New(&quot;value&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(units));
+  Nan::Set(result, Nan::New(&quot;units&quot;).ToLocalChecked(), SafeString::New(unit_name));
 
-	info.GetReturnValue().Set(result);
+  info.GetReturnValue().Set(result);
 }
 
 /**
@@ -1029,55 +1007,53 @@ NAN_METHOD(SpatialReference::getLinearUnits)
  * @method getAngularUnits
  * @return {Object} An object containing &#x60;value&#x60; and &#x60;unit&#x60; properties.
  */
-NAN_METHOD(SpatialReference::getAngularUnits)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::getAngularUnits) {
+  Nan::HandleScope scope;
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
 
-	char* unit_name;
-	double units = srs-&gt;this_-&gt;GetAngularUnits(&amp;unit_name);
+  char *unit_name;
+  double units = srs-&gt;this_-&gt;GetAngularUnits(&amp;unit_name);
 
-	Local&lt;Object&gt; result = Nan::New&lt;Object&gt;();
-	Nan::Set(result, Nan::New(&quot;value&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(units));
-	Nan::Set(result, Nan::New(&quot;units&quot;).ToLocalChecked(), SafeString::New(unit_name));
+  Local&lt;Object&gt; result = Nan::New&lt;Object&gt;();
+  Nan::Set(result, Nan::New(&quot;value&quot;).ToLocalChecked(), Nan::New&lt;Number&gt;(units));
+  Nan::Set(result, Nan::New(&quot;units&quot;).ToLocalChecked(), SafeString::New(unit_name));
 
-	info.GetReturnValue().Set(result);
+  info.GetReturnValue().Set(result);
 }
 
 /**
  * Validate SRS tokens.
  *
- * This method attempts to verify that the spatial reference system is well formed, and consists of known tokens. The validation is not comprehensive.
+ * This method attempts to verify that the spatial reference system is well
+ * formed, and consists of known tokens. The validation is not comprehensive.
  *
  * @method validate
  * @return {string|null} &#x60;&quot;corrupt&quot;&#x60;, &#x27;&quot;unsupported&quot;&#x27;, &#x60;null&#x60; (if fine)
  */
-NAN_METHOD(SpatialReference::validate)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(SpatialReference::validate) {
+  Nan::HandleScope scope;
 
-	SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
+  SpatialReference *srs = Nan::ObjectWrap::Unwrap&lt;SpatialReference&gt;(info.This());
 
-	OGRErr err = srs-&gt;this_-&gt;Validate();
+  OGRErr err = srs-&gt;this_-&gt;Validate();
 
-	if(err == OGRERR_NONE) {
-		info.GetReturnValue().Set(Nan::Null());
-		return;
-	}
-	if(err == OGRERR_CORRUPT_DATA) {
-		info.GetReturnValue().Set(Nan::New(&quot;corrupt&quot;).ToLocalChecked());
-		return;
-	}
-	if(err == OGRERR_UNSUPPORTED_SRS) {
-		info.GetReturnValue().Set(Nan::New(&quot;unsupported&quot;).ToLocalChecked());
-		return;
-	}
+  if (err == OGRERR_NONE) {
+    info.GetReturnValue().Set(Nan::Null());
+    return;
+  }
+  if (err == OGRERR_CORRUPT_DATA) {
+    info.GetReturnValue().Set(Nan::New(&quot;corrupt&quot;).ToLocalChecked());
+    return;
+  }
+  if (err == OGRERR_UNSUPPORTED_SRS) {
+    info.GetReturnValue().Set(Nan::New(&quot;unsupported&quot;).ToLocalChecked());
+    return;
+  }
 
-	NODE_THROW_OGRERR(err);
-	return;
+  NODE_THROW_OGRERR(err);
+  return;
 }
-
 
 } // namespace node_gdal
 

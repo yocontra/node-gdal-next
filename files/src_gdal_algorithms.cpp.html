@@ -125,20 +125,19 @@
     <pre class="prettyprint linenums">
 #include &quot;gdal_algorithms.hpp&quot;
 #include &quot;gdal_common.hpp&quot;
-#include &quot;gdal_layer.hpp&quot;
 #include &quot;gdal_dataset.hpp&quot;
+#include &quot;gdal_layer.hpp&quot;
 #include &quot;gdal_rasterband.hpp&quot;
 #include &quot;utils/number_list.hpp&quot;
 
 namespace node_gdal {
 
-void Algorithms::Initialize(Local&lt;Object&gt; target)
-{
-	Nan::SetMethod(target, &quot;fillNodata&quot;, fillNodata);
-	Nan::SetMethod(target, &quot;contourGenerate&quot;, contourGenerate);
-	Nan::SetMethod(target, &quot;sieveFilter&quot;, sieveFilter);
-	Nan::SetMethod(target, &quot;checksumImage&quot;, checksumImage);
-	Nan::SetMethod(target, &quot;polygonize&quot;, polygonize);
+void Algorithms::Initialize(Local&lt;Object&gt; target) {
+  Nan::SetMethod(target, &quot;fillNodata&quot;, fillNodata);
+  Nan::SetMethod(target, &quot;contourGenerate&quot;, contourGenerate);
+  Nan::SetMethod(target, &quot;sieveFilter&quot;, sieveFilter);
+  Nan::SetMethod(target, &quot;checksumImage&quot;, checksumImage);
+  Nan::SetMethod(target, &quot;polygonize&quot;, polygonize);
 }
 
 /**
@@ -151,43 +150,46 @@ void Algorithms::Initialize(Local&lt;Object&gt; target)
  * @param {Object} options
  * @param {gdal.RasterBand} options.src This band to be updated in-place.
  * @param {gdal.RasterBand} [options.mask] Mask band
- * @param {Number} options.searchDist The maximum distance (in pixels) that the algorithm will search out for values to interpolate.
- * @param {integer} [options.smoothingIterations=0] The number of 3x3 average filter smoothing iterations to run after the interpolation to dampen artifacts.
+ * @param {Number} options.searchDist The maximum distance (in pixels) that the
+ * algorithm will search out for values to interpolate.
+ * @param {integer} [options.smoothingIterations=0] The number of 3x3 average
+ * filter smoothing iterations to run after the interpolation to dampen
+ * artifacts.
  */
-NAN_METHOD(Algorithms::fillNodata)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(Algorithms::fillNodata) {
+  Nan::HandleScope scope;
 
-	Local&lt;Object&gt; obj;
-	RasterBand* src;
-	RasterBand* mask = NULL;
-	double search_dist;
-	int smooth_iterations = 0;
+  Local&lt;Object&gt; obj;
+  RasterBand *src;
+  RasterBand *mask = NULL;
+  double search_dist;
+  int smooth_iterations = 0;
 
-	NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
+  NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
 
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
-	NODE_WRAPPED_FROM_OBJ_OPT(obj, &quot;mask&quot;, RasterBand, mask);
-	NODE_DOUBLE_FROM_OBJ(obj, &quot;searchDist&quot;, search_dist);
-	NODE_INT_FROM_OBJ_OPT(obj, &quot;smoothIterations&quot;, smooth_iterations)
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
+  NODE_WRAPPED_FROM_OBJ_OPT(obj, &quot;mask&quot;, RasterBand, mask);
+  NODE_DOUBLE_FROM_OBJ(obj, &quot;searchDist&quot;, search_dist);
+  NODE_INT_FROM_OBJ_OPT(obj, &quot;smoothIterations&quot;, smooth_iterations)
 
-	CPLErr err = GDALFillNodata(src-&gt;get(), mask ? mask-&gt;get() : NULL, search_dist, 0, smooth_iterations, NULL, NULL, NULL);
+  CPLErr err =
+    GDALFillNodata(src-&gt;get(), mask ? mask-&gt;get() : NULL, search_dist, 0, smooth_iterations, NULL, NULL, NULL);
 
-	if(err) {
-		NODE_THROW_CPLERR(err);
-		return;
-	}
+  if (err) {
+    NODE_THROW_CPLERR(err);
+    return;
+  }
 
-	return;
+  return;
 }
 
 /**
  * Create vector contours from raster DEM.
  *
  * This algorithm will generate contour vectors for the input raster band on the
- * requested set of contour levels. The vector contours are written to the passed
- * in vector layer. Also, a NODATA value may be specified to identify pixels
- * that should not be considered in contour line generation.
+ * requested set of contour levels. The vector contours are written to the
+ * passed in vector layer. Also, a NODATA value may be specified to identify
+ * pixels that should not be considered in contour line generation.
  *
  * @throws Error
  * @method contourGenerate
@@ -196,63 +198,82 @@ NAN_METHOD(Algorithms::fillNodata)
  * @param {Object} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
- * @param {Number} [options.offset=0] The &quot;offset&quot; relative to which contour intervals are applied. This is normally zero, but could be different. To generate 10m contours at 5, 15, 25, ... the offset would be 5.
- * @param {Number} [options.interval=100] The elevation interval between contours generated.
- * @param {Number[]} [options.fixedLevels] A list of fixed contour levels at which contours should be generated. Overrides interval/base options if set.
- * @param {Number} [options.nodata] The value to use as a &quot;nodata&quot; value. That is, a pixel value which should be ignored in generating contours as if the value of the pixel were not known.
- * @param {integer} [options.idField] A field index to indicate where a unique id should be written for each feature (contour) written.
- * @param {integer} [options.elevField] A field index to indicate where the elevation value of the contour should be written.
+ * @param {Number} [options.offset=0] The &quot;offset&quot; relative to which contour
+ * intervals are applied. This is normally zero, but could be different. To
+ * generate 10m contours at 5, 15, 25, ... the offset would be 5.
+ * @param {Number} [options.interval=100] The elevation interval between
+ * contours generated.
+ * @param {Number[]} [options.fixedLevels] A list of fixed contour levels at
+ * which contours should be generated. Overrides interval/base options if set.
+ * @param {Number} [options.nodata] The value to use as a &quot;nodata&quot; value. That
+ * is, a pixel value which should be ignored in generating contours as if the
+ * value of the pixel were not known.
+ * @param {integer} [options.idField] A field index to indicate where a unique
+ * id should be written for each feature (contour) written.
+ * @param {integer} [options.elevField] A field index to indicate where the
+ * elevation value of the contour should be written.
  */
-NAN_METHOD(Algorithms::contourGenerate)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(Algorithms::contourGenerate) {
+  Nan::HandleScope scope;
 
-	Local&lt;Object&gt; obj;
-	Local&lt;Value&gt; prop;
-	RasterBand* src;
-	Layer* dst;
-	double interval = 100, base = 0;
-	double *fixed_levels = NULL;
-	DoubleList fixed_level_array;
-	int n_fixed_levels = 0;
-	int use_nodata = 0;
-	double nodata = 0;
-	int id_field = -1, elev_field = -1;
+  Local&lt;Object&gt; obj;
+  Local&lt;Value&gt; prop;
+  RasterBand *src;
+  Layer *dst;
+  double interval = 100, base = 0;
+  double *fixed_levels = NULL;
+  DoubleList fixed_level_array;
+  int n_fixed_levels = 0;
+  int use_nodata = 0;
+  double nodata = 0;
+  int id_field = -1, elev_field = -1;
 
-	NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
+  NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
 
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;dst&quot;, Layer, dst);
-	NODE_INT_FROM_OBJ_OPT(obj, &quot;idField&quot;, id_field);
-	NODE_INT_FROM_OBJ_OPT(obj, &quot;elevField&quot;, elev_field);
-	NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;interval&quot;, interval);
-	NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;offset&quot;, base);
-	if(Nan::HasOwnProperty(obj, Nan::New(&quot;fixedLevels&quot;).ToLocalChecked()).FromMaybe(false)){
-		if(fixed_level_array.parse(Nan::Get(obj, Nan::New(&quot;fixedLevels&quot;).ToLocalChecked()).ToLocalChecked())){
-			return; //error parsing double list
-		} else {
-			fixed_levels = fixed_level_array.get();
-			n_fixed_levels = fixed_level_array.length();
-		}
-	}
-	if(Nan::HasOwnProperty(obj, Nan::New(&quot;nodata&quot;).ToLocalChecked()).FromMaybe(false)){
-		prop = Nan::Get(obj, Nan::New(&quot;nodata&quot;).ToLocalChecked()).ToLocalChecked();
-		if(prop-&gt;IsNumber()){
-			use_nodata = 1;
-			nodata = Nan::To&lt;double&gt;(prop).ToChecked();
-		} else if(!prop-&gt;IsNull() &amp;&amp; !prop-&gt;IsUndefined()){
-			Nan::ThrowTypeError(&quot;nodata property must be a number&quot;);
-		}
-	}
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;dst&quot;, Layer, dst);
+  NODE_INT_FROM_OBJ_OPT(obj, &quot;idField&quot;, id_field);
+  NODE_INT_FROM_OBJ_OPT(obj, &quot;elevField&quot;, elev_field);
+  NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;interval&quot;, interval);
+  NODE_DOUBLE_FROM_OBJ_OPT(obj, &quot;offset&quot;, base);
+  if (Nan::HasOwnProperty(obj, Nan::New(&quot;fixedLevels&quot;).ToLocalChecked()).FromMaybe(false)) {
+    if (fixed_level_array.parse(Nan::Get(obj, Nan::New(&quot;fixedLevels&quot;).ToLocalChecked()).ToLocalChecked())) {
+      return; // error parsing double list
+    } else {
+      fixed_levels = fixed_level_array.get();
+      n_fixed_levels = fixed_level_array.length();
+    }
+  }
+  if (Nan::HasOwnProperty(obj, Nan::New(&quot;nodata&quot;).ToLocalChecked()).FromMaybe(false)) {
+    prop = Nan::Get(obj, Nan::New(&quot;nodata&quot;).ToLocalChecked()).ToLocalChecked();
+    if (prop-&gt;IsNumber()) {
+      use_nodata = 1;
+      nodata = Nan::To&lt;double&gt;(prop).ToChecked();
+    } else if (!prop-&gt;IsNull() &amp;&amp; !prop-&gt;IsUndefined()) {
+      Nan::ThrowTypeError(&quot;nodata property must be a number&quot;);
+    }
+  }
 
-	CPLErr err = GDALContourGenerate(src-&gt;get(), interval, base, n_fixed_levels, fixed_levels, use_nodata, nodata, dst-&gt;get(), id_field, elev_field, NULL, NULL);
+  CPLErr err = GDALContourGenerate(
+    src-&gt;get(),
+    interval,
+    base,
+    n_fixed_levels,
+    fixed_levels,
+    use_nodata,
+    nodata,
+    dst-&gt;get(),
+    id_field,
+    elev_field,
+    NULL,
+    NULL);
 
-	if(err) {
-		NODE_THROW_CPLERR(err);
-		return;
-	}
+  if (err) {
+    NODE_THROW_CPLERR(err);
+    return;
+  }
 
-	return;
+  return;
 }
 
 /**
@@ -264,43 +285,48 @@ NAN_METHOD(Algorithms::contourGenerate)
  * @for gdal
  * @param {Object} options
  * @param {gdal.RasterBand} options.src
- * @param {gdal.RasterBand} options.dst Output raster band. It may be the same as src band to update the source in place.
- * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.
- * @param {Number} options.threshold Raster polygons with sizes smaller than this will be merged into their largest neighbour.
- * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
+ * @param {gdal.RasterBand} options.dst Output raster band. It may be the same
+ * as src band to update the source in place.
+ * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a
+ * value other than zero will be considered suitable for inclusion in polygons.
+ * @param {Number} options.threshold Raster polygons with sizes smaller than
+ * this will be merged into their largest neighbour.
+ * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal
+ * pixels are not considered directly adjacent for polygon membership purposes
+ * or 8 indicating they are.
  */
-NAN_METHOD(Algorithms::sieveFilter)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(Algorithms::sieveFilter) {
+  Nan::HandleScope scope;
 
-	Local&lt;Object&gt; obj;
-	RasterBand* src;
-	RasterBand* dst;
-	RasterBand* mask = NULL;
-	int threshold;
-	int connectedness = 4;
+  Local&lt;Object&gt; obj;
+  RasterBand *src;
+  RasterBand *dst;
+  RasterBand *mask = NULL;
+  int threshold;
+  int connectedness = 4;
 
-	NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
+  NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
 
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;dst&quot;, RasterBand, dst);
-	NODE_WRAPPED_FROM_OBJ_OPT(obj, &quot;mask&quot;, RasterBand, mask);
-	NODE_INT_FROM_OBJ(obj, &quot;threshold&quot;, threshold);
-	NODE_INT_FROM_OBJ_OPT(obj, &quot;connectedness&quot;, connectedness);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;dst&quot;, RasterBand, dst);
+  NODE_WRAPPED_FROM_OBJ_OPT(obj, &quot;mask&quot;, RasterBand, mask);
+  NODE_INT_FROM_OBJ(obj, &quot;threshold&quot;, threshold);
+  NODE_INT_FROM_OBJ_OPT(obj, &quot;connectedness&quot;, connectedness);
 
-	if(connectedness != 4 &amp;&amp; connectedness != 8){
-		Nan::ThrowError(&quot;connectedness option must be 4 or 8&quot;);
-		return;
-	}
+  if (connectedness != 4 &amp;&amp; connectedness != 8) {
+    Nan::ThrowError(&quot;connectedness option must be 4 or 8&quot;);
+    return;
+  }
 
-	CPLErr err = GDALSieveFilter(src-&gt;get(), mask ? mask-&gt;get() : NULL, dst-&gt;get(), threshold, connectedness, NULL, NULL, NULL);
+  CPLErr err =
+    GDALSieveFilter(src-&gt;get(), mask ? mask-&gt;get() : NULL, dst-&gt;get(), threshold, connectedness, NULL, NULL, NULL);
 
-	if(err) {
-		NODE_THROW_CPLERR(err);
-		return;
-	}
+  if (err) {
+    NODE_THROW_CPLERR(err);
+    return;
+  }
 
-	return;
+  return;
 }
 
 /**
@@ -317,39 +343,38 @@ NAN_METHOD(Algorithms::sieveFilter)
  * @param {integer} [h=src.height]
  * @return integer
  */
-NAN_METHOD(Algorithms::checksumImage)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(Algorithms::checksumImage) {
+  Nan::HandleScope scope;
 
-	RasterBand* src;
-	int x = 0, y = 0, w, h, bandw, bandh;
+  RasterBand *src;
+  int x = 0, y = 0, w, h, bandw, bandh;
 
-	NODE_ARG_WRAPPED(0, &quot;src&quot;, RasterBand, src);
+  NODE_ARG_WRAPPED(0, &quot;src&quot;, RasterBand, src);
 
-	w = bandw = src-&gt;get()-&gt;GetXSize();
-	h = bandh = src-&gt;get()-&gt;GetYSize();
+  w = bandw = src-&gt;get()-&gt;GetXSize();
+  h = bandh = src-&gt;get()-&gt;GetYSize();
 
-	NODE_ARG_INT_OPT(1, &quot;x&quot;, x);
-	NODE_ARG_INT_OPT(2, &quot;y&quot;, y);
-	NODE_ARG_INT_OPT(3, &quot;xSize&quot;, w);
-	NODE_ARG_INT_OPT(4, &quot;ySize&quot;, h);
+  NODE_ARG_INT_OPT(1, &quot;x&quot;, x);
+  NODE_ARG_INT_OPT(2, &quot;y&quot;, y);
+  NODE_ARG_INT_OPT(3, &quot;xSize&quot;, w);
+  NODE_ARG_INT_OPT(4, &quot;ySize&quot;, h);
 
-	if(x &lt; 0 || y &lt; 0 || x &gt;= bandw || y &gt;= bandh){
-		Nan::ThrowRangeError(&quot;offset invalid for given band&quot;);
-		return;
-	}
-	if(w &lt; 0 || h &lt; 0 || w &gt; bandw || h &gt; bandh){
-		Nan::ThrowRangeError(&quot;x and y size must be smaller than band dimensions and greater than 0&quot;);
-		return;
-	}
-	if(x+w-1 &gt;= bandw || y+h-1 &gt;= bandh){
-		Nan::ThrowRangeError(&quot;given range is outside bounds of given band&quot;);
-		return;
-	}
+  if (x &lt; 0 || y &lt; 0 || x &gt;= bandw || y &gt;= bandh) {
+    Nan::ThrowRangeError(&quot;offset invalid for given band&quot;);
+    return;
+  }
+  if (w &lt; 0 || h &lt; 0 || w &gt; bandw || h &gt; bandh) {
+    Nan::ThrowRangeError(&quot;x and y size must be smaller than band dimensions and greater than 0&quot;);
+    return;
+  }
+  if (x + w - 1 &gt;= bandw || y + h - 1 &gt;= bandh) {
+    Nan::ThrowRangeError(&quot;given range is outside bounds of given band&quot;);
+    return;
+  }
 
-	int checksum = GDALChecksumImage(src-&gt;get(), x, y, w, h);
+  int checksum = GDALChecksumImage(src-&gt;get(), x, y, w, h);
 
-	info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(checksum));
+  info.GetReturnValue().Set(Nan::New&lt;Integer&gt;(checksum));
 }
 
 /**
@@ -366,55 +391,75 @@ NAN_METHOD(Algorithms::checksumImage)
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
  * @param {gdal.RasterBand} [options.mask]
- * @param {integer} options.pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
- * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
- * @param {Boolean} [options.useFloats=false] Use floating point buffers instead of int buffers.
+ * @param {integer} options.pixValField The attribute field index indicating the
+ * feature attribute into which the pixel value of the polygon should be
+ * written.
+ * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal
+ * pixels are not considered directly adjacent for polygon membership purposes
+ * or 8 indicating they are.
+ * @param {Boolean} [options.useFloats=false] Use floating point buffers instead
+ * of int buffers.
  */
-NAN_METHOD(Algorithms::polygonize)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(Algorithms::polygonize) {
+  Nan::HandleScope scope;
 
-	Local&lt;Object&gt; obj;
-	RasterBand* src;
-	RasterBand* mask = NULL;
-	Layer* dst;
-	int connectedness = 4;
-	int pix_val_field = 0;
-	char** papszOptions = NULL;
+  Local&lt;Object&gt; obj;
+  RasterBand *src;
+  RasterBand *mask = NULL;
+  Layer *dst;
+  int connectedness = 4;
+  int pix_val_field = 0;
+  char **papszOptions = NULL;
 
-	NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
+  NODE_ARG_OBJECT(0, &quot;options&quot;, obj);
 
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
-	NODE_WRAPPED_FROM_OBJ(obj, &quot;dst&quot;, Layer, dst);
-	NODE_WRAPPED_FROM_OBJ_OPT(obj, &quot;mask&quot;, RasterBand, mask);
-	NODE_INT_FROM_OBJ_OPT(obj, &quot;connectedness&quot;, connectedness)
-	NODE_INT_FROM_OBJ(obj, &quot;pixValField&quot;, pix_val_field);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;src&quot;, RasterBand, src);
+  NODE_WRAPPED_FROM_OBJ(obj, &quot;dst&quot;, Layer, dst);
+  NODE_WRAPPED_FROM_OBJ_OPT(obj, &quot;mask&quot;, RasterBand, mask);
+  NODE_INT_FROM_OBJ_OPT(obj, &quot;connectedness&quot;, connectedness)
+  NODE_INT_FROM_OBJ(obj, &quot;pixValField&quot;, pix_val_field);
 
-	if(connectedness == 8) {
-		papszOptions = CSLSetNameValue(papszOptions, &quot;8CONNECTED&quot;, &quot;8&quot;);
-	} else if (connectedness != 4) {
-		Nan::ThrowError(&quot;connectedness must be 4 or 8&quot;);
-		return;
-	}
+  if (connectedness == 8) {
+    papszOptions = CSLSetNameValue(papszOptions, &quot;8CONNECTED&quot;, &quot;8&quot;);
+  } else if (connectedness != 4) {
+    Nan::ThrowError(&quot;connectedness must be 4 or 8&quot;);
+    return;
+  }
 
-	CPLErr err;
-	if(Nan::HasOwnProperty(obj, Nan::New(&quot;useFloats&quot;).ToLocalChecked()).FromMaybe(false) &amp;&amp; Nan::To&lt;bool&gt;(Nan::Get(obj, Nan::New(&quot;useFloats&quot;).ToLocalChecked()).ToLocalChecked()).ToChecked()){
-		err = GDALFPolygonize(src-&gt;get(), mask ? mask-&gt;get() : NULL, reinterpret_cast&lt;OGRLayerH&gt;(dst-&gt;get()), pix_val_field, papszOptions, NULL, NULL);
-	} else {
-		err = GDALPolygonize(src-&gt;get(), mask ? mask-&gt;get() : NULL, reinterpret_cast&lt;OGRLayerH&gt;(dst-&gt;get()), pix_val_field, papszOptions, NULL, NULL);
-	}
+  CPLErr err;
+  if (
+    Nan::HasOwnProperty(obj, Nan::New(&quot;useFloats&quot;).ToLocalChecked()).FromMaybe(false) &amp;&amp;
+    Nan::To&lt;bool&gt;(Nan::Get(obj, Nan::New(&quot;useFloats&quot;).ToLocalChecked()).ToLocalChecked()).ToChecked()) {
+    err = GDALFPolygonize(
+      src-&gt;get(),
+      mask ? mask-&gt;get() : NULL,
+      reinterpret_cast&lt;OGRLayerH&gt;(dst-&gt;get()),
+      pix_val_field,
+      papszOptions,
+      NULL,
+      NULL);
+  } else {
+    err = GDALPolygonize(
+      src-&gt;get(),
+      mask ? mask-&gt;get() : NULL,
+      reinterpret_cast&lt;OGRLayerH&gt;(dst-&gt;get()),
+      pix_val_field,
+      papszOptions,
+      NULL,
+      NULL);
+  }
 
-	if(papszOptions) CSLDestroy(papszOptions);
+  if (papszOptions) CSLDestroy(papszOptions);
 
-	if(err) {
-		NODE_THROW_CPLERR(err);
-		return;
-	}
+  if (err) {
+    NODE_THROW_CPLERR(err);
+    return;
+  }
 
-	return;
+  return;
 }
 
-} //node_gdal namespace
+} // namespace node_gdal
 
     </pre>
 </div>

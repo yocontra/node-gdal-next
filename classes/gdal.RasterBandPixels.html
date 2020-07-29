@@ -128,7 +128,8 @@
 
 <div class="yuidoc-class-description">
 <p>A representation of a <a href="../classes/gdal.RasterBand.html" class="crosslink">RasterBand</a>'s pixels.</p>
-<p>Note: Typed arrays should be created with an external ArrayBuffer for versions of node &gt;= 0.11</p>
+<p>Note: Typed arrays should be created with an external ArrayBuffer for
+versions of node &gt;= 0.11</p>
 <pre class="code prettyprint"><code>var n = 16*16;
 var data = new Float32Array(new ArrayBuffer(n*4));
 //read data into the existing array
@@ -145,8 +146,10 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 			<strong>Methods</strong>
 			<ul>
 				<li><a href="#method-get"><span class="im">get</span>(<span class="ia">x</span><span class="ia">y</span>)</a></li>
-				<li><a href="#method-read"><span class="im">read</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">width</span><span class="ia">height</span><span class="ia">data] The [TypedArray</span><span class="ia">options</span>)</a></li>
-				<li><a href="#method-readBlock"><span class="im">readBlock</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">data] The [TypedArray</span>)</a></li>
+				<li><a href="#method-read"><span class="im">read</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">width</span><span class="ia">height</span><span class="ia">[data] The
+[TypedArray]</span><span class="ia">options</span>)</a></li>
+				<li><a href="#method-readBlock"><span class="im">readBlock</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">[data] The
+[TypedArray]</span>)</a></li>
 				<li><a href="#method-set"><span class="im">set</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">value</span>)</a></li>
 				<li><a href="#method-write"><span class="im">write</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">width</span><span class="ia">height</span><span class="ia">data</span><span class="ia">options</span>)</a></li>
 				<li><a href="#method-writeBlock"><span class="im">writeBlock</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">data</span>)</a></li>
@@ -191,7 +194,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l93"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:93</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l92"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:92</code></a>
 		</p>
 
 
@@ -250,7 +253,8 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 						<code>height</code>
 				</li>
 				<li class="arg">
-						<code class="optional">data] The [TypedArray</code>
+						<code>[data] The
+[TypedArray]</code>
 				</li>
 				<li class="arg">
 						<code class="optional">options</code>
@@ -270,7 +274,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l162"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:162</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l161"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:161</code></a>
 		</p>
 
 
@@ -313,12 +317,13 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 
 				</li>
 				<li class="param">
-						<code class="param-name optional">[data] The [TypedArray]</code>
+						<code class="param-name">[data] The
+[TypedArray]</code>
 						<span class="type">TypedArray</span>
-						<span class="flag optional" title="This parameter is optional.">optional</span>
 
 
-					<div class="param-description"><p>(<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses</a>) to put the data in. A new array is created if not given.</p>
+					<div class="param-description"><p>(<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses</a>)
+to put the data in. A new array is created if not given.</p>
 </div>
 
 				</li>
@@ -351,7 +356,8 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 									<span class="type">String</span>
 									<span class="flag optional" title="This parameter is optional.">optional</span>
 
-								<div class="param-description"><p>See <a href="../classes/Constants (GDT).html" class="crosslink">GDT constants</a>.</p>
+								<div class="param-description"><p>See <a href="../classes/Constants (GDT).html" class="crosslink">GDT
+constants</a>.</p>
 </div>
 
 							</li>
@@ -381,7 +387,9 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 
 			<div class="returns-description">
 						<span class="type">TypedArray</span>:
-					<p>A <a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a> of values.</p>
+					<p>A
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a>
+of values.</p>
 
 			</div>
 		</div>
@@ -400,7 +408,8 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 						<code>y</code>
 				</li>
 				<li class="arg">
-						<code class="optional">data] The [TypedArray</code>
+						<code>[data] The
+[TypedArray]</code>
 				</li>
 			</ul><span class="paren">)</span>
 		</div>
@@ -417,7 +426,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l357"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:357</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l361"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:361</code></a>
 		</p>
 
 
@@ -446,12 +455,13 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 
 				</li>
 				<li class="param">
-						<code class="param-name optional">[data] The [TypedArray]</code>
+						<code class="param-name">[data] The
+[TypedArray]</code>
 						<span class="type">TypedArray</span>
-						<span class="flag optional" title="This parameter is optional.">optional</span>
 
 
-					<div class="param-description"><p>(<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses</a>) to put the data in. A new array is created if not given.</p>
+					<div class="param-description"><p>(<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses</a>)
+to put the data in. A new array is created if not given.</p>
 </div>
 
 				</li>
@@ -463,7 +473,9 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 
 			<div class="returns-description">
 						<span class="type">TypedArray</span>:
-					<p>A <a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a> of values.</p>
+					<p>A
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a>
+of values.</p>
 
 			</div>
 		</div>
@@ -496,7 +508,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l127"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:127</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l126"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:126</code></a>
 		</p>
 
 
@@ -572,7 +584,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l271"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:271</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l273"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:273</code></a>
 		</p>
 
 
@@ -619,7 +631,9 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 						<span class="type">TypedArray</span>
 
 
-					<div class="param-description"><p>The <a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a> to write to the band.</p>
+					<div class="param-description"><p>The
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a>
+to write to the band.</p>
 </div>
 
 				</li>
@@ -697,7 +711,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l415"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:415</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l422"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:422</code></a>
 		</p>
 
 
@@ -730,7 +744,9 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 						<span class="type">TypedArray</span>
 
 
-					<div class="param-description"><p>The <a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a> of values to write to the band.</p>
+					<div class="param-description"><p>The
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a>
+of values to write to the band.</p>
 </div>
 
 				</li>
