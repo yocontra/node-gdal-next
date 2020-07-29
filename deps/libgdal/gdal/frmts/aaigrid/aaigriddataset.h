@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: aaigriddataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: aaigriddataset.h 58d6ad3b40141636fc5b8307cc90f35a210c8b50 2019-12-29 12:31:59 +0100 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  Implements Arc/Info ASCII Grid Format.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam (warmerdam@pobox.com)
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2014, Kyle Shannon <kyle at pobox dot com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -66,7 +66,8 @@
 typedef enum
 {
     FORMAT_AAIG,
-    FORMAT_GRASSASCII
+    FORMAT_GRASSASCII,
+    FORMAT_ISG,
 } GridFormat;
 
 /************************************************************************/
@@ -77,7 +78,7 @@ typedef enum
 
 class AAIGRasterBand;
 
-class AAIGDataset : public GDALPamDataset
+class AAIGDataset CPL_NON_FINAL: public GDALPamDataset
 {
     friend class AAIGRasterBand;
 
@@ -100,6 +101,7 @@ class AAIGDataset : public GDALPamDataset
     double      adfGeoTransform[6];
     bool        bNoDataSet;
     double      dfNoDataValue;
+    CPLString   osUnits{};
 
     virtual int ParseHeader(const char* pszHeader, const char* pszDataType);
 
@@ -135,7 +137,7 @@ class AAIGDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class GRASSASCIIDataset : public AAIGDataset
+class GRASSASCIIDataset final: public AAIGDataset
 {
     int ParseHeader(const char* pszHeader, const char* pszDataType) override;
 
@@ -149,11 +151,28 @@ class GRASSASCIIDataset : public AAIGDataset
 
 /************************************************************************/
 /* ==================================================================== */
+/*                           ISGDataset                                 */
+/* ==================================================================== */
+/************************************************************************/
+
+class ISGDataset final: public AAIGDataset
+{
+    int ParseHeader(const char* pszHeader, const char* pszDataType) override;
+
+  public:
+    ISGDataset() : AAIGDataset() {}
+
+    static GDALDataset *Open( GDALOpenInfo * );
+    static int          Identify( GDALOpenInfo * );
+};
+
+/************************************************************************/
+/* ==================================================================== */
 /*                            AAIGRasterBand                             */
 /* ==================================================================== */
 /************************************************************************/
 
-class AAIGRasterBand : public GDALPamRasterBand
+class AAIGRasterBand final: public GDALPamRasterBand
 {
     friend class AAIGDataset;
 

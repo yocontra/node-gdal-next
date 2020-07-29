@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: cpgdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpgdataset.cpp d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $")
 
 enum Interleave { BSQ, BIL, BIP };
 
@@ -171,7 +171,7 @@ char **CPGDataset::GetFileList()
 /* ==================================================================== */
 /************************************************************************/
 
-class SIRC_QSLCRasterBand : public GDALRasterBand
+class SIRC_QSLCRasterBand final: public GDALRasterBand
 {
     friend class CPGDataset;
 
@@ -205,7 +205,7 @@ constexpr int M44 = 15;
 /* ==================================================================== */
 /************************************************************************/
 
-class CPG_STOKESRasterBand : public GDALRasterBand
+class CPG_STOKESRasterBand final: public GDALRasterBand
 {
     friend class CPGDataset;
 

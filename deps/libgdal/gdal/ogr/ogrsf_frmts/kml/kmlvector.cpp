@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Jens Oberender
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 // #include "kmlnode.h"
 #include "kmlutility.h"
 
-CPL_CVSID("$Id: kmlvector.cpp cbd6969d4cd9888733e328281bab59828a735905 2018-02-18 16:16:59Z Kurt Schwehr $")
+CPL_CVSID("$Id: kmlvector.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 KMLVector::~KMLVector() {}
 

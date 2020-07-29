@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shp_vsi.h ac1d66108744d81e28ed13c888fbf17d9fd565a9 2014-05-24 12:28:12Z Even Rouault $
+ * $Id: shp_vsi.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  IO Redirection via VSI services for shp/dbf io.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007,  Frank Warmerdam
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, Frank Warmerdam
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "gdal_pam.h"
 #include "gxfopen.h"
 
-CPL_CVSID("$Id: gxfdataset.cpp 5b0df3581273311cce7fa4975a2d849d7f26636f 2019-05-09 21:02:09 +0200 Even Rouault $")
+CPL_CVSID("$Id: gxfdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -41,7 +41,7 @@ CPL_CVSID("$Id: gxfdataset.cpp 5b0df3581273311cce7fa4975a2d849d7f26636f 2019-05-
 
 class GXFRasterBand;
 
-class GXFDataset : public GDALPamDataset
+class GXFDataset final: public GDALPamDataset
 {
     friend class GXFRasterBand;
 
@@ -70,7 +70,7 @@ class GXFDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class GXFRasterBand : public GDALPamRasterBand
+class GXFRasterBand final: public GDALPamRasterBand
 {
     friend class GXFDataset;
 
@@ -384,7 +384,7 @@ void GDALRegister_GXF()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "GeoSoft Grid Exchange Format" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#GXF" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/gxf.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gxf" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

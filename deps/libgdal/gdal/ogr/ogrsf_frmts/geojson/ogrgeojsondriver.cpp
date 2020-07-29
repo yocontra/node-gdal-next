@@ -46,7 +46,7 @@
 #include "ogrgeojsonutils.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrgeojsondriver.cpp b471cd08d02f7f05d658fe7da57f30f1b29d3b52 2020-01-07 22:30:27 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsondriver.cpp 56e004faba62c1e87c5595aaa1baec0d78b9a521 2020-04-16 20:02:53 +0200 Momtchil Momtchev $")
 
 static CPLMutex* ghMutex = nullptr;
 static char* gpszSource = nullptr;
@@ -58,7 +58,7 @@ class OGRESRIFeatureServiceDataset;
 /*                      OGRESRIFeatureServiceLayer                      */
 /************************************************************************/
 
-class OGRESRIFeatureServiceLayer: public OGRLayer
+class OGRESRIFeatureServiceLayer final: public OGRLayer
 {
     OGRESRIFeatureServiceDataset* poDS;
     OGRFeatureDefn* poFeatureDefn;
@@ -87,7 +87,7 @@ class OGRESRIFeatureServiceLayer: public OGRLayer
 /*                       OGRESRIFeatureServiceDataset                   */
 /************************************************************************/
 
-class OGRESRIFeatureServiceDataset: public GDALDataset
+class OGRESRIFeatureServiceDataset final: public GDALDataset
 {
     CPLString              osURL;
     GIntBig                nFirstOffset;
@@ -663,13 +663,14 @@ void RegisterOGRGeoJSON()
 "    <Value>String</Value>"
 "    <Value>Integer</Value>"
 "  </Option>"
+"  <Option name='ID_GENERATE' type='boolean' description='Auto-generate feature ids' />"
 "  <Option name='WRITE_NON_FINITE_VALUES' type='boolean' description='Whether to write NaN / Infinity values' default='NO'/>"
 "</LayerCreationOptionList>");
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES,
                                "Integer Integer64 Real String IntegerList "
-                               "Integer64List RealList StringList" );
+                               "Integer64List RealList StringList Date DateTime" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATASUBTYPES, "Boolean" );
 
     poDriver->pfnOpen = OGRGeoJSONDriverOpen;

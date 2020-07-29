@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -54,7 +54,7 @@
 #  include "ogr_xerces.h"
 #endif
 
-CPL_CVSID("$Id: gmlhandler.cpp 4971449609881d6ffdca70188292293852d12691 2017-12-17 16:48:14Z Even Rouault $")
+CPL_CVSID("$Id: gmlhandler.cpp 978ba46f732b27073d5bbc30f427a311d9daed28 2020-04-08 01:11:41 +0200 Even Rouault $")
 
 #ifdef HAVE_XERCES
 
@@ -472,6 +472,16 @@ static const char* const apszGMLGeometryElements[] =
 #define GML_GEOMETRY_TYPE_COUNT \
     static_cast<int>(sizeof(apszGMLGeometryElements) / \
                      sizeof(apszGMLGeometryElements[0]))
+
+bool OGRGMLIsGeometryElement(const char* pszElement)
+{
+    for( const auto& pszGMLElement: apszGMLGeometryElements )
+    {
+        if( strcmp(pszElement, pszGMLElement) == 0 )
+            return true;
+    }
+    return false;
+}
 
 struct _GeometryNamesStruct {
     unsigned long nHash;
@@ -1432,23 +1442,10 @@ CPLXMLNode* GMLHandler::ParseAIXMElevationPoint(CPLXMLNode *psGML)
 
     const char* pszPos = CPLGetXMLValue( psGML, "pos", nullptr );
     const char* pszCoordinates = CPLGetXMLValue( psGML, "coordinates", nullptr );
-    if (pszPos != nullptr)
+    if (pszPos != nullptr || pszCoordinates != nullptr)
     {
-        char* pszGeometry = CPLStrdup(CPLSPrintf(
-            "<gml:Point><gml:pos>%s</gml:pos></gml:Point>",
-                                                    pszPos));
-        CPLDestroyXMLNode(psGML);
-        psGML = CPLParseXMLString(pszGeometry);
-        CPLFree(pszGeometry);
-    }
-    else if (pszCoordinates != nullptr)
-    {
-        char* pszGeometry = CPLStrdup(CPLSPrintf(
-            "<gml:Point><gml:coordinates>%s</gml:coordinates></gml:Point>",
-                                            pszCoordinates));
-        CPLDestroyXMLNode(psGML);
-        psGML = CPLParseXMLString(pszGeometry);
-        CPLFree(pszGeometry);
+        CPLFree(psGML->pszValue);
+        psGML->pszValue = CPLStrdup("gml:Point");
     }
     else
     {

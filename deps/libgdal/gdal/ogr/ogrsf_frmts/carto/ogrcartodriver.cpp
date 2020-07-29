@@ -2,10 +2,10 @@
  *
  * Project:  Carto Translator
  * Purpose:  Implements OGRCARTODriver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 
 // g++ -g -Wall -fPIC -shared -o ogr_CARTO.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/carto ogr/ogrsf_frmts/carto/*.c* -L. -lgdal -Iogr/ogrsf_frmts/geojson/libjson
 
-CPL_CVSID("$Id: ogrcartodriver.cpp 33f8a9b6edc31b5a6594c9deea91c975aab77ba1 2018-07-09 07:41:00 -0700 Paul Ramsey $")
+CPL_CVSID("$Id: ogrcartodriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRCarto();
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_vdv.h bcfa716290c2ab4e6476a74e70a98ca9541cda0e 2018-10-03 21:06:30 +0200 Even Rouault $
+ * $Id: ogr_vdv.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  VDV Translator
  * Purpose:  Implements OGRVDVDriver.
@@ -40,7 +40,7 @@ class OGRVDVDataSource;
 /*                        OGRIDFDataSource                              */
 /************************************************************************/
 
-class OGRIDFDataSource : public GDALDataset
+class OGRIDFDataSource final: public GDALDataset
 {
     CPLString           m_osFilename;
     VSILFILE*           m_fpL;
@@ -63,7 +63,7 @@ class OGRIDFDataSource : public GDALDataset
 /*                          OGRVDVLayer                                 */
 /************************************************************************/
 
-class OGRVDVLayer: public OGRLayer
+class OGRVDVLayer final: public OGRLayer
 {
     VSILFILE*           m_fpL;
     bool                m_bOwnFP;
@@ -133,7 +133,7 @@ class OGRVDV452Tables
 /*                          OGRVDVWriterLayer                           */
 /************************************************************************/
 
-class OGRVDVWriterLayer: public OGRLayer
+class OGRVDVWriterLayer final: public OGRLayer
 {
     OGRVDVDataSource*   m_poDS;
     OGRFeatureDefn*     m_poFeatureDefn;
@@ -175,7 +175,7 @@ class OGRVDVWriterLayer: public OGRLayer
 /*                        OGRVDVDataSource                              */
 /************************************************************************/
 
-class OGRVDVDataSource : public GDALDataset
+class OGRVDVDataSource final: public GDALDataset
 {
     CPLString           m_osFilename;
     VSILFILE*           m_fpL;

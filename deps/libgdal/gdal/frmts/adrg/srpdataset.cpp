@@ -2,10 +2,10 @@
  * Purpose:  ASRP/USRP Reader
  * Author:   Frank Warmerdam (warmerdam@pobox.com)
  *
- * Derived from ADRG driver by Even Rouault, even.rouault at mines-paris.org.
+ * Derived from ADRG driver by Even Rouault, even.rouault at spatialys.com.
  *
  ******************************************************************************
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2009, Frank Warmerdam
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -39,9 +39,9 @@
 // Uncomment to recognize also .gen files in addition to .img files
 // #define OPEN_GEN
 
-CPL_CVSID("$Id: srpdataset.cpp fc772a7e94b9c97f62a72e3eab60fa20b97b9f92 2019-08-12 01:18:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: srpdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
-class SRPDataset : public GDALPamDataset
+class SRPDataset final: public GDALPamDataset
 {
     friend class SRPRasterBand;
 
@@ -105,7 +105,7 @@ class SRPDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class SRPRasterBand : public GDALPamRasterBand
+class SRPRasterBand final: public GDALPamRasterBand
 {
     friend class SRPDataset;
 
@@ -199,7 +199,7 @@ CPLErr SRPRasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
 /* -------------------------------------------------------------------- */
 /*      Is this a null block?                                           */
 /* -------------------------------------------------------------------- */
-    if (l_poDS->TILEINDEX && l_poDS->TILEINDEX[nBlock] == 0)
+    if (l_poDS->TILEINDEX && l_poDS->TILEINDEX[nBlock] <= 0)
     {
         memset(pImage, 0, 128 * 128);
         return CE_None;
@@ -1671,7 +1671,7 @@ void GDALRegister_SRP()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Standard Raster Product (ASRP/USRP)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#SRP" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/srp.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "img" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );

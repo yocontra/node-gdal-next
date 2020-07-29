@@ -33,7 +33,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: idadataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: idadataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /*                                tp2c()                                */
@@ -172,7 +172,7 @@ class IDADataset final: public RawDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class IDARasterBand : public RawRasterBand
+class IDARasterBand final: public RawRasterBand
 {
     friend class IDADataset;
 
@@ -1088,7 +1088,7 @@ void GDALRegister_IDA()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Image Data and Analysis" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#IDA" );
+                               "drivers/raster/ida.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );

@@ -19,29 +19,30 @@ using namespace node;
 
 namespace node_gdal {
 
-class LayerFeatures: public Nan::ObjectWrap {
-public:
-	static Nan::Persistent<FunctionTemplate> constructor;
+class LayerFeatures : public Nan::ObjectWrap {
+    public:
+  static Nan::Persistent<FunctionTemplate> constructor;
 
-	static void Initialize(Local<Object> target);
-	static NAN_METHOD(New);
-	static Local<Value> New(Local<Value> layer_obj);
-	static NAN_METHOD(toString);
+  static void Initialize(Local<Object> target);
+  static NAN_METHOD(New);
+  static Local<Value> New(Local<Value> layer_obj);
+  static NAN_METHOD(toString);
 
-	static NAN_METHOD(get);
-	static NAN_METHOD(first);
-	static NAN_METHOD(next);
-	static NAN_METHOD(count);
-	static NAN_METHOD(add);
-	static NAN_METHOD(set);
-	static NAN_METHOD(remove);
+  static NAN_METHOD(get);
+  static NAN_METHOD(first);
+  static NAN_METHOD(next);
+  static NAN_METHOD(count);
+  static NAN_METHOD(add);
+  static NAN_METHOD(set);
+  static NAN_METHOD(remove);
 
-	static NAN_GETTER(layerGetter);
+  static NAN_GETTER(layerGetter);
 
-	LayerFeatures();
-private:
-	~LayerFeatures();
+  LayerFeatures();
+
+    private:
+  ~LayerFeatures();
 };
 
-}
+} // namespace node_gdal
 #endif

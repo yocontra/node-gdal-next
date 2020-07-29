@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Andrey Kiselev
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 
 #include "cpl_config.h"
 
-CPL_CVSID("$Id: cpl_strtod.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: cpl_strtod.cpp 835000143e9aba57d80f961069b9dac38ff620ac 2020-05-25 14:36:21 +0200 Even Rouault $")
 
 // XXX: with GCC 2.95 strtof() function is only available when in c99 mode.
 // Fix it here not touching the compiler options.
@@ -159,6 +159,9 @@ double CPLAtofM( const char *nptr )
 /*                      CPLReplacePointByLocalePoint()                  */
 /************************************************************************/
 
+/* Return a newly allocated variable if substitution was done, or NULL
+ * otherwise.
+ */
 static char* CPLReplacePointByLocalePoint( const char* pszNumber, char point )
 {
 #if defined(__ANDROID__)
@@ -204,7 +207,7 @@ static char* CPLReplacePointByLocalePoint( const char* pszNumber, char point )
     }
 #endif  // __ANDROID__
 
-    return const_cast<char*>( pszNumber );
+    return nullptr;
 }
 
 /************************************************************************/
@@ -254,7 +257,8 @@ double CPLStrtodDelim(const char *nptr, char **endptr, char point)
     }
     else if( nptr[0] == '1' )
     {
-        if( STARTS_WITH(nptr, "1.#QNAN") )
+        if( STARTS_WITH(nptr, "1.#QNAN") ||
+            STARTS_WITH(nptr, "1.#SNAN") )
         {
             if( endptr ) *endptr = const_cast<char *>(nptr) + strlen(nptr);
             return std::numeric_limits<double>::quiet_NaN();
@@ -282,7 +286,8 @@ double CPLStrtodDelim(const char *nptr, char **endptr, char point)
 /*  with the one, taken from locale settings and use standard strtod()  */
 /*  on that buffer.                                                     */
 /* -------------------------------------------------------------------- */
-    char* pszNumber = CPLReplacePointByLocalePoint(nptr, point);
+    char* pszNewNumberOrNull = CPLReplacePointByLocalePoint(nptr, point);
+    const char* pszNumber = pszNewNumberOrNull ? pszNewNumberOrNull : nptr;
 
     const double dfValue = strtod( pszNumber, endptr );
     const int nError = errno;
@@ -290,8 +295,8 @@ double CPLStrtodDelim(const char *nptr, char **endptr, char point)
     if( endptr )
         *endptr = const_cast<char *>(nptr) + (*endptr - pszNumber);
 
-    if( pszNumber != const_cast<char *>(nptr) )
-        CPLFree( pszNumber );
+    if( pszNewNumberOrNull )
+        CPLFree( pszNewNumberOrNull );
 
     errno = nError;
     return dfValue;
@@ -353,15 +358,16 @@ float CPLStrtofDelim(const char *nptr, char **endptr, char point)
 /*  with the one, taken from locale settings and use standard strtof()  */
 /*  on that buffer.                                                     */
 /* -------------------------------------------------------------------- */
-    char * const pszNumber = CPLReplacePointByLocalePoint(nptr, point);
+    char * const pszNewNumberOrNull = CPLReplacePointByLocalePoint(nptr, point);
+    const char* pszNumber = pszNewNumberOrNull ? pszNewNumberOrNull : nptr;
     double dfValue = strtof( pszNumber, endptr );
     const int nError = errno;
 
     if( endptr )
         *endptr = const_cast<char *>(nptr) + (*endptr - pszNumber);
 
-    if( pszNumber != nptr )
-        CPLFree( pszNumber );
+    if( pszNewNumberOrNull )
+        CPLFree( pszNewNumberOrNull );
 
     errno = nError;
     return static_cast<float>(dfValue);

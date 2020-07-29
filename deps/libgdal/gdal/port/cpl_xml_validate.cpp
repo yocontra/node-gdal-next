@@ -2,10 +2,10 @@
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement XML validation against XSD schema
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_xml_validate.cpp 0f654dda9faabf9d86a44293f0f89903a8e97dd7 2018-04-15 20:18:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_xml_validate.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #ifdef HAVE_LIBXML2
 #include <libxml/xmlversion.h>

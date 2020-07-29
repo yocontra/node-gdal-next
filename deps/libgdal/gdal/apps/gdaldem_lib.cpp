@@ -3,13 +3,13 @@
  * Project:  GDAL DEM Utilities
  * Purpose:
  * Authors:  Matthew Perry, perrygeo at gmail.com
- *           Even Rouault, even dot rouault at mines dash paris dot org
+ *           Even Rouault, even dot rouault at spatialys.com
  *           Howard Butler, hobu.inc at gmail.com
  *           Chris Yesson, chris dot yesson at ioz dot ac dot uk
  *
  ******************************************************************************
  * Copyright (c) 2006, 2009 Matthew Perry
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  * Portions derived from GRASS 4.1 (public domain) See
  * http://trac.osgeo.org/gdal/ticket/2975 for more information regarding
  * history of this code
@@ -116,7 +116,7 @@
 #include "emmintrin.h"
 #endif
 
-CPL_CVSID("$Id: gdaldem_lib.cpp 4db55e60ad36bf21a576d1179c0f1788d2f8dbf2 2019-03-04 22:16:21 +0100 Martin Ždila $")
+CPL_CVSID("$Id: gdaldem_lib.cpp 160d622335cd6554059376f442f57f92c42cbc49 2020-06-05 23:03:58 +0200 Even Rouault $")
 
 static const double kdfDegreesToRadians = M_PI / 180.0;
 static const double kdfRadiansToDegrees = 180.0 / M_PI;
@@ -1919,8 +1919,16 @@ ColorAssociation* GDALColorReliefParseColorFile( GDALRasterBandH hSrcBand,
             pasColorAssociation = static_cast<ColorAssociation *>(
                 CPLRealloc(pasColorAssociation,
                            (nColorAssociation + 1) * sizeof(ColorAssociation)));
-            if( EQUAL(papszFields[0], "nv") && bSrcHasNoData )
+            if( EQUAL(papszFields[0], "nv") )
             {
+                if( !bSrcHasNoData )
+                {
+                    CPLError(CE_Warning, CPLE_AppDefined,
+                             "Input dataset has no nodata value. "
+                             "Ignoring 'nv' entry in color palette");
+                    CSLDestroy(papszFields);
+                    continue;
+                }
                 pasColorAssociation[nColorAssociation].dfVal = dfSrcNoDataValue;
             }
             else if( strlen(papszFields[0]) > 1 &&
@@ -2009,9 +2017,10 @@ GByte* GDALColorReliefPrecompute(GDALRasterBandH hSrcBand,
     const int nIndexOffset = (eDT == GDT_Int16) ? 32768 : 0;
     *pnIndexOffset = nIndexOffset;
     const int nXSize = GDALGetRasterBandXSize(hSrcBand);
-    const int nYSize = GDALGetRasterBandXSize(hSrcBand);
+    const int nYSize = GDALGetRasterBandYSize(hSrcBand);
     if( eDT == GDT_Byte ||
-        ((eDT == GDT_Int16 || eDT == GDT_UInt16) && nXSize * nYSize > 65536) )
+        ((eDT == GDT_Int16 || eDT == GDT_UInt16) &&
+         static_cast<GIntBig>(nXSize) * nYSize > 65536) )
     {
         const int iMax = (eDT == GDT_Byte) ? 256: 65536;
         pabyPrecomputed = static_cast<GByte *>(VSI_MALLOC2_VERBOSE(4, iMax));
@@ -3307,7 +3316,7 @@ static Algorithm GetAlgorithm(const char* pszProcessing)
 /**
  * Apply a DEM processing.
  *
- * This is the equivalent of the <a href="gdaldem.html">gdaldem</a> utility.
+ * This is the equivalent of the <a href="/programs/gdaldem.html">gdaldem</a> utility.
  *
  * GDALDEMProcessingOptions* must be allocated and freed with
  * GDALDEMProcessingOptionsNew() and GDALDEMProcessingOptionsFree()
@@ -3859,7 +3868,7 @@ GDALDatasetH GDALDEMProcessing( const char *pszDest,
  * Allocates a GDALDEMProcessingOptions struct.
  *
  * @param papszArgv NULL terminated list of options (potentially including filename and open options too), or NULL.
- *                  The accepted options are the ones of the <a href="gdaldem.html">gdaldem</a> utility.
+ *                  The accepted options are the ones of the <a href="/programs/gdaldem.html">gdaldem</a> utility.
  * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
  *                           otherwise (gdal_translate_bin.cpp use case) must be allocated with
  *                           GDALDEMProcessingOptionsForBinaryNew() prior to this function. Will be

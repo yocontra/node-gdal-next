@@ -2,10 +2,10 @@
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement VSI large file api for stdout
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -44,7 +44,7 @@
 #include <fcntl.h>
 #endif
 
-CPL_CVSID("$Id: cpl_vsil_stdout.cpp c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_stdout.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 static VSIWriteFunction pWriteFunction = fwrite;
 static FILE* pWriteStream = stdout;

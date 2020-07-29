@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGRPGDumpLayer class
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrpgdumplayer.cpp 769cc553fd4534277830b8bc277d14a7c5af82b7 2019-05-06 11:38:01 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdumplayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 constexpr int USE_COPY_UNSET = -1;
 

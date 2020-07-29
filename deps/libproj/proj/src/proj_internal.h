@@ -174,7 +174,9 @@ enum pj_io_units {
     PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
     PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
     PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
-    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
+    PJ_IO_UNITS_RADIANS   = 4,  /* Radians */
+    PJ_IO_UNITS_DEGREES   = 5,  /* Degrees */
+
 };
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
@@ -287,6 +289,62 @@ typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
 #define PJD_GRIDSHIFT 3
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
+struct CoordOperation
+{
+    int idxInOriginalList;
+    double minxSrc = 0.0;
+    double minySrc = 0.0;
+    double maxxSrc = 0.0;
+    double maxySrc = 0.0;
+    double minxDst = 0.0;
+    double minyDst = 0.0;
+    double maxxDst = 0.0;
+    double maxyDst = 0.0;
+    PJ* pj = nullptr;
+    std::string name{};
+    double accuracy = -1.0;
+    bool isOffshore = false;
+
+    CoordOperation(int idxInOriginalListIn,
+                   double minxSrcIn, double minySrcIn, double maxxSrcIn, double maxySrcIn,
+                   double minxDstIn, double minyDstIn, double maxxDstIn, double maxyDstIn,
+                   PJ* pjIn, const std::string& nameIn, double accuracyIn, bool isOffshoreIn):
+        idxInOriginalList(idxInOriginalListIn),
+        minxSrc(minxSrcIn), minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
+        minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn), maxyDst(maxyDstIn),
+        pj(pjIn), name(nameIn),
+        accuracy(accuracyIn),
+        isOffshore(isOffshoreIn)
+    {
+    }
+
+    CoordOperation(const CoordOperation&) = delete;
+
+    CoordOperation(CoordOperation&& other):
+        idxInOriginalList(other.idxInOriginalList),
+        minxSrc(other.minxSrc), minySrc(other.minySrc), maxxSrc(other.maxxSrc), maxySrc(other.maxySrc),
+        minxDst(other.minxDst), minyDst(other.minyDst), maxxDst(other.maxxDst), maxyDst(other.maxyDst),
+        name(std::move(other.name)),
+        accuracy(other.accuracy),
+        isOffshore(other.isOffshore) {
+        pj = other.pj;
+        other.pj = nullptr;
+    }
+
+    CoordOperation& operator=(const CoordOperation&) = delete;
+
+    ~CoordOperation()
+    {
+        proj_destroy(pj);
+    }
+};
+
+enum class TMercAlgo
+{
+    AUTO, // Poder/Engsager if far from central meridian, otherwise Evenden/Snyder
+    EVENDEN_SNYDER,
+    PODER_ENGSAGER,
+};
 
 /* base projection data structure */
 struct PJconsts {
@@ -493,52 +551,6 @@ struct PJconsts {
     /*************************************************************************************
      proj_create_crs_to_crs() alternative coordinate operations
     **************************************************************************************/
-
-    struct CoordOperation
-    {
-        double minxSrc = 0.0;
-        double minySrc = 0.0;
-        double maxxSrc = 0.0;
-        double maxySrc = 0.0;
-        double minxDst = 0.0;
-        double minyDst = 0.0;
-        double maxxDst = 0.0;
-        double maxyDst = 0.0;
-        PJ* pj = nullptr;
-        std::string name{};
-        double accuracy = -1.0;
-        bool isOffshore = false;
-
-        CoordOperation(double minxSrcIn, double minySrcIn, double maxxSrcIn, double maxySrcIn,
-                       double minxDstIn, double minyDstIn, double maxxDstIn, double maxyDstIn,
-                       PJ* pjIn, const std::string& nameIn, double accuracyIn, bool isOffshoreIn):
-            minxSrc(minxSrcIn), minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
-            minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn), maxyDst(maxyDstIn),
-            pj(pjIn), name(nameIn),
-            accuracy(accuracyIn),
-            isOffshore(isOffshoreIn)
-        {
-        }
-
-        CoordOperation(const CoordOperation&) = delete;
-
-        CoordOperation(CoordOperation&& other):
-            minxSrc(other.minxSrc), minySrc(other.minySrc), maxxSrc(other.maxxSrc), maxySrc(other.maxySrc),
-            minxDst(other.minxDst), minyDst(other.minyDst), maxxDst(other.maxxDst), maxyDst(other.maxyDst),
-            name(std::move(other.name)),
-            accuracy(other.accuracy),
-            isOffshore(other.isOffshore) {
-            pj = other.pj;
-            other.pj = nullptr;
-        }
-
-        CoordOperation& operator=(const CoordOperation&) = delete;
-
-        ~CoordOperation()
-        {
-            proj_destroy(pj);
-        }
-    };
     std::vector<CoordOperation> alternativeCoordinateOperations{};
     int iCurCoordOp = -1;
 
@@ -735,6 +747,9 @@ struct projCtx_t {
     projGridChunkCache gridChunkCache{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
+    int pipelineInitRecursiongCounter = 0; // to avoid potential infinite recursion in pipeline.cpp
+
+    TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
 
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
@@ -759,7 +774,7 @@ C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[];
 #ifdef PJ_LIB__
 #define PROJ_HEAD(name, desc) static const char des_##name [] = desc
 
-#define OPERATION(name, NEED_ELPJ_LPS)                          \
+#define OPERATION(name, NEED_ELLPS)                          \
                                                              \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE PJ *pj_##name (PJ *P);                           \
@@ -773,7 +788,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     if (nullptr==P)                                          \
         return nullptr;                                      \
     P->descr = des_##name;                                   \
-    P->need_ellps = NEED_ELPJ_LPS;                              \
+    P->need_ellps = NEED_ELLPS;                              \
     P->left  = PJ_IO_UNITS_RADIANS;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
@@ -820,12 +835,12 @@ void     *pj_dealloc_params (projCtx_t *ctx, paralist *start, int errlev);
 
 
 double *pj_enfn(double);
-double  pj_mlfn(double, double, double, double *);
-double  pj_inv_mlfn(projCtx_t *, double, double, double *);
+double  pj_mlfn(double, double, double, const double *);
+double  pj_inv_mlfn(projCtx_t *, double, double, const double *);
 double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
-double  PROJ_DLL pj_phi2(projCtx_t *, double, double);
+double  PROJ_DLL pj_phi2(projCtx_t *, const double, const double);
 double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
@@ -861,17 +876,33 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition);
 PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
 
 // For use by projinfo
-std::string PROJ_DLL pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
-
 void pj_load_ini(PJ_CONTEXT* ctx);
 
 // Exported for testing purposes only
 std::string PROJ_DLL pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx);
 
 // For use by projsync
-std::string PROJ_DLL pj_context_get_user_writable_directory(PJ_CONTEXT *ctx, bool create);
 void PROJ_DLL pj_context_set_user_writable_directory(PJ_CONTEXT* ctx, const std::string& path);
 std::string PROJ_DLL pj_get_relative_share_proj(PJ_CONTEXT *ctx);
+
+std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
+                                                     const PJ *source_crs,
+                                                     const PJ *target_crs,
+                                                     PJ_OBJ_LIST* op_list);
+
+int pj_get_suggested_operation(PJ_CONTEXT *ctx,
+                               const std::vector<CoordOperation>& opList,
+                               const int iExcluded[2],
+                               PJ_DIRECTION direction,
+                               PJ_COORD coord);
+
+const PJ_UNITS *pj_list_linear_units();
+const PJ_UNITS *pj_list_angular_units();
+
+void pj_clear_hgridshift_knowngrids_cache();
+void pj_clear_vgridshift_knowngrids_cache();
+
+PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial);
 
 /* classic public API */
 #include "proj_api.h"

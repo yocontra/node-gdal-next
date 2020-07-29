@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Philippe Vachon
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "gdal_pam.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: gff_dataset.cpp a542b2797f15f2ed694cfcee9ff17d86b339dfee 2018-04-02 00:24:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: gff_dataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /*******************************************************************
  * Declaration of the GFFDataset class                             *
@@ -44,7 +44,7 @@ CPL_CVSID("$Id: gff_dataset.cpp a542b2797f15f2ed694cfcee9ff17d86b339dfee 2018-04
 
 class GFFRasterBand;
 
-class GFFDataset : public GDALPamDataset
+class GFFDataset final: public GDALPamDataset
 {
     friend class GFFRasterBand;
     VSILFILE *fp;
@@ -103,7 +103,7 @@ GFFDataset::~GFFDataset()
  * Declaration and implementation of the GFFRasterBand Class         *
  *********************************************************************/
 
-class GFFRasterBand : public GDALPamRasterBand {
+class GFFRasterBand final: public GDALPamRasterBand {
     long nRasterBandMemory;
     int nSampleSize;
   public:
@@ -345,7 +345,7 @@ void GDALRegister_GFF()
     poDriver->SetMetadataItem(
         GDAL_DMD_LONGNAME,
         "Ground-based SAR Applications Testbed File Format (.gff)");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#GFF");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/gff.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "gff");
     poDriver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");
     poDriver->pfnOpen = GFFDataset::Open;

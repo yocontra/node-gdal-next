@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_aws.h 6df253b7cb1bb04d8fa847106b60ff190f23235b 2019-06-07 20:50:53 +0200 Even Rouault $
+ * $Id: cpl_aws.h a0f6709dc75fe9cb5c842fd4395e6072db3d9620 2020-03-05 16:04:26 +0100 Even Rouault $
  *
  * Name:     cpl_aws.h
  * Project:  CPL - Common Portability Library
@@ -36,6 +36,7 @@
 #ifdef HAVE_CURL
 
 #include <cstddef>
+#include <mutex>
 
 #include "cpl_string.h"
 
@@ -108,6 +109,8 @@ public:
                                        bool /*bSetError*/, bool* /*pbUpdateMap*/ = nullptr) { return false;}
 
         virtual const CPLString& GetURL() const = 0;
+
+        virtual CPLString GetCopySourceHeader() const { return std::string(); }
 
         static bool GetBucketAndObjectKey(const char* pszURI,
                                           const char* pszFSPrefix,
@@ -205,6 +208,8 @@ class VSIS3HandleHelper final: public IVSIS3LikeHandleHelper
         void SetRequestPayer(const CPLString &osStr);
         void SetVirtualHosting(bool b);
 
+        CPLString GetCopySourceHeader() const override { return "x-amz-copy-source"; }
+
         CPLString GetSignedURL(CSLConstList papszOptions);
 
         static void CleanMutex();
@@ -233,6 +238,12 @@ class VSIS3UpdateParams
             poHelper->SetRequestPayer(m_osRequestPayer);
             poHelper->SetVirtualHosting(m_bUseVirtualHosting);
         }
+
+        static std::mutex gsMutex;
+        static std::map< CPLString, VSIS3UpdateParams > goMapBucketsToS3Params;
+        static void UpdateMapFromHandle( IVSIS3LikeHandleHelper* poHandleHelper );
+        static void UpdateHandleFromMap( IVSIS3LikeHandleHelper* poHandleHelper );
+        static void ClearCache();
 };
 
 #endif /* HAVE_CURL */

@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogringresdatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogringresdatasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                            SetConnParam()                            */
@@ -573,7 +573,7 @@ int OGRIngresDataSource::FetchSRSId( OGRSpatialReference * poSRS )
         {
             CPLDebug("INGRES", "No rows exists matching EPSG:%s in spatial_ref_sys", pszAuthID );
         }
-        else if( papszRow != NULL && papszRow[0] != NULL )
+        else if( papszRow[0] != NULL )
         {
             nSRSId = *((II_INT4 *)papszRow[0]);
             return nSRSId;
@@ -610,7 +610,7 @@ int OGRIngresDataSource::FetchSRSId( OGRSpatialReference * poSRS )
         {
             CPLDebug("INGRES", "No rows exist currently exist in spatial_ref_sys");
         }
-        else if( papszRow != NULL && papszRow[0] != NULL )
+        else if( papszRow[0] != NULL )
         {
             nSRSId = *((II_INT4 *)papszRow[0]);
             return nSRSId;

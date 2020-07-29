@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Portions Copyright (c) Her majesty the Queen in right of Canada as
  * represented by the Minister of National Defence, 2006.
@@ -54,7 +54,7 @@
 #include "nitflib.h"
 
 
-CPL_CVSID("$Id: nitfrasterband.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: nitfrasterband.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       NITFMakeColorTable()                           */

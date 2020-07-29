@@ -41,7 +41,7 @@ void CPL_DLL GDALRegister_BPG();
 #include "libbpg.h"
 CPL_C_END
 
-CPL_CVSID("$Id: bpgdataset.cpp 6f51856470aecacbcb25254e6a6e263e5b1a5aae 2017-12-19 05:31:03Z Kurt Schwehr $")
+CPL_CVSID("$Id: bpgdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -51,7 +51,7 @@ CPL_CVSID("$Id: bpgdataset.cpp 6f51856470aecacbcb25254e6a6e263e5b1a5aae 2017-12-
 
 class BPGRasterBand;
 
-class BPGDataset : public GDALPamDataset
+class BPGDataset final: public GDALPamDataset
 {
     friend class BPGRasterBand;
 
@@ -75,7 +75,7 @@ class BPGDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class BPGRasterBand : public GDALPamRasterBand
+class BPGRasterBand final: public GDALPamRasterBand
 {
     friend class BPGDataset;
 
@@ -339,7 +339,7 @@ void GDALRegister_BPG()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Better Portable Graphics" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_bpg.html" );
+                               "drivers/raster/bpg.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "bpg" );
     // poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/bpg" );
 

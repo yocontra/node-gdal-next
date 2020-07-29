@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: ersdataset.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04-20 20:33:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: ersdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -745,7 +745,7 @@ void ERSDataset::ReadGCPs()
 /* ==================================================================== */
 /************************************************************************/
 
-class ERSRasterBand : public RawRasterBand
+class ERSRasterBand final: public RawRasterBand
 {
   public:
     ERSRasterBand( GDALDataset *poDS, int nBand, VSILFILE * fpRaw,
@@ -1512,7 +1512,7 @@ void GDALRegister_ERS()
     poDriver->SetDescription( "ERS" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ERMapper .ers Labelled" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_ers.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/ers.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "ers" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Int32 UInt32 "

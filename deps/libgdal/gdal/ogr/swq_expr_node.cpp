@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (C) 2010 Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #ifndef DOXYGEN_SKIP
 
 #include "cpl_port.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 #include <cctype>
 #include <cstdio>
@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: swq_expr_node.cpp 570599399e1c0665e63ad81fa7c9fed6e77a5f95 2019-03-10 23:21:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: swq_expr_node.cpp ffd62ee1bdeed41a9301102c35b3c0eb30a36dc2 2019-11-28 16:56:51 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           swq_expr_node()                            */
@@ -543,6 +543,7 @@ CPLString swq_expr_node::UnparseOperationFromUnparsedSubExpr(char** apszSubExpr)
       case SWQ_GE:
       case SWQ_LE:
       case SWQ_LIKE:
+      case SWQ_ILIKE:
       case SWQ_ADD:
       case SWQ_SUBTRACT:
       case SWQ_MULTIPLY:
@@ -574,7 +575,7 @@ CPLString swq_expr_node::UnparseOperationFromUnparsedSubExpr(char** apszSubExpr)
             osExpr += apszSubExpr[1];
             osExpr += ")";
         }
-        if( nOperation == SWQ_LIKE && nSubExprCount == 3 )
+        if( (nOperation == SWQ_LIKE || nOperation == SWQ_ILIKE) && nSubExprCount == 3 )
             osExpr += CPLSPrintf( " ESCAPE (%s)", apszSubExpr[2] );
         break;
 

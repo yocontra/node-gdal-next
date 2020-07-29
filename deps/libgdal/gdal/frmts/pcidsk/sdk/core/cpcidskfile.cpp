@@ -460,12 +460,23 @@ void CPCIDSKFile::InitializeFromHeader()
     width = atoi(fh.Get(384,8));
     height = atoi(fh.Get(392,8));
     channel_count = atoi(fh.Get(376,8));
+    if( width < 0 || height < 0 || channel_count < 0 )
+    {
+        return ThrowPCIDSKException(
+            "Invalid width, height and/or channel_count" );
+    }
     file_size = fh.GetUInt64(16,16);
 
     uint64 ih_start_block = atouint64(fh.Get(336,16));
     uint64 image_start_block = atouint64(fh.Get(304,16));
     fh.Get(360,8,interleaving);
 
+    if( image_start_block == 0 ||
+        image_start_block-1 > std::numeric_limits<uint64>::max() / 512 )
+    {
+        return ThrowPCIDSKException(
+            "Invalid image_start_block: " PCIDSK_FRMT_UINT64, image_start_block );
+    }
     uint64 image_offset = (image_start_block-1) * 512;
 
     block_size = 0;
@@ -486,7 +497,14 @@ void CPCIDSKFile::InitializeFromHeader()
 
     segment_count = (segment_block_count * 512) / 32;
     segment_pointers.SetSize( segment_block_count * 512 );
-    segment_pointers_offset = atouint64(fh.Get(440,16)) * 512 - 512;
+    segment_pointers_offset = atouint64(fh.Get(440,16));
+    if( segment_pointers_offset == 0 ||
+        segment_pointers_offset-1 > std::numeric_limits<uint64>::max() / 512 )
+    {
+        return ThrowPCIDSKException(
+            "Invalid segment_pointers_offset: " PCIDSK_FRMT_UINT64, segment_pointers_offset );
+    }
+    segment_pointers_offset = segment_pointers_offset * 512 - 512;
     ReadFromFile( segment_pointers.buffer, segment_pointers_offset,
                   segment_block_count * 512 );
 
@@ -554,8 +572,14 @@ void CPCIDSKFile::InitializeFromHeader()
     {
         PCIDSKBuffer ih(1024);
         PCIDSKChannel *channel = nullptr;
+        if( ih_start_block == 0 ||
+            ih_start_block-1 > std::numeric_limits<uint64>::max() / 512 ||
+            (ih_start_block-1)*512 > std::numeric_limits<uint64>::max() - (channelnum-1)*1024 )
+        {
+            return ThrowPCIDSKException( "Integer overflow when computing ih_offset");
+        }
         uint64  ih_offset = (ih_start_block-1)*512 + (channelnum-1)*1024;
-        
+
         ReadFromFile( ih.buffer, ih_offset, 1024 );
 
         // fetch the filename, if there is one.

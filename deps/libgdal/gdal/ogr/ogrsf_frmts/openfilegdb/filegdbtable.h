@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: filegdbtable.h cd620a45272533ba0e9a819993a5768ca9764f43 2018-04-11 08:13:21 +0200 Juergen E. Fischer $
+ * $Id: filegdbtable.h 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements reading of FileGDB tables
- * Author:   Even Rouault, <even dot rouault at mines-dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -309,7 +309,7 @@ class FileGDBTable
        int                      HasGotError() const { return bError; }
        int                      GetCurRow() const { return nCurRow; }
        int                      IsCurRowDeleted() const { return bIsDeleted; }
-       const OGRField*          GetFieldValue(int iCol);
+       OGRField*                GetFieldValue(int iCol);
 
        int                      GetFeatureExtent(const OGRField* psGeomField,
                                                  OGREnvelope* psOutFeatureEnvelope);

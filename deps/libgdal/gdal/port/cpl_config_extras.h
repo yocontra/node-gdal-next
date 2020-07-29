@@ -1,15 +1,9 @@
-/* $Id: cpl_config_extras.h 55f4cce7557b301901f754e28cd6193f2f02b522 2016-12-23 14:54:07Z Kurt Schwehr $ */
+/* $Id: cpl_config_extras.h e4dbe6c45993f8567c5f711991cfd35e3a24cfe0 2020-03-25 15:38:54 +0100 Even Rouault $ */
 
 #ifndef INCLUDED_CPL_CONFIG_EXTRAS
 #define INCLUDED_CPL_CONFIG_EXTRAS
 
 #if defined(__APPLE__)
-
-#ifdef __BIG_ENDIAN__
-  #define HOST_FILLORDER FILLORDER_MSB2LSB
-#else
-  #define HOST_FILLORDER FILLORDER_LSB2MSB
-#endif
 
 #ifdef __LP64__
   #define SIZEOF_UNSIGNED_LONG 8

@@ -6,7 +6,7 @@
  *
  * ****************************************************************************
  * Copyright (c) 2006, MapShots Inc (www.mapshots.com)
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -46,7 +46,7 @@
 #include "cpl_string.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: nearblack_lib.cpp 88eda08930b6dafb9ea1374ba19e0b1cf5ded3d3 2018-08-11 20:16:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: nearblack_lib.cpp 15841279d82ea156e16522db2bcd65d88653b0a1 2019-11-26 03:45:52 -0500 Cody Benkoski $")
 
 typedef std::vector<int> Color;
 typedef std::vector< Color > Colors;
@@ -86,7 +86,7 @@ static void ProcessLine( GByte *pabyLine, GByte *pabyMask, int iStart,
 /**
  * Convert nearly black/white borders to exact value.
  *
- * This is the equivalent of the <a href="nearblack.html">nearblack</a> utility.
+ * This is the equivalent of the <a href="/programs/nearblack.html">nearblack</a> utility.
  *
  * GDALNearblackOptions* must be allocated and freed with GDALNearblackOptionsNew()
  * and GDALNearblackOptionsFree() respectively.
@@ -535,6 +535,7 @@ GDALDatasetH CPL_DLL GDALNearblack( const char *pszDest, GDALDatasetH hDstDS,
         CPLFree(pabyMask);
 
     CPLFree( panLastLineCounts );
+    GDALNearblackOptionsFree(psOptionsToFree);
 
     return hDstDS;
 }
@@ -750,7 +751,7 @@ static bool IsInt( const char *pszArg )
  * Allocates a GDALNearblackOptions struct.
  *
  * @param papszArgv NULL terminated list of options (potentially including filename and open options too), or NULL.
- *                  The accepted options are the ones of the <a href="nearblack.html">nearblack</a> utility.
+ *                  The accepted options are the ones of the <a href="/programs/nearblack.html">nearblack</a> utility.
  * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
  *                           otherwise (gdal_translate_bin.cpp use case) must be allocated with
  *                           GDALNearblackOptionsForBinaryNew() prior to this function. Will be

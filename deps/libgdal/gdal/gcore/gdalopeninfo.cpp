@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalopeninfo.cpp a0845a051c0cd1cc7dfbeebb776dc325af262cac 2018-06-14 16:22:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalopeninfo.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 // Keep in sync prototype of those 2 functions between gdalopeninfo.cpp,
 // ogrsqlitedatasource.cpp and ogrgeopackagedatasource.cpp

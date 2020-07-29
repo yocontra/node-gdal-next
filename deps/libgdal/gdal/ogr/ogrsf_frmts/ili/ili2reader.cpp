@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Pirmin Kalberer, Sourcepole AG
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 
 using namespace std;
 
-CPL_CVSID("$Id: ili2reader.cpp f4f4d190ad478ea8e71742e2e97d52f3e74d1054 2019-03-23 13:57:22 +0100 Even Rouault $")
+CPL_CVSID("$Id: ili2reader.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 //
 // constants

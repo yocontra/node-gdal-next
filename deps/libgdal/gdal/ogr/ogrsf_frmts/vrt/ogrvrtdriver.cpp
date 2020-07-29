@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: ogrvrtdriver.cpp 59baa002d746636c306c4fc9825a9d77122cd150 2018-03-31 18:02:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtdriver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRVRTErrorHandler()                       */

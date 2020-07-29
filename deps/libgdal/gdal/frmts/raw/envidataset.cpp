@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -55,7 +55,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: envidataset.cpp 558f8a7aa15498ac25fb4a8227b220c1d4fecf29 2019-09-14 12:13:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: envidataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 // TODO(schwehr): This really should be defined in port/somewhere.h.
 constexpr double kdfDegToRad = M_PI / 180.0;
@@ -1821,6 +1821,12 @@ void ENVIDataset::ProcessGeoPoints( const char *pszGeoPoints )
     CSLDestroy(papszFields);
 }
 
+static unsigned byteSwapUInt(unsigned swapMe)
+{
+    CPL_MSBPTR32(&swapMe);
+    return swapMe;
+}
+
 void ENVIDataset::ProcessStatsFile()
 {
     osStaFilename = CPLResetExtension(pszHDRFilename, "sta");
@@ -1853,10 +1859,10 @@ void ENVIDataset::ProcessStatsFile()
     }
 
     // TODO(schwehr): What are 1, 4, 8, and 40?
-    int lOffset = 0;
+    unsigned lOffset = 0;
     if( VSIFSeekL(fpStaFile, 40 + static_cast<vsi_l_offset>(nb + 1) * 4, SEEK_SET) == 0 &&
-        VSIFReadL(&lOffset, sizeof(int), 1, fpStaFile) == 1 &&
-        VSIFSeekL(fpStaFile, 40 + static_cast<vsi_l_offset>(nb + 1) * 8 + byteSwapInt(lOffset) + nb,
+        VSIFReadL(&lOffset, sizeof(lOffset), 1, fpStaFile) == 1 &&
+        VSIFSeekL(fpStaFile, 40 + static_cast<vsi_l_offset>(nb + 1) * 8 + byteSwapUInt(lOffset) + nb,
                   SEEK_SET) == 0)
     {
         // This should be the beginning of the statistics.
@@ -1988,6 +1994,22 @@ bool ENVIDataset::ReadHeader( VSILFILE *fpHdr )
         }
     }
 
+    return true;
+}
+
+/************************************************************************/
+/*                        GetRawBinaryLayout()                          */
+/************************************************************************/
+
+bool ENVIDataset::GetRawBinaryLayout(GDALDataset::RawBinaryLayout& sLayout)
+{
+    const bool bIsCompressed = atoi(
+        m_aosHeader.FetchNameValueDef("file_compression", "0")) != 0;
+    if( bIsCompressed )
+        return false;
+    if( !RawDataset::GetRawBinaryLayout(sLayout) )
+        return false;
+    sLayout.osRawFilename = GetDescription();
     return true;
 }
 
@@ -2785,7 +2807,7 @@ void GDALRegister_ENVI()
     poDriver->SetDescription("ENVI");
     poDriver->SetMetadataItem(GDAL_DCAP_RASTER, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "ENVI .hdr Labelled");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#ENVI");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/envi.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES,
                               "Byte Int16 UInt16 Int32 UInt32 "

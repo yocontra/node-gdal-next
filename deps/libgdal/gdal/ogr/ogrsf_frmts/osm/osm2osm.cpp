@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: osm2osm.cpp 59358b29296ad9c7d6bfe503dfc6c556e95ce4a2 2018-02-12 16:03:19Z Kurt Schwehr $
+ * $Id: osm2osm.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  * Purpose:  osm2osm
  *
  ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

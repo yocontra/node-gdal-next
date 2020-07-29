@@ -1,10 +1,10 @@
 /******************************************************************************
  *
  * Purpose:  ADRG reader
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,13 +34,13 @@
 #include <limits>
 #include <new>
 
-CPL_CVSID("$Id: adrgdataset.cpp fc772a7e94b9c97f62a72e3eab60fa20b97b9f92 2019-08-12 01:18:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: adrgdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 #define N_ELEMENTS(x)  (sizeof(x)/sizeof(x[0]))
 
 #define DIGIT_ZERO '0'
 
-class ADRGDataset : public GDALPamDataset
+class ADRGDataset final: public GDALPamDataset
 {
     friend class ADRGRasterBand;
 
@@ -113,7 +113,7 @@ class ADRGDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class ADRGRasterBand : public GDALPamRasterBand
+class ADRGRasterBand final: public GDALPamRasterBand
 {
     friend class ADRGDataset;
 
@@ -2377,7 +2377,7 @@ void GDALRegister_ADRG()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "ARC Digitized Raster Graphics" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#ADRG" );
+                               "drivers/raster/adrg.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gen" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte" );

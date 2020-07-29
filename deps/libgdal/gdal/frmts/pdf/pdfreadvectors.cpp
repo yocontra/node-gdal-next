@@ -2,10 +2,10 @@
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset (read vector features)
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,10 +28,12 @@
 
 #include "gdal_pdf.h"
 
+#include <array>
+
 #define SQUARE(x) ((x)*(x))
 #define EPSILON 1e-5
 
-CPL_CVSID("$Id: pdfreadvectors.cpp abcbfb770f9b14a08544deefa93c39626d2495a7 2020-01-11 23:11:05 +0100 Even Rouault $")
+CPL_CVSID("$Id: pdfreadvectors.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 
@@ -351,9 +353,9 @@ OGRGeometry* PDFDataset::GetGeometryFromMCID(int nMCID)
 class GraphicState
 {
     public:
-        double adfCM[6];
-        double adfStrokeColor[3];
-        double adfFillColor[3];
+        std::array<double,6> adfCM;
+        std::array<double,3> adfStrokeColor;
+        std::array<double,3> adfFillColor;
 
         GraphicState()
         {
@@ -516,6 +518,8 @@ static OGRPoint* PDFGetStarCenter(OGRLineString* poLS)
     double dfSqD13 = SQUARE(poLS->getX(1) - poLS->getX(3)) +
                       SQUARE(poLS->getY(1) - poLS->getY(3));
     const double dfSin18divSin126 = 0.38196601125;
+    if( dfSqD02 == 0 )
+        return nullptr;
     int bOK = fabs(dfSqD13 / dfSqD02 - SQUARE(dfSin18divSin126)) < EPSILON;
     for(int i=1;i<10 && bOK;i++)
     {
@@ -1215,7 +1219,7 @@ OGRGeometry* PDFDataset::ParseContent(const char* pszContent,
                 }
                 else if( EQUAL2(szToken, "RG") || EQUAL2(szToken, "rg") )
                 {
-                    double* padf = ( EQUAL2(szToken, "RG") ) ? oGS.adfStrokeColor : oGS.adfFillColor;
+                    double* padf = ( EQUAL2(szToken, "RG") ) ? &oGS.adfStrokeColor[0] : &oGS.adfFillColor[0];
                     if (!UnstackTokens(szToken, 3, aszTokenStack, nTokenStackSize, padf))
                     {
                         CPLDebug("PDF", "Should not happen at line %d", __LINE__);
@@ -1471,14 +1475,14 @@ OGRGeometry* PDFDataset::BuildGeometry(std::vector<double>& oCoords,
                 {
                     poLS->closeRings();
 
-                    OGRPoint* poCenter = nullptr;
+                    std::unique_ptr<OGRPoint> poCenter;
 
                    if (nPolys == 0 &&
                         poLS &&
                         poLS->getNumPoints() == 1 + BEZIER_STEPS * 4 )
                    {
                         // Recognize points as written by GDAL (ogr-sym-3 : circle (filled))
-                        poCenter = PDFGetCircleCenter(poLS);
+                        poCenter.reset(PDFGetCircleCenter(poLS));
                    }
 
                     if (nPolys == 0 &&
@@ -1487,7 +1491,7 @@ OGRGeometry* PDFDataset::BuildGeometry(std::vector<double>& oCoords,
                         poLS->getNumPoints() == 5)
                     {
                         // Recognize points as written by GDAL (ogr-sym-5: square (filled))
-                        poCenter = PDFGetSquareCenter(poLS);
+                        poCenter.reset(PDFGetSquareCenter(poLS));
 
                         /* ESRI points */
                         if (poCenter == nullptr &&
@@ -1497,8 +1501,8 @@ OGRGeometry* PDFDataset::BuildGeometry(std::vector<double>& oCoords,
                             poLS->getY(2) == poLS->getY(3) &&
                             poLS->getX(3) == poLS->getX(0))
                         {
-                            poCenter = new OGRPoint((poLS->getX(0) + poLS->getX(1)) / 2,
-                                                    (poLS->getY(0) + poLS->getY(2)) / 2);
+                            poCenter.reset(new OGRPoint((poLS->getX(0) + poLS->getX(1)) / 2,
+                                                    (poLS->getY(0) + poLS->getY(2)) / 2));
                         }
                     }
                     // Recognize points as written by GDAL (ogr-sym-7: triangle (filled))
@@ -1506,19 +1510,20 @@ OGRGeometry* PDFDataset::BuildGeometry(std::vector<double>& oCoords,
                              poLS &&
                              poLS->getNumPoints() == 4)
                     {
-                        poCenter = PDFGetTriangleCenter(poLS);
+                        poCenter.reset(PDFGetTriangleCenter(poLS));
                     }
                     // Recognize points as written by GDAL (ogr-sym-9: star (filled))
                     else if (nPolys == 0 &&
                              poLS &&
                              poLS->getNumPoints() == 11)
                     {
-                        poCenter = PDFGetStarCenter(poLS);
+                        poCenter.reset(PDFGetStarCenter(poLS));
                     }
 
                     if (poCenter)
                     {
-                        poGeom = poCenter;
+                        delete poGeom;
+                        poGeom = poCenter.release();
                         break;
                     }
 
@@ -1757,25 +1762,10 @@ void PDFDataset::ExploreContentsNonStructured(GDALPDFObject* poContents,
         if (poProperties != nullptr &&
             poProperties->GetType() == PDFObjectType_Dictionary)
         {
-            char** papszLayersWithRef = osLayerWithRefList.List();
-            char** papszIter = papszLayersWithRef;
             std::map< std::pair<int, int>, OGRPDFLayer *> oMapNumGenToLayer;
-            while(papszIter && *papszIter)
+            for(const auto& oLayerWithref: aoLayerWithRef )
             {
-                char** papszTokens = CSLTokenizeString(*papszIter);
-
-                if( CSLCount(papszTokens) != 3 ) {
-                    CSLDestroy(papszTokens);
-                    CPLDebug("PDF", "Ignore '%s', unparsable.", *papszIter);
-                    papszIter ++;
-                    continue;
-                }
-
-                const char* pszLayerName = papszTokens[0];
-                int nNum = atoi(papszTokens[1]);
-                int nGen = atoi(papszTokens[2]);
-
-                CPLString osSanitizedName(PDFSanitizeLayerName(pszLayerName));
+                CPLString osSanitizedName(PDFSanitizeLayerName(oLayerWithref.osName));
 
                 OGRPDFLayer* poLayer = (OGRPDFLayer*) GetLayerByName(osSanitizedName.c_str());
                 if (poLayer == nullptr)
@@ -1793,10 +1783,7 @@ void PDFDataset::ExploreContentsNonStructured(GDALPDFObject* poContents,
                     nLayers ++;
                 }
 
-                oMapNumGenToLayer[ std::pair<int,int>(nNum, nGen) ] = poLayer;
-
-                CSLDestroy(papszTokens);
-                papszIter ++;
+                oMapNumGenToLayer[ std::pair<int,int>(oLayerWithref.nOCGNum.toInt(), oLayerWithref.nOCGGen) ] = poLayer;
             }
 
             std::map<CPLString, GDALPDFObject*>& oMap =

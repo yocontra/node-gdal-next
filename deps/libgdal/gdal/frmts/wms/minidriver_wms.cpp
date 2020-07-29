@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Adam Nowacki
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: minidriver_wms.cpp 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
+CPL_CVSID("$Id: minidriver_wms.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 WMSMiniDriver_WMS::WMSMiniDriver_WMS() : m_iversion(0) {}
 

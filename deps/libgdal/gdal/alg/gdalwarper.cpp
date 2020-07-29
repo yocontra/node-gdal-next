@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp 568ffe2360fda1100a08ba74371f4f25d7059785 2019-05-05 19:08:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarper.cpp 3faf501a82260b41e85125d14b21ec3c54e319d7 2020-04-01 11:57:08 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */
@@ -1594,6 +1594,8 @@ GDALSerializeWarpOptions( const GDALWarpOptions *psWO )
         pszAlgName = "Quartile1";
     else if( psWO->eResampleAlg == GRA_Q3 )
         pszAlgName = "Quartile3";
+    else if( psWO->eResampleAlg == GRA_Sum )
+        pszAlgName = "Sum";
     else
         pszAlgName = "Unknown";
 
@@ -1770,8 +1772,8 @@ GDALSerializeWarpOptions( const GDALWarpOptions *psWO )
             == OGRERR_NONE )
         {
             CPLCreateXMLElementAndValue( psTree, "Cutline", pszWKT );
-            CPLFree( pszWKT );
         }
+        CPLFree( pszWKT );
     }
 
     if( psWO->dfCutlineBlendDist != 0.0 )
@@ -1843,6 +1845,8 @@ GDALWarpOptions * CPL_STDCALL GDALDeserializeWarpOptions( CPLXMLNode *psTree )
         psWO->eResampleAlg = GRA_Q1;
     else if( EQUAL(pszValue, "Quartile3") )
         psWO->eResampleAlg = GRA_Q3;
+    else if( EQUAL(pszValue, "Sum") )
+        psWO->eResampleAlg = GRA_Sum;
     else if( EQUAL(pszValue, "Default") )
         /* leave as is */;
     else

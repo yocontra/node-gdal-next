@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -43,7 +43,7 @@
 #define va_copy __va_copy
 #endif
 
-CPL_CVSID("$Id: cplstring.cpp e12a0fc61edef91a039e13c7baff2ce58288a552 2018-08-10 00:53:29 +0200 Juergen E. Fischer $")
+CPL_CVSID("$Id: cplstring.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /*
  * The CPLString class is derived from std::string, so the vast majority

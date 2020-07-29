@@ -2,10 +2,10 @@
  *
  * Project:  ECRG TOC read Translator
  * Purpose:  Implementation of ECRGTOCDataset and ECRGTOCSubDataset.
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,6 +30,7 @@
 
 #include "cpl_port.h"
 
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
@@ -51,7 +52,7 @@
 #include "ogr_srs_api.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: ecrgtocdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ecrgtocdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /** Overview of used classes :
    - ECRGTOCDataset : lists the different subdatasets, listed in the .xml,
@@ -75,7 +76,7 @@ typedef struct
 /* ==================================================================== */
 /************************************************************************/
 
-class ECRGTOCDataset : public GDALPamDataset
+class ECRGTOCDataset final: public GDALPamDataset
 {
   char      **papszSubDatasets;
   double      adfGeoTransform[6];
@@ -136,7 +137,7 @@ class ECRGTOCDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class ECRGTOCSubDataset : public VRTDataset
+class ECRGTOCSubDataset final: public VRTDataset
 {
   char**       papszFileList;
 
@@ -328,6 +329,9 @@ int GetExtent(const char* pszFrameName, int nScale, int nZone,
               double& dfPixelXSize, double& dfPixelYSize)
 {
     const int nAbsZone = abs(nZone);
+#ifdef DEBUG
+    assert( nAbsZone > 0 && nAbsZone <= 8 );
+#endif
 
 /************************************************************************/
 /*  Compute east-west constant                                          */
@@ -416,7 +420,7 @@ int GetExtent(const char* pszFrameName, int nScale, int nZone,
 /* ==================================================================== */
 /************************************************************************/
 
-class ECRGTOCProxyRasterDataSet : public GDALProxyPoolDataset
+class ECRGTOCProxyRasterDataSet final: public GDALProxyPoolDataset
 {
     /* The following parameters are only for sanity checking */
     mutable int checkDone;
@@ -1186,7 +1190,7 @@ void GDALRegister_ECRGTOC()
     poDriver->pfnOpen = ECRGTOCDataset::Open;
 
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#ECRGTOC" );
+                               "drivers/raster/ecrgtoc.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "xml" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );

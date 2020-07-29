@@ -1,13 +1,13 @@
 /**********************************************************************
- * $Id: cpl_atomic_ops.h 44e0c0ecc2e12f7885d8572d0f18dd94e7fbda1c 2016-10-25 02:28:29Z Kurt Schwehr $
+ * $Id: cpl_atomic_ops.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Name:     cpl_atomic_ops.h
  * Project:  CPL - Common Portability Library
  * Purpose:  Atomic operation functions.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

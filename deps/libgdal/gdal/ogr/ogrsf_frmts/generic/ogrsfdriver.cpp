@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999,  Les Technologies SoftMap Inc.
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "ogr_p.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrsfdriver.cpp e5a287aeb4a9c8665a45b9877e555e16ed93843d 2018-04-18 19:06:22 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsfdriver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 

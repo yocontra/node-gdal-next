@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Andrey Kiselev <dron@ak4719.spb.edu>
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@
 #include "cpl_worker_thread_pool.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalgrid.cpp 134b9c4e437e347aac48c459a18a933ed526be5b 2018-06-25 13:43:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalgrid.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 constexpr double TO_RADIANS = M_PI / 180.0;
 

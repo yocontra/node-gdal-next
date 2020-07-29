@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gridlib.c 5c54326d96d23b2fee099383897b85c15bef9a6a 2017-12-30 09:14:05Z Even Rouault $
+ * $Id: gridlib.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  Arc/Info Binary Grid Translator
  * Purpose:  Grid file reading code.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2007-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 
 #include "aigrid.h"
 
-CPL_CVSID("$Id: gridlib.c 5c54326d96d23b2fee099383897b85c15bef9a6a 2017-12-30 09:14:05Z Even Rouault $")
+CPL_CVSID("$Id: gridlib.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 

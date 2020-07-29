@@ -17,7 +17,8 @@
 				"../gdal/frmts/vrt/vrtwarped.cpp",
 				"../gdal/frmts/vrt/vrtdriver.cpp",
 				"../gdal/frmts/vrt/vrtderivedrasterband.cpp",
-				"../gdal/frmts/vrt/vrtrawrasterband.cpp"
+				"../gdal/frmts/vrt/vrtrawrasterband.cpp",
+        "../gdal/frmts/vrt/vrtmultidim.cpp"
 			],
 			"include_dirs": [
 				"../gdal/frmts/vrt",

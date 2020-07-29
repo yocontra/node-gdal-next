@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dgn.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: ogr_dgn.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  OGR Driver for DGN Reader.
@@ -37,7 +37,7 @@
 /*                            OGRDGNLayer                               */
 /************************************************************************/
 
-class OGRDGNLayer : public OGRLayer
+class OGRDGNLayer final: public OGRLayer
 {
     OGRFeatureDefn     *poFeatureDefn;
 
@@ -91,7 +91,7 @@ class OGRDGNLayer : public OGRLayer
 /*                          OGRDGNDataSource                            */
 /************************************************************************/
 
-class OGRDGNDataSource : public OGRDataSource
+class OGRDGNDataSource final: public OGRDataSource
 {
     OGRDGNLayer     **papoLayers;
     int                 nLayers;

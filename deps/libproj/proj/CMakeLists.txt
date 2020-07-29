@@ -37,6 +37,13 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 message(STATUS "Requiring C${CMAKE_C_STANDARD} - done")
 
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+if(APPLE)
+    set(MACOSX_RPATH ON)
+endif()
+
 # Set global -fvisibility=hidden
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -103,9 +110,9 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 7 MINOR 0 PATCH 0)
-set(PROJ_API_VERSION "19")
-set(PROJ_BUILD_VERSION "19.0.0")
+proj_version(MAJOR 7 MINOR 1 PATCH 0)
+set(PROJ_API_VERSION "20")
+set(PROJ_BUILD_VERSION "20.0.1")
 
 ################################################################################
 # Build features and variants
@@ -218,9 +225,9 @@ endif()
 # top of the build tree rather than in hard-to-find leaf
 # directories. This simplifies manual testing and the use of the build
 # tree rather than installed PROJ libraries.
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJ_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJ_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJ_BINARY_DIR}/bin)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 ################################################################################

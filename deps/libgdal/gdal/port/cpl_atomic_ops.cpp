@@ -3,10 +3,10 @@
  * Name:     cpl_atomic_ops.cpp
  * Project:  CPL - Common Portability Library
  * Purpose:  Atomic operation functions.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 
 // TODO: If C++11, use #include <atomic>.
 
-CPL_CVSID("$Id: cpl_atomic_ops.cpp 9a53d222083f9d406142013c04cfccf2bb75655c 2018-02-13 16:44:50Z Even Rouault $")
+CPL_CVSID("$Id: cpl_atomic_ops.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 #if defined(_MSC_VER)
 

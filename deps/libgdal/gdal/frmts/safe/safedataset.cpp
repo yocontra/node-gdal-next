@@ -34,7 +34,7 @@
 #include <set>
 #include <map>
 
-CPL_CVSID("$Id: safedataset.cpp 840c4c2232b264937e29d33a4d8a1981875a0fac 2019-08-14 14:37:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: safedataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -1219,7 +1219,7 @@ void GDALRegister_SAFE()
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Sentinel-1 SAR SAFE Product" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_safe.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/safe.html" );
 
     poDriver->pfnOpen = SAFEDataset::Open;
     poDriver->pfnIdentify = SAFEDataset::Identify;

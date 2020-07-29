@@ -29,11 +29,13 @@
 
 #include "kearat.h"
 
-CPL_CVSID("$Id: kearat.cpp 2519a7eb0e1649dbf8625ae8ffc7bb7c3ef9514b 2018-07-10 12:05:23 +0100 Robert Coup $")
+CPL_CVSID("$Id: kearat.cpp 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $")
 
 KEARasterAttributeTable::KEARasterAttributeTable(kealib::KEAAttributeTable *poKEATable,
                             KEARasterBand *poBand)
 {
+    this->m_hMutex = CPLCreateMutex();
+    CPLReleaseMutex( this->m_hMutex );
     for( size_t nColumnIndex = 0; nColumnIndex < poKEATable->getMaxGlobalColIdx(); nColumnIndex++ )
     {
         kealib::KEAATTField sKEAField;
@@ -56,6 +58,8 @@ KEARasterAttributeTable::~KEARasterAttributeTable()
 {
     // can't just delete thanks to Windows
     kealib::KEAAttributeTable::destroyAttributeTable(m_poKEATable);
+    CPLDestroyMutex( m_hMutex );
+    m_hMutex = nullptr;
 }
 
 GDALDefaultRasterAttributeTable *KEARasterAttributeTable::Clone() const
@@ -365,6 +369,7 @@ CPLErr KEARasterAttributeTable::ValuesIO(GDALRWFlag eRWFlag, int iField, int iSt
             "Dataset not open in update mode");
         return CE_Failure;
     }*/
+    CPLMutexHolderD( &m_hMutex );
 
     if( iField < 0 || iField >= (int) m_aoFields.size() )
     {
@@ -496,6 +501,7 @@ CPLErr KEARasterAttributeTable::ValuesIO(GDALRWFlag eRWFlag, int iField, int iSt
             "Dataset not open in update mode");
         return CE_Failure;
     }*/
+    CPLMutexHolderD( &m_hMutex );
 
     if( iField < 0 || iField >= (int) m_aoFields.size() )
     {
@@ -689,6 +695,7 @@ CPLErr KEARasterAttributeTable::ValuesIO(GDALRWFlag eRWFlag, int iField, int iSt
             "Dataset not open in update mode");
         return CE_Failure;
     }*/
+    CPLMutexHolderD( &m_hMutex );
 
     if( iField < 0 || iField >= (int) m_aoFields.size() )
     {
@@ -849,6 +856,7 @@ CPLErr KEARasterAttributeTable::CreateColumn( const char *pszFieldName,
             "Dataset not open in update mode");
         return CE_Failure;
     }*/
+    CPLMutexHolderD( &m_hMutex );
 
     std::string strUsage = "Generic";
     switch(eFieldUsage)

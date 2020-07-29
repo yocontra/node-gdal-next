@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2011, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,7 +47,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsil_cache.cpp c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_cache.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -97,7 +97,7 @@ class VSICachedFile final : public VSIVirtualHandle
     VSICachedFile( VSIVirtualHandle *poBaseHandle,
                    size_t nChunkSize,
                    size_t nCacheSize );
-    ~VSICachedFile() override { Close(); }
+    ~VSICachedFile() override { VSICachedFile::Close(); }
 
     void          FlushLRU();
     int           LoadBlocks( vsi_l_offset nStartBlock, size_t nBlockCount,

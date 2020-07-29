@@ -37,7 +37,7 @@
 #include "gdal_priv.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdaldem_bin.cpp 4db55e60ad36bf21a576d1179c0f1788d2f8dbf2 2019-03-04 22:16:21 +0100 Martin Ždila $")
+CPL_CVSID("$Id: gdaldem_bin.cpp 4cc601c05cc367a0d604c31a3c480e43d37b46ae 2019-08-12 22:03:02 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -158,6 +158,7 @@ MAIN_START(argc, argv)
 
     GDALDEMProcessingOptionsForBinary* psOptionsForBinary =
         GDALDEMProcessingOptionsForBinaryNew();
+    // coverity[tainted_data]
     GDALDEMProcessingOptions *psOptions =
         GDALDEMProcessingOptionsNew(argv + 1, psOptionsForBinary);
     CSLDestroy( argv );

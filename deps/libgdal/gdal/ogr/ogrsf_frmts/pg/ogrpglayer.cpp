@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -64,7 +64,7 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpglayer.cpp e57c8627b2925254b5d0b35d42d987891eb3bcd0 2018-11-21 20:25:46 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrpglayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 // These originally are defined in libpq-fs.h.
 

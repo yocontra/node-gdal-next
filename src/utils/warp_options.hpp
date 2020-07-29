@@ -15,8 +15,8 @@
 #include <gdal_priv.h>
 #include <gdalwarper.h>
 
-#include "string_list.hpp"
 #include "number_list.hpp"
+#include "string_list.hpp"
 
 using namespace v8;
 
@@ -44,29 +44,30 @@ namespace node_gdal {
 // }
 
 class WarpOptions {
-public:
-	int parse(Local<Value> value);
-	int parseResamplingAlg(Local<Value> value);
+    public:
+  int parse(Local<Value> value);
+  int parseResamplingAlg(Local<Value> value);
 
-	WarpOptions();
-	~WarpOptions();
+  WarpOptions();
+  ~WarpOptions();
 
-	inline GDALWarpOptions* get() {
-		return options;
-	}
-	inline bool useMultithreading() {
-		return multi;
-	}
-private:
-	GDALWarpOptions *options;
-	StringList additional_options;
-	IntegerList src_bands;
-	IntegerList dst_bands;
-	double* src_nodata;
-	double* dst_nodata;
-	bool multi;
+  inline GDALWarpOptions *get() {
+    return options;
+  }
+  inline bool useMultithreading() {
+    return multi;
+  }
+
+    private:
+  GDALWarpOptions *options;
+  StringList       additional_options;
+  IntegerList      src_bands;
+  IntegerList      dst_bands;
+  double *         src_nodata;
+  double *         dst_nodata;
+  bool             multi;
 };
 
-}
+} // namespace node_gdal
 
 #endif

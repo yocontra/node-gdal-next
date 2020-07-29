@@ -4,7 +4,7 @@
       - Remove old C style function prototypes
       - Add support for ZIP64
 
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
 
    Original licence available in port/LICENCE_minizip
 */
@@ -33,7 +33,7 @@
 #include "zconf.h"
 #include "zlib.h"
 
-CPL_CVSID("$Id: cpl_minizip_ioapi.cpp 0f654dda9faabf9d86a44293f0f89903a8e97dd7 2018-04-15 20:18:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_minizip_ioapi.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 static
 voidpf ZCALLBACK fopen_file_func ( voidpf /* opaque */ ,

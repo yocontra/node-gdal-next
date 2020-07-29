@@ -46,7 +46,7 @@ constexpr int SUBBLOCK_SIZE = 64;
 #define TO_SUBBLOCK(x) ((x) >> 6)
 #define WITHIN_SUBBLOCK(x) ((x) & 0x3f)
 
-CPL_CVSID("$Id: gdalarraybandblockcache.cpp c590dcec36eb6dcd7c5451623b859e7227475b44 2019-11-13 16:36:03 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalarraybandblockcache.cpp 2cef454ab06723a32379690b46581a40eb2e5af2 2019-11-13 16:36:03 +0100 Even Rouault $")
 
 /* ******************************************************************** */
 /*                        GDALArrayBandBlockCache                       */
@@ -106,7 +106,7 @@ GDALArrayBandBlockCache::GDALArrayBandBlockCache(GDALRasterBand* poBandIn) :
 
 GDALArrayBandBlockCache::~GDALArrayBandBlockCache()
 {
-    FlushCache();
+    GDALArrayBandBlockCache::FlushCache();
 
     if( !bSubBlockingActive )
         CPLFree( u.papoBlocks );

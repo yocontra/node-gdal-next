@@ -39,7 +39,7 @@
 
 #include "cpl_alibaba_oss.h"
 
-CPL_CVSID("$Id: cpl_vsil_webhdfs.cpp 66580a13ceae0e4d3a03063d7f12e30088e76ea9 2019-11-12 15:53:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_webhdfs.cpp 28298cf06e439640bf7122b40e58dc63f65f5852 2019-11-12 15:53:17 +0100 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -901,8 +901,8 @@ vsi_l_offset VSIWebHDFSHandle::GetFileSize( bool bSetError )
 
     CPLString osURL(m_pszURL);
 
-    if( osURL.find("/webhdfs/v1") ==
-        osURL.size() - strlen("/webhdfs/v1") &&
+    if( osURL.size() > strlen("/webhdfs/v1") &&
+        osURL.find("/webhdfs/v1") == osURL.size() - strlen("/webhdfs/v1") &&
         std::count(osURL.begin(),
                    osURL.end(),'/') == 4 )
     {

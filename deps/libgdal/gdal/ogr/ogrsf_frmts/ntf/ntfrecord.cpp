@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 #include "ntf.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ntfrecord.cpp 1dcdb5c8f617002a6e034d4d98dfdf080f709325 2018-01-14 01:50:09Z Kurt Schwehr $")
+CPL_CVSID("$Id: ntfrecord.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 static int nFieldBufSize = 0;
 static char *pszFieldBuf = nullptr;

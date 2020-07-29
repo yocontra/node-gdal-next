@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGRGeomediaDataSource class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -33,7 +33,7 @@
 #include "cpl_string.h"
 #include <vector>
 
-CPL_CVSID("$Id: ogrgeomediadatasource.cpp 4971449609881d6ffdca70188292293852d12691 2017-12-17 16:48:14Z Even Rouault $")
+CPL_CVSID("$Id: ogrgeomediadatasource.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRGeomediaDataSource()                        */

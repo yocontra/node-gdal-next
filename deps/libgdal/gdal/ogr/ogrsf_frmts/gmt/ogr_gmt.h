@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gmt.h b73bd61268d34090f6dbccd2e4297c23ec84a7f2 2018-03-31 13:55:05 +0200 Even Rouault $
+ * $Id: ogr_gmt.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the OGR GMT driver.
@@ -38,7 +38,7 @@
 /*                             OGRGmtLayer                              */
 /************************************************************************/
 
-class OGRGmtLayer : public OGRLayer
+class OGRGmtLayer final: public OGRLayer
 {
     OGRSpatialReference *poSRS;
     OGRFeatureDefn     *poFeatureDefn;
@@ -93,7 +93,7 @@ class OGRGmtLayer : public OGRLayer
 /*                           OGRGmtDataSource                           */
 /************************************************************************/
 
-class OGRGmtDataSource : public OGRDataSource
+class OGRGmtDataSource final: public OGRDataSource
 {
     OGRGmtLayer       **papoLayers;
     int                 nLayers;

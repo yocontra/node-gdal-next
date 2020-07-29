@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rawdataset.h 818f06b5bc60efa562497297e60d066a2ed9c0c3 2019-04-17 21:45:17 +0200 Even Rouault $
+ * $Id: rawdataset.h af4cbf6d26bba259567ee5f6f58def17cdb08979 2019-10-18 14:45:04 +0200 Even Rouault $
  *
  * Project:  Raw Translator
  * Purpose:  Implementation of RawDataset class.  Intended to be subclassed
@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -60,6 +60,8 @@ class CPL_DLL RawDataset : public GDALPamDataset
                  RawDataset();
          virtual ~RawDataset() = 0;
 
+    bool GetRawBinaryLayout(GDALDataset::RawBinaryLayout&) override;
+
   private:
     CPL_DISALLOW_COPY_ASSIGN(RawDataset)
 };
@@ -77,6 +79,15 @@ class CPL_DLL RawDataset : public GDALPamDataset
  */
 class CPL_DLL RawRasterBand : public GDALPamRasterBand
 {
+public:
+
+    enum class ByteOrder
+    {
+        ORDER_LITTLE_ENDIAN,
+        ORDER_BIG_ENDIAN,
+        ORDER_VAX // only valid for Float32, Float64, CFloat32 and CFloat64
+    };
+
 protected:
     friend class RawDataset;
 
@@ -86,7 +97,7 @@ protected:
     int         nPixelOffset{};
     int         nLineOffset{};
     int         nLineSize{};
-    int         bNativeOrder{};
+    ByteOrder   eByteOrder{};
 
     int         nLoadedScanline{};
     void        *pLineBuffer{};
@@ -132,10 +143,25 @@ public:
                                 GDALDataType eDataType, int bNativeOrder,
                                 OwnFP bOwnsFP );
 
+                 RawRasterBand( GDALDataset *poDS, int nBand, VSILFILE* fpRaw,
+                                vsi_l_offset nImgOffset, int nPixelOffset,
+                                int nLineOffset,
+                                GDALDataType eDataType,
+                                ByteOrder eByteOrder,
+                                OwnFP bOwnsFP );
+
                  RawRasterBand( VSILFILE* fpRaw,
                                 vsi_l_offset nImgOffset, int nPixelOffset,
                                 int nLineOffset,
                                 GDALDataType eDataType, int bNativeOrder,
+                                int nXSize, int nYSize,
+                                OwnFP bOwnsFP );
+
+                 RawRasterBand( VSILFILE* fpRaw,
+                                vsi_l_offset nImgOffset, int nPixelOffset,
+                                int nLineOffset,
+                                GDALDataType eDataType,
+                                ByteOrder eByteOrder,
                                 int nXSize, int nYSize,
                                 OwnFP bOwnsFP );
 
@@ -170,12 +196,15 @@ public:
     vsi_l_offset GetImgOffset() const { return nImgOffset; }
     int          GetPixelOffset() const { return nPixelOffset; }
     int          GetLineOffset() const { return nLineOffset; }
-    int          GetNativeOrder() const { return bNativeOrder; }
+    ByteOrder    GetByteOrder() const { return eByteOrder; }
     VSILFILE    *GetFPL() const { return fpRawL; }
     int          GetOwnsFP() const { return bOwnsFP; }
 
   private:
     CPL_DISALLOW_COPY_ASSIGN(RawRasterBand)
+
+    bool         NeedsByteOrderChange() const;
+    void         DoByteSwap(void* pBuffer, size_t nValues, bool bDiskToCPU) const;
 };
 
 #ifdef GDAL_COMPILATION

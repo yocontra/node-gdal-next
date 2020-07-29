@@ -32,7 +32,7 @@
 #include "cpl_error.h"
 #include "cpl_quad_tree.h"
 
-CPL_CVSID("$Id: io_selafin.cpp a3ac6beb77388edda26d06368b9e489ec06a0275 2019-01-01 17:27:27 +0100 Even Rouault $")
+CPL_CVSID("$Id: io_selafin.cpp 0fb16ebc687101c0beda924366f28b1473474ab3 2019-08-23 16:44:59 +0200 Even Rouault $")
 
 namespace Selafin {
 
@@ -629,6 +629,11 @@ namespace Selafin {
         // Update the size of the header and calculate the number of time steps
         poHeader->setUpdated();
         int nPos=poHeader->getPosition(0);
+        if( static_cast<vsi_l_offset>(nPos) > poHeader->nFileSize )
+        {
+            delete poHeader;
+            return nullptr;
+        }
         vsi_l_offset nStepsBig = (poHeader->nFileSize-nPos)/(poHeader->getPosition(1)-nPos);
         if( nStepsBig > INT_MAX )
             poHeader->nSteps=INT_MAX;

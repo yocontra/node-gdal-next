@@ -2,7 +2,7 @@
 #define SHAPEFILE_H_INCLUDED
 
 /******************************************************************************
- * $Id: shapefil.h aa2a1c234c3bff9eb6f4330b88ea093b9e67b25a 2018-02-24 21:40:16Z Even Rouault $
+ * $Id: shapefil.h 5b6e8ef05d9b27fc2448da6907ce63210612cf70 2019-11-23 09:58:42 +0100 Even Rouault $
  *
  * Project:  Shapelib
  * Purpose:  Primary include file for Shapelib.
@@ -10,7 +10,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2012-2016, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2016, Even Rouault <even dot rouault at spatialys.com>
  *
  * This software is available under the following "MIT Style" license,
  * or at the option of the licensee under the LGPL (see COPYING).  This
@@ -492,6 +492,8 @@ typedef struct
     int         nUpdateDay; /* 1-31 */
 
     int         bWriteEndOfFileChar; /* defaults to TRUE */
+
+    int         bRequireNextWriteSeek;
 } DBFInfo;
 
 typedef DBFInfo * DBFHandle;

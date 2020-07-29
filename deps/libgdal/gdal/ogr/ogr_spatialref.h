@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_spatialref.h 8b99fd4d3ad3db542705722876fcf484486f46d6 2019-12-17 14:27:30 +0100 Even Rouault $
+ * $Id: ogr_spatialref.h 8f0ebfd5b6f153a63b6e2186b68577937cedc02c 2020-06-14 00:21:08 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes for manipulating spatial reference systems in a
@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999,  Les Technologies SoftMap Inc.
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -146,11 +146,12 @@ class CPL_DLL OGR_SRSNode
  * SRS using GetAttrValue(), but in special cases the underlying parse tree
  * (or OGR_SRSNode objects) can be accessed more directly.
  *
- * See <a href="osr_tutorial.html">the tutorial</a> for more information on
- * how to use this class.
+ * See <a href="https://gdal.org/tutorials/osr_api_tut.html">the tutorial
+ * </a> for more information on how to use this class.
  * 
- * Consult also the <a href="wktproblems.html">OGC WKT Coordinate System Issues</a> page
- * for implementation details of WKT in OGR.
+ * Consult also the <a href="https://gdal.org/tutorials/wktproblems.html">
+ * OGC WKT Coordinate System Issues</a> page for implementation details of 
+ * WKT in OGR.
  */
 
 class CPL_DLL OGRSpatialReference
@@ -191,6 +192,8 @@ class CPL_DLL OGRSpatialReference
     OGRErr      exportToWkt( char ** ) const;
     OGRErr      exportToWkt( char ** ppszWKT, const char* const* papszOptions ) const;
     OGRErr      exportToPrettyWkt( char **, int = FALSE) const;
+    // cppcheck-suppress functionStatic
+    OGRErr      exportToPROJJSON( char **, const char* const* papszOptions ) const;
     OGRErr      exportToProj4( char ** ) const;
     OGRErr      exportToPCI( char **, char **, double ** ) const;
     OGRErr      exportToUSGS( long *, long *, double **, long * ) const;
@@ -223,6 +226,7 @@ class CPL_DLL OGRSpatialReference
                                 double *padfPrjParams, long iDatum,
                                 int nUSGSAngleFormat = USGS_ANGLE_PACKEDDMS );
     OGRErr      importFromPanorama( long, long, long, double* );
+    OGRErr      importVertCSFromPanorama( int );
     OGRErr      importFromOzi( const char * const* papszLines );
     OGRErr      importFromWMSAUTO( const char *pszAutoDef );
     OGRErr      importFromXML( const char * );
@@ -243,6 +247,9 @@ class CPL_DLL OGRSpatialReference
 
     OGRErr      Validate() const;
     OGRErr      StripVertical();
+
+    bool        StripTOWGS84IfKnownDatumAndAllowed();
+    bool        StripTOWGS84IfKnownDatum();
 
     int         EPSGTreatsAsLatLong() const;
     int         EPSGTreatsAsNorthingEasting() const;
@@ -286,7 +293,11 @@ class CPL_DLL OGRSpatialReference
                                       const char *pszUnitAuthority = nullptr,
                                       const char *pszUnitCode = nullptr);
 
-    double      GetLinearUnits( char ** ) const CPL_WARN_DEPRECATED("Use GetLinearUnits(const char**) instead");
+    double      GetLinearUnits( char ** ) const
+/*! @cond Doxygen_Suppress */
+        CPL_WARN_DEPRECATED("Use GetLinearUnits(const char**) instead")
+/*! @endcond */
+        ;
     double      GetLinearUnits( const char ** = nullptr ) const;
 /*! @cond Doxygen_Suppress */
     double      GetLinearUnits( std::nullptr_t ) const
@@ -295,7 +306,10 @@ class CPL_DLL OGRSpatialReference
 
     double      GetTargetLinearUnits( const char *pszTargetKey,
                                       char ** ppszRetName ) const
-            CPL_WARN_DEPRECATED("Use GetTargetLinearUnits(const char*, const char**)");
+/*! @cond Doxygen_Suppress */
+            CPL_WARN_DEPRECATED("Use GetTargetLinearUnits(const char*, const char**)")
+/*! @endcond */
+            ;
     double      GetTargetLinearUnits( const char *pszTargetKey,
                                       const char ** ppszRetName = nullptr ) const;
 /*! @cond Doxygen_Suppress */
@@ -304,14 +318,22 @@ class CPL_DLL OGRSpatialReference
 /*! @endcond */
 
     OGRErr      SetAngularUnits( const char *pszName, double dfInRadians );
-    double      GetAngularUnits( char ** ) const CPL_WARN_DEPRECATED("Use GetAngularUnits(const char**) instead");
+    double      GetAngularUnits( char ** ) const
+/*! @cond Doxygen_Suppress */
+        CPL_WARN_DEPRECATED("Use GetAngularUnits(const char**) instead")
+/*! @endcond */
+        ;
     double      GetAngularUnits( const char ** = nullptr ) const;
 /*! @cond Doxygen_Suppress */
     double      GetAngularUnits( std::nullptr_t ) const
         { return GetAngularUnits( static_cast<const char**>(nullptr) ); }
 /*! @endcond */
 
-    double      GetPrimeMeridian( char ** ) const CPL_WARN_DEPRECATED("Use GetPrimeMeridian(const char**) instead");
+    double      GetPrimeMeridian( char ** ) const
+/*! @cond Doxygen_Suppress */
+        CPL_WARN_DEPRECATED("Use GetPrimeMeridian(const char**) instead")
+/*! @endcond */
+        ;
     double      GetPrimeMeridian( const char ** = nullptr ) const;
 /*! @cond Doxygen_Suppress */
     double      GetPrimeMeridian( std::nullptr_t ) const
@@ -320,6 +342,7 @@ class CPL_DLL OGRSpatialReference
 
     bool        IsEmpty() const;
     int         IsGeographic() const;
+    int         IsDerivedGeographic() const;
     int         IsProjected() const;
     int         IsGeocentric() const;
     int         IsLocal() const;
@@ -354,6 +377,9 @@ class CPL_DLL OGRSpatialReference
     OGRErr      SetCompoundCS( const char *pszName,
                                const OGRSpatialReference *poHorizSRS,
                                const OGRSpatialReference *poVertSRS );
+
+    // cppcheck-suppress functionStatic
+    OGRErr      PromoteTo3D( const char* pszName );
 
     OGRErr      SetFromUserInput( const char * );
 
@@ -634,6 +660,22 @@ class CPL_DLL OGRSpatialReference
     /** Spherical, Cross-track, Height */
     OGRErr      SetSCH( double dfPegLat, double dfPegLong,
                         double dfPegHeading, double dfPegHgt);
+
+    /** Vertical Perspective / Near-sided Perspective */
+    OGRErr      SetVerticalPerspective( double dfTopoOriginLat,
+                                        double dfTopoOriginLon,
+                                        double dfTopoOriginHeight,
+                                        double dfViewPointHeight,
+                                        double dfFalseEasting,
+                                        double dfFalseNorthing);
+
+    /** Pole rotation (GRIB convention) */
+    OGRErr      SetDerivedGeogCRSWithPoleRotationGRIBConvention(
+                                               const char* pszCRSName,
+                                               double dfSouthPoleLat,
+                                               double dfSouthPoleLon,
+                                               double dfAxisRotation );
+
     /** State Plane */
     OGRErr      SetStatePlane( int nZone, int bNAD83 = TRUE,
                                const char *pszOverrideUnitName = nullptr,
@@ -648,6 +690,10 @@ class CPL_DLL OGRSpatialReference
     OGRErr      ImportFromESRIWisconsinWKT(
         const char* pszPrjName, double dfCentralMeridian, double dfLatOfOrigin,
         const char* pszUnitsName, const char* pszCRSName = nullptr );
+
+/*! @cond Doxygen_Suppress */
+    void UpdateCoordinateSystemFromGeogCRS();
+/*! @endcond */
 
     static OGRSpatialReference* GetWGS84SRS();
 
@@ -755,6 +801,11 @@ public:
      */
     static inline OGRCoordinateTransformation* FromHandle(OGRCoordinateTransformationH hCT)
         { return reinterpret_cast<OGRCoordinateTransformation*>(hCT); }
+
+    /** Clone
+     * @since GDAL 3.1
+     */
+    virtual OGRCoordinateTransformation* Clone() const = 0;
 };
 
 OGRCoordinateTransformation CPL_DLL *
@@ -770,13 +821,17 @@ OGRCreateCoordinateTransformation( const OGRSpatialReference *poSource,
 
 struct CPL_DLL OGRCoordinateTransformationOptions
 {
+/*! @cond Doxygen_Suppress */
 private:
     friend class OGRProjCT;
     struct Private;
     std::unique_ptr<Private> d;
+/*! @endcond */
 
 public:
     OGRCoordinateTransformationOptions();
+    OGRCoordinateTransformationOptions(const OGRCoordinateTransformationOptions&);
+    OGRCoordinateTransformationOptions& operator= (const OGRCoordinateTransformationOptions&);
     ~OGRCoordinateTransformationOptions();
 
     bool SetAreaOfInterest(double dfWestLongitudeDeg,

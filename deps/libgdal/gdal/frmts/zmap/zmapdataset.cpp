@@ -2,10 +2,10 @@
  *
  * Project:  ZMap driver
  * Purpose:  GDALDataset driver for ZMap dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: zmapdataset.cpp 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $")
+CPL_CVSID("$Id: zmapdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -43,7 +43,7 @@ CPL_CVSID("$Id: zmapdataset.cpp 6ef13199b493973da285decbfcd5e2a763954b97 2018-06
 
 class ZMapRasterBand;
 
-class ZMapDataset : public GDALPamDataset
+class ZMapDataset final: public GDALPamDataset
 {
     friend class ZMapRasterBand;
 
@@ -75,7 +75,7 @@ class ZMapDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class ZMapRasterBand : public GDALPamRasterBand
+class ZMapRasterBand final: public GDALPamRasterBand
 {
     friend class ZMapDataset;
 
@@ -306,6 +306,7 @@ GDALDataset *ZMapDataset::Open( GDALOpenInfo * poOpenInfo )
         else
             break;
     }
+    // cppcheck-suppress knownConditionTrueFalse
     if (pszLine == nullptr)
     {
         VSIFCloseL(poOpenInfo->fpL);
@@ -723,7 +724,7 @@ void GDALRegister_ZMap()
     poDriver->SetDescription( "ZMap" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ZMap Plus Grid" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#ZMap" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/zmap.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "dat" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

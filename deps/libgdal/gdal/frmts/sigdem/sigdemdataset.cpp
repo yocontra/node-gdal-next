@@ -29,7 +29,7 @@
 #include "sigdemdataset.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: sigdemdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: sigdemdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 #ifdef CPL_IS_LSB
 #define SWAP_SIGDEM_HEADER(abyHeader) { \
@@ -99,7 +99,7 @@ void GDALRegister_SIGDEM() {
         poDriver->SetMetadataItem(GDAL_DMD_LONGNAME,
                 "Scaled Integer Gridded DEM .sigdem");
         poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC,
-                "frmt_various.html#SIGDEM");
+                "drivers/raster/sigdem.html");
         poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "sigdem");
 
         poDriver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");

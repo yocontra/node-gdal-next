@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfimage.c 0a2ab4c78d753e6f0cc61b0a454194fd21614473 2018-07-20 18:47:04 +0200 Even Rouault $
+ * $Id: nitfimage.c d7976d4611d69cb3b28a4d6cc623ec4e6826cae0 2019-10-28 09:12:28 +0100 Even Rouault $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Module responsible for implementation of most NITFImage
@@ -8,7 +8,7 @@
  *
  **********************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: nitfimage.c 0a2ab4c78d753e6f0cc61b0a454194fd21614473 2018-07-20 18:47:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: nitfimage.c d7976d4611d69cb3b28a4d6cc623ec4e6826cae0 2019-10-28 09:12:28 +0100 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 
@@ -638,7 +638,7 @@ NITFImage *NITFImageAccess( NITFFile *psFile, int iSegment )
 /* -------------------------------------------------------------------- */
     else if( nOffset+10 <= (int)psSegInfo->nSegmentHeaderSize )
     {
-        int nUserTREBytes, nExtendedTREBytes;
+        int nUserTREBytes, nExtendedTREBytes, nFirstTagUsedLength = 0;
 
 /* -------------------------------------------------------------------- */
 /*      Are there user TRE bytes to skip?                               */
@@ -646,7 +646,7 @@ NITFImage *NITFImageAccess( NITFFile *psFile, int iSegment )
         nUserTREBytes = atoi(NITFGetField( szTemp, pachHeader, nOffset, 5 ));
         nOffset += 5;
 
-        if( nUserTREBytes > 3 )
+        if( nUserTREBytes > 3 + 11 )  /* Must have at least one tag */
         {
             if( (int)psSegInfo->nSegmentHeaderSize < nOffset + nUserTREBytes )
                 GOTO_header_too_small();
@@ -657,6 +657,16 @@ NITFImage *NITFImageAccess( NITFFile *psFile, int iSegment )
                     psImage->nTREBytes );
 
             nOffset += nUserTREBytes;
+
+            sscanf(psImage->pachTRE + 6, "%*5d%n", &nFirstTagUsedLength);
+            if (nFirstTagUsedLength != 5)
+            {
+                CPLError(CE_Warning, CPLE_AppDefined,
+                        "Cannot read User TRE. First tag's length is invalid");
+                CPLFree( psImage->pachTRE );
+                psImage->nTREBytes = 0;
+                psImage->pachTRE = NULL;
+            }
         }
         else
         {
@@ -2288,7 +2298,7 @@ static int NITFFormatRPC00BCoefficient( char* pszBuffer, double dfVal,
     // with 3 digits + 1 terminating byte
     char szTemp[12+2+1];
 #if defined(DEBUG) || defined(WIN32)
-    size_t nLen;
+    int nLen;
 #endif
 
     if( fabs(dfVal) > 9.999999e9 )
@@ -2300,7 +2310,8 @@ static int NITFFormatRPC00BCoefficient( char* pszBuffer, double dfVal,
 
     CPLsnprintf( szTemp, sizeof(szTemp), "%+.6E", dfVal);
 #if defined(DEBUG) || defined(WIN32)
-    nLen = strlen(szTemp);
+    nLen = (int)strlen(szTemp);
+    CPL_IGNORE_RET_VAL_INT(nLen);
 #endif
     CPLAssert( szTemp[9] == 'E' );
 #ifdef WIN32
@@ -3412,12 +3423,12 @@ static void NITFLoadColormapSubSection( NITFImage *psImage )
 
     for (i=0; bOK && i<nOffsetRecs; i++)
     {
-        if( VSIFSeekL( psFile->fp, nLocBaseColormapSubSection + colormapRecords[i].colorTableOffset,
-                    SEEK_SET ) != 0  )
+        vsi_l_offset nOffset = (vsi_l_offset)nLocBaseColormapSubSection + colormapRecords[i].colorTableOffset;
+        if( VSIFSeekL( psFile->fp, nOffset, SEEK_SET ) != 0  )
         {
             CPLError( CE_Failure, CPLE_FileIO,
-                    "Failed to seek to %d.",
-                    nLocBaseColormapSubSection + colormapRecords[i].colorTableOffset );
+                    "Failed to seek to " CPL_FRMT_GUIB ".",
+                    nOffset );
             CPLFree(colormapRecords);
             return;
         }
@@ -3691,7 +3702,7 @@ static void NITFLoadLocationTable( NITFImage *psImage )
         }
     }
 
-    if( nHeaderOffset != 0 )
+    if( nHeaderOffset > 11 )
     {
         char achHeaderChunk[1000];
 
@@ -3864,7 +3875,7 @@ static int NITFLoadVQTables( NITFImage *psImage, int bTryGuessingOffset )
         bOK &= VSIFReadL( &nVQVector, 1, 4, psImage->psFile->fp ) == 4;
         nVQVector = CPL_MSBWORD32( nVQVector );
 
-        bOK &= VSIFSeekL( psImage->psFile->fp, nVQOffset + nVQVector, SEEK_SET ) == 0;
+        bOK &= VSIFSeekL( psImage->psFile->fp, (vsi_l_offset)(nVQOffset) + nVQVector, SEEK_SET ) == 0;
         bOK &= VSIFReadL( psImage->apanVQLUT[i], 4, 4096, psImage->psFile->fp ) == 4096;
         if( !bOK )
         {

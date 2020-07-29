@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg_priv.h e40d0a17ddb8ca683d53dd68777a74094f8f1bde 2019-03-12 13:31:28 +0100 Even Rouault $
+ * $Id: gdal_alg_priv.h 225923a5caa782d1543b7c0d7248b92dcc0bc8bf 2020-04-06 12:59:27 +0200 Even Rouault $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes and definitions for various GDAL based algorithms:
@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2008, Andrey Kiselev <dron@ak4719.spb.edu>
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -60,7 +60,7 @@ typedef struct {
     int nPixelSpace;
     GSpacing nLineSpace;
     GSpacing nBandSpace;
-    double *padfBurnValue;
+    const double *padfBurnValue;
     GDALBurnValueSrc eBurnValueSource;
     GDALRasterMergeAlg eMergeAlg;
 } GDALRasterizeInfo;
@@ -80,26 +80,28 @@ typedef void (*llScanlineFunc)( void *, int, int, int, double );
 typedef void (*llPointFunc)( void *, int, int, double );
 
 void GDALdllImagePoint( int nRasterXSize, int nRasterYSize,
-                        int nPartCount, int *panPartSize,
-                        double *padfX, double *padfY, double *padfVariant,
+                        int nPartCount, const int *panPartSize,
+                        const double *padfX, const double *padfY,
+                        const double *padfVariant,
                         llPointFunc pfnPointFunc, void *pCBData );
 
 void GDALdllImageLine( int nRasterXSize, int nRasterYSize,
-                       int nPartCount, int *panPartSize,
-                       double *padfX, double *padfY, double *padfVariant,
+                       int nPartCount, const int *panPartSize,
+                       const double *padfX, const double *padfY,
+                       const double *padfVariant,
                        llPointFunc pfnPointFunc, void *pCBData );
 
 void GDALdllImageLineAllTouched( int nRasterXSize, int nRasterYSize,
-                                 int nPartCount, int *panPartSize,
-                                 double *padfX, double *padfY,
-                                 double *padfVariant,
+                                 int nPartCount, const int *panPartSize,
+                                 const double *padfX, const double *padfY,
+                                 const double *padfVariant,
                                  llPointFunc pfnPointFunc, void *pCBData,
                                  int bAvoidBurningSamePoints );
 
 void GDALdllImageFilledPolygon( int nRasterXSize, int nRasterYSize,
-                                int nPartCount, int *panPartSize,
-                                double *padfX, double *padfY,
-                                double *padfVariant,
+                                int nPartCount, const int *panPartSize,
+                                const double *padfX, const double *padfY,
+                                const double *padfVariant,
                                 llScanlineFunc pfnScanlineFunc, void *pCBData );
 
 CPL_C_END

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@
 #include "ogrwarpedlayer.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrvrtdatasource.cpp f86a5db0aa1e6694326dfdf97a838d8af7dbad67 2019-11-02 02:39:12 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtdatasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRVRTGetGeometryType()                        */
@@ -426,8 +426,7 @@ OGRLayer *OGRVRTDataSource::InstantiateUnionLayer(
         if( psSubNode->eType != CXT_Element )
             continue;
 
-        if( psSubNode->eType == CXT_Element &&
-            EQUAL(psSubNode->pszValue, "Field") )
+        if( EQUAL(psSubNode->pszValue, "Field") )
         {
             // Field name.
             const char *l_pszName = CPLGetXMLValue(psSubNode, "name", nullptr);

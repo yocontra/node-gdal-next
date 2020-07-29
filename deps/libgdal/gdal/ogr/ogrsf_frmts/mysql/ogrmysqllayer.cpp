@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrmysqllayer.cpp 06803487d7e0d67089b5fc6e58a0dd7ecc831b23 2018-09-08 11:50:50 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmysqllayer.cpp f6ca9e699ebaf802a3a75608dfadc5f5464aff44 2019-12-16 23:52:17 +0900 Hiroshi Miura $")
 
 /************************************************************************/
 /*                           OGRMySQLLayer()                            */
@@ -316,10 +316,20 @@ int OGRMySQLLayer::FetchSRSId()
         mysql_free_result( hResultSet );
     hResultSet = nullptr;
 
-    osCommand.Printf(
-             "SELECT srid FROM geometry_columns "
-             "WHERE f_table_name = '%s'",
-             pszGeomColumnTable );
+    if( poDS->GetMajorVersion() < 8 || poDS->IsMariaDB() )
+    {
+        osCommand.Printf(
+                 "SELECT srid FROM geometry_columns "
+                 "WHERE f_table_name = '%s'",
+                 pszGeomColumnTable );
+    }
+    else
+    {
+        osCommand.Printf(
+                "SELECT SRS_ID FROM INFORMATION_SCHEMA.ST_GEOMETRY_COLUMNS "
+                "WHERE TABLE_NAME = '%s'",
+                pszGeomColumnTable );
+    }
 
     if( !mysql_query( poDS->GetConn(), osCommand ) )
         hResultSet = mysql_store_result( poDS->GetConn() );

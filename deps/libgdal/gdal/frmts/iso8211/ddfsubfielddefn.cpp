@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ddfsubfielddefn.cpp e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $")
+CPL_CVSID("$Id: ddfsubfielddefn.cpp 32450164707ff447612c67262b7e2829168bfbb2 2019-12-13 00:10:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          DDFSubfieldDefn()                           */
@@ -171,6 +171,13 @@ int DDFSubfieldDefn::SetFormat( const char * pszFormat )
         // or do we have a binary type indicator? (is it binary)
         else
         {
+            if( pszFormatString[1] < '0' || pszFormatString[1] > '5' )
+            {
+                 CPLError( CE_Failure, CPLE_AppDefined,
+                           "Binary format = %c is invalid.",
+                           pszFormatString[1] );
+                return FALSE;
+            }
             eBinaryFormat = (DDFBinaryFormat) (pszFormatString[1] - '0');
             nFormatWidth = atoi(pszFormatString+2);
             if( nFormatWidth < 0 )

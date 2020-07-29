@@ -32,7 +32,7 @@
 #include "math.h"
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_polyline_smooth.cpp 98dfb4b4012c5ae4621e246e8eb393b3c05a3f48 2018-04-02 22:09:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxf_polyline_smooth.cpp 7a9a0f43bd42f92cc79e0f626c04a9e9367b323d 2019-05-21 15:33:16 +1000 Alan Thomas $")
 
 /************************************************************************/
 /*                Local helper functions                                */
@@ -169,7 +169,7 @@ void DXFSmoothPolyline::EmitArc(
     const DXFSmoothPolylineVertex& end,
     double radius, double len, double bulge,
     OGRLineString* poLS,
-    double dfZ )
+    double dfZ ) const
 {
     assert(poLS);
 
@@ -267,7 +267,7 @@ void DXFSmoothPolyline::EmitArc(
                 ogrArcCenter.x, ogrArcCenter.y, dfZ,
                 ogrArcRadius, ogrArcRadius, ogrArcRotation,
                 ogrArcStartAngle, ogrArcEndAngle,
-                0.0)->toLineString();
+                0.0, m_bUseMaxGapWhenTessellatingArcs)->toLineString();
 
         poLS->addSubLineString(poArcpoLS);
 

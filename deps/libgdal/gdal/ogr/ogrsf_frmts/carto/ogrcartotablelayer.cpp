@@ -2,10 +2,10 @@
  *
  * Project:  Carto Translator
  * Purpose:  Implements OGRCARTOTableLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "ogr_pgdump.h"
 #include "ogrgeojsonreader.h"
 
-CPL_CVSID("$Id: ogrcartotablelayer.cpp 7c1371be6c306fc45cfc2b8f556060d67c54e6f3 2019-04-16 16:43:35 +0200 Raul Marin $")
+CPL_CVSID("$Id: ogrcartotablelayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                    OGRCARTOEscapeIdentifier( )                     */

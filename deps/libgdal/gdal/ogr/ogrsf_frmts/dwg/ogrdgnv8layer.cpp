@@ -50,7 +50,7 @@ constexpr double DEG_TO_RAD = M_PI / 180.0;
 constexpr double RAD_TO_DEG = 180.0 / M_PI;
 constexpr double CONTIGUITY_TOLERANCE = 1e10; // Arbitrary high value
 
-CPL_CVSID("$Id: ogrdgnv8layer.cpp 0fe977e272dc43f48341e446d539dea902b39c29 2019-02-02 14:22:00 -0800 Lucian Plesea $")
+CPL_CVSID("$Id: ogrdgnv8layer.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
 
 static CPLString ToUTF8(const OdString& str)
 {
@@ -174,7 +174,7 @@ OGRDGNV8Layer::OGRDGNV8Layer( OGRDGNV8DataSource* poDS,
     oField.SetPrecision( 0 );
     m_poFeatureDefn->AddFieldDefn( &oField );
     
-    ResetReading();
+    OGRDGNV8Layer::ResetReading();
 }
 
 /************************************************************************/

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2013, Kyle Shannon <kyle at pobox dot com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -52,7 +52,7 @@
 #include "ogr_p.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: ogr_srs_esri.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogr_srs_esri.cpp 66d73e156f3438212d86d2e78ade158fd86cf1b2 2019-10-19 23:07:02 +0200 Even Rouault $")
 
 /* -------------------------------------------------------------------- */
 /*      Table relating USGS and ESRI state plane zones.                 */
@@ -410,21 +410,18 @@ OGRErr OGRSpatialReference::importFromESRI( char **papszPrj )
 /* -------------------------------------------------------------------- */
     if( STARTS_WITH_CI(papszPrj[0], "GEOGCS")
         || STARTS_WITH_CI(papszPrj[0], "PROJCS")
-        || STARTS_WITH_CI(papszPrj[0], "LOCAL_CS") )
+        || STARTS_WITH_CI(papszPrj[0], "LOCAL_CS")
+        // Also accept COMPD_CS, even if it is unclear that it is valid
+        // traditional ESRI WKT. But people might use such PRJ file
+        // See https://github.com/OSGeo/gdal/issues/1881
+        || STARTS_WITH_CI(papszPrj[0], "COMPD_CS") )
     {
-        char *pszWKT = CPLStrdup(papszPrj[0]);
+        std::string osWKT(papszPrj[0]);
         for( int i = 1; papszPrj[i] != nullptr; i++ )
         {
-            pszWKT = static_cast<char *>(
-                CPLRealloc(pszWKT, strlen(pszWKT)+strlen(papszPrj[i]) + 1));
-            strcat( pszWKT, papszPrj[i] );
+            osWKT += papszPrj[i];
         }
-        OGRErr eErr = importFromWkt( pszWKT );
-        CPLFree( pszWKT );
-
-        if( eErr == OGRERR_NONE )
-            eErr = morphFromESRI();
-        return eErr;
+        return importFromWkt( osWKT.c_str() );
     }
 
 /* -------------------------------------------------------------------- */

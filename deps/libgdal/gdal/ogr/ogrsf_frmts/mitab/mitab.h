@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab.h ad25ca25caa01bbc7d125b216c1119939330bc90 2018-12-04 22:17:28 +0300 drons $
+ * $Id: mitab.h ee1ad78131c83cdc0b32088f11e98629fdb3c632 2020-01-20 01:29:33 +0300 Dmitry Baryshnikov $
  *
  * Name:     mitab.h
  * Project:  MapInfo TAB Read/Write library
@@ -75,7 +75,7 @@ typedef enum
  * be available for any type of MapInfo dataset.
  *--------------------------------------------------------------------*/
 
-class IMapInfoFile : public OGRLayer
+class IMapInfoFile CPL_NON_FINAL: public OGRLayer
 {
     CPL_DISALLOW_COPY_ASSIGN(IMapInfoFile)
 
@@ -85,7 +85,7 @@ class IMapInfoFile : public OGRLayer
     GBool               m_bBoundsSet;
 
     char                *m_pszCharset;
-
+    std::set<CPLString> m_oSetFields{};
     TABFeature*         CreateTABFeature(OGRFeature *poFeature);
 
   public:
@@ -178,6 +178,7 @@ class IMapInfoFile : public OGRLayer
     void SetEncoding( const char* );
     const char* GetEncoding() const;
     int TestUtf8Capability() const;
+    CPLString NormalizeFieldName(const char *pszName) const;
     ///////////////
     // semi-private.
     virtual int  GetProjInfo(TABProjInfo *poPI) = 0;
@@ -216,7 +217,6 @@ class TABFile final : public IMapInfoFile
     TABINDFile  *m_poINDFile;   // Attributes index file
 
     OGRFeatureDefn *m_poDefn;
-    std::set<CPLString> m_oSetFields{};
     OGRSpatialReference *m_poSpatialRef;
     int         bUseSpatialTraversal;
 
@@ -283,6 +283,10 @@ class TABFile final : public IMapInfoFile
     virtual OGRErr      AlterFieldDefn( int iField, OGRFieldDefn* poNewFieldDefn, int nFlags ) override;
 
     virtual OGRErr      SyncToDisk() override;
+
+    virtual CPLErr SetMetadataItem( const char * pszName,
+                                    const char * pszValue,
+                                    const char * pszDomain = "" ) override;
 
     ///////////////
     // Read access specific stuff
@@ -654,7 +658,6 @@ class MIFFile final : public IMapInfoFile
     MIDDATAFile  *m_poMIFFile;   // Mif File
 
     OGRFeatureDefn *m_poDefn;
-    std::set<CPLString> m_oSetFields{};
     OGRSpatialReference *m_poSpatialRef;
 
     int         m_nFeatureCount;

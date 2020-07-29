@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Ivan Lucena
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files ( the "Software" ),
@@ -40,7 +40,7 @@
 #include "IntergraphBand.h"
 #include "IngrTypes.h"
 
-CPL_CVSID("$Id: IntergraphDataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: IntergraphDataset.cpp d621d0075a2cc325f5a84d02b61eb726f86e5103 2020-05-22 19:53:25 +0200 Even Rouault $")
 
 //  ----------------------------------------------------------------------------
 //                                        IntergraphDataset::IntergraphDataset()
@@ -163,7 +163,7 @@ GDALDataset *IntergraphDataset::Open( GDALOpenInfo *poOpenInfo )
     // Get Data Type Code (DTC) => Format Type
     // --------------------------------------------------------------------
 
-    INGR_Format eFormat = (INGR_Format) hHeaderOne.DataTypeCode;
+    int eFormatUntyped = hHeaderOne.DataTypeCode;
 
     // --------------------------------------------------------------------
     // We need to scan around the file, so we open it now.
@@ -176,7 +176,7 @@ GDALDataset *IntergraphDataset::Open( GDALOpenInfo *poOpenInfo )
     // Get Format Type from the tile directory
     // --------------------------------------------------------------------
 
-    if( hHeaderOne.DataTypeCode == TiledRasterData )
+    if( eFormatUntyped == TiledRasterData )
     {
         INGR_TileHeader hTileDir;
 
@@ -208,7 +208,7 @@ GDALDataset *IntergraphDataset::Open( GDALOpenInfo *poOpenInfo )
             return nullptr;
         }
 
-        eFormat = (INGR_Format) hTileDir.DataTypeCode;
+        eFormatUntyped = hTileDir.DataTypeCode;
     }
 
     // --------------------------------------------------------------------
@@ -227,25 +227,25 @@ GDALDataset *IntergraphDataset::Open( GDALOpenInfo *poOpenInfo )
     // Check supported Format Type
     // --------------------------------------------------------------------
 
-    if( eFormat != ByteInteger &&
-        eFormat != WordIntegers &&
-        eFormat != Integers32Bit &&
-        eFormat != FloatingPoint32Bit &&
-        eFormat != FloatingPoint64Bit &&
-        eFormat != RunLengthEncoded &&
-        eFormat != RunLengthEncodedC &&
-        eFormat != CCITTGroup4 &&
-        eFormat != AdaptiveRGB &&
-        eFormat != Uncompressed24bit &&
-        eFormat != AdaptiveGrayScale &&
-        eFormat != ContinuousTone &&
-        eFormat != JPEGGRAY &&
-        eFormat != JPEGRGB &&
-        eFormat != JPEGCMYK )
+    if( eFormatUntyped != ByteInteger &&
+        eFormatUntyped != WordIntegers &&
+        eFormatUntyped != Integers32Bit &&
+        eFormatUntyped != FloatingPoint32Bit &&
+        eFormatUntyped != FloatingPoint64Bit &&
+        eFormatUntyped != RunLengthEncoded &&
+        eFormatUntyped != RunLengthEncodedC &&
+        eFormatUntyped != CCITTGroup4 &&
+        eFormatUntyped != AdaptiveRGB &&
+        eFormatUntyped != Uncompressed24bit &&
+        eFormatUntyped != AdaptiveGrayScale &&
+        eFormatUntyped != ContinuousTone &&
+        eFormatUntyped != JPEGGRAY &&
+        eFormatUntyped != JPEGRGB &&
+        eFormatUntyped != JPEGCMYK )
     {
         CPLError( CE_Failure, CPLE_AppDefined,
-            "Intergraph Raster Format %d ( \"%s\" ) not supported",
-            hHeaderOne.DataTypeCode, INGR_GetFormatName( (uint16) eFormat ) );
+            "Intergraph Raster Format %d not supported",
+            eFormatUntyped );
         VSIFCloseL( fp );
         return nullptr;
     }
@@ -326,7 +326,7 @@ GDALDataset *IntergraphDataset::Open( GDALOpenInfo *poOpenInfo )
 
         INGR_HeaderTwoADiskToMem( &poDS->hHeaderTwo, abyBuf );
 
-        switch( eFormat )
+        switch( static_cast<INGR_Format>(eFormatUntyped) )
         {
         case JPEGRGB:
         case JPEGCMYK:
@@ -883,7 +883,7 @@ void GDALRegister_INGR()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Intergraph Raster" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_IntergraphRaster.html" );
+                               "drivers/raster/intergraphraster.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 Int32 Float32 Float64" );

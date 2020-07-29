@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: iso19115_srs.cpp de35b73572bc3545ba4b5c3c72a6e340249339cf 2018-08-27 15:05:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: iso19115_srs.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     OGR_SRS_ImportFromISO19115()                     */

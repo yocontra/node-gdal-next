@@ -6,8 +6,8 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
- * Copyright (c) 2017, Alan Thomas <alant@outlook.com.au>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
+ * Copyright (c) 2017-2020, Alan Thomas <alant@outlook.com.au>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #include <stdexcept>
 #include <memory>
 
-CPL_CVSID("$Id: ogrdxflayer.cpp baa5303d0994a8896d35285093cd4de40e21518f 2019-12-15 12:56:42 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdxflayer.cpp f722e742a6963701692ad111819225355a14a3c6 2020-03-29 21:41:09 +1100 Alan Thomas $")
 
 
 /************************************************************************/
@@ -48,7 +48,6 @@ CPL_CVSID("$Id: ogrdxflayer.cpp baa5303d0994a8896d35285093cd4de40e21518f 2019-12
 
 void OGRDXFFeatureQueue::push( OGRDXFFeature* poFeature )
 {
-    nFeaturesSize += GetFeatureSize(poFeature);
     apoFeatures.push( poFeature );
 }
 
@@ -59,22 +58,7 @@ void OGRDXFFeatureQueue::push( OGRDXFFeature* poFeature )
 void OGRDXFFeatureQueue::pop()
 {
     CPLAssert( !apoFeatures.empty() );
-    OGRDXFFeature* poFeature = apoFeatures.front();
-    nFeaturesSize -= GetFeatureSize(poFeature);
     apoFeatures.pop();
-}
-
-/************************************************************************/
-/*                           GetFeatureSize()                           */
-/************************************************************************/
-
-size_t OGRDXFFeatureQueue::GetFeatureSize(OGRFeature* poFeature)
-{
-    size_t nSize = 0;
-    OGRGeometry* poGeom = poFeature->GetGeometryRef();
-    if( poGeom )
-        nSize += poGeom->WkbSize();
-    return nSize;
 }
 
 /************************************************************************/
@@ -143,6 +127,8 @@ void OGRDXFLayer::ResetReading()
 {
     iNextFID = 0;
     ClearPendingFeatures();
+    m_oInsertState.m_nRowCount = 0;
+    m_oInsertState.m_nColumnCount = 0;
     poDS->RestartEntities();
 }
 
@@ -173,8 +159,29 @@ void OGRDXFLayer::TranslateGenericProperty( OGRDXFFeature *poFeature,
       }
       break;
 
+      case 101:
+        // Embedded objects mark the end of meaningful DXF data
+        // See http://docs.autodesk.com/ACDMAC/2016/ENU/ObjectARX_Dev_Guide/files/GUID-C953866F-A335-4FFD-AE8C-256A76065552.htm
+      {
+          char szLineBuf[257];
+          // Eat the rest of this entity
+          while( (nCode = poDS->ReadValue(szLineBuf,sizeof(szLineBuf))) > 0 &&
+              nCode > 0 );
+
+          if( nCode < 0 )
+          {
+              // Let the entity reader function discover this error for itself
+              return;
+          }
+
+          if( nCode == 0 )
+              poDS->UnreadValue();
+      }
+      break;
+
       case 60:
-        poFeature->oStyleProperties["Hidden"] = pszValue;
+        if( atoi(pszValue) )
+            poFeature->oStyleProperties["Hidden"] = "1";
         break;
 
       case 67:
@@ -1163,6 +1170,7 @@ OGRDXFFeature *OGRDXFLayer::TranslateLWPOLYLINE()
     if(nPolylineFlag & 0x01)
         smoothPolyline.Close();
 
+    smoothPolyline.SetUseMaxGapWhenTessellatingArcs( poDS->InlineBlocks() );
     OGRGeometry* poGeom = smoothPolyline.Tesselate();
     poFeature->ApplyOCSTransformer( poGeom );
     poFeature->SetGeometryDirectly( poGeom );
@@ -1343,7 +1351,7 @@ OGRDXFFeature *OGRDXFLayer::TranslatePOLYLINE()
             poLR->set3D(TRUE);
             if (vertexIndex71 != 0 && vertexIndex71 <= nPoints)
             {
-                if (startPoint == -1)
+                //if (startPoint == -1)
                     startPoint = vertexIndex71-1;
                 poLR->setPoint(iPoint,papoPoints[vertexIndex71-1]);
                 iPoint++;
@@ -1434,6 +1442,7 @@ OGRDXFFeature *OGRDXFLayer::TranslatePOLYLINE()
     if(nPolylineFlag & 0x01)
         smoothPolyline.Close();
 
+    smoothPolyline.SetUseMaxGapWhenTessellatingArcs( poDS->InlineBlocks() );
     OGRGeometry* poGeom = smoothPolyline.Tesselate();
 
     if( (nPolylineFlag & 8) == 0 )
@@ -1725,7 +1734,7 @@ OGRDXFFeature *OGRDXFLayer::TranslateCIRCLE()
         OGRGeometryFactory::approximateArcAngles( dfX1, dfY1, dfZ1,
                                                   dfRadius, dfRadius, 0.0,
                                                   0.0, 360.0,
-                                                  0.0 )->toLineString();
+                                                  0.0, poDS->InlineBlocks() )->toLineString();
 
     const int nPoints = poCircle->getNumPoints();
 
@@ -1940,13 +1949,15 @@ OGRDXFFeature *OGRDXFLayer::TranslateELLIPSE()
 
     if( fabs(dfEndAngle - dfStartAngle) <= 361.0 )
     {
+        // Only honor OGR_DXF_MAX_GAP if this geometry isn't at risk of
+        // being enlarged or shrunk as part of a block insertion.
         OGRGeometry *poEllipse =
             OGRGeometryFactory::approximateArcAngles( dfX1, dfY1, dfZ1,
                                                     dfPrimaryRadius,
                                                     dfSecondaryRadius,
                                                     dfRotation,
                                                     dfStartAngle, dfEndAngle,
-                                                    0.0 );
+                                                    0.0, poDS->InlineBlocks() );
 
         if( !bHaveZ )
             poEllipse->flattenTo2D();
@@ -2044,7 +2055,7 @@ OGRDXFFeature *OGRDXFLayer::TranslateARC()
             OGRGeometryFactory::approximateArcAngles( dfX1, dfY1, dfZ1,
                                                     dfRadius, dfRadius, 0.0,
                                                     dfStartAngle, dfEndAngle,
-                                                    0.0 );
+                                                    0.0, poDS->InlineBlocks() );
         if( !bHaveZ )
             poArc->flattenTo2D();
 
@@ -3084,23 +3095,25 @@ OGRDXFFeature *OGRDXFLayer::InsertBlockInline( GUInt32 nInitialErrorCounter,
 /*                          TranslateINSERT()                           */
 /************************************************************************/
 
-OGRDXFFeature *OGRDXFLayer::TranslateINSERT()
+bool OGRDXFLayer::TranslateINSERT()
 
 {
     char szLineBuf[257];
     int nCode = 0;
 
-    OGRDXFFeature *poTemplateFeature = new OGRDXFFeature( poFeatureDefn );
-    OGRDXFInsertTransformer oTransformer;
-    CPLString osBlockName;
-
-    int nColumnCount = 1;
-    int nRowCount = 1;
-    double dfColumnSpacing = 0.0;
-    double dfRowSpacing = 0.0;
+    m_oInsertState.m_poTemplateFeature.reset(new OGRDXFFeature( poFeatureDefn ));
+    m_oInsertState.m_oTransformer = OGRDXFInsertTransformer();
+    m_oInsertState.m_osBlockName.clear();
+    m_oInsertState.m_nColumnCount = 1;
+    m_oInsertState.m_nRowCount = 1;
+    m_oInsertState.m_iCurCol = 0;
+    m_oInsertState.m_iCurRow = 0;
+    m_oInsertState.m_dfColumnSpacing = 0.0;
+    m_oInsertState.m_dfRowSpacing = 0.0;
 
     bool bHasAttribs = false;
-    std::vector<std::unique_ptr<OGRDXFFeature>> apoAttribs;
+    m_oInsertState.m_apoAttribs.clear();
+    m_oInsertState.m_aosAttribs.Clear();
 
 /* -------------------------------------------------------------------- */
 /*      Process values.                                                 */
@@ -3110,41 +3123,41 @@ OGRDXFFeature *OGRDXFLayer::TranslateINSERT()
         switch( nCode )
         {
           case 10:
-            oTransformer.dfXOffset = CPLAtof(szLineBuf);
+            m_oInsertState.m_oTransformer.dfXOffset = CPLAtof(szLineBuf);
             break;
 
           case 20:
-            oTransformer.dfYOffset = CPLAtof(szLineBuf);
+            m_oInsertState.m_oTransformer.dfYOffset = CPLAtof(szLineBuf);
             break;
 
           case 30:
-            oTransformer.dfZOffset = CPLAtof(szLineBuf);
+            m_oInsertState.m_oTransformer.dfZOffset = CPLAtof(szLineBuf);
             break;
 
           case 41:
-            oTransformer.dfXScale = CPLAtof(szLineBuf);
+            m_oInsertState.m_oTransformer.dfXScale = CPLAtof(szLineBuf);
             break;
 
           case 42:
-            oTransformer.dfYScale = CPLAtof(szLineBuf);
+            m_oInsertState.m_oTransformer.dfYScale = CPLAtof(szLineBuf);
             break;
 
           case 43:
-            oTransformer.dfZScale = CPLAtof(szLineBuf);
+            m_oInsertState.m_oTransformer.dfZScale = CPLAtof(szLineBuf);
             break;
 
           case 44:
-            dfColumnSpacing = CPLAtof(szLineBuf);
+            m_oInsertState.m_dfColumnSpacing = CPLAtof(szLineBuf);
             break;
 
           case 45:
-            dfRowSpacing = CPLAtof(szLineBuf);
+            m_oInsertState.m_dfRowSpacing = CPLAtof(szLineBuf);
             break;
 
           case 50:
             // We want to transform this to radians.
             // It is apparently always in degrees regardless of $AUNITS
-            oTransformer.dfAngle = CPLAtof(szLineBuf) * M_PI / 180.0;
+            m_oInsertState.m_oTransformer.dfAngle = CPLAtof(szLineBuf) * M_PI / 180.0;
             break;
 
           case 66:
@@ -3152,27 +3165,42 @@ OGRDXFFeature *OGRDXFLayer::TranslateINSERT()
             break;
 
           case 70:
-            nColumnCount = atoi(szLineBuf);
+            m_oInsertState.m_nColumnCount = atoi(szLineBuf);
+            if( m_oInsertState.m_nColumnCount <= 0 )
+            {
+                DXF_LAYER_READER_ERROR();
+                m_oInsertState.m_nRowCount = 0;
+                m_oInsertState.m_nColumnCount = 0;
+                return false;
+            }
             break;
 
           case 71:
-            nRowCount = atoi(szLineBuf);
+            m_oInsertState.m_nRowCount = atoi(szLineBuf);
+            if( m_oInsertState.m_nRowCount <= 0 )
+            {
+                DXF_LAYER_READER_ERROR();
+                m_oInsertState.m_nRowCount = 0;
+                m_oInsertState.m_nColumnCount = 0;
+                return false;
+            }
             break;
 
           case 2:
-            osBlockName = szLineBuf;
+            m_oInsertState.m_osBlockName = szLineBuf;
             break;
 
           default:
-            TranslateGenericProperty( poTemplateFeature, nCode, szLineBuf );
+            TranslateGenericProperty( m_oInsertState.m_poTemplateFeature.get(), nCode, szLineBuf );
             break;
         }
     }
     if( nCode < 0 )
     {
         DXF_LAYER_READER_ERROR();
-        delete poTemplateFeature;
-        return nullptr;
+        m_oInsertState.m_nRowCount = 0;
+        m_oInsertState.m_nColumnCount = 0;
+        return false;
     }
 
 /* -------------------------------------------------------------------- */
@@ -3186,15 +3214,16 @@ OGRDXFFeature *OGRDXFLayer::TranslateINSERT()
             if( !EQUAL( szLineBuf, "ATTRIB" ) )
             {
                 DXF_LAYER_READER_ERROR();
-                delete poTemplateFeature;
-                return nullptr;
+                m_oInsertState.m_nRowCount = 0;
+                m_oInsertState.m_nColumnCount = 0;
+                return false;
             }
 
             OGRDXFFeature *poAttribFeature = TranslateTEXT( true );
 
             if( poAttribFeature && poAttribFeature->osAttributeTag != "" )
             {
-                apoAttribs.push_back(
+                m_oInsertState.m_apoAttribs.push_back(
                     std::unique_ptr<OGRDXFFeature>( poAttribFeature ) );
             }
             else
@@ -3216,80 +3245,42 @@ OGRDXFFeature *OGRDXFLayer::TranslateINSERT()
 /*      BlockAttributes field if we are not inlining blocks.            */
 /* -------------------------------------------------------------------- */
 
-    char** papszAttribs = nullptr;
     if( !poDS->InlineBlocks() && bHasAttribs &&
         poFeatureDefn->GetFieldIndex( "BlockAttributes" ) != -1 )
     {
-        papszAttribs = static_cast<char**>(
-            CPLCalloc(apoAttribs.size() + 1, sizeof(char*)));
-        int iIndex = 0;
-
-        for( auto oIt = apoAttribs.begin(); oIt != apoAttribs.end(); ++oIt )
+        for( const auto& poAttr: m_oInsertState.m_apoAttribs )
         {
-            CPLString osAttribString = (*oIt)->osAttributeTag;
+            CPLString osAttribString = poAttr->osAttributeTag;
             osAttribString += " ";
-            osAttribString += (*oIt)->GetFieldAsString( "Text" );
+            osAttribString += poAttr->GetFieldAsString( "Text" );
 
-            papszAttribs[iIndex] = VSIStrdup(osAttribString);
-
-            iIndex++;
+            m_oInsertState.m_aosAttribs.AddString(osAttribString);
         }
     }
 
-/* -------------------------------------------------------------------- */
-/*      Perform the actual block insertion.                             */
-/* -------------------------------------------------------------------- */
-
-    bool bLimitReached = false;
-    GUInt32 nErrorCounter = CPLGetErrorCounter();
-    for( int iRow = 0; !bLimitReached && iRow < nRowCount; iRow++ )
-    {
-        for( int iColumn = 0; !bLimitReached && iColumn < nColumnCount; iColumn++ )
-        {
-            TranslateINSERTCore( poTemplateFeature, osBlockName, oTransformer,
-                iColumn * dfColumnSpacing * cos( oTransformer.dfAngle ) +
-                    iRow * dfRowSpacing * -sin( oTransformer.dfAngle ),
-                iColumn * dfColumnSpacing * sin( oTransformer.dfAngle ) +
-                    iRow * dfRowSpacing * cos( oTransformer.dfAngle ),
-                papszAttribs, apoAttribs );
-
-            if( CPLGetErrorCounter() > 100 + nErrorCounter )
-            {
-                bLimitReached = true;
-            }
-            // Prevent excessive memory usage with an arbitrary limit
-            if( apoPendingFeatures.size() > 100000 ||
-                apoPendingFeatures.GetFeaturesSize() > 100*1024*1024  )
-            {
-                CPLError( CE_Warning, CPLE_AppDefined,
-                    "Too many features generated by MInsertBlock. "
-                    "Some features have been omitted." );
-                bLimitReached = true;
-            }
-        }
-    }
-
-    CSLDestroy(papszAttribs);
-
-    // The block geometries were appended to apoPendingFeatures
-    delete poTemplateFeature;
-    return nullptr;
+    return true;
 }
 
 /************************************************************************/
-/*                        TranslateINSERTCore()                         */
-/*                                                                      */
-/*      Helper function for TranslateINSERT.                            */
+/*                       GenerateINSERTFeatures()                       */
 /************************************************************************/
 
-void OGRDXFLayer::TranslateINSERTCore(
-    OGRDXFFeature* const poTemplateFeature, const CPLString& osBlockName,
-    OGRDXFInsertTransformer oTransformer, const double dfExtraXOffset,
-    const double dfExtraYOffset, char** const papszAttribs,
-    const std::vector<std::unique_ptr<OGRDXFFeature>>& apoAttribs )
+bool OGRDXFLayer::GenerateINSERTFeatures()
 {
-    OGRDXFFeature* poFeature = poTemplateFeature->CloneDXFFeature();
+    OGRDXFFeature* poFeature = m_oInsertState.m_poTemplateFeature->CloneDXFFeature();
 
+    const double dfExtraXOffset =
+        m_oInsertState.m_iCurCol * m_oInsertState.m_dfColumnSpacing *
+            cos( m_oInsertState.m_oTransformer.dfAngle ) +
+        m_oInsertState.m_iCurRow * m_oInsertState.m_dfRowSpacing *
+            -sin( m_oInsertState.m_oTransformer.dfAngle );
+    const double dfExtraYOffset =
+        m_oInsertState.m_iCurCol * m_oInsertState.m_dfColumnSpacing *
+            sin( m_oInsertState.m_oTransformer.dfAngle ) +
+        m_oInsertState.m_iCurRow * m_oInsertState.m_dfRowSpacing *
+            cos( m_oInsertState.m_oTransformer.dfAngle );
+
+    OGRDXFInsertTransformer oTransformer(m_oInsertState.m_oTransformer);
     oTransformer.dfXOffset += dfExtraXOffset;
     oTransformer.dfYOffset += dfExtraYOffset;
 
@@ -3297,9 +3288,10 @@ void OGRDXFLayer::TranslateINSERTCore(
     // to this block
     if( !poDS->InlineBlocks() )
     {
-        poFeature = InsertBlockReference( osBlockName, oTransformer,
-            poFeature );
+        poFeature = InsertBlockReference(
+            m_oInsertState.m_osBlockName, oTransformer, poFeature );
 
+        auto papszAttribs = m_oInsertState.m_aosAttribs.List();
         if( papszAttribs )
             poFeature->SetField( "BlockAttributes", papszAttribs );
 
@@ -3313,7 +3305,7 @@ void OGRDXFLayer::TranslateINSERTCore(
         {
             poFeature = InsertBlockInline(
                 CPLGetErrorCounter(),
-                osBlockName,
+                m_oInsertState.m_osBlockName,
                 oTransformer, poFeature, apoExtraFeatures,
                 true, poDS->ShouldMergeBlockGeometries() );
         }
@@ -3321,9 +3313,10 @@ void OGRDXFLayer::TranslateINSERTCore(
         {
             // Block doesn't exist
             CPLError(CE_Warning, CPLE_AppDefined,
-                     "Block %s does not exist", osBlockName.c_str());
+                     "Block %s does not exist",
+                     m_oInsertState.m_osBlockName.c_str());
             delete poFeature;
-            return;
+            return false;
         }
 
         if( poFeature )
@@ -3336,15 +3329,15 @@ void OGRDXFLayer::TranslateINSERTCore(
         }
 
         // Append the attribute features to the pending feature stack
-        if( !apoAttribs.empty() )
+        if( !m_oInsertState.m_apoAttribs.empty() )
         {
             OGRDXFInsertTransformer oAttribTransformer;
             oAttribTransformer.dfXOffset = dfExtraXOffset;
             oAttribTransformer.dfYOffset = dfExtraYOffset;
 
-            for( auto oIt = apoAttribs.begin(); oIt != apoAttribs.end(); ++oIt )
+            for( const auto& poAttr: m_oInsertState.m_apoAttribs )
             {
-                OGRDXFFeature* poAttribFeature = (*oIt)->CloneDXFFeature();
+                OGRDXFFeature* poAttribFeature = poAttr->CloneDXFFeature();
 
                 if( poAttribFeature->GetGeometryRef() )
                 {
@@ -3356,6 +3349,7 @@ void OGRDXFLayer::TranslateINSERTCore(
             }
         }
     }
+    return true;
 }
 
 /************************************************************************/
@@ -3366,27 +3360,50 @@ OGRDXFFeature *OGRDXFLayer::GetNextUnfilteredFeature()
 
 {
     OGRDXFFeature *poFeature = nullptr;
-
+    while( poFeature == nullptr )
+    {
 /* -------------------------------------------------------------------- */
 /*      If we have pending features, return one of them.                */
 /* -------------------------------------------------------------------- */
-    if( !apoPendingFeatures.empty() )
-    {
-        poFeature = apoPendingFeatures.front();
-        apoPendingFeatures.pop();
+        if( !apoPendingFeatures.empty() )
+        {
+            poFeature = apoPendingFeatures.front();
+            apoPendingFeatures.pop();
 
-        poFeature->SetFID( iNextFID++ );
-        return poFeature;
-    }
+            poFeature->SetFID( iNextFID++ );
+            return poFeature;
+        }
 
 /* -------------------------------------------------------------------- */
-/*      Read the entity type.                                           */
+/*      Emit INSERT features.                                           */
 /* -------------------------------------------------------------------- */
-    char szLineBuf[257];
+        if( m_oInsertState.m_iCurRow < m_oInsertState.m_nRowCount )
+        {
+            if( m_oInsertState.m_iCurCol == m_oInsertState.m_nColumnCount )
+            {
+                m_oInsertState.m_iCurRow ++;
+                m_oInsertState.m_iCurCol = 0;
+                if( m_oInsertState.m_iCurRow == m_oInsertState.m_nRowCount )
+                {
+                    m_oInsertState.m_nRowCount = 0;
+                    m_oInsertState.m_nColumnCount = 0;
+                    continue;
+                }
+            }
+            if( GenerateINSERTFeatures() )
+            {
+                m_oInsertState.m_iCurCol ++;
+            }
+            else
+            {
+                m_oInsertState.m_nRowCount = 0;
+                m_oInsertState.m_nColumnCount = 0;
+            }
+            continue;
+        }
 
-    while( poFeature == nullptr )
-    {
         // read ahead to an entity.
+        char szLineBuf[257];
         int nCode = 0;
         while( (nCode = poDS->ReadValue(szLineBuf,sizeof(szLineBuf))) > 0 ) {}
         if( nCode < 0 )
@@ -3467,7 +3484,8 @@ OGRDXFFeature *OGRDXFLayer::GetNextUnfilteredFeature()
         }
         else if( EQUAL(szLineBuf,"INSERT") )
         {
-            poFeature = TranslateINSERT();
+            if( !TranslateINSERT() )
+                return nullptr;
         }
         else if( EQUAL(szLineBuf,"DIMENSION") )
         {
@@ -3515,17 +3533,6 @@ OGRDXFFeature *OGRDXFLayer::GetNextUnfilteredFeature()
                 CPLDebug( "DXF", "Ignoring one or more of entity '%s'.",
                             szLineBuf );
             }
-        }
-
-        // If there are no more features, but we do still have pending features
-        // (for example, after an INSERT), return the first pending feature.
-        if ( poFeature == nullptr && !apoPendingFeatures.empty() )
-        {
-            poFeature = apoPendingFeatures.front();
-            apoPendingFeatures.pop();
-
-            poFeature->SetFID( iNextFID++ );
-            return poFeature;
         }
     }
 

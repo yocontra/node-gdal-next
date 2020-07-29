@@ -37,12 +37,12 @@ static PJ_XY ocea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
 static PJ_LP ocea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double t, s;
 
     xy.y /= Q->rok;
     xy.x /= Q->rtk;
-    t = sqrt(1. - xy.y * xy.y);
-    lp.phi = asin(xy.y * Q->sinphi + t * Q->cosphi * (s = sin(xy.x)));
+    const double t = sqrt(1. - xy.y * xy.y);
+    const double s = sin(xy.x);
+    lp.phi = asin(xy.y * Q->sinphi + t * Q->cosphi * s);
     lp.lam = atan2(t * Q->sinphi * s - xy.y * Q->cosphi,
         t * cos(xy.x));
     return lp;
@@ -65,12 +65,12 @@ PJ *PROJECTION(ocea) {
         /*Define Pole of oblique transformation from 1 point & 1 azimuth*/
         // ERO: I've added M_PI so that the alpha is the angle from point 1 to point 2
         // from the North in a clockwise direction
-        // (to be consistent with omerc behaviour)
+        // (to be consistent with omerc behavior)
         alpha   = M_PI + pj_param(P->ctx, P->params, "ralpha").f;
         lonz = pj_param(P->ctx, P->params, "rlonc").f;
         /*Equation 9-8 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
         // Actually slightliy modified to use atan2(), as it is suggested by
-        // Snyder for equation 9-1, but this is not mentionned here
+        // Snyder for equation 9-1, but this is not mentioned here
         lam_p = atan2(-cos(alpha) , -sin(P->phi0) * sin(alpha)) + lonz;
         /*Equation 9-7 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
         phi_p = asin(cos(P->phi0) * sin(alpha));

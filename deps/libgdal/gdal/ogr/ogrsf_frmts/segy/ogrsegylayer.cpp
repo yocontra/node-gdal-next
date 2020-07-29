@@ -2,10 +2,10 @@
  *
  * Project:  SEG-Y Translator
  * Purpose:  Implements OGRSEGYLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "ogr_p.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: ogrsegylayer.cpp 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsegylayer.cpp 272416f0c3a7d14d2fb687b05724805578de4de0 2019-08-23 13:20:03 +0200 Even Rouault $")
 
 // #define SEGY_EXTENSIONS
 
@@ -359,7 +359,7 @@ static float GetIBMFloat(const GByte* pabyData)
     int nVal = 0;
     memcpy(&nVal, pabyData, 4);
     CPL_MSBPTR32(&nVal);
-    const int nSign = 1 - 2 * (((unsigned)nVal >> 31) & 0x01);
+    const int nSign = 1 - 2 * (int)(((unsigned)nVal >> 31) & 0x01);
     const int nExp = (nVal >> 24) & 0x7f;
     const int nMant = nVal & 0xffffff;
 

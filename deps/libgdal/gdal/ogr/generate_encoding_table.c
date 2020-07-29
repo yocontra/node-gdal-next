@@ -1,13 +1,13 @@
 /******************************************************************************
- * $Id: generate_encoding_table.c 340b059d097242e67d5869f851d4c8d5978fe7c4 2016-11-22 23:34:00Z Even Rouault $
+ * $Id: generate_encoding_table.c 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  OGR
  * Purpose:  Generate a mapping table from a 1-byte encoding to unicode,
  *           for ogr_expat.cpp
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Project:  ElasticSearch Translator
+ * Project:  Elasticsearch Translator
  * Purpose:
  * Author:
  *
@@ -29,26 +29,26 @@
 #include "ogr_elastic.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrelasticdriver.cpp 0143e15c994333ffb95ba270d113ce300661c970 2018-08-10 15:17:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrelasticdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
 
 /************************************************************************/
-/*                   OGRElasticSearchDriverIdentify()                   */
+/*                   OGRElasticsearchDriverIdentify()                   */
 /************************************************************************/
 
-static int OGRElasticSearchDriverIdentify( GDALOpenInfo* poOpenInfo )
+static int OGRElasticsearchDriverIdentify( GDALOpenInfo* poOpenInfo )
 
 {
     return STARTS_WITH_CI(poOpenInfo->pszFilename, "ES:");
 }
 
 /************************************************************************/
-/*                  OGRElasticSearchDriverOpen()                        */
+/*                  OGRElasticsearchDriverOpen()                        */
 /************************************************************************/
 
-static GDALDataset* OGRElasticSearchDriverOpen( GDALOpenInfo* poOpenInfo )
+static GDALDataset* OGRElasticsearchDriverOpen( GDALOpenInfo* poOpenInfo )
 
 {
-    if( !OGRElasticSearchDriverIdentify(poOpenInfo) )
+    if( !OGRElasticsearchDriverIdentify(poOpenInfo) )
         return nullptr;
 
     OGRElasticDataSource *poDS = new OGRElasticDataSource();
@@ -61,9 +61,9 @@ static GDALDataset* OGRElasticSearchDriverOpen( GDALOpenInfo* poOpenInfo )
 }
 
 /************************************************************************/
-/*                     OGRElasticSearchDriverCreate()                   */
+/*                     OGRElasticsearchDriverCreate()                   */
 /************************************************************************/
-static GDALDataset* OGRElasticSearchDriverCreate( const char * pszName,
+static GDALDataset* OGRElasticsearchDriverCreate( const char * pszName,
                                                   CPL_UNUSED int nXSize,
                                                   CPL_UNUSED int nYSize,
                                                   CPL_UNUSED int nBands,
@@ -88,12 +88,12 @@ void RegisterOGRElastic() {
     if (!GDAL_CHECK_VERSION("OGR/Elastic Search driver"))
         return;
 
-    if( GDALGetDriverByName( "ElasticSearch" ) != nullptr )
+    if( GDALGetDriverByName( "Elasticsearch" ) != nullptr )
       return;
 
     GDALDriver  *poDriver = new GDALDriver();
 
-    poDriver->SetDescription( "ElasticSearch" );
+    poDriver->SetDescription( "Elasticsearch" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Elastic Search" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_elasticsearch.html" );
@@ -105,7 +105,7 @@ void RegisterOGRElastic() {
     "<LayerCreationOptionList>"
     "  <Option name='INDEX_NAME' type='string' description='Name of the index to create (or reuse). By default the index name is the layer name.'/>"
     "  <Option name='INDEX_DEFINITION' type='string' description='Filename from which to read a user-defined index definition, or index definition as serialized JSon.'/>"
-    "  <Option name='MAPPING_NAME' type='string' description='Name of the mapping type within the index.' default='FeatureCollection'/>"
+    "  <Option name='MAPPING_NAME' type='string' description='(ES &lt; 7) Name of the mapping type within the index.' default='FeatureCollection'/>"
     "  <Option name='MAPPING' type='string' description='Filename from which to read a user-defined mapping, or mapping as serialized JSon.'/>"
     "  <Option name='WRITE_MAPPING' type='string' description='Filename where to write the OGR generated mapping.'/>"
     "  <Option name='OVERWRITE' type='boolean' description='Whether to overwrite an existing type mapping with the layer name to be created' default='NO'/>"
@@ -143,6 +143,7 @@ void RegisterOGRElastic() {
 "  <Option name='BULK_INSERT' type='boolean' description='Whether to use bulk insert for feature creation' default='YES'/>"
 "  <Option name='BULK_SIZE' type='integer' description='Size in bytes of the buffer for bulk upload' default='1000000'/>"
 "  <Option name='FID' type='string' description='Field name, with integer values, to use as FID' default='ogc_fid'/>"
+"  <Option name='FORWARD_HTTP_HEADERS_FROM_ENV' type='string' description='Comma separated list of http_header_name=env_variable_name'/>"
 "</OpenOptionList>");
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES,
@@ -150,9 +151,9 @@ void RegisterOGRElastic() {
                                "Time IntegerList Integer64List RealList "
                                "StringList Binary" );
 
-    poDriver->pfnIdentify = OGRElasticSearchDriverIdentify;
-    poDriver->pfnOpen = OGRElasticSearchDriverOpen;
-    poDriver->pfnCreate = OGRElasticSearchDriverCreate;
+    poDriver->pfnIdentify = OGRElasticsearchDriverIdentify;
+    poDriver->pfnOpen = OGRElasticsearchDriverOpen;
+    poDriver->pfnCreate = OGRElasticsearchDriverCreate;
 
     GetGDALDriverManager()->RegisterDriver( poDriver );
 }

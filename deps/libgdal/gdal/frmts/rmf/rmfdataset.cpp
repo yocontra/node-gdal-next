@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Andrey Kiselev <dron@ak4719.spb.edu>
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,9 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id: rmfdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+#include "cpl_safemaths.hpp"
+
+CPL_CVSID("$Id: rmfdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 constexpr int RMF_DEFAULT_BLOCKXSIZE = 256;
 constexpr int RMF_DEFAULT_BLOCKYSIZE = 256;
@@ -964,6 +966,7 @@ do {                                                    \
             CPLCalloc( sHeader.nExtHdrSize, 1 ) );
 
         RMF_WRITE_LONG( pabyExtHeader, sExtHeader.nEllipsoid, 24 );
+        RMF_WRITE_LONG( pabyExtHeader, sExtHeader.nVertDatum, 28 );
         RMF_WRITE_LONG( pabyExtHeader, sExtHeader.nDatum, 32 );
         RMF_WRITE_LONG( pabyExtHeader, sExtHeader.nZone, 36 );
 
@@ -1264,11 +1267,22 @@ do {                                                                    \
         return nullptr;
     }
 
-    GUInt64 nMaxTileBits = 2ULL *
-                           static_cast<GUInt64>(poDS->sHeader.nTileWidth) *
-                           static_cast<GUInt64>(poDS->sHeader.nTileHeight) *
-                           static_cast<GUInt64>(poDS->sHeader.nBitDepth);
-    if(nMaxTileBits > static_cast<GUInt64>(std::numeric_limits<GUInt32>::max()))
+    bool bInvalidTileSize;
+    try
+    {
+        GUInt64 nMaxTileBits =
+            (CPLSM(static_cast<GUInt64>(2)) *
+             CPLSM(static_cast<GUInt64>(poDS->sHeader.nTileWidth)) *
+             CPLSM(static_cast<GUInt64>(poDS->sHeader.nTileHeight)) *
+             CPLSM(static_cast<GUInt64>(poDS->sHeader.nBitDepth))).v();
+        bInvalidTileSize = (
+            nMaxTileBits > static_cast<GUInt64>(std::numeric_limits<GUInt32>::max()));
+    }
+    catch( ... )
+    {
+        bInvalidTileSize = true;
+    }
+    if( bInvalidTileSize )
     {
         CPLError(CE_Warning, CPLE_IllegalArg,
                  "Invalid tile size. Width %lu, height %lu, bit depth %lu.",
@@ -1332,6 +1346,7 @@ do {                                                                    \
         if( poDS->sHeader.nExtHdrSize >= 36 + 4 )
         {
             RMF_READ_LONG( pabyExtHeader, poDS->sExtHeader.nEllipsoid, 24 );
+            RMF_READ_LONG( pabyExtHeader, poDS->sExtHeader.nVertDatum, 28 );
             RMF_READ_LONG( pabyExtHeader, poDS->sExtHeader.nDatum, 32 );
             RMF_READ_LONG( pabyExtHeader, poDS->sExtHeader.nZone, 36 );
         }
@@ -1710,7 +1725,17 @@ do {                                                                    \
         if(poDS->sHeader.iEPSGCode > RMF_EPSG_MIN_CODE &&
            (OGRERR_NONE != res || oSRS.IsLocal()))
         {
-            oSRS.importFromEPSG(poDS->sHeader.iEPSGCode);
+            res = oSRS.importFromEPSG(poDS->sHeader.iEPSGCode);
+        }
+
+        const char* pszSetVertCS =
+            CSLFetchNameValueDef(poOpenInfo->papszOpenOptions,
+                                "RMF_SET_VERTCS",
+                                 CPLGetConfigOption("RMF_SET_VERTCS", "NO"));
+        if(CPLTestBool(pszSetVertCS) && res == OGRERR_NONE && 
+           poDS->sExtHeader.nVertDatum > 0)
+        {
+            oSRS.importVertCSFromPanorama(poDS->sExtHeader.nVertDatum);
         }
 
         if( poDS->pszProjection )
@@ -3045,7 +3070,7 @@ void GDALRegister_RMF()
     poDriver->SetDescription( "RMF" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Raster Matrix Format" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_rmf.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/rmf.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "rsw" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 Int32 Float64" );
@@ -3073,6 +3098,10 @@ void GDALRegister_RMF()
     poDriver->pfnIdentify = RMFDataset::Identify;
     poDriver->pfnOpen = RMFDataset::Open;
     poDriver->pfnCreate = RMFDataset::Create;
+    poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
+        "<OpenOptionList>"
+        "  <Option name='RMF_SET_VERTCS' type='string' description='Layers spatial reference will include vertical coordinate system description if exist' default='NO'/>"
+        "</OpenOptionList>");
 
     GetGDALDriverManager()->RegisterDriver( poDriver );
 }

@@ -3,7 +3,7 @@
  * Name:     cpl_time.cpp
  * Project:  CPL - Common Portability Library
  * Purpose:  Time functions.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
  *
@@ -28,7 +28,7 @@
 
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_time.cpp 0846c4df38348216396587449b9cef818856b36c 2018-01-10 16:19:40Z Kurt Schwehr $")
+CPL_CVSID("$Id: cpl_time.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 constexpr int SECSPERMIN = 60;
 constexpr int MINSPERHOUR = 60;

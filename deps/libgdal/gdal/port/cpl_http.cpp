@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -70,7 +70,7 @@
 
 #endif // HAVE_CURL
 
-CPL_CVSID("$Id: cpl_http.cpp 78ebfa67fe512cc98e3452fc307a0a17e88d0b68 2019-06-21 00:26:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_http.cpp d9be1482d9a7c360931823a89a6eca28d992c9df 2019-08-21 17:48:11 +0200 Even Rouault $")
 
 // list of named persistent http sessions
 
@@ -690,6 +690,13 @@ CPLHTTPResult *CPLHTTPFetchEx( const char *pszURL, CSLConstList papszOptions,
             osURL += "&POSTFIELDS=";
             osURL += pszPost;
         }
+        const char* pszHeaders = CSLFetchNameValue( papszOptions, "HEADERS" );
+        if( pszHeaders != nullptr &&
+            CPLTestBool(CPLGetConfigOption("CPL_CURL_VSIMEM_PRINT_HEADERS", "FALSE")) )
+        {
+            osURL += "&HEADERS=";
+            osURL += pszHeaders;
+        }
         vsi_l_offset nLength = 0;
         CPLHTTPResult* psResult =
             static_cast<CPLHTTPResult *>(CPLCalloc(1, sizeof(CPLHTTPResult)));
@@ -994,6 +1001,7 @@ CPLHTTPResult *CPLHTTPFetchEx( const char *pszURL, CSLConstList papszOptions,
     if( pszMaxRetries == nullptr )
         pszMaxRetries = CPLGetConfigOption( "GDAL_HTTP_MAX_RETRY",
                                     CPLSPrintf("%d",CPL_HTTP_MAX_RETRY) );
+    // coverity[tainted_data]
     double dfRetryDelaySecs = CPLAtof(pszRetryDelay);
     int nMaxRetries = atoi(pszMaxRetries);
     int nRetryCount = 0;
@@ -1745,16 +1753,22 @@ void *CPLHTTPSetOptions(void *pcurl, const char* pszURL,
     if( pszConnectTimeout == nullptr )
         pszConnectTimeout = CPLGetConfigOption("GDAL_HTTP_CONNECTTIMEOUT", nullptr);
     if( pszConnectTimeout != nullptr )
+    {
+        // coverity[tainted_data]
         curl_easy_setopt(http_handle, CURLOPT_CONNECTTIMEOUT_MS,
                          static_cast<int>(1000 * CPLAtof(pszConnectTimeout)) );
+    }
 
     // Set timeout.
     const char *pszTimeout = CSLFetchNameValue( papszOptions, "TIMEOUT" );
     if( pszTimeout == nullptr )
         pszTimeout = CPLGetConfigOption("GDAL_HTTP_TIMEOUT", nullptr);
     if( pszTimeout != nullptr )
+    {
+        // coverity[tainted_data]
         curl_easy_setopt(http_handle, CURLOPT_TIMEOUT_MS,
                          static_cast<int>(1000 * CPLAtof(pszTimeout)) );
+    }
 
     // Set low speed time and limit.
     const char *pszLowSpeedTime =

@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: pdfio.h c2ba8363845c146d4b7048a11bd939b127692be5 2019-11-26 15:12:19 +0100 Even Rouault $
+ * $Id: pdfio.h c82531d303948c7102a987b2adc8b58414f2fbf5 2019-11-26 15:12:19 +0100 Even Rouault $
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

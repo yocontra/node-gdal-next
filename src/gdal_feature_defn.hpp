@@ -19,40 +19,40 @@ using namespace node;
 
 namespace node_gdal {
 
-class FeatureDefn: public Nan::ObjectWrap {
-public:
-	static Nan::Persistent<FunctionTemplate> constructor;
-	static void Initialize(Local<Object> target);
-	static NAN_METHOD(New);
-	static Local<Value> New(OGRFeatureDefn *def);
-	static Local<Value> New(OGRFeatureDefn *def, bool owned);
-	static NAN_METHOD(toString);
-	static NAN_METHOD(clone);
+class FeatureDefn : public Nan::ObjectWrap {
+    public:
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void                              Initialize(Local<Object> target);
+  static NAN_METHOD(New);
+  static Local<Value> New(OGRFeatureDefn *def);
+  static Local<Value> New(OGRFeatureDefn *def, bool owned);
+  static NAN_METHOD(toString);
+  static NAN_METHOD(clone);
 
-	static NAN_GETTER(fieldsGetter);
-	static NAN_GETTER(nameGetter);
-	static NAN_GETTER(geomTypeGetter);
-	static NAN_GETTER(geomIgnoredGetter);
-	static NAN_GETTER(styleIgnoredGetter);
-	
-	static NAN_SETTER(geomTypeSetter);
-	static NAN_SETTER(geomIgnoredSetter);
-	static NAN_SETTER(styleIgnoredSetter);
+  static NAN_GETTER(fieldsGetter);
+  static NAN_GETTER(nameGetter);
+  static NAN_GETTER(geomTypeGetter);
+  static NAN_GETTER(geomIgnoredGetter);
+  static NAN_GETTER(styleIgnoredGetter);
 
-	FeatureDefn();
-	FeatureDefn(OGRFeatureDefn *def);
-	inline OGRFeatureDefn *get() {
-		return this_;
-	}
-	inline bool isAlive(){
-		return this_;
-	}
+  static NAN_SETTER(geomTypeSetter);
+  static NAN_SETTER(geomIgnoredSetter);
+  static NAN_SETTER(styleIgnoredSetter);
 
-private:
-	~FeatureDefn();
-	OGRFeatureDefn *this_;
-	bool owned_;
+  FeatureDefn();
+  FeatureDefn(OGRFeatureDefn *def);
+  inline OGRFeatureDefn *get() {
+    return this_;
+  }
+  inline bool isAlive() {
+    return this_;
+  }
+
+    private:
+  ~FeatureDefn();
+  OGRFeatureDefn *this_;
+  bool            owned_;
 };
 
-}
+} // namespace node_gdal
 #endif

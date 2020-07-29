@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pg.h e57c8627b2925254b5d0b35d42d987891eb3bcd0 2018-11-21 20:25:46 +0100 Even Rouault $
+ * $Id: ogr_pg.h 1210bf06cd5fb2b2b574ebf5f4a1cca0df7b3c64 2020-04-03 12:37:25 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL driver.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -137,7 +137,7 @@ class OGRPGGeomFieldDefn final: public OGRGeomFieldDefn
 /*                          OGRPGFeatureDefn                            */
 /************************************************************************/
 
-class OGRPGFeatureDefn: public OGRFeatureDefn
+class OGRPGFeatureDefn CPL_NON_FINAL: public OGRFeatureDefn
 {
     public:
         explicit OGRPGFeatureDefn( const char * pszName = nullptr ) :
@@ -162,7 +162,7 @@ class OGRPGFeatureDefn: public OGRFeatureDefn
 /*                            OGRPGLayer                                */
 /************************************************************************/
 
-class OGRPGLayer : public OGRLayer
+class OGRPGLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRPGFeatureDefn   *poFeatureDefn;
@@ -457,7 +457,6 @@ class OGRPGDataSource final: public OGRDataSource
     int                 nLayers;
 
     char               *pszName;
-    char               *pszDBName;
 
     int                 bDSUpdate;
     int                 bHavePostGIS;

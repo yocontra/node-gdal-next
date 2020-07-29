@@ -2,10 +2,10 @@
  *
  * Project:  GDAL
  * Purpose:  Server application that is forked by libgdal
- * Author:   Even Rouault, <even dot rouault at mines-paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -88,7 +88,7 @@ int  CPL_DLL  GDALServerLoopInstanceRunIteration(void* pInstance);
 void CPL_DLL  GDALServerLoopInstanceDestroy(void* pInstance);
 CPL_C_END
 
-CPL_CVSID("$Id: gdalserver.cpp 279125b5bbeb0125be65c40c2577151e36a89fa9 2018-05-10 22:08:21 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalserver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 static int bVerbose = FALSE;
 

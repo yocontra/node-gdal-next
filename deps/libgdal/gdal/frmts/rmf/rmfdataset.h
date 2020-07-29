@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rmfdataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: rmfdataset.h 8924c82185ab30883949ccf90d27b3d64310de70 2020-05-22 19:09:55 +0200 Even Rouault $
  *
  * Project:  Raster Matrix Format
  * Purpose:  Private class declarations for the RMF classes used to read/write
@@ -130,6 +130,7 @@ typedef struct
 typedef struct
 {
     GInt32      nEllipsoid;
+    GInt32      nVertDatum;
     GInt32      nDatum;
     GInt32      nZone;
 } RMFExtHeader;
@@ -138,7 +139,7 @@ typedef struct
 /*                            RMFCompressionJob                         */
 /************************************************************************/
 
-typedef struct
+struct RMFCompressionJob
 {
     RMFDataset* poDS = nullptr;
     CPLErr eResult = CE_None;
@@ -150,7 +151,7 @@ typedef struct
     size_t nCompressedBytes = 0;
     GUInt32 nXSize = 0;
     GUInt32 nYSize = 0;
-} RMFCompressionJob;
+};
 
 /************************************************************************/
 /*                            RMFCompressData                           */
@@ -176,11 +177,11 @@ struct RMFCompressData
 /*                            RMFTileData                               */
 /************************************************************************/
 
-typedef struct
+struct RMFTileData
 {
     std::vector<GByte>  oData;
     int                 nBandsWritten = 0;
-} RMFTileData;
+};
 
 /************************************************************************/
 /*                              RMFDataset                              */

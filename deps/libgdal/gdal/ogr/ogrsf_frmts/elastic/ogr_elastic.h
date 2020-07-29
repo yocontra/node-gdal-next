@@ -1,7 +1,7 @@
 /******************************************************************************
- * $Id: ogr_elastic.h 0143e15c994333ffb95ba270d113ce300661c970 2018-08-10 15:17:07 +0200 Even Rouault $
+ * $Id: ogr_elastic.h ac79f4a7bb3dbbcff8bcd266cd516f24835d240a 2020-05-22 19:10:11 +0200 Even Rouault $
  *
- * Project:  ElasticSearch Translator
+ * Project:  Elasticsearch Translator
  * Purpose:
  * Author:
  *
@@ -37,6 +37,7 @@
 #include "ogr_p.h"
 #include "cpl_http.h"
 
+#include <map>
 #include <memory>
 #include <set>
 #include <vector>
@@ -50,7 +51,6 @@ typedef enum
 
 class OGRElasticDataSource;
 
-// cppcheck-suppress copyCtorAndEqOperator
 class OGRESSortDesc
 {
     public:
@@ -60,9 +60,6 @@ class OGRESSortDesc
         OGRESSortDesc( const CPLString& osColumnIn, bool bAscIn ) :
             osColumn(osColumnIn),
             bAsc(bAscIn) {}
-        OGRESSortDesc(const OGRESSortDesc& other) :
-            osColumn(other.osColumn),
-            bAsc(other.bAsc) {}
 };
 
 /************************************************************************/
@@ -139,6 +136,8 @@ class OGRElasticLayer final: public OGRLayer {
                                                 json_object* poObj,
                                                 char chNestedAttributeSeparator,
                                                 std::vector<CPLString>& aosPath);
+
+    CPLString                             BuildMappingURL(bool bMappingApi);
 
     CPLString                             BuildJSonFromFeature(OGRFeature *poFeature);
 
@@ -226,6 +225,7 @@ class OGRElasticDataSource final: public GDALDataset {
     std::vector<std::unique_ptr<OGRElasticLayer>> m_apoLayers;
     bool                m_bAllLayersListed = false;
     std::map<OGRLayer*, OGRLayer*> m_oMapResultSet;
+    std::map<std::string, std::string> m_oMapHeadersFromEnv{};
 
     bool                CheckVersion();
     int                 GetLayerIndex( const char* pszName );
@@ -250,7 +250,7 @@ public:
     int Create(const char *pszFilename,
                char **papszOptions);
 
-    CPLHTTPResult*      HTTPFetch(const char* pszURL, char** papszOptions);
+    CPLHTTPResult*      HTTPFetch(const char* pszURL, CSLConstList papszOptions);
 
     const char         *GetURL() { return m_osURL.c_str(); }
 

@@ -1,13 +1,13 @@
 /**********************************************************************
- * $Id: cpl_virtualmem.h aa47027b5633ab93caafae35f82f5e53c72ed05c 2016-11-24 07:54:20Z Kurt Schwehr $
+ * $Id: cpl_virtualmem.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Name:     cpl_virtualmem.h
  * Project:  CPL - Common Portability Library
  * Purpose:  Virtual memory
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

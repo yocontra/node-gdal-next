@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGRGeomediaTableLayer class, access to an existing table.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "ogr_geomedia.h"
 
-CPL_CVSID("$Id: ogrgeomediatablelayer.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrgeomediatablelayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRGeomediaTableLayer()                     */

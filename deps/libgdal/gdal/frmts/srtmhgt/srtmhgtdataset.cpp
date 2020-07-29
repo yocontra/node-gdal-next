@@ -9,7 +9,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@
 
 constexpr GInt16 SRTMHG_NODATA_VALUE = -32768;
 
-CPL_CVSID("$Id: srtmhgtdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: srtmhgtdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -50,7 +50,7 @@ CPL_CVSID("$Id: srtmhgtdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018
 
 class SRTMHGTRasterBand;
 
-class SRTMHGTDataset : public GDALPamDataset
+class SRTMHGTDataset final: public GDALPamDataset
 {
     friend class SRTMHGTRasterBand;
 
@@ -81,7 +81,7 @@ class SRTMHGTDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class SRTMHGTRasterBand : public GDALPamRasterBand
+class SRTMHGTRasterBand final: public GDALPamRasterBand
 {
     friend class SRTMHGTDataset;
 
@@ -671,7 +671,7 @@ void GDALRegister_SRTMHGT()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "SRTMHGT File Format");
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "hgt");
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#SRTMHGT" );
+                               "drivers/raster/srtmhgt.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );

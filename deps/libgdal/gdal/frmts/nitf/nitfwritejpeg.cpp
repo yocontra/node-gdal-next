@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Portions Copyright (c) Her majesty the Queen in right of Canada as
  * represented by the Minister of National Defence, 2006.
@@ -35,7 +35,7 @@
 #include "cpl_port.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: nitfwritejpeg.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: nitfwritejpeg.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 CPL_C_START
 #ifdef LIBJPEG_12_PATH

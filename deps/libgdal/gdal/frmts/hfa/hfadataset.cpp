@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -63,7 +63,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: hfadataset.cpp 2e65b761646aa623e527bc3ed2cab1dd0f337706 2019-03-23 11:35:29 +0100 Even Rouault $")
+CPL_CVSID("$Id: hfadataset.cpp 6ae7f60a5914a2f16b8b1a94758f10e6621e4aca 2020-05-31 21:52:48 +0200 Even Rouault $")
 
 constexpr double R2D = 180.0 / M_PI;
 constexpr double D2R = M_PI / 180.0;
@@ -5026,31 +5026,51 @@ HFAPCSStructToWKT( const Eprj_Datum *psDatum,
     // Try and set the GeogCS information.
     if( !oSRS.IsLocal() )
     {
+        bool bWellKnwonDatum = false;
         if( pszDatumName == nullptr)
             oSRS.SetGeogCS(pszDatumName, pszDatumName, pszEllipsoidName,
                            psPro->proSpheroid.a, dfInvFlattening);
         else if( EQUAL(pszDatumName, "WGS 84")
             || EQUAL(pszDatumName,"WGS_1984") )
+        {
+            bWellKnwonDatum = true;
             oSRS.SetWellKnownGeogCS("WGS84" );
+        }
         else if( strstr(pszDatumName, "NAD27") != nullptr
                  || EQUAL(pszDatumName,"North_American_Datum_1927") )
+        {
+            bWellKnwonDatum = true;
             oSRS.SetWellKnownGeogCS("NAD27");
+        }
         else if( strstr(pszDatumName, "NAD83") != nullptr
                  || EQUAL(pszDatumName, "North_American_Datum_1983"))
+        {
+            bWellKnwonDatum = true;
             oSRS.SetWellKnownGeogCS("NAD83");
+        }
         else
             oSRS.SetGeogCS(pszDatumName, pszDatumName, pszEllipsoidName,
                            psPro->proSpheroid.a, dfInvFlattening);
 
         if( psDatum != nullptr && psDatum->type == EPRJ_DATUM_PARAMETRIC )
         {
-            oSRS.SetTOWGS84(psDatum->params[0],
-                            psDatum->params[1],
-                            psDatum->params[2],
-                            -psDatum->params[3] * RAD2ARCSEC,
-                            -psDatum->params[4] * RAD2ARCSEC,
-                            -psDatum->params[5] * RAD2ARCSEC,
-                            psDatum->params[6] * 1e+6);
+            if( bWellKnwonDatum &&
+                CPLTestBool(CPLGetConfigOption("OSR_STRIP_TOWGS84", "YES")) )
+            {
+                CPLDebug("OSR", "TOWGS84 information has been removed. "
+                        "It can be kept by setting the OSR_STRIP_TOWGS84 "
+                        "configuration option to NO");
+            }
+            else
+            {
+                oSRS.SetTOWGS84(psDatum->params[0],
+                                psDatum->params[1],
+                                psDatum->params[2],
+                                -psDatum->params[3] * RAD2ARCSEC,
+                                -psDatum->params[4] * RAD2ARCSEC,
+                                -psDatum->params[5] * RAD2ARCSEC,
+                                psDatum->params[6] * 1e+6);
+            }
         }
     }
 
@@ -6094,7 +6114,7 @@ void GDALRegister_HFA()
     poDriver->SetDescription("HFA");
     poDriver->SetMetadataItem(GDAL_DCAP_RASTER, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "Erdas Imagine Images (.img)");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_hfa.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/hfa.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "img");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES,
                               "Byte Int16 UInt16 Int32 UInt32 Float32 Float64 "

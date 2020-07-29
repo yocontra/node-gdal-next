@@ -31,7 +31,7 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id: rmfdem.cpp 67f9577cc94b44560968be2c09cef9da1d534c2c 2018-07-05 00:59:11 +0400 drons $")
+CPL_CVSID("$Id: rmfdem.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
 
 /*
  * The encoded data stream is a series of records.
@@ -670,7 +670,7 @@ size_t RMFDataset::DEMCompress(const GByte* pabyIn, GUInt32 nSizeIn,
         if(nRecordSize == 1)
         {
             eRecordType = eCurrType;
-            nRecordElementSize = anDeltaTypeSize[eCurrType >> 5];
+            //nRecordElementSize = anDeltaTypeSize[eCurrType >> 5];
             continue;
         }
 
@@ -710,9 +710,9 @@ size_t RMFDataset::DEMCompress(const GByte* pabyIn, GUInt32 nSizeIn,
 
         nLessCount++;
 
-        GUInt32 nElementDeltaSize(nRecordElementSize -
-                                  anDeltaTypeSize[eCurrType >> 5]);
-        if( nElementDeltaSize * nLessCount < 16)
+        GUInt32 nDeltaSize(anDeltaTypeSize[eCurrType >> 5]);
+        if(nRecordElementSize < nDeltaSize ||
+           (nRecordElementSize - nDeltaSize) * nLessCount < 16)
         {
             continue;
         }

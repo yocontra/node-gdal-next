@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2007, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -77,7 +77,7 @@
 #define CAST_PCT(x) x
 #endif
 
-CPL_CVSID("$Id: gdaldither.cpp 7c397f8aee59df906fb51153f5a7980a8cc86d43 2018-04-05 22:42:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldither.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 static int MAKE_COLOR_CODE( int r, int g, int b )
 {

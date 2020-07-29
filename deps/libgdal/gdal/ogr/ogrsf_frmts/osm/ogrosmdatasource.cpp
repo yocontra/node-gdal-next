@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGROSMDataSource class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2012-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -65,7 +65,7 @@
 #include "ogrsf_frmts.h"
 #include "ogrsqliteexecutesql.h"
 #include "osm_parser.h"
-#include "swq.h"
+#include "ogr_swq.h"
 #include "sqlite3.h"
 
 #undef SQLITE_STATIC
@@ -175,7 +175,7 @@ size_t GetMaxTotalAllocs();
 static void WriteVarInt64(GUIntBig nSVal, GByte** ppabyData);
 static void WriteVarSInt64(GIntBig nSVal, GByte** ppabyData);
 
-CPL_CVSID("$Id: ogrosmdatasource.cpp 5e0679e815c088f3dae50f701da355e74a96f0a1 2018-08-14 09:04:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrosmdatasource.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
 
 class DSToBeOpened
 {
@@ -4264,7 +4264,7 @@ OGRErr OGROSMDataSource::GetExtent( OGREnvelope *psExtent )
 /*                   OGROSMSingleFeatureLayer                           */
 /************************************************************************/
 
-class OGROSMSingleFeatureLayer : public OGRLayer
+class OGROSMSingleFeatureLayer final: public OGRLayer
 {
   private:
     int                 nVal;
@@ -4349,7 +4349,7 @@ OGRFeature * OGROSMSingleFeatureLayer::GetNextFeature()
 /*                      OGROSMResultLayerDecorator                      */
 /************************************************************************/
 
-class OGROSMResultLayerDecorator : public OGRLayerDecorator
+class OGROSMResultLayerDecorator final: public OGRLayerDecorator
 {
         CPLString               osDSName;
         CPLString               osInterestLayers;

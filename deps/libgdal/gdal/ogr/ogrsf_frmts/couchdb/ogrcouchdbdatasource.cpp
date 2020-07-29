@@ -2,10 +2,10 @@
  *
  * Project:  CouchDB Translator
  * Purpose:  Implements OGRCouchDBDataSource class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,9 +28,9 @@
 
 #include "ogr_couchdb.h"
 #include "ogrgeojsonreader.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrcouchdbdatasource.cpp c3b17f3db1f346b23bbab3000bd3b5e4225b7512 2019-01-03 10:26:12 -0500 alanstewart-terragotech $")
+CPL_CVSID("$Id: ogrcouchdbdatasource.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
 
 /************************************************************************/
 /*                        OGRCouchDBDataSource()                        */
@@ -699,7 +699,7 @@ class PointerAutoFree
         ~PointerAutoFree() { CPLFree(m_p); }
 };
 
-class OGRCouchDBOneLineLayer : public OGRLayer
+class OGRCouchDBOneLineLayer final: public OGRLayer
 {
     public:
         OGRFeature* poFeature;

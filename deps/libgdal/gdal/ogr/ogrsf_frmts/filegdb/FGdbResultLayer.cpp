@@ -2,10 +2,10 @@
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Implements FileGDB OGR result layer.
-* Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+* Author:   Even Rouault, <even dot rouault at spatialys.com>
 *
 ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "FGdbUtils.h"
 
-CPL_CVSID("$Id: FGdbResultLayer.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: FGdbResultLayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 using std::string;
 using std::wstring;

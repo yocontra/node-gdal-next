@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_port.h 7d34df879ac151e8cc377ecd5d0107c579b0c0a2 2019-04-25 12:22:24 +0200 Even Rouault $
+ * $Id: cpl_port.h 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -359,6 +359,9 @@ typedef unsigned int  GUIntptr_t;
 #    define CPL_INTERNAL
 #  endif
 #endif
+
+// Marker for unstable API
+#define CPL_UNSTABLE_API CPL_DLL
 
 #endif
 
@@ -989,6 +992,9 @@ static const char *cvsid_aw() { return( cvsid_aw() ? NULL : cpl_cvsid ); }
 /** C++11 final qualifier */
 #  define CPL_FINAL final
 
+/** Mark that a class is explicitly recognized as non-final */
+#  define CPL_NON_FINAL
+
 /** Helper to remove the copy and assignment constructors so that the compiler
    will not generate the default versions.
 
@@ -1169,6 +1175,18 @@ inline bool operator!= (const bool& one, const MSVCPedanticBool& other) { return
 #else
 #define CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
 #endif
+
+#if defined(__cplusplus) && !defined(CPL_SUPRESS_CPLUSPLUS) && defined(GDAL_COMPILATION)
+extern "C++" {
+template<class C, class A, class B>
+CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
+inline C CPLUnsanitizedAdd(A a, B b)
+{
+    return a + b;
+}
+}
+#endif
+
 /*! @endcond */
 
 /*! @cond Doxygen_Suppress */

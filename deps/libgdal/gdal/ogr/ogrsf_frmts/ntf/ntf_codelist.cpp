@@ -26,19 +26,20 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include <algorithm>
 #include <stdarg.h>
 #include "ntf.h"
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ntf_codelist.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ntf_codelist.cpp 00d44500f517366650cb62cb7781ba24661e0454 2019-08-23 15:02:17 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             NTFCodeList                              */
 /************************************************************************/
 
 NTFCodeList::NTFCodeList( NTFRecord * poRecord ) :
-    nNumCode(atoi(poRecord->GetField(20,22))),
+    nNumCode(std::max(0, atoi(poRecord->GetField(20,22)))),
     papszCodeVal(static_cast<char **>(CPLMalloc(sizeof(char*) * nNumCode))),
     papszCodeDes(static_cast<char **>(CPLMalloc(sizeof(char*) * nNumCode)))
 {

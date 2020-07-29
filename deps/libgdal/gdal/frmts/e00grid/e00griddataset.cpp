@@ -2,10 +2,10 @@
  *
  * Project:  E00 grid driver
  * Purpose:  GDALDataset driver for E00 grid dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #define E00ReadNextLine     GDALE00GRIDReadNextLine
 #define E00ReadRewind       GDALE00GRIDReadRewind
 
-CPL_CVSID("$Id: e00griddataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: e00griddataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 #undef NULL
 #define NULL nullptr
@@ -74,7 +74,7 @@ http://wrri.nmsu.edu/publish/techrpt/tr322/GIS/dem.e00 (compressed)
 
 class E00GRIDRasterBand;
 
-class E00GRIDDataset : public GDALPamDataset
+class E00GRIDDataset final: public GDALPamDataset
 {
     friend class E00GRIDRasterBand;
 
@@ -126,7 +126,7 @@ class E00GRIDDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class E00GRIDRasterBand : public GDALPamRasterBand
+class E00GRIDRasterBand final: public GDALPamRasterBand
 {
     friend class E00GRIDDataset;
 
@@ -921,7 +921,7 @@ void GDALRegister_E00GRID()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Arc/Info Export E00 GRID" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#E00GRID" );
+                               "drivers/raster/e00grid.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "e00" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );

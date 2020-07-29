@@ -2,10 +2,10 @@
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: pdfio.cpp 433cfa35e1b597384a5304b6d784523eeedc18e3 2019-12-12 22:58:55 +0100 Even Rouault $")
+CPL_CVSID("$Id: pdfio.cpp 2b10cb8700f8f187452f517bc82438d67714d4dd 2019-12-12 22:58:55 +0100 Even Rouault $")
 
 /* Poppler 0.31.0 is the first one that needs to know the file size */
 static vsi_l_offset VSIPDFFileStreamGetSize(VSILFILE* f)
@@ -219,7 +219,7 @@ int VSIPDFFileStream::FillBuffer()
     // and liberation of VSIPDFFileStream as PDFDoc::str member.
     if( nCurrentPos == 0 || nCurrentPos == VSI_L_OFFSET_MAX )
     {
-        for(int i=0;i<nToRead-(int)strlen("/Linearized ");i++)
+        for(int i=0;i<nBufferLength-(int)strlen("/Linearized ");i++)
         {
             if( memcmp(abyBuffer + i, "/Linearized ",
                        strlen("/Linearized ")) == 0 )

@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Intergraph Corporation
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: hfafield.cpp e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $")
+CPL_CVSID("$Id: hfafield.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 constexpr int MAX_ENTRY_REPORT = 16;
 

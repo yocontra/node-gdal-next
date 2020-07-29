@@ -1,5 +1,5 @@
 /*
- * $Id: kearat.h 2519a7eb0e1649dbf8625ae8ffc7bb7c3ef9514b 2018-07-10 12:05:23 +0100 Robert Coup $
+ * $Id: kearat.h 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $
  *  kearat.h
  *
  *  Created by Pete Bunting on 01/08/2012.
@@ -43,6 +43,7 @@ private:
     std::vector<kealib::KEAATTField> m_aoFields;
     CPLString osWorkingResult;
     KEARasterBand *m_poBand;
+    CPLMutex            *m_hMutex;
 
 public:
     KEARasterAttributeTable(kealib::KEAAttributeTable *poKEATable, KEARasterBand *poBand);

@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: tigerfilebase.cpp cf79f01d31f2de889a3045a3d09f944cb04d7071 2018-03-03 22:40:32Z Even Rouault $")
+CPL_CVSID("$Id: tigerfilebase.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           TigerFileBase()                            */

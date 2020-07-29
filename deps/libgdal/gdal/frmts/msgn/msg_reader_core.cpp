@@ -44,7 +44,7 @@
 #ifdef GDAL_SUPPORT
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: msg_reader_core.cpp e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $")
+CPL_CVSID("$Id: msg_reader_core.cpp b5174429691e01d1cff7ebc69f956b5cd9ffd6cc 2019-08-26 19:14:19 +0200 Even Rouault $")
 
 #else
 #define VSIFSeek(fp, pos, ref)    CPL_IGNORE_RET_VAL(fseek(fp, pos, ref))
@@ -224,13 +224,15 @@ void Msg_reader_core::read_metadata_block(VSILFILE* fin) {
     sscanf(_sec_header.northLineSelectedRectangle.value, "%u", &_lines);
     sscanf(_sec_header.southLineSelectedRectangle.value, "%u", &lines);
     _line_start = lines;
-    _lines -= lines - 1;
+    if( lines > 0 && _lines >= lines - 1 )
+        _lines -= lines - 1;
 
     unsigned int cols;
     sscanf(_sec_header.westColumnSelectedRectangle.value, "%u", &_columns);
     sscanf(_sec_header.eastColumnSelectedRectangle.value, "%u", &cols);
     _col_start = cols;
-    _columns -= cols - 1;
+    if( cols > 0 && _columns >= cols - 1 )
+        _columns -= cols - 1;
 
 #ifdef DEBUG
     printf("lines = %u, cols = %u\n", _lines, _columns);/*ok*/

@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlasdatasource.cpp 74d67acbfdb033d1e062c214f8041ee578b1bd29 2019-04-17 22:56:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasdatasource.cpp 7b2d828a4ae40db103c71896e2d2c34c09f23900 2020-05-11 01:00:20 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRGMLASDataSource()                        */
@@ -857,7 +857,9 @@ bool OGRGMLASDataSource::Open(GDALOpenInfo* poOpenInfo)
             if( VSIStatL(m_osGMLFilename, &sStat) == 0 )
             {
                 m_nFileSize = sStat.st_size;
-                CPL_SHA256Update(&ctxt, &(sStat.st_size), sizeof(sStat.st_size));
+                GUInt64 nFileSizeLittleEndian = static_cast<GUInt64>(sStat.st_size);
+                CPL_LSBPTR64(&nFileSizeLittleEndian);
+                CPL_SHA256Update(&ctxt, &nFileSizeLittleEndian, sizeof(nFileSizeLittleEndian));
             }
 
             GByte abyHash[CPL_SHA256_HASH_SIZE];

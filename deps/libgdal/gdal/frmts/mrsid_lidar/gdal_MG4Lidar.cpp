@@ -48,7 +48,7 @@ LT_USE_LIDAR_NAMESPACE
 #include "gdal_pam.h"
 // #include "gdal_alg.h" // 1.6 and later have gridding algorithms
 
-CPL_CVSID("$Id: gdal_MG4Lidar.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_MG4Lidar.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -77,7 +77,7 @@ IMPLEMENT_OBJECT_CREATE(CropableMG4PointReader)
 
 static double MaxRasterSize = 2048.0;
 static double MaxBlockSideSize = 1024.0;
-class MG4LidarDataset : public GDALPamDataset
+class MG4LidarDataset final: public GDALPamDataset
 {
 friend class MG4LidarRasterBand;
 
@@ -109,7 +109,7 @@ protected:
 /*                            MG4LidarRasterBand                                          */
 /* ========================================  */
 
-class MG4LidarRasterBand : public GDALPamRasterBand
+class MG4LidarRasterBand final: public GDALPamRasterBand
 {
    friend class MG4LidarDataset;
 
@@ -927,7 +927,7 @@ void GDALRegister_MG4Lidar()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "MrSID Generation 4 / Lidar (.sid)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,  "frmt_mrsid_lidar.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,  "drivers/raster/mg4lidar.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "view" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Float64" );

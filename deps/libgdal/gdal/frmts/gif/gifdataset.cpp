@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gifdataset.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: gifdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 CPL_C_START
 #if !(defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5)
@@ -93,7 +93,7 @@ static int VSIGIFWriteFunc( GifFileType *psGFile,
 
 class GIFRasterBand;
 
-class GIFDataset : public GIFAbstractDataset
+class GIFDataset final: public GIFAbstractDataset
 {
     friend class GIFRasterBand;
 
@@ -115,7 +115,7 @@ class GIFDataset : public GIFAbstractDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class GIFRasterBand : public GIFAbstractRasterBand
+class GIFRasterBand final: public GIFAbstractRasterBand
 {
   public:
     GIFRasterBand( GIFDataset *, int, SavedImage *, int );
@@ -713,7 +713,7 @@ void GDALRegister_GIF()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Graphics Interchange Format (.gif)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_gif.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/gif.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gif" );
     poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/gif" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );

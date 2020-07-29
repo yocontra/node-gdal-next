@@ -29,11 +29,11 @@
 
 #include "keamaskband.h"
 
-CPL_CVSID("$Id: keamaskband.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: keamaskband.cpp 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $")
 
 // constructor
 KEAMaskBand::KEAMaskBand(GDALRasterBand *pParent,
-                kealib::KEAImageIO *pImageIO, int *pRefCount)
+                kealib::KEAImageIO *pImageIO, LockedRefCount *pRefCount)
 {
     m_nSrcBand = pParent->GetBand();
     poDS = nullptr;
@@ -48,9 +48,9 @@ KEAMaskBand::KEAMaskBand(GDALRasterBand *pParent,
 
     // grab the imageio class and its refcount
     this->m_pImageIO = pImageIO;
-    this->m_pnRefCount = pRefCount;
+    this->m_pRefCount = pRefCount;
     // increment the refcount as we now have a reference to imageio
-    (*this->m_pnRefCount)++;
+    this->m_pRefCount->IncRef();
 }
 
 KEAMaskBand::~KEAMaskBand()
@@ -59,8 +59,7 @@ KEAMaskBand::~KEAMaskBand()
     this->FlushCache();
 
     // decrement the recount and delete if needed
-    (*m_pnRefCount)--;
-    if( *m_pnRefCount == 0 )
+    if( m_pRefCount->DecRef() )
     {
         try
         {
@@ -70,7 +69,7 @@ KEAMaskBand::~KEAMaskBand()
         {
         }
         delete m_pImageIO;
-        delete m_pnRefCount;
+        delete m_pRefCount;
     }
 }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeojsonreader.h b471cd08d02f7f05d658fe7da57f30f1b29d3b52 2020-01-07 22:30:27 +0100 Even Rouault $
+ * $Id: ogrgeojsonreader.h 3a7914cee018d5b65dc1639368edbd8faac2543d 2020-01-07 22:30:27 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines GeoJSON reader within OGR OGRGeoJSON Driver.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Mateusz Loskot
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -295,11 +295,11 @@ private:
     bool ParseField( json_object* poObj );
     bool AddFeature( OGRFeature* poFeature );
 
-    OGRGeometry* ReadGeometry( json_object* poObj );
     OGRFeature* ReadFeature( json_object* poObj );
     OGRGeoJSONLayer* ReadFeatureCollection( json_object* poObj );
 };
 
+OGRGeometry* OGRESRIJSONReadGeometry( json_object* poObj );
 OGRSpatialReference* OGRESRIJSONReadSpatialReference( json_object* poObj );
 OGRwkbGeometryType OGRESRIJSONGetGeometryType( json_object* poObj );
 OGRPoint* OGRESRIJSONReadPoint( json_object* poObj);

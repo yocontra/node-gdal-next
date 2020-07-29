@@ -107,7 +107,7 @@ static const char* const pszLABEL_BYTES_PLACEHOLDER = "!*^LABEL_BYTES^*!";
 static const char* const pszHISTORY_STARTBYTE_PLACEHOLDER =
                                                     "!*^HISTORY_STARTBYTE^*!";
 
-CPL_CVSID("$Id: isis3dataset.cpp 1d1b6d0b14c048a9b8ba7b460410d438920e3cd1 2019-05-06 12:04:39 +0200 Even Rouault $")
+CPL_CVSID("$Id: isis3dataset.cpp 85c5690f0bff62a987dcbbf03f9987b8a0d8c4fe 2020-07-02 22:27:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -151,7 +151,7 @@ class ISIS3Dataset final: public RawDataset
     bool        m_bHasSrcNoData; // creation only
     double      m_dfSrcNoData; // creation only
 
-    CPLString   m_osProjection;
+    OGRSpatialReference m_oSRS;
 
     // creation only variables
     CPLString   m_osComment;
@@ -175,6 +175,8 @@ class ISIS3Dataset final: public RawDataset
     CPLStringList m_aosAdditionalFiles;
     CPLString     m_osFromFilename; // creation only
 
+    RawBinaryLayout m_sLayout{};
+
     const char *GetKeyword( const char *pszPath,
                             const char *pszDefault = "");
 
@@ -197,14 +199,8 @@ public:
     virtual CPLErr GetGeoTransform( double * padfTransform ) override;
     virtual CPLErr SetGeoTransform( double * padfTransform ) override;
 
-    virtual const char *_GetProjectionRef(void) override;
-    virtual CPLErr _SetProjection( const char* pszProjection ) override;
-    const OGRSpatialReference* GetSpatialRef() const override {
-        return GetSpatialRefFromOldGetProjectionRef();
-    }
-    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override {
-        return OldSetProjectionFromSetSpatialRef(poSRS);
-    }
+    const OGRSpatialReference* GetSpatialRef() const override;
+    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override;
 
     virtual char **GetFileList() override;
 
@@ -212,6 +208,8 @@ public:
     virtual char **GetMetadata( const char* pszDomain = "" ) override;
     virtual CPLErr SetMetadata( char** papszMD, const char* pszDomain = "" )
                                                                      override;
+
+    bool GetRawBinaryLayout(GDALDataset::RawBinaryLayout&) override;
 
     static int          Identify( GDALOpenInfo * );
     static GDALDataset *Open( GDALOpenInfo * );
@@ -1437,29 +1435,32 @@ char **ISIS3Dataset::GetFileList()
 }
 
 /************************************************************************/
-/*                          GetProjectionRef()                          */
+/*                           GetSpatialRef()                            */
 /************************************************************************/
 
-const char *ISIS3Dataset::_GetProjectionRef()
+const OGRSpatialReference* ISIS3Dataset::GetSpatialRef() const
 
 {
-    if( !m_osProjection.empty() )
-        return m_osProjection;
+    if( !m_oSRS.IsEmpty() )
+        return &m_oSRS;
 
-    return GDALPamDataset::_GetProjectionRef();
+    return GDALPamDataset::GetSpatialRef();
 }
 
 /************************************************************************/
-/*                           SetProjection()                            */
+/*                           SetSpatialRef()                            */
 /************************************************************************/
 
-CPLErr ISIS3Dataset::_SetProjection( const char* pszProjection )
+CPLErr ISIS3Dataset::SetSpatialRef( const OGRSpatialReference* poSRS )
 {
     if( eAccess == GA_ReadOnly )
-        return GDALPamDataset::_SetProjection( pszProjection );
-    m_osProjection = pszProjection ? pszProjection : "";
+        return GDALPamDataset::SetSpatialRef( poSRS );
+    if( poSRS )
+        m_oSRS = *poSRS;
+    else
+        m_oSRS.Clear();
     if( m_poExternalDS )
-        m_poExternalDS->SetProjection(pszProjection);
+        m_poExternalDS->SetSpatialRef(poSRS);
     InvalidateLabel();
     return CE_None;
 }
@@ -1590,6 +1591,75 @@ int ISIS3Dataset::Identify( GDALOpenInfo * poOpenInfo )
         return TRUE;
 
     return FALSE;
+}
+
+/************************************************************************/
+/*                        GetRawBinaryLayout()                          */
+/************************************************************************/
+
+bool ISIS3Dataset::GetRawBinaryLayout(GDALDataset::RawBinaryLayout& sLayout)
+{
+    if( m_sLayout.osRawFilename.empty() )
+        return false;
+    sLayout = m_sLayout;
+    return true;
+}
+
+/************************************************************************/
+/*                           GetValueAndUnits()                         */
+/************************************************************************/
+
+static void GetValueAndUnits(const CPLJSONObject& obj,
+                             std::vector<double>& adfValues,
+                             std::vector<std::string>& aosUnits,
+                             int nExpectedVals)
+{
+    if( obj.GetType() == CPLJSONObject::Integer ||
+        obj.GetType() == CPLJSONObject::Double )
+    {
+        adfValues.push_back(obj.ToDouble());
+    }
+    else if( obj.GetType() == CPLJSONObject::Object )
+    {
+        auto oValue = obj.GetObj("value");
+        auto oUnit = obj.GetObj("unit");
+        if( oValue.IsValid() &&
+            (oValue.GetType() == CPLJSONObject::Integer ||
+                oValue.GetType() == CPLJSONObject::Double ||
+                oValue.GetType() == CPLJSONObject::Array) &&
+            oUnit.IsValid() && oUnit.GetType() == CPLJSONObject::String )
+        {
+            if( oValue.GetType() == CPLJSONObject::Array )
+            {
+                GetValueAndUnits(oValue, adfValues, aosUnits, nExpectedVals);
+            }
+            else
+            {
+                adfValues.push_back(oValue.ToDouble());
+            }
+            aosUnits.push_back(oUnit.ToString());
+        }
+    }
+    else if( obj.GetType() == CPLJSONObject::Array )
+    {
+        auto oArray = obj.ToArray();
+        if( oArray.Size() == nExpectedVals )
+        {
+            for( int i = 0; i < nExpectedVals; i++ )
+            {
+                if( oArray[i].GetType() == CPLJSONObject::Integer ||
+                    oArray[i].GetType() == CPLJSONObject::Double )
+                {
+                    adfValues.push_back(oArray[i].ToDouble());
+                }
+                else
+                {
+                    adfValues.clear();
+                    return;
+                }
+            }
+        }
+    }
 }
 
 /************************************************************************/
@@ -1810,6 +1880,13 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
     /**** This is the planets name i.e. Mars ***/
     const char *target_name = poDS->GetKeyword("IsisCube.Mapping.TargetName");
 
+#ifdef notdef
+    const double dfLongitudeMulFactor =
+        EQUAL(poDS->GetKeyword( "IsisCube.Mapping.LongitudeDirection", "PositiveEast"), "PositiveEast") ? 1 : -1;
+#else
+    const double dfLongitudeMulFactor = 1;
+#endif
+
     /***********   Grab MAP_PROJECTION_TYPE ************/
      const char *map_proj_name =
         poDS->GetKeyword( "IsisCube.Mapping.ProjectionName");
@@ -1828,7 +1905,7 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
 
     /***********   Grab CENTER_LON ************/
     const double center_lon =
-        CPLAtof(poDS->GetKeyword( "IsisCube.Mapping.CenterLongitude"));
+        CPLAtof(poDS->GetKeyword( "IsisCube.Mapping.CenterLongitude")) * dfLongitudeMulFactor;
 
     /***********   Grab 1st std parallel ************/
     const double first_std_parallel =
@@ -1859,7 +1936,7 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
     //  Equirectangular
     //  LambertConformal
     //  Mercator
-    //  ObliqueCylindrical //Todo
+    //  ObliqueCylindrical
     //  Orthographic
     //  PolarStereographic
     //  SimpleCylindrical
@@ -1875,19 +1952,42 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
 
     if ((EQUAL( map_proj_name, "Equirectangular" )) ||
         (EQUAL( map_proj_name, "SimpleCylindrical" )) )  {
-        oSRS.OGRSpatialReference::SetEquirectangular2 ( 0.0, center_lon, center_lat, 0, 0 );
+        oSRS.SetEquirectangular2 ( 0.0, center_lon, center_lat, 0, 0 );
     } else if (EQUAL( map_proj_name, "Orthographic" )) {
-        oSRS.OGRSpatialReference::SetOrthographic ( center_lat, center_lon, 0, 0 );
+        oSRS.SetOrthographic ( center_lat, center_lon, 0, 0 );
     } else if (EQUAL( map_proj_name, "Sinusoidal" )) {
-        oSRS.OGRSpatialReference::SetSinusoidal ( center_lon, 0, 0 );
+        oSRS.SetSinusoidal ( center_lon, 0, 0 );
     } else if (EQUAL( map_proj_name, "Mercator" )) {
-        oSRS.OGRSpatialReference::SetMercator ( center_lat, center_lon, scaleFactor, 0, 0 );
+        oSRS.SetMercator ( center_lat, center_lon, scaleFactor, 0, 0 );
     } else if (EQUAL( map_proj_name, "PolarStereographic" )) {
-        oSRS.OGRSpatialReference::SetPS ( center_lat, center_lon, scaleFactor, 0, 0 );
+        oSRS.SetPS ( center_lat, center_lon, scaleFactor, 0, 0 );
     } else if (EQUAL( map_proj_name, "TransverseMercator" )) {
-        oSRS.OGRSpatialReference::SetTM ( center_lat, center_lon, scaleFactor, 0, 0 );
+        oSRS.SetTM ( center_lat, center_lon, scaleFactor, 0, 0 );
     } else if (EQUAL( map_proj_name, "LambertConformal" )) {
-        oSRS.OGRSpatialReference::SetLCC ( first_std_parallel, second_std_parallel, center_lat, center_lon, 0, 0 );
+        oSRS.SetLCC ( first_std_parallel, second_std_parallel, center_lat, center_lon, 0, 0 );
+    } else if (EQUAL( map_proj_name, "PointPerspective" )) {
+        // Distance parameter is the distance to the center of the body, and is given in km
+        const double distance = CPLAtof(poDS->GetKeyword( "IsisCube.Mapping.Distance")) * 1000.0;
+        const double height_above_ground = distance - semi_major;
+        oSRS.SetVerticalPerspective(center_lat, center_lon, 0, height_above_ground, 0, 0);
+    } else if (EQUAL( map_proj_name, "ObliqueCylindrical" )) {
+        const double poleLatitude = CPLAtof(poDS->GetKeyword( "IsisCube.Mapping.PoleLatitude"));
+        const double poleLongitude = CPLAtof(poDS->GetKeyword( "IsisCube.Mapping.PoleLongitude")) * dfLongitudeMulFactor;
+        const double poleRotation = CPLAtof(poDS->GetKeyword( "IsisCube.Mapping.PoleRotation"));
+        CPLString oProj4String;
+        // ISIS3 rotated pole doesn't use the same conventions than PROJ ob_tran
+        // Compare the sign difference in https://github.com/USGS-Astrogeology/ISIS3/blob/3.8.0/isis/src/base/objs/ObliqueCylindrical/ObliqueCylindrical.cpp#L244
+        // and https://github.com/OSGeo/PROJ/blob/6.2/src/projections/ob_tran.cpp#L34
+        // They can be compensated by modifying the poleLatitude to 180-poleLatitude
+        // There's also a sign difference for the poleRotation parameter
+        // The existence of those different conventions is acknowledged in
+        // https://pds-imaging.jpl.nasa.gov/documentation/Cassini_BIDRSIS.PDF in the middle of page 10
+        oProj4String.Printf(
+            "+proj=ob_tran +o_proj=eqc +o_lon_p=%.18g +o_lat_p=%.18g +lon_0=%.18g",
+            -poleRotation,
+            180-poleLatitude,
+            poleLongitude);
+        oSRS.SetFromUserInput(oProj4String);
     } else {
         CPLDebug( "ISIS3",
                   "Dataset projection %s is not supported. Continuing...",
@@ -1942,7 +2042,8 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
         else if ( (EQUAL( map_proj_name, "SimpleCylindrical" )) ||
                   (EQUAL( map_proj_name, "Orthographic" )) ||
                   (EQUAL( map_proj_name, "Stereographic" )) ||
-                  (EQUAL( map_proj_name, "Sinusoidal" )) ) {
+                  (EQUAL( map_proj_name, "Sinusoidal" )) ||
+                  (EQUAL( map_proj_name, "PointPerspective" )) ) {
             // ISIS uses the spherical equation for these projections
             // so force a sphere.
             oSRS.SetGeogCS( osGeogName, osDatumName, osSphereName,
@@ -1980,10 +2081,8 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
         }
 
         // translate back into a projection string.
-        char *pszResult = nullptr;
-        oSRS.exportToWkt( &pszResult );
-        poDS->m_osProjection = pszResult;
-        CPLFree( pszResult );
+        poDS->m_oSRS = oSRS;
+        poDS->m_oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
     }
 
 /* END ISIS3 Label Read */
@@ -2174,8 +2273,129 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
             return nullptr;
         }
         nBandOffset = static_cast<vsi_l_offset>(nLineOffset) * nRows;
+
+        poDS->m_sLayout.osRawFilename = osQubeFile;
+        if( nBands > 1 )
+            poDS->m_sLayout.eInterleaving = RawBinaryLayout::Interleaving::BSQ;
+        poDS->m_sLayout.eDataType = eDataType;
+        poDS->m_sLayout.bLittleEndianOrder = bIsLSB;
+        poDS->m_sLayout.nImageOffset = nSkipBytes;
+        poDS->m_sLayout.nPixelOffset = nPixelOffset;
+        poDS->m_sLayout.nLineOffset = nLineOffset;
+        poDS->m_sLayout.nBandOffset = static_cast<GIntBig>(nBandOffset);
     }
     /* else Tiled or external */
+
+/* -------------------------------------------------------------------- */
+/*      Extract BandBin info.                                           */
+/* -------------------------------------------------------------------- */
+    std::vector<std::string> aosBandNames;
+    std::vector<std::string> aosBandUnits;
+    std::vector<double> adfWavelengths;
+    std::vector<std::string> aosWavelengthsUnit;
+    std::vector<double> adfBandwidth;
+    std::vector<std::string> aosBandwidthUnit;
+    const auto oBandBin = poDS->m_oJSonLabel.GetObj( "IsisCube/BandBin" );
+    if( oBandBin.IsValid() && oBandBin.GetType() == CPLJSONObject::Object )
+    {
+        for( const auto& child: oBandBin.GetChildren() )
+        {
+            if( CPLString(child.GetName()).ifind("name") != std::string::npos )
+            {
+                // Use "name" in priority
+                if( EQUAL(child.GetName().c_str(), "name") )
+                {
+                    aosBandNames.clear();
+                }
+                else if( !aosBandNames.empty() )
+                {
+                    continue;
+                }
+
+                if( child.GetType() == CPLJSONObject::String && nBands == 1 )
+                {
+                    aosBandNames.push_back(child.ToString());
+                }
+                else if( child.GetType() == CPLJSONObject::Array )
+                {
+                    auto oArray = child.ToArray();
+                    if( oArray.Size() == nBands )
+                    {
+                        for( int i = 0; i < nBands; i++ )
+                        {
+                            if( oArray[i].GetType() == CPLJSONObject::String )
+                            {
+                                aosBandNames.push_back(oArray[i].ToString());
+                            }
+                            else
+                            {
+                                aosBandNames.clear();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else if( EQUAL(child.GetName().c_str(), "BandSuffixUnit") &&
+                     child.GetType() == CPLJSONObject::Array )
+            {
+                auto oArray = child.ToArray();
+                if( oArray.Size() == nBands )
+                {
+                    for( int i = 0; i < nBands; i++ )
+                    {
+                        if( oArray[i].GetType() == CPLJSONObject::String )
+                        {
+                            aosBandUnits.push_back(oArray[i].ToString());
+                        }
+                        else
+                        {
+                            aosBandUnits.clear();
+                            break;
+                        }
+                    }
+                }
+            }
+            else if( EQUAL(child.GetName().c_str(), "BandBinCenter") ||
+                     EQUAL(child.GetName().c_str(), "Center") )
+            {
+                GetValueAndUnits(child, adfWavelengths, aosWavelengthsUnit,
+                                 nBands);
+            }
+            else if( EQUAL(child.GetName().c_str(), "BandBinUnit") &&
+                     child.GetType() == CPLJSONObject::String )
+            {
+                CPLString unit(child.ToString());
+                if( STARTS_WITH_CI(unit, "micromet") ||
+                    EQUAL(unit, "um") ||
+                    STARTS_WITH_CI(unit, "nanomet") ||
+                    EQUAL(unit, "nm")  )
+                {
+                    aosWavelengthsUnit.push_back(child.ToString());
+                }
+            }
+            else if( EQUAL(child.GetName().c_str(), "Width") )
+            {
+                GetValueAndUnits(child, adfBandwidth, aosBandwidthUnit,
+                                 nBands);
+            }
+        }
+
+        if( !adfWavelengths.empty() && aosWavelengthsUnit.size() == 1 )
+        {
+            for( int i = 1; i < nBands; i++ )
+            {
+                aosWavelengthsUnit.push_back(aosWavelengthsUnit[0]);
+            }
+        }
+        if( !adfBandwidth.empty() && aosBandwidthUnit.size() == 1 )
+        {
+            for( int i = 1; i < nBands; i++ )
+            {
+                aosBandwidthUnit.push_back(aosBandwidthUnit[0]);
+            }
+        }
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Create band information objects.                                */
@@ -2233,6 +2453,27 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
             poISISBand->SetMaskBand( new ISISMaskBand(poISISBand) );
         }
 
+        if( i < static_cast<int>(aosBandNames.size()) )
+        {
+            poBand->SetDescription(aosBandNames[i].c_str());
+        }
+        if( i < static_cast<int>(adfWavelengths.size()) &&
+            i < static_cast<int>(aosWavelengthsUnit.size()) )
+        {
+            poBand->SetMetadataItem("WAVELENGTH", CPLSPrintf("%f", adfWavelengths[i]));
+            poBand->SetMetadataItem("WAVELENGTH_UNIT", aosWavelengthsUnit[i].c_str());
+            if( i < static_cast<int>(adfBandwidth.size()) &&
+                i < static_cast<int>(aosBandwidthUnit.size()) )
+            {
+                poBand->SetMetadataItem("BANDWIDTH", CPLSPrintf("%f", adfBandwidth[i]));
+                poBand->SetMetadataItem("BANDWIDTH_UNIT", aosBandwidthUnit[i].c_str());
+            }
+        }
+        if( i < static_cast<int>(aosBandUnits.size()) )
+        {
+            poBand->SetUnitType(aosBandUnits[i].c_str());
+        }
+
         poBand->SetNoDataValue( dfNoData );
 
         // Set offset/scale values.
@@ -2265,10 +2506,8 @@ GDALDataset *ISIS3Dataset::Open( GDALOpenInfo * poOpenInfo )
         if( oSRS2.importFromESRI( papszLines ) == OGRERR_NONE )
         {
             poDS->m_aosAdditionalFiles.AddString( pszPrjFile );
-            char *pszResult = nullptr;
-            oSRS2.exportToWkt( &pszResult );
-            poDS->m_osProjection = pszResult;
-            CPLFree( pszResult );
+            poDS->m_oSRS = oSRS2;
+            poDS->m_oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
         }
 
         CSLDestroy( papszLines );
@@ -2455,7 +2694,7 @@ void ISIS3Dataset::BuildLabel()
     oPixels.Set( "Base", GetRasterBand(1)->GetOffset() );
     oPixels.Set( "Multiplier", GetRasterBand(1)->GetScale() );
 
-    OGRSpatialReference oSRS;
+    const OGRSpatialReference& oSRS = m_oSRS;
 
     if( !m_bUseSrcMapping )
     {
@@ -2473,11 +2712,10 @@ void ISIS3Dataset::BuildLabel()
         if( !m_osLongitudeDirection.empty() )
             oMapping.Set( "LongitudeDirection", m_osLongitudeDirection );
     }
-    else if( !m_bUseSrcMapping && !m_osProjection.empty() )
+    else if( !m_bUseSrcMapping && !m_oSRS.IsEmpty() )
     {
         oMapping.Add( "_type", "group" );
 
-        oSRS.SetFromUserInput(m_osProjection);
         if( oSRS.IsProjected() || oSRS.IsGeographic() )
         {
             const char* pszDatum = oSRS.GetAttrValue("DATUM");
@@ -2688,6 +2926,52 @@ void ISIS3Dataset::BuildLabel()
                         oSRS.GetNormProjParm(SRS_PP_STANDARD_PARALLEL_2, 0.0) );
             }
 
+            else if( EQUAL(pszProjection, "Vertical Perspective") ) // PROJ 7 required
+            {
+                oMapping.Add( "ProjectionName", "PointPerspective" );
+                oMapping.Add( "CenterLongitude", FixLong(
+                        oSRS.GetNormProjParm("Longitude of topocentric origin", 0.0)) );
+                oMapping.Add( "CenterLatitude",
+                        oSRS.GetNormProjParm("Latitude of topocentric origin", 0.0) );
+                // ISIS3 value is the distance from center of ellipsoid, in km
+                oMapping.Add( "Distance",
+                        (oSRS.GetNormProjParm("Viewpoint height", 0.0) + oSRS.GetSemiMajor()) / 1000.0 );
+            }
+
+            else if( EQUAL(pszProjection, "custom_proj4") )
+            {
+                const char* pszProj4 = oSRS.GetExtension("PROJCS", "PROJ4", nullptr);
+                if( pszProj4 && strstr(pszProj4, "+proj=ob_tran" ) &&
+                    strstr(pszProj4, "+o_proj=eqc") )
+                {
+                    const auto FetchParam = [](const char* pszProj4Str, const char* pszKey)
+                    {
+                        CPLString needle;
+                        needle.Printf("+%s=", pszKey);
+                        const char* pszVal = strstr(pszProj4Str, needle.c_str());
+                        if( pszVal )
+                            return CPLAtof(pszVal+needle.size());
+                        return 0.0;
+                    };
+
+                    double dfLonP = FetchParam(pszProj4, "o_lon_p");
+                    double dfLatP = FetchParam(pszProj4, "o_lat_p");
+                    double dfLon0 = FetchParam(pszProj4, "lon_0");
+                    double dfPoleRotation = -dfLonP;
+                    double dfPoleLatitude = 180 - dfLatP;
+                    double dfPoleLongitude = dfLon0;
+                    oMapping.Add( "ProjectionName", "ObliqueCylindrical" );
+                    oMapping.Add( "PoleLatitude", dfPoleLatitude );
+                    oMapping.Add( "PoleLongitude", FixLong(dfPoleLongitude) );
+                    oMapping.Add( "PoleRotation", dfPoleRotation );
+                }
+                else
+                {
+                    CPLError(CE_Warning, CPLE_NotSupported,
+                            "Projection %s not supported",
+                            pszProjection);
+                }
+            }
             else
             {
                 CPLError(CE_Warning, CPLE_NotSupported,
@@ -2724,7 +3008,7 @@ void ISIS3Dataset::BuildLabel()
         oMapping.Add( "_type", "group" );
 
         const double dfDegToMeter = oSRS.GetSemiMajor() * M_PI / 180.0;
-        if( !m_osProjection.empty() && oSRS.IsProjected() )
+        if( !m_oSRS.IsEmpty() && oSRS.IsProjected() )
         {
             const double dfLinearUnits = oSRS.GetLinearUnits();
             // Maybe we should deal differently with non meter units ?
@@ -2737,7 +3021,7 @@ void ISIS3Dataset::BuildLabel()
             oMapping.Add( "Scale/value", dfScale );
             oMapping.Add( "Scale/unit", "pixels/degree" );
         }
-        else if( !m_osProjection.empty() && oSRS.IsGeographic() )
+        else if( !m_oSRS.IsEmpty() && oSRS.IsGeographic() )
         {
             const double dfScale = 1.0 / m_adfGeoTransform[1];
             const double dfRes = m_adfGeoTransform[1] * dfDegToMeter;
@@ -3094,6 +3378,12 @@ void ISIS3Dataset::WriteLabel()
     // Serialize label
     CPLString osLabel( SerializeAsPDL(m_oJSonLabel) );
     osLabel += "End\n";
+    if( m_osExternalFilename.empty() && osLabel.size() < 65536 )
+    {
+        // In-line labels have conventionally a minimize size of 65536 bytes
+        // See #2741
+        osLabel.resize(65536);
+    }
     char *pszLabel = &osLabel[0];
     const int nLabelSize = static_cast<int>(osLabel.size());
 
@@ -3992,10 +4282,10 @@ GDALDataset* ISIS3Dataset::CreateCopy( const char *pszFilename,
         poDS->SetGeoTransform( adfGeoTransform );
     }
 
-    if( poSrcDS->GetProjectionRef() != nullptr
-        && strlen(poSrcDS->GetProjectionRef()) > 0 )
+    auto poSrcSRS = poSrcDS->GetSpatialRef();
+    if( poSrcSRS )
     {
-        poDS->SetProjection( poSrcDS->GetProjectionRef() );
+        poDS->SetSpatialRef( poSrcSRS );
     }
 
     for(int i=1;i<=nBands;i++)
@@ -4057,7 +4347,7 @@ void GDALRegister_ISIS3()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "USGS Astrogeology ISIS cube (Version 3)" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_isis3.html" );
+                               "drivers/raster/isis3.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "lbl cub" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
@@ -4071,7 +4361,7 @@ void GDALRegister_ISIS3()
 "     <Value>EXTERNAL</Value>"
 "     <Value>GEOTIFF</Value>"
 "  </Option>"
-"  <Option name='GEOTIFF_AS_REGULAR_EXTERNAL' type='boolean'"
+"  <Option name='GEOTIFF_AS_REGULAR_EXTERNAL' type='boolean' "
     "description='Whether the GeoTIFF file, if uncompressed, should be "
     "registered as a regular raw file' default='YES'/>"
 "  <Option name='GEOTIFF_OPTIONS' type='string' "
@@ -4103,29 +4393,29 @@ void GDALRegister_ISIS3()
     "Mapping.TargetName'/>"
 "  <Option name='FORCE_360' type='boolean' "
     "description='Whether to force longitudes in [0,360] range' default='NO'/>"
-"  <Option name='WRITE_BOUNDING_DEGREES' type='boolean'"
+"  <Option name='WRITE_BOUNDING_DEGREES' type='boolean' "
     "description='Whether to write Min/MaximumLong/Latitude values' "
     "default='YES'/>"
-"  <Option name='BOUNDING_DEGREES' type='string'"
+"  <Option name='BOUNDING_DEGREES' type='string' "
     "description='Manually set bounding box with the syntax "
     "min_long,min_lat,max_long,max_lat'/>"
-"  <Option name='USE_SRC_LABEL' type='boolean'"
+"  <Option name='USE_SRC_LABEL' type='boolean' "
     "description='Whether to use source label in ISIS3 to ISIS3 conversions' "
     "default='YES'/>"
-"  <Option name='USE_SRC_MAPPING' type='boolean'"
+"  <Option name='USE_SRC_MAPPING' type='boolean' "
     "description='Whether to use Mapping group from source label in "
                  "ISIS3 to ISIS3 conversions' "
     "default='NO'/>"
-"  <Option name='USE_SRC_HISTORY' type='boolean'"
+"  <Option name='USE_SRC_HISTORY' type='boolean' "
     "description='Whether to use content pointed by the History object in "
                  "ISIS3 to ISIS3 conversions' "
     "default='YES'/>"
-"  <Option name='ADD_GDAL_HISTORY' type='boolean'"
+"  <Option name='ADD_GDAL_HISTORY' type='boolean' "
     "description='Whether to add GDAL specific history in the content pointed "
                  "by the History object in "
                  "ISIS3 to ISIS3 conversions' "
     "default='YES'/>"
-"  <Option name='GDAL_HISTORY' type='string'"
+"  <Option name='GDAL_HISTORY' type='string' "
     "description='Manually defined GDAL history. Must be formatted as ISIS3 "
     "PDL. If not specified, it is automatically composed.'/>"
 "</CreationOptionList>"

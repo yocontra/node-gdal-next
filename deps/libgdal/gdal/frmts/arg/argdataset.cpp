@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2012, David Zwarg <dzwarg@azavea.com>
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "ogrgeojsonreader.h"
 #include <limits>
 
-CPL_CVSID("$Id: argdataset.cpp 34d585a9a14d9e412456bb2773c4ed1ec12ca892 2019-03-23 10:12:47 +0100 Even Rouault $")
+CPL_CVSID("$Id: argdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -804,7 +804,7 @@ void GDALRegister_ARG()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Azavea Raster Grid format" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#ARG" );
+                               "drivers/raster/arg.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnIdentify = ARGDataset::Identify;

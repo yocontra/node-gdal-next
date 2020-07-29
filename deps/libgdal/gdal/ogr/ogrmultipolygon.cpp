@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrmultipolygon.cpp ba2ef4045f82fd2260f1732e9e46a927277ac93d 2018-05-06 19:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmultipolygon.cpp c7d51c5ead794772b42f3c58c394bfff6045f8d6 2019-08-22 09:59:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRMultiPolygon()                           */
@@ -130,11 +130,9 @@ OGRMultiPolygon::isCompatibleSubType( OGRwkbGeometryType eGeomType ) const
 /*                            exportToWkt()                             */
 /************************************************************************/
 
-OGRErr OGRMultiPolygon::exportToWkt( char ** ppszDstText,
-                                     OGRwkbVariant eWkbVariant ) const
-
+std::string OGRMultiPolygon::exportToWkt(const OGRWktOptions& opts, OGRErr *err) const
 {
-    return exportToWktInternal( ppszDstText, eWkbVariant, "POLYGON" );
+    return exportToWktInternal(opts, err, "POLYGON");
 }
 
 /************************************************************************/

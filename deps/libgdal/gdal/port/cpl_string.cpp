@@ -7,7 +7,7 @@
  *
  **********************************************************************
  * Copyright (c) 1998, Daniel Morissette
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -63,7 +63,7 @@
 #define va_copy __va_copy
 #endif
 
-CPL_CVSID("$Id: cpl_string.cpp d9b1be9bfecd6c68b3443bb6c9e3f6cb81b42770 2019-04-01 18:21:14 +0200 Raul Marin $")
+CPL_CVSID("$Id: cpl_string.cpp 723164e9b6cffcb02cb84fc57a9cdba428929016 2019-11-08 22:30:49 +0100 Even Rouault $")
 
 /*=====================================================================
                     StringList manipulation functions.
@@ -2154,7 +2154,7 @@ char *CPLEscapeString( const char *pszInput, int nLength,
                 || pszInput[iIn] == '+' || pszInput[iIn] == '!'
                 || pszInput[iIn] == '*' || pszInput[iIn] == '\''
                 || pszInput[iIn] == '(' || pszInput[iIn] == ')'
-                || pszInput[iIn] == '"' || pszInput[iIn] == ',' )
+                || pszInput[iIn] == ',' )
             {
                 pszOutput[iOut++] = pszInput[iIn];
             }

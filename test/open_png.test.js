@@ -43,7 +43,7 @@ describe('Open', () => {
       assert.isNull(ds.srs)
     })
 
-    it('should be able to read statistics', () => {
+    it.skip('should be able to read statistics', () => {
       const band = ds.bands.get(1)
       const expected_stats = {
         min: 1,
@@ -70,7 +70,6 @@ describe('Open', () => {
     it('should have file list', () => {
       const files = [
         path.join(__dirname, 'data/CM13ct.png'),
-        path.join(__dirname, 'data/CM13ct.png.aux.xml'),
         path.join(__dirname, 'data/CM13ct.pgw')
       ]
 

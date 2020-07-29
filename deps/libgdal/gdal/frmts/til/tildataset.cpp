@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: tildataset.cpp 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: tildataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -489,7 +489,7 @@ void GDALRegister_TIL()
     poDriver->SetDescription( "TIL" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "EarthWatch .TIL" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_til.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/til.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = TILDataset::Open;

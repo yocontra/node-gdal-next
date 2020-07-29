@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001-2008, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "gdal_pam.h"
 #include "gifabstractdataset.h"
 
-CPL_CVSID("$Id: biggifdataset.cpp 1dd8a744bbfec8b849371abec5cd44f729eecb03 2018-05-06 21:11:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: biggifdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -387,7 +387,7 @@ void GDALRegister_BIGGIF()
      poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                 "Graphics Interchange Format (.gif)" );
      poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                                "frmt_gif.html" );
+                                "drivers/raster/gif.html" );
      poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gif" );
      poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/gif" );
      poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );

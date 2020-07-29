@@ -28,7 +28,7 @@
 
 #include "aoutils.h"
 
-CPL_CVSID("$Id: aoutils.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: aoutils.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 bool AOErr(HRESULT hr, std::string desc)
 {
@@ -282,12 +282,6 @@ bool AOToOGRSpatialReference(esriGeometry::ISpatialReference* pSR, OGRSpatialRef
   }
 
   esriGeometry::IESRISpatialReferenceGEN2Ptr ipSRGen = pSR;
-
-  if (ipSRGen == NULL)
-  {
-    CPLError( CE_Warning, CPLE_AppDefined, "ESRI Spatial Reference is Unknown");
-    return false;
-  }
 
   long bufferSize = 0;
   if (FAILED(hr = ipSRGen->get_ESRISpatialReferenceSize(&bufferSize)) || bufferSize == 0)

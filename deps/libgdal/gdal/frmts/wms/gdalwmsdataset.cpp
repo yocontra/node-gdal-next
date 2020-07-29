@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Adam Nowacki
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2017, Dmitry Baryshnikov, <polimax@mail.ru>
  * Copyright (c) 2017, NextGIS, <info@nextgis.com>
  *
@@ -46,7 +46,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: gdalwmsdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalwmsdataset.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALWMSDataset()                           */

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: geoconcept.c f825dbb9d097f3b37afe160c626248799fba13c1 2019-04-01 17:37:43 +0200 Raul Marin $
+ * $Id: geoconcept.c 1fb5cf8cab5a7a968325498f351c5f0c1dfaecbb 2019-08-15 17:00:38 +0200 Even Rouault $
  *
  * Name:     geoconcept.c
  * Project:  OpenGIS Simple Features Reference Implementation
@@ -8,7 +8,7 @@
  *
  **********************************************************************
  * Copyright (c) 2007,  Geoconcept and IGN
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "cpl_string.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: geoconcept.c f825dbb9d097f3b37afe160c626248799fba13c1 2019-04-01 17:37:43 +0200 Raul Marin $")
+CPL_CVSID("$Id: geoconcept.c 1fb5cf8cab5a7a968325498f351c5f0c1dfaecbb 2019-08-15 17:00:38 +0200 Even Rouault $")
 
 #define kItemSize_GCIO      256
 #define kExtraSize_GCIO    4096
@@ -2134,7 +2134,11 @@ static OGRGeometryH GCIOAPI_CALL _buildOGRGeometry_GCIO (
               {
                 OGRGeometryH hPolyRing = OGR_G_CreateGeometry(wkbPolygon);
                 int bRes;
-                OGR_G_AddGeometryDirectly(hPolyRing, ring);
+                if(OGR_G_AddGeometryDirectly(hPolyRing, ring) != OGRERR_NONE )
+                {
+                  OGR_G_DestroyGeometry(hPolyRing);
+                  goto onError;
+                }
                 bRes = OGR_G_Contains(outer,hPolyRing) ;
                 OGR_G_RemoveGeometry(hPolyRing, 0, FALSE);
                 OGR_G_DestroyGeometry(hPolyRing);

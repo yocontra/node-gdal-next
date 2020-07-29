@@ -2,10 +2,10 @@
  *
  * Project:  X-Plane apt.dat file reader
  * Purpose:  Implements OGRXPlaneAptReader class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@
 #include "ogr_xplane_apt_reader.h"
 #include "ogr_geo_utils.h"
 
-CPL_CVSID("$Id: ogr_xplane_apt_reader.cpp 317ae5a1782a7c432ccf90090cc616303b43afcc 2018-05-12 22:32:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_xplane_apt_reader.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                   OGRXPlaneCreateAptFileReader                       */
@@ -257,7 +257,8 @@ void OGRXPlaneAptReader::Read()
                 }
                 return;
             }
-            else if( nTokens == 0 || !assertMinCol(2) )
+            else if( papszTokens == nullptr || papszTokens[0] == nullptr ||
+                     !assertMinCol(2) )
             {
                 break;
             }
@@ -1222,7 +1223,7 @@ bool OGRXPlaneAptReader::ParsePolygonalGeometry(OGRGeometry** ppoGeom)
                                dfLatBezier, dfLonBezier,
                                dfLat, dfLon);
             }
-            else if (!bIsFirst && !(dfLastLat == dfLat && dfLastLon == dfLon))
+            else if (!(dfLastLat == dfLat && dfLastLon == dfLon))
             {
                 double dfCtrLatBezier = dfLat - (dfLatBezier - dfLat);
                 double dfCtrLonBezier = dfLon - (dfLonBezier - dfLon);
@@ -1572,7 +1573,7 @@ bool OGRXPlaneAptReader::ParseLinearGeometry(
                                dfLatBezier, dfLonBezier,
                                dfLat, dfLon);
             }
-            else if (!bIsFirst && !(dfLastLat == dfLat && dfLastLon == dfLon))
+            else if (!(dfLastLat == dfLat && dfLastLon == dfLon))
             {
                 double dfCtrLatBezier = dfLat - (dfLatBezier - dfLat);
                 double dfCtrLonBezier = dfLon - (dfLonBezier - dfLon);

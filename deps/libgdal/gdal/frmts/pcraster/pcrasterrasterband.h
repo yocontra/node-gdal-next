@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcrasterrasterband.h e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $
+ * $Id: pcrasterrasterband.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster raster band declaration.
@@ -42,7 +42,7 @@ class PCRasterDataset;
 //! This class specialises the GDALRasterBand class for PCRaster rasters.
 /*!
 */
-class PCRasterRasterBand: public GDALPamRasterBand
+class PCRasterRasterBand final: public GDALPamRasterBand
 {
 
 private:

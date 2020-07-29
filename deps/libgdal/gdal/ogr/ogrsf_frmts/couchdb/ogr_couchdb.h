@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_couchdb.h db7b8a03d90637c2f6ba5cbdb087e2819d8ec8dd 2018-05-12 22:34:30 +0200 Even Rouault $
+ * $Id: ogr_couchdb.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  CouchDB Translator
  * Purpose:  Definition of classes for OGR CouchDB / GeoCouch driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@ typedef enum
 /************************************************************************/
 class OGRCouchDBDataSource;
 
-class OGRCouchDBLayer : public OGRLayer
+class OGRCouchDBLayer CPL_NON_FINAL: public OGRLayer
 {
 protected:
     OGRCouchDBDataSource*       poDS;
@@ -106,7 +106,7 @@ protected:
 /*                      OGRCouchDBTableLayer                            */
 /************************************************************************/
 
-class OGRCouchDBTableLayer : public OGRCouchDBLayer
+class OGRCouchDBTableLayer CPL_NON_FINAL: public OGRCouchDBLayer
 {
     int                       nNextFIDForCreate;
     bool                      bInTransaction;
@@ -219,7 +219,7 @@ class OGRCouchDBTableLayer : public OGRCouchDBLayer
 /*                       OGRCouchDBRowsLayer                            */
 /************************************************************************/
 
-class OGRCouchDBRowsLayer : public OGRCouchDBLayer
+class OGRCouchDBRowsLayer final: public OGRCouchDBLayer
 {
     bool                      bAllInOne;
 
@@ -240,7 +240,7 @@ class OGRCouchDBRowsLayer : public OGRCouchDBLayer
 /*                         OGRCouchDBDataSource                         */
 /************************************************************************/
 
-class OGRCouchDBDataSource : public OGRDataSource
+class OGRCouchDBDataSource CPL_NON_FINAL: public OGRDataSource
 {
   protected:
     char*               pszName;

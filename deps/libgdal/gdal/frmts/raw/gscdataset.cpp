@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: gscdataset.cpp b2723bb9ee29fb36de5c3afec9e9a6b757ef743c 2018-05-10 21:21:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: gscdataset.cpp 95727499e1e118c5eeae7ca5bd5c4774ce32cb8a 2020-03-24 08:33:14 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -227,8 +227,8 @@ void GDALRegister_GSC()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "GSC Geogrid" );
-    // poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-    //                            "frmt_various.html#GSC" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
+                               "drivers/raster/gsc.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = GSCDataset::Open;

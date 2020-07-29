@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_rec.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogr_rec.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  Epi .REC Translator
  * Purpose:  Definition of classes for OGR .REC support.
@@ -46,7 +46,7 @@ CPL_C_END
 /*                             OGRRECLayer                              */
 /************************************************************************/
 
-class OGRRECLayer : public OGRLayer
+class OGRRECLayer final: public OGRLayer
 {
     OGRFeatureDefn     *poFeatureDefn;
 
@@ -82,7 +82,7 @@ class OGRRECLayer : public OGRLayer
 /*                           OGRRECDataSource                           */
 /************************************************************************/
 
-class OGRRECDataSource : public OGRDataSource
+class OGRRECDataSource final: public OGRDataSource
 {
     char                *pszName;
 

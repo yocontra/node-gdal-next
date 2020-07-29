@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,7 +35,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-CPL_CVSID("$Id: xpmdataset.cpp 68dd2c1dac7c7bda908a3277a036ad1947348055 2019-02-28 13:02:12 +0100 Even Rouault $")
+CPL_CVSID("$Id: xpmdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 static unsigned char *ParseXPM( const char *pszInput,
                                 unsigned int nFileSize,
@@ -48,7 +48,7 @@ static unsigned char *ParseXPM( const char *pszInput,
 /* ==================================================================== */
 /************************************************************************/
 
-class XPMDataset : public GDALPamDataset
+class XPMDataset final: public GDALPamDataset
 {
   public:
                  XPMDataset() {}
@@ -442,7 +442,7 @@ void GDALRegister_XPM()
     poDriver->SetDescription( "XPM" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "X11 PixMap Format" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#XPM" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/xpm.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "xpm" );
     poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/x-xpixmap" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );

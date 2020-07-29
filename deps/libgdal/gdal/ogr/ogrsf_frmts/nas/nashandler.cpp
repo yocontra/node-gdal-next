@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2010-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 #include "cpl_string.h"
 #include "ogr_xerces.h"
 
-CPL_CVSID("$Id: nashandler.cpp c54716eea353376511e06b8080f9e965cd94eafe 2018-03-17 16:02:58Z Even Rouault $")
+CPL_CVSID("$Id: nashandler.cpp db901781979e7cc7f97439b5629fab38fd1e8e8d 2019-08-12 18:18:55 +0200 Even Rouault $")
 
 /*
   Update modes:
@@ -469,6 +469,13 @@ void NASHandler::startElement( const XMLCh* const /* uri */,
     poState->PushPath( m_osElementName );
 
     m_nDepth ++;
+
+    if( poState->osPath.size() > 512 )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Too long path. Stop parsing");
+        m_poReader->StopParsing();
+    }
 }
 
 /************************************************************************/

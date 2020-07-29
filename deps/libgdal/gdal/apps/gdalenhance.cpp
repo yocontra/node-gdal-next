@@ -6,7 +6,7 @@
  *
  * ****************************************************************************
  * Copyright (c) 2007, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: gdalenhance.cpp f007ad4c08eba374ffefc0cdcacf8c820ed9e422 2018-07-16 10:39:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalenhance.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 static int
 ComputeEqualizationLUTs( GDALDatasetH hDataset,  int nLUTBins,

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2008, Frank Warmerdam
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2015, Sean Gillies <sean@mapbox.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -45,7 +45,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: rasterfill.cpp 47fc5963633c59f05e820ca575bbddfe88573739 2020-01-07 21:15:46 +0100 Even Rouault $")
+CPL_CVSID("$Id: rasterfill.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALFilterLine()                           */
@@ -661,8 +661,7 @@ GDALFillNodata( GDALRasterBandH hTargetBand,
 /* -------------------------------------------------------------------- */
 /*      report progress.                                                */
 /* -------------------------------------------------------------------- */
-        if( eErr == CE_None &&
-            !pfnProgress(
+        if( !pfnProgress(
                 dfProgressRatio * (0.5*(iY+1) /
                                    static_cast<double>(nYSize)),
                 "Filling...", pProgressArg ) )
@@ -853,8 +852,7 @@ GDALFillNodata( GDALRasterBandH hTargetBand,
 /* -------------------------------------------------------------------- */
 /*      report progress.                                                */
 /* -------------------------------------------------------------------- */
-        if( eErr == CE_None &&
-            !pfnProgress(
+        if( !pfnProgress(
                 dfProgressRatio*(0.5+0.5*(nYSize-iY) /
                                  static_cast<double>(nYSize)),
                 "Filling...", pProgressArg) )

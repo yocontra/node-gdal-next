@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Mateusz Loskot <mateusz@loskot.net>
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,6 +29,7 @@
 
 #include "cpl_port.h"
 #include "gdal.h"
+#include "gdalpython.h"
 
 #include "cpl_conv.h"
 #include "cpl_error.h"
@@ -85,6 +86,7 @@ void GDALDestroy(void)
     GDALDestroyDriverManager();
 
     OGRCleanupAll();
+    GDALPythonFinalize();
     bInGDALGlobalDestructor = false;
 
     /* See corresponding bug reports: */

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -57,7 +57,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ehdrdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ehdrdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 constexpr int HAS_MIN_FLAG = 0x1;
 constexpr int HAS_MAX_FLAG = 0x2;
@@ -2077,7 +2077,7 @@ void GDALRegister_EHdr()
     poDriver->SetDescription("EHdr");
     poDriver->SetMetadataItem(GDAL_DCAP_RASTER, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "ESRI .hdr Labelled");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#EHdr");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/ehdr.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "bil");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES,
                               "Byte Int16 UInt16 Int32 UInt32 Float32");

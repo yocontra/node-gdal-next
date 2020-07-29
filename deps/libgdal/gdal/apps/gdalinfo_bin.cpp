@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdalinfo_bin.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalinfo_bin.cpp 17973835a8fbc78d12e01cde249b8fca561efaeb 2019-11-16 00:02:55 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -233,7 +233,7 @@ MAIN_START(argc, argv)
     GDALDestroyDriverManager();
 
     CPLDumpSharedList( nullptr );
-    CPLCleanupTLS();
+    GDALDestroy();
 
     exit( 0 );
 }

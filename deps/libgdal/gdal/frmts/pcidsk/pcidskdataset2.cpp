@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: pcidskdataset2.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04-20 20:33:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: pcidskdataset2.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 const PCIDSK::PCIDSKInterfaces *PCIDSK2GetInterfaces(void);
 
@@ -99,7 +99,7 @@ PCIDSK2Band::PCIDSK2Band( PCIDSKChannel *poChannelIn )
 
     if( poChannel->GetType() == CHN_BIT )
     {
-        SetMetadataItem( "NBITS", "1", "IMAGE_STRUCTURE" );
+        PCIDSK2Band::SetMetadataItem( "NBITS", "1", "IMAGE_STRUCTURE" );
 
         if( !STARTS_WITH_CI(poChannel->GetDescription().c_str(),
                     "Contents Not Specified") )
@@ -2251,7 +2251,7 @@ void GDALRegister_PCIDSK()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "PCIDSK Database File" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_pcidsk.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/pcidsk.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "pix" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,

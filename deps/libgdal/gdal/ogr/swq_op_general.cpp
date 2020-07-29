@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (C) 2010 Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
  ****************************************************************************/
 
 #include "cpl_port.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 #include <cctype>
 #include <climits>
@@ -45,7 +45,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: swq_op_general.cpp ff06f5356dd71dedba7ba941221ae03688982b69 2018-06-07 19:35:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: swq_op_general.cpp 25f4fb073a8bb568aa3205f4a0a3943969b1ba5d 2020-05-18 10:03:16 +0200 Julien Cabieces $")
 
 /************************************************************************/
 /*                           swq_test_like()                            */
@@ -54,7 +54,7 @@ CPL_CVSID("$Id: swq_op_general.cpp ff06f5356dd71dedba7ba941221ae03688982b69 2018
 /************************************************************************/
 
 static int swq_test_like( const char *input, const char *pattern,
-                          char chEscape )
+                          char chEscape, bool insensitive )
 
 {
     if( input == nullptr || pattern == nullptr )
@@ -70,8 +70,11 @@ static int swq_test_like( const char *input, const char *pattern,
             pattern++;
             if( *pattern == '\0' )
                 return 0;
-            if( tolower(*pattern) != tolower(*input) )
+            if( (!insensitive && *pattern != *input) ||
+                (insensitive && tolower(*pattern) != tolower(*input)) )
+            {
                 return 0;
+            }
             else
             {
                 input++;
@@ -92,7 +95,7 @@ static int swq_test_like( const char *input, const char *pattern,
             // Try eating varying amounts of the input till we get a positive.
             for( int eat = 0; input[eat] != '\0'; eat++ )
             {
-                if( swq_test_like(input + eat, pattern + 1, chEscape) )
+                if( swq_test_like(input + eat, pattern + 1, chEscape, insensitive) )
                     return 1;
             }
 
@@ -100,8 +103,11 @@ static int swq_test_like( const char *input, const char *pattern,
         }
         else
         {
-            if( tolower(*pattern) != tolower(*input) )
+            if( (!insensitive && *pattern != *input) ||
+                (insensitive && tolower(*pattern) != tolower(*input)) )
+            {
                 return 0;
+            }
             else
             {
                 input++;
@@ -829,9 +835,22 @@ swq_expr_node *SWQGeneralEvaluator( swq_expr_node *node,
             char chEscape = '\0';
             if( node->nSubExprCount == 3 )
                 chEscape = sub_node_values[2]->string_value[0];
+            const bool bInsensitive =
+                CPLTestBool(CPLGetConfigOption("OGR_SQL_LIKE_AS_ILIKE", "FALSE"));
             poRet->int_value = swq_test_like(sub_node_values[0]->string_value,
                                              sub_node_values[1]->string_value,
-                                             chEscape);
+                                             chEscape, bInsensitive);
+            break;
+          }
+
+          case SWQ_ILIKE:
+          {
+            char chEscape = '\0';
+            if( node->nSubExprCount == 3 )
+                chEscape = sub_node_values[2]->string_value[0];
+            poRet->int_value = swq_test_like(sub_node_values[0]->string_value,
+                                             sub_node_values[1]->string_value,
+                                             chEscape, true);
             break;
           }
 
@@ -1147,6 +1166,7 @@ swq_field_type SWQGeneralChecker( swq_expr_node *poNode,
         break;
 
       case SWQ_LIKE:
+      case SWQ_ILIKE:
         if( !SWQCheckSubExprAreNotGeometries(poNode) )
             return SWQ_ERROR;
         eRetType = SWQ_BOOLEAN;
@@ -1162,12 +1182,12 @@ swq_field_type SWQGeneralChecker( swq_expr_node *poNode,
             eRetType = SWQ_STRING;
             eArgType = SWQ_STRING;
         }
-        else if( poNode->papoSubExpr[0]->field_type == SWQ_FLOAT )
+        else if( poNode->papoSubExpr[0]->field_type == SWQ_FLOAT || poNode->papoSubExpr[1]->field_type == SWQ_FLOAT )
         {
             eRetType = SWQ_FLOAT;
             eArgType = SWQ_FLOAT;
         }
-        else if( poNode->papoSubExpr[0]->field_type == SWQ_INTEGER64 )
+        else if( poNode->papoSubExpr[0]->field_type == SWQ_INTEGER64 || poNode->papoSubExpr[1]->field_type == SWQ_INTEGER64 )
         {
             eRetType = SWQ_INTEGER64;
             eArgType = SWQ_INTEGER64;
@@ -1186,12 +1206,12 @@ swq_field_type SWQGeneralChecker( swq_expr_node *poNode,
         if( !SWQCheckSubExprAreNotGeometries(poNode) )
             return SWQ_ERROR;
         SWQAutoPromoteIntegerToInteger64OrFloat( poNode );
-        if( poNode->papoSubExpr[0]->field_type == SWQ_FLOAT )
+        if( poNode->papoSubExpr[0]->field_type == SWQ_FLOAT || poNode->papoSubExpr[1]->field_type == SWQ_FLOAT )
         {
             eRetType = SWQ_FLOAT;
             eArgType = SWQ_FLOAT;
         }
-        else if( poNode->papoSubExpr[0]->field_type == SWQ_INTEGER64 )
+        else if( poNode->papoSubExpr[0]->field_type == SWQ_INTEGER64 || poNode->papoSubExpr[1]->field_type == SWQ_INTEGER64 )
         {
             eRetType = SWQ_INTEGER64;
             eArgType = SWQ_INTEGER64;

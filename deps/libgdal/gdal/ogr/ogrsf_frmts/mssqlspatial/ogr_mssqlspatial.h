@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mssqlspatial.h 74bf9367d33c608de344cc32a57a9ca924e36191 2019-03-31 20:45:06 +0200 Tamas Szekeres $
+ * $Id: ogr_mssqlspatial.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  MSSQL Spatial driver
  * Purpose:  Definition of classes for OGR MSSQL Spatial driver.
@@ -273,7 +273,7 @@ public:
 /*                             OGRMSSQLSpatialLayer                     */
 /************************************************************************/
 
-class OGRMSSQLSpatialLayer : public OGRLayer
+class OGRMSSQLSpatialLayer CPL_NON_FINAL: public OGRLayer
 {
     protected:
     OGRFeatureDefn     *poFeatureDefn = nullptr;
@@ -612,10 +612,10 @@ public:
 };
 
 /************************************************************************/
-/*                             OGRODBCDriver                            */
+/*                        OGRMSSQLSpatialDriver                         */
 /************************************************************************/
 
-class OGRMSSQLSpatialDriver : public OGRSFDriver
+class OGRMSSQLSpatialDriver final: public OGRSFDriver
 {
   public:
     virtual ~OGRMSSQLSpatialDriver();

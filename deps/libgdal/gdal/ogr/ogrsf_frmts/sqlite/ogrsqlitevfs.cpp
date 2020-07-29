@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements SQLite VFS
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
 
  ******************************************************************************
- * Copyright (c) 2011-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@
 #include "cpl_vsi.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqlitevfs.cpp 722bc4c4c4f6ec3494bb2e4ee96b8742d72ac4c5 2018-02-14 22:51:15Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrsqlitevfs.cpp e665ed544d2c5572c03c44a7327d8b284c03d86b 2019-08-15 22:13:38 +0200 Even Rouault $")
 
 #ifdef DEBUG_IO
 # define DEBUG_ONLY
@@ -479,7 +479,9 @@ sqlite3_vfs* OGRSQLiteCreateVFS(pfnNotifyFileOpenedType pfn, void* pfnUserData)
 
     OGRSQLiteVFSAppDataStruct* pVFSAppData =
         (OGRSQLiteVFSAppDataStruct*) CPLCalloc(1, sizeof(OGRSQLiteVFSAppDataStruct));
-    snprintf(pVFSAppData->szVFSName, sizeof(pVFSAppData->szVFSName), "OGRSQLITEVFS_%p", pVFSAppData);
+    char szPtr[32];
+    snprintf(szPtr, sizeof(szPtr), "%p", pVFSAppData);
+    snprintf(pVFSAppData->szVFSName, sizeof(pVFSAppData->szVFSName), "OGRSQLITEVFS_%s", szPtr);
     pVFSAppData->pDefaultVFS = pDefaultVFS;
     pVFSAppData->pfn = pfn;
     pVFSAppData->pfnUserData = pfnUserData;

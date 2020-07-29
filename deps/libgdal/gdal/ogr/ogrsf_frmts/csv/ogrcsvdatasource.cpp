@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,13 +47,13 @@
 #include "ogreditablelayer.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrcsvdatasource.cpp 981af424642a34de2baf939f0515beeba38593a5 2018-07-10 13:45:02 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcsvdatasource.cpp 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     OGRCSVEditableLayerSynchronizer                  */
 /************************************************************************/
 
-class OGRCSVEditableLayerSynchronizer : public IOGREditableLayerSynchronizer
+class OGRCSVEditableLayerSynchronizer final: public IOGREditableLayerSynchronizer
 {
     OGRCSVLayer *m_poCSVLayer;
     char        **m_papszOpenOptions;
@@ -297,7 +297,7 @@ OGRErr OGRCSVEditableLayerSynchronizer::EditableSyncToDisk(
 /*                        OGRCSVEditableLayer                           */
 /************************************************************************/
 
-class OGRCSVEditableLayer: public OGREditableLayer
+class OGRCSVEditableLayer final: public OGREditableLayer
 {
     std::set<CPLString> m_oSetFields;
 

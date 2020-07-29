@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_xplane_reader.h 29dcefd34892121afac0b7b978757ee6daad614a 2018-05-03 15:55:54 +0200 Even Rouault $
+ * $Id: ogr_xplane_reader.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  X-Plane aeronautical data reader
  * Purpose:  Definition of classes for OGR X-Plane aeronautical data reader.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

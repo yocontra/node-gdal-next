@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@
 #include "gdal_pam.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: rdataset.cpp ab2f960bc12d840c903075cf129e0efd9431dd9b 2019-02-02 12:16:13 +0100 Thomas Bonfort $")
+CPL_CVSID("$Id: rdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 // constexpr int R_NILSXP = 0;
 constexpr int R_LISTSXP = 2;
@@ -602,7 +602,7 @@ void GDALRegister_R()
     poDriver->SetDescription("R");
     poDriver->SetMetadataItem(GDAL_DCAP_RASTER, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "R Object Data Store");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_r.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/r.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "rda");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES, "Float32");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONOPTIONLIST,

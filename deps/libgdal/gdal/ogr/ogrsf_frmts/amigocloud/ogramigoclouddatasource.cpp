@@ -31,7 +31,7 @@
 #include "ogrgeojsonreader.h"
 #include <sstream>
 
-CPL_CVSID("$Id: ogramigoclouddatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogramigoclouddatasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 CPLString OGRAMIGOCLOUDGetOptionValue(const char* pszFilename, const char* pszOptionName);
 
@@ -154,7 +154,6 @@ bool OGRAmigoCloudDataSource::ListDatasets()
         return false;
     }
 
-    if( result != nullptr )
     {
         auto type = json_object_get_type(result);
         if(type == json_type_object)
@@ -289,9 +288,9 @@ const char* OGRAmigoCloudDataSource::GetAPIURL() const
         return pszAPIURL;
 
     else if( bUseHTTPS )
-        return CPLSPrintf("https://www.amigocloud.com/api/v1");
+        return CPLSPrintf("https://app.amigocloud.com/api/v1");
     else
-        return CPLSPrintf("http://www.amigocloud.com/api/v1");
+        return CPLSPrintf("http://app.amigocloud.com/api/v1");
 }
 
 /************************************************************************/
@@ -559,7 +558,7 @@ bool OGRAmigoCloudDataSource::waitForJobToFinish(const char* jobId)
             return false;
         }
 
-        if (result != nullptr) {
+        {
             int type = json_object_get_type(result);
             if (type == json_type_object) {
                 json_object *poStatus = CPL_json_object_object_get(result, "status");

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Brian Case
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "ogr_p.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrlibkmlfield.cpp a4652d3daf2b2735f2976540e22c795deb5bbc62 2018-08-02 22:49:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmlfield.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 using kmldom::CameraPtr;
 using kmldom::DataPtr;

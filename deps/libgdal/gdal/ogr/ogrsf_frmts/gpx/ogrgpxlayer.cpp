@@ -2,10 +2,10 @@
  *
  * Project:  GPX Translator
  * Purpose:  Implements OGRGPXLayer class.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrgpxlayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgpxlayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 constexpr int FLD_TRACK_FID = 0;
 constexpr int FLD_TRACK_SEG_ID = 1;
@@ -357,7 +357,7 @@ OGRGPXLayer::OGRGPXLayer( const char* pszFilename,
     else
         fpGPX = nullptr;
 
-    ResetReading();
+    OGRGPXLayer::ResetReading();
 }
 
 /************************************************************************/
@@ -1360,7 +1360,7 @@ void OGRGPXLayer::WriteFeatureAttributes( OGRFeature *poFeatureIn, int nIdentLev
                     }
 
                     /* Remove leading spaces for a numeric field */
-                    if (poFieldDefn->GetType() == OFTInteger || poFieldDefn->GetType() == OFTReal)
+                    if (poFieldDefn->GetType() == OFTInteger)
                     {
                         while( *pszRaw == ' ' )
                             pszRaw++;

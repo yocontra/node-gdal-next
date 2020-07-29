@@ -11,6 +11,8 @@
 			"sources": [
 				"./gdal/apps/ogr2ogr_lib.cpp",
 				"./gdal/apps/gdalbuildvrt_lib.cpp",
+        "./gdal/apps/gdal_translate_lib.cpp",
+        "./gdal/apps/gdalwarp_lib.cpp",
 				"./gdal/apps/commonutils.cpp",
 				"./gdal/frmts/gdalallregister.cpp",
 				"./gdal/frmts/derived/deriveddataset.cpp",
@@ -174,6 +176,7 @@
 				"./gdal/port/cpl_aws.cpp",
 				"./gdal/port/cpl_atomic_ops.cpp",
 				"./gdal/port/cpl_alibaba_oss.cpp",
+        "./gdal/port/cpl_vax.cpp",
 
 				'<!@(python ../glob-files.py "./gdal/gnm/*.cpp")',
 				'<!@(python ../glob-files.py "./gdal/frmts/jpeg/libjpeg/*.c")'

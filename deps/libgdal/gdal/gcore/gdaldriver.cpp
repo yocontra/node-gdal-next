@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, 2000, Frank Warmerdam
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -46,7 +46,7 @@
 #include "ogr_core.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdaldriver.cpp 74cca99362f3810b39913ba1b7ec423d59f30940 2018-09-20 21:08:22 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldriver.cpp 2fa8003283f1060a504fe8b7d76d3c179e21eca8 2020-05-22 00:25:05 +0200 Even Rouault $")
 
 CPL_C_START
 // TODO(schwehr): Why is this not in a header?
@@ -60,11 +60,14 @@ CPL_C_END
 GDALDriver::GDALDriver() :
     pfnOpen(nullptr),
     pfnCreate(nullptr),
+    pfnCreateEx(nullptr),
+    pfnCreateMultiDimensional(nullptr),
     pfnDelete(nullptr),
     pfnCreateCopy(nullptr),
     pDriverData(nullptr),
     pfnUnloadDriver(nullptr),
     pfnIdentify(nullptr),
+    pfnIdentifyEx(nullptr),
     pfnRename(nullptr),
     pfnCopyFiles(nullptr),
     pfnOpenWithDriverArg(nullptr),
@@ -167,7 +170,7 @@ GDALDataset * GDALDriver::Create( const char * pszFilename,
 /* -------------------------------------------------------------------- */
 /*      Does this format support creation.                              */
 /* -------------------------------------------------------------------- */
-    if( pfnCreate == nullptr && pfnCreateVectorOnly == nullptr )
+    if( pfnCreate == nullptr && pfnCreateEx == nullptr && pfnCreateVectorOnly == nullptr )
     {
         CPLError( CE_Failure, CPLE_NotSupported,
                   "GDALDriver::Create() ... no create method implemented"
@@ -245,9 +248,15 @@ GDALDataset * GDALDriver::Create( const char * pszFilename,
         // This is somewhat messy. Ideally there should be a way for the
         // driver to overload the default behaviour
         if( !EQUAL(GetDescription(), "MEM") &&
-            !EQUAL(GetDescription(), "Memory") )
+            !EQUAL(GetDescription(), "Memory") &&
+            // ogr2ogr -f PostgreSQL might reach the Delete method of the
+            // PostgisRaster dirver which is undesirable
+            !EQUAL(GetDescription(), "PostgreSQL") )
         {
-            QuietDelete( pszFilename );
+            char** papszAllowedDrivers = nullptr;
+            papszAllowedDrivers = CSLAddString(papszAllowedDrivers, GetDescription() );
+            QuietDelete( pszFilename, papszAllowedDrivers );
+            CSLDestroy( papszAllowedDrivers );
         }
     }
 
@@ -267,7 +276,12 @@ GDALDataset * GDALDriver::Create( const char * pszFilename,
               papszOptions );
 
     GDALDataset *poDS = nullptr;
-    if( pfnCreate != nullptr )
+    if( pfnCreateEx != nullptr )
+    {
+        poDS = pfnCreateEx( this, pszFilename, nXSize, nYSize, nBands, eType,
+                          papszOptions );
+    }
+    else if( pfnCreate != nullptr )
     {
         poDS = pfnCreate( pszFilename, nXSize, nYSize, nBands, eType,
                           papszOptions );
@@ -316,6 +330,129 @@ GDALCreate( GDALDriverH hDriver, const char * pszFilename,
                                                     eBandType,
                                                     const_cast<char**>(papszOptions) );
 }
+
+/************************************************************************/
+/*                       CreateMultiDimensional()                       */
+/************************************************************************/
+
+/**
+ * \brief Create a new multidimensioanl dataset with this driver.
+ * 
+ * Only drivers that advertize the GDAL_DCAP_MULTIDIM_RASTER capability and
+ * implement the pfnCreateMultiDimensional method might return a non nullptr
+ * GDALDataset.
+ *
+ * This is the same as the C function GDALCreateMultiDimensional().
+ * 
+ * @param pszFilename  the name of the dataset to create.  UTF-8 encoded.
+ * @param papszRootGroupOptions driver specific options regarding the creation
+ *                              of the root group. Might be nullptr.
+ * @param papszOptions driver specific options regarding the creation
+ *                     of the dataset. Might be nullptr.
+ * @return a new dataset, or nullptr in case of failure.
+ *
+ * @since GDAL 3.1
+ */
+
+GDALDataset * GDALDriver::CreateMultiDimensional( const char * pszFilename,
+                                                  CSLConstList papszRootGroupOptions,
+                                                  CSLConstList papszOptions )
+
+{
+/* -------------------------------------------------------------------- */
+/*      Does this format support creation.                              */
+/* -------------------------------------------------------------------- */
+    if( pfnCreateMultiDimensional== nullptr )
+    {
+        CPLError( CE_Failure, CPLE_NotSupported,
+                  "GDALDriver::CreateMultiDimensional() ... "
+                  "no CreateMultiDimensional method implemented "
+                  "for this format." );
+
+        return nullptr;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Validate creation options.                                      */
+/* -------------------------------------------------------------------- */
+    if( CPLTestBool(
+            CPLGetConfigOption("GDAL_VALIDATE_CREATION_OPTIONS", "YES") ) )
+    {
+        const char *pszOptionList = GetMetadataItem( GDAL_DMD_MULTIDIM_DATASET_CREATIONOPTIONLIST );
+        CPLString osDriver;
+        osDriver.Printf("driver %s", GetDescription());
+        GDALValidateOptions( pszOptionList, papszOptions,
+                            "creation option", osDriver );
+    }
+
+    auto poDstDS = pfnCreateMultiDimensional(pszFilename,
+                                     papszRootGroupOptions,
+                                     papszOptions);
+
+    if( poDstDS != nullptr )
+    {
+        if( poDstDS->GetDescription() == nullptr
+            || strlen(poDstDS->GetDescription()) == 0 )
+            poDstDS->SetDescription( pszFilename );
+
+        if( poDstDS->poDriver == nullptr )
+            poDstDS->poDriver = this;
+    }
+
+    return poDstDS;
+}
+
+/************************************************************************/
+/*                       GDALCreateMultiDimensional()                   */
+/************************************************************************/
+
+/** \brief Create a new multidimensioanl dataset with this driver.
+ * 
+ * This is the same as the C++ method GDALDriver::CreateMultiDimensional().
+ */
+GDALDatasetH GDALCreateMultiDimensional( GDALDriverH hDriver,
+                                                 const char * pszName,
+                                                 CSLConstList papszRootGroupOptions,
+                                                 CSLConstList papszOptions )
+{
+    VALIDATE_POINTER1( hDriver, __func__, nullptr );
+    VALIDATE_POINTER1( pszName, __func__, nullptr );
+    return GDALDataset::ToHandle(
+        GDALDriver::FromHandle(hDriver)->CreateMultiDimensional(
+            pszName, papszRootGroupOptions, papszOptions));
+}
+
+/************************************************************************/
+/*                  DefaultCreateCopyMultiDimensional()                 */
+/************************************************************************/
+
+//! @cond Doxygen_Suppress
+
+CPLErr GDALDriver::DefaultCreateCopyMultiDimensional(
+                                     GDALDataset *poSrcDS,
+                                     GDALDataset *poDstDS,
+                                     bool bStrict,
+                                     CSLConstList /*papszOptions*/,
+                                     GDALProgressFunc pfnProgress,
+                                     void * pProgressData )
+{
+    if( pfnProgress == nullptr )
+        pfnProgress = GDALDummyProgress;
+
+    auto poSrcRG = poSrcDS->GetRootGroup();
+    if( !poSrcRG )
+        return CE_Failure;
+    auto poDstRG = poDstDS->GetRootGroup();
+    if( !poDstRG )
+        return CE_Failure;
+    GUInt64 nCurCost = 0;
+    return poDstRG->CopyFrom(poDstRG, poSrcDS, poSrcRG, bStrict,
+                             nCurCost, poSrcRG->GetTotalCopyCost(),
+                             pfnProgress, pProgressData) ?
+                CE_None : CE_Failure;
+}
+//! @endcond
+
 
 /************************************************************************/
 /*                          DefaultCopyMasks()                          */
@@ -383,6 +520,7 @@ CPLErr GDALDriver::DefaultCopyMasks( GDALDataset *poSrcDS,
                 eErr = poDstBand->CreateMaskBand( nMaskFlags );
                 if( eErr == CE_None )
                 {
+                    // coverity[divide_by_zero]
                     void* pScaledData = GDALCreateScaledProgress(
                         double(iBandWithMask) / nTotalBandsWithMask,
                         double(iBandWithMask + 1) / nTotalBandsWithMask,
@@ -443,6 +581,31 @@ GDALDataset *GDALDriver::DefaultCreateCopy( const char * pszFilename,
         pfnProgress = GDALDummyProgress;
 
     CPLErrorReset();
+
+/* -------------------------------------------------------------------- */
+/*      Use multidimensional raster API if available.                   */
+/* -------------------------------------------------------------------- */
+    auto poSrcGroup = poSrcDS->GetRootGroup();
+    if( poSrcGroup != nullptr && GetMetadataItem(GDAL_DCAP_MULTIDIM_RASTER) )
+    {
+        auto poDstDS = std::unique_ptr<GDALDataset>(
+            CreateMultiDimensional(pszFilename,
+                                   nullptr,
+                                   papszOptions));
+        if( !poDstDS )
+            return nullptr;
+        auto poDstGroup = poDstDS->GetRootGroup();
+        if( !poDstGroup )
+            return nullptr;
+        if( DefaultCreateCopyMultiDimensional(poSrcDS,
+                                              poDstDS.get(),
+                                              CPL_TO_BOOL(bStrict),
+                                              papszOptions,
+                                              pfnProgress,
+                                              pProgressData) != CE_None )
+            return nullptr;
+        return poDstDS.release();
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Validate that we can create the output as requested.            */
@@ -864,7 +1027,10 @@ GDALDataset *GDALDriver::CreateCopy( const char * pszFilename,
         if( !EQUAL(GetDescription(), "MEM") &&
             !EQUAL(GetDescription(), "Memory") )
         {
-            QuietDelete( pszFilename );
+            char** papszAllowedDrivers = nullptr;
+            papszAllowedDrivers = CSLAddString(papszAllowedDrivers, GetDescription() );
+            QuietDelete( pszFilename, papszAllowedDrivers );
+            CSLDestroy( papszAllowedDrivers );
         }
     }
 
@@ -873,7 +1039,7 @@ GDALDataset *GDALDriver::CreateCopy( const char * pszFilename,
         CSLPartialFindString(papszOptions, "QUIET_DELETE_ON_CREATE_COPY=");
     if( iIdxQuietDeleteOnCreateCopy >= 0 )
     {
-        if( papszOptionsToDelete == nullptr )
+        //if( papszOptionsToDelete == nullptr )
             papszOptionsToDelete = CSLDuplicate(papszOptions);
         papszOptions =
             CSLRemoveStrings(papszOptionsToDelete, iIdxQuietDeleteOnCreateCopy,
@@ -1004,10 +1170,14 @@ GDALDatasetH CPL_STDCALL GDALCreateCopy( GDALDriverH hDriver,
  * using Identify().
  *
  * @param pszName the dataset name to try and delete.
+ * @param papszAllowedDrivers NULL to consider all candidate drivers, or a NULL
+ * terminated list of strings with the driver short names that must be
+ * considered.
  * @return CE_None if the dataset does not exist, or is deleted without issues.
  */
 
-CPLErr GDALDriver::QuietDelete( const char *pszName )
+CPLErr GDALDriver::QuietDelete( const char *pszName,
+                                const char *const *papszAllowedDrivers )
 
 {
     VSIStatBufL sStat;
@@ -1030,7 +1200,7 @@ CPLErr GDALDriver::QuietDelete( const char *pszName )
 
     CPLPushErrorHandler(CPLQuietErrorHandler);
     GDALDriver * const poDriver =
-        GDALDriver::FromHandle( GDALIdentifyDriver( pszName, nullptr ) );
+        GDALDriver::FromHandle( GDALIdentifyDriver( pszName, papszAllowedDrivers ) );
     CPLPopErrorHandler();
 
     if( poDriver == nullptr )
@@ -2052,7 +2222,7 @@ GDALIdentifyDriverEx( const char* pszFilename,
 
         VALIDATE_POINTER1( poDriver, "GDALIdentifyDriver", nullptr );
 
-        if( poDriver->pfnIdentify == nullptr )
+        if( poDriver->pfnIdentify == nullptr && poDriver->pfnIdentifyEx == nullptr)
         {
             continue;
         }
@@ -2070,8 +2240,16 @@ GDALIdentifyDriverEx( const char* pszFilename,
             poDriver->GetMetadataItem(GDAL_DCAP_VECTOR) == nullptr )
             continue;
 
-        if( poDriver->pfnIdentify( &oOpenInfo ) > 0 )
-            return poDriver;
+        if( poDriver->pfnIdentifyEx )
+        {
+            if( poDriver->pfnIdentifyEx( poDriver, &oOpenInfo ) > 0 )
+                return poDriver;
+        }
+        else
+        {
+            if( poDriver->pfnIdentify( &oOpenInfo ) > 0 )
+                return poDriver;
+        }
     }
 
     // Second pass: slow method.
@@ -2101,7 +2279,12 @@ GDALIdentifyDriverEx( const char* pszFilename,
             poDriver->GetMetadataItem(GDAL_DCAP_VECTOR) == nullptr )
             continue;
 
-        if( poDriver->pfnIdentify != nullptr )
+        if( poDriver->pfnIdentifyEx != nullptr )
+        {
+            if( poDriver->pfnIdentifyEx( poDriver, &oOpenInfo ) == 0 )
+                continue;
+        }
+        else if( poDriver->pfnIdentify != nullptr )
         {
             if( poDriver->pfnIdentify( &oOpenInfo ) == 0 )
                 continue;

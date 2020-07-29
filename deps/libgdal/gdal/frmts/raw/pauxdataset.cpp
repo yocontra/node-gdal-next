@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: pauxdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: pauxdataset.cpp 13897e11edeccc1ed3dc2a7a3dedb6419db4e294 2020-06-26 17:57:50 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -98,7 +98,7 @@ class PAuxDataset final: public RawDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class PAuxRasterBand : public RawRasterBand
+class PAuxRasterBand final: public RawRasterBand
 {
     CPL_DISALLOW_COPY_ASSIGN(PAuxRasterBand)
 
@@ -691,7 +691,9 @@ GDALDataset *PAuxDataset::Open( GDALOpenInfo * poOpenInfo )
 /*      At this point we should be verifying that it refers to our      */
 /*      binary file, but that is a pretty involved test.                */
 /* -------------------------------------------------------------------- */
-    const char *pszLine = CPLReadLineL( fp );
+    CPLPushErrorHandler(CPLQuietErrorHandler);
+    const char *pszLine = CPLReadLine2L( fp, 1024, nullptr );
+    CPLPopErrorHandler();
 
     CPL_IGNORE_RET_VAL(VSIFCloseL( fp ));
 
@@ -699,6 +701,7 @@ GDALDataset *PAuxDataset::Open( GDALOpenInfo * poOpenInfo )
         || (!STARTS_WITH_CI(pszLine, "AuxilaryTarget")
             && !STARTS_WITH_CI(pszLine, "AuxiliaryTarget")) )
     {
+        CPLErrorReset();
         return nullptr;
     }
 
@@ -711,7 +714,7 @@ GDALDataset *PAuxDataset::Open( GDALOpenInfo * poOpenInfo )
 /*      Load the .aux file into a string list suitable to be            */
 /*      searched with CSLFetchNameValue().                              */
 /* -------------------------------------------------------------------- */
-    poDS->papszAuxLines = CSLLoad( osAuxFilename );
+    poDS->papszAuxLines = CSLLoad2( osAuxFilename, 1024, 1024, nullptr );
     poDS->pszAuxFilename = CPLStrdup(osAuxFilename);
 
 /* -------------------------------------------------------------------- */
@@ -1112,7 +1115,7 @@ void GDALRegister_PAux()
     poDriver->SetDescription( "PAux" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "PCI .aux Labelled" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#PAux" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/paux.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Float32" );
     poDriver->SetMetadataItem(

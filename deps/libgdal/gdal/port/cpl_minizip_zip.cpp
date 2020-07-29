@@ -35,7 +35,7 @@
    Oct-2009 - Mathias Svensson - Added support for BZIP2 as compression mode (bzip2 lib is required)
    Jan-2010 - back to unzip and minizip 1.0 name scheme, with compatibility layer
 
-   Copyright (c) 2010-2018, Even Rouault <even dot rouault at mines-paris dot org>
+   Copyright (c) 2010-2018, Even Rouault <even dot rouault at spatialys.com>
 
 */
 
@@ -62,7 +62,7 @@
 #   include <errno.h>
 #endif
 
-CPL_CVSID("$Id: cpl_minizip_zip.cpp a3a3b8cb4cdded6c01884fed15c9c7799745dbc9 2019-02-15 12:44:57 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_minizip_zip.cpp edcdc5b0a57b4fab159b14180141ee42a0408830 2019-06-22 19:28:34 +0200 Even Rouault $")
 
 #ifndef VERSIONMADEBY
 # define VERSIONMADEBY   (0x0) /* platform dependent */
@@ -1484,7 +1484,8 @@ extern int ZEXPORT cpl_zipCloseFileInZipRaw (
 #endif
 
     // update Current Item crc and sizes,
-    if(compressed_size >= 0xffffffff || uncompressed_size >= 0xffffffff || zi->ci.pos_local_header >= 0xffffffff)
+    if( zi->ci.pos_zip64extrainfo ||
+        compressed_size >= 0xffffffff || uncompressed_size >= 0xffffffff || zi->ci.pos_local_header >= 0xffffffff)
     {
       /*version Made by*/
       zip64local_putValue_inmemory(zi->ci.central_header+4,45,2);

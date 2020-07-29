@@ -38,7 +38,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: byndataset.cpp 9cf37ca4b4b20ed78be7010492ebcb7be5fec0f4 2019-12-14 12:26:47 +0100 Even Rouault $")
+CPL_CVSID("$Id: byndataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 // Specification at
 // https://www.nrcan.gc.ca/sites/www.nrcan.gc.ca/files/earthsciences/pdf/gpshgrid_e.pdf
@@ -894,7 +894,7 @@ void GDALRegister_BYN()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Natural Resources Canada's Geoid" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "byn err" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_byn.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/byn.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Int16 Int32" );
 
     poDriver->pfnOpen = BYNDataset::Open;

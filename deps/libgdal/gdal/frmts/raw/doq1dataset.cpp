@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: doq1dataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: doq1dataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 static const char UTM_FORMAT[] =
     "PROJCS[\"%s / UTM zone %dN\",GEOGCS[%s,PRIMEM[\"Greenwich\",0],"
@@ -110,7 +110,7 @@ static void DOQGetDescription( GDALDataset *poDS, unsigned char *pabyData )
 /* ==================================================================== */
 /************************************************************************/
 
-class DOQ1Dataset : public RawDataset
+class DOQ1Dataset final: public RawDataset
 {
     VSILFILE    *fpImage;       // image data file.
 
@@ -410,7 +410,7 @@ void GDALRegister_DOQ1()
     poDriver->SetDescription( "DOQ1" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "USGS DOQ (Old Style)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#DOQ1" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/doq1.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = DOQ1Dataset::Open;

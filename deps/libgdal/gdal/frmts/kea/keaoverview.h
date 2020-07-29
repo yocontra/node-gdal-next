@@ -1,5 +1,5 @@
 /*
- * $Id: keaoverview.h 1dd8a744bbfec8b849371abec5cd44f729eecb03 2018-05-06 21:11:29 +0200 Even Rouault $
+ * $Id: keaoverview.h 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $
  *  keaoverview.h
  *
  *  Created by Pete Bunting on 01/08/2012.
@@ -41,7 +41,7 @@ class KEAOverview final: public KEARasterBand
     int         m_nOverviewIndex; // the index of this overview
 public:
     KEAOverview(KEADataset *pDataset, int nSrcBand, GDALAccess eAccess,
-                kealib::KEAImageIO *pImageIO, int *pRefCount,
+                kealib::KEAImageIO *pImageIO, LockedRefCount *pRefCount,
                 int nOverviewIndex, uint64_t nXSize, uint64_t nYSize );
     ~KEAOverview();
 

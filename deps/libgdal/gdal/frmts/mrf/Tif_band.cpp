@@ -45,7 +45,7 @@
 
 #include "marfa.h"
 
-CPL_CVSID("$Id: Tif_band.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: Tif_band.cpp 3f68d11104319388dc0f0c2faaf07e60198e8096 2019-10-05 11:41:37 +0200 Even Rouault $")
 
 NAMESPACE_MRF_START
 
@@ -82,7 +82,7 @@ static CPLErr CompressTIF(buf_mgr &dst, buf_mgr &src, const ILImage &img, char *
     GDALDataset *poTiff = poTiffDriver->Create(fname, img.pagesize.x, img.pagesize.y,
                                                img.pagesize.c, img.dt, papszOptions );
 
-    // Read directly to avoid double caching in GDAL
+    // Write directly to avoid double caching in GDAL
     // Unfortunately not possible for multiple bands
     if (img.pagesize.c == 1) {
         ret = poTiff->GetRasterBand(1)->WriteBlock(0,0,src.buffer);
@@ -148,23 +148,22 @@ static CPLErr DecompressTIF(buf_mgr &dst, buf_mgr &src, const ILImage &img)
 #else
     GDALDataset *poTiff = reinterpret_cast<GDALDataset*>(GDALOpen(fname, GA_ReadOnly));
 #endif
-    if (poTiff == nullptr) {
+    if (poTiff == nullptr || !poTiff->GetRasterCount()) {
         CPLError(CE_Failure,CPLE_AppDefined,
-            "MRF: TIFF, can't open page as a Tiff");
+            "MRF: Can't open page as a raster Tiff");
+        if (poTiff)
+            GDALClose(poTiff);
         VSIUnlink(fname);
         return CE_Failure;
     }
-    int nBlockXSize, nBlockYSize;
-    poTiff->GetRasterBand(1)->GetBlockSize(&nBlockXSize, &nBlockYSize);
+
     const GDALDataType eGTiffDT = poTiff->GetRasterBand(1)->GetRasterDataType();
     const int nDTSize = GDALGetDataTypeSizeBytes(eGTiffDT);
     if( poTiff->GetRasterXSize() != img.pagesize.x ||
         poTiff->GetRasterYSize() != img.pagesize.y ||
         poTiff->GetRasterCount() != img.pagesize.c ||
-        nBlockXSize != img.pagesize.x ||
-        nBlockYSize != img.pagesize.y ||
         img.dt != eGTiffDT ||
-        static_cast<vsi_l_offset>(nBlockXSize) * nBlockYSize * nDTSize * img.pagesize.c != dst.size )
+        static_cast<size_t>(img.pagesize.x) * img.pagesize.y * nDTSize * img.pagesize.c != dst.size )
     {
         CPLError(CE_Failure,CPLE_AppDefined,
             "MRF: TIFF inconsistent with MRF parameters");
@@ -174,17 +173,38 @@ static CPLErr DecompressTIF(buf_mgr &dst, buf_mgr &src, const ILImage &img)
     }
 
     CPLErr ret;
-    // Bypass the GDAL caching
-    if (img.pagesize.c == 1) {
-        ret = poTiff->GetRasterBand(1)->ReadBlock(0,0,dst.buffer);
-    } else {
-        ret = poTiff->RasterIO(GF_Read,0,0,img.pagesize.x,img.pagesize.y,
-            dst.buffer, img.pagesize.x, img.pagesize.y, img.dt, img.pagesize.c,
-            nullptr, 0,0,0
+    // Bypass the GDAL caching if single band and block size is right
+    int nBlockXSize = 0, nBlockYSize = 0;
+    poTiff->GetRasterBand(1)->GetBlockSize(&nBlockXSize, &nBlockYSize);
+
+    // Allow for TIFF blocks to be larger than MRF page size, but not in
+    // huge proportion, to avoid later attempts at allocating a lot of memory
+    if( (nBlockXSize > 4096 && nBlockXSize > img.pagesize.x) ||
+         (nBlockYSize > 4096 && nBlockYSize > img.pagesize.y) )
+    {
+        CPLError(CE_Failure,CPLE_AppDefined,
+            "MRF: TIFF block size inconsistent with MRF parameters");
+        GDALClose(poTiff);
+        VSIUnlink(fname);
+        return CE_Failure;
+    }
+
+    if (img.pagesize.c == 1 && nBlockXSize == img.pagesize.x && nBlockYSize == img.pagesize.y)
+    {
+        ret = poTiff->GetRasterBand(1)->ReadBlock(0, 0, dst.buffer);
+    }
+    else
+    {
+        ret = poTiff->RasterIO(GF_Read, 0, 0, img.pagesize.x, img.pagesize.y,
+                    dst.buffer, img.pagesize.x, img.pagesize.y,
+                    img.dt, img.pagesize.c, nullptr,
+                    nDTSize * img.pagesize.c,
+                    nDTSize * img.pagesize.c * img.pagesize.x,
+                    nDTSize
 #if GDAL_VERSION_MAJOR >= 2
-            ,nullptr
+                    , nullptr
 #endif
-            );
+        );
     }
     GDALClose(poTiff);
     VSIUnlink(fname);

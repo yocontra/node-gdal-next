@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Kevin Locke <kwl7@cornell.edu>
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gsagdataset.cpp a542b2797f15f2ed694cfcee9ff17d86b339dfee 2018-04-02 00:24:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: gsagdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -49,7 +49,7 @@ CPL_CVSID("$Id: gsagdataset.cpp a542b2797f15f2ed694cfcee9ff17d86b339dfee 2018-04
 
 class GSAGRasterBand;
 
-class GSAGDataset : public GDALPamDataset
+class GSAGDataset final: public GDALPamDataset
 {
     friend class GSAGRasterBand;
 
@@ -93,7 +93,7 @@ const size_t GSAGDataset::nMAX_HEADER_SIZE = 200;
 /* ==================================================================== */
 /************************************************************************/
 
-class GSAGRasterBand : public GDALPamRasterBand
+class GSAGRasterBand final: public GDALPamRasterBand
 {
     friend class GSAGDataset;
 
@@ -1728,7 +1728,7 @@ void GDALRegister_GSAG()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Golden Software ASCII Grid (.grd)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#GSAG" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/gsag.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "grd" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Int32 UInt32 "

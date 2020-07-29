@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: aigopen.c 4c86d24f4f400bc03425297f80fa72e62237b715 2019-03-23 23:54:29 +0100 Even Rouault $
+ * $Id: aigopen.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  Arc/Info Binary Grid Translator
  * Purpose:  Grid file access cover API for non-GDAL use.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 
 #include "aigrid.h"
 
-CPL_CVSID("$Id: aigopen.c 4c86d24f4f400bc03425297f80fa72e62237b715 2019-03-23 23:54:29 +0100 Even Rouault $")
+CPL_CVSID("$Id: aigopen.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 

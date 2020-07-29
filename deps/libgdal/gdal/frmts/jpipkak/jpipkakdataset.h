@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: jpipkakdataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: jpipkakdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  jpip read driver
  * Purpose:  GDAL bindings for JPIP.
@@ -93,7 +93,7 @@ public:
 /*                           JPIPKAKDataset                             */
 /* ==================================================================== */
 /************************************************************************/
-class JPIPKAKDataset: public GDALPamDataset
+class JPIPKAKDataset final: public GDALPamDataset
 {
 private:
     int       bNeedReinitialize;
@@ -216,7 +216,7 @@ public:
 /* ==================================================================== */
 /************************************************************************/
 
-class JPIPKAKRasterBand : public GDALPamRasterBand
+class JPIPKAKRasterBand final: public GDALPamRasterBand
 {
     friend class JPIPKAKDataset;
 
@@ -256,7 +256,7 @@ public:
 /* ==================================================================== */
 /************************************************************************/
 
-class JPIPKAKAsyncReader : public GDALAsyncReader
+class JPIPKAKAsyncReader final: public GDALAsyncReader
 {
 private:
     void *pAppBuf;

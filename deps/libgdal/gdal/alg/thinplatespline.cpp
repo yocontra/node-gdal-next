@@ -9,7 +9,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, VIZRT Inc.
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,14 +47,11 @@
 #include "cpl_error.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: thinplatespline.cpp c85c58ac781ef781cd126006d91cb5eed2dd53e2 2018-05-18 18:16:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: thinplatespline.cpp 5426fbb5939ec949739e29d63c02930a2e1788a2 2019-09-02 21:19:22 +0200 mamofejo $")
 
 //////////////////////////////////////////////////////////////////////////////
 //// vizGeorefSpline2D
 //////////////////////////////////////////////////////////////////////////////
-
-#define A(r,c) _AA[ _nof_eqs * (r) + (c) ]
-#define Ainv(r,c) _Ainv[ _nof_eqs * (r) + (c) ]
 
 // #define VIZ_GEOREF_SPLINE_DEBUG 0
 
@@ -559,19 +556,7 @@ int VizGeorefSpline2D::solve()
         return 0;
     }
 
-    double* _AA = static_cast<double *>(
-        VSI_CALLOC_VERBOSE(_nof_eqs * _nof_eqs, sizeof(double)));
-
-    if( _AA == nullptr )
-    {
-        return 0;
-    }
-
-    // Calc the values of the matrix A.
-    for( int r = 0; r < 3; r++ )
-        for( int c = 0; c < 3; c++ )
-            A(r, c) = 0.0;
-
+    GDALMatrix A(_nof_eqs, _nof_eqs);
     x_mean = 0;
     y_mean = 0;
     for( int c = 0; c < _nof_points; c++ )
@@ -614,28 +599,21 @@ int VizGeorefSpline2D::solve()
 
 #endif
 
-    double* adfRHS = static_cast<double*>(VSICalloc( _nof_eqs * _nof_vars, sizeof(double) ));
+    GDALMatrix RHS(_nof_eqs, _nof_vars);
     for( int iRHS = 0; iRHS < _nof_vars; iRHS++ )
         for( int iRow = 0; iRow < _nof_eqs; iRow++ )
-            adfRHS[iRow * _nof_vars + iRHS] = rhs[iRHS][iRow];
+            RHS(iRow, iRHS) = rhs[iRHS][iRow];
 
-    double* adfCoef = static_cast<double*>(VSICalloc( _nof_eqs * _nof_vars, sizeof(double) ));
+    GDALMatrix Coef(_nof_eqs, _nof_vars);
 
-    if( !GDALLinearSystemSolve( _nof_eqs, _nof_vars, _AA, adfRHS, adfCoef ) )
+    if( !GDALLinearSystemSolve(A, RHS, Coef ) )
     {
-        VSIFree(adfRHS);
-        VSIFree(adfCoef);
-        VSIFree(_AA);
         return 0;
     }
 
     for( int iRHS = 0; iRHS < _nof_vars; iRHS++ )
         for( int iRow = 0; iRow < _nof_eqs; iRow++ )
-            coef[iRHS][iRow] = adfCoef[iRow * _nof_vars + iRHS];
-
-    VSIFree(adfRHS);
-    VSIFree(adfCoef);
-    VSIFree(_AA);
+            coef[iRHS][iRow] = Coef(iRow, iRHS);
 
     return 4;
 }

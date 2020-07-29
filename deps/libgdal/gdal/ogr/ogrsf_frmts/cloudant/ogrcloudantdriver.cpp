@@ -2,10 +2,10 @@
  *
  * Project:  CouchDB Translator
  * Purpose:  Implements OGRCloudantDriver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,7 +28,7 @@
 
 #include "ogr_cloudant.h"
 
-CPL_CVSID("$Id: ogrcloudantdriver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrcloudantdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
 
 extern "C" void RegisterOGRCloudant();
 
@@ -112,7 +112,7 @@ void RegisterOGRCloudant()
     poDriver->SetMetadataItem( GDAL_DS_LAYER_CREATIONOPTIONLIST,
     "<LayerCreationOptionList>"
     "  <Option name='UPDATE_PERMISSIONS' type='string' description='Update permissions for the new layer.'/>"
-    "  <Option name='GEOJSON ' type='boolean' description='Whether to write documents as GeoJSON documents.' default='YES'/>"
+    "  <Option name='GEOJSON' type='boolean' description='Whether to write documents as GeoJSON documents.' default='YES'/>"
     "  <Option name='COORDINATE_PRECISION' type='int' description='Maximum number of figures after decimal separator to write in coordinates.' default='15'/>"
     "</LayerCreationOptionList>");
 

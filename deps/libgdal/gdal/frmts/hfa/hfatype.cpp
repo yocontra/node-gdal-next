@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Intergraph Corporation
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: hfatype.cpp e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $")
+CPL_CVSID("$Id: hfatype.cpp 085ace6b956265eaf2405b298048c59e7a9027cd 2019-10-19 23:19:13 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -55,8 +55,6 @@ CPL_CVSID("$Id: hfatype.cpp e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 
 HFAType::HFAType() :
     bInCompleteDefn(false),
     nBytes(0),
-    nFields(0),
-    papoFields(nullptr),
     pszTypeName(nullptr)
 {}
 
@@ -67,13 +65,6 @@ HFAType::HFAType() :
 HFAType::~HFAType()
 
 {
-    for( int i = 0; i < nFields; i++ )
-    {
-        delete papoFields[i];
-    }
-
-    CPLFree(papoFields);
-
     CPLFree(pszTypeName);
 }
 
@@ -102,18 +93,12 @@ const char *HFAType::Initialize( const char *pszInput )
     // Read the field definitions.
     while( pszInput != nullptr && *pszInput != '}' )
     {
-        HFAField *poNewField = new HFAField();
+        std::unique_ptr<HFAField> poNewField(new HFAField());
 
         pszInput = poNewField->Initialize(pszInput);
         if( pszInput != nullptr )
         {
-            papoFields = static_cast<HFAField **>(
-                CPLRealloc(papoFields, sizeof(void *) * (nFields + 1)));
-            papoFields[nFields++] = poNewField;
-        }
-        else
-        {
-            delete poNewField;
+            apoFields.emplace_back(std::move(poNewField));
         }
     }
 
@@ -162,17 +147,17 @@ bool HFAType::CompleteDefn( HFADictionary * poDict )
     // Complete each of the fields, totaling up the sizes.  This
     // isn't really accurate for object with variable sized subobjects.
     bool bRet = true;
-    for( int i = 0; i < nFields; i++ )
+    for( auto& poField: apoFields )
     {
-        if( !papoFields[i]->CompleteDefn(poDict) )
+        if( !poField->CompleteDefn(poDict) )
         {
             bRet = false;
             break;
         }
-        if( papoFields[i]->nBytes < 0 || nBytes == -1 )
+        if( poField->nBytes < 0 || nBytes == -1 )
             nBytes = -1;
-        else if( nBytes < INT_MAX - papoFields[i]->nBytes )
-            nBytes += papoFields[i]->nBytes;
+        else if( nBytes < INT_MAX - poField->nBytes )
+            nBytes += poField->nBytes;
         else
             nBytes = -1;
     }
@@ -191,9 +176,9 @@ void HFAType::Dump( FILE * fp )
     CPL_IGNORE_RET_VAL(
         VSIFPrintf(fp, "HFAType %s/%d bytes\n", pszTypeName, nBytes));
 
-    for( int i = 0; i < nFields; i++ )
+    for( auto& poField: apoFields )
     {
-        papoFields[i]->Dump(fp);
+        poField->Dump(fp);
     }
 
     CPL_IGNORE_RET_VAL(VSIFPrintf(fp, "\n"));
@@ -242,17 +227,18 @@ HFAType::SetInstValue( const char *pszFieldPath,
 
     // Find this field within this type, if possible.
     int nByteOffset = 0;
-    int iField = 0;
+    size_t iField = 0;
+    const size_t nFields = apoFields.size();
     for( ; iField < nFields && nByteOffset < nDataSize; iField++ )
     {
-        if( EQUALN(pszFieldPath, papoFields[iField]->pszFieldName, nNameLen)
-            && papoFields[iField]->pszFieldName[nNameLen] == '\0' )
+        if( EQUALN(pszFieldPath, apoFields[iField]->pszFieldName, nNameLen)
+            && apoFields[iField]->pszFieldName[nNameLen] == '\0' )
         {
             break;
         }
 
         std::set<HFAField*> oVisitedFields;
-        const int nInc = papoFields[iField]->GetInstBytes(
+        const int nInc = apoFields[iField]->GetInstBytes(
             pabyData + nByteOffset, nDataSize - nByteOffset, oVisitedFields);
 
         if( nInc <= 0 ||
@@ -269,7 +255,7 @@ HFAType::SetInstValue( const char *pszFieldPath,
         return CE_Failure;
 
     // Extract this field value, and return.
-    return papoFields[iField]->SetInstValue(pszRemainder, nArrayIndex,
+    return apoFields[iField]->SetInstValue(pszRemainder, nArrayIndex,
                                             pabyData + nByteOffset,
                                             nDataOffset + nByteOffset,
                                             nDataSize - nByteOffset,
@@ -319,17 +305,18 @@ HFAType::GetInstCount( const char *pszFieldPath,
 
     // Find this field within this type, if possible.
     int nByteOffset = 0;
-    int iField = 0;
+    size_t iField = 0;
+    const size_t nFields = apoFields.size();
     for( ; iField < nFields && nByteOffset < nDataSize; iField++ )
     {
-        if( EQUALN(pszFieldPath, papoFields[iField]->pszFieldName,nNameLen)
-            && papoFields[iField]->pszFieldName[nNameLen] == '\0' )
+        if( EQUALN(pszFieldPath, apoFields[iField]->pszFieldName,nNameLen)
+            && apoFields[iField]->pszFieldName[nNameLen] == '\0' )
         {
             break;
         }
 
         std::set<HFAField*> oVisitedFields;
-        const int nInc = papoFields[iField]->GetInstBytes(
+        const int nInc = apoFields[iField]->GetInstBytes(
             pabyData + nByteOffset, nDataSize - nByteOffset, oVisitedFields);
 
         if( nInc <= 0 || nByteOffset > INT_MAX - nInc )
@@ -345,7 +332,7 @@ HFAType::GetInstCount( const char *pszFieldPath,
         return -1;
 
     // Extract this field value, and return.
-    return papoFields[iField]->GetInstCount(pabyData + nByteOffset,
+    return apoFields[iField]->GetInstCount(pabyData + nByteOffset,
                                             nDataSize - nByteOffset);
 }
 
@@ -412,17 +399,18 @@ HFAType::ExtractInstValue( const char *pszFieldPath,
 
     // Find this field within this type, if possible.
     int nByteOffset = 0;
-    int iField = 0;
+    size_t iField = 0;
+    const size_t nFields = apoFields.size();
     for( ; iField < nFields && nByteOffset < nDataSize; iField++ )
     {
-        if( EQUALN(pszFieldPath, papoFields[iField]->pszFieldName, nNameLen)
-            && papoFields[iField]->pszFieldName[nNameLen] == '\0' )
+        if( EQUALN(pszFieldPath, apoFields[iField]->pszFieldName, nNameLen)
+            && apoFields[iField]->pszFieldName[nNameLen] == '\0' )
         {
             break;
         }
 
         std::set<HFAField*> oVisitedFields;
-        const int nInc = papoFields[iField]->GetInstBytes(
+        const int nInc = apoFields[iField]->GetInstBytes(
             pabyData + nByteOffset, nDataSize - nByteOffset,
             oVisitedFields);
 
@@ -439,7 +427,7 @@ HFAType::ExtractInstValue( const char *pszFieldPath,
         return false;
 
     // Extract this field value, and return.
-    return papoFields[iField]->
+    return apoFields[iField]->
         ExtractInstValue(pszRemainder, nArrayIndex,
                          pabyData + nByteOffset,
                          nDataOffset + nByteOffset,
@@ -457,9 +445,10 @@ void HFAType::DumpInstValue( FILE *fpOut,
                              int nDataSize, const char *pszPrefix ) const
 
 {
-    for( int iField = 0; iField < nFields && nDataSize > 0; iField++ )
+    const size_t nFields = apoFields.size();
+    for( size_t iField = 0; iField < nFields && nDataSize > 0; iField++ )
     {
-        HFAField *poField = papoFields[iField];
+        auto& poField = apoFields[iField];
 
         poField->DumpInstValue(fpOut, pabyData, nDataOffset,
                                nDataSize, pszPrefix);
@@ -493,10 +482,10 @@ int HFAType::GetInstBytes( GByte *pabyData, int nDataSize,
         return nBytes;
 
     int nTotal = 0;
-
-    for( int iField = 0; iField < nFields && nTotal < nDataSize; iField++ )
+    const size_t nFields = apoFields.size();
+    for( size_t iField = 0; iField < nFields && nTotal < nDataSize; iField++ )
     {
-        HFAField *poField = papoFields[iField];
+        auto& poField = apoFields[iField];
 
         const int nInstBytes =
             poField->GetInstBytes(pabyData, nDataSize - nTotal, oVisitedFields);

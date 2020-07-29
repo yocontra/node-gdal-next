@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: gifabstractdataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: gifabstractdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  GIF Driver
  * Purpose:  GIF Abstract Dataset
- * Author:   Even Rouault <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault <even dot rouault at spatialys.com>
  *
  ****************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,7 +42,7 @@ CPL_C_END
 /* ==================================================================== */
 /************************************************************************/
 
-class GIFAbstractDataset : public GDALPamDataset
+class GIFAbstractDataset CPL_NON_FINAL: public GDALPamDataset
 {
   protected:
     friend class    GIFAbstractRasterBand;
@@ -102,7 +102,7 @@ class GIFAbstractDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class GIFAbstractRasterBand : public GDALPamRasterBand
+class GIFAbstractRasterBand CPL_NON_FINAL: public GDALPamRasterBand
 {
   protected:
     SavedImage  *psImage;

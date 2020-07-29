@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "ogr_pg.h"
 
-CPL_CVSID("$Id: ogrpgresultlayer.cpp b2447274e34c713aa4873f1561ebd9daa6b2e8ad 2019-07-22 17:29:09 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgresultlayer.cpp 66ac31a48902247bbf0f60205d975e17b764a749 2019-07-22 17:29:09 +0200 Even Rouault $")
 
 #define PQexec this_is_an_error
 

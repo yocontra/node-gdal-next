@@ -2,10 +2,10 @@
  *
  * Project:  GDAL WEBP Driver
  * Purpose:  Implement GDAL WEBP Support based on libwebp
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 
 #include "webp_headers.h"
 
-CPL_CVSID("$Id: webpdataset.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04-20 20:33:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: webpdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -42,7 +42,7 @@ CPL_CVSID("$Id: webpdataset.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04
 
 class WEBPRasterBand;
 
-class WEBPDataset : public GDALPamDataset
+class WEBPDataset final: public GDALPamDataset
 {
     friend class WEBPRasterBand;
 
@@ -83,7 +83,7 @@ class WEBPDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class WEBPRasterBand : public GDALPamRasterBand
+class WEBPRasterBand final: public GDALPamRasterBand
 {
     friend class WEBPDataset;
 
@@ -874,7 +874,7 @@ void GDALRegister_WEBP()
     poDriver->SetDescription( "WEBP" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "WEBP" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_webp.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/webp.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "webp" );
     poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/webp" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );

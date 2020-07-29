@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vsil_target.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: vsil_target.h b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $
  *
  * Project:  JPEG-2000
  * Purpose:  Implements VSI*L based writer.
@@ -42,7 +42,7 @@ class vsil_target : public kdu_compressed_target {
 
 public:
     vsil_target() { file = nullptr; }
-    ~vsil_target() { close(); }
+    ~vsil_target() { vsil_target::close(); }
 
     void open(const char *fname, const char *access )
         {

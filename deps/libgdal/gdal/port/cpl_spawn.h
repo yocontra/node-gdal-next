@@ -1,12 +1,12 @@
 /**********************************************************************
- * $Id: cpl_spawn.h f5361e0be8e2ae819dde996e6c6aa5985b8fefec 2018-04-02 15:11:21 +0200 Even Rouault $
+ * $Id: cpl_spawn.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement CPLSystem().
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -2,10 +2,10 @@
  *
  * Project:  OGR
  * Purpose:  Geo-computations
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 #include "cpl_port.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: ogr_geo_utils.cpp ca96ce2460d05900411c3d00e212d00dae8d62db 2018-09-05 10:11:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_geo_utils.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 constexpr double RAD2METER = (180.0 / M_PI) * 60.0 * 1852.0;
 constexpr double METER2RAD = 1.0 / RAD2METER;

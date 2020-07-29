@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,7 +42,7 @@
 #include "cpl_multiproc.h"
 #include "gdal_csv.h"
 
-CPL_CVSID("$Id: cpl_csv.cpp 73308f342a9bdb6163f66b13c5249dfa9736a3f0 2018-06-14 21:00:53 -0700 Kurt Schwehr $")
+CPL_CVSID("$Id: cpl_csv.cpp cb59cbc877cc671877362c711b73edf9f855fdc2 2020-01-30 00:45:57 +0100 Even Rouault $")
 
 /* ==================================================================== */
 /*      The CSVTable is a persistent set of info about an open CSV      */
@@ -274,35 +274,17 @@ void CSVDeaccess( const char * pszFilename )
 /*      semantics.                                                      */
 /************************************************************************/
 
-static char **CSVSplitLine( CSVTable* psTable,
+static char **CSVSplitLine( CSVTable*,
                             const char *pszString, char chDelimiter )
 
 {
-
-    char *pszToken = static_cast<char *>( VSI_CALLOC_VERBOSE( 10, 1 ) );
-    if( pszToken == nullptr )
-        return nullptr;
-
-    int nTokenMax = 10;
-    char **papszRetList = nullptr;
-    int nListSize = 0;
-    int nListAlloc = 0;
-    if( psTable )
-    {
-        papszRetList = static_cast<char**>(
-            VSI_CALLOC_VERBOSE( psTable->nFields + 1, sizeof(char*) ));
-        if( papszRetList == nullptr )
-        {
-            VSIFree(pszToken);
-            return nullptr;
-        }
-        nListAlloc = psTable->nFields;
-    }
+    std::string osToken;
+    CPLStringList aosList;
 
     while( pszString != nullptr && *pszString != '\0' )
     {
         bool bInString = false;
-        int nTokenLen = 0;
+        osToken.clear();
 
         /* Try to find the next delimiter, marking end of token */
         for( ; *pszString != '\0'; pszString++ )
@@ -328,72 +310,21 @@ static char **CSVSplitLine( CSVTable* psTable,
                 }
             }
 
-            if( nTokenLen >= nTokenMax-2 )
-            {
-                nTokenMax = nTokenMax * 2 + 10;
-                char* pszTokenNew = static_cast<char *>(
-                    VSI_REALLOC_VERBOSE( pszToken, nTokenMax ) );
-                if( pszTokenNew == nullptr )
-                {
-                    VSIFree(pszToken);
-                    CSLDestroy(papszRetList);
-                    return nullptr;
-                }
-                pszToken = pszTokenNew;
-            }
-
-            pszToken[nTokenLen] = *pszString;
-            nTokenLen++;
+            osToken += *pszString;
         }
-
-        pszToken[nTokenLen] = '\0';
-        if( nListSize + 1 >= nListAlloc )
-        {
-            nListAlloc = 10 + 2 * nListAlloc;
-            char** papszRetListNew = static_cast<char**>(
-                VSI_REALLOC_VERBOSE(papszRetList,
-                                    (nListAlloc + 1) * sizeof(char*)));
-            if( papszRetListNew == nullptr )
-            {
-                CSLDestroy(papszRetList);
-                VSIFree(pszToken);
-                return nullptr;
-            }
-            papszRetList = papszRetListNew;
-        }
-
-        papszRetList[nListSize] = VSI_STRDUP_VERBOSE(pszToken);
-        if( papszRetList[nListSize] == nullptr )
-        {
-            CSLDestroy(papszRetList);
-            VSIFree(pszToken);
-            return nullptr;
-        }
-        nListSize ++;
-        papszRetList[nListSize] = nullptr;
-
+        aosList.AddString(osToken.c_str());
 
         /* If the last token is an empty token, then we have to catch
          * it now, otherwise we won't reenter the loop and it will be lost.
          */
         if( *pszString == '\0' && *(pszString-1) == chDelimiter )
         {
-            papszRetList[nListSize] = VSI_STRDUP_VERBOSE("");
-            if( papszRetList[nListSize] == nullptr )
-            {
-                CSLDestroy(papszRetList);
-                VSIFree(pszToken);
-                return nullptr;
-            }
-            nListSize ++;
-            papszRetList[nListSize] = nullptr;
+            aosList.AddString("");
             break;
         }
     }
 
-    VSIFree( pszToken );
-
-    return papszRetList;
+    return aosList.StealList();
 }
 
 /************************************************************************/

@@ -33,7 +33,7 @@
 #include "ogr_p.h"
 #include "gmlutils.h"
 
-CPL_CVSID("$Id: ogrcswdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrcswdataset.cpp 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRCSW();
 
@@ -43,7 +43,7 @@ extern "C" void RegisterOGRCSW();
 
 class OGRCSWDataSource;
 
-class OGRCSWLayer : public OGRLayer
+class OGRCSWLayer final: public OGRLayer
 {
     OGRCSWDataSource*   poDS;
     OGRFeatureDefn*     poFeatureDefn;
@@ -84,7 +84,7 @@ class OGRCSWLayer : public OGRLayer
 /*                           OGRCSWDataSource                           */
 /************************************************************************/
 
-class OGRCSWDataSource : public OGRDataSource
+class OGRCSWDataSource final: public OGRDataSource
 {
     char*               pszName;
     CPLString           osBaseURL;

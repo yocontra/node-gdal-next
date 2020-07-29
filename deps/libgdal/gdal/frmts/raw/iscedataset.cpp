@@ -30,7 +30,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: iscedataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: iscedataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 static const char * const apszISCE2GDALDatatypes[] = {
     "BYTE:Byte",
@@ -936,7 +936,7 @@ void GDALRegister_ISCE()
 
     poDriver->SetDescription( "ISCE" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ISCE raster" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#ISCE" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/isce.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 Int32 Int64 Float32"
                                " Float64 CInt16 CInt64 CFloat32 "

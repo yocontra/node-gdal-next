@@ -8,6 +8,7 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/frmts/gtiff/gt_jpeg_copy.cpp",
+        "../gdal/frmts/gtiff/cogdriver.cpp",
 				"../gdal/frmts/gtiff/libtiff/tif_ojpeg.c",
 				"../gdal/frmts/gtiff/libtiff/tif_dirwrite.c",
 				"../gdal/frmts/gtiff/libtiff/tif_tile.c",

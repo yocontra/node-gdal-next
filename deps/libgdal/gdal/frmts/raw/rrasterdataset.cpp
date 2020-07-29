@@ -39,7 +39,7 @@
 #include <limits>
 #include <memory>
 
-CPL_CVSID("$Id: rrasterdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: rrasterdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -886,7 +886,7 @@ CPLErr RRASTERDataset::_SetProjection( const char *pszSRS )
     if( GetAccess() != GA_Update )
     {
         CPLError(CE_Failure, CPLE_NotSupported,
-                 "Cannot set prejection on a read-only dataset");
+                 "Cannot set projection on a read-only dataset");
         return CE_Failure;
     }
 
@@ -1559,7 +1559,7 @@ void GDALRegister_RRASTER()
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "grd" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "R Raster" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#RRASTER" );
+                               "drivers/raster/rraster.html" );
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES,
                               "Byte Int16 UInt16 Int32 UInt32 Float32 Float64");
 

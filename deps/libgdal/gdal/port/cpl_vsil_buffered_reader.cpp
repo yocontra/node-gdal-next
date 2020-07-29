@@ -2,10 +2,10 @@
  *
  * Project:  VSI Virtual File System
  * Purpose:  Implementation of buffered reader IO functions.
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2010-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@
 
 constexpr int MAX_BUFFER_SIZE = 65536;
 
-CPL_CVSID("$Id: cpl_vsil_buffered_reader.cpp d57006d94d94f8d365a20cbf14a0241f906f1706 2018-07-25 18:30:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_buffered_reader.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 class VSIBufferedReaderHandle final : public VSIVirtualHandle
 {

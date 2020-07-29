@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_citation.h 028edae15c93a64d26d691b7c3b45bf141baee2f 2018-05-23 17:44:17 +0200 Even Rouault $
+ * $Id: gt_citation.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implements special parsing of Imagine citation strings, and
@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2008, Xiuguang Zhou (ESRI)
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sde.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogr_sde.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR SDE driver.
@@ -51,7 +51,7 @@
 
 class OGRSDEDataSource;
 
-class OGRSDELayer : public OGRLayer
+class OGRSDELayer final: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -155,7 +155,7 @@ class OGRSDELayer : public OGRLayer
 /************************************************************************/
 /*                           OGRSDEDataSource                            */
 /************************************************************************/
-class OGRSDEDataSource : public OGRDataSource
+class OGRSDEDataSource final: public OGRDataSource
 {
     OGRSDELayer        **papoLayers;
     int                 nLayers;
@@ -218,7 +218,7 @@ class OGRSDEDataSource : public OGRDataSource
 /*                             OGRSDEDriver                              */
 /************************************************************************/
 
-class OGRSDEDriver : public OGRSFDriver
+class OGRSDEDriver final: public OGRSFDriver
 {
   public:
     virtual ~OGRSDEDriver();

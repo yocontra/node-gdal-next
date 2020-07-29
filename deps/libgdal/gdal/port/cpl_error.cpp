@@ -7,7 +7,7 @@
  *
  **********************************************************************
  * Copyright (c) 1998, Daniel Morissette
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,6 +42,7 @@
 #include "cpl_multiproc.h"
 #include "cpl_string.h"
 #include "cpl_vsi.h"
+#include "cpl_error_internal.h"
 
 #if !defined(va_copy) && defined(__va_copy)
 #define va_copy __va_copy
@@ -50,7 +51,7 @@
 #define TIMESTAMP_DEBUG
 // #define MEMORY_DEBUG
 
-CPL_CVSID("$Id: cpl_error.cpp e3511844a11959bd81f5956a1e7e2de96900e7ac 2019-04-25 11:53:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_error.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
 
 static CPLMutex *hErrorMutex = nullptr;
 static void *pErrorHandlerUserData = nullptr;
@@ -258,7 +259,7 @@ static void ApplyErrorHandler( CPLErrorContext *psCtx, CPLErr eErrClass,
                 pfnErrorHandler(eErrClass, err_no, pszMessage);
             }
         }
-        else if( eErrClass == CE_Debug )
+        else /* if( eErrClass == CE_Debug ) */
         {
             // for CPLDebug messages we propagate to the default error handler
             pActiveUserData = nullptr;
@@ -1344,4 +1345,29 @@ bool CPLIsDefaultErrorHandlerAndCatchDebug()
     return (psCtx == nullptr || psCtx->psHandlerStack == nullptr) &&
             gbCatchDebug &&
            pfnErrorHandler == CPLDefaultErrorHandler;
+}
+
+/************************************************************************/
+/*                       CPLErrorHandlerAccumulator()                   */
+/************************************************************************/
+
+static
+void CPL_STDCALL CPLErrorHandlerAccumulator( CPLErr eErr, CPLErrorNum no,
+                                              const char* msg )
+{
+    std::vector<CPLErrorHandlerAccumulatorStruct>* paoErrors =
+        static_cast<std::vector<CPLErrorHandlerAccumulatorStruct> *>(
+            CPLGetErrorHandlerUserData());
+    paoErrors->push_back(CPLErrorHandlerAccumulatorStruct(eErr, no, msg));
+}
+
+
+void CPLInstallErrorHandlerAccumulator(std::vector<CPLErrorHandlerAccumulatorStruct>& aoErrors)
+{
+    CPLPushErrorHandlerEx( CPLErrorHandlerAccumulator, &aoErrors );
+}
+
+void CPLUninstallErrorHandlerAccumulator()
+{
+    CPLPopErrorHandler();
 }

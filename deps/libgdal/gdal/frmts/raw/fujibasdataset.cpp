@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: fujibasdataset.cpp b2723bb9ee29fb36de5c3afec9e9a6b757ef743c 2018-05-10 21:21:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: fujibasdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -39,7 +39,7 @@ CPL_CVSID("$Id: fujibasdataset.cpp b2723bb9ee29fb36de5c3afec9e9a6b757ef743c 2018
 /* ==================================================================== */
 /************************************************************************/
 
-class FujiBASDataset : public RawDataset
+class FujiBASDataset final: public RawDataset
 {
     VSILFILE        *fpImage;  // image data file.
     CPLString        osRawFilename{};
@@ -249,7 +249,7 @@ void GDALRegister_FujiBAS()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Fuji BAS Scanner Image" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#FujiBAS" );
+                               "drivers/raster/fujibas.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = FujiBASDataset::Open;

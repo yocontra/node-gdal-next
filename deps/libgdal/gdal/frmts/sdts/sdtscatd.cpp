@@ -29,7 +29,9 @@
 
 #include "sdts_al.h"
 
-CPL_CVSID("$Id: sdtscatd.cpp 2ace03ec48c36dae8ba74089d85617c095643428 2018-11-02 18:02:33 +0100 Even Rouault $")
+#include <set>
+
+CPL_CVSID("$Id: sdtscatd.cpp b45294c72549ddbba14dec8c6df485981dbed6d8 2019-10-20 13:14:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -140,6 +142,7 @@ int SDTS_CATD::Read( const char * pszFilename )
 /* ==================================================================== */
     DDFRecord *poRecord = nullptr;
     int nIters = 0;
+    std::set<std::string> aoSetFiles;
     while( (poRecord = oCATDFile.ReadRecord()) != nullptr && nIters < 1000 )
     {
         nIters ++;
@@ -167,7 +170,8 @@ int SDTS_CATD::Read( const char * pszFilename )
         if( poEntry->pszModule[0] == '\0' ||
             poEntry->pszFile[0] == '\0' ||
             // Exclude following one for performance reasons in oss-fuzz
-            (poEntry->pszFile[0] == '/' && poEntry->pszFile[1] == '\0') )
+            (poEntry->pszFile[0] == '/' && poEntry->pszFile[1] == '\0') ||
+            aoSetFiles.find(poEntry->pszFile) != aoSetFiles.end() )
         {
             CPLFree(poEntry->pszModule);
             CPLFree(poEntry->pszFile);
@@ -176,6 +180,7 @@ int SDTS_CATD::Read( const char * pszFilename )
             delete poEntry;
             continue;
         }
+        aoSetFiles.insert( poEntry->pszFile );
 
 /* -------------------------------------------------------------------- */
 /*      Create a full path to the file.                                 */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_virtual.h 7b937306fdeb31f6adefa6675d83ccd60f99e619 2018-11-25 23:10:44 +0100 Even Rouault $
+ * $Id: cpl_vsi_virtual.h 3bd384f52281218f6b6528763aee1296b8cf7431 2020-03-19 12:29:06 +0100 Even Rouault $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Declarations for classes related to the virtual filesystem.
@@ -10,7 +10,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -95,10 +95,12 @@ public:
     virtual int Stat( const char *pszFilename, VSIStatBufL *pStatBuf, int nFlags) = 0;
     virtual int Unlink( const char *pszFilename )
                       { (void) pszFilename; errno=ENOENT; return -1; }
+    virtual int* UnlinkBatch( CSLConstList papszFiles );
     virtual int Mkdir( const char *pszDirname, long nMode )
                       {(void)pszDirname; (void)nMode; errno=ENOENT; return -1;}
     virtual int Rmdir( const char *pszDirname )
                       { (void) pszDirname; errno=ENOENT; return -1; }
+    virtual int RmdirRecursive( const char *pszDirname );
     virtual char **ReadDir( const char *pszDirname )
                       { (void) pszDirname; return nullptr; }
     virtual char **ReadDirEx( const char *pszDirname, int /* nMaxFiles */ )
@@ -121,6 +123,14 @@ public:
 
     virtual VSIDIR* OpenDir( const char *pszPath, int nRecurseDepth,
                              const char* const *papszOptions);
+
+    virtual char** GetFileMetadata( const char * pszFilename, const char* pszDomain,
+                                    CSLConstList papszOptions );
+
+    virtual bool   SetFileMetadata( const char * pszFilename,
+                                    CSLConstList papszMetadata,
+                                    const char* pszDomain,
+                                    CSLConstList papszOptions );
 };
 #endif /* #ifndef DOXYGEN_SKIP */
 

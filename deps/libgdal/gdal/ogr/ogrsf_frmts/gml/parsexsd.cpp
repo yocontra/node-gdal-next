@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,7 +42,7 @@
 #include "cpl_string.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: parsexsd.cpp 4a763acf24d556bba8122ae38067b56655abe677 2019-03-19 17:27:36 +0100 Even Rouault $")
+CPL_CVSID("$Id: parsexsd.cpp 8f2d9a25ddfba66412b29ced2eda889ef6bea5dd 2019-11-06 21:25:57 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                              StripNS()                               */
@@ -134,11 +134,21 @@ bool GetSimpleTypeProperties(CPLXMLNode *psTypeNode,
         return true;
     }
 
-    /* TODO: Would be nice to have a proper date type */
-    else if( EQUAL(pszBase, "date") ||
-             EQUAL(pszBase, "dateTime") )
+    else if( EQUAL(pszBase, "date")  )
     {
-        *pGMLType = GMLPT_String;
+        *pGMLType = GMLPT_Date;
+        return true;
+    }
+
+    else if( EQUAL(pszBase, "time")  )
+    {
+        *pGMLType = GMLPT_Time;
+        return true;
+    }
+
+    else if( EQUAL(pszBase, "dateTime") )
+    {
+        *pGMLType = GMLPT_DateTime;
         return true;
     }
 
@@ -432,10 +442,12 @@ GMLFeatureClass *GMLParseFeatureType(CPLXMLNode *psSchemaNode,
             if (EQUAL(pszStrippedNSType, "string") ||
                 EQUAL(pszStrippedNSType, "Character"))
                 gmlType = GMLPT_String;
-            // TODO: Would be nice to have a proper date type.
-            else if (EQUAL(pszStrippedNSType, "date") ||
-                     EQUAL(pszStrippedNSType, "dateTime"))
-                gmlType = GMLPT_String;
+            else if (EQUAL(pszStrippedNSType, "date"))
+                gmlType = GMLPT_Date;
+            else if (EQUAL(pszStrippedNSType, "time"))
+                gmlType = GMLPT_Time;
+            else if (EQUAL(pszStrippedNSType, "dateTime"))
+                gmlType = GMLPT_DateTime;
             else if (EQUAL(pszStrippedNSType, "real") ||
                      EQUAL(pszStrippedNSType, "double") ||
                      EQUAL(pszStrippedNSType, "decimal"))

@@ -49,7 +49,7 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id: rmflzw.cpp ac5c9afc16a3fcb0096e79f1ff4dad8e69a0309e 2018-07-05 08:21:22 +0300 drons $")
+CPL_CVSID("$Id: rmflzw.cpp d898728d97791409670c719b872025e2fd9bffa6 2019-08-13 17:35:26 +0200 Even Rouault $")
 
 // Code marks that there is no predecessor in the string
 constexpr GUInt32 NO_PRED = 0xFFFF;
@@ -76,6 +76,12 @@ typedef struct
 /*                           LZWUpdateTab()                             */
 /************************************************************************/
 
+CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
+static GUInt32 UnsanitizedMul(GUInt32 a, GUInt32 b)
+{
+    return a * b;
+}
+
 static void LZWUpdateTab(LZWStringTab *poCodeTab, GUInt32 iPred, char bFoll)
 {
 /* -------------------------------------------------------------------- */
@@ -85,8 +91,8 @@ static void LZWUpdateTab(LZWStringTab *poCodeTab, GUInt32 iPred, char bFoll)
 /* It will NOT notice if the table is full. This must be handled        */
 /* elsewhere                                                            */
 /* -------------------------------------------------------------------- */
-    GUInt32 nLocal = (iPred + bFoll) | 0x0800;
-    nLocal = (nLocal*nLocal >> 6) & 0x0FFF;      // middle 12 bits of result
+    GUInt32 nLocal = CPLUnsanitizedAdd<GUInt32>(iPred, bFoll) | 0x0800;
+    nLocal = (UnsanitizedMul(nLocal, nLocal) >> 6) & 0x0FFF;      // middle 12 bits of result
 
     // If string is not used
     GUInt32 nNext = nLocal;
@@ -138,8 +144,8 @@ static LZWStringTab* LZWCreateTab()
 
 static GUInt32 LZWFindIndex(const LZWStringTab* poCodeTab, GUInt32 iPred, char bFoll)
 {
-    GUInt32 nLocal = (iPred + bFoll) | 0x0800;
-    nLocal = (nLocal*nLocal >> 6) & 0x0FFF;      // middle 12 bits of result
+    GUInt32 nLocal = CPLUnsanitizedAdd<GUInt32>(iPred, bFoll) | 0x0800;
+    nLocal = (UnsanitizedMul(nLocal, nLocal) >> 6) & 0x0FFF;      // middle 12 bits of result
 
     do
     {

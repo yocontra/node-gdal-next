@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlaswriter.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlaswriter.cpp 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $")
 
 namespace GMLAS
 {
@@ -3072,7 +3072,7 @@ void GMLASWriter::PrintLine(VSILFILE* fp, const char *fmt, ...)
 /*                           GMLASFakeDataset                           */
 /************************************************************************/
 
-class GMLASFakeDataset : public GDALDataset
+class GMLASFakeDataset final: public GDALDataset
 {
     public:
         GMLASFakeDataset() {}

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "ogrsf_frmts/ogrsf_frmts.h"
 #include "ogrsf_frmts/vrt/ogr_vrt.h"
 
-CPL_CVSID("$Id: ogrvrtlayer.cpp f86a5db0aa1e6694326dfdf97a838d8af7dbad67 2019-11-02 02:39:12 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtlayer.cpp ac212d2bbf184ecfdc67fad3095222fed96344bf 2019-11-02 02:39:12 +0100 Even Rouault $")
 
 #define UNSUPPORTED_OP_READ_ONLY \
     "%s : unsupported operation on a read-only datasource."

@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 #include "cpl_error.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalcolortable.cpp 07992936d7131adb0203bd5b10db3aea923841d0 2018-08-01 14:10:49 -0700 Kurt Schwehr $")
+CPL_CVSID("$Id: gdalcolortable.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALColorTable()                           */

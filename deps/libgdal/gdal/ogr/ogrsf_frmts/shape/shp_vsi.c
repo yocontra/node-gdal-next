@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shp_vsi.c dae19934cb8852265339c697a23f82b0d59f7976 2017-07-05 13:27:02Z Even Rouault $
+ * $Id: shp_vsi.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  IO Redirection via VSI services for shp/dbf io.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007,  Frank Warmerdam
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "cpl_vsi_error.h"
 #include <limits.h>
 
-CPL_CVSID("$Id: shp_vsi.c dae19934cb8852265339c697a23f82b0d59f7976 2017-07-05 13:27:02Z Even Rouault $")
+CPL_CVSID("$Id: shp_vsi.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 typedef struct
 {

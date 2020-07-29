@@ -2,10 +2,10 @@
  *
  * Project:  OGR
  * Purpose:  Convenience function for parsing with Expat library
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 
 
-CPL_CVSID("$Id: ogr_expat.cpp ddb98717c6ef6a73aaa65601daf4f5baf874025a 2019-08-04 21:00:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_expat.cpp 148115fcc40f1651a5d15fa34c9a8c528e7147bb 2019-08-04 21:00:33 +0200 Even Rouault $")
 
 constexpr size_t OGR_EXPAT_MAX_ALLOWED_ALLOC = 10000000;
 

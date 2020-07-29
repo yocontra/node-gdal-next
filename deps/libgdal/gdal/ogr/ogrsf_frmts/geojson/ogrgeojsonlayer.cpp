@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Mateusz Loskot
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "ogr_geojson.h"
 #include "ogrgeojsonreader.h"
 
-CPL_CVSID("$Id: ogrgeojsonlayer.cpp ffec3571dd163c73ac70bec1d5cd4385ef324539 2020-01-07 04:30:14 -0700 Sean Gillies $")
+CPL_CVSID("$Id: ogrgeojsonlayer.cpp 245fbcca246f2fd183176dcacd68e3b4e98622df 2020-01-07 04:30:14 -0700 Sean Gillies $")
 
 /************************************************************************/
 /*                       STATIC MEMBERS DEFINITION                      */

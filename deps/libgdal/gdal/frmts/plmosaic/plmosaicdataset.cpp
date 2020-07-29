@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: plmosaicdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: plmosaicdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 #define SPHERICAL_RADIUS        6378137.0
 #define GM_ORIGIN  -20037508.340
@@ -1490,7 +1490,7 @@ void GDALRegister_PLMOSAIC()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Planet Labs Mosaics API" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_plmosaic.html" );
+                               "drivers/raster/plmosaic.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "PLMOSAIC:" );
 

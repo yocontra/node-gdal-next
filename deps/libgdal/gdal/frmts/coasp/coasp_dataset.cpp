@@ -11,7 +11,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Philippe Vachon
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #include "gdal_frmts.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: coasp_dataset.cpp a7ae5e6f64689138615e640994f9b38739231873 2019-12-30 13:20:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: coasp_dataset.cpp 95727499e1e118c5eeae7ca5bd5c4774ce32cb8a 2020-03-24 08:33:14 +0100 Kai Pastor $")
 
 constexpr int TYPE_GENERIC = 0;
 constexpr int TYPE_GEOREF = 1;
@@ -246,7 +246,7 @@ class COASPRasterBand;
  *    herein is from harassing various Defence Scientists at DRDC Ottawa.
  */
 
-class COASPDataset : public GDALDataset
+class COASPDataset final: public GDALDataset
 {
         friend class COASPRasterBand;
         VSILFILE *fpHdr; /* File pointer for the header file */
@@ -278,7 +278,7 @@ public:
  * ================================================================ *
  ********************************************************************/
 
-class COASPRasterBand : public GDALRasterBand {
+class COASPRasterBand final: public GDALRasterBand {
     VSILFILE *fp;
     // int ePol;
   public:
@@ -567,7 +567,7 @@ void GDALRegister_COASP()
                                "DRDC COASP SAR Processor Raster" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION,
                                "hdr" );
-    // poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_coasp.html");
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/coasp.html");
     poDriver->pfnIdentify = COASPDataset::Identify;
     poDriver->pfnOpen = COASPDataset::Open;
     GetGDALDriverManager()->RegisterDriver( poDriver );

@@ -44,7 +44,7 @@
 #include "mitab_priv.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: mitab_coordsys.cpp 971ad299681ca1ea2e1b800e88209f426b77e9aa 2018-04-17 12:14:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_coordsys.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 extern const MapInfoDatumInfo asDatumInfoList[];
 extern const MapInfoSpheroidInfo asSpheroidInfoList[];
@@ -347,8 +347,7 @@ int MITABCoordSys2TABProjInfo(const char * pszCoordSys, TABProjInfo *psProj)
             }
         }
 
-        if( asDatumInfoList[iDatum].nMapInfoDatumID == -1 &&
-            nDatum != 999 && nDatum != 9999 )
+        if( asDatumInfoList[iDatum].nMapInfoDatumID == -1 )
         {
             // Use WGS84.
             psDatumInfo = asDatumInfoList + 0;

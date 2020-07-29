@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gxfopen.c 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $
+ * $Id: gxfopen.c 68c453b0a55be4fa90b52f55167e59d8b4a9e0e9 2019-08-20 16:34:12 +0200 Even Rouault $
  *
  * Project:  GXF Reader
  * Purpose:  Majority of Geosoft GXF reading code.
@@ -8,7 +8,7 @@
  ******************************************************************************
  * Copyright (c) 1998, Global Geomatics
  * Copyright (c) 1998, Frank Warmerdam
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include <ctype.h>
 #include "gxfopen.h"
 
-CPL_CVSID("$Id: gxfopen.c 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
+CPL_CVSID("$Id: gxfopen.c 68c453b0a55be4fa90b52f55167e59d8b4a9e0e9 2019-08-20 16:34:12 +0200 Even Rouault $")
 
 
 /* this is also defined in gdal.h which we avoid in this separable component */
@@ -447,6 +447,7 @@ void GXFClose( GXFHandle hGXF )
 /*      values have to be recognised outside this function.             */
 /************************************************************************/
 
+CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
 static
 double GXFParseBase90( GXFInfo_t * psGXF, const char * pszText,
                        int bScale )

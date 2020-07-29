@@ -2,10 +2,10 @@
  *
  * Project:  Arc/Info Generate Translator
  * Purpose:  Implements OGRARCGENLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "ogr_p.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: ograrcgenlayer.cpp 98dfb4b4012c5ae4621e246e8eb393b3c05a3f48 2018-04-02 22:09:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ograrcgenlayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRARCGENLayer()                             */

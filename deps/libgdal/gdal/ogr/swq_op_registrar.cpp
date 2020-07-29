@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (C) 2010 Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,14 +29,14 @@
  ****************************************************************************/
 
 #include "cpl_port.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 #include <cstddef>
 
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: swq_op_registrar.cpp ba2ef4045f82fd2260f1732e9e46a927277ac93d 2018-05-06 19:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: swq_op_registrar.cpp ffd62ee1bdeed41a9301102c35b3c0eb30a36dc2 2019-11-28 16:56:51 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 static swq_field_type SWQColumnFuncChecker(
@@ -54,6 +54,7 @@ static const swq_operation swq_apsOperations[] =
     { "<", SWQ_LT , SWQGeneralEvaluator, SWQGeneralChecker },
     { ">", SWQ_GT , SWQGeneralEvaluator, SWQGeneralChecker },
     { "LIKE", SWQ_LIKE , SWQGeneralEvaluator, SWQGeneralChecker },
+    { "ILIKE", SWQ_ILIKE , SWQGeneralEvaluator, SWQGeneralChecker },
     { "IS NULL", SWQ_ISNULL , SWQGeneralEvaluator, SWQGeneralChecker },
     { "IN", SWQ_IN , SWQGeneralEvaluator, SWQGeneralChecker },
     { "BETWEEN", SWQ_BETWEEN , SWQGeneralEvaluator, SWQGeneralChecker },

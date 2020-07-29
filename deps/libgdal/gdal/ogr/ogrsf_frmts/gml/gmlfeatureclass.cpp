@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -44,7 +44,7 @@
 #include "ogr_core.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: gmlfeatureclass.cpp 6c215be4458b32ab4278c9f64ed7e31099a5021c 2018-06-23 13:09:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlfeatureclass.cpp 8f2d9a25ddfba66412b29ced2eda889ef6bea5dd 2019-11-06 21:25:57 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          GMLFeatureClass()                           */
@@ -674,6 +674,18 @@ bool GMLFeatureClass::InitializeFromXML( CPLXMLNode *psRoot )
                     poPDefn->SetType(GMLPT_Boolean);
                     poPDefn->SetWidth(1);
                 }
+                else if( EQUAL(pszSubType, "Date") )
+                {
+                    poPDefn->SetType(GMLPT_Date);
+                }
+                else if( EQUAL(pszSubType, "Time") )
+                {
+                    poPDefn->SetType(GMLPT_Time);
+                }
+                else if( EQUAL(pszSubType, "Datetime") )
+                {
+                    poPDefn->SetType(GMLPT_DateTime);
+                }
                 else
                 {
                     poPDefn->SetType(GMLPT_String);
@@ -903,26 +915,59 @@ CPLXMLNode *GMLFeatureClass::SerializeToXML()
         CPLCreateXMLElementAndValue(psPDefnNode, "Name", poPDefn->GetName());
         CPLCreateXMLElementAndValue(psPDefnNode, "ElementPath",
                                     poPDefn->GetSrcElement());
-        switch( poPDefn->GetType() )
+        const auto gmlType = poPDefn->GetType();
+        const char* pszSubTypeName = nullptr;
+        switch( gmlType )
         {
           case GMLPT_Untyped:
             pszTypeName = "Untyped";
             break;
 
           case GMLPT_String:
-          case GMLPT_Boolean:
             pszTypeName = "String";
             break;
 
+          case GMLPT_Boolean:
+            pszTypeName = "String";
+            pszSubTypeName = "Boolean";
+            break;
+
+          case GMLPT_Date:
+            pszTypeName = "String";
+            pszSubTypeName = "Date";
+            break;
+
+          case GMLPT_Time:
+            pszTypeName = "String";
+            pszSubTypeName = "Time";
+            break;
+
+          case GMLPT_DateTime:
+            pszTypeName = "String";
+            pszSubTypeName = "DateTime";
+            break;
+
           case GMLPT_Integer:
-          case GMLPT_Short:
-          case GMLPT_Integer64:
             pszTypeName = "Integer";
             break;
 
+          case GMLPT_Short:
+            pszTypeName = "Integer";
+            pszSubTypeName = "Short";
+            break;
+
+          case GMLPT_Integer64:
+            pszTypeName = "Integer";
+            pszSubTypeName = "Integer64";
+            break;
+
           case GMLPT_Real:
+            pszTypeName = "Real";
+            break;
+
           case GMLPT_Float:
             pszTypeName = "Real";
+            pszSubTypeName = "Float";
             break;
 
           case GMLPT_Complex:
@@ -930,8 +975,12 @@ CPLXMLNode *GMLFeatureClass::SerializeToXML()
             break;
 
           case GMLPT_IntegerList:
+            pszTypeName = "IntegerList";
+            break;
+
           case GMLPT_Integer64List:
             pszTypeName = "IntegerList";
+            pszSubTypeName = "Integer64";
             break;
 
           case GMLPT_RealList:
@@ -939,8 +988,12 @@ CPLXMLNode *GMLFeatureClass::SerializeToXML()
             break;
 
           case GMLPT_StringList:
+            pszTypeName = "StringList";
+            break;
+
           case GMLPT_BooleanList:
             pszTypeName = "StringList";
+            pszSubTypeName = "Boolean";
             break;
 
           // Should not happen in practice for now because this is not
@@ -956,15 +1009,8 @@ CPLXMLNode *GMLFeatureClass::SerializeToXML()
             break;
         }
         CPLCreateXMLElementAndValue(psPDefnNode, "Type", pszTypeName);
-        if( poPDefn->GetType() == GMLPT_Boolean || poPDefn->GetType() == GMLPT_BooleanList )
-            CPLCreateXMLElementAndValue(psPDefnNode, "Subtype", "Boolean");
-        else if( poPDefn->GetType() == GMLPT_Short )
-            CPLCreateXMLElementAndValue(psPDefnNode, "Subtype", "Short");
-        else if( poPDefn->GetType() == GMLPT_Float )
-            CPLCreateXMLElementAndValue(psPDefnNode, "Subtype", "Float");
-        else if( poPDefn->GetType() == GMLPT_Integer64 ||
-                 poPDefn->GetType() == GMLPT_Integer64List )
-            CPLCreateXMLElementAndValue(psPDefnNode, "Subtype", "Integer64");
+        if( pszSubTypeName )
+            CPLCreateXMLElementAndValue(psPDefnNode, "Subtype", pszSubTypeName);
 
         if( EQUAL(pszTypeName, "String") )
         {
@@ -992,4 +1038,61 @@ CPLXMLNode *GMLFeatureClass::SerializeToXML()
     }
 
     return psRoot;
+}
+
+/************************************************************************/
+/*                       GML_GetOGRFieldType()                          */
+/************************************************************************/
+
+OGRFieldType GML_GetOGRFieldType(GMLPropertyType eType, OGRFieldSubType& eSubType)
+{
+    OGRFieldType eFType = OFTString;
+    eSubType = OFSTNone;
+    if( eType == GMLPT_Untyped )
+        eFType = OFTString;
+    else if( eType == GMLPT_String )
+        eFType = OFTString;
+    else if( eType == GMLPT_Integer )
+        eFType = OFTInteger;
+    else if( eType == GMLPT_Boolean )
+    {
+        eFType = OFTInteger;
+        eSubType = OFSTBoolean;
+    }
+    else if( eType == GMLPT_Short )
+    {
+        eFType = OFTInteger;
+        eSubType = OFSTInt16;
+    }
+    else if( eType == GMLPT_Integer64 )
+        eFType = OFTInteger64;
+    else if( eType == GMLPT_Real )
+        eFType = OFTReal;
+    else if( eType == GMLPT_Float )
+    {
+        eFType = OFTReal;
+        eSubType = OFSTFloat32;
+    }
+    else if( eType == GMLPT_StringList )
+        eFType = OFTStringList;
+    else if( eType == GMLPT_IntegerList )
+        eFType = OFTIntegerList;
+    else if( eType == GMLPT_BooleanList )
+    {
+        eFType = OFTIntegerList;
+        eSubType = OFSTBoolean;
+    }
+    else if( eType == GMLPT_Integer64List )
+        eFType = OFTInteger64List;
+    else if( eType == GMLPT_RealList )
+        eFType = OFTRealList;
+    else if( eType == GMLPT_Date)
+        eFType = OFTDate;
+    else if( eType == GMLPT_Time )
+        eFType = OFTTime;
+    else if( eType == GMLPT_DateTime )
+        eFType = OFTDateTime;
+    else if( eType == GMLPT_FeaturePropertyList )
+        eFType = OFTStringList;
+    return eFType;
 }

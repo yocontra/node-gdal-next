@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: avc_misc.cpp 033fae178bca4f53702e4e822f6bea9d9ecf40b3 2019-04-06 15:27:03 +0200 Even Rouault $
+ * $Id: avc_misc.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $
  *
  * Name:     avc_misc.c
  * Project:  Arc/Info vector coverage (AVC)  BIN<->E00 conversion library
@@ -372,7 +372,13 @@ char *AVCAdjustCaseSensitiveFilename(char *pszFname)
             if (EQUAL(pszTmpPath+iLastPartStart, papszDir[iEntry]))
             {
                 /* Fount it! */
+#ifdef CSA_BUILD
+                // Silence false positive warning about overlapping buffers
+                memmove(pszTmpPath+iLastPartStart, papszDir[iEntry],
+                        strlen(papszDir[iEntry]) + 1);
+#else
                 strcpy(pszTmpPath+iLastPartStart, papszDir[iEntry]);
+#endif
                 break;
             }
         }

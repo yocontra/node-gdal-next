@@ -30,7 +30,7 @@
 #include "gdal_pam.h"
 #include "pcrasterdataset.h"
 
-CPL_CVSID("$Id: pcrastermisc.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: pcrastermisc.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 void GDALRegister_PCRaster()
 {
@@ -47,7 +47,7 @@ void GDALRegister_PCRaster()
 
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "PCRaster Raster File");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES, "Byte Int32 Float32");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#PCRaster");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/pcraster.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "map" );
 
     poDriver->pfnOpen = PCRasterDataset::open;

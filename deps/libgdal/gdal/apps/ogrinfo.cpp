@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id: ogrinfo.cpp 89c0d84eefe6b89d8f5d3b35781ccbddd1dccbad 2019-12-18 12:11:59 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrinfo.cpp f151b0f35b5f0b1394de38d0145a53907634a246 2019-12-18 12:11:59 +0100 Even Rouault $")
 
 bool bVerbose = true;
 bool bSuperQuiet = false;
@@ -72,7 +72,7 @@ static void Usage( const char* pszErrorMsg = nullptr )
            "               [-sql statement|@filename] [-dialect sql_dialect] [-al] [-rl] [-so] [-fields={YES/NO}]\n"
            "               [-geom={YES/NO/SUMMARY}] [[-oo NAME=VALUE] ...]\n"
            "               [-nomd] [-listmdd] [-mdd domain|`all`]*\n"
-           "               [-nocount] [-noextent] [-wkt_format WKT1|WKT2|...]\n"
+           "               [-nocount] [-noextent] [-nogeomtype] [-wkt_format WKT1|WKT2|...]\n"
            "               datasource_name [layer [layer ...]]\n");
 
     if( pszErrorMsg != nullptr )
@@ -203,6 +203,7 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
                            char** papszExtraMDDomains,
                            bool bFeatureCount,
                            bool bExtent,
+                           bool bGeomType,
                            const char* pszWKTFormat )
 {
     OGRFeatureDefn      *poDefn = poLayer->GetLayerDefn();
@@ -253,7 +254,7 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
     if( bVerbose )
     {
         const int nGeomFieldCount =
-            poLayer->GetLayerDefn()->GetGeomFieldCount();
+            bGeomType ? poLayer->GetLayerDefn()->GetGeomFieldCount() : 0;
         if( nGeomFieldCount > 1 )
         {
             for(int iGeom = 0;iGeom < nGeomFieldCount; iGeom ++ )
@@ -264,7 +265,7 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
                        OGRGeometryTypeToName(poGFldDefn->GetType()));
             }
         }
-        else
+        else if( bGeomType )
         {
             printf("Geometry: %s\n",
                    OGRGeometryTypeToName(poLayer->GetGeomType()));
@@ -511,6 +512,7 @@ MAIN_START(nArgc, papszArgv)
     bool bShowMetadata = true;
     bool bFeatureCount = true;
     bool bExtent = true;
+    bool bGeomType = true;
     bool bDatasetGetNextFeature = false;
     bool bReadOnly = false;
     bool bUpdate = false;
@@ -683,6 +685,10 @@ MAIN_START(nArgc, papszArgv)
         else if( EQUAL(papszArgv[iArg], "-noextent") )
         {
             bExtent = false;
+        }
+        else if( EQUAL(papszArgv[iArg], "-nogeomtype") )
+        {
+            bGeomType = false;
         }
         else if( EQUAL(papszArgv[iArg], "-rl"))
         {
@@ -884,6 +890,7 @@ MAIN_START(nArgc, papszArgv)
                                   papszExtraMDDomains,
                                   bFeatureCount,
                                   bExtent,
+                                  bGeomType,
                                   pszWKTFormat);
                     bSummaryOnly = bSummaryOnlyBackup;
                 }
@@ -926,11 +933,11 @@ MAIN_START(nArgc, papszArgv)
                 ReportOnLayer(poResultSet, nullptr,
                               pszGeomField, poSpatialFilter,
                               bListMDD, bShowMetadata, papszExtraMDDomains,
-                              bFeatureCount, bExtent, pszWKTFormat);
+                              bFeatureCount, bExtent, bGeomType, pszWKTFormat);
             else
                 ReportOnLayer(poResultSet, nullptr, nullptr, nullptr,
                               bListMDD, bShowMetadata, papszExtraMDDomains,
-                              bFeatureCount, bExtent, pszWKTFormat);
+                              bFeatureCount, bExtent, bGeomType, pszWKTFormat);
             poDS->ReleaseResultSet(poResultSet);
         }
     }
@@ -969,7 +976,7 @@ MAIN_START(nArgc, papszArgv)
                     }
 
                     const int nGeomFieldCount =
-                        poLayer->GetLayerDefn()->GetGeomFieldCount();
+                        bGeomType ? poLayer->GetLayerDefn()->GetGeomFieldCount() : 0;
                     if( nGeomFieldCount > 1 )
                     {
                         printf(" (");
@@ -987,7 +994,7 @@ MAIN_START(nArgc, papszArgv)
                         }
                         printf(")");
                     }
-                    else if( poLayer->GetGeomType() != wkbUnknown )
+                    else if( bGeomType && poLayer->GetGeomType() != wkbUnknown )
                         printf(" (%s)",
                                OGRGeometryTypeToName(
                                    poLayer->GetGeomType()));
@@ -1002,7 +1009,7 @@ MAIN_START(nArgc, papszArgv)
                     ReportOnLayer(poLayer, pszWHERE,
                                   pszGeomField, poSpatialFilter,
                                   bListMDD, bShowMetadata, papszExtraMDDomains,
-                                  bFeatureCount, bExtent, pszWKTFormat);
+                                  bFeatureCount, bExtent, bGeomType, pszWKTFormat);
                 }
             }
         }
@@ -1030,7 +1037,7 @@ MAIN_START(nArgc, papszArgv)
 
                 ReportOnLayer(poLayer, pszWHERE, pszGeomField, poSpatialFilter,
                               bListMDD, bShowMetadata, papszExtraMDDomains,
-                              bFeatureCount, bExtent, pszWKTFormat);
+                              bFeatureCount, bExtent, bGeomType, pszWKTFormat);
             }
         }
     }
@@ -1056,7 +1063,7 @@ end:
     CPLFree(pszSQLStatement);
     CPLFree(pszWHERE);
 
-    OGRCleanupAll();
+    GDALDestroy();
 
     return nRet;
 }

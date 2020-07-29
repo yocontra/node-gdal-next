@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sdts.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: ogr_sdts.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  STS Translator
  * Purpose:  Definition of classes finding SDTS support into OGRDriver
@@ -40,7 +40,7 @@ class OGRSDTSDataSource;
 /*                             OGRSDTSLayer                             */
 /************************************************************************/
 
-class OGRSDTSLayer : public OGRLayer
+class OGRSDTSLayer final: public OGRLayer
 {
     OGRFeatureDefn     *poFeatureDefn;
 
@@ -68,7 +68,7 @@ class OGRSDTSLayer : public OGRLayer
 /*                          OGRSDTSDataSource                           */
 /************************************************************************/
 
-class OGRSDTSDataSource : public OGRDataSource
+class OGRSDTSDataSource final: public OGRDataSource
 {
     SDTSTransfer        *poTransfer;
     char                *pszName;

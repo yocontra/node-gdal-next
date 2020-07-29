@@ -31,7 +31,7 @@
 
 #include <cstddef>
 
-CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp 88eda08930b6dafb9ea1374ba19e0b1cf5ded3d3 2018-08-11 20:16:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp d1b96f561f28cb16ce6529b452926cc0de27f55d 2019-08-14 15:08:38 +0200 Even Rouault $")
 
 #ifdef HAVE_LIBXML2
 
@@ -54,6 +54,16 @@ CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp 88eda08930b6dafb9ea1374ba19e0b1cf5d
 // CHECK_ARITY: check the number of args passed to an XPath function matches.
 #undef NULL
 #define NULL nullptr
+
+// Simplified version of the macro proposed by libxml2
+// The reason is when running against filegdbAPI which includes it own copy
+// of libxml2, and the check 'ctxt->valueNr < ctxt->valueFrame + (x)'
+// done by libxml2 CHECK_ARITY() thus points to garbage
+#undef CHECK_ARITY
+#define CHECK_ARITY(x)                                                  \
+    if (ctxt == NULL) return;                                           \
+    if (nargs != (x))                                                   \
+        XP_ERROR(XPATH_INVALID_ARITY);
 
 /************************************************************************/
 /*                            GDALGMLJP2Expr                            */

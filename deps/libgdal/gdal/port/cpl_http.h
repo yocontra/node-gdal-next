@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_http.h 78ebfa67fe512cc98e3452fc307a0a17e88d0b68 2019-06-21 00:26:51 +0200 Even Rouault $
+ * $Id: cpl_http.h 921541449c45622f0fbae99e2d6cc4269e59d182 2019-06-21 00:26:51 +0200 Even Rouault $
  *
  * Project:  Common Portability Library
  * Purpose:  Function wrapper for libcurl HTTP access.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Frank Warmerdam
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

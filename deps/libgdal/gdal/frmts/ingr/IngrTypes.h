@@ -1,5 +1,5 @@
 /*****************************************************************************
- * $Id: IngrTypes.h 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $
+ * $Id: IngrTypes.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  Intergraph Raster Format support
  * Purpose:  Types, constants and functions definition
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Ivan Lucena
- * Copyright (c) 2007-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files ( the "Software" ),

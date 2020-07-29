@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,8 +49,9 @@
 #include "gmlutils.h"
 #include "ogr_p.h"
 #include "parsexsd.h"
+#include "../mem/ogr_mem.h"
 
-CPL_CVSID("$Id: ogrgmldatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgmldatasource.cpp 978ba46f732b27073d5bbc30f427a311d9daed28 2020-04-08 01:11:41 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                   ReplaceSpaceByPct20IfNeeded()                      */
@@ -673,8 +674,27 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
         poOpenInfo->papszOpenOptions, "GML_ATTRIBUTES_TO_OGR_FIELDS",
         CPLTestBool(CPLGetConfigOption("GML_ATTRIBUTES_TO_OGR_FIELDS", "NO"))));
 
-    // Find <gml:description>, <gml:name> and <gml:boundedBy>
+    // Find <gml:description>, <gml:name> and <gml:boundedBy> and if it is
+    // a standalone geometry
     FindAndParseTopElements(fp);
+
+    if( m_poStandaloneGeom )
+    {
+        papoLayers = static_cast<OGRLayer **>(CPLMalloc(sizeof(OGRLayer *)));
+        nLayers = 1;
+        auto poLayer = new OGRMemLayer(
+            "geometry",
+            m_oStandaloneGeomSRS.IsEmpty() ? nullptr : &m_oStandaloneGeomSRS,
+            m_poStandaloneGeom->getGeometryType());
+        papoLayers[0] = poLayer;
+        OGRFeature* poFeature = new OGRFeature(poLayer->GetLayerDefn());
+        poFeature->SetGeometryDirectly(m_poStandaloneGeom.release());
+        CPL_IGNORE_RET_VAL(poLayer->CreateFeature(poFeature));
+        delete poFeature;
+        poLayer->SetUpdatable(false);
+        VSIFCloseL(fp);
+        return true;
+    }
 
     if( szSRSName[0] != '\0' )
         poReader->SetGlobalSRSName(szSRSName);
@@ -1272,8 +1292,8 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
     }
 
     // Translate the GMLFeatureClasses into layers.
-    papoLayers = static_cast<OGRGMLLayer **>(
-        CPLCalloc(sizeof(OGRGMLLayer *), poReader->GetClassCount()));
+    papoLayers = static_cast<OGRLayer **>(
+        CPLCalloc(sizeof(OGRLayer *), poReader->GetClassCount()));
     nLayers = 0;
 
     if (poReader->GetClassCount() == 1 && nNumberOfFeatures != 0)
@@ -1585,49 +1605,16 @@ OGRGMLLayer *OGRGMLDataSource::TranslateGMLSchema( GMLFeatureClass *poClass )
     for( int iField = 0; iField < poClass->GetPropertyCount(); iField++ )
     {
         GMLPropertyDefn *poProperty = poClass->GetProperty(iField);
-        OGRFieldType eFType;
-
-        if( poProperty->GetType() == GMLPT_Untyped )
-            eFType = OFTString;
-        else if( poProperty->GetType() == GMLPT_String )
-            eFType = OFTString;
-        else if( poProperty->GetType() == GMLPT_Integer ||
-                 poProperty->GetType() == GMLPT_Boolean ||
-                 poProperty->GetType() == GMLPT_Short )
-            eFType = OFTInteger;
-        else if( poProperty->GetType() == GMLPT_Integer64 )
-            eFType = OFTInteger64;
-        else if( poProperty->GetType() == GMLPT_Real ||
-                 poProperty->GetType() == GMLPT_Float )
-            eFType = OFTReal;
-        else if( poProperty->GetType() == GMLPT_StringList )
-            eFType = OFTStringList;
-        else if( poProperty->GetType() == GMLPT_IntegerList ||
-                 poProperty->GetType() == GMLPT_BooleanList )
-            eFType = OFTIntegerList;
-        else if( poProperty->GetType() == GMLPT_Integer64List )
-            eFType = OFTInteger64List;
-        else if( poProperty->GetType() == GMLPT_RealList )
-            eFType = OFTRealList;
-        else if( poProperty->GetType() == GMLPT_FeaturePropertyList )
-            eFType = OFTStringList;
-        else
-            eFType = OFTString;
-
+        OGRFieldSubType eSubType = OFSTNone;
+        const OGRFieldType eFType = GML_GetOGRFieldType(poProperty->GetType(), eSubType);
         OGRFieldDefn oField(poProperty->GetName(), eFType);
+        oField.SetSubType(eSubType);
         if ( STARTS_WITH_CI(oField.GetNameRef(), "ogr:") )
           oField.SetName(poProperty->GetName() + 4);
         if( poProperty->GetWidth() > 0 )
             oField.SetWidth(poProperty->GetWidth());
         if( poProperty->GetPrecision() > 0 )
             oField.SetPrecision(poProperty->GetPrecision());
-        if( poProperty->GetType() == GMLPT_Boolean ||
-            poProperty->GetType() == GMLPT_BooleanList )
-            oField.SetSubType(OFSTBoolean);
-        else if( poProperty->GetType() == GMLPT_Short)
-            oField.SetSubType(OFSTInt16);
-        else if( poProperty->GetType() == GMLPT_Float)
-            oField.SetSubType(OFSTFloat32);
         if( !bEmptyAsNull )
             oField.SetNullable(poProperty->IsNullable() );
 
@@ -1953,8 +1940,8 @@ OGRGMLDataSource::ICreateLayer(const char *pszLayerName,
     CPLFree(pszCleanLayerName);
 
     // Add layer to data source layer list.
-    papoLayers = static_cast<OGRGMLLayer **>(
-        CPLRealloc(papoLayers, sizeof(OGRGMLLayer *) * (nLayers + 1)));
+    papoLayers = static_cast<OGRLayer **>(
+        CPLRealloc(papoLayers, sizeof(OGRLayer *) * (nLayers + 1)));
 
     papoLayers[nLayers++] = poLayer;
 
@@ -2068,7 +2055,8 @@ void OGRGMLDataSource::InsertHeader()
     // Detect if there are fields of List types.
     bool bHasListFields = false;
 
-    for( int iLayer = 0; !bHasListFields && iLayer < GetLayerCount(); iLayer++ )
+    const int nLayerCount = OGRGMLDataSource::GetLayerCount();
+    for( int iLayer = 0; !bHasListFields && iLayer < nLayerCount; iLayer++ )
     {
         OGRFeatureDefn *poFDefn = papoLayers[iLayer]->GetLayerDefn();
         for( int iField = 0;
@@ -2264,7 +2252,7 @@ void OGRGMLDataSource::InsertHeader()
     }
 
     // Define the schema for each layer.
-    for( int iLayer = 0; iLayer < GetLayerCount(); iLayer++ )
+    for( int iLayer = 0; iLayer < nLayerCount; iLayer++ )
     {
         OGRFeatureDefn *poFDefn = papoLayers[iLayer]->GetLayerDefn();
 
@@ -2390,8 +2378,9 @@ void OGRGMLDataSource::InsertHeader()
                 continue;
 
             int nMinOccurs = poFieldDefn->IsNullable() ? 0 : 1;
-            if( poFieldDefn->GetType() == OFTInteger ||
-                poFieldDefn->GetType() == OFTIntegerList )
+            const OGRFieldType eType = poFieldDefn->GetType();
+            if( eType == OFTInteger ||
+                eType == OFTIntegerList )
             {
                 int nWidth =
                     poFieldDefn->GetWidth() > 0 ? poFieldDefn->GetWidth() : 16;
@@ -2399,7 +2388,7 @@ void OGRGMLDataSource::InsertHeader()
                 PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"%s\">",
                           poFieldDefn->GetNameRef(),
                           nMinOccurs,
-                          poFieldDefn->GetType() == OFTIntegerList ? "unbounded": "1");
+                          eType == OFTIntegerList ? "unbounded": "1");
                 PrintLine(fpSchema, "          <xs:simpleType>");
                 if( poFieldDefn->GetSubType() == OFSTBoolean )
                 {
@@ -2425,8 +2414,8 @@ void OGRGMLDataSource::InsertHeader()
                 PrintLine(fpSchema, "          </xs:simpleType>");
                 PrintLine(fpSchema, "        </xs:element>");
             }
-            else if( poFieldDefn->GetType() == OFTInteger64 ||
-                     poFieldDefn->GetType() == OFTInteger64List )
+            else if( eType == OFTInteger64 ||
+                     eType == OFTInteger64List )
             {
                 int nWidth =
                     poFieldDefn->GetWidth() > 0 ? poFieldDefn->GetWidth() : 16;
@@ -2434,7 +2423,7 @@ void OGRGMLDataSource::InsertHeader()
                 PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"%s\">",
                           poFieldDefn->GetNameRef(),
                           nMinOccurs,
-                          poFieldDefn->GetType() == OFTInteger64List ? "unbounded": "1");
+                          eType == OFTInteger64List ? "unbounded": "1");
                 PrintLine(fpSchema, "          <xs:simpleType>");
                 if( poFieldDefn->GetSubType() == OFSTBoolean )
                 {
@@ -2459,8 +2448,8 @@ void OGRGMLDataSource::InsertHeader()
                 PrintLine(fpSchema, "          </xs:simpleType>");
                 PrintLine(fpSchema, "        </xs:element>");
             }
-            else if( poFieldDefn->GetType() == OFTReal ||
-                     poFieldDefn->GetType() == OFTRealList )
+            else if( eType == OFTReal ||
+                     eType == OFTRealList )
             {
                 int nWidth, nDecimals;
 
@@ -2470,7 +2459,7 @@ void OGRGMLDataSource::InsertHeader()
                 PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"%s\">",
                           poFieldDefn->GetNameRef(),
                           nMinOccurs,
-                          poFieldDefn->GetType() == OFTRealList ? "unbounded": "1");
+                          eType == OFTRealList ? "unbounded": "1");
                 PrintLine(fpSchema, "          <xs:simpleType>");
                 if( poFieldDefn->GetSubType() == OFSTFloat32 )
                     PrintLine(fpSchema, "            <xs:restriction base=\"xs:float\">");
@@ -2491,13 +2480,13 @@ void OGRGMLDataSource::InsertHeader()
                 PrintLine(fpSchema, "          </xs:simpleType>");
                 PrintLine(fpSchema, "        </xs:element>");
             }
-            else if( poFieldDefn->GetType() == OFTString ||
-                     poFieldDefn->GetType() == OFTStringList )
+            else if( eType == OFTString ||
+                     eType == OFTStringList )
             {
                 PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"%s\">",
                           poFieldDefn->GetNameRef(),
                           nMinOccurs,
-                          poFieldDefn->GetType() == OFTStringList ? "unbounded": "1");
+                          eType == OFTStringList ? "unbounded": "1");
                 PrintLine(fpSchema, "          <xs:simpleType>");
                 PrintLine(fpSchema,
                           "            <xs:restriction base=\"xs:string\">");
@@ -2509,16 +2498,25 @@ void OGRGMLDataSource::InsertHeader()
                 PrintLine(fpSchema, "          </xs:simpleType>");
                 PrintLine(fpSchema, "        </xs:element>");
             }
-            else if( poFieldDefn->GetType() == OFTDate || poFieldDefn->GetType() == OFTDateTime )
+            else if( eType == OFTDate )
             {
-                PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"1\">",
+                PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"1\" type=\"xs:date\">",
                            poFieldDefn->GetNameRef(),
                            nMinOccurs );
-                PrintLine(fpSchema, "          <xs:simpleType>");
-                PrintLine(fpSchema,
-                          "            <xs:restriction base=\"xs:string\">");
-                PrintLine(fpSchema, "            </xs:restriction>");
-                PrintLine(fpSchema, "          </xs:simpleType>");
+                PrintLine(fpSchema, "        </xs:element>");
+            }
+            else if( eType == OFTTime )
+            {
+                PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"1\" type=\"xs:time\">",
+                           poFieldDefn->GetNameRef(),
+                           nMinOccurs );
+                PrintLine(fpSchema, "        </xs:element>");
+            }
+            else if( eType == OFTDateTime )
+            {
+                PrintLine(fpSchema, "        <xs:element name=\"%s\" nillable=\"true\" minOccurs=\"%d\" maxOccurs=\"1\" type=\"xs:dateTime\">",
+                           poFieldDefn->GetNameRef(),
+                           nMinOccurs );
                 PrintLine(fpSchema, "        </xs:element>");
             }
             else
@@ -2540,12 +2538,12 @@ void OGRGMLDataSource::InsertHeader()
     if( fpSchema == fpOutput )
     {
         // Read the schema into memory.
-        int nSchemaSize = static_cast<int>(VSIFTellL(fpOutput) - nSchemaStart);
+        int nSchemaSize = static_cast<int>(VSIFTellL(fpSchema) - nSchemaStart);
         char *pszSchema = static_cast<char *>(CPLMalloc(nSchemaSize + 1));
 
-        VSIFSeekL(fpOutput, nSchemaStart, SEEK_SET);
+        VSIFSeekL(fpSchema, nSchemaStart, SEEK_SET);
 
-        VSIFReadL(pszSchema, 1, nSchemaSize, fpOutput);
+        VSIFReadL(pszSchema, 1, nSchemaSize, fpSchema);
         pszSchema[nSchemaSize] = '\0';
 
         // Move file data down by "schema size" bytes from after <?xml> header
@@ -2559,11 +2557,11 @@ void OGRGMLDataSource::InsertHeader()
             const int nBytesToMove =
                 std::min(nChunkSize, nEndOfUnmovedData - nSchemaInsertLocation);
 
-            VSIFSeekL(fpOutput, nEndOfUnmovedData - nBytesToMove, SEEK_SET);
-            VSIFReadL(pszChunk, 1, nBytesToMove, fpOutput);
-            VSIFSeekL(fpOutput, nEndOfUnmovedData - nBytesToMove + nSchemaSize,
+            VSIFSeekL(fpSchema, nEndOfUnmovedData - nBytesToMove, SEEK_SET);
+            VSIFReadL(pszChunk, 1, nBytesToMove, fpSchema);
+            VSIFSeekL(fpSchema, nEndOfUnmovedData - nBytesToMove + nSchemaSize,
                       SEEK_SET);
-            VSIFWriteL(pszChunk, 1, nBytesToMove, fpOutput);
+            VSIFWriteL(pszChunk, 1, nBytesToMove, fpSchema);
 
             nEndOfUnmovedData -= nBytesToMove;
         }
@@ -2571,10 +2569,10 @@ void OGRGMLDataSource::InsertHeader()
         CPLFree(pszChunk);
 
         // Write the schema in the opened slot.
-        VSIFSeekL(fpOutput, nSchemaInsertLocation, SEEK_SET);
-        VSIFWriteL(pszSchema, 1, nSchemaSize, fpOutput);
+        VSIFSeekL(fpSchema, nSchemaInsertLocation, SEEK_SET);
+        VSIFWriteL(pszSchema, 1, nSchemaSize, fpSchema);
 
-        VSIFSeekL(fpOutput, 0, SEEK_END);
+        VSIFSeekL(fpSchema, 0, SEEK_END);
 
         nBoundedByLocation += nSchemaSize;
 
@@ -2613,7 +2611,7 @@ void OGRGMLDataSource::PrintLine(VSILFILE *fp, const char *fmt, ...)
 /*                     OGRGMLSingleFeatureLayer                         */
 /************************************************************************/
 
-class OGRGMLSingleFeatureLayer : public OGRLayer
+class OGRGMLSingleFeatureLayer final: public OGRLayer
 {
   private:
     int                 nVal;
@@ -2716,7 +2714,15 @@ void OGRGMLDataSource::FindAndParseTopElements(VSILFILE *fp)
         if (pszStartTag != nullptr)
         {
             pszStartTag++;
-            const char *pszEndTag = strchr(pszStartTag, ' ');
+            const char *pszEndTag = nullptr;
+            for( const char *pszIter = pszStartTag; *pszIter != '\0'; pszIter++ )
+            {
+                if( isspace(*pszIter) || *pszIter == '>' )
+                {
+                    pszEndTag = pszIter;
+                    break;
+                }
+            }
             if (pszEndTag != nullptr && pszEndTag - pszStartTag < 128 )
             {
                 memcpy(szStartTag, pszStartTag, pszEndTag - pszStartTag);
@@ -2728,6 +2734,67 @@ void OGRGMLDataSource::FindAndParseTopElements(VSILFILE *fp)
     }
 
     const char *pszFeatureMember = strstr(pszXML, "<gml:featureMember");
+
+    // Is it a standalone geometry ?
+    if( pszFeatureMember == nullptr && pszStartTag != nullptr )
+    {
+        const char* pszElement = szStartTag;
+        const char* pszColon = strchr(pszElement, ':');
+        if( pszColon )
+            pszElement = pszColon + 1;
+        if( OGRGMLIsGeometryElement(pszElement) )
+        {
+            VSIFSeekL(fp, 0, SEEK_END);
+            const auto nLen = VSIFTellL(fp);
+            if( nLen < 10 * 1024 * 1024U )
+            {
+                VSIFSeekL(fp, 0, SEEK_SET);
+                std::string osBuffer;
+                try
+                {
+                    osBuffer.resize(static_cast<size_t>(nLen));
+                    VSIFReadL(&osBuffer[0], 1, osBuffer.size(), fp);
+                }
+                catch( const std::exception& )
+                {
+                }
+                CPLPushErrorHandler(CPLQuietErrorHandler);
+                CPLXMLNode* psTree = CPLParseXMLString(osBuffer.data());
+                CPLPopErrorHandler();
+                CPLErrorReset();
+                if( psTree )
+                {
+                    m_poStandaloneGeom.reset(GML2OGRGeometry_XMLNode(
+                        psTree,
+                        false,
+                        0, 0, false, true,
+                        false));
+
+                    if( m_poStandaloneGeom )
+                    {
+                        for( CPLXMLNode* psCur = psTree; psCur; psCur = psCur->psNext )
+                        {
+                            if( psCur->eType == CXT_Element &&
+                                strcmp(psCur->pszValue, szStartTag) == 0 )
+                            {
+                                const char* pszSRSName = CPLGetXMLValue(psCur, "srsName", nullptr);
+                                if( pszSRSName )
+                                {
+                                    m_oStandaloneGeomSRS.SetFromUserInput(pszSRSName);
+                                    m_oStandaloneGeomSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+                                    if( GML_IsSRSLatLongOrder(pszSRSName) )
+                                        m_poStandaloneGeom->swapXY();
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    CPLDestroyXMLNode(psTree);
+                }
+            }
+        }
+    }
+
     const char *pszDescription = strstr(pszXML, "<gml:description>");
     if( pszDescription && (pszFeatureMember == nullptr || pszDescription < pszFeatureMember) )
     {

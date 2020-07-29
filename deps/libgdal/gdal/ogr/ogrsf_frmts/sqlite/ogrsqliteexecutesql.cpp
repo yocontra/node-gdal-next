@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Run SQL requests with SQLite SQL engine
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,13 +49,13 @@
 #include "ogr_spatialref.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqliteexecutesql.cpp 722bc4c4c4f6ec3494bb2e4ee96b8742d72ac4c5 2018-02-14 22:51:15Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrsqliteexecutesql.cpp e665ed544d2c5572c03c44a7327d8b284c03d86b 2019-08-15 22:13:38 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRSQLiteExecuteSQLLayer                       */
 /************************************************************************/
 
-class OGRSQLiteExecuteSQLLayer: public OGRSQLiteSelectLayer
+class OGRSQLiteExecuteSQLLayer final: public OGRSQLiteSelectLayer
 {
     char             *pszTmpDBName;
 
@@ -741,8 +741,9 @@ OGRLayer * OGRSQLiteExecuteSQL( GDALDataset* poDS,
                                 CPL_UNUSED const char *pszDialect )
 {
     char* pszTmpDBName = (char*) CPLMalloc(256);
-    void* ptr = pszTmpDBName;
-    snprintf(pszTmpDBName, 256, "/vsimem/ogr2sqlite/temp_%p.db", ptr);
+    char szPtr[32];
+    snprintf(szPtr, sizeof(szPtr), "%p", pszTmpDBName);
+    snprintf(pszTmpDBName, 256, "/vsimem/ogr2sqlite/temp_%s.db", szPtr);
 
     OGRSQLiteDataSource* poSQLiteDS = nullptr;
     int bSpatialiteDB = FALSE;
@@ -778,9 +779,9 @@ OGRLayer * OGRSQLiteExecuteSQL( GDALDataset* poDS,
         {
             bTried = TRUE;
             char* pszCachedFilename = (char*) CPLMalloc(256);
-            void* ptrCached = pszCachedFilename;
-            snprintf(pszCachedFilename, 256, "/vsimem/ogr2sqlite/reference_%p.db",
-                     ptrCached);
+            snprintf(szPtr, sizeof(szPtr), "%p", pszCachedFilename);
+            snprintf(pszCachedFilename, 256, "/vsimem/ogr2sqlite/reference_%s.db",
+                     szPtr);
             char** papszOptions = CSLAddString(nullptr, "SPATIALITE=YES");
             OGRSQLiteDataSource* poCachedDS = new OGRSQLiteDataSource();
             const int nRet = poCachedDS->Create( pszCachedFilename, papszOptions );

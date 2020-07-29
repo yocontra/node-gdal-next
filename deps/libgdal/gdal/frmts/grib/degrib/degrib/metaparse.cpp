@@ -1014,7 +1014,8 @@ static int ParseSect3 (sInt4 *is3, sInt4 ns3, grib_MetaData *meta)
    }
    meta->gds.Nx = is3[30];
    meta->gds.Ny = is3[34];
-   if (meta->gds.Nx * meta->gds.Ny != meta->gds.numPts) {
+   if ((meta->gds.Nx != 0 && meta->gds.Ny > UINT_MAX / meta->gds.Nx) ||
+       meta->gds.Nx * meta->gds.Ny != meta->gds.numPts) {
       errSprintf ("Nx * Ny != number of points?\n");
       return -2;
    }
@@ -1027,9 +1028,7 @@ static int ParseSect3 (sInt4 *is3, sInt4 ns3, grib_MetaData *meta)
    meta->gds.lat2 = meta->gds.lon2 = 0;
    switch (is3[12]) {
       case GS3_LATLON: /* 0: Regular lat/lon grid. */
-#ifdef notdef
-      case 1: // 1: Rotated lat/lon grid
-#endif
+      case GS3_ROTATED_LATLON: // 1: Rotated lat/lon grid
       case GS3_GAUSSIAN_LATLON:  /* 40: Gaussian lat/lon grid. */
          if (ns3 < 72) {
             return -1;
@@ -1069,22 +1068,15 @@ static int ParseSect3 (sInt4 *is3, sInt4 ns3, grib_MetaData *meta)
          meta->gds.scan = (uChar) is3[71];
          meta->gds.meshLat = 0;
          meta->gds.orientLon = 0;
-#ifdef notdef
-         if( is3[12] == 1 ) {
+         if( is3[12] == GS3_ROTATED_LATLON ) {
              if( ns3 < 84 ) {
                  return -1;
              }
-             CPLDebug("GRIB", "Latitude1: %f", meta->gds.lat1);
-             CPLDebug("GRIB", "Longitude1: %f", meta->gds.lon1);
-             CPLDebug("GRIB", "Latitude2: %f", meta->gds.lat2);
-             CPLDebug("GRIB", "Longitude2: %f", meta->gds.lon2);
-             CPLDebug("GRIB", "Di : %f", meta->gds.Dx);
-             CPLDebug("GRIB", "Dj : %f", meta->gds.Dy);
-             CPLDebug("GRIB", "Latitude of the southern pole of projection: %f", is3[73-1] * unit);
-             CPLDebug("GRIB", "Longitude of the southern pole of projection: %f", is3[77-1] * unit);
-             CPLDebug("GRIB", "Angle of rotation of projection: %f", is3[81-1] * unit);
+             meta->gds.f_typeLatLon = 3;
+             meta->gds.southLat = is3[73-1] * unit;
+             meta->gds.southLon = is3[77-1] * unit;
+             meta->gds.angleRotate = is3[81-1] * unit;
          }
-#endif
          /* Resolve resolution flag(bit 3,4).  Copy Dx,Dy as appropriate. */
          if ((meta->gds.resFlag & GRIB2BIT_3) &&
              (!(meta->gds.resFlag & GRIB2BIT_4))) {
@@ -2977,7 +2969,7 @@ void ParseGrid (VSILFILE *fp, gridAttribType *attrib, double **Grib_Data,
                          * missing values. */
    uInt4 scanIndex;     /* Where we are in the original grid. */
    sInt4 x, y;          /* Where we are in a grid of scan value 0100 */
-   sInt4 newIndex;      /* x,y in a 1 dimensional array. */
+   uInt4 newIndex;      /* x,y in a 1 dimensional array. */
    double value;        /* The data in the new units. */
    /* A pointer to Grib_Data for ease of manipulation. */
    double *grib_Data = nullptr;
@@ -3020,9 +3012,12 @@ void ParseGrid (VSILFILE *fp, gridAttribType *attrib, double **Grib_Data,
           }
       }
 
-      *grib_DataLen = subNxNy;
-      double* newData = (double *) realloc ((void *) (*Grib_Data),
-                                       (*grib_DataLen) * sizeof (double));
+      double* newData = nullptr;
+      const size_t nBufferSize = subNxNy * sizeof (double);
+      if( nBufferSize / sizeof(double) == subNxNy )
+      {
+        newData = (double *) realloc ((void *) (*Grib_Data), nBufferSize);
+      }
       if( newData == nullptr )
       {
           errSprintf ("Memory allocation failed");
@@ -3031,6 +3026,7 @@ void ParseGrid (VSILFILE *fp, gridAttribType *attrib, double **Grib_Data,
           *grib_DataLen = 0;
           return;
       }
+      *grib_DataLen = subNxNy;
       *Grib_Data = newData;
    }
    grib_Data = *Grib_Data;
@@ -3117,7 +3113,7 @@ void ParseGrid (VSILFILE *fp, gridAttribType *attrib, double **Grib_Data,
          }
          ScanIndex2XY (scanIndex, &x, &y, scan, Nx, Ny);
          /* ScanIndex returns value as if scan was 0100 */
-         newIndex = (x - 1) + (y - 1) * Nx;
+         newIndex = (uInt4)(x - 1) + (uInt4)(y - 1) * Nx;
          grib_Data[newIndex] = value;
       }
    }
@@ -3150,7 +3146,7 @@ void ParseGrid (VSILFILE *fp, gridAttribType *attrib, double **Grib_Data,
       for (scanIndex = 0; scanIndex < (uInt4)nd2x3 && scanIndex < Nx * Ny; scanIndex++) {
          ScanIndex2XY (scanIndex, &x, &y, scan, Nx, Ny);
          /* ScanIndex returns value as if scan was 0100 */
-         newIndex = (x - 1) + (y - 1) * Nx;
+         newIndex = (uInt4)(x - 1) + (uInt4)(y - 1) * Nx;
          if (attrib->fieldType) {
             value = iain[scanIndex];
          } else {
@@ -3186,7 +3182,7 @@ void ParseGrid (VSILFILE *fp, gridAttribType *attrib, double **Grib_Data,
          for (scanIndex = 0; scanIndex < (uInt4)nd2x3 && scanIndex < Nx * Ny; scanIndex++) {
             ScanIndex2XY (scanIndex, &x, &y, scan, Nx, Ny);
             /* ScanIndex returns value as if scan was 0100 */
-            newIndex = (x - 1) + (y - 1) * Nx;
+            newIndex = (uInt4)(x - 1) + (uInt4)(y - 1) * Nx;
             /* Corrected this on 5/10/2004 */
             if (ib[scanIndex] != 1) {
                grib_Data[newIndex] = xmissp;

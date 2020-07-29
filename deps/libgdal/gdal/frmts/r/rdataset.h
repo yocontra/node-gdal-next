@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rdataset.h ab2f960bc12d840c903075cf129e0efd9431dd9b 2019-02-02 12:16:13 +0100 Thomas Bonfort $
+ * $Id: rdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  R Format Driver
  * Purpose:  Read/write R stats package object format.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -59,7 +59,7 @@ RCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
 /* ==================================================================== */
 /************************************************************************/
 
-class RDataset : public GDALPamDataset
+class RDataset final: public GDALPamDataset
 {
     friend class RRasterBand;
     VSILFILE   *fp;
@@ -90,7 +90,7 @@ class RDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class RRasterBand : public GDALPamRasterBand
+class RRasterBand final: public GDALPamRasterBand
 {
     friend class RDataset;
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_srs_api.h 8b99fd4d3ad3db542705722876fcf484486f46d6 2019-12-17 14:27:30 +0100 Even Rouault $
+ * $Id: ogr_srs_api.h 111ddab546748482d008cd057ff8ccfe5171a236 2020-04-23 21:09:58 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API and constant declarations for OGR Spatial References.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -503,6 +503,9 @@ OGRErr CPL_DLL CPL_STDCALL OSRExportToWkt( OGRSpatialReferenceH, char ** );
 OGRErr CPL_DLL OSRExportToWktEx( OGRSpatialReferenceH, char ** ppszResult,
                                  const char* const* papszOptions );
 OGRErr CPL_DLL CPL_STDCALL OSRExportToPrettyWkt( OGRSpatialReferenceH, char **, int);
+OGRErr CPL_DLL OSRExportToPROJJSON( OGRSpatialReferenceH hSRS,
+                                    char ** ppszReturn,
+                                    const char* const* papszOptions );
 OGRErr CPL_DLL CPL_STDCALL OSRExportToProj4( OGRSpatialReferenceH, char **);
 OGRErr CPL_DLL OSRExportToPCI( OGRSpatialReferenceH, char **, char **,
                                double ** );
@@ -542,6 +545,7 @@ double CPL_DLL OSRGetTargetLinearUnits( OGRSpatialReferenceH, const char *, char
 double CPL_DLL OSRGetPrimeMeridian( OGRSpatialReferenceH, char ** );
 
 int CPL_DLL OSRIsGeographic( OGRSpatialReferenceH );
+int CPL_DLL OSRIsDerivedGeographic( OGRSpatialReferenceH );
 int CPL_DLL OSRIsLocal( OGRSpatialReferenceH );
 int CPL_DLL OSRIsProjected( OGRSpatialReferenceH );
 int CPL_DLL OSRIsCompound( OGRSpatialReferenceH );
@@ -572,6 +576,8 @@ OGRErr CPL_DLL OSRSetCompoundCS( OGRSpatialReferenceH hSRS,
                                  const char *pszName,
                                  OGRSpatialReferenceH hHorizSRS,
                                  OGRSpatialReferenceH hVertSRS );
+OGRErr CPL_DLL OSRPromoteTo3D( OGRSpatialReferenceH hSRS, const char* pszName );
+
 OGRErr CPL_DLL OSRSetGeogCS( OGRSpatialReferenceH hSRS,
                       const char * pszGeogName,
                       const char * pszDatumName,
@@ -640,6 +646,7 @@ int    CPL_DLL OSREPSGTreatsAsNorthingEasting( OGRSpatialReferenceH hSRS );
 const char CPL_DLL *OSRGetAxis( OGRSpatialReferenceH hSRS,
                                 const char *pszTargetKey, int iAxis,
                                 OGRAxisOrientation *peOrientation );
+int    CPL_DLL OSRGetAxesCount( OGRSpatialReferenceH hSRS );
 OGRErr CPL_DLL OSRSetAxes( OGRSpatialReferenceH hSRS,
                            const char *pszTargetKey,
                            const char *pszXAxisName,
@@ -661,6 +668,10 @@ void CPL_DLL OSRSetAxisMappingStrategy( OGRSpatialReferenceH hSRS,
                                         OSRAxisMappingStrategy strategy );
 
 const int CPL_DLL *OSRGetDataAxisToSRSAxisMapping( OGRSpatialReferenceH hSRS, int* pnCount );
+
+OGRErr CPL_DLL OSRSetDataAxisToSRSAxisMapping( OGRSpatialReferenceH hSRS,
+                                               int nMappingSize,
+                                               const int* panMapping );
 
 /** Albers Conic Equal Area */
 OGRErr CPL_DLL OSRSetACEA( OGRSpatialReferenceH hSRS, double dfStdP1, double dfStdP2,
@@ -936,6 +947,15 @@ OGRErr CPL_DLL OSRSetQSC( OGRSpatialReferenceH hSRS,
 OGRErr CPL_DLL OSRSetSCH( OGRSpatialReferenceH hSRS,
                               double dfPegLat, double dfPegLong,
                               double dfPegHeading, double dfPegHgt);
+
+/** Vertical Perspective / Near-sided Perspective */
+OGRErr CPL_DLL OSRSetVerticalPerspective( OGRSpatialReferenceH hSRS,
+                                          double dfTopoOriginLat,
+                                          double dfTopoOriginLon,
+                                          double dfTopoOriginHeight,
+                                          double dfViewPointHeight,
+                                          double dfFalseEasting,
+                                          double dfFalseNorthing);
 
 double CPL_DLL OSRCalcInvFlattening( double dfSemiMajor, double dfSemiMinor );
 double CPL_DLL OSRCalcSemiMinorFromInvFlattening( double dfSemiMajor, double dfInvFlattening );

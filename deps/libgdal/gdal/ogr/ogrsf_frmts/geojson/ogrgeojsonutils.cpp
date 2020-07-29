@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Mateusz Loskot
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: ogrgeojsonutils.cpp 0ddce43f6d60098b42ed40c2e9eeb38459758f38 2019-05-18 18:42:43 -0500 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonutils.cpp 15b25126b5d1c4c3f1be56cbda197a97750f1717 2020-06-25 14:04:47 +0200 Even Rouault $")
 
 const char szESRIJSonPotentialStart1[] =
     "{\"features\":[{\"geometry\":{\"rings\":[";
@@ -184,6 +184,14 @@ static bool IsGeoJSONLikeObject( const char* pszText, bool* pbMightBeSequence )
     // See https://raw.githubusercontent.com/icepack/icepack-data/master/meshes/larsen/larsen_inflow.geojson
     if( osWithoutSpace.find("{\"crs\":{") == 0 &&
         osWithoutSpace.find(",\"features\":[") != std::string::npos )
+    {
+        if( pbMightBeSequence )
+            *pbMightBeSequence = false;
+        return true;
+    }
+
+    // See https://github.com/OSGeo/gdal/issues/2720
+    if( osWithoutSpace.find("{\"coordinates\":[") == 0 )
     {
         if( pbMightBeSequence )
             *pbMightBeSequence = false;
@@ -544,8 +552,7 @@ GeoJSONSourceType ESRIJSONDriverGetSourceType( GDALOpenInfo* poOpenInfo )
     // By default read first 6000 bytes.
     // 6000 was chosen as enough bytes to
     // enable all current tests to pass.
-    if( poOpenInfo->fpL == nullptr ||
-        !poOpenInfo->TryToIngest(6000) )
+    if( !poOpenInfo->TryToIngest(6000) )
     {
         return eGeoJSONSourceUnknown;
     }
@@ -603,8 +610,7 @@ GeoJSONSourceType TopoJSONDriverGetSourceType( GDALOpenInfo* poOpenInfo )
     // By default read first 6000 bytes.
     // 6000 was chosen as enough bytes to
     // enable all current tests to pass.
-    if( poOpenInfo->fpL == nullptr ||
-        !poOpenInfo->TryToIngest(6000) )
+    if( !poOpenInfo->TryToIngest(6000) )
     {
         return eGeoJSONSourceUnknown;
     }

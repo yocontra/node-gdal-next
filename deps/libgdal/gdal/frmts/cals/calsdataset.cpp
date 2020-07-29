@@ -32,7 +32,7 @@
 
 #include "tiff.h"
 
-CPL_CVSID("$Id: calsdataset.cpp 6f51856470aecacbcb25254e6a6e263e5b1a5aae 2017-12-19 05:31:03Z Kurt Schwehr $")
+CPL_CVSID("$Id: calsdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -40,7 +40,7 @@ CPL_CVSID("$Id: calsdataset.cpp 6f51856470aecacbcb25254e6a6e263e5b1a5aae 2017-12
 /* ==================================================================== */
 /************************************************************************/
 
-class CALSDataset : public GDALPamDataset
+class CALSDataset final: public GDALPamDataset
 {
     friend class CALSRasterBand;
 
@@ -73,7 +73,7 @@ class CALSDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class CALSRasterBand: public GDALPamRasterBand
+class CALSRasterBand final: public GDALPamRasterBand
 {
     GDALRasterBand* poUnderlyingBand;
 
@@ -134,7 +134,7 @@ class CALSRasterBand: public GDALPamRasterBand
 /* ==================================================================== */
 /************************************************************************/
 
-class CALSWrapperSrcBand: public GDALPamRasterBand
+class CALSWrapperSrcBand final: public GDALPamRasterBand
 {
         GDALDataset* poSrcDS;
         bool bInvertValues;
@@ -205,7 +205,7 @@ class CALSWrapperSrcBand: public GDALPamRasterBand
 /* ==================================================================== */
 /************************************************************************/
 
-class CALSWrapperSrcDataset: public GDALPamDataset
+class CALSWrapperSrcDataset final: public GDALPamDataset
 {
     public:
         CALSWrapperSrcDataset( GDALDataset* poSrcDS, const char* pszPadding )
@@ -608,9 +608,9 @@ void GDALRegister_CALS()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "CALS (Type 1)" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_cals.html" );
+                               "drivers/raster/cals.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
-    poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, ".cal .ct1");
+    poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "cal ct1");
 
     poDriver->pfnIdentify = CALSDataset::Identify;
     poDriver->pfnOpen = CALSDataset::Open;

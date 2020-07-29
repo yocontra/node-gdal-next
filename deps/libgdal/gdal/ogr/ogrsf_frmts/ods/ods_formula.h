@@ -1,14 +1,14 @@
 /******************************************************************************
- * $Id: ods_formula.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: ods_formula.h 327ac75f35d58a7aebccdcdb88e23695a5aab39f 2020-05-22 19:48:49 +0200 Even Rouault $
  *
  * Component: ODS formula Engine
  * Purpose: Implementation of the ods_formula_node class used to represent a
  *          node in a ODS expression.
- * Author: Even Rouault <even dot rouault at mines dash paris dot org>
+ * Author: Even Rouault <even dot rouault at spatialys.com>
  *
  ******************************************************************************
  * Copyright (C) 2010 Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -148,15 +148,15 @@ class ods_formula_node {
  public:
     ods_formula_node();
 
-    ods_formula_node(
+    explicit ods_formula_node(
         const char *,
         ods_formula_field_type field_type_in = ODS_FIELD_TYPE_STRING );
     // cppcheck-suppress noExplicitConstructor
-    ods_formula_node( int );
+    explicit ods_formula_node( int );
     // cppcheck-suppress noExplicitConstructor
-    ods_formula_node( double );
+    explicit ods_formula_node( double );
     // cppcheck-suppress noExplicitConstructor
-    ods_formula_node( ods_formula_op );
+    explicit ods_formula_node( ods_formula_op );
 
     ods_formula_node( const ods_formula_node& other );
 
@@ -204,6 +204,8 @@ public:
     virtual int EvaluateRange(int nRow1, int nCol1, int nRow2, int nCol2,
                               std::vector<ods_formula_node>& aoOutValues) = 0;
     virtual ~IODSCellEvaluator() {}
+
+    int m_nDepth = 0;
 };
 
 ods_formula_node* ods_formula_compile( const char *expr );

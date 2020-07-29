@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: wmsmetadataset.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: wmsmetadataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  WMS Client Driver
  * Purpose:  Declaration of GDALWMSMetaDataset class
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -55,7 +55,7 @@ class WMSCTileSetDesc
 /* ==================================================================== */
 /************************************************************************/
 
-class GDALWMSMetaDataset : public GDALPamDataset
+class GDALWMSMetaDataset final: public GDALPamDataset
 {
   private:
     CPLString osGetURL;

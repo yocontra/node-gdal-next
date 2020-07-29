@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_pam.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: gdal_pam.h 69f25f253d141faf836c400676f9f94dd3f43707 2019-07-12 18:42:23 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Declaration for Peristable Auxiliary Metadata classes.
@@ -237,6 +237,8 @@ typedef struct {
 
     GDALRasterAttributeTable *poDefaultRAT;
 
+    bool           bOffsetSet;
+    bool           bScaleSet;
 } GDALRasterBandPamInfo;
 //! @endcond
 /* ******************************************************************** */

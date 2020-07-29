@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_ods.h ee6278f8dd1be7064db87be87fe31fa8943730ec 2019-02-01 23:12:48 +0100 Even Rouault $
+ * $Id: ogr_ods.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  ODS Translator
  * Purpose:  Definition of classes for OGR OpenOfficeSpreadsheet .ods driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

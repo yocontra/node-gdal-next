@@ -30,9 +30,9 @@
 #include "ogr_cloudant.h"
 #include "ogrgeojsonreader.h"
 #include "ogrgeojsonwriter.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrcloudantdatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrcloudantdatasource.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
 
 /************************************************************************/
 /*                        OGRCloudantDataSource()                       */

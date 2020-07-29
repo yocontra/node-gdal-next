@@ -2,10 +2,10 @@
  *
  * Project:  GeoRSS Translator
  * Purpose:  Implements OGRGeoRSSDriver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2008, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 #include "gdal_priv.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: ogrgeorssdriver.cpp c4482349ac2c508ba9fd1e26ec144329bea96411 2018-02-14 20:06:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrgeorssdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -135,13 +135,13 @@ void RegisterOGRGeoRSS()
 "  </Option>"
 "  <Option name='USE_EXTENSIONS' type='boolean' description='Whether extension fields (that is to say fields not in the base schema of RSS or Atom documents) will be written' default='NO'/>"
 "  <Option name='WRITE_HEADER_AND_FOOTER' type='boolean' description='Whether header and footer are written' default='YES'/>"
-"  <Option name='HEADER' type='string' description='XML content that will be put between the <channel> element and the first <item> element for a RSS document, or between the xml tag and the first <entry> element for an Atom document. If it is specified, it will overload the following options'/>"
-"  <Option name='TITLE' type='string' description='value put inside the <title> element in the header'/>"
-"  <Option name='DESCRIPTION' type='string' description='(RSS only) value put inside the <description> element in the header'/>"
-"  <Option name='LINK' type='string' description='(RSS only) value put inside the <link> element in the header'/>"
-"  <Option name='UPDATED' type='string' description='(RSS only) value put inside the <updated> element in the header. Should be formatted as a XML datetime'/>"
-"  <Option name='AUTHOR_NAME' type='string' description='(ATOM only) value put inside the <author><name> element in the header'/>"
-"  <Option name='ID' type='string' description='(ATOM only) value put inside the <id> element in the header.'/>"
+"  <Option name='HEADER' type='string' description='XML content that will be put between the &lt;channel&gt; element and the first &lt;item&gt; element for a RSS document, or between the xml tag and the first &lt;entry&gt; element for an Atom document. If it is specified, it will overload the following options'/>"
+"  <Option name='TITLE' type='string' description='value put inside the &lt;title&gt; element in the header'/>"
+"  <Option name='DESCRIPTION' type='string' description='(RSS only) value put inside the &lt;description&gt; element in the header'/>"
+"  <Option name='LINK' type='string' description='(RSS only) value put inside the &lt;link&gt; element in the header'/>"
+"  <Option name='UPDATED' type='string' description='(RSS only) value put inside the &lt;updated&gt; element in the header. Should be formatted as a XML datetime'/>"
+"  <Option name='AUTHOR_NAME' type='string' description='(ATOM only) value put inside the &lt;author&gt;&lt;name&gt; element in the header'/>"
+"  <Option name='ID' type='string' description='(ATOM only) value put inside the &lt;id&gt; element in the header.'/>"
 "</CreationOptionList>");
     poDriver->SetMetadataItem(GDAL_DS_LAYER_CREATIONOPTIONLIST,
                               "<LayerCreationOptionList/>");

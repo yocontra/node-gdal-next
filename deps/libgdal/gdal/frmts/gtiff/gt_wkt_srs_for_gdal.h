@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: gt_wkt_srs_for_gdal.h eeedace5a1f16c463f958796d3e793dcd0d9c531 2017-06-27 21:06:52Z Even Rouault $
+ * $Id: gt_wkt_srs_for_gdal.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Read/Write in-memory GeoTIFF file
  * Author:   Even Rouault
  *
  ******************************************************************************
- * Copyright (c) 2010-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

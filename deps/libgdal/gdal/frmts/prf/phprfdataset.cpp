@@ -40,7 +40,7 @@ enum ph_format
 #define PH_DEM_EXT          "x-dem"
 #define PH_GEOREF_SHIFT_Y   (1.0)
 
-class PhPrfBand : public VRTSourcedRasterBand
+class PhPrfBand final : public VRTSourcedRasterBand
 {
     std::vector<GDALRasterBand*> osOverview;
 public:
@@ -80,7 +80,7 @@ public:
     }
 };
 
-class PhPrfDataset : public VRTDataset
+class PhPrfDataset final : public VRTDataset
 {
     std::vector<GDALDataset*>    osSubTiles;
 public:
@@ -113,7 +113,7 @@ PhPrfDataset::PhPrfDataset( GDALAccess _eAccess, int nSizeX, int nSizeY,
 
 PhPrfDataset::~PhPrfDataset()
 {
-    CloseDependentDatasets();
+    PhPrfDataset::CloseDependentDatasets();
 }
 
 bool PhPrfDataset::AddTile( const char* pszPartName, GDALAccess eAccessType,
@@ -134,7 +134,9 @@ bool PhPrfDataset::AddTile( const char* pszPartName, GDALAccess eAccessType,
             return false;
         }
 
-        //! \todo What reason for nBlockXSize&nBlockYSize passed to AddSrcBandDescription
+        // Block sizes (nBlockXSize&nBlockYSize) passed as zeros.
+        // They will be loaded when RefUnderlyingRasterBand
+        // function is called on first open of tile's dataset 'poTileDataset'.
         poTileDataset->AddSrcBandDescription(poBand->GetRasterDataType(), 0, 0);
         GDALRasterBand* poTileBand = poTileDataset->GetRasterBand( nBand );
 
@@ -661,7 +663,7 @@ void GDALRegister_PRF()
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "prf" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_prf.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/prf.html" );
     poDriver->pfnIdentify = PhPrfDataset::Identify;
     poDriver->pfnOpen = PhPrfDataset::Open;
     GDALRegisterDriver( (GDALDriverH)poDriver );

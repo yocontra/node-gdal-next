@@ -3,10 +3,10 @@
  * Name:     cpl_virtualmem.cpp
  * Project:  CPL - Common Portability Library
  * Purpose:  Virtual memory
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "cpl_error.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: cpl_virtualmem.cpp 1ab096be50a6bd1fd2fd4bc075df08b9b808b95a 2019-04-01 18:24:26 +0200 Raul Marin $")
+CPL_CVSID("$Id: cpl_virtualmem.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 #ifdef NDEBUG
 // Non NDEBUG: Ignore the result.

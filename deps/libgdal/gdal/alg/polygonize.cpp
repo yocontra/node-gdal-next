@@ -5,7 +5,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2008, Frank Warmerdam
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: polygonize.cpp fe2d81c8819bf9794bce0210098e637565728350 2018-05-06 00:49:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: polygonize.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */

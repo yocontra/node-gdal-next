@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999,  Les Technologies SoftMap Inc.
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -41,7 +41,7 @@
 #include "cpl_string.h"
 
 
-CPL_CVSID("$Id: ogrfielddefn.cpp 76bc4fed0662a4be6d6e7e17b6dfd6f8329ce47c 2018-11-21 19:28:32 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrfielddefn.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRFieldDefn()                            */

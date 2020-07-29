@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -230,7 +230,7 @@ WCSDataset::DirectRasterIO( CPL_UNUSED GDALRWFlag eRWFlag,
                             int *panBandMap,
                             GSpacing nPixelSpace, GSpacing nLineSpace,
                             GSpacing nBandSpace,
-                            CPL_UNUSED GDALRasterIOExtraArg* psExtraArg)
+                            GDALRasterIOExtraArg* psExtraArg)
 {
     CPLDebug( "WCS", "DirectRasterIO(%d,%d,%d,%d) -> (%d,%d) (%d bands)\n",
               nXOff, nYOff, nXSize, nYSize,
@@ -253,7 +253,7 @@ WCSDataset::DirectRasterIO( CPL_UNUSED GDALRWFlag eRWFlag,
     CPLHTTPResult *psResult = nullptr;
     CPLErr eErr =
         GetCoverage( nXOff, nYOff, nXSize, nYSize, nBufXSize, nBufYSize,
-                     band_count, panBandMap, &psResult );
+                     band_count, panBandMap, psExtraArg, &psResult );
 
     if( eErr != CE_None )
         return eErr;
@@ -339,6 +339,7 @@ static bool ProcessError( CPLHTTPResult *psResult );
 CPLErr WCSDataset::GetCoverage( int nXOff, int nYOff, int nXSize, int nYSize,
                                 int nBufXSize, int nBufYSize,
                                 int nBandCount, int *panBandList,
+                                GDALRasterIOExtraArg *psExtraArg,
                                 CPLHTTPResult **ppsResult )
 
 {
@@ -378,8 +379,18 @@ CPLErr WCSDataset::GetCoverage( int nXOff, int nYOff, int nXSize, int nYSize,
 /*      Fetch the result.                                               */
 /* -------------------------------------------------------------------- */
     CPLErrorReset();
-    *ppsResult = CPLHTTPFetch( osRequest, papszHttpOptions );
-
+    if( psExtraArg && psExtraArg->pfnProgress != nullptr)
+    {
+        *ppsResult = CPLHTTPFetchEx( osRequest, papszHttpOptions,
+                                     psExtraArg->pfnProgress,
+                                     psExtraArg->pProgressData,
+                                     nullptr, nullptr);
+    }
+    else
+    {
+        *ppsResult = CPLHTTPFetch( osRequest, papszHttpOptions );
+    }
+    
     if( ProcessError( *ppsResult ) )
         return CE_Failure;
     else
@@ -583,7 +594,7 @@ int WCSDataset::EstablishRasterDetails()
     CPLHTTPResult *psResult = nullptr;
     CPLErr eErr;
 
-    eErr = GetCoverage( 0, 0, 2, 2, 2, 2, 0, nullptr, &psResult );
+    eErr = GetCoverage( 0, 0, 2, 2, 2, 2, 0, nullptr, nullptr, &psResult );
     if( eErr != CE_None )
         return false;
 
@@ -1678,7 +1689,7 @@ void GDALRegister_WCS()
     poDriver->SetDescription( "WCS" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "OGC Web Coverage Service" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_wcs.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/wcs.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
 

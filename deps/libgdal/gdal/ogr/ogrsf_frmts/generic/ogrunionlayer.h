@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogrunionlayer.h 10e54d45fee8229428eb8ab22949aa46eb9da150 2018-05-06 11:07:25 +0200 Even Rouault $
+ * $Id: ogrunionlayer.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRUnionLayer class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 /*                      OGRUnionLayerGeomFieldDefn                      */
 /************************************************************************/
 
-class OGRUnionLayerGeomFieldDefn: public OGRGeomFieldDefn
+class OGRUnionLayerGeomFieldDefn final: public OGRGeomFieldDefn
 {
     public:
 
@@ -64,7 +64,7 @@ typedef enum
     FIELD_SPECIFIED,
 } FieldUnionStrategy;
 
-class OGRUnionLayer : public OGRLayer
+class OGRUnionLayer final: public OGRLayer
 {
     CPL_DISALLOW_COPY_ASSIGN(OGRUnionLayer)
 

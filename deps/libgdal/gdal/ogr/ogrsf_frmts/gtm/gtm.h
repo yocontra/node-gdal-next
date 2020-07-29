@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gtm.h 3c7e475e5bd7bd39058020357f7010d1886ee51e 2016-10-25 16:46:26Z Kurt Schwehr $
+ * $Id: gtm.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  GTM Driver
  * Purpose:  Class for reading, parsing and handling a gtm file.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Leonardo de Paula Rosa Piga
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -5,7 +5,7 @@
  * Author:   James McClain, <jmcclain@azavea.com>
  *
  **********************************************************************
- * Copyright (c) 2010-2015, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2015, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2018, Azavea
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -49,7 +49,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_hdfs.cpp a72bb74253019efc240755d64b3ad44a87323e1b 2019-03-10 04:36:52 -0400 James McClain $")
+CPL_CVSID("$Id: cpl_vsil_hdfs.cpp 5551b0b7ab234a3c412620ed91c8b941d56efc87 2020-03-16 16:01:21 +0100 Even Rouault $")
 
 #ifdef HDFS_ENABLED
 
@@ -87,7 +87,6 @@ class VSIHdfsHandle final : public VSIVirtualHandle
     hdfsFile poFile = nullptr;
     hdfsFS poFilesystem = nullptr;
     std::string oFilename;
-    bool bReadOnly;
     bool bEOF = false;
 
   public:
@@ -115,8 +114,8 @@ class VSIHdfsHandle final : public VSIVirtualHandle
 VSIHdfsHandle::VSIHdfsHandle(hdfsFile _poFile,
                              hdfsFS _poFilesystem,
                              const char * pszFilename,
-                             bool _bReadOnly)
-  : poFile(_poFile), poFilesystem(_poFilesystem), oFilename(pszFilename), bReadOnly(_bReadOnly)
+                             bool /*_bReadOnly*/)
+  : poFile(_poFile), poFilesystem(_poFilesystem), oFilename(pszFilename)
 {}
 
 VSIHdfsHandle::~VSIHdfsHandle()
@@ -169,7 +168,7 @@ VSIHdfsHandle::Read(void *pBuffer, size_t nSize, size_t nMemb)
       // be encoded in a signed 32-bit number, break the request into
       // 2GB batches.
       bytes = hdfsRead(poFilesystem, poFile,
-                       pBuffer + bytes_read,
+                       static_cast<char*>(pBuffer) + bytes_read,
                        bytes_to_request > INT_MAX ? INT_MAX : bytes_to_request);
 
       if (bytes > 0) {
@@ -185,12 +184,11 @@ VSIHdfsHandle::Read(void *pBuffer, size_t nSize, size_t nMemb)
       }
     }
 
-  if (bytes_read > 0)
-    return bytes_read/nSize;
+  return bytes_read/nSize;
 }
 
 size_t
-VSIHdfsHandle::Write(const void *pBuffer, size_t nSize, size_t nMemb)
+VSIHdfsHandle::Write(const void *, size_t, size_t)
 {
   CPLError(CE_Failure, CPLE_AppDefined, "HDFS driver is read-only");
   return -1;
@@ -350,21 +348,21 @@ VSIHdfsFilesystemHandler::Stat( const char *pszeFilename, VSIStatBufL *pStatBuf,
 }
 
 int
-VSIHdfsFilesystemHandler::Unlink(const char *pszFilename)
+VSIHdfsFilesystemHandler::Unlink(const char *)
 {
   CPLError(CE_Failure, CPLE_AppDefined, "HDFS driver is read-only");
   return -1;
 }
 
 int
-VSIHdfsFilesystemHandler::Mkdir(const char *pszDirname, long nMode)
+VSIHdfsFilesystemHandler::Mkdir(const char *, long)
 {
   CPLError(CE_Failure, CPLE_AppDefined, "HDFS driver is read-only");
   return -1;
 }
 
 int
-VSIHdfsFilesystemHandler::Rmdir(const char *pszDirname)
+VSIHdfsFilesystemHandler::Rmdir(const char *)
 {
   CPLError(CE_Failure, CPLE_AppDefined, "HDFS driver is read-only");
   return -1;
@@ -391,7 +389,7 @@ VSIHdfsFilesystemHandler::ReadDir(const char *pszDirname)
 }
 
 int
-VSIHdfsFilesystemHandler::Rename(const char *oldpath, const char *newpath)
+VSIHdfsFilesystemHandler::Rename(const char *, const char *)
 {
   CPLError(CE_Failure, CPLE_AppDefined, "HDFS driver is read-only");
   return -1;

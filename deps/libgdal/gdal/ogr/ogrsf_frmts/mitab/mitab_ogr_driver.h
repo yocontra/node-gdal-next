@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab_ogr_driver.h f83fcc02c2413b7153a8edee8ca109b25a5a6fed 2020-01-16 16:32:14 +0300 Dmitry Baryshnikov $
+ * $Id: mitab_ogr_driver.h 1a84c3072423a876ffe2262fef692f9eac43d5ed 2020-01-16 16:32:14 +0300 Dmitry Baryshnikov $
  *
  * Name:     mitab_ogr_drive.h
  * Project:  Mid/mif tab ogr support

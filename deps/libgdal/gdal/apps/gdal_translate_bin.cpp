@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, 2002, Frank Warmerdam
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdal_translate_bin.cpp 743d0ce0d7ea6bdc710b6b2950d1e8c34243797f 2019-04-23 08:10:30 -0400 fechen123 $")
+CPL_CVSID("$Id: gdal_translate_bin.cpp 17973835a8fbc78d12e01cde249b8fca561efaeb 2019-11-16 00:02:55 +0100 Even Rouault $")
 
 /*  ******************************************************************* */
 /*                               Usage()                                */
@@ -351,7 +351,7 @@ MAIN_START(argc, argv)
         GDALTranslateOptionsFree(psOptions);
         GDALTranslateOptionsForBinaryFree(psOptionsForBinary);
 
-        GDALDestroyDriverManager();
+        GDALDestroy();
         return 0;
     }
 
@@ -369,7 +369,7 @@ MAIN_START(argc, argv)
     GDALTranslateOptionsFree(psOptions);
     GDALTranslateOptionsForBinaryFree(psOptionsForBinary);
 
-    GDALDestroyDriverManager();
+    GDALDestroy();
 
     return nRetCode;
 }

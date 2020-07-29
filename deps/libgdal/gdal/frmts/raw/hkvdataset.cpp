@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hkvdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: hkvdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -49,7 +49,7 @@ CPL_CVSID("$Id: hkvdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-
 
 class HKVDataset;
 
-class HKVRasterBand : public RawRasterBand
+class HKVRasterBand final: public RawRasterBand
 {
     friend class HKVDataset;
 
@@ -1879,7 +1879,7 @@ void GDALRegister_HKV()
     poDriver->SetDescription( "MFF2" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Vexcel MFF2 (HKV) Raster" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_mff2.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/mff2.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Int32 UInt32 CInt16 "
                                "CInt32 Float32 Float64 CFloat32 CFloat64" );

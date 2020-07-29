@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_minixml.cpp 1991ea2daa9d0cbd29cd04095309df497f95a95e 2019-01-04 16:58:48 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_minixml.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 typedef enum {
     TNone,

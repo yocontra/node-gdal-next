@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: test_ogrsf.cpp 765f9701959517cb9c13deea90566e390f72c718 2019-01-24 00:26:25 +0100 Even Rouault $")
+CPL_CVSID("$Id: test_ogrsf.cpp 5fb7444c23ea382684f36e76f5d51165314bd240 2019-09-28 19:06:36 +0200 Even Rouault $")
 
 bool bReadOnly = false;
 bool bVerbose = true;
@@ -897,7 +897,8 @@ static int TestCreateLayer( GDALDriver* poDriver, OGRwkbGeometryType eGeomType )
         !EQUAL(poDriver->GetDescription(), "PDF") &&
         !EQUAL(poDriver->GetDescription(), "GeoJSON") &&
         !EQUAL(poDriver->GetDescription(), "OGR_GMT") &&
-        !EQUAL(poDriver->GetDescription(), "PDS4") )
+        !EQUAL(poDriver->GetDescription(), "PDS4") &&
+        !EQUAL(poDriver->GetDescription(), "FlatGeobuf") )
     {
         /* Reopen dataset */
         poDS = LOG_ACTION(static_cast<GDALDataset*>(GDALOpenEx(osFilename,

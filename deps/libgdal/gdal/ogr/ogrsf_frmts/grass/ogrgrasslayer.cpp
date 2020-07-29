@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Radim Blazek <radim.blazek@gmail.com>
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "ogrgrass.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrgrasslayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgrasslayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRGRASSLayer()                            */

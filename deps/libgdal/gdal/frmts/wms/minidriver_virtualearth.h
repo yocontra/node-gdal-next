@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: minidriver_virtualearth.h b73bc525428c4d0c0b398b937223b11a119caa5e 2016-12-01 23:13:38Z Lucian Plesea $
+ * $Id: minidriver_virtualearth.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  WMS Client Driver
  * Purpose:  Implementation of Dataset and RasterBand classes for WMS
@@ -7,7 +7,7 @@
  * Author:   Even Rouault
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

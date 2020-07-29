@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, 2011, Martin Lambers <marlam@marlam.de>
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -91,7 +91,7 @@
 #include "gdal_pam.h"
 #include "gta_headers.h"
 
-CPL_CVSID("$Id: gtadataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gtadataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* Helper functions                                                     */
@@ -129,7 +129,7 @@ static CPLString PrintDoubles( const double *padfDoubles, int nCount )
 /* ==================================================================== */
 /************************************************************************/
 
-class GTAIO : public gta::custom_io
+class GTAIO final: public gta::custom_io
 {
   private:
     VSILFILE *fp;
@@ -214,7 +214,7 @@ class GTAIO : public gta::custom_io
 
 class GTARasterBand;
 
-class GTADataset : public GDALPamDataset
+class GTADataset final: public GDALPamDataset
 {
     friend class GTARasterBand;
 
@@ -278,7 +278,7 @@ class GTADataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class GTARasterBand : public GDALPamRasterBand
+class GTARasterBand final: public GDALPamRasterBand
 {
     friend class GTADataset;
   private:
@@ -1704,7 +1704,7 @@ void GDALRegister_GTA()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Generic Tagged Arrays (.gta)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_gta.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/gta.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gta" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte UInt16 Int16 UInt32 Int32 Float32 Float64 "

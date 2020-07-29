@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frans van den Bergh <fvdbergh@csir.co.za>
- * Copyright (c) 2008-2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 
 using namespace msg_native_format;
 
-CPL_CVSID("$Id: msgndataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: msgndataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 typedef enum {
     MODE_VISIR,     // Visible and Infrared bands (1 through 11) in 10-bit raw mode
@@ -53,7 +53,7 @@ class MSGNRasterBand;
 /* ==================================================================== */
 /************************************************************************/
 
-class MSGNDataset : public GDALDataset
+class MSGNDataset final: public GDALDataset
 {
     friend class MSGNRasterBand;
 
@@ -82,7 +82,7 @@ class MSGNDataset : public GDALDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class MSGNRasterBand : public GDALRasterBand
+class MSGNRasterBand final: public GDALRasterBand
 {
     friend class MSGNDataset;
 
@@ -175,15 +175,15 @@ CPLErr MSGNRasterBand::IReadBlock( CPL_UNUSED int nBlockXOff,
     int i_nBlockYOff = poDS->GetRasterYSize() - 1 - nBlockYOff;
 
     unsigned int data_length =  bytes_per_line + (unsigned int)sizeof(SUB_VISIRLINE);
-    unsigned int data_offset = 0;
+    vsi_l_offset data_offset = 0;
 
     if (open_mode != MODE_HRV) {
         data_offset = poGDS->msg_reader_core->get_f_data_offset() +
-            interline_spacing*i_nBlockYOff  + (band_in_file-1)*packet_size +
+            static_cast<vsi_l_offset>(interline_spacing)*i_nBlockYOff  + (band_in_file-1)*packet_size +
             (packet_size - data_length);
     } else {
         data_offset = poGDS->msg_reader_core->get_f_data_offset() +
-            interline_spacing*(int(i_nBlockYOff/3) + 1) -
+            static_cast<vsi_l_offset>(interline_spacing)*(int(i_nBlockYOff/3) + 1) -
             packet_size*(3 - (i_nBlockYOff % 3)) + (packet_size - data_length);
     }
 
@@ -559,7 +559,7 @@ void GDALRegister_MSGN()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "EUMETSAT Archive native (.nat)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_msgn.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/msgn.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "nat" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

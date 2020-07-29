@@ -39,7 +39,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: gdalabstractbandblockcache.cpp c590dcec36eb6dcd7c5451623b859e7227475b44 2019-11-13 16:36:03 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalabstractbandblockcache.cpp 2cef454ab06723a32379690b46581a40eb2e5af2 2019-11-13 16:36:03 +0100 Even Rouault $")
 
 #ifdef DEBUG_VERBOSE_ABBC
 static int nAllBandsKeptAlivedBlocks = 0;
@@ -219,7 +219,8 @@ void GDALAbstractBandBlockCache::StartDirtyBlockFlushingLog()
     if( m_nDirtyBlocks > 0 && CPLIsDefaultErrorHandlerAndCatchDebug() )
     {
         const char *pszDebug = CPLGetConfigOption("CPL_DEBUG", nullptr);
-        if( pszDebug && (EQUAL(pszDebug, "ON") || EQUAL(pszDebug, "GDAL")) )
+        if( pszDebug && (EQUAL(pszDebug, "ON") || EQUAL(pszDebug, "GDAL")) &&
+            CPLGetConfigOption("GDAL_REPORT_DIRTY_BLOCK_FLUSHING", nullptr) == nullptr )
         {
             m_nInitialDirtyBlocksInFlushCache = m_nDirtyBlocks;
             m_nLastTick = -1;

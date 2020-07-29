@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: aigdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: aigdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 static CPLString OSR_GDS( char **papszNV, const char * pszField,
                           const char *pszDefaultValue );
@@ -50,7 +50,7 @@ static CPLString OSR_GDS( char **papszNV, const char * pszField,
 
 class AIGRasterBand;
 
-class AIGDataset : public GDALPamDataset
+class AIGDataset final: public GDALPamDataset
 {
     friend class AIGRasterBand;
 
@@ -87,7 +87,7 @@ class AIGDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class AIGRasterBand : public GDALPamRasterBand
+class AIGRasterBand final: public GDALPamRasterBand
 
 {
     friend class AIGDataset;
@@ -1067,7 +1067,7 @@ void GDALRegister_AIGrid()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Arc/Info Binary Grid" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#AIG" );
+                               "drivers/raster/aig.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = AIGDataset::Open;

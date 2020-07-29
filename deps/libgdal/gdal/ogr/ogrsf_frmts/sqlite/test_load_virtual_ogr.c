@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: test_load_virtual_ogr.c a5e7f143716411041a782228fde5f9935c11d428 2016-03-13 05:42:13Z Kurt Schwehr $
+ * $Id: test_load_virtual_ogr.c 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Test dynamic loading of SQLite Virtual Table module using OGR layers
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

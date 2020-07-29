@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: s57.h d4f24139fa19c874881af67308722ed71533bb74 2018-07-29 19:08:34 +0200 Even Rouault $
+ * $Id: s57.h bd0ba53e34de9ea1dcdf3f6d7046016c7de6b353 2020-05-08 20:11:55 +0200 Even Rouault $
  *
  * Project:  S-57 Translator
  * Purpose:  Declarations for S-57 translator not including the
@@ -9,7 +9,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,6 +33,7 @@
 #ifndef S57_H_INCLUDED
 #define S57_H_INCLUDED
 
+#include <string>
 #include <vector>
 #include "ogr_feature.h"
 #include "iso8211.h"
@@ -276,7 +277,9 @@ class CPL_DLL S57Reader
     int                 nNextDSIDIndex;
     DDFRecord           *poDSIDRecord;
     DDFRecord           *poDSPMRecord;
-    char                szUPDNUpdate[10];
+    std::string         m_osEDTNUpdate;
+    std::string         m_osUPDNUpdate;
+    std::string         m_osISDTUpdate;
 
     char                **papszOptions;
 

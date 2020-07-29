@@ -29,7 +29,7 @@
 
 #include <string.h>
 
-CPL_CVSID("$Id: cosar_dataset.cpp d7e1da18851695b9c865dccbcb24560c744f9f26 2019-01-02 16:40:56 +0100 Even Rouault $")
+CPL_CVSID("$Id: cosar_dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /* Various offsets, in bytes */
 // Commented out the unused defines.
@@ -46,7 +46,7 @@ const static int MAGIC1_OFFSET = 28; /* Magic number 1: 0x43534152 */
 // #define COSAR_MAGIC  0x43534152  /* String CSAR */
 // #define FILLER_MAGIC 0x7F7F7F7F  /* Filler value, we'll use this for a test */
 
-class COSARDataset : public GDALDataset
+class COSARDataset final: public GDALDataset
 {
 public:
         COSARDataset() : fp(nullptr) { }
@@ -56,7 +56,7 @@ public:
         static GDALDataset *Open( GDALOpenInfo * );
 };
 
-class COSARRasterBand : public GDALRasterBand
+class COSARRasterBand final: public GDALRasterBand
 {
     unsigned long nRTNB;
 
@@ -217,7 +217,7 @@ void GDALRegister_COSAR()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "COSAR Annotated Binary Matrix (TerraSAR-X)");
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_cosar.html");
+                               "drivers/raster/cosar.html");
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->pfnOpen = COSARDataset::Open;
     GetGDALDriverManager()->RegisterDriver(poDriver);

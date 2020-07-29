@@ -13,7 +13,7 @@
  * diminish Trent and Roberts contribution.
  ******************************************************************************
  * Copyright (c) 2006, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -46,7 +46,7 @@ constexpr int RECORD_SIZE = 512;
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: isis2dataset.cpp 37ca65d0ddcccfbc6ba9ef7d46102a552109af21 2019-02-03 10:03:34 +0100 Thomas Bonfort $")
+CPL_CVSID("$Id: isis2dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -54,7 +54,7 @@ CPL_CVSID("$Id: isis2dataset.cpp 37ca65d0ddcccfbc6ba9ef7d46102a552109af21 2019-0
 /* ==================================================================== */
 /************************************************************************/
 
-class ISIS2Dataset : public RawDataset
+class ISIS2Dataset final: public RawDataset
 {
     VSILFILE     *fpImage;      // image data file.
     CPLString    osExternalCube;
@@ -314,12 +314,17 @@ GDALDataset *ISIS2Dataset::Open( GDALOpenInfo * poOpenInfo )
 
     /***********   Grab Qube record bytes  **********/
     const int record_bytes = atoi(poDS->GetKeyword("RECORD_BYTES"));
+    if( record_bytes < 0 )
+    {
+        delete poDS;
+        return nullptr;
+    }
 
     GUIntBig nSkipBytes = 0;
     if (nQube > 0 && bByteLocation )
         nSkipBytes = (nQube - 1);
     else if( nQube > 0 )
-        nSkipBytes = (nQube - 1) * record_bytes;
+        nSkipBytes = static_cast<GUIntBig>(nQube - 1) * record_bytes;
     else
         nSkipBytes = 0;
 
@@ -388,23 +393,19 @@ GDALDataset *ISIS2Dataset::Open( GDALOpenInfo * poOpenInfo )
 
     /***********   Grab LINE_PROJECTION_OFFSET ************/
     double dfULYMap = 0.5;
-    double yulcenter = 0.0;
 
     value = poDS->GetKeyword("QUBE.IMAGE_MAP_PROJECTION.LINE_PROJECTION_OFFSET");
     if (strlen(value) > 0) {
-        yulcenter = static_cast<float>( CPLAtof(value) );
-        yulcenter = ((yulcenter) * dfYDim);
+        const double yulcenter = static_cast<float>( CPLAtof(value) ) * dfYDim;
         dfULYMap = yulcenter - (dfYDim/2);
     }
 
     /***********   Grab SAMPLE_PROJECTION_OFFSET ************/
     double dfULXMap = 0.5;
-    double xulcenter = 0.0;
 
     value = poDS->GetKeyword("QUBE.IMAGE_MAP_PROJECTION.SAMPLE_PROJECTION_OFFSET");
     if( strlen(value) > 0 ) {
-        xulcenter= static_cast<float>( CPLAtof(value) );
-        xulcenter = ((xulcenter) * dfXDim);
+        const double xulcenter = static_cast<float>( CPLAtof(value) ) * dfXDim;
         dfULXMap = xulcenter - (dfXDim/2);
     }
 
@@ -1176,7 +1177,7 @@ void GDALRegister_ISIS2()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "USGS Astrogeology ISIS cube (Version 2)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_isis2.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/isis2.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Float32 Float64");

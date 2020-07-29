@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dted_api.c 4c86d24f4f400bc03425297f80fa72e62237b715 2019-03-23 23:54:29 +0100 Even Rouault $
+ * $Id: dted_api.c fdb4a391f1fc6a50b13f11bbd47edc177d44f4a4 2020-04-15 15:55:30 +0200 Even Rouault $
  *
  * Project:  DTED Translator
  * Purpose:  Implementation of DTED/CDED access functions.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "dted_api.h"
 
 #ifndef AVOID_CPL
-CPL_CVSID("$Id: dted_api.c 4c86d24f4f400bc03425297f80fa72e62237b715 2019-03-23 23:54:29 +0100 Even Rouault $")
+CPL_CVSID("$Id: dted_api.c fdb4a391f1fc6a50b13f11bbd47edc177d44f4a4 2020-04-15 15:55:30 +0200 Even Rouault $")
 #endif
 
 static int bWarnedTwoComplement = FALSE;
@@ -702,7 +702,7 @@ int DTEDReadProfileEx( DTEDInfo * psDInfo, int nColumnOffset,
         else if (fileCheckSum != nCheckSum)
         {
 #ifndef AVOID_CPL
-            CPLError( CE_Warning, CPLE_AppDefined,
+            CPLError( CE_Failure, CPLE_AppDefined,
 #else
             fprintf( stderr,
 #endif

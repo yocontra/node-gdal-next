@@ -2,10 +2,10 @@
  *
  * Project:  CTG driver
  * Purpose:  GDALDataset driver for CTG dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 #include "gdal_pam.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ctgdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ctgdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 constexpr int HEADER_LINE_COUNT = 5;
 
@@ -108,7 +108,7 @@ static const char* const apszBandDescription[] =
 
 class CTGRasterBand;
 
-class CTGDataset : public GDALPamDataset
+class CTGDataset final: public GDALPamDataset
 {
     friend class CTGRasterBand;
 
@@ -145,7 +145,7 @@ class CTGDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class CTGRasterBand : public GDALPamRasterBand
+class CTGRasterBand final: public GDALPamRasterBand
 {
     friend class CTGDataset;
 
@@ -586,7 +586,7 @@ void GDALRegister_CTG()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "USGS LULC Composite Theme Grid" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#CTG" );
+                               "drivers/raster/ctg.html" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

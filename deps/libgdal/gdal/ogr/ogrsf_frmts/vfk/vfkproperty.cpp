@@ -34,7 +34,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: vfkproperty.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: vfkproperty.cpp 1c1263aa7ccb49bf14d8031c79f80b33d330a7a2 2019-08-15 22:19:23 +0200 Even Rouault $")
 
 /*!
   \brief Set VFK property (null)
@@ -96,30 +96,6 @@ VFKProperty::VFKProperty( CPLString const& strValue ) :
   \brief VFK property destructor
 */
 VFKProperty::~VFKProperty() {}
-
-/*!
-  \brief Copy constructor.
-*/
-VFKProperty::VFKProperty( VFKProperty const& other ) :
-    m_bIsNull(other.m_bIsNull),
-    m_iValue(other.m_iValue),
-    m_dValue(other.m_dValue),
-    m_strValue(other.m_strValue)
-{}
-
-/*!
-  \brief Assignment operator.
-*/
-VFKProperty& VFKProperty::operator=( VFKProperty const& other )
-{
-    if (&other != this) {
-        m_bIsNull = other.m_bIsNull;
-        m_iValue = other.m_iValue;
-        m_dValue = other.m_dValue;
-        m_strValue = other.m_strValue;
-    }
-    return *this;
-}
 
 /*!
   \brief Get string property

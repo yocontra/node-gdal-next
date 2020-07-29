@@ -1,5 +1,5 @@
 /*****************************************************************************
- * $Id: IntergraphDataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: IntergraphDataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  Intergraph Raster Format support
  * Purpose:  Read selected types of Intergraph Raster Format
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Ivan Lucena
- * Copyright (c) 2007-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files ( the "Software" ),
@@ -34,7 +34,7 @@
 //     Intergraph GDALDataset
 //  ----------------------------------------------------------------------------
 
-class IntergraphDataset : public GDALPamDataset
+class IntergraphDataset final: public GDALPamDataset
 {
     friend class IntergraphRasterBand;
     friend class IntergraphRGBBand;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vfkreader.h d82443f0f0de16df0aa32344c920c18bc28e0727 2018-05-20 22:54:02 +0200 Martin Landa $
+ * $Id: vfkreader.h 75aca682806c29c78cf341ea527db1aea3be90dc 2020-04-08 14:59:53 +0200 Even Rouault $
  *
  * Project:  VFK Reader
  * Purpose:  Public Declarations for OGR free VFK Reader code.
@@ -83,8 +83,9 @@ public:
     explicit VFKProperty(CPLString const&);
     virtual ~VFKProperty();
 
-    VFKProperty(VFKProperty const& other);
-    VFKProperty& operator=(VFKProperty const& other);
+    VFKProperty(VFKProperty const& other) = default;
+    VFKProperty& operator=(VFKProperty const&) = default;
+    VFKProperty& operator=(VFKProperty&&) = default;
 
     bool                    IsNull()      const { return m_bIsNull; }
     int                     GetValueI()   const { return static_cast<int> (m_iValue); }
@@ -255,6 +256,8 @@ protected:
     virtual int        LoadGeometryLineStringSBP() = 0;
     virtual int        LoadGeometryLineStringHP() = 0;
     virtual int        LoadGeometryPolygon() = 0;
+
+    static void        FillPointList(PointList* poList, const OGRLineString *poLine);
 
 public:
     IVFKDataBlock(const char *, const IVFKReader *);

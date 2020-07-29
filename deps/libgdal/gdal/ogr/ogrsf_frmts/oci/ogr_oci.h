@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_oci.h 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $
+ * $Id: ogr_oci.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  Oracle Spatial Driver
  * Purpose:  Oracle Spatial OGR Driver Declarations.
@@ -219,7 +219,7 @@ public:
 
 class OGROCIDataSource;
 
-class OGROCILayer : public OGRLayer
+class OGROCILayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -282,7 +282,7 @@ class OGROCILayer : public OGRLayer
 /*                         OGROCIWritableLayer                          */
 /************************************************************************/
 
-class OGROCIWritableLayer : public OGROCILayer
+class OGROCIWritableLayer CPL_NON_FINAL: public OGROCILayer
 {
 protected:
     int                 nDimension;

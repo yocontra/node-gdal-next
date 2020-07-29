@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2015, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2015, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "ogr_p.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogr2ogr_bin.cpp 2bfb2825ccf7bff1ab4ed0c6bc069cafab1598c3 2019-04-12 19:27:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr2ogr_bin.cpp d2777f108e5d735d0821dd77527a6edb2703ab9b 2020-05-15 19:56:11 +1000 Simon O'Keefe $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -90,6 +90,7 @@ static void Usage( const char* pszAdditionalMsg = nullptr, bool bShort = true )
         "               [-clipdstwhere expression]\n"
         "               [-wrapdateline][-datelineoffset val]\n"
         "               [[-simplify tolerance] | [-segmentize max_dist]]\n"
+        "               [-makevalid]\n"
         "               [-addfields] [-unsetFid]\n"
         "               [-relaxedFieldNameMatch] [-forceNullable] [-unsetDefault]\n"
         "               [-fieldTypeToString All|(type1[,type2]*)] [-unsetFieldWidth]\n"
@@ -170,7 +171,7 @@ static void Usage( const char* pszAdditionalMsg = nullptr, bool bShort = true )
         "      starts at zero. There must be exactly as many values in the list as\n"
         "      the count of the fields in the source layer. We can use the 'identity'\n"
         "      setting to specify that the fields should be transferred by using the\n"
-        "      same order. This setting should be used along with the append setting.");
+        "      same order. This setting should be used along with the append setting.\n");
 
     printf(" -a_srs srs_def: Assign an output SRS\n"
            " -t_srs srs_def: Reproject/transform to this SRS on output\n"
@@ -426,7 +427,7 @@ MAIN_START( nArgc, papszArgv )
 
 exit:
     CSLDestroy(papszArgv);
-    OGRCleanupAll();
+    GDALDestroy();
 
     return nRetCode;
 }

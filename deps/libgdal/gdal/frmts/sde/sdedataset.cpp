@@ -32,7 +32,7 @@
 #include "gdal_frmts.h"
 #include "sdedataset.h"
 
-CPL_CVSID("$Id: sdedataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: sdedataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /*                          GetRastercount()                            */
@@ -509,7 +509,7 @@ void GDALRegister_SDE()
     poDriver->SetDescription( "SDE" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ESRI ArcSDE" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,  "frmt_various.html#SDE" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,  "drivers/raster/sde.html" );
 
     poDriver->pfnOpen = SDEDataset::Open;
 

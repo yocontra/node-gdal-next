@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: ceosdataset.cpp 6f51856470aecacbcb25254e6a6e263e5b1a5aae 2017-12-19 05:31:03Z Kurt Schwehr $")
+CPL_CVSID("$Id: ceosdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -41,7 +41,7 @@ CPL_CVSID("$Id: ceosdataset.cpp 6f51856470aecacbcb25254e6a6e263e5b1a5aae 2017-12
 
 class CEOSRasterBand;
 
-class CEOSDataset : public GDALPamDataset
+class CEOSDataset final: public GDALPamDataset
 {
     friend class CEOSRasterBand;
 
@@ -59,7 +59,7 @@ class CEOSDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class CEOSRasterBand : public GDALPamRasterBand
+class CEOSRasterBand final: public GDALPamRasterBand
 {
     friend class CEOSDataset;
 
@@ -232,7 +232,7 @@ void GDALRegister_CEOS()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "CEOS Image" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#CEOS" );
+                               "drivers/raster/ceos.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = CEOSDataset::Open;

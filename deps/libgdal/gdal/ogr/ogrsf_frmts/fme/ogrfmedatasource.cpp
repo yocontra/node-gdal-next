@@ -38,7 +38,7 @@
 
 const char* kPROVIDERNAME = "FME_OLEDB";
 
-CPL_CVSID("$Id: ogrfmedatasource.cpp 002b050d9a9ef403a732c1210784736ef97216d4 2018-04-09 21:34:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrfmedatasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 #ifdef WIN32
 #define FMEDLL_NAME "fme.dll"
@@ -290,7 +290,7 @@ char *OGRFMEDataSource::PromptForSource()
     poSourceFormat = poSession->createString();
     poSourceDSName = poSession->createString();
 
-    if( poSession->createDialog( poDialog ) != 0 )
+    if( poSession->createDialog( poDialog ) != 0 || poDialog == nullptr )
         return NULL;
 
     poUserDirectives->append( "SPATIAL_SETTINGS" );

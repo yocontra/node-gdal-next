@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_geo_utils.h 770dbf0162f10fe7160a99c42d90bd0de57736c7 2017-05-31 21:29:09Z Even Rouault $
+ * $Id: ogr_geo_utils.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  X-Plane aeronautical data reader
  * Purpose:  Definition of geo-computation functions
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2008, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

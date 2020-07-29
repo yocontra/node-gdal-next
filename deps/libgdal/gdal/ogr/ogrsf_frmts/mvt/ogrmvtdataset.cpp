@@ -47,7 +47,7 @@
 #include <vector>
 #include <set>
 
-CPL_CVSID("$Id: ogrmvtdataset.cpp 365cb838c8782afa3cf1e22d7e03712f116aa70d 2019-06-19 12:22:21 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmvtdataset.cpp e5192a81937c9dfeb23c5f95db190cdae0a5c3df 2020-05-17 19:21:08 +0200 Even Rouault $")
 
 const char* SRS_EPSG_3857 = "PROJCS[\"WGS 84 / Pseudo-Mercator\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Mercator_1SP\"],PARAMETER[\"central_meridian\",0],PARAMETER[\"scale_factor\",1],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"X\",EAST],AXIS[\"Y\",NORTH],EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs\"],AUTHORITY[\"EPSG\",\"3857\"]]";
 
@@ -126,7 +126,7 @@ static unsigned GetCmdCount(unsigned int nCmdCountCombined)
 /*                          OGRMVTLayerBase                             */
 /************************************************************************/
 
-class OGRMVTLayerBase: public OGRLayer
+class OGRMVTLayerBase CPL_NON_FINAL: public OGRLayer
 {
         virtual OGRFeature         *GetNextRawFeature() = 0;
 
@@ -152,7 +152,7 @@ class OGRMVTLayerBase: public OGRLayer
 
 class OGRMVTDataset;
 
-class OGRMVTLayer : public OGRMVTLayerBase
+class OGRMVTLayer final: public OGRMVTLayerBase
 {
     OGRMVTDataset       *m_poDS;
     const GByte               *m_pabyDataStart;
@@ -707,21 +707,10 @@ bool OGRMVTLayer::QuickScanFeature(const GByte* pabyData,
                 READ_SIZE(pabyData, pabyDataFeatureEnd, nGeometrySize);
                 const GByte* pabyDataGeometryEnd = pabyData + nGeometrySize;
                 OGRwkbGeometryType eType = wkbUnknown;
+
                 if( nGeomType == knGEOM_TYPE_POINT )
                 {
                     eType = wkbPoint;
-                }
-                else if( nGeomType == knGEOM_TYPE_LINESTRING )
-                {
-                    eType = wkbLineString;
-                }
-                else if( nGeomType == knGEOM_TYPE_POLYGON )
-                {
-                    eType = wkbPolygon;
-                }
-
-                if( eType == wkbPoint )
-                {
                     unsigned int nCmdCountCombined = 0;
                     READ_VARUINT32(pabyData, pabyDataGeometryEnd,
                                     nCmdCountCombined);
@@ -731,8 +720,9 @@ bool OGRMVTLayer::QuickScanFeature(const GByte* pabyData,
                         eType = wkbMultiPoint;
                     }
                 }
-                else if( eType == wkbLineString )
+                else if( nGeomType == knGEOM_TYPE_LINESTRING )
                 {
+                    eType = wkbLineString;
                     for( int iIter = 0;
                             pabyData < pabyDataGeometryEnd; iIter++ )
                     {
@@ -756,8 +746,9 @@ bool OGRMVTLayer::QuickScanFeature(const GByte* pabyData,
                         }
                     }
                 }
-                else if( eType == wkbPolygon )
+                else if( nGeomType == knGEOM_TYPE_POLYGON )
                 {
+                    eType = wkbPolygon;
                     for( int iIter = 0;
                             pabyData < pabyDataGeometryEnd; iIter++ )
                     {
@@ -1420,7 +1411,7 @@ static CPLStringList StripDummyEntries(const CPLStringList& aosInput)
             aosOutput.AddString( aosInput[i] );
         }
     }
-    return aosOutput;
+    return aosOutput.Sort();
 }
 
 /************************************************************************/
@@ -1630,7 +1621,7 @@ void OGRMVTDirectoryLayer::OpenTile()
         int nX = (m_bUseReadDir || !m_aosDirContent.empty()) ?
                         atoi(m_aosDirContent[m_nXIndex]) : m_nXIndex;
         int nY = m_bUseReadDir ? atoi(m_aosSubDirContent[m_nYIndex]) : m_nYIndex;
-        m_nFIDBase = (static_cast<GIntBig>(nY) << m_nZ) | nX;
+        m_nFIDBase = (static_cast<GIntBig>(nX) << m_nZ) | nY;
     }
 }
 
@@ -3266,9 +3257,9 @@ class OGRMVTWriterDataset final: public GDALDataset
         OGRErr              PreGenerateForTile(int nZ, int nX, int nY,
                                                const CPLString& osTargetName,
                                                bool bIsMaxZoomForLayer,
-                                               OGRFeature* poFeature,
+                                               std::shared_ptr<OGRFeature> poFeature,
                                                GIntBig nSerial,
-                                               OGRGeometry* poGeom,
+                                               std::shared_ptr<OGRGeometry> poGeom,
                                                const OGREnvelope& sEnvelope) const;
 
         static void         WriterTaskFunc(void* pParam);
@@ -3276,9 +3267,9 @@ class OGRMVTWriterDataset final: public GDALDataset
         OGRErr              PreGenerateForTileReal(int nZ, int nX, int nY,
                                                const CPLString& osTargetName,
                                                bool bIsMaxZoomForLayer,
-                                               OGRFeature* poFeature,
+                                               const OGRFeature* poFeature,
                                                GIntBig nSerial,
-                                               OGRGeometry* poGeom,
+                                               const OGRGeometry* poGeom,
                                                const OGREnvelope& sEnvelope) const;
 
         void                ConvertToTileCoords(double dfX,
@@ -3289,7 +3280,7 @@ class OGRMVTWriterDataset final: public GDALDataset
                                                   double dfTopY,
                                                   double dfTileDim) const;
         bool                EncodeLineString(MVTTileLayerFeature *poGPBFeature,
-                                             OGRLineString* poLS,
+                                             const OGRLineString* poLS,
                                              OGRLineString* poOutLS,
                                              bool bWriteLastPoint,
                                              bool bReverseOrder,
@@ -3300,7 +3291,7 @@ class OGRMVTWriterDataset final: public GDALDataset
                                              int& nLastX,
                                              int& nLastY) const;
         bool                EncodePolygon(MVTTileLayerFeature *poGPBFeature,
-                                             OGRPolygon* poPoly,
+                                             const OGRPolygon* poPoly,
                                              double dfTopX,
                                              double dfTopY,
                                              double dfTileDim,
@@ -3382,7 +3373,7 @@ class OGRMVTWriterDataset final: public GDALDataset
 /*                           OGRMVTWriterLayer                          */
 /************************************************************************/
 
-class OGRMVTWriterLayer: public OGRLayer
+class OGRMVTWriterLayer final: public OGRLayer
 {
         friend class OGRMVTWriterDataset;
 
@@ -3573,7 +3564,7 @@ static unsigned GetCmdCountCombined(unsigned int nCmdId,
 /************************************************************************/
 
 bool OGRMVTWriterDataset::EncodeLineString(MVTTileLayerFeature *poGPBFeature,
-                                           OGRLineString* poLS,
+                                           const OGRLineString* poLS,
                                            OGRLineString* poOutLS,
                                            bool bWriteLastPoint,
                                            bool bReverseOrder,
@@ -3784,7 +3775,7 @@ bool OGRMVTWriterDataset::EncodeRepairedOuterRing(
 /************************************************************************/
 
 bool OGRMVTWriterDataset::EncodePolygon(MVTTileLayerFeature *poGPBFeature,
-                                           OGRPolygon* poPoly,
+                                           const OGRPolygon* poPoly,
                                            double dfTopX,
                                            double dfTopY,
                                            double dfTileDim,
@@ -3799,7 +3790,7 @@ bool OGRMVTWriterDataset::EncodePolygon(MVTTileLayerFeature *poGPBFeature,
 
     for( int i = 0; i < 1 + poPoly->getNumInteriorRings(); i++ )
     {
-        OGRLinearRing* poRing = (i == 0) ? poPoly->getExteriorRing():
+        const OGRLinearRing* poRing = (i == 0) ? poPoly->getExteriorRing():
                                            poPoly->getInteriorRing(i-1);
         if( poRing->getNumPoints() < 4 ||
             poRing->getX(0) != poRing->getX(poRing->getNumPoints()-1) ||
@@ -3975,9 +3966,9 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
                                                int nZ, int nTileX, int nTileY,
                                                const CPLString& osTargetName,
                                                bool bIsMaxZoomForLayer,
-                                               OGRFeature* poFeature,
+                                               const OGRFeature* poFeature,
                                                GIntBig nSerial,
-                                               OGRGeometry* poGeom,
+                                               const OGRGeometry* poGeom,
                                                const OGREnvelope& sEnvelope) const
 {
     double dfTileDim = m_dfTileDim0 / (1 << nZ);
@@ -3991,7 +3982,7 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
     double dfIntersectBottomRightX = dfBottomRightX + dfBuffer;
     double dfIntersectBottomRightY = dfBottomRightY - dfBuffer;
 
-    OGRGeometry* poIntersection;
+    const OGRGeometry* poIntersection;
     std::unique_ptr<OGRGeometry> poIntersectionHolder;
     if( sEnvelope.MinX >= dfIntersectTopX &&
         sEnvelope.MinY >= dfIntersectBottomRightY &&
@@ -4013,8 +4004,9 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
 
         CPLErrorStateBackuper oErrorStateBackuper;
         CPLErrorHandlerPusher oErrorHandler(CPLQuietErrorHandler);
-        poIntersection = poGeom->Intersection(&oPoly);
-        poIntersectionHolder = std::unique_ptr<OGRGeometry>(poIntersection);
+        auto poTmp = poGeom->Intersection(&oPoly);
+        poIntersection = poTmp;
+        poIntersectionHolder = std::unique_ptr<OGRGeometry>(poTmp);
         if( poIntersection == nullptr || poIntersection->IsEmpty() )
         {
             return OGRERR_NONE;
@@ -4044,7 +4036,7 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
     OGRwkbGeometryType eGeomToEncodeType = wkbFlatten(poIntersection->getGeometryType());
 
     // Simplify contour if requested by user
-    OGRGeometry* poGeomToEncode = poIntersection;
+    const OGRGeometry* poGeomToEncode = poIntersection;
     std::unique_ptr<OGRGeometry> poGeomSimplified;
     const double dfSimplification = bIsMaxZoomForLayer ?
                                 m_dfSimplificationMaxZoom : m_dfSimplification;
@@ -4068,7 +4060,7 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
     {
         if( eGeomToEncodeType == wkbPoint )
         {
-            OGRPoint* poPoint = poIntersection->toPoint();
+            const OGRPoint* poPoint = poIntersection->toPoint();
             int nX, nY;
             double dfX = poPoint->getX();
             double dfY = poPoint->getY();
@@ -4082,7 +4074,7 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
         else if( eGeomToEncodeType == wkbMultiPoint ||
                  eGeomToEncodeType == wkbGeometryCollection )
         {
-            OGRGeometryCollection* poGC = poIntersection->toGeometryCollection();
+            const OGRGeometryCollection* poGC = poIntersection->toGeometryCollection();
             std::set<std::pair<int,int>> oSetUniqueCoords;
             poGPBFeature->addGeometry(
                 GetCmdCountCombined(knCMD_MOVETO, 0) ); // To be modified later
@@ -4092,7 +4084,7 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
             {
                 if( wkbFlatten(poSubGeom->getGeometryType()) == wkbPoint )
                 {
-                    OGRPoint* poPoint = poSubGeom->toPoint();
+                    const OGRPoint* poPoint = poSubGeom->toPoint();
                     int nX, nY;
                     double dfX = poPoint->getX();
                     double dfY = poPoint->getY();
@@ -4126,7 +4118,7 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
 
         if( eGeomToEncodeType == wkbLineString )
         {
-            OGRLineString* poLS = poGeomToEncode->toLineString();
+            const OGRLineString* poLS = poGeomToEncode->toLineString();
             int nLastX = 0;
             int nLastY = 0;
             OGRLineString oOutLS;
@@ -4140,14 +4132,14 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
         else if( eGeomToEncodeType == wkbMultiLineString ||
                  eGeomToEncodeType == wkbGeometryCollection )
         {
-            OGRGeometryCollection* poGC = poGeomToEncode->toGeometryCollection();
+            const OGRGeometryCollection* poGC = poGeomToEncode->toGeometryCollection();
             int nLastX = 0;
             int nLastY = 0;
             for( auto&& poSubGeom: poGC )
             {
                 if( wkbFlatten(poSubGeom->getGeometryType()) == wkbLineString )
                 {
-                    OGRLineString* poLS = poSubGeom->toLineString();
+                    const OGRLineString* poLS = poSubGeom->toLineString();
                     OGRLineString oOutLS;
                     bool bSubGeomOK = EncodeLineString(
                                      poGPBFeature.get(), poLS, &oOutLS,
@@ -4166,7 +4158,7 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
     {
         if( eGeomToEncodeType == wkbPolygon )
         {
-            OGRPolygon* poPoly = poGeomToEncode->toPolygon();
+            const OGRPolygon* poPoly = poGeomToEncode->toPolygon();
             int nLastX = 0;
             int nLastY = 0;
             bGeomOK = EncodePolygon(poGPBFeature.get(), poPoly,
@@ -4177,14 +4169,14 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
         else if( eGeomToEncodeType == wkbMultiPolygon ||
                  eGeomToEncodeType == wkbGeometryCollection )
         {
-            OGRGeometryCollection* poGC = poGeomToEncode->toGeometryCollection();
+            const OGRGeometryCollection* poGC = poGeomToEncode->toGeometryCollection();
             int nLastX = 0;
             int nLastY = 0;
             for( auto&& poSubGeom: poGC )
             {
                 if( wkbFlatten(poSubGeom->getGeometryType()) == wkbPolygon )
                 {
-                    OGRPolygon* poPoly = poSubGeom->toPolygon();
+                    const OGRPolygon* poPoly = poSubGeom->toPolygon();
                     double dfPartArea = 0.0;
                     bGeomOK |= EncodePolygon(
                                   poGPBFeature.get(), poPoly,
@@ -4199,13 +4191,13 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTileReal(
     if( !bGeomOK )
         return OGRERR_NONE;
 
-    OGRFeatureDefn* poFDefn = poFeature->GetDefnRef();
+    const OGRFeatureDefn* poFDefn = poFeature->GetDefnRef();
     for( int i = 0; i < poFeature->GetFieldCount(); i++ )
     {
         if( poFeature->IsFieldSetAndNotNull(i) )
         {
             MVTTileLayerValue oValue;
-            OGRFieldDefn* poFieldDefn = poFDefn->GetFieldDefn(i);
+            const OGRFieldDefn* poFieldDefn = poFDefn->GetFieldDefn(i);
             OGRFieldType eFieldType = poFieldDefn->GetType();
             if( eFieldType == OFTInteger ||
                 eFieldType == OFTInteger64 )
@@ -4328,9 +4320,9 @@ class MVTWriterTask
         int nTileY;
         CPLString osTargetName;
         bool bIsMaxZoomForLayer;
-        OGRFeature* poFeature;
+        std::shared_ptr<OGRFeature> poFeature;
         GIntBig nSerial;
-        OGRGeometry* poGeom;
+        std::shared_ptr<OGRGeometry> poGeom;
         OGREnvelope sEnvelope;
 };
 
@@ -4347,9 +4339,9 @@ void OGRMVTWriterDataset::WriterTaskFunc(void* pParam)
                            poTask->nTileY,
                            poTask->osTargetName,
                            poTask->bIsMaxZoomForLayer,
-                           poTask->poFeature,
+                           poTask->poFeature.get(),
                            poTask->nSerial,
-                           poTask->poGeom,
+                           poTask->poGeom.get(),
                            poTask->sEnvelope);
     if( eErr != OGRERR_NONE )
     {
@@ -4357,8 +4349,6 @@ void OGRMVTWriterDataset::WriterTaskFunc(void* pParam)
         poTask->poDS->m_bWriteFeatureError = true;
         poTask->poDS->m_oDBMutex.unlock();
     }
-    delete poTask->poFeature;
-    delete poTask->poGeom;
     delete poTask;
 }
 
@@ -4369,9 +4359,9 @@ void OGRMVTWriterDataset::WriterTaskFunc(void* pParam)
 OGRErr OGRMVTWriterDataset::PreGenerateForTile(int nZ, int nTileX, int nTileY,
                                                const CPLString& osTargetName,
                                                bool bIsMaxZoomForLayer,
-                                               OGRFeature* poFeature,
+                                               std::shared_ptr<OGRFeature> poFeature,
                                                GIntBig nSerial,
-                                               OGRGeometry* poGeom,
+                                               std::shared_ptr<OGRGeometry> poGeom,
                                                const OGREnvelope& sEnvelope) const
 {
     if( !m_bThreadPoolOK )
@@ -4379,8 +4369,9 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTile(int nZ, int nTileX, int nTileY,
         return PreGenerateForTileReal(nZ, nTileX, nTileY,
                                       osTargetName,
                                       bIsMaxZoomForLayer,
-                                      poFeature, nSerial,
-                                      poGeom, sEnvelope);
+                                      poFeature.get(),
+                                      nSerial,
+                                      poGeom.get(), sEnvelope);
     }
     else
     {
@@ -4391,13 +4382,9 @@ OGRErr OGRMVTWriterDataset::PreGenerateForTile(int nZ, int nTileX, int nTileY,
         poTask->nTileY = nTileY;
         poTask->osTargetName = osTargetName;
         poTask->bIsMaxZoomForLayer = bIsMaxZoomForLayer;
-        // Small optimization to avoid cloning the geometry of the feature,
-        // since we don't need it
-        OGRGeometry* poGeomBak = poFeature->StealGeometry();
-        poTask->poFeature = poFeature->Clone();
-        poFeature->SetGeometryDirectly(poGeomBak);
+        poTask->poFeature =poFeature;
         poTask->nSerial = nSerial;
-        poTask->poGeom = poGeom->clone();
+        poTask->poGeom = poGeom;
         poTask->sEnvelope = sEnvelope;
         m_oThreadPool.SubmitJob(OGRMVTWriterDataset::WriterTaskFunc, poTask);
         // Do not queue more than 1000 jobs to avoid memory exhaustion
@@ -5769,8 +5756,7 @@ OGRErr OGRMVTWriterDataset::WriteFeature(OGRMVTWriterLayer* poLayer,
     OGRwkbGeometryType eGeomType = wkbFlatten(poGeom->getGeometryType());
     if( eGeomType == wkbGeometryCollection )
     {
-        OGRGeometryCollection* poGC =
-            dynamic_cast<OGRGeometryCollection*>(poGeom);
+        OGRGeometryCollection* poGC = poGeom->toGeometryCollection();
         for( int i = 0; i < poGC->getNumGeometries(); i++ )
         {
             if( WriteFeature(poLayer, poFeature, nSerial,
@@ -5794,6 +5780,13 @@ OGRErr OGRMVTWriterDataset::WriteFeature(OGRMVTWriterLayer* poLayer,
 
     if( !m_bReuseTempFile )
     {
+        // Small optimization to avoid cloning the geometry of the feature,
+        // since we don't need it
+        OGRGeometry* poGeomBak = poFeature->StealGeometry();
+        auto poSharedFeature = std::shared_ptr<OGRFeature>(poFeature->Clone());
+        poFeature->SetGeometryDirectly(poGeomBak);
+        auto poSharedGeom = std::shared_ptr<OGRGeometry>(poGeom->clone());
+
         for( int nZ = poLayer->m_nMinZoom; nZ <= poLayer->m_nMaxZoom; nZ++ )
         {
             double dfTileDim = m_dfTileDim0 / (1 << nZ);
@@ -5812,7 +5805,10 @@ OGRErr OGRMVTWriterDataset::WriteFeature(OGRMVTWriterLayer* poLayer,
                 {
                     if( PreGenerateForTile(nZ, iX, iY, poLayer->m_osTargetName,
                             (nZ == poLayer->m_nMaxZoom),
-                            poFeature, nSerial, poGeom, sExtent) != OGRERR_NONE )
+                            poSharedFeature,
+                            nSerial,
+                            poSharedGeom,
+                            sExtent) != OGRERR_NONE )
                     {
                         return OGRERR_FAILURE;
                     }

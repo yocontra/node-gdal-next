@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2008, Xiuguang Zhou (ESRI)
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -45,7 +45,7 @@
 #include "gt_wkt_srs_priv.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gt_citation.cpp 028edae15c93a64d26d691b7c3b45bf141baee2f 2018-05-23 17:44:17 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_citation.cpp fb76410650e54adda139b18a4b294abc1809a378 2020-04-22 19:05:15 +0200 Even Rouault $")
 
 static const char * const apszUnitMap[] = {
     "meters", "1.0",
@@ -601,7 +601,7 @@ OGRBoolean CheckCitationKeyForStatePlaneUTM( GTIF* hGTIF, GTIFDefn* psDefn,
 
     bool hasUnits = false;
     if( GDALGTIFKeyGetASCII( hGTIF, GTCitationGeoKey, szCTString,
-                             0, sizeof(szCTString) ) )
+                             sizeof(szCTString) ) )
     {
         CPLString osLCCT = szCTString;
 
@@ -695,8 +695,8 @@ OGRBoolean CheckCitationKeyForStatePlaneUTM( GTIF* hGTIF, GTIFDefn* psDefn,
 
     // Check PCSCitationGeoKey if it exists.
     szCTString[0] = '\0';
-    if( hGTIF && GDALGTIFKeyGetASCII( hGTIF, PCSCitationGeoKey, szCTString,
-                                      0, sizeof(szCTString)) )
+    if( GDALGTIFKeyGetASCII( hGTIF, PCSCitationGeoKey, szCTString,
+                             sizeof(szCTString)) )
     {
         // For tif created by LEICA(ERDAS), ESRI state plane pe string was
         // used and the state plane zone is given in PCSCitation. Therefore

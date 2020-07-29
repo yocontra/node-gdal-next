@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc.
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "rawdataset.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: sar_ceosdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: sar_ceosdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 static GInt16 CastToGInt16(float val)
 {
@@ -123,7 +123,7 @@ class SAR_CEOSRasterBand;
 class CCPRasterBand;
 class PALSARRasterBand;
 
-class SAR_CEOSDataset : public GDALPamDataset
+class SAR_CEOSDataset final: public GDALPamDataset
 {
     friend class SAR_CEOSRasterBand;
     friend class CCPRasterBand;
@@ -165,7 +165,7 @@ class SAR_CEOSDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class CCPRasterBand : public GDALPamRasterBand
+class CCPRasterBand final: public GDALPamRasterBand
 {
     friend class SAR_CEOSDataset;
 
@@ -181,7 +181,7 @@ class CCPRasterBand : public GDALPamRasterBand
 /* ==================================================================== */
 /************************************************************************/
 
-class PALSARRasterBand : public GDALPamRasterBand
+class PALSARRasterBand final: public GDALPamRasterBand
 {
     friend class SAR_CEOSDataset;
 
@@ -197,7 +197,7 @@ class PALSARRasterBand : public GDALPamRasterBand
 /* ==================================================================== */
 /************************************************************************/
 
-class SAR_CEOSRasterBand : public GDALPamRasterBand
+class SAR_CEOSRasterBand final: public GDALPamRasterBand
 {
     friend class SAR_CEOSDataset;
 
@@ -2196,7 +2196,7 @@ void GDALRegister_SAR_CEOS()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "CEOS SAR Image" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#SAR_CEOS" );
+                               "drivers/raster/sar_ceos.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = SAR_CEOSDataset::Open;

@@ -8,7 +8,7 @@
  ******************************************************************************
  * Copyright (c) 2010, Ragi Yaser Burhum
  * Copyright (c) 2011, Paul Ramsey <pramsey at cleverelephant.ca>
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "FGdbUtils.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: FGdbDatasource.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: FGdbDatasource.cpp 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $")
 
 using std::vector;
 using std::wstring;
@@ -260,6 +260,13 @@ int FGdbDataSource::ReOpen()
 bool FGdbDataSource::OpenFGDBTables(const std::wstring &type,
                                     const std::vector<std::wstring> &layers)
 {
+#ifdef DISPLAY_RELATED_DATASETS
+    std::vector<std::wstring> relationshipTypes;
+    m_pGeodatabase->GetDatasetRelationshipTypes(relationshipTypes);
+    std::vector<std::wstring> datasetTypes;
+    m_pGeodatabase->GetDatasetTypes(datasetTypes);
+#endif
+
     fgdbError hr;
     for ( unsigned int i = 0; i < layers.size(); i++ )
     {
@@ -287,6 +294,43 @@ bool FGdbDataSource::OpenFGDBTables(const std::wstring &type,
                    (". Skipping it. " + CPLString(pszLikelyReason)).c_str());
             continue;
         }
+
+#ifdef DISPLAY_RELATED_DATASETS
+        CPLDebug("FGDB", "Finding datasets related to %s",
+                 WStringToString(layers[i]).c_str());
+        // Slow !
+        for ( const auto& relType: relationshipTypes )
+        {
+            for ( const auto& itemType: datasetTypes )
+            {
+                std::vector<std::wstring> relatedDatasets;
+                m_pGeodatabase->GetRelatedDatasets(
+                    layers[i], relType, itemType, relatedDatasets);
+
+                std::vector<std::string> relatedDatasetDefs;
+                m_pGeodatabase->GetRelatedDatasetDefinitions(
+                    layers[i], relType, itemType, relatedDatasetDefs);
+
+                if( !relatedDatasets.empty() || !relatedDatasetDefs.empty())
+                {
+                    CPLDebug("FGDB", "relationshipType: %s",
+                             WStringToString(relType).c_str());
+                    CPLDebug("FGDB", "itemType: %s",
+                             WStringToString(itemType).c_str());
+                }
+                for( const auto& name: relatedDatasets )
+                {
+                    CPLDebug("FGDB", "Related dataset: %s",
+                             WStringToString(name).c_str());
+                }
+                for( const auto& xml: relatedDatasetDefs )
+                {
+                    CPLDebug("FGDB", "Related dataset def: %s", xml.c_str());
+                }
+            }
+        }
+#endif
+
         FGdbLayer* pLayer = new FGdbLayer();
         if (!pLayer->Initialize(this, pTable, layers[i], type))
         {
@@ -343,6 +387,7 @@ bool FGdbDataSource::LoadLayers(const std::wstring &root)
         if ( !featureclasses.empty() && ! OpenFGDBTables(L"Feature Class", featureclasses) )
             return false;
     }
+
     return true;
 }
 
@@ -527,7 +572,7 @@ FGdbDataSource::ICreateLayer( const char * pszLayerName,
 /*                   OGRFGdbSingleFeatureLayer                          */
 /************************************************************************/
 
-class OGRFGdbSingleFeatureLayer : public OGRLayer
+class OGRFGdbSingleFeatureLayer final: public OGRLayer
 {
   private:
     char               *pszVal;

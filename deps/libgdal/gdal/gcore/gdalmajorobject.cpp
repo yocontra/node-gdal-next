@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 #include "cpl_string.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalmajorobject.cpp 555e540bc97e0201cd3ed57f7906323d476c13fb 2018-04-04 19:43:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalmajorobject.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          GDALMajorObject()                           */

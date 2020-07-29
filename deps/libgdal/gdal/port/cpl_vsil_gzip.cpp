@@ -2,10 +2,10 @@
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement VSI large file api for gz/zip files (.gz and .zip).
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -111,7 +111,7 @@
 #include "cpl_vsi_virtual.h"
 #include "cpl_worker_thread_pool.h"
 
-CPL_CVSID("$Id: cpl_vsil_gzip.cpp 8ccfbed587f9795b885262e29efad66a261347ed 2019-07-04 17:37:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gzip.cpp a720b845266cdba8890ac2eb41a098693edd16e7 2020-03-13 09:23:33 +0100 Even Rouault $")
 
 constexpr int Z_BUFSIZE = 65536;  // Original size is 16384
 constexpr int gz_magic[2] = {0x1f, 0x8b};  // gzip magic header
@@ -181,7 +181,7 @@ class VSIGZipHandle final : public VSIVirtualHandle
 
     void check_header();
     int get_byte();
-    int gzseek( vsi_l_offset nOffset, int nWhence );
+    bool gzseek( vsi_l_offset nOffset, int nWhence );
     int gzrewind ();
     uLong getLong ();
 
@@ -526,10 +526,13 @@ void VSIGZipHandle::check_header()
     if( (flags & EXTRA_FIELD) != 0 )
     {
         // Skip the extra field.
-        len = static_cast<uInt>(get_byte());
-        len += static_cast<uInt>(get_byte()) << 8;
+        len = static_cast<uInt>(get_byte()) & 0xFF;
+        len += (static_cast<uInt>(get_byte()) & 0xFF) << 8;
         // len is garbage if EOF but the loop below will quit anyway.
-        while( len-- != 0 && get_byte() != EOF ) {}
+        while( len != 0 && get_byte() != EOF )
+        {
+            --len;
+        }
     }
 
     int c = 0;
@@ -619,18 +622,14 @@ int VSIGZipHandle::gzrewind ()
 
 int VSIGZipHandle::Seek( vsi_l_offset nOffset, int nWhence )
 {
-    /* The semantics of gzseek are different from ::Seek */
-    /* It returns the current offset, where as ::Seek should return 0 */
-    /* if successful */
-    int ret = gzseek(nOffset, nWhence);
-    return (ret >= 0) ? 0 : ret;
+    return gzseek(nOffset, nWhence) ? 0 : -1;
 }
 
 /************************************************************************/
 /*                            gzseek()                                  */
 /************************************************************************/
 
-int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
+bool VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
 {
     const vsi_l_offset original_offset = offset;
     const int original_nWhence = whence;
@@ -648,8 +647,8 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
         {
             if( out + offset > m_compressed_size )
             {
-                CPL_VSIL_GZ_RETURN(-1);
-                return -1L;
+                CPL_VSIL_GZ_RETURN(FALSE);
+                return false;
             }
 
             offset = startOff + out + offset;
@@ -658,8 +657,8 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
         {
             if( offset > m_compressed_size )
             {
-                CPL_VSIL_GZ_RETURN(-1);
-                return -1L;
+                CPL_VSIL_GZ_RETURN(FALSE);
+                return false;
             }
 
             offset = startOff + offset;
@@ -670,30 +669,27 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
             // so no way to seek backward. See #1590 */
             if( offset > 0 ) // || -offset > compressed_size
             {
-                CPL_VSIL_GZ_RETURN(-1);
-                return -1L;
+                CPL_VSIL_GZ_RETURN(FALSE);
+                return false;
             }
 
             offset = startOff + m_compressed_size - offset;
         }
         else
         {
-            CPL_VSIL_GZ_RETURN(-1);
-            return -1L;
+            CPL_VSIL_GZ_RETURN(FALSE);
+            return false;
         }
 
         if( VSIFSeekL(reinterpret_cast<VSILFILE*>(m_poBaseHandle), offset, SEEK_SET) < 0 )
         {
-            CPL_VSIL_GZ_RETURN(-1);
-            return -1L;
+            CPL_VSIL_GZ_RETURN(FALSE);
+            return false;
         }
 
         out = offset - startOff;
         in = out;
-#ifdef ENABLE_DEBUG
-        CPLDebug("GZIP", "return " CPL_FRMT_GUIB, in);
-#endif
-        return in > INT_MAX ? INT_MAX : static_cast<int>(in);
+        return true;
     }
 
     // whence == SEEK_END is unsuppored in original gzseek.
@@ -704,7 +700,7 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
         if( offset == 0 && m_uncompressed_size != 0 )
         {
             out = m_uncompressed_size;
-            return 1;
+            return true;
         }
 
         // We don't know the uncompressed size. This is unfortunate.
@@ -738,14 +734,14 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
     }
     else if( gzrewind() < 0 )
     {
-            CPL_VSIL_GZ_RETURN(-1);
-            return -1L;
+        CPL_VSIL_GZ_RETURN(FALSE);
+        return false;
     }
 
     if( z_err != Z_OK && z_err != Z_STREAM_END )
     {
-        CPL_VSIL_GZ_RETURN(-1);
-        return -1L;
+        CPL_VSIL_GZ_RETURN(FALSE);
+        return false;
     }
 
     for( unsigned int i = 0;
@@ -794,17 +790,14 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
         outbuf = static_cast<Byte*>(ALLOC(Z_BUFSIZE));
         if( outbuf == nullptr )
         {
-            CPL_VSIL_GZ_RETURN(-1);
-            return -1L;
+            CPL_VSIL_GZ_RETURN(FALSE);
+            return false;
         }
     }
 
     if( original_nWhence == SEEK_END && z_err == Z_STREAM_END )
     {
-#ifdef ENABLE_DEBUG
-        CPLDebug("GZIP", "gzseek return " CPL_FRMT_GUIB, out);
-#endif
-        return static_cast<int>(out);
+        return true;
     }
 
     while( offset > 0 )
@@ -817,8 +810,8 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
             static_cast<int>(Read(outbuf, 1, static_cast<uInt>(size)));
         if( read_size == 0 )
         {
-            // CPL_VSIL_GZ_RETURN(-1);
-            return -1L;
+            // CPL_VSIL_GZ_RETURN(FALSE);
+            return false;
         }
         if( original_nWhence == SEEK_END )
         {
@@ -831,7 +824,7 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
         offset -= read_size;
     }
 #ifdef ENABLE_DEBUG
-    CPLDebug("GZIP", "gzseek return " CPL_FRMT_GUIB, out);
+    CPLDebug("GZIP", "gzseek at offset " CPL_FRMT_GUIB, out);
 #endif
 
     if( original_offset == 0 && original_nWhence == SEEK_END )
@@ -870,7 +863,7 @@ int VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
         }
     }
 
-    return static_cast<int>(out);
+    return true;
 }
 
 /************************************************************************/
@@ -1125,10 +1118,10 @@ size_t VSIGZipHandle::Read( void * const buf, size_t const nSize,
 
 uLong VSIGZipHandle::getLong ()
 {
-    uLong x = static_cast<uLong>(get_byte());
+    uLong x = static_cast<uLong>(get_byte()) & 0xFF;
 
-    x += static_cast<uLong>(get_byte()) << 8;
-    x += static_cast<uLong>(get_byte()) << 16;
+    x += (static_cast<uLong>(get_byte()) & 0xFF) << 8;
+    x += (static_cast<uLong>(get_byte()) & 0xFF) << 16;
     const int c = get_byte();
     if( c == EOF )
     {
@@ -1295,7 +1288,7 @@ VSIGZipWriteHandleMT::VSIGZipWriteHandleMT(  VSIVirtualHandle* poBaseHandle,
 VSIGZipWriteHandleMT::~VSIGZipWriteHandleMT()
 
 {
-    Close();
+    VSIGZipWriteHandleMT::Close();
     for( auto& psJob: apoFinishedJobs_ )
     {
         delete psJob->pBuffer_;
@@ -1874,6 +1867,7 @@ VSIVirtualHandle* VSICreateGZipWritable( VSIVirtualHandle* poBaseHandle,
         nThreads = std::max(1, std::min(128, nThreads));
         if( nThreads > 1 )
         {
+            // coverity[tainted_data]
             return new VSIGZipWriteHandleMT( poBaseHandle,
                                                 nThreads,
                                                 nDeflateTypeIn,
@@ -1893,7 +1887,7 @@ VSIGZipWriteHandle::~VSIGZipWriteHandle()
 
 {
     if( bCompressActive )
-        Close();
+        VSIGZipWriteHandle::Close();
 
     CPLFree( pabyInBuf );
     CPLFree( pabyOutBuf );
@@ -3121,7 +3115,7 @@ VSIZipWriteHandle::VSIZipWriteHandle( VSIZipFilesystemHandler* poFS,
 
 VSIZipWriteHandle::~VSIZipWriteHandle()
 {
-    Close();
+    VSIZipWriteHandle::Close();
 }
 
 /************************************************************************/

@@ -30,9 +30,9 @@
 #include "gdal_proxy.h"
 #include "derivedlist.h"
 
-CPL_CVSID("$Id: deriveddataset.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: deriveddataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
-class DerivedDataset : public VRTDataset
+class DerivedDataset final: public VRTDataset
 {
     public:
         DerivedDataset( int nXSize, int nYSize );
@@ -213,7 +213,7 @@ void GDALRegister_Derived()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
 #endif
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Derived datasets using VRT pixel functions" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_derived.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/derived.html" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "NO" );
 
     poDriver->pfnOpen = DerivedDataset::Open;

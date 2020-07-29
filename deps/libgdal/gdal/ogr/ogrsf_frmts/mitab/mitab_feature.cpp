@@ -55,7 +55,7 @@
 #include "ogr_featurestyle.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: mitab_feature.cpp a18fcc078bc59d73d4fc1f7e3150ebea54911e3f 2019-06-27 11:07:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_feature.cpp e9605fc9c629e461953c44e744c03f79ee7ff435 2020-05-26 10:29:40 +0200 Even Rouault $")
 
 /*=====================================================================
  *                      class TABFeature
@@ -589,9 +589,11 @@ int TABFeature::WriteRecordToDATFile(TABDATFile *poDATFile,
             }
             else
             {
-                nHour = 0;
-                nMin = 0;
-                fSec = 0;
+                // Put negative values, so that WriteTimeField() forges
+                // a negative value, and ultimately write -1 in the binary field
+                nHour = -1;
+                nMin = -1;
+                fSec = -1;
             }
             nStatus = poDATFile->WriteTimeField(nHour, nMin, static_cast<int>(fSec),
                                                 OGR_GET_MS(fSec), poINDFile,

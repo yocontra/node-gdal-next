@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Daniel Morissette
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrogdilayer.cpp f40fcd1f9eeff056ff3e8046eaa263ecbf778c7c 2019-02-28 20:40:47 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrogdilayer.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGROGDILayer()                            */
@@ -55,7 +55,7 @@ OGROGDILayer::OGROGDILayer( OGROGDIDataSource *poODS,
 {
 
     // Select layer and feature family.
-    ResetReading();
+    OGROGDILayer::ResetReading();
 
     BuildFeatureDefn();
 }

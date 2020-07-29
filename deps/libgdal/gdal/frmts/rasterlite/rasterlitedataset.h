@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: rasterlitedataset.h 42f40d8c5e2c50a6ec2a5b7e159631ade0bf3465 2019-03-26 00:33:48 +0100 Even Rouault $
+ * $Id: rasterlitedataset.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  GDAL Rasterlite driver
  * Purpose:  Implement GDAL Rasterlite support using OGR SQLite driver
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

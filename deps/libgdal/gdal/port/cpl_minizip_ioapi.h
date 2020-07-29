@@ -1,10 +1,10 @@
-/* $Id: cpl_minizip_ioapi.h 105d437a91a1a110bdeaba3bab046cd235701173 2018-07-02 12:01:26 +0200 Even Rouault $ */
+/* $Id: cpl_minizip_ioapi.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $ */
 
 /* Modified version by Even Rouault. :
       - change fill_fopen_filefunc to cpl_fill_fopen_filefunc
       - Add support for ZIP64
 
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
 
    Original licence available in port/LICENCE_minizip
 */

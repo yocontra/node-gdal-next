@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2012, Roger Veciana <rveciana@gmail.com>
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <sstream>
 
-CPL_CVSID("$Id: irisdataset.cpp c1ddf7153615962acd70cb146077f7185ae1e48d 2019-10-28 22:22:36 +0100 Even Rouault $")
+CPL_CVSID("$Id: irisdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 static double DEG2RAD = M_PI / 180.0;
 static double RAD2DEG = 180.0 / M_PI;
@@ -50,7 +50,7 @@ static double RAD2DEG = 180.0 / M_PI;
 
 class IRISRasterBand;
 
-class IRISDataset : public GDALPamDataset
+class IRISDataset final: public GDALPamDataset
 {
     friend class IRISRasterBand;
 
@@ -148,7 +148,7 @@ const char* const IRISDataset::aszProjections[] = {
 /* ==================================================================== */
 /************************************************************************/
 
-class IRISRasterBand : public GDALPamRasterBand
+class IRISRasterBand final: public GDALPamRasterBand
 {
     friend class IRISDataset;
 
@@ -1160,7 +1160,7 @@ void GDALRegister_IRIS()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "IRIS data (.PPI, .CAPPi etc)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#IRIS" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/iris.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "ppi" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

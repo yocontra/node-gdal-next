@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrs57driver.cpp d4f24139fa19c874881af67308722ed71533bb74 2018-07-29 19:08:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrs57driver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 S57ClassRegistrar *OGRS57Driver::poRegistrar = nullptr;
 static CPLMutex* hS57RegistrarMutex = nullptr;

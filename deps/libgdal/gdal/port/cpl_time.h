@@ -1,13 +1,13 @@
 /**********************************************************************
- * $Id: cpl_time.h 66be9d67448bf852a32b5473508a75f26569a2e1 2017-09-26 18:35:09Z Even Rouault $
+ * $Id: cpl_time.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Name:     cpl_time.h
  * Project:  CPL - Common Portability Library
  * Purpose:  Time functions.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

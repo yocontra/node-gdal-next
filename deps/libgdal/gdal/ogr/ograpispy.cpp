@@ -41,7 +41,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ograpispy.cpp ba2ef4045f82fd2260f1732e9e46a927277ac93d 2018-05-06 19:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: ograpispy.cpp ab5c2611ec88c7d2693f40100c612bbc51c54e03 2019-08-15 15:41:26 +0200 Even Rouault $")
 
 #ifdef OGRAPISPY_ENABLED
 
@@ -76,6 +76,7 @@ class DatasetDescription
 
     DatasetDescription() = default;
     explicit DatasetDescription( int iDSIn ) : iDS(iDSIn) {}
+    DatasetDescription& operator=(DatasetDescription&&) = default;
     ~DatasetDescription();
 };
 

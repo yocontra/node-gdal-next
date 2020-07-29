@@ -8,7 +8,7 @@
  *
  **********************************************************************
  * Copyright (c) 2011, Andrey Kiselev <dron@ak4719.spb.edu>
- * Copyright (c) 2011-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: cpl_recode_iconv.cpp 0f654dda9faabf9d86a44293f0f89903a8e97dd7 2018-04-15 20:18:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_recode_iconv.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #ifdef CPL_RECODE_ICONV
 

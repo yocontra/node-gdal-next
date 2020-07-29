@@ -1593,6 +1593,14 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
 
     PROJ_INTERNAL TransformationNNPtr shallowClone() const;
 
+    PROJ_INTERNAL TransformationNNPtr
+    promoteTo3D(const std::string &newName,
+                const io::DatabaseContextPtr &dbContext) const;
+
+    PROJ_INTERNAL TransformationNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
+
     //! @endcond
 
   protected:
@@ -1758,6 +1766,10 @@ class PROJ_GCC_DLL CoordinateOperationContext {
     PROJ_DLL double getDesiredAccuracy() const;
 
     PROJ_DLL void setDesiredAccuracy(double accuracy);
+
+    PROJ_DLL void setAllowBallparkTransformations(bool allow);
+
+    PROJ_DLL bool getAllowBallparkTransformations() const;
 
     /** Specify how source and target CRS extent should be used to restrict
      * candidate operations (only taken into account if no explicit area of

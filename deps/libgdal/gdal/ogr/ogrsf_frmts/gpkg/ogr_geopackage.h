@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h 1f5037da497fb5ee7497768ccf4172b92a91578d 2019-02-19 21:19:51 +0100 Even Rouault $
+ * $Id: ogr_geopackage.h 8a31698d1a421c99c51b45e6fc72553817177c6a 2020-06-05 20:35:35 +0200 Even Rouault $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -92,6 +92,7 @@ class OGRGeoPackageTableLayer;
 class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALGPKGMBTilesLikePseudoDataset
 {
     friend class GDALGeoPackageRasterBand;
+    friend class OGRGeoPackageLayer;
     friend class OGRGeoPackageTableLayer;
 
     GUInt32             m_nApplicationId;
@@ -112,7 +113,7 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
     bool                m_bGridCellEncodingAsCO = false;
     bool                m_bHasReadMetadataFromStorage;
     bool                m_bMetadataDirty;
-    char              **m_papszSubDatasets;
+    CPLStringList       m_aosSubDatasets{};
     char               *m_pszProjection;
     bool                m_bRecordInsertedInGPKGContent;
     bool                m_bGeoTransformValid;
@@ -221,6 +222,10 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
 
         bool                ConvertGpkgSpatialRefSysToExtensionWkt2();
 
+        std::map<int, bool> m_oSetGPKGLayerWarnings{};
+
+        void                FixupWrongRTreeTrigger();
+
     public:
                             GDALGeoPackageDataset();
                             virtual ~GDALGeoPackageDataset();
@@ -310,7 +315,7 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
         virtual int                     IGetRasterCount() override { return nBands; }
         virtual GDALRasterBand*         IGetRasterBand(int nBand) override { return GetRasterBand(nBand); }
         virtual sqlite3                *IGetDB() override { return GetDB(); }
-        virtual bool                    IGetUpdate() override { return bUpdate != FALSE; }
+        virtual bool                    IGetUpdate() override { return GetUpdate(); }
         virtual bool                    ICanIWriteBlock() override;
         virtual OGRErr                  IStartTransaction() override { return SoftStartTransaction(); }
         virtual OGRErr                  ICommitTransaction() override { return SoftCommitTransaction(); }
@@ -353,7 +358,7 @@ class GDALGeoPackageRasterBand final: public GDALGPKGMBTilesLikeRasterBand
 /*                           OGRGeoPackageLayer                         */
 /************************************************************************/
 
-class OGRGeoPackageLayer : public OGRLayer, public IOGRSQLiteGetSpatialWhere
+class OGRGeoPackageLayer CPL_NON_FINAL: public OGRLayer, public IOGRSQLiteGetSpatialWhere
 {
   protected:
     GDALGeoPackageDataset *m_poDS;
@@ -408,6 +413,8 @@ class OGRGeoPackageTableLayer final : public OGRGeoPackageLayer
     bool                        m_bIsInGpkgContents;
     bool                        m_bFeatureDefnCompleted;
     int                         m_iSrs;
+    int                         m_nZFlag = 0;
+    int                         m_nMFlag = 0;
     OGREnvelope*                m_poExtent;
 #ifdef ENABLE_GPKG_OGR_CONTENTS
     GIntBig                     m_nTotalFeatureCount;

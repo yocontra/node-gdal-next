@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,7 +47,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gdalpamdataset.cpp 22a76081aac3d81d1b91a8b135a23ba7a91983ff 2019-04-09 10:56:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalpamdataset.cpp 66ea9bfa6e0e4ba27b0ae8ce7c75f3d5ad11da63 2020-01-28 12:30:39 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALPamDataset()                           */
@@ -195,7 +195,17 @@ CPLXMLNode *GDALPamDataset::SerializeToXML( const char *pszUnused )
     if( psPam->poSRS && !psPam->poSRS->IsEmpty() )
     {
         char* pszWKT = nullptr;
-        psPam->poSRS->exportToWkt(&pszWKT);
+        {
+            CPLErrorStateBackuper oErrorStateBackuper;
+            CPLErrorHandlerPusher oErrorHandler(CPLQuietErrorHandler);
+            if( psPam->poSRS->exportToWkt(&pszWKT) != OGRERR_NONE )
+            {
+                CPLFree(pszWKT);
+                pszWKT = nullptr;
+                const char* const apszOptions[] = { "FORMAT=WKT2", nullptr };
+                psPam->poSRS->exportToWkt(&pszWKT, apszOptions);
+            }
+        }
         CPLXMLNode* psSRSNode = CPLCreateXMLElementAndValue( psDSTree, "SRS", pszWKT );
         CPLFree(pszWKT);
         const auto& mapping = psPam->poSRS->GetDataAxisToSRSAxisMapping();
@@ -494,6 +504,56 @@ CPLErr GDALPamDataset::XMLInit( CPLXMLNode *psTree, const char *pszUnused )
                 psPam->poSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
                 if( psPam->poSRS->importFromWkt(pszESRI_WKT) != OGRERR_NONE)
                 {
+                    delete psPam->poSRS;
+                    psPam->poSRS = nullptr;
+                }
+            }
+
+            // Parse GCPs
+            const CPLXMLNode* psSourceGCPS = CPLGetXMLNode(psGeodataXform, "SourceGCPs");
+            const CPLXMLNode* psTargetGCPs = CPLGetXMLNode(psGeodataXform, "TargetGCPs");
+            if( psSourceGCPS && psTargetGCPs && !psPam->bHaveGeoTransform )
+            {
+                std::vector<double> adfSource;
+                std::vector<double> adfTarget;
+                bool ySourceAllNegative = true;
+                for( auto psIter = psSourceGCPS->psChild; psIter; psIter = psIter->psNext )
+                {
+                    if( psIter->eType == CXT_Element && strcmp(psIter->pszValue, "Double") == 0 )
+                    {
+                        adfSource.push_back(CPLAtof(CPLGetXMLValue(psIter, nullptr, "0")));
+                        if( (adfSource.size() % 2) == 0 && adfSource.back() > 0 )
+                            ySourceAllNegative = false;
+                    }
+                }
+                for( auto psIter = psTargetGCPs->psChild; psIter; psIter = psIter->psNext )
+                {
+                    if( psIter->eType == CXT_Element && strcmp(psIter->pszValue, "Double") == 0 )
+                    {
+                        adfTarget.push_back(CPLAtof(CPLGetXMLValue(psIter, nullptr, "0")));
+                    }
+                }
+                if( !adfSource.empty() &&
+                    adfSource.size() == adfTarget.size() &&
+                    (adfSource.size() % 2) == 0 )
+                {
+                    std::vector<GDAL_GCP> asGCPs;
+                    asGCPs.resize(adfSource.size() / 2);
+                    char szEmptyString[] = { 0 };
+                    for( size_t i = 0; i+1 < adfSource.size(); i+= 2 )
+                    {
+                        asGCPs[i/2].pszId = szEmptyString;
+                        asGCPs[i/2].pszInfo = szEmptyString;
+                        asGCPs[i/2].dfGCPPixel = adfSource[i];
+                        asGCPs[i/2].dfGCPLine =
+                            ySourceAllNegative ? -adfSource[i+1] : adfSource[i+1];
+                        asGCPs[i/2].dfGCPX = adfTarget[i];
+                        asGCPs[i/2].dfGCPY = adfTarget[i+1];
+                        asGCPs[i/2].dfGCPZ = 0;
+                    }
+                    GDALPamDataset::SetGCPs( static_cast<int>(asGCPs.size()),
+                                             &asGCPs[0],
+                                             psPam->poSRS );
                     delete psPam->poSRS;
                     psPam->poSRS = nullptr;
                 }
@@ -986,21 +1046,16 @@ CPLErr GDALPamDataset::CloneInfo( GDALDataset *poSrcDS, int nCloneFlags )
 /* -------------------------------------------------------------------- */
     if( nCloneFlags & GCIF_METADATA )
     {
-        if( poSrcDS->GetMetadata() != nullptr )
+        for( const char* pszMDD: { "", "RPC", "json:ISIS3", "json:VICAR" } )
         {
-            if( !bOnlyIfMissing
-                || CSLCount(GetMetadata()) != CSLCount(poSrcDS->GetMetadata()) )
+            auto papszSrcMD = poSrcDS->GetMetadata(pszMDD);
+            if(papszSrcMD  != nullptr )
             {
-                SetMetadata( poSrcDS->GetMetadata() );
-            }
-        }
-        if( poSrcDS->GetMetadata("RPC") != nullptr )
-        {
-            if( !bOnlyIfMissing
-                || CSLCount(GetMetadata("RPC"))
-                   != CSLCount(poSrcDS->GetMetadata("RPC")) )
-            {
-                SetMetadata( poSrcDS->GetMetadata("RPC"), "RPC" );
+                if( !bOnlyIfMissing
+                    || CSLCount(GetMetadata(pszMDD)) != CSLCount(papszSrcMD) )
+                {
+                    SetMetadata( papszSrcMD, pszMDD );
+                }
             }
         }
     }

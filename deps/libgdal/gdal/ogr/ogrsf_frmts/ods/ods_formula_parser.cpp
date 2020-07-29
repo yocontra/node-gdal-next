@@ -75,11 +75,11 @@
  * Component: OGR ODS Formula Engine
  * Purpose: expression and select parser grammar.
  *          Requires Bison 2.4.0 or newer to process.  Use "make parser" target.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
  * Copyright (C) 2010 Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines dash paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -104,7 +104,7 @@
 #include "cpl_string.h"
 #include "ods_formula.h"
 
-CPL_CVSID("$Id: ods_formula_parser.cpp 002b050d9a9ef403a732c1210784736ef97216d4 2018-04-09 21:34:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ods_formula_parser.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 #define YYSTYPE  ods_formula_node*
 

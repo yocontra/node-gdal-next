@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,9 +48,9 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 #include "sqlite3.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrsqliteselectlayer.cpp 722bc4c4c4f6ec3494bb2e4ee96b8742d72ac4c5 2018-02-14 22:51:15Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrsqliteselectlayer.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
 
 /************************************************************************/
 /*                   OGRSQLiteSelectLayerCommonBehaviour()              */

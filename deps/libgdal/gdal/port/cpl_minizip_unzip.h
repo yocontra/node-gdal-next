@@ -1,11 +1,11 @@
-/* $Id: cpl_minizip_unzip.h 44e0c0ecc2e12f7885d8572d0f18dd94e7fbda1c 2016-10-25 02:28:29Z Kurt Schwehr $ */
+/* $Id: cpl_minizip_unzip.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $ */
 /* Modified version by Even Rouault. :
      - Addition of cpl_unzGetCurrentFileZStreamPos
      - Decoration of symbol names unz* -> cpl_unz*
      - Undef EXPORT so that we are sure the symbols are not exported
      - Add support for ZIP64
 
- * Copyright (c) 2008, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008, Even Rouault <even dot rouault at spatialys.com>
 
    Original licence available in port/LICENCE_minizip
 */

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "rawdataset.h"
 #include <cctype>
 
-CPL_CVSID("$Id: pnmdataset.cpp b2723bb9ee29fb36de5c3afec9e9a6b757ef743c 2018-05-10 21:21:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: pnmdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -337,6 +337,23 @@ GDALDataset *PNMDataset::Create( const char * pszFilename,
 
         return nullptr;
     }
+    const CPLString osExt( CPLGetExtension(pszFilename) );
+    if( nBands == 1 )
+    {
+        if( !EQUAL(osExt, "PGM") )
+        {
+            CPLError(CE_Warning, CPLE_AppDefined,
+                     "Extension for a 1-band netpbm file should be .pgm");
+        }
+    }
+    else /* if( nBands == 3 ) */
+    {
+        if( !EQUAL(osExt, "PPM") )
+        {
+            CPLError(CE_Warning, CPLE_AppDefined,
+                     "Extension for a 3-band netpbm file should be .ppm");
+        }
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Try to create the file.                                         */
@@ -387,8 +404,9 @@ GDALDataset *PNMDataset::Create( const char * pszFilename,
 
     if( !bOK )
         return nullptr;
-    return
-        reinterpret_cast<GDALDataset *>( GDALOpen( pszFilename, GA_Update ) );
+
+    GDALOpenInfo oOpenInfo(pszFilename, GA_Update);
+    return Open(&oOpenInfo);
 }
 
 /************************************************************************/
@@ -407,7 +425,7 @@ void GDALRegister_PNM()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Portable Pixmap Format (netpbm)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#PNM" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/pnm.html" );
     // pgm : grey
     // ppm : RGB
     // pnm : ??

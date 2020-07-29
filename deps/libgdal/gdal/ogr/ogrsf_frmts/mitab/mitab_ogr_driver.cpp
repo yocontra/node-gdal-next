@@ -32,7 +32,7 @@
 
 #include "mitab_ogr_driver.h"
 
-CPL_CVSID("$Id: mitab_ogr_driver.cpp 43b6061a355c4bce2283b787b28d5f3ae6b9e2af 2018-05-06 14:19:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_ogr_driver.cpp ee1ad78131c83cdc0b32088f11e98629fdb3c632 2020-01-20 01:29:33 +0300 Dmitry Baryshnikov $")
 
 /************************************************************************/
 /*                  OGRTABDriverIdentify()                              */
@@ -209,6 +209,7 @@ void RegisterOGRTAB()
 "<LayerCreationOptionList>"
 "  <Option name='BOUNDS' type='string' description='Custom bounds. Expect format is xmin,ymin,xmax,ymax'/>"
 "  <Option name='ENCODING' type='string' description='to override the encoding interpretation of the DAT/MID with any encoding supported by CPLRecode or to \"\" to avoid any recoding (Neutral charset)'/>"
+"  <Option name='DESCRIPTION' type='string' description='Friendly name of table. Only for tab format.'/>" // See https://support.pitneybowes.com/SearchArticles/VFP05_KnowledgeWithSidebarHowTo?id=kA180000000CtuHCAS&popup=false&lang=en_US
 "</LayerCreationOptionList>");
 
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONOPTIONLIST,

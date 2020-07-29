@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarpkernel_opencl.cpp 4ea6dec275d732830425f6792438c820ba8689c1 2018-05-12 08:21:45 +0800 liminlu $
+ * $Id: gdalwarpkernel_opencl.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  OpenCL Image Reprojector
  * Purpose:  Implementation of the GDALWarpKernel reprojector in OpenCL.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Seth Price <seth@pricepages.org>
- * Copyright (c) 2010-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,7 +42,7 @@
 #include "cpl_string.h"
 #include "gdalwarpkernel_opencl.h"
 
-CPL_CVSID("$Id: gdalwarpkernel_opencl.cpp 4ea6dec275d732830425f6792438c820ba8689c1 2018-05-12 08:21:45 +0800 liminlu $")
+CPL_CVSID("$Id: gdalwarpkernel_opencl.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #define handleErr(err) if((err) != CL_SUCCESS) { \
     CPLError(CE_Failure, CPLE_AppDefined, "Error at file %s line %d: %s", __FILE__, __LINE__, getCLErrorString(err)); \

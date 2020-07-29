@@ -1,13 +1,13 @@
 /******************************************************************************
- * $Id: gdalgeorefpamdataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: gdalgeorefpamdataset.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  GDALPamDataset with internal storage for georeferencing, with
  *           priority for PAM over internal georeferencing
- * Author:   Even Rouault <even dot rouault at mines-paris dot org>
+ * Author:   Even Rouault <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

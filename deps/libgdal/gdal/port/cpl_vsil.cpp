@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,6 +40,7 @@
 #endif
 
 #include <algorithm>
+#include <limits>
 #include <map>
 #include <memory>
 #include <set>
@@ -54,7 +55,7 @@
 #include "cpl_vsi_virtual.h"
 
 
-CPL_CVSID("$Id: cpl_vsil.cpp 22d95175f375d90d8f598436d1187fd143e00b67 2019-09-17 23:06:11 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil.cpp 3bd384f52281218f6b6528763aee1296b8cf7431 2020-03-19 12:29:06 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                             VSIReadDir()                             */
@@ -505,6 +506,48 @@ int VSIUnlink( const char * pszFilename )
 }
 
 /************************************************************************/
+/*                           VSIUnlinkBatch()                           */
+/************************************************************************/
+
+/**
+ * \brief Delete several files, possibly in a batch.
+ *
+ * All files should belong to the same file system handler.
+ *
+ * @param papszFiles NULL terminated list of files. UTF-8 encoded.
+ *
+ * @return an array of size CSLCount(papszFiles), whose values are TRUE or FALSE
+ * depending on the success of deletion of the corresponding file. The array
+ * should be freed with VSIFree().
+ * NULL might be return in case of a more general error (for example,
+ * files belonging to different file system handlers)
+ *
+ * @since GDAL 3.1
+ */
+
+int *VSIUnlinkBatch( CSLConstList papszFiles )
+{
+    VSIFilesystemHandler *poFSHandler = nullptr;
+    for( CSLConstList papszIter = papszFiles;
+            papszIter && *papszIter; ++papszIter )
+    {
+        auto poFSHandlerThisFile = VSIFileManager::GetHandler( *papszIter );
+        if( poFSHandler == nullptr )
+            poFSHandler = poFSHandlerThisFile;
+        else if( poFSHandler != poFSHandlerThisFile )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Files belong to different file system handlers");
+            poFSHandler = nullptr;
+            break;
+        }
+    }
+    if( poFSHandler == nullptr )
+        return nullptr;
+    return poFSHandler->UnlinkBatch(papszFiles);
+}
+
+/************************************************************************/
 /*                             VSIRename()                              */
 /************************************************************************/
 
@@ -549,8 +592,13 @@ int VSIRename( const char * oldpath, const char * newpath )
  * the timestamps of the files (or optionally the ETag/MD5Sum) to avoid
  * unneeded copy operations.
  *
- * Note: currently only implemented efficiently for local filesystem <-->
- * remote filesystem.
+ * This is only implemented efficiently for:
+ * <ul>
+ * <li> local filesystem <--> remote filesystem.</li>
+ * <li> remote filesystem <--> remote filesystem (starting with GDAL 3.1).
+ * Where the source and target remote filesystems are the same and one of
+ * /vsis3/, /vsigs/ or /vsiaz/</li>
+ * </ul>
  *
  * Similarly to rsync behaviour, if the source filename ends with a slash,
  * it means that the content of the directory must be copied, but not the
@@ -581,8 +629,16 @@ int VSIRename( const char * oldpath, const char * newpath )
  *     for files not using KMS server side encryption and uploaded in a single
  *     PUT operation (so smaller than 50 MB given the default used by GDAL).
  *     Only to be used for /vsis3/, /vsigs/ or other filesystems using a
- *     MD5Sum as ETAG.
- * </li>
+ *     MD5Sum as ETAG.</li>
+ * <li>NUM_THREADS=integer. Number of threads to use for parallel file copying.
+ *     Only use for when /vsis3/, /vsigs/ or /vsiaz/ is in source or target.
+ *     Since GDAL 3.1</li>
+ * <li>CHUNK_SIZE=integer. Maximum size of chunk (in bytes) to use to split
+ *     large objects when downloading them from /vsis3/, /vsigs/ or /vsiaz/ to
+ *     local file system, or for upload to /vsis3/ from local file system.
+ *     Only used if NUM_THREADS > 1.
+ *     For upload to /vsis3/, this chunk size will be set at least to 5 MB.
+ *     Since GDAL 3.1</li>
  * </ul>
  * @param pProgressFunc Progress callback, or NULL.
  * @param pProgressData User data of progress callback, or NULL.
@@ -654,13 +710,16 @@ int VSIRmdir( const char * pszDirname )
 }
 
 /************************************************************************/
-/*                              VSIRmdir()                              */
+/*                         VSIRmdirRecursive()                          */
 /************************************************************************/
 
 /**
  * \brief Delete a directory recursively
  *
  * Deletes a directory object and its content from the file system.
+ *
+ * Starting with GDAL 3.1, /vsis3/ has an efficient implementation of this
+ * function.
  *
  * @return 0 on success or -1 on an error.
  * @since GDAL 2.3
@@ -673,40 +732,9 @@ int VSIRmdirRecursive( const char* pszDirname )
     {
         return -1;
     }
-    char** papszFiles = VSIReadDir(pszDirname);
-    for( char** papszIter = papszFiles; papszIter && *papszIter; ++papszIter )
-    {
-        if( (*papszIter)[0] == '\0' ||
-            strcmp(*papszIter, ".") == 0 ||
-            strcmp(*papszIter, "..") == 0 )
-        {
-            continue;
-        }
-        VSIStatBufL sStat;
-        const CPLString osFilename(
-            CPLFormFilename(pszDirname, *papszIter, nullptr));
-        if( VSIStatL(osFilename, &sStat) == 0 )
-        {
-            if( VSI_ISDIR(sStat.st_mode) )
-            {
-                if( VSIRmdirRecursive(osFilename) != 0 )
-                {
-                    CSLDestroy(papszFiles);
-                    return -1;
-                }
-            }
-            else
-            {
-                if( VSIUnlink(osFilename) != 0 )
-                {
-                    CSLDestroy(papszFiles);
-                    return -1;
-                }
-            }
-        }
-    }
-    CSLDestroy(papszFiles);
-    return VSIRmdir(pszDirname);
+    VSIFilesystemHandler *poFSHandler =
+        VSIFileManager::GetHandler( pszDirname );
+    return poFSHandler->RmdirRecursive( pszDirname );
 }
 
 /************************************************************************/
@@ -779,7 +807,8 @@ int VSIStatExL( const char * pszFilename, VSIStatBufL *psStatBuf, int nFlags )
     char szAltPath[4] = { '\0' };
 
     // Enable to work on "C:" as if it were "C:\".
-    if( strlen(pszFilename) == 2 && pszFilename[1] == ':' )
+    if( pszFilename[0] != '\0' && pszFilename[1] == ':' &&
+        pszFilename[2] == '\0' )
     {
         szAltPath[0] = pszFilename[0];
         szAltPath[1] = pszFilename[1];
@@ -798,6 +827,77 @@ int VSIStatExL( const char * pszFilename, VSIStatBufL *psStatBuf, int nFlags )
 
     return poFSHandler->Stat( pszFilename, psStatBuf, nFlags );
 }
+
+
+/************************************************************************/
+/*                       VSIGetFileMetadata()                           */
+/************************************************************************/
+
+/**
+ * \brief Get metadata on files.
+ *
+ * Implemented currently only for network-like filesystems.
+ *
+ * @param pszFilename the path of the filesystem object to be queried.
+ * UTF-8 encoded.
+ * @param pszDomain Metadata domain to query. Depends on the file system.
+ * The following are supported:
+ * <ul>
+ * <li>HEADERS: to get HTTP headers for network-like filesystems (/vsicurl/, /vsis3/, etc)</li>
+ * <li>TAGS: specific to /vsis3/: to get S3 Object tagging information</li>
+ * </ul>
+ * @param papszOptions Unused. Should be set to NULL.
+ *
+ * @return a NULL-terminated list of key=value strings, to be freed with CSLDestroy()
+ * or NULL in case of error / empty list.
+ *
+ * @since GDAL 3.1.0
+ */
+
+char** VSIGetFileMetadata( const char * pszFilename, const char* pszDomain,
+                           CSLConstList papszOptions )
+{
+    VSIFilesystemHandler *poFSHandler =
+        VSIFileManager::GetHandler( pszFilename );
+    return poFSHandler->GetFileMetadata( pszFilename, pszDomain, papszOptions );
+}
+
+/************************************************************************/
+/*                       VSISetFileMetadata()                           */
+/************************************************************************/
+
+/**
+ * \brief Set metadata on files.
+ *
+ * Implemented currently only for /vsis3/
+ *
+ * @param pszFilename the path of the filesystem object to be queried.
+ * UTF-8 encoded.
+ * @param papszMetadata NULL-terminated list of key=value strings.
+ * @param pszDomain Metadata domain to set. Depends on the file system.
+ * The following are supported:
+ * <ul>
+ * <li>HEADERS: to set HTTP header</li>
+ * <li>TAGS: to set S3 Object tagging information</li>
+ * </ul>
+ * @param papszOptions Unused. Should be set to NULL.
+ *
+ * @return TRUE in case of success.
+ *
+ * @since GDAL 3.1.0
+ */
+
+int VSISetFileMetadata( const char * pszFilename,
+                           CSLConstList papszMetadata,
+                           const char* pszDomain,
+                           CSLConstList papszOptions )
+{
+    VSIFilesystemHandler *poFSHandler =
+        VSIFileManager::GetHandler( pszFilename );
+    return poFSHandler->SetFileMetadata( pszFilename, papszMetadata, pszDomain,
+                                         papszOptions ) ? 1 : 0;
+}
+
 
 /************************************************************************/
 /*                       VSIIsCaseSensitiveFS()                         */
@@ -1090,6 +1190,7 @@ bool VSIFilesystemHandler::Sync( const char* pszSource, const char* pszTarget,
                     CPLFormFilename(osSourceWithoutSlash, *iter, nullptr) );
                 CPLString osSubTarget(
                     CPLFormFilename(osTargetDir, *iter, nullptr) );
+                // coverity[divide_by_zero]
                 void* pScaledProgress = GDALCreateScaledProgress(
                     double(iFile) / nFileCount, double(iFile + 1) / nFileCount,
                     pProgressFunc, pProgressData);
@@ -1200,6 +1301,21 @@ VSIDIREntry::VSIDIREntry(): pszName(nullptr), nMode(0), nSize(0), nMTime(0),
                    papszExtra(nullptr)
 {
 }
+
+/************************************************************************/
+/*                            VSIDIREntry()                             */
+/************************************************************************/
+
+VSIDIREntry::VSIDIREntry(const VSIDIREntry& other):
+    pszName(VSIStrdup(other.pszName)),
+    nMode(other.nMode),
+    nSize(other.nSize),
+    nMTime(other.nMTime),
+    bModeKnown(other.bModeKnown),
+    bSizeKnown(other.bSizeKnown),
+    bMTimeKnown(other.bMTimeKnown),
+    papszExtra(CSLDuplicate(other.papszExtra))
+{}
 
 /************************************************************************/
 /*                           ~VSIDIREntry()                             */
@@ -1376,6 +1492,85 @@ const VSIDIREntry* VSIDIRGeneric::NextDirEntry()
     return &(entry);
 }
 
+/************************************************************************/
+/*                           UnlinkBatch()                              */
+/************************************************************************/
+
+int* VSIFilesystemHandler::UnlinkBatch( CSLConstList papszFiles )
+{
+    int* panRet = static_cast<int*>(
+        CPLMalloc(sizeof(int) * CSLCount(papszFiles)));
+    for( int i = 0; papszFiles && papszFiles[i]; ++i )
+    {
+        panRet[i] = VSIUnlink(papszFiles[i]) == 0;
+    }
+    return panRet;
+}
+
+/************************************************************************/
+/*                          RmdirRecursive()                            */
+/************************************************************************/
+
+int VSIFilesystemHandler::RmdirRecursive( const char* pszDirname )
+{
+    char** papszFiles = VSIReadDir(pszDirname);
+    for( char** papszIter = papszFiles; papszIter && *papszIter; ++papszIter )
+    {
+        if( (*papszIter)[0] == '\0' ||
+            strcmp(*papszIter, ".") == 0 ||
+            strcmp(*papszIter, "..") == 0 )
+        {
+            continue;
+        }
+        VSIStatBufL sStat;
+        const CPLString osFilename(
+            CPLFormFilename(pszDirname, *papszIter, nullptr));
+        if( VSIStatL(osFilename, &sStat) == 0 )
+        {
+            if( VSI_ISDIR(sStat.st_mode) )
+            {
+                if( RmdirRecursive(osFilename) != 0 )
+                {
+                    CSLDestroy(papszFiles);
+                    return -1;
+                }
+            }
+            else
+            {
+                if( VSIUnlink(osFilename) != 0 )
+                {
+                    CSLDestroy(papszFiles);
+                    return -1;
+                }
+            }
+        }
+    }
+    CSLDestroy(papszFiles);
+    return VSIRmdir(pszDirname);
+}
+
+/************************************************************************/
+/*                          GetFileMetadata()                           */
+/************************************************************************/
+
+char** VSIFilesystemHandler::GetFileMetadata( const char * /* pszFilename*/, const char* /*pszDomain*/,
+                                    CSLConstList /*papszOptions*/ )
+{
+    return nullptr;
+}
+
+/************************************************************************/
+/*                          SetFileMetadata()                           */
+/************************************************************************/
+
+bool VSIFilesystemHandler::SetFileMetadata( const char * /* pszFilename*/,
+                                    CSLConstList /* papszMetadata */,
+                                    const char* /* pszDomain */,
+                                    CSLConstList /* papszOptions */ )
+{
+    CPLError(CE_Failure, CPLE_NotSupported, "SetFileMetadata() not supported");
+    return false;
+}
 
 #endif
 
@@ -2156,6 +2351,8 @@ int VSIIngestFile( VSILFILE* fp,
         // VSIMalloc could allocate. Catch it here.
         if( nDataLen != static_cast<vsi_l_offset>(static_cast<size_t>(nDataLen))
             || nDataLen + 1 < nDataLen
+            // opening a directory returns nDataLen = INT_MAX (on 32bit) or INT64_MAX (on 64bit)
+            || nDataLen + 1 > std::numeric_limits<size_t>::max() / 2
             || (nMaxSize >= 0 &&
                 nDataLen > static_cast<vsi_l_offset>(nMaxSize)) )
         {

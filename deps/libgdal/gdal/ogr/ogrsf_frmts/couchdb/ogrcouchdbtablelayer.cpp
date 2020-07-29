@@ -2,10 +2,10 @@
  *
  * Project:  CouchDB Translator
  * Purpose:  Implements OGRCouchDBTableLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,11 +29,11 @@
 #include "ogr_couchdb.h"
 #include "ogrgeojsonreader.h"
 #include "ogrgeojsonwriter.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrcouchdbtablelayer.cpp 8924aa1cb27afa6091666df2862a53e001bb3581 2019-02-26 15:48:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrcouchdbtablelayer.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
 
 /************************************************************************/
 /*                       OGRCouchDBTableLayer()                         */

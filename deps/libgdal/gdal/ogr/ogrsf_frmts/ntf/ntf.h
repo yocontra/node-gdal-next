@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ntf.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: ntf.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  NTF Translator
  * Purpose:  Main declarations for NTF translator.
@@ -374,7 +374,7 @@ class NTFFileReader
 /*                             OGRNTFLayer                              */
 /************************************************************************/
 
-class OGRNTFLayer : public OGRLayer
+class OGRNTFLayer final: public OGRLayer
 {
     OGRFeatureDefn     *poFeatureDefn;
     NTFFeatureTranslator pfnTranslator;
@@ -417,7 +417,7 @@ class OGRNTFLayer : public OGRLayer
 /*                       OGRNTFFeatureClassLayer                        */
 /************************************************************************/
 
-class OGRNTFFeatureClassLayer : public OGRLayer
+class OGRNTFFeatureClassLayer final: public OGRLayer
 {
     OGRFeatureDefn     *poFeatureDefn;
     OGRGeometry        *poFilterGeom;
@@ -451,7 +451,7 @@ class OGRNTFFeatureClassLayer : public OGRLayer
 /*                          OGRNTFRasterLayer                           */
 /************************************************************************/
 
-class OGRNTFRasterLayer : public OGRLayer
+class OGRNTFRasterLayer final: public OGRLayer
 {
     OGRFeatureDefn     *poFeatureDefn;
     OGRGeometry        *poFilterGeom;
@@ -492,7 +492,7 @@ class OGRNTFRasterLayer : public OGRLayer
 /*                           OGRNTFDataSource                           */
 /************************************************************************/
 
-class OGRNTFDataSource : public OGRDataSource
+class OGRNTFDataSource final: public OGRDataSource
 {
     char                *pszName;
 

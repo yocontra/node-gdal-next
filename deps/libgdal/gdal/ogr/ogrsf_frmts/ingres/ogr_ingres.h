@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_ingres.h d14a537a4324399712f4b822656d374341773cd3 2018-07-29 23:14:54 +0200 Even Rouault $
+ * $Id: ogr_ingres.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Declarations for Ingres OGR Driver Classes.
@@ -82,7 +82,7 @@ public:
 /*                            OGRIngresLayer                             */
 /************************************************************************/
 
-class OGRIngresLayer : public OGRLayer
+class OGRIngresLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -137,7 +137,7 @@ class OGRIngresLayer : public OGRLayer
 /*                          OGRIngresTableLayer                          */
 /************************************************************************/
 
-class OGRIngresTableLayer : public OGRIngresLayer
+class OGRIngresTableLayer final: public OGRIngresLayer
 {
     int                 bUpdateAccess;
 
@@ -193,7 +193,7 @@ class OGRIngresTableLayer : public OGRIngresLayer
 /*                         OGRIngresResultLayer                          */
 /************************************************************************/
 
-class OGRIngresResultLayer : public OGRIngresLayer
+class OGRIngresResultLayer final: public OGRIngresLayer
 {
     void                BuildFullQueryStatement();
 
@@ -217,7 +217,7 @@ class OGRIngresResultLayer : public OGRIngresLayer
 /*                          OGRIngresDataSource                          */
 /************************************************************************/
 
-class OGRIngresDataSource : public OGRDataSource
+class OGRIngresDataSource final: public OGRDataSource
 {
     OGRIngresLayer    **papoLayers = nullptr;
     int                 nLayers = 0;
@@ -284,7 +284,7 @@ class OGRIngresDataSource : public OGRDataSource
 /*                            OGRIngresDriver                            */
 /************************************************************************/
 
-class OGRIngresDriver : public OGRSFDriver
+class OGRIngresDriver final: public OGRSFDriver
 {
     char         **ParseWrappedName( const char * );
 

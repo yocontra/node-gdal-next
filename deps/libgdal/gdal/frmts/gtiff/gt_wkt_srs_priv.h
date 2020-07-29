@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_wkt_srs_priv.h 71b7dc7aa9058e4945d5d9dc42bbd5fd6725654d 2014-12-29 22:00:08Z Even Rouault $
+ * $Id: gt_wkt_srs_priv.h fb76410650e54adda139b18a4b294abc1809a378 2020-04-22 19:05:15 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Internal methods of gt_wkt_srs.cpp shared with gt_citation.cpp
@@ -32,13 +32,20 @@
 
 #include "geotiff.h"
 
+#if LIBGEOTIFF_VERSION >= 1600
+
+#define GDALGTIFKeyGetASCII GTIFKeyGetASCII
+#define GDALGTIFKeyGetSHORT GTIFKeyGetSHORT
+#define GDALGTIFKeyGetDOUBLE GTIFKeyGetDOUBLE
+
+#else
+
 int GDALGTIFKeyGetASCII( GTIF *hGTIF, geokey_t key,
                                 char* szStr,
-                                int nIndex,
                                 int szStrMaxLen );
 
 int GDALGTIFKeyGetSHORT( GTIF *hGTIF, geokey_t key,
-                                short* pnVal,
+                                unsigned short* pnVal,
                                 int nIndex,
                                 int nCount );
 
@@ -46,5 +53,7 @@ int GDALGTIFKeyGetDOUBLE( GTIF *hGTIF, geokey_t key,
                                  double* pdfVal,
                                  int nIndex,
                                  int nCount );
+
+#endif
 
 #endif // GT_WKT_SRS_PRIV_H_INCLUDED

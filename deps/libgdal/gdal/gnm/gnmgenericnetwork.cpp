@@ -34,7 +34,7 @@
 
 #include <set>
 
-CPL_CVSID("$Id: gnmgenericnetwork.cpp 98dfb4b4012c5ae4621e246e8eb393b3c05a3f48 2018-04-02 22:09:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: gnmgenericnetwork.cpp b878db8a22b3c59c80ab68c91b785227f347eced 2020-02-11 23:08:41 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 GNMGenericNetwork::GNMGenericNetwork() :
@@ -1388,17 +1388,9 @@ int GNMGenericNetwork::TestCapability( const char * pszCap )
 OGRLayer *GNMGenericNetwork::CopyLayer(OGRLayer *poSrcLayer,
                                        const char *pszNewName, char **papszOptions)
 {
-    if(CSLFindName(papszOptions, "DST_SRSWKT") == -1)
-    {
-        papszOptions = CSLAddNameValue(papszOptions, "DST_SRSWKT",
-                                       GetProjectionRef());
-    }
-    else
-    {
-        papszOptions = CSLSetNameValue(papszOptions, "DST_SRSWKT",
-                                       GetProjectionRef());
-    }
-    return GDALDataset::CopyLayer(poSrcLayer, pszNewName, papszOptions);
+    CPLStringList aosOptions(CSLDuplicate(papszOptions));
+    aosOptions.SetNameValue("DST_SRSWKT", GetProjectionRef());
+    return GDALDataset::CopyLayer(poSrcLayer, pszNewName, aosOptions.List());
 }
 
 int GNMGenericNetwork::CloseDependentDatasets()

@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_fgdb.h 365a72f2b5a94946e92323060b68f9963cd2dbd5 2018-05-06 22:14:36 +0200 Even Rouault $
+* $Id: ogr_fgdb.h 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Standard includes and class definitions ArcObjects OGR driver.
@@ -7,7 +7,7 @@
 *
 ******************************************************************************
 * Copyright (c) 2009, Ragi Yaser Burhum
- * Copyright (c) 2011-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2014, Even Rouault <even dot rouault at spatialys.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -71,7 +71,7 @@ class FGdbDriver;
 /*                           FGdbBaseLayer                              */
 /************************************************************************/
 
-class FGdbBaseLayer : public OGRLayer
+class FGdbBaseLayer CPL_NON_FINAL: public OGRLayer
 {
 protected:
 
@@ -88,6 +88,7 @@ protected:
 
   bool  m_suppressColumnMappingError;
   bool  m_forceMulti;
+  bool  m_bTimeInUTC = false;
 
   bool OGRFeatureFromGdbRow(Row* pRow, OGRFeature** ppFeature);
 

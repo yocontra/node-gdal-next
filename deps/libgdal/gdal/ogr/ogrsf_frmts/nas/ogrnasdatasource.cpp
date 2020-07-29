@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_nas.h"
 
-CPL_CVSID("$Id: ogrnasdatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrnasdatasource.cpp e6fdbf29732751fe93e7593ec6a034ac84a3cc02 2020-04-06 13:45:04 +0200 Even Rouault $")
 
 static const char * const apszURNNames[] =
 {
@@ -159,7 +159,13 @@ int OGRNASDataSource::Open( const char * pszNewName )
 /*      Save the schema file if possible.  Do not make a fuss if we     */
 /*      cannot.  It could be read-only directory or something.          */
 /* -------------------------------------------------------------------- */
-    if( !bHaveSchema && poReader->GetClassCount() > 0 )
+    if( !bHaveSchema && poReader->GetClassCount() > 0 &&
+        !STARTS_WITH_CI(pszNewName, "/vsitar/") &&
+        !STARTS_WITH_CI(pszNewName, "/vsizip/") &&
+        !STARTS_WITH_CI(pszNewName, "/vsigzip/vsi") &&
+        !STARTS_WITH_CI(pszNewName, "/vsigzip//vsi") &&
+        !STARTS_WITH_CI(pszNewName, "/vsicurl/") &&
+        !STARTS_WITH_CI(pszNewName, "/vsicurl_streaming/") )
     {
         VSILFILE *fp = nullptr;
 

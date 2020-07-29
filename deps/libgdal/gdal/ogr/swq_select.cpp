@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (C) 2010 Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,7 +28,7 @@
  ****************************************************************************/
 
 #include "cpl_port.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 #include <cstdio>
 #include <cstring>
@@ -41,7 +41,7 @@
 #include "ogr_geometry.h"
 #include "swq_parser.hpp"
 
-CPL_CVSID("$Id: swq_select.cpp a8d30b37682544123e5e24d69cb33041d544c465 2018-05-06 01:37:21 +0200 Even Rouault $")
+CPL_CVSID("$Id: swq_select.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/
@@ -473,7 +473,7 @@ int swq_select::PushField( swq_expr_node *poExpr, const char *pszAlias,
 /* -------------------------------------------------------------------- */
     if( pszAlias != nullptr )
         col_def->field_alias = CPLStrdup( pszAlias );
-    else if( pszAlias == nullptr && poExpr->eNodeType == SNT_OPERATION
+    else if( poExpr->eNodeType == SNT_OPERATION
              && poExpr->nSubExprCount >= 1
              && ( static_cast<swq_op>(poExpr->nOperation) == SWQ_CONCAT ||
                   static_cast<swq_op>(poExpr->nOperation) == SWQ_SUBSTR )

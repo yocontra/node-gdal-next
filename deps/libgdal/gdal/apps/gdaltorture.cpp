@@ -2,10 +2,10 @@
  *
  * Project:  GDAL Utilities
  * Purpose:  Command line utility to torture GDAL API on datasets
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 
 #include <cassert>
 
-CPL_CVSID("$Id: gdaltorture.cpp a8cbfe1bffcda65bd06767f0b5f4f90996e04d61 2018-01-26 16:59:17Z Kurt Schwehr $")
+CPL_CVSID("$Id: gdaltorture.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */

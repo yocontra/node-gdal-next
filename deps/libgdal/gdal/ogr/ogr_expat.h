@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_expat.h 8f23c07654499bf39ce1d71a760e86ef109e9504 2014-03-16 23:41:27Z Even Rouault $
+ * $Id: ogr_expat.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  OGR
  * Purpose:  Convenience function for parsing with Expat library
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

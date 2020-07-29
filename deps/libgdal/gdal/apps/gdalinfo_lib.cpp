@@ -61,7 +61,7 @@
 
 using std::vector;
 
-CPL_CVSID("$Id: gdalinfo_lib.cpp 2ebdf85677d49f5fc4a1307171fd15d8932dbb0f 2020-01-25 22:36:26 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalinfo_lib.cpp 18bfbd32302f611bde0832f61ca0747d4c4421dd 2020-01-25 22:36:26 +0100 Even Rouault $")
 
 /*! output format */
 typedef enum {
@@ -194,7 +194,7 @@ static void Concat( CPLString& osRet, bool bStdoutOutput,
 /**
  * Lists various information about a GDAL supported raster dataset.
  *
- * This is the equivalent of the <a href="gdalinfo.html">gdalinfo</a> utility.
+ * This is the equivalent of the <a href="/programs/gdalinfo.html">gdalinfo</a> utility.
  *
  * GDALInfoOptions* must be allocated and freed with GDALInfoOptionsNew()
  * and GDALInfoOptionsFree() respectively.
@@ -1783,7 +1783,7 @@ static void GDALInfoReportMetadata( const GDALInfoOptions* psOptions,
  * Allocates a GDALInfoOptions struct.
  *
  * @param papszArgv NULL terminated list of options (potentially including filename and open options too), or NULL.
- *                  The accepted options are the ones of the <a href="gdalinfo.html">gdalinfo</a> utility.
+ *                  The accepted options are the ones of the <a href="/programs/gdalinfo.html">gdalinfo</a> utility.
  * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
  *                           otherwise (gdalinfo_bin.cpp use case) must be allocated with
  *                           GDALInfoOptionsForBinaryNew() prior to this function. Will be

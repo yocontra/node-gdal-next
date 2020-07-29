@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: dgnwrite.cpp 002b050d9a9ef403a732c1210784736ef97216d4 2018-04-09 21:34:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: dgnwrite.cpp 9c23a3df3e508de5558886ed45f1bb270f3bfaf8 2019-08-15 15:46:57 +0200 Even Rouault $")
 
 static void DGNPointToInt( DGNInfo *psDGN, DGNPoint *psPoint,
                            unsigned char *pabyTarget );
@@ -2472,5 +2472,6 @@ int DGNAddShapeFillInfo( DGNHandle hDGN, DGNElemCore *psElement,
 
     abyFillInfo[8] = (unsigned char) nColor;
 
+    // coverity[overrun-buffer-arg]
     return DGNAddRawAttrLink( hDGN, psElement, 16, abyFillInfo );
 }

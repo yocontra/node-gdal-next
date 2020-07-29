@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ntv1dataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ntv1dataset.cpp 6e221b5fd9bb196492f09e52fd257158573f93b3 2019-12-28 02:02:25 +0100 Even Rouault $")
 
 
 
@@ -230,6 +230,7 @@ GDALDataset *NTv1Dataset::Open( GDALOpenInfo * poOpenInfo )
 
     poDS->GetRasterBand(1)->SetDescription( "Latitude Offset (arc seconds)" );
     poDS->GetRasterBand(2)->SetDescription( "Longitude Offset (arc seconds)" );
+    poDS->GetRasterBand(2)->SetMetadataItem("positive_value", "west");
 
 /* -------------------------------------------------------------------- */
 /*      Setup georeferencing.                                           */

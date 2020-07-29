@@ -5,7 +5,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Constantin Jucovschi
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@
 
 void CPL_DLL CPL_STDCALL GDALRegister_RASDAMAN();
 
-CPL_CVSID("$Id: rasdamandataset.cpp 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
+CPL_CVSID("$Id: rasdamandataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 // cppcheck-suppress copyCtorAndEqOperator
 class Subset
@@ -102,7 +102,7 @@ typedef std::map<Subset, r_Ref<r_GMarray> > ArrayCache;
 class RasdamanRasterBand;
 static CPLString getQuery(const char *templateString, const char* x_lo, const char* x_hi, const char* y_lo, const char* y_hi);
 
-class RasdamanDataset : public GDALPamDataset
+class RasdamanDataset final: public GDALPamDataset
 {
   friend class RasdamanRasterBand;
 
@@ -295,7 +295,7 @@ void RasdamanDataset::clear_array_cache() {
 /* ==================================================================== */
 /************************************************************************/
 
-class RasdamanRasterBand : public GDALPamRasterBand
+class RasdamanRasterBand final: public GDALPamRasterBand
 {
   friend class RasdamanDataset;
 
@@ -709,7 +709,7 @@ void GDALRegister_RASDAMAN()
   poDriver->SetDescription( "RASDAMAN" );
   poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
   poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "RASDAMAN" );
-  poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_rasdaman.html" );
+  poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/rasdaman.html" );
 
   poDriver->pfnOpen = RasdamanDataset::Open;
 

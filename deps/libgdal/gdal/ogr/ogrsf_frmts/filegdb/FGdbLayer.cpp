@@ -8,7 +8,7 @@
 ******************************************************************************
 * Copyright (c) 2010, Ragi Yaser Burhum
 * Copyright (c) 2011, Paul Ramsey <pramsey at cleverelephant.ca>
- * Copyright (c) 2011-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2014, Even Rouault <even dot rouault at spatialys.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "FGdbUtils.h"
 #include "cpl_minixml.h" // the only way right now to extract schema information
 
-CPL_CVSID("$Id: FGdbLayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: FGdbLayer.cpp 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $")
 
 using std::string;
 using std::wstring;
@@ -717,6 +717,7 @@ int  FGdbLayer::EditGDBTablX( const CPLString& osGDBTablX,
                 // then skip to it
                 i = ((nNextOGRFID-1) / 1024) * 1024 + 1;
             }
+            // coverity[negative_shift]
             else if( !bDisableSparsePages && pabyBlockMap != nullptr && i <= nInMaxFID &&
                      TEST_BIT(pabyBlockMap, (i-1)/1024) == 0 )
             {
@@ -767,6 +768,7 @@ int  FGdbLayer::EditGDBTablX( const CPLString& osGDBTablX,
             int iBlock = (nSrcFID-1) / 1024;
 
             // Check if the block is not empty
+            // coverity[negative_shift]
             if( TEST_BIT(pabyBlockMap, iBlock) )
             {
                 int nCountBlocksBefore;
@@ -774,13 +776,19 @@ int  FGdbLayer::EditGDBTablX( const CPLString& osGDBTablX,
                 {
                     nCountBlocksBefore = nCountBlocksBeforeIBlockValue;
                     for(int j=nCountBlocksBeforeIBlockIdx;j<iBlock;j++)
+                    {
+                        // coverity[negative_shift]
                         nCountBlocksBefore += TEST_BIT(pabyBlockMap, j) != 0;
+                    }
                 }
                 else
                 {
                     nCountBlocksBefore = 0;
                     for(int j=0;j<iBlock;j++)
+                    {
+                        // coverity[negative_shift]
                         nCountBlocksBefore += TEST_BIT(pabyBlockMap, j) != 0;
+                    }
                 }
                 nCountBlocksBeforeIBlockIdx = iBlock;
                 nCountBlocksBeforeIBlockValue = nCountBlocksBefore;
@@ -2593,6 +2601,8 @@ bool FGdbLayer::Initialize(FGdbDataSource* pParentDataSource, Table* pTable,
     {
         CPLXMLNode *psNode;
 
+        m_bTimeInUTC = CPLTestBool(CPLGetXMLValue(pDataElementNode, "IsTimeInUTC", "false"));
+
         for( psNode = pDataElementNode->psChild;
         psNode != nullptr;
         psNode = psNode->psNext )
@@ -3365,7 +3375,8 @@ bool FGdbBaseLayer::OGRFeatureFromGdbRow(Row* pRow, OGRFeature** ppFeature)
                 }
 
                 pOutFeature->SetField(i, val.tm_year + 1900, val.tm_mon + 1,
-                                      val.tm_mday, val.tm_hour, val.tm_min, (float)val.tm_sec);
+                                      val.tm_mday, val.tm_hour, val.tm_min, (float)val.tm_sec,
+                                      m_bTimeInUTC ? 100 : 0);
             // Examine test data to figure out how to extract that
             }
             break;

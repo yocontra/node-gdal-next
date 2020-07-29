@@ -40,7 +40,7 @@
 #include "cpl_multiproc.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogr_xerces.cpp ba2ef4045f82fd2260f1732e9e46a927277ac93d 2018-05-06 19:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_xerces.cpp 1b9f0a2e0fd3a222576b64436720029db466742f 2019-07-07 22:49:00 +0200 Even Rouault $")
 
 #ifdef HAVE_XERCES
 
@@ -217,7 +217,7 @@ class OGRXercesInputSource : public InputSource
     CPL_DISALLOW_COPY_ASSIGN(OGRXercesInputSource)
 
   public:
-    OGRXercesInputSource(VSILFILE* fp,
+    explicit OGRXercesInputSource(VSILFILE* fp,
                          MemoryManager* const manager =
                          XMLPlatformUtils::fgMemoryManager);
     ~OGRXercesInputSource() override;

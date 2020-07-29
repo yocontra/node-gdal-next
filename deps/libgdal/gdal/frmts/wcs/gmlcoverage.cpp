@@ -42,7 +42,7 @@
 #include "ogr_spatialref.h"
 #include "gmlcoverage.h"
 
-CPL_CVSID("$Id: gmlcoverage.cpp 98dfb4b4012c5ae4621e246e8eb393b3c05a3f48 2018-04-02 22:09:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlcoverage.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        ParseGMLCoverageDesc()                        */
@@ -122,7 +122,6 @@ CPLErr WCSParseGMLCoverage( CPLXMLNode *psXML,
     OGRPoint *poOriginGeometry = nullptr;
     const char *pszSRSName = nullptr;
 
-    if( psOriginPoint != nullptr )
     {
         bool bOldWrap = false;
 

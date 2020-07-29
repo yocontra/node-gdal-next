@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -55,7 +55,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsi_mem.cpp cc40f285204d363d762804d7b9b4cd136384e85a 2018-11-08 23:36:59 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsi_mem.cpp 85911a38cebbf5713d0bcc0cf4b10f8fd00dbe5e 2020-06-18 18:28:13 +0200 Even Rouault $")
 
 /*
 ** Notes on Multithreading:
@@ -758,6 +758,8 @@ int VSIMemFilesystemHandler::Rename( const char *pszOldPath,
 
     const CPLString osOldPath = NormalizePath(pszOldPath);
     const CPLString osNewPath = NormalizePath(pszNewPath);
+    if( !STARTS_WITH(pszNewPath, "/vsimem/") )
+        return -1;
 
     if( osOldPath.compare(osNewPath) == 0 )
         return 0;
@@ -795,9 +797,12 @@ int VSIMemFilesystemHandler::Rename( const char *pszOldPath,
 
 std::string VSIMemFilesystemHandler::NormalizePath( const std::string &in )
 {
-    std::string s(in);
+    CPLString s(in);
     std::replace(s.begin(), s.end(), '\\', '/');
-    return s;
+    s.replaceAll("//", '/');
+    if( !s.empty() && s.back() == '/' )
+        s.resize(s.size() - 1);
+    return std::move(s);
 }
 
 /************************************************************************/

@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  SQLite Virtual Table module using OGR layers
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@
 #include "ogrsqlite3ext.h"
 #include "ogrsqlitesqlfunctions.h"
 #include "ogrsqliteutility.h"
-#include "swq.h"
+#include "ogr_swq.h"
 #include "sqlite3.h"
 
 /************************************************************************/
@@ -2588,7 +2588,7 @@ int OGR2SQLITE_static_register (sqlite3 * hDB, char **pzErrMsg, void * _pApi)
 {
     const sqlite3_api_routines * pApi = (const sqlite3_api_routines * )_pApi;
 #ifndef WIN32
-    if( pApi->create_module == nullptr )
+    if( ( pApi == nullptr ) || ( pApi->create_module == nullptr ) )
     {
         pApi = &OGRSQLITE_static_routines;
     }

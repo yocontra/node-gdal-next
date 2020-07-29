@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2007, Frank Warmerdam
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: nitfaridpcm.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: nitfaridpcm.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 constexpr int neighbourhood_size_75[4] = { 23, 47, 74, 173 };
 constexpr int bits_per_level_by_busycode_75[4/*busy code*/][4/*level*/] = {

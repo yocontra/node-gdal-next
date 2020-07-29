@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shptree.c be177ef3add5bf04141c53ca0982de1a8fd6521f 2018-05-06 13:32:15 +0200 Even Rouault $
+ * $Id: shptree.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  Shapelib
  * Purpose:  Implementation of quadtree building and searching functions.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * This software is available under the following "MIT Style" license,
  * or at the option of the licensee under the LGPL (see COPYING).  This
@@ -47,7 +47,7 @@
 #include "cpl_error.h"
 #endif
 
-SHP_CVSID("$Id: shptree.c be177ef3add5bf04141c53ca0982de1a8fd6521f 2018-05-06 13:32:15 +0200 Even Rouault $")
+SHP_CVSID("$Id: shptree.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #ifndef TRUE
 #  define TRUE 1

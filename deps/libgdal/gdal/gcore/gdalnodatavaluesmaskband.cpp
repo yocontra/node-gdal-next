@@ -5,10 +5,10 @@
  *           a default band mask based on the NODATA_VALUES metadata item.
  *           A pixel is considered nodata in all bands if and only if all bands
  *           match the corresponding value in the NODATA_VALUES tuple
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot ogr>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2008-2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalnodatavaluesmaskband.cpp 003ad4e9e410423af8b35843956f781e44a8daac 2019-02-18 15:48:35 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalnodatavaluesmaskband.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/

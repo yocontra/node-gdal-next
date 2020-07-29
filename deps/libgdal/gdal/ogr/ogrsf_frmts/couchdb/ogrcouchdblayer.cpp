@@ -2,10 +2,10 @@
  *
  * Project:  CouchDB Translator
  * Purpose:  Implements OGRCouchDBLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 #include "ogrgeojsonreader.h"
 #include "ogrgeojsonutils.h"
 
-CPL_CVSID("$Id: ogrcouchdblayer.cpp c3b17f3db1f346b23bbab3000bd3b5e4225b7512 2019-01-03 10:26:12 -0500 alanstewart-terragotech $")
+CPL_CVSID("$Id: ogrcouchdblayer.cpp 6d34914732d5e9173582cc58ea553e349041d5c8 2020-06-27 13:32:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRCouchDBLayer()                             */
@@ -317,10 +317,10 @@ void OGRCouchDBLayer::ParseFieldValue(OGRFeature* poFeature,
         {
             if ( json_object_get_type(poValue) == json_type_array )
             {
-                const auto nLength = json_object_array_length(poValue);
+                auto nLength = json_object_array_length(poValue);
                 char** papszVal = static_cast<char **>(
                     CPLMalloc(sizeof(char*) * (nLength+1)));
-                auto i = decltype(nLength){0};  // Used after for.
+                decltype(nLength) i = 0; // Used after for.
                 for( ; i < nLength; i++ )
                 {
                     json_object* poRow = json_object_array_get_idx(poValue, i);

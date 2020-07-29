@@ -52,7 +52,7 @@
 #include "ogr_feature.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: mitab_datfile.cpp a18fcc078bc59d73d4fc1f7e3150ebea54911e3f 2019-06-27 11:07:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_datfile.cpp 267d2860dab2d5b922913563ee1c06de0367cf06 2019-06-27 11:07:36 +0200 Even Rouault $")
 
 /*=====================================================================
  *                      class TABDATFile

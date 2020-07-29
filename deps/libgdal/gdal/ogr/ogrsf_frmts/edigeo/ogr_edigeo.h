@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_edigeo.h 1a1c6adf70492873a57bcbd56637f5a93880b7a7 2018-06-25 18:52:18 +0200 Valentin Sasyan $
+ * $Id: ogr_edigeo.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  EDIGEO Translator
  * Purpose:  Definition of classes for OGR .edigeo driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -41,7 +41,7 @@
 
 class OGREDIGEODataSource;
 
-class OGREDIGEOLayer : public OGRLayer
+class OGREDIGEOLayer final: public OGRLayer
 {
     OGREDIGEODataSource* poDS;
 
@@ -137,7 +137,7 @@ class OGREDIGEOFEADesc
         CPLString osQUP_RID;                   /* e.g. Actualite_Objet_X */
 };
 
-class OGREDIGEODataSource : public OGRDataSource
+class OGREDIGEODataSource final: public OGRDataSource
 {
     friend class OGREDIGEOLayer;
 

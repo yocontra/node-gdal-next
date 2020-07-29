@@ -2,10 +2,10 @@
  *
  * Project:  GDAL Utilities
  * Purpose:  Common utility routines
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 #include "cpl_string.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: commonutils.cpp 10d2cf3c7944c209da6b9bfa391b0ea0b6222ed8 2018-09-11 08:31:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: commonutils.cpp a7cdc486d524bef67fe59ab48bff81c8880be984 2019-06-22 19:30:01 +0200 Even Rouault $")
 
 /* -------------------------------------------------------------------- */
 /*                   DoesDriverHandleExtension()                        */
@@ -74,6 +74,12 @@ std::vector<CPLString> GetOutputDriversFor(const char* pszDestFilename,
     std::vector<CPLString> aoDriverList;
 
     CPLString osExt = CPLGetExtension(pszDestFilename);
+    if( EQUAL(osExt, "zip") &&
+            (CPLString(pszDestFilename).endsWith(".shp.zip") ||
+             CPLString(pszDestFilename).endsWith(".SHP.ZIP")) )
+    {
+        osExt = "shp.zip";
+    }
     const int nDriverCount = GDALGetDriverCount();
     for( int i = 0; i < nDriverCount; i++ )
     {

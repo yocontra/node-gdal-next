@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_csv.h 99aa5b9717f6d18543ca4487ebd4ccd34cb2b29e 2016-11-21 06:54:04Z Kurt Schwehr $
+ * $Id: cpl_csv.h 7d6fac2a7dd6f5deed06d3ab591ba52f6bde7a70 2019-05-18 15:30:03 -0500 Even Rouault $
  *
  * Project:  Common Portability Library
  * Purpose:  Functions for reading and scanning CSV (comma separated,
@@ -71,7 +71,9 @@ void CPL_DLL CSVDeaccess( const char * );
 const char CPL_DLL *CSVGetField( const char *, const char *, const char *,
                                  CSVCompareCriteria, const char * );
 
+#ifndef DOXYGEN_XML
 void CPL_DLL SetCSVFilenameHook( const char *(*)(const char *) );
+#endif
 
 CPL_C_END
 

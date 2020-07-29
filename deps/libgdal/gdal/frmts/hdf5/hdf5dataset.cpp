@@ -35,6 +35,7 @@
 #include "hdf5dataset.h"
 #include "hdf5vfl.h"
 
+#include <algorithm>
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -46,7 +47,7 @@
 #include "gdal_frmts.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: hdf5dataset.cpp 6cb6727cae8ceeb5c7321307f2194d08eb4b6201 2019-07-18 00:05:09 +0200 Even Rouault $")
+CPL_CVSID("$Id: hdf5dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 constexpr size_t MAX_METADATA_LEN = 32768;
 
@@ -98,10 +99,12 @@ void GDALRegister_HDF5()
     poDriver->SetMetadataItem(GDAL_DCAP_RASTER, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME,
                               "Hierarchical Data Format Release 5");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_hdf5.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/hdf5.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSIONS, "h5 hdf5");
     poDriver->SetMetadataItem(GDAL_DMD_SUBDATASETS, "YES");
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
+
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIDIM_RASTER, "YES" );
 
     poDriver->pfnOpen = HDF5Dataset::Open;
     poDriver->pfnIdentify = HDF5Dataset::Identify;
@@ -201,8 +204,6 @@ GDALDataType HDF5Dataset::GetDataType(hid_t TypeID)
             return GDT_Unknown;
         else if( H5Tequal(H5T_NATIVE_ULLONG, TypeID) )
             return GDT_Unknown;
-        else if( H5Tequal(H5T_NATIVE_DOUBLE, TypeID) )
-            return GDT_Unknown;
     }
     else  //Parse compound type to determine if data is complex
     {
@@ -216,6 +217,20 @@ GDALDataType HDF5Dataset::GetDataType(hid_t TypeID)
         const bool bTypeEqual = H5Tequal( ElemTypeID, Elem2TypeID) > 0;
         H5Tclose(Elem2TypeID);
         if ( !bTypeEqual )
+        {
+            H5Tclose(ElemTypeID);
+            return GDT_Unknown;
+        }
+
+        char* pszName1 = H5Tget_member_name(TypeID, 0);
+        const bool bIsReal = pszName1 && (pszName1[0] == 'r' ||pszName1[0] == 'R');
+        H5free_memory(pszName1);
+
+        char* pszName2 = H5Tget_member_name(TypeID, 1);
+        const bool bIsImaginary = pszName2 && (pszName2[0] == 'i' ||pszName2[0] == 'I');
+        H5free_memory(pszName2);
+
+        if( !bIsReal || !bIsImaginary)
         {
             H5Tclose(ElemTypeID);
             return GDT_Unknown;
@@ -345,6 +360,12 @@ const char *HDF5Dataset::GetDataTypeName(hid_t TypeID)
 int HDF5Dataset::Identify( GDALOpenInfo * poOpenInfo )
 
 {
+    if( (poOpenInfo->nOpenFlags & GDAL_OF_MULTIDIM_RASTER) &&
+        STARTS_WITH(poOpenInfo->pszFilename, "HDF5:") )
+    {
+        return TRUE;
+    }
+
     // Is it an HDF5 file?
     constexpr char achSignature[] = "\211HDF\r\n\032\n";
 
@@ -405,6 +426,49 @@ int HDF5Dataset::Identify( GDALOpenInfo * poOpenInfo )
 }
 
 /************************************************************************/
+/*                         GDAL_HDF5Open()                              */
+/************************************************************************/
+hid_t GDAL_HDF5Open(const std::string& osFilename )
+{
+    hid_t hHDF5;
+    // Heuristics to able datasets split over several files, using the 'family'
+    // driver. If passed the first file, and it contains a single 0, or
+    // ends up with 0.h5 or 0.hdf5, replace the 0 with %d and try the family driver.
+    if( std::count(osFilename.begin(), osFilename.end(), '0') == 1 ||
+        osFilename.find("0.h5") != std::string::npos ||
+        osFilename.find("0.hdf5") != std::string::npos )
+    {
+        const auto zero_pos = osFilename.rfind('0');
+        const auto osNewName = osFilename.substr(0, zero_pos) + "%d" + osFilename.substr(zero_pos+1);
+        hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT);
+#ifdef HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+        H5E_BEGIN_TRY {
+            hHDF5 = H5Fopen(osNewName.c_str(), H5F_ACC_RDONLY, fapl);
+        } H5E_END_TRY;
+#ifdef HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT
+#pragma GCC diagnostic pop
+#endif
+        H5Pclose(fapl);
+        if( hHDF5 >= 0 )
+        {
+            CPLDebug("HDF5", "Actually opening %s with 'family' driver",
+                     osNewName.c_str());
+            return hHDF5;
+        }
+    }
+
+    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_driver(fapl, HDF5GetFileDriver(), nullptr);
+    hHDF5 = H5Fopen(osFilename.c_str(), H5F_ACC_RDONLY, fapl);
+    H5Pclose(fapl);
+    return hHDF5;
+}
+
+/************************************************************************/
 /*                                Open()                                */
 /************************************************************************/
 GDALDataset *HDF5Dataset::Open( GDALOpenInfo *poOpenInfo )
@@ -412,17 +476,18 @@ GDALDataset *HDF5Dataset::Open( GDALOpenInfo *poOpenInfo )
     if( !Identify(poOpenInfo) )
         return nullptr;
 
+    if( poOpenInfo->nOpenFlags & GDAL_OF_MULTIDIM_RASTER )
+    {
+        return OpenMultiDim(poOpenInfo);
+    }
+
     // Create datasource.
     HDF5Dataset *const poDS = new HDF5Dataset();
 
     poDS->SetDescription(poOpenInfo->pszFilename);
 
     // Try opening the dataset.
-    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_driver(fapl, HDF5GetFileDriver(), nullptr);
-    poDS->hHDF5 = H5Fopen(poOpenInfo->pszFilename, H5F_ACC_RDONLY, fapl);
-    H5Pclose(fapl);
-
+    poDS->hHDF5 = GDAL_HDF5Open(poOpenInfo->pszFilename);
     if( poDS->hHDF5 < 0 )
     {
         delete poDS;
@@ -442,6 +507,15 @@ GDALDataset *HDF5Dataset::Open( GDALOpenInfo *poOpenInfo )
 
     poDS->SetMetadata(poDS->papszMetadata);
 
+    if( STARTS_WITH(CSLFetchNameValueDef(poDS->papszMetadata, "mission_name", ""), "Sentinel 3") &&
+        EQUAL(CSLFetchNameValueDef(poDS->papszMetadata, "altimeter_sensor_name", ""), "SRAL") &&
+        EQUAL(CSLFetchNameValueDef(poDS->papszMetadata, "radiometer_sensor_name", ""), "MWR") &&
+        GDALGetDriverByName("netCDF") != nullptr )
+    {
+        delete poDS;
+        return nullptr;
+    }
+
     if ( CSLCount(poDS->papszSubDatasets) / 2 >= 1 )
         poDS->SetMetadata(poDS->papszSubDatasets, "SUBDATASETS");
 
@@ -455,7 +529,8 @@ GDALDataset *HDF5Dataset::Open( GDALOpenInfo *poOpenInfo )
         CPLString osDSName =
             CSLFetchNameValue(poDS->papszSubDatasets, "SUBDATASET_1_NAME");
         delete poDS;
-        return (GDALDataset *)GDALOpen(osDSName, poOpenInfo->eAccess);
+        return GDALDataset::Open(osDSName, poOpenInfo->nOpenFlags, nullptr,
+                                 poOpenInfo->papszOpenOptions, nullptr);
     }
     else
     {
@@ -1036,7 +1111,7 @@ CPLErr HDF5Dataset::CreateMetadata( HDF5GroupObjects *poH5Object, int nType)
 
     poH5CurrentObject = poH5Object;
 
-    if( poH5Object->pszPath == nullptr || EQUAL(poH5Object->pszPath, "") )
+    if( EQUAL(poH5Object->pszPath, "") )
         return CE_None;
 
     HDF5Dataset *const poDS = this;

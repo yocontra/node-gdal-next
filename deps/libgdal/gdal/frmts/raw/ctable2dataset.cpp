@@ -32,7 +32,7 @@
 #include "ogr_srs_api.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: ctable2dataset.cpp dadb91bf34f59f06ee6627114bb174d1e7d20739 2019-08-14 16:13:25 +0200 Even Rouault $")
+CPL_CVSID("$Id: ctable2dataset.cpp 6e221b5fd9bb196492f09e52fd257158573f93b3 2019-12-28 02:02:25 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -218,6 +218,7 @@ GDALDataset *CTable2Dataset::Open( GDALOpenInfo * poOpenInfo )
 /* -------------------------------------------------------------------- */
 /*      Setup the bands.                                                */
 /* -------------------------------------------------------------------- */
+    CPLErrorReset();
     RawRasterBand *poBand =
         new RawRasterBand( poDS, 1, poDS->fpImage,
                            160 + 4 + static_cast<vsi_l_offset>(nRasterXSize) *
@@ -234,8 +235,13 @@ GDALDataset *CTable2Dataset::Open( GDALOpenInfo * poOpenInfo )
                            8, -8 * nRasterXSize,
                            GDT_Float32, CPL_IS_LSB, RawRasterBand::OwnFP::NO );
     poBand->SetDescription( "Longitude Offset (radians)" );
+    poBand->SetMetadataItem("positive_value", "west");
     poDS->SetBand( 2, poBand );
-
+    if( CPLGetLastErrorType() != CE_None )
+    {
+        delete poDS;
+        return nullptr;
+    }
 /* -------------------------------------------------------------------- */
 /*      Initialize any PAM information.                                 */
 /* -------------------------------------------------------------------- */

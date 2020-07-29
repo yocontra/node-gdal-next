@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpgtablelayer.cpp 56f9eca9a81a56ab2cf198d5b3288f6eb8df702a 2019-02-27 09:45:00 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrpgtablelayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 #define USE_COPY_UNSET  -10
 
@@ -54,7 +54,7 @@ class OGRPGTableFeatureDefn final: public OGRPGFeatureDefn
         void SolveFields() const;
 
     public:
-        OGRPGTableFeatureDefn( OGRPGTableLayer* poLayerIn,
+        explicit OGRPGTableFeatureDefn( OGRPGTableLayer* poLayerIn,
                                const char * pszName = nullptr ) :
             OGRPGFeatureDefn(pszName), poLayer(poLayerIn)
         {
@@ -232,7 +232,7 @@ char ** OGRPGTableLayer::GetMetadataDomainList()
 {
     if( pszDescription == nullptr )
         GetMetadata();
-    if( pszDescription[0] != '\0' )
+    if( pszDescription != nullptr && pszDescription[0] != '\0' )
         return CSLAddString(nullptr, "");
     return nullptr;
 }
@@ -299,18 +299,20 @@ CPLErr OGRPGTableLayer::SetMetadata(char** papszMD, const char* pszDomain)
     if( !bDeferredCreation && (pszDomain == nullptr || EQUAL(pszDomain, "")) )
     {
         const char* l_pszDescription = OGRLayer::GetMetadataItem("DESCRIPTION");
+        if( l_pszDescription == nullptr )
+            l_pszDescription = "";
         PGconn              *hPGConn = poDS->GetPGConn();
         CPLString osCommand;
 
         osCommand.Printf( "COMMENT ON TABLE %s IS %s",
                            pszSqlTableName,
-                           l_pszDescription && l_pszDescription[0] != '\0' ?
+                           l_pszDescription[0] != '\0' ?
                               OGRPGEscapeString(hPGConn, l_pszDescription).c_str() : "NULL" );
         PGresult* hResult = OGRPG_PQexec(hPGConn, osCommand.c_str() );
         OGRPGClearResult( hResult );
 
         CPLFree(pszDescription);
-        pszDescription = CPLStrdup(l_pszDescription ? l_pszDescription : "");
+        pszDescription = CPLStrdup(l_pszDescription);
     }
 
     return CE_None;
@@ -913,9 +915,6 @@ OGRFeature *OGRPGTableLayer::GetNextFeature()
     if( pszQueryStatement == nullptr )
         ResetReading();
 
-    if( pszQueryStatement == nullptr )
-        ResetReading();
-
     OGRPGGeomFieldDefn* poGeomFieldDefn = nullptr;
     if( poFeatureDefn->GetGeomFieldCount() != 0 )
         poGeomFieldDefn = poFeatureDefn->myGetGeomFieldDefn(m_iGeomFieldFilter);
@@ -937,7 +936,7 @@ OGRFeature *OGRPGTableLayer::GetNextFeature()
             || poGeomFieldDefn->ePostgisType == GEOM_TYPE_GEOGRAPHY
             || FilterGeometry( poFeature->GetGeomFieldRef(m_iGeomFieldFilter) )  )
         {
-            if( poFeature && iFIDAsRegularColumnIndex >= 0 )
+            if( iFIDAsRegularColumnIndex >= 0 )
             {
                 poFeature->SetField(iFIDAsRegularColumnIndex, poFeature->GetFID());
             }
@@ -1815,7 +1814,7 @@ OGRErr OGRPGTableLayer::CreateFeatureViaInsert( OGRFeature *poFeature )
                 osCommand += "''";
         }
         else if( poGeomFieldDefn->ePostgisType == GEOM_TYPE_WKB &&
-                 bWkbAsOid && poGeom != nullptr )
+                 bWkbAsOid )
         {
             Oid     oid = GeometryToOID( poGeom );
 

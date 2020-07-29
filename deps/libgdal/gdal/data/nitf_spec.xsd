@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <!--
 /******************************************************************************
- * $Id: nitf_spec.xsd 53d6df8552738b8e852ea38462051f9079587baa 2011-08-06 13:47:27Z Even Rouault $
+ * $Id: nitf_spec.xsd 7efb66b70139062bce1243d9a9344f8cd228ef3a 2019-06-19 17:11:32 +0200 Even Rouault $
  *
  * Project:  NITF Library
  * Purpose:  Schema of description of NITF TREs
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
  * Copyright (c) 2011, Even Rouault

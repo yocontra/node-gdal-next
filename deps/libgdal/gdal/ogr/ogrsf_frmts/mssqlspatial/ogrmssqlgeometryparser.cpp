@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlgeometryparser.cpp 3ce964310676d6c68cc32ac7a4dd46e8971e036b 2019-06-25 21:55:08 +0200 Tamas Szekeres $")
+CPL_CVSID("$Id: ogrmssqlgeometryparser.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
 
 /*   SqlGeometry/SqlGeography serialization format
 
@@ -489,6 +489,8 @@ OGRCompoundCurve* OGRMSSQLGeometryParser::ReadCompoundCurve(int iFigure)
     // adding the last curve
     if (iPoint == iNextPoint)
         AddCurveSegment(poCompoundCurve, poCurve, iPoint - nPointsPrepared, iPoint + 1);
+    else
+        delete poCurve;
 
     return poCompoundCurve;
 }

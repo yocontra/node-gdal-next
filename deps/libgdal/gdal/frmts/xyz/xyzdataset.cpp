@@ -2,10 +2,10 @@
  *
  * Project:  XYZ driver
  * Purpose:  GDALDataset driver for XYZ dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <vector>
 
-CPL_CVSID("$Id: xyzdataset.cpp 26e1f9bdbd9c6e1eb91451fa5db6fb28d505f966 2019-04-24 21:41:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: xyzdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 constexpr double RELATIVE_ERROR = 1e-3;
 
@@ -46,7 +46,7 @@ constexpr double RELATIVE_ERROR = 1e-3;
 
 class XYZRasterBand;
 
-class XYZDataset : public GDALPamDataset
+class XYZDataset final: public GDALPamDataset
 {
     friend class XYZRasterBand;
 
@@ -88,7 +88,7 @@ class XYZDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class XYZRasterBand : public GDALPamRasterBand
+class XYZRasterBand final: public GDALPamRasterBand
 {
     friend class XYZDataset;
 
@@ -914,6 +914,7 @@ GDALDataset *XYZDataset::Open( GDALOpenInfo * poOpenInfo )
                                 eDT = GDT_Float32;
                             }
                             else if ((eDT == GDT_Byte || eDT == GDT_Int16)
+                                    // cppcheck-suppress knownConditionTrueFalse
                                      && (nZ < 0 || nZ > 255))
                             {
                                 if (nZ < -32768 || nZ > 32767)
@@ -1434,7 +1435,7 @@ void GDALRegister_XYZ()
     poDriver->SetDescription( "XYZ" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ASCII Gridded XYZ" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_xyz.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/xyz.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "xyz" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

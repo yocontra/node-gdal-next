@@ -7,7 +7,7 @@
  *
  * Author:       David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisrasterdataset.cpp 2bd6bbffd0448037745dc5c7acdff09f4109ca3e 2019-05-02 11:32:48 +0200 Even Rouault $
+ * Last changes: $Id: postgisrasterdataset.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -41,7 +41,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: postgisrasterdataset.cpp 2bd6bbffd0448037745dc5c7acdff09f4109ca3e 2019-05-02 11:32:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: postgisrasterdataset.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 #ifdef _WIN32
 #define rint(x) floor((x) + 0.5)
@@ -148,8 +148,10 @@ PostGISRasterDataset::PostGISRasterDataset() :
     adfGeoTransform[GEOTRSFRM_ROTATION_PARAM1] = 0.0;
     adfGeoTransform[GEOTRSFRM_TOPLEFT_Y] = 0.0;
     adfGeoTransform[GEOTRSFRM_ROTATION_PARAM2] = 0.0;
+    // coverity[tainted_data]
     adfGeoTransform[GEOTRSFRM_WE_RES] =
         CPLAtof(CPLGetConfigOption("PR_WE_RES", NO_VALID_RES));
+    // coverity[tainted_data]
     adfGeoTransform[GEOTRSFRM_NS_RES] =
         CPLAtof(CPLGetConfigOption("PR_NS_RES", NO_VALID_RES));
 
@@ -3493,14 +3495,10 @@ PostGISRasterDataset::CreateCopy( CPL_UNUSED const char * pszFilename,
             PQerrorMessage(poConn));
         if (poResult != nullptr)
             PQclear(poResult);
-        if (pszSchema)
-            CPLFree(pszSchema);
-        if (pszTable)
-            CPLFree(pszTable);
-        if (pszColumn)
-            CPLFree(pszColumn);
-        if (pszWhere)
-            CPLFree(pszWhere);
+        CPLFree(pszSchema);
+        CPLFree(pszTable);
+        CPLFree(pszColumn);
+        CPLFree(pszWhere);
 
         CPLFree(pszConnectionString);
 
@@ -3896,14 +3894,10 @@ PostGISRasterDataset::Delete(const char* pszFilename)
             PQclear(poResult);
     }
 
-    if (pszSchema)
-        CPLFree(pszSchema);
-    if (pszTable)
-        CPLFree(pszTable);
-    if (pszColumn)
-        CPLFree(pszColumn);
-    if (pszWhere)
-        CPLFree(pszWhere);
+    CPLFree(pszSchema);
+    CPLFree(pszTable);
+    CPLFree(pszColumn);
+    CPLFree(pszWhere);
 
     // clean up connection string
     CPLFree(pszConnectionString);

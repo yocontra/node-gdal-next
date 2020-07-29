@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "ershdrnode.h"
 
-CPL_CVSID("$Id: ershdrnode.cpp 315a1454d3b784db7245724bad0056028203cf08 2018-05-29 21:18:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: ershdrnode.cpp 681c3e492f9e8b4d60495c5038b583c8528c7d90 2019-08-23 12:48:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             ERSHdrNode()                             */
@@ -175,7 +175,7 @@ int ERSHdrNode::ParseChildren( VSILFILE * fp, int nRecLevel )
 
         if( (iOff = osLine.find_first_of( '=' )) != std::string::npos )
         {
-            CPLString osName = osLine.substr(0,iOff-1);
+            CPLString osName = iOff == 0 ? std::string() : osLine.substr(0,iOff-1);
             osName.Trim();
 
             CPLString osValue = osLine.c_str() + iOff + 1;
@@ -294,8 +294,11 @@ const char *ERSHdrNode::Find( const char *pszPath, const char *pszDefault )
                     {
                         // strip off quotes.
                         osTempReturn = papszItemValue[i];
-                        osTempReturn =
-                            osTempReturn.substr( 1, osTempReturn.length()-2 );
+                        if( osTempReturn.length() < 2 )
+                            osTempReturn.clear();
+                        else
+                            osTempReturn =
+                                osTempReturn.substr( 1, osTempReturn.length()-2 );
                         return osTempReturn;
                     }
                     else

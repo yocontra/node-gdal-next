@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_aeronavfaa.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogr_aeronavfaa.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  AeronavFAA Translator
  * Purpose:  Definition of classes for OGR AeronavFAA driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@ typedef struct
 /*                         OGRAeronavFAALayer                           */
 /************************************************************************/
 
-class OGRAeronavFAALayer : public OGRLayer
+class OGRAeronavFAALayer CPL_NON_FINAL: public OGRLayer
 {
 protected:
     OGRFeatureDefn*    poFeatureDefn;
@@ -83,7 +83,7 @@ protected:
 /*                       OGRAeronavFAADOFLayer                          */
 /************************************************************************/
 
-class OGRAeronavFAADOFLayer : public OGRAeronavFAALayer
+class OGRAeronavFAADOFLayer final: public OGRAeronavFAALayer
 {
   private:
     static int GetLatLon(const char* pszLat, const char* pszLon, double& dfLat, double& dfLon);
@@ -99,7 +99,7 @@ class OGRAeronavFAADOFLayer : public OGRAeronavFAALayer
 /*                     OGRAeronavFAANAVAIDLayer                         */
 /************************************************************************/
 
-class OGRAeronavFAANAVAIDLayer : public OGRAeronavFAALayer
+class OGRAeronavFAANAVAIDLayer final: public OGRAeronavFAALayer
 {
   private:
     static int GetLatLon(const char* pszLat, const char* pszLon, double& dfLat, double& dfLon);
@@ -115,7 +115,7 @@ class OGRAeronavFAANAVAIDLayer : public OGRAeronavFAALayer
 /*                     OGRAeronavFAARouteLayer                          */
 /************************************************************************/
 
-class OGRAeronavFAARouteLayer : public OGRAeronavFAALayer
+class OGRAeronavFAARouteLayer final: public OGRAeronavFAALayer
 {
   private:
     int       bIsDPOrSTARS;
@@ -137,7 +137,7 @@ class OGRAeronavFAARouteLayer : public OGRAeronavFAALayer
 /*                     OGRAeronavFAAIAPLayer                            */
 /************************************************************************/
 
-class OGRAeronavFAAIAPLayer : public OGRAeronavFAALayer
+class OGRAeronavFAAIAPLayer final: public OGRAeronavFAALayer
 {
   private:
     CPLString osCityName;
@@ -159,7 +159,7 @@ class OGRAeronavFAAIAPLayer : public OGRAeronavFAALayer
 /*                        OGRAeronavFAADataSource                       */
 /************************************************************************/
 
-class OGRAeronavFAADataSource : public OGRDataSource
+class OGRAeronavFAADataSource final: public OGRDataSource
 {
     char*               pszName;
 

@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: cpl_vsil_curl_priv.h 9a2bcee25a010c5fe6c5e8fc258ed46578d043fb 2016-12-10 06:29:22Z Kurt Schwehr $
+ * $Id: cpl_vsil_curl_priv.h 5f22744da4d967c5a4f8699997dc0a697df5ee35 2020-03-10 20:19:20 +0100 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Private API for VSICurl
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,5 +49,7 @@ int VSICurlInstallReadCbk( VSILFILE* fp, VSICurlReadCbkFunc pfnReadCbk,
                            void* pfnUserData,
                            int bStopOnInterruptUntilUninstall );
 int VSICurlUninstallReadCbk( VSILFILE* fp );
+
+void VSICurlAuthParametersChanged();
 
 #endif // CPL_VSIL_CURL_PRIV_H_INCLUDED

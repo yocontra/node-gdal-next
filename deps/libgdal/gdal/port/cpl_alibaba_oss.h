@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_alibaba_oss.h c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $
+ * $Id: cpl_alibaba_oss.h 5e20a8bb8da9ffbe2b8c850a885b29f9bff6d70c 2019-11-28 15:35:44 +0100 Even Rouault $
  *
  * Name:     cpl_alibaba_oss.h
  * Project:  CPL - Common Portability Library
@@ -97,6 +97,9 @@ class VSIOSSHandleHelper final: public IVSIS3LikeHandleHelper
         const CPLString& GetObjectKey() const { return m_osObjectKey; }
         const CPLString& GetEndpoint()const  { return m_osEndpoint; }
         bool GetVirtualHosting() const { return m_bUseVirtualHosting; }
+
+        CPLString GetCopySourceHeader() const override { return "x-oss-copy-source"; }
+
         void SetEndpoint(const CPLString &osStr);
         void SetVirtualHosting(bool b);
 

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrmemlayer.cpp 07b24f8cd487508a42b6ca5df2e5b96a85e9f204 2019-06-27 22:53:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmemlayer.cpp ee96623c61ea9a3a712e3bd6876be0ca6d7e4c73 2019-08-15 21:24:45 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      IOGRMemLayerFeatureIterator                     */
@@ -719,7 +719,8 @@ OGRErr OGRMemLayer::AlterFieldDefn( int iField, OGRFieldDefn *poNewFieldDefn,
                 if( poFeature->IsFieldSetAndNotNull(iField) &&
                     !poFeature->IsFieldNull(iField) )
                 {
-                    poFieldRaw->Integer64 = poFieldRaw->Integer;
+                    const GIntBig nVal = poFieldRaw->Integer;
+                    poFieldRaw->Integer64 = nVal;
                 }
             }
             delete poIter;
@@ -737,7 +738,8 @@ OGRErr OGRMemLayer::AlterFieldDefn( int iField, OGRFieldDefn *poNewFieldDefn,
                 if( poFeature->IsFieldSetAndNotNull(iField) &&
                     !poFeature->IsFieldNull(iField) )
                 {
-                    poFieldRaw->Real = poFieldRaw->Integer;
+                    const double dfVal = poFieldRaw->Integer;
+                    poFieldRaw->Real = dfVal;
                 }
             }
             delete poIter;
@@ -755,8 +757,9 @@ OGRErr OGRMemLayer::AlterFieldDefn( int iField, OGRFieldDefn *poNewFieldDefn,
                 if( poFeature->IsFieldSetAndNotNull(iField) &&
                     !poFeature->IsFieldNull(iField) )
                 {
-                    poFieldRaw->Real =
+                    const double dfVal =
                         static_cast<double>(poFieldRaw->Integer64);
+                    poFieldRaw->Real = dfVal;
                 }
             }
             delete poIter;
@@ -867,7 +870,7 @@ OGRErr OGRMemLayer::CreateGeomField( OGRGeomFieldDefn *poGeomField,
 /*                        OGRMemLayerIteratorArray                      */
 /************************************************************************/
 
-class OGRMemLayerIteratorArray: public IOGRMemLayerFeatureIterator
+class OGRMemLayerIteratorArray final: public IOGRMemLayerFeatureIterator
 {
     GIntBig m_iCurIdx;
     GIntBig m_nMaxFeatureCount;
@@ -900,7 +903,7 @@ class OGRMemLayerIteratorArray: public IOGRMemLayerFeatureIterator
 /*                         OGRMemLayerIteratorMap                       */
 /************************************************************************/
 
-class OGRMemLayerIteratorMap: public IOGRMemLayerFeatureIterator
+class OGRMemLayerIteratorMap final: public IOGRMemLayerFeatureIterator
 {
     typedef std::map<GIntBig, OGRFeature *>           FeatureMap;
     typedef std::map<GIntBig, OGRFeature *>::iterator FeatureIterator;

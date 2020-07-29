@@ -2,10 +2,10 @@
  *
  * Project:   OZF2 and OZFx3 binary files driver
  * Purpose:  GDALDataset driver for OZF2 and OZFx3 binary files.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 
 /* g++ -fPIC -g -Wall frmts/ozi/ozidataset.cpp -shared -o gdal_OZI.so -Iport -Igcore -Iogr -L. -lgdal  */
 
-CPL_CVSID("$Id: ozidataset.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: ozidataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -42,7 +42,7 @@ CPL_CVSID("$Id: ozidataset.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-
 
 class OZIRasterBand;
 
-class OZIDataset : public GDALPamDataset
+class OZIDataset final: public GDALPamDataset
 {
     friend class OZIRasterBand;
 
@@ -69,7 +69,7 @@ class OZIDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class OZIRasterBand : public GDALPamRasterBand
+class OZIRasterBand final: public GDALPamRasterBand
 {
     friend class OZIDataset;
 
@@ -680,7 +680,7 @@ void GDALRegister_OZI()
     poDriver->SetDescription( "OZI" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "OziExplorer Image File" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_ozi.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/ozi.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OZIDataset::Open;

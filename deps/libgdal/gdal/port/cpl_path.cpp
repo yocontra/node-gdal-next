@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_path.cpp 2c1ffb11c1874cb8856fd591b00a3f658f680058 2019-03-17 19:47:33 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_path.cpp 428925d6f580b65a1ab1d58528a0c7f3b9375409 2019-09-28 15:44:15 +0200 Even Rouault $")
 
 // Should be size of larged possible filename.
 constexpr int CPL_PATH_BUF_SIZE = 2048;
@@ -1181,4 +1181,37 @@ const char *CPLGetHomeDir()
 #else
     return CPLGetConfigOption("HOME", nullptr);
 #endif
+}
+
+
+
+/************************************************************************/
+/*                        CPLLaunderForFilename()                       */
+/************************************************************************/
+
+/**
+ * Launder a string to be compatible of a filename.
+ *
+ * @param pszName The input string to launder.
+ * @param pszOutputPath The directory where the file would be created.
+ *                      Unused for now. May be NULL.
+ * @return the laundered name.
+ *
+ * @since GDAL 3.1
+ */
+
+const char* CPLLaunderForFilename(const char* pszName,
+                                  CPL_UNUSED const char* pszOutputPath )
+{
+    std::string osRet(pszName);
+    for( char& ch: osRet )
+    {
+        // https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file
+        if( ch == '<' || ch == '>' || ch == ':' || ch == '"' ||
+            ch == '/' || ch == '\\' || ch== '?' || ch == '*' )
+        {
+            ch = '_';
+        }
+    }
+    return CPLSPrintf("%s", osRet.c_str());
 }

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Andrey Kiselev <dron@ak4719.spb.edu>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -43,7 +43,7 @@
 #include <geo_normalize.h>
 #include <geovalues.h>
 
-CPL_CVSID("$Id: mrsiddataset.cpp 4e012e8df81083ee297a8290a5cc0bd9e092d7f8 2019-04-23 11:06:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: mrsiddataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 CPL_C_START
 double GTIFAngleToDD( double dfAngle, int nUOMAngle );
@@ -87,11 +87,11 @@ template <class T>
 class LTIDLLReader : public T
 {
 public:
-   LTIDLLReader(const LTFileSpec& fileSpec,
+   explicit LTIDLLReader(const LTFileSpec& fileSpec,
                 bool useWorldFile = false) : T(fileSpec, useWorldFile) {}
-   LTIDLLReader(LTIOStreamInf &oStream,
+   explicit LTIDLLReader(LTIOStreamInf &oStream,
                 bool useWorldFile = false) : T(oStream, useWorldFile) {}
-   LTIDLLReader(LTIOStreamInf *poStream,
+   explicit LTIDLLReader(LTIOStreamInf *poStream,
                 LTIOStreamInf *poWorldFile = nullptr) : T(poStream, poWorldFile) {}
    virtual ~LTIDLLReader() {}
 };
@@ -3551,7 +3551,7 @@ void GDALRegister_MrSID()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Multi-resolution Seamless Image Database "
                                "(MrSID)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_mrsid.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/mrsid.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "sid" );
 
 #ifdef MRSID_ESDK
@@ -3592,7 +3592,7 @@ void GDALRegister_MrSID()
     poDriver->SetDescription( "JP2MrSID" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "MrSID JPEG2000" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_jp2mrsid.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/jp2mrsid.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "jp2" );
 
 #ifdef MRSID_ESDK

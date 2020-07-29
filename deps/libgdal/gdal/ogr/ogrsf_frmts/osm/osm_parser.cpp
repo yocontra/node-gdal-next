@@ -1,11 +1,11 @@
 /******************************************************************************
  *
  * Project:  OpenGIS Simple Features Reference Implementation
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  * Purpose:  OSM XML and OSM PBF parser
  *
  ******************************************************************************
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@
 #include "ogr_expat.h"
 #endif
 
-CPL_CVSID("$Id: osm_parser.cpp 492e798bc6ac5f2aadcd051228c3c2cb7d774c40 2019-03-23 14:03:24 +0100 Even Rouault $")
+CPL_CVSID("$Id: osm_parser.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 // The buffer that are passed to GPB decoding are extended with 0's
 // to be sure that we will be able to read a single 64bit value without

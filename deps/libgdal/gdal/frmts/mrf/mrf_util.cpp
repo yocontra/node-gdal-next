@@ -43,8 +43,9 @@
 #include "marfa.h"
 #include <zlib.h>
 #include <algorithm>
+#include <limits>
 
-CPL_CVSID("$Id: mrf_util.cpp 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $")
+CPL_CVSID("$Id: mrf_util.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 // LERC is not ready for big endian hosts for now
 #if defined(LERC) && defined(WORDS_BIGENDIAN)
@@ -180,6 +181,11 @@ GIntBig IdxSize(const ILImage &full, const int scale) {
         img.pagecount = pcount(img.size, img.pagesize);
         sz += img.pagecount.l;
     }
+    if( sz > std::numeric_limits<GIntBig>::max() / static_cast<int>(sizeof(ILIdx)) )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "IdxSize: integer overflow");
+        return 0;
+    }
     return sz*sizeof(ILIdx);
 }
 
@@ -242,8 +248,9 @@ CPLString getFname(CPLXMLNode *node, const char *token, const CPLString &in, con
     // Does it look like an absolute path or we won't find the basename of 'in'
     if (slashPos == 0                               // Starts with slash
         || (slashPos == 2 && fn[1] == ':')          // Starts with disk letter column
-        || !(slashPos == fn.find_first_not_of('.')) // Does not start with dots and then slash
-        || EQUALN(in,"<MRF_META>",10)               // XML string input
+        // Does not start with dots then slash
+        || (slashPos != fn.npos && slashPos != fn.find_first_not_of('.')) 
+        || EQUALN(in,"<MRF_META>", 10)              // XML string input
         || in.find_first_of("\\/") == in.npos)      // We can't get a basename from 'in'
         return fn;
 
@@ -291,6 +298,7 @@ GDALMRFRasterBand *newMRFRasterBand(GDALMRFDataset *pDS, const ILImage &image, i
 
 {
     GDALMRFRasterBand *bnd = nullptr;
+    CPLErrorReset();
     switch(pDS->current.comp)
     {
     case IL_PPNG: // Uses the PNG code, just has a palette in each PNG
@@ -589,7 +597,7 @@ void GDALRegister_mrf()
     GDALDriver *driver = new GDALDriver();
     driver->SetDescription("MRF");
     driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meta Raster Format");
-    driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_marfa.html");
+    driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/marfa.html");
     driver->SetMetadataItem(GDAL_DMD_EXTENSION, "mrf");
     driver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");
 

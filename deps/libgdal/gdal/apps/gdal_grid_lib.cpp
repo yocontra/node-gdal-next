@@ -54,7 +54,7 @@
 #include "ogr_srs_api.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdal_grid_lib.cpp 241ddd6210cbfad84dd2e83fa061c64ae0a8560d 2018-12-07 11:58:04 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_grid_lib.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          GDALGridOptions                             */
@@ -524,6 +524,9 @@ static CPLErr ProcessLayer( OGRLayerH hSrcLayer, GDALDatasetH hDstDS,
 
     // Try to grow the work buffer up to 16 MB if it is smaller
     GDALGetBlockSize( hBand, &nBlockXSize, &nBlockYSize );
+    if( nXSize == 0 || nYSize == 0 || nBlockXSize == 0 || nBlockYSize == 0 )
+        return CE_Failure;
+
     const int nDesiredBufferSize = 16*1024*1024;
     if( nBlockXSize < nXSize && nBlockYSize < nYSize &&
         nBlockXSize < nDesiredBufferSize / (nBlockYSize * nDataTypeSize) )
@@ -709,7 +712,7 @@ static OGRGeometryCollection* LoadGeometry( const char* pszDS,
 /**
  * Create raster from the scattered data.
  *
- * This is the equivalent of the <a href="gdal_grid.html">gdal_grid</a> utility.
+ * This is the equivalent of the <a href="/programs/gdal_grid.html">gdal_grid</a> utility.
  *
  * GDALGridOptions* must be allocated and freed with GDALGridOptionsNew()
  * and GDALGridOptionsFree() respectively.
@@ -980,7 +983,7 @@ static bool IsNumber(const char* pszStr)
  * Allocates a GDALGridOptions struct.
  *
  * @param papszArgv NULL terminated list of options (potentially including filename and open options too), or NULL.
- *                  The accepted options are the ones of the <a href="gdal_translate.html">gdal_translate</a> utility.
+ *                  The accepted options are the ones of the <a href="/programs/gdal_translate.html">gdal_translate</a> utility.
  * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
  *                           otherwise (gdal_translate_bin.cpp use case) must be allocated with
  *                           GDALGridOptionsForBinaryNew() prior to this function. Will be
@@ -1036,7 +1039,7 @@ GDALGridOptions *GDALGridOptionsNew(char** papszArgv, GDALGridOptionsForBinary* 
 /*      Handle command line arguments.                                  */
 /* -------------------------------------------------------------------- */
     const int argc = CSLCount(papszArgv);
-    for( int i = 0; papszArgv != nullptr && i < argc; i++ )
+    for( int i = 0; i < argc && papszArgv != nullptr && papszArgv[i] != nullptr; i++ )
     {
         if( i < argc-1 && (EQUAL(papszArgv[i],"-of") || EQUAL(papszArgv[i],"-f")) )
         {
@@ -1089,8 +1092,11 @@ GDALGridOptions *GDALGridOptionsNew(char** papszArgv, GDALGridOptionsForBinary* 
 
         else if( i+2 < argc && EQUAL(papszArgv[i],"-outsize") )
         {
-            psOptions->nXSize = atoi(papszArgv[++i]);
-            psOptions->nYSize = atoi(papszArgv[++i]);
+            CPLAssert(papszArgv[i+1]);
+            CPLAssert(papszArgv[i+2]);
+            psOptions->nXSize = atoi(papszArgv[i+1]);
+            psOptions->nYSize = atoi(papszArgv[i+2]);
+            i += 2;
         }
 
         else if( i+1 < argc && EQUAL(papszArgv[i],"-co") )

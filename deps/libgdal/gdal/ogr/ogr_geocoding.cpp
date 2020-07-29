@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Client of geocoding service.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -86,7 +86,7 @@ int OGR_gettimeofday( struct timeval *tv, struct timezone * /* tzIgnored */ )
 #include <sys/time.h>
 #endif  // WIN32
 
-CPL_CVSID("$Id: ogr_geocoding.cpp 971ad299681ca1ea2e1b800e88209f426b77e9aa 2018-04-17 12:14:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_geocoding.cpp e7a1f47c20721d288fcaa1a167bb823735e18c57 2019-08-15 15:38:50 +0200 Even Rouault $")
 
 struct _OGRGeocodingSessionHS
 {
@@ -316,6 +316,7 @@ OGRGeocodingSessionH OGRGeocodeCreateSession( char** papszOptions )
 
     const char* pszDelayBetweenQueries = OGRGeocodeGetParameter(papszOptions,
                                                                 "DELAY", "1.0");
+    // coverity[tainted_data]
     hSession->dfDelayBetweenQueries = CPLAtofM(pszDelayBetweenQueries);
 
     const char* pszQueryTemplateDefault = nullptr;

@@ -2,10 +2,10 @@
  *
  * Project:  EDIGEO Translator
  * Purpose:  Implements OGREDIGEODataSource class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogredigeodatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogredigeodatasource.cpp ac74af497ac5f6f08d69354dfcc93e79213c0ba4 2019-08-15 15:47:49 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGREDIGEODataSource()                         */
@@ -60,6 +60,7 @@ OGREDIGEODataSource::OGREDIGEODataSource() :
     iSIZE(-1),
     iOBJ_LNK(-1),
     iOBJ_LNK_LAYER(-1),
+    // coverity[tainted_data]
     dfSizeFactor(CPLAtof(
         CPLGetConfigOption("OGR_EDIGEO_FONT_SIZE_FACTOR", "2"))),
     bIncludeFontFamily(CPLTestBool(

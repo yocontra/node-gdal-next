@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2008, Ivan Lucena <ivan dot lucena at oracle dot com>
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files ( the "Software" ),
@@ -42,7 +42,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: georaster_dataset.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04-20 20:33:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: georaster_dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterDataset()
@@ -72,7 +72,7 @@ GeoRasterDataset::GeoRasterDataset()
 
 GeoRasterDataset::~GeoRasterDataset()
 {
-    FlushCache();
+    GeoRasterDataset::FlushCache();
 
     poGeoRaster->FlushMetadata();
 
@@ -602,6 +602,7 @@ boolean GeoRasterDataset::JP2_CopyDirect( const char* pszJP2Filename,
     
     if( CSLCount(papszFileList) == 0 )
     {
+        CSLDestroy( papszFileList );
         return false;
     }
     
@@ -2935,7 +2936,7 @@ void CPL_DLL GDALRegister_GEOR()
     poDriver->SetDescription(  "GeoRaster" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Oracle Spatial GeoRaster" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_georaster.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/georaster.html" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte UInt16 Int16 UInt32 Int32 Float32 "

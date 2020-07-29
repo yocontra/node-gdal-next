@@ -35,7 +35,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: ogravce00layer.cpp 002b050d9a9ef403a732c1210784736ef97216d4 2018-04-09 21:34:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogravce00layer.cpp 79184515dce9423c42e128d82d1d3136018d79b6 2019-08-17 11:53:00 +0200 Even Rouault $")
 
 constexpr int SERIAL_ACCESS_FID = INT_MIN;
 
@@ -166,6 +166,8 @@ OGRFeature *OGRAVCE00Layer::GetFeature( GIntBig nFID )
 
     if( nFID == SERIAL_ACCESS_FID )
     {
+        bLastWasSequential = true;
+
         while( (pFeature = AVCE00ReadNextObjectE00(psRead)) != nullptr
                && psRead->hParseInfo->eFileType != AVCFileUnknown
                && !MatchesSpatialFilter( pFeature ) )
@@ -177,11 +179,13 @@ OGRFeature *OGRAVCE00Layer::GetFeature( GIntBig nFID )
     {
         bNeedReset = true;
 
-        if (nNextFID > nFID)
+        if (nNextFID > nFID || bLastWasSequential)
         {
+            bLastWasSequential = false;
             /* advance to the specified line number */
             if (AVCE00ReadGotoSectionE00(psRead, psSection, 0) != 0)
                 return nullptr;
+            nNextFID = 1;
         }
 
         do

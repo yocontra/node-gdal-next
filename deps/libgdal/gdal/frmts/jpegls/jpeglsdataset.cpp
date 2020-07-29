@@ -2,10 +2,10 @@
  *
  * Project:  JPEGLS driver based on CharLS library
  * Purpose:  JPEGLS driver based on CharLS library
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 
 /* g++ -Wall -g fmrts/jpegls/jpeglsdataset.cpp -shared -fPIC -o gdal_JPEGLS.so -Iport -Igcore -L. -lgdal -I/home/even/charls-1.0 -L/home/even/charls-1.0/build -lCharLS */
 
-CPL_CVSID("$Id: jpeglsdataset.cpp 7a61a1f5683b7c5aeb34d364b55c69e6908bd103 2018-05-20 23:43:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpeglsdataset.cpp c0b4a47a2b5677eafc40b74c46b029ddbded4413 2020-04-28 17:46:33 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -42,7 +42,7 @@ CPL_CVSID("$Id: jpeglsdataset.cpp 7a61a1f5683b7c5aeb34d364b55c69e6908bd103 2018-
 /* ==================================================================== */
 /************************************************************************/
 
-class JPEGLSDataset : public GDALPamDataset
+class JPEGLSDataset final: public GDALPamDataset
 {
     friend class JPEGLSRasterBand;
 
@@ -74,7 +74,7 @@ class JPEGLSDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class JPEGLSRasterBand : public GDALPamRasterBand
+class JPEGLSRasterBand final: public GDALPamRasterBand
 {
     friend class JPEGLSDataset;
 
@@ -121,9 +121,11 @@ static const char* JPEGLSGetErrorAsString(CharlsApiResultType eCode)
         case CharlsApiResultType::ParameterValueNotSupported: return "ParameterValueNotSupported";
         case CharlsApiResultType::UncompressedBufferTooSmall: return "UncompressedBufferTooSmall";
         case CharlsApiResultType::CompressedBufferTooSmall: return "CompressedBufferTooSmall";
+#ifndef CHARLS_2_1
         case CharlsApiResultType::InvalidCompressedData: return "InvalidCompressedData";
         case CharlsApiResultType::ImageTypeNotSupported: return "ImageTypeNotSupported";
         case CharlsApiResultType::UnsupportedBitDepthForTransform: return "UnsupportedBitDepthForTransform";
+#endif
         case CharlsApiResultType::UnsupportedColorTransform: return "UnsupportedColorTransform";
         default: return "unknown";
     };
@@ -772,7 +774,7 @@ void GDALRegister_JPEGLS()
     poDriver->SetDescription( "JPEGLS" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "JPEGLS" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_jpegls.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/jpegls.html" );
     // poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/jls" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "jls" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte Int16" );

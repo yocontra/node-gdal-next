@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,7 +42,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: vrtfilters.cpp 64e5d4fba213ab6255a4dddcd09e8cda46848d7d 2019-10-04 13:50:44 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtfilters.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -496,7 +496,7 @@ CPLErr VRTKernelFilteredSource::FilterData( int nXSize, int nYSize,
 /* -------------------------------------------------------------------- */
 /*      Float32 case.                                                   */
 /* -------------------------------------------------------------------- */
-    if( eType == GDT_Float32 )
+    // if( eType == GDT_Float32 )
     {
         float *pafSrcData = reinterpret_cast<float *>( pabySrcData );
         float *pafDstData = reinterpret_cast<float *>( pabyDstData );

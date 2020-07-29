@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Philippe P. Vachon <philippe@cowpig.ca>
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: jaxapalsardataset.cpp 88eda08930b6dafb9ea1374ba19e0b1cf5ded3d3 2018-08-11 20:16:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: jaxapalsardataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 #if defined(WIN32)
 #define SEP_STRING "\\"
@@ -155,7 +155,7 @@ enum ePolarization {
 
 class PALSARJaxaRasterBand;
 
-class PALSARJaxaDataset : public GDALPamDataset {
+class PALSARJaxaDataset final: public GDALPamDataset {
     friend class PALSARJaxaRasterBand;
 private:
     GDAL_GCP *pasGCPList;
@@ -194,7 +194,7 @@ PALSARJaxaDataset::~PALSARJaxaDataset()
 /* ==================================================================== */
 /************************************************************************/
 
-class PALSARJaxaRasterBand : public GDALRasterBand {
+class PALSARJaxaRasterBand final: public GDALRasterBand {
     VSILFILE *fp;
     ePolarization nPolarization;
     eFileType nFileType;
@@ -658,7 +658,7 @@ void GDALRegister_PALSARJaxa()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "JAXA PALSAR Product Reader (Level 1.1/1.5)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_palsar.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/palsar.html" );
 
     poDriver->pfnOpen = PALSARJaxaDataset::Open;
     poDriver->pfnIdentify = PALSARJaxaDataset::Identify;

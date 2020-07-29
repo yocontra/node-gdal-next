@@ -9,7 +9,7 @@
  ******************************************************************************
  * Copyright (c) 2011, Ben Ahmed Daho Ali
  * Copyright (c) 2013, NextGIS
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 #include "ogr_srs_api.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrsxflayer.cpp dd78be7491f410ef103c05b37100754430c60420 2018-01-03 09:09:16Z Even Rouault $")
+CPL_CVSID("$Id: ogrsxflayer.cpp 78f3bf72654dc87dc9f73c731edac98639f2ad41 2020-05-10 22:29:46 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRSXFLayer()                                 */
@@ -143,6 +143,7 @@ bool OGRSXFLayer::AddRecord( long nFID, unsigned nClassCode, vsi_l_offset nOffse
                 int nReadObj = static_cast<int>(VSIFReadL(&stAttrInfo, 4, 1, fpSXF));
                 if (nReadObj == 1)
                 {
+                    CPL_LSBPTR16(&(stAttrInfo.nCode));
                     CPLString oFieldName;
                     if (snAttributeCodes.find(stAttrInfo.nCode) == snAttributeCodes.end())
                     {
@@ -400,7 +401,9 @@ OGRFeature *OGRSXFLayer::GetNextFeature()
 int OGRSXFLayer::TestCapability( const char * pszCap )
 
 {
-    if (EQUAL(pszCap, OLCStringsAsUTF8))
+    if (EQUAL(pszCap, OLCStringsAsUTF8) &&
+        CPLCanRecode("test", "CP1251", CPL_ENC_UTF8) &&
+        CPLCanRecode("test", "KOI8-R", CPL_ENC_UTF8))
         return TRUE;
     else if (EQUAL(pszCap, OLCRandomRead))
         return TRUE;
@@ -616,6 +619,15 @@ OGRFeature *OGRSXFLayer::GetNextRawFeature(long nFID)
         CPLError(CE_Failure, CPLE_FileIO, "SXF. Read record failed.");
         return nullptr;
     }
+    CPL_LSBPTR32(&(stRecordHeader.nID));
+    CPL_LSBPTR32(&(stRecordHeader.nFullLength));
+    CPL_LSBPTR32(&(stRecordHeader.nGeometryLength));
+    CPL_LSBPTR32(&(stRecordHeader.nClassifyCode));
+    CPL_LSBPTR16(&(stRecordHeader.anGroup[0]));
+    CPL_LSBPTR16(&(stRecordHeader.anGroup[1]));
+    CPL_LSBPTR32(&(stRecordHeader.nPointCount));
+    CPL_LSBPTR16(&(stRecordHeader.nSubObjectCount));
+    CPL_LSBPTR16(&(stRecordHeader.nPointCountSmall));
 
     SXFGeometryType eGeomType = SXF_GT_Unknown;
     GByte code = 0;
@@ -872,6 +884,7 @@ OGRFeature *OGRSXFLayer::GetNextRawFeature(long nFID)
             {
                 char *psSemanticsdBufBeg = psSemanticsdBuf + offset;
                 SXFRecordAttributeInfo stAttInfo = *(SXFRecordAttributeInfo*)psSemanticsdBufBeg;
+                CPL_LSBPTR16(&(stAttInfo.nCode));
                 offset += 4;
 
                 CPLString oFieldName;

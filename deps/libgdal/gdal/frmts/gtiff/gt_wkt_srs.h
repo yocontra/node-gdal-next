@@ -1,15 +1,13 @@
 /******************************************************************************
- * $Id: gt_wkt_srs.h 8b99fd4d3ad3db542705722876fcf484486f46d6 2019-12-17 14:27:30 +0100 Even Rouault $
+ * $Id: gt_wkt_srs.h cc02dc4397c7ec43ec4c4b842e5faabe16c54904 2019-12-17 14:27:30 +0100 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implements translation between GeoTIFF normalized projection
- *           definitions and OpenGIS WKT SRS format.  This code is
- *           deliberately GDAL free, and it is intended to be moved into
- *           libgeotiff someday if possible.
+ *           definitions and OpenGIS WKT SRS format.
  * Author:   Even Rouault
  *
  ******************************************************************************
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,9 +47,17 @@ typedef enum
     GEOTIFF_KEYS_ESRI_PE
 } GTIFFKeysFlavorEnum;
 
-int GTIFSetFromOGISDefnEx( GTIF *, const char *, GTIFFKeysFlavorEnum );
+typedef enum
+{
+    GEOTIFF_VERSION_AUTO,
+    GEOTIFF_VERSION_1_0,
+    GEOTIFF_VERSION_1_1
+} GeoTIFFVersionEnum;
 
 OGRSpatialReferenceH GTIFGetOGISDefnAsOSR( GTIF *, GTIFDefn * );
+
+int GTIFSetFromOGISDefnEx( GTIF *, const char *, GTIFFKeysFlavorEnum,
+                           GeoTIFFVersionEnum );
 
 CPL_C_END
 

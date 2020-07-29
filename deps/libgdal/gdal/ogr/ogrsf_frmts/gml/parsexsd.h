@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: parsexsd.h 57b6aec245c1a56e51fed67ce205928d67cb0038 2015-11-26 14:14:41Z Even Rouault $
+ * $Id: parsexsd.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  GML Reader
  * Purpose:  Implementation of GMLParseXSD()
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

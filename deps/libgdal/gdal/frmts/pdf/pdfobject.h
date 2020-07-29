@@ -1,9 +1,9 @@
 /******************************************************************************
- * $Id: pdfobject.h 5a04126b888092d810db40222dce30479b5ff901 2019-04-09 18:05:52 +0200 Even Rouault $
+ * $Id: pdfobject.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
  *
@@ -13,7 +13,7 @@
  * Author: Martin Mikita <martin.mikita@klokantech.com>, xmikit00 @ FIT VUT Brno
  *
  ******************************************************************************
- * Copyright (c) 2011-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

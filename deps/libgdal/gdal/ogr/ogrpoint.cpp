@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -41,7 +41,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrpoint.cpp ba2ef4045f82fd2260f1732e9e46a927277ac93d 2018-05-06 19:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpoint.cpp 741291b2826d2c45b627afbfb1d38fb5545a9c15 2019-10-21 13:43:43 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              OGRPoint()                              */
@@ -115,6 +115,25 @@ OGRPoint::OGRPoint( double xIn, double yIn, double zIn, double mIn ) :
     m(mIn)
 {
     flags = OGR_G_NOT_EMPTY_POINT | OGR_G_3D | OGR_G_MEASURED;
+}
+
+/************************************************************************/
+/*                             createXYM()                              */
+/************************************************************************/
+
+/**
+ * \brief Create a XYM point.
+ * @param x x
+ * @param y y
+ * @param m m
+ * @since GDAL 3.1
+ */
+
+OGRPoint* OGRPoint::createXYM( double x, double y, double m )
+{
+    auto p = new OGRPoint(x, y, 0, m);
+    p->flags &= ~OGR_G_3D;
+    return p;
 }
 
 /************************************************************************/
@@ -560,60 +579,26 @@ OGRErr OGRPoint::importFromWkt( const char ** ppszInput )
 /*      equivalent.                                                     */
 /************************************************************************/
 
-OGRErr OGRPoint::exportToWkt( char ** ppszDstText,
-                              OGRwkbVariant eWkbVariant ) const
-
+std::string OGRPoint::exportToWkt(const OGRWktOptions& opts, OGRErr *err) const
 {
+    std::string wkt = getGeometryName() + wktTypeString(opts.variant);
     if( IsEmpty() )
     {
-        if( eWkbVariant == wkbVariantIso )
-        {
-            if( (flags & OGR_G_3D) && (flags & OGR_G_MEASURED) )
-                *ppszDstText = CPLStrdup("POINT ZM EMPTY");
-            else if( flags & OGR_G_MEASURED )
-                *ppszDstText = CPLStrdup("POINT M EMPTY");
-            else if( flags & OGR_G_3D )
-                *ppszDstText = CPLStrdup("POINT Z EMPTY");
-            else
-                *ppszDstText = CPLStrdup("POINT EMPTY");
-        }
-        else
-        {
-            *ppszDstText = CPLStrdup("POINT EMPTY");
-        }
+        wkt += "EMPTY";
     }
     else
     {
-        char szTextEquiv[180] = {};
-        if( eWkbVariant == wkbVariantIso )
-        {
-            char szCoordinate[80] = {};
-            OGRMakeWktCoordinateM(szCoordinate, x, y, z, m,
-                                  Is3D(), IsMeasured());
-            if( (flags & OGR_G_3D) && (flags & OGR_G_MEASURED) )
-                snprintf(szTextEquiv, sizeof(szTextEquiv),
-                         "POINT ZM (%s)", szCoordinate);
-            else if( flags & OGR_G_MEASURED )
-                snprintf(szTextEquiv, sizeof(szTextEquiv),
-                         "POINT M (%s)", szCoordinate);
-            else if( flags & OGR_G_3D )
-                snprintf(szTextEquiv, sizeof(szTextEquiv),
-                         "POINT Z (%s)", szCoordinate);
-            else
-                snprintf(szTextEquiv, sizeof(szTextEquiv),
-                         "POINT (%s)", szCoordinate);
-        }
-        else
-        {
-            char szCoordinate[80] = {};
-            OGRMakeWktCoordinateM(szCoordinate, x, y, z, m, Is3D(), FALSE);
-            snprintf( szTextEquiv, sizeof(szTextEquiv),
-                      "POINT (%s)", szCoordinate );
-        }
-        *ppszDstText = CPLStrdup( szTextEquiv );
+        wkt += "(";
+
+        bool measured = ((opts.variant == wkbVariantIso) && IsMeasured());
+        wkt += OGRMakeWktCoordinateM(x, y, z, m, Is3D(), measured, opts);
+
+        wkt += ")";
     }
 
-    return OGRERR_NONE;
+    if (err)
+        *err = OGRERR_NONE;
+    return wkt;
 }
 
 /************************************************************************/

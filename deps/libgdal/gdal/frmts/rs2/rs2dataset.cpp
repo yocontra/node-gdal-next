@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "gdal_pam.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: rs2dataset.cpp c629ec11fefeb35d4367c8128f713b6baf35c3d3 2019-06-24 16:49:43 +0300 an-ivanov $")
+CPL_CVSID("$Id: rs2dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 typedef enum eCalibration_t {
     Sigma0 = 0,
@@ -273,7 +273,7 @@ CPLErr RS2RasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
 /* or beta nought.                                                      */
 /************************************************************************/
 
-class RS2CalibRasterBand : public GDALPamRasterBand {
+class RS2CalibRasterBand final: public GDALPamRasterBand {
 private:
     // eCalibration m_eCalib;
     GDALDataset *m_poBandDataset;
@@ -1509,7 +1509,7 @@ void GDALRegister_RS2()
     poDriver->SetDescription( "RS2" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "RadarSat 2 XML Product" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_rs2.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/rs2.html" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

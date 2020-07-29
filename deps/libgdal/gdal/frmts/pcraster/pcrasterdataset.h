@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcrasterdataset.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: pcrasterdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster CSF 2.0 raster file driver declarations.
@@ -53,7 +53,7 @@ namespace gdal {
   Additional documentation about this driver can be found in
   frmts/frmts_various.html of the GDAL source code distribution.
 */
-class PCRasterDataset: public GDALPamDataset
+class PCRasterDataset final: public GDALPamDataset
 {
 
   friend class gdal::PCRasterDatasetTest;

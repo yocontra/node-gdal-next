@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "ogr_api.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gdalwarpoperation.cpp 776e6027755b1ec5045a2592c565ec164fca0d73 2019-11-12 14:20:18 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalwarpoperation.cpp 3faf501a82260b41e85125d14b21ec3c54e319d7 2020-04-01 11:57:08 +0200 Even Rouault $")
 
 struct _GDALWarpChunk {
     int dx, dy, dsx, dsy;
@@ -267,7 +267,8 @@ int GDALWarpOperation::ValidateOptions()
         && psOptions->eResampleAlg != GRA_Min
         && psOptions->eResampleAlg != GRA_Med
         && psOptions->eResampleAlg != GRA_Q1
-        && psOptions->eResampleAlg != GRA_Q3)
+        && psOptions->eResampleAlg != GRA_Q3
+        && psOptions->eResampleAlg != GRA_Sum)
     {
         CPLError( CE_Failure, CPLE_IllegalArg,
                   "GDALWarpOptions.Validate(): "
@@ -2423,6 +2424,8 @@ void GDALWarpOperation::ComputeSourceWindowStartingFromSource(
 {
     const int nSrcRasterXSize = GDALGetRasterXSize(psOptions->hSrcDS);
     const int nSrcRasterYSize = GDALGetRasterYSize(psOptions->hSrcDS);
+    if( nSrcRasterXSize == 0 || nSrcRasterYSize == 0 )
+        return;
 
     GDALWarpPrivateData* privateData = GetWarpPrivateData(this);
     if( privateData->nStepCount == 0 )
@@ -2500,6 +2503,7 @@ void GDALWarpOperation::ComputeSourceWindowStartingFromSource(
     int iPoint = 0;
 #ifdef DEBUG
     const size_t nSampleMax = (nStepCount + 2) * (nStepCount + 2);
+    CPL_IGNORE_RET_VAL(nSampleMax);
     CPLAssert( privateData->adfDstX.size() == nSampleMax );
     CPLAssert( privateData->adfDstY.size() == nSampleMax );
     CPLAssert( privateData->abSuccess.size() == nSampleMax );

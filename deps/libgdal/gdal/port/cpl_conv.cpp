@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, Frank Warmerdam
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -78,6 +78,7 @@
 #include "cpl_multiproc.h"
 #include "cpl_string.h"
 #include "cpl_vsi.h"
+#include "cpl_vsil_curl_priv.h"
 
 #ifdef DEBUG
 #define OGRAPISPY_ENABLED
@@ -91,7 +92,7 @@ void OGRAPISPYCPLSetThreadLocalConfigOption(const char*, const char*);
 // Uncomment to get list of options that have been fetched and set.
 // #define DEBUG_CONFIG_OPTIONS
 
-CPL_CVSID("$Id: cpl_conv.cpp 5318f6d39d2006a10cb6c1410334c56d76a74aa6 2018-06-20 16:38:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_conv.cpp 5f22744da4d967c5a4f8699997dc0a697df5ee35 2020-03-10 20:19:20 +0100 Even Rouault $")
 
 static CPLMutex *hConfigMutex = nullptr;
 static volatile char **g_papszConfigOptions = nullptr;
@@ -1799,6 +1800,18 @@ CPLGetThreadLocalConfigOption( const char *pszKey, const char *pszDefault )
 }
 
 /************************************************************************/
+/*                  NotifyOtherComponentsConfigOptionChanged()          */
+/************************************************************************/
+
+static void NotifyOtherComponentsConfigOptionChanged( const char *pszKey,
+                                                      const char * /*pszValue*/ )
+{
+    // Hack
+    if( STARTS_WITH_CI(pszKey, "AWS_") )
+        VSICurlAuthParametersChanged();
+}
+
+/************************************************************************/
 /*                         CPLSetConfigOption()                         */
 /************************************************************************/
 
@@ -1832,6 +1845,8 @@ void CPL_STDCALL
 CPLSetConfigOption( const char *pszKey, const char *pszValue )
 
 {
+    NotifyOtherComponentsConfigOptionChanged(pszKey, pszValue);
+
 #ifdef DEBUG_CONFIG_OPTIONS
     CPLAccessConfigOption(pszKey, FALSE);
 #endif
@@ -1885,6 +1900,8 @@ void CPL_STDCALL
 CPLSetThreadLocalConfigOption( const char *pszKey, const char *pszValue )
 
 {
+    NotifyOtherComponentsConfigOptionChanged(pszKey, pszValue);
+
 #ifdef DEBUG_CONFIG_OPTIONS
     CPLAccessConfigOption(pszKey, FALSE);
 #endif
@@ -3140,8 +3157,8 @@ CPLConfigOptionSetter::CPLConfigOptionSetter(
     m_pszOldValue(nullptr),
     m_bRestoreOldValue(false)
 {
-    const char* pszOldValue = CPLGetConfigOption(pszKey, nullptr);
-    if( (bSetOnlyIfUndefined && pszOldValue == nullptr) || !bSetOnlyIfUndefined )
+    const char* pszOldValue = CPLGetThreadLocalConfigOption(pszKey, nullptr);
+    if( (bSetOnlyIfUndefined && CPLGetConfigOption(pszKey, nullptr) == nullptr) || !bSetOnlyIfUndefined )
     {
         m_bRestoreOldValue = true;
         if( pszOldValue )

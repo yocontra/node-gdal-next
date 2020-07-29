@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gxf_ogcwkt.c e4ee8bc7e8e7e9ccd48caeaac99a8c9b7edb423c 2018-03-03 22:05:25Z Even Rouault $
+ * $Id: gxf_ogcwkt.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  GXF Reader
  * Purpose:  Handle GXF to OGC WKT projection transformation.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "gxfopen.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: gxf_ogcwkt.c e4ee8bc7e8e7e9ccd48caeaac99a8c9b7edb423c 2018-03-03 22:05:25Z Even Rouault $")
+CPL_CVSID("$Id: gxf_ogcwkt.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /* -------------------------------------------------------------------- */
 /* the following #defines come from ogr_spatialref.h in the GDAL/OGR	*/

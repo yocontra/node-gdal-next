@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Radim Blazek <radim.blazek@gmail.com>
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrgrassdatasource.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: ogrgrassdatasource.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #if GRASS_VERSION_MAJOR  >= 7
 #define G__setenv                G_setenv_nogisrc

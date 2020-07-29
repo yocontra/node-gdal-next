@@ -2,10 +2,10 @@
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement VSI large file api for tar files (.tar).
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_tar.cpp 83417ffdd139c71fce15baca165b0bf3b2f15a9e 2019-08-21 15:36:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_tar.cpp fc7c34ea9ce55c9cbd09945314711e9fcb5c5544 2019-09-05 16:41:28 +0200 Even Rouault $")
 
 #if (defined(DEBUG) || defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)) && !defined(HAVE_FUZZER_FRIENDLY_ARCHIVE)
 /* This is a completely custom archive format that is rather inefficient */
@@ -364,7 +364,17 @@ int VSITarReader::GotoNextFile()
         for(int i=0;i<11;i++)
         {
             if( abyHeader[124+i] != ' ' )
+            {
+                if( nNextFileSize > static_cast<GUIntBig>(GINTBIG_MAX / 8) ||
+                    abyHeader[124+i] < '0' ||
+                    abyHeader[124+i] >= '8' )
+                {
+                    CPLError(CE_Failure, CPLE_AppDefined,
+                            "Invalid file size for %s", osNextFileName.c_str());
+                    return FALSE;
+                }
                 nNextFileSize = nNextFileSize * 8 + (abyHeader[124+i] - '0');
+            }
         }
         if( nNextFileSize > GINTBIG_MAX )
         {
@@ -377,7 +387,18 @@ int VSITarReader::GotoNextFile()
         for(int i=0;i<11;i++)
         {
             if( abyHeader[136+i] != ' ' )
+            {
+                if( nModifiedTime > GINTBIG_MAX / 8 ||
+                    abyHeader[136+i] < '0' ||
+                    abyHeader[136+i] >= '8' ||
+                    nModifiedTime * 8 > GINTBIG_MAX - (abyHeader[136+i] - '0') )
+                {
+                    CPLError(CE_Failure, CPLE_AppDefined,
+                            "Invalid mtime for %s", osNextFileName.c_str());
+                    return FALSE;
+                }
                 nModifiedTime = nModifiedTime * 8 + (abyHeader[136+i] - '0');
+            }
         }
 
         if( abyHeader[156] == 'L' && nNextFileSize > 0 && nNextFileSize < 32768 )
@@ -453,7 +474,8 @@ int VSITarReader::GotoFileOffset( VSIArchiveEntryFileOffset* pOffset )
         return TRUE;
     }
 #endif
-    if( VSIFSeekL(fp, pTarEntryOffset->m_nOffset - 512, SEEK_SET) < 0 )
+    if( pTarEntryOffset->m_nOffset < 512 ||
+        VSIFSeekL(fp, pTarEntryOffset->m_nOffset - 512, SEEK_SET) < 0 )
         return FALSE;
     return GotoNextFile();
 }

@@ -37,7 +37,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrmultisurface.cpp ba2ef4045f82fd2260f1732e9e46a927277ac93d 2018-05-06 19:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmultisurface.cpp c7d51c5ead794772b42f3c58c394bfff6045f8d6 2019-08-22 09:59:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRMultiSurface()                           */
@@ -263,11 +263,11 @@ OGRErr OGRMultiSurface::importFromWkt( const char ** ppszInput )
 /*                            exportToWkt()                             */
 /************************************************************************/
 
-OGRErr OGRMultiSurface::exportToWkt( char ** ppszDstText,
-                                     OGRwkbVariant /* eWkbVariant */ ) const
-
+std::string OGRMultiSurface::exportToWkt(const OGRWktOptions& opts, OGRErr *err) const
 {
-    return exportToWktInternal( ppszDstText, wkbVariantIso, "POLYGON" );
+    OGRWktOptions optsModified(opts);
+    optsModified.variant = wkbVariantIso;
+    return exportToWktInternal(optsModified, err, "POLYGON");
 }
 
 /************************************************************************/

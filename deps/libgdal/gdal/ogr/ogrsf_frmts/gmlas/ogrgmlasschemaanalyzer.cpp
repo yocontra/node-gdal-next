@@ -41,7 +41,7 @@ static XSModel* getGrammarPool(XMLGrammarPool* pool)
 #include "ogr_gmlas.h"
 #include "ogr_pgdump.h"
 
-CPL_CVSID("$Id: ogrgmlasschemaanalyzer.cpp c0856bd3877de26ba25aa5f4c71c7f5b845ea159 2019-04-14 22:55:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasschemaanalyzer.cpp 8df5727ebe08a38302a35b327111f6f57559ce3e 2019-08-15 20:24:04 +0200 Even Rouault $")
 
 static OGRwkbGeometryType GetOGRGeometryType( XSTypeDefinition* poTypeDef );
 
@@ -612,15 +612,13 @@ XSElementDeclaration* GMLASSchemaAnalyzer::GetTopElementDeclarationFromXPath(
                                                     XSModel* poModel)
 {
     const char* pszTypename = osXPath.c_str();
-    const char* pszName = strrchr(pszTypename, ':');
-    if( pszName )
-        pszName ++;
+    const char* pszColon = strrchr(pszTypename, ':');
     XSElementDeclaration* poEltDecl = nullptr;
-    if( pszName != nullptr )
+    if( pszColon != nullptr )
     {
         CPLString osNSPrefix = pszTypename;
-        osNSPrefix.resize( pszName - 1 - pszTypename );
-        CPLString osName = pszName;
+        osNSPrefix.resize( pszColon - pszTypename );
+        CPLString osName = pszColon + 1;
         CPLString osNSURI;
 
         for( const auto& oIterNS: m_oMapURIToPrefix )
@@ -750,6 +748,7 @@ bool GMLASSchemaAnalyzer::Analyze(GMLASXSDCache& oCache,
         //
         poParser->setFeature (XMLUni::fgXercesSchema, true);
 
+        // coverity[unsafe_xml_parse_config]
         poParser->setFeature (XMLUni::fgXercesValidationErrorAsFatal, false);
 
         // Use the loaded grammar during parsing.
@@ -1005,7 +1004,8 @@ bool GMLASSchemaAnalyzer::Analyze(GMLASXSDCache& oCache,
                             auto poParticle = poCT->getParticle();
                             if( poParticle )
                             {
-                                FindElementsWithMustBeToLevel(
+                                CPL_IGNORE_RET_VAL(
+                                    FindElementsWithMustBeToLevel(
                                         osXPath,
                                         poParticle->getModelGroupTerm(),
                                         0,
@@ -1015,7 +1015,7 @@ bool GMLASSchemaAnalyzer::Analyze(GMLASXSDCache& oCache,
                                         aoSetXPathEltsForTopClass,
                                         poModel,
                                         bSimpleEnoughOut,
-                                        nSubCountSubEltOut );
+                                        nSubCountSubEltOut ));
                             }
                         }
                     }

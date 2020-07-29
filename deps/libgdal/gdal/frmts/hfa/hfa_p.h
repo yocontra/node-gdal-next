@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hfa_p.h e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $
+ * $Id: hfa_p.h 085ace6b956265eaf2405b298048c59e7a9027cd 2019-10-19 23:19:13 +0200 Even Rouault $
  *
  * Project:  Erdas Imagine (.img) Translator
  * Purpose:  Private class declarations for the HFA classes used to read
@@ -36,6 +36,7 @@
 #include "hfa.h"
 
 #include <cstdio>
+#include <memory>
 #include <vector>
 #include <set>
 
@@ -396,8 +397,7 @@ class HFAType
   public:
     int         nBytes;
 
-    int         nFields;
-    HFAField    **papoFields;
+    std::vector<std::unique_ptr<HFAField>> apoFields;
 
     char        *pszTypeName;
 

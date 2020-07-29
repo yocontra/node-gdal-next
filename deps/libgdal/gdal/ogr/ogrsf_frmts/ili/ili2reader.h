@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ili2reader.h 9ff6d46686d8c7c6b1b813179caebe45b0dea065 2018-04-02 16:59:04 +0200 Even Rouault $
+ * $Id: ili2reader.h 0680e53a52fd3f37ec274c60e698b033948e3c70 2020-05-15 10:00:42 +0900 Hiroshi Miura $
  *
  * Project:  Interlis 2 Reader
  * Purpose:  Public Declarations for Reader code.
@@ -29,12 +29,6 @@
 
 #ifndef CPL_ILI2READER_H_INCLUDED
 #define CPL_ILI2READER_H_INCLUDED
-
-// This works around problems with math.h on some platforms #defining INFINITY
-#ifdef INFINITY
-#undef  INFINITY
-#define INFINITY INFINITY_XERCES
-#endif
 
 #include "imdreader.h"
 #include <list>

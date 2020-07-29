@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@
 #include "gdalwarper.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vrtwarped.cpp 776e6027755b1ec5045a2592c565ec164fca0d73 2019-11-12 14:20:18 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtwarped.cpp ef49c00611235df0c1ce4f51344f00567a668661 2020-02-13 11:08:39 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                      GDALAutoCreateWarpedVRT()                       */
@@ -555,6 +555,10 @@ public:
         }
         return TRUE;
     }
+
+    virtual OGRCoordinateTransformation* Clone() const override {
+        return new GDALWarpCoordRescaler(*this); }
+
 };
 
 /************************************************************************/
@@ -682,7 +686,7 @@ void VRTWarpedDataset::CreateImplicitOverviews()
         {
             GDALWarpCoordRescaler oRescaler(1.0 / dfSrcRatioX,
                                             1.0 / dfSrcRatioY);
-            reinterpret_cast<OGRGeometry*>(psWOOvr->hCutline)->
+            static_cast<OGRGeometry*>(psWOOvr->hCutline)->
                                                     transform(&oRescaler);
         }
 
@@ -740,7 +744,7 @@ char** VRTWarpedDataset::GetFileList()
 
         if( psWO->hSrcDS != nullptr &&
             (pszFilename =
-             reinterpret_cast<GDALDataset*>(psWO->hSrcDS)->GetDescription()) != nullptr )
+             static_cast<GDALDataset*>(psWO->hSrcDS)->GetDescription()) != nullptr )
         {
             VSIStatBufL  sStat;
             if( VSIStatL( pszFilename, &sStat ) == 0 )
@@ -1176,7 +1180,8 @@ GDALInitializeWarpedVRT( GDALDatasetH hDS, GDALWarpOptions *psWO )
 {
     VALIDATE_POINTER1( hDS, "GDALInitializeWarpedVRT", CE_Failure );
 
-    return reinterpret_cast<VRTWarpedDataset *>( hDS )->Initialize( psWO );
+    return static_cast<VRTWarpedDataset *>(GDALDataset::FromHandle(hDS))->
+        Initialize( psWO );
 }
 
 /*! @cond Doxygen_Suppress */
@@ -1666,7 +1671,7 @@ CPLErr VRTWarpedDataset::ProcessBlock( int iBlockX, int iBlockY )
                 }
                 else
                 {
-                     GByte* pabyBlock = reinterpret_cast<GByte *>(
+                     GByte* pabyBlock = static_cast<GByte *>(
                         poBlock->GetDataRef() );
                     const int nDTSize =
                         GDALGetDataTypeSizeBytes(poBlock->GetDataType());
@@ -1725,7 +1730,7 @@ VRTWarpedRasterBand::VRTWarpedRasterBand( GDALDataset *poDSIn, int nBandIn,
     nBand = nBandIn;
     eAccess = GA_Update;
 
-    reinterpret_cast<VRTWarpedDataset *>( poDS )->GetBlockSize( &nBlockXSize,
+    static_cast<VRTWarpedDataset *>( poDS )->GetBlockSize( &nBlockXSize,
                                                                 &nBlockYSize );
 
     if( eType != GDT_Unknown )
@@ -1750,7 +1755,7 @@ CPLErr VRTWarpedRasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
                                         void * pImage )
 
 {
-    VRTWarpedDataset *poWDS = reinterpret_cast<VRTWarpedDataset *>( poDS );
+    VRTWarpedDataset *poWDS = static_cast<VRTWarpedDataset *>( poDS );
     GDALRasterBlock *poBlock = GetLockedBlockRef( nBlockXOff, nBlockYOff, TRUE );
     if( poBlock == nullptr )
         return CE_Failure;
@@ -1778,7 +1783,7 @@ CPLErr VRTWarpedRasterBand::IWriteBlock( int nBlockXOff, int nBlockYOff,
                                          void * pImage )
 
 {
-    VRTWarpedDataset *poWDS = reinterpret_cast<VRTWarpedDataset *>( poDS );
+    VRTWarpedDataset *poWDS = static_cast<VRTWarpedDataset *>( poDS );
 
     // This is a bit tricky. In the case we are warping a VRTWarpedDataset
     // with a destination alpha band, IWriteBlock can be called on that alpha
@@ -1821,7 +1826,7 @@ int VRTWarpedRasterBand::GetOverviewCount()
 
 {
     VRTWarpedDataset * const poWDS =
-        reinterpret_cast<VRTWarpedDataset *>( poDS );
+        static_cast<VRTWarpedDataset *>( poDS );
 
     poWDS->CreateImplicitOverviews();
 
@@ -1836,7 +1841,7 @@ GDALRasterBand *VRTWarpedRasterBand::GetOverview( int iOverview )
 
 {
     VRTWarpedDataset * const poWDS =
-        reinterpret_cast<VRTWarpedDataset *>( poDS );
+        static_cast<VRTWarpedDataset *>( poDS );
 
     if( iOverview < 0 || iOverview >= GetOverviewCount() )
         return nullptr;

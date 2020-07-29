@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -45,7 +45,7 @@
 #include "gmlutils.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: gmlreader.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gmlreader.cpp 67428c7863250a072304ba6edb5f523f8a01aa64 2020-06-30 23:01:14 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ~IGMLReader()                             */
@@ -192,7 +192,7 @@ CPL_UNUSED
 GMLReader::~GMLReader()
 
 {
-    ClearClasses();
+    GMLReader::ClearClasses();
 
     CPLFree(m_pszFilename);
 
@@ -426,6 +426,7 @@ void GMLReader::CleanupParser()
     nFeatureTabLength = 0;
     nFeatureTabAlloc = 0;
     ppoFeatureTab = nullptr;
+    m_osErrorMessage.clear();
 
 #endif
 
@@ -506,15 +507,19 @@ GMLFeature *GMLReader::NextFeatureExpat()
         m_bReadStarted = true;
     }
 
-    if (fpGML == nullptr || m_bStopParsing)
-        return nullptr;
-
     if (nFeatureTabIndex < nFeatureTabLength)
     {
         return ppoFeatureTab[nFeatureTabIndex++];
     }
 
-    if (VSIFEofL(fpGML))
+    if( !m_osErrorMessage.empty() )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "%s", m_osErrorMessage.c_str());
+        m_osErrorMessage.clear();
+        return nullptr;
+    }
+
+    if (fpGML == nullptr || m_bStopParsing || VSIFEofL(fpGML))
         return nullptr;
 
     nFeatureTabLength = 0;
@@ -540,7 +545,8 @@ GMLFeature *GMLReader::NextFeatureExpat()
 
         if (XML_Parse(oParser, pabyBuf, nLen, nDone) == XML_STATUS_ERROR)
         {
-            CPLError(CE_Failure, CPLE_AppDefined,
+            // Defer emission of the error message until we have to return nullptr
+            m_osErrorMessage.Printf(
                      "XML parsing of GML file failed : %s "
                      "at line %d, column %d",
                      XML_ErrorString(XML_GetErrorCode(oParser)),
@@ -553,7 +559,16 @@ GMLFeature *GMLReader::NextFeatureExpat()
                 HasStoppedParsing();
     } while (!nDone && !m_bStopParsing && nFeatureTabLength == 0);
 
-    return nFeatureTabLength ? ppoFeatureTab[nFeatureTabIndex++] : nullptr;
+    if( nFeatureTabLength )
+        return ppoFeatureTab[nFeatureTabIndex++];
+
+    if( !m_osErrorMessage.empty() )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "%s", m_osErrorMessage.c_str());
+        m_osErrorMessage.clear();
+    }
+
+    return nullptr;
 }
 #endif
 
@@ -1108,8 +1123,16 @@ void GMLReader::SetFeaturePropertyDirectly( const char *pszElement,
 /* -------------------------------------------------------------------- */
     if( !poClass->IsSchemaLocked() && !EQUAL(pszValue, OGR_GML_NULL) )
     {
-        poClass->GetProperty(iProperty)->AnalysePropertyValue(
-            poFeature->GetProperty(iProperty), m_bSetWidthFlag );
+        auto poClassProperty = poClass->GetProperty(iProperty);
+        if( poClassProperty )
+        {
+            poClassProperty->AnalysePropertyValue(
+                poFeature->GetProperty(iProperty), m_bSetWidthFlag );
+        }
+        else
+        {
+            CPLAssert(false);
+        }
     }
 }
 

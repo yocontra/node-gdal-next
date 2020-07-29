@@ -32,7 +32,7 @@
 #include "ntf.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ntf_estlayers.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ntf_estlayers.cpp 85aade48c21538ba123f385aaa62eb7728038cb1 2019-08-24 11:14:58 +0200 Even Rouault $")
 
 constexpr int MAX_LINK = 5000;
 
@@ -1164,7 +1164,7 @@ static OGRFeature *TranslateStrategiNode( CPL_UNUSED NTFFileReader *poReader,
     // NUM_LINKS
     int         nNumLinks = atoi(papoGroup[0]->GetField( 15, 18 ));
 
-    if( nNumLinks > MAX_LINK )
+    if( nNumLinks < 0 || nNumLinks > MAX_LINK )
     {
         CPLError( CE_Failure, CPLE_AppDefined,
                   "MAX_LINK exceeded in ntf_estlayers.cpp." );

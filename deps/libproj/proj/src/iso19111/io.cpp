@@ -179,7 +179,7 @@ struct WKTFormatter::Private {
  *
  * A formatter can be used only once (its internal state is mutated)
  *
- * Its default behaviour can be adjusted with the different setters.
+ * Its default behavior can be adjusted with the different setters.
  *
  * @param convention WKT flavor. Defaults to Convention::WKT2
  * @param dbContext Database context, to allow queries in it if needed.
@@ -201,7 +201,7 @@ WKTFormatterNNPtr WKTFormatter::create(Convention convention,
  *
  * A formatter can be used only once (its internal state is mutated)
  *
- * Its default behaviour can be adjusted with the different setters.
+ * Its default behavior can be adjusted with the different setters.
  *
  * @param other source formatter.
  * @return new formatter.
@@ -1285,6 +1285,8 @@ struct WKTParser::Private {
                            const UnitOfMeasure &defaultLinearUnit,
                            const UnitOfMeasure &defaultAngularUnit);
 
+    static std::string getExtensionProj4(const WKTNode::Private *nodeP);
+
     static void addExtensionProj4ToProp(const WKTNode::Private *nodeP,
                                         PropertyMap &props);
 
@@ -1298,19 +1300,22 @@ struct WKTParser::Private {
     static std::string projectionGetParameter(const WKTNodeNNPtr &projCRSNode,
                                               const char *paramName);
 
-    ConversionNNPtr buildProjection(const WKTNodeNNPtr &projCRSNode,
+    ConversionNNPtr buildProjection(const GeodeticCRSNNPtr &baseGeodCRS,
+                                    const WKTNodeNNPtr &projCRSNode,
                                     const WKTNodeNNPtr &projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
 
     ConversionNNPtr
-    buildProjectionStandard(const WKTNodeNNPtr &projCRSNode,
+    buildProjectionStandard(const GeodeticCRSNNPtr &baseGeodCRS,
+                            const WKTNodeNNPtr &projCRSNode,
                             const WKTNodeNNPtr &projectionNode,
                             const UnitOfMeasure &defaultLinearUnit,
                             const UnitOfMeasure &defaultAngularUnit);
 
     ConversionNNPtr
-    buildProjectionFromESRI(const WKTNodeNNPtr &projCRSNode,
+    buildProjectionFromESRI(const GeodeticCRSNNPtr &baseGeodCRS,
+                            const WKTNodeNNPtr &projCRSNode,
                             const WKTNodeNNPtr &projectionNode,
                             const UnitOfMeasure &defaultLinearUnit,
                             const UnitOfMeasure &defaultAngularUnit);
@@ -1331,7 +1336,7 @@ struct WKTParser::Private {
 
     DerivedVerticalCRSNNPtr buildDerivedVerticalCRS(const WKTNodeNNPtr &node);
 
-    CompoundCRSNNPtr buildCompoundCRS(const WKTNodeNNPtr &node);
+    CRSNNPtr buildCompoundCRS(const WKTNodeNNPtr &node);
 
     BoundCRSNNPtr buildBoundCRS(const WKTNodeNNPtr &node);
 
@@ -2463,17 +2468,56 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 return CartesianCS::createEastingNorthing(unit);
             }
         } else if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
+                   ci_equal(parentNodeName, WKTConstants::VERTCS) ||
                    ci_equal(parentNodeName, WKTConstants::BASEVERTCRS)) {
             csTypeCStr = "vertical";
+
+            bool downDirection = false;
+            if (ci_equal(parentNodeName, WKTConstants::VERTCS)) // ESRI
+            {
+                for (const auto &childNode : parentNode->GP()->children()) {
+                    const auto &childNodeChildren = childNode->GP()->children();
+                    if (childNodeChildren.size() == 2 &&
+                        ci_equal(childNode->GP()->value(),
+                                 WKTConstants::PARAMETER) &&
+                        childNodeChildren[0]->GP()->value() ==
+                            "\"Direction\"") {
+                        const auto &paramValue =
+                            childNodeChildren[1]->GP()->value();
+                        try {
+                            double val = asDouble(childNodeChildren[1]);
+                            if (val == 1.0) {
+                                // ok
+                            } else if (val == -1.0) {
+                                downDirection = true;
+                            }
+                        } catch (const std::exception &) {
+                            throw ParsingException(
+                                concat("unhandled parameter value type : ",
+                                       paramValue));
+                        }
+                    }
+                }
+            }
+
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    if (ci_equal(parentNodeName, WKTConstants::VERT_CS)) {
+                    if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
+                        ci_equal(parentNodeName, WKTConstants::VERTCS)) {
                         ThrowParsingExceptionMissingUNIT();
                     } else {
                         unit = UnitOfMeasure::METRE;
                     }
+                }
+                if (downDirection) {
+                    return VerticalCS::create(
+                        util::PropertyMap(),
+                        CoordinateSystemAxis::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    "depth"),
+                            "D", AxisDirection::DOWN, unit));
                 }
                 return VerticalCS::createGravityRelatedHeight(unit);
             }
@@ -2623,14 +2667,25 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
 
 // ---------------------------------------------------------------------------
 
-void WKTParser::Private::addExtensionProj4ToProp(const WKTNode::Private *nodeP,
-                                                 PropertyMap &props) {
+std::string
+WKTParser::Private::getExtensionProj4(const WKTNode::Private *nodeP) {
     auto &extensionNode = nodeP->lookForChild(WKTConstants::EXTENSION);
     const auto &extensionChildren = extensionNode->GP()->children();
     if (extensionChildren.size() == 2) {
         if (ci_equal(stripQuotes(extensionChildren[0]), "PROJ4")) {
-            props.set("EXTENSION_PROJ4", stripQuotes(extensionChildren[1]));
+            return stripQuotes(extensionChildren[1]);
         }
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTParser::Private::addExtensionProj4ToProp(const WKTNode::Private *nodeP,
+                                                 PropertyMap &props) {
+    const auto extensionProj4(getExtensionProj4(nodeP));
+    if (!extensionProj4.empty()) {
+        props.set("EXTENSION_PROJ4", extensionProj4);
     }
 }
 
@@ -2860,7 +2915,8 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
                ci_find(paramName, "parallel") != std::string::npos ||
                ci_find(paramName, "azimuth") != std::string::npos ||
                ci_find(paramName, "angle") != std::string::npos ||
-               ci_find(paramName, "heading") != std::string::npos) {
+               ci_find(paramName, "heading") != std::string::npos ||
+               ci_find(paramName, "rotation") != std::string::npos) {
         unit = defaultAngularUnit;
     } else if (ci_find(paramName, "easting") != std::string::npos ||
                ci_find(paramName, "northing") != std::string::npos ||
@@ -3138,9 +3194,40 @@ bool WKTParser::Private::hasWebMercPROJ4String(
 
 // ---------------------------------------------------------------------------
 
+static const MethodMapping *
+selectSphericalOrEllipsoidal(const MethodMapping *mapping,
+                             const GeodeticCRSNNPtr &baseGeodCRS) {
+    if (mapping->epsg_code ==
+            EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL ||
+        mapping->epsg_code == EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA) {
+        mapping = getMapping(
+            baseGeodCRS->ellipsoid()->isSphere()
+                ? EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL
+                : EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
+    } else if (mapping->epsg_code ==
+                   EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL ||
+               mapping->epsg_code ==
+                   EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA) {
+        mapping = getMapping(
+            baseGeodCRS->ellipsoid()->isSphere()
+                ? EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL
+                : EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA);
+    } else if (mapping->epsg_code ==
+                   EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL ||
+               mapping->epsg_code == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL) {
+        mapping =
+            getMapping(baseGeodCRS->ellipsoid()->isSphere()
+                           ? EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL
+                           : EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL);
+    }
+    return mapping;
+}
+
+// ---------------------------------------------------------------------------
+
 ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
-    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
-    const UnitOfMeasure &defaultLinearUnit,
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
     const UnitOfMeasure &defaultAngularUnit) {
     const std::string esriProjectionName =
         stripQuotes(projectionNode->GP()->children()[0]);
@@ -3150,7 +3237,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     // on the parameters / their values
     const auto esriMappings = getMappingsFromESRI(esriProjectionName);
     if (esriMappings.empty()) {
-        return buildProjectionStandard(projCRSNode, projectionNode,
+        return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
                                        defaultLinearUnit, defaultAngularUnit);
     }
 
@@ -3185,7 +3272,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
             if (iter != mapParamNameToValue.end()) {
                 if (param->wkt2_name == nullptr) {
                     try {
-                        if (param->fixed_value == io::asDouble(iter->second)) {
+                        if (io::asDouble(param->fixed_value) ==
+                            io::asDouble(iter->second)) {
                             matchCount++;
                         }
                     } catch (const std::exception &) {
@@ -3193,6 +3281,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
                 } else {
                     matchCount++;
                 }
+            } else if (param->is_fixed_value) {
+                mapParamNameToValue[param->esri_name] = param->fixed_value;
             }
         }
         if (matchCount > bestMatchCount) {
@@ -3229,6 +3319,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         }
     }
     assert(wkt2_mapping);
+
+    wkt2_mapping = selectSphericalOrEllipsoidal(wkt2_mapping, baseGeodCRS);
 
     PropertyMap propertiesMethod;
     propertiesMethod.set(IdentifiedObject::NAME_KEY, wkt2_mapping->wkt2_name);
@@ -3317,19 +3409,18 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr
-WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
-                                    const WKTNodeNNPtr &projectionNode,
-                                    const UnitOfMeasure &defaultLinearUnit,
-                                    const UnitOfMeasure &defaultAngularUnit) {
+ConversionNNPtr WKTParser::Private::buildProjection(
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
+    const UnitOfMeasure &defaultAngularUnit) {
     if (projectionNode->GP()->childrenSize() == 0) {
         ThrowNotEnoughChildren(WKTConstants::PROJECTION);
     }
     if (esriStyle_) {
-        return buildProjectionFromESRI(projCRSNode, projectionNode,
+        return buildProjectionFromESRI(baseGeodCRS, projCRSNode, projectionNode,
                                        defaultLinearUnit, defaultAngularUnit);
     }
-    return buildProjectionStandard(projCRSNode, projectionNode,
+    return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
                                    defaultLinearUnit, defaultAngularUnit);
 }
 
@@ -3354,8 +3445,8 @@ WKTParser::Private::projectionGetParameter(const WKTNodeNNPtr &projCRSNode,
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr WKTParser::Private::buildProjectionStandard(
-    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
-    const UnitOfMeasure &defaultLinearUnit,
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
     const UnitOfMeasure &defaultAngularUnit) {
     std::string wkt1ProjectionName =
         stripQuotes(projectionNode->GP()->children()[0]);
@@ -3473,6 +3564,9 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     std::string projectionName(wkt1ProjectionName);
     const MethodMapping *mapping =
         tryToIdentifyWKT1Method ? getMappingFromWKT1(projectionName) : nullptr;
+    if (mapping) {
+        mapping = selectSphericalOrEllipsoidal(mapping, baseGeodCRS);
+    }
 
     // For Krovak, we need to look at axis to decide between the Krovak and
     // Krovak East-North Oriented methods
@@ -3615,13 +3709,13 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
 
 // ---------------------------------------------------------------------------
 
-static ProjectedCRSNNPtr createPseudoMercator(const PropertyMap &props) {
+static ProjectedCRSNNPtr createPseudoMercator(const PropertyMap &props,
+                                              const cs::CartesianCSNNPtr &cs) {
     auto conversion = Conversion::createPopularVisualisationPseudoMercator(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
         Angle(0), Length(0), Length(0));
-    return ProjectedCRS::create(
-        props, GeographicCRS::EPSG_4326, conversion,
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    return ProjectedCRS::create(props, GeographicCRS::EPSG_4326, conversion,
+                                cs);
 }
 
 // ---------------------------------------------------------------------------
@@ -3647,6 +3741,15 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
     auto props = buildProperties(node);
 
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
+    const auto &nodeValue = nodeP->value();
+    if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::PROJCS) &&
+        !ci_equal(nodeValue, WKTConstants::BASEPROJCRS)) {
+        ThrowMissing(WKTConstants::CS_);
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+
     const std::string projCRSName = stripQuotes(nodeP->children()[0]);
     if (esriStyle_ && dbContext_) {
         // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
@@ -3667,26 +3770,48 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                 projCRSName, "projected_crs", "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
+                // Special case for https://github.com/OSGeo/PROJ/issues/2086
+                // The name of the CRS to identify is
+                // NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501
+                // whereas it should be
+                // NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501_Feet
+                constexpr double US_FOOT_CONV_FACTOR = 12.0 / 39.37;
+                if (projCRSName.find("_FIPS_") != std::string::npos &&
+                    projCRSName.find("_Feet") == std::string::npos &&
+                    std::fabs(
+                        cartesianCS->axisList()[0]->unit().conversionToSI() -
+                        US_FOOT_CONV_FACTOR) < 1e-10 * US_FOOT_CONV_FACTOR) {
+                    auto officialNameFromFeet =
+                        authFactory->getOfficialNameFromAlias(
+                            projCRSName + "_Feet", "projected_crs", "ESRI",
+                            false, outTableName, authNameFromAlias,
+                            codeFromAlias);
+                    if (!officialNameFromFeet.empty()) {
+                        officialName = officialNameFromFeet;
+                    }
+                }
+
                 props.set(IdentifiedObject::NAME_KEY, officialName);
             }
         }
     }
 
-    if (isNull(conversionNode) && hasWebMercPROJ4String(node, projectionNode)) {
+    if (isNull(conversionNode) && hasWebMercPROJ4String(node, projectionNode) &&
+        cartesianCS) {
         toWGS84Parameters_.clear();
-        return createPseudoMercator(props);
+        return createPseudoMercator(props, NN_NO_CHECK(cartesianCS));
     }
 
     // WGS_84_Pseudo_Mercator: Particular case for corrupted ESRI WKT generated
     // by older GDAL versions
     // https://trac.osgeo.org/gdal/changeset/30732
     // WGS_1984_Web_Mercator: deprecated ESRI:102113
-    if (metadata::Identifier::isEquivalentName(projCRSName.c_str(),
-                                               "WGS_84_Pseudo_Mercator") ||
-        metadata::Identifier::isEquivalentName(projCRSName.c_str(),
-                                               "WGS_1984_Web_Mercator")) {
+    if (cartesianCS && (metadata::Identifier::isEquivalentName(
+                            projCRSName.c_str(), "WGS_84_Pseudo_Mercator") ||
+                        metadata::Identifier::isEquivalentName(
+                            projCRSName.c_str(), "WGS_1984_Web_Mercator"))) {
         toWGS84Parameters_.clear();
-        return createPseudoMercator(props);
+        return createPseudoMercator(props, NN_NO_CHECK(cartesianCS));
     }
 
     auto linearUnit = buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
@@ -3695,16 +3820,8 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     auto conversion =
         !isNull(conversionNode)
             ? buildConversion(conversionNode, linearUnit, angularUnit)
-            : buildProjection(node, projectionNode, linearUnit, angularUnit);
-
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
-    const auto &nodeValue = nodeP->value();
-    if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::PROJCS) &&
-        !ci_equal(nodeValue, WKTConstants::BASEPROJCRS)) {
-        ThrowMissing(WKTConstants::CS_);
-    }
-    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+            : buildProjection(baseGeodCRS, node, projectionNode, linearUnit,
+                              angularUnit);
 
     // No explicit AXIS node ? (WKT1)
     if (isNull(nodeP->lookForChild(WKTConstants::AXIS))) {
@@ -3776,6 +3893,12 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         ThrowNotExpectedCSType("Cartesian");
     }
 
+    if (cartesianCS->axisList().size() == 3 &&
+        baseGeodCRS->coordinateSystem()->axisList().size() == 2) {
+        baseGeodCRS = NN_NO_CHECK(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+            baseGeodCRS->promoteTo3D(std::string(), dbContext_)));
+    }
+
     addExtensionProj4ToProp(nodeP, props);
 
     return ProjectedCRS::create(props, baseGeodCRS, conversion,
@@ -3821,9 +3944,18 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
             modelName);
     }
 
-    // WKT1 VERT_DATUM has a datum type after the datum name that we ignore.
-    return VerticalReferenceFrame::create(buildProperties(node),
-                                          getAnchor(node));
+    // WKT1 VERT_DATUM has a datum type after the datum name
+    const auto *nodeP = node->GP();
+    const std::string &name(nodeP->value());
+    auto &props = buildProperties(node);
+    if (ci_equal(name, WKTConstants::VERT_DATUM)) {
+        const auto &children = nodeP->children();
+        if (children.size() >= 2) {
+            props.set("VERT_DATUM_TYPE", children[1]->GP()->value());
+        }
+    }
+
+    return VerticalReferenceFrame::create(props, getAnchor(node));
 }
 
 // ---------------------------------------------------------------------------
@@ -3864,6 +3996,79 @@ WKTParser::Private::buildParametricDatum(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+static CRSNNPtr
+createBoundCRSSourceTransformationCRS(const crs::CRSPtr &sourceCRS,
+                                      const crs::CRSPtr &targetCRS) {
+    CRSPtr sourceTransformationCRS;
+    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
+        GeographicCRSPtr sourceGeographicCRS =
+            sourceCRS->extractGeographicCRS();
+        sourceTransformationCRS = sourceGeographicCRS;
+        if (sourceGeographicCRS) {
+            if (sourceGeographicCRS->datum() != nullptr &&
+                sourceGeographicCRS->primeMeridian()
+                        ->longitude()
+                        .getSIValue() != 0.0) {
+                sourceTransformationCRS =
+                    GeographicCRS::create(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY,
+                            sourceGeographicCRS->nameStr() +
+                                " (with Greenwich prime meridian)"),
+                        datum::GeodeticReferenceFrame::create(
+                            util::PropertyMap().set(
+                                common::IdentifiedObject::NAME_KEY,
+                                sourceGeographicCRS->datum()->nameStr() +
+                                    " (with Greenwich prime meridian)"),
+                            sourceGeographicCRS->datum()->ellipsoid(),
+                            util::optional<std::string>(),
+                            datum::PrimeMeridian::GREENWICH),
+                        sourceGeographicCRS->coordinateSystem())
+                        .as_nullable();
+            }
+        } else {
+            auto vertSourceCRS =
+                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
+            if (!vertSourceCRS) {
+                throw ParsingException(
+                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
+            }
+            const auto &axis = vertSourceCRS->coordinateSystem()->axisList()[0];
+            if (axis->unit() == common::UnitOfMeasure::METRE &&
+                &(axis->direction()) == &AxisDirection::UP) {
+                sourceTransformationCRS = sourceCRS;
+            } else {
+                std::string sourceTransformationCRSName(
+                    vertSourceCRS->nameStr());
+                if (ends_with(sourceTransformationCRSName, " (ftUS)")) {
+                    sourceTransformationCRSName.resize(
+                        sourceTransformationCRSName.size() - strlen(" (ftUS)"));
+                }
+                if (ends_with(sourceTransformationCRSName, " depth")) {
+                    sourceTransformationCRSName.resize(
+                        sourceTransformationCRSName.size() - strlen(" depth"));
+                }
+                if (!ends_with(sourceTransformationCRSName, " height")) {
+                    sourceTransformationCRSName += " height";
+                }
+                sourceTransformationCRS =
+                    VerticalCRS::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          sourceTransformationCRSName),
+                        vertSourceCRS->datum(), vertSourceCRS->datumEnsemble(),
+                        VerticalCS::createGravityRelatedHeight(
+                            common::UnitOfMeasure::METRE))
+                        .as_nullable();
+            }
+        }
+    } else {
+        sourceTransformationCRS = sourceCRS;
+    }
+    return NN_NO_CHECK(sourceTransformationCRS);
+}
+
+// ---------------------------------------------------------------------------
+
 CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     auto &datumNode =
@@ -3887,6 +4092,7 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     const auto &nodeValue = nodeP->value();
     if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::VERT_CS) &&
+        !ci_equal(nodeValue, WKTConstants::VERTCS) &&
         !ci_equal(nodeValue, WKTConstants::BASEVERTCRS)) {
         ThrowMissing(WKTConstants::CS_);
     }
@@ -3902,7 +4108,8 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     // following conventions from
     // https://pubs.usgs.gov/tm/11b4/pdf/tm11-B4.pdf
     // page 9
-    if (ci_equal(nodeValue, WKTConstants::VERT_CS)) {
+    if (ci_equal(nodeValue, WKTConstants::VERT_CS) ||
+        ci_equal(nodeValue, WKTConstants::VERTCS)) {
         std::string name;
         if (props.getStringValue(IdentifiedObject::NAME_KEY, name)) {
             std::string geoidName;
@@ -3986,16 +4193,18 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                     gridName != "g2012a_conus.gtx,g2012a_alaska.gtx,"
                                 "g2012a_guam.gtx,g2012a_hawaii.gtx,"
                                 "g2012a_puertorico.gtx,g2012a_samoa.gtx") {
-                    std::string transformationName(crs->nameStr());
-                    if (!ends_with(transformationName, " height")) {
-                        transformationName += " height";
-                    }
-                    transformationName += " to WGS84 ellipsoidal height";
+                    auto sourceTransformationCRS =
+                        createBoundCRSSourceTransformationCRS(
+                            crs.as_nullable(),
+                            GeographicCRS::EPSG_4979.as_nullable());
                     auto transformation = Transformation::
                         createGravityRelatedHeightToGeographic3D(
-                            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                              transformationName),
-                            crs, GeographicCRS::EPSG_4979, nullptr, gridName,
+                            PropertyMap().set(
+                                IdentifiedObject::NAME_KEY,
+                                sourceTransformationCRS->nameStr() +
+                                    " to WGS84 ellipsoidal height"),
+                            sourceTransformationCRS, GeographicCRS::EPSG_4979,
+                            nullptr, gridName,
                             std::vector<PositionalAccuracyNNPtr>());
                     return nn_static_pointer_cast<CRS>(BoundCRS::create(
                         crs, GeographicCRS::EPSG_4979, transformation));
@@ -4046,8 +4255,7 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
-CompoundCRSNNPtr
-WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
+CRSNNPtr WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
     std::vector<CRSNNPtr> components;
     for (const auto &child : node->GP()->children()) {
         auto crs = buildCRS(child);
@@ -4055,7 +4263,13 @@ WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
             components.push_back(NN_NO_CHECK(crs));
         }
     }
-    return CompoundCRS::create(buildProperties(node), components);
+
+    if (ci_equal(node->GP()->value(), WKTConstants::COMPD_CS)) {
+        return CompoundCRS::createLax(buildProperties(node), components,
+                                      dbContext_);
+    } else {
+        return CompoundCRS::create(buildProperties(node), components);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -4103,23 +4317,10 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     consumeParameters(abridgedNode, true, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
-    CRSPtr sourceTransformationCRS;
-    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
-        sourceTransformationCRS = sourceCRS->extractGeographicCRS();
-        if (!sourceTransformationCRS) {
-            sourceTransformationCRS =
-                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
-            if (!sourceTransformationCRS) {
-                throw ParsingException(
-                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
-            }
-        }
-    } else {
-        sourceTransformationCRS = sourceCRS;
-    }
-
+    const auto sourceTransformationCRS(
+        createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
     auto transformation = Transformation::create(
-        buildProperties(abridgedNode), NN_NO_CHECK(sourceTransformationCRS),
+        buildProperties(abridgedNode), sourceTransformationCRS,
         NN_NO_CHECK(targetCRS), nullptr, buildProperties(methodNode),
         parameters, values, std::vector<PositionalAccuracyNNPtr>());
 
@@ -4352,22 +4553,63 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     const std::string &name(nodeP->value());
 
+    const auto applyHorizontalBoundCRSParams = [&](const CRSNNPtr &crs) {
+        if (!toWGS84Parameters_.empty()) {
+            auto ret = BoundCRS::createFromTOWGS84(crs, toWGS84Parameters_);
+            toWGS84Parameters_.clear();
+            return util::nn_static_pointer_cast<CRS>(ret);
+        } else if (!datumPROJ4Grids_.empty()) {
+            auto ret = BoundCRS::createFromNadgrids(crs, datumPROJ4Grids_);
+            datumPROJ4Grids_.clear();
+            return util::nn_static_pointer_cast<CRS>(ret);
+        }
+        return crs;
+    };
+
     if (isGeodeticCRS(name)) {
         if (!isNull(nodeP->lookForChild(WKTConstants::BASEGEOGCRS,
                                         WKTConstants::BASEGEODCRS))) {
-            return buildDerivedGeodeticCRS(node);
+            return util::nn_static_pointer_cast<CRS>(
+                applyHorizontalBoundCRSParams(buildDerivedGeodeticCRS(node)));
         } else {
-            return util::nn_static_pointer_cast<CRS>(buildGeodeticCRS(node));
+            return util::nn_static_pointer_cast<CRS>(
+                applyHorizontalBoundCRSParams(buildGeodeticCRS(node)));
         }
     }
 
     if (ci_equal(name, WKTConstants::PROJCS) ||
         ci_equal(name, WKTConstants::PROJCRS) ||
         ci_equal(name, WKTConstants::PROJECTEDCRS)) {
-        return util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
+        // Get the EXTENSION "PROJ4" node before attempting to call
+        // buildProjectedCRS() since formulations of WKT1_GDAL from GDAL 2.x
+        // with the netCDF driver and the lack the required UNIT[] node
+        std::string projString = getExtensionProj4(nodeP);
+        if (!projString.empty() &&
+            (starts_with(projString, "+proj=ob_tran +o_proj=longlat") ||
+             starts_with(projString, "+proj=ob_tran +o_proj=lonlat") ||
+             starts_with(projString, "+proj=ob_tran +o_proj=latlong") ||
+             starts_with(projString, "+proj=ob_tran +o_proj=latlon"))) {
+            // Those are not a projected CRS, but a DerivedGeographic one...
+            if (projString.find(" +type=crs") == std::string::npos) {
+                projString += " +type=crs";
+            }
+            try {
+                auto projObj =
+                    PROJStringParser().createFromPROJString(projString);
+                auto crs = nn_dynamic_pointer_cast<CRS>(projObj);
+                if (crs) {
+                    return util::nn_static_pointer_cast<CRS>(
+                        applyHorizontalBoundCRSParams(NN_NO_CHECK(crs)));
+                }
+            } catch (const io::ParsingException &) {
+            }
+        }
+        return util::nn_static_pointer_cast<CRS>(
+            applyHorizontalBoundCRSParams(buildProjectedCRS(node)));
     }
 
     if (ci_equal(name, WKTConstants::VERT_CS) ||
+        ci_equal(name, WKTConstants::VERTCS) ||
         ci_equal(name, WKTConstants::VERTCRS) ||
         ci_equal(name, WKTConstants::VERTICALCRS)) {
         if (!isNull(nodeP->lookForChild(WKTConstants::BASEVERTCRS))) {
@@ -4436,16 +4678,6 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
     auto crs = buildCRS(node);
     if (crs) {
-        if (!toWGS84Parameters_.empty()) {
-            return util::nn_static_pointer_cast<BaseObject>(
-                BoundCRS::createFromTOWGS84(NN_NO_CHECK(crs),
-                                            toWGS84Parameters_));
-        }
-        if (!datumPROJ4Grids_.empty()) {
-            return util::nn_static_pointer_cast<BaseObject>(
-                BoundCRS::createFromNadgrids(NN_NO_CHECK(crs),
-                                             datumPROJ4Grids_));
-        }
         return util::nn_static_pointer_cast<BaseObject>(NN_NO_CHECK(crs));
     }
 
@@ -5265,24 +5497,11 @@ BoundCRSNNPtr JSONParser::buildBoundCRS(const json &j) {
         values.emplace_back(ParameterValue::create(getMeasure(param)));
     }
 
-    CRSPtr sourceTransformationCRS;
-    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
-        sourceTransformationCRS = sourceCRS->extractGeographicCRS();
-        if (!sourceTransformationCRS) {
-            sourceTransformationCRS =
-                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS.as_nullable());
-            if (!sourceTransformationCRS) {
-                throw ParsingException(
-                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
-            }
-        }
-    } else {
-        sourceTransformationCRS = sourceCRS;
-    }
-
+    const auto sourceTransformationCRS(
+        createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
     auto transformation = Transformation::create(
-        buildProperties(transformationJ), NN_NO_CHECK(sourceTransformationCRS),
-        targetCRS, nullptr, buildProperties(methodJ), parameters, values,
+        buildProperties(transformationJ), sourceTransformationCRS, targetCRS,
+        nullptr, buildProperties(methodJ), parameters, values,
         std::vector<PositionalAccuracyNNPtr>());
 
     return BoundCRS::create(sourceCRS, targetCRS, transformation);
@@ -5719,11 +5938,11 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                 tokensCode[0], false));
                             auto crs2(factory->createCoordinateReferenceSystem(
                                 tokensCode[1], false));
-                            return CompoundCRS::create(
+                            return CompoundCRS::createLax(
                                 util::PropertyMap().set(
                                     IdentifiedObject::NAME_KEY,
                                     crs1->nameStr() + " + " + crs2->nameStr()),
-                                {crs1, crs2});
+                                {crs1, crs2}, dbContext);
                         }
                         throw;
                     }
@@ -5933,32 +6152,20 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
     if (dbContext) {
         auto factory =
             AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
-        // First pass: exact match on CRS objects
-        // Second pass: exact match on other objects
-        // Third pass: approximate match on CRS objects
-        // Fourth pass: approximate match on other objects
-        constexpr size_t limitResultCount = 10;
-        for (int pass = 0; pass <= 3; ++pass) {
-            const bool approximateMatch = (pass >= 2);
+
+        const auto searchObject = [&factory](
+            const std::string &objectName, bool approximateMatch,
+            const std::vector<AuthorityFactory::ObjectType> &objectTypes,
+            bool &goOn) {
+            constexpr size_t limitResultCount = 10;
             auto res = factory->createObjectsFromName(
-                text,
-                (pass == 0 || pass == 2)
-                    ? std::vector<
-                          AuthorityFactory::ObjectType>{AuthorityFactory::
-                                                            ObjectType::CRS}
-                    : std::vector<
-                          AuthorityFactory::
-                              ObjectType>{AuthorityFactory::ObjectType::
-                                              ELLIPSOID,
-                                          AuthorityFactory::ObjectType::DATUM,
-                                          AuthorityFactory::ObjectType::
-                                              COORDINATE_OPERATION},
-                approximateMatch, limitResultCount);
+                objectName, objectTypes, approximateMatch, limitResultCount);
             if (res.size() == 1) {
                 return res.front();
             }
             if (res.size() > 1) {
-                if (pass == 0 || pass == 2) {
+                if (objectTypes.size() == 1 &&
+                    objectTypes[0] == AuthorityFactory::ObjectType::CRS) {
                     for (size_t ndim = 2; ndim <= 3; ndim++) {
                         for (const auto &obj : res) {
                             auto crs =
@@ -5986,6 +6193,79 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                     msg += obj->nameStr();
                 }
                 throw ParsingException(msg);
+            }
+            goOn = true;
+            throw ParsingException("dummy");
+        };
+
+        const auto searchCRS = [&searchObject](const std::string &objectName) {
+            bool goOn = false;
+            const auto objectTypes = std::vector<AuthorityFactory::ObjectType>{
+                AuthorityFactory::ObjectType::CRS};
+            try {
+                constexpr bool approximateMatch = false;
+                return searchObject(objectName, approximateMatch, objectTypes,
+                                    goOn);
+            } catch (const std::exception &) {
+                if (!goOn)
+                    throw;
+            }
+            constexpr bool approximateMatch = true;
+            return searchObject(objectName, approximateMatch, objectTypes,
+                                goOn);
+        };
+
+        // strings like "WGS 84 + EGM96 height"
+        CompoundCRSPtr compoundCRS;
+        try {
+            const auto tokensCompound = split(text, " + ");
+            if (tokensCompound.size() == 2) {
+                auto obj1 = searchCRS(tokensCompound[0]);
+                auto obj2 = searchCRS(tokensCompound[1]);
+                auto crs1 = util::nn_dynamic_pointer_cast<CRS>(obj1);
+                auto crs2 = util::nn_dynamic_pointer_cast<CRS>(obj2);
+                if (crs1 && crs2) {
+                    compoundCRS =
+                        CompoundCRS::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    crs1->nameStr() + " + " +
+                                                        crs2->nameStr()),
+                            {NN_NO_CHECK(crs1), NN_NO_CHECK(crs2)})
+                            .as_nullable();
+                }
+            }
+        } catch (const std::exception &) {
+        }
+
+        // First pass: exact match on CRS objects
+        // Second pass: exact match on other objects
+        // Third pass: approximate match on CRS objects
+        // Fourth pass: approximate match on other objects
+        for (int pass = 0; pass <= 3; ++pass) {
+            const bool approximateMatch = (pass >= 2);
+            bool goOn = false;
+            try {
+                return searchObject(
+                    text, approximateMatch,
+                    (pass == 0 || pass == 2)
+                        ? std::vector<
+                              AuthorityFactory::ObjectType>{AuthorityFactory::
+                                                                ObjectType::CRS}
+                        : std::vector<
+                              AuthorityFactory::
+                                  ObjectType>{AuthorityFactory::ObjectType::
+                                                  ELLIPSOID,
+                                              AuthorityFactory::ObjectType::
+                                                  DATUM,
+                                              AuthorityFactory::ObjectType::
+                                                  COORDINATE_OPERATION},
+                    goOn);
+            } catch (const std::exception &) {
+                if (!goOn)
+                    throw;
+            }
+            if (compoundCRS) {
+                return NN_NO_CHECK(compoundCRS);
             }
         }
     }
@@ -6022,6 +6302,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>a compound CRS made from two object names separated with " + ".
+ *     e.g. "WGS 84 + EGM96 height"</li>
  * <li>PROJJSON string</li>
  * </ul>
  *
@@ -6071,6 +6353,8 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>a compound CRS made from two object names separated with " + ".
+ *     e.g. "WGS 84 + EGM96 height"</li>
  * <li>PROJJSON string</li>
  * </ul>
  *
@@ -6142,6 +6426,9 @@ WKTParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
  */
 WKTParser::WKTGuessedDialect
 WKTParser::guessDialect(const std::string &wkt) noexcept {
+    if (ci_starts_with(wkt, WKTConstants::VERTCS)) {
+        return WKTGuessedDialect::WKT1_ESRI;
+    }
     const std::string *const wkt1_keywords[] = {
         &WKTConstants::GEOCCS, &WKTConstants::GEOGCS,  &WKTConstants::COMPD_CS,
         &WKTConstants::PROJCS, &WKTConstants::VERT_CS, &WKTConstants::LOCAL_CS};
@@ -6348,6 +6635,7 @@ struct PROJStringFormatter::Private {
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
     bool omitProjLongLatIfPossible_ = false;
     std::vector<bool> omitZUnitConversion_{false};
+    std::vector<bool> omitHorizontalConversionInVertTransformation_{false};
     DatabaseContextPtr dbContext_{};
     bool useApproxTMerc_ = false;
     bool addNoDefs_ = true;
@@ -6389,7 +6677,7 @@ PROJStringFormatter::~PROJStringFormatter() = default;
  *
  * A formatter can be used only once (its internal state is mutated)
  *
- * Its default behaviour can be adjusted with the different setters.
+ * Its default behavior can be adjusted with the different setters.
  *
  * @param conventionIn PROJ string flavor. Defaults to Convention::PROJ_5
  * @param dbContext Database context (can help to find alternative grid names).
@@ -6673,6 +6961,38 @@ const std::string &PROJStringFormatter::toString() const {
                 }
             }
             if (changeDone) {
+                break;
+            }
+
+            // +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 +z_out=Z2
+            //  +step +proj=unitconvert +z_in=Z2 +z_out=Z3
+            // ==> step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2
+            // +z_out=Z3
+            if (prevStep.name == "unitconvert" &&
+                curStep.name == "unitconvert" && !prevStep.inverted &&
+                !curStep.inverted && prevStep.paramValues.size() == 4 &&
+                curStep.paramValues.size() == 2 &&
+                prevStep.paramValues[0].keyEquals("xy_in") &&
+                prevStep.paramValues[1].keyEquals("z_in") &&
+                prevStep.paramValues[2].keyEquals("xy_out") &&
+                prevStep.paramValues[3].keyEquals("z_out") &&
+                curStep.paramValues[0].keyEquals("z_in") &&
+                curStep.paramValues[1].keyEquals("z_out") &&
+                prevStep.paramValues[3].value == curStep.paramValues[0].value) {
+                auto xy_in = prevStep.paramValues[0].value;
+                auto z_in = prevStep.paramValues[1].value;
+                auto xy_out = prevStep.paramValues[2].value;
+                auto z_out = curStep.paramValues[1].value;
+                d->steps_.erase(iterPrev, iterCur);
+                iterCur->paramValues.clear();
+                iterCur->paramValues.emplace_back(
+                    Step::KeyValue("xy_in", xy_in));
+                iterCur->paramValues.emplace_back(Step::KeyValue("z_in", z_in));
+                iterCur->paramValues.emplace_back(
+                    Step::KeyValue("xy_out", xy_out));
+                iterCur->paramValues.emplace_back(
+                    Step::KeyValue("z_out", z_out));
+                changeDone = true;
                 break;
             }
 
@@ -7352,7 +7672,10 @@ std::set<std::string> PROJStringFormatter::getUsedGridNames() const {
     for (const auto &step : d->steps_) {
         for (const auto &param : step.paramValues) {
             if (param.keyEquals("grids")) {
-                res.insert(param.value);
+                const auto gridNames = split(param.value, ",");
+                for (const auto &gridName : gridNames) {
+                    res.insert(gridName);
+                }
             }
         }
     }
@@ -7413,6 +7736,25 @@ void PROJStringFormatter::popOmitZUnitConversion() {
 
 bool PROJStringFormatter::omitZUnitConversion() const {
     return d->omitZUnitConversion_.back();
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::pushOmitHorizontalConversionInVertTransformation() {
+    d->omitHorizontalConversionInVertTransformation_.push_back(true);
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::popOmitHorizontalConversionInVertTransformation() {
+    assert(d->omitHorizontalConversionInVertTransformation_.size() > 1);
+    d->omitHorizontalConversionInVertTransformation_.pop_back();
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::omitHorizontalConversionInVertTransformation() const {
+    return d->omitHorizontalConversionInVertTransformation_.back();
 }
 
 // ---------------------------------------------------------------------------
@@ -7847,7 +8189,7 @@ std::string PROJStringParser::Private::guessBodyName(double a) {
 GeodeticReferenceFrameNNPtr
 PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
 
-    const auto &ellpsStr = getParamValue(step, "ellps");
+    std::string ellpsStr = getParamValue(step, "ellps");
     const auto &datumStr = getParamValue(step, "datum");
     const auto &RStr = getParamValue(step, "R");
     const auto &aStr = getParamValue(step, "a");
@@ -7863,6 +8205,11 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
     const bool numericParamPresent =
         !RStr.empty() || !aStr.empty() || !bStr.empty() || !rfStr.empty() ||
         !fStr.empty() || !esStr.empty() || !eStr.empty();
+
+    if (!numericParamPresent && ellpsStr.empty() && datumStr.empty() &&
+        step.name == "krovak") {
+        ellpsStr = "bessel";
+    }
 
     PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
     PropertyMap grfMap;
@@ -8262,6 +8609,9 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                 throw ParsingException("Unhandled order=" + orderStr);
             }
         }
+    } else if (step.name == "krovak" && hasParamValue(step, "czech")) {
+        axis[0] = west;
+        axis[1] = south;
     }
     return axis;
 }
@@ -8516,6 +8866,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     auto &step = steps_[iStep];
     auto mappings = getMappingsFromPROJName(step.name);
     const MethodMapping *mapping = mappings.empty() ? nullptr : mappings[0];
+    if (mapping) {
+        mapping = selectSphericalOrEllipsoidal(mapping, geogCRS);
+    }
 
     assert(isProjectedStep(step.name));
     assert(iUnitConvert < 0 ||
@@ -8532,6 +8885,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     auto axisType = AxisType::REGULAR;
     bool bWebMercator = false;
+    std::string webMercatorName("WGS 84 / Pseudo-Mercator");
 
     if (step.name == "tmerc" &&
         ((getParamValue(step, "axis") == "wsu" && iAxisSwap < 0) ||
@@ -8561,8 +8915,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
     } else if (step.name == "aeqd" && hasParamValue(step, "guam")) {
         mapping = getMapping(EPSG_CODE_METHOD_GUAM_PROJECTION);
-    } else if (step.name == "cea" && !geogCRS->ellipsoid()->isSphere()) {
-        mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
     } else if (step.name == "geos" && getParamValue(step, "sweep") == "x") {
         mapping =
             getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X);
@@ -8597,9 +8949,14 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 Step::KeyValue("lonc", getParamValue(step, "lon_0")));
         }
     } else if (step.name == "krovak" &&
-               ((getParamValue(step, "axis") == "swu" && iAxisSwap < 0) ||
+               ((iAxisSwap < 0 && getParamValue(step, "axis") == "swu" &&
+                 !hasParamValue(step, "czech")) ||
                 (iAxisSwap > 0 &&
-                 getParamValue(steps_[iAxisSwap], "order") == "-2,-1"))) {
+                 getParamValue(steps_[iAxisSwap], "order") == "-2,-1" &&
+                 !hasParamValue(step, "czech")))) {
+        mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
+    } else if (step.name == "krovak" && iAxisSwap < 0 &&
+               hasParamValue(step, "czech") && !hasParamValue(step, "axis")) {
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
     } else if (step.name == "merc") {
         if (hasParamValue(step, "a") && hasParamValue(step, "b") &&
@@ -8622,6 +8979,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 getAngularValue(getParamValue(step, "x_0")) == 0.0 &&
                 getAngularValue(getParamValue(step, "y_0")) == 0.0) {
                 bWebMercator = true;
+                if (hasParamValue(step, "units") &&
+                    getParamValue(step, "units") != "m") {
+                    webMercatorName +=
+                        " (unit " + getParamValue(step, "units") + ')';
+                }
             }
         } else if (hasParamValue(step, "lat_ts")) {
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
@@ -8667,15 +9029,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             } else {
                 axisType = AxisType::SOUTH_POLE;
             }
-        }
-        if (geogCRS->ellipsoid()->isSphere()) {
-            mapping = getMapping(
-                EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL);
-        }
-    } else if (step.name == "eqc") {
-        if (geogCRS->ellipsoid()->isSphere()) {
-            mapping =
-                getMapping(EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL);
         }
     }
 
@@ -8752,9 +9105,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 if (hasError) {
                     throw ParsingException("invalid value for " + proj_name);
                 }
-
-            } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
-                value = 1;
             }
             // For omerc, if gamma is missing, the default value is
             // alpha
@@ -8764,13 +9114,24 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     value = getAngularValue(*paramValue);
                 }
             } else if (step.name == "krovak") {
+                // Keep it in sync with defaults of krovak.cpp
                 if (param->epsg_code ==
-                    EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
+                    EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE) {
+                    value = 49.5;
+                } else if (param->epsg_code ==
+                           EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN) {
+                    value = 24.833333333333333333;
+                } else if (param->epsg_code ==
+                           EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
                     value = 30.28813975277777776;
                 } else if (
                     param->epsg_code ==
                     EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
                     value = 78.5;
+                } else if (
+                    param->epsg_code ==
+                    EPSG_CODE_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL) {
+                    value = 0.9999;
                 }
             } else if (step.name == "cea" && proj_name == "lat_ts") {
                 paramValue = &getParamValueK(step);
@@ -8794,6 +9155,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                         throw ParsingException("k/k_0 should be in [0,1]");
                     }
                 }
+            } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
+                value = 1;
             }
 
             PropertyMap propertiesParameter;
@@ -8914,8 +9277,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     CRSNNPtr crs =
         bWebMercator
-            ? createPseudoMercator(props.set(IdentifiedObject::NAME_KEY,
-                                             "WGS 84 / Pseudo-Mercator"))
+            ? createPseudoMercator(
+                  props.set(IdentifiedObject::NAME_KEY, webMercatorName), cs)
             : ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
 
     if (!hasParamValue(step, "geoidgrids") &&
@@ -9070,7 +9433,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 bool hasSignificantParamValues = false;
                 for (const auto &kv : d->steps_[0].paramValues) {
                     if (!((kv.key == "type" && kv.value == "crs") ||
-                          kv.key == "no_defs")) {
+                          kv.key == "wktext" || kv.key == "no_defs")) {
                         hasSignificantParamValues = true;
                         break;
                     }
@@ -9277,12 +9640,17 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     if (!pj_context) {
         throw ParsingException("out of memory");
     }
+
+    // Backup error logger and level, and install temporary handler
+    auto old_logger = pj_context->logger;
+    auto old_logger_app_data = pj_context->logger_app_data;
+    auto log_level = proj_log_level(pj_context, PJ_LOG_ERROR);
+    proj_log_func(pj_context, &logger, Logger::log);
+
     if (pj_context != d->ctx_) {
-        proj_log_func(pj_context, &logger, Logger::log);
         proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
     }
     pj_context->projStringParserCreateFromPROJStringRecursionCounter++;
-    auto log_level = proj_log_level(pj_context, PJ_LOG_NONE);
     auto pj = pj_create_internal(
         pj_context, (projString.find("type=crs") != std::string::npos
                          ? projString + " +disable_grid_presence_check"
@@ -9290,7 +9658,11 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         .c_str());
     pj_context->projStringParserCreateFromPROJStringRecursionCounter--;
     valid = pj != nullptr;
+
+    // Restore initial error logger and level
     proj_log_level(pj_context, log_level);
+    pj_context->logger = old_logger;
+    pj_context->logger_app_data = old_logger_app_data;
 
     // Remove parameters not understood by PROJ.
     if (valid && d->steps_.size() == 1) {
@@ -9352,13 +9724,13 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     proj_destroy(pj);
 
     if (!valid) {
-        std::string prefix("Error " + toString(proj_context_errno(pj_context)) +
-                           ": ");
+        const int l_errno = proj_context_errno(pj_context);
+        std::string prefix("Error " + toString(l_errno) + " (" +
+                           proj_errno_string(l_errno) + ")");
         if (logger.msg.empty()) {
-            logger.msg =
-                prefix + proj_errno_string(proj_context_errno(pj_context));
+            logger.msg = prefix;
         } else {
-            logger.msg = prefix + logger.msg;
+            logger.msg = prefix + ": " + logger.msg;
         }
     }
 
@@ -9518,7 +9890,7 @@ JSONFormatter::~JSONFormatter() = default;
 
 // ---------------------------------------------------------------------------
 
-CPLJSonStreamingWriter &JSONFormatter::writer() const { return d->writer_; }
+CPLJSonStreamingWriter *JSONFormatter::writer() const { return &(d->writer_); }
 
 // ---------------------------------------------------------------------------
 

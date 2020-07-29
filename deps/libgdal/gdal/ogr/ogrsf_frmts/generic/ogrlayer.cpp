@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999,  Les Technologies SoftMap Inc.
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,10 +31,10 @@
 #include "ogr_api.h"
 #include "ogr_p.h"
 #include "ogr_attrind.h"
-#include "swq.h"
+#include "ogr_swq.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrlayer.cpp 3613d00e9e9629493b431e463f1c3a45f2819eb0 2018-05-11 00:50:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlayer.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
 
 struct OGRLayer::Private
 {

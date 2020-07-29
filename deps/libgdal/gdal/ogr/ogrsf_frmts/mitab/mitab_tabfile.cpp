@@ -56,10 +56,111 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: mitab_tabfile.cpp 3340eefbe607ca580d4e669819e38eca2b45a82d 2018-12-17 23:32:55 +0300 drons $")
+CPL_CVSID("$Id: mitab_tabfile.cpp ee1ad78131c83cdc0b32088f11e98629fdb3c632 2020-01-20 01:29:33 +0300 Dmitry Baryshnikov $")
 
 static const char UNSUPPORTED_OP_READ_ONLY[] =
   "%s : unsupported operation on a read-only datasource.";
+
+constexpr const char *DESCRIPTION_KEY = "DESCRIPTION";
+// Tab file allow to store description longer than 255 characters.
+// But only 255 will shown in MapInfo layer list.
+constexpr int MAX_DESCRIPTION_LEN = 254 * 2;
+
+static char *EscapeString( const char *pszInput, bool bEscapeDoubleQuotes = false )
+{
+    if( nullptr == pszInput )
+    {
+        return nullptr;
+    }
+
+    auto nLength = CPLStrnlen(pszInput, MAX_DESCRIPTION_LEN);
+    char *pszOutput = static_cast<char*>( CPLMalloc( nLength * 2 + 1 ) );
+    int iOut = 0;
+    int nDoubleQuotesCount = 0;
+    for( int iIn = 0; iIn < static_cast<int>(nLength + 1); ++iIn )
+    {
+        if( pszInput[iIn] == '"')
+        {
+            if( bEscapeDoubleQuotes )
+            {
+                pszOutput[iOut++] = '"';
+                pszOutput[iOut++] = '"';
+            }
+            else
+            {
+                nDoubleQuotesCount++;
+                pszOutput[iOut++] = pszInput[iIn];
+            }
+            
+        }
+        else if( pszInput[iIn] == '\n' || pszInput[iIn] == '\r' )
+        {
+            pszOutput[iOut++] = ' ';
+        }
+        else
+        {
+            if ((pszInput[iIn] & 0xc0) != 0x80)
+            {
+                // Stop at the start of the character just beyond the maximum accepted
+                if( iOut >= MAX_DESCRIPTION_LEN - nDoubleQuotesCount )
+                {
+                    break;
+                }
+            }
+            pszOutput[iOut++] = pszInput[iIn];
+        }
+    }
+
+    pszOutput[iOut] = '\0';
+    return pszOutput;
+}
+
+static char *UnescapeString( const char *pszInput )
+{
+    if( nullptr == pszInput )
+    {
+        return nullptr;
+    }
+
+    auto nLength = CPLStrnlen(pszInput, MAX_DESCRIPTION_LEN);
+    char *pszOutput = static_cast<char *>( CPLMalloc( nLength * 2 + 1 ) );
+    int iOut = 0;
+    for( int iIn = 0; iIn < static_cast<int>(nLength + 1); ++iIn )
+    {
+        if( pszInput[iIn] == '"' && pszInput[iIn+1] == '"' )
+        {
+            ++iIn;
+            pszOutput[iOut++] = pszInput[iIn];
+        }
+        else
+        {
+            if ((pszInput[iIn] & 0xc0) != 0x80)
+            {
+                // Stop at the start of the character just beyond the maximum accepted
+                if( iOut >= MAX_DESCRIPTION_LEN )
+                {
+                    break;
+                }
+            }
+            pszOutput[iOut++] = pszInput[iIn];
+        }
+    }
+    pszOutput[iOut] = '\0';
+    return pszOutput;
+}
+
+static std::string GetTabDescription( const char *pszLine )
+{
+    CPLString osDescriptionLine(pszLine);
+    auto nStart = osDescriptionLine.find_first_of('"') + 1;
+    if(nStart != std::string::npos)
+    {
+        auto nEnd = osDescriptionLine.find_last_of('"');
+        auto nLen = nEnd == std::string::npos ? nEnd : nEnd - nStart;
+        return osDescriptionLine.substr(nStart, nLen);
+    }
+    return "";
+}
 
 /*=====================================================================
  *                      class TABFile
@@ -604,6 +705,33 @@ int TABFile::ParseTABFileFirstPass(GBool bTestOpenNoError)
             }
         }
         else if (bInsideTableDef && !bFoundTableFields &&
+                 EQUAL(papszTok[0], "Description") )
+        {
+            auto osDescription = GetTabDescription( m_papszTABFile[iLine] );
+            if( !osDescription.empty() )
+            {
+                const char *pszEncoding = GetEncoding();
+                if (pszEncoding == nullptr || EQUAL(pszEncoding, ""))
+                {
+                    std::shared_ptr<char> oUnescapedDescription(
+                            UnescapeString( osDescription.c_str() ), CPLFree);
+                    IMapInfoFile::SetMetadataItem( DESCRIPTION_KEY,
+                                                oUnescapedDescription.get() );
+                }
+                else
+                {
+                    std::shared_ptr<char> oEncodedDescription(
+                        CPLRecode(osDescription.c_str(), pszEncoding,
+                        CPL_ENC_UTF8), CPLFree);
+
+                    std::shared_ptr<char> oUnescapedDescription(
+                            UnescapeString( oEncodedDescription.get() ), CPLFree);
+                    IMapInfoFile::SetMetadataItem( DESCRIPTION_KEY,
+                                                   oUnescapedDescription.get() );
+                }
+            }
+        }
+        else if (bInsideTableDef && !bFoundTableFields &&
                  (EQUAL(papszTok[0],"Fields") || EQUAL(papszTok[0],"FIELDS:")))
         {
             /*---------------------------------------------------------
@@ -978,6 +1106,24 @@ int TABFile::WriteTABFile()
         {
             VSIFPrintfL(fp, "Definition Table\n");
             VSIFPrintfL(fp, "  Type NATIVE Charset \"%s\"\n", m_pszCharset);
+            const char *pszDescription = GetMetadataItem(DESCRIPTION_KEY);
+            if (nullptr != pszDescription)
+            {
+                std::shared_ptr<char> oEscapedDescription(
+                    EscapeString( pszDescription, true ), CPLFree);
+                const char *pszEncoding = GetEncoding();
+                if (nullptr == pszEncoding || EQUAL(pszEncoding, ""))
+                {
+                    VSIFPrintfL(fp, "  Description \"%s\"\n", oEscapedDescription.get());
+                }
+                else
+                {
+                    std::shared_ptr<char> oEncodedDescription(
+                        CPLRecode(oEscapedDescription.get(), CPL_ENC_UTF8,
+                                  pszEncoding), CPLFree);
+                    VSIFPrintfL(fp, "  Description \"%s\"\n", oEncodedDescription.get());
+                }
+            }
             VSIFPrintfL(fp, "  Fields %d\n", m_poDefn->GetFieldCount());
 
             for( int iField = 0; iField < m_poDefn->GetFieldCount(); iField++ )
@@ -1964,34 +2110,7 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
     else if (nWidth == 0)
         nWidth=254; /* char fields */
 
-    char szNewFieldName[31+1];  // 31 is the max characters for a field name.
-    strncpy(szNewFieldName, pszName, sizeof(szNewFieldName)-1);
-    szNewFieldName[sizeof(szNewFieldName)-1] = '\0';
-
-    int nRenameNum = 1;
-
-    while (m_oSetFields.find(CPLString(szNewFieldName).toupper()) != m_oSetFields.end() &&
-           nRenameNum < 10)
-      CPLsnprintf( szNewFieldName, sizeof(szNewFieldName), "%.29s_%.1d", pszName, nRenameNum++ );
-
-    while (m_oSetFields.find(CPLString(szNewFieldName).toupper()) != m_oSetFields.end() &&
-           nRenameNum < 100)
-      CPLsnprintf( szNewFieldName, sizeof(szNewFieldName), "%.29s%.2d", pszName, nRenameNum++ );
-
-    if (m_oSetFields.find(CPLString(szNewFieldName).toupper()) != m_oSetFields.end())
-    {
-      CPLError( CE_Failure, CPLE_NotSupported,
-                "Too many field names like '%s' when truncated to 31 letters "
-                "for MapInfo format.", pszName );
-    }
-
-    if( !EQUAL(pszName,szNewFieldName) )
-    {
-      CPLError( CE_Warning, CPLE_NotSupported,
-                "Normalized/laundered field name: '%s' to '%s'",
-                pszName,
-                szNewFieldName );
-    }
+    CPLString   osName(NormalizeFieldName(pszName));
 
     /*-----------------------------------------------------------------
      * Map MapInfo native types to OGR types
@@ -2004,14 +2123,14 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
         /*-------------------------------------------------
          * CHAR type
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName, OFTString);
+        poFieldDefn = new OGRFieldDefn(osName.c_str(), OFTString);
         poFieldDefn->SetWidth(nWidth);
         break;
       case TABFInteger:
         /*-------------------------------------------------
          * INTEGER type
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName, OFTInteger);
+        poFieldDefn = new OGRFieldDefn(osName.c_str(), OFTInteger);
         if (nWidth <= 10)
             poFieldDefn->SetWidth(nWidth);
         break;
@@ -2019,7 +2138,7 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
         /*-------------------------------------------------
          * SMALLINT type
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName, OFTInteger);
+        poFieldDefn = new OGRFieldDefn(osName.c_str(), OFTInteger);
         if (nWidth <= 5)
             poFieldDefn->SetWidth(nWidth);
         break;
@@ -2027,7 +2146,7 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
         /*-------------------------------------------------
          * DECIMAL type
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName, OFTReal);
+        poFieldDefn = new OGRFieldDefn(osName.c_str(), OFTReal);
         poFieldDefn->SetWidth(nWidth);
         poFieldDefn->SetPrecision(nPrecision);
         break;
@@ -2035,13 +2154,13 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
         /*-------------------------------------------------
          * FLOAT type
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName, OFTReal);
+        poFieldDefn = new OGRFieldDefn(osName.c_str(), OFTReal);
         break;
       case TABFDate:
         /*-------------------------------------------------
          * DATE type (V450, returned as a string: "DD/MM/YYYY")
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName,
+        poFieldDefn = new OGRFieldDefn(osName.c_str(),
 #ifdef MITAB_USE_OFTDATETIME
                                                    OFTDate);
 #else
@@ -2054,7 +2173,7 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
         /*-------------------------------------------------
          * TIME type (V900, returned as a string: "HH:MM:SS")
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName,
+        poFieldDefn = new OGRFieldDefn(osName.c_str(),
 #ifdef MITAB_USE_OFTDATETIME
                                                    OFTTime);
 #else
@@ -2067,7 +2186,7 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
         /*-------------------------------------------------
          * DATETIME type (V900, returned as a string: "DD/MM/YYYY HH:MM:SS")
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName,
+        poFieldDefn = new OGRFieldDefn(osName.c_str(),
 #ifdef MITAB_USE_OFTDATETIME
                                                    OFTDateTime);
 #else
@@ -2080,12 +2199,12 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
         /*-------------------------------------------------
          * LOGICAL type (value "T" or "F")
          *------------------------------------------------*/
-        poFieldDefn = new OGRFieldDefn(szNewFieldName, OFTString);
+        poFieldDefn = new OGRFieldDefn(osName.c_str(), OFTString);
         poFieldDefn->SetWidth(1);
         break;
       default:
         CPLError(CE_Failure, CPLE_NotSupported,
-                 "Unsupported type for field %s", szNewFieldName);
+                 "Unsupported type for field %s", osName.c_str());
         return -1;
     }
 
@@ -2099,7 +2218,7 @@ int TABFile::AddFieldNative(const char *pszName, TABFieldType eMapInfoType,
     /*-----------------------------------------------------
      * ... and pass field info to the .DAT file.
      *----------------------------------------------------*/
-    int nStatus = m_poDATFile->AddField(szNewFieldName, eMapInfoType,
+    int nStatus = m_poDATFile->AddField(osName.c_str(), eMapInfoType,
                                         nWidth, nPrecision);
 
     /*-----------------------------------------------------------------
@@ -2852,3 +2971,29 @@ void TABFile::Dump(FILE *fpOut /*=NULL*/)
 }
 
 #endif // DEBUG
+
+/*
+ * SetMetadataItem()
+ */
+CPLErr TABFile::SetMetadataItem( const char * pszName, const char * pszValue,
+                                 const char * pszDomain )
+{
+    if(EQUAL(DESCRIPTION_KEY, pszName) && EQUAL(pszDomain, ""))
+    {
+        if(m_eAccessMode == TABRead)
+        {
+            CPLError(CE_Warning, CPLE_AppDefined, "Description will not save in TAB file in readonly mode.");
+        }
+
+        m_bNeedTABRewrite = TRUE;
+        std::shared_ptr<char> oEscapedString(EscapeString( pszValue ), CPLFree);
+        auto result = IMapInfoFile::SetMetadataItem( DESCRIPTION_KEY, 
+                                                     oEscapedString.get() );
+        if(oEscapedString)
+        {
+            CPLDebug("MITAB", "Set description to '%s'", oEscapedString.get());
+        }
+        return result;
+    }
+    return IMapInfoFile::SetMetadataItem(pszName, pszValue, pszDomain);
+}

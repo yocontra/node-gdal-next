@@ -5,7 +5,7 @@
  * Author:   Mateusz Loskot, mateusz@loskot.net
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2007, Mateusz Loskot
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgeojsonwritelayer.cpp ffec3571dd163c73ac70bec1d5cd4385ef324539 2020-01-07 04:30:14 -0700 Sean Gillies $")
+CPL_CVSID("$Id: ogrgeojsonwritelayer.cpp 56e004faba62c1e87c5595aaa1baec0d78b9a521 2020-04-16 20:02:53 +0200 Momtchil Momtchev $")
 
 /************************************************************************/
 /*                         OGRGeoJSONWriteLayer()                       */
@@ -183,6 +183,9 @@ OGRErr OGRGeoJSONWriteLayer::ICreateFeature( OGRFeature* poFeature )
         poFeatureToWrite = poFeature;
     }
 
+    if (oWriteOptions_.bGenerateID && poFeatureToWrite->GetFID() == OGRNullFID) {
+        poFeatureToWrite->SetFID(nOutCounter_);
+    }
     json_object* poObj =
         OGRGeoJSONWriteFeature( poFeatureToWrite, oWriteOptions_ );
     CPLAssert( nullptr != poObj );
@@ -199,7 +202,7 @@ OGRErr OGRGeoJSONWriteLayer::ICreateFeature( OGRFeature* poFeature )
     ++nOutCounter_;
 
     OGRGeometry* poGeometry = poFeatureToWrite->GetGeometryRef();
-    if( bWriteFC_BBOX && poGeometry != nullptr && !poGeometry->IsEmpty() )
+    if( poGeometry != nullptr && !poGeometry->IsEmpty() )
     {
         OGREnvelope3D sEnvelope = OGRGeoJSONGetBBox( poGeometry,
                                                      oWriteOptions_ );
@@ -320,4 +323,18 @@ int OGRGeoJSONWriteLayer::TestCapability( const char* pszCap )
     else if( EQUAL(pszCap, OLCStringsAsUTF8) )
         return TRUE;
     return FALSE;
+}
+
+/************************************************************************/
+/*                            GetExtent()                               */
+/************************************************************************/
+
+OGRErr OGRGeoJSONWriteLayer::GetExtent(OGREnvelope *psExtent, int)
+{
+    if( sEnvelopeLayer.IsInit() )
+    {
+        *psExtent = sEnvelopeLayer;
+        return OGRERR_NONE;
+    }
+    return OGRERR_FAILURE;
 }

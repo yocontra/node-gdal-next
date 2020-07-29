@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: bsb_read.c ae217f74475a65895ddfbf279d7c019eddac6222 2018-01-17 08:15:37Z Even Rouault $
+ * $Id: bsb_read.c edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $
  *
  * Project:  BSB Reader
  * Purpose:  Low level BSB Access API Implementation (non-GDAL).
@@ -12,7 +12,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,10 +37,10 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: bsb_read.c ae217f74475a65895ddfbf279d7c019eddac6222 2018-01-17 08:15:37Z Even Rouault $")
+CPL_CVSID("$Id: bsb_read.c edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
 
 static int BSBReadHeaderLine( BSBInfo *psInfo, char* pszLine, int nLineMaxLen, int bNO1 );
-static int BSBSeekAndCheckScanlineNumber ( BSBInfo *psInfo, int nScanline,
+static int BSBSeekAndCheckScanlineNumber ( BSBInfo *psInfo, unsigned nScanline,
                                            int bVerboseIfError );
 /************************************************************************
 
@@ -273,6 +273,8 @@ BSBInfo *BSBOpen( const char *pszFilename )
                                                     FALSE,FALSE);
             nCount = CSLCount(papszTokens);
         }
+        if( papszTokens == NULL )
+            continue;
 
         if( STARTS_WITH_CI(szLine, "BSB/") )
         {
@@ -306,7 +308,9 @@ BSBInfo *BSBOpen( const char *pszFilename )
             psInfo->nXSize = atoi(papszTokens[nRAIndex+3]);
             psInfo->nYSize = atoi(papszTokens[nRAIndex+4]);
         }
-        else if( EQUALN(szLine, pszPalette, 3) && szLine[3] == '/'
+        else if( EQUALN(szLine, pszPalette, 3)
+                 && szLine[0] != '\0' && szLine[1] != '\0' && szLine[2] != '\0'
+                 && szLine[3] == '/'
                  && nCount >= 4 )
         {
             int	iPCT = atoi(papszTokens[0]);
@@ -660,10 +664,16 @@ static int BSBReadHeaderLine( BSBInfo *psInfo, char* pszLine, int nLineMaxLen, i
 /* @param nScanline zero based line number                              */
 /************************************************************************/
 
-static int BSBSeekAndCheckScanlineNumber ( BSBInfo *psInfo, int nScanline,
+CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
+static unsigned UpdateLineMarker(unsigned nLineMarker, int byNext)
+{
+    return nLineMarker * 128U + (unsigned)(byNext & 0x7f);
+}
+
+static int BSBSeekAndCheckScanlineNumber ( BSBInfo *psInfo, unsigned nScanline,
                                            int bVerboseIfError )
 {
-    int		nLineMarker = 0;
+    unsigned    nLineMarker = 0;
     int         byNext;
     VSILFILE	*fp = psInfo->fp;
     int         bErrorFlag = FALSE;
@@ -703,8 +713,7 @@ static int BSBSeekAndCheckScanlineNumber ( BSBInfo *psInfo, int nScanline,
         while( nScanline != 0 && nLineMarker == 0 && byNext == 0 && !bErrorFlag )
             byNext = BSBGetc( psInfo, psInfo->bNO1, &bErrorFlag );
 
-        /* Avoid int32 overflow. The unsigned overflow is OK */
-        nLineMarker = (int)((unsigned)nLineMarker * 128U + (unsigned)(byNext & 0x7f));
+        nLineMarker = UpdateLineMarker(nLineMarker, byNext);
     } while( (byNext & 0x80) != 0 );
 
     if ( bErrorFlag )
@@ -725,12 +734,12 @@ static int BSBSeekAndCheckScanlineNumber ( BSBInfo *psInfo, int nScanline,
         if (bVerboseIfError && !bIgnoreLineNumbers )
         {
             CPLError( CE_Failure, CPLE_AppDefined,
-                     "Got scanline id %d when looking for %d @ offset %d.\nSet BSB_IGNORE_LINENUMBERS=TRUE configuration option to try file anyways.",
+                     "Got scanline id %u when looking for %u @ offset %d.\nSet BSB_IGNORE_LINENUMBERS=TRUE configuration option to try file anyways.",
                      nLineMarker, nScanline+1, psInfo->panLineOffset[nScanline]);
         }
         else
         {
-            CPLDebug("BSB", "Got scanline id %d when looking for %d @ offset %d.",
+            CPLDebug("BSB", "Got scanline id %u when looking for %u @ offset %d.",
                      nLineMarker, nScanline+1, psInfo->panLineOffset[nScanline]);
         }
 
@@ -819,9 +828,13 @@ int BSBReadScanline( BSBInfo *psInfo, int nScanline,
             while( (byNext & 0x80) != 0 && !bErrorFlag)
             {
                 byNext = BSBGetc( psInfo, psInfo->bNO1, &bErrorFlag );
-                /* Cast to unsigned to avoid int overflow. Even if the */
-                /* value is crazy, we validate it afterwards */
-                nRunCount = (int)((unsigned)nRunCount * 128 + (byNext & 0x7f));
+                if( nRunCount > (INT_MAX - (byNext & 0x7f)) / 128 )
+                {
+                    CPLError( CE_Failure, CPLE_FileIO,
+                              "Corrupted run count" );
+                    return FALSE;
+                }
+                nRunCount = nRunCount * 128 + (byNext & 0x7f);
             }
 
             /* Prevent over-run of line data */

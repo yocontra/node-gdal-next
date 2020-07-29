@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@
 #include "gdal_priv.h"
 #include "gdal_rat.h"
 
-CPL_CVSID("$Id: gdalpamrasterband.cpp 24638830292ceae1017dbd9fef207111ca34fab4 2018-10-05 16:39:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalpamrasterband.cpp 69f25f253d141faf836c400676f9f94dd3f43707 2019-07-12 18:42:23 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALPamRasterBand()                          */
@@ -777,7 +777,7 @@ double GDALPamRasterBand::GetOffset( int *pbSuccess )
         return GDALRasterBand::GetOffset( pbSuccess );
 
     if( pbSuccess != nullptr )
-        *pbSuccess = TRUE;
+        *pbSuccess = psPam->bOffsetSet;
 
     return psPam->dfOffset;
 }
@@ -797,6 +797,7 @@ CPLErr GDALPamRasterBand::SetOffset( double dfNewOffset )
     if( psPam->dfOffset != dfNewOffset )
     {
         psPam->dfOffset = dfNewOffset;
+        psPam->bOffsetSet = true;
         psPam->poParentDS->MarkPamDirty();
     }
 
@@ -814,7 +815,7 @@ double GDALPamRasterBand::GetScale( int *pbSuccess )
         return GDALRasterBand::GetScale( pbSuccess );
 
     if( pbSuccess != nullptr )
-        *pbSuccess = TRUE;
+        *pbSuccess = psPam->bScaleSet;
 
     return psPam->dfScale;
 }
@@ -834,6 +835,7 @@ CPLErr GDALPamRasterBand::SetScale( double dfNewScale )
     if( dfNewScale != psPam->dfScale )
     {
         psPam->dfScale = dfNewScale;
+        psPam->bScaleSet = true;
         psPam->poParentDS->MarkPamDirty();
     }
     return CE_None;

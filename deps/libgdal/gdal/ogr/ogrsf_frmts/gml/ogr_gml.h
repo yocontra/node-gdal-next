@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gml.h 365a72f2b5a94946e92323060b68f9963cd2dbd5 2018-05-06 22:14:36 +0200 Even Rouault $
+ * $Id: ogr_gml.h 978ba46f732b27073d5bbc30f427a311d9daed28 2020-04-08 01:11:41 +0200 Even Rouault $
  *
  * Project:  GML Reader
  * Purpose:  Declarations for OGR wrapper classes for GML, and GML<->OGR
@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,6 +35,8 @@
 #include "ogrsf_frmts.h"
 #include "gmlreader.h"
 #include "gmlutils.h"
+
+#include <memory>
 
 class OGRGMLDataSource;
 
@@ -103,7 +105,7 @@ class OGRGMLLayer final: public OGRLayer
 
 class OGRGMLDataSource final: public OGRDataSource
 {
-    OGRGMLLayer     **papoLayers;
+    OGRLayer          **papoLayers;
     int                 nLayers;
 
     char                *pszName;
@@ -155,6 +157,9 @@ class OGRGMLDataSource final: public OGRDataSource
     OGRGMLLayer        *poLastReadLayer;
 
     bool                bEmptyAsNull;
+
+    OGRSpatialReference m_oStandaloneGeomSRS{};
+    std::unique_ptr<OGRGeometry> m_poStandaloneGeom{};
 
     void                FindAndParseTopElements(VSILFILE* fp);
     void                SetExtents(double dfMinX, double dfMinY, double dfMaxX, double dfMaxY);

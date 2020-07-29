@@ -32,7 +32,7 @@
 #include "cpl_string.h"
 #include "cpl_csv.h"
 
-CPL_CVSID("$Id: ogrdxfreader.cpp 6b6607358c2c280f54ea0922536a27a8e12930b5 2018-07-14 16:23:19 +1000 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxfreader.cpp 4221746d6e88e2ec813e59d5fb9c34c77fcee655 2020-05-28 14:49:59 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRDXFReader()                            */
@@ -125,7 +125,7 @@ void OGRDXFReader::LoadDiskChunk()
 /*      Read one type code and value line pair from the DXF file.       */
 /************************************************************************/
 
-int OGRDXFReader::ReadValue( char *pszValueBuf, int nValueBufSize )
+int OGRDXFReader::ReadValueRaw( char *pszValueBuf, int nValueBufSize )
 
 {
 /* -------------------------------------------------------------------- */
@@ -215,13 +215,23 @@ int OGRDXFReader::ReadValue( char *pszValueBuf, int nValueBufSize )
 /* -------------------------------------------------------------------- */
     nLastValueSize = iSrcBufferOffset - iStartSrcBufferOffset;
 
-/* -------------------------------------------------------------------- */
-/*      Is this a comment?  If so, tail recurse to get another line.    */
-/* -------------------------------------------------------------------- */
-    if( nValueCode == 999 )
-        return ReadValue(pszValueBuf,nValueBufSize);
-    else
-        return nValueCode;
+    return nValueCode;
+}
+
+int OGRDXFReader::ReadValue( char *pszValueBuf, int nValueBufSize )
+{
+    int nValueCode;
+    while( true )
+    {
+        nValueCode = ReadValueRaw(pszValueBuf,nValueBufSize);
+        if( nValueCode == 999 )
+        {
+            // Skip comments
+            continue;
+        }
+        break;
+    }
+    return nValueCode;
 }
 
 /************************************************************************/

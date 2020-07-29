@@ -8,7 +8,7 @@
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
  * Copyright (c) 2011, Paul Ramsey <pramsey at cleverelephant.ca>
- * Copyright (c) 2011-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrpgeogeometry.cpp 47d8d3665dcc12f04d5c025ab646e30259059522 2019-03-18 13:31:56 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeogeometry.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
 
 constexpr int SHPP_TRISTRIP  = 0;
 constexpr int SHPP_TRIFAN    = 1;
@@ -515,12 +515,7 @@ OGRGeometry* OGRCreateFromMultiPatch       ( int nParts,
                 if( oSetDuplicated.find(iPart) != oSetDuplicated.end() )
                     continue;
 
-                int nPartStart = 0;
-                if( panPartStart != nullptr )
-                {
-                    nPartStart = panPartStart[iPart];
-                }
-
+                const int nPartStart = panPartStart[iPart];
                 OGRPoint oPoint1  (padfX[nPartStart],
                                    padfY[nPartStart],
                                    padfZ[nPartStart]);
@@ -1921,6 +1916,7 @@ static OGRCurve* OGRShapeCreateCompoundCurve( int nPartStartIdx,
                 dfStartAngle += 2 * M_PI;
             else if( dfEndAngle + M_PI < dfStartAngle )
                 dfEndAngle += 2 * M_PI;
+            // coverity[tainted_data]
             const double dfStepSizeRad =
                 CPLAtofM(CPLGetConfigOption("OGR_ARC_STEPSIZE", "4")) / 180.0 * M_PI;
             const double dfLengthTangentStart = (dfX1 - dfX0) * (dfX1 - dfX0) +

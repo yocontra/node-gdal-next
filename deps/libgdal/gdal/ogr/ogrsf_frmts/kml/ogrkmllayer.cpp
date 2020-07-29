@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Christopher Condit
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,7 +48,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrkmllayer.cpp 27b9bf644bcf1208f7d6594bdd104cc8a8bb0646 2019-06-05 19:04:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrkmllayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /* Function utility to dump OGRGeometry to KML text. */
 char *OGR_G_ExportToKML( OGRGeometryH hGeometry, const char* pszAltitudeMode );
@@ -445,7 +445,6 @@ OGRErr OGRKMLLayer::ICreateFeature( OGRFeature* poFeature )
         VSIFPrintfL( fp, "\t<Style>");
         if( poPen != nullptr )
         {
-            bool bHasWidth = false;
             GBool bDefault = FALSE;
 
             /* Require width to be returned in pixel */
@@ -453,8 +452,6 @@ OGRErr OGRKMLLayer::ICreateFeature( OGRFeature* poFeature )
             double fW = poPen->Width(bDefault);
             if( bDefault )
                 fW = 1;
-            else
-                bHasWidth = true;
             const char* pszColor = poPen->Color(bDefault);
             const int nColorLen = static_cast<int>(CPLStrnlen(pszColor, 10));
             if( pszColor != nullptr &&
@@ -480,8 +477,7 @@ OGRErr OGRKMLLayer::ICreateFeature( OGRFeature* poFeature )
                 acColor[6] = pszColor[1]; /* R */
                 acColor[7] = pszColor[2];
                 VSIFPrintfL( fp, "<LineStyle><color>%s</color>", acColor);
-                if (bHasWidth)
-                    VSIFPrintfL( fp, "<width>%g</width>", fW);
+                VSIFPrintfL( fp, "<width>%g</width>", fW);
                 VSIFPrintfL( fp, "</LineStyle>");
             }
             else

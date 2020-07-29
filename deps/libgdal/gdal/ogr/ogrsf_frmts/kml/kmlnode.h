@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: kmlnode.h f2eb8781ae5db589bee4dcdb93a5be1e36e986a1 2018-02-19 13:28:36Z Even Rouault $
+ * $Id: kmlnode.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  KML Driver
  * Purpose:  Class for building up the node structure of the kml file.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Jens Oberender
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

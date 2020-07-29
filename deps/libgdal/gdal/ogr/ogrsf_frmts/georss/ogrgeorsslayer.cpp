@@ -2,10 +2,10 @@
  *
  * Project:  GeoRSS Translator
  * Purpose:  Implements OGRGeoRSSLayer class.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrgeorsslayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeorsslayer.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
 
 static const char* const apszAllowedATOMFieldNamesWithSubElements[] =
     { "author", "contributor", nullptr };
@@ -180,7 +180,7 @@ OGRGeoRSSLayer::OGRGeoRSSLayer( const char* pszFilename,
         }
     }
 
-    ResetReading();
+    OGRGeoRSSLayer::ResetReading();
 }
 
 /************************************************************************/

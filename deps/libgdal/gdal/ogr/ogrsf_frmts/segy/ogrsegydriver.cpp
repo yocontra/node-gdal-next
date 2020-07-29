@@ -2,10 +2,10 @@
  *
  * Project:  SEG-Y Translator
  * Purpose:  Implements OGRSEGYDriver class.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@
 #include "ogr_segy.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrsegydriver.cpp 1dcdb5c8f617002a6e034d4d98dfdf080f709325 2018-01-14 01:50:09Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrsegydriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           EBCDICToASCII                              */

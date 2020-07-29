@@ -8,7 +8,6 @@
 			"type": "static_library",
 			"sources": [
 				# "../gdal/ogr/ogrsf_frmts/dgn/dgndump.c",
-				"../gdal/ogr/ogrsf_frmts/dgn/dgnfloat.cpp",
 				"../gdal/ogr/ogrsf_frmts/dgn/dgnhelp.cpp",
 				"../gdal/ogr/ogrsf_frmts/dgn/dgnopen.cpp",
 				"../gdal/ogr/ogrsf_frmts/dgn/dgnread.cpp",

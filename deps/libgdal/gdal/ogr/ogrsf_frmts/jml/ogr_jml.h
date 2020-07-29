@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_jml.h 2bfaf0a5dc110c2fb51198f07eff4f165c3be22e 2018-02-03 13:06:36Z Even Rouault $
+ * $Id: ogr_jml.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  JML .jml Translator
  * Purpose:  Definition of classes for OGR JML driver.
@@ -63,7 +63,7 @@ class OGRJMLColumn
 /*                             OGRJMLLayer                              */
 /************************************************************************/
 
-class OGRJMLLayer : public OGRLayer
+class OGRJMLLayer final: public OGRLayer
 {
     OGRFeatureDefn     *poFeatureDefn;
 
@@ -142,7 +142,7 @@ class OGRJMLLayer : public OGRLayer
 /*                          OGRJMLWriterLayer                           */
 /************************************************************************/
 
-class OGRJMLWriterLayer : public OGRLayer
+class OGRJMLWriterLayer final: public OGRLayer
 {
     OGRJMLDataset      *poDS;
     OGRFeatureDefn     *poFeatureDefn;
@@ -184,7 +184,7 @@ class OGRJMLWriterLayer : public OGRLayer
 /*                            OGRJMLDataset                             */
 /************************************************************************/
 
-class OGRJMLDataset : public GDALDataset
+class OGRJMLDataset final: public GDALDataset
 {
     OGRLayer           *poLayer;
 

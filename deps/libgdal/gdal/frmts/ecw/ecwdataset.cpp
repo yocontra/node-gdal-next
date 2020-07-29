@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,11 +35,10 @@
 #include "gdal_frmts.h"
 #include "ogr_spatialref.h"
 #include "ogr_api.h"
-#include "ogr_geometry.h"
 
 #include "../mem/memdataset.h"
 
-CPL_CVSID("$Id: ecwdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ecwdataset.cpp 5eebbf721d5c84c8d68b27eaa295958671a4b3fd 2020-06-09 17:31:52 +0800 jbowman-hexagon $")
 
 #undef NOISY_DEBUG
 
@@ -194,11 +193,11 @@ ECWRasterBand::ECWRasterBand( ECWDataset *poDSIn, int nBandIn, int iOverviewIn,
         CPLDebug("ECW", "Fourth (alpha) band is promoted from 1 bit to 8 bit");
 
     if( (poDSIn->psFileInfo->pBands[nBand-1].nBits % 8) != 0 && !bPromoteTo8Bit )
-        SetMetadataItem("NBITS",
+        GDALPamRasterBand::SetMetadataItem("NBITS",
                         CPLString().Printf("%d",poDSIn->psFileInfo->pBands[nBand-1].nBits),
                         "IMAGE_STRUCTURE" );
 
-    SetDescription(poDSIn->psFileInfo->pBands[nBand-1].szDesc);
+    GDALPamRasterBand::SetDescription(poDSIn->psFileInfo->pBands[nBand-1].szDesc);
 }
 
 /************************************************************************/
@@ -206,9 +205,8 @@ ECWRasterBand::ECWRasterBand( ECWDataset *poDSIn, int nBandIn, int iOverviewIn,
 /************************************************************************/
 
 ECWRasterBand::~ECWRasterBand()
-
 {
-    FlushCache();
+    GDALRasterBand::FlushCache();
 
     while( !apoOverviews.empty() )
     {
@@ -266,7 +264,7 @@ CPLErr ECWRasterBand::AdviseRead( int nXOff, int nYOff, int nXSize, int nYSize,
                                   GDALDataType eDT,
                                   char **papszOptions )
 {
-    int nResFactor = 1 << (iOverview+1);
+    const int nResFactor = 1 << (iOverview+1);
 
     return poGDS->AdviseRead( nXOff * nResFactor,
                               nYOff * nResFactor,
@@ -308,17 +306,18 @@ CPLErr ECWRasterBand::GetDefaultHistogram( double *pdfMin, double *pdfMax,
     }
     GetBandIndexAndCountForStatistics(nStatsBandIndex, nStatsBandCount);
     bool bHistogramFromFile = false;
-    if ( poGDS->pStatistics != nullptr ){
+
+    if (poGDS->pStatistics != nullptr) {
         NCSBandStats& bandStats = poGDS->pStatistics->BandsStats[nStatsBandIndex];
         if ( bandStats.Histogram != nullptr && bandStats.nHistBucketCount > 0 ){
             *pnBuckets = bandStats.nHistBucketCount;
-            *ppanHistogram = (GUIntBig *)VSIMalloc(bandStats.nHistBucketCount *sizeof(GUIntBig));
+            *ppanHistogram = static_cast<GUIntBig *>(VSIMalloc(bandStats.nHistBucketCount * sizeof(GUIntBig)));
             for (size_t i = 0; i < bandStats.nHistBucketCount; i++){
-                (*ppanHistogram)[i] = (GUIntBig) bandStats.Histogram[i];
+                (*ppanHistogram)[i] = static_cast<GUIntBig>(bandStats.Histogram[i]);
             }
             //JTO: this is not perfect as You can't tell who wrote the histogram !!!
             //It will offset it unnecessarily for files with hists not modified by GDAL.
-            double dfHalfBucket = (bandStats.fMaxHist -  bandStats.fMinHist) / (2 * (*pnBuckets - 1));
+            const double dfHalfBucket = (bandStats.fMaxHist -  bandStats.fMinHist) / (2 * (*pnBuckets - 1));
             if ( pdfMin != nullptr ){
                 *pdfMin = bandStats.fMinHist - dfHalfBucket;
             }
@@ -326,41 +325,29 @@ CPLErr ECWRasterBand::GetDefaultHistogram( double *pdfMin, double *pdfMax,
                 *pdfMax = bandStats.fMaxHist + dfHalfBucket;
             }
             bHistogramFromFile = true;
-        }else{
-            bHistogramFromFile = false;
         }
-    }else{
-        bHistogramFromFile = false;
     }
 
-    if (!bHistogramFromFile ){
+    if (!bHistogramFromFile) {
         if (bForce == TRUE){
             //compute. Save.
             pamError = GDALPamRasterBand::GetDefaultHistogram(pdfMin, pdfMax, pnBuckets, ppanHistogram, TRUE, f,pProgressData);
             if (pamError == CE_None){
-                CPLErr error2 = SetDefaultHistogram(*pdfMin, *pdfMax, *pnBuckets, *ppanHistogram);
+                const CPLErr error2 = SetDefaultHistogram(*pdfMin, *pdfMax, *pnBuckets, *ppanHistogram);
                 if (error2 != CE_None){
                     //Histogram is there but we failed to save it back to file.
                     CPLError (CE_Warning, CPLE_AppDefined,
                         "SetDefaultHistogram failed in ECWRasterBand::GetDefaultHistogram. Histogram might not be saved in .ecw file." );
                 }
                 return CE_None;
-            }else{
-                //Something went wrong during histogram computation.
-                return pamError;
             }
+            return pamError;
         }
-        else
-        {
-            // No histogram, no forced computation.
-            return CE_Warning;
-        }
+        // No histogram, no forced computation.
+        return CE_Warning;
     }
-    else
-    {
-        // Statistics were already there and were used.
-        return CE_None;
-    }
+    // Statistics were already there and were used.
+    return CE_None;
 }
 
 /************************************************************************/
@@ -426,7 +413,7 @@ CPLErr ECWRasterBand::SetDefaultHistogram( double dfMin, double dfMax,
                 bucketCounts[i] = pStatistics->BandsStats[i].nHistBucketCount;
             }
             bucketCounts[nStatsBandIndex] = nBuckets;
-            if (nBuckets < (int)pStatistics->BandsStats[nStatsBandIndex].nHistBucketCount){
+            if (nBuckets < static_cast<int>(pStatistics->BandsStats[nStatsBandIndex].nHistBucketCount)){
                 pStatistics->BandsStats[nStatsBandIndex].nHistBucketCount = nBuckets;
             }
             error = NCSEcwInitStatistics(&pNewStatistics, nStatsBandCount, bucketCounts);
@@ -454,10 +441,10 @@ CPLErr ECWRasterBand::SetDefaultHistogram( double dfMin, double dfMax,
 
     //at this point we have allocated statistics structure.
     double dfHalfBucket = (dfMax - dfMin) / (2 * nBuckets);
-    pStatistics->BandsStats[nStatsBandIndex].fMinHist = (IEEE4) (dfMin + dfHalfBucket);
-    pStatistics->BandsStats[nStatsBandIndex].fMaxHist = (IEEE4) (dfMax - dfHalfBucket);
+    pStatistics->BandsStats[nStatsBandIndex].fMinHist = static_cast<IEEE4>(dfMin + dfHalfBucket);
+    pStatistics->BandsStats[nStatsBandIndex].fMaxHist = static_cast<IEEE4>(dfMax - dfHalfBucket);
     for (int i=0;i<nBuckets;i++){
-        pStatistics->BandsStats[nStatsBandIndex].Histogram[i] = (UINT64)panHistogram[i];
+        pStatistics->BandsStats[nStatsBandIndex].Histogram[i] = static_cast<UINT64>(panHistogram[i]);
     }
 
     if (hasPAMDefaultHistogram){
@@ -472,7 +459,8 @@ CPLErr ECWRasterBand::SetDefaultHistogram( double dfMin, double dfMax,
 /*                   GetBandIndexAndCountForStatistics()                */
 /************************************************************************/
 
-void ECWRasterBand::GetBandIndexAndCountForStatistics(int &bandIndex, int &bandCount){
+void ECWRasterBand::GetBandIndexAndCountForStatistics(int &bandIndex, int &bandCount) const
+{
     bandIndex = nBand-1;
     bandCount = poGDS->nBands;
     for (int i=0;i<poGDS->nBands;i++){
@@ -500,7 +488,7 @@ double ECWRasterBand::GetMinimum(int* pbSuccess)
             if ( poGDS->pStatistics != nullptr )
             {
                 NCSBandStats& bandStats = poGDS->pStatistics->BandsStats[nStatsBandIndex];
-                if ( bandStats.fMinVal == bandStats.fMinVal )
+                if (!std::isnan(bandStats.fMinVal))
                 {
                     if( pbSuccess )
                         *pbSuccess = TRUE;
@@ -527,7 +515,7 @@ double ECWRasterBand::GetMaximum(int* pbSuccess)
             if ( poGDS->pStatistics != nullptr )
             {
                 NCSBandStats& bandStats = poGDS->pStatistics->BandsStats[nStatsBandIndex];
-                if ( bandStats.fMaxVal == bandStats.fMaxVal )
+                if (!std::isnan(bandStats.fMaxVal))
                 {
                     if( pbSuccess )
                         *pbSuccess = TRUE;
@@ -549,7 +537,7 @@ CPLErr ECWRasterBand::GetStatistics( int bApproxOK, int bForce,
     int bForceCoalesced = bForce;
     // If file version is smaller than 3, there will be no statistics in the file. But if it is version 3 or higher we don't want underlying implementation to compute histogram
     // so we set bForceCoalesced to FALSE.
-    if (poGDS->psFileInfo->nFormatVersion >= 3){
+    if (poGDS->psFileInfo->nFormatVersion >= 3) {
         bForceCoalesced = FALSE;
     }
     // We check if we have PAM histogram. If we have them we return them. This will allow to override statistics stored in the file.
@@ -571,22 +559,22 @@ CPLErr ECWRasterBand::GetStatistics( int bApproxOK, int bForce,
     {
         bStatisticsFromFile = true;
         NCSBandStats& bandStats = poGDS->pStatistics->BandsStats[nStatsBandIndex];
-        if ( pdfMin != nullptr && bandStats.fMinVal == bandStats.fMinVal){
+        if ( pdfMin != nullptr && !std::isnan(bandStats.fMinVal)) {
             *pdfMin = bandStats.fMinVal;
         }else{
             bStatisticsFromFile = false;
         }
-        if ( pdfMax != nullptr && bandStats.fMaxVal == bandStats.fMaxVal){
+        if ( pdfMax != nullptr && !std::isnan(bandStats.fMaxVal)) {
             *pdfMax = bandStats.fMaxVal;
         }else{
             bStatisticsFromFile = false;
         }
-        if ( pdfMean != nullptr && bandStats.fMeanVal == bandStats.fMeanVal){
+        if ( pdfMean != nullptr && !std::isnan(bandStats.fMeanVal)) {
             *pdfMean = bandStats.fMeanVal;
         }else{
             bStatisticsFromFile = false;
         }
-        if ( padfStdDev != nullptr && bandStats.fStandardDev == bandStats.fStandardDev){
+        if ( padfStdDev != nullptr && !std::isnan(bandStats.fStandardDev)) {
             *padfStdDev  = bandStats.fStandardDev;
         }else{
             bStatisticsFromFile = false;
@@ -614,20 +602,18 @@ CPLErr ECWRasterBand::GetStatistics( int bApproxOK, int bForce,
             *padfStdDev = dfStdDev;
         }
         if ( pamError == CE_None){
-            CPLErr err = SetStatistics(dfMin,dfMax,dfMean,dfStdDev);
+            const CPLErr err = SetStatistics(dfMin,dfMax,dfMean,dfStdDev);
             if (err !=CE_None){
                 CPLError (CE_Warning, CPLE_AppDefined,
                     "SetStatistics failed in ECWRasterBand::GetDefaultHistogram. Statistics might not be saved in .ecw file." );
             }
             return CE_None;
-        }else{
-            //whatever happened we return.
-            return pamError;
         }
-    }else{
-        //no statistics and we are not forced to return.
-        return CE_Warning;
+        //whatever happened we return.
+        return pamError;
     }
+    //no statistics and we are not forced to return.
+    return CE_Warning;
 }
 
 /************************************************************************/
@@ -658,10 +644,10 @@ CPLErr ECWRasterBand::SetStatistics( double dfMin, double dfMax,
         }
     }
 
-    poGDS->pStatistics->BandsStats[nStatsBandIndex].fMinVal = (IEEE4) dfMin;
-    poGDS->pStatistics->BandsStats[nStatsBandIndex].fMaxVal = (IEEE4)dfMax;
-    poGDS->pStatistics->BandsStats[nStatsBandIndex].fMeanVal = (IEEE4)dfMean;
-    poGDS->pStatistics->BandsStats[nStatsBandIndex].fStandardDev = (IEEE4)dfStdDev;
+    poGDS->pStatistics->BandsStats[nStatsBandIndex].fMinVal = static_cast<IEEE4>(dfMin);
+    poGDS->pStatistics->BandsStats[nStatsBandIndex].fMaxVal = static_cast<IEEE4>(dfMax);
+    poGDS->pStatistics->BandsStats[nStatsBandIndex].fMeanVal = static_cast<IEEE4>(dfMean);
+    poGDS->pStatistics->BandsStats[nStatsBandIndex].fStandardDev = static_cast<IEEE4>(dfStdDev);
     poGDS->bStatisticsDirty = TRUE;
     //if we have PAM statistics we need to save them as well. Better option would be to remove them from PAM file but I don't know how to do that without messing in PAM internals.
     if ( hasPAMStatistics ){
@@ -692,9 +678,9 @@ CPLErr ECWRasterBand::OldIRasterIO( GDALRWFlag eRWFlag,
                                  GDALRasterIOExtraArg* psExtraArg )
 
 {
-    int          iBand, bDirect;
+    int          iBand;
     GByte        *pabyWorkBuffer = nullptr;
-    int nResFactor = 1 << (iOverview+1);
+    const int nResFactor = 1 << (iOverview+1);
 
     nXOff *= nResFactor;
     nYOff *= nResFactor;
@@ -707,12 +693,12 @@ CPLErr ECWRasterBand::OldIRasterIO( GDALRWFlag eRWFlag,
     int nRet = poGDS->TryWinRasterIO( eRWFlag,
                                nXOff, nYOff,
                                nXSize, nYSize,
-                               (GByte *) pData, nBufXSize, nBufYSize,
+                               static_cast<GByte *>(pData), nBufXSize, nBufYSize,
                                eBufType, 1, &nBand,
                                nPixelSpace, nLineSpace, 0 , psExtraArg);
     if( nRet == TRUE )
         return CE_None;
-    else if( nRet < 0 )
+    if( nRet < 0 )
         return CE_Failure;
 
 /* -------------------------------------------------------------------- */
@@ -732,12 +718,12 @@ CPLErr ECWRasterBand::OldIRasterIO( GDALRWFlag eRWFlag,
 /*      Can we perform direct loads, or must we load into a working     */
 /*      buffer, and transform?                                          */
 /* -------------------------------------------------------------------- */
-    int     nRawPixelSize = GDALGetDataTypeSize(poGDS->eRasterDataType) / 8;
+    const int     nRawPixelSize = GDALGetDataTypeSize(poGDS->eRasterDataType) / 8;
 
-    bDirect = nPixelSpace == 1 && eBufType == GDT_Byte
+    int bDirect = nPixelSpace == 1 && eBufType == GDT_Byte
         && nNewXSize == nBufXSize && nNewYSize == nBufYSize;
     if( !bDirect )
-        pabyWorkBuffer = (GByte *) CPLMalloc(nNewXSize * nRawPixelSize);
+        pabyWorkBuffer = static_cast<GByte *>(CPLMalloc(nNewXSize * nRawPixelSize));
 
 /* -------------------------------------------------------------------- */
 /*      Establish access at the desired resolution.                     */
@@ -747,7 +733,7 @@ CPLErr ECWRasterBand::OldIRasterIO( GDALRWFlag eRWFlag,
     iBand = nBand-1;
     poGDS->nBandIndexToPromoteTo8Bit = ( bPromoteTo8Bit ) ? 0 : -1;
     // TODO: Fix writable strings issue.
-    CNCSError oErr = poGDS->poFileView->SetView( 1, (unsigned int *) (&iBand),
+    CNCSError oErr = poGDS->poFileView->SetView( 1, reinterpret_cast<unsigned int *>(&iBand),
                                                  nXOff, nYOff,
                                                  nXOff + nXSize - 1,
                                                  nYOff + nYSize - 1,
@@ -765,8 +751,8 @@ CPLErr ECWRasterBand::OldIRasterIO( GDALRWFlag eRWFlag,
 /*      Supersampling is not supported by the ECW API, so we will do    */
 /*      it ourselves.                                                   */
 /* -------------------------------------------------------------------- */
-    double  dfSrcYInc = (double)nNewYSize / nBufYSize;
-    double  dfSrcXInc = (double)nNewXSize / nBufXSize;
+    double  dfSrcYInc = static_cast<double>(nNewYSize) / nBufYSize;
+    double  dfSrcXInc = static_cast<double>(nNewXSize) / nBufXSize;
     int         iSrcLine, iDstLine;
     CPLErr eErr = CE_None;
 
@@ -1017,7 +1003,7 @@ ECWDataset::ECWDataset(int bIsJPEG2000In)
 ECWDataset::~ECWDataset()
 
 {
-    FlushCache();
+    GDALPamDataset::FlushCache();
     CleanupWindow();
 
 #if ECWSDK_VERSION>=50
@@ -1070,6 +1056,9 @@ ECWDataset::~ECWDataset()
     // from the GDAL destructor.
     if( poFileView != nullptr && !GDALIsInGlobalDestructor() )
     {
+#if ECWSDK_VERSION >= 55
+        delete poFileView;
+#else
         VSIIOStream *poUnderlyingIOStream = (VSIIOStream *)nullptr;
 
         if( bUsingCustomStream )
@@ -1083,6 +1072,8 @@ ECWDataset::~ECWDataset()
             if( --poUnderlyingIOStream->nFileViewCount == 0 )
                 delete poUnderlyingIOStream;
         }
+#endif
+        poFileView = nullptr;
     }
 
     /* WriteHeader() must be called after closing the file handle to work */
@@ -2549,11 +2540,22 @@ CNCSJP2FileView *ECWDataset::OpenFileView( const char *pszDatasetName,
         {
             CPLDebug( "ECW", "Got mutex." );
         }
-        VSIIOStream *poIOStream = new VSIIOStream();
-        poIOStream->Access( fpVSIL, FALSE, TRUE, pszDatasetName, 0, -1 );
 
         poFileView = new CNCSJP2FileView();
-        oErr = poFileView->Open( poIOStream, bProgressive );
+
+#if ECWSDK_VERSION >= 55
+       NCS::CString streamName(pszDatasetName);
+       auto vsiIoStream = NCS::CView::FindSteamByStreamNameFromOpenDatasets(streamName);
+       if (!vsiIoStream) {
+           vsiIoStream = std::make_shared<VSIIOStream>();
+           std::static_pointer_cast<VSIIOStream>(vsiIoStream)->Access(fpVSIL, FALSE, TRUE, pszDatasetName, 0, -1);
+           bUsingCustomStream = TRUE;
+       }
+       oErr = poFileView->Open(vsiIoStream, bProgressive);
+#else
+        auto vsiIoStream = new VSIIOStream();
+        vsiIoStream->Access(fpVSIL, FALSE, TRUE, pszDatasetName, 0, -1);
+        oErr = poFileView->Open(vsiIoStream, bProgressive);
 
         // The CNCSJP2FileView (poFileView) object may not use the iostream
         // (poIOStream) passed to the CNCSJP2FileView::Open() method if an
@@ -2572,17 +2574,18 @@ CNCSJP2FileView *ECWDataset::OpenFileView( const char *pszDatasetName,
         VSIIOStream * poUnderlyingIOStream =
             ((VSIIOStream *)(poFileView->GetStream()));
 
-        if ( poUnderlyingIOStream )
+        if (poUnderlyingIOStream)
             poUnderlyingIOStream->nFileViewCount++;
 
-        if ( poIOStream != poUnderlyingIOStream )
+        if ( vsiIoStream != poUnderlyingIOStream )
         {
-            delete poIOStream;
+            delete vsiIoStream;
         }
         else
         {
             bUsingCustomStream = TRUE;
         }
+#endif
 
         CPLReleaseMutex( hECWDatasetMutex );
 
@@ -3552,7 +3555,7 @@ void GDALRegister_ECW()
     osLongName += ")";
 
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, osLongName );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_ecw.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/ecw.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "ecw" );
 
     poDriver->pfnIdentify = ECWDataset::IdentifyECW;
@@ -3649,7 +3652,7 @@ void GDALRegister_JP2ECW()
     osLongName += ")";
 
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, osLongName );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_jp2ecw.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/jp2ecw.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "jp2" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

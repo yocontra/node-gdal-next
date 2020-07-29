@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #include "cpl_string.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gdalmultidomainmetadata.cpp ec7b85e6bb8f9737693a31f0bf7166e31e10992e 2018-04-16 00:08:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalmultidomainmetadata.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/
@@ -127,8 +127,12 @@ CPLErr GDALMultiDomainMetadata::SetMetadata( char **papszMetadata,
 
     // we want to mark name/value pair domains as being sorted for fast
     // access.
-    if( !STARTS_WITH_CI(pszDomain, "xml:") && !EQUAL(pszDomain, "SUBDATASETS") )
+    if( !STARTS_WITH_CI(pszDomain, "xml:") &&
+        !STARTS_WITH_CI(pszDomain, "json:") && 
+        !EQUAL(pszDomain, "SUBDATASETS") )
+    {
         papoMetadataLists[iDomain]->Sort();
+    }
 
     return CE_None;
 }
@@ -221,7 +225,7 @@ int GDALMultiDomainMetadata::XMLInit( CPLXMLNode *psTree, int /* bMerge */ )
 /* -------------------------------------------------------------------- */
 /*      XML format subdocuments.                                        */
 /* -------------------------------------------------------------------- */
-        if( EQUAL(pszFormat,"xml") )
+        if( EQUAL(pszFormat,"xml")  )
         {
             // Find first non-attribute child of current element.
             CPLXMLNode *psSubDoc = psMetadata->psChild;
@@ -232,6 +236,22 @@ int GDALMultiDomainMetadata::XMLInit( CPLXMLNode *psTree, int /* bMerge */ )
 
             poMDList->Clear();
             poMDList->AddStringDirectly( pszDoc );
+        }
+
+/* -------------------------------------------------------------------- */
+/*      JSon format subdocuments.                                       */
+/* -------------------------------------------------------------------- */
+        else if( EQUAL(pszFormat,"json") )
+        {
+            // Find first text child of current element.
+            CPLXMLNode *psSubDoc = psMetadata->psChild;
+            while( psSubDoc != nullptr && psSubDoc->eType != CXT_Text )
+                psSubDoc = psSubDoc->psNext;
+            if( psSubDoc )
+            {
+                poMDList->Clear();
+                poMDList->AddString( psSubDoc->pszValue );
+            }
         }
 
 /* -------------------------------------------------------------------- */
@@ -288,7 +308,7 @@ CPLXMLNode *GDALMultiDomainMetadata::Serialize()
                 CPLCreateXMLNode( psMD, CXT_Attribute, "domain" ),
                 CXT_Text, papszDomainList[iDomain] );
 
-        bool bFormatXML = false;
+        bool bFormatXMLOrJSon = false;
 
         if( STARTS_WITH_CI(papszDomainList[iDomain], "xml:")
             && CSLCount(papszMD) == 1 )
@@ -296,7 +316,7 @@ CPLXMLNode *GDALMultiDomainMetadata::Serialize()
             CPLXMLNode *psValueAsXML = CPLParseXMLString( papszMD[0] );
             if( psValueAsXML != nullptr )
             {
-                bFormatXML = true;
+                bFormatXMLOrJSon = true;
 
                 CPLCreateXMLNode(
                     CPLCreateXMLNode( psMD, CXT_Attribute, "format" ),
@@ -306,7 +326,18 @@ CPLXMLNode *GDALMultiDomainMetadata::Serialize()
             }
         }
 
-        if( !bFormatXML )
+        if( STARTS_WITH_CI(papszDomainList[iDomain], "json:")
+            && CSLCount(papszMD) == 1 )
+        {
+            bFormatXMLOrJSon = true;
+
+            CPLCreateXMLNode(
+                CPLCreateXMLNode( psMD, CXT_Attribute, "format" ),
+                CXT_Text, "json" );
+            CPLCreateXMLNode( psMD, CXT_Text, *papszMD );
+        }
+
+        if( !bFormatXMLOrJSon )
         {
             CPLXMLNode* psLastChild = nullptr;
             // To go after domain attribute.
@@ -316,7 +347,7 @@ CPLXMLNode *GDALMultiDomainMetadata::Serialize()
                 while( psLastChild->psNext != nullptr )
                     psLastChild = psLastChild->psNext;
             }
-            for( int i = 0; papszMD != nullptr && papszMD[i] != nullptr; i++ )
+            for( int i = 0; papszMD[i] != nullptr; i++ )
             {
                 char *pszKey = nullptr;
 

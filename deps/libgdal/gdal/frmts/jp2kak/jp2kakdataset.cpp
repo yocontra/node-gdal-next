@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include <cmath>
 #include <vector>
 
-CPL_CVSID("$Id: jp2kakdataset.cpp a1d003559346ee7d5f672498550b7d9e01c17485 2019-10-23 16:47:33 +0200 Thomas Bonfort $")
+CPL_CVSID("$Id: jp2kakdataset.cpp 198d510a8188eb2e8c6766be5af43f67163e1fff 2020-03-25 13:36:53 +0100 Even Rouault $")
 
 // Before v7.5 Kakadu does not advertise its version well
 // After v7.5 Kakadu has KDU_{MAJOR,MINOR,PATCH}_VERSION defines so it is easier
@@ -1380,8 +1380,8 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
         poCodeStream->apply_input_restrictions(0, 0, nDiscardLevels, 0, nullptr);
         kdu_dims l_dims;
         poCodeStream->get_dims(0, l_dims);
-        const int nOvrXSize = l_dims.size.x;
-        const int nOvrYSize = l_dims.size.y;
+        const int nOvrCanvasXSize = l_dims.pos.x + l_dims.size.x;
+        const int nOvrCanvasYSize = l_dims.pos.y + l_dims.size.y;
 
         l_dims.pos.x = l_dims.pos.x + nXOff / nResMult;
         l_dims.pos.y = l_dims.pos.y + nYOff / nResMult;
@@ -1402,10 +1402,10 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
         {
             l_dims.size.y = nBufYSize;
         }
-        if( l_dims.pos.x + l_dims.size.x > nOvrXSize )
-            l_dims.size.x = nOvrXSize - l_dims.pos.x;
-        if( l_dims.pos.y + l_dims.size.y > nOvrYSize )
-            l_dims.size.y = nOvrYSize - l_dims.pos.y;
+        if( l_dims.pos.x + l_dims.size.x > nOvrCanvasXSize )
+            l_dims.size.x = nOvrCanvasXSize - l_dims.pos.x;
+        if( l_dims.pos.y + l_dims.size.y > nOvrCanvasYSize )
+            l_dims.size.y = nOvrCanvasYSize - l_dims.pos.y;
 
         kdu_dims l_dims_roi;
 
@@ -2703,7 +2703,7 @@ void GDALRegister_JP2KAK()
     poDriver->SetMetadataItem(GDAL_DCAP_VECTOR, "YES");
     poDriver->SetMetadataItem(
         GDAL_DMD_LONGNAME, "JPEG-2000 (based on Kakadu " KDU_CORE_VERSION ")");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_jp2kak.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/jp2kak.html");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES, "Byte Int16 UInt16");
     poDriver->SetMetadataItem(GDAL_DMD_MIMETYPE, "image/jp2");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "jp2 j2k");

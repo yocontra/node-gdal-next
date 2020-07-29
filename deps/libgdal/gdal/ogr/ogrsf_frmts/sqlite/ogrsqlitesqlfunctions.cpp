@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Extension SQL functions
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,9 +36,9 @@
 #include "ogr_geocoding.h"
 
 #include "ogrsqliteregexp.cpp" /* yes the .cpp file, to make it work on Windows with load_extension('gdalXX.dll') */
-#include "swq.h"
+#include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrsqlitesqlfunctions.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitesqlfunctions.cpp 0536038c7e0b969f54957699d240911ec20e7a77 2020-04-18 20:48:53 +0200 Even Rouault $")
 
 #undef SQLITE_STATIC
 #define SQLITE_STATIC      ((sqlite3_destructor_type)nullptr)
@@ -690,6 +690,29 @@ void OGR2SQLITE_ogr_SetConfigOption(sqlite3_context* pContext,
 }
 #endif // notdef
 
+/************************************************************************/
+/*                OGR2SQLITE_SetGeom_AndDestroy()                       */
+/************************************************************************/
+
+static void OGR2SQLITE_SetGeom_AndDestroy(sqlite3_context* pContext,
+                                          OGRGeometry* poGeom,
+                                          int nSRSId)
+{
+    GByte* pabySLBLOB = nullptr;
+    int nBLOBLen = 0;
+    if( poGeom != nullptr && OGRSQLiteLayer::ExportSpatiaLiteGeometry(
+                    poGeom, nSRSId, wkbNDR,
+                    FALSE, FALSE, &pabySLBLOB, &nBLOBLen ) == OGRERR_NONE )
+    {
+        sqlite3_result_blob(pContext, pabySLBLOB, nBLOBLen, CPLFree);
+    }
+    else
+    {
+        sqlite3_result_null(pContext);
+    }
+    delete poGeom;
+}
+
 #ifdef MINIMAL_SPATIAL_FUNCTIONS
 
 /************************************************************************/
@@ -743,29 +766,6 @@ void OGR2SQLITE_ST_AsBinary(sqlite3_context* pContext,
     }
     else
         sqlite3_result_null (pContext);
-}
-
-/************************************************************************/
-/*                OGR2SQLITE_SetGeom_AndDestroy()                       */
-/************************************************************************/
-
-static void OGR2SQLITE_SetGeom_AndDestroy(sqlite3_context* pContext,
-                                          OGRGeometry* poGeom,
-                                          int nSRSId)
-{
-    GByte* pabySLBLOB = nullptr;
-    int nBLOBLen = 0;
-    if( poGeom != nullptr && OGRSQLiteLayer::ExportSpatiaLiteGeometry(
-                    poGeom, nSRSId, wkbNDR,
-                    FALSE, FALSE, &pabySLBLOB, &nBLOBLen ) == OGRERR_NONE )
-    {
-        sqlite3_result_blob(pContext, pabySLBLOB, nBLOBLen, CPLFree);
-    }
-    else
-    {
-        sqlite3_result_null(pContext);
-    }
-    delete poGeom;
 }
 
 /************************************************************************/
@@ -1048,6 +1048,23 @@ void OGR2SQLITE_ST_MakePoint(sqlite3_context* pContext,
 #endif // #ifdef MINIMAL_SPATIAL_FUNCTIONS
 
 /************************************************************************/
+/*                    OGR2SQLITE_ST_MakeValid()                         */
+/************************************************************************/
+
+static
+void OGR2SQLITE_ST_MakeValid(sqlite3_context* pContext,
+                          int argc, sqlite3_value** argv)
+{
+    int nSRSId = -1;
+    OGRGeometry* poGeom = OGR2SQLITE_GetGeom(pContext, argc, argv, &nSRSId);
+    if( poGeom != nullptr )
+        OGR2SQLITE_SetGeom_AndDestroy(pContext, poGeom->MakeValid(), nSRSId);
+    else
+        sqlite3_result_null(pContext);
+    delete poGeom;
+}
+
+/************************************************************************/
 /*                     OGRSQLITE_hstore_get_value()                     */
 /************************************************************************/
 
@@ -1145,18 +1162,15 @@ void* OGRSQLiteRegisterSQLFunctions(sqlite3* hDB)
                             SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
                             OGRSQLITE_hstore_get_value, nullptr, nullptr);
 
-#ifdef MINIMAL_SPATIAL_FUNCTIONS
     /* Check if spatialite is available */
     int rc = sqlite3_exec(hDB, "SELECT spatialite_version()", nullptr, nullptr, nullptr);
 
     /* Reset error flag */
     sqlite3_exec(hDB, "SELECT 1", nullptr, nullptr, nullptr);
 
-    if( rc != SQLITE_OK &&
-        CPLTestBool(CPLGetConfigOption("OGR_SQLITE_SPATIAL_FUNCTIONS", "YES")) )
-    {
-        CPLDebug("SQLITE",
-                 "Spatialite not available. Implementing a few functions");
+    const bool bSpatialiteAvailable = rc == SQLITE_OK;
+    const bool bAllowOGRSQLiteSpatialFunctions =
+        CPLTestBool(CPLGetConfigOption("OGR_SQLITE_SPATIAL_FUNCTIONS", "YES"));
 
 #define REGISTER_ST_op(argc, op) \
         sqlite3_create_function(hDB, #op, argc, \
@@ -1165,6 +1179,12 @@ void* OGRSQLiteRegisterSQLFunctions(sqlite3* hDB)
         sqlite3_create_function(hDB, "ST_" #op, argc, \
                                 SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr, \
                                 OGR2SQLITE_ST_##op, nullptr, nullptr);
+
+#ifdef MINIMAL_SPATIAL_FUNCTIONS
+    if( !bSpatialiteAvailable && bAllowOGRSQLiteSpatialFunctions )
+    {
+        CPLDebug("SQLITE",
+                 "Spatialite not available. Implementing a few functions");
 
         REGISTER_ST_op(1, AsText);
         REGISTER_ST_op(1, AsBinary);
@@ -1200,6 +1220,34 @@ void* OGRSQLiteRegisterSQLFunctions(sqlite3* hDB)
         REGISTER_ST_op(3, MakePoint);
     }
 #endif // #ifdef MINIMAL_SPATIAL_FUNCTIONS
+
+    if( bAllowOGRSQLiteSpatialFunctions )
+    {
+        bool bRegisterMakeValid = false;
+        if( bSpatialiteAvailable )
+        {
+            // ST_MakeValid() only available (at time of writing) in
+            // Spatialite builds against (GPL) liblwgeom
+            // In the future, if they use GEOS 3.8 MakeValid, we could
+            // get rid of this.
+            rc = sqlite3_exec(hDB,
+                "SELECT ST_MakeValid(ST_GeomFromText('POINT (0 0)'))",
+                nullptr, nullptr, nullptr);
+
+            /* Reset error flag */
+            sqlite3_exec(hDB, "SELECT 1", nullptr, nullptr, nullptr);
+
+            bRegisterMakeValid = (rc != SQLITE_OK);
+        }
+        else
+        {
+            bRegisterMakeValid = true;
+        }
+        if( bRegisterMakeValid )
+        {
+            REGISTER_ST_op(1, MakeValid);
+        }
+    }
 
     pData->SetRegExpCache(OGRSQLiteRegisterRegExpFunction(hDB));
 

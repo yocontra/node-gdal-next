@@ -19,23 +19,24 @@ using namespace node;
 
 namespace node_gdal {
 
-class GDALDrivers: public Nan::ObjectWrap {
-public:
-	static Nan::Persistent<FunctionTemplate> constructor;
+class GDALDrivers : public Nan::ObjectWrap {
+    public:
+  static Nan::Persistent<FunctionTemplate> constructor;
 
-	static void Initialize(Local<Object> target);
-	static NAN_METHOD(New);
-	static Local<Value> New();
-	static NAN_METHOD(toString);
+  static void Initialize(Local<Object> target);
+  static NAN_METHOD(New);
+  static Local<Value> New();
+  static NAN_METHOD(toString);
 
-	static NAN_METHOD(get);
-	static NAN_METHOD(getNames);
-	static NAN_METHOD(count);
+  static NAN_METHOD(get);
+  static NAN_METHOD(getNames);
+  static NAN_METHOD(count);
 
-	GDALDrivers();
-private:
-	~GDALDrivers();
+  GDALDrivers();
+
+    private:
+  ~GDALDrivers();
 };
 
-}
+} // namespace node_gdal
 #endif

@@ -2,10 +2,10 @@
  *
  * Project:  PDS Translator
  * Purpose:  Implements OGRPDSLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpdslayer.cpp 9c8c1ccc38ee3b948ec6b0545b91593a855e54cd 2019-04-30 18:05:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpdslayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 namespace OGRPDS {
 

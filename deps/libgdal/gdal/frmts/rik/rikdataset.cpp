@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Daniel Wallner <daniel.wallner@bredband.net>
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: rikdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: rikdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 #define RIK_HEADER_DEBUG 0
 #define RIK_CLEAR_DEBUG 0
@@ -114,7 +114,7 @@ typedef struct
 
 class RIKRasterBand;
 
-class RIKDataset : public GDALPamDataset
+class RIKDataset final: public GDALPamDataset
 {
     friend class RIKRasterBand;
 
@@ -152,7 +152,7 @@ class RIKDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class RIKRasterBand : public GDALPamRasterBand
+class RIKRasterBand final: public GDALPamRasterBand
 {
     friend class RIKDataset;
 
@@ -573,7 +573,11 @@ CPLErr RIKRasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
         uLong destLen = pixels;
         Byte *upsideDown = static_cast<Byte *>( CPLMalloc( pixels ) );
 
-        uncompress( upsideDown, &destLen, blockData, nBlockSize );
+        if( uncompress( upsideDown, &destLen, blockData, nBlockSize ) != Z_OK )
+        {
+            CPLDebug("RIK", "Deflate compression failed on block %u",
+                     nBlockIndex);
+        }
 
         for (GUInt32 i = 0; i < poRDS->nBlockYSize; i++)
         {
@@ -868,9 +872,9 @@ GDALDataset *RIKDataset::Open( GDALOpenInfo * poOpenInfo )
         VSIFReadL( &header.iOptions, 1, sizeof(header.iOptions), poOpenInfo->fpL );
 
         header.fSouth = header.fNorth -
-            header.iVertBlocks * header.iBlockHeight * header.iMPPNum;
+            static_cast<double>(header.iVertBlocks) * header.iBlockHeight * header.iMPPNum;
         header.fEast = header.fWest +
-            header.iHorBlocks * header.iBlockWidth * header.iMPPNum;
+            static_cast<double>(header.iHorBlocks) * header.iBlockWidth * header.iMPPNum;
 
         metersPerPixel = header.iMPPNum;
     }
@@ -1299,7 +1303,7 @@ void GDALRegister_RIK()
     poDriver->SetDescription( "RIK" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Swedish Grid RIK (.rik)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#RIK" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/rik.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "rik" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: jpgdataset_12.cpp bde879dd6c2dd67ecf317ad588846089f0905cb9 2016-03-15 00:39:53Z Kurt Schwehr $
+ * $Id: jpgdataset_12.cpp c8dccc4748607bd0df3214640ddd71698e172558 2020-04-25 13:38:36 +0200 Even Rouault $
  *
  * Project:  JPEG JFIF Driver
  * Purpose:  Implement GDAL JPEG Support based on IJG libjpeg.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,14 +39,14 @@
 
 #include "jpgdataset.cpp"
 
-GDALDataset* JPEGDataset12Open(JPGDatasetOpenArgs* psArgs);
+JPGDatasetCommon* JPEGDataset12Open(JPGDatasetOpenArgs* psArgs);
 GDALDataset* JPEGDataset12CreateCopy( const char * pszFilename,
                                     GDALDataset *poSrcDS,
                                     int bStrict, char ** papszOptions,
                                     GDALProgressFunc pfnProgress,
                                     void * pProgressData );
 
-GDALDataset* JPEGDataset12Open(JPGDatasetOpenArgs* psArgs)
+JPGDatasetCommon* JPEGDataset12Open(JPGDatasetOpenArgs* psArgs)
 {
     return JPGDataset12::Open(psArgs);
 }

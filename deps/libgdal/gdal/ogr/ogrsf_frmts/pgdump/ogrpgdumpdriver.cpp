@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGRPGDumpDriver class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@
 #include "ogr_pgdump.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgdumpdriver.cpp 1439dfd01ac6dfcbb4f4f0c267c8db2b15c98461 2018-09-09 15:02:14 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdumpdriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRPGDumpDriverCreate()                      */

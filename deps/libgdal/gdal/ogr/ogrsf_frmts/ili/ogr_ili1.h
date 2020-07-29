@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_ili1.h 29dcefd34892121afac0b7b978757ee6daad614a 2018-05-03 15:55:54 +0200 Even Rouault $
+ * $Id: ogr_ili1.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  Interlis 1 Translator
  * Purpose:   Definition of classes for OGR Interlis 1 driver.
@@ -39,7 +39,7 @@ class OGRILI1DataSource;
 /*                           OGRILI1Layer                               */
 /************************************************************************/
 
-class OGRILI1Layer : public OGRLayer
+class OGRILI1Layer final: public OGRLayer
 {
 private:
 #if 0
@@ -94,7 +94,7 @@ private:
 /*                          OGRILI1DataSource                           */
 /************************************************************************/
 
-class OGRILI1DataSource : public OGRDataSource
+class OGRILI1DataSource final: public OGRDataSource
 {
   private:
     char       *pszName;

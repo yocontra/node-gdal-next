@@ -71,6 +71,7 @@ struct OutputOptions {
     bool c_ify = false;
     bool singleLine = false;
     bool strict = true;
+    bool ballparkAllowed = true;
 };
 } // anonymous namespace
 
@@ -89,10 +90,10 @@ static void usage() {
         << std::endl
         << "                [--grid-check "
            "none|discard_missing|sort|known_available] "
-           "[--show-superseded]"
         << std::endl
         << "                [--pivot-crs always|if_no_direct_transformation|"
         << "never|{auth:code[,auth:code]*}]" << std::endl
+        << "                [--show-superseded] [--hide-ballpark]" << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
@@ -329,9 +330,6 @@ static void outputObject(
     if (projStringExportable) {
         if (outputOpt.PROJ5) {
             try {
-                if (alreadyOutputed) {
-                    std::cout << std::endl;
-                }
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 if (!outputOpt.quiet) {
                     if (crs) {
@@ -481,8 +479,8 @@ static void outputObject(
                     std::cout << "WKT1:GDAL string:" << std::endl;
                 }
 
-                auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL);
+                auto formatter = WKTFormatter::create(
+                    WKTFormatter::Convention::WKT1_GDAL, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -554,7 +552,8 @@ static void outputObject(
     }
 
     auto op = dynamic_cast<CoordinateOperation *>(obj.get());
-    if (op && dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
+    if (!outputOpt.quiet && op && dbContext &&
+        getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
         try {
             auto setGrids = op->gridsNeeded(dbContext, false);
             bool firstWarning = true;
@@ -707,6 +706,7 @@ static void outputOperations(
         ctxt->setIntermediateCRS(pivots);
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
+        ctxt->setAllowBallparkTransformations(outputOpt.ballparkAllowed);
         list = CoordinateOperationFactory::create()->createOperations(
             nnSourceCRS, nnTargetCRS, ctxt);
         if (!spatialCriterionExplicitlySpecified &&
@@ -1056,6 +1056,8 @@ int main(int argc, char **argv) {
             showSuperseded = true;
         } else if (arg == "--lax") {
             outputOpt.strict = false;
+        } else if (arg == "--hide-ballpark") {
+            outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
         } else if (ci_equal(arg, "--searchpaths")) {
@@ -1073,7 +1075,7 @@ int main(int argc, char **argv) {
 #ifdef CURL_ENABLED
             if (proj_context_is_network_enabled(nullptr)) {
                 std::cout << "Status: enabled" << std::endl;
-                std::cout << "URL: " << pj_context_get_url_endpoint(nullptr)
+                std::cout << "URL: " << proj_context_get_url_endpoint(nullptr)
                           << std::endl;
             } else {
                 std::cout << "Status: disabled" << std::endl;

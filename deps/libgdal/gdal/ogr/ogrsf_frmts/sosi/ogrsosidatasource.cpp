@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Thomas Hirsch
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include <map>
 #include <math.h>
 
-CPL_CVSID("$Id: ogrsosidatasource.cpp 2ae9e3ce4df0980f945434968ca0dac52e90df8f 2019-03-23 14:05:51 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrsosidatasource.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /* This is the most common encoding for SOSI files. Let's at least try if
  * it is supported, or generate a meaningful error message.               */

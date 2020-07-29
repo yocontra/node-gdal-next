@@ -8,7 +8,7 @@
  **********************************************************************
  * Copyright (c) 2011, Andrey Kiselev <dron@ak4719.spb.edu>
  * Copyright (c) 2008, Frank Warmerdam
- * Copyright (c) 2011-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: cpl_recode.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: cpl_recode.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #ifdef CPL_RECODE_ICONV
 extern void CPLClearRecodeIconvWarningFlags();
@@ -369,4 +369,45 @@ int CPLStrlenUTF8( const char *pszUTF8Str )
             ++nCharacterCount;
     }
     return nCharacterCount;
+}
+
+/************************************************************************/
+/*                           CPLCanRecode()                             */
+/************************************************************************/
+
+/**
+ * Checks if it is possible to recode a string from one encoding to another.
+ *
+ * @param pszTestStr a NULL terminated string.
+ * @param pszSrcEncoding the source encoding.
+ * @param pszDstEncoding the destination encoding.
+ *
+ * @return a TRUE if recode is possible.
+ *
+ * @since GDAL 3.1.0
+ */
+int CPLCanRecode(const char *pszTestStr,
+                 const char *pszSrcEncoding,
+                 const char *pszDstEncoding)
+{
+    CPLClearRecodeWarningFlags();
+    CPLErrorReset();
+
+    CPLPushErrorHandler(CPLQuietErrorHandler);
+    char* pszRec( CPLRecode( pszTestStr, pszSrcEncoding, pszDstEncoding ) );
+    CPLPopErrorHandler();
+
+    if( pszRec == nullptr )
+    {
+        return FALSE;
+    }
+
+    CPLFree( pszRec );
+
+    if( CPLGetLastErrorType() != 0 )
+    {
+        return FALSE;
+    }
+
+    return TRUE;
 }

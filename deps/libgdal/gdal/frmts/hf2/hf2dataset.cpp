@@ -2,10 +2,10 @@
  *
  * Project:  HF2 driver
  * Purpose:  GDALDataset driver for HF2/HFZ dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: hf2dataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: hf2dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -47,7 +47,7 @@ CPL_CVSID("$Id: hf2dataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-
 
 class HF2RasterBand;
 
-class HF2Dataset : public GDALPamDataset
+class HF2Dataset final: public GDALPamDataset
 {
     friend class HF2RasterBand;
 
@@ -83,7 +83,7 @@ class HF2Dataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class HF2RasterBand : public GDALPamRasterBand
+class HF2RasterBand final: public GDALPamRasterBand
 {
     friend class HF2Dataset;
 
@@ -1175,7 +1175,7 @@ void GDALRegister_HF2()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "HF2/HFZ heightfield raster" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_hf2.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/hf2.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "hf2" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

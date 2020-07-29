@@ -1,84 +1,91 @@
+#include "linestring_points.hpp"
 #include "../gdal_common.hpp"
 #include "../gdal_geometry.hpp"
 #include "../gdal_linestring.hpp"
 #include "../gdal_point.hpp"
-#include "linestring_points.hpp"
 
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> LineStringPoints::constructor;
 
-void LineStringPoints::Initialize(Local<Object> target)
-{
-	Nan::HandleScope scope;
+void LineStringPoints::Initialize(Local<Object> target) {
+  Nan::HandleScope scope;
 
-	Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(LineStringPoints::New);
-	lcons->InstanceTemplate()->SetInternalFieldCount(1);
-	lcons->SetClassName(Nan::New("LineStringPoints").ToLocalChecked());
+  Local<FunctionTemplate> lcons =
+    Nan::New<FunctionTemplate>(LineStringPoints::New);
+  lcons->InstanceTemplate()->SetInternalFieldCount(1);
+  lcons->SetClassName(Nan::New("LineStringPoints").ToLocalChecked());
 
-	Nan::SetPrototypeMethod(lcons, "toString", toString);
-	Nan::SetPrototypeMethod(lcons, "count", count);
-	Nan::SetPrototypeMethod(lcons, "get", get);
-	Nan::SetPrototypeMethod(lcons, "set", set);
-	Nan::SetPrototypeMethod(lcons, "add", add);
-	Nan::SetPrototypeMethod(lcons, "reverse", reverse);
-	Nan::SetPrototypeMethod(lcons, "resize", resize);
+  Nan::SetPrototypeMethod(lcons, "toString", toString);
+  Nan::SetPrototypeMethod(lcons, "count", count);
+  Nan::SetPrototypeMethod(lcons, "get", get);
+  Nan::SetPrototypeMethod(lcons, "set", set);
+  Nan::SetPrototypeMethod(lcons, "add", add);
+  Nan::SetPrototypeMethod(lcons, "reverse", reverse);
+  Nan::SetPrototypeMethod(lcons, "resize", resize);
 
-	Nan::Set(target, Nan::New("LineStringPoints").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(
+    target,
+    Nan::New("LineStringPoints").ToLocalChecked(),
+    Nan::GetFunction(lcons).ToLocalChecked());
 
-	constructor.Reset(lcons);
+  constructor.Reset(lcons);
 }
 
-LineStringPoints::LineStringPoints()
-	: Nan::ObjectWrap()
-{}
+LineStringPoints::LineStringPoints() : Nan::ObjectWrap() {
+}
 
-LineStringPoints::~LineStringPoints()
-{}
+LineStringPoints::~LineStringPoints() {
+}
 
 /**
- * An encapsulation of a {{#crossLink "gdal.LineString"}}LineString{{/crossLink}}'s points.
+ * An encapsulation of a {{#crossLink
+ * "gdal.LineString"}}LineString{{/crossLink}}'s points.
  *
  * @class gdal.LineStringPoints
  */
-NAN_METHOD(LineStringPoints::New)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(LineStringPoints::New) {
+  Nan::HandleScope scope;
 
-	if (!info.IsConstructCall()) {
-		Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
-		return;
-	}
-	if (info[0]->IsExternal()) {
-		Local<External> ext = info[0].As<External>();
-		void* ptr = ext->Value();
-		LineStringPoints *geom =  static_cast<LineStringPoints *>(ptr);
-		geom->Wrap(info.This());
-		info.GetReturnValue().Set(info.This());
-		return;
-	} else {
-		Nan::ThrowError("Cannot create LineStringPoints directly");
-		return;
-	}
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError(
+      "Cannot call constructor as function, you need to use 'new' keyword");
+    return;
+  }
+  if (info[0]->IsExternal()) {
+    Local<External>   ext  = info[0].As<External>();
+    void *            ptr  = ext->Value();
+    LineStringPoints *geom = static_cast<LineStringPoints *>(ptr);
+    geom->Wrap(info.This());
+    info.GetReturnValue().Set(info.This());
+    return;
+  } else {
+    Nan::ThrowError("Cannot create LineStringPoints directly");
+    return;
+  }
 }
 
-Local<Value> LineStringPoints::New(Local<Value> geom)
-{
-	Nan::EscapableHandleScope scope;
+Local<Value> LineStringPoints::New(Local<Value> geom) {
+  Nan::EscapableHandleScope scope;
 
-	LineStringPoints *wrapped = new LineStringPoints();
+  LineStringPoints *wrapped = new LineStringPoints();
 
-	v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
-	v8::Local<v8::Object> obj = Nan::NewInstance(Nan::GetFunction(Nan::New(LineStringPoints::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
-	Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), geom);
+  v8::Local<v8::Value>  ext = Nan::New<External>(wrapped);
+  v8::Local<v8::Object> obj =
+    Nan::NewInstance(
+      Nan::GetFunction(Nan::New(LineStringPoints::constructor))
+        .ToLocalChecked(),
+      1,
+      &ext)
+      .ToLocalChecked();
+  Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), geom);
 
-	return scope.Escape(obj);
+  return scope.Escape(obj);
 }
 
-NAN_METHOD(LineStringPoints::toString)
-{
-	Nan::HandleScope scope;
-	info.GetReturnValue().Set(Nan::New("LineStringPoints").ToLocalChecked());
+NAN_METHOD(LineStringPoints::toString) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New("LineStringPoints").ToLocalChecked());
 }
 
 /**
@@ -87,14 +94,16 @@ NAN_METHOD(LineStringPoints::toString)
  * @method count
  * @return {Integer}
  */
-NAN_METHOD(LineStringPoints::count)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(LineStringPoints::count) {
+  Nan::HandleScope scope;
 
-	Local<Object> parent = Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-	LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
+  Local<Object> parent =
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
+      .ToLocalChecked()
+      .As<Object>();
+  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
-	info.GetReturnValue().Set(Nan::New<Integer>(geom->get()->getNumPoints()));
+  info.GetReturnValue().Set(Nan::New<Integer>(geom->get()->getNumPoints()));
 }
 
 /**
@@ -102,16 +111,18 @@ NAN_METHOD(LineStringPoints::count)
  *
  * @method reverse
  */
-NAN_METHOD(LineStringPoints::reverse)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(LineStringPoints::reverse) {
+  Nan::HandleScope scope;
 
-	Local<Object> parent = Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-	LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
+  Local<Object> parent =
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
+      .ToLocalChecked()
+      .As<Object>();
+  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
-	geom->get()->reversePoints();
+  geom->get()->reversePoints();
 
-	return;
+  return;
 }
 
 /**
@@ -120,18 +131,20 @@ NAN_METHOD(LineStringPoints::reverse)
  * @method resize
  * @param {Integer} count
  */
-NAN_METHOD(LineStringPoints::resize)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(LineStringPoints::resize) {
+  Nan::HandleScope scope;
 
-	Local<Object> parent = Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-	LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
+  Local<Object> parent =
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
+      .ToLocalChecked()
+      .As<Object>();
+  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
-	int count;
-	NODE_ARG_INT(0, "point count", count)
-	geom->get()->setNumPoints(count);
+  int count;
+  NODE_ARG_INT(0, "point count", count)
+  geom->get()->setNumPoints(count);
 
-	return;
+  return;
 }
 
 /**
@@ -141,25 +154,27 @@ NAN_METHOD(LineStringPoints::resize)
  * @param {Integer} index 0-based index
  * @return {gdal.Point}
  */
-NAN_METHOD(LineStringPoints::get)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(LineStringPoints::get) {
+  Nan::HandleScope scope;
 
-	Local<Object> parent = Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-	LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
+  Local<Object> parent =
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
+      .ToLocalChecked()
+      .As<Object>();
+  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
-	OGRPoint *pt = new OGRPoint();
-	int i;
+  OGRPoint *pt = new OGRPoint();
+  int       i;
 
-	NODE_ARG_INT(0, "index", i);
-	if(i < 0 || i >= geom->get()->getNumPoints()) {
-		info.GetReturnValue().Set(Nan::Null());
-		return;
-	}
+  NODE_ARG_INT(0, "index", i);
+  if (i < 0 || i >= geom->get()->getNumPoints()) {
+    info.GetReturnValue().Set(Nan::Null());
+    return;
+  }
 
-	geom->get()->getPoint(i, pt);
+  geom->get()->getPoint(i, pt);
 
-	info.GetReturnValue().Set(Point::New(pt));
+  info.GetReturnValue().Set(Point::New(pt));
 }
 
 /**
@@ -174,80 +189,90 @@ NAN_METHOD(LineStringPoints::get)
  * @param {Integer} index 0-based index
  * @param {gdal.Point} point
  */
-NAN_METHOD(LineStringPoints::set)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(LineStringPoints::set) {
+  Nan::HandleScope scope;
 
-	Local<Object> parent = Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-	LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
+  Local<Object> parent =
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
+      .ToLocalChecked()
+      .As<Object>();
+  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
-	int i;
-	NODE_ARG_INT(0, "index", i);
-	if(i < 0 || i >= geom->get()->getNumPoints()) {
-		Nan::ThrowError("Point index out of range");
-		return;
-	}
+  int i;
+  NODE_ARG_INT(0, "index", i);
+  if (i < 0 || i >= geom->get()->getNumPoints()) {
+    Nan::ThrowError("Point index out of range");
+    return;
+  }
 
-	int n = info.Length() - 1;
+  int n = info.Length() - 1;
 
-	if(n == 0) {
-		Nan::ThrowError("Point must be given");
-		return;
-	} else if(n == 1) {
-		if(!info[1]->IsObject()) {
-			Nan::ThrowError("Point or object expected for second argument");
-			return;
-		}
-		if(IS_WRAPPED(info[1], Point)){
-			//set from Point object
-			Point* pt = Nan::ObjectWrap::Unwrap<Point>(info[1].As<Object>());
-			geom->get()->setPoint(i, pt->get());
-		} else {
-			Local<Object> obj = info[1].As<Object>();
-			//set from object {x: 0, y: 5}
-			double x, y;
-			NODE_DOUBLE_FROM_OBJ(obj, "x", x);
-			NODE_DOUBLE_FROM_OBJ(obj, "y", y);
+  if (n == 0) {
+    Nan::ThrowError("Point must be given");
+    return;
+  } else if (n == 1) {
+    if (!info[1]->IsObject()) {
+      Nan::ThrowError("Point or object expected for second argument");
+      return;
+    }
+    if (IS_WRAPPED(info[1], Point)) {
+      // set from Point object
+      Point *pt = Nan::ObjectWrap::Unwrap<Point>(info[1].As<Object>());
+      geom->get()->setPoint(i, pt->get());
+    } else {
+      Local<Object> obj = info[1].As<Object>();
+      // set from object {x: 0, y: 5}
+      double x, y;
+      NODE_DOUBLE_FROM_OBJ(obj, "x", x);
+      NODE_DOUBLE_FROM_OBJ(obj, "y", y);
 
-			Local<String> z_prop_name = Nan::New("z").ToLocalChecked();
-			if (Nan::HasOwnProperty(obj, z_prop_name).FromMaybe(false)) {
-				Local<Value> z_val = Nan::Get(obj, z_prop_name).ToLocalChecked();
-				if (!z_val->IsNumber()) {
-					Nan::ThrowError("z property must be number");
-					return;
-				}
-				geom->get()->setPoint(i, x, y, Nan::To<double>(z_val).ToChecked());
-			} else {
-				geom->get()->setPoint(i, x, y);
-			}
-		}
-	} else {
-		//set x, y, z from numeric arguments
-		if(!info[1]->IsNumber()){
-			Nan::ThrowError("Number expected for second argument");
-			return;
-		}
-		if(!info[2]->IsNumber()){
-			Nan::ThrowError("Number expected for third argument");
-			return;
-		}
-		if(n == 2){
-			geom->get()->setPoint(i, Nan::To<double>(info[1]).ToChecked(), Nan::To<double>(info[2]).ToChecked());
-		} else {
-			if(!info[3]->IsNumber()){
-				Nan::ThrowError("Number expected for fourth argument");
-				return;
-			}
+      Local<String> z_prop_name = Nan::New("z").ToLocalChecked();
+      if (Nan::HasOwnProperty(obj, z_prop_name).FromMaybe(false)) {
+        Local<Value> z_val = Nan::Get(obj, z_prop_name).ToLocalChecked();
+        if (!z_val->IsNumber()) {
+          Nan::ThrowError("z property must be number");
+          return;
+        }
+        geom->get()->setPoint(i, x, y, Nan::To<double>(z_val).ToChecked());
+      } else {
+        geom->get()->setPoint(i, x, y);
+      }
+    }
+  } else {
+    // set x, y, z from numeric arguments
+    if (!info[1]->IsNumber()) {
+      Nan::ThrowError("Number expected for second argument");
+      return;
+    }
+    if (!info[2]->IsNumber()) {
+      Nan::ThrowError("Number expected for third argument");
+      return;
+    }
+    if (n == 2) {
+      geom->get()->setPoint(
+        i,
+        Nan::To<double>(info[1]).ToChecked(),
+        Nan::To<double>(info[2]).ToChecked());
+    } else {
+      if (!info[3]->IsNumber()) {
+        Nan::ThrowError("Number expected for fourth argument");
+        return;
+      }
 
-			geom->get()->setPoint(i, Nan::To<double>(info[1]).ToChecked(), Nan::To<double>(info[2]).ToChecked(), Nan::To<double>(info[3]).ToChecked());
-		}
-	}
+      geom->get()->setPoint(
+        i,
+        Nan::To<double>(info[1]).ToChecked(),
+        Nan::To<double>(info[2]).ToChecked(),
+        Nan::To<double>(info[3]).ToChecked());
+    }
+  }
 
-	return;
+  return;
 }
 
 /**
- * Adds point(s) to the line string. Also accepts any object with an x and y property.
+ * Adds point(s) to the line string. Also accepts any object with an x and y
+ * property.
  *
  * @example
  * ```
@@ -261,103 +286,111 @@ NAN_METHOD(LineStringPoints::set)
  * @throws Error
  * @param {gdal.Point|object|Array} point(s)
  */
-NAN_METHOD(LineStringPoints::add)
-{
-	Nan::HandleScope scope;
+NAN_METHOD(LineStringPoints::add) {
+  Nan::HandleScope scope;
 
-	Local<Object> parent = Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-	LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
+  Local<Object> parent =
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
+      .ToLocalChecked()
+      .As<Object>();
+  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
-	int n = info.Length();
+  int n = info.Length();
 
-	if(n == 0) {
-		Nan::ThrowError("Point must be given");
-		return;
-	} else if(n == 1) {
-		if(!info[0]->IsObject()) {
-			Nan::ThrowError("Point, object, or array of points expected");
-			return;
-		}
-		if(IS_WRAPPED(info[0], Point)){
-			//set from Point object
-			Point* pt = Nan::ObjectWrap::Unwrap<Point>(info[0].As<Object>());
-			geom->get()->addPoint(pt->get());
-		} else if (info[0]->IsArray()) {
-			//set from array of points
-			Local<Array> array = info[0].As<Array>();
-			int length = array->Length();
-			for (int i = 0; i < length; i++){
-				Local<Value> element = Nan::Get(array, i).ToLocalChecked();
-				if(!element->IsObject()) {
-					Nan::ThrowError("All points must be Point objects or objects");
-					return;
-				}
-				Local<Object> element_obj = element.As<Object>();
-				if(IS_WRAPPED(element_obj, Point)){
-					//set from Point object
-					Point* pt = Nan::ObjectWrap::Unwrap<Point>(element_obj);
-					geom->get()->addPoint(pt->get());
-				} else {
-					//set from object {x: 0, y: 5}
-					double x, y;
-					NODE_DOUBLE_FROM_OBJ(element_obj, "x", x);
-					NODE_DOUBLE_FROM_OBJ(element_obj, "y", y);
+  if (n == 0) {
+    Nan::ThrowError("Point must be given");
+    return;
+  } else if (n == 1) {
+    if (!info[0]->IsObject()) {
+      Nan::ThrowError("Point, object, or array of points expected");
+      return;
+    }
+    if (IS_WRAPPED(info[0], Point)) {
+      // set from Point object
+      Point *pt = Nan::ObjectWrap::Unwrap<Point>(info[0].As<Object>());
+      geom->get()->addPoint(pt->get());
+    } else if (info[0]->IsArray()) {
+      // set from array of points
+      Local<Array> array  = info[0].As<Array>();
+      int          length = array->Length();
+      for (int i = 0; i < length; i++) {
+        Local<Value> element = Nan::Get(array, i).ToLocalChecked();
+        if (!element->IsObject()) {
+          Nan::ThrowError("All points must be Point objects or objects");
+          return;
+        }
+        Local<Object> element_obj = element.As<Object>();
+        if (IS_WRAPPED(element_obj, Point)) {
+          // set from Point object
+          Point *pt = Nan::ObjectWrap::Unwrap<Point>(element_obj);
+          geom->get()->addPoint(pt->get());
+        } else {
+          // set from object {x: 0, y: 5}
+          double x, y;
+          NODE_DOUBLE_FROM_OBJ(element_obj, "x", x);
+          NODE_DOUBLE_FROM_OBJ(element_obj, "y", y);
 
-					Local<String> z_prop_name = Nan::New("z").ToLocalChecked();
-					if (Nan::HasOwnProperty(element_obj, z_prop_name).FromMaybe(false)) {
-						Local<Value> z_val = Nan::Get(element_obj, z_prop_name).ToLocalChecked();
-						if (!z_val->IsNumber()) {
-							Nan::ThrowError("z property must be number");
-							return;
-						}
-						geom->get()->addPoint(x, y, Nan::To<double>(z_val).ToChecked());
-					} else {
-						geom->get()->addPoint(x, y);
-					}
-				}
-			}
-		} else {
-			//set from object {x: 0, y: 5}
-			Local<Object> obj = info[0].As<Object>();
-			double x, y;
-			NODE_DOUBLE_FROM_OBJ(obj, "x", x);
-			NODE_DOUBLE_FROM_OBJ(obj, "y", y);
+          Local<String> z_prop_name = Nan::New("z").ToLocalChecked();
+          if (Nan::HasOwnProperty(element_obj, z_prop_name).FromMaybe(false)) {
+            Local<Value> z_val =
+              Nan::Get(element_obj, z_prop_name).ToLocalChecked();
+            if (!z_val->IsNumber()) {
+              Nan::ThrowError("z property must be number");
+              return;
+            }
+            geom->get()->addPoint(x, y, Nan::To<double>(z_val).ToChecked());
+          } else {
+            geom->get()->addPoint(x, y);
+          }
+        }
+      }
+    } else {
+      // set from object {x: 0, y: 5}
+      Local<Object> obj = info[0].As<Object>();
+      double        x, y;
+      NODE_DOUBLE_FROM_OBJ(obj, "x", x);
+      NODE_DOUBLE_FROM_OBJ(obj, "y", y);
 
-			Local<String> z_prop_name = Nan::New("z").ToLocalChecked();
-			if (Nan::HasOwnProperty(obj, z_prop_name).FromMaybe(false)) {
-				Local<Value> z_val = Nan::Get(obj, z_prop_name).ToLocalChecked();
-				if (!z_val->IsNumber()) {
-					Nan::ThrowError("z property must be number");
-					return;
-				}
-				geom->get()->addPoint(x, y, Nan::To<double>(z_val).ToChecked());
-			} else {
-				geom->get()->addPoint(x, y);
-			}
-		}
-	} else {
-		//set x, y, z from numeric arguments
-		if(!info[0]->IsNumber()){
-			Nan::ThrowError("Number expected for first argument");
-			return;
-		}
-		if(!info[1]->IsNumber()){
-			Nan::ThrowError("Number expected for second argument");
-			return;
-		}
-		if(n == 2){
-			geom->get()->addPoint(Nan::To<double>(info[0]).ToChecked(), Nan::To<double>(info[1]).ToChecked());
-		} else {
-			if(!info[2]->IsNumber()){
-				Nan::ThrowError("Number expected for third argument");
-				return;
-			}
+      Local<String> z_prop_name = Nan::New("z").ToLocalChecked();
+      if (Nan::HasOwnProperty(obj, z_prop_name).FromMaybe(false)) {
+        Local<Value> z_val = Nan::Get(obj, z_prop_name).ToLocalChecked();
+        if (!z_val->IsNumber()) {
+          Nan::ThrowError("z property must be number");
+          return;
+        }
+        geom->get()->addPoint(x, y, Nan::To<double>(z_val).ToChecked());
+      } else {
+        geom->get()->addPoint(x, y);
+      }
+    }
+  } else {
+    // set x, y, z from numeric arguments
+    if (!info[0]->IsNumber()) {
+      Nan::ThrowError("Number expected for first argument");
+      return;
+    }
+    if (!info[1]->IsNumber()) {
+      Nan::ThrowError("Number expected for second argument");
+      return;
+    }
+    if (n == 2) {
+      geom->get()->addPoint(
+        Nan::To<double>(info[0]).ToChecked(),
+        Nan::To<double>(info[1]).ToChecked());
+    } else {
+      if (!info[2]->IsNumber()) {
+        Nan::ThrowError("Number expected for third argument");
+        return;
+      }
 
-			geom->get()->addPoint(Nan::To<double>(info[0]).ToChecked(), Nan::To<double>(info[1]).ToChecked(), Nan::To<double>(info[2]).ToChecked());
-		}
-	}
+      geom->get()->addPoint(
+        Nan::To<double>(info[0]).ToChecked(),
+        Nan::To<double>(info[1]).ToChecked(),
+        Nan::To<double>(info[2]).ToChecked());
+    }
+  }
 
-	return;
+  return;
 }
 
 } // namespace node_gdal

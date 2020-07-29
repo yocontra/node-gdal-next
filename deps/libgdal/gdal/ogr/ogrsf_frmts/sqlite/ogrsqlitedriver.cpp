@@ -13,7 +13,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@
 #include "ogr_core.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqlitedriver.cpp 52ab63f8c20bb2ccc0a5b378a29fdc11768a09c0 2018-09-22 15:56:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitedriver.cpp c32973ee27efd67d5c5388c9866a7e688ce83257 2020-01-11 01:10:34 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                     OGRSQLiteDriverIdentify()                        */
@@ -198,7 +198,7 @@ static GDALDataset *OGRSQLiteDriverOpen( GDALOpenInfo* poOpenInfo )
         poDS->ExecuteSQL(pszSQL, nullptr, nullptr);
         CPLFree(pszSQL);
         CPLFree(pszSQLiteFilename);
-        poDS->SetUpdate(FALSE);
+        poDS->DisableUpdate();
         return poDS;
     }
 

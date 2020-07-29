@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -56,7 +56,7 @@
 
 #include "proj.h"
 
-CPL_CVSID("$Id: ogr_fromepsg.cpp ff69f498fecc07add460ed0bcbed7a30e7b23009 2019-03-23 12:56:47 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogr_fromepsg.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 extern void OGRsnPrintDouble( char * pszStrBuf, size_t size, double dfValue );
 

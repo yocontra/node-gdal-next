@@ -92,6 +92,15 @@ namespace proj {}
 #include "nn.hpp"
 
 /* To allow customizing the base namespace of PROJ */
+#ifdef PROJ_INTERNAL_CPP_NAMESPACE
+#define NS_PROJ osgeo::internalproj
+#define NS_PROJ_START                                                          \
+    namespace osgeo {                                                          \
+    namespace internalproj {
+#define NS_PROJ_END                                                            \
+    }                                                                          \
+    }
+#else
 #ifndef NS_PROJ
 #define NS_PROJ osgeo::proj
 #define NS_PROJ_START                                                          \
@@ -100,6 +109,7 @@ namespace proj {}
 #define NS_PROJ_END                                                            \
     }                                                                          \
     }
+#endif
 #endif
 
 // Private-implementation (Pimpl) pattern
@@ -296,7 +306,7 @@ struct BaseObjectNNPtr : public util::nn<BaseObjectPtr> {
 using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
 #endif
 
-/** \brief Class that can be derived from, to emulate Java's Object behaviour.
+/** \brief Class that can be derived from, to emulate Java's Object behavior.
  */
 class PROJ_GCC_DLL BaseObject {
   public:

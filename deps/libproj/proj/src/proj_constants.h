@@ -109,12 +109,17 @@
     "Equidistant Cylindrical (Spherical)"
 #define EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL 1029
 
+#define PROJ_WKT2_NAME_METHOD_FLAT_POLAR_QUARTIC "Flat Polar Quartic"
+
 #define PROJ_WKT2_NAME_METHOD_GALL_STEREOGRAPHIC "Gall Stereographic"
 
 #define PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE "Goode Homolosine"
 
 #define PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE \
     "Interrupted Goode Homolosine"
+
+#define PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE_OCEAN \
+    "Interrupted Goode Homolosine Ocean"
 
 #define PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X \
     "Geostationary Satellite (Sweep X)"
@@ -535,6 +540,9 @@
 
 #define EPSG_CODE_METHOD_VERTICALGRID_NZLVD 1071
 #define EPSG_NAME_METHOD_VERTICALGRID_NZLVD "Vertical Offset by Grid Interpolation (NZLVD)"
+
+#define EPSG_CODE_METHOD_VERTICALGRID_BEV_AT 1080
+#define EPSG_NAME_METHOD_VERTICALGRID_BEV_AT "Vertical Offset by Grid Interpolation (BEV AT)"
 
 #define EPSG_CODE_METHOD_VERTICALGRID_GTX 1084
 #define EPSG_NAME_METHOD_VERTICALGRID_GTX "Vertical Offset by Grid Interpolation (gtx)"

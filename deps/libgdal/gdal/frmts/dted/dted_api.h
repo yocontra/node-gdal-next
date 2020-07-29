@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dted_api.h bde879dd6c2dd67ecf317ad588846089f0905cb9 2016-03-15 00:39:53Z Kurt Schwehr $
+ * $Id: dted_api.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  DTED Translator
  * Purpose:  Public (C callable) interface for DTED/CDED reading.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_arcgen.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogr_arcgen.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  Arc/Info Generate Translator
  * Purpose:  Definition of classes for OGR .arcgen driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 /*                             OGRARCGENLayer                              */
 /************************************************************************/
 
-class OGRARCGENLayer : public OGRLayer
+class OGRARCGENLayer final: public OGRLayer
 {
     OGRFeatureDefn*    poFeatureDefn;
 
@@ -64,7 +64,7 @@ class OGRARCGENLayer : public OGRLayer
 /*                           OGRARCGENDataSource                           */
 /************************************************************************/
 
-class OGRARCGENDataSource : public OGRDataSource
+class OGRARCGENDataSource final: public OGRDataSource
 {
     char*               pszName;
 

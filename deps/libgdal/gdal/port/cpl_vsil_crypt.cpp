@@ -44,7 +44,7 @@ void CPL_DLL VSIInstallCryptFileHandler();
 void CPL_DLL VSISetCryptKey( const GByte* pabyKey, int nKeySize );
 CPL_C_END
 
-CPL_CVSID("$Id: cpl_vsil_crypt.cpp 929320a45b5cb4b3ef0005d9b4fcbe514b3b667e 2019-08-01 16:47:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_crypt.cpp c7b080012506c537b1620279ed1c1ac7079ba447 2019-08-17 23:54:34 +0200 Even Rouault $")
 
 constexpr char VSICRYPT_PREFIX[] = "/vsicrypt/";
 
@@ -447,10 +447,19 @@ VSICryptFileHeader::CryptKeyCheck( CryptoPP::BlockCipher* poEncCipher )
     CPLAssert( osIV.size() == poEncCipher->BlockSize() );
     // Generate a unique IV with a sector offset of 0xFFFFFFFFFFFFFFFF.
     std::string osCheckIV(VSICryptGenerateSectorIV(osIV, ~(static_cast<vsi_l_offset>(0))));
-    CryptoPP::StringSink* poSink = new CryptoPP::StringSink(osKeyCheckRes);
-    CryptoPP::StreamTransformation* poMode =
-        new CryptoPP::CBC_Mode_ExternalCipher::Encryption(
+    CryptoPP::StreamTransformation* poMode;
+    try
+    {
+        poMode = new CryptoPP::CBC_Mode_ExternalCipher::Encryption(
             *poEncCipher, reinterpret_cast<const cryptopp_byte*>(osCheckIV.c_str()));
+    }
+    catch( const std::exception& e )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "CryptoPP exception: %s", e.what());
+        return std::string();
+    }
+    CryptoPP::StringSink* poSink = new CryptoPP::StringSink(osKeyCheckRes);
     CryptoPP::StreamTransformationFilter* poEnc =
         new CryptoPP::StreamTransformationFilter(
             *poMode, poSink,
@@ -894,23 +903,32 @@ void VSICryptFileHandle::EncryptBlock( GByte* pabyData, vsi_l_offset nOffset )
     std::string osIV(VSICryptGenerateSectorIV(poHeader->osIV, nOffset));
     CPLAssert( static_cast<int>(osIV.size()) == nBlockSize );
 
-    CryptoPP::StringSink* poSink = new CryptoPP::StringSink(osRes);
     CryptoPP::StreamTransformation* poMode;
-    if( poHeader->eMode == MODE_CBC )
-        poMode = new CryptoPP::CBC_Mode_ExternalCipher::Encryption(
-            *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
-    else if( poHeader->eMode == MODE_CFB )
-        poMode = new CryptoPP::CFB_Mode_ExternalCipher::Encryption(
-            *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
-    else if( poHeader->eMode == MODE_OFB )
-        poMode = new CryptoPP::OFB_Mode_ExternalCipher::Encryption(
-            *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
-    else if( poHeader->eMode == MODE_CTR )
-        poMode = new CryptoPP::CTR_Mode_ExternalCipher::Encryption(
-            *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
-    else
-        poMode = new CryptoPP::CBC_CTS_Mode_ExternalCipher::Encryption(
-            *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
+    try
+    {
+        if( poHeader->eMode == MODE_CBC )
+            poMode = new CryptoPP::CBC_Mode_ExternalCipher::Encryption(
+                *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
+        else if( poHeader->eMode == MODE_CFB )
+            poMode = new CryptoPP::CFB_Mode_ExternalCipher::Encryption(
+                *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
+        else if( poHeader->eMode == MODE_OFB )
+            poMode = new CryptoPP::OFB_Mode_ExternalCipher::Encryption(
+                *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
+        else if( poHeader->eMode == MODE_CTR )
+            poMode = new CryptoPP::CTR_Mode_ExternalCipher::Encryption(
+                *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
+        else
+            poMode = new CryptoPP::CBC_CTS_Mode_ExternalCipher::Encryption(
+                *poEncCipher, reinterpret_cast<const cryptopp_byte *>(osIV.c_str()) );
+    }
+    catch( const std::exception& e )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "cryptopp exception: %s", e.what());
+        return;
+    }
+    CryptoPP::StringSink* poSink = new CryptoPP::StringSink(osRes);
     CryptoPP::StreamTransformationFilter* poEnc =
         new CryptoPP::StreamTransformationFilter(
             *poMode, poSink, CryptoPP::StreamTransformationFilter::NO_PADDING);

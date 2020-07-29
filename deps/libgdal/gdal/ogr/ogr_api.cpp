@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "cpl_error.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: ogr_api.cpp 7b9e27aa9fa7d5fd0c2ebdcfa3c563d0c61d462c 2018-09-28 01:42:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_api.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 static bool bNonLinearGeometriesEnabled = true;
 

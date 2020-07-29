@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2012, Jean-Claude Repetto
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 #include "ogr_geometry.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: mapdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: mapdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -41,7 +41,7 @@ CPL_CVSID("$Id: mapdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-
 /* ==================================================================== */
 /************************************************************************/
 
-class MAPDataset : public GDALDataset
+class MAPDataset final: public GDALDataset
 {
     GDALDataset *poImageDS;
 
@@ -81,7 +81,7 @@ class MAPDataset : public GDALDataset
 /*                         MAPWrapperRasterBand                         */
 /* ==================================================================== */
 /************************************************************************/
-class MAPWrapperRasterBand : public GDALProxyRasterBand
+class MAPWrapperRasterBand final: public GDALProxyRasterBand
 {
   GDALRasterBand* poBaseBand;
 
@@ -365,13 +365,16 @@ GDALDataset *MAPDataset::Open( GDALOpenInfo * poOpenInfo )
             if ( pszWKT != nullptr )
             {
                 OGRSpatialReference oSRS;
-                OGRSpatialReference *poLatLong = nullptr;
+                OGRSpatialReference *poLongLat = nullptr;
                 if ( OGRERR_NONE == oSRS.importFromWkt ( pszWKT ))
-                    poLatLong = oSRS.CloneGeogCS();
-                if ( poLatLong )
-                    poTransform = OGRCreateCoordinateTransformation( poLatLong, &oSRS );
-                if ( poLatLong )
-                    delete poLatLong;
+                    poLongLat = oSRS.CloneGeogCS();
+                if ( poLongLat )
+                {
+                    oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+                    poLongLat->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+                    poTransform = OGRCreateCoordinateTransformation( poLongLat, &oSRS );
+                    delete poLongLat;
+                }
             }
 
             for ( int iLine = 10; iLine < nLines; iLine++ )
@@ -495,7 +498,7 @@ void GDALRegister_MAP()
     poDriver->SetDescription( "MAP" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "OziExplorer .MAP" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_map.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/map.html" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

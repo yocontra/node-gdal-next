@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdalrasterize.cpp e40d0a17ddb8ca683d53dd68777a74094f8f1bde 2019-03-12 13:31:28 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterize.cpp 225923a5caa782d1543b7c0d7248b92dcc0bc8bf 2020-04-06 12:59:27 +0200 Even Rouault $")
 
 
 /************************************************************************/
@@ -222,7 +222,7 @@ void gvBurnPoint( void *pCBData, int nY, int nX, double dfVariant )
 /************************************************************************/
 
 static void GDALCollectRingsFromGeometry(
-    OGRGeometry *poShape,
+    const OGRGeometry *poShape,
     std::vector<double> &aPointX, std::vector<double> &aPointY,
     std::vector<double> &aPointVariant,
     std::vector<int> &aPartSize, GDALBurnValueSrc eBurnValueSrc)
@@ -235,12 +235,8 @@ static void GDALCollectRingsFromGeometry(
 
     if( eFlatType == wkbPoint )
     {
-        OGRPoint *poPoint = dynamic_cast<OGRPoint *>(poShape);
-        CPLAssert(poPoint != nullptr);
-        const size_t nNewCount = aPointX.size() + 1;
+        const auto poPoint = poShape->toPoint();
 
-        aPointX.reserve( nNewCount );
-        aPointY.reserve( nNewCount );
         aPointX.push_back( poPoint->getX() );
         aPointY.push_back( poPoint->getY() );
         aPartSize.push_back( 1 );
@@ -250,7 +246,6 @@ static void GDALCollectRingsFromGeometry(
             // switch( eBurnValueSrc )
             // {
             // case GBV_Z:*/
-            aPointVariant.reserve( nNewCount );
             aPointVariant.push_back( poPoint->getZ() );
             // break;
             // case GBV_M:
@@ -258,10 +253,60 @@ static void GDALCollectRingsFromGeometry(
             //    aPointVariant.push_back( poPoint->getM() );
         }
     }
+    else if( EQUAL(poShape->getGeometryName(), "LINEARRING") )
+    {
+        const auto poRing = poShape->toLinearRing();
+        const int nCount = poRing->getNumPoints();
+        const size_t nNewCount = aPointX.size() + static_cast<size_t>(nCount);
+
+        aPointX.reserve( nNewCount );
+        aPointY.reserve( nNewCount );
+        if( eBurnValueSrc != GBV_UserBurnValue )
+            aPointVariant.reserve( nNewCount );
+        if( poRing->isClockwise() )
+        {
+            for( int i = 0; i < nCount; i++ )
+            {
+                aPointX.push_back( poRing->getX(i) );
+                aPointY.push_back( poRing->getY(i) );
+                if( eBurnValueSrc != GBV_UserBurnValue )
+                {
+                    /*switch( eBurnValueSrc )
+                    {
+                    case GBV_Z:*/
+                        aPointVariant.push_back( poRing->getZ(i) );
+                        /*break;
+                    case GBV_M:
+                        aPointVariant.push_back( poRing->getM(i) );
+                    }*/
+                }
+            }
+        }
+        else
+        {
+            for( int i = nCount - 1; i >= 0; i-- )
+            {
+                aPointX.push_back( poRing->getX(i) );
+                aPointY.push_back( poRing->getY(i) );
+                if( eBurnValueSrc != GBV_UserBurnValue )
+                {
+                    /*switch( eBurnValueSrc )
+                    {
+                    case GBV_Z:*/
+                        aPointVariant.push_back( poRing->getZ(i) );
+                        /*break;
+                    case GBV_M:
+                        aPointVariant.push_back( poRing->getM(i) );
+                    }*/
+                }
+
+            }
+        }
+        aPartSize.push_back( nCount );
+    }
     else if( eFlatType == wkbLineString )
     {
-        OGRLineString *poLine = dynamic_cast<OGRLineString *>(poShape);
-        CPLAssert(poLine != nullptr);
+        const auto poLine = poShape->toLineString();
         const int nCount = poLine->getNumPoints();
         const size_t nNewCount = aPointX.size() + static_cast<size_t>(nCount);
 
@@ -287,40 +332,9 @@ static void GDALCollectRingsFromGeometry(
         }
         aPartSize.push_back( nCount );
     }
-    else if( EQUAL(poShape->getGeometryName(), "LINEARRING") )
-    {
-        OGRLinearRing *poRing = dynamic_cast<OGRLinearRing *>(poShape);
-        CPLAssert(poRing != nullptr);
-        const int nCount = poRing->getNumPoints();
-        const size_t nNewCount = aPointX.size() + static_cast<size_t>(nCount);
-
-        aPointX.reserve( nNewCount );
-        aPointY.reserve( nNewCount );
-        if( eBurnValueSrc != GBV_UserBurnValue )
-            aPointVariant.reserve( nNewCount );
-        int i = nCount - 1;  // Used after for.
-        for( ; i >= 0; i-- )
-        {
-            aPointX.push_back( poRing->getX(i) );
-            aPointY.push_back( poRing->getY(i) );
-        }
-        if( eBurnValueSrc != GBV_UserBurnValue )
-        {
-            /*switch( eBurnValueSrc )
-            {
-            case GBV_Z:*/
-                aPointVariant.push_back( poRing->getZ(i) );
-                /*break;
-            case GBV_M:
-                aPointVariant.push_back( poRing->getM(i) );
-            }*/
-        }
-        aPartSize.push_back( nCount );
-    }
     else if( eFlatType == wkbPolygon )
     {
-        OGRPolygon *poPolygon = dynamic_cast<OGRPolygon *>(poShape);
-        CPLAssert(poPolygon != nullptr);
+        const auto poPolygon = poShape->toPolygon();
 
         GDALCollectRingsFromGeometry( poPolygon->getExteriorRing(),
                                       aPointX, aPointY, aPointVariant,
@@ -336,9 +350,7 @@ static void GDALCollectRingsFromGeometry(
              || eFlatType == wkbMultiPolygon
              || eFlatType == wkbGeometryCollection )
     {
-        OGRGeometryCollection *poGC = dynamic_cast<OGRGeometryCollection *>(poShape);
-        CPLAssert(poGC != nullptr);
-
+        const auto poGC = poShape->toGeometryCollection();
         for( int i = 0; i < poGC->getNumGeometries(); i++ )
             GDALCollectRingsFromGeometry( poGC->getGeometryRef(i),
                                           aPointX, aPointY, aPointVariant,
@@ -359,7 +371,8 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
                         int nBands, GDALDataType eType,
                         int nPixelSpace, GSpacing nLineSpace, GSpacing nBandSpace,
                         int bAllTouched,
-                        OGRGeometry *poShape, double *padfBurnValue,
+                        const OGRGeometry *poShape,
+                        const double *padfBurnValue,
                         GDALBurnValueSrc eBurnValueSrc,
                         GDALRasterMergeAlg eMergeAlg,
                         GDALTransformerFunc pfnTransformer,
@@ -368,6 +381,32 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
 {
     if( poShape == nullptr || poShape->IsEmpty() )
         return;
+    const auto eGeomType = wkbFlatten(poShape->getGeometryType());
+
+    if( (eGeomType == wkbMultiLineString ||
+         eGeomType == wkbMultiPolygon ||
+         eGeomType == wkbGeometryCollection) &&
+        eMergeAlg == GRMA_Replace )
+    {
+        // Speed optimization: in replace mode, we can rasterize each part of
+        // a geometry collection separately.
+        const auto poGC = poShape->toGeometryCollection();
+        for( const auto poPart: *poGC )
+        {
+            gv_rasterize_one_shape(pabyChunkBuf, nXOff, nYOff,
+                                   nXSize, nYSize,
+                                   nBands, eType,
+                                   nPixelSpace, nLineSpace, nBandSpace,
+                                   bAllTouched,
+                                   poPart,
+                                   padfBurnValue,
+                                   eBurnValueSrc,
+                                   eMergeAlg,
+                                   pfnTransformer,
+                                   pTransformArg);
+        }
+        return;
+    }
 
     if(nPixelSpace == 0)
     {
@@ -417,7 +456,7 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
 
         // TODO: We need to add all appropriate error checking at some point.
         pfnTransformer( pTransformArg, FALSE, static_cast<int>(aPointX.size()),
-                        &(aPointX[0]), &(aPointY[0]), nullptr, panSuccess );
+                        aPointX.data(), aPointY.data(), nullptr, panSuccess );
         CPLFree( panSuccess );
     }
 
@@ -435,21 +474,15 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
 /*      stored in continuous memory block.                              */
 /* -------------------------------------------------------------------- */
 
-    // TODO - mloskot: Check if vectors are empty, otherwise it may
-    // lead to undefined behavior by returning non-referencable pointer.
-    // if( !aPointX.empty() )
-    //    // Fill polygon.
-    // else
-    //    // How to report this problem?
-    switch( wkbFlatten(poShape->getGeometryType()) )
+    switch( eGeomType )
     {
       case wkbPoint:
       case wkbMultiPoint:
         GDALdllImagePoint( sInfo.nXSize, nYSize,
-                           static_cast<int>(aPartSize.size()), &(aPartSize[0]),
-                           &(aPointX[0]), &(aPointY[0]),
+                           static_cast<int>(aPartSize.size()), aPartSize.data(),
+                           aPointX.data(), aPointY.data(),
                            (eBurnValueSrc == GBV_UserBurnValue)?
-                           nullptr : &(aPointVariant[0]),
+                           nullptr : aPointVariant.data(),
                            gvBurnPoint, &sInfo );
         break;
       case wkbLineString:
@@ -458,19 +491,19 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
           if( bAllTouched )
               GDALdllImageLineAllTouched( sInfo.nXSize, nYSize,
                                           static_cast<int>(aPartSize.size()),
-                                          &(aPartSize[0]),
-                                          &(aPointX[0]), &(aPointY[0]),
+                                          aPartSize.data(),
+                                          aPointX.data(), aPointY.data(),
                                           (eBurnValueSrc == GBV_UserBurnValue)?
-                                          nullptr : &(aPointVariant[0]),
+                                          nullptr : aPointVariant.data(),
                                           gvBurnPoint, &sInfo,
                                           eMergeAlg == GRMA_Add );
           else
               GDALdllImageLine( sInfo.nXSize, nYSize,
                                 static_cast<int>(aPartSize.size()),
-                                &(aPartSize[0]),
-                                &(aPointX[0]), &(aPointY[0]),
+                                aPartSize.data(),
+                                aPointX.data(), aPointY.data(),
                                 (eBurnValueSrc == GBV_UserBurnValue)?
-                                nullptr : &(aPointVariant[0]),
+                                nullptr : aPointVariant.data(),
                                 gvBurnPoint, &sInfo );
       }
       break;
@@ -479,10 +512,10 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
       {
           GDALdllImageFilledPolygon(
               sInfo.nXSize, nYSize,
-              static_cast<int>(aPartSize.size()), &(aPartSize[0]),
-              &(aPointX[0]), &(aPointY[0]),
+              static_cast<int>(aPartSize.size()), aPartSize.data(),
+              aPointX.data(), aPointY.data(),
               (eBurnValueSrc == GBV_UserBurnValue)?
-              nullptr : &(aPointVariant[0]),
+              nullptr : aPointVariant.data(),
               gvBurnScanline, &sInfo );
           if( bAllTouched )
           {
@@ -494,8 +527,8 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
               {
                   GDALdllImageLineAllTouched(
                       sInfo.nXSize, nYSize,
-                      static_cast<int>(aPartSize.size()), &(aPartSize[0]),
-                      &(aPointX[0]), &(aPointY[0]),
+                      static_cast<int>(aPartSize.size()), aPartSize.data(),
+                      aPointX.data(), aPointY.data(),
                       nullptr,
                       gvBurnPoint, &sInfo,
                       eMergeAlg == GRMA_Add );
@@ -512,9 +545,9 @@ gv_rasterize_one_shape( unsigned char *pabyChunkBuf, int nXOff, int nYOff,
 
                   GDALdllImageLineAllTouched(
                       sInfo.nXSize, nYSize,
-                      static_cast<int>(aPartSize.size()), &(aPartSize[0]),
-                      &(aPointX[0]), &(aPointY[0]),
-                      &(aPointVariant[0]),
+                      static_cast<int>(aPartSize.size()), aPartSize.data(),
+                      aPointX.data(), aPointY.data(),
+                      aPointVariant.data(),
                       gvBurnPoint, &sInfo,
                       eMergeAlg == GRMA_Add );
               }
@@ -945,9 +978,8 @@ CPLErr GDALRasterizeGeometries( GDALDatasetH hDS,
         // rem: optimized for square blocks
         const GIntBig nbMaxBlocks64 = GDALGetCacheMax64() / nPixelSize / nYBlockSize / nXBlockSize;
         const int knIntMax = std::numeric_limits<int>::max();
-        const int nbMaxBlocks =
-            nbMaxBlocks64 > knIntMax
-            ? knIntMax : static_cast<int>(nbMaxBlocks64);
+        const int nbMaxBlocks = static_cast<int>(std::min(
+            static_cast<GIntBig>(knIntMax / nPixelSize / nYBlockSize / nXBlockSize), nbMaxBlocks64));
         const int nbBlocsX = std::max(1, std::min(static_cast<int>(sqrt(static_cast<double>(nbMaxBlocks))), nXBlocks));
         const int nbBlocsY = std::max(1, std::min(nbMaxBlocks / nbBlocsX, nYBlocks));
 

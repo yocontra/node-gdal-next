@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -44,7 +44,7 @@
 #include "netcdf.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gmtdataset.cpp be09f0a95a554cc61b240f5c4e5c85150489d2a9 2018-01-17 15:58:09Z Even Rouault $")
+CPL_CVSID("$Id: gmtdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 extern CPLMutex *hNCMutex; /* shared with netcdf. See netcdfdataset.cpp */
 
@@ -56,7 +56,7 @@ extern CPLMutex *hNCMutex; /* shared with netcdf. See netcdfdataset.cpp */
 
 class GMTRasterBand;
 
-class GMTDataset : public GDALPamDataset
+class GMTDataset final: public GDALPamDataset
 {
     int         z_id;
     double      adfGeoTransform[6];
@@ -83,7 +83,7 @@ class GMTDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class GMTRasterBand : public GDALPamRasterBand
+class GMTRasterBand final: public GDALPamRasterBand
 {
     nc_type nc_datatype;
     int         nZId;
@@ -640,7 +640,7 @@ void GDALRegister_GMT()
     poDriver->SetDescription( "GMT" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GMT NetCDF Grid Format" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#GMT" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/gmt.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "nc" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Int16 Int32 Float32 Float64" );

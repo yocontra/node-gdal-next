@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Simon Perkins
- * Copyright (c) 2008-2018, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2018, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2018, Chiara Marmo <chiara dot marmo at u-psud dot fr>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -40,7 +40,7 @@
 #include <cstring>
 
 
-CPL_CVSID("$Id: fitsdataset.cpp 859a6aa88ff020db0e8fb22f68a949acb041565d 2019-08-18 11:54:22 +0200 Even Rouault $")
+CPL_CVSID("$Id: fitsdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -95,6 +95,8 @@ public:
   virtual CPLErr GetGeoTransform( double * ) override;
   virtual CPLErr SetGeoTransform( double * ) override;
 
+  bool GetRawBinaryLayout(GDALDataset::RawBinaryLayout&) override;
+
 };
 
 /************************************************************************/
@@ -103,7 +105,7 @@ public:
 /* ==================================================================== */
 /************************************************************************/
 
-class FITSRasterBand : public GDALPamRasterBand {
+class FITSRasterBand final: public GDALPamRasterBand {
 
   friend class  FITSDataset;
 
@@ -430,6 +432,36 @@ FITSDataset::~FITSDataset() {
     // Close the FITS handle
     fits_close_file(hFITS, &status);
   }
+}
+
+
+/************************************************************************/
+/*                        GetRawBinaryLayout()                          */
+/************************************************************************/
+
+bool FITSDataset::GetRawBinaryLayout(GDALDataset::RawBinaryLayout& sLayout)
+{
+    int status = 0;
+    if( fits_is_compressed_image( hFITS, &status) )
+        return false;
+    GDALDataType eDT = GetRasterBand(1)->GetRasterDataType();
+    if( eDT == GDT_UInt16 || eDT == GDT_UInt32 )
+        return false; // are supported as native signed with offset
+
+    sLayout.osRawFilename = GetDescription();
+    OFF_T headerstart = 0;
+    OFF_T datastart = 0;
+    OFF_T dataend = 0;
+    fits_get_hduoff(hFITS, &headerstart, &datastart, &dataend, &status);
+    if( nBands > 1 )
+        sLayout.eInterleaving = RawBinaryLayout::Interleaving::BSQ;
+    sLayout.eDataType = eDT;
+    sLayout.bLittleEndianOrder = false;
+    sLayout.nImageOffset = static_cast<GIntBig>(datastart);
+    sLayout.nPixelOffset = GDALGetDataTypeSizeBytes(eDT);
+    sLayout.nLineOffset = sLayout.nPixelOffset * nRasterXSize;
+    sLayout.nBandOffset = sLayout.nLineOffset * nRasterYSize;
+    return true;
 }
 
 /************************************************************************/
@@ -1547,7 +1579,7 @@ void GDALRegister_FITS()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Flexible Image Transport System" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#FITS" );
+                               "drivers/raster/fits.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte UInt16 Int16 UInt32 Int32 Float32 Float64" );
 

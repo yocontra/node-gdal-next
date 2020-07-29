@@ -3,10 +3,10 @@
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implementation of OGRESRIJSONReader class (OGR ESRIJSON Driver)
  *           to read ESRI Feature Service REST data
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2007, Mateusz Loskot
  * Copyright (c) 2013, Kyle Shannon <kyle at pobox dot com>
  *
@@ -50,7 +50,7 @@
 #include "ogrgeojsonutils.h"
 // #include "symbol_renames.h"
 
-CPL_CVSID("$Id: ogresrijsonreader.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogresrijsonreader.cpp 38b0feed67f80ded32be6c508323d862e1a14474 2020-04-07 12:01:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRESRIJSONReader()                         */
@@ -292,10 +292,10 @@ bool OGRESRIJSONReader::AddFeature( OGRFeature* poFeature )
 }
 
 /************************************************************************/
-/*                           ReadGeometry()                             */
+/*                       OGRESRIJSONReadGeometry()                      */
 /************************************************************************/
 
-OGRGeometry* OGRESRIJSONReader::ReadGeometry( json_object* poObj )
+OGRGeometry* OGRESRIJSONReadGeometry( json_object* poObj )
 {
     OGRGeometry* poGeometry = nullptr;
 
@@ -310,6 +310,33 @@ OGRGeometry* OGRESRIJSONReader::ReadGeometry( json_object* poObj )
 
     return poGeometry;
 }
+
+
+/************************************************************************/
+/*                     OGR_G_CreateGeometryFromEsriJson()               */
+/************************************************************************/
+
+/** Create a OGR geometry from a ESRIJson geometry object */
+OGRGeometryH OGR_G_CreateGeometryFromEsriJson( const char* pszJson )
+{
+    if( nullptr == pszJson )
+    {
+        // Translation failed.
+        return nullptr;
+    }
+
+    json_object *poObj = nullptr;
+    if( !OGRJSonParse(pszJson, &poObj) )
+        return nullptr;
+
+    OGRGeometry* poGeometry = OGRESRIJSONReadGeometry( poObj );
+
+    // Release JSON tree.
+    json_object_put( poObj );
+
+    return OGRGeometry::ToHandle(poGeometry);
+}
+
 
 /************************************************************************/
 /*                           ReadFeature()                              */
@@ -390,19 +417,11 @@ OGRFeature* OGRESRIJSONReader::ReadFeature( json_object* poObj )
 
     if( nullptr != poObjGeom )
     {
-        OGRGeometry* poGeometry = ReadGeometry( poObjGeom );
+        OGRGeometry* poGeometry = OGRESRIJSONReadGeometry( poObjGeom );
         if( nullptr != poGeometry )
         {
             poFeature->SetGeometryDirectly( poGeometry );
         }
-    }
-    else
-    {
-        CPLError( CE_Failure, CPLE_AppDefined,
-                  "Invalid Feature object. "
-                  "Missing \'geometry\' member." );
-        delete poFeature;
-        return nullptr;
     }
 
     return poFeature;
@@ -1025,6 +1044,21 @@ OGRSpatialReference* OGRESRIJSONReadSpatialReference( json_object* poObj )
             {
                 delete poSRS;
                 poSRS = nullptr;
+            }
+            else
+            {
+                int nEntries = 0;
+                int* panMatchConfidence = nullptr;
+                OGRSpatialReferenceH* pahSRS = poSRS->FindMatches(
+                    nullptr, &nEntries, &panMatchConfidence);
+                if( nEntries == 1 && panMatchConfidence[0] >= 70 )
+                {
+                    delete poSRS;
+                    poSRS = OGRSpatialReference::FromHandle(pahSRS[0])->Clone();
+                    poSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+                }
+                OSRFreeSRSArray(pahSRS);
+                CPLFree(panMatchConfidence);
             }
 
             return poSRS;

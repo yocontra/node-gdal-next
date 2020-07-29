@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2017, Alan Thomas <alant@outlook.com.au>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -34,7 +34,7 @@
 
 #include <stdexcept>
 
-CPL_CVSID("$Id: ogrdxf_dimension.cpp 73707b32a2b6b1a5c36b202f541bfb65b8cb404a 2018-05-03 12:31:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxf_dimension.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             PointDist()                              */

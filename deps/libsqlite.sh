@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libsqlite"
 
-SQLITE_VERSION=3310100
+SQLITE_VERSION=3320300
 dir_sqlite=./sqlite
 
 #

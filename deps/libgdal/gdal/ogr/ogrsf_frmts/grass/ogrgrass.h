@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgrass.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogrgrass.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/GRASS driver.
@@ -47,7 +47,7 @@ extern "C" {
 /************************************************************************/
 /*                            OGRGRASSLayer                             */
 /************************************************************************/
-class OGRGRASSLayer : public OGRLayer
+class OGRGRASSLayer final: public OGRLayer
 {
   public:
                         OGRGRASSLayer( int layer, struct Map_info * map );
@@ -125,7 +125,7 @@ class OGRGRASSLayer : public OGRLayer
 /************************************************************************/
 /*                          OGRGRASSDataSource                          */
 /************************************************************************/
-class OGRGRASSDataSource : public OGRDataSource
+class OGRGRASSDataSource final: public OGRDataSource
 {
   public:
                         OGRGRASSDataSource();
@@ -159,7 +159,7 @@ class OGRGRASSDataSource : public OGRDataSource
 /************************************************************************/
 /*                            OGRGRASSDriver                            */
 /************************************************************************/
-class OGRGRASSDriver : public OGRSFDriver
+class OGRGRASSDriver final: public OGRSFDriver
 {
   public:
                         virtual ~OGRGRASSDriver();

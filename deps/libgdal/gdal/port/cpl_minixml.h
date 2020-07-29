@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_minixml.h df507edcc67aa14ada1432baf516f49e6557fb06 2018-04-10 15:26:13 +0200 Even Rouault $
+ * $Id: cpl_minixml.h 7d6fac2a7dd6f5deed06d3ab591ba52f6bde7a70 2019-05-18 15:30:03 -0500 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Declarations for MiniXML Handler.
@@ -50,6 +50,10 @@ typedef enum
     /*! Node is a special literal */    CXT_Literal = 4
 } CPLXMLNodeType;
 
+/*! @cond Doxygen_Suppress */
+typedef struct CPLXMLNode CPLXMLNode;
+/*! @endcond */
+
 /**
  * Document node structure.
  *
@@ -62,8 +66,7 @@ typedef enum
  * Using the psChild and psNext pointers, a hierarchical tree structure
  * for a document can be represented as a tree of CPLXMLNode structures.
  */
-
-typedef struct CPLXMLNode
+struct CPLXMLNode
 {
     /**
      * \brief Node type
@@ -116,7 +119,7 @@ typedef struct CPLXMLNode
      */
 
     struct CPLXMLNode  *psChild;
-} CPLXMLNode;
+};
 
 CPLXMLNode CPL_DLL *CPLParseXMLString( const char * );
 void       CPL_DLL  CPLDestroyXMLNode( CPLXMLNode * );

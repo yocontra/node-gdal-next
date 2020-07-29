@@ -29,7 +29,7 @@
 #include "ogr_pg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgdriver.cpp 1439dfd01ac6dfcbb4f4f0c267c8db2b15c98461 2018-09-09 15:02:14 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdriver.cpp 1210bf06cd5fb2b2b574ebf5f4a1cca0df7b3c64 2020-04-03 12:37:25 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              Identify()                              */
@@ -120,6 +120,7 @@ void RegisterOGRPG()
 "  <Option name='USER' type='string' description='User name'/>"
 "  <Option name='PASSWORD' type='string' description='Password'/>"
 "  <Option name='HOST' type='string' description='Server hostname'/>"
+"  <Option name='SERVICE' type='string' description='Service name'/>"
 "  <Option name='ACTIVE_SCHEMA' type='string' description='Active schema'/>"
 "  <Option name='SCHEMAS' type='string' description='Restricted sets of schemas to explore (comma separated)'/>"
 "  <Option name='TABLES' type='string' description='Restricted set of tables to list (comma separated)'/>"

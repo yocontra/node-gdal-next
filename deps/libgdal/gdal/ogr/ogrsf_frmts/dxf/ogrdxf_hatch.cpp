@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2017, Alan Thomas <alant@outlook.com.au>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -34,9 +34,10 @@
 #include "ogr_api.h"
 
 #include <algorithm>
+#include <cmath>
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_hatch.cpp 1f9a66b4f5f617ca082094fcc6e35439eaa611f0 2018-11-25 17:16:25 +1100 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxf_hatch.cpp 4b39d4093be7b17ee65eec89e4881944c2a02ad3 2020-03-25 17:38:08 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           TranslateHATCH()                           */
@@ -312,7 +313,7 @@ OGRErr OGRDXFLayer::CollectBoundaryPath( OGRGeometryCollection *poGC,
                 OGRGeometry *poArc = OGRGeometryFactory::approximateArcAngles(
                     dfCenterX, dfCenterY, dfElevation,
                     dfRadius, dfRadius, 0.0,
-                    dfStartAngle, dfEndAngle, 0.0 );
+                    dfStartAngle, dfEndAngle, 0.0, poDS->InlineBlocks() );
 
                 // If the input was 2D, we assume we want to keep it that way
                 if( dfElevation == 0.0 )
@@ -407,17 +408,23 @@ OGRErr OGRDXFLayer::CollectBoundaryPath( OGRGeometryCollection *poGC,
             // The start and end angles are stored as circular angles. However,
             // approximateArcAngles is expecting elliptical angles (what AutoCAD
             // calls "parameters"), so let's transform them.
-            dfStartAngle = 180.0 * floor ( ( dfStartAngle + 90 ) / 180 ) +
-                    atan( ( 1.0 / dfRatio ) * tan( dfStartAngle * M_PI / 180 ) ) * 180 / M_PI;
-            dfEndAngle = 180.0 * floor ( ( dfEndAngle + 90 ) / 180 ) +
-                    atan( ( 1.0 / dfRatio ) * tan( dfEndAngle * M_PI / 180 ) ) * 180 / M_PI;
+            dfStartAngle = 180.0 * round( dfStartAngle / 180 ) +
+                ( fabs( fmod( dfStartAngle, 180 ) ) == 90 ?
+                    ( std::signbit( dfStartAngle ) ? 180 : -180 ) :
+                    0 ) +
+                atan( ( 1.0 / dfRatio ) * tan( dfStartAngle * M_PI / 180 ) ) * 180 / M_PI;
+            dfEndAngle = 180.0 * round( dfEndAngle / 180 ) +
+                ( fabs( fmod( dfEndAngle, 180 ) ) == 90 ?
+                    ( std::signbit( dfEndAngle ) ? 180 : -180 ) :
+                    0 ) +
+                atan( ( 1.0 / dfRatio ) * tan( dfEndAngle * M_PI / 180 ) ) * 180 / M_PI;
 
             if( fabs(dfEndAngle - dfStartAngle) <= 361.0 )
             {
                 OGRGeometry *poArc = OGRGeometryFactory::approximateArcAngles(
                     dfCenterX, dfCenterY, dfElevation,
                     dfMajorRadius, dfMinorRadius, dfRotation,
-                    dfStartAngle, dfEndAngle, 0.0 );
+                    dfStartAngle, dfEndAngle, 0.0, poDS->InlineBlocks() );
 
                 // If the input was 2D, we assume we want to keep it that way
                 if( dfElevation == 0.0 )
@@ -585,6 +592,9 @@ OGRErr OGRDXFLayer::CollectPolylinePath( OGRGeometryCollection *poGC,
     int nVertexCount = -1;
     bool bHaveBulges = false;
 
+    if( dfElevation != 0 )
+        oSmoothPolyline.setCoordinateDimension(3);
+
 /* -------------------------------------------------------------------- */
 /*      Read the boundary path type.                                    */
 /* -------------------------------------------------------------------- */
@@ -671,6 +681,7 @@ OGRErr OGRDXFLayer::CollectPolylinePath( OGRGeometryCollection *poGC,
         return OGRERR_FAILURE;
     }
 
+    oSmoothPolyline.SetUseMaxGapWhenTessellatingArcs( poDS->InlineBlocks() );
     poGC->addGeometryDirectly( oSmoothPolyline.Tesselate() );
 
 /* -------------------------------------------------------------------- */

@@ -29,7 +29,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrcurve.cpp e2d634382dd6d3df536ae9d3b1a8dca39ea6b8b0 2019-12-18 13:19:04 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrcurve.cpp 41fde33f22f2ddbb5d93c032afd9eab378929eb5 2019-12-18 13:19:04 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 

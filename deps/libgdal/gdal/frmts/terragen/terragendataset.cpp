@@ -110,7 +110,7 @@
 
 #include <algorithm>
 
-// CPL_CVSID("$Id: terragendataset.cpp 503aa4be7c0496b98a7ed36ce399afd65e155c3a 2019-08-14 14:39:27 +0200 Even Rouault $")
+// CPL_CVSID("$Id: terragendataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 const double kdEarthCircumPolar = 40007849;
 const double kdEarthCircumEquat = 40075004;
@@ -139,7 +139,7 @@ static bool approx_equal(double a, double b)
 
 class TerragenRasterBand;
 
-class TerragenDataset : public GDALPamDataset
+class TerragenDataset final: public GDALPamDataset
 {
     friend class TerragenRasterBand;
 
@@ -210,7 +210,7 @@ class TerragenDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class TerragenRasterBand : public GDALPamRasterBand
+class TerragenRasterBand final: public GDALPamRasterBand
 {
     friend class TerragenDataset;
 
@@ -1078,7 +1078,7 @@ void GDALRegister_Terragen()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "ter" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Terragen heightfield" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_terragen.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/terragen.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

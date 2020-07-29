@@ -22,74 +22,85 @@ using namespace node;
 
 namespace node_gdal {
 
-class CoordinateTransformation: public Nan::ObjectWrap {
-public:
-	static Nan::Persistent<FunctionTemplate> constructor;
-	static void Initialize(Local<Object> target);
-	static NAN_METHOD(New);
-	static Local<Value> New(OGRCoordinateTransformation *transform);
-	static NAN_METHOD(toString);
-	static NAN_METHOD(transformPoint);
+class CoordinateTransformation : public Nan::ObjectWrap {
+    public:
+  static Nan::Persistent<FunctionTemplate> constructor;
+  static void                              Initialize(Local<Object> target);
+  static NAN_METHOD(New);
+  static Local<Value> New(OGRCoordinateTransformation *transform);
+  static NAN_METHOD(toString);
+  static NAN_METHOD(transformPoint);
 
-	CoordinateTransformation();
-	CoordinateTransformation(OGRCoordinateTransformation *srs);
-	inline OGRCoordinateTransformation *get() {
-		return this_;
-	}
-    inline bool isAlive(){
-        return this_;
-    }
+  CoordinateTransformation();
+  CoordinateTransformation(OGRCoordinateTransformation *srs);
+  inline OGRCoordinateTransformation *get() {
+    return this_;
+  }
+  inline bool isAlive() {
+    return this_;
+  }
 
-private:
-	~CoordinateTransformation();
-	OGRCoordinateTransformation *this_;
+    private:
+  ~CoordinateTransformation();
+  OGRCoordinateTransformation *this_;
 };
 
 // adapted from gdalwarp source
 
 class GeoTransformTransformer : public OGRCoordinateTransformation {
-public:
-    void* hSrcImageTransformer;
+    public:
+  void *hSrcImageTransformer = nullptr;
 
-    virtual OGRSpatialReference* GetSourceCS() override { return nullptr; }
-    virtual OGRSpatialReference* GetTargetCS() override { return nullptr; }
+  virtual OGRSpatialReference *GetSourceCS() override {
+    return nullptr;
+  }
+  virtual OGRSpatialReference *GetTargetCS() override {
+    return nullptr;
+  }
 
-		// only used on GDAL 2.X
-		virtual int TransformEx( int nCount,
-                             double *x, double *y, double *z = NULL,
-                             int *pabSuccess = NULL ) {
-        return GDALGenImgProjTransform( hSrcImageTransformer, TRUE,
-                                        nCount, x, y, z, pabSuccess );
-    }
+  // only used on GDAL 2.X
+  virtual int TransformEx(
+    int     nCount,
+    double *x,
+    double *y,
+    double *z          = NULL,
+    int *   pabSuccess = NULL) {
+    return GDALGenImgProjTransform(
+      hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
+  }
 
-		// GDAL 3.x below
-    virtual int Transform(int nCount,
-        double* x, double* y, double* z = NULL)
-    {
-        int nResult;
+  virtual int Transform(int nCount, double *x, double *y, double *z = NULL) {
+    int nResult;
 
-        int* pabSuccess = (int*)CPLCalloc(sizeof(int), nCount);
-        nResult = Transform(nCount, x, y, z, pabSuccess);
-        CPLFree(pabSuccess);
+    int *pabSuccess = (int *)CPLCalloc(sizeof(int), nCount);
+    nResult         = Transform(nCount, x, y, z, pabSuccess);
+    CPLFree(pabSuccess);
 
-        return nResult;
-    }
+    return nResult;
+  }
 
-    int Transform(int nCount,
-        double* x, double* y, double* z,
-        int* pabSuccess)
-    {
-        return GDALGenImgProjTransform(hSrcImageTransformer, TRUE,
-            nCount, x, y, z, pabSuccess);
-    }
+  // GDAL 3.x+
+  virtual int
+  Transform(int nCount, double *x, double *y, double *z, int *pabSuccess) {
+    return GDALGenImgProjTransform(
+      hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
+  }
 
-    virtual int Transform(int nCount,
-        double* x, double* y, double* z, double* /* t */,
-        int* pabSuccess)
-    {
-        return GDALGenImgProjTransform(hSrcImageTransformer, TRUE,
-            nCount, x, y, z, pabSuccess);
-    }
+  // Latest GDAL
+  virtual int Transform(
+    int     nCount,
+    double *x,
+    double *y,
+    double *z,
+    double * /* t */,
+    int *pabSuccess) override {
+    return GDALGenImgProjTransform(
+      hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
+  }
+
+  virtual OGRCoordinateTransformation *Clone() const override {
+    return new GeoTransformTransformer(*this);
+  }
 };
-}
+} // namespace node_gdal
 #endif

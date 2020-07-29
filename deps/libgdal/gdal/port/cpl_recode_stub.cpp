@@ -14,7 +14,7 @@
  **********************************************************************
  * Copyright (c) 2008, Frank Warmerdam
  * Copyright 2006 by Bill Spitzak and others.
- * Copyright (c) 2009-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_recode_stub.cpp 9d3d2f715e84d9aa2ccaa72d1167a842a0bee1ed 2018-05-11 22:39:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_recode_stub.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #ifdef CPL_RECODE_STUB
 

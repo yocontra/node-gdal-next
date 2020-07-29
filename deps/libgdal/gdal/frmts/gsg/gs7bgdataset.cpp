@@ -8,7 +8,7 @@
  *
  ****************************************************************************
  * Copyright (c) 2007, Adam Guernsey <adam@ctech.com>
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gs7bgdataset.cpp a542b2797f15f2ed694cfcee9ff17d86b339dfee 2018-04-02 00:24:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: gs7bgdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -50,7 +50,7 @@ class GS7BGRasterBand;
 
 constexpr double dfDefaultNoDataValue = 1.701410009187828e+38f;
 
-class GS7BGDataset : public GDALPamDataset
+class GS7BGDataset final: public GDALPamDataset
 {
     friend class GS7BGRasterBand;
 
@@ -105,7 +105,7 @@ const long  nFAULT_TAG = 0x49544c46;
 /* ==================================================================== */
 /************************************************************************/
 
-class GS7BGRasterBand : public GDALPamRasterBand
+class GS7BGRasterBand final: public GDALPamRasterBand
 {
     friend class GS7BGDataset;
 
@@ -1318,7 +1318,7 @@ void GDALRegister_GS7BG()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Golden Software 7 Binary Grid (.grd)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#GS7BG" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/gs7bg.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "grd" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Float32 Float64" );

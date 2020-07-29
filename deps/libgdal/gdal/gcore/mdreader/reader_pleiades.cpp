@@ -42,7 +42,7 @@
 #include "cpl_minixml.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: reader_pleiades.cpp 13451aabc59c2e130ab2dd4998d8c61e139973ec 2018-06-23 23:34:04 +0300 Dmitry Baryshnikov $")
+CPL_CVSID("$Id: reader_pleiades.cpp 809eed37cf152e0c128b25c11d3e9a1f76e10045 2020-04-05 18:42:52 +0200 Even Rouault $")
 
 /**
  * GDALMDReaderPleiades()
@@ -84,7 +84,6 @@ GDALMDReaderPleiades::GDALMDReaderPleiades(const char *pszPath,
     if(!bHasRowColPart || sscanf (pszBaseName + nLastUnderline + 5U, "R%uC%u",
         &iRow, &iCol) != 2)
     {
-        CPLDebug( "MDReaderPleiades", "Not a Pleiades product" );
         return;
     }
 

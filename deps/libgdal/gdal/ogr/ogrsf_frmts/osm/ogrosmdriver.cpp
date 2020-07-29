@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGROSMDriver class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 
 /* g++ -DHAVE_EXPAT -fPIC -g -Wall ogr/ogrsf_frmts/osm/ogrosmdriver.cpp ogr/ogrsf_frmts/osm/ogrosmdatasource.cpp ogr/ogrsf_frmts/osm/ogrosmlayer.cpp -Iport -Igcore -Iogr -Iogr/ogrsf_frmts/osm -Iogr/ogrsf_frmts/mitab -Iogr/ogrsf_frmts -shared -o ogr_OSM.so -L. -lgdal */
 
-CPL_CVSID("$Id: ogrosmdriver.cpp 1758774fff760a0e28521d01de2d9ae74ca66701 2018-02-14 22:17:51Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrosmdriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGROSMDriverIdentify()                          */

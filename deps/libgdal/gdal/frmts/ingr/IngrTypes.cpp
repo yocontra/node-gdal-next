@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Ivan Lucena
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files ( the "Software" ),
@@ -34,7 +34,7 @@
 #include "stdio.h"
 #endif
 
-CPL_CVSID("$Id: IngrTypes.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: IngrTypes.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 static const INGR_FormatDescription INGR_FormatTable[] = {
     {PackedBinary,            "Packed Binary",               GDT_Byte},
@@ -1161,6 +1161,7 @@ INGR_DecodeRunLengthBitonal( GByte *pabySrcData, GByte *pabyDstData,
             bHeader = false;
             break;
         }
+        // cppcheck-suppress knownConditionTrueFalse
         if( nWordsInScanline < 4 )
             return 0;
 

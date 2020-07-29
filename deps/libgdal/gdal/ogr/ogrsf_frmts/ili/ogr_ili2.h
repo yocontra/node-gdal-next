@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_ili2.h 29dcefd34892121afac0b7b978757ee6daad614a 2018-05-03 15:55:54 +0200 Even Rouault $
+ * $Id: ogr_ili2.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  Interlis 2 Translator
  * Purpose:   Definition of classes for OGR Interlis 2 driver.
@@ -43,7 +43,7 @@ class OGRILI2DataSource;
 /*                           OGRILI2Layer                               */
 /************************************************************************/
 
-class OGRILI2Layer : public OGRLayer
+class OGRILI2Layer final: public OGRLayer
 {
   private:
     OGRFeatureDefn     *poFeatureDefn;
@@ -82,7 +82,7 @@ class OGRILI2Layer : public OGRLayer
 /*                          OGRILI2DataSource                           */
 /************************************************************************/
 
-class OGRILI2DataSource : public OGRDataSource
+class OGRILI2DataSource final: public OGRDataSource
 {
   private:
     std::list<OGRLayer *> listLayer;

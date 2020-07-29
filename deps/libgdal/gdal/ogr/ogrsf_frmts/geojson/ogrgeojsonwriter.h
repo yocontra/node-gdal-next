@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeojsonwriter.h a965bda62acdb21b5ac3e5291f84cdadcbeb4b05 2018-11-22 12:39:10 +0100 Even Rouault $
+ * $Id: ogrgeojsonwriter.h 56e004faba62c1e87c5595aaa1baec0d78b9a521 2020-04-16 20:02:53 +0200 Momtchil Momtchev $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines GeoJSON reader within OGR OGRGeoJSON Driver.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Mateusz Loskot
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -80,6 +80,7 @@ class OGRGeoJSONWriteOptions
         bool bHonourReservedRFC7946Members = false;
         CPLString osIDField{};
         bool bForceIDFieldType = false;
+        bool bGenerateID = false;
         OGRFieldType eForcedIDFieldType = OFTString;
         bool bAllowNonFiniteValues = false;
 

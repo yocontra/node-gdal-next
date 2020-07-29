@@ -6,7 +6,7 @@
  *
  **********************************************************************
  * Copyright (c) 2007, Frank Warmerdam
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -43,7 +43,7 @@ CPL_C_START
 CPL_C_END
 #include "tifvsi.h"
 
-CPL_CVSID("$Id: nitfbilevel.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: nitfbilevel.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       NITFUncompressBILEVEL()                        */

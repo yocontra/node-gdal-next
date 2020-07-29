@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2007-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,6 +35,7 @@
 #include <cstdlib>
 
 #include <algorithm>
+#include <complex>
 #include <limits>
 #include <vector>
 
@@ -53,7 +54,7 @@
 #include "gdalsse_priv.h"
 #endif
 
-CPL_CVSID("$Id: overview.cpp 003ad4e9e410423af8b35843956f781e44a8daac 2019-02-18 15:48:35 +0100 Even Rouault $")
+CPL_CVSID("$Id: overview.cpp 47a93a942e87b40df623a6639a7005e865f17b88 2020-04-03 10:24:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALResampleChunk32R_Near()                      */
@@ -392,13 +393,20 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
     T *pDstScanline = static_cast<T *>(
         VSI_MALLOC_VERBOSE(
             nDstXWidth * GDALGetDataTypeSizeBytes(eWrkDataType) ) );
-    int* panSrcXOffShifted = static_cast<int *>(
-        VSI_MALLOC_VERBOSE(2 * nDstXWidth * sizeof(int) ) );
+    struct PrecomputedXValue
+    {
+        int nLeftXOffShifted;
+        int nRightXOffShifted;
+        double dfLeftWeight;
+        double dfRightWeight;
+    };
+    PrecomputedXValue* pasSrcX = static_cast<PrecomputedXValue *>(
+        VSI_MALLOC_VERBOSE(nDstXWidth * sizeof(PrecomputedXValue) ) );
 
-    if( pDstScanline == nullptr || panSrcXOffShifted == nullptr )
+    if( pDstScanline == nullptr || pasSrcX == nullptr )
     {
         VSIFree(pDstScanline);
-        VSIFree(panSrcXOffShifted);
+        VSIFree(pasSrcX);
         return CE_Failure;
     }
 
@@ -411,7 +419,7 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
                                nTransparentIdx) )
     {
         VSIFree(pDstScanline);
-        VSIFree(panSrcXOffShifted);
+        VSIFree(pasSrcX);
         return CE_Failure;
     }
 
@@ -423,7 +431,7 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
         {
             CPLError(CE_Failure, CPLE_ObjectNull, "No aEntries.");
             VSIFree(pDstScanline);
-            VSIFree(panSrcXOffShifted);
+            VSIFree(pasSrcX);
             return CE_Failure;
         }
         aEntries[static_cast<int>(tNoDataValue)].c4 = 0;
@@ -446,33 +454,21 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
         double dfSrcXOff = dfSrcXDelta + iDstPixel * dfXRatioDstToSrc;
         // Apply some epsilon to avoid numerical precision issues
         int nSrcXOff = static_cast<int>(dfSrcXOff + 1e-8);
-#ifdef only_pixels_with_more_than_10_pct_participation
-        // When oversampling, don't take into account pixels that have a tiny
-        // participation in the resulting pixel
-        if( dfXRatioDstToSrc > 1 && dfSrcXOff - nSrcXOff > 0.9 &&
-            nSrcXOff < nChunkRightXOff)
-            nSrcXOff ++;
-#endif
-        if( nSrcXOff < nChunkXOff )
-            nSrcXOff = nChunkXOff;
-
         double dfSrcXOff2 = dfSrcXDelta + (iDstPixel+1)* dfXRatioDstToSrc;
         int nSrcXOff2 = static_cast<int>(ceil(dfSrcXOff2 - 1e-8));
-#ifdef only_pixels_with_more_than_10_pct_participation
-        // When oversampling, don't take into account pixels that have a tiny
-        // participation in the resulting pixel
-        if( dfXRatioDstToSrc > 1 && nSrcXOff2 - dfSrcXOff2 > 0.9 &&
-            nSrcXOff2 > nChunkXOff)
-            nSrcXOff2 --;
-#endif
+
+        if( nSrcXOff < nChunkXOff )
+            nSrcXOff = nChunkXOff;
         if( nSrcXOff2 == nSrcXOff )
             nSrcXOff2 ++;
         if( nSrcXOff2 > nChunkRightXOff )
             nSrcXOff2 = nChunkRightXOff;
 
-        panSrcXOffShifted[2 * (iDstPixel - nDstXOff)] = nSrcXOff - nChunkXOff;
-        panSrcXOffShifted[2 * (iDstPixel - nDstXOff) + 1] =
-            nSrcXOff2 - nChunkXOff;
+        pasSrcX[iDstPixel - nDstXOff].nLeftXOffShifted = nSrcXOff - nChunkXOff;
+        pasSrcX[iDstPixel - nDstXOff].nRightXOffShifted = nSrcXOff2 - nChunkXOff;
+        pasSrcX[iDstPixel - nDstXOff].dfLeftWeight = ( nSrcXOff2 == nSrcXOff + 1 ) ? 1.0 :  1 - (dfSrcXOff - nSrcXOff);
+        pasSrcX[iDstPixel - nDstXOff].dfRightWeight = 1 - (nSrcXOff2 - dfSrcXOff2);
+
         if( nSrcXOff2 - nSrcXOff != 2 ||
             (nLastSrcXOff2 >= 0 && nLastSrcXOff2 != nSrcXOff) )
         {
@@ -491,25 +487,11 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
     {
         double dfSrcYOff = dfSrcYDelta + iDstLine * dfYRatioDstToSrc;
         int nSrcYOff = static_cast<int>(dfSrcYOff + 1e-8);
-#ifdef only_pixels_with_more_than_10_pct_participation
-        // When oversampling, don't take into account pixels that have a tiny
-        // participation in the resulting pixel
-        if( dfYRatioDstToSrc > 1 && dfSrcYOff - nSrcYOff > 0.9 &&
-            nSrcYOff < nChunkBottomYOff)
-            nSrcYOff ++;
-#endif
         if( nSrcYOff < nChunkYOff )
             nSrcYOff = nChunkYOff;
 
         double dfSrcYOff2 = dfSrcYDelta + (iDstLine+1) * dfYRatioDstToSrc;
         int nSrcYOff2 = static_cast<int>(ceil(dfSrcYOff2 - 1e-8));
-#ifdef only_pixels_with_more_than_10_pct_participation
-        // When oversampling, don't take into account pixels that have a tiny
-        // participation in the resulting pixel
-        if( dfYRatioDstToSrc > 1 && nSrcYOff2 - dfSrcYOff2 > 0.9 &&
-            nSrcYOff2 > nChunkYOff)
-            nSrcYOff2 --;
-#endif
         if( nSrcYOff2 == nSrcYOff )
             ++nSrcYOff2;
         if( nSrcYOff2 > nChunkBottomYOff )
@@ -527,7 +509,7 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
                 // Optimized case : no nodata, overview by a factor of 2 and
                 // regular x and y src spacing.
                 const T* pSrcScanlineShifted =
-                    pChunk + panSrcXOffShifted[0] +
+                    pChunk + pasSrcX[0].nLeftXOffShifted +
                     static_cast<GPtrDiff_t>(nSrcYOff - nChunkYOff) * nChunkXSize;
                 for( int iDstPixel = 0; iDstPixel < nDstXWidth; ++iDstPixel )
                 {
@@ -546,27 +528,74 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
             }
             else
             {
+                const double dfBottomWeight =
+                    (nSrcYOff + 1 == nSrcYOff2) ? 1.0 : 1.0 - (dfSrcYOff - nSrcYOff);
+                const double dfTopWeight = 1.0 - (nSrcYOff2 - dfSrcYOff2);
                 nSrcYOff -= nChunkYOff;
                 nSrcYOff2 -= nChunkYOff;
 
                 for( int iDstPixel = 0; iDstPixel < nDstXWidth; ++iDstPixel )
                 {
-                    const int nSrcXOff = panSrcXOffShifted[2 * iDstPixel];
-                    const int nSrcXOff2 = panSrcXOffShifted[2 * iDstPixel + 1];
+                    const int nSrcXOff = pasSrcX[iDstPixel].nLeftXOffShifted;
+                    const int nSrcXOff2 = pasSrcX[iDstPixel].nRightXOffShifted;
 
-                    Tsum dfTotal = 0;
+                    double dfTotal = 0;
+                    double dfTotalWeight = 0;
                     GPtrDiff_t nCount = 0;
 
                     for( int iY = nSrcYOff; iY < nSrcYOff2; ++iY )
                     {
-                        for( int iX = nSrcXOff; iX < nSrcXOff2; ++iX )
+                        const double dfWeightY =
+                            (iY == nSrcYOff) ? dfBottomWeight :
+                            (iY + 1 == nSrcYOff2) ? dfTopWeight :
+                            1.0;
+
+                        const auto pChunkShifted = pChunk +
+                            static_cast<GPtrDiff_t>(iY) *nChunkXSize;
+                        // Left pixel
                         {
-                            const T val = pChunk[iX + static_cast<GPtrDiff_t>(iY) *nChunkXSize];
+                            const int iX = nSrcXOff;
+                            const T val = pChunkShifted[iX];
                             if( pabyChunkNodataMask == nullptr ||
                                 pabyChunkNodataMask[iX + iY *nChunkXSize] )
                             {
-                                dfTotal += val;
-                                ++nCount;
+                                nCount ++;
+                                const double dfWeightX = pasSrcX[iDstPixel].dfLeftWeight;
+                                const double dfWeight = dfWeightX * dfWeightY;
+                                dfTotalWeight += dfWeight;
+                                dfTotal += val * dfWeight;
+                            }
+                        }
+
+                        if( nSrcXOff + 1 < nSrcXOff2 )
+                        {
+                            // Middle pixels
+                            for( int iX = nSrcXOff + 1; iX + 1 < nSrcXOff2; ++iX )
+                            {
+                                const T val = pChunkShifted[iX];
+                                if( pabyChunkNodataMask == nullptr ||
+                                    pabyChunkNodataMask[iX + iY *nChunkXSize] )
+                                {
+                                    nCount ++;
+                                    const double dfWeight = dfWeightY;
+                                    dfTotalWeight += dfWeight;
+                                    dfTotal += val * dfWeight;
+                                }
+                            }
+
+                            // Right pixel
+                            {
+                                const int iX = nSrcXOff2 - 1;
+                                const T val = pChunkShifted[iX];
+                                if( pabyChunkNodataMask == nullptr ||
+                                    pabyChunkNodataMask[iX + iY *nChunkXSize] )
+                                {
+                                    nCount ++;
+                                    const double dfWeightX = pasSrcX[iDstPixel].dfRightWeight;
+                                    const double dfWeight = dfWeightX * dfWeightY;
+                                    dfTotalWeight += dfWeight;
+                                    dfTotal += val * dfWeight;
+                                }
                             }
                         }
                     }
@@ -580,14 +609,14 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
                     else if( eWrkDataType == GDT_Byte ||
                              eWrkDataType == GDT_UInt16)
                     {
-                        auto nVal = static_cast<T>((dfTotal + nCount / 2) / nCount);
+                        auto nVal = static_cast<T>((dfTotal + dfTotalWeight / 2) / dfTotalWeight);
                         if( bHasNoData && nVal == tNoDataValue )
                             nVal = tReplacementVal;
                         pDstScanline[iDstPixel] = nVal;
                     }
                     else
                     {
-                        auto nVal = static_cast<T>(dfTotal / nCount);
+                        auto nVal = static_cast<T>(dfTotal / dfTotalWeight);
                         if( bHasNoData && nVal == tNoDataValue )
                             nVal = tReplacementVal;
                         pDstScanline[iDstPixel] = nVal;
@@ -602,8 +631,8 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
 
             for( int iDstPixel = 0; iDstPixel < nDstXWidth; ++iDstPixel )
             {
-                const int nSrcXOff = panSrcXOffShifted[2 * iDstPixel];
-                const int nSrcXOff2 = panSrcXOffShifted[2 * iDstPixel + 1];
+                const int nSrcXOff = pasSrcX[iDstPixel].nLeftXOffShifted;
+                const int nSrcXOff2 = pasSrcX[iDstPixel].nRightXOffShifted;
 
                 GPtrDiff_t nTotalR = 0;
                 GPtrDiff_t nTotalG = 0;
@@ -652,7 +681,7 @@ GDALResampleChunk32R_AverageT( double dfXRatioDstToSrc,
 
     CPLFree( pDstScanline );
     CPLFree( aEntries );
-    CPLFree( panSrcXOffShifted );
+    CPLFree( pasSrcX );
 
     return eErr;
 }
@@ -2635,7 +2664,7 @@ GDALResampleChunkC32R( int nSrcWidth, int nSrcHeight,
                             pafSrcScanline[iX*2+static_cast<GPtrDiff_t>(iY-nSrcYOff)*nSrcWidth*2+1];
                         dfTotalR += dfR;
                         dfTotalI += dfI;
-                        dfTotalM += sqrt( dfR*dfR + dfI*dfI );
+                        dfTotalM += std::hypot(dfR, dfI);
                         ++nCount;
                     }
                 }
@@ -2652,12 +2681,8 @@ GDALResampleChunkC32R( int nSrcWidth, int nSrcHeight,
                         static_cast<float>(dfTotalR/nCount);
                     pafDstScanline[iDstPixel*2+1] =
                         static_cast<float>(dfTotalI/nCount);
-
-                    const double dfM =
-                        std::sqrt( pafDstScanline[iDstPixel*2]
-                                  * pafDstScanline[iDstPixel*2]
-                              + pafDstScanline[iDstPixel*2+1]
-                                  * pafDstScanline[iDstPixel*2+1] );
+                    const double dfM = std::hypot(pafDstScanline[iDstPixel*2],
+                                                  pafDstScanline[iDstPixel*2+1]);
                     const double dfDesiredM = dfTotalM / nCount;
                     double dfRatio = 1.0;
                     if( dfM != 0.0 )
@@ -3137,6 +3162,7 @@ GDALRegenerateOverviews( GDALRasterBandH hSrcBand,
     GDALRasterBand* poMaskBand = nullptr;
     int nMaskFlags = 0;
     bool bUseNoDataMask = false;
+    bool bCanUseCascaded = true;
 
     if( !STARTS_WITH_CI(pszResampling, "NEAR") )
     {
@@ -3148,10 +3174,19 @@ GDALRegenerateOverviews( GDALRasterBandH hSrcBand,
             poMaskBand = poSrcBand;
             nMaskFlags = GMF_ALPHA | GMF_PER_DATASET;
         }
+        // Same as above for mask band. I'd wish we had a better way of conveying this !
+        else if( CPLTestBool(CPLGetConfigOption(
+                    "GDAL_REGENERATED_BAND_IS_MASK", "NO")) )
+        {
+            poMaskBand = poSrcBand;
+            nMaskFlags = GMF_PER_DATASET;
+        }
         else
         {
             poMaskBand = poSrcBand->GetMaskBand();
             nMaskFlags = poSrcBand->GetMaskFlags();
+            bCanUseCascaded = (nMaskFlags == GMF_NODATA ||
+                               nMaskFlags == GMF_ALL_VALID);
         }
 
         bUseNoDataMask = (nMaskFlags & GMF_ALL_VALID) == 0;
@@ -3172,7 +3207,7 @@ GDALRegenerateOverviews( GDALRasterBandH hSrcBand,
          EQUAL(pszResampling, "CUBICSPLINE") ||
          EQUAL(pszResampling, "LANCZOS") ||
          EQUAL(pszResampling, "BILINEAR")) && nOverviewCount > 1
-         && !(bUseNoDataMask && nMaskFlags != GMF_NODATA))
+         && bCanUseCascaded )
         return GDALRegenerateCascadingOverviews( poSrcBand,
                                                  nOverviewCount, papoOvrBands,
                                                  pszResampling,
@@ -3607,11 +3642,15 @@ GDALRegenerateOverviewsMultiBand( int nBands, GDALRasterBand** papoSrcBands,
     GDALDataType eWrkDataType =
         GDALGetOvrWorkDataType(pszResampling, eDataType);
 
+    // I'd wish we had a better way of conveying this !
+    const bool bIsMask = CPLTestBool(CPLGetConfigOption(
+                    "GDAL_REGENERATED_BAND_IS_MASK", "NO"));
+
     // If we have a nodata mask and we are doing something more complicated
     // than nearest neighbouring, we have to fetch to nodata mask.
     const bool bUseNoDataMask =
         !STARTS_WITH_CI(pszResampling, "NEAR") &&
-        (papoSrcBands[0]->GetMaskFlags() & GMF_ALL_VALID) == 0;
+        (bIsMask || (papoSrcBands[0]->GetMaskFlags() & GMF_ALL_VALID) == 0);
 
     int* const pabHasNoData = static_cast<int *>(
         VSI_MALLOC_VERBOSE(nBands * sizeof(int)) );
@@ -3849,7 +3888,8 @@ GDALRegenerateOverviewsMultiBand( int nBands, GDALRasterBand** papoSrcBands,
                         poSrcBand = papoSrcBands[0];
                     else
                         poSrcBand = papapoOverviewBands[0][iSrcOverview];
-                    eErr = poSrcBand->GetMaskBand()->RasterIO(
+                    auto poMaskBand = bIsMask ? poSrcBand : poSrcBand->GetMaskBand();
+                    eErr = poMaskBand->RasterIO(
                         GF_Read,
                         nChunkXOffQueried, nChunkYOffQueried,
                         nChunkXSizeQueried, nChunkYSizeQueried,
@@ -3995,9 +4035,8 @@ GDALComputeBandStats( GDALRasterBandH hSrcBand,
             if( bComplex )
             {
                 // Compute the magnitude of the complex value.
-                fValue =
-                    std::sqrt(pafData[iPixel*2  ] * pafData[iPixel*2  ]
-                         + pafData[iPixel*2+1] * pafData[iPixel*2+1]);
+                fValue = std::hypot(pafData[iPixel*2],
+                                    pafData[iPixel*2+1]);
             }
             else
             {

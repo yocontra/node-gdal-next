@@ -33,7 +33,7 @@
 
 // g++ -I/usr/include/json -DxDEBUG_VERBOSE -DDEBUG   -g -DDEBUG -ftrapv  -Wall -Wextra -Winit-self -Wunused-parameter -Wformat -Werror=format-security -Wno-format-nonliteral -Wlogical-op -Wshadow -Werror=vla -Wmissing-declarations -Wnon-virtual-dtor -Woverloaded-virtual -fno-operator-names ogr/ogrsf_frmts/gmlas/*.cpp -fPIC -shared -o ogr_GMLAS.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/mem  -L. -lgdal   -I/home/even/spatialys/eea/inspire_gml/install-xerces-c-3.1.3/include
 
-CPL_CVSID("$Id: ogrgmlasdriver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
 
 /************************************************************************/
 /*                        OGRGMLASDriverIdentify()                      */
@@ -137,7 +137,6 @@ void RegisterOGRGMLAS()
 "Space separated list of filenames of XML schemas that apply to the data file'/>"
 "  <Option name='" + szCONFIG_FILE_OPTION + "' type='string' "
             "description='Filename of the configuration file'/>"
-            "'Space separated list of filenames of XML schemas that apply'/>"
 "  <Option name='" +szLAYERS_OPTION + "' type='string' "
             "description='Comma separated list of layer names to export'/>"
 "  <Option name='" + szSRSNAME_FORMAT_OPTION + "' type='string-select' "

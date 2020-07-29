@@ -28,7 +28,7 @@
 
 #include "gh5_convenience.h"
 
-CPL_CVSID("$Id: gh5_convenience.cpp 8b0bde70644ca46fbc7e8f717f3c61d119bc431f 2019-05-05 15:14:12 +0200 Even Rouault $")
+CPL_CVSID("$Id: gh5_convenience.cpp c43fee06b528111b4548f9f9c4cec78cef610699 2020-05-11 01:42:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                    GH5_FetchAttribute(CPLString)                     */
@@ -383,11 +383,11 @@ bool GH5_WriteAttribute (hid_t loc_id, const char *pszAttrName,
     if( H5Tequal(hAttrNativeType, H5T_NATIVE_FLOAT) )
     {
         float fVal = static_cast<float>(dfValue);
-        bSuccess = H5Awrite(hAttr, hDataType, &fVal) >= 0;
+        bSuccess = H5Awrite(hAttr, hAttrNativeType, &fVal) >= 0;
     }
     else if( H5Tequal(hAttrNativeType, H5T_NATIVE_DOUBLE) )
     {
-        bSuccess = H5Awrite(hAttr, hDataType, &dfValue) >= 0;
+        bSuccess = H5Awrite(hAttr, hAttrNativeType, &dfValue) >= 0;
     }
     else
     {
@@ -426,7 +426,7 @@ bool GH5_WriteAttribute (hid_t loc_id, const char *pszAttrName,
     if( H5Tequal(hAttrNativeType, H5T_NATIVE_INT) ||
         H5Tequal(hAttrNativeType, H5T_NATIVE_UINT) )
     {
-        bSuccess = H5Awrite(hAttr, hDataType, &nValue) >= 0;
+        bSuccess = H5Awrite(hAttr, hAttrNativeType, &nValue) >= 0;
     }
     else
     {

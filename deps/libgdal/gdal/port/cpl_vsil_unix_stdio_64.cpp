@@ -7,7 +7,7 @@
  *
  **********************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -87,7 +87,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_error.h"
 
-CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp e6801fa6bc6733ad029a6a278ef8171aef997276 2018-08-13 12:04:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #if defined(UNIX_STDIO_64)
 

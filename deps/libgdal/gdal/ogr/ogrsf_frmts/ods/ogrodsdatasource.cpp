@@ -2,10 +2,10 @@
  *
  * Project:  ODS Translator
  * Purpose:  Implements OGRODSDataSource class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrodsdatasource.cpp a582289d83514f9eb8647ab93d08010a4cb0a080 2019-02-08 14:49:55 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrodsdatasource.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 namespace OGRODS {
 

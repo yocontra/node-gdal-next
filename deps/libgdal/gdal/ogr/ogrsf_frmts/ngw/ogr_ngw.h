@@ -31,7 +31,7 @@
 
 // gdal headers
 #include "ogrsf_frmts.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 #include <map>
 #include <set>
@@ -112,7 +112,7 @@ namespace NGWAPI {
 
 class OGRNGWDataset;
 
-class OGRNGWLayer : public OGRLayer
+class OGRNGWLayer final: public OGRLayer
 {
     std::string osResourceId;
     OGRNGWDataset *poDS;

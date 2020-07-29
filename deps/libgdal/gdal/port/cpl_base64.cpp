@@ -10,7 +10,7 @@
  * Copyright (c) 2008 Paul Ramsey
  * Copyright (c) 2002 Refractions Research
  * Copyright (C) 2004-2008 René Nyffenegger
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * (see also part way down the file for license terms for René's code)
  *
@@ -40,7 +40,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: cpl_base64.cpp 0846c4df38348216396587449b9cef818856b36c 2018-01-10 16:19:40Z Kurt Schwehr $")
+CPL_CVSID("$Id: cpl_base64.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 // Derived from MapServer's mappostgis.c.
 

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000-2001, Stephane Villeneuve
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -45,7 +45,7 @@
 #include "ogr_core.h"
 #include "ogr_feature.h"
 
-CPL_CVSID("$Id: ogrfeaturestyle.cpp 1e082b59d067cf2edf5713e15101c0b369d37e9a 2018-12-02 22:16:23 +0300 drons $")
+CPL_CVSID("$Id: ogrfeaturestyle.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /****************************************************************************/
 /*                Class Parameter (used in the String)                      */

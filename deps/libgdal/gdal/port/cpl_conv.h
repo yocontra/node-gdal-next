@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_conv.h c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $
+ * $Id: cpl_conv.h 8f0ebfd5b6f153a63b6e2186b68577937cedc02c 2020-06-14 00:21:08 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Convenience functions declarations.
@@ -8,7 +8,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, Frank Warmerdam
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -170,13 +170,15 @@ int CPL_DLL CPLCheckForFile( char *pszFilename, char **papszSiblingList );
 const char CPL_DLL *CPLGenerateTempFilename( const char *pszStem ) CPL_WARN_UNUSED_RESULT CPL_RETURNS_NONNULL;
 const char CPL_DLL *CPLExpandTilde( const char *pszFilename ) CPL_WARN_UNUSED_RESULT CPL_RETURNS_NONNULL;
 const char CPL_DLL *CPLGetHomeDir(void) CPL_WARN_UNUSED_RESULT;
+const char CPL_DLL *CPLLaunderForFilename(const char* pszName,
+                                          const char* pszOutputPath ) CPL_WARN_UNUSED_RESULT;
 
 /* -------------------------------------------------------------------- */
 /*      Find File Function                                              */
 /* -------------------------------------------------------------------- */
 
 /** Callback for CPLPushFileFinder */
-typedef const char *(*CPLFileFinder)(const char *, const char *);
+typedef char const *(*CPLFileFinder)(const char *, const char *);
 
 const char    CPL_DLL *CPLFindFile(const char *pszClass,
                                    const char *pszBasename);

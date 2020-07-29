@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam
- * Copyright (c) 2007-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,7 +53,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: gdalmediancut.cpp 9fcb3fe3c338c0e2941812b4b690b04f10bd0bae 2018-04-28 11:07:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalmediancut.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 template<typename T> static T* HISTOGRAM( T *h, int n, int r, int g, int b )
 {

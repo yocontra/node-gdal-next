@@ -2,10 +2,10 @@
  *
  * Project:  BNA Translator
  * Purpose:  Implements OGRBNADriver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2007, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@
 #include "ogr_bna.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrbnadriver.cpp a36939afd5248338d928ac2107e2136b32ffb9df 2018-06-01 14:24:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrbnadriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, Frank Warmerdam
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -92,7 +92,7 @@
 extern "C" GIntBig CPL_DLL CPL_STDCALL GDALGetCacheUsed64(void);
 #endif
 
-CPL_CVSID("$Id: cpl_vsisimple.cpp 0dfb146aa567f1264b72cece4cc2f0a2362774ba 2018-12-23 11:20:51 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsisimple.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /* Unix or Windows NT/2000/XP */
 #if !defined(WIN32)

@@ -12,8 +12,8 @@
 #pragma GCC diagnostic pop
 
 // gdal
-#include <gdal_priv.h>
 #include <gdal_alg.h>
+#include <gdal_priv.h>
 
 // ogr
 #include <ogrsf_frmts.h>
@@ -27,14 +27,14 @@ using namespace node;
 namespace node_gdal {
 namespace Algorithms {
 
-	void Initialize(Local<Object> target);
+void Initialize(Local<Object> target);
 
-	NAN_METHOD(fillNodata);
-	NAN_METHOD(contourGenerate);
-	NAN_METHOD(sieveFilter);
-	NAN_METHOD(checksumImage);
-	NAN_METHOD(polygonize);
-}
-}
+NAN_METHOD(fillNodata);
+NAN_METHOD(contourGenerate);
+NAN_METHOD(sieveFilter);
+NAN_METHOD(checksumImage);
+NAN_METHOD(polygonize);
+} // namespace Algorithms
+} // namespace node_gdal
 
 #endif

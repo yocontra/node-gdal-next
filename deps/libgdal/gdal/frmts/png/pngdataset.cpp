@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -50,7 +50,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: pngdataset.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04-20 20:33:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: pngdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 // Note: Callers must provide blocks in increasing Y order.
 // Disclaimer (E. Rouault): this code is not production ready at all. A lot of
@@ -349,7 +349,7 @@ CPLErr PNGDataset::IRasterIO( GDALRWFlag eRWFlag,
        (eBufType == GDT_Byte) &&
        (eBufType == GetRasterBand(1)->GetRasterDataType()) &&
        (pData != nullptr) &&
-       (panBandMap != nullptr) && IsFullBandMap(panBandMap, nBands))
+       IsFullBandMap(panBandMap, nBands))
     {
         // Pixel interleaved case.
         if( nBandSpace == 1 )
@@ -2071,7 +2071,7 @@ void GDALRegister_PNG()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Portable Network Graphics" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#PNG" );
+                               "drivers/raster/png.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "png" );
     poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/png" );
 

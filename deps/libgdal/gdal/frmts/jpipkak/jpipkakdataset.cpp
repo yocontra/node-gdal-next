@@ -35,7 +35,7 @@
 #include "gdal_frmts.h"
 #include "jpipkakdataset.h"
 
-CPL_CVSID("$Id: jpipkakdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: jpipkakdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 /*
 ** The following are for testing premature stream termination support.
@@ -1506,7 +1506,7 @@ void GDALRegister_JPIPKAK()
     poDriver->SetDescription( "JPIPKAK" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "JPIP (based on Kakadu)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_jpipkak.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/jpipkak.html" );
     poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/jpp-stream" );
 
     poDriver->pfnOpen = JPIPKAKDataset::Open;

@@ -2,10 +2,10 @@
  *
  * Project:  BNA Translator
  * Purpose:  Implements OGRBNALayer class.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2007-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "cpl_csv.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrbnalayer.cpp 7a3b8689d54765d306ea9cc4c773b4c967db980f 2018-10-14 19:50:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrbnalayer.cpp f459e96d58bcda014371ee8b511d27e3c16b3152 2019-10-20 15:34:30 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRBNALayer()                             */
@@ -55,9 +55,7 @@ OGRBNALayer::OGRBNALayer( const char *pszFilename,
     failed(false),
     curLine(0),
     nNextFID(0),
-    nFeatures(0),
-    partialIndexTable(TRUE),
-    offsetAndLineFeaturesTable(nullptr)
+    nFeatures(0)
 {
     static const char* const iKnowHowToCount[]
         = { "Primary", "Secondary", "Third", "Fourth", "Fifth" };
@@ -119,8 +117,6 @@ OGRBNALayer::~OGRBNALayer()
 {
     poFeatureDefn->Release();
 
-    CPLFree(offsetAndLineFeaturesTable);
-
     if (fpBNA)
         VSIFCloseL( fpBNA );
 }
@@ -128,14 +124,10 @@ OGRBNALayer::~OGRBNALayer()
 /************************************************************************/
 /*                         SetFeatureIndexTable()                       */
 /************************************************************************/
-void OGRBNALayer::SetFeatureIndexTable(
-    int nFeaturesIn,
-    OffsetAndLine* offsetAndLineFeaturesTableIn,
-    int partialIndexTableIn )
+void OGRBNALayer::SetFeatureIndexTable(std::vector<OffsetAndLine>&& offsetAndLineFeaturesTableIn)
 {
-    nFeatures = nFeaturesIn;
-    offsetAndLineFeaturesTable = offsetAndLineFeaturesTableIn;
-    partialIndexTable = CPL_TO_BOOL(partialIndexTableIn);
+    nFeatures = static_cast<int>(offsetAndLineFeaturesTableIn.size());
+    offsetAndLineFeaturesTable = std::move(offsetAndLineFeaturesTableIn);
 }
 
 /************************************************************************/
@@ -160,21 +152,16 @@ void OGRBNALayer::ResetReading()
 
 OGRFeature *OGRBNALayer::GetNextFeature()
 {
-    if( failed || eof || fpBNA == nullptr )
+    if( failed || eof || fpBNA == nullptr  )
         return nullptr;
 
-    while( true )
+    while( nNextFID < nFeatures )
     {
         int ok = FALSE;
-        const int offset = static_cast<int>( VSIFTellL(fpBNA) );
-        const int line = curLine;
-        if (nNextFID < nFeatures)
-        {
-            if( VSIFSeekL( fpBNA, offsetAndLineFeaturesTable[nNextFID].offset,
-                           SEEK_SET ) < 0 )
-                return nullptr;
-            curLine = offsetAndLineFeaturesTable[nNextFID].line;
-        }
+        if( VSIFSeekL( fpBNA, offsetAndLineFeaturesTable[nNextFID].offset,
+                        SEEK_SET ) < 0 )
+            return nullptr;
+        curLine = offsetAndLineFeaturesTable[nNextFID].line;
         BNARecord* record
             = BNA_GetNextRecord(fpBNA, &ok, &curLine, TRUE, bnaFeatureType);
         if (ok == FALSE)
@@ -187,25 +174,11 @@ OGRFeature *OGRBNALayer::GetNextFeature()
         {
             /* end of file */
             eof = true;
-
-            /* and we have finally build the whole index table */
-            partialIndexTable = false;
             return nullptr;
         }
 
         if (record->featureType == bnaFeatureType)
         {
-            if (nNextFID >= nFeatures)
-            {
-                nFeatures++;
-                offsetAndLineFeaturesTable =
-                    static_cast<OffsetAndLine *>(
-                        CPLRealloc( offsetAndLineFeaturesTable,
-                                    nFeatures * sizeof(OffsetAndLine) ) );
-                offsetAndLineFeaturesTable[nFeatures-1].offset = offset;
-                offsetAndLineFeaturesTable[nFeatures-1].line = line;
-            }
-
             OGRFeature *poFeature
                 = BuildFeatureFromBNARecord(record, nNextFID++);
 
@@ -226,6 +199,7 @@ OGRFeature *OGRBNALayer::GetNextFeature()
             BNA_FreeRecord(record);
         }
     }
+    return nullptr;
 }
 
 /************************************************************************/
@@ -803,99 +777,27 @@ OGRFeature *OGRBNALayer::BuildFeatureFromBNARecord (BNARecord* record, long fid)
 }
 
 /************************************************************************/
-/*                           FastParseUntil()                           */
-/************************************************************************/
-void OGRBNALayer::FastParseUntil ( int interestFID)
-{
-    if( partialIndexTable )
-    {
-        ResetReading();
-
-        BNARecord *record = nullptr;
-
-        if (nFeatures > 0)
-        {
-            if( VSIFSeekL( fpBNA,
-                           offsetAndLineFeaturesTable[nFeatures-1].offset,
-                           SEEK_SET ) < 0 )
-                return;
-            curLine = offsetAndLineFeaturesTable[nFeatures-1].line;
-
-            /* Just skip the last read one */
-            int ok = FALSE;
-            record = BNA_GetNextRecord(fpBNA, &ok, &curLine, TRUE,
-                                       BNA_READ_NONE);
-            BNA_FreeRecord(record);
-        }
-
-        while(1)
-        {
-            int ok = FALSE;
-            int offset = static_cast<int>( VSIFTellL(fpBNA) );
-            int line = curLine;
-            record = BNA_GetNextRecord(fpBNA, &ok, &curLine, TRUE,
-                                       BNA_READ_NONE);
-            if (ok == FALSE)
-            {
-                failed = true;
-                return;
-            }
-            if (record == nullptr)
-            {
-                /* end of file */
-                eof = true;
-
-                /* and we have finally build the whole index table */
-                partialIndexTable = false;
-                return;
-            }
-
-            if (record->featureType == bnaFeatureType)
-            {
-                nFeatures++;
-                offsetAndLineFeaturesTable =
-                    static_cast<OffsetAndLine *>(
-                        CPLRealloc( offsetAndLineFeaturesTable,
-                                    nFeatures * sizeof(OffsetAndLine) ) );
-                offsetAndLineFeaturesTable[nFeatures-1].offset = offset;
-                offsetAndLineFeaturesTable[nFeatures-1].line = line;
-
-                BNA_FreeRecord(record);
-
-                if (nFeatures - 1 == interestFID)
-                  return;
-            }
-            else
-            {
-                BNA_FreeRecord(record);
-            }
-        }
-    }
-}
-
-/************************************************************************/
 /*                           GetFeature()                               */
 /************************************************************************/
 
 OGRFeature *  OGRBNALayer::GetFeature( GIntBig nFID )
 {
-    if (nFID < 0 || !CPL_INT64_FITS_ON_INT32(nFID))
+    if (bWriter || nFID < 0 || !CPL_INT64_FITS_ON_INT32(nFID))
         return nullptr;
 
-    FastParseUntil( static_cast<int>( nFID ) );
-
+    const int nFID32 = static_cast<int>(nFID);
     if (nFID >= nFeatures)
         return nullptr;
 
-    if( VSIFSeekL( fpBNA, offsetAndLineFeaturesTable[nFID].offset, SEEK_SET ) < 0 )
+    if( VSIFSeekL( fpBNA, offsetAndLineFeaturesTable[nFID32].offset, SEEK_SET ) < 0 )
         return nullptr;
 
-    curLine = offsetAndLineFeaturesTable[nFID].line;
+    curLine = offsetAndLineFeaturesTable[nFID32].line;
     int ok = FALSE;
     BNARecord* record
         = BNA_GetNextRecord(fpBNA, &ok, &curLine, TRUE, bnaFeatureType);
 
-    OGRFeature *poFeature = BuildFeatureFromBNARecord(record, (int)nFID);
+    OGRFeature *poFeature = BuildFeatureFromBNARecord(record, nFID32);
 
     BNA_FreeRecord(record);
 

@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_geomedia.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogr_geomedia.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Geomedia MDB driver.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -42,7 +42,7 @@
 
 class OGRGeomediaDataSource;
 
-class OGRGeomediaLayer : public OGRLayer
+class OGRGeomediaLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -91,7 +91,7 @@ class OGRGeomediaLayer : public OGRLayer
 /*                       OGRGeomediaTableLayer                          */
 /************************************************************************/
 
-class OGRGeomediaTableLayer : public OGRGeomediaLayer
+class OGRGeomediaTableLayer final: public OGRGeomediaLayer
 {
     char                *pszQuery;
 
@@ -121,7 +121,7 @@ class OGRGeomediaTableLayer : public OGRGeomediaLayer
 /*                        OGRGeomediaSelectLayer                        */
 /************************************************************************/
 
-class OGRGeomediaSelectLayer : public OGRGeomediaLayer
+class OGRGeomediaSelectLayer final: public OGRGeomediaLayer
 {
     char                *pszBaseStatement;
 
@@ -147,7 +147,7 @@ class OGRGeomediaSelectLayer : public OGRGeomediaLayer
 /*                        OGRGeomediaDataSource                         */
 /************************************************************************/
 
-class OGRGeomediaDataSource : public OGRDataSource
+class OGRGeomediaDataSource final: public OGRDataSource
 {
     OGRGeomediaLayer  **papoLayers;
     int                 nLayers;
@@ -193,7 +193,7 @@ class OGRGeomediaDataSource : public OGRDataSource
 /*                          OGRGeomediaDriver                           */
 /************************************************************************/
 
-class OGRGeomediaDriver : public OGRODBCMDBDriver
+class OGRGeomediaDriver final: public OGRODBCMDBDriver
 {
   public:
                 ~OGRGeomediaDriver();

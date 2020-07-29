@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1998, 2002, Frank Warmerdam
- * Copyright (c) 2007-2015, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2015, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2015, Faza Mahamood
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -42,6 +42,7 @@
 #include "commonutils.h"
 #include "cpl_conv.h"
 #include "cpl_error.h"
+#include "cpl_json.h"
 #include "cpl_progress.h"
 #include "cpl_string.h"
 #include "cpl_vsi.h"
@@ -54,12 +55,13 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: gdal_translate_lib.cpp bf8afbd97cff56fa47f2cbc836574bb114635ef4 2019-05-24 23:45:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_translate_lib.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
 
 static int ArgIsNumeric( const char * );
 static void AttachMetadata( GDALDatasetH, char ** );
 static void CopyBandInfo( GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand,
-                            int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData, bool bCopyRAT );
+                          int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData, bool bCopyRAT,
+                          const GDALTranslateOptions* psOptions );
 
 typedef enum
 {
@@ -507,13 +509,154 @@ static GDALDatasetH GDALTranslateFlush(GDALDatasetH hOutDS)
 }
 
 /************************************************************************/
+/*                    EditISIS3MetadataForBandChange()                  */
+/************************************************************************/
+
+static CPLJSONObject Clone(const CPLJSONObject& obj)
+{
+    auto serialized = obj.Format(CPLJSONObject::Plain);
+    CPLJSONDocument oJSONDocument;
+    const GByte *pabyData = reinterpret_cast<const GByte *>(serialized.c_str());
+    oJSONDocument.LoadMemory( pabyData );
+    return oJSONDocument.GetRoot();
+}
+
+static void ReworkArray(CPLJSONObject& container, const CPLJSONObject& obj,
+                        int nSrcBandCount,
+                        const GDALTranslateOptions *psOptions)
+{
+    auto oArray = obj.ToArray();
+    if( oArray.Size() == nSrcBandCount )
+    {
+        CPLJSONArray oNewArray;
+        for( int i = 0; i < psOptions->nBandCount; i++ )
+        {
+            const int iSrcIdx = psOptions->panBandList[i]-1;
+            oNewArray.Add(oArray[iSrcIdx]);
+        }
+        const auto childName(obj.GetName());
+        container.Delete(childName);
+        container.Add(childName, oNewArray);
+    }
+}
+
+static CPLString EditISIS3MetadataForBandChange(const char* pszJSON,
+                                                int nSrcBandCount,
+                                                const GDALTranslateOptions *psOptions)
+{
+    CPLJSONDocument oJSONDocument;
+    const GByte *pabyData = reinterpret_cast<const GByte *>(pszJSON);
+    if( !oJSONDocument.LoadMemory( pabyData ) )
+    {
+        return CPLString();
+    }
+
+    auto oRoot = oJSONDocument.GetRoot();
+    if( !oRoot.IsValid() )
+    {
+        return CPLString();
+    }
+
+    auto oBandBin = oRoot.GetObj( "IsisCube/BandBin" );
+    if( oBandBin.IsValid() && oBandBin.GetType() == CPLJSONObject::Object )
+    {
+        // Backup original BandBin object
+        oRoot.GetObj("IsisCube").Add("OriginalBandBin", Clone(oBandBin));
+
+        // Iterate over BandBin members and reorder/resize its arrays that
+        // have the same number of elements than the number of bands of the
+        // source dataset.
+        for( auto& child: oBandBin.GetChildren() )
+        {
+            if( child.GetType() == CPLJSONObject::Array )
+            {
+                ReworkArray(oBandBin, child, nSrcBandCount, psOptions);
+            }
+            else if( child.GetType() == CPLJSONObject::Object )
+            {
+                auto oValue = child.GetObj("value");
+                auto oUnit = child.GetObj("unit");
+                if( oValue.GetType() == CPLJSONObject::Array )
+                {
+                    ReworkArray(child, oValue, nSrcBandCount, psOptions);
+                }
+            }
+        }
+    }
+
+    return oRoot.Format(CPLJSONObject::Pretty);
+}
+
+/************************************************************************/
+/*                       AdjustNoDataValue()                            */
+/************************************************************************/
+
+static double AdjustNoDataValue( double dfInputNoDataValue,
+                                 GDALRasterBand* poBand,
+                                 const GDALTranslateOptions *psOptions )
+{
+    bool bSignedByte = false;
+    const char* pszPixelType = CSLFetchNameValue( psOptions->papszCreateOptions, "PIXELTYPE" );
+    if( pszPixelType == nullptr )
+    {
+        pszPixelType = poBand->GetMetadataItem("PIXELTYPE", "IMAGE_STRUCTURE");
+    }
+    if( pszPixelType != nullptr && EQUAL(pszPixelType, "SIGNEDBYTE") )
+        bSignedByte = true;
+    int bClamped = FALSE;
+    int bRounded = FALSE;
+    double dfVal = 0.0;
+    const GDALDataType eBandType = poBand->GetRasterDataType();
+    if( bSignedByte )
+    {
+        if( dfInputNoDataValue < -128.0 )
+        {
+            dfVal = -128.0;
+            bClamped = TRUE;
+        }
+        else if( dfInputNoDataValue > 127.0 )
+        {
+            dfVal = 127.0;
+            bClamped = TRUE;
+        }
+        else
+        {
+            dfVal = static_cast<int>(floor(dfInputNoDataValue + 0.5));
+            if( dfVal != dfInputNoDataValue )
+                bRounded = TRUE;
+        }
+    }
+    else
+    {
+        dfVal = GDALAdjustValueToDataType(eBandType,
+                                                dfInputNoDataValue,
+                                                &bClamped, &bRounded );
+    }
+
+    if (bClamped)
+    {
+        CPLError( CE_Warning, CPLE_AppDefined, "for band %d, nodata value has been clamped "
+                "to %.0f, the original value being out of range.",
+                poBand->GetBand(), dfVal);
+    }
+    else if(bRounded)
+    {
+        CPLError( CE_Warning, CPLE_AppDefined, "for band %d, nodata value has been rounded "
+                "to %.0f, %s being an integer datatype.",
+                poBand->GetBand(), dfVal,
+                GDALGetDataTypeName(eBandType));
+    }
+    return dfVal;
+}
+
+/************************************************************************/
 /*                             GDALTranslate()                          */
 /************************************************************************/
 
 /**
  * Converts raster data between different formats.
  *
- * This is the equivalent of the <a href="gdal_translate.html">gdal_translate</a> utility.
+ * This is the equivalent of the <a href="/programs/gdal_translate.html">gdal_translate</a> utility.
  *
  * GDALTranslateOptions* must be allocated and freed with GDALTranslateOptionsNew()
  * and GDALTranslateOptionsFree() respectively.
@@ -611,7 +754,17 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
         }
 
         char* pszSRS = nullptr;
-        oOutputSRS.exportToWkt( &pszSRS );
+        {
+            CPLErrorStateBackuper oErrorStateBackuper;
+            CPLErrorHandlerPusher oErrorHandler(CPLQuietErrorHandler);
+            if( oOutputSRS.exportToWkt( &pszSRS ) != OGRERR_NONE )
+            {
+                CPLFree(pszSRS);
+                pszSRS = nullptr;
+                const char* const apszOptions[] = { "FORMAT=WKT2", nullptr };
+                oOutputSRS.exportToWkt( &pszSRS, apszOptions );
+            }
+        }
         CPLFree( psOptions->pszOutputSRS );
         psOptions->pszOutputSRS = CPLStrdup( pszSRS );
         CPLFree( pszSRS );
@@ -1160,12 +1313,24 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
     // For gdal_translate_fuzzer
     if( psOptions->nLimitOutSize > 0 )
     {
-        vsi_l_offset nRawOutSize = static_cast<vsi_l_offset>(nOXSize) * nOYSize *
-                                psOptions->nBandCount;
+        vsi_l_offset nRawOutSize = static_cast<vsi_l_offset>(nOXSize) * nOYSize;
         if( psOptions->nBandCount )
         {
-            nRawOutSize *= GDALGetDataTypeSizeBytes(
+            if( nRawOutSize > std::numeric_limits<vsi_l_offset>::max() / psOptions->nBandCount )
+            {
+                GDALTranslateOptionsFree(psOptions);
+                return nullptr;
+            }
+            nRawOutSize *= psOptions->nBandCount;
+            const int nDTSize = GDALGetDataTypeSizeBytes(
                 static_cast<GDALDataset *>(hSrcDataset)->GetRasterBand(1)->GetRasterDataType() );
+            if( nDTSize > 0 &&
+                nRawOutSize > std::numeric_limits<vsi_l_offset>::max() / nDTSize )
+            {
+                GDALTranslateOptionsFree(psOptions);
+                return nullptr;
+            }
+            nRawOutSize *= nDTSize;
         }
         if( nRawOutSize > static_cast<vsi_l_offset>(psOptions->nLimitOutSize) )
         {
@@ -1337,18 +1502,40 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
     if (pszInterleave)
         poVDS->SetMetadataItem("INTERLEAVE", pszInterleave, "IMAGE_STRUCTURE");
 
-    /* ISIS3 -> ISIS3 special case */
-    if( EQUAL(psOptions->pszFormat, "ISIS3") )
+    /* ISIS3 metadata preservation */
+    char** papszMD_ISIS3 = poSrcDS->GetMetadata("json:ISIS3");
+    if( papszMD_ISIS3 != nullptr)
     {
-        char** papszMD_ISIS3 = poSrcDS->GetMetadata("json:ISIS3");
-        if( papszMD_ISIS3 != nullptr)
+        if( !bAllBandsInOrder )
+        {
+            CPLString osJSON = EditISIS3MetadataForBandChange(
+                papszMD_ISIS3[0], GDALGetRasterCount( hSrcDataset ), psOptions);
+            if( !osJSON.empty() )
+            {
+                char* apszMD[] = { &osJSON[0], nullptr };
+                poVDS->SetMetadata( apszMD, "json:ISIS3" );
+            }
+        }
+        else
+        {
             poVDS->SetMetadata( papszMD_ISIS3, "json:ISIS3" );
+        }
     }
-    else if( EQUAL(psOptions->pszFormat, "PDS4") )
+
+    // PDS4 -> PDS4 special case
+    if( EQUAL(psOptions->pszFormat, "PDS4") )
     {
         char** papszMD_PDS4 = poSrcDS->GetMetadata("xml:PDS4");
         if( papszMD_PDS4 != nullptr)
             poVDS->SetMetadata( papszMD_PDS4, "xml:PDS4" );
+    }
+
+    // VICAR -> VICAR special case
+    if( EQUAL(psOptions->pszFormat, "VICAR") )
+    {
+        char** papszMD_VICAR = poSrcDS->GetMetadata("json:VICAR");
+        if( papszMD_VICAR != nullptr)
+            poVDS->SetMetadata( papszMD_VICAR, "json:VICAR" );
     }
 
 /* -------------------------------------------------------------------- */
@@ -1770,7 +1957,8 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
                           !psOptions->bUnscale && !psOptions->bSetScale &&
                             !psOptions->bSetOffset,
                           !psOptions->bSetNoData && !psOptions->bUnsetNoData,
-                          !psOptions->bNoRAT );
+                          !psOptions->bNoRAT,
+                          psOptions );
             if( psOptions->nScaleRepeat == 0 &&
                 psOptions->nExponentRepeat == 0 &&
                 EQUAL(psOptions->pszFormat, "GRIB") )
@@ -1797,57 +1985,8 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
 /* -------------------------------------------------------------------- */
         if( psOptions->bSetNoData )
         {
-            bool bSignedByte = false;
-            pszPixelType = CSLFetchNameValue( psOptions->papszCreateOptions, "PIXELTYPE" );
-            if( pszPixelType == nullptr )
-            {
-                pszPixelType = poVRTBand->GetMetadataItem("PIXELTYPE", "IMAGE_STRUCTURE");
-            }
-            if( pszPixelType != nullptr && EQUAL(pszPixelType, "SIGNEDBYTE") )
-                bSignedByte = true;
-            int bClamped = FALSE;
-            int bRounded = FALSE;
-            double dfVal = 0.0;
-            if( bSignedByte )
-            {
-                if( psOptions->dfNoDataReal < -128.0 )
-                {
-                    dfVal = -128.0;
-                    bClamped = TRUE;
-                }
-                else if( psOptions->dfNoDataReal > 127.0 )
-                {
-                    dfVal = 127.0;
-                    bClamped = TRUE;
-                }
-                else
-                {
-                    dfVal = static_cast<int>(floor(psOptions->dfNoDataReal + 0.5));
-                    if( dfVal != psOptions->dfNoDataReal )
-                        bRounded = TRUE;
-                }
-            }
-            else
-            {
-                dfVal = GDALAdjustValueToDataType(eBandType,
-                                                     psOptions->dfNoDataReal,
-                                                     &bClamped, &bRounded );
-            }
-
-            if (bClamped)
-            {
-                CPLError( CE_Warning, CPLE_AppDefined, "for band %d, nodata value has been clamped "
-                       "to %.0f, the original value being out of range.",
-                       i + 1, dfVal);
-            }
-            else if(bRounded)
-            {
-                CPLError( CE_Warning, CPLE_AppDefined, "for band %d, nodata value has been rounded "
-                       "to %.0f, %s being an integer datatype.",
-                       i + 1, dfVal,
-                       GDALGetDataTypeName(eBandType));
-            }
-
+            const double dfVal = AdjustNoDataValue(
+                psOptions->dfNoDataReal, poVRTBand, psOptions);
             poVRTBand->SetNoDataValue( dfVal );
         }
 
@@ -1983,7 +2122,8 @@ static void AttachMetadata( GDALDatasetH hDS, char **papszMetadataOptions )
 /* more and more custom behaviour in the context of gdal_translate ... */
 
 static void CopyBandInfo( GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand,
-                          int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData, bool bCopyRAT )
+                          int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData, bool bCopyRAT,
+                          const GDALTranslateOptions *psOptions )
 
 {
 
@@ -2033,7 +2173,11 @@ static void CopyBandInfo( GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand
         int bSuccess = FALSE;
         double dfNoData = poSrcBand->GetNoDataValue(&bSuccess);
         if( bSuccess )
-            poDstBand->SetNoDataValue( dfNoData );
+        {
+            const double dfVal = AdjustNoDataValue(
+                dfNoData, poDstBand, psOptions);
+            poDstBand->SetNoDataValue( dfVal );
+        }
     }
 
     if (bCopyScale)
@@ -2090,7 +2234,7 @@ static int GetColorInterp( const char* pszStr )
  * Allocates a GDALTranslateOptions struct.
  *
  * @param papszArgv NULL terminated list of options (potentially including filename and open options too), or NULL.
- *                  The accepted options are the ones of the <a href="gdal_translate.html">gdal_translate</a> utility.
+ *                  The accepted options are the ones of the <a href="/programs/gdal_translate.html">gdal_translate</a> utility.
  * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
  *                           otherwise (gdal_translate_bin.cpp use case) must be allocated with
  *                           GDALTranslateOptionsForBinaryNew() prior to this function. Will be
@@ -2170,7 +2314,7 @@ GDALTranslateOptions *GDALTranslateOptionsNew(char** papszArgv, GDALTranslateOpt
 /*      Handle command line arguments.                                  */
 /* -------------------------------------------------------------------- */
     const int argc = CSLCount(papszArgv);
-    for( int i = 0; papszArgv != nullptr && i < argc; i++ )
+    for( int i = 0; i < argc && papszArgv != nullptr && papszArgv[i] != nullptr; i++ )
     {
         if( i < argc-1 && (EQUAL(papszArgv[i],"-of") || EQUAL(papszArgv[i],"-f")) )
         {

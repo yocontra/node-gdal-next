@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements Open FileGDB OGR driver.
- * Author:   Even Rouault, <even dot rouault at mines-dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -50,9 +50,9 @@
 #include "ogr_srs_api.h"
 #include "ogrsf_frmts.h"
 #include "filegdbtable.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogropenfilegdblayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogropenfilegdblayer.cpp 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGROpenFileGDBGeomFieldDefn                     */
@@ -286,6 +286,8 @@ int OGROpenFileGDBLayer::BuildGeometryColumnGDBv10()
         CPLDestroyXMLNode(psTree);
         return FALSE;
     }
+
+    m_bTimeInUTC = CPLTestBool(CPLGetXMLValue(psInfo, "IsTimeInUTC", "false"));
 
     /* We cannot trust the XML definition to build the field definitions. */
     /* It sometimes misses a few fields ! */
@@ -1538,9 +1540,10 @@ OGRFeature* OGROpenFileGDBLayer::GetCurrentFeature()
         }
         else
         {
-            if( !m_poFeatureDefn->GetFieldDefn(iOGRIdx)->IsIgnored() )
+            const OGRFieldDefn* poFieldDefn = m_poFeatureDefn->GetFieldDefn(iOGRIdx);
+            if( !poFieldDefn->IsIgnored() )
             {
-                const OGRField* psField = m_poLyrTable->GetFieldValue(iGDBIdx);
+                OGRField* psField = m_poLyrTable->GetFieldValue(iGDBIdx);
                 if( poFeature == nullptr )
                     poFeature = new OGRFeature(m_poFeatureDefn);
                 if( psField == nullptr )
@@ -1551,9 +1554,14 @@ OGRFeature* OGROpenFileGDBLayer::GetCurrentFeature()
                 {
 
                     if( iGDBIdx == m_iFieldToReadAsBinary )
-                        poFeature->SetField(iOGRIdx, (const char*) psField->Binary.paData);
+                        poFeature->SetField(iOGRIdx, reinterpret_cast<const char*>(psField->Binary.paData));
+                    else if( poFieldDefn->GetType() == OFTDateTime )
+                    {
+                        psField->Date.TZFlag = m_bTimeInUTC ? 100 : 0;
+                        poFeature->SetField(iOGRIdx, psField);
+                    }
                     else
-                        poFeature->SetField(iOGRIdx, (OGRField*) psField);
+                        poFeature->SetField(iOGRIdx, psField);
                 }
             }
             iOGRIdx ++;

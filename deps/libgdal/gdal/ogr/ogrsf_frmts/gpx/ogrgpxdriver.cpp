@@ -2,10 +2,10 @@
  *
  * Project:  GPX Translator
  * Purpose:  Implements OGRGPXDriver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2007-2008, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2008, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 #include "gdal_priv.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: ogrgpxdriver.cpp 66622e3a6420f73324c88fe28fc0084031bf6141 2018-02-23 03:45:47Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrgpxdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -130,7 +130,7 @@ void RegisterOGRGPX()
 "    <Value>CRLF</Value>"
 "    <Value>LF</Value>"
 "  </Option>"
-"  <Option name='GPX_USE_EXTENSIONS' type='boolean' description='Whether to write non-GPX attributes in an <extensions> tag' default='NO'/>"
+"  <Option name='GPX_USE_EXTENSIONS' type='boolean' description='Whether to write non-GPX attributes in an &lt;extensions&gt; tag' default='NO'/>"
 "  <Option name='GPX_EXTENSIONS_NS' type='string' description='Namespace value used for extension tags' default='ogr'/>"
 "  <Option name='GPX_EXTENSIONS_NS_URL' type='string' description='Namespace URI' default='http://osgeo.org/gdal'/>"
 "</CreationOptionList>");

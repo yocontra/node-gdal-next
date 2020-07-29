@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_idb.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogr_idb.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGRIDBTableLayer class, access to an existing table
@@ -41,7 +41,7 @@
 
 class OGRIDBDataSource;
 
-class OGRIDBLayer : public OGRLayer
+class OGRIDBLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -89,7 +89,7 @@ class OGRIDBLayer : public OGRLayer
 /*                           OGRIDBTableLayer                          */
 /************************************************************************/
 
-class OGRIDBTableLayer : public OGRIDBLayer
+class OGRIDBTableLayer final: public OGRIDBLayer
 {
     int                 bUpdateAccess;
 
@@ -133,7 +133,7 @@ class OGRIDBTableLayer : public OGRIDBLayer
 /*                          OGRIDBSelectLayer                          */
 /************************************************************************/
 
-class OGRIDBSelectLayer : public OGRIDBLayer
+class OGRIDBSelectLayer final: public OGRIDBLayer
 {
     char                *pszBaseQuery;
 
@@ -163,7 +163,7 @@ class OGRIDBSelectLayer : public OGRIDBLayer
 /*                           OGRIDBDataSource                          */
 /************************************************************************/
 
-class OGRIDBDataSource : public OGRDataSource
+class OGRIDBDataSource final: public OGRDataSource
 {
     OGRIDBLayer        **papoLayers;
     int                 nLayers;
@@ -201,7 +201,7 @@ class OGRIDBDataSource : public OGRDataSource
 /*                             OGRIDBDriver                            */
 /************************************************************************/
 
-class OGRIDBDriver : public OGRSFDriver
+class OGRIDBDriver final: public OGRSFDriver
 {
     public:
                        ~OGRIDBDriver();

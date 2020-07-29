@@ -40,7 +40,7 @@
 
 #include "cpl_swift.h"
 
-CPL_CVSID("$Id: cpl_vsil_swift.cpp 78ebfa67fe512cc98e3452fc307a0a17e88d0b68 2019-06-21 00:26:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_swift.cpp a68b4b9092dd4a42d8dcf77dabaacf23029e39c2 2020-02-14 10:00:34 +0100 Jiri Drbalek $")
 
 #ifndef HAVE_CURL
 
@@ -267,6 +267,7 @@ class VSISwiftHandle final : public IVSIS3LikeHandle
     struct curl_slist* GetCurlHeaders(
         const CPLString& osVerb,
         const struct curl_slist* psExistingHeaders ) override;
+    virtual bool Authenticate() override;
 
   public:
     VSISwiftHandle( VSISwiftFSHandler* poFS,
@@ -524,6 +525,7 @@ char** VSISwiftFSHandler::GetFileList( const char *pszDirname,
         int nRetryCount = 0;
         const int nMaxRetry = atoi(CPLGetConfigOption("GDAL_HTTP_MAX_RETRY",
                                     CPLSPrintf("%d",CPL_HTTP_MAX_RETRY)));
+        // coverity[tainted_data]
         double dfRetryDelay = CPLAtof(CPLGetConfigOption("GDAL_HTTP_RETRY_DELAY",
                                     CPLSPrintf("%f", CPL_HTTP_RETRY_DELAY)));
         do
@@ -681,6 +683,15 @@ struct curl_slist* VSISwiftHandle::GetCurlHeaders( const CPLString& osVerb,
                                 const struct curl_slist* psExistingHeaders )
 {
     return m_poHandleHelper->GetCurlHeaders(osVerb, psExistingHeaders);
+}
+
+/************************************************************************/
+/*                           Authenticate()                             */
+/************************************************************************/
+
+bool VSISwiftHandle::Authenticate()
+{
+    return m_poHandleHelper->Authenticate();
 }
 
 

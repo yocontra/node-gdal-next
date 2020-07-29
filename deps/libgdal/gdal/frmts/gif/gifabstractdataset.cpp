@@ -2,10 +2,10 @@
  *
  * Project:  GIF Driver
  * Purpose:  GIF Abstract Dataset
- * Author:   Even Rouault <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault <even dot rouault at spatialys.com>
  *
  ****************************************************************************
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,7 +28,7 @@
 
 #include "gifabstractdataset.h"
 
-CPL_CVSID("$Id: gifabstractdataset.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04-20 20:33:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: gifabstractdataset.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 constexpr int InterlacedOffset[] = { 0, 4, 2, 1 };
 constexpr int InterlacedJumps[] = { 8, 8, 4, 2 };

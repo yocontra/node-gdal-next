@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: subfile_source.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: subfile_source.h b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $
  *
  * Project:  JPEG-2000
  * Purpose:  Implements read-only virtual io on a subregion of a file.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -58,7 +58,7 @@ class subfile_source : public kdu_compressed_source {
         file(nullptr)
     {}
 
-    ~subfile_source() override { close(); }
+    ~subfile_source() override { subfile_source::close(); }
 
     bool exists() const { return (file != nullptr); }
 

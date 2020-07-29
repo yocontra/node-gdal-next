@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: commonutils.h a0d71bfef1ef5d11e3ea2a4d1df27ac992f06c26 2017-11-20 14:22:39Z Even Rouault $
+ * $Id: commonutils.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  GDAL Utilities
  * Purpose:  Common utility routines
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

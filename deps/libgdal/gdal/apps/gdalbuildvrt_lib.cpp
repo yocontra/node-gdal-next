@@ -56,7 +56,7 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: gdalbuildvrt_lib.cpp 06e2659c4ecd0a3d4dc9ff66b93af7af04721237 2018-04-07 23:13:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalbuildvrt_lib.cpp 15841279d82ea156e16522db2bcd65d88653b0a1 2019-11-26 03:45:52 -0500 Cody Benkoski $")
 
 #define GEOTRSFRM_TOPLEFT_X            0
 #define GEOTRSFRM_WE_RES               1
@@ -1520,7 +1520,7 @@ GDALBuildVRTOptions* GDALBuildVRTOptionsClone(const GDALBuildVRTOptions *psOptio
 /**
  * Build a VRT from a list of datasets.
  *
- * This is the equivalent of the <a href="gdalbuildvrt.html">gdalbuildvrt</a> utility.
+ * This is the equivalent of the <a href="/programs/gdalbuildvrt.html">gdalbuildvrt</a> utility.
  *
  * GDALBuildVRTOptions* must be allocated and freed with GDALBuildVRTOptionsNew()
  * and GDALBuildVRTOptionsFree() respectively.
@@ -1668,7 +1668,7 @@ static char *SanitizeSRS( const char *pszUserInput )
  * Allocates a GDALBuildVRTOptions struct.
  *
  * @param papszArgv NULL terminated list of options (potentially including filename and open options too), or NULL.
- *                  The accepted options are the ones of the <a href="gdalbuildvrt.html">gdalbuildvrt</a> utility.
+ *                  The accepted options are the ones of the <a href="/programs/gdalbuildvrt.html">gdalbuildvrt</a> utility.
  * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
  *                           otherwise (gdal_translate_bin.cpp use case) must be allocated with
  *                           GDALBuildVRTOptionsForBinaryNew() prior to this function. Will be

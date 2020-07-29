@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_findfile.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: cpl_findfile.cpp 36a6a8ceffd622ab2b2ecddf489b5f790f1c65a0 2019-08-12 23:56:02 +0200 Even Rouault $")
 
 typedef struct
 {
@@ -217,7 +217,9 @@ void CPLPushFileFinder( CPLFileFinder pfnFinder )
 CPLFileFinder CPLPopFileFinderInternal( FindFileTLS* pTLSData )
 
 {
-    if( pTLSData == nullptr || pTLSData->nFileFinders == 0 )
+    if( pTLSData == nullptr )
+        return nullptr;
+    if( pTLSData->nFileFinders == 0 )
         return nullptr;
 
     CPLFileFinder pfnReturn = pTLSData->papfnFinders[--pTLSData->nFileFinders];

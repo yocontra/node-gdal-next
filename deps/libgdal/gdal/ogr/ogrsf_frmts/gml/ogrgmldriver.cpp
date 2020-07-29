@@ -31,7 +31,7 @@
 #include "cpl_multiproc.h"
 #include "gmlreaderp.h"
 
-CPL_CVSID("$Id: ogrgmldriver.cpp efa2b50f96a33d250a43ce851e2314232cef1795 2017-12-12 07:57:09Z Even Rouault $")
+CPL_CVSID("$Id: ogrgmldriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
 
 /************************************************************************/
 /*                         OGRGMLDriverIdentify()                       */
@@ -208,7 +208,7 @@ void RegisterOGRGML()
 "    <Value>OGC_URN</Value>"
 "    <Value>OGC_URL</Value>"
 "  </Option>"
-"  <Option name='WRITE_FEATURE_BOUNDED_BY' type='boolean' description='Whether to write <gml:boundedBy> element for each feature with GML3* versions' default='YES'/>"
+"  <Option name='WRITE_FEATURE_BOUNDED_BY' type='boolean' description='Whether to write &lt;gml:boundedBy&gt; element for each feature with GML3* versions' default='YES'/>"
 "  <Option name='SPACE_INDENTATION' type='boolean' description='Whether to indent the output for readability' default='YES'/>"
 "  <Option name='SRSDIMENSION_LOC' type='string-select' description='(only valid for FORMAT=GML3xx) Location where to put srsDimension attribute' default='POSLIST'>"
 "    <Value>POSLIST</Value>"

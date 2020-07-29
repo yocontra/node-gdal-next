@@ -2,10 +2,10 @@
  *
  * Project:  GDAL Gridding API.
  * Purpose:  Implementation of GDAL scattered data gridder.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #ifdef HAVE_SSE_AT_COMPILE_TIME
 #include <xmmintrin.h>
 
-CPL_CVSID("$Id: gdalgridsse.cpp 75ca5cf8283b1c35266b53e555a575aa4180f38a 2019-02-18 20:54:30 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalgridsse.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*         GDALGridInverseDistanceToAPower2NoSmoothingNoSearchSSE()     */

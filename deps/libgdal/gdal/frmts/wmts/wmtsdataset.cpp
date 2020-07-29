@@ -50,7 +50,7 @@ extern "C" void GDALRegister_WMTS();
 
 #define WMTS_WGS84_DEG_PER_METER    (180 / M_PI / SRS_WGS84_SEMIMAJOR)
 
-CPL_CVSID("$Id: wmtsdataset.cpp b384815f8a4a2344821c49ad9e030887a0b92058 2019-02-12 01:06:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: wmtsdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 typedef enum
 {
@@ -125,7 +125,7 @@ class WMTSTileMatrixSet
 /* ==================================================================== */
 /************************************************************************/
 
-class WMTSDataset : public GDALPamDataset
+class WMTSDataset final: public GDALPamDataset
 {
   friend class WMTSBand;
 
@@ -199,7 +199,7 @@ class WMTSDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class WMTSBand : public GDALPamRasterBand
+class WMTSBand final: public GDALPamRasterBand
 {
   public:
                   WMTSBand(WMTSDataset* poDS, int nBand);
@@ -2235,7 +2235,7 @@ void GDALRegister_WMTS()
     poDriver->SetDescription( "WMTS" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "OGC Web Map Tile Service" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_wmts.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/wmts.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "WMTS:" );
 

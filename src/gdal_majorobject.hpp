@@ -20,9 +20,9 @@ using namespace node;
 namespace node_gdal {
 
 class MajorObject {
-public:
-	static Local<Object> getMetadata(GDALMajorObject *obj, const char *domain);
+    public:
+  static Local<Object> getMetadata(GDALMajorObject *obj, const char *domain);
 };
 
-}
+} // namespace node_gdal
 #endif

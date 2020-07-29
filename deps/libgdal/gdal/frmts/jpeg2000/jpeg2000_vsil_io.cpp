@@ -2,7 +2,7 @@
  *
  * Project:  JPEG-2000
  * Purpose:  Return a stream for a VSIL file
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************/
 
@@ -14,7 +14,7 @@
  *   British Columbia.
  * Copyright (c) 2001-2003 Michael David Adams.
  * All rights reserved.
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  */
 
 /* __START_OF_JASPER_LICENSE__
@@ -81,7 +81,7 @@
 #include "jpeg2000_vsil_io.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: jpeg2000_vsil_io.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: jpeg2000_vsil_io.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /*
  * File descriptor file object.

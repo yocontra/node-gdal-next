@@ -628,6 +628,9 @@ static const MethodMapping projectionMethodMappings[] = {
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL, "Equirectangular",
      "eqc", nullptr, paramsEqc},
 
+    {PROJ_WKT2_NAME_METHOD_FLAT_POLAR_QUARTIC, 0, "Flat_Polar_Quartic",
+     "mbtfpq", nullptr, paramsLonNatOrigin},
+
     {PROJ_WKT2_NAME_METHOD_GALL_STEREOGRAPHIC, 0, "Gall_Stereographic", "gall",
      nullptr, paramsLonNatOrigin},
 
@@ -636,6 +639,9 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE, 0,
      "Interrupted_Goode_Homolosine", "igh", nullptr, paramsLonNatOrigin},
+
+    {PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE_OCEAN, 0, nullptr,
+     "igh_o", nullptr, paramsLonNatOrigin},
 
     // No proper WKT1 representation fr sweep=x
     {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X, 0, nullptr, "geos",
@@ -792,6 +798,9 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {"Quartic Authalic", 0, "Quartic_Authalic", "qua_aut", nullptr,
      paramsLonNatOrigin},
+
+    {"Transverse Cylindrical Equal Area", 0,
+     "Transverse_Cylindrical_Equal_Area", "tcea", nullptr, paramsObliqueStereo},
 
     {EPSG_NAME_METHOD_EQUAL_EARTH, EPSG_CODE_METHOD_EQUAL_EARTH, nullptr,
      "eqearth", nullptr, paramsLonNatOrigin},

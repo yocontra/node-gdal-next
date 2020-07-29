@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2011, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 
 #include "gdal_ecw.h"
 
-CPL_CVSID("$Id: ecwasyncreader.cpp d4681234b337b14e215ae6b4d3ca7dc5e48d0a17 2019-03-24 15:50:26 +0100 Even Rouault $")
+CPL_CVSID("$Id: ecwasyncreader.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 #if defined(FRMT_ecw) && (ECWSDK_VERSION >= 40)
 

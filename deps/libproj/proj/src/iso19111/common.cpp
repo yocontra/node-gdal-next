@@ -39,6 +39,9 @@
 #include "proj/internal/io_internal.hpp"
 
 #include "proj.h"
+#include "proj_internal.h"
+
+#include "proj_json_streaming_writer.hpp"
 
 #include <cmath> // M_PI
 #include <cstdlib>
@@ -242,45 +245,45 @@ void UnitOfMeasure::_exportToWKT(
 void UnitOfMeasure::_exportToJSON(
     JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     const auto &l_codeSpace = codeSpace();
     auto objContext(
         formatter->MakeObjectContext(nullptr, !l_codeSpace.empty()));
-    writer.AddObjKey("type");
+    writer->AddObjKey("type");
     const auto l_type = type();
     if (l_type == Type::LINEAR) {
-        writer.Add("LinearUnit");
+        writer->Add("LinearUnit");
     } else if (l_type == Type::ANGULAR) {
-        writer.Add("AngularUnit");
+        writer->Add("AngularUnit");
     } else if (l_type == Type::SCALE) {
-        writer.Add("ScaleUnit");
+        writer->Add("ScaleUnit");
     } else if (l_type == Type::TIME) {
-        writer.Add("TimeUnit");
+        writer->Add("TimeUnit");
     } else if (l_type == Type::PARAMETRIC) {
-        writer.Add("ParametricUnit");
+        writer->Add("ParametricUnit");
     } else {
-        writer.Add("Unit");
+        writer->Add("Unit");
     }
 
-    writer.AddObjKey("name");
+    writer->AddObjKey("name");
     const auto &l_name = name();
-    writer.Add(l_name);
+    writer->Add(l_name);
 
     const auto &factor = conversionToSI();
-    writer.AddObjKey("conversion_factor");
-    writer.Add(factor, 15);
+    writer->AddObjKey("conversion_factor");
+    writer->Add(factor, 15);
 
     if (!l_codeSpace.empty() && formatter->outputId()) {
-        writer.AddObjKey("id");
+        writer->AddObjKey("id");
         auto idContext(formatter->MakeObjectContext(nullptr, false));
-        writer.AddObjKey("authority");
-        writer.Add(l_codeSpace);
-        writer.AddObjKey("code");
+        writer->AddObjKey("authority");
+        writer->Add(l_codeSpace);
+        writer->AddObjKey("code");
         const auto &l_code = code();
         try {
-            writer.Add(std::stoi(l_code));
+            writer->Add(std::stoi(l_code));
         } catch (const std::exception &) {
-            writer.Add(l_code);
+            writer->Add(l_code);
         }
     }
 }
@@ -312,7 +315,7 @@ bool UnitOfMeasure::operator!=(const UnitOfMeasure &other) PROJ_PURE_DEFN {
 //! @cond Doxygen_Suppress
 std::string UnitOfMeasure::exportToPROJString() const {
     if (type() == Type::LINEAR) {
-        auto proj_units = proj_list_units();
+        auto proj_units = pj_list_linear_units();
         for (int i = 0; proj_units[i].id != nullptr; i++) {
             if (::fabs(proj_units[i].factor - conversionToSI()) <
                 1e-10 * conversionToSI()) {
@@ -320,7 +323,7 @@ std::string UnitOfMeasure::exportToPROJString() const {
             }
         }
     } else if (type() == Type::ANGULAR) {
-        auto proj_angular_units = proj_list_angular_units();
+        auto proj_angular_units = pj_list_angular_units();
         for (int i = 0; proj_angular_units[i].id != nullptr; i++) {
             if (::fabs(proj_angular_units[i].factor - conversionToSI()) <
                 1e-10 * conversionToSI()) {
@@ -419,7 +422,7 @@ bool Measure::operator==(const Measure &other) PROJ_PURE_DEFN {
 
 /** \brief Returns whether an object is equivalent to another one.
  * @param other other object to compare to
- * @param criterion comparaison criterion.
+ * @param criterion comparison criterion.
  * @param maxRelativeError Maximum relative error allowed.
  * @return true if objects are equivalent.
  */
@@ -875,13 +878,13 @@ void IdentifiedObject::formatRemarks(WKTFormatter *formatter) const {
 
 void IdentifiedObject::formatID(JSONFormatter *formatter) const {
     const auto &ids(identifiers());
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     if (ids.size() == 1) {
-        writer.AddObjKey("id");
+        writer->AddObjKey("id");
         ids.front()->_exportToJSON(formatter);
     } else if (!ids.empty()) {
-        writer.AddObjKey("ids");
-        auto arrayContext(writer.MakeArrayContext());
+        writer->AddObjKey("ids");
+        auto arrayContext(writer->MakeArrayContext());
         for (const auto &id : ids) {
             id->_exportToJSON(formatter);
         }
@@ -892,9 +895,9 @@ void IdentifiedObject::formatID(JSONFormatter *formatter) const {
 
 void IdentifiedObject::formatRemarks(JSONFormatter *formatter) const {
     if (!remarks().empty()) {
-        auto &writer = formatter->writer();
-        writer.AddObjKey("remarks");
-        writer.Add(remarks());
+        auto writer = formatter->writer();
+        writer->AddObjKey("remarks");
+        writer->Add(remarks());
     }
 }
 
@@ -1059,30 +1062,30 @@ void ObjectDomain::_exportToWKT(WKTFormatter *formatter) const {
 
 //! @cond Doxygen_Suppress
 void ObjectDomain::_exportToJSON(JSONFormatter *formatter) const {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     if (d->scope_.has_value()) {
-        writer.AddObjKey("scope");
-        writer.Add(*(d->scope_));
+        writer->AddObjKey("scope");
+        writer->Add(*(d->scope_));
     }
     if (d->domainOfValidity_) {
         if (d->domainOfValidity_->description().has_value()) {
-            writer.AddObjKey("area");
-            writer.Add(*(d->domainOfValidity_->description()));
+            writer->AddObjKey("area");
+            writer->Add(*(d->domainOfValidity_->description()));
         }
         if (d->domainOfValidity_->geographicElements().size() == 1) {
             const auto bbox = dynamic_cast<const GeographicBoundingBox *>(
                 d->domainOfValidity_->geographicElements()[0].get());
             if (bbox) {
-                writer.AddObjKey("bbox");
-                auto bboxContext(writer.MakeObjectContext());
-                writer.AddObjKey("south_latitude");
-                writer.Add(bbox->southBoundLatitude(), 15);
-                writer.AddObjKey("west_longitude");
-                writer.Add(bbox->westBoundLongitude(), 15);
-                writer.AddObjKey("north_latitude");
-                writer.Add(bbox->northBoundLatitude(), 15);
-                writer.AddObjKey("east_longitude");
-                writer.Add(bbox->eastBoundLongitude(), 15);
+                writer->AddObjKey("bbox");
+                auto bboxContext(writer->MakeObjectContext());
+                writer->AddObjKey("south_latitude");
+                writer->Add(bbox->southBoundLatitude(), 15);
+                writer->AddObjKey("west_longitude");
+                writer->Add(bbox->westBoundLongitude(), 15);
+                writer->AddObjKey("north_latitude");
+                writer->Add(bbox->northBoundLatitude(), 15);
+                writer->AddObjKey("east_longitude");
+                writer->Add(bbox->eastBoundLongitude(), 15);
             }
         }
         if (d->domainOfValidity_->verticalElements().size() == 1) {
@@ -1231,16 +1234,16 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
 
 void ObjectUsage::baseExportToJSON(JSONFormatter *formatter) const {
 
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     if (formatter->outputUsage()) {
         const auto &l_domains = domains();
         if (l_domains.size() == 1) {
             l_domains[0]->_exportToJSON(formatter);
         } else if (!l_domains.empty()) {
-            writer.AddObjKey("usages");
-            auto arrayContext(writer.MakeArrayContext(false));
+            writer->AddObjKey("usages");
+            auto arrayContext(writer->MakeArrayContext(false));
             for (const auto &domain : l_domains) {
-                auto objContext(writer.MakeObjectContext());
+                auto objContext(writer->MakeObjectContext());
                 domain->_exportToJSON(formatter);
             }
         }

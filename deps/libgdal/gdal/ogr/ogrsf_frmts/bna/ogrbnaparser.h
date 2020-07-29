@@ -1,9 +1,9 @@
 /******************************************************************************
- * $Id: ogrbnaparser.h 3d704e3dd0aad44ff466e20c7f200a9593994e88 2016-10-24 12:09:43Z Kurt Schwehr $
+ * $Id: ogrbnaparser.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  BNA Parser header
  * Purpose:  Definition of structures, enums and functions of BNA parser
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
  * Copyright (c) 2007, Even Rouault

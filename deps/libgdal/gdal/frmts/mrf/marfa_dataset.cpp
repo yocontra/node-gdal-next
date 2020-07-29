@@ -56,7 +56,7 @@
 #include <algorithm>
 #include <vector>
 
-CPL_CVSID("$Id: marfa_dataset.cpp 9abb7aac9a26b8b02f7b802aab4353d0ff039981 2019-03-31 13:33:09 +0200 Even Rouault $")
+CPL_CVSID("$Id: marfa_dataset.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 using std::vector;
 using std::string;
@@ -324,8 +324,7 @@ CPLErr GDALMRFDataset::IBuildOverviews(
                 config = nullptr;
             }
             catch (const CPLErr& ) {
-                if (config)
-                    CPLDestroyXMLNode(config);
+                CPLDestroyXMLNode(config);
                 throw; // Rethrow
             }
 
@@ -1140,7 +1139,7 @@ VSILFILE *GDALMRFDataset::DataFP() {
     if (source.empty())
         goto io_error;
 
-    // Cloud be there but read only, remember that it was open that way
+    // May be there but read only, remember that it was open that way
     mode = "rb";
     dfp.acc = GF_Read;
     dfp.FP = VSIFOpenL(current.datfname, mode);
@@ -1329,7 +1328,24 @@ CPLErr GDALMRFDataset::Initialize(CPLXMLNode *config)
         bGeoTransformValid = TRUE;
     }
 
-    SetProjection(CPLGetXMLValue(config, "GeoTags.Projection", ""));
+    OGRSpatialReference oSRS;
+    const char *pszRawProjFromXML = CPLGetXMLValue(config, "GeoTags.Projection", "");
+    if (strlen(pszRawProjFromXML) == 0 ||
+        oSRS.SetFromUserInput(pszRawProjFromXML) != OGRERR_NONE )
+    {
+        SetProjection("");
+    }
+    else
+    {
+        char* pszRawProj = nullptr;
+        if( oSRS.exportToWkt(&pszRawProj) != OGRERR_NONE )
+        {
+            CPLFree(pszRawProj);
+            pszRawProj = CPLStrdup("");
+        }
+        SetProjection(pszRawProj);
+        CPLFree(pszRawProj);
+    }
 
     // Copy the full size to current, data and index are not yet open
     current = full;
@@ -1450,6 +1466,10 @@ CPLErr GDALMRFDataset::Initialize(CPLXMLNode *config)
     }
 
     idxSize = IdxSize(full, int(scale));
+    if( idxSize == 0 )
+    {
+        return CE_Failure;
+    }
 
     // If not set by the bands, get a pageSizeBytes buffer
     if (GetPBufferSize() == 0)

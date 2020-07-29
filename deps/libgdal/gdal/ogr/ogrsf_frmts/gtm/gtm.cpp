@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Leonardo de Paula Rosa Piga
- * Copyright (c) 2009-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@
 
 #include "gtm.h"
 
-CPL_CVSID("$Id: gtm.cpp 9944743a9d4f77b8bbcf6c365b3dd8a262b5adfb 2018-02-12 13:11:56Z Even Rouault $")
+CPL_CVSID("$Id: gtm.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*        Methods for dealing with write on files and buffers           */

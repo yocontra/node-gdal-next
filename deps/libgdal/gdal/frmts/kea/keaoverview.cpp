@@ -29,11 +29,11 @@
 
 #include "keaoverview.h"
 
-CPL_CVSID("$Id: keaoverview.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: keaoverview.cpp 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $")
 
 // constructor
 KEAOverview::KEAOverview(KEADataset *pDataset, int nSrcBand, GDALAccess eAccessIn,
-                kealib::KEAImageIO *pImageIO, int *pRefCount,
+                kealib::KEAImageIO *pImageIO, LockedRefCount *pRefCount,
                 int nOverviewIndex, uint64_t nXSize, uint64_t nYSize)
  : KEARasterBand( pDataset, nSrcBand, eAccessIn, pImageIO, pRefCount )
 {

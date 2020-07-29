@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "ogr_mysql.h"
 
-CPL_CVSID("$Id: ogrmysqlresultlayer.cpp d80c4b49b7f6477247bd5afefc0973d6bb7ec05b 2018-04-12 21:49:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmysqlresultlayer.cpp f6ca9e699ebaf802a3a75608dfadc5f5464aff44 2019-12-16 23:52:17 +0900 Hiroshi Miura $")
 
 /************************************************************************/
 /*                        OGRMySQLResultLayer()                         */
@@ -235,9 +235,18 @@ OGRFeatureDefn *OGRMySQLResultLayer::ReadResultDefinition()
         poDefn->SetGeomType( wkbUnknown );
         poDefn->GetGeomFieldDefn(0)->SetName( pszGeomColumn );
 
-        osCommand.Printf(
-                "SELECT type FROM geometry_columns WHERE f_table_name='%s'",
-                pszGeomColumnTable );
+        if( poDS->GetMajorVersion() < 8 || poDS->IsMariaDB() ) {
+            osCommand.Printf(
+                    "SELECT type FROM geometry_columns WHERE f_table_name='%s'",
+                    pszGeomColumnTable);
+        }
+        else
+        {
+            osCommand.Printf(
+                    "SELECT GEOMETRY_TYPE_NAME FROM INFORMATION_SCHEMA.ST_GEOMETRY_COLUMNS "
+                    "WHERE TABLE_NAME = '%s'",
+                    pszGeomColumnTable);
+        }
 
         if( hResultSet != nullptr )
             mysql_free_result( hResultSet );

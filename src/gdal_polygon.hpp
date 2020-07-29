@@ -19,35 +19,35 @@ using namespace node;
 
 namespace node_gdal {
 
-class Polygon: public Nan::ObjectWrap {
+class Polygon : public Nan::ObjectWrap {
 
-public:
-	static Nan::Persistent<FunctionTemplate> constructor;
+    public:
+  static Nan::Persistent<FunctionTemplate> constructor;
 
-	static void Initialize(Local<Object> target);
-	static NAN_METHOD(New);
-	static Local<Value> New(OGRPolygon *geom);
-	static Local<Value> New(OGRPolygon *geom, bool owned);
-	static NAN_METHOD(toString);
-	static NAN_METHOD(getArea);
+  static void Initialize(Local<Object> target);
+  static NAN_METHOD(New);
+  static Local<Value> New(OGRPolygon *geom);
+  static Local<Value> New(OGRPolygon *geom, bool owned);
+  static NAN_METHOD(toString);
+  static NAN_METHOD(getArea);
 
-	static NAN_GETTER(ringsGetter);
+  static NAN_GETTER(ringsGetter);
 
-	Polygon();
-	Polygon(OGRPolygon *geom);
-	inline OGRPolygon *get() {
-		return this_;
-	}
-	inline bool isAlive(){
-		return this_;
-	}
+  Polygon();
+  Polygon(OGRPolygon *geom);
+  inline OGRPolygon *get() {
+    return this_;
+  }
+  inline bool isAlive() {
+    return this_;
+  }
 
-private:
-	~Polygon();
-	OGRPolygon *this_;
-	bool owned_;
-	int size_;
+    private:
+  ~Polygon();
+  OGRPolygon *this_;
+  bool        owned_;
+  int         size_;
 };
 
-}
+} // namespace node_gdal
 #endif

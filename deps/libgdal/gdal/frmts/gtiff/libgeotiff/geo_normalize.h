@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geo_normalize.h ffb0ad0c862cf4ef5d6907d1d83cc76fcf8c305b 2019-07-17 17:40:29 +0200 Even Rouault $
+ * $Id: geo_normalize.h 48793b5613cf1bf789125516ba845947dc63098f 2019-07-17 17:40:29 +0200 Even Rouault $
  *
  * Project:  libgeotiff
  * Purpose:  Include file related to geo_normalize.c containing Code to
@@ -62,7 +62,7 @@ typedef struct {
         GCS_Voirol_1875_Paris.  Includes datum and prime meridian value. */
     short	GCS;
 
-    /** From ProjLinearUnitsGeoKey.  For example Linear_Meter. */
+    /** From ProjLinearUnitsGeoKey if found, or from GeogLinearUnitsGeoKey otherwise.  For example Linear_Meter. */
     short	UOMLength;
 
     /** One UOMLength = UOMLengthInMeters meters. */

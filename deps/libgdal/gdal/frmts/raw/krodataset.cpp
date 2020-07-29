@@ -2,11 +2,11 @@
  *
  * Project:  KRO format reader/writer
  * Purpose:  Implementation of KOLOR Raw Format
- * Author:   Even Rouault, <even dot rouault at mines-paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  * Financial Support: SITES (http://www.sites.fr)
  *
  ******************************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: krodataset.cpp b2723bb9ee29fb36de5c3afec9e9a6b757ef743c 2018-05-10 21:21:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: krodataset.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 // http://www.autopano.net/wiki-en/Format_KRO
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_plscenes.h 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $
+ * $Id: ogr_plscenes.h 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $
  *
  * Project:  PlanetLabs scene driver
  * Purpose:  PLScenes driver interface
@@ -36,7 +36,7 @@
 #include "cpl_http.h"
 #include "ogr_geojson.h"
 #include "ogrgeojsonreader.h"
-#include "swq.h"
+#include "ogr_swq.h"
 #include <map>
 #include <set>
 #include <vector>

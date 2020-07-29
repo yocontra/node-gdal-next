@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "gdaljp2metadata.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ecwcreatecopy.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ecwcreatecopy.cpp e5cb5406ea9090b2f17cffeeb7ba5fb49e7158f2 2019-10-15 17:19:14 +0800 Chris Tapley $")
 
 #if defined(FRMT_ecw) && defined(HAVE_COMPRESS)
 
@@ -75,7 +75,7 @@ CPLString GetCompressionSoftwareName(){
 }
 #endif
 
-class GDALECWCompressor : public CNCSFile {
+class GDALECWCompressor final: public CNCSFile {
 
 public:
     GDALECWCompressor();
@@ -115,7 +115,7 @@ public:
 
     GDALDataset *m_poSrcDS;
 
-    VSIIOStream m_OStream;
+    std::shared_ptr<VSIIOStream> m_OStream;
     int m_nPercentComplete;
 
     int m_bCancelled;
@@ -143,7 +143,7 @@ private:
 /************************************************************************/
 
 GDALECWCompressor::GDALECWCompressor() :
-    eWorkDT(GDT_Unknown)
+    m_OStream(std::make_shared<VSIIOStream>()), eWorkDT(GDT_Unknown)
 {
     m_poSrcDS = nullptr;
     m_nPercentComplete = -1;
@@ -186,7 +186,7 @@ CPLErr GDALECWCompressor::CloseDown()
 
 {
     Close( true );
-    m_OStream.Close();
+    m_OStream->Close();
 
     return CE_None;
 }
@@ -1008,7 +1008,7 @@ CPLErr GDALECWCompressor::Initialize(
             return CE_Failure;
         }
 
-        m_OStream.Access( fpVSIL, TRUE, (BOOLEAN) bSeekable, pszFilename,
+        m_OStream->Access( fpVSIL, TRUE, (BOOLEAN) bSeekable, pszFilename,
                           0, -1 );
     }
     else
@@ -1114,8 +1114,13 @@ CPLErr GDALECWCompressor::Initialize(
                 oError = GetCNCSError(Open( (char *) pszFilename, false, true ));
             }
         }
-        else
-            oError = CNCSJP2FileView::Open( &(m_OStream) );
+        else {
+#if ECWSDK_VERSION>=55
+            oError = CNCSJP2FileView::Open(m_OStream);
+#else
+            oError = CNCSJP2FileView::Open(m_OStream.get());
+#endif
+        }
     }
 
     if( oError.GetErrorNumber() == NCS_SUCCESS )
@@ -1584,7 +1589,7 @@ class IRasterIORequest
 };
 #endif
 
-class ECWWriteDataset : public GDALDataset
+class ECWWriteDataset final: public GDALDataset
 {
     friend class ECWWriteRasterBand;
 
@@ -1648,7 +1653,7 @@ class ECWWriteDataset : public GDALDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class ECWWriteRasterBand : public GDALRasterBand
+class ECWWriteRasterBand final: public GDALRasterBand
 {
     friend class ECWWriteDataset;
 

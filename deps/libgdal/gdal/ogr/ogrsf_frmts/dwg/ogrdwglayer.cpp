@@ -31,7 +31,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwglayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdwglayer.cpp 6406d8fb59e7fba0b52b1b8fb0309881da63d022 2020-04-07 17:01:28 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRDWGLayer()                             */
@@ -76,7 +76,7 @@ OGRDWGLayer::OGRDWGLayer( OGRDWGDataSource *poDSIn )
             m_poBlock = nullptr;
     }
 
-    ResetReading();
+    OGRDWGLayer::ResetReading();
 }
 
 /************************************************************************/
@@ -1080,6 +1080,8 @@ public:
 
     OGRSpatialReference *GetSourceCS() override { return nullptr; }
     OGRSpatialReference *GetTargetCS() override { return nullptr; }
+
+    OGRCoordinateTransformation* Clone() const override { return new GeometryInsertTransformer(*this); }
 
     int Transform( int nCount,
                      double *x, double *y, double *z = nullptr,

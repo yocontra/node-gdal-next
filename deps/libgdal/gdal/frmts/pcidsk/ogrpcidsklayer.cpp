@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpcidsklayer.cpp c26e96305fcdf9718cc61dde9c0e5ef16e40532d 2018-05-19 13:21:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpcidsklayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRPCIDSKLayer()                           */

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -59,7 +59,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: ogrcsvlayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrcsvlayer.cpp 4dbc7d443508ffb1b9fee8027e4d9bc3b4d9d274 2019-10-26 23:13:59 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            CSVSplitLine()                            */
@@ -2395,6 +2395,7 @@ OGRErr OGRCSVLayer::ICreateFeature( OGRFeature *poNewFeature )
             }
             else
             {
+                CPLFree(pszEscaped);
                 pszEscaped = CPLStrdup("");
             }
         }

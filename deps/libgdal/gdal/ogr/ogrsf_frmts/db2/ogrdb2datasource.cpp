@@ -29,7 +29,7 @@
 
 #include "ogr_db2.h"
 
-CPL_CVSID("$Id: ogrdb2datasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdb2datasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 static GPKGTileFormat GetTileFormat(const char* pszTF );
 
@@ -1887,7 +1887,7 @@ int OGRDB2DataSource::OpenRaster( const char* pszTableName,
                            "WHERE zoom_level = tm.zoom_level FETCH FIRST ROW ONLY)",
                            pszTableName);
     }
-    else if( pszZoomLevel == nullptr )
+    else // if( pszZoomLevel == nullptr )
     {
         oStatement.Appendf(" AND zoom_level <= (SELECT MAX(zoom_level) FROM %s)",
                            pszTableName);

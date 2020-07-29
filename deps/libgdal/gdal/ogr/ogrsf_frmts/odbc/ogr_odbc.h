@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_odbc.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: ogr_odbc.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/ODBC driver.
@@ -40,7 +40,7 @@
 
 class OGRODBCDataSource;
 
-class OGRODBCLayer : public OGRLayer
+class OGRODBCLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -87,7 +87,7 @@ class OGRODBCLayer : public OGRLayer
 /*                           OGRODBCTableLayer                          */
 /************************************************************************/
 
-class OGRODBCTableLayer : public OGRODBCLayer
+class OGRODBCTableLayer final: public OGRODBCLayer
 {
     char                *pszQuery;
 
@@ -138,7 +138,7 @@ class OGRODBCTableLayer : public OGRODBCLayer
 /*                          OGRODBCSelectLayer                          */
 /************************************************************************/
 
-class OGRODBCSelectLayer : public OGRODBCLayer
+class OGRODBCSelectLayer final: public OGRODBCLayer
 {
     char                *pszBaseStatement;
 
@@ -168,7 +168,7 @@ class OGRODBCSelectLayer : public OGRODBCLayer
 /*                           OGRODBCDataSource                          */
 /************************************************************************/
 
-class OGRODBCDataSource : public OGRDataSource
+class OGRODBCDataSource final: public OGRDataSource
 {
     OGRODBCLayer        **papoLayers;
     int                 nLayers;
@@ -214,7 +214,7 @@ class OGRODBCDataSource : public OGRDataSource
 /*                             OGRODBCDriver                            */
 /************************************************************************/
 
-class OGRODBCDriver : public OGRSFDriver
+class OGRODBCDriver final: public OGRSFDriver
 {
   public:
                 virtual ~OGRODBCDriver();

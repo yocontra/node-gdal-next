@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2008, Chris Toney
- * Copyright (c) 2008-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2011, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2013, Kyle Shannon <kyle at pobox dot com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -34,7 +34,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: lcpdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: lcpdataset.cpp a3f8b8b84d38c65717e1d9f08f8be85782cf7094 2020-06-02 15:04:46 +0200 Even Rouault $")
 
 constexpr size_t LCP_HEADER_SIZE = 7316;
 constexpr int LCP_MAX_BANDS = 10;
@@ -175,6 +175,17 @@ int LCPDataset::Identify( GDALOpenInfo * poOpenInfo )
     {
         return FALSE;
     }
+
+/* -------------------------------------------------------------------- */
+/*      Check file extension                                            */
+/* -------------------------------------------------------------------- */
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    const char* pszFileExtension = CPLGetExtension( poOpenInfo->pszFilename );
+    if( ! EQUAL( pszFileExtension, "lcp" ) )
+    {
+        return FALSE;
+    }
+#endif
 
     return TRUE;
 }
@@ -1680,7 +1691,7 @@ void GDALRegister_LCP()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "FARSITE v.4 Landscape File (.lcp)" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "lcp" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_lcp.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/lcp.html" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

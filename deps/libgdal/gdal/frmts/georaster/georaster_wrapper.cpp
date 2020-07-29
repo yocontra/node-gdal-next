@@ -34,7 +34,7 @@
 #include "cpl_string.h"
 #include "cpl_minixml.h"
 
-CPL_CVSID("$Id: georaster_wrapper.cpp 19d847c8519919fcd1e7e7247644d28771034317 2019-03-29 20:17:06 +0100 Even Rouault $")
+CPL_CVSID("$Id: georaster_wrapper.cpp 6433e6613ac68c17e2b8ed93b470116975a0552e 2019-08-12 22:44:23 +0200 Even Rouault $")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterWrapper()
@@ -2280,7 +2280,8 @@ CPLList* AddToNoDataList( CPLXMLNode* phNode, int nNumber, CPLList* poList )
 
 void GeoRasterWrapper::LoadNoDataValues( void )
 {
-    CPLListDestroy( psNoDataList );
+    if( psNoDataList )
+        return;
 
     CPLXMLNode* phLayerInfo = CPLGetXMLNode( phMetadata, "layerInfo" );
 

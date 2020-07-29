@@ -31,7 +31,7 @@
 
 #include "gdal_ecw.h"
 
-CPL_CVSID("$Id: jp2userbox.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: jp2userbox.cpp e5cb5406ea9090b2f17cffeeb7ba5fb49e7158f2 2019-10-15 17:19:14 +0800 Chris Tapley $")
 
 #if defined(HAVE_COMPRESS)
 
@@ -72,7 +72,7 @@ void JP2UserBox::SetData( int nLengthIn, const unsigned char *pabyDataIn )
         CPLFree( pabyData );
 
     nDataLength = nLengthIn;
-    pabyData = (unsigned char *) CPLMalloc(nDataLength);
+    pabyData = static_cast<unsigned char *>(CPLMalloc(nDataLength));
     memcpy( pabyData, pabyDataIn, nDataLength );
 
     m_bValid = true;
@@ -94,8 +94,10 @@ void JP2UserBox::UpdateXLBox()
 /*                                                                      */
 /*      Parse box, and data contents from file into memory.             */
 /************************************************************************/
-
-#if ECWSDK_VERSION >= 40
+#if ECWSDK_VERSION >= 55
+CNCSError JP2UserBox::Parse(CPL_UNUSED NCS::SDK::CFileBase &JP2File, 
+                            CPL_UNUSED const NCS::CIOStreamPtr &Stream)
+#elif ECWSDK_VERSION >= 40
 CNCSError JP2UserBox::Parse( CPL_UNUSED NCS::SDK::CFileBase &JP2File,
                              CPL_UNUSED NCS::CIOStream &Stream )
 #else
@@ -113,8 +115,10 @@ CNCSError JP2UserBox::Parse( CPL_UNUSED class CNCSJP2File &JP2File,
 /*                                                                      */
 /*      Write box meta information, and data to file.                   */
 /************************************************************************/
-
-#if ECWSDK_VERSION >= 40
+#if ECWSDK_VERSION >= 55
+CNCSError JP2UserBox::UnParse(NCS::SDK::CFileBase &JP2File,
+                              const NCS::CIOStreamPtr &Stream)
+#elif ECWSDK_VERSION >= 40
 CNCSError JP2UserBox::UnParse( NCS::SDK::CFileBase &JP2File,
                                NCS::CIOStream &Stream )
 #else
@@ -136,9 +140,12 @@ CNCSError JP2UserBox::UnParse( class CNCSJP2File &JP2File,
 #else
     Error = CNCSSDKBox::UnParse(JP2File, Stream);
 #endif
-//    NCSJP2_CHECKIO_BEGIN(Error, Stream);
+
+#if ECWSDK_VERSION >= 55
+    Stream->Write(pabyData, nDataLength);
+#else
     Stream.Write(pabyData, nDataLength);
-//    NCSJP2_CHECKIO_END();
+#endif
 
     return Error;
 }

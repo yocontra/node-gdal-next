@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -56,7 +56,7 @@
 #endif
 #include "ogrgeojsonwriter.h"
 
-CPL_CVSID("$Id: gdal_rat.cpp 2519a7eb0e1649dbf8625ae8ffc7bb7c3ef9514b 2018-07-10 12:05:23 +0100 Robert Coup $")
+CPL_CVSID("$Id: gdal_rat.cpp 63bfc5a68638c1bcb0efc729ca39e101ecf29691 2019-09-24 17:55:12 +0200 Even Rouault $")
 
 /**
  * \class GDALRasterAttributeTable
@@ -1054,8 +1054,10 @@ GDALColorTable *GDALRasterAttributeTable::TranslateToColorTable(
             return nullptr;
 
         for( int iRow = 0; iRow < GetRowCount(); iRow++ )
+        {
             nEntryCount =
-                std::max(nEntryCount, GetValueAsInt(iRow, iMaxCol) + 1);
+                std::max(nEntryCount, std::min(65535, GetValueAsInt(iRow, iMaxCol)) + 1);
+        }
 
         if( nEntryCount < 0 )
             return nullptr;

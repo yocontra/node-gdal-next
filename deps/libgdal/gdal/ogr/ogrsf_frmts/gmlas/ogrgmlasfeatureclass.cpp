@@ -31,7 +31,7 @@
 // Must be first for DEBUG_BOOL case
 #include "ogr_gmlas.h"
 
-CPL_CVSID("$Id: ogrgmlasfeatureclass.cpp ec4b4866ec4d16a40f6850548b7740b7c912522a 2017-12-05 14:50:04Z Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasfeatureclass.cpp 2ec160d4331d3d6b0fbd965d4875b1445b61717e 2019-09-29 23:20:49 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              GMLASField()                            */
@@ -64,7 +64,8 @@ GMLASFieldType GMLASField::GetTypeFromString( const CPLString& osType )
         osType == szXS_TOKEN ||
         osType == szXS_NMTOKEN ||
         osType == szXS_NCNAME ||
-        osType == szXS_QNAME )
+        osType == szXS_QNAME ||
+        osType == szXS_IDREF )
     {
         // token has special processing by XML processor: all leading/trailing
         // white space is removed

@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_segukooa.h 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $
+ * $Id: ogr_segukooa.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  SEG-P1 / UKOOA P1-90 Translator
  * Purpose:  Definition of classes for OGR SEG-P1 / UKOOA P1-90 driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 /*                        OGRSEGUKOOABaseLayer                          */
 /************************************************************************/
 
-class OGRSEGUKOOABaseLayer : public OGRLayer
+class OGRSEGUKOOABaseLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn*    poFeatureDefn;

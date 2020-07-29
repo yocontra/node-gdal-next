@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_s57.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: ogr_s57.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  S-57 Translator
  * Purpose:  Declarations for classes binding S57 support onto OGRLayer,
@@ -42,7 +42,7 @@ class OGRS57DataSource;
 /*      Represents all features of a particular S57 object class.       */
 /************************************************************************/
 
-class OGRS57Layer : public OGRLayer
+class OGRS57Layer final: public OGRLayer
 {
     OGRS57DataSource   *poDS;
 
@@ -80,7 +80,7 @@ class OGRS57Layer : public OGRLayer
 /*                          OGRS57DataSource                            */
 /************************************************************************/
 
-class OGRS57DataSource : public OGRDataSource
+class OGRS57DataSource final: public OGRDataSource
 {
     char                *pszName;
 
@@ -132,7 +132,7 @@ class OGRS57DataSource : public OGRDataSource
 /*                            OGRS57Driver                              */
 /************************************************************************/
 
-class OGRS57Driver : public GDALDriver
+class OGRS57Driver final: public GDALDriver
 {
     static S57ClassRegistrar *poRegistrar;
 

@@ -37,7 +37,7 @@
 #include "cpl_vsi.h"
 #include "hfa.h"
 
-CPL_CVSID("$Id: hfacompress.cpp 8c1d039cc423641eee65e278fbadf2cf52e15062 2020-01-06 22:17:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: hfacompress.cpp 0d3fc0a10e1ccec8161b82a7506bfbb4ed964959 2020-01-06 22:17:34 +0100 Even Rouault $")
 
 HFACompress::HFACompress( void *pData, GUInt32 nBlockSize, EPTType eDataType ) :
     m_pData(pData),

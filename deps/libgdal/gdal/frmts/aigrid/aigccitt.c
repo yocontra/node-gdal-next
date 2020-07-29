@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: aigccitt.c a33916fe4a206e06e9f043a19e604a515ee2322c 2017-06-04 18:13:57Z Even Rouault $
+ * $Id: aigccitt.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  Arc/Info Binary Grid Translator
  * Purpose:  Code for decoding CCITT RLE (G1) compressed data.
@@ -11,7 +11,7 @@
  * Copyright (c) 2002 Frank Warmerdam <warmerdam@pobox.com>
  * Copyright (c) 1990-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation for any purpose is hereby granted without fee, provided

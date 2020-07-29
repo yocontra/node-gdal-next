@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: rpftoclib.h 461e850085c14cf5a7512ce9d448ab582ea8d181 2016-03-14 06:29:14Z Kurt Schwehr $
+ * $Id: rpftoclib.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  RPF A.TOC read Library
  * Purpose:  Main GDAL independent include file for RPF TOC support.
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  **********************************************************************
- * Copyright (c) 2007-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

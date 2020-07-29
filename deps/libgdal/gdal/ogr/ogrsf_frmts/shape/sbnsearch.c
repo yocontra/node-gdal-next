@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: sbnsearch.c be177ef3add5bf04141c53ca0982de1a8fd6521f 2018-05-06 13:32:15 +0200 Even Rouault $
+ * $Id: sbnsearch.c 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  Shapelib
  * Purpose:  Implementation of search in ESRI SBN spatial index.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * This software is available under the following "MIT Style" license,
  * or at the option of the licensee under the LGPL (see COPYING).  This
@@ -41,7 +41,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-SHP_CVSID("$Id: sbnsearch.c be177ef3add5bf04141c53ca0982de1a8fd6521f 2018-05-06 13:32:15 +0200 Even Rouault $")
+SHP_CVSID("$Id: sbnsearch.c 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 #ifndef TRUE
 #  define TRUE 1

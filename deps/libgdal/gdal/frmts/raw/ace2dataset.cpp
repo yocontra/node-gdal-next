@@ -3,10 +3,10 @@
  * Project:  ACE2 Driver
  * Purpose:  Implementation of ACE2 elevation format read support.
  *           http://tethys.eaprs.cse.dmu.ac.uk/ACE2/shared/documentation
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: ace2dataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ace2dataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 static const char * const apszCategorySource[] =
 {
@@ -91,7 +91,7 @@ static const char * const apszCategoryConfidence[] =
 /* ==================================================================== */
 /************************************************************************/
 
-class ACE2Dataset : public GDALPamDataset
+class ACE2Dataset final: public GDALPamDataset
 {
     friend class ACE2RasterBand;
 
@@ -117,7 +117,7 @@ class ACE2Dataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class ACE2RasterBand : public RawRasterBand
+class ACE2RasterBand final: public RawRasterBand
 {
   public:
     ACE2RasterBand( VSILFILE* fpRaw,
@@ -394,7 +394,7 @@ void GDALRegister_ACE2()
     poDriver->SetDescription( "ACE2" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ACE2" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#ACE2" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/ace2.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "ACE2" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

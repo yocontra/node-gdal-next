@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dgnlibp.h 01d97526bd8cf1da723b27dc55ccc73887012973 2018-03-08 20:36:54Z Even Rouault $
+ * $Id: dgnlibp.h 7762c6c3088eebb0b696d9e01c2329fd19b32c9f 2019-10-17 22:23:24 +0200 Even Rouault $
  *
  * Project:  Microstation DGN Access Library
  * Purpose:  Internal (privatE) datastructures, and prototypes for DGN Access
@@ -32,6 +32,7 @@
 #define DGNLIBP_H_INCLUDED
 
 #include "cpl_vsi.h"
+#include "cpl_vax.h"
 #include "dgnlib.h"
 
 typedef struct {
@@ -96,8 +97,8 @@ int DGNParseCore( DGNInfo *, DGNElemCore * );
 void DGNTransformPoint( DGNInfo *, DGNPoint * );
 void DGNInverseTransformPoint( DGNInfo *, DGNPoint * );
 void DGNInverseTransformPointToInt( DGNInfo *, DGNPoint *, unsigned char * );
-void DGN2IEEEDouble( void * );
-void IEEE2DGNDouble( void * );
+#define DGN2IEEEDouble CPLVaxToIEEEDouble
+#define IEEE2DGNDouble CPLIEEEToVaxDouble
 void DGNBuildIndex( DGNInfo * );
 void DGNRad50ToAscii( unsigned short rad50, char *str );
 void DGNAsciiToRad50( const char *str, unsigned short *rad50 );

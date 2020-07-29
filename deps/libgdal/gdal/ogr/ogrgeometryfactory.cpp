@@ -64,7 +64,7 @@
 #define UNUSED_IF_NO_GEOS
 #endif
 
-CPL_CVSID("$Id: ogrgeometryfactory.cpp 06b1cad14a8f61c97f5fe50bdf33e168824b79c8 2019-02-26 15:48:51 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeometryfactory.cpp 7c7402f4226a5d821bfd6bf38af0e682c8720ba7 2020-04-27 13:06:52 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           createFromWkb()                            */
@@ -306,7 +306,7 @@ OGRErr CPL_DLL OGR_G_CreateFromWkb( const void *pabyData,
  *
  *  <b>Example:</b>
  *
- *  <pre>
+ * \code{.cpp}
  *    const char* wkt= "POINT(0 0)";
  *
  *    // cast because OGR_G_CreateFromWkt will move the pointer
@@ -315,7 +315,7 @@ OGRErr CPL_DLL OGR_G_CreateFromWkb( const void *pabyData,
  *    OGRGeometryH new_geom;
  *    OSRSetAxisMappingStrategy(poSR, OAMS_TRADITIONAL_GIS_ORDER);
  *    OGRErr err = OGR_G_CreateFromWkt(&pszWkt, ref, &new_geom);
- *  </pre>
+ * \endcode
  *
  *
  *
@@ -1118,7 +1118,7 @@ OGRGeometry *OGRGeometryFactory::forceToMultiLineString( OGRGeometry *poGeom )
 
         for( auto&& poMember: poGC )
         {
-            if( poMember->getGeometryType() != wkbLineString )
+            if( wkbFlatten(poMember->getGeometryType()) != wkbLineString )
             {
                 return poGeom;
             }
@@ -1298,6 +1298,111 @@ OGRGeometryH OGR_G_ForceToMultiLineString( OGRGeometryH hGeom )
     return reinterpret_cast<OGRGeometryH>(
         OGRGeometryFactory::forceToMultiLineString(
             reinterpret_cast<OGRGeometry *>(hGeom)));
+}
+
+/************************************************************************/
+/*                      removeLowerDimensionSubGeoms()                  */
+/************************************************************************/
+
+/** \brief Remove sub-geometries from a geometry collection that do not have
+ *         the maximum topological dimensionality of the collection.
+ *
+ * This is typically to be used as a cleanup phase after running OGRGeometry::MakeValid()
+ *
+ * For example, MakeValid() on a polygon can return a geometry collection of
+ * polygons and linestrings. Calling this method will return either a polygon
+ * or multipolygon by dropping those linestrings.
+ *
+ * On a non-geometry collection, this will return a clone of the passed geometry.
+ *
+ * @param poGeom input geometry
+ * @return a new geometry.
+ *
+ * @since GDAL 3.1.0
+ */
+OGRGeometry* OGRGeometryFactory::removeLowerDimensionSubGeoms( const OGRGeometry* poGeom )
+{
+    if( poGeom == nullptr )
+        return nullptr;
+    if( wkbFlatten(poGeom->getGeometryType()) != wkbGeometryCollection ||
+        poGeom->IsEmpty() )
+    {
+        return poGeom->clone();
+    }
+    const OGRGeometryCollection* poGC = poGeom->toGeometryCollection();
+    int nMaxDim = 0;
+    OGRBoolean bHasCurve = FALSE;
+    for( const auto poSubGeom: *poGC )
+    {
+        nMaxDim = std::max(nMaxDim, poSubGeom->getDimension());
+        bHasCurve |= poSubGeom->hasCurveGeometry();
+    }
+    int nCountAtMaxDim = 0;
+    const OGRGeometry* poGeomAtMaxDim = nullptr;
+    for( const auto poSubGeom: *poGC )
+    {
+        if( poSubGeom->getDimension() == nMaxDim )
+        {
+            poGeomAtMaxDim = poSubGeom;
+            nCountAtMaxDim ++;
+        }
+    }
+    if( nCountAtMaxDim == 1 && poGeomAtMaxDim != nullptr )
+    {
+        return poGeomAtMaxDim->clone();
+    }
+    OGRGeometryCollection* poRet =
+        (nMaxDim == 0) ?               static_cast<OGRGeometryCollection*>(new OGRMultiPoint()) :
+        (nMaxDim == 1 && !bHasCurve) ? static_cast<OGRGeometryCollection*>(new OGRMultiLineString()) :
+        (nMaxDim == 1 && bHasCurve) ?  static_cast<OGRGeometryCollection*>(new OGRMultiCurve()) :
+        (nMaxDim == 2 && !bHasCurve) ? static_cast<OGRGeometryCollection*>(new OGRMultiPolygon()) :
+                                       static_cast<OGRGeometryCollection*>(new OGRMultiSurface());
+    for( const auto poSubGeom: *poGC )
+    {
+        if( poSubGeom->getDimension() == nMaxDim )
+        {
+            if( OGR_GT_IsSubClassOf(poSubGeom->getGeometryType(), wkbGeometryCollection) )
+            {
+                const OGRGeometryCollection* poSubGeomAsGC = poSubGeom->toGeometryCollection();
+                for( const auto poSubSubGeom: *poSubGeomAsGC )
+                {
+                    if( poSubSubGeom->getDimension() == nMaxDim )
+                    {
+                        poRet->addGeometryDirectly(poSubSubGeom->clone());
+                    }
+                }
+            }
+            else
+            {
+                poRet->addGeometryDirectly(poSubGeom->clone());
+            }
+        }
+    }
+    return poRet;
+}
+
+/************************************************************************/
+/*                  OGR_G_RemoveLowerDimensionSubGeoms()                */
+/************************************************************************/
+
+/** \brief Remove sub-geometries from a geometry collection that do not have
+ *         the maximum topological dimensionality of the collection.
+ *
+ * This function is the same as the C++ method
+ * OGRGeometryFactory::removeLowerDimensionSubGeoms().
+ *
+ * @param hGeom handle to the geometry to convert
+ * @return a new geometry.
+ *
+ * @since GDAL 3.1.0
+ */
+
+OGRGeometryH OGR_G_RemoveLowerDimensionSubGeoms( const OGRGeometryH hGeom )
+
+{
+    return OGRGeometry::ToHandle(
+        OGRGeometryFactory::removeLowerDimensionSubGeoms(
+            OGRGeometry::FromHandle(hGeom)));
 }
 
 /************************************************************************/
@@ -2101,17 +2206,13 @@ OGRGeometryFactory::createFromGEOS(
     {
         poGeometry = nullptr;
     }
-
-    if( pabyBuf != nullptr )
-    {
-        // Since GEOS 3.1.1, so we test 3.2.0.
+    // Since GEOS 3.1.1, so we test 3.2.0.
 #if GEOS_CAPI_VERSION_MAJOR >= 2 || \
     (GEOS_CAPI_VERSION_MAJOR == 1 && GEOS_CAPI_VERSION_MINOR >= 6)
-        GEOSFree_r( hGEOSCtxt, pabyBuf );
+    GEOSFree_r( hGEOSCtxt, pabyBuf );
 #else
-        free( pabyBuf );
+    free( pabyBuf );
 #endif
-    }
 
     return poGeometry;
 
@@ -3701,8 +3802,8 @@ OGRGeometryFactory::TransformWithOptionsCache::~TransformWithOptionsCache()
 
 /** Transform a geometry.
  * @param poSrcGeom source geometry
- * @param poCT coordinate transformation object.
- * @param papszOptions options. Including WRAPDATELINE=YES.
+ * @param poCT coordinate transformation object, or NULL.
+ * @param papszOptions options. Including WRAPDATELINE=YES and DATELINEOFFSET=.
  * @param cache Cache. May increase performance if persisted between invokations
  * @return (new) transformed geometry.
  */
@@ -3861,12 +3962,118 @@ OGRGeometry* OGRGeometryFactory::transformWithOptions(
 }
 
 /************************************************************************/
+/*                         OGRGeomTransformer()                         */
+/************************************************************************/
+
+struct OGRGeomTransformer
+{
+    std::unique_ptr<OGRCoordinateTransformation> poCT{};
+    OGRGeometryFactory::TransformWithOptionsCache cache{};
+    CPLStringList aosOptions{};
+
+    OGRGeomTransformer() = default;
+    OGRGeomTransformer(const OGRGeomTransformer&) = delete;
+    OGRGeomTransformer& operator=(const OGRGeomTransformer&) = delete;
+};
+
+/************************************************************************/
+/*                     OGR_GeomTransformer_Create()                     */
+/************************************************************************/
+
+/** Create a geometry transformer.
+ *
+ * This is a enhanced version of OGR_G_Transform().
+ *
+ * When reprojecting geometries from a Polar Stereographic projection or a
+ * projection naturally crossing the antimeridian (like UTM Zone 60) to a
+ * geographic CRS, it will cut geometries along the antimeridian. So a
+ * LineString might be returned as a MultiLineString.
+ *
+ * The WRAPDATELINE=YES option might be specified for circumstances to correct
+ * geometries that incorrectly go from a longitude on a side of the antimeridian
+ * to the other side, like a LINESTRING(-179 0,179 0) will be transformed to
+ * a MULTILINESTRING ((-179 0,-180 0),(180 0,179 0)). For that use case, hCT
+ * might be NULL.
+ *
+ * @param hCT Coordinate transformation object (will be cloned) or NULL.
+ * @param papszOptions NULL terminated list of options, or NULL.
+ *                     Supported options are:
+ *                     <ul>
+ *                         <li>WRAPDATELINE=YES</li>
+ *                         <li>DATELINEOFFSET=longitude_gap_in_degree. Defaults to 10.</li>
+ *                     </ul>
+ * @return transformer object to free with OGR_GeomTransformer_Destroy()
+ * @since GDAL 3.1
+ */
+OGRGeomTransformerH OGR_GeomTransformer_Create( OGRCoordinateTransformationH hCT,
+                                                CSLConstList papszOptions )
+{
+    OGRGeomTransformer* transformer = new OGRGeomTransformer;
+    if( hCT )
+    {
+        transformer->poCT.reset(
+            OGRCoordinateTransformation::FromHandle(hCT)->Clone());
+    }
+    transformer->aosOptions.Assign(CSLDuplicate(papszOptions));
+    return transformer;
+}
+
+/************************************************************************/
+/*                     OGR_GeomTransformer_Transform()                  */
+/************************************************************************/
+
+/** Transforms a geometry.
+ *
+ * @param hTransformer transformer object.
+ * @param hGeom Source geometry.
+ * @return a new geometry (or NULL) to destroy with OGR_G_DestroyGeometry()
+ * @since GDAL 3.1
+ */
+OGRGeometryH OGR_GeomTransformer_Transform(OGRGeomTransformerH hTransformer,
+                                           OGRGeometryH hGeom)
+{
+    VALIDATE_POINTER1( hTransformer, "OGR_GeomTransformer_Transform", nullptr );
+    VALIDATE_POINTER1( hGeom, "OGR_GeomTransformer_Transform", nullptr );
+
+    return OGRGeometry::ToHandle(
+        OGRGeometryFactory::transformWithOptions(
+            OGRGeometry::FromHandle(hGeom),
+            hTransformer->poCT.get(),
+            hTransformer->aosOptions.List(),
+            hTransformer->cache));
+}
+
+/************************************************************************/
+/*                      OGR_GeomTransformer_Destroy()                   */
+/************************************************************************/
+
+/** Destroy a geometry transformer allocated with OGR_GeomTransformer_Create()
+ *
+ * @param hTransformer transformer object.
+ * @since GDAL 3.1
+ */
+void OGR_GeomTransformer_Destroy(OGRGeomTransformerH hTransformer)
+{
+    delete hTransformer;
+}
+
+/************************************************************************/
 /*                       OGRGF_GetDefaultStepSize()                     */
 /************************************************************************/
 
 static double OGRGF_GetDefaultStepSize()
 {
+    // coverity[tainted_data]
     return CPLAtofM(CPLGetConfigOption("OGR_ARC_STEPSIZE", "4"));
+}
+
+/************************************************************************/
+/*                              DISTANCE()                              */
+/************************************************************************/
+
+static inline double DISTANCE(double x1, double y1, double x2, double y2)
+{
+    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
 /************************************************************************/
@@ -3883,6 +4090,11 @@ static double OGRGF_GetDefaultStepSize()
  * used.  This is currently 4 degrees unless the user has overridden the
  * value with the OGR_ARC_STEPSIZE configuration variable.
  *
+ * If the OGR_ARC_MAX_GAP configuration variable is set, the straight-line
+ * distance between adjacent pairs of interpolated points will be limited to
+ * the specified distance. If the distance between a pair of points exceeds
+ * this maximum, additional points are interpolated between the two points.
+ *
  * @see CPLSetConfigOption()
  *
  * @param dfCenterX center X
@@ -3895,6 +4107,7 @@ static double OGRGF_GetDefaultStepSize()
  * @param dfEndAngle angle to last point on arc (clockwise of X-positive)
  * @param dfMaxAngleStepSizeDegrees the largest step in degrees along the
  * arc, zero to use the default setting.
+ * @param bUseMaxGap Optional: whether to honor OGR_ARC_MAX_GAP.
  *
  * @return OGRLineString geometry representing an approximation of the arc.
  *
@@ -3905,7 +4118,7 @@ OGRGeometry* OGRGeometryFactory::approximateArcAngles(
     double dfCenterX, double dfCenterY, double dfZ,
     double dfPrimaryRadius, double dfSecondaryRadius, double dfRotation,
     double dfStartAngle, double dfEndAngle,
-    double dfMaxAngleStepSizeDegrees )
+    double dfMaxAngleStepSizeDegrees, const bool bUseMaxGap /* = false */ )
 
 {
     OGRLineString *poLine = new OGRLineString();
@@ -3916,6 +4129,14 @@ OGRGeometry* OGRGeometryFactory::approximateArcAngles(
     {
         dfMaxAngleStepSizeDegrees = OGRGF_GetDefaultStepSize();
     }
+
+    // Determine maximum interpolation gap. This is the largest straight-line
+    // distance allowed between pairs of interpolated points. Default zero,
+    // meaning no gap.
+    // coverity[tainted_data]
+    const double dfMaxInterpolationGap = bUseMaxGap ?
+        CPLAtofM(CPLGetConfigOption("OGR_ARC_MAX_GAP", "0")) :
+        0.0;
 
     // Is this a full circle?
     const bool bIsFullCircle = fabs( dfEndAngle - dfStartAngle ) == 360.0;
@@ -3938,6 +4159,9 @@ OGRGeometry* OGRGeometryFactory::approximateArcAngles(
 /* -------------------------------------------------------------------- */
 /*      Compute the interpolated points.                                */
 /* -------------------------------------------------------------------- */
+    double dfLastX = 0.0;
+    double dfLastY = 0.0;
+    int nTotalAddPoints = 0;
     for( int iPoint = 0; iPoint < nVertexCount; iPoint++ )
     {
         const double dfAngleOnEllipse =
@@ -3946,6 +4170,50 @@ OGRGeometry* OGRGeometryFactory::approximateArcAngles(
         // Compute position on the unrotated ellipse.
         const double dfEllipseX = cos(dfAngleOnEllipse) * dfPrimaryRadius;
         const double dfEllipseY = sin(dfAngleOnEllipse) * dfSecondaryRadius;
+
+        // Is this point too far from the previous point?
+        if( iPoint && dfMaxInterpolationGap != 0.0 )
+        {
+            const double dfDistFromLast =
+                DISTANCE(dfLastX, dfLastY, dfEllipseX, dfEllipseY);
+
+            if( dfDistFromLast > dfMaxInterpolationGap )
+            {
+                const int nAddPoints =
+                    static_cast<int>( dfDistFromLast / dfMaxInterpolationGap );
+                const double dfAddSlice = dfSlice / (nAddPoints + 1);
+
+                // Interpolate additional points
+                for( int iAddPoint = 0; iAddPoint < nAddPoints; iAddPoint++ )
+                {
+                    const double dfAddAngleOnEllipse = (dfStartAngle +
+                        (iPoint - 1) * dfSlice +
+                        (iAddPoint + 1) * dfAddSlice) * (M_PI / 180.0);
+
+                    poLine->setPoint( iPoint + nTotalAddPoints + iAddPoint,
+                        cos(dfAddAngleOnEllipse) * dfPrimaryRadius,
+                        sin(dfAddAngleOnEllipse) * dfSecondaryRadius,
+                        dfZ );
+                }
+
+                nTotalAddPoints += nAddPoints;
+            }
+        }
+
+        poLine->setPoint( iPoint + nTotalAddPoints,
+            dfEllipseX, dfEllipseY, dfZ );
+        dfLastX = dfEllipseX;
+        dfLastY = dfEllipseY;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Rotate and translate the ellipse.                               */
+/* -------------------------------------------------------------------- */
+    nVertexCount = poLine->getNumPoints();
+    for( int iPoint = 0; iPoint < nVertexCount; iPoint++ )
+    {
+        const double dfEllipseX = poLine->getX( iPoint );
+        const double dfEllipseY = poLine->getY( iPoint );
 
         // Rotate this position around the center of the ellipse.
         const double dfArcX = dfCenterX
@@ -4617,11 +4885,6 @@ OGRGeometryH OGR_G_ForceTo( OGRGeometryH hGeom,
 /************************************************************************/
 /*                         GetCurveParmeters()                          */
 /************************************************************************/
-
-static inline double DISTANCE(double x1, double y1, double x2, double y2)
-{
-    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-}
 
 /**
  * \brief Returns the parameter of an arc circle.
@@ -5704,7 +5967,9 @@ OGRCurve* OGRGeometryFactory::curveFromLineString(
     OGRCompoundCurve* poCC = nullptr;
     OGRCircularString* poCS = nullptr;
     OGRLineString* poLSNew = nullptr;
-    for( int i = 0; i < poLS->getNumPoints(); /* nothing */ )
+    const int nLSNumPoints = poLS->getNumPoints();
+    const bool bIsClosed = nLSNumPoints >= 4 && poLS->get_IsClosed();
+    for( int i = 0; i < nLSNumPoints; /* nothing */ )
     {
         const int iNewI = OGRGF_DetectArc(poLS, i, poCC, poCS, poLSNew);
         if( iNewI == -2 )
@@ -5736,10 +6001,12 @@ OGRCurve* OGRGeometryFactory::curveFromLineString(
         {
             double dfScale = std::max(1.0, fabs(p.getX()));
             dfScale = std::max(dfScale, fabs(p.getY()));
-            if( fabs(poLSNew->getX(poLSNew->getNumPoints()-1) -
-                     p.getX()) / dfScale > 1e-8 ||
-                fabs(poLSNew->getY(poLSNew->getNumPoints()-1) -
-                     p.getY()) / dfScale > 1e-8 )
+            if (bIsClosed && i == nLSNumPoints - 1)
+                dfScale = 0;
+            if( fabs(poLSNew->getX(poLSNew->getNumPoints()-1) - p.getX()) >
+                    1e-8 * dfScale ||
+                fabs(poLSNew->getY(poLSNew->getNumPoints()-1) - p.getY()) >
+                    1e-8 * dfScale )
             {
                 poLSNew->addPoint(&p);
             }

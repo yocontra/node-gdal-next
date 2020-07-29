@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gensql.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
+ * $Id: ogr_gensql.h 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes related to generic implementation of ExecuteSQL().
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #define OGR_GENSQL_H_INCLUDED
 
 #include "ogrsf_frmts.h"
-#include "swq.h"
+#include "ogr_swq.h"
 #include "cpl_hash_set.h"
 #include "cpl_string.h"
 

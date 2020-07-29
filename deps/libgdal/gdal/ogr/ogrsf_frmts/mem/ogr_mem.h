@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mem.h a8d30b37682544123e5e24d69cb33041d544c465 2018-05-06 01:37:21 +0200 Even Rouault $
+ * $Id: ogr_mem.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the OGR Memory driver.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,7 +42,7 @@ class OGRMemDataSource;
 
 class IOGRMemLayerFeatureIterator;
 
-class OGRMemLayer : public OGRLayer
+class OGRMemLayer CPL_NON_FINAL: public OGRLayer
 {
     CPL_DISALLOW_COPY_ASSIGN(OGRMemLayer)
 
@@ -119,7 +119,7 @@ class OGRMemLayer : public OGRLayer
 /*                           OGRMemDataSource                           */
 /************************************************************************/
 
-class OGRMemDataSource : public OGRDataSource
+class OGRMemDataSource CPL_NON_FINAL: public OGRDataSource
 {
     CPL_DISALLOW_COPY_ASSIGN(OGRMemDataSource)
 
@@ -149,7 +149,7 @@ class OGRMemDataSource : public OGRDataSource
 /*                             OGRMemDriver                             */
 /************************************************************************/
 
-class OGRMemDriver : public OGRSFDriver
+class OGRMemDriver final: public OGRSFDriver
 {
   public:
     virtual ~OGRMemDriver();

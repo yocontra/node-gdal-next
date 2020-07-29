@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Thomas Hirsch
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,8 +30,11 @@
 #include "ogr_sosi.h"
 #include <map>
 #include <memory>
+#include <stdio.h>
+#include <string.h>
 
-CPL_CVSID("$Id: ogrsosilayer.cpp 1a8cd1b07a75b672150242ef8a59b1821e82a137 2018-05-12 22:35:40 +0200 Even Rouault $")
+
+CPL_CVSID("$Id: ogrsosilayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRSOSILayer()                             */
@@ -49,7 +52,7 @@ OGRSOSILayer::OGRSOSILayer( OGRSOSIDataSource *poPar, OGRFeatureDefn *poFeatDefn
     if( poFeatureDefn->GetGeomFieldCount() > 0 )
         poFeatureDefn->GetGeomFieldDefn(0)->SetSpatialRef(poParent->poSRS);
 
-    ResetReading();
+    OGRSOSILayer::ResetReading();
 }
 
 /************************************************************************/
@@ -130,6 +133,35 @@ OGRFeature *OGRSOSILayer::GetNextFeature() {
     long  nNumCoo;
     unsigned short nInfo;
 
+    // Used to limit the number of limit the fields to be appended.
+    // Default is that duplicates will appended if no appendFieldsMap parameter is sent.
+    std::map<std::string,std::string> appendFieldsMap;
+
+    // Get appendFieldsMap and update appendFieldsMap if present;
+    // The input must on this format
+
+    // -oo appendFieldsMap="BEITEBRUKERID:,&FIELD2test: &FIELD3test:;"
+    // With the example above the field BEITEBRUKERID append character will be ':', for FIELD2test it will space and for FIELD3test it will be ;
+
+    // -oo appendFieldsMap="BEITEBRUKERID&FIELD2test&FIELD3test"
+    // With the example above the append character will be ',' for fields in the list
+
+    const char * appendFieldsMapInput = CSLFetchNameValue(poParent->GetOpenOptions(),"appendFieldsMap");
+    CPLStringList aosTokens(CSLTokenizeString2(appendFieldsMapInput, "&", 0));
+    for( int i = 0; i < aosTokens.size(); i++ )
+    {
+        std::string filedsAndDelimStr = aosTokens[i];
+        std::size_t found = filedsAndDelimStr.find(":");
+        std::string appfieldName = filedsAndDelimStr;
+        std::string appfieldDelimiter = ",";
+        if (found < filedsAndDelimStr.length()) {
+            appfieldName = filedsAndDelimStr.substr(0,found);
+            appfieldDelimiter = filedsAndDelimStr.substr(found+1);
+        }
+        appendFieldsMap.insert(std::pair<std::string,std::string>(appfieldName,appfieldDelimiter));
+    }
+
+
     /* iterate through the SOSI groups*/
     while (LC_NextBgr(poNextSerial,LC_FRAMGR)) {
         nName = LC_RxGr(&oNextSerial, LES_OPTIMALT, &nNumLines, &nNumCoo, &nInfo);
@@ -151,8 +183,25 @@ OGRFeature *OGRSOSILayer::GetNextFeature() {
             char *pszPos = strstr(pszUTFLine, " ");
             if (pszPos != nullptr) {
                 osKey = CPLString(std::string(pszUTFLine,pszPos));
-                osValue = CPLString(pszPos+1);
-                oHeaders.insert(std::pair<CPLString,CPLString>(osKey,osValue));
+                // Check if this oskey is used before in this feature
+                if (oHeaders.count(osKey) > 0 && appendFieldsMap.count(osKey.c_str()) > 0) {
+                    // get old osvalue so we can append the next value
+                    CPLString newAppendOsValue = oHeaders[osKey];
+
+                    // append split character
+                    newAppendOsValue.append(appendFieldsMap[osKey]);
+
+                    // append new value
+                    newAppendOsValue.append(CPLString(pszPos+1));
+
+                    // the new value
+                    oHeaders[osKey]= newAppendOsValue;
+
+                    // printf ("Append value for %s is %s \n", osKey.c_str(), newAppendOsValue.c_str());
+                } else {
+                    osValue = CPLString(pszPos+1);
+                    oHeaders.insert(std::pair<CPLString,CPLString>(osKey,osValue));
+                }
             }
             CPLFree(pszUTFLine);
         }
@@ -281,7 +330,7 @@ OGRFeature *OGRSOSILayer::GetNextFeature() {
 
         if (poGeom == nullptr) continue;                         /* skipping L_HODE and unrecognized groups */
         if (oGType != poFeatureDefn->GetGeomType()) {
-            if (poGeom != nullptr) delete poGeom;
+            delete poGeom;
             continue; /* skipping features that are not the correct geometry */
         }
 
@@ -346,8 +395,7 @@ OGRFeature *OGRSOSILayer::GetNextFeature() {
           CSLDestroy(tokens);
         }
 
-        if( poGeom != nullptr )
-            poGeom->assignSpatialReference(poParent->poSRS);
+        poGeom->assignSpatialReference(poParent->poSRS);
 
         poFeature->SetGeometryDirectly( poGeom );
         poFeature->SetFID( nNextFID++ );

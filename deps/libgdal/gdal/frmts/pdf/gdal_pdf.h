@@ -1,9 +1,9 @@
 /******************************************************************************
- * $Id: gdal_pdf.h 68a3c6855387daecff1eab460485cf9ff517a5a5 2020-01-12 23:57:04 +0100 Even Rouault $
+ * $Id: gdal_pdf.h 5afc2a1dfe5c2735beb1ff8f1ffb3fc125a93bf4 2020-01-12 23:57:04 +0100 Even Rouault $
  *
  * Project:  PDF Translator
  * Purpose:  Definition of classes for OGR .pdf driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
  *
@@ -13,7 +13,7 @@
  * Author: Martin Mikita <martin.mikita@klokantech.com>, xmikit00 @ FIT VUT Brno
  *
  ******************************************************************************
- * Copyright (c) 2010-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -296,7 +296,19 @@ private:
 
     CPLStringList osLayerList;
 
-    CPLStringList osLayerWithRefList;
+    struct LayerWithRef
+    {
+        CPLString        osName{};
+        GDALPDFObjectNum nOCGNum{};
+        int              nOCGGen = 0;
+
+        LayerWithRef(const CPLString& osNameIn,
+                     const GDALPDFObjectNum& nOCGNumIn,
+                     int nOCGGenIn) :
+            osName(osNameIn), nOCGNum(nOCGNumIn), nOCGGen(nOCGGenIn) {}
+    };
+    std::vector<LayerWithRef> aoLayerWithRef;
+
     CPLString     FindLayerOCG(GDALPDFDictionary* poPageDict,
                                const char* pszLayerName);
     void          FindLayersGeneric(GDALPDFDictionary* poPageDict);
@@ -441,7 +453,7 @@ private:
 /* ==================================================================== */
 /************************************************************************/
 
-class PDFRasterBand: public GDALPamRasterBand
+class PDFRasterBand CPL_NON_FINAL: public GDALPamRasterBand
 {
     friend class PDFDataset;
 

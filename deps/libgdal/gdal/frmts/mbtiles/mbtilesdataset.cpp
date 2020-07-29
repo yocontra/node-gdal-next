@@ -48,7 +48,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: mbtilesdataset.cpp 2bd6bbffd0448037745dc5c7acdff09f4109ca3e 2019-05-02 11:32:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: mbtilesdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 static const char * const apszAllowedDrivers[] = {"JPEG", "PNG", nullptr};
 
@@ -3543,7 +3543,7 @@ void GDALRegister_MBTiles()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "MBTiles" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_mbtiles.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/mbtiles.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "mbtiles" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );
 

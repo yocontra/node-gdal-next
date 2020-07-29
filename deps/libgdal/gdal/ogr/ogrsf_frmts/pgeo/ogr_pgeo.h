@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pgeo.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ogr_pgeo.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Personal Geodatabase driver.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -41,7 +41,7 @@
 
 class OGRPGeoDataSource;
 
-class OGRPGeoLayer : public OGRLayer
+class OGRPGeoLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -90,7 +90,7 @@ class OGRPGeoLayer : public OGRLayer
 /*                           OGRPGeoTableLayer                            */
 /************************************************************************/
 
-class OGRPGeoTableLayer : public OGRPGeoLayer
+class OGRPGeoTableLayer final: public OGRPGeoLayer
 {
     char                *pszQuery;
 
@@ -132,7 +132,7 @@ class OGRPGeoTableLayer : public OGRPGeoLayer
 /*                          OGRPGeoSelectLayer                          */
 /************************************************************************/
 
-class OGRPGeoSelectLayer : public OGRPGeoLayer
+class OGRPGeoSelectLayer final: public OGRPGeoLayer
 {
     char                *pszBaseStatement;
 
@@ -158,7 +158,7 @@ class OGRPGeoSelectLayer : public OGRPGeoLayer
 /*                           OGRPGeoDataSource                            */
 /************************************************************************/
 
-class OGRPGeoDataSource : public OGRDataSource
+class OGRPGeoDataSource final: public OGRDataSource
 {
     OGRPGeoLayer        **papoLayers;
     int                 nLayers;
@@ -196,7 +196,7 @@ class OGRPGeoDataSource : public OGRDataSource
 /*                           OGRODBCMDBDriver                           */
 /************************************************************************/
 
-class OGRODBCMDBDriver : public OGRSFDriver
+class OGRODBCMDBDriver CPL_NON_FINAL: public OGRSFDriver
 {
 #ifndef WIN32
     CPLString   osDriverFile;
@@ -215,7 +215,7 @@ protected:
 /*                             OGRPGeoDriver                            */
 /************************************************************************/
 
-class OGRPGeoDriver : public OGRODBCMDBDriver
+class OGRPGeoDriver final: public OGRODBCMDBDriver
 {
   public:
                 ~OGRPGeoDriver();

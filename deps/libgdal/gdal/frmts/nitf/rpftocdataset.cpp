@@ -2,10 +2,10 @@
  *
  * Project:  RPF TOC read Translator
  * Purpose:  Implementation of RPFTOCDataset and RPFTOCSubDataset.
- * Author:   Even Rouault, even.rouault at mines-paris.org
+ * Author:   Even Rouault, even.rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2007-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,7 +47,7 @@
 #include "nitflib.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: rpftocdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: rpftocdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 constexpr int GEOTRSFRM_TOPLEFT_X = 0;
 constexpr int GEOTRSFRM_WE_RES = 1;
@@ -71,7 +71,7 @@ constexpr int GEOTRSFRM_NS_RES = 5;
 /* ==================================================================== */
 /************************************************************************/
 
-class RPFTOCDataset : public GDALPamDataset
+class RPFTOCDataset final: public GDALPamDataset
 {
   char      **papszSubDatasets;
   char       *pszProjection;
@@ -161,7 +161,7 @@ class RPFTOCDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class RPFTOCSubDataset : public VRTDataset
+class RPFTOCSubDataset final: public VRTDataset
 {
 
   int          cachedTileBlockXOff;
@@ -236,7 +236,7 @@ class RPFTOCSubDataset : public VRTDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class RPFTOCProxyRasterDataSet : public GDALProxyPoolDataset
+class RPFTOCProxyRasterDataSet final: public GDALProxyPoolDataset
 {
     /* The following parameters are only for sanity checking */
     int checkDone;
@@ -293,7 +293,7 @@ class RPFTOCProxyRasterDataSet : public GDALProxyPoolDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class RPFTOCProxyRasterBandRGBA : public GDALPamRasterBand
+class RPFTOCProxyRasterBandRGBA final: public GDALPamRasterBand
 {
     int initDone;
     unsigned char colorTable[256];
@@ -464,7 +464,7 @@ CPLErr RPFTOCProxyRasterBandRGBA::IReadBlock( int nBlockXOff, int nBlockYOff,
 /* ==================================================================== */
 /************************************************************************/
 
-class RPFTOCProxyRasterBandPalette : public GDALPamRasterBand
+class RPFTOCProxyRasterBandPalette final: public GDALPamRasterBand
 {
     int initDone;
     int blockByteSize;
@@ -1344,7 +1344,7 @@ void GDALRegister_RPFTOC()
     poDriver->pfnOpen = RPFTOCDataset::Open;
 
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#RPFTOC" );
+                               "drivers/raster/rpftoc.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "toc" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );

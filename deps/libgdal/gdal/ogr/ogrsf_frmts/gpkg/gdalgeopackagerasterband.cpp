@@ -34,7 +34,7 @@
 #include <cassert>
 #include <limits>
 
-CPL_CVSID("$Id: gdalgeopackagerasterband.cpp a694e230393890e77b19369b9bb71d99bd5c7ecc 2019-03-19 10:56:07 +0800 Chris Tapley $")
+CPL_CVSID("$Id: gdalgeopackagerasterband.cpp 6c4b9d9b6447da74f5a92bcce47826a4e661c76f 2020-05-06 15:19:05 +0200 Even Rouault $")
 
 #if !defined(DEBUG_VERBOSE) && defined(DEBUG_VERBOSE_GPKG)
 #define DEBUG_VERBOSE
@@ -412,6 +412,7 @@ void GDALGPKGMBTilesLikePseudoDataset::FillBuffer(GByte* pabyData,
     const double dfNoDataValue = IGetRasterBand(1)->GetNoDataValue(&bHasNoData);
     if( !bHasNoData || dfNoDataValue == 0.0 )
     {
+        // cppcheck-suppress nullPointer
         memset(pabyData, 0, nPixels * m_nDTSize );
     }
     else
@@ -802,7 +803,7 @@ GByte* GDALGPKGMBTilesLikePseudoDataset::ReadTile(int nRow, int nCol)
     }
     else
     {
-        GByte* pabyDest = m_pabyCachedTiles;
+        GByte* pabyDest = m_pabyCachedTiles + 2 * nTileBands * nBandBlockSize;
         bool bAllNonDirty = true;
         for( int i = 0; i < nBands; i++ )
         {
@@ -816,7 +817,7 @@ GByte* GDALGPKGMBTilesLikePseudoDataset::ReadTile(int nRow, int nCol)
 
         /* If some bands of the blocks are dirty/written we need to fetch */
         /* the tile in a temporary buffer in order not to override dirty bands*/
-        GByte* pabyTemp = m_pabyCachedTiles + nTileBands * nBandBlockSize;
+        GByte* pabyTemp = m_pabyCachedTiles + 3 * nTileBands * nBandBlockSize;
         if( ReadTile(nRow, nCol, pabyTemp) != nullptr )
         {
             for( int i = 0; i < nBands; i++ )

@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "ogrgeojsonreader.h"
 #include "ogrgeojsonwriter.h"
-#include "swq.h"
+#include "ogr_swq.h"
 #include "eeda.h"
 
 #include <algorithm>
@@ -82,7 +82,7 @@ static CPLString CPLEscapeURLQueryParameter( const char *pszInput )
 
 class GDALEEDALayer;
 
-class GDALEEDADataset: public GDALEEDABaseDataset
+class GDALEEDADataset final: public GDALEEDABaseDataset
 {
             CPL_DISALLOW_COPY_ASSIGN(GDALEEDADataset)
 
@@ -104,7 +104,7 @@ class GDALEEDADataset: public GDALEEDABaseDataset
 /*                          GDALEEDALayer                               */
 /************************************************************************/
 
-class GDALEEDALayer: public OGRLayer
+class GDALEEDALayer final: public OGRLayer
 {
                 CPL_DISALLOW_COPY_ASSIGN(GDALEEDALayer)
 
@@ -1230,7 +1230,7 @@ void GDALRegister_EEDA()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Earth Engine Data API" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_eeda.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/eeda.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "EEDA:" );
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
 "<OpenOptionList>"

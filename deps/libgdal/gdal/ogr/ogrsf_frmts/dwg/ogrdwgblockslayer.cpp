@@ -29,7 +29,7 @@
 #include "ogr_dwg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdwgblockslayer.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrdwgblockslayer.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRDWGBlocksLayer()                          */
@@ -39,7 +39,7 @@ OGRDWGBlocksLayer::OGRDWGBlocksLayer( OGRDWGDataSource *poDSIn ) :
     poDS(poDSIn),
     poFeatureDefn(new OGRFeatureDefn( "blocks" ))
 {
-    ResetReading();
+    OGRDWGBlocksLayer::ResetReading();
 
     poFeatureDefn->Reference();
 

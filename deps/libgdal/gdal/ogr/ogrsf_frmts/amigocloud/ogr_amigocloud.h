@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_amigocloud.h c3122bfce67aa8278d0163c0d41cfe0ab05bd691 2019-03-23 21:38:44 +0100 Even Rouault $
+ * $Id: ogr_amigocloud.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  AMIGOCLOUD Translator
  * Purpose:  Definition of classes for OGR AmigoCloud driver.
@@ -90,7 +90,7 @@ class OGRAmigoCloudFID
 /************************************************************************/
 class OGRAmigoCloudDataSource;
 
-class OGRAmigoCloudLayer : public OGRLayer
+class OGRAmigoCloudLayer CPL_NON_FINAL: public OGRLayer
 {
     protected:
         OGRAmigoCloudDataSource* poDS;

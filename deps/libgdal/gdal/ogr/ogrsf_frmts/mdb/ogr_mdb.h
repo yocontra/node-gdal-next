@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_mdb.h d14a537a4324399712f4b822656d374341773cd3 2018-07-29 23:14:54 +0200 Even Rouault $
+ * $Id: ogr_mdb.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for MDB driver.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -223,7 +223,7 @@ typedef enum
 
 class OGRMDBDataSource;
 
-class OGRMDBLayer : public OGRLayer
+class OGRMDBLayer final: public OGRLayer
 {
   protected:
     OGRMDBTable* poMDBTable;
@@ -293,7 +293,7 @@ class OGRMDBLayer : public OGRLayer
 /*                           OGRMDBDataSource                            */
 /************************************************************************/
 
-class OGRMDBDataSource : public OGRDataSource
+class OGRMDBDataSource final: public OGRDataSource
 {
     OGRMDBLayer        **papoLayers;
     int                 nLayers;
@@ -333,7 +333,7 @@ class OGRMDBDataSource : public OGRDataSource
 /*                             OGRMDBDriver                             */
 /************************************************************************/
 
-class OGRMDBDriver : public OGRSFDriver
+class OGRMDBDriver final: public OGRSFDriver
 {
   public:
                 ~OGRMDBDriver();

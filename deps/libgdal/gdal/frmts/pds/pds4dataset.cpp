@@ -40,6 +40,13 @@
 #include <vector>
 #include <algorithm>
 
+#define TIFF_GEOTIFF_STRING "TIFF/GeoTIFF"
+#define BIGTIFF_GEOTIFF_STRING "BigTIFF/GeoTIFF"
+#define PREEXISTING_BINARY_FILE \
+    "Binary file pre-existing PDS4 label. This comment is used by GDAL to " \
+    "avoid deleting the binary file when the label is deleted. Keep it to " \
+    "preserve this behaviour."
+
 extern "C" void GDALRegister_PDS4();
 
 /************************************************************************/
@@ -529,6 +536,18 @@ PDS4Dataset::~PDS4Dataset()
 }
 
 /************************************************************************/
+/*                        GetRawBinaryLayout()                          */
+/************************************************************************/
+
+bool PDS4Dataset::GetRawBinaryLayout(GDALDataset::RawBinaryLayout& sLayout)
+{
+    if( !RawDataset::GetRawBinaryLayout(sLayout) )
+        return false;
+    sLayout.osRawFilename = m_osImageFilename;
+    return true;
+}
+
+/************************************************************************/
 /*                        CloseDependentDatasets()                      */
 /************************************************************************/
 
@@ -825,8 +844,10 @@ static double GetAngularValue(CPLXMLNode* psParent, const char* pszElementName,
 /*                          ReadGeoreferencing()                       */
 /************************************************************************/
 
-// See https://pds.nasa.gov/pds4/cart/v1/PDS4_CART_1700.xsd
-// and https://pds.nasa.gov/pds4/cart/v1/PDS4_CART_1700.sch
+// See https://pds.nasa.gov/pds4/cart/v1/PDS4_CART_1D00_1933.xsd,
+//     https://raw.githubusercontent.com/nasa-pds-data-dictionaries/ldd-cart/master/build/1.B.0.0/PDS4_CART_1B00.xsd,
+//     https://pds.nasa.gov/pds4/cart/v1/PDS4_CART_1700.xsd
+// and the corresponding .sch files
 void PDS4Dataset::ReadGeoreferencing(CPLXMLNode* psProduct)
 {
     CPLXMLNode* psCart = CPLGetXMLNode(psProduct,
@@ -995,6 +1016,25 @@ void PDS4Dataset::ReadGeoreferencing(CPLXMLNode* psProduct)
                     oSRS.SetLCC(dfStdParallel1, dfStdParallel2,
                                 dfCenterLat, dfCenterLon, 0, 0);
                 }
+            }
+            else if( EQUAL(osProjName, "Mercator") )
+            {
+                if( bGotScale )
+                {
+                    oSRS.SetMercator(dfCenterLat, // should be 0 normally
+                                     dfCenterLon, dfScale,
+                                     0.0, 0.0);
+                }
+                else
+                {
+                    oSRS.SetMercator2SP(dfStdParallel1,
+                                        dfCenterLat, // should be 0 normally
+                                        dfCenterLon, 0.0, 0.0);
+                }
+            }
+            else if( EQUAL(osProjName, "Orthographic") )
+            {
+                oSRS.SetOrthographic(dfCenterLat, dfCenterLon, 0.0, 0.0);
             }
             else if( EQUAL(osProjName, "Oblique Mercator") &&
                      (psObliqueAzimuth != nullptr || psObliquePoint != nullptr) )
@@ -1466,8 +1506,8 @@ GDALDataset* PDS4Dataset::Open(GDALOpenInfo* poOpenInfo)
         CSLDestroy(papszTokens);
     }
 
-    CPLXMLNode* psRoot = CPLParseXMLFile(osXMLFilename);
-    CPLXMLTreeCloser oCloser(psRoot);
+    CPLXMLTreeCloser oCloser(CPLParseXMLFile(osXMLFilename));
+    CPLXMLNode* psRoot = oCloser.get();
     CPLStripXMLNamespace(psRoot, nullptr, TRUE);
 
     GDALAccess eAccess = STARTS_WITH_CI(poOpenInfo->pszFilename, "PDS4:") ?
@@ -1514,7 +1554,6 @@ GDALDataset* PDS4Dataset::Open(GDALOpenInfo* poOpenInfo)
         }
 
         nFAOIdx ++;
-
         CPLXMLNode* psFile = CPLGetXMLNode(psIter, "File");
         if( psFile == nullptr )
         {
@@ -1524,6 +1563,17 @@ GDALDataset* PDS4Dataset::Open(GDALOpenInfo* poOpenInfo)
         if( pszFilename == nullptr )
         {
             continue;
+        }
+
+        for( CPLXMLNode* psSubIter = psFile->psChild;
+                psSubIter != nullptr;
+                psSubIter = psSubIter->psNext )
+        {
+            if( psSubIter->eType == CXT_Comment &&
+                EQUAL(psSubIter->pszValue, PREEXISTING_BINARY_FILE) )
+            {
+                poDS->m_bCreatedFromExistingBinaryFile = true;
+            }
         }
 
         int nArrayIdx = 0;
@@ -1876,6 +1926,7 @@ GDALDataset* PDS4Dataset::Open(GDALOpenInfo* poOpenInfo)
             poDS->nRasterYSize = nLines;
             poDS->m_osImageFilename = pszImageFullFilename;
             poDS->m_fpImage = fp;
+            poDS->m_bIsLSB = bLSBOrder;
 
             if( memcmp(szOrder, "BLS", 3) == 0 )
             {
@@ -2021,12 +2072,23 @@ GDALDataset* PDS4Dataset::Open(GDALOpenInfo* poOpenInfo)
 }
 
 /************************************************************************/
+/*                         IsCARTVersionGTE()                           */
+/************************************************************************/
+
+// Returns true is pszCur >= pszRef
+// Must be things like 1900, 1B00, 1D00_1933 ...
+static bool IsCARTVersionGTE(const char* pszCur, const char* pszRef)
+{
+    return strcmp(pszCur, pszRef) >= 0;
+}
+
+/************************************************************************/
 /*                         WriteGeoreferencing()                        */
 /************************************************************************/
 
 void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
                                       const char* pszWKT,
-                                      bool bCart1B00OrLater)
+                                      const char* pszCARTVersion)
 {
     bool bHasBoundingBox = false;
     double adfX[4] = {0};
@@ -2177,6 +2239,9 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         typedef std::pair<const char*, double> ProjParam;
         std::vector<ProjParam> aoProjParams;
 
+        const bool bUse_CART_1933_Or_Later =
+            IsCARTVersionGTE(pszCARTVersion, "1D00_1933");
+
         if( pszProjection == nullptr )
         {
             pszPDS4ProjectionName = "Equirectangular";
@@ -2187,23 +2252,47 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         else if( EQUAL(pszProjection, SRS_PT_EQUIRECTANGULAR) )
         {
             pszPDS4ProjectionName = "Equirectangular";
-            aoProjParams.push_back(ProjParam("standard_parallel_1",
-                    oSRS.GetNormProjParm(SRS_PP_STANDARD_PARALLEL_1, 1.0)));
-            aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
-                    oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
-            aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
-                    oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
+            if( bUse_CART_1933_Or_Later )
+            {
+                aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
+                        oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
+                aoProjParams.push_back(ProjParam("standard_parallel_1",
+                        oSRS.GetNormProjParm(SRS_PP_STANDARD_PARALLEL_1, 1.0)));
+                aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
+                        oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
+            }
+            else
+            {
+                aoProjParams.push_back(ProjParam("standard_parallel_1",
+                        oSRS.GetNormProjParm(SRS_PP_STANDARD_PARALLEL_1, 1.0)));
+                aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
+                        oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
+                aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
+                        oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
+            }
         }
 
         else if( EQUAL(pszProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP) )
         {
             pszPDS4ProjectionName = "Lambert Conformal Conic";
-            aoProjParams.push_back(ProjParam("scale_factor_at_projection_origin",
-                    oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 1.0)));
-            aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
-                    oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
-            aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
-                    oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
+            if( bUse_CART_1933_Or_Later )
+            {
+                aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
+                        oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
+                aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
+                        oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
+                aoProjParams.push_back(ProjParam("scale_factor_at_projection_origin",
+                        oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 1.0)));
+            }
+            else
+            {
+                aoProjParams.push_back(ProjParam("scale_factor_at_projection_origin",
+                        oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 1.0)));
+                aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
+                        oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
+                aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
+                        oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
+            }
         }
 
         else if( EQUAL(pszProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP) )
@@ -2234,7 +2323,9 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         else if( EQUAL(pszProjection, SRS_PT_POLAR_STEREOGRAPHIC) )
         {
             pszPDS4ProjectionName = "Polar Stereographic";
-            aoProjParams.push_back(ProjParam("straight_vertical_longitude_from_pole",
+            aoProjParams.push_back(ProjParam(
+                bUse_CART_1933_Or_Later ?  "longitude_of_central_meridian" :
+                                           "straight_vertical_longitude_from_pole",
                     oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
             aoProjParams.push_back(ProjParam("scale_factor_at_projection_origin",
                     oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 1.0)));
@@ -2271,7 +2362,6 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         }
         else if( EQUAL(pszProjection, SRS_PT_ORTHOGRAPHIC) )
         {
-            // Does not exist yet in schema
             pszPDS4ProjectionName = "Orthographic";
             aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
                     oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
@@ -2281,22 +2371,29 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
 
         else if( EQUAL(pszProjection, SRS_PT_MERCATOR_1SP) )
         {
-            // Does not exist yet in schema
             pszPDS4ProjectionName = "Mercator";
+            aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
+                    oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
+            aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
+                    oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
             aoProjParams.push_back(ProjParam("scale_factor_at_projection_origin",
                     oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 1.0)));
+        }
+
+        else if( EQUAL(pszProjection, SRS_PT_MERCATOR_2SP) )
+        {
+            pszPDS4ProjectionName = "Mercator";
+            aoProjParams.push_back(ProjParam("standard_parallel_1",
+                    oSRS.GetNormProjParm(SRS_PP_STANDARD_PARALLEL_1, 0.0)));
             aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
                     oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
             aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
                     oSRS.GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0)));
         }
 
-        else if( EQUAL(pszProjection, SRS_PT_MERCATOR_2SP) )
+        else if( EQUAL(pszProjection, SRS_PT_LAMBERT_AZIMUTHAL_EQUAL_AREA) )
         {
-            // Does not exist yet in schema
-            pszPDS4ProjectionName = "Mercator";
-            aoProjParams.push_back(ProjParam("standard_parallel_1",
-                    oSRS.GetNormProjParm(SRS_PP_STANDARD_PARALLEL_1, 0.0)));
+            pszPDS4ProjectionName = "Lambert Azimuthal Equal Area";
             aoProjParams.push_back(ProjParam("longitude_of_central_meridian",
                     oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0)));
             aoProjParams.push_back(ProjParam("latitude_of_projection_origin",
@@ -2328,10 +2425,7 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         if( pszProjection &&
             EQUAL(pszProjection, SRS_PT_HOTINE_OBLIQUE_MERCATOR_AZIMUTH_CENTER) )
         {
-            CPLCreateXMLElementAndValue(psProj,
-                (osPrefix + "scale_factor_at_projection_origin").c_str(),
-                CPLSPrintf("%.18g", oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 0.0)));
-            CPLXMLNode* psOLA = CPLCreateXMLNode(psProj, CXT_Element,
+            CPLXMLNode* psOLA = CPLCreateXMLNode(nullptr, CXT_Element,
                                     (osPrefix + "Oblique_Line_Azimuth").c_str());
             CPLAddXMLAttributeAndValue( 
                 CPLCreateXMLElementAndValue(psOLA,
@@ -2344,6 +2438,35 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
                     (osPrefix + "azimuth_measure_point_longitude").c_str(),
                     CPLSPrintf("%.18g", oSRS.GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0))),
                 "unit", "deg");
+
+            if( bUse_CART_1933_Or_Later )
+            {
+                CPLAddXMLChild(psProj, psOLA);
+
+                CPLAddXMLAttributeAndValue(
+                    CPLCreateXMLElementAndValue(psProj,
+                        (osPrefix + "longitude_of_central_meridian").c_str(),
+                        "0"),
+                    "unit", "deg");
+
+                const double dfScaleFactor = oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 0.0);
+                if( dfScaleFactor != 1.0 )
+                {
+                    CPLError(CE_Warning, CPLE_NotSupported,
+                             "Scale factor on initial support = %.18g cannot "
+                             "be encoded in PDS4",
+                             dfScaleFactor);
+                }
+            }
+            else
+            {
+                CPLCreateXMLElementAndValue(psProj,
+                    (osPrefix + "scale_factor_at_projection_origin").c_str(),
+                    CPLSPrintf("%.18g", oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 0.0)));
+
+                CPLAddXMLChild(psProj, psOLA);
+            }
+
             CPLAddXMLAttributeAndValue(
                 CPLCreateXMLElementAndValue(psProj,
                     (osPrefix + "latitude_of_projection_origin").c_str(),
@@ -2353,9 +2476,24 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         else if( pszProjection &&
             EQUAL(pszProjection, SRS_PT_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN) )
         {
-            CPLCreateXMLElementAndValue(psProj,
-                (osPrefix + "scale_factor_at_projection_origin").c_str(),
-                CPLSPrintf("%.18g", oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 0.0)));
+            if( bUse_CART_1933_Or_Later )
+            {
+                const double dfScaleFactor = oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 0.0);
+                if( dfScaleFactor != 1.0 )
+                {
+                    CPLError(CE_Warning, CPLE_NotSupported,
+                             "Scale factor on initial support = %.18g cannot "
+                             "be encoded in PDS4",
+                             dfScaleFactor);
+                }
+            }
+            else
+            {
+                CPLCreateXMLElementAndValue(psProj,
+                    (osPrefix + "scale_factor_at_projection_origin").c_str(),
+                    CPLSPrintf("%.18g", oSRS.GetNormProjParm(SRS_PP_SCALE_FACTOR, 0.0)));
+            }
+
             CPLXMLNode* psOLP = CPLCreateXMLNode(psProj, CXT_Element,
                                     (osPrefix + "Oblique_Line_Point").c_str());
             CPLXMLNode* psOLPG1 = CPLCreateXMLNode(psOLP, CXT_Element,
@@ -2382,6 +2520,16 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
                     (osPrefix + "oblique_line_longitude").c_str(),
                     CPLSPrintf("%.18g", oSRS.GetNormProjParm(SRS_PP_LONGITUDE_OF_POINT_2, 0.0))),
                 "unit", "deg");
+
+            if( bUse_CART_1933_Or_Later )
+            {
+                CPLAddXMLAttributeAndValue(
+                    CPLCreateXMLElementAndValue(psProj,
+                        (osPrefix + "longitude_of_central_meridian").c_str(),
+                        "0"),
+                    "unit", "deg");
+            }
+
             CPLAddXMLAttributeAndValue(
                 CPLCreateXMLElementAndValue(psProj,
                     (osPrefix + "latitude_of_projection_origin").c_str(),
@@ -2390,7 +2538,7 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         }
 
         CPLXMLNode* psCR = nullptr;
-        if( m_bGotTransform || !bCart1B00OrLater )
+        if( m_bGotTransform || !IsCARTVersionGTE(pszCARTVersion, "1B00") )
         {
             CPLXMLNode* psPCI = CPLCreateXMLNode(psPlanar, CXT_Element,
                             (osPrefix + "Planar_Coordinate_Information").c_str());
@@ -2520,7 +2668,7 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
     {
         CPLXMLNode* psGeographic = CPLCreateXMLNode(psHCSD, CXT_Element,
                     (osPrefix + "Geographic").c_str());
-        if( !bCart1B00OrLater )
+        if( !IsCARTVersionGTE(pszCARTVersion, "1B00") )
         {
             CPLAddXMLAttributeAndValue(
                         CPLCreateXMLElementAndValue(psGeographic,
@@ -2577,22 +2725,25 @@ void PDS4Dataset::WriteGeoreferencing(CPLXMLNode* psCart,
         CSLDestroy(papszTokens);
     }
 
+    const bool bUseLDD1930RadiusNames =
+        IsCARTVersionGTE(pszCARTVersion, "1B10_1930");
+
     CPLAddXMLAttributeAndValue(
         CPLCreateXMLElementAndValue(psGM,
-                (osPrefix + "semi_major_radius").c_str(),
+                (osPrefix + (bUseLDD1930RadiusNames ? "a_axis_radius" : "semi_major_radius")).c_str(),
                 CPLSPrintf("%.18g", dfSemiMajor)),
         "unit", "m");
-    // No, this is not a bug. The PDS4 semi_minor_radius is the minor radius
+    // No, this is not a bug. The PDS4  b_axis_radius/semi_minor_radius is the minor radius
     // on the equatorial plane. Which in WKT doesn't really exist, so reuse
     // the WKT semi major
     CPLAddXMLAttributeAndValue(
         CPLCreateXMLElementAndValue(psGM,
-                (osPrefix + "semi_minor_radius").c_str(),
+                (osPrefix + (bUseLDD1930RadiusNames ? "b_axis_radius" : "semi_minor_radius")).c_str(),
                 CPLSPrintf("%.18g", dfSemiMajor)),
         "unit", "m");
     CPLAddXMLAttributeAndValue(
         CPLCreateXMLElementAndValue(psGM,
-                (osPrefix + "polar_radius").c_str(),
+                (osPrefix + (bUseLDD1930RadiusNames ? "c_axis_radius" : "polar_radius")).c_str(),
                 CPLSPrintf("%.18g", dfSemiMinor)),
         "unit", "m");
     const char* pszLongitudeDirection =
@@ -2880,10 +3031,10 @@ static CPLXMLNode* GetSpecialConstants(const CPLString& osPrefix,
 
 void PDS4Dataset::WriteHeaderAppendCase()
 {
-    CPLXMLNode* psRoot = CPLParseXMLFile(GetDescription());
+    CPLXMLTreeCloser oCloser(CPLParseXMLFile(GetDescription()));
+    CPLXMLNode* psRoot = oCloser.get();
     if( psRoot == nullptr )
         return;
-    CPLXMLTreeCloser oCloser(psRoot);
     CPLString osPrefix;
     CPLXMLNode* psProduct = CPLGetXMLNode(psRoot, "=Product_Observational");
     if( psProduct == nullptr )
@@ -2960,13 +3111,13 @@ void PDS4Dataset::WriteArray(const CPLString& osPrefix,
     const char* pszDataType =
         (eDT == GDT_Byte) ? "UnsignedByte" :
         (eDT == GDT_UInt16) ? "UnsignedLSB2" :
-        (eDT == GDT_Int16) ? "SignedLSB2" :
-        (eDT == GDT_UInt32) ? "UnsignedLSB4" :
-        (eDT == GDT_Int32) ? "SignedLSB4" :
-        (eDT == GDT_Float32) ? "IEEE754LSBSingle" :
-        (eDT == GDT_Float64) ? "IEEE754LSBDouble" :
-        (eDT == GDT_CFloat32) ? "ComplexLSB8" :
-        (eDT == GDT_CFloat64) ? "ComplexLSB16" :
+        (eDT == GDT_Int16) ? (m_bIsLSB ? "SignedLSB2" : "SignedMSB2") :
+        (eDT == GDT_UInt32) ? (m_bIsLSB ? "UnsignedLSB4": "UnsignedMSB4") :
+        (eDT == GDT_Int32) ? (m_bIsLSB ? "SignedLSB4" : "SignedMSB4") :
+        (eDT == GDT_Float32) ? (m_bIsLSB ? "IEEE754LSBSingle" : "IEEE754MSBSingle") :
+        (eDT == GDT_Float64) ? (m_bIsLSB ? "IEEE754LSBDouble" : "IEEE754MSBDouble") :
+        (eDT == GDT_CFloat32) ?  (m_bIsLSB ? "ComplexLSB8" : "ComplexMSB8") :
+        (eDT == GDT_CFloat64) ? (m_bIsLSB ? "ComplexLSB16" : "ComplexMSB16") :
                                 "should not happen";
     CPLCreateXMLElementAndValue(psElementArray,
                                 (osPrefix + "data_type").c_str(),
@@ -3183,8 +3334,7 @@ void PDS4Dataset::WriteVectorLayers(CPLXMLNode* psProduct)
 /************************************************************************/
 
 void PDS4Dataset::CreateHeader(CPLXMLNode* psProduct,
-                               bool bCartNeedsInternalReference,
-                               bool bCart1B00OrLater)
+                               const char* pszCARTVersion)
 {
     CPLString osPrefix;
     if( STARTS_WITH(psProduct->pszValue, "pds:") )
@@ -3310,16 +3460,23 @@ void PDS4Dataset::CreateHeader(CPLXMLNode* psProduct,
                         psSchemaLoc->psChild->pszValue != nullptr )
                     {
                         CPLString osCartSchema;
-                        if( strstr(psSchemaLoc->psChild->pszValue, "PDS4_PDS_1B00.xsd") )
+                        if( strstr(psSchemaLoc->psChild->pszValue, "PDS4_PDS_1800.xsd")  )
                         {
+                            // GDAL 2.4
+                            osCartSchema = "https://pds.nasa.gov/pds4/cart/v1/PDS4_CART_1700.xsd";
+                            pszCARTVersion = "1700";
+                        }
+                        else if( strstr(psSchemaLoc->psChild->pszValue, "PDS4_PDS_1B00.xsd") )
+                        {
+                            // GDAL 3.0
                             osCartSchema = "https://raw.githubusercontent.com/nasa-pds-data-dictionaries/ldd-cart/master/build/1.B.0.0/PDS4_CART_1B00.xsd";
-                            bCartNeedsInternalReference = true;
-                            bCart1B00OrLater = true;
+                            pszCARTVersion = "1B00";
                         }
                         else
                         {
-                            osCartSchema = "https://pds.nasa.gov/pds4/cart/v1/PDS4_CART_1700.xsd";
-                            bCartNeedsInternalReference = false;
+                            // GDAL 3.1
+                            osCartSchema = "https://pds.nasa.gov/pds4/cart/v1/PDS4_CART_1D00_1933.xsd";
+                            pszCARTVersion = "1D00_1933";
                         }
                         CPLString osNewVal(psSchemaLoc->psChild->pszValue);
                         osNewVal += " http://pds.nasa.gov/pds4/cart/v1 " + osCartSchema;
@@ -3337,7 +3494,7 @@ void PDS4Dataset::CreateHeader(CPLXMLNode* psProduct,
                 }
             }
 
-            if( bCartNeedsInternalReference )
+            if( IsCARTVersionGTE(pszCARTVersion, "1900") )
             {
                 const char* pszLocalIdentifier = CPLGetXMLValue(
                     psDisciplineArea,
@@ -3355,7 +3512,7 @@ void PDS4Dataset::CreateHeader(CPLXMLNode* psProduct,
                             "cartography_parameters_to_image_object");
             }
 
-            WriteGeoreferencing(psCart, osWKT, bCart1B00OrLater);
+            WriteGeoreferencing(psCart, osWKT, pszCARTVersion);
         }
     }
     else
@@ -3449,11 +3606,15 @@ void PDS4Dataset::CreateHeader(CPLXMLNode* psProduct,
             CPLXMLNode* psFAO = CPLCreateXMLNode(nullptr, CXT_Element,
                                 (osPrefix + "File_Area_Observational").c_str());
             psFAOPrev->psNext = psFAO;
+
             CPLXMLNode* psFile = CPLCreateXMLNode(psFAO, CXT_Element,
                                                 (osPrefix + "File").c_str());
             CPLCreateXMLElementAndValue(psFile, (osPrefix + "file_name").c_str(),
                                         CPLGetFilename(m_osImageFilename));
-
+            if( m_bCreatedFromExistingBinaryFile )
+            {
+                CPLCreateXMLNode(psFile, CXT_Comment, PREEXISTING_BINARY_FILE);
+            }
             CPLXMLNode* psDisciplineArea = CPLGetXMLNode(psProduct,
                 (osPrefix + "Observation_Area." + osPrefix + "Discipline_Area").c_str());
             const char* pszLocalIdentifier = CPLGetXMLValue(
@@ -3461,6 +3622,59 @@ void PDS4Dataset::CreateHeader(CPLXMLNode* psProduct,
                 "disp:Display_Settings.Local_Internal_Reference."
                                                 "local_identifier_reference",
                 "image");
+
+            if( m_poExternalDS && m_poExternalDS->GetDriver() &&
+                EQUAL(m_poExternalDS->GetDriver()->GetDescription(), "GTiff") )
+            {
+                VSILFILE* fpTemp = VSIFOpenL(m_poExternalDS->GetDescription(), "rb");
+                if( fpTemp )
+                {
+                    GByte abySignature[4] = {0};
+                    VSIFReadL(abySignature, 1, 4, fpTemp);
+                    VSIFCloseL(fpTemp);
+                    const bool bBigTIFF = abySignature[2] == 43 || abySignature[3] == 43;
+                    m_osHeaderParsingStandard = bBigTIFF ? BIGTIFF_GEOTIFF_STRING : TIFF_GEOTIFF_STRING;
+                    const char* pszOffset = m_poExternalDS->GetRasterBand(1)->
+                            GetMetadataItem("BLOCK_OFFSET_0_0", "TIFF");
+                    if( pszOffset )
+                        m_nBaseOffset = CPLAtoGIntBig(pszOffset);
+                }
+            }
+
+            if( !m_osHeaderParsingStandard.empty() && m_nBaseOffset > 0 )
+            {
+                CPLXMLNode* psHeader = CPLCreateXMLNode(psFAO, CXT_Element,
+                                                (osPrefix + "Header").c_str());
+                CPLAddXMLAttributeAndValue(
+                    CPLCreateXMLElementAndValue(psHeader,
+                        (osPrefix + "offset").c_str(), "0"), "unit", "byte");
+                CPLAddXMLAttributeAndValue(
+                    CPLCreateXMLElementAndValue(psHeader,
+                        (osPrefix + "object_length").c_str(),
+                        CPLSPrintf(CPL_FRMT_GUIB,
+                                   static_cast<GUIntBig>(m_nBaseOffset))),
+                    "unit", "byte");
+                CPLCreateXMLElementAndValue(psHeader,
+                        (osPrefix + "parsing_standard_id").c_str(),
+                        m_osHeaderParsingStandard.c_str());
+                if( m_osHeaderParsingStandard == TIFF_GEOTIFF_STRING )
+                {
+                    CPLCreateXMLElementAndValue(psHeader,
+                        (osPrefix + "description").c_str(),
+                        "TIFF/GeoTIFF header. The TIFF/GeoTIFF format is used "
+                        "throughout the geospatial and science communities "
+                        "to share geographic image data. ");
+                }
+                else if( m_osHeaderParsingStandard == BIGTIFF_GEOTIFF_STRING )
+                {
+                    CPLCreateXMLElementAndValue(psHeader,
+                        (osPrefix + "description").c_str(),
+                        "BigTIFF/GeoTIFF header. The BigTIFF/GeoTIFF format is used "
+                        "throughout the geospatial and science communities "
+                        "to share geographic image data. ");
+                }
+            }
+
             WriteArray(osPrefix, psFAO, pszLocalIdentifier,
                     psTemplateSpecialConstants);
         }
@@ -3514,9 +3728,10 @@ void PDS4Dataset::WriteHeader()
     {
         psRoot = CPLParseXMLFile(m_osXMLFilename);
     }
+    CPLXMLTreeCloser oCloser(psRoot);
+    psRoot = oCloser.get();
     if( psRoot == nullptr )
         return;
-    CPLXMLTreeCloser oCloser(psRoot);
     CPLXMLNode* psProduct = CPLGetXMLNode(psRoot, "=Product_Observational");
     if( psProduct == nullptr )
     {
@@ -3531,8 +3746,7 @@ void PDS4Dataset::WriteHeader()
 
     if( m_bCreateHeader )
     {
-        bool bCartNeedsInternalReference = false;
-        bool bCart1B00OrLater = false;
+        CPLString osCARTVersion("1D00_1933");
         char* pszXML = CPLSerializeXMLTree(psRoot);
         if( pszXML )
         {
@@ -3542,14 +3756,11 @@ void PDS4Dataset::WriteHeader()
                 const char* pszCartSchema = strstr(pszIter, "PDS4_CART_");
                 if( pszCartSchema )
                 {
-                    if( strlen(pszCartSchema) >= strlen("PDS4_CART_xxxx.xsd") &&
-                        EQUALN(pszCartSchema + strlen("PDS4_CART_xxxx."), "xsd", 3) )
+                    const char* pszXSDExtension = strstr(pszCartSchema, ".xsd");
+                    if( pszXSDExtension && pszXSDExtension - pszCartSchema <= 20 )
                     {
-                        CPLString osVersion(pszCartSchema + strlen("PDS4_CART_"), 4);
-                        bCartNeedsInternalReference =
-                            strtol(osVersion, nullptr, 16) >= strtol("1900", nullptr, 16);
-                        bCart1B00OrLater =
-                            strtol(osVersion, nullptr, 16) >= strtol("1B00", nullptr, 16);
+                        osCARTVersion = pszCartSchema + strlen("PDS4_CART_");
+                        osCARTVersion.resize(pszXSDExtension - pszCartSchema - strlen("PDS4_CART_"));
                         break;
                     }
                     else
@@ -3566,7 +3777,7 @@ void PDS4Dataset::WriteHeader()
             CPLFree(pszXML);
         }
 
-        CreateHeader(psProduct, bCartNeedsInternalReference, bCart1B00OrLater);
+        CreateHeader(psProduct, osCARTVersion.c_str());
     }
 
     WriteVectorLayers(psProduct);
@@ -3678,6 +3889,19 @@ int PDS4Dataset::TestCapability( const char * pszCap )
 GDALDataset *PDS4Dataset::Create(const char *pszFilename,
                                  int nXSize, int nYSize, int nBands,
                                  GDALDataType eType, char **papszOptions)
+{
+    return CreateInternal(pszFilename, nullptr, nXSize, nYSize, nBands,
+                          eType, papszOptions);
+}
+
+/************************************************************************/
+/*                           CreateInternal()                           */
+/************************************************************************/
+
+PDS4Dataset *PDS4Dataset::CreateInternal(const char *pszFilename,
+                                         GDALDataset* poSrcDS,
+                                         int nXSize, int nYSize, int nBands,
+                                         GDALDataType eType, char **papszOptions)
 {
     if( nXSize == 0 && nYSize == 0 && nBands == 0 && eType == GDT_Unknown )
     {
@@ -3810,7 +4034,82 @@ GDALDataset *PDS4Dataset::Create(const char *pszFilename,
 
     GDALDataset* poExternalDS = nullptr;
     VSILFILE* fpImage = nullptr;
-    if( EQUAL(pszImageFormat, "GEOTIFF") )
+    vsi_l_offset nBaseOffset = 0;
+    bool bIsLSB = true;
+    CPLString osHeaderParsingStandard;
+    const bool bCreateLabelOnly = CPLFetchBool(papszOptions, "CREATE_LABEL_ONLY", false);
+    if( bCreateLabelOnly )
+    {
+        if( poSrcDS == nullptr )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "CREATE_LABEL_ONLY is only compatible of CreateCopy() mode");
+            return nullptr;
+        }
+        RawBinaryLayout sLayout;
+        if( !poSrcDS->GetRawBinaryLayout(sLayout) )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Source dataset is not compatible of a raw binary format");
+            return nullptr;
+        }
+        if( (nBands > 1 && sLayout.eInterleaving == RawBinaryLayout::Interleaving::UNKNOWN) ||
+            (nBands == 1 && !(sLayout.nPixelOffset == nItemSize &&
+                              sLayout.nLineOffset == sLayout.nPixelOffset * nXSize)) )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Source dataset has an interleaving not handled in PDS4");
+            return nullptr;
+        }
+        fpImage = VSIFOpenL(sLayout.osRawFilename.c_str(), "rb");
+        if( fpImage == nullptr )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Cannot open raw image %s", sLayout.osRawFilename.c_str());
+            return nullptr;
+        }
+        osImageFilename = sLayout.osRawFilename;
+        if( nBands == 1 || sLayout.eInterleaving == RawBinaryLayout::Interleaving::BIP )
+            pszInterleave = "BIP";
+        else if( sLayout.eInterleaving == RawBinaryLayout::Interleaving::BIL )
+            pszInterleave = "BIL";
+        else
+            pszInterleave = "BSQ";
+        nBaseOffset = sLayout.nImageOffset;
+        nPixelOffset = static_cast<int>(sLayout.nPixelOffset);
+        nLineOffset = static_cast<int>(sLayout.nLineOffset);
+        nBandOffset = static_cast<vsi_l_offset>(sLayout.nBandOffset);
+        bIsLSB = sLayout.bLittleEndianOrder;
+        auto poSrcDriver = poSrcDS->GetDriver();
+        if( poSrcDriver)
+        {
+            auto pszDriverName = poSrcDriver->GetDescription();
+            if( EQUAL(pszDriverName, "GTiff") )
+            {
+                GByte abySignature[4] = {0};
+                VSIFReadL(abySignature, 1, 4, fpImage);
+                const bool bBigTIFF = abySignature[2] == 43 || abySignature[3] == 43;
+                osHeaderParsingStandard = bBigTIFF ? BIGTIFF_GEOTIFF_STRING : TIFF_GEOTIFF_STRING;
+            }
+            else if( EQUAL(pszDriverName, "ISIS3") )
+            {
+                osHeaderParsingStandard = "ISIS3";
+            }
+            else if( EQUAL(pszDriverName, "VICAR") )
+            {
+                osHeaderParsingStandard = "VICAR2";
+            }
+            else if( EQUAL(pszDriverName, "PDS") )
+            {
+                osHeaderParsingStandard = "PDS3";
+            }
+            else if( EQUAL(pszDriverName, "FITS") )
+            {
+                osHeaderParsingStandard = "FITS 3.0";
+            }
+        }
+    }
+    else if( EQUAL(pszImageFormat, "GEOTIFF") )
     {
         if( EQUAL(pszInterleave, "BIL") )
         {
@@ -3898,6 +4197,7 @@ GDALDataset *PDS4Dataset::Create(const char *pszFilename,
         if( bAppend )
         {
             VSIFSeekL(fpImage, 0, SEEK_END);
+            nBaseOffset = VSIFTellL(fpImage);
         }
     }
 
@@ -3905,8 +4205,7 @@ GDALDataset *PDS4Dataset::Create(const char *pszFilename,
     poDS->SetDescription(pszFilename);
     poDS->m_bMustInitImageFile = true;
     poDS->m_fpImage = fpImage;
-    if( fpImage && bAppend )
-        poDS->m_nBaseOffset = VSIFTellL(fpImage);
+    poDS->m_nBaseOffset = nBaseOffset;
     poDS->m_poExternalDS = poExternalDS;
     poDS->nRasterXSize = nXSize;
     poDS->nRasterYSize = nYSize;
@@ -3917,6 +4216,9 @@ GDALDataset *PDS4Dataset::Create(const char *pszFilename,
     poDS->m_osInterleave = pszInterleave;
     poDS->m_papszCreationOptions = CSLDuplicate(papszOptions);
     poDS->m_bUseSrcLabel = CPLFetchBool(papszOptions, "USE_SRC_LABEL", true);
+    poDS->m_bIsLSB = bIsLSB;
+    poDS->m_osHeaderParsingStandard = osHeaderParsingStandard;
+    poDS->m_bCreatedFromExistingBinaryFile = bCreateLabelOnly;
 
     if( EQUAL(pszInterleave, "BIP") )
     {
@@ -3947,9 +4249,9 @@ GDALDataset *PDS4Dataset::Create(const char *pszFilename,
                                         nLineOffset,
                                         eType,
 #ifdef CPL_LSB
-                                        TRUE
+                                        poDS->m_bIsLSB
 #else
-                                        FALSE // force LSB order
+                                        !(poDS->m_bIsLSB)
 #endif
             );
             poDS->SetBand(i+1, poBand);
@@ -4093,8 +4395,8 @@ GDALDataset* PDS4Dataset::CreateCopy( const char *pszFilename,
     const int nYSize = poSrcDS->GetRasterYSize();
     const int nBands = poSrcDS->GetRasterCount();
     GDALDataType eType = poSrcDS->GetRasterBand(1)->GetRasterDataType();
-    PDS4Dataset *poDS = reinterpret_cast<PDS4Dataset*>(
-        Create( pszFilename, nXSize, nYSize, nBands, eType, papszOptions ));
+    PDS4Dataset *poDS = CreateInternal(
+        pszFilename, poSrcDS, nXSize, nYSize, nBands, eType, papszOptions );
     if( poDS == nullptr )
         return nullptr;
 
@@ -4150,18 +4452,89 @@ GDALDataset* PDS4Dataset::CreateCopy( const char *pszFilename,
         // completely
         poDS->m_bMustInitImageFile = false;
     }
-    CPLErr eErr = GDALDatasetCopyWholeRaster( poSrcDS, poDS,
-                                           nullptr, pfnProgress, pProgressData );
-    poDS->FlushCache();
-    if( eErr != CE_None )
+
+    if( !CPLFetchBool(papszOptions, "CREATE_LABEL_ONLY", false) )
     {
-        delete poDS;
-        return nullptr;
+        CPLErr eErr = GDALDatasetCopyWholeRaster( poSrcDS, poDS,
+                                           nullptr, pfnProgress, pProgressData );
+        poDS->FlushCache();
+        if( eErr != CE_None )
+        {
+            delete poDS;
+            return nullptr;
+        }
+
+        char **papszISIS3MD = poSrcDS->GetMetadata("json:ISIS3");
+        if( papszISIS3MD )
+        {
+            poDS->SetMetadata( papszISIS3MD, "json:ISIS3");
+        }
     }
 
     return poDS;
 }
 
+/************************************************************************/
+/*                             Delete()                                 */
+/************************************************************************/
+
+CPLErr PDS4Dataset::Delete( const char * pszFilename )
+
+{
+/* -------------------------------------------------------------------- */
+/*      Collect file list.                                              */
+/* -------------------------------------------------------------------- */
+    auto poDS = std::unique_ptr<PDS4Dataset>(
+        dynamic_cast<PDS4Dataset*>(GDALDataset::Open(pszFilename)));
+    if( poDS == nullptr )
+    {
+        if( CPLGetLastErrorNo() == 0 )
+            CPLError( CE_Failure, CPLE_OpenFailed,
+                      "Unable to open %s to obtain file list.", pszFilename );
+
+        return CE_Failure;
+    }
+
+    char **papszFileList = poDS->GetFileList();
+    CPLString osImageFilename = poDS->m_osImageFilename;
+    bool bCreatedFromExistingBinaryFile = poDS->m_bCreatedFromExistingBinaryFile;
+
+    poDS.reset();
+
+    if( CSLCount( papszFileList ) == 0 )
+    {
+        CPLError( CE_Failure, CPLE_NotSupported,
+                  "Unable to determine files associated with %s, "
+                  "delete fails.", pszFilename );
+        CSLDestroy( papszFileList );
+        return CE_Failure;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Delete all files.                                               */
+/* -------------------------------------------------------------------- */
+    CPLErr eErr = CE_None;
+    for( int i = 0; papszFileList[i] != nullptr; ++i )
+    {
+        if( bCreatedFromExistingBinaryFile &&
+            EQUAL(papszFileList[i], osImageFilename) )
+        {
+            continue;
+        }
+        if( VSIUnlink( papszFileList[i] ) != 0 )
+        {
+            CPLError( CE_Failure, CPLE_AppDefined,
+                      "Deleting %s failed:\n%s",
+                      papszFileList[i],
+                      VSIStrerror(errno) );
+            eErr = CE_Failure;
+        }
+    }
+
+    CSLDestroy( papszFileList );
+
+    return eErr;
+}
 
 /************************************************************************/
 /*                         GDALRegister_PDS4()                          */
@@ -4181,7 +4554,7 @@ void GDALRegister_PDS4()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "NASA Planetary Data System 4" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_pds4.html" );
+                               "drivers/raster/pds4.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "xml" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte UInt16 Int16 UInt32 Int32 Float32 "
@@ -4210,6 +4583,8 @@ void GDALRegister_PDS4()
                     "'Image filename'/>"
 "  <Option name='IMAGE_EXTENSION' type='string' scope='raster' description="
                     "'Extension of the binary raw/geotiff file'/>"
+"  <Option name='CREATE_LABEL_ONLY' scope='raster' type='boolean' description="
+                    "'whether to create only the XML label when converting from an existing raw format.' default='NO' />"
 "  <Option name='IMAGE_FORMAT' type='string-select' scope='raster' "
                     "description='Format of the image file' default='RAW'>"
 "     <Value>RAW</Value>"
@@ -4301,6 +4676,7 @@ void GDALRegister_PDS4()
     poDriver->pfnIdentify = PDS4Dataset::Identify;
     poDriver->pfnCreate = PDS4Dataset::Create;
     poDriver->pfnCreateCopy = PDS4Dataset::CreateCopy;
+    poDriver->pfnDelete = PDS4Dataset::Delete;
 
     GetGDALDriverManager()->RegisterDriver( poDriver );
 }

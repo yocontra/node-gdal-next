@@ -2,10 +2,10 @@
  *
  * Project:  GDAL
  * Purpose:  Includes CharLS headers
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,9 +35,15 @@
 #pragma GCC system_header
 #endif
 
+#ifdef CHARLS_2_1
+#define CHARLS_2
+#endif
+
 /* CharLS header */
 #ifdef CHARLS_INTERFACE_H
 #include <CharLS/interface.h>
+#elif defined(CHARLS_2_1)
+#include <charls/charls.h>
 #else
 #include <CharLS/charls.h>
 #endif

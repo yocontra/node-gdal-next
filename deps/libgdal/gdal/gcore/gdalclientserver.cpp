@@ -2,10 +2,10 @@
  *
  * Project:  GDAL Core
  * Purpose:  GDAL Client/server dataset mechanism.
- * Author:   Even Rouault, <even dot rouault at mines-paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -3691,7 +3691,7 @@ GDALClientDataset::GDALClientDataset(GDALPipe* pIn)
 
 GDALClientDataset::~GDALClientDataset()
 {
-    FlushCache();
+    GDALClientDataset::FlushCache();
 
     ProcessAsyncProgress();
 
@@ -6074,8 +6074,7 @@ GDALDataset *GDALClientDataset::Open( GDALOpenInfo * poOpenInfo )
         delete poDS;
         return nullptr;
     }
-    if( poDS != nullptr )
-        CPLErrorReset();
+    CPLErrorReset();
 
     return poDS;
 }

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Waypoint Information Technology
- * Copyright (c) 2009-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -41,7 +41,7 @@
 #include "../../ogr/ogrsf_frmts/mitab/mitab.h"
 #endif
 
-CPL_CVSID("$Id: grddataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: grddataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 #define NODATA -1.e37f
 #define SCALE16BIT 65534.0
@@ -67,7 +67,7 @@ void replaceExt(std::string& s, const std::string& newExt) {
 /************************************************************************/
 class NWT_GRDRasterBand;
 
-class NWT_GRDDataset: public GDALPamDataset {
+class NWT_GRDDataset final: public GDALPamDataset {
     friend class NWT_GRDRasterBand;
 
     VSILFILE *fp;
@@ -108,7 +108,7 @@ public:
 /* ==================================================================== */
 /************************************************************************/
 
-class NWT_GRDRasterBand: public GDALPamRasterBand {
+class NWT_GRDRasterBand final: public GDALPamRasterBand {
     friend class NWT_GRDDataset;
 
     int bHaveOffsetScale;
@@ -409,7 +409,7 @@ NWT_GRDDataset::~NWT_GRDDataset() {
     // Make sure any changes to the header etc are written
     // if we are in update mode.
     if (eAccess == GA_Update) {
-        FlushCache();
+        NWT_GRDDataset::FlushCache();
     }
     pGrd->fp = nullptr;       // this prevents nwtCloseGrid from closing the fp
     nwtCloseGrid(pGrd);
@@ -576,7 +576,7 @@ GDALDataset *NWT_GRDDataset::Open(GDALOpenInfo * poOpenInfo) {
 
     poDS->pGrd->fp = poDS->fp;
 
-    if (!nwt_ParseHeader(poDS->pGrd, reinterpret_cast<char *>(poDS->abyHeader))
+    if (!nwt_ParseHeader(poDS->pGrd, poDS->abyHeader)
             || !GDALCheckDatasetDimensions(poDS->pGrd->nXSide,
                     poDS->pGrd->nYSide)) {
         delete poDS;
@@ -1036,7 +1036,7 @@ void GDALRegister_NWT_GRD() {
     poDriver->SetMetadataItem(GDAL_DCAP_RASTER, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME,
             "Northwood Numeric Grid Format .grd/.tab");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_nwtgrd.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/nwtgrd.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "grd");
     poDriver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES, "Float32");

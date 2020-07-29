@@ -2,10 +2,10 @@
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2012-2019, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2019, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -43,7 +43,7 @@
 #include <utility>
 #include <vector>
 
-CPL_CVSID("$Id: pdfcreatecopy.cpp 2fa3504506fc6cc9d3678ccfd9451d84393c9025 2019-09-12 00:09:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: pdfcreatecopy.cpp 8fef404f981b5830fad78f1023c1d0c0964ed142 2020-05-28 14:16:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        GDALPDFBaseWriter()                           */
@@ -2986,29 +2986,26 @@ GDALPDFObjectNum GDALPDFBaseWriter::WriteAttributes(
     oDict.Add("A", poDictA);
     poDictA->Add("O", GDALPDFObjectRW::CreateName("UserProperties"));
 
-    if( !aosIncludedFields.empty() )
+    GDALPDFArrayRW* poArray = new GDALPDFArrayRW();
+    for( const auto& fieldName: aosIncludedFields )
     {
-        GDALPDFArrayRW* poArray = new GDALPDFArrayRW();
-        for( const auto& fieldName: aosIncludedFields )
+        int i = OGR_F_GetFieldIndex(hFeat, fieldName);
+        if (i >= 0 && OGR_F_IsFieldSetAndNotNull(hFeat, i))
         {
-            int i = OGR_F_GetFieldIndex(hFeat, fieldName);
-            if (i >= 0 && OGR_F_IsFieldSetAndNotNull(hFeat, i))
-            {
-                OGRFieldDefnH hFDefn = OGR_F_GetFieldDefnRef( hFeat, i );
-                GDALPDFDictionaryRW* poKV = new GDALPDFDictionaryRW();
-                poKV->Add("N", OGR_Fld_GetNameRef(hFDefn));
-                if (OGR_Fld_GetType(hFDefn) == OFTInteger)
-                    poKV->Add("V", OGR_F_GetFieldAsInteger(hFeat, i));
-                else if (OGR_Fld_GetType(hFDefn) == OFTReal)
-                    poKV->Add("V", OGR_F_GetFieldAsDouble(hFeat, i));
-                else
-                    poKV->Add("V", OGR_F_GetFieldAsString(hFeat, i));
-                poArray->Add(poKV);
-            }
+            OGRFieldDefnH hFDefn = OGR_F_GetFieldDefnRef( hFeat, i );
+            GDALPDFDictionaryRW* poKV = new GDALPDFDictionaryRW();
+            poKV->Add("N", OGR_Fld_GetNameRef(hFDefn));
+            if (OGR_Fld_GetType(hFDefn) == OFTInteger)
+                poKV->Add("V", OGR_F_GetFieldAsInteger(hFeat, i));
+            else if (OGR_Fld_GetType(hFDefn) == OFTReal)
+                poKV->Add("V", OGR_F_GetFieldAsDouble(hFeat, i));
+            else
+                poKV->Add("V", OGR_F_GetFieldAsString(hFeat, i));
+            poArray->Add(poKV);
         }
-
-        poDictA->Add("P", poArray);
     }
+
+    poDictA->Add("P", poArray);
 
     oDict.Add("K", nMCID);
     oDict.Add("P", oParent, 0);
@@ -4500,7 +4497,7 @@ static int GDALPDFGetJPEGQuality(char** papszOptions)
 /*                         GDALPDFClippingDataset                       */
 /************************************************************************/
 
-class GDALPDFClippingDataset: public GDALDataset
+class GDALPDFClippingDataset final: public GDALDataset
 {
         GDALDataset* poSrcDS;
         double adfGeoTransform[6];

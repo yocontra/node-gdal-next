@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements Open FileGDB OGR driver.
- * Author:   Even Rouault, <even dot rouault at mines-dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 #include "gdal_priv.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: ogropenfilegdbdriver.cpp 33445df4503c0fb7a0c45ec0cbd4d2f8afa26085 2018-02-16 06:05:00Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogropenfilegdbdriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 // g++ -O2 -Wall -Wextra -g -shared -fPIC ogr/ogrsf_frmts/openfilegdb/*.cpp
 // -o ogr_OpenFileGDB.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts

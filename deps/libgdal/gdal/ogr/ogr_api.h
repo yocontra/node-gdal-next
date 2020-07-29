@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_api.h 29693f999fa9435ffcf1c4bdc2ffa2eeb3011b9c 2018-03-28 16:51:44 +0200 Even Rouault $
+ * $Id: ogr_api.h 7c7402f4226a5d821bfd6bf38af0e682c8720ba7 2020-04-27 13:06:52 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API for OGR Geometry, Feature, Layers, DataSource and drivers.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -66,6 +66,7 @@ typedef void *OGRGeometryH;
 #define DEFINED_OGRSpatialReferenceH
 /*! @endcond */
 
+#ifndef DOXYGEN_XML
 #ifdef DEBUG
 typedef struct OGRSpatialReferenceHS *OGRSpatialReferenceH;
 typedef struct OGRCoordinateTransformationHS *OGRCoordinateTransformationH;
@@ -74,6 +75,7 @@ typedef struct OGRCoordinateTransformationHS *OGRCoordinateTransformationH;
 typedef void *OGRSpatialReferenceH;
 /** Opaque type for a coordinate transformation object */
 typedef void *OGRCoordinateTransformationH;
+#endif
 #endif
 
 #endif /* DEFINED_OGRSpatialReferenceH */
@@ -105,6 +107,7 @@ OGRGeometryH CPL_DLL OGR_G_ForceToMultiLineString( OGRGeometryH ) CPL_WARN_UNUSE
 OGRGeometryH CPL_DLL OGR_G_ForceTo( OGRGeometryH hGeom,
                                     OGRwkbGeometryType eTargetType,
                                     char** papszOptions ) CPL_WARN_UNUSED_RESULT;
+OGRGeometryH CPL_DLL OGR_G_RemoveLowerDimensionSubGeoms( const OGRGeometryH hGeom ) CPL_WARN_UNUSED_RESULT;
 
 int    CPL_DLL OGR_G_GetDimension( OGRGeometryH );
 int    CPL_DLL OGR_G_GetCoordinateDimension( OGRGeometryH );
@@ -144,12 +147,21 @@ char   CPL_DLL *OGR_G_ExportToJson( OGRGeometryH ) CPL_WARN_UNUSED_RESULT;
 char   CPL_DLL *OGR_G_ExportToJsonEx( OGRGeometryH, char** papszOptions ) CPL_WARN_UNUSED_RESULT;
 /** Create a OGR geometry from a GeoJSON geometry object */
 OGRGeometryH CPL_DLL OGR_G_CreateGeometryFromJson( const char* ) CPL_WARN_UNUSED_RESULT;
+/** Create a OGR geometry from a ESRI JSON geometry object */
+OGRGeometryH CPL_DLL OGR_G_CreateGeometryFromEsriJson( const char* ) CPL_WARN_UNUSED_RESULT;
 
 void   CPL_DLL OGR_G_AssignSpatialReference( OGRGeometryH,
                                              OGRSpatialReferenceH );
 OGRSpatialReferenceH CPL_DLL OGR_G_GetSpatialReference( OGRGeometryH );
 OGRErr CPL_DLL OGR_G_Transform( OGRGeometryH, OGRCoordinateTransformationH );
 OGRErr CPL_DLL OGR_G_TransformTo( OGRGeometryH, OGRSpatialReferenceH );
+
+/** Opaque type for a geometry transformer. */
+typedef struct OGRGeomTransformer* OGRGeomTransformerH;
+OGRGeomTransformerH CPL_DLL OGR_GeomTransformer_Create( OGRCoordinateTransformationH,
+                                                        CSLConstList papszOptions ) CPL_WARN_UNUSED_RESULT;
+OGRGeometryH CPL_DLL OGR_GeomTransformer_Transform(OGRGeomTransformerH hTransformer, OGRGeometryH hGeom ) CPL_WARN_UNUSED_RESULT;
+void CPL_DLL OGR_GeomTransformer_Destroy(OGRGeomTransformerH hTransformer);
 
 OGRGeometryH CPL_DLL OGR_G_Simplify( OGRGeometryH hThis, double tolerance ) CPL_WARN_UNUSED_RESULT;
 OGRGeometryH CPL_DLL OGR_G_SimplifyPreserveTopology( OGRGeometryH hThis, double tolerance ) CPL_WARN_UNUSED_RESULT;

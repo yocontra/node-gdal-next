@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxfdatasource.cpp a977483f0946e73193ff13b713d93c3aef7ba22e 2019-01-18 11:44:31 +1100 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxfdatasource.cpp f722e742a6963701692ad111819225355a14a3c6 2020-03-29 21:41:09 +1100 Alan Thomas $")
 
 /************************************************************************/
 /*                          OGRDXFDataSource()                          */
@@ -413,7 +413,8 @@ bool OGRDXFDataSource::ReadLayerDefinition()
           case 62:
             oLayerProperties["Color"] = szLineBuf;
 
-            if( atoi(szLineBuf) < 0 ) // Is layer off?
+            // Is layer off?
+            if( atoi(szLineBuf) < 0 && oLayerProperties["Hidden"] != "2" )
                 oLayerProperties["Hidden"] = "1";
             break;
 
@@ -423,8 +424,10 @@ bool OGRDXFDataSource::ReadLayerDefinition()
 
           case 70:
             oLayerProperties["Flags"] = szLineBuf;
-            if( atoi(szLineBuf) & 0x01 ) // Is layer frozen?
-                oLayerProperties["Hidden"] = "1";
+
+            // Is layer frozen?
+            if( atoi(szLineBuf) & 0x01 )
+                oLayerProperties["Hidden"] = "2";
             break;
 
           case 370:

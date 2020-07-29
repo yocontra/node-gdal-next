@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: ogr_wfs.h 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $
+ * $Id: ogr_wfs.h ac79f4a7bb3dbbcff8bcd266cd516f24835d240a 2020-05-22 19:10:11 +0200 Even Rouault $
  *
  * Project:  WFS Translator
  * Purpose:  Definition of classes for OGR WFS driver.
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 #include "ogrsf_frmts.h"
 #include "gmlreader.h"
 #include "cpl_http.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 CPLXMLNode* WFSFindNode(CPLXMLNode* psXML, const char* pszRootName);
 void OGRWFSRecursiveUnlink( const char *pszName );
@@ -59,7 +59,6 @@ const char* FindSubStringInsensitive(const char* pszStr,
 CPLString WFS_EscapeURL(const char* pszURL);
 CPLString WFS_DecodeURL(const CPLString &osSrc);
 
-// cppcheck-suppress copyCtorAndEqOperator
 class OGRWFSSortDesc
 {
     public:
@@ -69,9 +68,6 @@ class OGRWFSSortDesc
         OGRWFSSortDesc( const CPLString& osColumnIn, int bAscIn ) :
             osColumn(osColumnIn),
             bAsc(CPL_TO_BOOL(bAscIn)) {}
-        OGRWFSSortDesc(const OGRWFSSortDesc& other) :
-            osColumn(other.osColumn),
-            bAsc(other.bAsc) {}
 };
 
 /************************************************************************/

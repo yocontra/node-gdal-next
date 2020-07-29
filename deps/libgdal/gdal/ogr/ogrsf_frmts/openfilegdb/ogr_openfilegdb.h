@@ -1,12 +1,12 @@
 /******************************************************************************
-* $Id: ogr_openfilegdb.h 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $
+* $Id: ogr_openfilegdb.h 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Implements Open FileGDB OGR driver.
-* Author:   Even Rouault, <even dot rouault at mines-dash paris dot org>
+* Author:   Even Rouault, <even dot rouault at spatialys.com>
 *
 ******************************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 
 #include "ogrsf_frmts.h"
 #include "filegdbtable.h"
-#include "swq.h"
+#include "ogr_swq.h"
 #include "cpl_quad_tree.h"
 
 #include <vector>
@@ -71,6 +71,7 @@ class OGROpenFileGDBLayer final: public OGRLayer
     OGRwkbGeometryType m_eGeomType;
     int               m_bValidLayerDefn;
     int               m_bEOF;
+    bool              m_bTimeInUTC = false;
 
     int               BuildLayerDefinition();
     int               BuildGeometryColumnGDBv10();

@@ -19,26 +19,27 @@ using namespace node;
 
 namespace node_gdal {
 
-class RasterBandPixels: public Nan::ObjectWrap {
-public:
-	static Nan::Persistent<FunctionTemplate> constructor;
+class RasterBandPixels : public Nan::ObjectWrap {
+    public:
+  static Nan::Persistent<FunctionTemplate> constructor;
 
-	static void Initialize(Local<Object> target);
-	static NAN_METHOD(New);
-	static Local<Value> New(Local<Value> band_obj);
-	static NAN_METHOD(toString);
+  static void Initialize(Local<Object> target);
+  static NAN_METHOD(New);
+  static Local<Value> New(Local<Value> band_obj);
+  static NAN_METHOD(toString);
 
-	static NAN_METHOD(get);
-	static NAN_METHOD(set);
-	static NAN_METHOD(read);
-	static NAN_METHOD(write);
-	static NAN_METHOD(readBlock);
-	static NAN_METHOD(writeBlock);
-	
-	RasterBandPixels();
-private:
-	~RasterBandPixels();
+  static NAN_METHOD(get);
+  static NAN_METHOD(set);
+  static NAN_METHOD(read);
+  static NAN_METHOD(write);
+  static NAN_METHOD(readBlock);
+  static NAN_METHOD(writeBlock);
+
+  RasterBandPixels();
+
+    private:
+  ~RasterBandPixels();
 };
 
-}
+} // namespace node_gdal
 #endif

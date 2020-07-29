@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 
 #include "cpl_port.h"
 #include "ogr_feature.h"
-#include "swq.h"
+#include "ogr_swq.h"
 
 #include <cstddef>
 #include <cstdlib>
@@ -46,7 +46,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: ogrfeaturequery.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrfeaturequery.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
 
 /************************************************************************/
 /*     Support for special attributes (feature query and selection)     */

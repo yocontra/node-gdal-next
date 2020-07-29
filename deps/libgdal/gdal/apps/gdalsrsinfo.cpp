@@ -8,7 +8,7 @@
  *
  * ****************************************************************************
  * Copyright (c) 1998, Frank Warmerdam
- * Copyright (c) 2011-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,9 @@
 #include "ogrsf_frmts.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdalsrsinfo.cpp c2f67cb9fae85ddf8e6ac40104f61f94a19cc183 2019-02-07 10:13:10 +0100 Even Rouault $")
+#include "proj.h"
+
+CPL_CVSID("$Id: gdalsrsinfo.cpp 6eb829fd0626b765340d7fe73ffb09c48a5b5176 2019-08-20 14:40:43 +0200 Even Rouault $")
 
 bool FindSRS( const char *pszInput, OGRSpatialReference &oSRS );
 CPLErr PrintSRS( const OGRSpatialReference &oSRS,
@@ -67,7 +69,11 @@ static void Usage(const char* pszErrorMsg = nullptr)
             "   [-V]                   Validate SRS\n"
             "   [-e]                   Search for EPSG number(s) corresponding to SRS\n"
             "   [-o out_type]          Output type { default, all, wkt_all,\n"
+#if PROJ_VERSION_MAJOR > 6 || PROJ_VERSION_MINOR >= 2
+            "                                        PROJJSON, proj4, epsg,\n"
+#else
             "                                        proj4, epsg,\n"
+#endif
             "                                        wkt1, wkt_simple, wkt_noct, wkt_esri,\n"
             "                                        wkt2, wkt2_2015, wkt2_2018, mapinfo, xml }\n\n" );
 
@@ -240,7 +246,11 @@ MAIN_START(argc, argv)
                 if ( bFindEPSG )
                     printf("\nEPSG:%d\n\n",nEPSGCode);
                 const char* papszOutputTypes[] =
-                    {"proj4", "wkt1", "wkt2_2015", "wkt2_2018", "wkt_simple","wkt_noct","wkt_esri","mapinfo","xml",nullptr};
+                    {"proj4", "wkt1", "wkt2_2015", "wkt2_2018", "wkt_simple","wkt_noct","wkt_esri","mapinfo","xml",
+#if PROJ_VERSION_MAJOR > 6 || PROJ_VERSION_MINOR >= 2
+                     "PROJJSON",
+#endif
+                     nullptr};
                 PrintSRSOutputTypes( oSRS, papszOutputTypes, bPretty );
             }
             else if ( EQUAL("wkt_all", pszOutputType ) ) {
@@ -405,6 +415,14 @@ CPLErr PrintSRS( const OGRSpatialReference &oSRS,
     if ( EQUAL("proj4", pszOutputType ) ) {
         if ( bPrintSep ) printf( "PROJ.4 : ");
         oSRS.exportToProj4( &pszOutput );
+        printf( "%s\n", pszOutput );
+    }
+
+    else if ( EQUAL("PROJJSON", pszOutputType ) ) {
+        if ( bPrintSep ) printf( "PROJJSON :\n");
+        const char* const apszOptions[] = {
+            bPretty ? "MULTILINE=YES" : "MULTILINE=NO", nullptr };
+        oSRS.exportToPROJJSON( &pszOutput, apszOptions );
         printf( "%s\n", pszOutput );
     }
 

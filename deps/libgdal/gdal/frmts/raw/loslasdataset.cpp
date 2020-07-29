@@ -32,19 +32,23 @@
 #include "ogr_srs_api.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: loslasdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: loslasdataset.cpp 86fc87cb5dbe16f6a72624564de23da35426ed67 2019-12-29 00:41:16 +0100 Even Rouault $")
 
 /**
 
 NOAA .LOS/.LAS Datum Grid Shift Format
+
+Also used for .geo file from https://geodesy.noaa.gov/GEOID/MEXICO97/
 
 All values are little endian
 
 Header
 ------
 
-char[56] "NADCON EXTRACTED REGION"
-char[8]  "NADGRD  "
+char[56] "NADCON EXTRACTED REGION" or
+         "GEOID EXTRACTED REGION "
+char[8]  "NADGRD  " or
+         "GEOGRD  "
 int32    grid width
 int32    grid height
 int32    z count (1)
@@ -58,7 +62,7 @@ Data
 ----
 
 int32   ? always 0
-float32*gridwidth offset in arcseconds.
+float32*gridwidth offset in arcseconds (or in metres for geoids)
 
 Note that the record length is always gridwidth*4 + 4, and
 even the header record is this length though it means some waste.
@@ -134,12 +138,13 @@ int LOSLASDataset::Identify( GDALOpenInfo *poOpenInfo )
         return FALSE;
 
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-    if( !EQUAL(CPLGetExtension(poOpenInfo->pszFilename),"las")
-        && !EQUAL(CPLGetExtension(poOpenInfo->pszFilename),"los") )
+    const char* pszExt = CPLGetExtension(poOpenInfo->pszFilename);
+    if( !EQUAL(pszExt,"las") && !EQUAL(pszExt,"los") && !EQUAL(pszExt,"geo") )
         return FALSE;
 #endif
 
-    if( !STARTS_WITH_CI((const char *)poOpenInfo->pabyHeader + 56, "NADGRD") )
+    if( !STARTS_WITH_CI((const char *)poOpenInfo->pabyHeader + 56, "NADGRD") &&
+        !STARTS_WITH_CI((const char *)poOpenInfo->pabyHeader + 56, "GEOGRD") )
         return FALSE;
 
     return TRUE;
@@ -222,6 +227,20 @@ GDALDataset *LOSLASDataset::Open( GDALOpenInfo * poOpenInfo )
                               GDT_Float32,
                               CPL_IS_LSB,
                               RawRasterBand::OwnFP::NO ) );
+
+    if( EQUAL(CPLGetExtension(poOpenInfo->pszFilename),"las") )
+    {
+        poDS->GetRasterBand(1)->SetDescription( "Latitude Offset (arc seconds)" );
+    }
+    else if( EQUAL(CPLGetExtension(poOpenInfo->pszFilename),"los") )
+    {
+        poDS->GetRasterBand(1)->SetDescription( "Longitude Offset (arc seconds)" );
+        poDS->GetRasterBand(1)->SetMetadataItem("positive_value", "west");
+    }
+    else if( EQUAL(CPLGetExtension(poOpenInfo->pszFilename),"geo") )
+    {
+        poDS->GetRasterBand(1)->SetDescription( "Geoid undulation (meters)" );
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Setup georeferencing.                                           */

@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Frank Warmerdam
- * Copyright (c) 2009-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -57,7 +57,7 @@
 #include "ogr_srs_api.h"
 #include "ogr_geo_utils.h"
 
-CPL_CVSID("$Id: gml2ogrgeometry.cpp 482c13a093672635cf0a3d07b2cd7aac945c3cbb 2018-10-14 15:23:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: gml2ogrgeometry.cpp 27abfaab99b3c3b3d57cb2ab0a309d91d2942e3a 2020-04-07 18:23:08 +0200 Even Rouault $")
 
 constexpr double kdfD2R = M_PI / 180.0;
 constexpr double kdf2PI = 2.0 * M_PI;
@@ -268,7 +268,6 @@ static bool ParseGMLCoordinates( const CPLXMLNode *psGeomNode,
 {
     const CPLXMLNode *psCoordinates =
         FindBareXMLChild( psGeomNode, "coordinates" );
-    int iCoord = 0;
 
 /* -------------------------------------------------------------------- */
 /*      Handle <coordinates> case.                                      */
@@ -316,7 +315,7 @@ static bool ParseGMLCoordinates( const CPLXMLNode *psGeomNode,
             if( strlen(pszTS) != 1 || (pszTS[0] >= '0' && pszTS[0] <= '9') )
             {
                 CPLError(CE_Failure, CPLE_AppDefined,
-                         "Wrong value for tes attribute");
+                         "Wrong value for ts attribute");
                 return false;
             }
             chTS = pszTS[0];
@@ -328,83 +327,117 @@ static bool ParseGMLCoordinates( const CPLXMLNode *psGeomNode,
             return true;
         }
 
-        while( *pszCoordString != '\0' )
+        int iCoord = 0;
+        const OGRwkbGeometryType eType = wkbFlatten(poGeometry->getGeometryType());
+        OGRSimpleCurve *poCurve =
+            (eType == wkbLineString || eType == wkbCircularString) ?
+                poGeometry->toSimpleCurve() : nullptr;
+        for( int iter = (eType == wkbPoint ? 1 : 0); iter < 2; iter++ )
         {
-            double dfX = 0.0;
-            int nDimension = 2;
-
-            // parse out 2 or 3 tuple.
-            if( chDecimal == '.' )
-                dfX = OGRFastAtof( pszCoordString );
-            else
-                dfX = CPLAtofDelim( pszCoordString, chDecimal);
-            while( *pszCoordString != '\0'
-                   && *pszCoordString != chCS
-                   && !isspace(static_cast<unsigned char>(*pszCoordString)) )
-                pszCoordString++;
-
-            if( *pszCoordString == '\0' )
+            const char* pszStr = pszCoordString;
+            double dfX = 0;
+            double dfY = 0;
+            double dfZ = 0;
+            iCoord = 0;
+            while( *pszStr != '\0' )
             {
-                CPLError(CE_Failure, CPLE_AppDefined,
-                         "Corrupt <coordinates> value.");
-                return false;
+                int nDimension = 2;
+                // parse out 2 or 3 tuple.
+                if( iter == 1 )
+                {
+                    if( chDecimal == '.' )
+                        dfX = OGRFastAtof( pszStr );
+                    else
+                        dfX = CPLAtofDelim( pszStr, chDecimal);
+                }
+                while( *pszStr != '\0'
+                    && *pszStr != chCS
+                    && !isspace(static_cast<unsigned char>(*pszStr)) )
+                    pszStr++;
+
+                if( *pszStr == '\0' )
+                {
+                    CPLError(CE_Failure, CPLE_AppDefined,
+                            "Corrupt <coordinates> value.");
+                    return false;
+                }
+                else if( chCS == ',' && pszCS == nullptr &&
+                        isspace(static_cast<unsigned char>(*pszStr)) )
+                {
+                    // In theory, the coordinates inside a coordinate tuple should
+                    // be separated by a comma. However it has been found in the
+                    // wild that the coordinates are in rare cases separated by a
+                    // space, and the tuples by a comma.
+                    // See:
+                    // https://52north.org/twiki/bin/view/Processing/WPS-IDWExtension-ObservationCollectionExample
+                    // or
+                    // http://agisdemo.faa.gov/aixmServices/getAllFeaturesByLocatorId?locatorId=DFW
+                    chCS = ' ';
+                    chTS = ',';
+                }
+
+                pszStr++;
+
+                if( iter == 1 )
+                {
+                    if( chDecimal == '.' )
+                        dfY = OGRFastAtof( pszStr );
+                    else
+                        dfY = CPLAtofDelim( pszStr, chDecimal);
+                }
+                while( *pszStr != '\0'
+                    && *pszStr != chCS
+                    && *pszStr != chTS
+                    && !isspace(static_cast<unsigned char>(*pszStr)) )
+                    pszStr++;
+
+                dfZ = 0.0;
+                if( *pszStr == chCS )
+                {
+                    pszStr++;
+                    if( iter == 1 )
+                    {
+                        if( chDecimal == '.' )
+                            dfZ = OGRFastAtof( pszStr );
+                        else
+                            dfZ = CPLAtofDelim( pszStr, chDecimal);
+                    }
+                    nDimension = 3;
+                    while( *pszStr != '\0'
+                        && *pszStr != chCS
+                        && *pszStr != chTS
+                        && !isspace(static_cast<unsigned char>(*pszStr)) )
+                    pszStr++;
+                }
+
+                if( *pszStr == chTS )
+                {
+                    pszStr++;
+                }
+
+                while( isspace(static_cast<unsigned char>(*pszStr)) )
+                    pszStr++;
+
+                if( iter == 1 )
+                {
+                    if( poCurve )
+                    {
+                        if( nDimension == 3 )
+                            poCurve->setPoint(iCoord, dfX, dfY, dfZ);
+                        else
+                            poCurve->setPoint(iCoord, dfX, dfY);
+                    }
+                    else if( !AddPoint( poGeometry, dfX, dfY, dfZ, nDimension ) )
+                        return false;
+                }
+
+                iCoord++;
             }
-            else if( chCS == ',' && pszCS == nullptr &&
-                     isspace(static_cast<unsigned char>(*pszCoordString)) )
+
+            if( poCurve && iter == 0 )
             {
-                // In theory, the coordinates inside a coordinate tuple should
-                // be separated by a comma. However it has been found in the
-                // wild that the coordinates are in rare cases separated by a
-                // space, and the tuples by a comma.
-                // See:
-                // https://52north.org/twiki/bin/view/Processing/WPS-IDWExtension-ObservationCollectionExample
-                // or
-                // http://agisdemo.faa.gov/aixmServices/getAllFeaturesByLocatorId?locatorId=DFW
-                chCS = ' ';
-                chTS = ',';
+                poCurve->setNumPoints(iCoord);
             }
-
-            pszCoordString++;
-
-            double dfY = 0.0;
-            if( chDecimal == '.' )
-                dfY = OGRFastAtof( pszCoordString );
-            else
-                dfY = CPLAtofDelim( pszCoordString, chDecimal);
-            while( *pszCoordString != '\0'
-                   && *pszCoordString != chCS
-                   && *pszCoordString != chTS
-                   && !isspace(static_cast<unsigned char>(*pszCoordString)) )
-                pszCoordString++;
-
-            double dfZ = 0.0;
-            if( *pszCoordString == chCS )
-            {
-                pszCoordString++;
-                if( chDecimal == '.' )
-                    dfZ = OGRFastAtof( pszCoordString );
-                else
-                    dfZ = CPLAtofDelim( pszCoordString, chDecimal);
-                nDimension = 3;
-                while( *pszCoordString != '\0'
-                       && *pszCoordString != chCS
-                       && *pszCoordString != chTS
-                       && !isspace(static_cast<unsigned char>(*pszCoordString)) )
-                pszCoordString++;
-            }
-
-            if( *pszCoordString == chTS )
-            {
-                pszCoordString++;
-            }
-
-            while( isspace(static_cast<unsigned char>(*pszCoordString)) )
-                pszCoordString++;
-
-            if( !AddPoint( poGeometry, dfX, dfY, dfZ, nDimension ) )
-                return false;
-
-            iCoord++;
         }
 
         return iCoord > 0;
@@ -586,6 +619,7 @@ static bool ParseGMLCoordinates( const CPLXMLNode *psGeomNode,
 /*      Handle form with a list of <coord> items each with an <X>,      */
 /*      and <Y> element.                                                */
 /* -------------------------------------------------------------------- */
+    int iCoord = 0;
     for( const CPLXMLNode *psCoordNode = psGeomNode->psChild;
          psCoordNode != nullptr;
          psCoordNode = psCoordNode->psNext )
@@ -1142,6 +1176,161 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
         return poLinearRing;
     }
 
+    const auto storeArcByCenterPointParameters = [](
+        const CPLXMLNode* psChild,
+        const char* l_pszSRSName,
+        bool &bIsApproximateArc,
+        double &dfLastCurveApproximateArcRadius,
+        bool &bLastCurveWasApproximateArcInvertedAxisOrder)
+    {
+        const CPLXMLNode* psRadius =
+            FindBareXMLChild(psChild, "radius");
+        if( psRadius && psRadius->eType == CXT_Element )
+        {
+            double dfRadius = CPLAtof(CPLGetXMLValue(
+                psRadius, nullptr, "0"));
+            const char* pszUnits = CPLGetXMLValue(
+                psRadius, "uom", nullptr);
+            bool bSRSUnitIsDegree = false;
+            bool bInvertedAxisOrder = false;
+            if( l_pszSRSName != nullptr )
+            {
+                OGRSpatialReference oSRS;
+                if( oSRS.SetFromUserInput(l_pszSRSName)
+                    == OGRERR_NONE )
+                {
+                    if( oSRS.IsGeographic() )
+                    {
+                        bInvertedAxisOrder =
+                            CPL_TO_BOOL(oSRS.EPSGTreatsAsLatLong());
+                        bSRSUnitIsDegree =
+                            fabs(oSRS.GetAngularUnits(nullptr) -
+                                    CPLAtof(SRS_UA_DEGREE_CONV))
+                            < 1e-8;
+                    }
+                }
+            }
+            if( bSRSUnitIsDegree && pszUnits != nullptr &&
+                (EQUAL(pszUnits, "m") ||
+                 EQUAL(pszUnits, "nm") ||
+                 EQUAL(pszUnits, "[nmi_i]") ||
+                 EQUAL(pszUnits, "mi") ||
+                 EQUAL(pszUnits, "ft")) )
+            {
+                bIsApproximateArc = true;
+                if( EQUAL(pszUnits, "nm") || EQUAL(pszUnits, "[nmi_i]"))
+                    dfRadius *= CPLAtof(SRS_UL_INTL_NAUT_MILE_CONV);
+                else if( EQUAL(pszUnits, "mi") )
+                    dfRadius *= CPLAtof(SRS_UL_INTL_STAT_MILE_CONV);
+                else if( EQUAL(pszUnits, "ft") )
+                    dfRadius *= CPLAtof(SRS_UL_INTL_FOOT_CONV);
+                dfLastCurveApproximateArcRadius = dfRadius;
+                bLastCurveWasApproximateArcInvertedAxisOrder =
+                    bInvertedAxisOrder;
+            }
+        }
+    };
+
+    const auto connectArcByCenterPointToOtherSegments = [](
+        OGRGeometry* poGeom,
+        OGRCompoundCurve* poCC,
+        const bool bIsApproximateArc,
+        const bool bLastCurveWasApproximateArc,
+        const double dfLastCurveApproximateArcRadius,
+        const bool bLastCurveWasApproximateArcInvertedAxisOrder)
+    {
+        if( bIsApproximateArc )
+        {
+            if( poGeom->getGeometryType() == wkbLineString )
+            {
+                OGRCurve* poPreviousCurve =
+                    poCC->getCurve(poCC->getNumCurves()-1);
+                OGRLineString* poLS = poGeom->toLineString();
+                if( poPreviousCurve->getNumPoints() >= 2 &&
+                    poLS->getNumPoints() >= 2 )
+                {
+                    OGRPoint p;
+                    OGRPoint p2;
+                    poPreviousCurve->EndPoint(&p);
+                    poLS->StartPoint(&p2);
+                    double dfDistance = 0.0;
+                    if( bLastCurveWasApproximateArcInvertedAxisOrder )
+                        dfDistance =
+                            OGR_GreatCircle_Distance(
+                                p.getX(), p.getY(),
+                                p2.getX(), p2.getY());
+                    else
+                        dfDistance =
+                            OGR_GreatCircle_Distance(
+                                p.getY(), p.getX(),
+                                p2.getY(), p2.getX());
+                    // CPLDebug("OGR", "%f %f",
+                    //          dfDistance,
+                    //          dfLastCurveApproximateArcRadius
+                    //          / 10.0 );
+                    if( dfDistance <
+                        dfLastCurveApproximateArcRadius / 5.0 )
+                    {
+                        CPLDebug("OGR",
+                                    "Moving approximate start of "
+                                    "ArcByCenterPoint to end of "
+                                    "previous curve");
+                        poLS->setPoint(0, &p);
+                    }
+                }
+            }
+        }
+        else if( bLastCurveWasApproximateArc )
+        {
+            OGRCurve* poPreviousCurve =
+                poCC->getCurve(poCC->getNumCurves()-1);
+            if( poPreviousCurve->getGeometryType() ==
+                wkbLineString )
+            {
+                OGRLineString* poLS = poPreviousCurve->toLineString();
+                OGRCurve *poAsCurve = poGeom->toCurve();
+
+                if( poLS->getNumPoints() >= 2 &&
+                    poAsCurve->getNumPoints() >= 2 )
+                {
+                    OGRPoint p;
+                    OGRPoint p2;
+                    poAsCurve->StartPoint(&p);
+                    poLS->EndPoint(&p2);
+                    double dfDistance = 0.0;
+                    if( bLastCurveWasApproximateArcInvertedAxisOrder )
+                        dfDistance =
+                            OGR_GreatCircle_Distance(
+                                p.getX(), p.getY(),
+                                p2.getX(), p2.getY());
+                    else
+                        dfDistance =
+                            OGR_GreatCircle_Distance(
+                                p.getY(), p.getX(),
+                                p2.getY(), p2.getX());
+                    // CPLDebug(
+                    //    "OGR", "%f %f",
+                    //    dfDistance,
+                    //    dfLastCurveApproximateArcRadius / 10.0 );
+
+                    // "A-311 WHEELER AFB OAHU, HI.xml" needs more
+                    // than 10%.
+                    if( dfDistance <
+                        dfLastCurveApproximateArcRadius / 5.0 )
+                    {
+                        CPLDebug(
+                            "OGR",
+                            "Moving approximate end of last "
+                            "ArcByCenterPoint to start of the "
+                            "current curve");
+                        poLS->setPoint(poLS->getNumPoints() - 1,
+                                        &p);
+                    }
+                }
+            }
+        }
+    };
+
 /* -------------------------------------------------------------------- */
 /*      Ring GML3                                                       */
 /* -------------------------------------------------------------------- */
@@ -1154,6 +1343,11 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
         bool bLastCurveWasApproximateArc = false;
         bool bLastCurveWasApproximateArcInvertedAxisOrder = false;
         double dfLastCurveApproximateArcRadius = 0.0;
+
+        bool bIsFirstChild = true;
+        bool bFirstChildIsApproximateArc = false;
+        double dfFirstChildApproximateArcRadius = 0.0;
+        bool bFirstChildWasApproximateArcInvertedAxisOrder = false;
 
         for( const CPLXMLNode *psChild = psNode->psChild;
              psChild != nullptr;
@@ -1216,56 +1410,29 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                 // with consecutive curves, as found in some AIXM files.
                 bool bIsApproximateArc = false;
                 const CPLXMLNode* psChild2, *psChild3;
-                if( strcmp(psCurveChild->pszValue, "Curve") == 0 &&
+                if( strcmp(BareGMLElement(psCurveChild->pszValue), "Curve") == 0 &&
                     (psChild2 = GetChildElement(psCurveChild)) != nullptr &&
-                    strcmp(psChild2->pszValue, "segments") == 0 &&
+                    strcmp(BareGMLElement(psChild2->pszValue), "segments") == 0 &&
                     (psChild3 = GetChildElement(psChild2)) != nullptr &&
-                    strcmp(psChild3->pszValue, "ArcByCenterPoint") == 0 )
+                    strcmp(BareGMLElement(psChild3->pszValue), "ArcByCenterPoint") == 0 )
                 {
-                    const CPLXMLNode* psRadius =
-                        FindBareXMLChild(psChild3, "radius");
-                    if( psRadius && psRadius->eType == CXT_Element )
+                    storeArcByCenterPointParameters(psChild3,
+                                               pszSRSName,
+                                               bIsApproximateArc,
+                                               dfLastCurveApproximateArcRadius,
+                                               bLastCurveWasApproximateArcInvertedAxisOrder);
+                    if( bIsFirstChild && bIsApproximateArc )
                     {
-                        double dfRadius = CPLAtof(CPLGetXMLValue(
-                            psRadius, nullptr, "0"));
-                        const char* pszUnits = CPLGetXMLValue(
-                            psRadius, "uom", nullptr);
-                        bool bSRSUnitIsDegree = false;
-                        bool bInvertedAxisOrder = false;
-                        if( pszSRSName != nullptr )
-                        {
-                            OGRSpatialReference oSRS;
-                            if( oSRS.SetFromUserInput(pszSRSName)
-                                == OGRERR_NONE )
-                            {
-                                if( oSRS.IsGeographic() )
-                                {
-                                    bInvertedAxisOrder =
-                                        CPL_TO_BOOL(oSRS.EPSGTreatsAsLatLong());
-                                    bSRSUnitIsDegree =
-                                        fabs(oSRS.GetAngularUnits(nullptr) -
-                                             CPLAtof(SRS_UA_DEGREE_CONV))
-                                        < 1e-8;
-                                }
-                            }
-                        }
-                        if( bSRSUnitIsDegree && pszUnits != nullptr &&
-                            (EQUAL(pszUnits, "m") || EQUAL(pszUnits, "nm") ||
-                             EQUAL(pszUnits, "mi") || EQUAL(pszUnits, "ft")) )
-                        {
-                            bIsApproximateArc = true;
-                            if( EQUAL(pszUnits, "nm") )
-                                dfRadius *= CPLAtof(SRS_UL_INTL_NAUT_MILE_CONV);
-                            else if( EQUAL(pszUnits, "mi") )
-                                dfRadius *= CPLAtof(SRS_UL_INTL_STAT_MILE_CONV);
-                            else if( EQUAL(pszUnits, "ft") )
-                                dfRadius *= CPLAtof(SRS_UL_INTL_FOOT_CONV);
-                            dfLastCurveApproximateArcRadius = dfRadius;
-                            bLastCurveWasApproximateArcInvertedAxisOrder =
-                                bInvertedAxisOrder;
-                        }
+                        bFirstChildIsApproximateArc = true;
+                        dfFirstChildApproximateArcRadius = dfLastCurveApproximateArcRadius;
+                        bFirstChildWasApproximateArcInvertedAxisOrder = bLastCurveWasApproximateArcInvertedAxisOrder;
+                    }
+                    else if( psChild3->psNext )
+                    {
+                        bIsApproximateArc = false;
                     }
                 }
+                bIsFirstChild = false;
 
                 if( poCC == nullptr && poRing == nullptr )
                 {
@@ -1287,96 +1454,11 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                         poRing = nullptr;
                     }
 
-                    if( bIsApproximateArc )
-                    {
-                        if( poGeom->getGeometryType() == wkbLineString )
-                        {
-                            OGRCurve* poPreviousCurve =
-                                poCC->getCurve(poCC->getNumCurves()-1);
-                            OGRLineString* poLS = poGeom->toLineString();
-                            if( poPreviousCurve->getNumPoints() >= 2 &&
-                                poLS->getNumPoints() >= 2 )
-                            {
-                                OGRPoint p;
-                                OGRPoint p2;
-                                poPreviousCurve->EndPoint(&p);
-                                poLS->StartPoint(&p2);
-                                double dfDistance = 0.0;
-                                if( bLastCurveWasApproximateArcInvertedAxisOrder )
-                                    dfDistance =
-                                        OGR_GreatCircle_Distance(
-                                            p.getX(), p.getY(),
-                                            p2.getX(), p2.getY());
-                                else
-                                    dfDistance =
-                                        OGR_GreatCircle_Distance(
-                                            p.getY(), p.getX(),
-                                            p2.getY(), p2.getX());
-                                // CPLDebug("OGR", "%f %f",
-                                //          dfDistance,
-                                //          dfLastCurveApproximateArcRadius
-                                //          / 10.0 );
-                                if( dfDistance <
-                                    dfLastCurveApproximateArcRadius / 5.0 )
-                                {
-                                    CPLDebug("OGR",
-                                             "Moving approximate start of "
-                                             "ArcByCenterPoint to end of "
-                                             "previous curve");
-                                    poLS->setPoint(0, &p);
-                                }
-                            }
-                        }
-                    }
-                    else if( bLastCurveWasApproximateArc )
-                    {
-                        OGRCurve* poPreviousCurve =
-                            poCC->getCurve(poCC->getNumCurves()-1);
-                        if( poPreviousCurve->getGeometryType() ==
-                            wkbLineString )
-                        {
-                            OGRLineString* poLS = poPreviousCurve->toLineString();
-                            OGRCurve *poCurve = poGeom->toCurve();
-
-                            if( poLS->getNumPoints() >= 2 &&
-                                poCurve->getNumPoints() >= 2 )
-                            {
-                                OGRPoint p;
-                                OGRPoint p2;
-                                poCurve->StartPoint(&p);
-                                poLS->EndPoint(&p2);
-                                double dfDistance = 0.0;
-                                if( bLastCurveWasApproximateArcInvertedAxisOrder )
-                                    dfDistance =
-                                        OGR_GreatCircle_Distance(
-                                            p.getX(), p.getY(),
-                                            p2.getX(), p2.getY());
-                                else
-                                    dfDistance =
-                                        OGR_GreatCircle_Distance(
-                                            p.getY(), p.getX(),
-                                            p2.getY(), p2.getX());
-                                // CPLDebug(
-                                //    "OGR", "%f %f",
-                                //    dfDistance,
-                                //    dfLastCurveApproximateArcRadius / 10.0 );
-
-                                // "A-311 WHEELER AFB OAHU, HI.xml" needs more
-                                // than 10%.
-                                if( dfDistance <
-                                    dfLastCurveApproximateArcRadius / 5.0 )
-                                {
-                                    CPLDebug(
-                                        "OGR",
-                                        "Moving approximate end of last "
-                                        "ArcByCenterPoint to start of the "
-                                        "current curve");
-                                    poLS->setPoint(poLS->getNumPoints() - 1,
-                                                   &p);
-                                }
-                            }
-                        }
-                    }
+                    connectArcByCenterPointToOtherSegments(poGeom, poCC,
+                                                           bIsApproximateArc,
+                                                           bLastCurveWasApproximateArc,
+                                                           dfLastCurveApproximateArcRadius,
+                                                           bLastCurveWasApproximateArcInvertedAxisOrder);
 
                     OGRCurve *poCurve = poGeom->toCurve();
 
@@ -1398,6 +1480,38 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
 
         if( poRing )
         {
+            if( poRing->getNumPoints() >= 2 &&
+                bFirstChildIsApproximateArc && !poRing->get_IsClosed() &&
+                wkbFlatten(poRing->getGeometryType()) == wkbLineString )
+            {
+                OGRLineString* poLS = poRing->toLineString();
+
+                OGRPoint p;
+                OGRPoint p2;
+                poLS->StartPoint(&p);
+                poLS->EndPoint(&p2);
+                double dfDistance = 0.0;
+                if( bFirstChildWasApproximateArcInvertedAxisOrder )
+                    dfDistance =
+                        OGR_GreatCircle_Distance(
+                            p.getX(), p.getY(),
+                            p2.getX(), p2.getY());
+                else
+                    dfDistance =
+                        OGR_GreatCircle_Distance(
+                            p.getY(), p.getX(),
+                            p2.getY(), p2.getX());
+                if( dfDistance <
+                    dfFirstChildApproximateArcRadius / 5.0 )
+                {
+                    CPLDebug("OGR",
+                             "Moving approximate start of "
+                             "ArcByCenterPoint to end of "
+                             "curve");
+                    poLS->setPoint(0, &p2);
+                }
+            }
+
             if( poRing->getNumPoints() < 2 || !poRing->get_IsClosed() )
             {
                 CPLError(CE_Failure, CPLE_AppDefined, "Non-closed ring");
@@ -1693,14 +1807,18 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
         const double dfCenterY = p.getY();
 
         if( bSRSUnitIsDegree && pszUnits != nullptr &&
-            (EQUAL(pszUnits, "m") || EQUAL(pszUnits, "nm") ||
-             EQUAL(pszUnits, "mi") || EQUAL(pszUnits, "ft")) )
+            (EQUAL(pszUnits, "m") ||
+             EQUAL(pszUnits, "nm") ||
+             EQUAL(pszUnits, "[nmi_i]") ||
+             EQUAL(pszUnits, "mi") ||
+             EQUAL(pszUnits, "ft")) )
         {
             OGRLineString* poLS = new OGRLineString();
+            // coverity[tainted_data]
             const double dfStep =
                 CPLAtof(CPLGetConfigOption("OGR_ARC_STEPSIZE", "4"));
             double dfDistance = dfRadius;
-            if( EQUAL(pszUnits, "nm") )
+            if( EQUAL(pszUnits, "nm") || EQUAL(pszUnits, "[nmi_i]") )
                 dfDistance *= CPLAtof(SRS_UL_INTL_NAUT_MILE_CONV);
             else if( EQUAL(pszUnits, "mi") )
                 dfDistance *= CPLAtof(SRS_UL_INTL_STAT_MILE_CONV);
@@ -1718,11 +1836,11 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                     OGR_GreatCircle_ExtendPosition(
                        dfCenterX, dfCenterY,
                        dfDistance,
-                       // Not sure of angle conversion here.
-                       90.0 - dfAngle,
+                       // See https://ext.eurocontrol.int/aixm_confluence/display/ACG/ArcByCenterPoint+Interpretation+Summary
+                       dfAngle,
                        &dfLat, &dfLong);
-                    p.setY( dfLat );
-                    p.setX( dfLong );
+                    p.setX( dfLat ); // yes, external code will do the swap later
+                    p.setY( dfLong );
                 }
                 else
                 {
@@ -1741,11 +1859,10 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
             {
                 OGR_GreatCircle_ExtendPosition(dfCenterX, dfCenterY,
                                          dfDistance,
-                                         // Not sure of angle conversion here.
-                                         90.0 - dfEndAngle,
+                                         dfEndAngle,
                                          &dfLat, &dfLong);
-                p.setY( dfLat );
-                p.setX( dfLong );
+                p.setX( dfLat ); // yes, external code will do the swap later
+                p.setY( dfLong );
             }
             else
             {
@@ -1819,14 +1936,17 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
         const double dfCenterY = p.getY();
 
         if( bSRSUnitIsDegree && pszUnits != nullptr &&
-            (EQUAL(pszUnits, "m") || EQUAL(pszUnits, "nm") ||
-             EQUAL(pszUnits, "mi") || EQUAL(pszUnits, "ft")) )
+            (EQUAL(pszUnits, "m") ||
+             EQUAL(pszUnits, "nm") ||
+             EQUAL(pszUnits, "[nmi_i]") ||
+             EQUAL(pszUnits, "mi") ||
+             EQUAL(pszUnits, "ft")) )
         {
             OGRLineString* poLS = new OGRLineString();
             const double dfStep =
                 CPLAtof(CPLGetConfigOption("OGR_ARC_STEPSIZE", "4"));
             double dfDistance = dfRadius;
-            if( EQUAL(pszUnits, "nm") )
+            if( EQUAL(pszUnits, "nm") || EQUAL(pszUnits, "[nmi_i]") )
                 dfDistance *= CPLAtof(SRS_UL_INTL_NAUT_MILE_CONV);
             else if( EQUAL(pszUnits, "mi") )
                 dfDistance *= CPLAtof(SRS_UL_INTL_STAT_MILE_CONV);
@@ -1841,8 +1961,8 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                     OGR_GreatCircle_ExtendPosition(dfCenterX, dfCenterY,
                                              dfDistance, dfAngle,
                                              &dfLat, &dfLong);
-                    p.setY( dfLat );
-                    p.setX( dfLong );
+                    p.setX( dfLat ); // yes, external code will do the swap later
+                    p.setY( dfLong );
                 }
                 else
                 {
@@ -2468,6 +2588,10 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
         OGRCompoundCurve *poCC = nullptr;
         bool bChildrenAreAllLineString = true;
 
+        bool bLastCurveWasApproximateArc = false;
+        bool bLastCurveWasApproximateArcInvertedAxisOrder = false;
+        double dfLastCurveApproximateArcRadius = 0.0;
+
         for( const CPLXMLNode *psChild = psNode->psChild;
              psChild != nullptr;
              psChild = psChild->psNext )
@@ -2499,13 +2623,26 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                     return nullptr;
                 }
 
+
+                // Ad-hoc logic to handle nicely connecting ArcByCenterPoint
+                // with consecutive curves, as found in some AIXM files.
+                bool bIsApproximateArc = false;
+                if( strcmp(BareGMLElement(psChild->pszValue), "ArcByCenterPoint") == 0 )
+                {
+                    storeArcByCenterPointParameters(psChild,
+                                               pszSRSName,
+                                               bIsApproximateArc,
+                                               dfLastCurveApproximateArcRadius,
+                                               bLastCurveWasApproximateArcInvertedAxisOrder);
+                }
+
                 if( wkbFlatten(poGeom->getGeometryType()) != wkbLineString )
                     bChildrenAreAllLineString = false;
 
                 if( poCC == nullptr && poCurve == nullptr )
                 {
                     poCurve = poGeom->toCurve();
-               }
+                }
                 else
                 {
                     if( poCC == nullptr )
@@ -2521,6 +2658,12 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                         poCurve = nullptr;
                     }
 
+                    connectArcByCenterPointToOtherSegments(poGeom, poCC,
+                                                           bIsApproximateArc,
+                                                           bLastCurveWasApproximateArc,
+                                                           dfLastCurveApproximateArcRadius,
+                                                           bLastCurveWasApproximateArcInvertedAxisOrder);
+
                     OGRCurve *poAsCurve = poGeom->toCurve();
                     if( poCC->addCurveDirectly(poAsCurve) != OGRERR_NONE )
                     {
@@ -2529,6 +2672,8 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                         return nullptr;
                     }
                 }
+
+                bLastCurveWasApproximateArc = bIsApproximateArc;
             }
         }
 
@@ -2887,7 +3032,7 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                 {
                     CPLError( CE_Failure, CPLE_AppDefined,
                               "Got %.500s geometry as Member instead of %s.",
-                              poGeom ? poGeom->getGeometryName() : "NULL",
+                              poGeom->getGeometryName(),
                               bGetSecondaryGeometry?"MULTIPOINT":"LINESTRING");
                     delete poGeom;
                     if( bGetSecondaryGeometry )
@@ -3284,10 +3429,9 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                             poMS = new OGRMultiPolygon();
                         else
                             poMS = new OGRMultiSurface();
-#ifdef DEBUG
                         OGRErr eErr =
-#endif
                           poMS->addGeometryDirectly( poResultPoly );
+                        CPL_IGNORE_RET_VAL(eErr);
                         CPLAssert(eErr == OGRERR_NONE);
                         poResultPoly = poMS;
                     }
@@ -3299,10 +3443,9 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                         poMS = OGRMultiPolygon::CastToMultiSurface(poMultiPoly);
                         poResultPoly = poMS;
                     }
-#ifdef DEBUG
                     OGRErr eErr =
-#endif
                       poMS->addGeometryDirectly( poGeom );
+                    CPL_IGNORE_RET_VAL(eErr);
                     CPLAssert(eErr == OGRERR_NONE);
                 }
             }
@@ -3326,17 +3469,15 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
                     if( poTIN == nullptr )
                     {
                         poTIN = new OGRTriangulatedSurface();
-#ifdef DEBUG
                         OGRErr eErr =
-#endif
                           poTIN->addGeometryDirectly( poResultTri );
+                        CPL_IGNORE_RET_VAL(eErr);
                         CPLAssert(eErr == OGRERR_NONE);
                         poResultTri = poTIN;
                     }
-#ifdef DEBUG
                     OGRErr eErr =
-#endif
                       poTIN->addGeometryDirectly( poGeom );
+                    CPL_IGNORE_RET_VAL(eErr);
                     CPLAssert(eErr == OGRERR_NONE);
                 }
             }
@@ -3349,7 +3490,7 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
             return poResultPoly;
         else if( poResultPoly == nullptr )
             return poResultTri;
-        else if( poResultTri != nullptr && poResultPoly != nullptr )
+        else
         {
             poGC = new OGRGeometryCollection();
             poGC->addGeometryDirectly(poResultTri);
@@ -3432,8 +3573,7 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
             // This is empty PolyhedralSurface.
             return new OGRPolyhedralSurface();
         }
-        else if( psChild != nullptr &&
-                 !EQUAL(BareGMLElement(psChild->pszValue), "PolygonPatch") )
+        else if( !EQUAL(BareGMLElement(psChild->pszValue), "PolygonPatch") )
         {
             CPLError( CE_Failure, CPLE_AppDefined,
                       "Missing <PolygonPatch> for %s.", pszBaseGeometry );

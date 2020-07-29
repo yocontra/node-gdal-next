@@ -2,10 +2,10 @@
  *
  * Project:  GDAL Epsilon driver
  * Purpose:  Implement GDAL Epsilon support using Epsilon library
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2009-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #pragma clang diagnostic pop
 #endif
 
-CPL_CVSID("$Id: epsilondataset.cpp a542b2797f15f2ed694cfcee9ff17d86b339dfee 2018-04-02 00:24:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: epsilondataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 #define RASTERLITE_WAVELET_HEADER "StartWaveletsImage$$"
 #define RASTERLITE_WAVELET_FOOTER "$$EndWaveletsImage"
@@ -71,7 +71,7 @@ typedef struct
 /* ==================================================================== */
 /************************************************************************/
 
-class EpsilonDataset : public GDALPamDataset
+class EpsilonDataset final: public GDALPamDataset
 {
     friend class EpsilonRasterBand;
 
@@ -116,7 +116,7 @@ class EpsilonDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class EpsilonRasterBand : public GDALPamRasterBand
+class EpsilonRasterBand final: public GDALPamRasterBand
 {
   public:
     EpsilonRasterBand( EpsilonDataset* poDS, int nBand );
@@ -213,7 +213,8 @@ CPLErr EpsilonRasterBand::IReadBlock( int nBlockXOff,
 
     BlockDesc* psDesc = &poGDS->pasBlocks[nBlock];
 #ifdef DEBUG
-    int l_nBlocksPerColumn = (poGDS->nRasterYSize + nBlockYSize - 1) / nBlockYSize;
+    const int l_nBlocksPerColumn = (poGDS->nRasterYSize + nBlockYSize - 1) / nBlockYSize;
+    CPL_IGNORE_RET_VAL(l_nBlocksPerColumn);
     CPLAssert(psDesc->x == nBlockXOff * nBlockXSize);
     CPLAssert(psDesc->y == nBlockYOff * nBlockYSize);
     CPLAssert(psDesc->w == (nBlockXOff < l_nBlocksPerRow - 1) ?
@@ -1005,7 +1006,7 @@ void GDALRegister_EPSILON()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
 
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Epsilon wavelets" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_epsilon.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/epsilon.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );
 
     CPLString osMethods;

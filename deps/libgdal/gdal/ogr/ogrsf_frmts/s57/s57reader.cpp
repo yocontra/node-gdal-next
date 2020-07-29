@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, 2001, Frank Warmerdam
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <string>
 
-CPL_CVSID("$Id: s57reader.cpp 9dedf5b8948aeaec5518e1f4210f98a378c3d975 2019-03-17 13:17:53 +0100 Even Rouault $")
+CPL_CVSID("$Id: s57reader.cpp bd0ba53e34de9ea1dcdf3f6d7046016c7de6b353 2020-05-08 20:11:55 +0200 Even Rouault $")
 
 /**
 * Recode the given string from a source encoding to UTF-8 encoding.  The source
@@ -177,7 +177,6 @@ S57Reader::S57Reader( const char * pszFilename ) :
     bMissingWarningIssued(false),
     bAttrWarningIssued(false)
 {
-    szUPDNUpdate[0] = '\0';
 }
 
 /************************************************************************/
@@ -377,7 +376,7 @@ bool S57Reader::SetOptions( char ** papszOptionsIn )
     pszOptionValue = CSLFetchNameValue( papszOptions, S57O_UPDATES );
     if( pszOptionValue == nullptr )
         /* no change */;
-    else if( pszOptionValue != nullptr && !EQUAL(pszOptionValue,"APPLY") )
+    else if( !EQUAL(pszOptionValue,"APPLY") )
         nOptionFlags &= ~S57M_UPDATES;
     else
         nOptionFlags |= S57M_UPDATES;
@@ -1217,17 +1216,23 @@ OGRFeature *S57Reader::ReadDSID()
                      poDSIDRecord->GetIntSubfield( "DSID", 0, "INTU", 0 ));
         poFeature->SetField( "DSID_DSNM",
                      poDSIDRecord->GetStringSubfield( "DSID", 0, "DSNM", 0 ));
-        poFeature->SetField( "DSID_EDTN",
+        if( !m_osEDTNUpdate.empty() )
+            poFeature->SetField( "DSID_EDTN", m_osEDTNUpdate.c_str() );
+        else
+            poFeature->SetField( "DSID_EDTN",
                      poDSIDRecord->GetStringSubfield( "DSID", 0, "EDTN", 0 ));
-        if( strlen(szUPDNUpdate) > 0 )
-            poFeature->SetField( "DSID_UPDN", szUPDNUpdate );
+        if( !m_osUPDNUpdate.empty() )
+            poFeature->SetField( "DSID_UPDN", m_osUPDNUpdate.c_str() );
         else
             poFeature->SetField( "DSID_UPDN",
                      poDSIDRecord->GetStringSubfield( "DSID", 0, "UPDN", 0 ));
 
         poFeature->SetField( "DSID_UADT",
                      poDSIDRecord->GetStringSubfield( "DSID", 0, "UADT", 0 ));
-        poFeature->SetField( "DSID_ISDT",
+        if( !m_osISDTUpdate.empty() )
+            poFeature->SetField( "DSID_ISDT", m_osISDTUpdate.c_str() );
+        else
+            poFeature->SetField( "DSID_ISDT",
                      poDSIDRecord->GetStringSubfield( "DSID", 0, "ISDT", 0 ));
         poFeature->SetField( "DSID_STED",
                      poDSIDRecord->GetFloatSubfield( "DSID", 0, "STED", 0 ));
@@ -2142,7 +2147,7 @@ void S57Reader::AssembleLineGeometry( DDFRecord * poFRecord,
             int nVC_RCID_firstnode = 0;
             int nVC_RCID_lastnode = 0;
 
-            if( poVRPT != nullptr && poVRPT->GetRepeatCount() == 1 )
+            if( poVRPT->GetRepeatCount() == 1 )
             {
                 nVC_RCID_firstnode = ParseName( poVRPT );
                 poVRPT = poSRecord->FindField( "VRPT", 1 );
@@ -3099,10 +3104,8 @@ bool S57Reader::ApplyRecordUpdate( DDFRecord *poTarget, DDFRecord *poUpdate )
 
         if( poDstATTF == nullptr )
         {
-            CPLError( CE_Warning, CPLE_AppDefined,
-                      "Unable to apply ATTF change to target record without "
-                      "an ATTF field (see GDAL/OGR Bug #1648)" );
-            return false;
+            // Create empty ATTF Field (see GDAL/OGR Bug #1648)" ); 
+            poDstATTF = poTarget->AddField(poModule->FindFieldDefn( "ATTF" ));         
         }
 
         DDFField *poSrcATTF = poUpdate->FindField( "ATTF" );
@@ -3265,10 +3268,18 @@ bool S57Reader::ApplyUpdates( DDFModule *poUpdateModule )
         {
             if( poDSIDRecord != nullptr )
             {
+                const char* pszEDTN
+                    = poRecord->GetStringSubfield( "DSID", 0, "EDTN", 0 );
+                if( pszEDTN != nullptr )
+                    m_osEDTNUpdate = pszEDTN;
                 const char* pszUPDN
                     = poRecord->GetStringSubfield( "DSID", 0, "UPDN", 0 );
-                if( pszUPDN != nullptr && strlen(pszUPDN) < sizeof(szUPDNUpdate) )
-                    strcpy( szUPDNUpdate, pszUPDN );
+                if( pszUPDN != nullptr )
+                    m_osUPDNUpdate = pszUPDN;
+                const char* pszISDT
+                    = poRecord->GetStringSubfield( "DSID", 0, "ISDT", 0 );
+                if( pszISDT != nullptr)
+                    m_osISDTUpdate = pszISDT;
             }
         }
 

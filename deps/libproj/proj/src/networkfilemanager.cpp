@@ -1947,7 +1947,7 @@ static bool is_rel_or_absolute_filename(const char *name) {
 static std::string build_url(PJ_CONTEXT *ctx, const char *name) {
     if (!is_tilde_slash(name) && !is_rel_or_absolute_filename(name) &&
         !starts_with(name, "http://") && !starts_with(name, "https://")) {
-        std::string remote_file(pj_context_get_url_endpoint(ctx));
+        std::string remote_file(proj_context_get_url_endpoint(ctx));
         if (!remote_file.empty()) {
             if (remote_file.back() != '/') {
                 remote_file += '/';
@@ -2180,7 +2180,7 @@ void proj_grid_cache_clear(PJ_CONTEXT *ctx) {
  * use the "downloaded_file_properties" table of its grid cache database.
  * Consequently files manually placed in the user-writable
  * directory without using this function would be considered as
- * non-existing/obsolete and would be unconditionnaly downloaded again.
+ * non-existing/obsolete and would be unconditionally downloaded again.
  *
  * This function can only be used if networking is enabled, and either
  * the default curl network API or a custom one have been installed.
@@ -2213,7 +2213,8 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
     if (filename == nullptr)
         return false;
     const auto localFilename(
-        pj_context_get_user_writable_directory(ctx, false) + filename);
+        std::string(proj_context_get_user_writable_directory(ctx, false)) +
+        filename);
 
     auto f = NS_PROJ::FileManager::open(ctx, localFilename.c_str(),
                                         NS_PROJ::FileAccess::READ_ONLY);
@@ -2308,7 +2309,7 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
  * use the "downloaded_file_properties" table of its grid cache database.
  * Consequently files manually placed in the user-writable
  * directory without using this function would be considered as
- * non-existing/obsolete and would be unconditionnaly downloaded again.
+ * non-existing/obsolete and would be unconditionally downloaded again.
  *
  * This function can only be used if networking is enabled, and either
  * the default curl network API or a custom one have been installed.
@@ -2351,8 +2352,9 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
     const char *filename = strrchr(url.c_str(), '/');
     if (filename == nullptr)
         return false;
-    const auto localFilename(pj_context_get_user_writable_directory(ctx, true) +
-                             filename);
+    const auto localFilename(
+        std::string(proj_context_get_user_writable_directory(ctx, true)) +
+        filename);
 
 #ifdef _WIN32
     const int nPID = GetCurrentProcessId();
@@ -2536,7 +2538,7 @@ std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
     if (!ctx->gridChunkCache.filename.empty()) {
         return ctx->gridChunkCache.filename;
     }
-    const std::string path(pj_context_get_user_writable_directory(ctx, true));
+    const std::string path(proj_context_get_user_writable_directory(ctx, true));
     ctx->gridChunkCache.filename = path + "/cache.db";
     return ctx->gridChunkCache.filename;
 }

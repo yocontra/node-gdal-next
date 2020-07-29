@@ -31,7 +31,7 @@
 #include "gdal_priv.h"
 #include "pcidsk.h"
 
-CPL_CVSID("$Id: gdal_edb.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: gdal_edb.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
 
 using PCIDSK::EDBFile;
 using PCIDSK::eChanType;
@@ -51,14 +51,14 @@ EDBFile *GDAL_EDBOpen( const std::string& osFilename, const std::string& osAcces
 /* ==================================================================== */
 /************************************************************************/
 
-class GDAL_EDBFile : public EDBFile
+class GDAL_EDBFile final : public EDBFile
 {
     GDALDataset     *poDS;
 
 public:
 
     explicit GDAL_EDBFile( GDALDataset *poDSIn ) { poDS = poDSIn; }
-    ~GDAL_EDBFile() { if( poDS ) Close(); }
+    ~GDAL_EDBFile() { if( poDS ) GDAL_EDBFile::Close(); }
 
     int Close() const override;
     int GetWidth() const override;

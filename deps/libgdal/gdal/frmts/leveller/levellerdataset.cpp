@@ -10,7 +10,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005-2007 Daylon Graphics Ltd.
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,7 +35,7 @@
 #include "gdal_pam.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: levellerdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: levellerdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 static bool str_equal(const char *_s1, const char *_s2) {
     return 0 == strcmp(_s1, _s2);
@@ -1561,7 +1561,7 @@ void GDALRegister_Leveller()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "ter" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Leveller heightfield" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_leveller.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/leveller.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnIdentify = LevellerDataset::Identify;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sosi.h 1a8cd1b07a75b672150242ef8a59b1821e82a137 2018-05-12 22:35:40 +0200 Even Rouault $
+ * $Id: ogr_sosi.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  SOSI Translator
  * Purpose:  Implements OGRSOSIDriver.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Thomas Hirsch
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2006, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  * Copyright (c) 2017 Hobu Inc
  * Copyright (c) 2017, Dmitry Baryshnikov <polimax@mail.ru>
  * Copyright (c) 2017, NextGIS <info@nextgis.com>
@@ -56,7 +56,7 @@
 #include "ogrgeojsonreader.h"
 #include <vector>
 
-CPL_CVSID("$Id: nasakeywordhandler.cpp e154f9ed078e6b9d750c383b3d4fefb3cdfb109f 2019-11-02 12:46:36 +0100 Even Rouault $")
+CPL_CVSID("$Id: nasakeywordhandler.cpp 11905389e86c5da867ebf0c040d88dcad7e3e383 2019-11-02 12:46:36 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */

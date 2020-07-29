@@ -50,7 +50,7 @@
 #include "ogr_core.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: gdal_rasterize_lib.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_rasterize_lib.cpp 37f9dab19bf9c619430811308ece7f2dfaa86b01 2020-06-17 19:30:03 +0200 Andrea Giudiceandrea $")
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */
@@ -225,13 +225,13 @@ static CPLErr ProcessLayer(
 
     while( (hFeat = OGR_L_GetNextFeature( hSrcLayer )) != nullptr )
     {
-        if( OGR_F_GetGeometryRef( hFeat ) == nullptr )
+        OGRGeometryH hGeom = OGR_F_StealGeometry( hFeat );
+        if( hGeom == nullptr )
         {
             OGR_F_Destroy( hFeat );
             continue;
         }
 
-        OGRGeometryH hGeom = OGR_G_Clone( OGR_F_GetGeometryRef( hFeat ) );
         if( hCT != nullptr )
         {
             if( OGR_G_Transform(hGeom, hCT) != OGRERR_NONE )
@@ -557,7 +557,7 @@ struct GDALRasterizeOptions
 /**
  * Burns vector geometries into a raster
  *
- * This is the equivalent of the <a href="gdal_rasterize.html">gdal_rasterize</a> utility.
+ * This is the equivalent of the <a href="/programs/gdal_rasterize.html">gdal_rasterize</a> utility.
  *
  * GDALRasterizeOptions* must be allocated and freed with GDALRasterizeOptionsNew()
  * and GDALRasterizeOptionsFree() respectively.
@@ -808,7 +808,7 @@ GDALDatasetH GDALRasterize( const char *pszDest, GDALDatasetH hDstDS,
  * Allocates a GDALRasterizeOptions struct.
  *
  * @param papszArgv NULL terminated list of options (potentially including filename and open options too), or NULL.
- *                  The accepted options are the ones of the <a href="gdal_rasterize.html">gdal_rasterize</a> utility.
+ *                  The accepted options are the ones of the <a href="/programs/gdal_rasterize.html">gdal_rasterize</a> utility.
  * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
  *                           otherwise (gdal_translate_bin.cpp use case) must be allocated with
  *                           GDALRasterizeOptionsForBinaryNew() prior to this function. Will be
@@ -1072,7 +1072,7 @@ GDALRasterizeOptions *GDALRasterizeOptionsNew(char** papszArgv,
             if (psOptions->nXSize <= 0 || psOptions->nYSize <= 0)
             {
                 CPLError(CE_Failure, CPLE_AppDefined,
-                         "Wrong value for -outsize parameter.");
+                         "Wrong value for -ts parameter.");
                 GDALRasterizeOptionsFree(psOptions);
                 return nullptr;
             }

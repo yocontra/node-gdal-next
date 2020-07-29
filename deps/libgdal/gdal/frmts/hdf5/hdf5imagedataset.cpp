@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,18 +39,9 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hdf5imagedataset.cpp a3f3a76160ee93e37297621ec22008e621a794b6 2020-01-20 20:01:25 +0100 Even Rouault $")
+CPL_CVSID("$Id: hdf5imagedataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
-// Release 1.6.3 or 1.6.4 changed the type of count in some API functions.
-
-#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR <= 6 \
-       && (H5_VERS_MINOR < 6 || H5_VERS_RELEASE < 3)
-#  define H5OFFSET_TYPE hssize_t
-#else
-#  define H5OFFSET_TYPE  hsize_t
-#endif
-
-class HDF5ImageDataset : public HDF5Dataset
+class HDF5ImageDataset final: public HDF5Dataset
 {
     typedef enum { UNKNOWN_PRODUCT = 0, CSK_PRODUCT } Hdf5ProductType;
 
@@ -228,7 +219,7 @@ HDF5ImageDataset::~HDF5ImageDataset()
 /*                            Hdf5imagerasterband                       */
 /* ==================================================================== */
 /************************************************************************/
-class HDF5ImageRasterBand : public GDALPamRasterBand
+class HDF5ImageRasterBand final: public GDALPamRasterBand
 {
     friend class HDF5ImageDataset;
 
@@ -401,7 +392,10 @@ CPLErr HDF5ImageRasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
                                   mem_offset, nullptr,
                                   count, nullptr);
     if( status < 0 )
+    {
+        H5Sclose(memspace);
         return CE_Failure;
+    }
 
     status = H5Dread(poGDS->dataset_id, poGDS->native, memspace,
                      poGDS->dataspace_id, H5P_DEFAULT, pImage);
@@ -488,11 +482,7 @@ GDALDataset *HDF5ImageDataset::Open( GDALOpenInfo *poOpenInfo )
     poDS->SetPhysicalFilename(osFilename);
 
     // Try opening the dataset.
-    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_driver(fapl, HDF5GetFileDriver(), nullptr);
-    poDS->hHDF5 = H5Fopen(osFilename, H5F_ACC_RDONLY, fapl);
-    H5Pclose(fapl);
-
+    poDS->hHDF5 = GDAL_HDF5Open(osFilename);
     if( poDS->hHDF5 < 0 )
     {
         delete poDS;
@@ -610,7 +600,7 @@ void GDALRegister_HDF5Image()
     poDriver->SetDescription("HDF5Image");
     poDriver->SetMetadataItem(GDAL_DCAP_RASTER, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "HDF5 Dataset");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_hdf5.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/hdf5.html");
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = HDF5ImageDataset::Open;

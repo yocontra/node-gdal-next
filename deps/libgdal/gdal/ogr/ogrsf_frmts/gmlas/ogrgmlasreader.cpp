@@ -35,7 +35,7 @@
 
 #include "cpl_json_header.h"
 
-CPL_CVSID("$Id: ogrgmlasreader.cpp a8c61f67b231ce0931337d807cc2c722b1dc0798 2019-03-23 13:48:32 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasreader.cpp ace1ead80868e81e9c2c13c1c02bbfcef379dd22 2019-08-15 17:13:18 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        GMLASBinInputStream                           */
@@ -596,6 +596,7 @@ bool GMLASReader::Init(const char* pszFilename,
         m_poSAXReader->setFeature (XMLUni::fgXercesSchema, true);
 
         // We want all errors to be reported
+        // coverity[unsafe_xml_parse_config]
         m_poSAXReader->setFeature (XMLUni::fgXercesValidationErrorAsFatal, false);
 
         CPLString osBaseDirname( CPLGetDirname(pszFilename) );
@@ -2938,7 +2939,7 @@ void GMLASReader::ProcessGeometry(CPLXMLNode* psRoot)
             if( !bReprojectionOK )
             {
                 CPLError(CE_Warning, CPLE_AppDefined,
-                         "Reprojection fom %s to %s failed",
+                         "Reprojection from %s to %s failed",
                          pszSRSName,
                          m_oMapGeomFieldDefnToSRSName[poGeomFieldDefn].c_str());
                 delete poGeom;

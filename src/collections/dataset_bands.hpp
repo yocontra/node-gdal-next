@@ -19,25 +19,26 @@ using namespace node;
 
 namespace node_gdal {
 
-class DatasetBands: public Nan::ObjectWrap {
-public:
-	static Nan::Persistent<FunctionTemplate> constructor;
+class DatasetBands : public Nan::ObjectWrap {
+    public:
+  static Nan::Persistent<FunctionTemplate> constructor;
 
-	static void Initialize(Local<Object> target);
-	static NAN_METHOD(New);
-	static Local<Value> New(Local<Value> ds_obj);
-	static NAN_METHOD(toString);
+  static void Initialize(Local<Object> target);
+  static NAN_METHOD(New);
+  static Local<Value> New(Local<Value> ds_obj);
+  static NAN_METHOD(toString);
 
-	static NAN_METHOD(get);
-	static NAN_METHOD(count);
-	static NAN_METHOD(create);
+  static NAN_METHOD(get);
+  static NAN_METHOD(count);
+  static NAN_METHOD(create);
 
-	static NAN_GETTER(dsGetter);
-	
-	DatasetBands();
-private:
-	~DatasetBands();
+  static NAN_GETTER(dsGetter);
+
+  DatasetBands();
+
+    private:
+  ~DatasetBands();
 };
 
-}
+} // namespace node_gdal
 #endif

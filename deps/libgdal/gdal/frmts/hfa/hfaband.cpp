@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Intergraph Corporation
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,7 +47,7 @@
 #include "hfa.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: hfaband.cpp 2aed2bc59c131cf5ced4802d0bd9c5e20c65d976 2018-01-13 14:27:13Z Even Rouault $")
+CPL_CVSID("$Id: hfaband.cpp cffe9a3ef14da777687074350c870fa121122cac 2019-08-26 18:48:10 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              HFABand()                               */
@@ -225,8 +225,11 @@ CPLErr HFABand::LoadOverviews()
             }
 
             char *pszPath = pszEnd + 2;
-            if( pszPath[strlen(pszPath)-1] == ')' )
-                pszPath[strlen(pszPath)-1] = '\0';
+            {
+                const int nPathLen = static_cast<int>(strlen(pszPath));
+                if( pszPath[nPathLen-1] == ')' )
+                    pszPath[nPathLen-1] = '\0';
+            }
 
             for( int i = 0; pszPath[i] != '\0'; i++ )
             {
@@ -694,7 +697,7 @@ static CPLErr UncompressBlock( GByte *pabyCData, int nSrcBytes,
             }
 
             // Offset by the minimum value.
-            const int nDataValue = nRawValue + nDataMin;
+            const int nDataValue = CPLUnsanitizedAdd<int>(nRawValue, nDataMin);
 
             // Now apply to the output buffer in a type specific way.
             if( eDataType == EPT_u8 )
@@ -894,7 +897,7 @@ static CPLErr UncompressBlock( GByte *pabyCData, int nSrcBytes,
         }
 
         // Offset by the minimum value.
-        nDataValue += nDataMin;
+        nDataValue = CPLUnsanitizedAdd<int>(nDataValue, nDataMin);
 
         // Now apply to the output buffer in a type specific way.
         if( nRepeatCount > INT_MAX - nPixelsOutput ||

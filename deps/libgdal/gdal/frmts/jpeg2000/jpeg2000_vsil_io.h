@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: jpeg2000_vsil_io.h f070adf64950cae1c6cc86b104ba835c29df06b1 2016-08-28 06:06:11Z Kurt Schwehr $
+ * $Id: jpeg2000_vsil_io.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  JPEG-2000
  * Purpose:  Return a stream for a VSIL file
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2009, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements reading of FileGDB tables
- * Author:   Even Rouault, <even dot rouault at mines-dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -50,7 +50,7 @@
 #include "ogr_geometry.h"
 #include "ogrpgeogeometry.h"
 
-CPL_CVSID("$Id: filegdbtable.cpp 47d8d3665dcc12f04d5c025ab646e30259059522 2019-03-18 13:31:56 +0100 Even Rouault $")
+CPL_CVSID("$Id: filegdbtable.cpp 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $")
 
 #define TEST_BIT(ar, bit)                       (ar[(bit) / 8] & (1 << ((bit) % 8)))
 #define BIT_ARRAY_SIZE_IN_BYTES(bitsize)        (((bitsize)+7)/8)
@@ -778,6 +778,8 @@ int FileGDBTable::Open(const char* pszFilename,
     returnErrorIf(VSIFReadL( abyHeader, 14, 1, fpTable ) != 1 );
     nFieldDescLength = GetUInt32(abyHeader, 0);
 
+    returnErrorIf(nOffsetFieldDesc >
+                    std::numeric_limits<GUIntBig>::max() - nFieldDescLength);
     nOffsetHeaderEnd = nOffsetFieldDesc + nFieldDescLength;
 
     returnErrorIf(nFieldDescLength > 10 * 1024 * 1024 || nFieldDescLength < 10 );
@@ -807,6 +809,7 @@ int FileGDBTable::Open(const char* pszFilename,
         pabyIter ++;
         nRemaining --;
         returnErrorIf(nRemaining < (GUInt32)(2 * nCarCount + 1) );
+        // coverity[tainted_data,tainted_data_argument]
         std::string osName(ReadUTF16String(pabyIter, nCarCount));
         pabyIter += 2 * nCarCount;
         nRemaining -= 2 * nCarCount;
@@ -816,6 +819,7 @@ int FileGDBTable::Open(const char* pszFilename,
         pabyIter ++;
         nRemaining --;
         returnErrorIf(nRemaining < (GUInt32)(2 * nCarCount + 1) );
+        // coverity[tainted_data,tainted_data_argument]
         std::string osAlias(ReadUTF16String(pabyIter, nCarCount));
         pabyIter += 2 * nCarCount;
         nRemaining -= 2 * nCarCount;
@@ -1132,6 +1136,7 @@ static int SkipVarUInt(GByte*& pabyIter, GByte* pabyEnd, int nIter = 1)
 /*                      ReadVarIntAndAddNoCheck()                       */
 /************************************************************************/
 
+CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
 static void ReadVarIntAndAddNoCheck(GByte*& pabyIter, GIntBig& nOutVal)
 {
     GUInt32 b;
@@ -1218,11 +1223,11 @@ vsi_l_offset FileGDBTable::GetOffsetInTableForRow(int iRow)
         nCountBlocksBeforeIBlockIdx = iBlock;
         nCountBlocksBeforeIBlockValue = nCountBlocksBefore;
         int iCorrectedRow = nCountBlocksBefore * 1024 + (iRow % 1024);
-        VSIFSeekL(fpTableX, 16 + nTablxOffsetSize * iCorrectedRow, SEEK_SET);
+        VSIFSeekL(fpTableX, 16 + static_cast<vsi_l_offset>(nTablxOffsetSize) * iCorrectedRow, SEEK_SET);
     }
     else
     {
-        VSIFSeekL(fpTableX, 16 + nTablxOffsetSize * iRow, SEEK_SET);
+        VSIFSeekL(fpTableX, 16 + static_cast<vsi_l_offset>(nTablxOffsetSize) * iRow, SEEK_SET);
     }
 
     GByte abyBuffer[6];
@@ -1401,9 +1406,9 @@ int FileGDBDoubleDateToOGRDate(double dfVal, OGRField* psField)
 /*                          GetFieldValue()                             */
 /************************************************************************/
 
-const OGRField* FileGDBTable::GetFieldValue(int iCol)
+OGRField* FileGDBTable::GetFieldValue(int iCol)
 {
-    const OGRField* errorRetValue = nullptr;
+    OGRField* errorRetValue = nullptr;
 
     returnErrorIf(nCurRow < 0 );
     returnErrorIf((GUInt32)iCol >= apoFields.size() );
@@ -1886,9 +1891,9 @@ int FileGDBTable::GetFeatureExtent(const OGRField* psField,
         {
             GUIntBig x, y;
             ReadVarUInt64NoCheck(pabyCur, x);
-            x --;
+            x = CPLUnsanitizedAdd<GUIntBig>(x, -1);
             ReadVarUInt64NoCheck(pabyCur, y);
-            y --;
+            y = CPLUnsanitizedAdd<GUIntBig>(y, -1);
             psOutFeatureEnvelope->MinX = x / poGeomField->dfXYScale + poGeomField->dfXOrigin;
             psOutFeatureEnvelope->MinY = y / poGeomField->dfXYScale + poGeomField->dfYOrigin;
             psOutFeatureEnvelope->MaxX = psOutFeatureEnvelope->MinX;
@@ -1951,8 +1956,8 @@ int FileGDBTable::GetFeatureExtent(const OGRField* psField,
 
     psOutFeatureEnvelope->MinX = vxmin / poGeomField->dfXYScale + poGeomField->dfXOrigin;
     psOutFeatureEnvelope->MinY = vymin / poGeomField->dfXYScale + poGeomField->dfYOrigin;
-    psOutFeatureEnvelope->MaxX = (vxmin + vdx) / poGeomField->dfXYScale + poGeomField->dfXOrigin;
-    psOutFeatureEnvelope->MaxY = (vymin + vdy) / poGeomField->dfXYScale + poGeomField->dfYOrigin;
+    psOutFeatureEnvelope->MaxX = CPLUnsanitizedAdd<GUIntBig>(vxmin, vdx) / poGeomField->dfXYScale + poGeomField->dfXOrigin;
+    psOutFeatureEnvelope->MaxY = CPLUnsanitizedAdd<GUIntBig>(vymin, vdy) / poGeomField->dfXYScale + poGeomField->dfYOrigin;
 
     return TRUE;
 }
@@ -2048,10 +2053,10 @@ int FileGDBTable::DoesGeometryIntersectsFilterEnvelope(const OGRField* psField)
     if( vymin > nFilterYMax )
         return FALSE;
     ReadVarUInt64NoCheck(pabyCur, vdx);
-    if( vxmin + vdx < nFilterXMin )
+    if( CPLUnsanitizedAdd<GUIntBig>(vxmin, vdx) < nFilterXMin )
         return FALSE;
     ReadVarUInt64NoCheck(pabyCur, vdy);
-    return vymin + vdy >= nFilterYMin;
+    return CPLUnsanitizedAdd<GUIntBig>(vymin, vdy) >= nFilterYMin;
 }
 
 /************************************************************************/
@@ -2723,15 +2728,15 @@ OGRGeometry* FileGDBOGRGeometryConverterImpl::GetAsGeometry(const OGRField* psFi
             ReadVarUInt64NoCheck(pabyCur, y);
 
             const double dfX =
-                (x - 1) / poGeomField->GetXYScale() + poGeomField->GetXOrigin();
+                CPLUnsanitizedAdd<GUIntBig>(x, -1) / poGeomField->GetXYScale() + poGeomField->GetXOrigin();
             const double dfY =
-                (y - 1) / poGeomField->GetXYScale() + poGeomField->GetYOrigin();
+                CPLUnsanitizedAdd<GUIntBig>(y, -1) / poGeomField->GetXYScale() + poGeomField->GetYOrigin();
             double dfZ = 0.0;
             if( bHasZ )
             {
                 ReadVarUInt64NoCheck(pabyCur, z);
                 const double dfZScale = SanitizeScale(poGeomField->GetZScale());
-                dfZ = (z - 1) / dfZScale + poGeomField->GetZOrigin();
+                dfZ = CPLUnsanitizedAdd<GUIntBig>(z, -1) / dfZScale + poGeomField->GetZOrigin();
                 if( bHasM )
                 {
                     GUIntBig m = 0;
@@ -2739,7 +2744,7 @@ OGRGeometry* FileGDBOGRGeometryConverterImpl::GetAsGeometry(const OGRField* psFi
                     const double dfMScale =
                         SanitizeScale(poGeomField->GetMScale());
                     const double dfM =
-                        (m - 1) / dfMScale + poGeomField->GetMOrigin();
+                        CPLUnsanitizedAdd<GUIntBig>(m, -1) / dfMScale + poGeomField->GetMOrigin();
                     return new OGRPoint(dfX, dfY, dfZ, dfM);
                 }
                 return new OGRPoint(dfX, dfY, dfZ);
@@ -2751,7 +2756,7 @@ OGRGeometry* FileGDBOGRGeometryConverterImpl::GetAsGeometry(const OGRField* psFi
                 ReadVarUInt64NoCheck(pabyCur, m);
                 const double dfMScale = SanitizeScale(poGeomField->GetMScale());
                 const double dfM =
-                    (m - 1) / dfMScale + poGeomField->GetMOrigin();
+                    CPLUnsanitizedAdd<GUIntBig>(m, -1) / dfMScale + poGeomField->GetMOrigin();
                 poPoint->setM(dfM);
                 return poPoint;
             }
@@ -3230,6 +3235,8 @@ OGRGeometry* FileGDBOGRGeometryConverterImpl::GetAsGeometry(const OGRField* psFi
             panPartStart[0] = 0;
             for( i = 1; i < nParts; ++i )
                 panPartStart[i] = panPartStart[i-1] + panPointCount[i-1];
+            // (CID 1404102)
+            // coverity[overrun-buffer-arg]
             OGRGeometry* poRet = OGRCreateFromMultiPatch(
                                             static_cast<int>(nParts),
                                             panPartStart,

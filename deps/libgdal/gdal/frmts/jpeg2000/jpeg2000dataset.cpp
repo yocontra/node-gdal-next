@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2002, Andrey Kiselev <dron@ak4719.spb.edu>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -44,7 +44,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: jpeg2000dataset.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: jpeg2000dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 // XXX: Part of code below extracted from the JasPer internal headers and
 // must be in sync with JasPer version (this one works with JasPer 1.900.1)
@@ -189,7 +189,7 @@ int jp2_encode_uuid(jas_image_t *image, jas_stream_t *out,
 /* ==================================================================== */
 /************************************************************************/
 
-class JPEG2000Dataset : public GDALJP2AbstractDataset
+class JPEG2000Dataset final: public GDALJP2AbstractDataset
 {
     friend class JPEG2000RasterBand;
 
@@ -215,7 +215,7 @@ class JPEG2000Dataset : public GDALJP2AbstractDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class JPEG2000RasterBand : public GDALPamRasterBand
+class JPEG2000RasterBand final: public GDALPamRasterBand
 {
     friend class JPEG2000Dataset;
 
@@ -1393,7 +1393,7 @@ void GDALRegister_JPEG2000()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "JPEG-2000 part 1 (ISO/IEC 15444-1), "
                                "based on Jasper library" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_jpeg2000.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/jpeg2000.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Int32 UInt32" );
     poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/jp2" );

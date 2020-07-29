@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implementation of OGRTopoJSONReader class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include <json.h>  // JSON-C
 #include <ogr_api.h>
 
-CPL_CVSID("$Id: ogrtopojsonreader.cpp b471cd08d02f7f05d658fe7da57f30f1b29d3b52 2020-01-07 22:30:27 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrtopojsonreader.cpp 3a7914cee018d5b65dc1639368edbd8faac2543d 2020-01-07 22:30:27 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRTopoJSONReader()                         */

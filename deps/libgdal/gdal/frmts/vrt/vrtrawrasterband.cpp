@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: vrtrawrasterband.cpp 977f2da59e46852f49534361860bb92f9c6ad1fd 2019-03-14 21:46:14 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtrawrasterband.cpp ef49c00611235df0c1ce4f51344f00567a668661 2020-02-13 11:08:39 +0100 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -189,7 +189,7 @@ CPLErr VRTRawRasterBand::SetRawLink( const char *pszFilename,
 {
     ClearRawLink();
 
-    reinterpret_cast<VRTDataset *>( poDS )->SetNeedsFlush();
+    static_cast<VRTDataset *>( poDS )->SetNeedsFlush();
 
 /* -------------------------------------------------------------------- */
 /*      Prepare filename.                                               */
@@ -222,7 +222,7 @@ CPLErr VRTRawRasterBand::SetRawLink( const char *pszFilename,
         fp = CPLOpenShared( pszExpandedFilename, "rb", TRUE );
 
     if( fp == nullptr
-        && reinterpret_cast<VRTDataset *>( poDS )->GetAccess() == GA_Update )
+        && static_cast<VRTDataset *>( poDS )->GetAccess() == GA_Update )
     {
         fp = CPLOpenShared( pszExpandedFilename, "wb+", TRUE );
     }
@@ -257,18 +257,25 @@ CPLErr VRTRawRasterBand::SetRawLink( const char *pszFilename,
 /* -------------------------------------------------------------------- */
 /*      Work out if we are in native mode or not.                       */
 /* -------------------------------------------------------------------- */
-    bool bNative = true;
+    RawRasterBand::ByteOrder eByteOrder =
+#if CPL_IS_LSB
+        RawRasterBand::ByteOrder::ORDER_LITTLE_ENDIAN;
+#else
+        RawRasterBand::ByteOrder::ORDER_BIG_ENDIAN;
+#endif
 
     if( pszByteOrder != nullptr )
     {
         if( EQUAL(pszByteOrder,"LSB") )
-            bNative = CPL_TO_BOOL(CPL_IS_LSB);
+            eByteOrder = RawRasterBand::ByteOrder::ORDER_LITTLE_ENDIAN;
         else if( EQUAL(pszByteOrder,"MSB") )
-            bNative = !CPL_IS_LSB;
+            eByteOrder = RawRasterBand::ByteOrder::ORDER_BIG_ENDIAN;
+        else if( EQUAL(pszByteOrder,"VAX") )
+            eByteOrder = RawRasterBand::ByteOrder::ORDER_VAX;
         else
         {
             CPLError( CE_Failure, CPLE_AppDefined,
-                      "Illegal ByteOrder value '%s', should be LSB or MSB.",
+                      "Illegal ByteOrder value '%s', should be LSB, MSB or VAX.",
                       pszByteOrder );
             CPLCloseShared(fp);
             return CE_Failure;
@@ -281,7 +288,7 @@ CPLErr VRTRawRasterBand::SetRawLink( const char *pszFilename,
     m_poRawRaster = new RawRasterBand( reinterpret_cast<VSILFILE*>(fp),
                                        nImageOffset, nPixelOffset,
                                        nLineOffset, GetRasterDataType(),
-                                       bNative, GetXSize(), GetYSize(),
+                                       eByteOrder, GetXSize(), GetYSize(),
                                        RawRasterBand::OwnFP::NO );
 
 /* -------------------------------------------------------------------- */
@@ -314,6 +321,27 @@ void VRTRawRasterBand::ClearRawLink()
     CPLFree( m_pszSourceFilename );
     m_pszSourceFilename = nullptr;
 }
+
+/************************************************************************/
+/*                            GetVirtualMemAuto()                       */
+/************************************************************************/
+
+CPLVirtualMem * VRTRawRasterBand::GetVirtualMemAuto( GDALRWFlag eRWFlag,
+                                                     int *pnPixelSpace,
+                                                     GIntBig *pnLineSpace,
+                                                     char **papszOptions )
+
+{
+    // check the pointer to RawRasterBand
+    if( m_poRawRaster == nullptr )
+    {
+        // use the super class method
+        return VRTRasterBand::GetVirtualMemAuto(eRWFlag, pnPixelSpace, pnLineSpace, papszOptions);
+    }
+    // if available, use the RawRasterBand method (use mmap if available)
+    return m_poRawRaster->GetVirtualMemAuto(eRWFlag, pnPixelSpace, pnLineSpace, papszOptions);
+}
+
 
 /************************************************************************/
 /*                              XMLInit()                               */
@@ -461,14 +489,18 @@ CPLXMLNode *VRTRawRasterBand::SerializeToXML( const char *pszVRTPath )
                                  CPLSPrintf( "%d",
                                              m_poRawRaster->GetLineOffset()) );
 
-#if CPL_IS_LSB == 1
-    if( m_poRawRaster->GetNativeOrder() )
-#else
-    if( !m_poRawRaster->GetNativeOrder() )
-#endif
-        CPLCreateXMLElementAndValue( psTree, "ByteOrder", "LSB" );
-    else
-        CPLCreateXMLElementAndValue( psTree, "ByteOrder", "MSB" );
+    switch( m_poRawRaster->GetByteOrder() )
+    {
+        case RawRasterBand::ByteOrder::ORDER_LITTLE_ENDIAN:
+            CPLCreateXMLElementAndValue( psTree, "ByteOrder", "LSB" );
+            break;
+        case RawRasterBand::ByteOrder::ORDER_BIG_ENDIAN:
+            CPLCreateXMLElementAndValue( psTree, "ByteOrder", "MSB" );
+            break;
+        case RawRasterBand::ByteOrder::ORDER_VAX:
+            CPLCreateXMLElementAndValue( psTree, "ByteOrder", "VAX" );
+            break;
+    }
 
     return psTree;
 }
@@ -502,7 +534,7 @@ void VRTRawRasterBand::GetFileList( char*** ppapszFileList, int *pnSize,
     if (*pnSize + 1 >= *pnMaxSize)
     {
         *pnMaxSize = 2 + 2 * (*pnMaxSize);
-        *ppapszFileList = reinterpret_cast<char **>(
+        *ppapszFileList = static_cast<char **>(
             CPLRealloc( *ppapszFileList, sizeof(char*) * (*pnMaxSize) ) );
     }
 

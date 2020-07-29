@@ -10,7 +10,7 @@
 *
 ******************************************************************************
 * Copyright( c ) 2006, Ivan Lucena
- * Copyright (c) 2007-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2012, Even Rouault <even dot rouault at spatialys.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files( the "Software" ),
@@ -47,7 +47,7 @@
 
 #include <cmath>
 
-CPL_CVSID( "$Id: IdrisiDataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $" )
+CPL_CVSID( "$Id: IdrisiDataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $" )
 
 #ifdef WIN32
 #  define PATHDELIM       '\\'
@@ -496,7 +496,7 @@ class IdrisiRasterBand;
 //        Idrisi GDALDataset
 //  ----------------------------------------------------------------------------
 
-class IdrisiDataset : public GDALPamDataset
+class IdrisiDataset final: public GDALPamDataset
 {
     friend class IdrisiRasterBand;
 
@@ -553,7 +553,7 @@ public:
 //        Idrisi GDALPamRasterBand
 //  ----------------------------------------------------------------------------
 
-class IdrisiRasterBand : public GDALPamRasterBand
+class IdrisiRasterBand final: public GDALPamRasterBand
 {
     friend class IdrisiDataset;
 
@@ -3429,7 +3429,7 @@ void GDALRegister_IDRISI()
     poDriver->SetDescription( "RST" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, rstVERSION );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_Idrisi.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/Idrisi.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, extRST );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 Float32" );

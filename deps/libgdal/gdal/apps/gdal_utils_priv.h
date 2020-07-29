@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_utils_priv.h 9d450e52444f125a99f6a38c1e6ee820bc9b4ce2 2019-01-14 20:23:45 +0100 Even Rouault $
+ * $Id: gdal_utils_priv.h 9598f66a2ef90ef40fc3274e54d5d723ad597b0f 2019-07-13 00:03:57 +0200 Even Rouault $
  *
  * Project:  GDAL Utilities
  * Purpose:  GDAL Utilities Private Declarations.
@@ -136,6 +136,24 @@ struct GDALBuildVRTOptionsForBinary
     char* pszDstFilename;
     int bQuiet;
     int bOverwrite;
+};
+
+struct GDALMultiDimInfoOptionsForBinary
+{
+    /* Filename to open. */
+    char* pszFilename;
+
+    /* Open options. */
+    char** papszOpenOptions;
+};
+
+struct GDALMultiDimTranslateOptionsForBinary
+{
+    char* pszSource;
+    char* pszDest;
+    char* pszFormat;
+    int   bQuiet;
+    int   bUpdate;
 };
 
 CPL_C_END

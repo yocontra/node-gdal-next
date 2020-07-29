@@ -35,7 +35,7 @@
 #include <map>
 #include <sstream>
 
-CPL_CVSID("$Id: ogrwasplayer.cpp 1bfa8b811d4feaa8c65c9a10076b95c17e1db5cb 2019-05-15 07:42:43 -0500 Even Rouault $")
+CPL_CVSID("$Id: ogrwasplayer.cpp f38c60bc8645c4d6273ff66e80afb41325e1b6c7 2019-05-15 07:42:43 -0500 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRWAsPLayer()                             */

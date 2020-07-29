@@ -2,10 +2,10 @@
  *
  * Project:  XLSX Translator
  * Purpose:  Implements OGRXLSXDataSource class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2012-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrxlsxdatasource.cpp 31e51bb8bc6e0c62671c24ffa2483f574d8f90bd 2019-12-12 23:40:14 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrxlsxdatasource.cpp dd7780434ad6b6fcf185468f679c8ba1671926ee 2020-06-21 19:26:17 +0200 Even Rouault $")
 
 namespace OGRXLSX {
 
@@ -528,15 +528,19 @@ static void SetField(OGRFeature* poFeature,
         strcmp(pszCellType, "datetime_ms") == 0)
     {
         struct tm sTm;
-        double dfNumberOfDaysSince1900 = CPLAtof(pszValue);
-        GIntBig nUnixTime = (GIntBig)((dfNumberOfDaysSince1900 -
-                                       NUMBER_OF_DAYS_BETWEEN_1900_AND_1970 )*
-                                                NUMBER_OF_SECONDS_PER_DAY);
+        const double dfNumberOfDaysSince1900 = CPLAtof(pszValue);
+        if( !(std::fabs(dfNumberOfDaysSince1900) < 365.0 * 10000) )
+            return;
+        double dfNumberOfSecsSince1900 = dfNumberOfDaysSince1900 * NUMBER_OF_SECONDS_PER_DAY;
+        if( std::fabs(dfNumberOfSecsSince1900 - std::round(dfNumberOfSecsSince1900)) < 1e-3 )
+            dfNumberOfSecsSince1900 = std::round(dfNumberOfSecsSince1900);
+        const GIntBig nUnixTime = static_cast<GIntBig>(dfNumberOfSecsSince1900) -
+                static_cast<GIntBig>(NUMBER_OF_DAYS_BETWEEN_1900_AND_1970) * NUMBER_OF_SECONDS_PER_DAY;
         CPLUnixTimeToYMDHMS(nUnixTime, &sTm);
 
         if (eType == OFTTime || eType == OFTDate || eType == OFTDateTime)
         {
-            double fFracSec = fmod(fmod(dfNumberOfDaysSince1900,1) * 3600 * 24, 1);
+            double fFracSec = fmod(dfNumberOfSecsSince1900, 1);
             poFeature->SetField(i, sTm.tm_year + 1900, sTm.tm_mon + 1, sTm.tm_mday,
                                 sTm.tm_hour, sTm.tm_min,
                                 static_cast<float>(sTm.tm_sec + fFracSec), 0 );
@@ -553,7 +557,7 @@ static void SetField(OGRFeature* poFeature,
         }
         else /* if (strcmp(pszCellType, "datetime") == 0) */
         {
-            double fFracSec = fmod(fmod(dfNumberOfDaysSince1900,1) * 3600 * 24, 1);
+            double fFracSec = fmod(dfNumberOfSecsSince1900, 1);
             poFeature->SetField(i,
                                 sTm.tm_year + 1900, sTm.tm_mon + 1, sTm.tm_mday,
                                 sTm.tm_hour, sTm.tm_min,
@@ -1420,29 +1424,31 @@ void OGRXLSXDataSource::startElementWBCbk(const char *pszNameIn,
         const char* pszSheetName = GetAttributeValue(ppszAttr, "name", nullptr);
         const char* pszId = GetAttributeValue(ppszAttr, "r:id", nullptr);
         if (pszSheetName && pszId &&
-            oMapRelsIdToTarget.find(pszId) != oMapRelsIdToTarget.end() )
+            oMapRelsIdToTarget.find(pszId) != oMapRelsIdToTarget.end() &&
+            m_oSetSheetId.find(pszId) == m_oSetSheetId.end() )
         {
-            papoLayers = (OGRLayer**)CPLRealloc(papoLayers, (nLayers + 1) * sizeof(OGRLayer*));
+            const auto& osTarget(oMapRelsIdToTarget[pszId]);
+            m_oSetSheetId.insert(pszId);
             CPLString osFilename;
-            if( oMapRelsIdToTarget[pszId].empty() )
+            if( osTarget.empty() )
                 return;
-            if( oMapRelsIdToTarget[pszId][0] == '/' )
+            if( osTarget[0] == '/' )
             {
                 int nIdx = 1;
-                while( oMapRelsIdToTarget[pszId][nIdx] == '/' )
+                while( osTarget[nIdx] == '/' )
                     nIdx ++;
-                if( oMapRelsIdToTarget[pszId][nIdx] == '\0' )
+                if( osTarget[nIdx] == '\0' )
                     return;
                 // Is it an "absolute" path ?
-                osFilename = osPrefixedFilename +
-                             oMapRelsIdToTarget[pszId];
+                osFilename = osPrefixedFilename + osTarget;
             }
             else
             {
                 // or relative to the /xl subdirectory
                 osFilename = osPrefixedFilename +
-                             CPLString("/xl/") + oMapRelsIdToTarget[pszId];
+                             CPLString("/xl/") + osTarget;
             }
+            papoLayers = (OGRLayer**)CPLRealloc(papoLayers, (nLayers + 1) * sizeof(OGRLayer*));
             papoLayers[nLayers++] = new OGRXLSXLayer(this, osFilename,
                 pszSheetName);
         }

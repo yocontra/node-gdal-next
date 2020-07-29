@@ -39,7 +39,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrcurvepolygon.cpp ba2ef4045f82fd2260f1732e9e46a927277ac93d 2018-05-06 19:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcurvepolygon.cpp c7d51c5ead794772b42f3c58c394bfff6045f8d6 2019-08-22 09:59:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRCurvePolygon()                         */
@@ -535,12 +535,9 @@ OGRErr OGRCurvePolygon::importFromWkt( const char ** ppszInput )
 /*                            exportToWkt()                             */
 /************************************************************************/
 
-OGRErr
-OGRCurvePolygon::exportToWkt( char ** ppszDstText,
-                              OGRwkbVariant /* eWkbVariant */ ) const
-
+std::string OGRCurvePolygon::exportToWkt(const OGRWktOptions& opts, OGRErr *err) const
 {
-    return oCC.exportToWkt(this, ppszDstText);
+    return oCC.exportToWkt(this, opts, err);
 }
 
 /************************************************************************/

@@ -15,8 +15,8 @@ using namespace v8;
 using namespace node;
 
 class FastBuffer {
-public:
-	static v8::Local<v8::Value> New(unsigned char * data, int length);
+    public:
+  static v8::Local<v8::Value> New(unsigned char *data, int length);
 };
 
 #endif

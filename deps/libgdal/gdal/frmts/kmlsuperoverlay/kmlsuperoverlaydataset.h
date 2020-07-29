@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: kmlsuperoverlaydataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: kmlsuperoverlaydataset.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  KmlSuperOverlay
  * Purpose:  Implements write support for KML superoverlay - KMZ.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, SPADAC Inc. <harsh.govind@spadac.com>
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

@@ -7,7 +7,7 @@
  *
  **********************************************************************
  * Copyright (c) 1998, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: gdalrasterblock.cpp c590dcec36eb6dcd7c5451623b859e7227475b44 2019-11-13 16:36:03 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterblock.cpp 2cef454ab06723a32379690b46581a40eb2e5af2 2019-11-13 16:36:03 +0100 Even Rouault $")
 
 static bool bCacheMaxInitialized = false;
 // Will later be overridden by the default 5% if GDAL_CACHEMAX not defined.
@@ -259,7 +259,7 @@ GIntBig CPL_STDCALL GDALGetCacheMax64()
                 // nUsablePhysicalRAM ) and CPLAtof(pszCacheMax). Example values for
                 // operands: CPLAtof( pszCacheMax ) = 2251799813685248,
                 // static_cast<double>(nUsablePhysicalRAM) = -9223372036854775808."
-                // coverity[overflow]
+                // coverity[overflow,tainted_data]
                 double dfCacheMax =
                     static_cast<double>(nUsablePhysicalRAM) *
                     CPLAtof(pszCacheMax) / 100.0;

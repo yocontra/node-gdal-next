@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: fme2ogr.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: fme2ogr.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
  *
  * Project:  FMEObjects Translator
  * Purpose:  Declarations for translating IFMEFeatures to OGRFeatures.
@@ -48,7 +48,7 @@ void CPLFMEError( IFMESession *, const char *, ... );
 /*                             OGRFMELayer                              */
 /************************************************************************/
 
-class OGRFMELayer : public OGRLayer
+class OGRFMELayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -78,7 +78,7 @@ class OGRFMELayer : public OGRLayer
 /*                          OGRFMELayerCached                           */
 /************************************************************************/
 
-class OGRFMELayerCached : public OGRFMELayer
+class OGRFMELayerCached final: public OGRFMELayer
 {
   private:
     int                 nPreviousFeature;
@@ -114,7 +114,7 @@ class OGRFMELayerCached : public OGRFMELayer
 /*                            OGRFMELayerDB                             */
 /************************************************************************/
 
-class OGRFMELayerDB : public OGRFMELayer
+class OGRFMELayerDB final: public OGRFMELayer
 {
   private:
     int                 nPreviousFeature;
@@ -149,7 +149,7 @@ class OGRFMELayerDB : public OGRFMELayer
 /*                           OGRFMEDataSource                           */
 /************************************************************************/
 
-class OGRFMEDataSource : public OGRDataSource
+class OGRFMEDataSource final: public OGRDataSource
 {
     char                *pszName;          // full name, i.e. "SHAPE:D:\DATA"
     char                *pszReaderName;    // reader/driver name, i.e. "SHAPE"
@@ -219,7 +219,7 @@ class OGRFMEDataSource : public OGRDataSource
 /*                             OGRFMEDriver                             */
 /************************************************************************/
 
-class OGRFMEDriver : public OGRSFDriver
+class OGRFMEDriver final: public OGRSFDriver
 {
   public:
                 ~OGRFMEDriver();

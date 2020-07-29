@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: memdataset.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: memdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
  *
  * Project:  Memory Array Translator
  * Purpose:  Declaration of MEMDataset, and MEMRasterBand.
@@ -52,7 +52,7 @@ CPL_C_END
 
 class MEMRasterBand;
 
-class CPL_DLL MEMDataset : public GDALDataset
+class CPL_DLL MEMDataset CPL_NON_FINAL: public GDALDataset
 {
     CPL_DISALLOW_COPY_ASSIGN(MEMDataset)
 
@@ -69,6 +69,9 @@ class CPL_DLL MEMDataset : public GDALDataset
 
     int          m_nOverviewDSCount;
     GDALDataset  **m_papoOverviewDS;
+
+    struct Private;
+    std::unique_ptr<Private> m_poPrivate;
 
 #if 0
   protected:
@@ -126,17 +129,22 @@ class CPL_DLL MEMDataset : public GDALDataset
 
     virtual CPLErr          CreateMaskBand( int nFlagsIn ) override;
 
+    std::shared_ptr<GDALGroup> GetRootGroup() const override;
+
     static GDALDataset *Open( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
                                 GDALDataType eType, char ** papszParmList );
+    static GDALDataset *CreateMultiDimensional( const char * pszFilename,
+                                                CSLConstList papszRootGroupOptions,
+                                                CSLConstList papszOptions );
 };
 
 /************************************************************************/
 /*                            MEMRasterBand                             */
 /************************************************************************/
 
-class CPL_DLL MEMRasterBand : public GDALPamRasterBand
+class CPL_DLL MEMRasterBand CPL_NON_FINAL: public GDALPamRasterBand
 {
   private:
                 MEMRasterBand( GByte *pabyDataIn, GDALDataType eTypeIn,

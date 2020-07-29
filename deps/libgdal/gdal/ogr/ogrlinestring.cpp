@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: ogrlinestring.cpp b0a72128acb6b9509667ee4be06da1f28a010f42 2019-10-21 13:19:06 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlinestring.cpp ad9178b63f501e9840d86a3220c9e5100c6e3fa2 2019-10-21 13:19:06 +0200 Even Rouault $")
 
 namespace {
 
@@ -1251,44 +1251,6 @@ void OGRSimpleCurve::getPoints( OGRRawPoint * paoPointsOut,
     }
 }
 
-/************************************************************************/
-/*                          getPoints()                                 */
-/************************************************************************/
-
-/**
- * \brief Returns all points of line string.
- *
- * This method copies all points into user arrays. The user provides the
- * stride between 2 consecutive elements of the array.
- *
- * On some CPU architectures, care must be taken so that the arrays are properly
- * aligned.
- *
- * There is no SFCOM analog to this method.
- *
- * @param pabyX a buffer of at least (nXStride * nPointCount)
- * bytes, may be NULL.
- * @param nXStride the number of bytes between 2 elements of pabyX.
- * @param pabyY a buffer of at least (nYStride * nPointCount)
- * bytes, may be NULL.
- * @param nYStride the number of bytes between 2 elements of pabyY.
- * @param pabyZ a buffer of at last size (nZStride *
- * nPointCount) bytes, may be NULL.
- * @param nZStride the number of bytes between 2 elements of pabyZ.
- *
- * @since OGR 1.9.0
- */
-
-void OGRSimpleCurve::getPoints( void* pabyX, int nXStride,
-                                void* pabyY, int nYStride,
-                                void* pabyZ, int nZStride ) const
-{
-    return getPoints( pabyX, nXStride,
-                      pabyY, nYStride,
-                      pabyZ, nZStride,
-                      nullptr, 0);
-}
-
 /**
  * \brief Returns all points of line string.
  *
@@ -1867,96 +1829,37 @@ OGRErr OGRSimpleCurve::importFromWKTListOnly( const char ** ppszInput,
 /*      equivalent.  This could be made a lot more CPU efficient.       */
 /************************************************************************/
 
-OGRErr OGRSimpleCurve::exportToWkt( char ** ppszDstText,
-                                   OGRwkbVariant eWkbVariant ) const
-
+std::string OGRSimpleCurve::exportToWkt(const OGRWktOptions& opts, OGRErr *err) const
 {
-    const size_t nMaxString = static_cast<size_t>(nPointCount) * 40 * 4 + 26;
-
-/* -------------------------------------------------------------------- */
-/*      Handle special empty case.                                      */
-/* -------------------------------------------------------------------- */
+    // LINEARRING or LINESTRING or CIRCULARSTRING
+    std::string wkt = getGeometryName() + wktTypeString(opts.variant);
     if( IsEmpty() )
     {
-        CPLString osEmpty;
-        if( eWkbVariant == wkbVariantIso )
-        {
-            if( (flags & OGR_G_3D) && (flags & OGR_G_MEASURED) )
-                osEmpty.Printf("%s ZM EMPTY", getGeometryName());
-            else if( flags & OGR_G_MEASURED )
-                osEmpty.Printf("%s M EMPTY", getGeometryName());
-            else if( flags & OGR_G_3D )
-                osEmpty.Printf("%s Z EMPTY", getGeometryName());
-            else
-                osEmpty.Printf("%s EMPTY", getGeometryName());
-        }
-        else
-            osEmpty.Printf("%s EMPTY", getGeometryName());
-        *ppszDstText = CPLStrdup(osEmpty);
-        return OGRERR_NONE;
-    }
-
-/* -------------------------------------------------------------------- */
-/*      General case.                                                   */
-/* -------------------------------------------------------------------- */
-    *ppszDstText = static_cast<char *>(VSI_MALLOC_VERBOSE( nMaxString ));
-    if( *ppszDstText == nullptr )
-        return OGRERR_NOT_ENOUGH_MEMORY;
-
-    if( eWkbVariant == wkbVariantIso )
-    {
-        if( (flags & OGR_G_3D) && (flags & OGR_G_MEASURED) )
-            snprintf( *ppszDstText, nMaxString, "%s ZM (", getGeometryName() );
-        else if( flags & OGR_G_MEASURED )
-            snprintf( *ppszDstText, nMaxString, "%s M (", getGeometryName() );
-        else if( flags & OGR_G_3D )
-            snprintf( *ppszDstText, nMaxString, "%s Z (", getGeometryName() );
-        else
-            snprintf( *ppszDstText, nMaxString, "%s (", getGeometryName() );
+        wkt += "EMPTY";
     }
     else
-        snprintf( *ppszDstText, nMaxString, "%s (", getGeometryName() );
-
-    OGRBoolean hasZ = Is3D();
-    OGRBoolean hasM = IsMeasured();
-    if( eWkbVariant != wkbVariantIso )
-        hasM = FALSE;
-
-    size_t nRetLen = 0;
-
-    for( int i = 0; i < nPointCount; i++ )
     {
-        if( nMaxString <= strlen(*ppszDstText+nRetLen) + 32 + nRetLen )
+        wkt += "(";
+
+        OGRBoolean hasZ = Is3D();
+        OGRBoolean hasM =
+            (opts.variant != wkbVariantIso ? FALSE : IsMeasured());
+
+        for( int i = 0; i < nPointCount; i++ )
         {
-            CPLDebug( "OGR",
-                      "OGRSimpleCurve::exportToWkt() ... buffer overflow.\n"
-                      "nMaxString=%d, strlen(*ppszDstText) = %d, i=%d\n"
-                      "*ppszDstText = %s",
-                      static_cast<int>(nMaxString),
-                      static_cast<int>(strlen(*ppszDstText)), i, *ppszDstText );
+            if (i > 0)
+                wkt += ",";
 
-            VSIFree( *ppszDstText );
-            *ppszDstText = nullptr;
-            return OGRERR_NOT_ENOUGH_MEMORY;
+            wkt += OGRMakeWktCoordinateM(paoPoints[i].x, paoPoints[i].y,
+                                         padfZ ? padfZ[i] : 0.0,
+                                         padfM ? padfM[i] : 0.0,
+                                         hasZ, hasM, opts );
         }
-
-        if( i > 0 )
-            strcat( *ppszDstText + nRetLen, "," );
-
-        nRetLen += strlen(*ppszDstText + nRetLen);
-        OGRMakeWktCoordinateM( *ppszDstText + nRetLen,
-                               paoPoints[i].x,
-                               paoPoints[i].y,
-                               padfZ ? padfZ[i] : 0.0,
-                               padfM ? padfM[i] : 0.0,
-                               hasZ, hasM );
-
-        nRetLen += strlen(*ppszDstText + nRetLen);
+        wkt += ")";
     }
-
-    strcat( *ppszDstText+nRetLen, ")" );
-
-    return OGRERR_NONE;
+    if (err)
+        *err = OGRERR_NONE;
+    return wkt;
 }
 
 /************************************************************************/

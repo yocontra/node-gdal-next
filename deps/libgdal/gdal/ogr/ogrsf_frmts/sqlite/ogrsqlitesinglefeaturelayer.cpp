@@ -2,10 +2,10 @@
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGRSQLiteSingleFeatureLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2010-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "ogr_core.h"
 #include "ogr_feature.h"
 
-CPL_CVSID("$Id: ogrsqlitesinglefeaturelayer.cpp 722bc4c4c4f6ec3494bb2e4ee96b8742d72ac4c5 2018-02-14 22:51:15Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrsqlitesinglefeaturelayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                    OGRSQLiteSingleFeatureLayer()                     */

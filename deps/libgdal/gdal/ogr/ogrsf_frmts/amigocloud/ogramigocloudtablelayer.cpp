@@ -2,7 +2,7 @@
  *
  * Project:  AmigoCloud Translator
  * Purpose:  Implements OGRAmigoCloudTableLayer class.
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
  * Copyright (c) 2015, Victor Chernetsky, <victor at amigocloud dot com>
@@ -32,7 +32,7 @@
 #include "ogrgeojsonreader.h"
 #include <sstream>
 
-CPL_CVSID("$Id: ogramigocloudtablelayer.cpp c3b17f3db1f346b23bbab3000bd3b5e4225b7512 2019-01-03 10:26:12 -0500 alanstewart-terragotech $")
+CPL_CVSID("$Id: ogramigocloudtablelayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                    OGRAMIGOCLOUDEscapeIdentifier( )                     */
@@ -1075,7 +1075,6 @@ bool OGRAmigoCloudTableLayer::IsDatasetExists()
     if( result == nullptr )
         return false;
 
-    if( result != nullptr )
     {
         int type = json_object_get_type(result);
         if(type == json_type_object)

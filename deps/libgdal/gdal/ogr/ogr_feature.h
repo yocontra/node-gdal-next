@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_feature.h b1bcc1fb9ead43f093fa78f7126e332a51d2701a 2019-01-11 15:55:15 +0100 Even Rouault $
+ * $Id: ogr_feature.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Class for representing a whole feature, and layer schemas.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999,  Les Technologies SoftMap Inc.
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

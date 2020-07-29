@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009, Leonardo de Paula Rosa Piga
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@
 #include "ogr_gtm.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: gtmwaypointlayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gtmwaypointlayer.cpp 20cc78972442b16ab6fb2f5f4b55ddd154e81c9f 2020-06-21 00:34:40 +0200 Even Rouault $")
 
 GTMWaypointLayer::GTMWaypointLayer( const char* pszNameIn,
                                     OGRSpatialReference* poSRSIn,
@@ -154,8 +154,8 @@ void GTMWaypointLayer::WriteFeatureAttributes( OGRFeature *poFeature, float alti
                     brokendowndate.tm_min = min;
                     brokendowndate.tm_sec = sec;
                     GIntBig unixTime = CPLYMDHMSToUnixTime(&brokendowndate);
-                    if (TZFlag != 0)
-                        unixTime -= (TZFlag - 100) * 15;
+                    if (TZFlag != 0 && TZFlag != 1)
+                        unixTime -= (TZFlag - 100) * 15 * 60;
                     if (unixTime <= GTM_EPOCH || (unixTime - GTM_EPOCH) != (int)(unixTime - GTM_EPOCH))
                     {
                         CPLError(CE_Warning, CPLE_AppDefined,

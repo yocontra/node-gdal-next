@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,9 @@
 #include "sdts_al.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: sdtslib.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+#include <set>
+
+CPL_CVSID("$Id: sdtslib.cpp b45294c72549ddbba14dec8c6df485981dbed6d8 2019-10-20 13:14:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            SDTSFeature()                             */
@@ -205,7 +207,8 @@ char **SDTSScanModuleReferences( DDFModule * poModule, const char * pszFName )
     poModule->Rewind();
 
     DDFRecord *poRecord = nullptr;
-    char **papszModnList = nullptr;
+    CPLStringList aosModnList;
+    std::set<std::string> aoSetModNames;
     while( (poRecord = poModule->ReadRecord()) != nullptr )
     {
         for( int iField = 0; iField < poRecord->GetFieldCount(); iField++ )
@@ -226,8 +229,11 @@ char **SDTSScanModuleReferences( DDFModule * poModule, const char * pszFName )
                     strncpy( szName, pszModName, 4 );
                     szName[4] = '\0';
 
-                    if( CSLFindString( papszModnList, szName ) == -1 )
-                        papszModnList = CSLAddString( papszModnList, szName );
+                    if( aoSetModNames.find(szName) == aoSetModNames.end() )
+                    {
+                        aoSetModNames.insert( szName );
+                        aosModnList.AddString( szName );
+                    }
                 }
             }
         }
@@ -235,5 +241,5 @@ char **SDTSScanModuleReferences( DDFModule * poModule, const char * pszFName )
 
     poModule->Rewind();
 
-    return papszModnList;
+    return aosModnList.StealList();
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm.h c3122bfce67aa8278d0163c0d41cfe0ab05bd691 2019-03-23 21:38:44 +0100 Even Rouault $
+ * $Id: gnm.h 2854064296f013181ac011aa4f8473566a46fd4a 2019-08-15 15:36:49 +0200 Even Rouault $
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM general public declarations.
@@ -639,6 +639,10 @@ typedef enum
 
 class CPL_DLL GNMRule
 {
+    // to hopefully please Coverity Scan which complains about missing
+    // move assignment operator for performance reasons
+    GNMRule& operator==(GNMRule&&) = delete;
+
 public:
     /** Constructor */
     GNMRule();

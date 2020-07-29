@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pdfcreatefromcomposition.cpp ba54a1dbc1de680c03c302c7957063c9fb397504 2019-08-12 23:21:30 +0200 Even Rouault $
+ * $Id: pdfcreatefromcomposition.cpp 12552f346849e6fc3e97caa8c2e6b0b7823a7a46 2019-08-12 23:21:30 +0200 Even Rouault $
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.
@@ -1281,7 +1281,7 @@ bool GDALPDFComposerWriter::ExploreContent(const CPLXMLNode* psNode,
                 return false;
 #else
             CPLError(CE_Failure, CPLE_NotSupported,
-                    "PDF node not supported due to PDF read support in this GDAL build");
+                    "PDF node not supported due to missing PDF read support in this GDAL build");
             return false;
 #endif
         }

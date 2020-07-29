@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geojson.h 07b24f8cd487508a42b6ca5df2e5b96a85e9f204 2019-06-27 22:53:04 +0200 Even Rouault $
+ * $Id: ogr_geojson.h 77ae389de75448298d20c8bf9b27fbccb257bd39 2020-02-25 23:27:58 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions of OGR OGRGeoJSON driver types.
@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Mateusz Loskot
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -146,6 +146,9 @@ class OGRGeoJSONWriteLayer final: public OGRLayer
     OGRErr ICreateFeature( OGRFeature* poFeature ) override;
     OGRErr CreateField( OGRFieldDefn* poField, int bApproxOK ) override;
     int TestCapability( const char* pszCap ) override;
+    OGRErr GetExtent(OGREnvelope *psExtent, int bForce) override;
+    OGRErr GetExtent(int iGeomField, OGREnvelope *psExtent, int bForce) override
+        { return iGeomField == 0 ? OGRGeoJSONWriteLayer::GetExtent(psExtent, bForce) : OGRERR_FAILURE; }
 
   private:
     OGRGeoJSONDataSource* poDS_;

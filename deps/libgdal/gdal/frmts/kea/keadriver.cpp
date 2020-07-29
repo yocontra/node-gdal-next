@@ -30,7 +30,7 @@
 #include "gdal_frmts.h"
 #include "keadataset.h"
 
-CPL_CVSID("$Id: keadriver.cpp 80c30052d1c3c82fd6b3addde765b35eb5c10559 2019-01-04 11:59:45 +1000 Sam Gillingham $")
+CPL_CVSID("$Id: keadriver.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 // method to register this driver
 void GDALRegister_KEA()
@@ -47,7 +47,7 @@ void GDALRegister_KEA()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "KEA Image Format (.kea)" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "kea" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_kea.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/kea.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
                                "Byte Int16 UInt16 Int32 UInt32 "
                                "Float32 Float64" );

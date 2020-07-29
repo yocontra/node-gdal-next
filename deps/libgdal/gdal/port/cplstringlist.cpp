@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2011, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -41,7 +41,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cplstringlist.cpp c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cplstringlist.cpp 237cce44e47cca3290bf053bbfa153856575017e 2019-08-17 15:01:52 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           CPLStringList()                            */
@@ -120,6 +120,30 @@ CPLStringList &CPLStringList::operator=( const CPLStringList& oOther )
         // might surprise the client developer.
         MakeOurOwnCopy();
         bIsSorted = oOther.bIsSorted;
+    }
+
+    return *this;
+}
+
+/************************************************************************/
+/*                             operator=()                              */
+/************************************************************************/
+
+CPLStringList &CPLStringList::operator=( CPLStringList&& oOther )
+{
+    if( this != &oOther )
+    {
+        Clear();
+        papszList = oOther.papszList;
+        oOther.papszList = nullptr;
+        nCount = oOther.nCount;
+        oOther.nCount = 0;
+        nAllocation = oOther.nAllocation;
+        oOther.nAllocation = 0;
+        bOwnList = oOther.bOwnList;
+        oOther.bOwnList = false;
+        bIsSorted = oOther.bIsSorted;
+        oOther.bIsSorted = true;
     }
 
     return *this;

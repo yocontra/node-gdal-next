@@ -51,7 +51,7 @@
 // Limit types to practical use cases.
 #define LIMIT_TYPES 1
 
-CPL_CVSID("$Id: gdalpansharpen.cpp 850a0ae6beb0f39f01b5a44e136f0eebf99a421b 2019-03-24 20:29:56 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalpansharpen.cpp 685b96644b37dcd526ccb68cbb763f67a4108800 2020-03-20 17:27:19 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALCreatePansharpenOptions()                    */
@@ -325,17 +325,22 @@ GDALPansharpenOperation::Initialize( const GDALPansharpenOptions* psOptionsIn )
             for( int i = 0; i < psOptions->nInputSpectralBands; i++ )
             {
                 GDALRasterBand* poSrcBand = aMSBands[i];
+                int iVRTBand;
                 if( anInputBands.empty() || i == 0 )
                 {
                     poVDS = new VRTDataset(poSrcBand->GetXSize(), poSrcBand->GetYSize());
                     aVDS.push_back(poVDS);
+                    iVRTBand = 1;
                 }
-                if( !anInputBands.empty() )
+                else
+                {
                     anInputBands[i] = i + 1;
+                    iVRTBand = i + 1;
+                }
                 poVDS->AddBand(poSrcBand->GetRasterDataType(), nullptr);
                 VRTSourcedRasterBand* poVRTBand =
                     dynamic_cast<VRTSourcedRasterBand*>(
-                        poVDS->GetRasterBand(i + 1));
+                        poVDS->GetRasterBand(iVRTBand));
                 if( poVRTBand == nullptr )
                     return CE_Failure;
                 aMSBands[i] = poVRTBand;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_utils.h dc3819d387764593c0fb5a5c4d02c21a848a4c9d 2018-04-12 18:07:28 +0200 Even Rouault $
+ * $Id: gdal_utils.h 9598f66a2ef90ef40fc3274e54d5d723ad597b0f 2019-07-13 00:03:57 +0200 Even Rouault $
  *
  * Project:  GDAL Utilities
  * Purpose:  GDAL Utilities Public Declarations.
@@ -217,6 +217,40 @@ void CPL_DLL GDALBuildVRTOptionsSetProgress( GDALBuildVRTOptions *psOptions,
 GDALDatasetH CPL_DLL GDALBuildVRT( const char *pszDest,
                                    int nSrcCount, GDALDatasetH *pahSrcDS, const char* const* papszSrcDSNames,
                                    const GDALBuildVRTOptions *psOptions, int *pbUsageError );
+
+
+/*! Options for GDALMultiDimInfo(). Opaque type */
+typedef struct GDALMultiDimInfoOptions GDALMultiDimInfoOptions;
+
+/** Opaque type */
+typedef struct GDALMultiDimInfoOptionsForBinary GDALMultiDimInfoOptionsForBinary;
+
+GDALMultiDimInfoOptions CPL_DLL *GDALMultiDimInfoOptionsNew(char** papszArgv, GDALMultiDimInfoOptionsForBinary* psOptionsForBinary);
+
+void CPL_DLL GDALMultiDimInfoOptionsFree( GDALMultiDimInfoOptions *psOptions );
+
+char CPL_DLL *GDALMultiDimInfo( GDALDatasetH hDataset, const GDALMultiDimInfoOptions *psOptions );
+
+
+/*! Options for GDALMultiDimTranslate(). Opaque type */
+typedef struct GDALMultiDimTranslateOptions GDALMultiDimTranslateOptions;
+
+/** Opaque type */
+typedef struct GDALMultiDimTranslateOptionsForBinary GDALMultiDimTranslateOptionsForBinary;
+
+GDALMultiDimTranslateOptions CPL_DLL *GDALMultiDimTranslateOptionsNew(char** papszArgv, GDALMultiDimTranslateOptionsForBinary* psOptionsForBinary);
+
+void CPL_DLL GDALMultiDimTranslateOptionsFree( GDALMultiDimTranslateOptions *psOptions );
+
+void CPL_DLL GDALMultiDimTranslateOptionsSetProgress( GDALMultiDimTranslateOptions *psOptions,
+                                              GDALProgressFunc pfnProgress,
+                                              void *pProgressData );
+
+GDALDatasetH CPL_DLL GDALMultiDimTranslate( const char* pszDest,
+                                            GDALDatasetH hDstDataset,
+                                            int nSrcCount, GDALDatasetH *pahSrcDS,
+                                            const GDALMultiDimTranslateOptions *psOptions,
+                                            int *pbUsageError );
 
 CPL_C_END
 

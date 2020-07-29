@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999,  Les Technologies SoftMap Inc.
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -57,10 +57,7 @@
 #include "shapefil.h"
 #include "shp_vsi.h"
 
-CPL_CVSID("$Id: ogrshapelayer.cpp 1d78f57b1bf38a9021500e98ea929ef982c7e0c0 2019-12-16 12:00:15 +0100 Even Rouault $")
-
-static const char UNSUPPORTED_OP_READ_ONLY[] =
-    "%s : unsupported operation on a read-only datasource.";
+CPL_CVSID("$Id: ogrshapelayer.cpp d49b121dc5f7143e85dd0ef747e6ac666b0e8f46 2020-02-11 15:51:48 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRShapeLayer()                            */
@@ -180,6 +177,7 @@ OGRShapeLayer::OGRShapeLayer( OGRShapeDataSource* poDSIn,
             osEncoding = "";
         }
     }
+    SetMetadataItem("SOURCE_ENCODING", osEncoding, "SHAPEFILE");
 
     poFeatureDefn = SHPReadOGRFeatureDefn(
         CPLGetBasename(pszFullName),
@@ -342,6 +340,115 @@ void OGRShapeLayer::SetWriteDBFEOFChar( bool b )
 /*                          ConvertCodePage()                           */
 /************************************************************************/
 
+static CPLString GetEncodingFromLDIDNumber(int nLDID)
+{
+    int nCP = -1;  // Windows code page.
+
+    // http://www.autopark.ru/ASBProgrammerGuide/DBFSTRUC.HTM
+    switch( nLDID )
+    {
+        case 1: nCP = 437;      break;
+        case 2: nCP = 850;      break;
+        case 3: nCP = 1252;     break;
+        case 4: nCP = 10000;    break;
+        case 8: nCP = 865;      break;
+        case 10: nCP = 850;     break;
+        case 11: nCP = 437;     break;
+        case 13: nCP = 437;     break;
+        case 14: nCP = 850;     break;
+        case 15: nCP = 437;     break;
+        case 16: nCP = 850;     break;
+        case 17: nCP = 437;     break;
+        case 18: nCP = 850;     break;
+        case 19: nCP = 932;     break;
+        case 20: nCP = 850;     break;
+        case 21: nCP = 437;     break;
+        case 22: nCP = 850;     break;
+        case 23: nCP = 865;     break;
+        case 24: nCP = 437;     break;
+        case 25: nCP = 437;     break;
+        case 26: nCP = 850;     break;
+        case 27: nCP = 437;     break;
+        case 28: nCP = 863;     break;
+        case 29: nCP = 850;     break;
+        case 31: nCP = 852;     break;
+        case 34: nCP = 852;     break;
+        case 35: nCP = 852;     break;
+        case 36: nCP = 860;     break;
+        case 37: nCP = 850;     break;
+        case 38: nCP = 866;     break;
+        case 55: nCP = 850;     break;
+        case 64: nCP = 852;     break;
+        case 77: nCP = 936;     break;
+        case 78: nCP = 949;     break;
+        case 79: nCP = 950;     break;
+        case 80: nCP = 874;     break;
+        case 87: return CPL_ENC_ISO8859_1;
+        case 88: nCP = 1252;     break;
+        case 89: nCP = 1252;     break;
+        case 100: nCP = 852;     break;
+        case 101: nCP = 866;     break;
+        case 102: nCP = 865;     break;
+        case 103: nCP = 861;     break;
+        case 104: nCP = 895;     break;
+        case 105: nCP = 620;     break;
+        case 106: nCP = 737;     break;
+        case 107: nCP = 857;     break;
+        case 108: nCP = 863;     break;
+        case 120: nCP = 950;     break;
+        case 121: nCP = 949;     break;
+        case 122: nCP = 936;     break;
+        case 123: nCP = 932;     break;
+        case 124: nCP = 874;     break;
+        case 134: nCP = 737;     break;
+        case 135: nCP = 852;     break;
+        case 136: nCP = 857;     break;
+        case 150: nCP = 10007;   break;
+        case 151: nCP = 10029;   break;
+        case 200: nCP = 1250;    break;
+        case 201: nCP = 1251;    break;
+        case 202: nCP = 1254;    break;
+        case 203: nCP = 1253;    break;
+        case 204: nCP = 1257;    break;
+        default: break;
+    }
+
+    if( nCP < 0 )
+        return CPLString();
+    return CPLString().Printf("CP%d", nCP);
+}
+
+static CPLString GetEncodingFromCPG( const char* pszCPG )
+{
+    // see https://support.esri.com/en/technical-article/000013192
+    CPLString osEncodingFromCPG;
+    const int nCPG = atoi(pszCPG);
+    if( (nCPG >= 437 && nCPG <= 950)
+        || (nCPG >= 1250 && nCPG <= 1258) )
+    {
+        osEncodingFromCPG.Printf( "CP%d", nCPG );
+    }
+    else if( STARTS_WITH_CI(pszCPG, "8859") )
+    {
+        if( pszCPG[4] == '-' )
+            osEncodingFromCPG.Printf( "ISO-8859-%s", pszCPG + 5 );
+        else
+            osEncodingFromCPG.Printf( "ISO-8859-%s", pszCPG + 4 );
+    }
+    else if( STARTS_WITH_CI(pszCPG, "UTF-8") ||
+             STARTS_WITH_CI(pszCPG, "UTF8") )
+        osEncodingFromCPG =  CPL_ENC_UTF8;
+    else if( STARTS_WITH_CI(pszCPG, "ANSI 1251") )
+        osEncodingFromCPG = "CP1251";
+    else
+    {
+        // Try just using the CPG value directly.  Works for stuff like Big5.
+        osEncodingFromCPG = pszCPG;
+    }
+    return osEncodingFromCPG;
+}
+
+
 CPLString OGRShapeLayer::ConvertCodePage( const char *pszCodePage )
 
 {
@@ -350,110 +457,40 @@ CPLString OGRShapeLayer::ConvertCodePage( const char *pszCodePage )
     if( pszCodePage == nullptr )
         return l_osEncoding;
 
-    if( STARTS_WITH_CI(pszCodePage, "LDID/") )
+    CPLString osEncodingFromLDID;
+    if( hDBF->iLanguageDriver != 0 )
     {
-        int nCP = -1;  // Windows code page.
+        SetMetadataItem("LDID_VALUE",
+                        CPLSPrintf("%d", hDBF->iLanguageDriver),
+                        "SHAPEFILE");
 
-        // http://www.autopark.ru/ASBProgrammerGuide/DBFSTRUC.HTM
-        switch( atoi(pszCodePage+5) )
-        {
-          case 1: nCP = 437;      break;
-          case 2: nCP = 850;      break;
-          case 3: nCP = 1252;     break;
-          case 4: nCP = 10000;    break;
-          case 8: nCP = 865;      break;
-          case 10: nCP = 850;     break;
-          case 11: nCP = 437;     break;
-          case 13: nCP = 437;     break;
-          case 14: nCP = 850;     break;
-          case 15: nCP = 437;     break;
-          case 16: nCP = 850;     break;
-          case 17: nCP = 437;     break;
-          case 18: nCP = 850;     break;
-          case 19: nCP = 932;     break;
-          case 20: nCP = 850;     break;
-          case 21: nCP = 437;     break;
-          case 22: nCP = 850;     break;
-          case 23: nCP = 865;     break;
-          case 24: nCP = 437;     break;
-          case 25: nCP = 437;     break;
-          case 26: nCP = 850;     break;
-          case 27: nCP = 437;     break;
-          case 28: nCP = 863;     break;
-          case 29: nCP = 850;     break;
-          case 31: nCP = 852;     break;
-          case 34: nCP = 852;     break;
-          case 35: nCP = 852;     break;
-          case 36: nCP = 860;     break;
-          case 37: nCP = 850;     break;
-          case 38: nCP = 866;     break;
-          case 55: nCP = 850;     break;
-          case 64: nCP = 852;     break;
-          case 77: nCP = 936;     break;
-          case 78: nCP = 949;     break;
-          case 79: nCP = 950;     break;
-          case 80: nCP = 874;     break;
-          case 87: return CPL_ENC_ISO8859_1;
-          case 88: nCP = 1252;     break;
-          case 89: nCP = 1252;     break;
-          case 100: nCP = 852;     break;
-          case 101: nCP = 866;     break;
-          case 102: nCP = 865;     break;
-          case 103: nCP = 861;     break;
-          case 104: nCP = 895;     break;
-          case 105: nCP = 620;     break;
-          case 106: nCP = 737;     break;
-          case 107: nCP = 857;     break;
-          case 108: nCP = 863;     break;
-          case 120: nCP = 950;     break;
-          case 121: nCP = 949;     break;
-          case 122: nCP = 936;     break;
-          case 123: nCP = 932;     break;
-          case 124: nCP = 874;     break;
-          case 134: nCP = 737;     break;
-          case 135: nCP = 852;     break;
-          case 136: nCP = 857;     break;
-          case 150: nCP = 10007;   break;
-          case 151: nCP = 10029;   break;
-          case 200: nCP = 1250;    break;
-          case 201: nCP = 1251;    break;
-          case 202: nCP = 1254;    break;
-          case 203: nCP = 1253;    break;
-          case 204: nCP = 1257;    break;
-          default: break;
-        }
-
-        if( nCP != -1 )
-        {
-            l_osEncoding.Printf( "CP%d", nCP );
-            return l_osEncoding;
-        }
+        osEncodingFromLDID = GetEncodingFromLDIDNumber(hDBF->iLanguageDriver);
+    }
+    if( !osEncodingFromLDID.empty() )
+    {
+        SetMetadataItem("ENCODING_FROM_LDID",
+                        osEncodingFromLDID.c_str(),
+                        "SHAPEFILE");
     }
 
-    // From the CPG file
-    // http://resources.arcgis.com/fr/content/kbase?fa=articleShow&d=21106
-
-    if( (atoi(pszCodePage) >= 437 && atoi(pszCodePage) <= 950)
-        || (atoi(pszCodePage) >= 1250 && atoi(pszCodePage) <= 1258) )
+    CPLString osEncodingFromCPG;
+    if( !STARTS_WITH_CI(pszCodePage, "LDID/") )
     {
-        l_osEncoding.Printf( "CP%d", atoi(pszCodePage) );
-        return l_osEncoding;
-    }
-    if( STARTS_WITH_CI(pszCodePage, "8859") )
-    {
-        if( pszCodePage[4] == '-' )
-            l_osEncoding.Printf( "ISO-8859-%s", pszCodePage + 5 );
-        else
-            l_osEncoding.Printf( "ISO-8859-%s", pszCodePage + 4 );
-        return l_osEncoding;
-    }
-    if( STARTS_WITH_CI(pszCodePage, "UTF-8") )
-        return CPL_ENC_UTF8;
-    if( STARTS_WITH_CI(pszCodePage, "ANSI 1251") )
-        return "CP1251";
+        SetMetadataItem("CPG_VALUE", pszCodePage, "SHAPEFILE");
 
-    // Try just using the CPG value directly.  Works for stuff like Big5.
-    return pszCodePage;
+        osEncodingFromCPG = GetEncodingFromCPG(pszCodePage);
+
+        if( !osEncodingFromCPG.empty() )
+            SetMetadataItem("ENCODING_FROM_CPG", osEncodingFromCPG, "SHAPEFILE");
+
+        l_osEncoding = osEncodingFromCPG;
+    }
+    else if( !osEncodingFromLDID.empty() )
+    {
+        l_osEncoding = osEncodingFromLDID;
+    }
+
+    return l_osEncoding;
 }
 
 /************************************************************************/
@@ -929,22 +966,37 @@ OGRFeature *OGRShapeLayer::GetFeature( GIntBig nFeatureId )
 }
 
 /************************************************************************/
+/*                             StartUpdate()                            */
+/************************************************************************/
+
+bool OGRShapeLayer::StartUpdate( const char* pszOperation )
+{
+    if( !poDS->UncompressIfNeeded() )
+        return false;
+
+    if( !TouchLayer() )
+        return false;
+
+    if( !bUpdateAccess )
+    {
+        CPLError( CE_Failure, CPLE_NotSupported,
+                  "%s : unsupported operation on a read-only datasource.",
+                  pszOperation);
+        return false;
+    }
+
+    return true;
+}
+
+/************************************************************************/
 /*                             ISetFeature()                             */
 /************************************************************************/
 
 OGRErr OGRShapeLayer::ISetFeature( OGRFeature *poFeature )
 
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("SetFeature") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "SetFeature");
-        return OGRERR_FAILURE;
-    }
 
     GIntBig nFID = poFeature->GetFID();
     if( nFID < 0
@@ -1003,16 +1055,8 @@ OGRErr OGRShapeLayer::ISetFeature( OGRFeature *poFeature )
 OGRErr OGRShapeLayer::DeleteFeature( GIntBig nFID )
 
 {
-    if( !TouchLayer() || nFID > INT_MAX )
+    if( !StartUpdate("DeleteFeature") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "DeleteFeature");
-        return OGRERR_FAILURE;
-    }
 
     if( nFID < 0
         || (hSHP != nullptr && nFID >= hSHP->nRecords)
@@ -1053,16 +1097,8 @@ OGRErr OGRShapeLayer::DeleteFeature( GIntBig nFID )
 OGRErr OGRShapeLayer::ICreateFeature( OGRFeature *poFeature )
 
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("CreateFeature") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "CreateFeature");
-        return OGRERR_FAILURE;
-    }
 
     if( hDBF != nullptr &&
         !VSI_SHP_WriteMoreDataOK(hDBF->fp, hDBF->nRecordLength) )
@@ -1640,8 +1676,6 @@ int OGRShapeLayer::TestCapability( const char * pszCap )
         if( hDBF == nullptr || DBFGetFieldCount( hDBF ) == 0 )
             return TRUE;
 
-        CPLClearRecodeWarningFlags();
-
         // Otherwise test that we can re-encode field names to UTF-8.
         const int nFieldCount = DBFGetFieldCount( hDBF );
         for( int i = 0; i < nFieldCount; i++ )
@@ -1652,14 +1686,7 @@ int OGRShapeLayer::TestCapability( const char * pszCap )
 
             DBFGetFieldInfo( hDBF, i, szFieldName, &nWidth, &nPrecision );
 
-            CPLErrorReset();
-            CPLPushErrorHandler(CPLQuietErrorHandler);
-            char * const pszUTF8Field =
-                CPLRecode( szFieldName, osEncoding, CPL_ENC_UTF8);
-            CPLPopErrorHandler();
-            CPLFree( pszUTF8Field );
-
-            if( CPLGetLastErrorType() != 0 )
+            if(!CPLCanRecode(szFieldName, osEncoding, CPL_ENC_UTF8))
             {
                 return FALSE;
             }
@@ -1681,17 +1708,10 @@ int OGRShapeLayer::TestCapability( const char * pszCap )
 OGRErr OGRShapeLayer::CreateField( OGRFieldDefn *poFieldDefn, int bApproxOK )
 
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("CreateField") )
         return OGRERR_FAILURE;
 
     CPLAssert( nullptr != poFieldDefn );
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY, "CreateField" );
-        return OGRERR_FAILURE;
-    }
 
     bool bDBFJustCreated = false;
     if( hDBF == nullptr )
@@ -1957,16 +1977,8 @@ OGRErr OGRShapeLayer::CreateField( OGRFieldDefn *poFieldDefn, int bApproxOK )
 
 OGRErr OGRShapeLayer::DeleteField( int iField )
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("DeleteField") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "DeleteField");
-        return OGRERR_FAILURE;
-    }
 
     if( iField < 0 || iField >= poFeatureDefn->GetFieldCount() )
     {
@@ -1993,16 +2005,8 @@ OGRErr OGRShapeLayer::DeleteField( int iField )
 
 OGRErr OGRShapeLayer::ReorderFields( int* panMap )
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("ReorderFields") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "ReorderFields");
-        return OGRERR_FAILURE;
-    }
 
     if( poFeatureDefn->GetFieldCount() == 0 )
         return OGRERR_NONE;
@@ -2026,16 +2030,8 @@ OGRErr OGRShapeLayer::ReorderFields( int* panMap )
 OGRErr OGRShapeLayer::AlterFieldDefn( int iField, OGRFieldDefn* poNewFieldDefn,
                                       int nFlagsIn )
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("AlterFieldDefn") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "AlterFieldDefn");
-        return OGRERR_FAILURE;
-    }
 
     if( iField < 0 || iField >= poFeatureDefn->GetFieldCount() )
     {
@@ -2355,7 +2351,7 @@ OGRErr OGRShapeLayer::SyncToDisk()
 OGRErr OGRShapeLayer::DropSpatialIndex()
 
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("DropSpatialIndex") )
         return OGRERR_FAILURE;
 
     if( !CheckForQIX() && !CheckForSBN() )
@@ -2423,7 +2419,7 @@ OGRErr OGRShapeLayer::DropSpatialIndex()
 OGRErr OGRShapeLayer::CreateSpatialIndex( int nMaxDepth )
 
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("CreateSpatialIndex") )
         return OGRERR_FAILURE;
 
 /* -------------------------------------------------------------------- */
@@ -2437,7 +2433,7 @@ OGRErr OGRShapeLayer::CreateSpatialIndex( int nMaxDepth )
 /* -------------------------------------------------------------------- */
 /*      Build a quadtree structure for this file.                       */
 /* -------------------------------------------------------------------- */
-    SyncToDisk();
+    OGRShapeLayer::SyncToDisk();
     SHPTree *psTree = SHPCreateTree( hSHP, 2, nMaxDepth, nullptr, nullptr );
 
     if( nullptr == psTree )
@@ -2472,15 +2468,6 @@ OGRErr OGRShapeLayer::CreateSpatialIndex( int nMaxDepth )
     CheckForQIX();
 
     return OGRERR_NONE;
-}
-
-/************************************************************************/
-/*                            CopyInPlace()                             */
-/************************************************************************/
-
-static bool CopyInPlace( VSILFILE* fpTarget, const CPLString& osSourceFilename )
-{
-    return CPL_TO_BOOL(VSIOverwriteFile(fpTarget, osSourceFilename.c_str()));
 }
 
 /************************************************************************/
@@ -2538,16 +2525,8 @@ OGRErr OGRShapeLayer::Repack()
         return OGRERR_NONE;
     }
 
-    if( !TouchLayer() )
+    if( !StartUpdate("Repack") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "Repack");
-        return OGRERR_FAILURE;
-    }
 
 /* -------------------------------------------------------------------- */
 /*      Build a list of records to be dropped.                          */
@@ -2890,7 +2869,7 @@ OGRErr OGRShapeLayer::Repack()
     {
         if( hDBF != nullptr && !oTempFileDBF.empty() )
         {
-            if( !CopyInPlace( VSI_SHP_GetVSIL(hDBF->fp), oTempFileDBF ) )
+            if( !OGRShapeDataSource::CopyInPlace( VSI_SHP_GetVSIL(hDBF->fp), oTempFileDBF ) )
             {
                 CPLError( CE_Failure, CPLE_FileIO,
                         "An error occurred while copying the content of %s on top of %s. "
@@ -2919,7 +2898,7 @@ OGRErr OGRShapeLayer::Repack()
 
         if( hSHP != nullptr && !oTempFileSHP.empty() )
         {
-            if( !CopyInPlace( VSI_SHP_GetVSIL(hSHP->fpSHP), oTempFileSHP ) )
+            if( !OGRShapeDataSource::CopyInPlace( VSI_SHP_GetVSIL(hSHP->fpSHP), oTempFileSHP ) )
             {
                 CPLError( CE_Failure, CPLE_FileIO,
                         "An error occurred while copying the content of %s on top of %s. "
@@ -2941,7 +2920,7 @@ OGRErr OGRShapeLayer::Repack()
 
                 return OGRERR_FAILURE;
             }
-            if( !CopyInPlace( VSI_SHP_GetVSIL(hSHP->fpSHX), oTempFileSHX ) )
+            if( !OGRShapeDataSource::CopyInPlace( VSI_SHP_GetVSIL(hSHP->fpSHX), oTempFileSHX ) )
             {
                 CPLError( CE_Failure, CPLE_FileIO,
                         "An error occurred while copying the content of %s on top of %s. "
@@ -3112,16 +3091,8 @@ OGRErr OGRShapeLayer::Repack()
 OGRErr OGRShapeLayer::ResizeDBF()
 
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("ResizeDBF") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "ResizeDBF");
-        return OGRERR_FAILURE;
-    }
 
     if( hDBF == nullptr )
     {
@@ -3269,16 +3240,8 @@ void OGRShapeLayer::TruncateDBF()
 
 OGRErr OGRShapeLayer::RecomputeExtent()
 {
-    if( !TouchLayer() )
+    if( !StartUpdate("RecomputeExtent") )
         return OGRERR_FAILURE;
-
-    if( !bUpdateAccess )
-    {
-        CPLError( CE_Failure, CPLE_NotSupported,
-                  UNSUPPORTED_OP_READ_ONLY,
-                  "RecomputeExtent");
-        return OGRERR_FAILURE;
-    }
 
     if( hSHP == nullptr )
     {
@@ -3384,9 +3347,12 @@ bool OGRShapeLayer::ReopenFileDescriptors()
 {
     CPLDebug("SHAPE", "ReopenFileDescriptors(%s)", pszFullName);
 
+    const bool bRealUpdateAccess = bUpdateAccess &&
+        (!poDS->IsZip() || !poDS->GetTemporaryUnzipDir().empty());
+
     if( bHSHPWasNonNULL )
     {
-        hSHP = poDS->DS_SHPOpen( pszFullName, bUpdateAccess ? "r+" : "r" );
+        hSHP = poDS->DS_SHPOpen( pszFullName, bRealUpdateAccess ? "r+" : "r" );
 
         if( hSHP == nullptr )
         {
@@ -3397,7 +3363,7 @@ bool OGRShapeLayer::ReopenFileDescriptors()
 
     if( bHDBFWasNonNULL )
     {
-        hDBF = poDS->DS_DBFOpen( pszFullName, bUpdateAccess ? "r+" : "r" );
+        hDBF = poDS->DS_DBFOpen( pszFullName, bRealUpdateAccess ? "r+" : "r" );
 
         if( hDBF == nullptr )
         {
@@ -3502,4 +3468,21 @@ void OGRShapeLayer::AddToFileList( CPLStringList& oFileList )
             oFileList.AddString(pszSBXFilename);
         }
     }
+}
+
+/************************************************************************/
+/*                   UpdateFollowingDeOrRecompression()                 */
+/************************************************************************/
+
+void OGRShapeLayer::UpdateFollowingDeOrRecompression()
+{
+    CPLAssert( poDS->IsZip() );
+    CPLString osDSDir = poDS->GetTemporaryUnzipDir();
+    if( osDSDir.empty() )
+        osDSDir = poDS->GetVSIZipPrefixeDir();
+    char* pszNewFullName = CPLStrdup(
+        CPLFormFilename(osDSDir, CPLGetFilename(pszFullName), nullptr));
+    CPLFree(pszFullName);
+    pszFullName = pszNewFullName;
+    CloseUnderlyingLayer();
 }

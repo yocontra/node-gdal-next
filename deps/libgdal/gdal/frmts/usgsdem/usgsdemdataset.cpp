@@ -9,7 +9,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: usgsdemdataset.cpp 2d0b2e5d66b9651bc7c4d4ef49a20e518da4c6c5 2019-09-30 16:53:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: usgsdemdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 typedef struct {
     double      x;
@@ -285,7 +285,7 @@ static double DConvert( VSILFILE *fp, int nCharCount )
 
 class USGSDEMRasterBand;
 
-class USGSDEMDataset : public GDALPamDataset
+class USGSDEMDataset final: public GDALPamDataset
 {
     friend class USGSDEMRasterBand;
 
@@ -322,7 +322,7 @@ class USGSDEMDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class USGSDEMRasterBand : public GDALPamRasterBand
+class USGSDEMRasterBand final: public GDALPamRasterBand
 {
     friend class USGSDEMDataset;
 
@@ -948,7 +948,7 @@ void GDALRegister_USGSDEM()
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "dem" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "USGS Optional ASCII DEM (and CDED)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_usgsdem.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/usgsdem.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Int16" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

@@ -2,10 +2,10 @@
  *
  * Project:  GPX Translator
  * Purpose:  Implements OGRGPXDataSource class
- * Author:   Even Rouault, even dot rouault at mines dash paris dot org
+ * Author:   Even Rouault, even dot rouault at spatialys.com
  *
  ******************************************************************************
- * Copyright (c) 2007-2011, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2011, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,7 +47,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id: ogrgpxdatasource.cpp a5af54b27f9886af4c4e8a2f8b04b89d8d7e228e 2019-09-06 02:00:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgpxdatasource.cpp 6c20fa95d33fd0452329067f766b2d71a5ebd87f 2019-09-06 02:00:10 +0200 Even Rouault $")
 
 constexpr int SPACE_FOR_METADATA = 160;
 

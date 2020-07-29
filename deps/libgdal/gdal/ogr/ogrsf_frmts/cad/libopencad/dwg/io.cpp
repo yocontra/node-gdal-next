@@ -821,8 +821,10 @@ int CADBuffer::ReadBITLONG()
 
         case BITLONG_NOT_USED:
         {
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
             std::cerr <<
             "THAT SHOULD NEVER HAPPENED! BUG. (in file, or reader, or both.) ReadBITLONG(), case BITLONG_NOT_USED\n";
+#endif
             m_nBitOffsetFromStart += 0;
             return 0;
         }
@@ -834,6 +836,13 @@ int CADBuffer::ReadBITLONG()
 void CADBuffer::SkipTV()
 {
     short stringLength = ReadBITSHORT();
+    if( stringLength < 0 )
+    {
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+        std::cerr << "Negative string length" << std::endl;
+#endif
+        return;
+    }
     m_nBitOffsetFromStart += size_t( stringLength * 8 );
 }
 

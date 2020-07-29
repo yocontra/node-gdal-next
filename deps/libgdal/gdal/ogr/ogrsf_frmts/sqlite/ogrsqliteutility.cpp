@@ -35,7 +35,7 @@
 #include "cpl_error.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrsqliteutility.cpp 722bc4c4c4f6ec3494bb2e4ee96b8742d72ac4c5 2018-02-14 22:51:15Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrsqliteutility.cpp d7976d4611d69cb3b28a4d6cc623ec4e6826cae0 2019-10-28 09:12:28 +0100 Even Rouault $")
 
 /* Runs a SQL command and ignores the result (good for INSERT/UPDATE/CREATE) */
 OGRErr SQLCommand(sqlite3 * poDb, const char * pszSQL)
@@ -117,6 +117,7 @@ const char* SQLResultGetValue(const SQLResult * poResult, int iColNum, int iRowN
     const int nCols = poResult->nColCount;
 #ifdef DEBUG
     const int nRows = poResult->nRowCount;
+    CPL_IGNORE_RET_VAL(nRows);
 
     CPLAssert( iColNum >= 0 && iColNum < nCols );
     CPLAssert( iRowNum >= 0 && iRowNum < nRows );

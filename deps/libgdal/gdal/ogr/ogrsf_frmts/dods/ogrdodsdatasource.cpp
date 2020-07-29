@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam
- * Copyright (c) 2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrdodsdatasource.cpp a6ca81a11872c40b8a6da92f93e07132c4ac595d 2019-03-23 14:38:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdodsdatasource.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 /************************************************************************/
 /*                         OGRDODSDataSource()                          */
 /************************************************************************/

@@ -10,7 +10,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -38,7 +38,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: sgidataset.cpp c11e78a14a6fcd785d34dab60bff28d757b4b782 2018-06-14 21:29:20 +0200 Even Rouault $")
+CPL_CVSID("$Id: sgidataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 struct ImageRec
 {
@@ -218,7 +218,7 @@ static CPLErr ImageGetRow(ImageRec* image, unsigned char* buf, int y, int z)
 
 class SGIRasterBand;
 
-class SGIDataset : public GDALPamDataset
+class SGIDataset final: public GDALPamDataset
 {
     friend class SGIRasterBand;
 
@@ -246,7 +246,7 @@ public:
 /* ==================================================================== */
 /************************************************************************/
 
-class SGIRasterBand : public GDALPamRasterBand
+class SGIRasterBand final: public GDALPamRasterBand
 {
     friend class SGIDataset;
 
@@ -842,7 +842,7 @@ void GDALRegister_SGI()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "SGI Image File Format 1.0" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "rgb" );
     poDriver->SetMetadataItem( GDAL_DMD_MIMETYPE, "image/rgb" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#SGI" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/sgi.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

@@ -3,10 +3,10 @@
  * Project:  GDAL Utilities
  * Purpose:  Create an OGR datasource from the values of a GDAL dataset
  *           May be useful to test gdal_grid and generate its input OGR file
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2008, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@
 #include "ogr_srs_api.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: gdal2ogr.c ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: gdal2ogr.c 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */

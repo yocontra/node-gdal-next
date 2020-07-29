@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2007, Adam Nowacki
- * Copyright (c) 2009-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -47,7 +47,7 @@
 #include <limits>
 #include <utility>
 
-CPL_CVSID("$Id: wmsdriver.cpp 8fe13fd1bcb21369a4702e7ff1b18999864451da 2019-04-04 21:49:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: wmsdriver.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 //
 // A static map holding seen server GetTileService responses, per process
@@ -1063,7 +1063,7 @@ void GDALRegister_WMS()
     poDriver->SetDescription("WMS");
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "OGC Web Map Service" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_wms.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/wms.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
 

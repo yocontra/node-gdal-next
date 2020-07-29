@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxf_blockmap.cpp 6b6607358c2c280f54ea0922536a27a8e12930b5 2018-07-14 16:23:19 +1000 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxf_blockmap.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          ReadBlockSection()                          */
@@ -108,8 +108,7 @@ bool OGRDXFDataSource::ReadBlocksSection()
         if( EQUAL(szLineBuf,"ENDBLK") )
             continue;
 
-        if (nCode >= 0)
-            UnreadValue();
+        UnreadValue();
 
         if( oBlockMap.find(osBlockName) != oBlockMap.end() )
         {

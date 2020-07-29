@@ -7,7 +7,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999,  Les Technologies SoftMap Inc.
- * Copyright (c) 2007-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2007-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@
 #include "ogrshape.h"
 #include "shapefil.h"
 
-CPL_CVSID("$Id: shape2ogr.cpp 804fe53ab818b8fe2fdb0be7484a7a5df2be2f73 2018-08-16 17:32:41 +0200 Even Rouault $")
+CPL_CVSID("$Id: shape2ogr.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        RingStartEnd                                  */

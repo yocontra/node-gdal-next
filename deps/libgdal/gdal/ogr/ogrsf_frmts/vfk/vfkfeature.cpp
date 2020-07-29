@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2009-2010, 2012-2015, Martin Landa <landa.martin gmail.com>
- * Copyright (c) 2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -35,7 +35,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: vfkfeature.cpp 737b2508f8ca043a5048431d9769ab8b4e4c2ddf 2018-06-25 12:00:34 +0200 Martin Landa $")
+CPL_CVSID("$Id: vfkfeature.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 /*!
   \brief IVFKFeature constructor

@@ -2,10 +2,10 @@
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement CPLSystem().
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2012-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2012-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -66,7 +66,7 @@ constexpr int PIPE_BUFFER_SIZE = 4096;
 constexpr int IN_FOR_PARENT = 0;
 constexpr int OUT_FOR_PARENT = 1;
 
-CPL_CVSID("$Id: cpl_spawn.cpp 0f654dda9faabf9d86a44293f0f89903a8e97dd7 2018-04-15 20:18:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_spawn.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
 
 static void FillFileFromPipe(CPL_FILE_HANDLE pipe_fd, VSILFILE* fout);
 
@@ -666,7 +666,7 @@ CPLSpawnedProcess* CPLSpawnAsync( int (*pfnMain)(CPL_FILE_HANDLE,
 
         if( bDup2In )
         {
-            if( !bHasActions ) posix_spawn_file_actions_init(&actions);
+            /*if( !bHasActions )*/ posix_spawn_file_actions_init(&actions);
             posix_spawn_file_actions_adddup2(&actions, pipe_in[IN_FOR_PARENT],
                                              fileno(stdin));
             posix_spawn_file_actions_addclose(&actions,

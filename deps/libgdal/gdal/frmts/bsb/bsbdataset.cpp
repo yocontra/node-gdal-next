@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Frank Warmerdam <warmerdam@pobox.com>
- * Copyright (c) 2008-2012, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2012, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-CPL_CVSID("$Id: bsbdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: bsbdataset.cpp c143c2516730456e48277e7e64b3cc5b8f2e41ba 2020-03-26 22:45:59 -0400 Daniel Morissette $")
 
 //Disabled as people may worry about the BSB patent
 //#define BSB_CREATE
@@ -49,7 +49,7 @@ CPL_CVSID("$Id: bsbdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-
 
 class BSBRasterBand;
 
-class BSBDataset : public GDALPamDataset
+class BSBDataset final: public GDALPamDataset
 {
     int         nGCPCount;
     GDAL_GCP    *pasGCPList;
@@ -61,6 +61,8 @@ class BSBDataset : public GDALPamDataset
     void        ScanForGCPs( bool isNos, const char *pszFilename );
     void        ScanForGCPsNos( const char *pszFilename );
     void        ScanForGCPsBSB();
+
+    void        ScanForCutline();
 
     static int IdentifyInternal( GDALOpenInfo *, bool & isNosOut );
 
@@ -93,7 +95,7 @@ class BSBDataset : public GDALPamDataset
 /* ==================================================================== */
 /************************************************************************/
 
-class BSBRasterBand : public GDALPamRasterBand
+class BSBRasterBand final: public GDALPamRasterBand
 {
     GDALColorTable      oCT;
 
@@ -691,6 +693,49 @@ void BSBDataset::ScanForGCPsBSB()
 }
 
 /************************************************************************/
+/*                            ScanForCutline()                          */
+/************************************************************************/
+
+void BSBDataset::ScanForCutline()
+{
+    /* PLY: Border Polygon Record - coordinates of the panel within the 
+    * raster image, given in chart datum lat/long. Any shape polygon.
+    * They look like:
+    *      PLY/1,32.346666666667,-60.881666666667 
+    *      PLY/n,lat,long 
+    *
+    * If found then we return it via a BSB_CUTLINE metadata item as a WKT POLYGON.
+    */
+
+    std::string wkt;
+    for( int i = 0; psInfo->papszHeader[i] != nullptr; i++ )
+    {
+        if( !STARTS_WITH_CI(psInfo->papszHeader[i], "PLY/") )
+            continue;
+
+        const CPLStringList aosTokens(
+            CSLTokenizeString2( psInfo->papszHeader[i]+4, ",", 0 ));
+
+        if( aosTokens.size() >= 3 )
+        {
+            if (wkt.empty())
+                wkt = "POLYGON ((";
+            else
+                wkt += ',';
+            wkt += aosTokens[2];
+            wkt += ' ';
+            wkt += aosTokens[1];
+        }
+    }
+
+    if (!wkt.empty())
+    {
+        wkt += "))";
+        SetMetadataItem("BSB_CUTLINE", wkt.c_str());
+    }
+}
+
+/************************************************************************/
 /*                          IdentifyInternal()                          */
 /************************************************************************/
 
@@ -795,6 +840,11 @@ GDALDataset *BSBDataset::Open( GDALOpenInfo * poOpenInfo )
     poDS->SetBand( 1, new BSBRasterBand( poDS ));
 
     poDS->ScanForGCPs( isNos, poOpenInfo->pszFilename );
+    
+/* -------------------------------------------------------------------- */
+/*      Set CUTLINE metadata if a bounding polygon is available         */
+/* -------------------------------------------------------------------- */
+    poDS->ScanForCutline();
 
 /* -------------------------------------------------------------------- */
 /*      Initialize any PAM information.                                 */
@@ -1167,7 +1217,7 @@ void GDALRegister_BSB()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Maptech BSB Nautical Charts" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_various.html#BSB" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/bsb.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 #ifdef BSB_CREATE
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );

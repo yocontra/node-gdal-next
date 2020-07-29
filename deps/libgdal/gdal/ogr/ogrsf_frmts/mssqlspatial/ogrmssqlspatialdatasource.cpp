@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2010, Tamas Szekeres
- * Copyright (c) 2010-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2010-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,7 @@
 
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlspatialdatasource.cpp 74bf9367d33c608de344cc32a57a9ca924e36191 2019-03-31 20:45:06 +0200 Tamas Szekeres $")
+CPL_CVSID("$Id: ogrmssqlspatialdatasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRMSSQLSpatialDataSource()                 */
@@ -919,7 +919,7 @@ int OGRMSSQLSpatialDataSource::Open( const char * pszNewName, bool bUpdate,
     if (papszTableNames != nullptr && bUseGeometryColumns)
     {
         for( int iTable = 0;
-            papszTableNames != nullptr && papszTableNames[iTable] != nullptr;
+            papszTableNames[iTable] != nullptr;
             iTable++ )
         {
             CPLODBCStatement oStmt( &oSession );

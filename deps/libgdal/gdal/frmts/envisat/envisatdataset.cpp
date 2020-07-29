@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2001, Atlantis Scientific, Inc.
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,7 +34,7 @@
 #include "ogr_srs_api.h"
 #include "timedelta.hpp"
 
-CPL_CVSID("$Id: envisatdataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: envisatdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
 
 CPL_C_START
 #include "EnvisatFile.h"
@@ -46,7 +46,7 @@ CPL_C_END
 /*                        MerisL2FlagBand                         */
 /* ==================================================================== */
 /************************************************************************/
-class MerisL2FlagBand : public GDALPamRasterBand
+class MerisL2FlagBand final: public GDALPamRasterBand
 {
   public:
     MerisL2FlagBand( GDALDataset *, int, VSILFILE*, vsi_l_offset, int );
@@ -155,7 +155,7 @@ CPLErr MerisL2FlagBand::IReadBlock( CPL_UNUSED int nBlockXOff,
 /* ==================================================================== */
 /************************************************************************/
 
-class EnvisatDataset : public RawDataset
+class EnvisatDataset final: public RawDataset
 {
     EnvisatFile *hEnvisatFile;
     VSILFILE    *fpImage;
@@ -1159,7 +1159,7 @@ void GDALRegister_Envisat()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Envisat Image Format" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "frmt_various.html#Envisat" );
+                               "drivers/raster/esat.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "n1" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

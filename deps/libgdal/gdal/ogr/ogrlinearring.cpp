@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrlinearring.cpp 7a8201c34365f616d11a146cbe31a7910c19c0ce 2019-10-31 11:58:48 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrlinearring.cpp d9c232c73fb2150d50a75f9df0512893df23ea41 2019-10-31 11:58:48 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRLinearRing()                            */

@@ -41,7 +41,7 @@
 #include "cpl_json_streaming_parser.h"
 #include <ogr_api.h>
 
-CPL_CVSID("$Id: ogrgeojsonreader.cpp b471cd08d02f7f05d658fe7da57f30f1b29d3b52 2020-01-07 22:30:27 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonreader.cpp 6d34914732d5e9173582cc58ea553e349041d5c8 2020-06-27 13:32:58 +0200 Even Rouault $")
 
 static
 OGRGeometry* OGRGeoJSONReadGeometry( json_object* poObj,
@@ -1859,7 +1859,7 @@ void OGRGeoJSONReaderAddOrUpdateField(
                     poFDefn->SetSubType(OFSTNone);
                 }
             }
-            else if( eNewType != OFTInteger )
+            else
             {
                 poFDefn->SetSubType(OFSTNone);
                 poFDefn->SetType(OFTString);
@@ -2433,9 +2433,9 @@ void OGRGeoJSONReaderSetField( OGRLayer* poLayer,
         const enum json_type eJSonType(json_object_get_type(poVal));
         if( eJSonType == json_type_array )
         {
-            const auto nLength = json_object_array_length(poVal);
+            auto nLength = json_object_array_length(poVal);
             char** papszVal = (char**)CPLMalloc(sizeof(char*) * (nLength+1));
-            auto i = decltype(nLength){0};
+            decltype(nLength) i = 0; // Used after for.
             for( ; i < nLength; i++ )
             {
                 json_object* poRow = json_object_array_get_idx(poVal, i);

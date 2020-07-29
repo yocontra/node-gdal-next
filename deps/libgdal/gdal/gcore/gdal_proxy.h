@@ -1,12 +1,12 @@
 /******************************************************************************
- * $Id: gdal_proxy.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * $Id: gdal_proxy.h 48750f0a05e88eec700319b3e1a3146da6054e09 2019-09-20 20:55:41 +0300 drons $
  *
  * Project:  GDAL Core
  * Purpose:  GDAL Core C++/Private declarations
- * Author:   Even Rouault <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2008-2014, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2008-2014, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -252,6 +252,11 @@ class CPL_DLL GDALProxyPoolDataset : public GDALProxyDataset
     ~GDALProxyPoolDataset() override;
 
     void SetOpenOptions( char** papszOpenOptions );
+
+    // If size (nBlockXSize&nBlockYSize) parameters is zero
+    // they will be loaded when RefUnderlyingRasterBand function is called.
+    // But in this case we cannot use them in other non-virtual methods before
+    // RefUnderlyingRasterBand fist call.
     void AddSrcBandDescription( GDALDataType eDataType, int nBlockXSize,
                                 int nBlockYSize );
 

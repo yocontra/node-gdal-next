@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2004, Frank Warmerdam
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -58,7 +58,7 @@
 static const char UNSUPPORTED_OP_READ_ONLY[] =
   "%s : unsupported operation on a read-only datasource.";
 
-CPL_CVSID("$Id: ogrsqlitetablelayer.cpp 5597c62d8d3a0586a565526888d41a989cb492d0 2019-04-11 22:39:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitetablelayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRSQLiteTableLayer()                         */
@@ -485,6 +485,7 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
         poGeomFieldDefn->SetType( eGeomType );
         poGeomFieldDefn->SetSpatialRef(poDS->FetchSRS(poGeomFieldDefn->nSRSId));
 
+        // cppcheck-suppress knownConditionTrueFalse
         if( eGeomFormat == OSGF_SpatiaLite )
             bHasSpatialiteCol = TRUE;
     }
@@ -508,7 +509,7 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
         // obsolete library version not supporting new triggers
         // enforcing ReadOnly mode
             CPLDebug("SQLITE", "Enforcing ReadOnly mode : obsolete library version not supporting new triggers");
-            poDS->SetUpdate(FALSE);
+            poDS->DisableUpdate();
         }
 
         sqlite3_free_table( papszTriggerResult );
@@ -3410,6 +3411,7 @@ void OGRSQLiteTableLayer::LoadStatistics()
     /* If it is equal to the modified timestamp of the DB (as a file) */
     /* then we can safely use the data from the layer_statistics, since */
     /* it will be up-to-date */
+    // cppcheck-suppress knownConditionTrueFalse
     if( nFileTimestamp == nTS || nFileTimestamp == nTS + 1 )
     {
         osSQL.Printf("SELECT row_count, extent_min_x, extent_min_y, extent_max_x, extent_max_y "

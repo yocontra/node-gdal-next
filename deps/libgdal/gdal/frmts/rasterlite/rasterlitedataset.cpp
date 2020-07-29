@@ -2,10 +2,10 @@
  *
  * Project:  GDAL Rasterlite driver
  * Purpose:  Implement GDAL Rasterlite support using OGR SQLite driver
- * Author:   Even Rouault, <even dot rouault at mines dash paris dot org>
+ * Author:   Even Rouault, <even dot rouault at spatialys.com>
  *
  **********************************************************************
- * Copyright (c) 2009-2013, Even Rouault <even dot rouault at mines-paris dot org>
+ * Copyright (c) 2009-2013, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -42,7 +42,7 @@
 #define ENABLE_SQL_SQLITE_FORMAT
 #endif
 
-CPL_CVSID("$Id: rasterlitedataset.cpp 3189229c71a9620126f6b349f4f80399baeaf528 2019-04-20 20:33:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: rasterlitedataset.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
 
 /************************************************************************/
 /*                        RasterliteOpenSQLiteDB()                      */
@@ -1471,7 +1471,7 @@ void GDALRegister_Rasterlite()
     poDriver->SetDescription( "Rasterlite" );
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Rasterlite" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "frmt_rasterlite.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/rasterlite.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "sqlite" );
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES,
@@ -1483,8 +1483,8 @@ void GDALRegister_Rasterlite()
 "   <Option name='TILED' type='boolean' default='YES' description='Use tiling'/>"
 "   <Option name='BLOCKXSIZE' type='int' default='256' description='Tile Width'/>"
 "   <Option name='BLOCKYSIZE' type='int' default='256' description='Tile Height'/>"
-"   <Option name='DRIVER' type='string' default='GTiff' description='GDAL driver to use for storing tiles' default='GTiff'/>"
-"   <Option name='COMPRESS' type='string' default='(GTiff driver) Compression method' default='NONE'/>"
+"   <Option name='DRIVER' type='string' description='GDAL driver to use for storing tiles' default='GTiff'/>"
+"   <Option name='COMPRESS' type='string' description='(GTiff driver) Compression method' default='NONE'/>"
 "   <Option name='QUALITY' type='int' description='(JPEG-compressed GTiff, JPEG and WEBP drivers) JPEG/WEBP Quality 1-100' default='75'/>"
 "   <Option name='PHOTOMETRIC' type='string-select' description='(GTiff driver) Photometric interpretation'>"
 "       <Value>MINISBLACK</Value>"
