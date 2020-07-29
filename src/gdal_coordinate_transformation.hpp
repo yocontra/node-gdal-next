@@ -93,12 +93,12 @@ class GeoTransformTransformer : public OGRCoordinateTransformation {
     double *y,
     double *z,
     double * /* t */,
-    int *pabSuccess) override {
+    int *pabSuccess) {
     return GDALGenImgProjTransform(
       hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
 
-  virtual OGRCoordinateTransformation *Clone() const override {
+  virtual OGRCoordinateTransformation *Clone() const {
     return new GeoTransformTransformer(*this);
   }
 };
