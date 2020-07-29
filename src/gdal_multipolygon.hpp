@@ -44,8 +44,8 @@ class MultiPolygon : public Nan::ObjectWrap {
     private:
   ~MultiPolygon();
   OGRMultiPolygon *this_;
-  bool             owned_;
-  int              size_;
+  bool owned_;
+  int size_;
 };
 
 } // namespace node_gdal

@@ -49,8 +49,8 @@ class Point : public Nan::ObjectWrap {
     private:
   ~Point();
   OGRPoint *this_;
-  bool      owned_;
-  int       size_;
+  bool owned_;
+  int size_;
 };
 
 } // namespace node_gdal

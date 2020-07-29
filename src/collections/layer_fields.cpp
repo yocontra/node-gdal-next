@@ -26,10 +26,7 @@ void LayerFields::Initialize(Local<Object> target) {
 
   ATTR_DONT_ENUM(lcons, "layer", layerGetter, READ_ONLY_SETTER);
 
-  Nan::Set(
-    target,
-    Nan::New("LayerFields").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("LayerFields").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
@@ -47,14 +44,13 @@ NAN_METHOD(LayerFields::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
   if (info[0]->IsExternal()) {
-    Local<External> ext   = info[0].As<External>();
-    void *          ptr   = ext->Value();
-    LayerFields *   layer = static_cast<LayerFields *>(ptr);
+    Local<External> ext = info[0].As<External>();
+    void *ptr = ext->Value();
+    LayerFields *layer = static_cast<LayerFields *>(ptr);
     layer->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
     return;
@@ -69,13 +65,9 @@ Local<Value> LayerFields::New(Local<Value> layer_obj) {
 
   LayerFields *wrapped = new LayerFields();
 
-  v8::Local<v8::Value>  ext = Nan::New<External>(wrapped);
+  v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(LayerFields::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(LayerFields::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
   Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), layer_obj);
 
   return scope.Escape(obj);
@@ -96,9 +88,7 @@ NAN_METHOD(LayerFields::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -125,9 +115,7 @@ NAN_METHOD(LayerFields::indexOf) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -143,8 +131,7 @@ NAN_METHOD(LayerFields::indexOf) {
   std::string name("");
   NODE_ARG_STR(0, "field name", name);
 
-  info.GetReturnValue().Set(
-    Nan::New<Integer>(def->GetFieldIndex(name.c_str())));
+  info.GetReturnValue().Set(Nan::New<Integer>(def->GetFieldIndex(name.c_str())));
 }
 
 /**
@@ -159,9 +146,7 @@ NAN_METHOD(LayerFields::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -196,9 +181,7 @@ NAN_METHOD(LayerFields::getNames) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -211,7 +194,7 @@ NAN_METHOD(LayerFields::getNames) {
     return;
   }
 
-  int          n      = def->GetFieldCount();
+  int n = def->GetFieldCount();
   Local<Array> result = Nan::New<Array>(n);
 
   for (int i = 0; i < n; i++) {
@@ -233,9 +216,7 @@ NAN_METHOD(LayerFields::remove) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -278,9 +259,7 @@ NAN_METHOD(LayerFields::add) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -292,18 +271,18 @@ NAN_METHOD(LayerFields::add) {
   }
 
   FieldDefn *field_def;
-  int        err;
-  int        approx = 1;
+  int err;
+  int approx = 1;
   NODE_ARG_BOOL_OPT(1, "approx", approx);
 
   if (info[0]->IsArray()) {
     Local<Array> array = info[0].As<Array>();
-    int          n     = array->Length();
+    int n = array->Length();
     for (int i = 0; i < n; i++) {
       Local<Value> element = Nan::Get(array, i).ToLocalChecked();
       if (IS_WRAPPED(element, FieldDefn)) {
         field_def = Nan::ObjectWrap::Unwrap<FieldDefn>(element.As<Object>());
-        err       = layer->get()->CreateField(field_def->get(), approx);
+        err = layer->get()->CreateField(field_def->get(), approx);
         if (err) {
           NODE_THROW_OGRERR(err);
           return;
@@ -315,14 +294,13 @@ NAN_METHOD(LayerFields::add) {
     }
   } else if (IS_WRAPPED(info[0], FieldDefn)) {
     field_def = Nan::ObjectWrap::Unwrap<FieldDefn>(info[0].As<Object>());
-    err       = layer->get()->CreateField(field_def->get(), approx);
+    err = layer->get()->CreateField(field_def->get(), approx);
     if (err) {
       NODE_THROW_OGRERR(err);
       return;
     }
   } else {
-    Nan::ThrowError(
-      "field definition(s) must be a FieldDefn object or array of FieldDefn objects");
+    Nan::ThrowError("field definition(s) must be a FieldDefn object or array of FieldDefn objects");
     return;
   }
 
@@ -345,9 +323,7 @@ NAN_METHOD(LayerFields::reorder) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -363,7 +339,7 @@ NAN_METHOD(LayerFields::reorder) {
   Local<Array> field_map = Nan::New<Array>(0);
   NODE_ARG_ARRAY(0, "field map", field_map);
 
-  int    n   = def->GetFieldCount();
+  int n = def->GetFieldCount();
   OGRErr err = 0;
 
   if ((int)field_map->Length() != n) {
@@ -411,9 +387,7 @@ NAN_METHOD(LayerFields::reorder) {
  */
 NAN_GETTER(LayerFields::layerGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 
 } // namespace node_gdal

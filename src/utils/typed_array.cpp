@@ -9,9 +9,9 @@ namespace node_gdal {
 Local<Value> TypedArray::New(GDALDataType type, unsigned int length) {
   Nan::EscapableHandleScope scope;
 
-  Local<Value>    val;
+  Local<Value> val;
   Local<Function> constructor;
-  Local<Object>   global = Nan::GetCurrentContext()->Global();
+  Local<Object> global = Nan::GetCurrentContext()->Global();
 
   const char *name;
   switch (type) {
@@ -22,24 +22,20 @@ Local<Value> TypedArray::New(GDALDataType type, unsigned int length) {
     case GDT_UInt32: name = "Uint32Array"; break;
     case GDT_Float32: name = "Float32Array"; break;
     case GDT_Float64: name = "Float64Array"; break;
-    default:
-      Nan::ThrowError("Unsupported array type");
-      return scope.Escape(Nan::Undefined());
+    default: Nan::ThrowError("Unsupported array type"); return scope.Escape(Nan::Undefined());
   }
 
   // make ArrayBuffer
-  val =
-    Nan::Get(global, Nan::New("ArrayBuffer").ToLocalChecked()).ToLocalChecked();
+  val = Nan::Get(global, Nan::New("ArrayBuffer").ToLocalChecked()).ToLocalChecked();
 
   if (val.IsEmpty() || !val->IsFunction()) {
     Nan::ThrowError("Error getting ArrayBuffer constructor");
     return scope.Escape(Nan::Undefined());
   }
 
-  constructor       = val.As<Function>();
+  constructor = val.As<Function>();
   Local<Value> size = Nan::New<Integer>(length * GDALGetDataTypeSize(type) / 8);
-  Local<Value> array_buffer =
-    Nan::NewInstance(constructor, 1, &size).ToLocalChecked();
+  Local<Value> array_buffer = Nan::NewInstance(constructor, 1, &size).ToLocalChecked();
 
   if (array_buffer.IsEmpty() || !array_buffer->IsObject()) {
     Nan::ThrowError("Error allocating ArrayBuffer");
@@ -55,8 +51,7 @@ Local<Value> TypedArray::New(GDALDataType type, unsigned int length) {
   }
 
   constructor = val.As<Function>();
-  Local<Object> array =
-    Nan::NewInstance(constructor, 1, &array_buffer).ToLocalChecked();
+  Local<Object> array = Nan::NewInstance(constructor, 1, &array_buffer).ToLocalChecked();
 
   if (array.IsEmpty() || !array->IsObject()) {
     Nan::ThrowError("Error creating TypedArray");
@@ -79,22 +74,19 @@ GDALDataType TypedArray::Identify(Local<Object> obj) {
   return (GDALDataType)Nan::To<int32_t>(val).ToChecked();
 }
 
-void *
-TypedArray::Validate(Local<Object> obj, GDALDataType type, int min_length) {
+void *TypedArray::Validate(Local<Object> obj, GDALDataType type, int min_length) {
   // validate array
   Nan::HandleScope scope;
 
   GDALDataType src_type = TypedArray::Identify(obj);
   if (src_type == GDT_Unknown) {
-    Nan::ThrowTypeError(
-      "Unable to identify GDAL datatype of passed array object");
+    Nan::ThrowTypeError("Unable to identify GDAL datatype of passed array object");
     return NULL;
   }
   if (src_type != type) {
     std::ostringstream ss;
     ss << "Array type does not match band data type ("
-       << "input: " << GDALGetDataTypeName(src_type)
-       << ", target: " << GDALGetDataTypeName(type) << ")";
+       << "input: " << GDALGetDataTypeName(src_type) << ", target: " << GDALGetDataTypeName(type) << ")";
 
     Nan::ThrowTypeError(ss.str().c_str());
     return NULL;

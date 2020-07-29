@@ -24,16 +24,12 @@ void FeatureDefn::Initialize(Local<Object> target) {
   ATTR(lcons, "geomIgnored", geomIgnoredGetter, geomIgnoredSetter);
   ATTR(lcons, "geomType", geomTypeGetter, geomTypeSetter);
 
-  Nan::Set(
-    target,
-    Nan::New("FeatureDefn").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("FeatureDefn").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-FeatureDefn::FeatureDefn(OGRFeatureDefn *def)
-  : Nan::ObjectWrap(), this_(def), owned_(true) {
+FeatureDefn::FeatureDefn(OGRFeatureDefn *def) : Nan::ObjectWrap(), this_(def), owned_(true) {
   LOG("Created FeatureDefn [%p]", def);
 }
 
@@ -57,18 +53,17 @@ FeatureDefn::~FeatureDefn() {
  */
 NAN_METHOD(FeatureDefn::New) {
   Nan::HandleScope scope;
-  FeatureDefn *    f;
+  FeatureDefn *f;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
 
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    f                   = static_cast<FeatureDefn *>(ptr);
+    void *ptr = ext->Value();
+    f = static_cast<FeatureDefn *>(ptr);
   } else {
     if (info.Length() != 0) {
       Nan::ThrowError("FeatureDefn constructor doesn't take any arguments");
@@ -93,9 +88,7 @@ Local<Value> FeatureDefn::New(OGRFeatureDefn *def) {
 Local<Value> FeatureDefn::New(OGRFeatureDefn *def, bool owned) {
   Nan::EscapableHandleScope scope;
 
-  if (!def) {
-    return scope.Escape(Nan::Null());
-  }
+  if (!def) { return scope.Escape(Nan::Null()); }
 
   // make a copy of featuredefn owned by a layer
   // + no need to track when a layer is destroyed
@@ -106,21 +99,15 @@ Local<Value> FeatureDefn::New(OGRFeatureDefn *def, bool owned) {
   // TODO: cloning maybe unnecessary if reference counting is done right.
   //      def->Reference(); def->Release();
 
-  if (!owned) {
-    def = def->Clone();
-  }
+  if (!owned) { def = def->Clone(); }
 
   FeatureDefn *wrapped = new FeatureDefn(def);
-  wrapped->owned_      = true;
+  wrapped->owned_ = true;
   def->Reference();
 
-  Local<Value>  ext = Nan::New<External>(wrapped);
+  Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(FeatureDefn::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(FeatureDefn::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   return scope.Escape(obj);
 }
@@ -138,7 +125,7 @@ NAN_METHOD(FeatureDefn::toString) {
  */
 NAN_METHOD(FeatureDefn::clone) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(FeatureDefn::New(def->this_->Clone()));
 }
 
@@ -149,7 +136,7 @@ NAN_METHOD(FeatureDefn::clone) {
  */
 NAN_GETTER(FeatureDefn::nameGetter) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(SafeString::New(def->this_->GetName()));
 }
 
@@ -162,7 +149,7 @@ NAN_GETTER(FeatureDefn::nameGetter) {
  */
 NAN_GETTER(FeatureDefn::geomTypeGetter) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(Nan::New<Integer>(def->this_->GetGeomType()));
 }
 
@@ -172,7 +159,7 @@ NAN_GETTER(FeatureDefn::geomTypeGetter) {
  */
 NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(Nan::New<Boolean>(def->this_->IsGeometryIgnored()));
 }
 
@@ -182,7 +169,7 @@ NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
  */
 NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(Nan::New<Boolean>(def->this_->IsStyleIgnored()));
 }
 
@@ -193,25 +180,22 @@ NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
  */
 NAN_GETTER(FeatureDefn::fieldsGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("fields_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("fields_").ToLocalChecked()).ToLocalChecked());
 }
 
 NAN_SETTER(FeatureDefn::geomTypeSetter) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   if (!value->IsInt32()) {
     Nan::ThrowError("geomType must be an integer");
     return;
   }
-  def->this_->SetGeomType(
-    OGRwkbGeometryType(Nan::To<int64_t>(value).ToChecked()));
+  def->this_->SetGeomType(OGRwkbGeometryType(Nan::To<int64_t>(value).ToChecked()));
 }
 
 NAN_SETTER(FeatureDefn::geomIgnoredSetter) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   if (!value->IsBoolean()) {
     Nan::ThrowError("geomIgnored must be a boolean");
     return;
@@ -221,7 +205,7 @@ NAN_SETTER(FeatureDefn::geomIgnoredSetter) {
 
 NAN_SETTER(FeatureDefn::styleIgnoredSetter) {
   Nan::HandleScope scope;
-  FeatureDefn *    def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
+  FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   if (!value->IsBoolean()) {
     Nan::ThrowError("styleIgnored must be a boolean");
     return;

@@ -89,7 +89,7 @@ class Geometry : public Nan::ObjectWrap {
   static NAN_SETTER(coordinateDimensionSetter);
 
   static OGRwkbGeometryType getGeometryType_fixed(OGRGeometry *geom);
-  static Local<Value>       getConstructor(OGRwkbGeometryType type);
+  static Local<Value> getConstructor(OGRwkbGeometryType type);
 
   Geometry();
   Geometry(OGRGeometry *geom);
@@ -103,15 +103,15 @@ class Geometry : public Nan::ObjectWrap {
     protected:
   ~Geometry();
   OGRGeometry *this_;
-  bool         owned_;
-  int          size_;
+  bool owned_;
+  int size_;
 };
 
-#define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                 \
-  {                                                                            \
-    int new_size = geom->this_->WkbSize();                                     \
-    if (geom->owned_) Nan::AdjustExternalMemory(new_size - geom->size_);       \
-    geom->size_ = new_size;                                                    \
+#define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                         \
+  {                                                                                                                    \
+    int new_size = geom->this_->WkbSize();                                                                             \
+    if (geom->owned_) Nan::AdjustExternalMemory(new_size - geom->size_);                                               \
+    geom->size_ = new_size;                                                                                            \
   }
 
 } // namespace node_gdal

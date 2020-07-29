@@ -22,21 +22,16 @@ void LinearRing::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "getArea", getArea);
 
-  Nan::Set(
-    target,
-    Nan::New("LinearRing").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("LinearRing").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-LinearRing::LinearRing(OGRLinearRing *geom)
-  : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+LinearRing::LinearRing(OGRLinearRing *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created LinearRing [%p]", geom);
 }
 
-LinearRing::LinearRing()
-  : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+LinearRing::LinearRing() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
 }
 
 LinearRing::~LinearRing() {
@@ -60,18 +55,17 @@ LinearRing::~LinearRing() {
  */
 NAN_METHOD(LinearRing::New) {
   Nan::HandleScope scope;
-  LinearRing *     f;
+  LinearRing *f;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
 
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    f                   = static_cast<LinearRing *>(ptr);
+    void *ptr = ext->Value();
+    f = static_cast<LinearRing *>(ptr);
 
   } else {
     if (info.Length() != 0) {
@@ -96,9 +90,7 @@ Local<Value> LinearRing::New(OGRLinearRing *geom) {
 Local<Value> LinearRing::New(OGRLinearRing *geom, bool owned) {
   Nan::EscapableHandleScope scope;
 
-  if (!geom) {
-    return scope.Escape(Nan::Null());
-  }
+  if (!geom) { return scope.Escape(Nan::Null()); }
 
   // make a copy of geometry owned by a feature
   // + no need to track when a feature is destroyed
@@ -106,22 +98,16 @@ Local<Value> LinearRing::New(OGRLinearRing *geom, bool owned) {
   // geometry
   // - is slower
 
-  if (!owned) {
-    geom = static_cast<OGRLinearRing *>(geom->clone());
-  };
+  if (!owned) { geom = static_cast<OGRLinearRing *>(geom->clone()); };
 
   LinearRing *wrapped = new LinearRing(geom);
-  wrapped->owned_     = true;
+  wrapped->owned_ = true;
 
   UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
 
-  Local<Value>  ext = Nan::New<External>(wrapped);
+  Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(LinearRing::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(LinearRing::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   return scope.Escape(obj);
 }

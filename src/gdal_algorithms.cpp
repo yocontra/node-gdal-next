@@ -35,10 +35,10 @@ NAN_METHOD(Algorithms::fillNodata) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
-  RasterBand *  src;
-  RasterBand *  mask = NULL;
-  double        search_dist;
-  int           smooth_iterations = 0;
+  RasterBand *src;
+  RasterBand *mask = NULL;
+  double search_dist;
+  int smooth_iterations = 0;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -47,15 +47,8 @@ NAN_METHOD(Algorithms::fillNodata) {
   NODE_DOUBLE_FROM_OBJ(obj, "searchDist", search_dist);
   NODE_INT_FROM_OBJ_OPT(obj, "smoothIterations", smooth_iterations)
 
-  CPLErr err = GDALFillNodata(
-    src->get(),
-    mask ? mask->get() : NULL,
-    search_dist,
-    0,
-    smooth_iterations,
-    NULL,
-    NULL,
-    NULL);
+  CPLErr err =
+    GDALFillNodata(src->get(), mask ? mask->get() : NULL, search_dist, 0, smooth_iterations, NULL, NULL, NULL);
 
   if (err) {
     NODE_THROW_CPLERR(err);
@@ -99,16 +92,16 @@ NAN_METHOD(Algorithms::contourGenerate) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
-  Local<Value>  prop;
-  RasterBand *  src;
-  Layer *       dst;
-  double        interval = 100, base = 0;
-  double *      fixed_levels = NULL;
-  DoubleList    fixed_level_array;
-  int           n_fixed_levels = 0;
-  int           use_nodata     = 0;
-  double        nodata         = 0;
-  int           id_field = -1, elev_field = -1;
+  Local<Value> prop;
+  RasterBand *src;
+  Layer *dst;
+  double interval = 100, base = 0;
+  double *fixed_levels = NULL;
+  DoubleList fixed_level_array;
+  int n_fixed_levels = 0;
+  int use_nodata = 0;
+  double nodata = 0;
+  int id_field = -1, elev_field = -1;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -118,23 +111,19 @@ NAN_METHOD(Algorithms::contourGenerate) {
   NODE_INT_FROM_OBJ_OPT(obj, "elevField", elev_field);
   NODE_DOUBLE_FROM_OBJ_OPT(obj, "interval", interval);
   NODE_DOUBLE_FROM_OBJ_OPT(obj, "offset", base);
-  if (Nan::HasOwnProperty(obj, Nan::New("fixedLevels").ToLocalChecked())
-        .FromMaybe(false)) {
-    if (fixed_level_array.parse(
-          Nan::Get(obj, Nan::New("fixedLevels").ToLocalChecked())
-            .ToLocalChecked())) {
+  if (Nan::HasOwnProperty(obj, Nan::New("fixedLevels").ToLocalChecked()).FromMaybe(false)) {
+    if (fixed_level_array.parse(Nan::Get(obj, Nan::New("fixedLevels").ToLocalChecked()).ToLocalChecked())) {
       return; // error parsing double list
     } else {
-      fixed_levels   = fixed_level_array.get();
+      fixed_levels = fixed_level_array.get();
       n_fixed_levels = fixed_level_array.length();
     }
   }
-  if (Nan::HasOwnProperty(obj, Nan::New("nodata").ToLocalChecked())
-        .FromMaybe(false)) {
+  if (Nan::HasOwnProperty(obj, Nan::New("nodata").ToLocalChecked()).FromMaybe(false)) {
     prop = Nan::Get(obj, Nan::New("nodata").ToLocalChecked()).ToLocalChecked();
     if (prop->IsNumber()) {
       use_nodata = 1;
-      nodata     = Nan::To<double>(prop).ToChecked();
+      nodata = Nan::To<double>(prop).ToChecked();
     } else if (!prop->IsNull() && !prop->IsUndefined()) {
       Nan::ThrowTypeError("nodata property must be a number");
     }
@@ -185,11 +174,11 @@ NAN_METHOD(Algorithms::sieveFilter) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
-  RasterBand *  src;
-  RasterBand *  dst;
-  RasterBand *  mask = NULL;
-  int           threshold;
-  int           connectedness = 4;
+  RasterBand *src;
+  RasterBand *dst;
+  RasterBand *mask = NULL;
+  int threshold;
+  int connectedness = 4;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -204,15 +193,8 @@ NAN_METHOD(Algorithms::sieveFilter) {
     return;
   }
 
-  CPLErr err = GDALSieveFilter(
-    src->get(),
-    mask ? mask->get() : NULL,
-    dst->get(),
-    threshold,
-    connectedness,
-    NULL,
-    NULL,
-    NULL);
+  CPLErr err =
+    GDALSieveFilter(src->get(), mask ? mask->get() : NULL, dst->get(), threshold, connectedness, NULL, NULL, NULL);
 
   if (err) {
     NODE_THROW_CPLERR(err);
@@ -240,7 +222,7 @@ NAN_METHOD(Algorithms::checksumImage) {
   Nan::HandleScope scope;
 
   RasterBand *src;
-  int         x = 0, y = 0, w, h, bandw, bandh;
+  int x = 0, y = 0, w, h, bandw, bandh;
 
   NODE_ARG_WRAPPED(0, "src", RasterBand, src);
 
@@ -257,8 +239,7 @@ NAN_METHOD(Algorithms::checksumImage) {
     return;
   }
   if (w < 0 || h < 0 || w > bandw || h > bandh) {
-    Nan::ThrowRangeError(
-      "x and y size must be smaller than band dimensions and greater than 0");
+    Nan::ThrowRangeError("x and y size must be smaller than band dimensions and greater than 0");
     return;
   }
   if (x + w - 1 >= bandw || y + h - 1 >= bandh) {
@@ -298,12 +279,12 @@ NAN_METHOD(Algorithms::polygonize) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
-  RasterBand *  src;
-  RasterBand *  mask = NULL;
-  Layer *       dst;
-  int           connectedness = 4;
-  int           pix_val_field = 0;
-  char **       papszOptions  = NULL;
+  RasterBand *src;
+  RasterBand *mask = NULL;
+  Layer *dst;
+  int connectedness = 4;
+  int pix_val_field = 0;
+  char **papszOptions = NULL;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -322,11 +303,8 @@ NAN_METHOD(Algorithms::polygonize) {
 
   CPLErr err;
   if (
-    Nan::HasOwnProperty(obj, Nan::New("useFloats").ToLocalChecked())
-      .FromMaybe(false) &&
-    Nan::To<bool>(
-      Nan::Get(obj, Nan::New("useFloats").ToLocalChecked()).ToLocalChecked())
-      .ToChecked()) {
+    Nan::HasOwnProperty(obj, Nan::New("useFloats").ToLocalChecked()).FromMaybe(false) &&
+    Nan::To<bool>(Nan::Get(obj, Nan::New("useFloats").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
     err = GDALFPolygonize(
       src->get(),
       mask ? mask->get() : NULL,

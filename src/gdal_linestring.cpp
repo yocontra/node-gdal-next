@@ -26,21 +26,16 @@ void LineString::Initialize(Local<Object> target) {
 
   ATTR(lcons, "points", pointsGetter, READ_ONLY_SETTER);
 
-  Nan::Set(
-    target,
-    Nan::New("LineString").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("LineString").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-LineString::LineString(OGRLineString *geom)
-  : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+LineString::LineString(OGRLineString *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created LineString [%p]", geom);
 }
 
-LineString::LineString()
-  : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+LineString::LineString() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
 }
 
 LineString::~LineString() {
@@ -70,18 +65,17 @@ LineString::~LineString() {
  */
 NAN_METHOD(LineString::New) {
   Nan::HandleScope scope;
-  LineString *     f;
+  LineString *f;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
 
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    f                   = static_cast<LineString *>(ptr);
+    void *ptr = ext->Value();
+    f = static_cast<LineString *>(ptr);
 
   } else {
     if (info.Length() != 0) {
@@ -106,9 +100,7 @@ Local<Value> LineString::New(OGRLineString *geom) {
 Local<Value> LineString::New(OGRLineString *geom, bool owned) {
   Nan::EscapableHandleScope scope;
 
-  if (!geom) {
-    return scope.Escape(Nan::Null());
-  }
+  if (!geom) { return scope.Escape(Nan::Null()); }
 
   // make a copy of geometry owned by a feature
   // + no need to track when a feature is destroyed
@@ -116,22 +108,16 @@ Local<Value> LineString::New(OGRLineString *geom, bool owned) {
   // geometry
   // - is slower
 
-  if (!owned) {
-    geom = static_cast<OGRLineString *>(geom->clone());
-  };
+  if (!owned) { geom = static_cast<OGRLineString *>(geom->clone()); };
 
   LineString *wrapped = new LineString(geom);
-  wrapped->owned_     = true;
+  wrapped->owned_ = true;
 
   UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
 
-  Local<Value>  ext = Nan::New<External>(wrapped);
+  Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(LineString::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(LineString::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   return scope.Escape(obj);
 }
@@ -162,7 +148,7 @@ NAN_METHOD(LineString::value) {
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(info.This());
 
   OGRPoint *pt = new OGRPoint();
-  double    dist;
+  double dist;
 
   NODE_ARG_DOUBLE(0, "distance", dist);
 
@@ -191,8 +177,8 @@ NAN_METHOD(LineString::addSubLineString) {
 
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(info.This());
   LineString *other;
-  int         start = 0;
-  int         end   = -1;
+  int start = 0;
+  int end = -1;
 
   NODE_ARG_WRAPPED(0, "line", LineString, other);
   NODE_ARG_INT_OPT(1, "start", start);
@@ -220,9 +206,7 @@ NAN_METHOD(LineString::addSubLineString) {
  */
 NAN_GETTER(LineString::pointsGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("points_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("points_").ToLocalChecked()).ToLocalChecked());
 }
 
 } // namespace node_gdal

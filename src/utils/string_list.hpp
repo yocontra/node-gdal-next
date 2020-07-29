@@ -35,7 +35,7 @@ class StringList {
   }
 
     private:
-  char **      list;
+  char **list;
   std::string *strlist;
 };
 

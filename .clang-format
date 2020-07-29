@@ -1,10 +1,10 @@
 AccessModifierOffset: 2
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Right
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: true
@@ -18,7 +18,7 @@ BreakBeforeBraces: Attach
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
 BreakStringLiterals: false
-ColumnLimit: 80
+ColumnLimit: 120
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 2
@@ -27,7 +27,7 @@ IndentCaseLabels: true
 IndentWidth: 2
 TabWidth: 2
 UseTab: Never
-SortIncludes: true
+SortIncludes: false
 SortUsingDeclarations: true
 AlignAfterOpenBracket: AlwaysBreak
 AlignOperands: false

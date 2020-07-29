@@ -42,8 +42,7 @@ static NAN_METHOD(open) {
     return;
   }
 
-  OGRDataSource *ogr_ds =
-    OGRSFDriverRegistrar::Open(path.c_str(), static_cast<int>(access));
+  OGRDataSource *ogr_ds = OGRSFDriverRegistrar::Open(path.c_str(), static_cast<int>(access));
   if (ogr_ds) {
     info.GetReturnValue().Set(Dataset::New(ogr_ds));
     return;
@@ -65,8 +64,7 @@ static NAN_METHOD(open) {
     return;
   }
 
-  GDALDataset *ds =
-    (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+  GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
   if (ds) {
     info.GetReturnValue().Set(Dataset::New(ds));
     return;
@@ -107,8 +105,7 @@ static NAN_METHOD(getConfigOption) {
   std::string name;
   NODE_ARG_STR(0, "name", name);
 
-  info.GetReturnValue().Set(
-    SafeString::New(CPLGetConfigOption(name.c_str(), NULL)));
+  info.GetReturnValue().Set(SafeString::New(CPLGetConfigOption(name.c_str(), NULL)));
 }
 
 /**
@@ -126,23 +123,20 @@ static NAN_METHOD(getConfigOption) {
 static NAN_METHOD(decToDMS) {
   Nan::HandleScope scope;
 
-  double      angle;
+  double angle;
   std::string axis;
-  int         precision = 2;
+  int precision = 2;
   NODE_ARG_DOUBLE(0, "angle", angle);
   NODE_ARG_STR(1, "axis", axis);
   NODE_ARG_INT_OPT(2, "precision", precision);
 
-  if (axis.length() > 0) {
-    axis[0] = toupper(axis[0]);
-  }
+  if (axis.length() > 0) { axis[0] = toupper(axis[0]); }
   if (axis != "Lat" && axis != "Long") {
     Nan::ThrowError("Axis must be 'lat' or 'long'");
     return;
   }
 
-  info.GetReturnValue().Set(
-    SafeString::New(GDALDecToDMS(angle, axis.c_str(), precision)));
+  info.GetReturnValue().Set(SafeString::New(GDALDecToDMS(angle, axis.c_str(), precision)));
 }
 } // namespace node_gdal
 

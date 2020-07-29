@@ -25,7 +25,7 @@ namespace node_gdal {
 class CoordinateTransformation : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void                              Initialize(Local<Object> target);
+  static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
   static Local<Value> New(OGRCoordinateTransformation *transform);
   static NAN_METHOD(toString);
@@ -59,43 +59,28 @@ class GeoTransformTransformer : public OGRCoordinateTransformation {
   }
 
   // only used on GDAL 2.X
-  virtual int TransformEx(
-    int     nCount,
-    double *x,
-    double *y,
-    double *z          = NULL,
-    int *   pabSuccess = NULL) {
-    return GDALGenImgProjTransform(
-      hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
+  virtual int TransformEx(int nCount, double *x, double *y, double *z = NULL, int *pabSuccess = NULL) {
+    return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
 
   virtual int Transform(int nCount, double *x, double *y, double *z = NULL) {
     int nResult;
 
     int *pabSuccess = (int *)CPLCalloc(sizeof(int), nCount);
-    nResult         = Transform(nCount, x, y, z, pabSuccess);
+    nResult = Transform(nCount, x, y, z, pabSuccess);
     CPLFree(pabSuccess);
 
     return nResult;
   }
 
   // GDAL 3.x+
-  virtual int
-  Transform(int nCount, double *x, double *y, double *z, int *pabSuccess) {
-    return GDALGenImgProjTransform(
-      hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
+  virtual int Transform(int nCount, double *x, double *y, double *z, int *pabSuccess) {
+    return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
 
   // Latest GDAL
-  virtual int Transform(
-    int     nCount,
-    double *x,
-    double *y,
-    double *z,
-    double * /* t */,
-    int *pabSuccess) {
-    return GDALGenImgProjTransform(
-      hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
+  virtual int Transform(int nCount, double *x, double *y, double *z, double * /* t */, int *pabSuccess) {
+    return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
 
   virtual OGRCoordinateTransformation *Clone() const {

@@ -33,9 +33,9 @@ class IntegerList {
   }
 
     private:
-  int *        list;
+  int *list;
   unsigned int len;
-  const char * name;
+  const char *name;
 };
 
 class DoubleList {
@@ -54,9 +54,9 @@ class DoubleList {
   }
 
     private:
-  double *     list;
+  double *list;
   unsigned int len;
-  const char * name;
+  const char *name;
 };
 
 } // namespace node_gdal

@@ -9,8 +9,7 @@ Nan::Persistent<FunctionTemplate> RasterBandOverviews::constructor;
 void RasterBandOverviews::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
 
-  Local<FunctionTemplate> lcons =
-    Nan::New<FunctionTemplate>(RasterBandOverviews::New);
+  Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(RasterBandOverviews::New);
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
   lcons->SetClassName(Nan::New("RasterBandOverviews").ToLocalChecked());
 
@@ -19,10 +18,7 @@ void RasterBandOverviews::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "get", get);
   Nan::SetPrototypeMethod(lcons, "getBySampleCount", getBySampleCount);
 
-  Nan::Set(
-    target,
-    Nan::New("RasterBandOverviews").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("RasterBandOverviews").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
@@ -43,14 +39,13 @@ NAN_METHOD(RasterBandOverviews::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
   if (info[0]->IsExternal()) {
-    Local<External>      ext = info[0].As<External>();
-    void *               ptr = ext->Value();
-    RasterBandOverviews *f   = static_cast<RasterBandOverviews *>(ptr);
+    Local<External> ext = info[0].As<External>();
+    void *ptr = ext->Value();
+    RasterBandOverviews *f = static_cast<RasterBandOverviews *>(ptr);
     f->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
     return;
@@ -65,13 +60,9 @@ Local<Value> RasterBandOverviews::New(Local<Value> band_obj) {
 
   RasterBandOverviews *wrapped = new RasterBandOverviews();
 
-  v8::Local<v8::Value>  ext = Nan::New<External>(wrapped);
+  v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(RasterBandOverviews::constructor))
-        .ToLocalChecked(),
-      1,
-      &ext)
+    Nan::NewInstance(Nan::GetFunction(Nan::New(RasterBandOverviews::constructor)).ToLocalChecked(), 1, &ext)
       .ToLocalChecked();
   Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), band_obj);
 
@@ -95,9 +86,7 @@ NAN_METHOD(RasterBandOverviews::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
@@ -135,9 +124,7 @@ NAN_METHOD(RasterBandOverviews::getBySampleCount) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
@@ -162,9 +149,7 @@ NAN_METHOD(RasterBandOverviews::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");

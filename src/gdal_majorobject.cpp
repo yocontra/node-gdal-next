@@ -6,8 +6,7 @@
 
 namespace node_gdal {
 
-Local<Object>
-MajorObject::getMetadata(GDALMajorObject *obj, const char *domain) {
+Local<Object> MajorObject::getMetadata(GDALMajorObject *obj, const char *domain) {
   Nan::EscapableHandleScope scope;
 
   char **metadata = obj->GetMetadata(domain);
@@ -17,15 +16,12 @@ MajorObject::getMetadata(GDALMajorObject *obj, const char *domain) {
   if (metadata) {
     int i = 0;
     while (metadata[i]) {
-      std::string pair    = metadata[i];
+      std::string pair = metadata[i];
       std::size_t i_equal = pair.find_first_of('=');
       if (i_equal != std::string::npos) {
         std::string key = pair.substr(0, i_equal);
         std::string val = pair.substr(i_equal + 1);
-        Nan::Set(
-          result,
-          Nan::New(key.c_str()).ToLocalChecked(),
-          Nan::New(val.c_str()).ToLocalChecked());
+        Nan::Set(result, Nan::New(key.c_str()).ToLocalChecked(), Nan::New(val.c_str()).ToLocalChecked());
       }
       i++;
     }

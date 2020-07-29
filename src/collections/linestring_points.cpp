@@ -11,8 +11,7 @@ Nan::Persistent<FunctionTemplate> LineStringPoints::constructor;
 void LineStringPoints::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
 
-  Local<FunctionTemplate> lcons =
-    Nan::New<FunctionTemplate>(LineStringPoints::New);
+  Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(LineStringPoints::New);
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
   lcons->SetClassName(Nan::New("LineStringPoints").ToLocalChecked());
 
@@ -24,10 +23,7 @@ void LineStringPoints::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "reverse", reverse);
   Nan::SetPrototypeMethod(lcons, "resize", resize);
 
-  Nan::Set(
-    target,
-    Nan::New("LineStringPoints").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("LineStringPoints").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
@@ -48,13 +44,12 @@ NAN_METHOD(LineStringPoints::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
   if (info[0]->IsExternal()) {
-    Local<External>   ext  = info[0].As<External>();
-    void *            ptr  = ext->Value();
+    Local<External> ext = info[0].As<External>();
+    void *ptr = ext->Value();
     LineStringPoints *geom = static_cast<LineStringPoints *>(ptr);
     geom->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
@@ -70,13 +65,9 @@ Local<Value> LineStringPoints::New(Local<Value> geom) {
 
   LineStringPoints *wrapped = new LineStringPoints();
 
-  v8::Local<v8::Value>  ext = Nan::New<External>(wrapped);
+  v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(LineStringPoints::constructor))
-        .ToLocalChecked(),
-      1,
-      &ext)
+    Nan::NewInstance(Nan::GetFunction(Nan::New(LineStringPoints::constructor)).ToLocalChecked(), 1, &ext)
       .ToLocalChecked();
   Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), geom);
 
@@ -98,9 +89,7 @@ NAN_METHOD(LineStringPoints::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
   info.GetReturnValue().Set(Nan::New<Integer>(geom->get()->getNumPoints()));
@@ -115,9 +104,7 @@ NAN_METHOD(LineStringPoints::reverse) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
   geom->get()->reversePoints();
@@ -135,9 +122,7 @@ NAN_METHOD(LineStringPoints::resize) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
   int count;
@@ -158,13 +143,11 @@ NAN_METHOD(LineStringPoints::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
   OGRPoint *pt = new OGRPoint();
-  int       i;
+  int i;
 
   NODE_ARG_INT(0, "index", i);
   if (i < 0 || i >= geom->get()->getNumPoints()) {
@@ -193,9 +176,7 @@ NAN_METHOD(LineStringPoints::set) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
   int i;
@@ -249,10 +230,7 @@ NAN_METHOD(LineStringPoints::set) {
       return;
     }
     if (n == 2) {
-      geom->get()->setPoint(
-        i,
-        Nan::To<double>(info[1]).ToChecked(),
-        Nan::To<double>(info[2]).ToChecked());
+      geom->get()->setPoint(i, Nan::To<double>(info[1]).ToChecked(), Nan::To<double>(info[2]).ToChecked());
     } else {
       if (!info[3]->IsNumber()) {
         Nan::ThrowError("Number expected for fourth argument");
@@ -290,9 +268,7 @@ NAN_METHOD(LineStringPoints::add) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
   int n = info.Length();
@@ -311,8 +287,8 @@ NAN_METHOD(LineStringPoints::add) {
       geom->get()->addPoint(pt->get());
     } else if (info[0]->IsArray()) {
       // set from array of points
-      Local<Array> array  = info[0].As<Array>();
-      int          length = array->Length();
+      Local<Array> array = info[0].As<Array>();
+      int length = array->Length();
       for (int i = 0; i < length; i++) {
         Local<Value> element = Nan::Get(array, i).ToLocalChecked();
         if (!element->IsObject()) {
@@ -332,8 +308,7 @@ NAN_METHOD(LineStringPoints::add) {
 
           Local<String> z_prop_name = Nan::New("z").ToLocalChecked();
           if (Nan::HasOwnProperty(element_obj, z_prop_name).FromMaybe(false)) {
-            Local<Value> z_val =
-              Nan::Get(element_obj, z_prop_name).ToLocalChecked();
+            Local<Value> z_val = Nan::Get(element_obj, z_prop_name).ToLocalChecked();
             if (!z_val->IsNumber()) {
               Nan::ThrowError("z property must be number");
               return;
@@ -347,7 +322,7 @@ NAN_METHOD(LineStringPoints::add) {
     } else {
       // set from object {x: 0, y: 5}
       Local<Object> obj = info[0].As<Object>();
-      double        x, y;
+      double x, y;
       NODE_DOUBLE_FROM_OBJ(obj, "x", x);
       NODE_DOUBLE_FROM_OBJ(obj, "y", y);
 
@@ -374,9 +349,7 @@ NAN_METHOD(LineStringPoints::add) {
       return;
     }
     if (n == 2) {
-      geom->get()->addPoint(
-        Nan::To<double>(info[0]).ToChecked(),
-        Nan::To<double>(info[1]).ToChecked());
+      geom->get()->addPoint(Nan::To<double>(info[0]).ToChecked(), Nan::To<double>(info[1]).ToChecked());
     } else {
       if (!info[2]->IsNumber()) {
         Nan::ThrowError("Number expected for third argument");

@@ -10,8 +10,7 @@ Nan::Persistent<FunctionTemplate> LayerFeatures::constructor;
 void LayerFeatures::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
 
-  Local<FunctionTemplate> lcons =
-    Nan::New<FunctionTemplate>(LayerFeatures::New);
+  Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(LayerFeatures::New);
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
   lcons->SetClassName(Nan::New("LayerFeatures").ToLocalChecked());
 
@@ -26,10 +25,7 @@ void LayerFeatures::Initialize(Local<Object> target) {
 
   ATTR_DONT_ENUM(lcons, "layer", layerGetter, READ_ONLY_SETTER);
 
-  Nan::Set(
-    target,
-    Nan::New("LayerFeatures").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("LayerFeatures").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
@@ -50,14 +46,13 @@ NAN_METHOD(LayerFeatures::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    LayerFeatures * f   = static_cast<LayerFeatures *>(ptr);
+    void *ptr = ext->Value();
+    LayerFeatures *f = static_cast<LayerFeatures *>(ptr);
     f->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
     return;
@@ -72,13 +67,9 @@ Local<Value> LayerFeatures::New(Local<Value> layer_obj) {
 
   LayerFeatures *wrapped = new LayerFeatures();
 
-  v8::Local<v8::Value>  ext = Nan::New<External>(wrapped);
+  v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(LayerFeatures::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(LayerFeatures::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
   Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), layer_obj);
 
   return scope.Escape(obj);
@@ -104,9 +95,7 @@ NAN_METHOD(LayerFeatures::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -131,9 +120,7 @@ NAN_METHOD(LayerFeatures::first) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -160,9 +147,7 @@ NAN_METHOD(LayerFeatures::next) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -193,9 +178,7 @@ NAN_METHOD(LayerFeatures::add) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -224,9 +207,7 @@ NAN_METHOD(LayerFeatures::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -236,8 +217,7 @@ NAN_METHOD(LayerFeatures::count) {
   int force = 1;
   NODE_ARG_BOOL_OPT(0, "force", force);
 
-  info.GetReturnValue().Set(
-    Nan::New<Number>(layer->get()->GetFeatureCount(force)));
+  info.GetReturnValue().Set(Nan::New<Number>(layer->get()->GetFeatureCount(force)));
 }
 
 /**
@@ -252,18 +232,16 @@ NAN_METHOD(LayerFeatures::set) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
     return;
   }
 
-  int      err;
+  int err;
   Feature *f;
-  int      argc = info.Length();
+  int argc = info.Length();
 
   if (argc == 1) {
     NODE_ARG_WRAPPED(0, "feature", Feature, f);
@@ -304,9 +282,7 @@ NAN_METHOD(LayerFeatures::remove) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(parent);
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object already destroyed");
@@ -332,9 +308,7 @@ NAN_METHOD(LayerFeatures::remove) {
  */
 NAN_GETTER(LayerFeatures::layerGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 
 } // namespace node_gdal

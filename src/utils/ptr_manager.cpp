@@ -15,17 +15,16 @@ PtrManager::~PtrManager() {
 
 bool PtrManager::isAlive(long uid) {
   if (uid == 0) return true;
-  return bands.count(uid) > 0 || layers.count(uid) > 0 ||
-    datasets.count(uid) > 0;
+  return bands.count(uid) > 0 || layers.count(uid) > 0 || datasets.count(uid) > 0;
 }
 
 long PtrManager::add(OGRLayer *ptr, long parent_uid, bool is_result_set) {
   PtrManagerLayerItem *item = new PtrManagerLayerItem();
-  item->uid                 = uid++;
-  item->parent              = datasets[parent_uid];
-  item->ptr                 = ptr;
-  item->is_result_set       = is_result_set;
-  layers[item->uid]         = item;
+  item->uid = uid++;
+  item->parent = datasets[parent_uid];
+  item->ptr = ptr;
+  item->is_result_set = is_result_set;
+  layers[item->uid] = item;
 
   PtrManagerDatasetItem *parent = datasets[parent_uid];
   parent->layers.push_back(item);
@@ -34,10 +33,10 @@ long PtrManager::add(OGRLayer *ptr, long parent_uid, bool is_result_set) {
 
 long PtrManager::add(GDALRasterBand *ptr, long parent_uid) {
   PtrManagerRasterBandItem *item = new PtrManagerRasterBandItem();
-  item->uid                      = uid++;
-  item->parent                   = datasets[parent_uid];
-  item->ptr                      = ptr;
-  bands[item->uid]               = item;
+  item->uid = uid++;
+  item->parent = datasets[parent_uid];
+  item->ptr = ptr;
+  bands[item->uid] = item;
 
   PtrManagerDatasetItem *parent = datasets[parent_uid];
   parent->bands.push_back(item);
@@ -46,18 +45,18 @@ long PtrManager::add(GDALRasterBand *ptr, long parent_uid) {
 
 long PtrManager::add(GDALDataset *ptr) {
   PtrManagerDatasetItem *item = new PtrManagerDatasetItem();
-  item->uid                   = uid++;
-  item->ptr                   = ptr;
-  datasets[item->uid]         = item;
+  item->uid = uid++;
+  item->ptr = ptr;
+  datasets[item->uid] = item;
   return item->uid;
 }
 
 #if GDAL_VERSION_MAJOR < 2
 long PtrManager::add(OGRDataSource *ptr) {
   PtrManagerDatasetItem *item = new PtrManagerDatasetItem();
-  item->uid                   = uid++;
-  item->ptr_datasource        = ptr;
-  datasets[item->uid]         = item;
+  item->uid = uid++;
+  item->ptr_datasource = ptr;
+  datasets[item->uid] = item;
   return item->uid;
 }
 #endif
@@ -74,12 +73,8 @@ void PtrManager::dispose(long uid) {
 void PtrManager::dispose(PtrManagerDatasetItem *item) {
   datasets.erase(item->uid);
 
-  while (!item->layers.empty()) {
-    dispose(item->layers.back());
-  }
-  while (!item->bands.empty()) {
-    dispose(item->bands.back());
-  }
+  while (!item->layers.empty()) { dispose(item->layers.back()); }
+  while (!item->bands.empty()) { dispose(item->bands.back()); }
 
 #if GDAL_VERSION_MAJOR < 2
   if (item->ptr_datasource) {
@@ -113,9 +108,7 @@ void PtrManager::dispose(PtrManagerLayerItem *item) {
   GDALDataset *parent_ds = item->parent->ptr;
 #endif
 
-  if (item->is_result_set) {
-    parent_ds->ReleaseResultSet(item->ptr);
-  }
+  if (item->is_result_set) { parent_ds->ReleaseResultSet(item->ptr); }
 
   delete item;
 }

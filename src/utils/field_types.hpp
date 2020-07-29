@@ -24,9 +24,7 @@ static const char *const FIELD_TYPES[] = {
 
 inline const char *getFieldTypeName(OGRFieldType type) {
   int i = static_cast<int>(type);
-  if (i < 0 || i > OFTMaxType) {
-    return "invalid";
-  }
+  if (i < 0 || i > OFTMaxType) { return "invalid"; }
   return FIELD_TYPES[i];
 }
 

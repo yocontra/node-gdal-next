@@ -22,7 +22,7 @@ namespace node_gdal {
 class Feature : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void                              Initialize(Local<Object> target);
+  static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
   static Local<Value> New(OGRFeature *feature);
   static Local<Value> New(OGRFeature *feature, bool owned);
@@ -56,7 +56,7 @@ class Feature : public Nan::ObjectWrap {
     private:
   ~Feature();
   OGRFeature *this_;
-  bool        owned_;
+  bool owned_;
   // int size_;
 };
 

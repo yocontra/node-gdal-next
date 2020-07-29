@@ -31,7 +31,7 @@ namespace node_gdal {
 class Driver : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void                              Initialize(Local<Object> target);
+  static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
   static Local<Value> New(GDALDriver *driver);
   static NAN_METHOD(toString);

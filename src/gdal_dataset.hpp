@@ -31,7 +31,7 @@ namespace node_gdal {
 class Dataset : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void                              Initialize(Local<Object> target);
+  static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
   static Local<Value> New(GDALDataset *ds);
   static NAN_METHOD(toString);
@@ -69,15 +69,14 @@ class Dataset : public Nan::ObjectWrap {
   long uid;
 
 #if GDAL_VERSION_MAJOR < 2
-  static Local<Value>                        New(OGRDataSource *ds);
+  static Local<Value> New(OGRDataSource *ds);
   static ObjectCache<OGRDataSource, Dataset> datasource_cache;
   Dataset(OGRDataSource *ds);
   inline OGRDataSource *getDatasource() {
     return this_datasource;
   }
   inline bool isAlive() {
-    return (uses_ogr ? (this_datasource != NULL) : (this_dataset != NULL)) &&
-      ptr_manager.isAlive(uid);
+    return (uses_ogr ? (this_datasource != NULL) : (this_dataset != NULL)) && ptr_manager.isAlive(uid);
   }
   bool uses_ogr;
 #else

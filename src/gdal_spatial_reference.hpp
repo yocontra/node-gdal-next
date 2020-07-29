@@ -23,7 +23,7 @@ namespace node_gdal {
 class SpatialReference : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void                              Initialize(Local<Object> target);
+  static void Initialize(Local<Object> target);
 
   static NAN_METHOD(New);
   static Local<Value> New(OGRSpatialReference *srs);
@@ -85,7 +85,7 @@ class SpatialReference : public Nan::ObjectWrap {
     private:
   ~SpatialReference();
   OGRSpatialReference *this_;
-  bool                 owned_;
+  bool owned_;
 };
 
 } // namespace node_gdal

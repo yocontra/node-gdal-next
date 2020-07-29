@@ -22,21 +22,16 @@ void MultiPoint::Initialize(Local<Object> target) {
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
 
-  Nan::Set(
-    target,
-    Nan::New("MultiPoint").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("MultiPoint").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-MultiPoint::MultiPoint(OGRMultiPoint *geom)
-  : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+MultiPoint::MultiPoint(OGRMultiPoint *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created MultiPoint [%p]", geom);
 }
 
-MultiPoint::MultiPoint()
-  : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+MultiPoint::MultiPoint() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
 }
 
 MultiPoint::~MultiPoint() {
@@ -58,18 +53,17 @@ MultiPoint::~MultiPoint() {
  */
 NAN_METHOD(MultiPoint::New) {
   Nan::HandleScope scope;
-  MultiPoint *     f;
+  MultiPoint *f;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
 
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    f                   = static_cast<MultiPoint *>(ptr);
+    void *ptr = ext->Value();
+    f = static_cast<MultiPoint *>(ptr);
 
   } else {
     if (info.Length() != 0) {
@@ -80,8 +74,7 @@ NAN_METHOD(MultiPoint::New) {
   }
 
   Local<Value> children = GeometryCollectionChildren::New(info.This());
-  Nan::SetPrivate(
-    info.This(), Nan::New("children_").ToLocalChecked(), children);
+  Nan::SetPrivate(info.This(), Nan::New("children_").ToLocalChecked(), children);
 
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
@@ -95,9 +88,7 @@ Local<Value> MultiPoint::New(OGRMultiPoint *geom) {
 Local<Value> MultiPoint::New(OGRMultiPoint *geom, bool owned) {
   Nan::EscapableHandleScope scope;
 
-  if (!geom) {
-    return scope.Escape(Nan::Null());
-  }
+  if (!geom) { return scope.Escape(Nan::Null()); }
 
   // make a copy of geometry owned by a feature
   // + no need to track when a feature is destroyed
@@ -105,22 +96,16 @@ Local<Value> MultiPoint::New(OGRMultiPoint *geom, bool owned) {
   // geometry
   // - is slower
 
-  if (!owned) {
-    geom = static_cast<OGRMultiPoint *>(geom->clone());
-  }
+  if (!owned) { geom = static_cast<OGRMultiPoint *>(geom->clone()); }
 
   MultiPoint *wrapped = new MultiPoint(geom);
-  wrapped->owned_     = true;
+  wrapped->owned_ = true;
 
   UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
 
-  Local<Value>  ext = Nan::New<External>(wrapped);
+  Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(MultiPoint::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(MultiPoint::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   return scope.Escape(obj);
 }

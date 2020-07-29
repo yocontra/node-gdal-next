@@ -15,8 +15,7 @@ Nan::Persistent<FunctionTemplate> MultiLineString::constructor;
 void MultiLineString::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
 
-  Local<FunctionTemplate> lcons =
-    Nan::New<FunctionTemplate>(MultiLineString::New);
+  Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(MultiLineString::New);
   lcons->Inherit(Nan::New(GeometryCollection::constructor));
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
   lcons->SetClassName(Nan::New("MultiLineString").ToLocalChecked());
@@ -24,29 +23,21 @@ void MultiLineString::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "polygonize", polygonize);
 
-  Nan::Set(
-    target,
-    Nan::New("MultiLineString").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("MultiLineString").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-MultiLineString::MultiLineString(OGRMultiLineString *geom)
-  : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+MultiLineString::MultiLineString(OGRMultiLineString *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created MultiLineString [%p]", geom);
 }
 
-MultiLineString::MultiLineString()
-  : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+MultiLineString::MultiLineString() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
 }
 
 MultiLineString::~MultiLineString() {
   if (this_) {
-    LOG(
-      "Disposing GeometryCollection [%p] (%s)",
-      this_,
-      owned_ ? "owned" : "unowned");
+    LOG("Disposing GeometryCollection [%p] (%s)", this_, owned_ ? "owned" : "unowned");
     if (owned_) {
       OGRGeometryFactory::destroyGeometry(this_);
       Nan::AdjustExternalMemory(-size_);
@@ -66,15 +57,14 @@ NAN_METHOD(MultiLineString::New) {
   MultiLineString *f;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
 
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    f                   = static_cast<MultiLineString *>(ptr);
+    void *ptr = ext->Value();
+    f = static_cast<MultiLineString *>(ptr);
 
   } else {
     if (info.Length() != 0) {
@@ -85,8 +75,7 @@ NAN_METHOD(MultiLineString::New) {
   }
 
   Local<Value> children = GeometryCollectionChildren::New(info.This());
-  Nan::SetPrivate(
-    info.This(), Nan::New("children_").ToLocalChecked(), children);
+  Nan::SetPrivate(info.This(), Nan::New("children_").ToLocalChecked(), children);
 
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
@@ -100,9 +89,7 @@ Local<Value> MultiLineString::New(OGRMultiLineString *geom) {
 Local<Value> MultiLineString::New(OGRMultiLineString *geom, bool owned) {
   Nan::EscapableHandleScope scope;
 
-  if (!geom) {
-    return scope.Escape(Nan::Null());
-  }
+  if (!geom) { return scope.Escape(Nan::Null()); }
 
   // make a copy of geometry owned by a feature
   // + no need to track when a feature is destroyed
@@ -110,21 +97,16 @@ Local<Value> MultiLineString::New(OGRMultiLineString *geom, bool owned) {
   // geometry
   // - is slower
 
-  if (!owned) {
-    geom = static_cast<OGRMultiLineString *>(geom->clone());
-  };
+  if (!owned) { geom = static_cast<OGRMultiLineString *>(geom->clone()); };
 
   MultiLineString *wrapped = new MultiLineString(geom);
-  wrapped->owned_          = true;
+  wrapped->owned_ = true;
 
   UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
 
-  Local<Value>  ext = Nan::New<External>(wrapped);
+  Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(MultiLineString::constructor)).ToLocalChecked(),
-      1,
-      &ext)
+    Nan::NewInstance(Nan::GetFunction(Nan::New(MultiLineString::constructor)).ToLocalChecked(), 1, &ext)
       .ToLocalChecked();
 
   return scope.Escape(obj);

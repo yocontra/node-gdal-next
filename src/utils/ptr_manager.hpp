@@ -24,23 +24,23 @@ using namespace v8;
 
 struct PtrManagerDatasetItem;
 struct PtrManagerLayerItem {
-  long                   uid;
+  long uid;
   PtrManagerDatasetItem *parent;
-  OGRLayer *             ptr;
-  bool                   is_result_set;
+  OGRLayer *ptr;
+  bool is_result_set;
 };
 
 struct PtrManagerRasterBandItem {
-  long                   uid;
+  long uid;
   PtrManagerDatasetItem *parent;
-  GDALRasterBand *       ptr;
+  GDALRasterBand *ptr;
 };
 
 struct PtrManagerDatasetItem {
-  long                                  uid;
-  std::list<PtrManagerLayerItem *>      layers;
+  long uid;
+  std::list<PtrManagerLayerItem *> layers;
   std::list<PtrManagerRasterBandItem *> bands;
-  GDALDataset *                         ptr;
+  GDALDataset *ptr;
 #if GDAL_VERSION_MAJOR < 2
   OGRDataSource *ptr_datasource;
 #endif
@@ -65,13 +65,13 @@ class PtrManager {
   ~PtrManager();
 
     private:
-  long                                  uid;
-  void                                  dispose(PtrManagerLayerItem *item);
-  void                                  dispose(PtrManagerRasterBandItem *item);
-  void                                  dispose(PtrManagerDatasetItem *item);
+  long uid;
+  void dispose(PtrManagerLayerItem *item);
+  void dispose(PtrManagerRasterBandItem *item);
+  void dispose(PtrManagerDatasetItem *item);
   std::map<long, PtrManagerLayerItem *> layers;
   std::map<long, PtrManagerRasterBandItem *> bands;
-  std::map<long, PtrManagerDatasetItem *>    datasets;
+  std::map<long, PtrManagerDatasetItem *> datasets;
 };
 
 } // namespace node_gdal

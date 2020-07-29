@@ -20,10 +20,7 @@ void PolygonRings::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "get", get);
   Nan::SetPrototypeMethod(lcons, "add", add);
 
-  Nan::Set(
-    target,
-    Nan::New("PolygonRings").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("PolygonRings").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
@@ -44,14 +41,13 @@ NAN_METHOD(PolygonRings::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
   if (info[0]->IsExternal()) {
-    Local<External> ext  = info[0].As<External>();
-    void *          ptr  = ext->Value();
-    PolygonRings *  geom = static_cast<PolygonRings *>(ptr);
+    Local<External> ext = info[0].As<External>();
+    void *ptr = ext->Value();
+    PolygonRings *geom = static_cast<PolygonRings *>(ptr);
     geom->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
     return;
@@ -66,13 +62,9 @@ Local<Value> PolygonRings::New(Local<Value> geom) {
 
   PolygonRings *wrapped = new PolygonRings();
 
-  v8::Local<v8::Value>  ext = Nan::New<External>(wrapped);
+  v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(PolygonRings::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(PolygonRings::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
   Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), geom);
 
   return scope.Escape(obj);
@@ -93,9 +85,7 @@ NAN_METHOD(PolygonRings::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Polygon *geom = Nan::ObjectWrap::Unwrap<Polygon>(parent);
 
   int i = geom->get()->getExteriorRing() ? 1 : 0;
@@ -120,21 +110,17 @@ NAN_METHOD(PolygonRings::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Polygon *geom = Nan::ObjectWrap::Unwrap<Polygon>(parent);
 
   int i;
   NODE_ARG_INT(0, "index", i);
 
   if (i == 0) {
-    info.GetReturnValue().Set(
-      LinearRing::New(geom->get()->getExteriorRing(), false));
+    info.GetReturnValue().Set(LinearRing::New(geom->get()->getExteriorRing(), false));
     return;
   } else {
-    info.GetReturnValue().Set(
-      LinearRing::New(geom->get()->getInteriorRing(i - 1), false));
+    info.GetReturnValue().Set(LinearRing::New(geom->get()->getInteriorRing(i - 1), false));
     return;
   }
 }
@@ -164,9 +150,7 @@ NAN_METHOD(PolygonRings::add) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Polygon *geom = Nan::ObjectWrap::Unwrap<Polygon>(parent);
 
   LinearRing *ring;
@@ -177,8 +161,8 @@ NAN_METHOD(PolygonRings::add) {
   }
   if (info[0]->IsArray()) {
     // set from array of geometry objects
-    Local<Array> array  = info[0].As<Array>();
-    int          length = array->Length();
+    Local<Array> array = info[0].As<Array>();
+    int length = array->Length();
     for (int i = 0; i < length; i++) {
       Local<Value> element = Nan::Get(array, i).ToLocalChecked();
       if (IS_WRAPPED(element, LinearRing)) {

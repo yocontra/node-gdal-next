@@ -16,15 +16,15 @@ void Warper::Initialize(Local<Object> target) {
  * ChunkAndWarpMulti
  */
 CPLErr GDALReprojectImageMulti(
-  GDALDatasetH     hSrcDS,
-  const char *     pszSrcWKT,
-  GDALDatasetH     hDstDS,
-  const char *     pszDstWKT,
-  GDALResampleAlg  eResampleAlg,
-  double           dfWarpMemoryLimit,
-  double           dfMaxError,
+  GDALDatasetH hSrcDS,
+  const char *pszSrcWKT,
+  GDALDatasetH hDstDS,
+  const char *pszDstWKT,
+  GDALResampleAlg eResampleAlg,
+  double dfWarpMemoryLimit,
+  double dfMaxError,
   GDALProgressFunc pfnProgress,
-  void *           pProgressArg,
+  void *pProgressArg,
   GDALWarpOptions *psOptions)
 
 {
@@ -35,8 +35,7 @@ CPLErr GDALReprojectImageMulti(
   /* -------------------------------------------------------------------- */
   void *hTransformArg;
 
-  hTransformArg = GDALCreateGenImgProjTransformer(
-    hSrcDS, pszSrcWKT, hDstDS, pszDstWKT, TRUE, 1000.0, 0);
+  hTransformArg = GDALCreateGenImgProjTransformer(hSrcDS, pszSrcWKT, hDstDS, pszDstWKT, TRUE, 1000.0, 0);
 
   if (hTransformArg == NULL) return CE_Failure;
 
@@ -55,12 +54,11 @@ CPLErr GDALReprojectImageMulti(
   /*      Set transform.                                                  */
   /* -------------------------------------------------------------------- */
   if (dfMaxError > 0.0) {
-    psWOptions->pTransformerArg = GDALCreateApproxTransformer(
-      GDALGenImgProjTransform, hTransformArg, dfMaxError);
+    psWOptions->pTransformerArg = GDALCreateApproxTransformer(GDALGenImgProjTransform, hTransformArg, dfMaxError);
 
     psWOptions->pfnTransformer = GDALApproxTransform;
   } else {
-    psWOptions->pfnTransformer  = GDALGenImgProjTransform;
+    psWOptions->pfnTransformer = GDALGenImgProjTransform;
     psWOptions->pTransformerArg = hTransformArg;
   }
 
@@ -73,13 +71,10 @@ CPLErr GDALReprojectImageMulti(
   psWOptions->hDstDS = hDstDS;
 
   if (psWOptions->nBandCount == 0) {
-    psWOptions->nBandCount =
-      MIN(GDALGetRasterCount(hSrcDS), GDALGetRasterCount(hDstDS));
+    psWOptions->nBandCount = MIN(GDALGetRasterCount(hSrcDS), GDALGetRasterCount(hDstDS));
 
-    psWOptions->panSrcBands =
-      (int *)CPLMalloc(sizeof(int) * psWOptions->nBandCount);
-    psWOptions->panDstBands =
-      (int *)CPLMalloc(sizeof(int) * psWOptions->nBandCount);
+    psWOptions->panSrcBands = (int *)CPLMalloc(sizeof(int) * psWOptions->nBandCount);
+    psWOptions->panDstBands = (int *)CPLMalloc(sizeof(int) * psWOptions->nBandCount);
 
     for (iBand = 0; iBand < psWOptions->nBandCount; iBand++) {
       psWOptions->panSrcBands[iBand] = iBand + 1;
@@ -92,23 +87,19 @@ CPLErr GDALReprojectImageMulti(
   /*      any. Same for target nodata values                              */
   /* -------------------------------------------------------------------- */
   for (iBand = 0; iBand < psWOptions->nBandCount; iBand++) {
-    GDALRasterBandH hBand      = GDALGetRasterBand(hSrcDS, iBand + 1);
-    int             bGotNoData = FALSE;
-    double          dfNoDataValue;
+    GDALRasterBandH hBand = GDALGetRasterBand(hSrcDS, iBand + 1);
+    int bGotNoData = FALSE;
+    double dfNoDataValue;
 
-    if (GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand) {
-      psWOptions->nSrcAlphaBand = iBand + 1;
-    }
+    if (GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand) { psWOptions->nSrcAlphaBand = iBand + 1; }
 
     dfNoDataValue = GDALGetRasterNoDataValue(hBand, &bGotNoData);
     if (bGotNoData) {
       if (psWOptions->padfSrcNoDataReal == NULL) {
         int ii;
 
-        psWOptions->padfSrcNoDataReal =
-          (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
-        psWOptions->padfSrcNoDataImag =
-          (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
+        psWOptions->padfSrcNoDataReal = (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
+        psWOptions->padfSrcNoDataImag = (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
 
         for (ii = 0; ii < psWOptions->nBandCount; ii++) {
           psWOptions->padfSrcNoDataReal[ii] = -1.1e20;
@@ -121,19 +112,15 @@ CPLErr GDALReprojectImageMulti(
 
     // Deal with target band
     hBand = GDALGetRasterBand(hDstDS, iBand + 1);
-    if (hBand && GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand) {
-      psWOptions->nDstAlphaBand = iBand + 1;
-    }
+    if (hBand && GDALGetRasterColorInterpretation(hBand) == GCI_AlphaBand) { psWOptions->nDstAlphaBand = iBand + 1; }
 
     dfNoDataValue = GDALGetRasterNoDataValue(hBand, &bGotNoData);
     if (bGotNoData) {
       if (psWOptions->padfDstNoDataReal == NULL) {
         int ii;
 
-        psWOptions->padfDstNoDataReal =
-          (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
-        psWOptions->padfDstNoDataImag =
-          (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
+        psWOptions->padfDstNoDataReal = (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
+        psWOptions->padfDstNoDataImag = (double *)CPLMalloc(sizeof(double) * psWOptions->nBandCount);
 
         for (ii = 0; ii < psWOptions->nBandCount; ii++) {
           psWOptions->padfDstNoDataReal[ii] = -1.1e20;
@@ -149,7 +136,7 @@ CPLErr GDALReprojectImageMulti(
   /*      Set the progress function.                                      */
   /* -------------------------------------------------------------------- */
   if (pfnProgress != NULL) {
-    psWOptions->pfnProgress  = pfnProgress;
+    psWOptions->pfnProgress = pfnProgress;
     psWOptions->pProgressArg = pProgressArg;
   }
 
@@ -157,21 +144,18 @@ CPLErr GDALReprojectImageMulti(
   /*      Create a warp options based on the options.                     */
   /* -------------------------------------------------------------------- */
   GDALWarpOperation oWarper;
-  CPLErr            eErr;
+  CPLErr eErr;
 
   eErr = oWarper.Initialize(psWOptions);
 
-  if (eErr == CE_None)
-    eErr = oWarper.ChunkAndWarpMulti(
-      0, 0, GDALGetRasterXSize(hDstDS), GDALGetRasterYSize(hDstDS));
+  if (eErr == CE_None) eErr = oWarper.ChunkAndWarpMulti(0, 0, GDALGetRasterXSize(hDstDS), GDALGetRasterYSize(hDstDS));
 
   /* -------------------------------------------------------------------- */
   /*      Cleanup.                                                        */
   /* -------------------------------------------------------------------- */
   GDALDestroyGenImgProjTransformer(hTransformArg);
 
-  if (dfMaxError > 0.0)
-    GDALDestroyApproxTransformer(psWOptions->pTransformerArg);
+  if (dfMaxError > 0.0) GDALDestroyApproxTransformer(psWOptions->pTransformerArg);
 
   GDALDestroyWarpOptions(psWOptions);
 
@@ -211,15 +195,15 @@ NAN_METHOD(Warper::reprojectImage) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
-  Local<Value>  prop;
+  Local<Value> prop;
 
-  WarpOptions       options;
-  GDALWarpOptions * opts;
-  std::string       s_srs_str;
-  std::string       t_srs_str;
+  WarpOptions options;
+  GDALWarpOptions *opts;
+  std::string s_srs_str;
+  std::string t_srs_str;
   SpatialReference *s_srs;
   SpatialReference *t_srs;
-  double            maxError = 0;
+  double maxError = 0;
 
   NODE_ARG_OBJECT(0, "Warp options", obj);
 
@@ -307,23 +291,20 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
-  Local<Value>  prop;
+  Local<Value> prop;
 
-  Dataset *         ds;
+  Dataset *ds;
   SpatialReference *s_srs;
   SpatialReference *t_srs;
-  double            maxError = 0;
-  double            geotransform[6];
-  int               w = 0, h = 0;
+  double maxError = 0;
+  double geotransform[6];
+  int w = 0, h = 0;
 
   NODE_ARG_OBJECT(0, "Warp options", obj);
 
-  if (Nan::HasOwnProperty(obj, Nan::New("src").ToLocalChecked())
-        .FromMaybe(false)) {
+  if (Nan::HasOwnProperty(obj, Nan::New("src").ToLocalChecked()).FromMaybe(false)) {
     prop = Nan::Get(obj, Nan::New("src").ToLocalChecked()).ToLocalChecked();
-    if (
-      prop->IsObject() && !prop->IsNull() &&
-      Nan::New(Dataset::constructor)->HasInstance(prop)) {
+    if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
       ds = Nan::ObjectWrap::Unwrap<Dataset>(prop.As<Object>());
       if (!ds->getDataset()) {
 #if GDAL_VERSION_MAJOR < 2
@@ -360,8 +341,8 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
   }
 
   void *hTransformArg;
-  void *hGenTransformArg = GDALCreateGenImgProjTransformer(
-    ds->getDataset(), s_srs_wkt, NULL, t_srs_wkt, TRUE, 1000.0, 0);
+  void *hGenTransformArg =
+    GDALCreateGenImgProjTransformer(ds->getDataset(), s_srs_wkt, NULL, t_srs_wkt, TRUE, 1000.0, 0);
 
   if (!hGenTransformArg) {
     CPLFree(s_srs_wkt);
@@ -373,8 +354,7 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
   GDALTransformerFunc pfnTransformer;
 
   if (maxError > 0.0) {
-    hTransformArg = GDALCreateApproxTransformer(
-      GDALGenImgProjTransform, hGenTransformArg, maxError);
+    hTransformArg = GDALCreateApproxTransformer(GDALGenImgProjTransform, hGenTransformArg, maxError);
     pfnTransformer = GDALApproxTransform;
 
     if (!hTransformArg) {
@@ -385,19 +365,16 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
       return;
     }
   } else {
-    hTransformArg  = hGenTransformArg;
+    hTransformArg = hGenTransformArg;
     pfnTransformer = GDALGenImgProjTransform;
   }
 
-  CPLErr err = GDALSuggestedWarpOutput(
-    ds->getDataset(), pfnTransformer, hTransformArg, geotransform, &w, &h);
+  CPLErr err = GDALSuggestedWarpOutput(ds->getDataset(), pfnTransformer, hTransformArg, geotransform, &w, &h);
 
   CPLFree(s_srs_wkt);
   CPLFree(t_srs_wkt);
   GDALDestroyGenImgProjTransformer(hGenTransformArg);
-  if (maxError > 0.0) {
-    GDALDestroyApproxTransformer(hTransformArg);
-  }
+  if (maxError > 0.0) { GDALDestroyApproxTransformer(hTransformArg); }
 
   if (err) {
     NODE_THROW_CPLERR(err);
@@ -418,8 +395,7 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
 
   Local<Object> result = Nan::New<Object>();
   Nan::Set(result, Nan::New("rasterSize").ToLocalChecked(), result_size);
-  Nan::Set(
-    result, Nan::New("geoTransform").ToLocalChecked(), result_geotransform);
+  Nan::Set(result, Nan::New("geoTransform").ToLocalChecked(), result_geotransform);
 
   info.GetReturnValue().Set(result);
 }

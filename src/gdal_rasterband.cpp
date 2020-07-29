@@ -12,7 +12,7 @@
 
 namespace node_gdal {
 
-Nan::Persistent<FunctionTemplate>       RasterBand::constructor;
+Nan::Persistent<FunctionTemplate> RasterBand::constructor;
 ObjectCache<GDALRasterBand, RasterBand> RasterBand::cache;
 
 void RasterBand::Initialize(Local<Object> target) {
@@ -54,32 +54,20 @@ void RasterBand::Initialize(Local<Object> target) {
   ATTR(lcons, "maximum", maximumGetter, READ_ONLY_SETTER);
   ATTR(lcons, "readOnly", readOnlyGetter, READ_ONLY_SETTER);
   ATTR(lcons, "dataType", dataTypeGetter, READ_ONLY_SETTER);
-  ATTR(
-    lcons,
-    "hasArbitraryOverviews",
-    hasArbitraryOverviewsGetter,
-    READ_ONLY_SETTER);
+  ATTR(lcons, "hasArbitraryOverviews", hasArbitraryOverviewsGetter, READ_ONLY_SETTER);
   ATTR(lcons, "unitType", unitTypeGetter, unitTypeSetter);
   ATTR(lcons, "scale", scaleGetter, scaleSetter);
   ATTR(lcons, "offset", offsetGetter, offsetSetter);
   ATTR(lcons, "noDataValue", noDataValueGetter, noDataValueSetter);
   ATTR(lcons, "categoryNames", categoryNamesGetter, categoryNamesSetter);
-  ATTR(
-    lcons,
-    "colorInterpretation",
-    colorInterpretationGetter,
-    colorInterpretationSetter);
+  ATTR(lcons, "colorInterpretation", colorInterpretationGetter, colorInterpretationSetter);
 
-  Nan::Set(
-    target,
-    Nan::New("RasterBand").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("RasterBand").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-RasterBand::RasterBand(GDALRasterBand *band)
-  : Nan::ObjectWrap(), uid(0), this_(band), parent_ds(0) {
+RasterBand::RasterBand(GDALRasterBand *band) : Nan::ObjectWrap(), uid(0), this_(band), parent_ds(0) {
   LOG("Created band [%p] (dataset = %p)", band, band->GetDataset());
 }
 
@@ -111,20 +99,18 @@ NAN_METHOD(RasterBand::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
 
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    RasterBand *    f   = static_cast<RasterBand *>(ptr);
+    void *ptr = ext->Value();
+    RasterBand *f = static_cast<RasterBand *>(ptr);
     f->Wrap(info.This());
 
     Local<Value> overviews = RasterBandOverviews::New(info.This());
-    Nan::SetPrivate(
-      info.This(), Nan::New("overviews_").ToLocalChecked(), overviews);
+    Nan::SetPrivate(info.This(), Nan::New("overviews_").ToLocalChecked(), overviews);
     Local<Value> pixels = RasterBandPixels::New(info.This());
     Nan::SetPrivate(info.This(), Nan::New("pixels_").ToLocalChecked(), pixels);
 
@@ -138,22 +124,14 @@ NAN_METHOD(RasterBand::New) {
 Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
   Nan::EscapableHandleScope scope;
 
-  if (!raw) {
-    return scope.Escape(Nan::Null());
-  }
-  if (cache.has(raw)) {
-    return scope.Escape(cache.get(raw));
-  }
+  if (!raw) { return scope.Escape(Nan::Null()); }
+  if (cache.has(raw)) { return scope.Escape(cache.get(raw)); }
 
   RasterBand *wrapped = new RasterBand(raw);
 
-  Local<Value>  ext = Nan::New<External>(wrapped);
+  Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(RasterBand::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(RasterBand::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   LOG("Adding band to cache[%p] (parent=%p)", raw, raw_parent);
   cache.add(raw, obj);
@@ -167,17 +145,14 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
   if (Dataset::dataset_cache.has(raw_parent)) {
     ds = Dataset::dataset_cache.get(raw_parent);
   } else {
-    LOG(
-      "Band's parent dataset disappeared from cache (band = %p, dataset = %p)",
-      raw,
-      raw_parent);
+    LOG("Band's parent dataset disappeared from cache (band = %p, dataset = %p)", raw, raw_parent);
     Nan::ThrowError("Band's parent dataset disappeared from cache");
     return scope.Escape(Nan::Undefined());
     // ds = Dataset::New(raw_parent); //this should never happen
   }
 
-  long parent_uid    = Nan::ObjectWrap::Unwrap<Dataset>(ds)->uid;
-  wrapped->uid       = ptr_manager.add(raw, parent_uid);
+  long parent_uid = Nan::ObjectWrap::Unwrap<Dataset>(ds)->uid;
+  wrapped->uid = ptr_manager.add(raw, parent_uid);
   wrapped->parent_ds = raw_parent;
   Nan::SetPrivate(obj, Nan::New("ds_").ToLocalChecked(), ds);
 
@@ -214,8 +189,7 @@ NODE_WRAPPED_METHOD(RasterBand, flush, FlushCache);
  * @method getMaskFlags
  * @return {Integer} Mask flags
  */
-NODE_WRAPPED_METHOD_WITH_RESULT(
-  RasterBand, getMaskFlags, Integer, GetMaskFlags);
+NODE_WRAPPED_METHOD_WITH_RESULT(RasterBand, getMaskFlags, Integer, GetMaskFlags);
 // TODO: expose GMF constants in API
 // ({{#crossLink "Constants (GMF)"}}see flags{{/crossLink}})
 
@@ -226,8 +200,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(
  * @method createMaskBand
  * @param {Integer} flags Mask flags
  */
-NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM(
-  RasterBand, createMaskBand, CreateMaskBand, "mask flags");
+NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM(RasterBand, createMaskBand, CreateMaskBand, "mask flags");
 // TODO: expose GMF constants in API
 // ({{#crossLink "Constants (GMF)"}}see flags{{/crossLink}})
 
@@ -266,7 +239,7 @@ NAN_METHOD(RasterBand::getMaskBand) {
  */
 NAN_METHOD(RasterBand::fill) {
   Nan::HandleScope scope;
-  double           real, imaginary = 0;
+  double real, imaginary = 0;
   NODE_ARG_DOUBLE(0, "real value", real);
   NODE_ARG_DOUBLE_OPT(1, "imaginary value", real);
 
@@ -288,16 +261,11 @@ NAN_METHOD(RasterBand::fill) {
 // --- Custom error handling to handle VRT errors ---
 // see: https://github.com/mapbox/mapnik-omnivore/issues/10
 
-std::string     stats_file_err = "";
+std::string stats_file_err = "";
 CPLErrorHandler last_err_handler;
-void CPL_STDCALL
-statisticsErrorHandler(CPLErr eErrClass, int err_no, const char *msg) {
-  if (err_no == CPLE_OpenFailed) {
-    stats_file_err = msg;
-  }
-  if (last_err_handler) {
-    last_err_handler(eErrClass, err_no, msg);
-  }
+void CPL_STDCALL statisticsErrorHandler(CPLErr eErrClass, int err_no, const char *msg) {
+  if (err_no == CPLE_OpenFailed) { stats_file_err = msg; }
+  if (last_err_handler) { last_err_handler(eErrClass, err_no, msg); }
 }
 void pushStatsErrorHandler() {
   last_err_handler = CPLSetErrorHandler(statisticsErrorHandler);
@@ -326,8 +294,8 @@ void popStatsErrorHandler() {
  */
 NAN_METHOD(RasterBand::getStatistics) {
   Nan::HandleScope scope;
-  double           min, max, mean, std_dev;
-  int              approx, force;
+  double min, max, mean, std_dev;
+  int approx, force;
   NODE_ARG_BOOL(0, "allow approximation", approx);
   NODE_ARG_BOOL(1, "force", force);
 
@@ -338,15 +306,13 @@ NAN_METHOD(RasterBand::getStatistics) {
   }
 
   pushStatsErrorHandler();
-  CPLErr err =
-    band->this_->GetStatistics(approx, force, &min, &max, &mean, &std_dev);
+  CPLErr err = band->this_->GetStatistics(approx, force, &min, &max, &mean, &std_dev);
   popStatsErrorHandler();
   if (!stats_file_err.empty()) {
     Nan::ThrowError(stats_file_err.c_str());
   } else if (err) {
     if (!force && err == CE_Warning) {
-      Nan::ThrowError(
-        "Statistics cannot be efficiently computed without scanning raster");
+      Nan::ThrowError("Statistics cannot be efficiently computed without scanning raster");
       return;
     }
     NODE_THROW_CPLERR(err);
@@ -357,8 +323,7 @@ NAN_METHOD(RasterBand::getStatistics) {
   Nan::Set(result, Nan::New("min").ToLocalChecked(), Nan::New<Number>(min));
   Nan::Set(result, Nan::New("max").ToLocalChecked(), Nan::New<Number>(max));
   Nan::Set(result, Nan::New("mean").ToLocalChecked(), Nan::New<Number>(mean));
-  Nan::Set(
-    result, Nan::New("std_dev").ToLocalChecked(), Nan::New<Number>(std_dev));
+  Nan::Set(result, Nan::New("std_dev").ToLocalChecked(), Nan::New<Number>(std_dev));
 
   info.GetReturnValue().Set(result);
 }
@@ -380,8 +345,8 @@ NAN_METHOD(RasterBand::getStatistics) {
  */
 NAN_METHOD(RasterBand::computeStatistics) {
   Nan::HandleScope scope;
-  double           min, max, mean, std_dev;
-  int              approx;
+  double min, max, mean, std_dev;
+  int approx;
   NODE_ARG_BOOL(0, "allow approximation", approx);
 
   RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
@@ -391,8 +356,7 @@ NAN_METHOD(RasterBand::computeStatistics) {
   }
 
   pushStatsErrorHandler();
-  CPLErr err = band->this_->ComputeStatistics(
-    approx, &min, &max, &mean, &std_dev, NULL, NULL);
+  CPLErr err = band->this_->ComputeStatistics(approx, &min, &max, &mean, &std_dev, NULL, NULL);
   popStatsErrorHandler();
   if (!stats_file_err.empty()) {
     Nan::ThrowError(stats_file_err.c_str());
@@ -405,8 +369,7 @@ NAN_METHOD(RasterBand::computeStatistics) {
   Nan::Set(result, Nan::New("min").ToLocalChecked(), Nan::New<Number>(min));
   Nan::Set(result, Nan::New("max").ToLocalChecked(), Nan::New<Number>(max));
   Nan::Set(result, Nan::New("mean").ToLocalChecked(), Nan::New<Number>(mean));
-  Nan::Set(
-    result, Nan::New("std_dev").ToLocalChecked(), Nan::New<Number>(std_dev));
+  Nan::Set(result, Nan::New("std_dev").ToLocalChecked(), Nan::New<Number>(std_dev));
 
   info.GetReturnValue().Set(result);
 }
@@ -424,7 +387,7 @@ NAN_METHOD(RasterBand::computeStatistics) {
  */
 NAN_METHOD(RasterBand::setStatistics) {
   Nan::HandleScope scope;
-  double           min, max, mean, std_dev;
+  double min, max, mean, std_dev;
 
   NODE_ARG_DOUBLE(0, "min", min);
   NODE_ARG_DOUBLE(1, "max", max);
@@ -464,8 +427,7 @@ NAN_METHOD(RasterBand::getMetadata) {
     return;
   }
 
-  info.GetReturnValue().Set(MajorObject::getMetadata(
-    band->this_, domain.empty() ? NULL : domain.c_str()));
+  info.GetReturnValue().Set(MajorObject::getMetadata(band->this_, domain.empty() ? NULL : domain.c_str()));
 }
 
 /**
@@ -475,9 +437,7 @@ NAN_METHOD(RasterBand::getMetadata) {
  */
 NAN_GETTER(RasterBand::dsGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("ds_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("ds_").ToLocalChecked()).ToLocalChecked());
 }
 
 /**
@@ -487,9 +447,7 @@ NAN_GETTER(RasterBand::dsGetter) {
  */
 NAN_GETTER(RasterBand::overviewsGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("overviews_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("overviews_").ToLocalChecked()).ToLocalChecked());
 }
 
 /**
@@ -499,9 +457,7 @@ NAN_GETTER(RasterBand::overviewsGetter) {
  */
 NAN_GETTER(RasterBand::pixelsGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("pixels_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("pixels_").ToLocalChecked()).ToLocalChecked());
 }
 
 /**
@@ -511,7 +467,7 @@ NAN_GETTER(RasterBand::pixelsGetter) {
  */
 NAN_GETTER(RasterBand::idGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -556,21 +512,15 @@ NAN_GETTER(RasterBand::descriptionGetter) {
  */
 NAN_GETTER(RasterBand::sizeGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
 
   Local<Object> result = Nan::New<Object>();
-  Nan::Set(
-    result,
-    Nan::New("x").ToLocalChecked(),
-    Nan::New<Integer>(band->this_->GetXSize()));
-  Nan::Set(
-    result,
-    Nan::New("y").ToLocalChecked(),
-    Nan::New<Integer>(band->this_->GetYSize()));
+  Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(band->this_->GetXSize()));
+  Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(band->this_->GetYSize()));
   info.GetReturnValue().Set(result);
 }
 
@@ -583,7 +533,7 @@ NAN_GETTER(RasterBand::sizeGetter) {
  */
 NAN_GETTER(RasterBand::blockSizeGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -607,14 +557,14 @@ NAN_GETTER(RasterBand::blockSizeGetter) {
  */
 NAN_GETTER(RasterBand::minimumGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
 
-  int    success = 0;
-  double result  = band->this_->GetMinimum(&success);
+  int success = 0;
+  double result = band->this_->GetMinimum(&success);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -627,14 +577,14 @@ NAN_GETTER(RasterBand::minimumGetter) {
  */
 NAN_GETTER(RasterBand::maximumGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
 
-  int    success = 0;
-  double result  = band->this_->GetMaximum(&success);
+  int success = 0;
+  double result = band->this_->GetMaximum(&success);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -646,14 +596,14 @@ NAN_GETTER(RasterBand::maximumGetter) {
  */
 NAN_GETTER(RasterBand::offsetGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
 
-  int    success = 0;
-  double result  = band->this_->GetOffset(&success);
+  int success = 0;
+  double result = band->this_->GetOffset(&success);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -665,14 +615,14 @@ NAN_GETTER(RasterBand::offsetGetter) {
  */
 NAN_GETTER(RasterBand::scaleGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
 
-  int    success = 0;
-  double result  = band->this_->GetScale(&success);
+  int success = 0;
+  double result = band->this_->GetScale(&success);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -684,14 +634,14 @@ NAN_GETTER(RasterBand::scaleGetter) {
  */
 NAN_GETTER(RasterBand::noDataValueGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
 
-  int    success = 0;
-  double result  = band->this_->GetNoDataValue(&success);
+  int success = 0;
+  double result = band->this_->GetNoDataValue(&success);
 
   if (success && !CPLIsNan(result)) {
     info.GetReturnValue().Set(Nan::New<Number>(result));
@@ -713,7 +663,7 @@ NAN_GETTER(RasterBand::noDataValueGetter) {
  */
 NAN_GETTER(RasterBand::unitTypeGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -733,7 +683,7 @@ NAN_GETTER(RasterBand::unitTypeGetter) {
  */
 NAN_GETTER(RasterBand::dataTypeGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -754,7 +704,7 @@ NAN_GETTER(RasterBand::dataTypeGetter) {
  */
 NAN_GETTER(RasterBand::readOnlyGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -777,7 +727,7 @@ NAN_GETTER(RasterBand::readOnlyGetter) {
  */
 NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -795,7 +745,7 @@ NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
  */
 NAN_GETTER(RasterBand::categoryNamesGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -825,7 +775,7 @@ NAN_GETTER(RasterBand::categoryNamesGetter) {
  */
 NAN_GETTER(RasterBand::colorInterpretationGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -834,13 +784,12 @@ NAN_GETTER(RasterBand::colorInterpretationGetter) {
   if (interp == GCI_Undefined)
     return;
   else
-    info.GetReturnValue().Set(
-      SafeString::New(GDALGetColorInterpretationName(interp)));
+    info.GetReturnValue().Set(SafeString::New(GDALGetColorInterpretationName(interp)));
 }
 
 NAN_SETTER(RasterBand::unitTypeSetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -851,15 +800,13 @@ NAN_SETTER(RasterBand::unitTypeSetter) {
     return;
   }
   std::string input = *Nan::Utf8String(value);
-  CPLErr      err   = band->this_->SetUnitType(input.c_str());
-  if (err) {
-    NODE_THROW_CPLERR(err);
-  }
+  CPLErr err = band->this_->SetUnitType(input.c_str());
+  if (err) { NODE_THROW_CPLERR(err); }
 }
 
 NAN_SETTER(RasterBand::noDataValueSetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -877,14 +824,12 @@ NAN_SETTER(RasterBand::noDataValueSetter) {
   }
 
   CPLErr err = band->this_->SetNoDataValue(input);
-  if (err) {
-    NODE_THROW_CPLERR(err);
-  }
+  if (err) { NODE_THROW_CPLERR(err); }
 }
 
 NAN_SETTER(RasterBand::scaleSetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -895,15 +840,13 @@ NAN_SETTER(RasterBand::scaleSetter) {
     return;
   }
   double input = Nan::To<double>(value).ToChecked();
-  CPLErr err   = band->this_->SetScale(input);
-  if (err) {
-    NODE_THROW_CPLERR(err);
-  }
+  CPLErr err = band->this_->SetScale(input);
+  if (err) { NODE_THROW_CPLERR(err); }
 }
 
 NAN_SETTER(RasterBand::offsetSetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -914,15 +857,13 @@ NAN_SETTER(RasterBand::offsetSetter) {
     return;
   }
   double input = Nan::To<double>(value).ToChecked();
-  CPLErr err   = band->this_->SetOffset(input);
-  if (err) {
-    NODE_THROW_CPLERR(err);
-  }
+  CPLErr err = band->this_->SetOffset(input);
+  if (err) { NODE_THROW_CPLERR(err); }
 }
 
 NAN_SETTER(RasterBand::categoryNamesSetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -934,34 +875,30 @@ NAN_SETTER(RasterBand::categoryNamesSetter) {
   }
   Local<Array> names = value.As<Array>();
 
-  char **      list    = NULL;
+  char **list = NULL;
   std::string *strlist = NULL;
 
   if (names->Length() > 0) {
-    list    = new char *[names->Length() + 1];
+    list = new char *[names->Length() + 1];
     strlist = new std::string[names->Length()];
     unsigned int i;
     for (i = 0; i < names->Length(); i++) {
       strlist[i] = *Nan::Utf8String(Nan::Get(names, i).ToLocalChecked());
-      list[i]    = (char *)strlist[i].c_str();
+      list[i] = (char *)strlist[i].c_str();
     }
     list[i] = NULL;
   }
 
   int err = band->this_->SetCategoryNames(list);
 
-  if (list) {
-    delete[] list;
-  }
+  if (list) { delete[] list; }
 
-  if (err) {
-    NODE_THROW_CPLERR(err);
-  }
+  if (err) { NODE_THROW_CPLERR(err); }
 }
 
 NAN_SETTER(RasterBand::colorInterpretationSetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   if (!band->isAlive()) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
@@ -971,21 +908,19 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
 
   if (value->IsString()) {
     std::string name = *Nan::Utf8String(value);
-    ci               = GDALGetColorInterpretationByName(name.c_str());
+    ci = GDALGetColorInterpretationByName(name.c_str());
   } else if (!value->IsNull() && !value->IsUndefined()) {
     Nan::ThrowError("color interpretation must be a string or undefined");
     return;
   }
 
   CPLErr err = band->this_->SetColorInterpretation(ci);
-  if (err) {
-    NODE_THROW_CPLERR(err);
-  }
+  if (err) { NODE_THROW_CPLERR(err); }
 }
 
 NAN_GETTER(RasterBand::uidGetter) {
   Nan::HandleScope scope;
-  RasterBand *     band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   info.GetReturnValue().Set(Nan::New((int)band->uid));
 }
 

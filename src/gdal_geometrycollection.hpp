@@ -46,8 +46,8 @@ class GeometryCollection : public Nan::ObjectWrap {
     private:
   ~GeometryCollection();
   OGRGeometryCollection *this_;
-  bool                   owned_;
-  int                    size_;
+  bool owned_;
+  int size_;
 };
 
 } // namespace node_gdal

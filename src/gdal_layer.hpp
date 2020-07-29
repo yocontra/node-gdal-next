@@ -25,16 +25,14 @@ namespace node_gdal {
 class Layer : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  static void                              Initialize(Local<Object> target);
+  static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
 #if GDAL_VERSION_MAJOR >= 2
   static Local<Value> New(OGRLayer *raw, GDALDataset *raw_parent);
-  static Local<Value>
-  New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set);
+  static Local<Value> New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set);
 #else
   static Local<Value> New(OGRLayer *raw, OGRDataSource *raw_parent);
-  static Local<Value>
-                        New(OGRLayer *raw, OGRDataSource *raw_parent, bool result_set);
+  static Local<Value> New(OGRLayer *raw, OGRDataSource *raw_parent, bool result_set);
 #endif
   static NAN_METHOD(toString);
   static NAN_METHOD(getExtent);

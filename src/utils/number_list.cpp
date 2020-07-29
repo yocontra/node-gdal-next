@@ -17,8 +17,8 @@ IntegerList::~IntegerList() {
 
 int IntegerList::parse(Local<Value> value) {
   Nan::HandleScope scope;
-  unsigned int     i;
-  Local<Array>     arr;
+  unsigned int i;
+  Local<Array> arr;
 
   if (value->IsNull() || value->IsUndefined()) return 0;
 
@@ -33,19 +33,17 @@ int IntegerList::parse(Local<Value> value) {
       if (element->IsNumber()) {
         list[i] = Nan::To<int32_t>(element).ToChecked();
       } else {
-        std::string err = std::string("Every element in the") + name +
-          " array must be a number";
+        std::string err = std::string("Every element in the") + name + " array must be a number";
         Nan::ThrowTypeError(err.c_str());
         return 1;
       }
     }
   } else if (value->IsNumber()) {
-    list    = new int[1];
+    list = new int[1];
     list[0] = Nan::To<int32_t>(value).ToChecked();
-    len     = 1;
+    len = 1;
   } else {
-    std::string err =
-      std::string(name) + "integer list must be an array or single integer";
+    std::string err = std::string(name) + "integer list must be an array or single integer";
     Nan::ThrowTypeError(err.c_str());
     return 1;
   }
@@ -65,8 +63,8 @@ DoubleList::~DoubleList() {
 
 int DoubleList::parse(Local<Value> value) {
   Nan::HandleScope scope;
-  unsigned int     i;
-  Local<Array>     arr;
+  unsigned int i;
+  Local<Array> arr;
 
   if (value->IsNull() || value->IsUndefined()) return 0;
 
@@ -81,19 +79,17 @@ int DoubleList::parse(Local<Value> value) {
       if (element->IsNumber()) {
         list[i] = Nan::To<double>(element).ToChecked();
       } else {
-        std::string err = std::string("Every element in the") + name +
-          " array must be a number";
+        std::string err = std::string("Every element in the") + name + " array must be a number";
         Nan::ThrowTypeError(err.c_str());
         return 1;
       }
     }
   } else if (value->IsNumber()) {
-    list    = new double[1];
+    list = new double[1];
     list[0] = Nan::To<double>(value).ToChecked();
-    len     = 1;
+    len = 1;
   } else {
-    std::string err =
-      std::string(name) + "double list must be an array or single number";
+    std::string err = std::string(name) + "double list must be an array or single number";
     Nan::ThrowTypeError(err.c_str());
     return 1;
   }

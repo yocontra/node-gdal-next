@@ -23,16 +23,12 @@ void Point::Initialize(Local<Object> target) {
   ATTR(lcons, "y", yGetter, ySetter);
   ATTR(lcons, "z", zGetter, zSetter);
 
-  Nan::Set(
-    target,
-    Nan::New("Point").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("Point").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-Point::Point(OGRPoint *geom)
-  : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+Point::Point(OGRPoint *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created Point [%p]", geom);
 }
 
@@ -63,20 +59,19 @@ Point::~Point() {
  */
 NAN_METHOD(Point::New) {
   Nan::HandleScope scope;
-  Point *          f;
-  OGRPoint *       geom;
-  double           x = 0, y = 0, z = 0;
+  Point *f;
+  OGRPoint *geom;
+  double x = 0, y = 0, z = 0;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
 
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    f                   = static_cast<Point *>(ptr);
+    void *ptr = ext->Value();
+    f = static_cast<Point *>(ptr);
 
   } else {
     NODE_ARG_DOUBLE_OPT(0, "x", x);
@@ -109,9 +104,7 @@ Local<Value> Point::New(OGRPoint *geom) {
 Local<Value> Point::New(OGRPoint *geom, bool owned) {
   Nan::EscapableHandleScope scope;
 
-  if (!geom) {
-    return scope.Escape(Nan::Null());
-  }
+  if (!geom) { return scope.Escape(Nan::Null()); }
 
   // make a copy of geometry owned by a feature
   // + no need to track when a feature is destroyed
@@ -119,20 +112,16 @@ Local<Value> Point::New(OGRPoint *geom, bool owned) {
   // geometry
   // - is slower
 
-  if (!owned) {
-    geom = static_cast<OGRPoint *>(geom->clone());
-  }
+  if (!owned) { geom = static_cast<OGRPoint *>(geom->clone()); }
 
-  Point *wrapped  = new Point(geom);
+  Point *wrapped = new Point(geom);
   wrapped->owned_ = true;
 
   UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
 
-  Local<Value>  ext = Nan::New<External>(wrapped);
+  Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(Point::constructor)).ToLocalChecked(), 1, &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(Point::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   return scope.Escape(obj);
 }
@@ -148,13 +137,13 @@ NAN_METHOD(Point::toString) {
  */
 NAN_GETTER(Point::xGetter) {
   Nan::HandleScope scope;
-  Point *          geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  Point *geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
   info.GetReturnValue().Set(Nan::New<Number>((geom->this_)->getX()));
 }
 
 NAN_SETTER(Point::xSetter) {
   Nan::HandleScope scope;
-  Point *          geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  Point *geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
 
   if (!value->IsNumber()) {
     Nan::ThrowError("y must be a number");
@@ -171,13 +160,13 @@ NAN_SETTER(Point::xSetter) {
  */
 NAN_GETTER(Point::yGetter) {
   Nan::HandleScope scope;
-  Point *          geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  Point *geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
   info.GetReturnValue().Set(Nan::New<Number>((geom->this_)->getY()));
 }
 
 NAN_SETTER(Point::ySetter) {
   Nan::HandleScope scope;
-  Point *          geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  Point *geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
 
   if (!value->IsNumber()) {
     Nan::ThrowError("y must be a number");
@@ -194,7 +183,7 @@ NAN_SETTER(Point::ySetter) {
  */
 NAN_GETTER(Point::zGetter) {
   Nan::HandleScope scope;
-  Point *          geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
+  Point *geom = Nan::ObjectWrap::Unwrap<Point>(info.This());
   info.GetReturnValue().Set(Nan::New<Number>((geom->this_)->getZ()));
 }
 

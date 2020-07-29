@@ -60,12 +60,12 @@ class WarpOptions {
 
     private:
   GDALWarpOptions *options;
-  StringList       additional_options;
-  IntegerList      src_bands;
-  IntegerList      dst_bands;
-  double *         src_nodata;
-  double *         dst_nodata;
-  bool             multi;
+  StringList additional_options;
+  IntegerList src_bands;
+  IntegerList dst_bands;
+  double *src_nodata;
+  double *dst_nodata;
+  bool multi;
 };
 
 } // namespace node_gdal

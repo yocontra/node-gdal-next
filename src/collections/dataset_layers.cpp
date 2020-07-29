@@ -12,8 +12,7 @@ Nan::Persistent<FunctionTemplate> DatasetLayers::constructor;
 void DatasetLayers::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
 
-  Local<FunctionTemplate> lcons =
-    Nan::New<FunctionTemplate>(DatasetLayers::New);
+  Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(DatasetLayers::New);
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
   lcons->SetClassName(Nan::New("DatasetLayers").ToLocalChecked());
 
@@ -26,10 +25,7 @@ void DatasetLayers::Initialize(Local<Object> target) {
 
   ATTR_DONT_ENUM(lcons, "ds", dsGetter, READ_ONLY_SETTER);
 
-  Nan::Set(
-    target,
-    Nan::New("DatasetLayers").ToLocalChecked(),
-    Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("DatasetLayers").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
@@ -53,14 +49,13 @@ NAN_METHOD(DatasetLayers::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
-    Nan::ThrowError(
-      "Cannot call constructor as function, you need to use 'new' keyword");
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
   }
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
-    void *          ptr = ext->Value();
-    DatasetLayers * f   = static_cast<DatasetLayers *>(ptr);
+    void *ptr = ext->Value();
+    DatasetLayers *f = static_cast<DatasetLayers *>(ptr);
     f->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
     return;
@@ -75,13 +70,9 @@ Local<Value> DatasetLayers::New(Local<Value> ds_obj) {
 
   DatasetLayers *wrapped = new DatasetLayers();
 
-  v8::Local<v8::Value>  ext = Nan::New<External>(wrapped);
+  v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
-    Nan::NewInstance(
-      Nan::GetFunction(Nan::New(DatasetLayers::constructor)).ToLocalChecked(),
-      1,
-      &ext)
-      .ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(DatasetLayers::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), ds_obj);
 
@@ -104,9 +95,7 @@ NAN_METHOD(DatasetLayers::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(parent);
 
   if (!ds->isAlive()) {
@@ -133,7 +122,7 @@ NAN_METHOD(DatasetLayers::get) {
 
   if (info[0]->IsString()) {
     std::string layer_name = *Nan::Utf8String(info[0]);
-    lyr                    = raw->GetLayerByName(layer_name.c_str());
+    lyr = raw->GetLayerByName(layer_name.c_str());
   } else if (info[0]->IsNumber()) {
     lyr = raw->GetLayer(Nan::To<int64_t>(info[0]).ToChecked());
   } else {
@@ -166,9 +155,7 @@ NAN_METHOD(DatasetLayers::create) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(parent);
 
   if (!ds->isAlive()) {
@@ -186,10 +173,10 @@ NAN_METHOD(DatasetLayers::create) {
   }
 #endif
 
-  std::string        layer_name;
-  SpatialReference * spatial_ref = NULL;
-  OGRwkbGeometryType geom_type   = wkbUnknown;
-  StringList         options;
+  std::string layer_name;
+  SpatialReference *spatial_ref = NULL;
+  OGRwkbGeometryType geom_type = wkbUnknown;
+  StringList options;
 
   NODE_ARG_STR(0, "layer name", layer_name);
   NODE_ARG_WRAPPED_OPT(1, "spatial reference", SpatialReference, spatial_ref);
@@ -201,8 +188,7 @@ NAN_METHOD(DatasetLayers::create) {
   OGRSpatialReference *srs = NULL;
   if (spatial_ref) srs = spatial_ref->get();
 
-  OGRLayer *layer =
-    raw->CreateLayer(layer_name.c_str(), srs, geom_type, options.get());
+  OGRLayer *layer = raw->CreateLayer(layer_name.c_str(), srs, geom_type, options.get());
 
   if (layer) {
     info.GetReturnValue().Set(Layer::New(layer, raw, false));
@@ -223,9 +209,7 @@ NAN_METHOD(DatasetLayers::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(parent);
 
   if (!ds->isAlive()) {
@@ -259,9 +243,7 @@ NAN_METHOD(DatasetLayers::copy) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(parent);
 
   if (!ds->isAlive()) {
@@ -279,9 +261,9 @@ NAN_METHOD(DatasetLayers::copy) {
   }
 #endif
 
-  Layer *     layer_to_copy;
+  Layer *layer_to_copy;
   std::string new_name = "";
-  StringList  options;
+  StringList options;
 
   NODE_ARG_WRAPPED(0, "layer to copy", Layer, layer_to_copy);
   NODE_ARG_STR(1, "new layer name", new_name);
@@ -289,8 +271,7 @@ NAN_METHOD(DatasetLayers::copy) {
     return; // error parsing string list
   }
 
-  OGRLayer *layer =
-    raw->CopyLayer(layer_to_copy->get(), new_name.c_str(), options.get());
+  OGRLayer *layer = raw->CopyLayer(layer_to_copy->get(), new_name.c_str(), options.get());
 
   if (layer) {
     info.GetReturnValue().Set(Layer::New(layer, raw));
@@ -312,9 +293,7 @@ NAN_METHOD(DatasetLayers::remove) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked()
-      .As<Object>();
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(parent);
 
   if (!ds->isAlive()) {
@@ -352,9 +331,7 @@ NAN_METHOD(DatasetLayers::remove) {
  */
 NAN_GETTER(DatasetLayers::dsGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked())
-      .ToLocalChecked());
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 
 } // namespace node_gdal
