@@ -125,7 +125,6 @@
     <pre class="prettyprint linenums">
 #include &quot;../gdal_common.hpp&quot;
 #include &quot;../gdal_feature.hpp&quot;
-#include &quot;../utils/fast_buffer.hpp&quot;
 #include &quot;feature_fields.hpp&quot;
 
 namespace node_gdal {
@@ -671,9 +670,9 @@ Local&lt;Value&gt; FeatureFields::getFieldAsBinary(OGRFeature *feature, int fiel
 
   int count_of_bytes = 0;
 
-  unsigned char *data = (unsigned char *)feature-&gt;GetFieldAsBinary(field_index, &amp;count_of_bytes);
+  char *data = (char *)feature-&gt;GetFieldAsBinary(field_index, &amp;count_of_bytes);
 
-  if (count_of_bytes &gt; 0) { return scope.Escape(FastBuffer::New(data, count_of_bytes)); }
+  if (count_of_bytes &gt; 0) { return scope.Escape(Nan::NewBuffer(data, count_of_bytes).ToLocalChecked()); }
 
   return scope.Escape(Nan::Undefined());
 }

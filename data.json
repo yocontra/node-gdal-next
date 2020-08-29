@@ -457,7 +457,7 @@
             "plugin_for": [],
             "extension_for": [],
             "file": "src/collections/feature_fields.cpp",
-            "line": 40,
+            "line": 39,
             "description": "An encapsulation of all field data that makes up a {{#crossLink\n\"gdal.Feature\"}}Feature{{/crossLink}}."
         },
         "gdal.Geometry": {
@@ -469,7 +469,7 @@
             "plugin_for": [],
             "extension_for": [],
             "file": "src/gdal_geometry.cpp",
-            "line": 109,
+            "line": 108,
             "description": "Abstract base class for all geometry classes."
         },
         "gdal.LayerFields": {
@@ -2132,7 +2132,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 100,
+            "line": 99,
             "description": "Sets feature field(s).",
             "example": [
                 "\n```\n// most-efficient, least flexible. requires you to know the ordering of the\nfields: feature.fields.set(['Something']); feature.fields.set(0,\n'Something');\n\n// most flexible.\nfeature.fields.set({name: 'Something'});\nfeature.fields.set('name', 'Something');\n```"
@@ -2158,7 +2158,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 207,
+            "line": 206,
             "description": "Resets all fields.",
             "example": [
                 "\n```\nfeature.fields.reset();```"
@@ -2185,7 +2185,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 268,
+            "line": 267,
             "description": "Returns the number of fields.",
             "example": [
                 "\n```\nfeature.fields.count();```"
@@ -2200,7 +2200,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 292,
+            "line": 291,
             "description": "Returns the index of a field, given its name.",
             "example": [
                 "\n```\nvar index = feature.fields.indexOf('field');```"
@@ -2222,7 +2222,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 320,
+            "line": 319,
             "description": "Outputs the field data as a pure JS object.",
             "throws": {
                 "description": "Error"
@@ -2237,7 +2237,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 362,
+            "line": 361,
             "description": "Outputs the field values as a pure JS array.",
             "throws": {
                 "description": "Error"
@@ -2252,7 +2252,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 420,
+            "line": 419,
             "description": "Returns a field's value.",
             "example": [
                 "\n```\nvalue = feature.fields.get(0);\nvalue = feature.fields.get('field');```"
@@ -2274,7 +2274,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 461,
+            "line": 460,
             "description": "Returns a list of field name.",
             "itemtype": "method",
             "name": "getNames",
@@ -2289,7 +2289,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 582,
+            "line": 581,
             "description": "Parent feature",
             "readonly": "",
             "itemtype": "attribute",
@@ -4203,7 +4203,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 192,
+            "line": 191,
             "description": "Closes any un-closed rings.",
             "itemtype": "method",
             "name": "closeRings",
@@ -4211,7 +4211,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 199,
+            "line": 198,
             "description": "Clears the geometry.",
             "itemtype": "method",
             "name": "empty",
@@ -4219,7 +4219,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 206,
+            "line": 205,
             "description": "Swaps x, y coordinates.",
             "itemtype": "method",
             "name": "swapXY",
@@ -4227,7 +4227,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 213,
+            "line": 212,
             "description": "Determines if the geometry is empty.",
             "itemtype": "method",
             "name": "isEmpty",
@@ -4238,7 +4238,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 221,
+            "line": 220,
             "description": "Determines if the geometry is valid.",
             "itemtype": "method",
             "name": "isValid",
@@ -4249,7 +4249,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 229,
+            "line": 228,
             "description": "Determines if the geometry is simple.",
             "itemtype": "method",
             "name": "isSimple",
@@ -4260,7 +4260,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 237,
+            "line": 236,
             "description": "Determines if the geometry is a ring.",
             "itemtype": "method",
             "name": "isRing",
@@ -4271,7 +4271,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 245,
+            "line": 244,
             "description": "Determines if the two geometries intersect.",
             "itemtype": "method",
             "name": "intersects",
@@ -4289,7 +4289,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 255,
+            "line": 254,
             "description": "Determines if the two geometries equal each other.",
             "itemtype": "method",
             "name": "equals",
@@ -4307,7 +4307,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 264,
+            "line": 263,
             "description": "Determines if the two geometries are disjoint.",
             "itemtype": "method",
             "name": "disjoint",
@@ -4325,7 +4325,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 273,
+            "line": 272,
             "description": "Determines if the two geometries touch.",
             "itemtype": "method",
             "name": "touches",
@@ -4343,7 +4343,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 282,
+            "line": 281,
             "description": "Determines if the two geometries cross.",
             "itemtype": "method",
             "name": "crosses",
@@ -4361,7 +4361,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 291,
+            "line": 290,
             "description": "Determines if the current geometry is within the provided geometry.",
             "itemtype": "method",
             "name": "within",
@@ -4379,7 +4379,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 300,
+            "line": 299,
             "description": "Determines if the current geometry contains the provided geometry.",
             "itemtype": "method",
             "name": "contains",
@@ -4397,7 +4397,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 309,
+            "line": 308,
             "description": "Determines if the current geometry overlaps the provided geometry.",
             "itemtype": "method",
             "name": "overlaps",
@@ -4415,7 +4415,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 318,
+            "line": 317,
             "description": "Computes the distance between the two geometries.",
             "itemtype": "method",
             "name": "distance",
@@ -4433,7 +4433,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 328,
+            "line": 327,
             "description": "Modify the geometry such it has no segment longer then the given distance.",
             "itemtype": "method",
             "name": "segmentize",
@@ -4451,7 +4451,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 337,
+            "line": 336,
             "description": "Apply arbitrary coordinate transformation to the geometry.\n\nThis method will transform the coordinates of a geometry from their current\nspatial reference system to a new target spatial reference system. Normally\nthis means reprojecting the vectors, but it could include datum shifts,\nand changes of units.\n\nNote that this method does not require that the geometry already have a\nspatial reference system. It will be assumed that they can be treated as\nhaving the source spatial reference system of the {{#crossLink\n\"gdal.CoordinateTransformation\"}}CoordinateTransformation{{/crossLink}}\nobject, and the actual SRS of the geometry will be ignored.",
             "throws": {
                 "description": "Error"
@@ -4469,7 +4469,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 358,
+            "line": 357,
             "description": "Transforms the geometry to match the provided {{#crossLink\n\"gdal.SpatialReference\"}}SpatialReference{{/crossLink}}.",
             "throws": {
                 "description": "Error"
@@ -4487,7 +4487,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 369,
+            "line": 368,
             "description": "Clones the instance.",
             "itemtype": "method",
             "name": "clone",
@@ -4498,7 +4498,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 381,
+            "line": 380,
             "description": "Compute convex hull.",
             "itemtype": "method",
             "name": "convexHull",
@@ -4509,7 +4509,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 393,
+            "line": 392,
             "description": "Compute boundary.",
             "itemtype": "method",
             "name": "boundary",
@@ -4520,7 +4520,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 405,
+            "line": 404,
             "description": "Compute intersection with another geometry.",
             "itemtype": "method",
             "name": "intersection",
@@ -4538,7 +4538,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 423,
+            "line": 422,
             "description": "Compute the union of this geometry with another.",
             "itemtype": "method",
             "name": "union",
@@ -4556,7 +4556,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 441,
+            "line": 440,
             "description": "Compute the difference of this geometry with another.",
             "itemtype": "method",
             "name": "difference",
@@ -4574,7 +4574,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 459,
+            "line": 458,
             "description": "Computes the symmetric difference of this geometry and the second geometry.",
             "itemtype": "method",
             "name": "symDifference",
@@ -4592,7 +4592,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 477,
+            "line": 476,
             "description": "Reduces the geometry complexity.",
             "itemtype": "method",
             "name": "simplify",
@@ -4610,7 +4610,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 496,
+            "line": 495,
             "description": "Reduces the geometry complexity while preserving the topology.",
             "itemtype": "method",
             "name": "simplifyPreserveTopology",
@@ -4628,7 +4628,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 515,
+            "line": 514,
             "description": "Buffers the geometry by the given distance.",
             "itemtype": "method",
             "name": "buffer",
@@ -4651,7 +4651,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 537,
+            "line": 536,
             "description": "Convert a geometry into well known text format.",
             "itemtype": "method",
             "name": "toWKT",
@@ -4662,7 +4662,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 563,
+            "line": 562,
             "description": "Convert a geometry into well known binary format.",
             "itemtype": "method",
             "name": "toWKB",
@@ -4689,7 +4689,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 632,
+            "line": 626,
             "description": "Convert a geometry into KML format.",
             "itemtype": "method",
             "name": "toKML",
@@ -4700,7 +4700,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 654,
+            "line": 648,
             "description": "Convert a geometry into GML format.",
             "itemtype": "method",
             "name": "toGML",
@@ -4711,7 +4711,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 676,
+            "line": 670,
             "description": "Convert a geometry into JSON format.",
             "itemtype": "method",
             "name": "toJSON",
@@ -4722,7 +4722,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 698,
+            "line": 692,
             "description": "Compute the centroid of the geometry.",
             "itemtype": "method",
             "name": "centroid",
@@ -4733,7 +4733,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 716,
+            "line": 710,
             "description": "Computes the bounding box (envelope).",
             "itemtype": "method",
             "name": "getEnvelope",
@@ -4745,7 +4745,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 744,
+            "line": 738,
             "description": "Computes the 3D bounding box (envelope).",
             "itemtype": "method",
             "name": "getEnvelope3D",
@@ -4757,7 +4757,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 776,
+            "line": 770,
             "description": "Creates a Geometry from a WKT string.",
             "static": 1,
             "itemtype": "method",
@@ -4782,7 +4782,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 808,
+            "line": 802,
             "description": "Creates a Geometry from a WKB buffer.",
             "static": 1,
             "itemtype": "method",
@@ -4807,7 +4807,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 850,
+            "line": 844,
             "description": "Creates a Geometry from a GeoJSON string.",
             "static": 1,
             "itemtype": "method",
@@ -4826,7 +4826,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 884,
+            "line": 878,
             "description": "Creates an empty Geometry from a WKB type.",
             "static": 1,
             "itemtype": "method",
@@ -4845,7 +4845,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 902,
+            "line": 896,
             "itemtype": "attribute",
             "name": "srs",
             "type": "gdal.SpatialReference",
@@ -4853,7 +4853,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 928,
+            "line": 922,
             "readonly": "",
             "itemtype": "attribute",
             "name": "name",
@@ -4862,7 +4862,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 939,
+            "line": 933,
             "description": "See {{#crossLink \"Constants\n(wkbGeometryType)\"}}wkbGeometryTypes{{/crossLink}}.",
             "readonly": "",
             "itemtype": "attribute",
@@ -4872,7 +4872,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 952,
+            "line": 946,
             "readonly": "",
             "itemtype": "attribute",
             "name": "wkbSize",
@@ -4881,7 +4881,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 963,
+            "line": 957,
             "readonly": "",
             "itemtype": "attribute",
             "name": "dimension",
@@ -4890,7 +4890,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 974,
+            "line": 968,
             "itemtype": "attribute",
             "name": "coordinateDimension",
             "type": "Integer",
@@ -4898,7 +4898,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 1020,
+            "line": 1014,
             "description": "Returns the Geometry subclass that matches the\ngiven WKB geometry type.",
             "static": 1,
             "itemtype": "method",
@@ -4917,7 +4917,7 @@
         },
         {
             "file": "src/gdal_geometry.cpp",
-            "line": 1037,
+            "line": 1031,
             "description": "Returns the Geometry subclass name that matches the\ngiven WKB geometry type.",
             "static": 1,
             "itemtype": "method",
