@@ -11,7 +11,6 @@
 #include "gdal_point.hpp"
 #include "gdal_polygon.hpp"
 #include "gdal_spatial_reference.hpp"
-#include "utils/fast_buffer.hpp"
 
 #include <node_buffer.h>
 #include <ogr_core.h>
@@ -614,18 +613,13 @@ NAN_METHOD(Geometry::exportToWKB) {
 #endif
 
   //^^ export to wkb and fill buffer ^^
-  // TODO: avoid extra memcpy in FastBuffer::New and have exportToWkb write
-  // directly into buffer
-
   if (err) {
     free(data);
     NODE_THROW_OGRERR(err);
     return;
   }
 
-  Local<Value> result = FastBuffer::New(data, size);
-  free(data);
-
+  Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
   info.GetReturnValue().Set(result);
 }
 
