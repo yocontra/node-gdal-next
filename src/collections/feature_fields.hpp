@@ -39,7 +39,9 @@ class FeatureFields : public Nan::ObjectWrap {
 
   static Local<Value> get(OGRFeature *f, int field_index);
   static Local<Value> getFieldAsIntegerList(OGRFeature *feature, int field_index);
+#if defined(GDAL_VERSION_MAJOR) && (GDAL_VERSION_MAJOR >= 2)
   static Local<Value> getFieldAsInteger64List(OGRFeature *feature, int field_index);
+#endif
   static Local<Value> getFieldAsDoubleList(OGRFeature *feature, int field_index);
   static Local<Value> getFieldAsStringList(OGRFeature *feature, int field_index);
   static Local<Value> getFieldAsBinary(OGRFeature *feature, int field_index);

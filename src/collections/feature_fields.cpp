@@ -510,6 +510,7 @@ Local<Value> FeatureFields::getFieldAsIntegerList(OGRFeature *feature, int field
   return scope.Escape(return_array);
 }
 
+#if defined(GDAL_VERSION_MAJOR) && (GDAL_VERSION_MAJOR >= 2)
 Local<Value> FeatureFields::getFieldAsInteger64List(OGRFeature *feature, int field_index) {
   Nan::EscapableHandleScope scope;
 
@@ -525,6 +526,7 @@ Local<Value> FeatureFields::getFieldAsInteger64List(OGRFeature *feature, int fie
 
   return scope.Escape(return_array);
 }
+#endif
 
 Local<Value> FeatureFields::getFieldAsDoubleList(OGRFeature *feature, int field_index) {
   Nan::EscapableHandleScope scope;
