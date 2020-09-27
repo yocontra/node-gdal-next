@@ -1016,7 +1016,7 @@
             "plugin_for": [],
             "extension_for": [],
             "file": "src/node_gdal.cpp",
-            "line": 1142,
+            "line": 1158,
             "description": "Resampling options that can be used with the gdal.reprojectImage() method."
         }
     },
@@ -2252,7 +2252,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 419,
+            "line": 420,
             "description": "Returns a field's value.",
             "example": [
                 "\n```\nvalue = feature.fields.get(0);\nvalue = feature.fields.get('field');```"
@@ -2274,7 +2274,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 460,
+            "line": 461,
             "description": "Returns a list of field name.",
             "itemtype": "method",
             "name": "getNames",
@@ -2289,7 +2289,7 @@
         },
         {
             "file": "src/collections/feature_fields.cpp",
-            "line": 581,
+            "line": 600,
             "description": "Parent feature",
             "readonly": "",
             "itemtype": "attribute",
@@ -7475,7 +7475,25 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1076,
+            "line": 1078,
+            "final": 1,
+            "itemtype": "property",
+            "name": "gdal.OFTInteger64",
+            "type": "{String}",
+            "class": "Constants (OFT)"
+        },
+        {
+            "file": "src/node_gdal.cpp",
+            "line": 1084,
+            "final": 1,
+            "itemtype": "property",
+            "name": "gdal.OFTInteger64List",
+            "type": "{String}",
+            "class": "Constants (OFT)"
+        },
+        {
+            "file": "src/node_gdal.cpp",
+            "line": 1092,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTReal",
@@ -7484,7 +7502,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1082,
+            "line": 1098,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTRealList",
@@ -7493,7 +7511,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1088,
+            "line": 1104,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTString",
@@ -7502,7 +7520,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1094,
+            "line": 1110,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTStringList",
@@ -7511,7 +7529,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1101,
+            "line": 1117,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTWideString",
@@ -7520,7 +7538,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1108,
+            "line": 1124,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTWideStringList",
@@ -7529,7 +7547,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1117,
+            "line": 1133,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTBinary",
@@ -7538,7 +7556,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1123,
+            "line": 1139,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTDate",
@@ -7547,7 +7565,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1129,
+            "line": 1145,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTTime",
@@ -7556,7 +7574,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1135,
+            "line": 1151,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.OFTDateTime",
@@ -7565,7 +7583,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1148,
+            "line": 1164,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.GRA_NearestNeighbor",
@@ -7574,7 +7592,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1154,
+            "line": 1170,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.GRA_Bilinear",
@@ -7583,7 +7601,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1160,
+            "line": 1176,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.GRA_Cubic",
@@ -7592,7 +7610,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1166,
+            "line": 1182,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.GRA_CubicSpline",
@@ -7601,7 +7619,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1172,
+            "line": 1188,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.GRA_Lanczos",
@@ -7610,7 +7628,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1178,
+            "line": 1194,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.GRA_Average",
@@ -7619,7 +7637,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1184,
+            "line": 1200,
             "final": 1,
             "itemtype": "property",
             "name": "gdal.GRA_Mode",
@@ -7628,7 +7646,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1191,
+            "line": 1207,
             "description": "GDAL version (not the binding version)",
             "final": 1,
             "itemtype": "property",
@@ -7638,7 +7656,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1201,
+            "line": 1217,
             "description": "Details about the last error that occurred. The property\nwill be null or an object containing three properties: \"number\",\n\"message\", and \"type\".",
             "final": 1,
             "itemtype": "property",
@@ -7648,7 +7666,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1219,
+            "line": 1235,
             "description": "Disables all output.",
             "static": 1,
             "itemtype": "method",
@@ -7657,7 +7675,7 @@
         },
         {
             "file": "src/node_gdal.cpp",
-            "line": 1228,
+            "line": 1244,
             "description": "Displays extra debugging information from GDAL.",
             "static": 1,
             "itemtype": "method",

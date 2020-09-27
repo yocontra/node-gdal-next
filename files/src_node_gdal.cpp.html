@@ -1198,6 +1198,22 @@ static void Init(Local&lt;Object&gt; target) {
    */
   Nan::Set(
     target, Nan::New(&quot;OFTIntegerList&quot;).ToLocalChecked(), Nan::New(getFieldTypeName(OFTIntegerList)).ToLocalChecked());
+
+#if defined(GDAL_VERSION_MAJOR) &amp;&amp; (GDAL_VERSION_MAJOR &gt;= 2)
+  /**
+   * @final
+   * @property gdal.OFTInteger64
+   * @type {String}
+   */
+  Nan::Set(target, Nan::New(&quot;OFTInteger64&quot;).ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64)).ToLocalChecked());
+  /**
+   * @final
+   * @property gdal.OFTInteger64List
+   * @type {String}
+   */
+  Nan::Set(
+    target, Nan::New(&quot;OFTInteger64List&quot;).ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64List)).ToLocalChecked());
+#endif
   /**
    * @final
    * @property gdal.OFTReal
