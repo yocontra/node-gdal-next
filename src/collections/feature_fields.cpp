@@ -402,6 +402,7 @@ Local<Value> FeatureFields::get(OGRFeature *f, int field_index) {
     case OFTInteger: return scope.Escape(Nan::New<Integer>(f->GetFieldAsInteger(field_index)));
 #if defined(GDAL_VERSION_MAJOR) && (GDAL_VERSION_MAJOR >= 2)
     case OFTInteger64: return scope.Escape(Nan::New<Number>(f->GetFieldAsInteger64(field_index)));
+    case OFTInteger64List: return scope.Escape(getFieldAsInteger64List(f, field_index));
 #endif
     case OFTReal: return scope.Escape(Nan::New<Number>(f->GetFieldAsDouble(field_index)));
     case OFTString: return scope.Escape(SafeString::New(f->GetFieldAsString(field_index)));
@@ -504,6 +505,22 @@ Local<Value> FeatureFields::getFieldAsIntegerList(OGRFeature *feature, int field
 
   for (int index = 0; index < count_of_values; index++) {
     Nan::Set(return_array, index, Nan::New<Integer>(values[index]));
+  }
+
+  return scope.Escape(return_array);
+}
+
+Local<Value> FeatureFields::getFieldAsInteger64List(OGRFeature *feature, int field_index) {
+  Nan::EscapableHandleScope scope;
+
+  int count_of_values = 0;
+
+  const long long *values = feature->GetFieldAsInteger64List(field_index, &count_of_values);
+
+  Local<Array> return_array = Nan::New<Array>(count_of_values);
+
+  for (int index = 0; index < count_of_values; index++) {
+    Nan::Set(return_array, index, Nan::New<Number>(values[index]));
   }
 
   return scope.Escape(return_array);
