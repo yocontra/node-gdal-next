@@ -15,13 +15,11 @@ longitude second. If you don't want to make large code changes, you can replace 
 
 - None, I will keep the fork in sync and will merge back when the features are of sufficient quality
 
-# node-gdal-next
+# node-gdal-async
 
 Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
 
-```sh
-$ npm install gdal-next --save
-```
+The project is not published on NPM, it is meant to be merged back to node-gdal-next when ready
 
 By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed gdal you can use these flags when installing:
 
