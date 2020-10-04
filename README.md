@@ -37,7 +37,7 @@ Only asynchronous raster reading and asynchrounous opening are supported in the 
 #### Raster
 
 ```js
-const gdal = require("gdal-next")
+const gdal = require("node-gdal-async")
 gdal.openAsync("sample.tif", undefined, (e, dataset) => {
     if (e) {
         console.error(e);
@@ -52,6 +52,22 @@ gdal.openAsync("sample.tif", undefined, (e, dataset) => {
             console.log(data);
         });
 });
+```
+
+With promisify
+```js
+const gdal = require("node-gdal-async")
+
+const util = require('util');
+gdal.openAsync = util.promisify(gdal.openAsync);
+gdal.RasterBandPixels.prototype.readAsync = util.promisify(gdal.RasterBandPixels.prototype.readAsync);
+
+gdal.openAsync("sample.tif", undefined).then((dataset) => {
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y, undefined,
+        undefined, undefined, undefined, undefined, undefined).then((data) => {
+            console.log(data);
+        }).catch(e => console.error(e));
+}).catch(e => console.error(e));
 ```
 
 
