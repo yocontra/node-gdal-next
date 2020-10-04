@@ -1,12 +1,8 @@
 # Fork Notes
 
-This project is a fork of https://github.com/naturalatlas/node-gdal that:
+This project is a fork of https://github.com/contra/node-gdal-next which is a fork of https://github.com/naturalatlas/node-gdal that:
 
-- Updates native dependencies (GDAL/PROJ/GEOS) to latest versions
-- Updates the build system/JS/prebuilds for newer versions of node
-- Adds support for more formats
-  - GPKG, sqlite, OSM, MBTiles, MVT
-- Adds `Geometry.fromGeoJson` to parse GeoJSON easily
+- Early experimental support for asynchronous IO
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
@@ -37,35 +33,21 @@ $ npm install gdal-next --build-from-source --shared_gdal
 
 ## Sample Usage
 
+Only reading is supported in the current version
+
 #### Raster
 
 ```js
 const gdal = require("gdal-next")
 const dataset = gdal.open("sample.tif")
 
-console.log("number of bands: " + dataset.bands.count())
-console.log("width: " + dataset.rasterSize.x)
-console.log("height: " + dataset.rasterSize.y)
-console.log("geotransform: " + dataset.geoTransform)
-console.log("srs: " + (dataset.srs ? dataset.srs.toWKT() : 'null'))
+let data;
+dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y, data,
+    undefined, undefined, undefined, undefined, undefined, (e, r) => {
+        console.log(data);
+    });
 ```
 
-#### Vector
-
-```js
-const gdal = require("gdal-next")
-const dataset = gdal.open("sample.shp")
-const layer = dataset.layers.get(0)
-
-console.log("number of features: " + layer.features.count())
-console.log("fields: " + layer.fields.getNames())
-console.log("extent: " + JSON.stringify(layer.extent))
-console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
-```
-
-## Notes
-
-- This binding is *not* async, so it will block node's event loop. Be very careful (or avoid) using it in server code. We recommended using tools like [worker-farm](https://www.npmjs.com/package/worker-farm) to push expensive operations to a seperate process.
 
 ## Bundled Drivers
 
@@ -73,7 +55,7 @@ console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
 
 ## Contributors
 
-This binding is a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
+node-gdal is a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
 

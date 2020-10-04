@@ -43,10 +43,11 @@ long PtrManager::add(GDALRasterBand *ptr, long parent_uid) {
   return item->uid;
 }
 
-long PtrManager::add(GDALDataset *ptr) {
+long PtrManager::add(GDALDataset *ptr, uv_mutex_t *async_lock) {
   PtrManagerDatasetItem *item = new PtrManagerDatasetItem();
   item->uid = uid++;
   item->ptr = ptr;
+  item->async_lock = async_lock;
   datasets[item->uid] = item;
   return item->uid;
 }
@@ -82,6 +83,11 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
     OGRDataSource::DestroyDataSource(item->ptr_datasource);
   }
 #endif
+  if (item->async_lock) {
+    uv_mutex_destroy(item->async_lock);
+    if (item->ptr) { Dataset::dataset_async_locks.erase(item->ptr); }
+    delete item->async_lock;
+  }
   if (item->ptr) {
     Dataset::dataset_cache.erase(item->ptr);
     GDALClose(item->ptr);

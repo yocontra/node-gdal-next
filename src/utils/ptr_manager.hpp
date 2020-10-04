@@ -41,6 +41,7 @@ struct PtrManagerDatasetItem {
   std::list<PtrManagerLayerItem *> layers;
   std::list<PtrManagerRasterBandItem *> bands;
   GDALDataset *ptr;
+  uv_mutex_t *async_lock;
 #if GDAL_VERSION_MAJOR < 2
   OGRDataSource *ptr_datasource;
 #endif
@@ -52,7 +53,7 @@ namespace node_gdal {
 
 class PtrManager {
     public:
-  long add(GDALDataset *ptr);
+  long add(GDALDataset *ptr, uv_mutex_t *async_lock);
 #if GDAL_VERSION_MAJOR < 2
   long add(OGRDataSource *ptr);
 #endif

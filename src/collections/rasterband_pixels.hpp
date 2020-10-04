@@ -14,6 +14,8 @@
 // gdal
 #include <gdal_priv.h>
 
+#include "../gdal_rasterband.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -31,9 +33,13 @@ class RasterBandPixels : public Nan::ObjectWrap {
   static NAN_METHOD(get);
   static NAN_METHOD(set);
   static NAN_METHOD(read);
+  static NAN_METHOD(readAsync);
   static NAN_METHOD(write);
   static NAN_METHOD(readBlock);
   static NAN_METHOD(writeBlock);
+
+  static void _do_read(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
+  static RasterBand *parent(const Nan::FunctionCallbackInfo<v8::Value> &info);
 
   RasterBandPixels();
 

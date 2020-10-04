@@ -142,8 +142,10 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
   // https://github.com/naturalatlas/node-gdal/blob/master/deps/libgdal/gdal/frmts/gtiff/geotiff.cpp#L84
 
   Local<Object> ds;
+  uv_mutex_t *async_lock;
   if (Dataset::dataset_cache.has(raw_parent)) {
     ds = Dataset::dataset_cache.get(raw_parent);
+    async_lock = Dataset::dataset_async_locks[raw_parent];
   } else {
     LOG("Band's parent dataset disappeared from cache (band = %p, dataset = %p)", raw, raw_parent);
     Nan::ThrowError("Band's parent dataset disappeared from cache");
@@ -154,6 +156,7 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
   long parent_uid = Nan::ObjectWrap::Unwrap<Dataset>(ds)->uid;
   wrapped->uid = ptr_manager.add(raw, parent_uid);
   wrapped->parent_ds = raw_parent;
+  wrapped->async_lock = async_lock;
   Nan::SetPrivate(obj, Nan::New("ds_").ToLocalChecked(), ds);
 
   return scope.Escape(obj);

@@ -13,6 +13,10 @@ namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> Dataset::constructor;
 ObjectCache<GDALDataset, Dataset> Dataset::dataset_cache;
+/* The async locks must live outside the V8 memory management,
+ * otherwise they won't be accessible from the async threads
+ */
+std::map<GDALDataset*, uv_mutex_t *> Dataset::dataset_async_locks;
 #if GDAL_VERSION_MAJOR < 2
 ObjectCache<OGRDataSource, Dataset> Dataset::datasource_cache;
 #endif
@@ -148,7 +152,12 @@ Local<Value> Dataset::New(GDALDataset *raw) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(Dataset::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   dataset_cache.add(raw, obj);
-  wrapped->uid = ptr_manager.add(raw);
+
+  uv_mutex_t *async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
+  dataset_async_locks.insert({raw, async_lock});
+
+  wrapped->uid = ptr_manager.add(raw, async_lock);
 
   return scope.Escape(obj);
 }
