@@ -23,9 +23,12 @@ class AsyncOpen : public Nan::AsyncWorker {
   std::string path;
   unsigned flags;
   GDALDataset *raw;
+  GDALDriver *driver;
+  GDALAccess access;
 
     public:
   AsyncOpen(Nan::Callback *pCallback, std::string path, unsigned flags);
+  AsyncOpen(Nan::Callback *pCallback, GDALDriver *driver, std::string path, GDALAccess access);
 
   void Execute();
   void HandleOKCallback();

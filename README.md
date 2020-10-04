@@ -30,7 +30,9 @@ $ npm install gdal-next --build-from-source --shared_gdal
 
 ## Sample Usage
 
-Only asynchronous raster reading and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch dataset object itself while asynchrounous operations are running**
+Only asynchronous raster reading and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch dataset object itself while asynchronous operations are running**
+
+**Does not support worker_thread**
 
 #### Raster
 

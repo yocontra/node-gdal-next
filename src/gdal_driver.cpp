@@ -2,6 +2,7 @@
 #include "gdal_common.hpp"
 #include "gdal_dataset.hpp"
 #include "gdal_majorobject.hpp"
+#include "async/async_open.hpp"
 #include "utils/string_list.hpp"
 
 namespace node_gdal {
@@ -21,6 +22,7 @@ void Driver::Initialize(Local<Object> target) {
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "open", open);
+  Nan::SetPrototypeMethod(lcons, "openAsync", openAsync);
   Nan::SetPrototypeMethod(lcons, "create", create);
   Nan::SetPrototypeMethod(lcons, "createCopy", createCopy);
   Nan::SetPrototypeMethod(lcons, "deleteDataset", deleteDataset);
@@ -454,17 +456,7 @@ NAN_METHOD(Driver::getMetadata) {
   info.GetReturnValue().Set(result);
 }
 
-/**
- * Opens a dataset.
- *
- * @throws Error
- * @method open
- * @param {String} path
- * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
- * `"r+"`
- * @return {gdal.Dataset}
- */
-NAN_METHOD(Driver::open) {
+void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -483,6 +475,10 @@ NAN_METHOD(Driver::open) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Async opening is not supported on GDAL < 2.x");
+    return;
+  }
   if (driver->uses_ogr) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *ds = raw->Open(path.c_str(), static_cast<int>(access));
@@ -496,14 +492,49 @@ NAN_METHOD(Driver::open) {
 #endif
 
   GDALDriver *raw = driver->getGDALDriver();
-  GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
-  GDALDataset *ds = raw->pfnOpen(open_info);
-  delete open_info;
-  if (!ds) {
-    Nan::ThrowError("Error opening dataset");
-    return;
+
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(2, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, raw, path, access));
+  } else {
+    GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
+    GDALDataset *ds = raw->pfnOpen(open_info);
+    delete open_info;
+    if (!ds) {
+      Nan::ThrowError("Error opening dataset");
+      return;
+    }
+    info.GetReturnValue().Set(Dataset::New(ds));
   }
-  info.GetReturnValue().Set(Dataset::New(ds));
+}
+
+/**
+ * Opens a dataset.
+ *
+ * @throws Error
+ * @method open
+ * @param {String} path
+ * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * `"r+"`
+ * @return {gdal.Dataset}
+ */
+NAN_METHOD(Driver::open) {
+  _do_open(info, false);
+}
+
+/**
+ * Opens a dataset.
+ *
+ * @throws Error
+ * @method open
+ * @param {String} path
+ * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * `"r+"`
+ * @return {gdal.Dataset}
+ */
+NAN_METHOD(Driver::openAsync) {
+  _do_open(info, true);
 }
 
 } // namespace node_gdal

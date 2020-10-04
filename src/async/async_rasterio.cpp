@@ -65,7 +65,7 @@ void AsyncRasterIO::Execute() {
 
 void AsyncRasterIO::HandleOKCallback() {
   Nan::HandleScope scope;
-  Local<v8::Value> argv[] = {Nan::Null(), Nan::New(hDataPersistentHandle)};
+  Local<v8::Value> argv[] = {Nan::Undefined(), Nan::New(hDataPersistentHandle)};
 
   hDataPersistentHandle.Reset();
   hBandPersistentHandle.Reset();
@@ -76,7 +76,7 @@ void AsyncRasterIO::HandleErrorCallback() {
   Nan::HandleScope scope;
   hDataPersistentHandle.Reset();
   hBandPersistentHandle.Reset();
-  v8::Local<v8::Value> argv[] = {Nan::New(this->ErrorMessage()).ToLocalChecked(), Nan::Null()};
+  v8::Local<v8::Value> argv[] = {Nan::New(this->ErrorMessage()).ToLocalChecked(), Nan::Undefined()};
   Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
 }
 } // namespace node_gdal
