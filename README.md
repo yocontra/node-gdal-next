@@ -33,7 +33,7 @@ $ npm install gdal-next --build-from-source --shared_gdal
 
 ## Sample Usage
 
-Only reading is supported in the current version
+Only asynchronous reading and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch dataset object itself while asynchrounous operations are running**
 
 #### Raster
 

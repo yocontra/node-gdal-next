@@ -214,6 +214,7 @@ static NAN_METHOD(isAlive) {
 static void Init(Local<Object> target) {
 
   Nan::SetMethod(target, "open", open);
+  Nan::SetMethod(target, "openAsync", openAsync);
   Nan::SetMethod(target, "setConfigOption", setConfigOption);
   Nan::SetMethod(target, "getConfigOption", getConfigOption);
   Nan::SetMethod(target, "decToDMS", decToDMS);

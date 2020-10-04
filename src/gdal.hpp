@@ -19,12 +19,14 @@
 #include "gdal_dataset.hpp"
 #include "gdal_driver.hpp"
 
+#include "async/async_open.hpp"
+
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-static NAN_METHOD(open) {
+static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
 
   std::string path;
@@ -34,6 +36,11 @@ static NAN_METHOD(open) {
   NODE_ARG_OPT_STR(1, "mode", mode);
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Async opening is not supported on GDAL < 2.x");
+    return;
+  }
+
   GDALAccess access = GA_ReadOnly;
   if (mode == "r+") {
     access = GA_Update;
@@ -64,15 +71,30 @@ static NAN_METHOD(open) {
     return;
   }
 
-  GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
-  if (ds) {
-    info.GetReturnValue().Set(Dataset::New(ds));
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(2, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, path, flags));
     return;
+  } else {
+    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+    if (ds) {
+      info.GetReturnValue().Set(Dataset::New(ds));
+      return;
+    }
   }
 #endif
 
   Nan::ThrowError("Error opening dataset");
   return;
+}
+
+static NAN_METHOD(open) {
+  _do_open(info, false);
+}
+
+static NAN_METHOD(openAsync) {
+  _do_open(info, true);
 }
 
 static NAN_METHOD(setConfigOption) {
