@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/deps/libgdal/gdal/port",
+                "${workspaceFolder}/deps/libgdal/gdal/gcore",
+                "${workspaceFolder}/deps/libgdal/gdal/ogr",
+                "${workspaceFolder}/deps/libgdal/gdal/ogr/ogrsf_frmts",
+                "${workspaceFolder}/deps/libgdal/arch/unix"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu18",
+            "cppStandard": "gnu++14"
+        }
+    ],
+    "version": 4
+}

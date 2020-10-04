@@ -6,10 +6,14 @@ This project is a fork of https://github.com/contra/node-gdal-next which is a fo
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
-### Breaking Changes
+### Breaking Changes relative to node-gdal
 
 - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
 longitude second. If you don't want to make large code changes, you can replace code like `gdal.SpatialReference.fromEPSG(4326)` with `gdal.SpatialReference.fromProj4('+init=epsg:4326')`
+
+### Breaking Changes relative to node-gdal-next
+
+- None
 
 # node-gdal-next
 
@@ -33,7 +37,7 @@ $ npm install gdal-next --build-from-source --shared_gdal
 
 ## Sample Usage
 
-Only asynchronous reading and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch dataset object itself while asynchrounous operations are running**
+Only asynchronous raster reading and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch dataset object itself while asynchrounous operations are running**
 
 #### Raster
 
@@ -60,7 +64,11 @@ gdal.openAsync("sample.tif", undefined, (e,r) => {
 
 ## Contributors
 
-node-gdal is a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
+This binding is a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
+
+node-gdal-next is maintained by [@contra](https://github.com/contra)
+
+The async bindings are by [@mmomtchev](https://github.com/mmomtchev)
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
 

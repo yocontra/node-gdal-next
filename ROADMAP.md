@@ -1,15 +1,15 @@
-# v2.0.0
+# Phase 1
 
-- Switch from nan to N-API
-  - Normalize the build system for this package to match more recent native modules like node-sqlite
-- Switch off of G++ to Clang for all CI work
-- Improve performance by reducing parse/serialize flows
-  - `Geometry.toObject()`
-  - `Geometry.fromGeoJson()`
-- Automate the yuidoc publishing
-- Build out an async API
-- Add a streaming API for parsing files
-- Find a way to keep the dependency source code out of the repository to reduce noise
-- Reduce the number of manual patching done in the gdal format gyp files
-- Automate dependency updates and prebuilt binaries for new node releases
-  - It would be nice if we had a bot that did this weekly
+- Be able to asynchronously call the raster API to read from Express
+
+# Phase 2
+
+- Support writing
+
+# Phase 3
+
+- Be able to use all raster features without blocking the event loop
+
+# Phase 4
+
+- Support the vector API
