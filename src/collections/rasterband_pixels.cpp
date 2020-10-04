@@ -210,7 +210,9 @@ void RasterBandPixels::_do_read(const Nan::FunctionCallbackInfo<v8::Value> &info
   if (info.Length() >= 5 && !info[4]->IsUndefined() && !info[4]->IsNull()) {
     NODE_ARG_OBJECT(4, "data", obj);
     type = TypedArray::Identify(obj);
-    if (type == GDT_Unknown) {
+    /* FIXME: This error should not depend on the number of arguments > 5
+     * because this doesn't work in async mode */
+    if (type == GDT_Unknown && !async) {
       Nan::ThrowError("Invalid array");
       return;
     }
