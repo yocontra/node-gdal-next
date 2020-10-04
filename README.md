@@ -39,13 +39,18 @@ Only asynchronous reading and asynchrounous opening are supported in the current
 
 ```js
 const gdal = require("gdal-next")
-const dataset = gdal.open("sample.tif")
-
-let data;
-dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y, data,
-    undefined, undefined, undefined, undefined, undefined, (e, r) => {
-        console.log(data);
-    });
+gdal.openAsync("sample.tif", undefined, (e,r) => {
+    if (e) {
+        console.error(e);
+        return;
+    }
+    const dataset = r;
+    let data;
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y, data,
+        undefined, undefined, undefined, undefined, undefined, (e, r) => {
+            console.log(data);
+        });
+});
 ```
 
 
