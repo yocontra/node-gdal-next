@@ -252,7 +252,8 @@ void RasterBandPixels::_do_read(const Nan::FunctionCallbackInfo<v8::Value> &info
   }
 
   if (async) {
-    Nan::Callback *callback = new Nan::Callback(info[10].As<Function>());
+    Nan::Callback *callback;
+    NODE_ARG_CB(10, "callback", callback);
     Nan::AsyncQueueWorker(new AsyncRasterIO(
       callback, band, GF_Read, x, y, w, h, &obj, data, buffer_w, buffer_h, type, pixel_space, line_space));
   } else {
