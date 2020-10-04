@@ -1,6 +1,6 @@
 # Fork Notes
 
-This project is a fork of https://github.com/contra/node-gdal-next which is a fork of https://github.com/naturalatlas/node-gdal that:
+This project is a fork of https://github.com/contra/node-gdal-next which is a fork of https://github.com/naturalatlas/node-gdal with:
 
 - Early experimental support for asynchronous IO
 
