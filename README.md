@@ -13,16 +13,11 @@ longitude second. If you don't want to make large code changes, you can replace 
 
 ### Breaking Changes relative to node-gdal-next
 
-- None
+- None, I will keep the fork in sync and will merge back when the features are of sufficient quality
 
 # node-gdal-next
 
-[![NPM version](http://img.shields.io/npm/v/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
-[![Installs](http://img.shields.io/npm/dm/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
-[![Build Status](https://travis-ci.org/contra/node-gdal-next.svg)](https://travis-ci.org/contra/node-gdal-next)
-[<img src="https://ci.appveyor.com/api/projects/status/8u9qlfu2cjor4idi?svg=true" height="20" alt="" />](https://ci.appveyor.com/project/contra/node-gdal-next)
-
-Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
+Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
 
 ```sh
 $ npm install gdal-next --save
