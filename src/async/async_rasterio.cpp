@@ -4,7 +4,7 @@
 
 #include "async_rasterio.hpp"
 
-#include <pthread.h>
+#include <string>
 
 namespace node_gdal {
 
@@ -59,7 +59,7 @@ void AsyncRasterIO::Execute() {
   eErr = this->pBand->get()->RasterIO(
     eRWFlag, nXOff, nYOff, nXSize, nYSize, pData, nBufXSize, nBufYSize, eBufType, nPixelSpace, nLineSpace, psExtraArg);
     
-  if (eErr != CE_None) { this->SetErrorMessage((const char *)eErr); }
+  if (eErr != CE_None) { this->SetErrorMessage(std::to_string((int)eErr).c_str()); }
   uv_mutex_unlock(async_lock);
 }
 
