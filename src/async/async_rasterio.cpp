@@ -54,6 +54,13 @@ AsyncRasterIO::AsyncRasterIO(
     eErr(CE_None) {
 }
 
+/*
+ * TypedArray's are a strange beast
+ * Unline Node Buffers which are almost pure C++ objects,
+ * TypedArray's are JS Objects and can be garbage collected
+ * ...however...
+ * their backing stores are not allocated on the heap
+ */
 void AsyncRasterIO::Execute() {
   uv_mutex_lock(async_lock);
   eErr = this->pBand->get()->RasterIO(
