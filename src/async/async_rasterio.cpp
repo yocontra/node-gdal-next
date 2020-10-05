@@ -4,7 +4,7 @@
 
 #include "async_rasterio.hpp"
 
-#include <pthread.h>
+#include <string>
 
 namespace node_gdal {
 
@@ -54,12 +54,19 @@ AsyncRasterIO::AsyncRasterIO(
     eErr(CE_None) {
 }
 
+/*
+ * TypedArray's are a strange beast
+ * Unline Node Buffers which are almost pure C++ objects,
+ * TypedArray's are JS Objects and can be garbage collected
+ * ...however...
+ * their backing stores are not allocated on the heap
+ */
 void AsyncRasterIO::Execute() {
   uv_mutex_lock(async_lock);
   eErr = this->pBand->get()->RasterIO(
     eRWFlag, nXOff, nYOff, nXSize, nYSize, pData, nBufXSize, nBufYSize, eBufType, nPixelSpace, nLineSpace, psExtraArg);
     
-  if (eErr != CE_None) { this->SetErrorMessage((const char *)eErr); }
+  if (eErr != CE_None) { this->SetErrorMessage(std::to_string((int)eErr).c_str()); }
   uv_mutex_unlock(async_lock);
 }
 

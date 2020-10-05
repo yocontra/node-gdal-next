@@ -20,15 +20,11 @@ namespace node_gdal {
 
 class AsyncOpen : public Nan::AsyncWorker {
     private:
-  std::string path;
-  unsigned flags;
+  std::function<GDALDataset *()> doit;
   GDALDataset *raw;
-  GDALDriver *driver;
-  GDALAccess access;
 
     public:
-  AsyncOpen(Nan::Callback *pCallback, std::string path, unsigned flags);
-  AsyncOpen(Nan::Callback *pCallback, GDALDriver *driver, std::string path, GDALAccess access);
+  AsyncOpen(Nan::Callback *pCallback, std::function<GDALDataset *()> doit);
 
   void Execute();
   void HandleOKCallback();

@@ -33,38 +33,36 @@ $ npx node-pre-gyp build [--shared_gdal]  # --shared_gdal allows linking to the 
 
 ## Sample Usage
 
-Only asynchronous raster reading and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch the dataset object itself while asynchronous operations are running**
+Only asynchronous raster reading/writing and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch the dataset object itself while asynchronous operations are running**
 
 **Does not support worker_threads**
 
 #### With callbacks
 
 ```js
-const gdal = require("node-gdal-async")
-gdal.openAsync("sample.tif", undefined, (e, dataset) => {
-    if (e) {
-        console.error(e);
-        return;
-    }
-    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y, undefined,
-        undefined, undefined, undefined, undefined, undefined, (e, data) => {
-            if (e) {
-                console.error(e);
-                return;
-            }
-            console.log(data);
-        });
+const gdal = require('../node-gdal-async') // Or where it is installed
+gdal.openAsync('sample.tif', undefined, undefined, undefined, undefined,
+        undefined, undefined, {}, (e, dataset) => {
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x,
+        dataset.rasterSize.y, undefined, {}, (e, data) => {
+        if (e) {
+            console.error(e);
+            return;
+        }
+        console.log(data);
+    });
 });
 ```
 
 #### With promises
 
 ```js
-
-gdal.openPromise("sample.tif").then((dataset) => {
-    dataset.bands.get(1).pixels.readPromise(0, 0, dataset.rasterSize.x, dataset.rasterSize.y).then((data) => {
-            console.log(data);
-        }).catch(e => console.error(e));
+const gdal = require('../node-gdal-async')
+gdal.openPromise('sample.tif').then((dataset) => {
+    dataset.bands.get(1).pixels.readPromise(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
+        .then((data) => {
+        console.log(data);
+    }).catch(e => console.error(e));
 }).catch(e => console.error(e));
 ```
 
