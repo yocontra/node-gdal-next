@@ -35,10 +35,12 @@ class RasterBandPixels : public Nan::ObjectWrap {
   static NAN_METHOD(read);
   static NAN_METHOD(readAsync);
   static NAN_METHOD(write);
+  static NAN_METHOD(writeAsync);
   static NAN_METHOD(readBlock);
   static NAN_METHOD(writeBlock);
 
   static void _do_read(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
+  static void _do_write(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
   static RasterBand *parent(const Nan::FunctionCallbackInfo<v8::Value> &info);
 
   RasterBandPixels();

@@ -24,6 +24,7 @@ void Driver::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "open", open);
   Nan::SetPrototypeMethod(lcons, "openAsync", openAsync);
   Nan::SetPrototypeMethod(lcons, "create", create);
+  Nan::SetPrototypeMethod(lcons, "createAsync", createAsync);
   Nan::SetPrototypeMethod(lcons, "createCopy", createCopy);
   Nan::SetPrototypeMethod(lcons, "deleteDataset", deleteDataset);
   Nan::SetPrototypeMethod(lcons, "rename", rename);
@@ -203,25 +204,7 @@ NAN_METHOD(Driver::deleteDataset) {
   return;
 }
 
-/**
- * Create a new dataset with this driver.
- *
- * @throws Error
- * @method create
- * @param {String} filename
- * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
- * datasets)
- * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
- * datasets)
- * @param {Integer} [band_count=0]
- * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
- * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
- * types{{/crossLink}})
- * @param {String[]|object} [creation_options] An array or object containing
- * driver-specific dataset creation options
- * @return gdal.Dataset
- */
-NAN_METHOD(Driver::create) {
+void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -229,12 +212,12 @@ NAN_METHOD(Driver::create) {
   unsigned int x_size = 0, y_size = 0, n_bands = 0;
   GDALDataType type = GDT_Byte;
   std::string type_name = "";
-  StringList options;
+  StringList *options = new StringList;
 
   NODE_ARG_STR(0, "filename", filename);
 
   if (info.Length() < 3) {
-    if (info.Length() > 1 && options.parse(info[1])) {
+    if (info.Length() > 1 && options->parse(info[1])) {
       return; // error parsing string list
     }
   } else {
@@ -242,7 +225,7 @@ NAN_METHOD(Driver::create) {
     NODE_ARG_INT(2, "y size", y_size);
     NODE_ARG_INT_OPT(3, "number of bands", n_bands);
     NODE_ARG_OPT_STR(4, "data type", type_name);
-    if (info.Length() > 5 && options.parse(info[5])) {
+    if (info.Length() > 5 && options->parse(info[5])) {
       return; // error parsing string list
     }
     if (!type_name.empty()) { type = GDALGetDataTypeByName(type_name.c_str()); }
@@ -264,14 +247,71 @@ NAN_METHOD(Driver::create) {
 #endif
 
   GDALDriver *raw = driver->getGDALDriver();
-  GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options.get());
 
-  if (!ds) {
-    Nan::ThrowError("Error creating dataset");
-    return;
+  // Very careful here
+  // we can't reference automatic variables, thus the *options object
+  std::function<GDALDataset *()> doit = [raw, filename, x_size, y_size, n_bands, type, options]() {
+    GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
+    delete options;
+    return ds;
+  };
+
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(6, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
+  } else {
+    GDALDataset *ds = doit();
+    if (!ds) {
+      Nan::ThrowError("Error creating dataset");
+      return;
+    }
+    info.GetReturnValue().Set(Dataset::New(ds));
   }
+}
 
-  info.GetReturnValue().Set(Dataset::New(ds));
+/**
+ * Create a new dataset with this driver.
+ *
+ * @throws Error
+ * @method create
+ * @param {String} filename
+ * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [band_count=0]
+ * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
+ * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
+ * types{{/crossLink}})
+ * @param {String[]|object} [creation_options] An array or object containing
+ * driver-specific dataset creation options
+ * @return gdal.Dataset
+ */
+NAN_METHOD(Driver::create) {
+  _do_create(info, false);
+}
+
+/**
+ * Asynchronously create a new dataset with this driver.
+ *
+ * @throws Error
+ * @method create
+ * @param {String} filename
+ * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [band_count=0]
+ * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
+ * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
+ * types{{/crossLink}})
+ * @param {String[]|object} [creation_options] An array or object containing
+ * driver-specific dataset creation options
+ * @return gdal.Dataset
+ */
+NAN_METHOD(Driver::createAsync) {
+  _do_create(info, true);
 }
 
 /**
@@ -493,14 +533,19 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
 
   GDALDriver *raw = driver->getGDALDriver();
 
-  if (async) {
-    Nan::Callback *callback;
-    NODE_ARG_CB(2, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncOpen(callback, raw, path, access));
-  } else {
+  std::function<GDALDataset *()> doit = [raw, path, access]() {
     GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
     GDALDataset *ds = raw->pfnOpen(open_info);
     delete open_info;
+    return ds;
+  };
+
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(2, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
+  } else {
+    GDALDataset *ds = doit();
     if (!ds) {
       Nan::ThrowError("Error opening dataset");
       return;

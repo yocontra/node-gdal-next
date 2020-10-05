@@ -324,24 +324,17 @@ NAN_METHOD(RasterBandPixels::readAsync) {
 }
 
 /**
- * Writes a region of pixels.
+ * Low level read for both synchronous and asynchronous writing.
  *
- * @method write
+ * @method _do_write
  * @throws Error
- * @param {Integer} x
- * @param {Integer} y
- * @param {Integer} width
- * @param {Integer} height
- * @param {TypedArray} data The
+ * @param {FunctionCallbackInfo} info V8 data
+ * @param {bool} async asynchronous mode
+ * @return {TypedArray} A
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * to write to the band.
- * @param {Object} [options]
- * @param {Integer} [options.buffer_width=x_size]
- * @param {Integer} [options.buffer_height=y_size]
- * @param {Integer} [options.pixel_space]
- * @param {Integer} [options.line_space]
+ * of values.
  */
-NAN_METHOD(RasterBandPixels::write) {
+void RasterBandPixels::_do_write(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
 
   RasterBand *band;
@@ -397,15 +390,66 @@ NAN_METHOD(RasterBandPixels::write) {
     return; // TypedArray::Validate threw an error
   }
 
-  uv_mutex_lock(band->async_lock);
-  CPLErr err = band->get()->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-  uv_mutex_unlock(band->async_lock);
-  if (err) {
-    NODE_THROW_CPLERR(err);
-    return;
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(9, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncRasterIO(
+      callback, band, GF_Read, x, y, w, h, &passed_array, data, buffer_w, buffer_h, type, pixel_space, line_space));
+  } else {
+    uv_mutex_lock(band->async_lock);
+    CPLErr err = band->get()->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+    uv_mutex_unlock(band->async_lock);
+    if (err) {
+      NODE_THROW_CPLERR(err);
+      return;
+    }
   }
 
   return;
+}
+
+/**
+ * Writes a region of pixels.
+ *
+ * @method write
+ * @throws Error
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {TypedArray} data The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to write to the band.
+ * @param {Object} [options]
+ * @param {Integer} [options.buffer_width=x_size]
+ * @param {Integer} [options.buffer_height=y_size]
+ * @param {Integer} [options.pixel_space]
+ * @param {Integer} [options.line_space]
+ */
+NAN_METHOD(RasterBandPixels::write) {
+  _do_write(info, false);
+}
+
+/**
+ * Writes a region of pixels.
+ *
+ * @method write
+ * @throws Error
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {TypedArray} data The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to write to the band.
+ * @param {Object} [options]
+ * @param {Integer} [options.buffer_width=x_size]
+ * @param {Integer} [options.buffer_height=y_size]
+ * @param {Integer} [options.pixel_space]
+ * @param {Integer} [options.line_space]
+ */
+NAN_METHOD(RasterBandPixels::writeAsync) {
+  _do_write(info, true);
 }
 
 /**

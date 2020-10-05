@@ -6,6 +6,12 @@ const gdal = require('../lib/gdal.js')
 chai.use(chaiAsPromised)
 const expect = chai.expect
 
+/* Without this, unhandledRejections are silently ignored!!!
+*/
+process.on('unhandledRejection', e => {
+  console.error(e); process.exit(1)
+})
+
 describe('gdal.RasterBand', () => {
   afterEach(gc)
 
@@ -35,7 +41,8 @@ describe('gdal.RasterBand', () => {
       })
       describe('setter', () => {
         it('should throw error', () => {
-          const ds = gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`, undefined, (e, ds) => {
+          const ds = gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`,
+            undefined, undefined, undefined, undefined, undefined, undefined, {}, (e, ds) => {
             const band = ds.bands.get(1)
             assert.throws(() => {
               band.description = 'test'
@@ -57,7 +64,8 @@ describe('gdal.RasterBand', () => {
     describe('"pixels" property', () => {
       describe('readAsync()', () => {
         it('should return a TypedArray', () => {
-          const ds = gdal.openAsync(`${__dirname}/data/sample.tif`, undefined, (e, ds) => {
+          gdal.openAsync(`${__dirname}/data/sample.tif`,
+            undefined, undefined, undefined, undefined, undefined, undefined, {}, (e, ds) => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
@@ -71,7 +79,7 @@ describe('gdal.RasterBand', () => {
       })
       describe('readPromise()', () => {
         it('should return a TypedArray', () => {
-          const ds = gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+          gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
@@ -84,18 +92,32 @@ describe('gdal.RasterBand', () => {
         })
         describe('w/data argument', () => {
           it('should put the data in the existing array', () => {
-            gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
-              const band = ds.bands.get(1)
-              const data = new Uint8Array(new ArrayBuffer(20 * 30))
-              data[15] = 31
-              band.pixels.readPromise(0, 0, 20, 30, data).then(result => {
-                assert.equal(data, result)
-                assert.equal(data[15], 0)
+            gdal.openPromise('temp',
+              'w',
+              'MEM',
+              256,
+              256,
+              1,
+              gdal.GDT_Byte).then(ds => {
+                const band = ds.bands.get(1)
+                const data = new Uint8Array(new ArrayBuffer(20 * 30))
+                data[15] = 31
+                band.pixels.readPromise(0, 0, 20, 30, data).then(result => {
+                  assert.equal(data, result)
+                  assert.equal(data[15], 0)
+                })
               })
-            })
           })
           it('should create new array if null', () => {
-            gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+            gdal.openPromise(
+              'temp',
+              'w',
+              'MEM',
+              256,
+              256,
+              1,
+              gdal.GDT_Byte
+            ).then(ds => {
               const band = ds.bands.get(1)
               band.pixels.readPromise(0, 0, 20, 30, null).then(data => {
                 assert.instanceOf(data, Uint8Array)
@@ -104,16 +126,27 @@ describe('gdal.RasterBand', () => {
             })
           })
           it('should throw error if array is too small', () => {
-            gdal.openPromise(`${__dirname}/data/sample.tif`).then(async (ds) => {
-              const band = ds.bands.get(1)
-              const data = new Uint8Array(new ArrayBuffer(20 * 30))
-              await expect(band.pixels.readPromise(0, 0, 20, 31, data)).to.be.eventually.rejectedWith(Error)
-            })
+            gdal.openPromise('temp',
+              'w',
+              'MEM',
+              256,
+              256,
+              1,
+              gdal.GDT_Byte).then(async (ds) => {
+                const band = ds.bands.get(1)
+                const data = new Uint8Array(new ArrayBuffer(20 * 30))
+                await expect(band.pixels.readPromise(0, 0, 20, 31, data)).to.be.rejectedWith(Error)
+              })
           })
-          /*
-          Requires writing
           it('should automatically translate data to array data type', () => {
-            const ds = gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+            const ds = gdal.openPromise('temp',
+              'w',
+              'MEM',
+              256,
+              256,
+              1,
+              gdal.GDT_Byte
+            ).then(ds => {
               const band = ds.bands.get(1)
               band.pixels.set(1, 1, 30)
               const data = new Float64Array(new ArrayBuffer(20 * 30 * 8))
@@ -122,7 +155,6 @@ describe('gdal.RasterBand', () => {
               })
             })
           })
-          */
         })
         describe('w/options', () => {
           describe('"buffer_width", "buffer_height"', () => {
@@ -152,7 +184,7 @@ describe('gdal.RasterBand', () => {
                 await expect(band.pixels.readPromise(0, 0, 20, 30, data, {
                     buffer_width: 10,
                     buffer_height: 15
-                }, /Array length must be greater than.*/)).to.be.eventually.rejectedWith(Error)
+                }, /Array length must be greater than.*/)).to.be.rejectedWith(Error)
               })
             })
           })
@@ -177,12 +209,11 @@ describe('gdal.RasterBand', () => {
               })
             })
           })
-          /* Requires writing
           describe('"pixel_space", "line_space"', () => {
             it('should read data with space between values', () => {
               const w = 16,
                 h = 16
-              gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+              gdal.openPromise('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte).then(ds => {
                 const red = ds.bands.get(1)
                 const blue = ds.bands.get(2)
                 red.fill(1)
@@ -222,7 +253,7 @@ describe('gdal.RasterBand', () => {
             it('should throw error if array is not long enough to store result', () => {
               const w = 16,
                 h = 16
-              const ds = gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+              const ds = gdal.openPromise('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte).then(ds => {
                 const red = ds.bands.get(1)
                 const blue = ds.bands.get(2)
                 red.fill(1)
@@ -237,33 +268,30 @@ describe('gdal.RasterBand', () => {
                   line_space: 2 * w
                 }
 
-                red.pixels.readPromise(0, 0, w, h, interleaved, read_options).then(interleaved => {
-                  assert.throws(() => {
-                    blue.pixels.readPromise(
-                      0,
-                      0,
-                      w,
-                      h,
-                      interleaved.subarray(2),
-                      read_options
-                    )
-                  }, /Array length must be greater than./)
+                red.pixels.readPromise(0, 0, w, h, interleaved, read_options).then(async (interleaved) => {
+                  await expect(blue.pixels.readPromise(
+                    0,
+                    0,
+                    w,
+                    h,
+                    interleaved.subarray(2),
+                    read_options
+                  )).to.be.rejectedWith(Error)
                 })
               })
             })
           })
-          */
           it('should throw an error if region is out of bounds', () => {
             gdal.openPromise(`${__dirname}/data/sample.tif`).then(async (ds) => {
               const band = ds.bands.get(1)
-              await expect(band.pixels.readPromise(2000, 2000, 16, 16)).to.be.eventually.rejectedWith(3)
+              await expect(band.pixels.readPromise(2000, 2000, 16, 16)).to.be.rejectedWith(3)
             })
           })
           it('should throw error if dataset already closed', () => {
             gdal.openPromise(`${__dirname}/data/sample.tif`).then(async (ds) => {
               const band = ds.bands.get(1)
               ds.close()
-              await expect(band.pixels.readPromise(0, 0, 16, 16)).to.be.eventually.rejectedWith(Error)
+              await expect(band.pixels.readPromise(0, 0, 16, 16)).to.be.rejectedWith(Error)
             })
           })
         })

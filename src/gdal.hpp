@@ -71,13 +71,17 @@ static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asyn
     return;
   }
 
+  std::function<GDALDataset *()> doit = [path, flags]() {
+    return (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+  };
+
   if (async) {
     Nan::Callback *callback;
     NODE_ARG_CB(2, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncOpen(callback, path, flags));
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
     return;
   } else {
-    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+    GDALDataset *ds = doit();
     if (ds) {
       info.GetReturnValue().Set(Dataset::New(ds));
       return;

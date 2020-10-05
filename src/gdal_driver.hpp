@@ -38,6 +38,7 @@ class Driver : public Nan::ObjectWrap {
   static NAN_METHOD(open);
   static NAN_METHOD(openAsync);
   static NAN_METHOD(create);
+  static NAN_METHOD(createAsync);
   static NAN_METHOD(createCopy);
   static NAN_METHOD(deleteDataset);
   static NAN_METHOD(rename);
@@ -49,6 +50,7 @@ class Driver : public Nan::ObjectWrap {
   static NAN_GETTER(descriptionGetter);
 
   static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
+  static void _do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
 
   Driver();
   Driver(GDALDriver *driver);

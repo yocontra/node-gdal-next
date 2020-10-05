@@ -4,25 +4,13 @@
 
 namespace node_gdal {
 
-AsyncOpen::AsyncOpen(Nan::Callback *pCallback, std::string path, unsigned flags)
-  : Nan::AsyncWorker(pCallback), path(path), flags(flags), raw(nullptr), driver(nullptr), access(GA_ReadOnly) {
-}
-
-AsyncOpen::AsyncOpen(Nan::Callback *pCallback, GDALDriver *driver, std::string path, GDALAccess access)
-  : Nan::AsyncWorker(pCallback), path(path), flags(0), raw(nullptr), driver(driver), access(access) {
+AsyncOpen::AsyncOpen(Nan::Callback *pCallback, std::function<GDALDataset *()> doit)
+  : Nan::AsyncWorker(pCallback), doit(doit) {
 }
 
 void AsyncOpen::Execute() {
   /* V8 objects are not acessible here */
-
-  if (driver != nullptr) {
-    GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
-    raw = driver->pfnOpen(open_info);
-    delete open_info;
-  } else {
-    raw = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
-  }
-
+  raw = doit();
   if (!raw) { this->SetErrorMessage("Error opening dataset"); }
 }
 
