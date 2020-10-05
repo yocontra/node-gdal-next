@@ -47,6 +47,7 @@
     "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js"
   },
   "dependencies": {
+    "chai-as-promised": "^7.1.1",
     "nan": "^2.14.0",
     "node-pre-gyp": "^0.15.0"
   },
