@@ -23,6 +23,7 @@ void RasterBandPixels::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "read", read);
   Nan::SetPrototypeMethod(lcons, "readAsync", readAsync);
   Nan::SetPrototypeMethod(lcons, "write", write);
+  Nan::SetPrototypeMethod(lcons, "writeAsync", writeAsync);
   Nan::SetPrototypeMethod(lcons, "readBlock", readBlock);
   Nan::SetPrototypeMethod(lcons, "writeBlock", writeBlock);
 
