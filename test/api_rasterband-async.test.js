@@ -17,7 +17,7 @@ describe('gdal.RasterBand', () => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
-            band.pixels.readAsync(190, 290, w, h, undefined, undefined, undefined, undefined, undefined, undefined, (e, data) => {
+            band.pixels.readAsync(190, 290, w, h, undefined, {}, (e, data) => {
               assert.instanceOf(data, Uint8Array)
               assert.equal(data.length, w * h)
               assert.equal(data[10 * 20 + 10], 10)

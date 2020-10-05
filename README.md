@@ -24,8 +24,11 @@ The project is not published on NPM, it is meant to be merged back to node-gdal-
 By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed gdal you can use these flags when installing:
 
 ```sh
-# requires libgdal-dev (debian: sudo apt-get install libgdal-dev)
-$ npm install gdal-next --build-from-source --shared_gdal
+$ git clone https://github.com/mmomtchev/node-gdal-async.git
+$ cd node-gdal-async
+$ npm i
+$ npx node-pre-gyp configure
+$ npx node-pre-gyp build [--shared_gdal]  # --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev (debian: sudo apt-get install libgdal-dev)
 ```
 
 ## Sample Usage
@@ -43,8 +46,8 @@ gdal.openAsync("sample.tif", undefined, (e, dataset) => {
         console.error(e);
         return;
     }
-    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y, undefined,
-        undefined, undefined, undefined, undefined, undefined, (e, data) => {
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y,
+        undefined, {}, (e, data) => {
             if (e) {
                 console.error(e);
                 return;
