@@ -311,6 +311,7 @@ NAN_SETTER(READ_ONLY_SETTER);
   }                                                                                                                    \
   var = (*Nan::Utf8String(info[num]))
 
+// delete callback is in AsyncWorker::~AsyncWorker
 #define NODE_ARG_CB(num, name, var)                                                                                    \
   if (info.Length() < num + 1) {                                                                                       \
     Nan::ThrowError(name " must be given");                                                                            \
