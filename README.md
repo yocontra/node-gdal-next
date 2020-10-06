@@ -1,8 +1,16 @@
+# node-gdal-async
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Node.js CI](https://github.com/mmomtchev/node-gdal-async/workflows/Node.js%20CI/badge.svg)
+
+Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
+
+
 # Fork Notes
 
-This project is a fork of https://github.com/contra/node-gdal-next which is a fork of https://github.com/naturalatlas/node-gdal with:
+This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal> with:
 
-- Early experimental support for asynchronous IO
+- **Early experimental support for asynchronous IO**
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
@@ -15,9 +23,7 @@ longitude second. If you don't want to make large code changes, you can replace 
 
 - None, I will keep the fork in sync and will merge back when the features are of sufficient quality
 
-# node-gdal-async
-
-Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
+## Installation
 
 The project is not published on NPM, it is meant to be merged back to node-gdal-next when ready
 
