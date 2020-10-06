@@ -64,9 +64,6 @@
 				"_LARGEFILE_SOURCE",
 				"_FILE_OFFSET_BITS=64"
 			],
-			"cflags": [
-        "-std=c++11"
-			],
 			"xcode_settings": {
 				"GCC_ENABLE_CPP_EXCEPTIONS": "YES",
 				"OTHER_LDFLAGS": [

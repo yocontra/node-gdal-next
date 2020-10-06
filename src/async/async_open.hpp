@@ -1,6 +1,8 @@
 #ifndef __NODE_GDAL_ASYNC_OPEN_H__
 #define __NODE_GDAL_ASYNC_OPEN_H__
 
+#include <functional>
+
 // node
 #include <node.h>
 #include <node_object_wrap.h>
