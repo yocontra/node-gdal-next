@@ -8,6 +8,8 @@
 
 namespace node_gdal {
 
+const char AsyncRasterIOLabel[] = "node-gdal:RasterIO";
+
 /**
  * This class handles async RasterIO
  *
@@ -34,7 +36,7 @@ AsyncRasterIO::AsyncRasterIO(
   GSpacing nPixelSpace,
   GSpacing nLineSpace,
   GDALRasterIOExtraArg *psExtraArg)
-  : Nan::AsyncWorker(pCallback),
+  : Nan::AsyncWorker(pCallback, AsyncRasterIOLabel),
     async_lock(pBand->async_lock),
     hDataPersistentHandle(*pObjectData),
     hBandPersistentHandle(pBand->handle()),
