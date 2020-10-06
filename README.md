@@ -33,7 +33,16 @@ $ npx node-pre-gyp build [--shared_gdal]  # --shared_gdal allows linking to the 
 
 ## Sample Usage
 
-Only asynchronous raster reading/writing and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch the dataset object itself while asynchronous operations are running**
+Only asynchronous raster reading/writing and asynchrounous opening are supported in the current version.
+Mixing synchronous and asynchronous operations is supported.
+
+#### Safe mixing of asynchronous operations
+
+Simultaneous operations on distinct dataset objects are always safe
+When using the same dataset object and while an asynchronous operation is running, you can
+* Use everything in RasterBandPixels, whether synchronous or asynchronous
+* Use everything in RasterBand
+* Nothing else, and in particular nothing on the dataset object itself
 
 **Does not support worker_threads**
 
