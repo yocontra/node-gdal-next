@@ -24,7 +24,7 @@ class AsyncOpen : public Nan::AsyncWorker {
   GDALDataset *raw;
 
     public:
-  AsyncOpen(Nan::Callback *pCallback, std::function<GDALDataset *()> doit);
+  explicit AsyncOpen(Nan::Callback *pCallback, const std::function<GDALDataset *()> doit);
 
   void Execute();
   void HandleOKCallback();

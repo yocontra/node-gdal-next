@@ -37,7 +37,7 @@ class AsyncRasterIO : public Nan::AsyncWorker {
   CPLErr eErr;
 
     public:
-  AsyncRasterIO(
+  explicit AsyncRasterIO(
     Nan::Callback *pCallback,
     RasterBand *pBand,
     GDALRWFlag eRWFlag,

@@ -6,7 +6,7 @@ namespace node_gdal {
 
 const char AsyncOpenLabel[] = "node-gdal:OpenDataset";
 
-AsyncOpen::AsyncOpen(Nan::Callback *pCallback, std::function<GDALDataset *()> doit)
+AsyncOpen::AsyncOpen(Nan::Callback *pCallback, const std::function<GDALDataset *()> doit)
   : Nan::AsyncWorker(pCallback, AsyncOpenLabel), doit(doit) {
 }
 
