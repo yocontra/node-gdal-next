@@ -24,13 +24,13 @@ describe('gdal.RasterBand', () => {
     describe('"description" property', () => {
       describe('getter', () => {
         it('should return string', () => {
-          gdal.openPromise(`${__dirname}/data/dem_azimuth50_pa.img`).then(ds => {
+          gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`).then(ds => {
             const band = ds.bands.get(1)
             assert.equal(band.description, 'hshade17')
           })
         })
         it('should throw error if dataset already closed', () => {
-          gdal.openPromise(`${__dirname}/data/dem_azimuth50_pa.img`).then(ds => {
+          gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`).then(ds => {
             const band = ds.bands.get(1)
             ds.close()
             assert.throws(() => {
@@ -42,7 +42,7 @@ describe('gdal.RasterBand', () => {
       describe('setter', () => {
         it('should throw error', () => {
           const ds = gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`,
-            undefined, undefined, undefined, undefined, undefined, undefined, {}, (e, ds) => {
+            (e, ds) => {
             const band = ds.bands.get(1)
             assert.throws(() => {
               band.description = 'test'
@@ -54,7 +54,7 @@ describe('gdal.RasterBand', () => {
     describe('"readOnly" property', () => {
       describe('getter', () => {
         it('should return true on readOnly dataset', () => {
-          gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+          gdal.openAsync(`${__dirname}/data/sample.tif`).then(ds => {
             const band = ds.bands.get(1)
             assert.isTrue(band.readOnly)
           })
@@ -64,12 +64,11 @@ describe('gdal.RasterBand', () => {
     describe('"pixels" property', () => {
       describe('readAsync()', () => {
         it('should return a TypedArray', () => {
-          gdal.openAsync(`${__dirname}/data/sample.tif`,
-            undefined, undefined, undefined, undefined, undefined, undefined, {}, (e, ds) => {
+          gdal.openAsync(`${__dirname}/data/sample.tif`, (e, ds) => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
-            band.pixels.readAsync(190, 290, w, h, undefined, {}, (e, data) => {
+            band.pixels.readAsync(190, 290, w, h, (e, data) => {
               assert.instanceOf(data, Uint8Array)
               assert.equal(data.length, w * h)
               assert.equal(data[10 * 20 + 10], 10)
@@ -77,13 +76,13 @@ describe('gdal.RasterBand', () => {
           })
         })
       })
-      describe('readPromise()', () => {
+      describe('readAsync()', () => {
         it('should return a TypedArray', () => {
-          gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+          gdal.openAsync(`${__dirname}/data/sample.tif`).then(ds => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
-            band.pixels.readPromise(190, 290, w, h).then(data => {
+            band.pixels.readAsync(190, 290, w, h).then(data => {
               assert.instanceOf(data, Uint8Array)
               assert.equal(data.length, w * h)
               assert.equal(data[10 * 20 + 10], 10)
@@ -92,7 +91,7 @@ describe('gdal.RasterBand', () => {
         })
         describe('w/data argument', () => {
           it('should put the data in the existing array', () => {
-            gdal.openPromise('temp',
+            gdal.openAsync('temp',
               'w',
               'MEM',
               256,
@@ -102,14 +101,14 @@ describe('gdal.RasterBand', () => {
                 const band = ds.bands.get(1)
                 const data = new Uint8Array(new ArrayBuffer(20 * 30))
                 data[15] = 31
-                band.pixels.readPromise(0, 0, 20, 30, data).then(result => {
+                band.pixels.readAsync(0, 0, 20, 30, data).then(result => {
                   assert.equal(data, result)
                   assert.equal(data[15], 0)
                 })
               })
           })
           it('should create new array if null', () => {
-            gdal.openPromise(
+            gdal.openAsync(
               'temp',
               'w',
               'MEM',
@@ -119,14 +118,14 @@ describe('gdal.RasterBand', () => {
               gdal.GDT_Byte
             ).then(ds => {
               const band = ds.bands.get(1)
-              band.pixels.readPromise(0, 0, 20, 30, null).then(data => {
+              band.pixels.readAsync(0, 0, 20, 30, null).then(data => {
                 assert.instanceOf(data, Uint8Array)
                 assert.equal(data.length, 20 * 30)
               })
             })
           })
           it('should throw error if array is too small', () => {
-            gdal.openPromise('temp',
+            gdal.openAsync('temp',
               'w',
               'MEM',
               256,
@@ -135,11 +134,11 @@ describe('gdal.RasterBand', () => {
               gdal.GDT_Byte).then(async (ds) => {
                 const band = ds.bands.get(1)
                 const data = new Uint8Array(new ArrayBuffer(20 * 30))
-                await expect(band.pixels.readPromise(0, 0, 20, 31, data)).to.be.rejectedWith(Error)
+                await expect(band.pixels.readAsync(0, 0, 20, 31, data)).to.be.rejectedWith(Error)
               })
           })
           it('should automatically translate data to array data type', () => {
-            const ds = gdal.openPromise('temp',
+            const ds = gdal.openAsync('temp',
               'w',
               'MEM',
               256,
@@ -150,7 +149,7 @@ describe('gdal.RasterBand', () => {
               const band = ds.bands.get(1)
               band.pixels.set(1, 1, 30)
               const data = new Float64Array(new ArrayBuffer(20 * 30 * 8))
-              band.pixels.readPromise(1, 1, 20, 30).then(data => {
+              band.pixels.readAsync(1, 1, 20, 30).then(data => {
                 assert.equal(data[0], 30)
               })
             })
@@ -159,17 +158,17 @@ describe('gdal.RasterBand', () => {
         describe('w/options', () => {
           describe('"buffer_width", "buffer_height"', () => {
             it('should default to width, height when not present', () => {
-              gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+              gdal.openAsync(`${__dirname}/data/sample.tif`).then(ds => {
                 const band = ds.bands.get(1)
-                band.pixels.readPromise(0, 0, 20, 30).then(data => {
+                band.pixels.readAsync(0, 0, 20, 30).then(data => {
                   assert.equal(data.length, 20 * 30)
                 })
               })
             })
             it("should create new array with given dimensions if array isn't given", () => {
-              gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+              gdal.openAsync(`${__dirname}/data/sample.tif`).then(ds => {
                 const band = ds.bands.get(1)
-                band.pixels.readPromise(0, 0, 20, 30, null, {
+                band.pixels.readAsync(0, 0, 20, 30, null, {
                   buffer_width: 10,
                   buffer_height: 15
                 }).then(data => {
@@ -178,10 +177,10 @@ describe('gdal.RasterBand', () => {
               })
             })
             it('should throw error if given array is smaller than given dimensions', () => {
-              gdal.openPromise(`${__dirname}/data/sample.tif`).then(async (ds) => {
+              gdal.openAsync(`${__dirname}/data/sample.tif`).then(async (ds) => {
                 const band = ds.bands.get(1)
                 const data = new Float64Array(new ArrayBuffer(8 * 10 * 14))
-                await expect(band.pixels.readPromise(0, 0, 20, 30, data, {
+                await expect(band.pixels.readAsync(0, 0, 20, 30, data, {
                     buffer_width: 10,
                     buffer_height: 15
                 }, /Array length must be greater than.*/)).to.be.rejectedWith(Error)
@@ -190,7 +189,7 @@ describe('gdal.RasterBand', () => {
           })
           describe('"type"', () => {
             it('should be ignored if typed array is given', () => {
-              gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+              gdal.openAsync(`${__dirname}/data/sample.tif`).then(ds => {
                 const band = ds.bands.get(1)
                 const data = new Float64Array(new ArrayBuffer(20 * 30 * 8))
                 const result = band.pixels.read(0, 0, 20, 30, data, {
@@ -200,7 +199,7 @@ describe('gdal.RasterBand', () => {
               })
             })
             it('should create output array with given type', () => {
-              gdal.openPromise(`${__dirname}/data/sample.tif`).then(ds => {
+              gdal.openAsync(`${__dirname}/data/sample.tif`).then(ds => {
                 const band = ds.bands.get(1)
                 const data = band.pixels.read(0, 0, 20, 30, null, {
                   type: gdal.GDT_Float64
@@ -213,7 +212,7 @@ describe('gdal.RasterBand', () => {
             it('should read data with space between values', () => {
               const w = 16,
                 h = 16
-              gdal.openPromise('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte).then(ds => {
+              gdal.openAsync('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte).then(ds => {
                 const red = ds.bands.get(1)
                 const blue = ds.bands.get(2)
                 red.fill(1)
@@ -229,8 +228,8 @@ describe('gdal.RasterBand', () => {
                   line_space: 2 * w
                 }
 
-                red.pixels.readPromise(0, 0, w, h, interleaved, read_options).then(interleaved => {
-                  blue.pixels.readPromise(
+                red.pixels.readAsync(0, 0, w, h, interleaved, read_options).then(interleaved => {
+                  blue.pixels.readAsync(
                     0,
                     0,
                     w,
@@ -253,7 +252,7 @@ describe('gdal.RasterBand', () => {
             it('should throw error if array is not long enough to store result', () => {
               const w = 16,
                 h = 16
-              const ds = gdal.openPromise('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte).then(ds => {
+              const ds = gdal.openAsync('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte).then(ds => {
                 const red = ds.bands.get(1)
                 const blue = ds.bands.get(2)
                 red.fill(1)
@@ -268,8 +267,8 @@ describe('gdal.RasterBand', () => {
                   line_space: 2 * w
                 }
 
-                red.pixels.readPromise(0, 0, w, h, interleaved, read_options).then(async (interleaved) => {
-                  await expect(blue.pixels.readPromise(
+                red.pixels.readAsync(0, 0, w, h, interleaved, read_options).then(async (interleaved) => {
+                  await expect(blue.pixels.readAsync(
                     0,
                     0,
                     w,
@@ -282,16 +281,16 @@ describe('gdal.RasterBand', () => {
             })
           })
           it('should throw an error if region is out of bounds', () => {
-            gdal.openPromise(`${__dirname}/data/sample.tif`).then(async (ds) => {
+            gdal.openAsync(`${__dirname}/data/sample.tif`).then(async (ds) => {
               const band = ds.bands.get(1)
-              await expect(band.pixels.readPromise(2000, 2000, 16, 16)).to.be.rejectedWith(3)
+              await expect(band.pixels.readAsync(2000, 2000, 16, 16)).to.be.rejectedWith(3)
             })
           })
           it('should throw error if dataset already closed', () => {
-            gdal.openPromise(`${__dirname}/data/sample.tif`).then(async (ds) => {
+            gdal.openAsync(`${__dirname}/data/sample.tif`).then(async (ds) => {
               const band = ds.bands.get(1)
               ds.close()
-              await expect(band.pixels.readPromise(0, 0, 16, 16)).to.be.rejectedWith(Error)
+              await expect(band.pixels.readAsync(0, 0, 16, 16)).to.be.rejectedWith(Error)
             })
           })
         })

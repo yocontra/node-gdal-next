@@ -39,12 +39,14 @@ Only asynchronous raster reading/writing and asynchrounous opening are supported
 
 #### With callbacks
 
+If the last argument of an xxxAsync function is a callback,
+it will be called on completion with standard *(e,r)* semantics
+In this case the function will return a resolved *Promise*
 ```js
 const gdal = require('../node-gdal-async') // Or where it is installed
-gdal.openAsync('sample.tif', undefined, undefined, undefined, undefined,
-        undefined, undefined, {}, (e, dataset) => {
+gdal.openAsync('sample.tif', (e, dataset) => {
     dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x,
-        dataset.rasterSize.y, undefined, {}, (e, data) => {
+        dataset.rasterSize.y, (e, data) => {
         if (e) {
             console.error(e);
             return;
@@ -56,13 +58,14 @@ gdal.openAsync('sample.tif', undefined, undefined, undefined, undefined,
 
 #### With promises
 
+If there is no callback, the function will return a *Promise*
+then can be *then()*ed, *catch()*ed or *await*ed
 ```js
-const gdal = require('../node-gdal-async')
-gdal.openPromise('sample.tif').then((dataset) => {
-    dataset.bands.get(1).pixels.readPromise(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
+gdal.openAsync('sample.tif').then((dataset) => {
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
         .then((data) => {
-        console.log(data);
-    }).catch(e => console.error(e));
+            console.log(data);
+        }).catch(e => console.error(e));
 }).catch(e => console.error(e));
 ```
 
