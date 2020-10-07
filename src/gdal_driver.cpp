@@ -232,6 +232,10 @@ void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool a
   }
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
+    return;
+  }
   if (driver->uses_ogr) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *ds = raw->CreateDataSource(filename.c_str(), options.get());
@@ -308,6 +312,7 @@ NAN_METHOD(Driver::create) {
  * types{{/crossLink}})
  * @param {String[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
+ * @param {Callback} callback promisifiable callback
  * @return gdal.Dataset
  */
 NAN_METHOD(Driver::createAsync) {
@@ -364,6 +369,10 @@ NAN_METHOD(Driver::createCopy) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
+    return;
+  }
   if (driver->uses_ogr != src_dataset->uses_ogr) {
     Nan::ThrowError("Driver unable to copy dataset");
     return;
@@ -516,7 +525,7 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
 
 #if GDAL_VERSION_MAJOR < 2
   if (async) {
-    Nan::ThrowError("Async opening is not supported on GDAL < 2.x");
+    Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
     return;
   }
   if (driver->uses_ogr) {
@@ -576,6 +585,7 @@ NAN_METHOD(Driver::open) {
  * @param {String} path
  * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
  * `"r+"`
+ * @param {Callback} callback promisifiable callback
  * @return {gdal.Dataset}
  */
 NAN_METHOD(Driver::openAsync) {
