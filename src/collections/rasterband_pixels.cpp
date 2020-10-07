@@ -448,6 +448,7 @@ NAN_METHOD(RasterBandPixels::write) {
  * @param {Integer} [options.buffer_height=y_size]
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
+ * @param {Callback} callback promisifiable callback
  */
 NAN_METHOD(RasterBandPixels::writeAsync) {
   _do_write(info, true);
