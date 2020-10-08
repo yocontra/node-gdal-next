@@ -496,9 +496,8 @@ NAN_METHOD(Driver::open) {
 #endif
 
   GDALDriver *raw = driver->getGDALDriver();
-  GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
-  GDALDataset *ds = raw->pfnOpen(open_info);
-  delete open_info;
+  const char *driver_list[2] = {raw->GetDescription(), nullptr};
+  GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
   if (!ds) {
     Nan::ThrowError("Error opening dataset");
     return;
