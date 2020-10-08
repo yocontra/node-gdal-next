@@ -1,8 +1,16 @@
+# node-gdal-async
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Node.js CI](https://github.com/mmomtchev/node-gdal-async/workflows/Node.js%20CI/badge.svg)
+
+Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
+
+
 # Fork Notes
 
-This project is a fork of https://github.com/contra/node-gdal-next which is a fork of https://github.com/naturalatlas/node-gdal with:
+This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal> with:
 
-- Early experimental support for asynchronous IO
+- **Early experimental support for asynchronous IO**
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
@@ -15,9 +23,7 @@ longitude second. If you don't want to make large code changes, you can replace 
 
 - None, I will keep the fork in sync and will merge back when the features are of sufficient quality
 
-# node-gdal-async
-
-Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
+## Installation
 
 The project is not published on NPM, it is meant to be merged back to node-gdal-next when ready
 
@@ -33,18 +39,31 @@ $ npx node-pre-gyp build [--shared_gdal]  # --shared_gdal allows linking to the 
 
 ## Sample Usage
 
-Only asynchronous raster reading/writing and asynchrounous opening are supported in the current version. Mixing synchronous and asynchronous operations should work **as long as you do not touch the dataset object itself while asynchronous operations are running**
+Only asynchronous raster reading/writing and asynchrounous opening are supported in the current version.
+Mixing synchronous and asynchronous operations is supported.
+
+#### Safe mixing of asynchronous operations
+
+Simultaneous operations on distinct dataset objects are always safe
+When using the same dataset object and while an asynchronous operation is running, you can
+* Use everything in RasterBandPixels, whether synchronous or asynchronous
+* Use everything in RasterBand
+* Nothing else, and in particular nothing on the dataset object itself
+
+Keep in mind that while multiple simultaneous IO operations on the same dataset object are safe, in practice they won't run in parallel. The only way to have multiple parallel operations on the same file is to use multiple dataset objects.
 
 **Does not support worker_threads**
 
 #### With callbacks
 
+If the last argument of an xxxAsync function is a callback,
+it will be called on completion with standard *(e,r)* semantics
+In this case the function will return a resolved *Promise*
 ```js
 const gdal = require('../node-gdal-async') // Or where it is installed
-gdal.openAsync('sample.tif', undefined, undefined, undefined, undefined,
-        undefined, undefined, {}, (e, dataset) => {
+gdal.openAsync('sample.tif', (e, dataset) => {
     dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x,
-        dataset.rasterSize.y, undefined, {}, (e, data) => {
+        dataset.rasterSize.y, (e, data) => {
         if (e) {
             console.error(e);
             return;
@@ -56,13 +75,14 @@ gdal.openAsync('sample.tif', undefined, undefined, undefined, undefined,
 
 #### With promises
 
+If there is no callback, the function will return a *Promise*
+then can be *then()*ed, *catch()*ed or *await*ed
 ```js
-const gdal = require('../node-gdal-async')
-gdal.openPromise('sample.tif').then((dataset) => {
-    dataset.bands.get(1).pixels.readPromise(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
+gdal.openAsync('sample.tif').then((dataset) => {
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
         .then((data) => {
-        console.log(data);
-    }).catch(e => console.error(e));
+            console.log(data);
+        }).catch(e => console.error(e));
 }).catch(e => console.error(e));
 ```
 

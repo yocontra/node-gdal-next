@@ -41,9 +41,11 @@ class Driver : public Nan::ObjectWrap {
   static NAN_METHOD(create);
   static NAN_METHOD(createAsync);
   static NAN_METHOD(createCopy);
+  static NAN_METHOD(createCopyAsync);
   static NAN_METHOD(deleteDataset);
   static NAN_METHOD(rename);
   static NAN_METHOD(copyFiles);
+  static NAN_METHOD(copyFilesAsync);
   static NAN_METHOD(getMetadata);
 
   static ObjectCache<GDALDriver, Driver> cache;
@@ -52,6 +54,8 @@ class Driver : public Nan::ObjectWrap {
 
   static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
   static void _do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
+  static void _do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
+  static void _do_copy_files(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
 
   Driver();
   Driver(GDALDriver *driver);

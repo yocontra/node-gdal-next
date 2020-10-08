@@ -26,6 +26,7 @@ void Driver::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "create", create);
   Nan::SetPrototypeMethod(lcons, "createAsync", createAsync);
   Nan::SetPrototypeMethod(lcons, "createCopy", createCopy);
+  Nan::SetPrototypeMethod(lcons, "createCopyAsync", createCopyAsync);
   Nan::SetPrototypeMethod(lcons, "deleteDataset", deleteDataset);
   Nan::SetPrototypeMethod(lcons, "rename", rename);
   Nan::SetPrototypeMethod(lcons, "copyFiles", copyFiles);
@@ -204,6 +205,9 @@ NAN_METHOD(Driver::deleteDataset) {
   return;
 }
 
+/*
+ * Low-level common code for synchronous and asynchronous creation
+ */
 void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
@@ -232,6 +236,10 @@ void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool a
   }
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
+    return;
+  }
   if (driver->uses_ogr) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *ds = raw->CreateDataSource(filename.c_str(), options.get());
@@ -308,25 +316,17 @@ NAN_METHOD(Driver::create) {
  * types{{/crossLink}})
  * @param {String[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
+ * @param {Callback} callback promisifiable callback
  * @return gdal.Dataset
  */
 NAN_METHOD(Driver::createAsync) {
   _do_create(info, true);
 }
 
-/**
- * Create a copy of a dataset.
- *
- * @throws Error
- * @method createCopy
- * @param {String} filename
- * @param {gdal.Dataset} src
- * @param {Boolean} [strict=false]
- * @param {String[]|object} [options=null] An array or object containing
- * driver-specific dataset creation options
- * @return gdal.Dataset
+/*
+ * Low-level common code for synchronous and asynchronous creation by copying
  */
-NAN_METHOD(Driver::createCopy) {
+void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -338,7 +338,7 @@ NAN_METHOD(Driver::createCopy) {
   std::string filename;
   Dataset *src_dataset;
   unsigned int strict = 0;
-  StringList options;
+  StringList *options;
 
   NODE_ARG_STR(0, "filename", filename);
 
@@ -359,11 +359,16 @@ NAN_METHOD(Driver::createCopy) {
     return;
   }
 
-  if (info.Length() > 2 && options.parse(info[2])) {
+  options = new StringList;
+  if (info.Length() > 2 && options->parse(info[2])) {
     return; // error parsing string list
   }
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
+    return;
+  }
   if (driver->uses_ogr != src_dataset->uses_ogr) {
     Nan::ThrowError("Driver unable to copy dataset");
     return;
@@ -385,15 +390,58 @@ NAN_METHOD(Driver::createCopy) {
 #endif
 
   GDALDriver *raw = driver->getGDALDriver();
-  GDALDataset *raw_ds = src_dataset->getDataset();
-  GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options.get(), NULL, NULL);
+  std::function<GDALDataset *()> doit = [raw, filename, src_dataset, strict, options]() {
+    GDALDataset *raw_ds = src_dataset->getDataset();
+    GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
+    delete options;
+    return ds;
+  };
 
-  if (!ds) {
-    Nan::ThrowError("Error copying dataset");
-    return;
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(3, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
+  } else {
+    GDALDataset *ds = doit();
+    if (!ds) {
+      Nan::ThrowError("Error copying dataset");
+      return;
+    }
+    info.GetReturnValue().Set(Dataset::New(ds));
   }
+}
 
-  info.GetReturnValue().Set(Dataset::New(ds));
+/**
+ * Create a copy of a dataset.
+ *
+ * @throws Error
+ * @method createCopy
+ * @param {String} filename
+ * @param {gdal.Dataset} src
+ * @param {Boolean} [strict=false]
+ * @param {String[]|object} [options=null] An array or object containing
+ * driver-specific dataset creation options
+ * @return gdal.Dataset
+ */
+NAN_METHOD(Driver::createCopy) {
+  _do_create_copy(info, false);
+}
+
+/**
+ * Asynchronously create a copy of a dataset.
+ *
+ * @throws Error
+ * @method createCopy
+ * @param {String} filename
+ * @param {gdal.Dataset} src
+ * @param {Boolean} [strict=false]
+ * @param {String[]|object} [options=null] An array or object containing
+ * driver-specific dataset creation options
+ * @param {Callback} callback promisifiable callback
+ * @return gdal.Dataset
+ */
+NAN_METHOD(Driver::createCopyAsync) {
+  _do_create_copy(info, true);
 }
 
 /**
@@ -496,6 +544,9 @@ NAN_METHOD(Driver::getMetadata) {
   info.GetReturnValue().Set(result);
 }
 
+/*
+ * Low-level common code for synchronous and asynchronous opening
+ */
 void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
@@ -516,7 +567,7 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
 
 #if GDAL_VERSION_MAJOR < 2
   if (async) {
-    Nan::ThrowError("Async opening is not supported on GDAL < 2.x");
+    Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
     return;
   }
   if (driver->uses_ogr) {
@@ -576,6 +627,7 @@ NAN_METHOD(Driver::open) {
  * @param {String} path
  * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
  * `"r+"`
+ * @param {Callback} callback promisifiable callback
  * @return {gdal.Dataset}
  */
 NAN_METHOD(Driver::openAsync) {

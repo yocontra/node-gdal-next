@@ -38,7 +38,7 @@ static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asyn
 
 #if GDAL_VERSION_MAJOR < 2
   if (async) {
-    Nan::ThrowError("Async opening is not supported on GDAL < 2.x");
+    Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
     return;
   }
 

@@ -222,7 +222,9 @@ NAN_METHOD(RasterBand::getMaskBand) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   GDALRasterBand *mask_band = band->this_->GetMaskBand();
+  uv_mutex_unlock(band->async_lock);
 
   if (!mask_band) {
     info.GetReturnValue().Set(Nan::Null());
@@ -252,7 +254,9 @@ NAN_METHOD(RasterBand::fill) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   int err = band->this_->Fill(real, imaginary);
+  uv_mutex_unlock(band->async_lock);
 
   if (err) {
     NODE_THROW_CPLERR(err);
@@ -308,9 +312,11 @@ NAN_METHOD(RasterBand::getStatistics) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   pushStatsErrorHandler();
   CPLErr err = band->this_->GetStatistics(approx, force, &min, &max, &mean, &std_dev);
   popStatsErrorHandler();
+  uv_mutex_unlock(band->async_lock);
   if (!stats_file_err.empty()) {
     Nan::ThrowError(stats_file_err.c_str());
   } else if (err) {
@@ -358,9 +364,11 @@ NAN_METHOD(RasterBand::computeStatistics) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   pushStatsErrorHandler();
   CPLErr err = band->this_->ComputeStatistics(approx, &min, &max, &mean, &std_dev, NULL, NULL);
   popStatsErrorHandler();
+  uv_mutex_unlock(band->async_lock);
   if (!stats_file_err.empty()) {
     Nan::ThrowError(stats_file_err.c_str());
   } else if (err) {
@@ -403,7 +411,9 @@ NAN_METHOD(RasterBand::setStatistics) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->this_->SetStatistics(min, max, mean, std_dev);
+  uv_mutex_unlock(band->async_lock);
 
   if (err) {
     NODE_THROW_CPLERR(err);
@@ -429,8 +439,11 @@ NAN_METHOD(RasterBand::getMetadata) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
-
-  info.GetReturnValue().Set(MajorObject::getMetadata(band->this_, domain.empty() ? NULL : domain.c_str()));
+  uv_mutex_lock(band->async_lock);
+  Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE meta =
+    MajorObject::getMetadata(band->this_, domain.empty() ? NULL : domain.c_str());
+  uv_mutex_unlock(band->async_lock);
+  info.GetReturnValue().Set(meta);
 }
 
 /**
@@ -476,7 +489,9 @@ NAN_GETTER(RasterBand::idGetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   int id = band->this_->GetBand();
+  uv_mutex_unlock(band->async_lock);
 
   if (id == 0) {
     info.GetReturnValue().Set(Nan::Null());
@@ -502,8 +517,11 @@ NAN_GETTER(RasterBand::descriptionGetter) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
+  uv_mutex_lock(band->async_lock);
+  const char *desc = band->this_->GetDescription();
+  uv_mutex_unlock(band->async_lock);
 
-  info.GetReturnValue().Set(SafeString::New(band->this_->GetDescription()));
+  info.GetReturnValue().Set(SafeString::New(desc));
 }
 
 /**
@@ -522,8 +540,12 @@ NAN_GETTER(RasterBand::sizeGetter) {
   }
 
   Local<Object> result = Nan::New<Object>();
-  Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(band->this_->GetXSize()));
-  Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(band->this_->GetYSize()));
+  uv_mutex_lock(band->async_lock);
+  int x = band->this_->GetXSize();
+  int y = band->this_->GetYSize();
+  uv_mutex_unlock(band->async_lock);
+  Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(x));
+  Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(y));
   info.GetReturnValue().Set(result);
 }
 
@@ -543,7 +565,9 @@ NAN_GETTER(RasterBand::blockSizeGetter) {
   }
 
   int x, y;
+  uv_mutex_lock(band->async_lock);
   band->this_->GetBlockSize(&x, &y);
+  uv_mutex_unlock(band->async_lock);
 
   Local<Object> result = Nan::New<Object>();
   Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(x));
@@ -567,7 +591,9 @@ NAN_GETTER(RasterBand::minimumGetter) {
   }
 
   int success = 0;
+  uv_mutex_lock(band->async_lock);
   double result = band->this_->GetMinimum(&success);
+  uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -587,7 +613,9 @@ NAN_GETTER(RasterBand::maximumGetter) {
   }
 
   int success = 0;
+  uv_mutex_lock(band->async_lock);
   double result = band->this_->GetMaximum(&success);
+  uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -606,7 +634,9 @@ NAN_GETTER(RasterBand::offsetGetter) {
   }
 
   int success = 0;
+  uv_mutex_lock(band->async_lock);
   double result = band->this_->GetOffset(&success);
+  uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -625,7 +655,9 @@ NAN_GETTER(RasterBand::scaleGetter) {
   }
 
   int success = 0;
+  uv_mutex_lock(band->async_lock);
   double result = band->this_->GetScale(&success);
+  uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(Nan::New<Number>(result));
 }
 
@@ -644,7 +676,9 @@ NAN_GETTER(RasterBand::noDataValueGetter) {
   }
 
   int success = 0;
+  uv_mutex_lock(band->async_lock);
   double result = band->this_->GetNoDataValue(&success);
+  uv_mutex_unlock(band->async_lock);
 
   if (success && !CPLIsNan(result)) {
     info.GetReturnValue().Set(Nan::New<Number>(result));
@@ -672,7 +706,9 @@ NAN_GETTER(RasterBand::unitTypeGetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   const char *result = band->this_->GetUnitType();
+  uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(SafeString::New(result));
 }
 
@@ -692,7 +728,9 @@ NAN_GETTER(RasterBand::dataTypeGetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   GDALDataType type = band->this_->GetRasterDataType();
+  uv_mutex_unlock(band->async_lock);
 
   if (type == GDT_Unknown) return;
   info.GetReturnValue().Set(SafeString::New(GDALGetDataTypeName(type)));
@@ -713,7 +751,9 @@ NAN_GETTER(RasterBand::readOnlyGetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   GDALAccess result = band->this_->GetAccess();
+  uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(result == GA_Update ? Nan::False() : Nan::True());
 }
 
@@ -736,7 +776,9 @@ NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   bool result = band->this_->HasArbitraryOverviews();
+  uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(Nan::New<Boolean>(result));
 }
 
@@ -754,7 +796,9 @@ NAN_GETTER(RasterBand::categoryNamesGetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   char **names = band->this_->GetCategoryNames();
+  uv_mutex_unlock(band->async_lock);
 
   Local<Array> results = Nan::New<Array>();
 
@@ -783,7 +827,9 @@ NAN_GETTER(RasterBand::colorInterpretationGetter) {
     Nan::ThrowError("RasterBand object has already been destroyed");
     return;
   }
+  uv_mutex_lock(band->async_lock);
   GDALColorInterp interp = band->this_->GetColorInterpretation();
+  uv_mutex_unlock(band->async_lock);
   if (interp == GCI_Undefined)
     return;
   else
@@ -803,7 +849,9 @@ NAN_SETTER(RasterBand::unitTypeSetter) {
     return;
   }
   std::string input = *Nan::Utf8String(value);
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->this_->SetUnitType(input.c_str());
+  uv_mutex_unlock(band->async_lock);
   if (err) { NODE_THROW_CPLERR(err); }
 }
 
@@ -826,7 +874,9 @@ NAN_SETTER(RasterBand::noDataValueSetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->this_->SetNoDataValue(input);
+  uv_mutex_unlock(band->async_lock);
   if (err) { NODE_THROW_CPLERR(err); }
 }
 
@@ -843,7 +893,9 @@ NAN_SETTER(RasterBand::scaleSetter) {
     return;
   }
   double input = Nan::To<double>(value).ToChecked();
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->this_->SetScale(input);
+  uv_mutex_unlock(band->async_lock);
   if (err) { NODE_THROW_CPLERR(err); }
 }
 
@@ -860,7 +912,9 @@ NAN_SETTER(RasterBand::offsetSetter) {
     return;
   }
   double input = Nan::To<double>(value).ToChecked();
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->this_->SetOffset(input);
+  uv_mutex_unlock(band->async_lock);
   if (err) { NODE_THROW_CPLERR(err); }
 }
 
@@ -892,7 +946,9 @@ NAN_SETTER(RasterBand::categoryNamesSetter) {
     list[i] = NULL;
   }
 
+  uv_mutex_lock(band->async_lock);
   int err = band->this_->SetCategoryNames(list);
+  uv_mutex_unlock(band->async_lock);
 
   if (list) { delete[] list; }
 
@@ -917,7 +973,9 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
     return;
   }
 
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->this_->SetColorInterpretation(ci);
+  uv_mutex_unlock(band->async_lock);
   if (err) { NODE_THROW_CPLERR(err); }
 }
 
