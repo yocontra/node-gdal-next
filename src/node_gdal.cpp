@@ -28,11 +28,7 @@
 #include <node_version.h>
 
 // nan
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#include <nan.h>
-#pragma GCC diagnostic pop
+#include "nan-wrapper.h"
 
 // gdal
 #include <gdal.h>
@@ -212,7 +208,7 @@ static NAN_METHOD(isAlive) {
   info.GetReturnValue().Set(Nan::New(ptr_manager.isAlive(uid)));
 }
 
-static void Init(Local<Object> target) {
+static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
   Nan::SetMethod(target, "open", open);
   Nan::SetMethod(target, "openAsync", openAsync);
