@@ -20,6 +20,12 @@ using namespace node;
 
 namespace node_gdal {
 
+#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR <= 2 && GDAL_VERSION_MINOR < 3)
+typedef char OGRChar;
+#else
+typedef const char OGRChar;
+#endif
+
 class SpatialReference : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
