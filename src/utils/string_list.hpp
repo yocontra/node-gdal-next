@@ -6,11 +6,7 @@
 #include <node.h>
 
 // nan
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#include <nan.h>
-#pragma GCC diagnostic pop
+#include "../nan-wrapper.h"
 
 using namespace v8;
 
