@@ -212,7 +212,7 @@ static NAN_METHOD(isAlive) {
   info.GetReturnValue().Set(Nan::New(ptr_manager.isAlive(uid)));
 }
 
-static void Init(Local<Object> target) {
+static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
   Nan::SetMethod(target, "open", open);
   Nan::SetMethod(target, "setConfigOption", setConfigOption);
