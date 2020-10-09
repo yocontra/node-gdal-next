@@ -785,7 +785,7 @@ NAN_METHOD(Geometry::createFromWkt) {
   NODE_ARG_STR(0, "wkt", wkt_string);
   NODE_ARG_WRAPPED_OPT(1, "srs", SpatialReference, srs);
 
-  char *wkt = (char *)wkt_string.c_str();
+  OGRChar *wkt = (OGRChar *)wkt_string.c_str();
   OGRGeometry *geom = NULL;
   OGRSpatialReference *ogr_srs = NULL;
   if (srs) { ogr_srs = srs->get(); }

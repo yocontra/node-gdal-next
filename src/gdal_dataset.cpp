@@ -746,7 +746,7 @@ NAN_GETTER(Dataset::srsGetter) {
 
   GDALDataset *raw = ds->getDataset();
   // get projection wkt and return null if not set
-  char *wkt = (char *)raw->GetProjectionRef();
+  OGRChar *wkt = (OGRChar *)raw->GetProjectionRef();
   if (*wkt == '\0') {
     // getProjectionRef returns string of length 0 if no srs set
     info.GetReturnValue().Set(Nan::Null());
