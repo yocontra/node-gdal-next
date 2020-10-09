@@ -4,6 +4,10 @@
 #if __GNUC__ > 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
+#endif
+
 #include <nan.h>
-#pragma GCC diagnostic pop 
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
 #endif
