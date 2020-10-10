@@ -168,14 +168,6 @@ NAN_METHOD(RasterBandPixels::set) {
 
 /**
  * Low level read for both synchronous and asynchronous reading.
- *
- * @method _do_read
- * @throws Error
- * @param {FunctionCallbackInfo} info V8 data
- * @param {bool} async asynchronous mode
- * @return {TypedArray} A
- * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * of values.
  */
 void RasterBandPixels::_do_read(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
@@ -327,14 +319,6 @@ NAN_METHOD(RasterBandPixels::readAsync) {
 
 /**
  * Low level read for both synchronous and asynchronous writing.
- *
- * @method _do_write
- * @throws Error
- * @param {FunctionCallbackInfo} info V8 data
- * @param {bool} async asynchronous mode
- * @return {TypedArray} A
- * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * of values.
  */
 void RasterBandPixels::_do_write(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
