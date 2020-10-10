@@ -23,6 +23,9 @@ using namespace node;
 
 namespace node_gdal {
 
+/*
+ * Common code for sync and async opening
+ */
 static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
 

@@ -304,7 +304,7 @@ NAN_METHOD(Driver::create) {
  * Asynchronously create a new dataset with this driver.
  *
  * @throws Error
- * @method create
+ * @method createAsync
  * @param {String} filename
  * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
  * datasets)
@@ -431,7 +431,7 @@ NAN_METHOD(Driver::createCopy) {
  * Asynchronously create a copy of a dataset.
  *
  * @throws Error
- * @method createCopy
+ * @method createCopyAsync
  * @param {String} filename
  * @param {gdal.Dataset} src
  * @param {Boolean} [strict=false]
@@ -630,7 +630,7 @@ NAN_METHOD(Driver::open) {
  * Opens a dataset.
  *
  * @throws Error
- * @method open
+ * @method openAsync
  * @param {String} path
  * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
  * `"r+"`
