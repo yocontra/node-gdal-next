@@ -148,9 +148,9 @@ describe('gdal.drivers', () => {
       driver.createCopyAsync(
         outputFilename,
         gdal.open(`${__dirname}/data/12_791_1476.jpg`)
-      ).then(result => {
+      ).then((result) => {
         assert.equal(result.driver.description, 'MEM')
-      }).catch(e => {
+      }).catch((e) => {
         console.error(e)
         process.exit(1)
       })
