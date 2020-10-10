@@ -20,6 +20,12 @@
 
 namespace node_gdal {
 
+/**
+ * This class handles async open
+ *
+ * The caller must provide a lambda that can be executed in
+ * another thread with the proper open sequence
+ */
 class AsyncOpen : public Nan::AsyncWorker {
     private:
   std::function<GDALDataset *()> doit;

@@ -16,6 +16,14 @@
 
 namespace node_gdal {
 
+/**
+ * This class handles async RasterIO
+ *
+ * It keeps strong references on the JS objects
+ * data and the parent band
+ * in hDataPersistentHandle and hBandPersistentHandle
+ * to protect them from the garbage collector
+ */
 class AsyncRasterIO : public Nan::AsyncWorker {
     private:
   uv_mutex_t *async_lock;

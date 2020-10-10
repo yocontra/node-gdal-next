@@ -10,16 +10,6 @@ namespace node_gdal {
 
 const char AsyncRasterIOLabel[] = "node-gdal:RasterIO";
 
-/**
- * This class handles async RasterIO
- *
- * It keeps strong references on the JS objects
- * data and the parent band
- * in hDataPersistentHandle and hBandPersistentHandle
- * to protect them from the garbage collector
- *
- * @class gdal.AsyncRasterIO
- */
 AsyncRasterIO::AsyncRasterIO(
   Nan::Callback *pCallback,
   RasterBand *pBand,
