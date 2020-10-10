@@ -290,7 +290,7 @@ NAN_METHOD(RasterBandPixels::read) {
 
 /**
  * Asynchronously reads a region of pixels.
- * If the last parameter is a callback, then this callback is called on completion and a resolved Promise is returned.
+ * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
  * Otherwise the function returns a Promise resolved with the result.
  *
  * @method readAsync
@@ -418,7 +418,7 @@ NAN_METHOD(RasterBandPixels::write) {
 
 /**
  * Asynchronously writes a region of pixels.
- * If the last parameter is a callback, then this callback is called on completion and a resolved Promise is returned.
+ * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
  * Otherwise the function returns a Promise resolved with the result.
  *
  * @method writeAsync

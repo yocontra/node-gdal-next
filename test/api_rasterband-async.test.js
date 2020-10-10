@@ -183,7 +183,7 @@ describe('gdal.RasterBand', () => {
                 await expect(band.pixels.readAsync(0, 0, 20, 30, data, {
                   buffer_width: 10,
                   buffer_height: 15
-                }, /Array length must be greater than.*/)).to.be.rejectedWith(Error)
+                } /*Array length must be greater than.*/)).to.be.rejectedWith(Error)
               })
             })
           })
