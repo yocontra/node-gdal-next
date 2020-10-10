@@ -565,6 +565,8 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
     return;
   }
 
+  GDALDriver *raw = driver->getGDALDriver();
+
 #if GDAL_VERSION_MAJOR < 2
   if (async) {
     Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
@@ -580,14 +582,19 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
     info.GetReturnValue().Set(Dataset::New(ds));
     return;
   }
+  GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
+  GDALDataset *ds = raw->pfnOpen(open_info);
+  delete open_info;
+
+  if (!ds) {
+    Nan::ThrowError("Error opening dataset");
+    return;
+  }
 #endif
 
-  GDALDriver *raw = driver->getGDALDriver();
-
   std::function<GDALDataset *()> doit = [raw, path, access]() {
-    GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
-    GDALDataset *ds = raw->pfnOpen(open_info);
-    delete open_info;
+    const char *driver_list[2] = {raw->GetDescription(), nullptr};
+    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
     return ds;
   };
 

@@ -718,8 +718,7 @@ NAN_GETTER(Dataset::rasterSizeGetter) {
 // sense in JS where we can return null instead of a number
 // https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
 #if GDAL_VERSION_MAJOR >= 2
-  /* TODO: Fix in node-gdal-next */
-  if (raw->GetDriver() == nullptr  || !raw->GetDriver()->GetMetadataItem(GDAL_DCAP_RASTER)) {
+  if (raw->GetDriver() == nullptr || !raw->GetDriver()->GetMetadataItem(GDAL_DCAP_RASTER)) {
     info.GetReturnValue().Set(Nan::Null());
     return;
   }
@@ -756,7 +755,7 @@ NAN_GETTER(Dataset::srsGetter) {
 
   GDALDataset *raw = ds->getDataset();
   // get projection wkt and return null if not set
-  char *wkt = (char *)raw->GetProjectionRef();
+  OGRChar *wkt = (OGRChar *)raw->GetProjectionRef();
   if (*wkt == '\0') {
     // getProjectionRef returns string of length 0 if no srs set
     info.GetReturnValue().Set(Nan::Null());
@@ -841,13 +840,13 @@ NAN_GETTER(Dataset::driverGetter) {
 #if GDAL_VERSION_MAJOR < 2
   if (ds->uses_ogr) {
     OGRDataSource *raw = ds->getDatasource();
-    info.GetReturnValue().Set(Driver::New(raw->GetDriver()));
+    if (raw->GetDriver() != nullptr) { info.GetReturnValue().Set(Driver::New(raw->GetDriver())); }
     return;
   }
 #endif
 
   GDALDataset *raw = ds->getDataset();
-  info.GetReturnValue().Set(Driver::New(raw->GetDriver()));
+  if (raw->GetDriver() != nullptr) { info.GetReturnValue().Set(Driver::New(raw->GetDriver())); }
 }
 
 NAN_SETTER(Dataset::srsSetter) {

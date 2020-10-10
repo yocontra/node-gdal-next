@@ -1,12 +1,12 @@
-# Phase 1
+# Phase 1 ✓
 
 - Be able to asynchronously call the raster API to read from Express
 
-# Phase 2
+# Phase 2 ✓
 
 - Support writing
 
-# Phase 3
+# Phase 3 ✓
 
 - Be able to use all raster features without blocking the event loop
 

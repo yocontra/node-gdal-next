@@ -117,7 +117,7 @@ NAN_METHOD(SpatialReference::New) {
     // sets reference count to one
     srs = new OGRSpatialReference(wkt.empty() ? 0 : wkt.c_str());
     if (!wkt.empty()) {
-      char *wkt_c = (char *)wkt.c_str();
+      OGRChar *wkt_c = (OGRChar*)wkt.c_str();
       int err = srs->importFromWkt(&wkt_c);
       if (err) {
         NODE_THROW_OGRERR(err);
@@ -513,7 +513,7 @@ NAN_METHOD(SpatialReference::fromWKT) {
 
   std::string wkt("");
   NODE_ARG_STR(0, "wkt", wkt);
-  char *str = (char *)wkt.c_str();
+  OGRChar *str = (OGRChar*)wkt.c_str();
 
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromWkt(&str);
@@ -866,7 +866,7 @@ NAN_METHOD(SpatialReference::getLinearUnits) {
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
 
-  char *unit_name;
+  OGRChar *unit_name;
   double units = srs->this_->GetLinearUnits(&unit_name);
 
   Local<Object> result = Nan::New<Object>();
@@ -887,7 +887,7 @@ NAN_METHOD(SpatialReference::getAngularUnits) {
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
 
-  char *unit_name;
+  OGRChar *unit_name;
   double units = srs->this_->GetAngularUnits(&unit_name);
 
   Local<Object> result = Nan::New<Object>();
