@@ -3,12 +3,12 @@
         {
             "name": "Linux",
             "includePath": [
-                "${default}",
                 "${workspaceFolder}/deps/libgdal/gdal/port",
                 "${workspaceFolder}/deps/libgdal/gdal/gcore",
                 "${workspaceFolder}/deps/libgdal/gdal/ogr",
                 "${workspaceFolder}/deps/libgdal/gdal/ogr/ogrsf_frmts",
-                "${workspaceFolder}/deps/libgdal/arch/unix"
+                "${workspaceFolder}/deps/libgdal/arch/unix",
+                "${default}"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu18",
