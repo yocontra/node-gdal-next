@@ -291,7 +291,8 @@ NAN_METHOD(RasterBandPixels::read) {
 /**
  * Asynchronously reads a region of pixels.
  * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
- * Otherwise the function returns a Promise resolved with the result.
+ * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
+ * as it is the last parameter. Otherwise the function returns a Promise resolved with the result.
  *
  * @method readAsync
  * @param {Integer} x
@@ -308,7 +309,8 @@ NAN_METHOD(RasterBandPixels::read) {
  * constants{{/crossLink}}.
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
- * @param {Callback} callback promisifiable callback
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
  * @return {TypedArray} A
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
  * of values.
@@ -419,6 +421,8 @@ NAN_METHOD(RasterBandPixels::write) {
 /**
  * Asynchronously writes a region of pixels.
  * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
+ * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
+ as it is the last parameter.
  * Otherwise the function returns a Promise resolved with the result.
  *
  * @method writeAsync
@@ -434,7 +438,8 @@ NAN_METHOD(RasterBandPixels::write) {
  * @param {Integer} [options.buffer_height=y_size]
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
- * @param {Callback} callback promisifiable callback
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
  */
 NAN_METHOD(RasterBandPixels::writeAsync) {
   _do_write(info, true);
