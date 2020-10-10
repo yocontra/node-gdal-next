@@ -16,7 +16,7 @@ ObjectCache<GDALDataset, Dataset> Dataset::dataset_cache;
 /* The async locks must live outside the V8 memory management,
  * otherwise they won't be accessible from the async threads
  */
-std::map<GDALDataset*, uv_mutex_t *> Dataset::dataset_async_locks;
+std::map<GDALDataset *, uv_mutex_t *> Dataset::dataset_async_locks;
 #if GDAL_VERSION_MAJOR < 2
 ObjectCache<OGRDataSource, Dataset> Dataset::datasource_cache;
 #endif

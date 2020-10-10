@@ -1078,14 +1078,17 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @property gdal.OFTInteger64
    * @type {String}
    */
-  Nan::Set(target, Nan::New("OFTInteger64").ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64)).ToLocalChecked());
+  Nan::Set(
+    target, Nan::New("OFTInteger64").ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64)).ToLocalChecked());
   /**
    * @final
    * @property gdal.OFTInteger64List
    * @type {String}
    */
   Nan::Set(
-    target, Nan::New("OFTInteger64List").ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64List)).ToLocalChecked());
+    target,
+    Nan::New("OFTInteger64List").ToLocalChecked(),
+    Nan::New(getFieldTypeName(OFTInteger64List)).ToLocalChecked());
 #endif
   /**
    * @final

@@ -67,7 +67,7 @@ void AsyncRasterIO::Execute() {
   uv_mutex_lock(async_lock);
   eErr = this->pBand->get()->RasterIO(
     eRWFlag, nXOff, nYOff, nXSize, nYSize, pData, nBufXSize, nBufYSize, eBufType, nPixelSpace, nLineSpace, psExtraArg);
-    
+
   if (eErr != CE_None) { this->SetErrorMessage(std::to_string((int)eErr).c_str()); }
   uv_mutex_unlock(async_lock);
 }

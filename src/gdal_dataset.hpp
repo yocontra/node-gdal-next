@@ -56,7 +56,7 @@ class Dataset : public Nan::ObjectWrap {
   static NAN_SETTER(geoTransformSetter);
 
   static ObjectCache<GDALDataset, Dataset> dataset_cache;
-  static std::map<GDALDataset*, uv_mutex_t*> dataset_async_locks;
+  static std::map<GDALDataset *, uv_mutex_t *> dataset_async_locks;
 
   Dataset(GDALDataset *ds);
   inline GDALDataset *getDataset() {
