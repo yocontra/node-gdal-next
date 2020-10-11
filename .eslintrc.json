@@ -12,9 +12,6 @@
     "mocha",
     "prefer-arrow"
   ],
-  "parserOptions": {
-    "ecmaVersion": 2017
-  },
   "rules": {
     "prefer-const": [
       "error",
@@ -155,5 +152,15 @@
       "error",
       "as-needed"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "test/*"
+      ],
+      "parserOptions": {
+        "ecmaVersion": 2017
+      }
+    }
+  ]
 }
