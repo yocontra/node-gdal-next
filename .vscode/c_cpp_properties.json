@@ -8,6 +8,8 @@
                 "${workspaceFolder}/deps/libgdal/gdal/ogr",
                 "${workspaceFolder}/deps/libgdal/gdal/ogr/ogrsf_frmts",
                 "${workspaceFolder}/deps/libgdal/arch/unix",
+                "${workspaceFolder}/node_modules/nan",
+                "/usr/include/node",
                 "${default}"
             ],
             "compilerPath": "/usr/bin/gcc",

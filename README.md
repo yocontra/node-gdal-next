@@ -44,13 +44,8 @@ Mixing synchronous and asynchronous operations is supported.
 
 #### Safe mixing of asynchronous operations
 
-Simultaneous operations on distinct dataset objects are always safe
-When using the same dataset object and while an asynchronous operation is running, you can
-* Use everything in RasterBandPixels, whether synchronous or asynchronous
-* Use everything in RasterBand
-* Nothing else, and in particular nothing on the dataset object itself
-
-Keep in mind that while multiple simultaneous IO operations on the same dataset object are safe, in practice they won't run in parallel. The only way to have multiple parallel operations on the same file is to use multiple dataset objects.
+Simultaneous operations on distinct dataset objects are always safe and can run it parallel.
+Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects.
 
 **Does not support worker_threads**
 

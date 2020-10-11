@@ -390,9 +390,12 @@ void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, b
 #endif
 
   GDALDriver *raw = driver->getGDALDriver();
-  std::function<GDALDataset *()> doit = [raw, filename, src_dataset, strict, options]() {
+  uv_mutex_t *async_lock = src_dataset->async_lock;
+  std::function<GDALDataset *()> doit = [raw, filename, src_dataset, strict, options, async_lock]() {
     GDALDataset *raw_ds = src_dataset->getDataset();
+    uv_mutex_lock(async_lock);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
+    uv_mutex_unlock(async_lock);
     delete options;
     return ds;
   };

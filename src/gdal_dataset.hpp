@@ -83,6 +83,7 @@ class Dataset : public Nan::ObjectWrap {
 #endif
 
   uv_mutex_t *async_lock;
+
     private:
   ~Dataset();
   GDALDataset *this_dataset;
