@@ -440,7 +440,7 @@ NAN_METHOD(RasterBand::getMetadata) {
     return;
   }
   uv_mutex_lock(band->async_lock);
-  Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE meta =
+  const Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE &meta =
     MajorObject::getMetadata(band->this_, domain.empty() ? NULL : domain.c_str());
   uv_mutex_unlock(band->async_lock);
   info.GetReturnValue().Set(meta);
