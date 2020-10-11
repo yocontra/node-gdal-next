@@ -85,7 +85,6 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
 #endif
   if (item->async_lock) {
     uv_mutex_destroy(item->async_lock);
-    if (item->ptr) { Dataset::dataset_async_locks.erase(item->ptr); }
     delete item->async_lock;
   }
   if (item->ptr) {

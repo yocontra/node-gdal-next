@@ -143,17 +143,17 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
 
   Local<Object> ds;
   uv_mutex_t *async_lock;
-  if (Dataset::dataset_cache.has(raw_parent)) {
-    ds = Dataset::dataset_cache.get(raw_parent);
-    async_lock = Dataset::dataset_async_locks[raw_parent];
-  } else {
+  if (!Dataset::dataset_cache.has(raw_parent)) {
     LOG("Band's parent dataset disappeared from cache (band = %p, dataset = %p)", raw, raw_parent);
     Nan::ThrowError("Band's parent dataset disappeared from cache");
     return scope.Escape(Nan::Undefined());
     // ds = Dataset::New(raw_parent); //this should never happen
   }
 
-  long parent_uid = Nan::ObjectWrap::Unwrap<Dataset>(ds)->uid;
+  ds = Dataset::dataset_cache.get(raw_parent);
+  Dataset *parent = Nan::ObjectWrap::Unwrap<Dataset>(ds);
+  async_lock = parent->async_lock;
+  long parent_uid = parent->uid;
   wrapped->uid = ptr_manager.add(raw, parent_uid);
   wrapped->parent_ds = raw_parent;
   wrapped->async_lock = async_lock;
