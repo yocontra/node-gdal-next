@@ -153,10 +153,7 @@
 #include &lt;node_version.h&gt;
 
 // nan
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored &quot;-Wunused-parameter&quot;
-#include &lt;nan.h&gt;
-#pragma GCC diagnostic pop
+#include &quot;nan-wrapper.h&quot;
 
 // gdal
 #include &lt;gdal.h&gt;
@@ -336,7 +333,7 @@ static NAN_METHOD(isAlive) {
   info.GetReturnValue().Set(Nan::New(ptr_manager.isAlive(uid)));
 }
 
-static void Init(Local&lt;Object&gt; target) {
+static void Init(Local&lt;Object&gt; target, Local&lt;v8::Value&gt;, void *) {
 
   Nan::SetMethod(target, &quot;open&quot;, open);
   Nan::SetMethod(target, &quot;setConfigOption&quot;, setConfigOption);

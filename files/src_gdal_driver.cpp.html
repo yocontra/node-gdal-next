@@ -607,6 +607,8 @@ NAN_METHOD(Driver::open) {
     return;
   }
 
+  GDALDriver *raw = driver-&gt;getGDALDriver();
+
 #if GDAL_VERSION_MAJOR &lt; 2
   if (driver-&gt;uses_ogr) {
     OGRSFDriver *raw = driver-&gt;getOGRSFDriver();
@@ -618,12 +620,15 @@ NAN_METHOD(Driver::open) {
     info.GetReturnValue().Set(Dataset::New(ds));
     return;
   }
-#endif
 
-  GDALDriver *raw = driver-&gt;getGDALDriver();
   GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
   GDALDataset *ds = raw-&gt;pfnOpen(open_info);
   delete open_info;
+#else
+  const char *driver_list[2] = {raw-&gt;GetDescription(), nullptr};
+  GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
+#endif
+
   if (!ds) {
     Nan::ThrowError(&quot;Error opening dataset&quot;);
     return;
