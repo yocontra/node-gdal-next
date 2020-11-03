@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp 3faf501a82260b41e85125d14b21ec3c54e319d7 2020-04-01 11:57:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarper.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */
@@ -1296,6 +1296,7 @@ GDALCloneWarpOptions( const GDALWarpOptions *psSrcOptions )
     COPY_MEM( padfSrcNoDataImag, double, psSrcOptions->nBandCount );
     COPY_MEM( padfDstNoDataReal, double, psSrcOptions->nBandCount );
     COPY_MEM( padfDstNoDataImag, double, psSrcOptions->nBandCount );
+    // cppcheck-suppress pointerSize
     COPY_MEM( papfnSrcPerBandValidityMaskFunc, GDALMaskFunc,
               psSrcOptions->nBandCount );
     psDstOptions->papSrcPerBandValidityMaskFuncArg = nullptr;

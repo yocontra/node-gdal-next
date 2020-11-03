@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2005, Radim Blazek <radim.blazek@gmail.com>
- * Copyright (c) 2008-2010, Even Rouault <even dot rouault at spatialys.com>
+ * Copyright (c) 2008-2020, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,11 +31,8 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrgrassdatasource.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgrassdatasource.cpp a832da5b936bac8438f9c50e7c20e563fd94c9ff 2020-09-22 13:06:27 +0200 Markus Neteler $")
 
-#if GRASS_VERSION_MAJOR  >= 7
-#define G__setenv                G_setenv_nogisrc
-#endif
 
 /************************************************************************/
 /*                         Grass2CPLErrorHook()                         */
@@ -88,11 +85,7 @@ OGRGRASSDataSource::~OGRGRASSDataSource()
 /*                                Open()                                */
 /************************************************************************/
 
-#if (GRASS_VERSION_MAJOR  >= 6 && GRASS_VERSION_MINOR  >= 3) || GRASS_VERSION_MAJOR  >= 7
 typedef int (*GrassErrorHandler)(const char *, int);
-#else
-typedef int (*GrassErrorHandler)(char *, int);
-#endif
 
 int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
                               int bTestOpen, int /*bSingleNewFileIn*/ )
@@ -183,18 +176,15 @@ int OGRGRASSDataSource::Open( const char * pszNewName, int /*bUpdate*/,
 /* -------------------------------------------------------------------- */
 /*      Set GRASS variables                                             */
 /* -------------------------------------------------------------------- */
-     G__setenv( "GISDBASE", pszGisdbase );
-     G__setenv( "LOCATION_NAME", pszLocation );
-     G__setenv( "MAPSET", pszMapset);
+     G_setenv_nogisrc( "GISDBASE", pszGisdbase );
+     G_setenv_nogisrc( "LOCATION_NAME", pszLocation );
+     G_setenv_nogisrc( "MAPSET", pszMapset);
      G_reset_mapsets();
      G_add_mapset_to_search_path ( pszMapset );
 
 /* -------------------------------------------------------------------- */
 /*      Open GRASS vector map                                           */
 /* -------------------------------------------------------------------- */
-#if GRASS_VERSION_MAJOR  < 7
-    Vect_set_fatal_error ( GV_FATAL_PRINT ); // Print error and continue
-#endif
     Vect_set_open_level (2);
     int level = Vect_open_old ( &map, pszMap, pszMapset);
 

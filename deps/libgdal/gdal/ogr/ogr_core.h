@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_core.h 504e5211ddf893644c256c583818e87fca0f685f 2020-04-16 14:15:58 +0200 Even Rouault $
+ * $Id: ogr_core.h 406f7cad9f53fc3784101bbd54bd0d435f0cbe36 2020-05-29 21:01:59 +0200 Alessandro Pasotti $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define some core portability services for cross-platform OGR code.
@@ -573,10 +573,17 @@ typedef enum
  */
 #define ALTER_DEFAULT_FLAG         0x10
 
+/** Alter field UNIQUE constraint.
+ * Used by OGR_L_AlterFieldDefn().
+ * @since GDAL 3.2
+ */
+#define ALTER_UNIQUE_FLAG         0x20
+
+
 /** Alter all parameters of field definition.
  * Used by OGR_L_AlterFieldDefn().
  */
-#define ALTER_ALL_FLAG             (ALTER_NAME_FLAG | ALTER_TYPE_FLAG | ALTER_WIDTH_PRECISION_FLAG | ALTER_NULLABLE_FLAG | ALTER_DEFAULT_FLAG)
+#define ALTER_ALL_FLAG             (ALTER_NAME_FLAG | ALTER_TYPE_FLAG | ALTER_WIDTH_PRECISION_FLAG | ALTER_NULLABLE_FLAG | ALTER_DEFAULT_FLAG | ALTER_UNIQUE_FLAG)
 
 /** Validate that fields respect not-null constraints.
  * Used by OGR_F_Validate().

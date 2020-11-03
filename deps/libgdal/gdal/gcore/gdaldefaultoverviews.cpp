@@ -47,7 +47,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdaldefaultoverviews.cpp 8c19c9d87751afbf777096601d97c45a23928d5e 2020-06-26 17:57:17 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldefaultoverviews.cpp a0022b0e5184151635fcb8513190005ec7e9ea88 2020-06-26 17:57:17 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/
@@ -484,7 +484,7 @@ int GDALOvLevelAdjust2( int nOvLevel, int nXSize, int nYSize )
 {
     // Select the larger dimension to have increased accuracy, but
     // with a slight preference to x even if (a bit) smaller than y
-    // in an attempt to behave closer as previous behaviour.
+    // in an attempt to behave closer as previous behavior.
     if( nXSize >= nYSize / 2 && !(nXSize < nYSize && nXSize < nOvLevel) )
     {
         const int nOXSize = (nXSize + nOvLevel - 1) / nOvLevel;
@@ -506,7 +506,7 @@ int GDALComputeOvFactor( int nOvrXSize, int nRasterXSize,
 {
     // Select the larger dimension to have increased accuracy, but
     // with a slight preference to x even if (a bit) smaller than y
-    // in an attempt to behave closer as previous behaviour.
+    // in an attempt to behave closer as previous behavior.
     if( nRasterXSize >= nRasterYSize / 2 )
     {
         return static_cast<int>(0.5 + nRasterXSize / static_cast<double>(nOvrXSize));

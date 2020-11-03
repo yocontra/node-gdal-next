@@ -62,7 +62,7 @@
 
 #include "proj.h"
 
-CPL_CVSID("$Id: gt_wkt_srs.cpp 45b9c0387b578da88450359d78a3beb0ec6ad04a 2020-05-16 12:29:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_wkt_srs.cpp 1154f9d97988cfebbb44a518a702897c8d93dae3 2020-08-07 21:19:49 +0200 Even Rouault $")
 
 static const geokey_t ProjLinearUnitsInterpCorrectGeoKey =
     static_cast<geokey_t>(3059);
@@ -708,6 +708,12 @@ OGRSpatialReferenceH GTIFGetOGISDefnAsOSR( GTIF *hGTIF, GTIFDefn * psDefn )
                               &(psDefn->SemiMajor), 0, 1 );
         GDALGTIFKeyGetDOUBLE( hGTIF, GeogInvFlatteningGeoKey,
                               &dfInvFlattening, 0, 1 );
+        if( std::isinf(dfInvFlattening) )
+        {
+            // Deal with the non-nominal case of
+            // https://github.com/OSGeo/PROJ/issues/2317
+            dfInvFlattening = 0;
+        }
     }
     if( !pszPMName )
     {
@@ -910,7 +916,7 @@ OGRSpatialReferenceH GTIFGetOGISDefnAsOSR( GTIF *hGTIF, GTIFDefn * psDefn )
             const char* pszUnitsName = nullptr;
             double dfUOMLengthInMeters = oSRS.GetLinearUnits( &pszUnitsName );
             // Non exact comparison, as there's a slight difference between
-            // the evaluation of US Survey foot harcoded in geo_normalize.c to
+            // the evaluation of US Survey foot hardcoded in geo_normalize.c to
             // 12.0 / 39.37, and the corresponding value returned by
             // PROJ >= 6.0.0 and <= 7.0.0 for EPSG:9003
             if( fabs(dfUOMLengthInMeters - oSRSTmp.GetLinearUnits(nullptr)) >

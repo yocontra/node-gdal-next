@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <string>
 
-CPL_CVSID("$Id: s57reader.cpp bd0ba53e34de9ea1dcdf3f6d7046016c7de6b353 2020-05-08 20:11:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: s57reader.cpp 768c9ed157d3f09d675f3993a63e4cb756b31486 2020-06-27 17:05:44 +0200 Even Rouault $")
 
 /**
 * Recode the given string from a source encoding to UTF-8 encoding.  The source
@@ -411,6 +411,12 @@ bool S57Reader::SetOptions( char ** papszOptionsIn )
         nOptionFlags |= S57M_RECODE_BY_DSSI;
     else
         nOptionFlags &= ~S57M_RECODE_BY_DSSI;
+
+    pszOptionValue = CSLFetchNameValue( papszOptions, S57O_LIST_AS_STRING );
+    if( pszOptionValue != nullptr && CPLTestBool(pszOptionValue) )
+        nOptionFlags |= S57M_LIST_AS_STRING;
+    else
+        nOptionFlags &= ~S57M_LIST_AS_STRING;
 
     return true;
 }
@@ -964,8 +970,9 @@ void S57Reader::ApplyObjectClassAttributes( DDFRecord * poRecord,
 
         OGRFieldDefn *poFldDefn
             = poFeature->GetDefnRef()->GetFieldDefn( iField );
-        if( poFldDefn->GetType() == OFTInteger
-            || poFldDefn->GetType() == OFTReal )
+        const auto eType = poFldDefn->GetType();
+        if( eType == OFTInteger
+            || eType == OFTReal )
         {
             if( strlen(pszValue) == 0 )
             {
@@ -979,8 +986,16 @@ void S57Reader::ApplyObjectClassAttributes( DDFRecord * poRecord,
             else
                 poFeature->SetField( iField, pszValue );
         }
+        else if( eType == OFTStringList )
+        {
+            char** papszTokens = CSLTokenizeString2(pszValue, ",", 0);
+            poFeature->SetField( iField, papszTokens );
+            CSLDestroy(papszTokens);
+        }
         else
+        {
             poFeature->SetField( iField, pszValue );
+        }
 
         CPLFree(pszValueToFree);
     }
@@ -1399,25 +1414,21 @@ OGRFeature *S57Reader::ReadVector( int nFeatureId, int nRCNM )
 /* -------------------------------------------------------------------- */
     if( nRCNM == RCNM_VI || nRCNM == RCNM_VC )
     {
-        double dfX = 0.0;
-        double dfY = 0.0;
-
         if( poRecord->FindField( "SG2D" ) != nullptr )
         {
-            dfX = poRecord->GetIntSubfield("SG2D",0,"XCOO",0) / (double)nCOMF;
-            dfY = poRecord->GetIntSubfield("SG2D",0,"YCOO",0) / (double)nCOMF;
+            const double dfX = poRecord->GetIntSubfield("SG2D",0,"XCOO",0) / (double)nCOMF;
+            const double dfY = poRecord->GetIntSubfield("SG2D",0,"YCOO",0) / (double)nCOMF;
             poFeature->SetGeometryDirectly( new OGRPoint( dfX, dfY ) );
         }
 
         else if( poRecord->FindField( "SG3D" ) != nullptr ) /* presume sounding*/
         {
-            double dfZ = 0.0;
             const int nVCount = poRecord->FindField("SG3D")->GetRepeatCount();
             if( nVCount == 1 )
             {
-                dfX =poRecord->GetIntSubfield("SG3D",0,"XCOO",0)/(double)nCOMF;
-                dfY =poRecord->GetIntSubfield("SG3D",0,"YCOO",0)/(double)nCOMF;
-                dfZ =poRecord->GetIntSubfield("SG3D",0,"VE3D",0)/(double)nSOMF;
+                const double dfX =poRecord->GetIntSubfield("SG3D",0,"XCOO",0)/(double)nCOMF;
+                const double dfY =poRecord->GetIntSubfield("SG3D",0,"YCOO",0)/(double)nCOMF;
+                const double dfZ =poRecord->GetIntSubfield("SG3D",0,"VE3D",0)/(double)nSOMF;
                 poFeature->SetGeometryDirectly( new OGRPoint( dfX, dfY, dfZ ));
             }
             else
@@ -1426,11 +1437,11 @@ OGRFeature *S57Reader::ReadVector( int nFeatureId, int nRCNM )
 
                 for( int i = 0; i < nVCount; i++ )
                 {
-                    dfX = poRecord->GetIntSubfield("SG3D",0,"XCOO",i)
+                    const double dfX = poRecord->GetIntSubfield("SG3D",0,"XCOO",i)
                         / static_cast<double>( nCOMF );
-                    dfY = poRecord->GetIntSubfield("SG3D",0,"YCOO",i)
+                    const double dfY = poRecord->GetIntSubfield("SG3D",0,"YCOO",i)
                         / static_cast<double>( nCOMF );
-                    dfZ = poRecord->GetIntSubfield("SG3D",0,"VE3D",i)
+                    const double dfZ = poRecord->GetIntSubfield("SG3D",0,"VE3D",i)
                         / static_cast<double>( nSOMF );
 
                     poMP->addGeometryDirectly( new OGRPoint( dfX, dfY, dfZ ) );
@@ -2868,6 +2879,8 @@ bool S57Reader::ApplyRecordUpdate( DDFRecord *poTarget, DDFRecord *poUpdate )
         DDFField *poSrcSG2D = poUpdate->FindField( "SG2D" );
         DDFField *poDstSG2D = poTarget->FindField( "SG2D" );
 
+        const int nCCUI = poUpdate->GetIntSubfield( "SGCC", 0, "CCUI", 0 );
+
         /* If we don't have SG2D, check for SG3D */
         if( poDstSG2D == nullptr )
         {
@@ -2876,28 +2889,30 @@ bool S57Reader::ApplyRecordUpdate( DDFRecord *poTarget, DDFRecord *poUpdate )
             {
                 poSrcSG2D = poUpdate->FindField("SG3D");
             }
+            else
+            {
+                if ( nCCUI != 1 )
+                {
+                    // CPLAssert( false );
+                    return false;
+                }
+
+                poTarget->AddField(poTarget->GetModule()->FindFieldDefn("SG2D"));
+                poDstSG2D = poTarget->FindField("SG2D");
+                if (poDstSG2D == nullptr) {
+                    // CPLAssert( false );
+                    return false;
+                }
+
+                // Delete null default data that was created
+                poTarget->SetFieldRaw( poDstSG2D, 0, nullptr, 0 );
+            }
         }
 
-        const int nCCUI = poUpdate->GetIntSubfield( "SGCC", 0, "CCUI", 0 );
-
-        if( (poSrcSG2D == nullptr && nCCUI != 2)
-            || (poDstSG2D == nullptr && nCCUI != 1) )
+        if( poSrcSG2D == nullptr && nCCUI != 2 )
         {
             // CPLAssert( false );
             return false;
-        }
-
-        if (poDstSG2D == nullptr)
-        {
-            poTarget->AddField(poTarget->GetModule()->FindFieldDefn("SG2D"));
-            poDstSG2D = poTarget->FindField("SG2D");
-            if (poDstSG2D == nullptr) {
-                // CPLAssert( false );
-                return false;
-            }
-
-            // Delete null default data that was created
-            poTarget->SetFieldRaw( poDstSG2D, 0, nullptr, 0 );
         }
 
         int nCoordSize = poDstSG2D->GetFieldDefn()->GetFixedWidth();

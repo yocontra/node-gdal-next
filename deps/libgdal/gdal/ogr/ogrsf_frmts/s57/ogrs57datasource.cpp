@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrs57datasource.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrs57datasource.cpp 342855360b69569556916db63ea417dd3514f258 2020-06-14 15:44:48 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRS57DataSource()                          */
@@ -211,6 +211,11 @@ int OGRS57DataSource::Open( const char * pszFilename )
         papszReaderOptions =
             CSLSetNameValue( papszReaderOptions, S57O_RECODE_BY_DSSI,
                              GetOption(S57O_RECODE_BY_DSSI) );
+
+    if( GetOption(S57O_LIST_AS_STRING) != nullptr )
+        papszReaderOptions =
+            CSLSetNameValue( papszReaderOptions, S57O_LIST_AS_STRING,
+                             GetOption(S57O_LIST_AS_STRING) );
 
     S57Reader *poModule = new S57Reader( pszFilename );
     bool bRet = poModule->SetOptions( papszReaderOptions );

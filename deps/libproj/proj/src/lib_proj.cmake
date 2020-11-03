@@ -164,6 +164,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/natearth2.cpp
   projections/calcofi.cpp
   projections/eqearth.cpp
+  projections/col_urban.cpp
 )
 
 set(SRC_LIBPROJ_CONVERSIONS
@@ -186,6 +187,7 @@ set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/vgridshift.cpp
   transformations/xyzgridshift.cpp
   transformations/defmodel.cpp
+  transformations/tinshift.cpp
 )
 
 set(SRC_LIBPROJ_ISO19111
@@ -302,8 +304,6 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 # Embed PROJ_LIB data files location
 add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
-
-add_definitions(-DTARGET_CLONES_FMA_ALLOWED)
 
 #################################################
 ## targets: libproj and proj_config.h

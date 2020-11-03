@@ -33,7 +33,7 @@
 #include "cpl_http.h"
 #include "parsexsd.h"
 
-CPL_CVSID("$Id: ogrwfslayer.cpp fde2639036f69a2864cd4c4e99e2b5b9b1d2c792 2019-12-29 00:45:57 +0100 Björn Harrtell $")
+CPL_CVSID("$Id: ogrwfslayer.cpp 26dec30a78b5f5b1c150232d4c7e0501083fd93f 2020-09-29 11:54:38 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRWFSRecursiveUnlink()                         */
@@ -673,12 +673,16 @@ GDALDataset* OGRWFSLayer::FetchGetFeature(int nRequestMaxFeatures)
     CPLString osOutputFormat = CPLURLGetValue(osURL, "OUTPUTFORMAT");
 
     if (CPLTestBool(CPLGetConfigOption("OGR_WFS_USE_STREAMING", "YES"))) {
-        const char* pszStreamingName = CPLSPrintf("/vsicurl_streaming/%s",
-                                                        osURL.c_str());
+        CPLString osStreamingName;
         if( STARTS_WITH(osURL, "/vsimem/") &&
                 CPLTestBool(CPLGetConfigOption("CPL_CURL_ENABLE_VSIMEM", "FALSE")) )
         {
-            pszStreamingName = osURL.c_str();
+            osStreamingName = osURL;
+        }
+        else
+        {
+            osStreamingName += "/vsicurl_streaming/";
+            osStreamingName += osURL;
         }
 
         GDALDataset* poOutputDS = nullptr;
@@ -712,11 +716,11 @@ GDALDataset* OGRWFSLayer::FetchGetFeature(int nRequestMaxFeatures)
             {
                 apszOpenOptions[iGMLOOIdex] = CPLSPrintf("EXPOSE_GML_ID=%s",
                                                 poDS->ExposeGMLId() ? "YES" : "NO");
-                iGMLOOIdex ++;
+                // iGMLOOIdex ++;
             }
 
             poOutputDS = (GDALDataset*)
-                    GDALOpenEx(pszStreamingName, GDAL_OF_VECTOR, apszAllowedDrivers,
+                    GDALOpenEx(osStreamingName, GDAL_OF_VECTOR, apszAllowedDrivers,
                             apszOpenOptions, nullptr);
 
         }
@@ -728,7 +732,7 @@ GDALDataset* OGRWFSLayer::FetchGetFeature(int nRequestMaxFeatures)
             const char* const apszAllowedDrivers[] = { "FlatGeobuf", nullptr };
 
             GDALDataset* poFlatGeobuf_DS = (GDALDataset*)
-                    GDALOpenEx(pszStreamingName, GDAL_OF_VECTOR, apszAllowedDrivers,
+                    GDALOpenEx(osStreamingName, GDAL_OF_VECTOR, apszAllowedDrivers,
                             nullptr, nullptr);
             if( poFlatGeobuf_DS )
             {
@@ -751,7 +755,7 @@ GDALDataset* OGRWFSLayer::FetchGetFeature(int nRequestMaxFeatures)
             /* it, if it is XML error content */
             char szBuffer[2048];
             int nRead = 0;
-            VSILFILE* fp = VSIFOpenL(pszStreamingName, "rb");
+            VSILFILE* fp = VSIFOpenL(osStreamingName, "rb");
             if (fp)
             {
                 nRead = (int)VSIFReadL(szBuffer, 1, sizeof(szBuffer) - 1, fp);
@@ -973,7 +977,7 @@ GDALDataset* OGRWFSLayer::FetchGetFeature(int nRequestMaxFeatures)
     {
         apszGMLOpenOptions[iGMLOOIdex] = CPLSPrintf("EXPOSE_GML_ID=%s",
                                         poDS->ExposeGMLId() ? "YES" : "NO");
-        iGMLOOIdex ++;
+        // iGMLOOIdex ++;
     }
 
     GDALDriverH hDrv = GDALIdentifyDriver(osTmpFileName, nullptr);

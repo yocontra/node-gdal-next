@@ -64,7 +64,7 @@
 #define UNUSED_IF_NO_GEOS
 #endif
 
-CPL_CVSID("$Id: ogrgeometryfactory.cpp 7c7402f4226a5d821bfd6bf38af0e682c8720ba7 2020-04-27 13:06:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeometryfactory.cpp 79ba54e1c67a602cd788eea814f4c9f9b0040e08 2020-09-17 12:48:23 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           createFromWkb()                            */
@@ -1497,7 +1497,7 @@ enum OrganizePolygonMethod
  * with care.
  *
  * If the OGR_ORGANIZE_POLYGONS configuration option is defined, its value will override
- * the value of the METHOD option of papszOptions (useful to modify the behaviour of the
+ * the value of the METHOD option of papszOptions (useful to modify the behavior of the
  * shapefile driver)
  *
  * @param papoPolygons array of geometry pointers - should all be OGRPolygons.
@@ -2924,12 +2924,17 @@ static void CutGeometryOnDateLineAndAddToMulti( OGRGeometryCollection* poMulti,
                 {
                     double dfMaxSmallDiffLong = 0;
                     bool bHasBigDiff = false;
+                    bool bOnlyAtPlusMinus180 = poLS->getNumPoints() > 0 &&
+                        ( fabs(fabs(poLS->getX(0)) - 180) < 1e-10 );
                     // Detect big gaps in longitude.
                     for( int i = 1; i < poLS->getNumPoints(); i++ )
                     {
                         const double dfPrevX = poLS->getX(i-1) + dfXOffset;
                         const double dfX = poLS->getX(i) + dfXOffset;
                         const double dfDiffLong = fabs(dfX - dfPrevX);
+                        if( fabs(fabs(poLS->getX(i)) - 180) > 1e-10 )
+                            bOnlyAtPlusMinus180 = false;
+
                         if( dfDiffLong > dfDiffSpace &&
                             ((dfX > dfLeftBorderX &&
                               dfPrevX < dfRightBorderX) ||
@@ -2939,7 +2944,8 @@ static void CutGeometryOnDateLineAndAddToMulti( OGRGeometryCollection* poMulti,
                         else if( dfDiffLong > dfMaxSmallDiffLong )
                             dfMaxSmallDiffLong = dfDiffLong;
                     }
-                    if( bHasBigDiff && dfMaxSmallDiffLong < dfDateLineOffset )
+                    if( bHasBigDiff && !bOnlyAtPlusMinus180 &&
+                        dfMaxSmallDiffLong < dfDateLineOffset )
                     {
                         if( eGeomType == wkbLineString )
                             bSplitLineStringAtDateline = true;
@@ -3597,92 +3603,69 @@ static OGRGeometry* TransformBeforeAntimeridianToWGS84(
 
     const double EPS = 1e-9;
 
-    // Build a multipolygon (in projected space) with 2 parts: one part left
-    // of the antimeridian, one part east
-    const OGRwkbGeometryType eType = wkbFlatten(poDstGeom->getGeometryType());
-
-    // If we have lines, then to get better accuracy of the intersection with
-    // the main geometry, we need to add extra points
-    const bool bHasLines = (eType == wkbLineString ||
-                            eType == wkbMultiLineString);
-
-    OGRLinearRing* poLR1 = new OGRLinearRing();
-    poLR1->addPoint( sEnvelope.MinX, sEnvelope.MinY );
-    if( bHasLines )
+    // Build a very thin polygon cutting the antimeridian at our points
+    OGRLinearRing* poLR = new OGRLinearRing;
     {
-        double x = 180.0 - EPS;
+        double x = 180.0-EPS;
         double y = aoPoints[0].y-EPS;
         poRevCT->Transform(1, &x, &y);
-        poLR1->addPoint( x, y );
+        poLR->addPoint( x, y );
     }
     for( const auto& oPoint: aoPoints )
     {
-        double x = 180.0 - EPS;
+        double x = 180.0-EPS;
         double y = oPoint.y;
         poRevCT->Transform(1, &x, &y);
-        poLR1->addPoint( x, y );
+        poLR->addPoint( x, y );
     }
-    if( bHasLines )
     {
-        double x = 180.0 - EPS;
+        double x = 180.0-EPS;
         double y = aoPoints.back().y+EPS;
         poRevCT->Transform(1, &x, &y);
-        poLR1->addPoint( x, y );
+        poLR->addPoint( x, y );
     }
-    poLR1->addPoint( sEnvelope.MinX, sEnvelope.MaxY );
-    poLR1->addPoint( sEnvelope.MinX, sEnvelope.MinY );
-    OGRPolygon* poPoly1 = new OGRPolygon();
-    poPoly1->addRingDirectly( poLR1 );
-
-
-    OGRLinearRing* poLR2 = new OGRLinearRing();
-    poLR2->addPoint( sEnvelope.MaxX, sEnvelope.MinY );
-    if( bHasLines )
     {
-        double x = -180.0 + EPS;
+        double x = 180.0+EPS;
+        double y = aoPoints.back().y+EPS;
+        poRevCT->Transform(1, &x, &y);
+        poLR->addPoint( x, y );
+    }
+    for( size_t i = aoPoints.size(); i > 0; )
+    {
+        --i;
+        const OGRRawPoint& oPoint = aoPoints[i];
+        double x = 180.0+EPS;
+        double y = oPoint.y;
+        poRevCT->Transform(1, &x, &y);
+        poLR->addPoint( x, y );
+    }
+    {
+        double x = 180.0+EPS;
         double y = aoPoints[0].y-EPS;
         poRevCT->Transform(1, &x, &y);
-        poLR2->addPoint( x, y );
+        poLR->addPoint( x, y );
     }
-    for( const auto& oPoint: aoPoints )
-    {
-        double x = -180.0 + EPS;
-        double y = oPoint.y;
-        poRevCT->Transform(1, &x, &y);
-        poLR2->addPoint( x, y );
-    }
-    if( bHasLines )
-    {
-        double x = -180.0 + EPS;
-        double y = aoPoints.back().y+EPS;
-        poRevCT->Transform(1, &x, &y);
-        poLR2->addPoint( x, y );
-    }
-    poLR2->addPoint( sEnvelope.MaxX, sEnvelope.MaxY );
-    poLR2->addPoint( sEnvelope.MaxX, sEnvelope.MinY );
-    OGRPolygon* poPoly2 = new OGRPolygon();
-    poPoly2->addRingDirectly( poLR2 );
+    poLR->closeRings();
 
-    OGRMultiPolygon oMP;
-    oMP.addGeometryDirectly(poPoly1);
-    oMP.addGeometryDirectly(poPoly2);
+    OGRPolygon oPolyToCut;
+    oPolyToCut.addRingDirectly(poLR);
 
 #if DEBUG_VERBOSE
     char* pszWKT = NULL;
-    oMP.exportToWkt(&pszWKT);
-    CPLDebug("OGR", "MP without antimeridian: %s", pszWKT);
+    oPolyToCut.exportToWkt(&pszWKT);
+    CPLDebug("OGR", "Geometry to cut: %s", pszWKT);
     CPLFree(pszWKT);
 #endif
 
     // Get the geometry without the antimeridian
-    OGRGeometry* poInter = poDstGeom->Intersection(&oMP);
+    OGRGeometry* poInter = poDstGeom->Difference(&oPolyToCut);
     if( poInter != nullptr )
     {
         delete poDstGeom;
         poDstGeom = poInter;
+        bNeedPostCorrectionOut = true;
     }
 
-    bNeedPostCorrectionOut = true;
     return poDstGeom;
 }
 
@@ -3804,7 +3787,7 @@ OGRGeometryFactory::TransformWithOptionsCache::~TransformWithOptionsCache()
  * @param poSrcGeom source geometry
  * @param poCT coordinate transformation object, or NULL.
  * @param papszOptions options. Including WRAPDATELINE=YES and DATELINEOFFSET=.
- * @param cache Cache. May increase performance if persisted between invokations
+ * @param cache Cache. May increase performance if persisted between invocations
  * @return (new) transformed geometry.
  */
 OGRGeometry* OGRGeometryFactory::transformWithOptions(

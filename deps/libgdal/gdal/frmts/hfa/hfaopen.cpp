@@ -61,7 +61,7 @@
 #include "gdal_priv.h"
 #include "hfa.h"
 
-CPL_CVSID("$Id: hfaopen.cpp 7e814564be8af202552c836f8bb9db84e2bea1b2 2019-12-12 23:52:08 +0100 Even Rouault $")
+CPL_CVSID("$Id: hfaopen.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 static const char * const apszAuxMetadataItems[] = {
 // node/entry            field_name                  metadata_key       type
@@ -2758,7 +2758,7 @@ CPLErr HFASetMetadata( HFAHandle hHFA, int nBand, char **papszMD )
                         else
                         {
                             // Histogram were written as doubles, as is now the
-                            // default behaviour.
+                            // default behavior.
                             bRet &= VSIFSeekL(hHFA->fp, nOffset + 8 * nBin,
                                               SEEK_SET) >= 0;
                             double nValue = CPLAtof(pszWork);

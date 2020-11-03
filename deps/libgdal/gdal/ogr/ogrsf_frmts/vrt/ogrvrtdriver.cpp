@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: ogrvrtdriver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRVRTErrorHandler()                       */
@@ -221,7 +221,7 @@ void RegisterOGRVRT()
     poDriver->SetMetadataItem(GDAL_DCAP_VECTOR, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "VRT - Virtual Datasource");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "vrt");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drv_vrt.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/vector/vrt.html");
     poDriver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");
     poDriver->SetMetadataItem( GDAL_DCAP_FEATURE_STYLES, "YES" );
 

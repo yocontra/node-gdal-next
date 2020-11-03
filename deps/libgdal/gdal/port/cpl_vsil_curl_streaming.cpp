@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp a0f6709dc75fe9cb5c842fd4395e6072db3d9620 2020-03-05 16:04:26 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp 84115d7a46d5d26f0da3c07744d5e04815e542c7 2020-10-03 23:21:18 +0200 Even Rouault $")
 
 #if !defined(HAVE_CURL) || defined(CPL_MULTIPROC_STUB)
 
@@ -112,7 +112,7 @@ class RingBuffer
     size_t nLength = 0;
 
     public:
-        RingBuffer(size_t nCapacity = BKGND_BUFFER_SIZE);
+        explicit RingBuffer(size_t nCapacity = BKGND_BUFFER_SIZE);
         ~RingBuffer();
 
         size_t GetCapacity() const { return nCapacity; }
@@ -274,8 +274,6 @@ class VSICurlStreamingHandle : public VSIVirtualHandle
     size_t          nCachedSize = 0;
     GByte          *pCachedData = nullptr;
 
-    CURL*           hCurlHandle = nullptr;
-
     volatile int    bDownloadInProgress = FALSE;
     volatile int    bDownloadStopped = FALSE;
     volatile int    bAskDownloadEnd = FALSE;
@@ -374,8 +372,6 @@ VSICurlStreamingHandle::~VSICurlStreamingHandle()
     StopDownload();
 
     CPLFree(m_pszURL);
-    if( hCurlHandle != nullptr )
-        curl_easy_cleanup(hCurlHandle);
     CSLDestroy( m_papszHTTPOptions );
 
     CPLFree(pCachedData);
@@ -538,16 +534,6 @@ vsi_l_offset VSICurlStreamingHandle::GetFileSize()
     }
     ReleaseMutex();
 
-#if LIBCURL_VERSION_NUM < 0x070B00
-    // Curl 7.10.X doesn't manage to unset the CURLOPT_RANGE that would have
-    // been previously set, so we have to reinit the connection handle.
-    if( hCurlHandle )
-    {
-        curl_easy_cleanup(hCurlHandle);
-        hCurlHandle = curl_easy_init();
-    }
-#endif
-
     CURL* hLocalHandle = curl_easy_init();
 
     struct curl_slist* headers =
@@ -692,10 +678,7 @@ vsi_l_offset VSICurlStreamingHandle::GetFileSize()
     const vsi_l_offset nRet = fileSize;
     ReleaseMutex();
 
-    if( hCurlHandle == nullptr )
-        hCurlHandle = hLocalHandle;
-    else
-        curl_easy_cleanup(hLocalHandle);
+    curl_easy_cleanup(hLocalHandle);
 
     return nRet;
 }
@@ -1020,6 +1003,8 @@ VSICurlStreamingHandleReceivedBytesHeader( void *buffer, size_t count,
 
 void VSICurlStreamingHandle::DownloadInThread()
 {
+    CURL* hCurlHandle = curl_easy_init();
+
     struct curl_slist* headers =
         VSICurlSetOptions(hCurlHandle, m_pszURL, m_papszHTTPOptions);
     headers = VSICurlMergeHeaders(headers, GetCurlHeaders("GET", headers));
@@ -1085,6 +1070,8 @@ void VSICurlStreamingHandle::DownloadInThread()
     // Signal to the consumer that the download has ended.
     CPLCondSignal(hCondProducer);
     ReleaseMutex();
+
+    curl_easy_cleanup(hCurlHandle);
 }
 
 static void VSICurlDownloadInThread( void* pArg )
@@ -1103,8 +1090,6 @@ void VSICurlStreamingHandle::StartDownload()
 
     CPLDebug("VSICURL", "Start download for %s", m_pszURL);
 
-    if( hCurlHandle == nullptr )
-        hCurlHandle = curl_easy_init();
     oRingBuffer.Reset();
     bDownloadInProgress = TRUE;
     nRingBufferFileOffset = 0;
@@ -1136,9 +1121,6 @@ void VSICurlStreamingHandle::StopDownload()
 
         CPLJoinThread(hThread);
         hThread = nullptr;
-
-        curl_easy_cleanup(hCurlHandle);
-        hCurlHandle = nullptr;
     }
 
     oRingBuffer.Reset();
@@ -1193,7 +1175,9 @@ size_t VSICurlStreamingHandle::Read( void * const pBuffer, size_t const nSize,
     size_t nRemaining = nBufferRequestSize;
 
     AcquireMutex();
-    const int bHasComputedFileSizeLocal = bHasComputedFileSize;
+    // fileSize might be set wrongly to 0, such as
+    // /vsicurl_streaming/https://query.data.world/s/jgsghstpphjhicstradhy5kpjwrnfy
+    const int bHasComputedFileSizeLocal = bHasComputedFileSize && fileSize > 0;
     const vsi_l_offset fileSizeLocal = fileSize;
     ReleaseMutex();
 
@@ -1544,12 +1528,9 @@ void VSICurlStreamingFSHandler::ClearCache()
 {
     CPLMutexHolder oHolder( &hMutex );
 
-    for( std::map<CPLString, CachedFileProp*>::const_iterator
-             iterCacheFileSize = cacheFileSize.begin();
-         iterCacheFileSize != cacheFileSize.end();
-         iterCacheFileSize++ )
+    for( auto& kv: cacheFileSize )
     {
-        CPLFree(iterCacheFileSize->second);
+        CPLFree(kv.second);
     }
     cacheFileSize.clear();
 }
@@ -1654,8 +1635,6 @@ int VSICurlStreamingFSHandler::Stat( const char *pszFilename,
 {
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
         return -1;
-
-    CPLString osFilename(pszFilename);
 
     memset(pStatBuf, 0, sizeof(VSIStatBufL));
 

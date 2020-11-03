@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrodsdatasource.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrodsdatasource.cpp 255f08f93b70e23643aca62af61448f9295c67a8 2020-09-13 00:01:20 +0200 Even Rouault $")
 
 namespace OGRODS {
 
@@ -1820,6 +1820,8 @@ void OGRODSDataSource::FlushCache()
             return;
         }
     }
+
+    CPLConfigOptionSetter oZip64Disable("CPL_CREATE_ZIP64", "NO", false);
 
     /* Maintain new ZIP files opened */
     void *hZIP = CPLCreateZip(pszName, nullptr);

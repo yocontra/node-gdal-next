@@ -50,7 +50,7 @@
 #include "ogr_geometry.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: mitab_tabview.cpp 43b6061a355c4bce2283b787b28d5f3ae6b9e2af 2018-05-06 14:19:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_tabview.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /*=====================================================================
  *                      class TABView
@@ -1386,7 +1386,6 @@ int  TABRelation::Init(const char *pszViewName,
      * Create new FeatureDefn and copy selected fields definitions
      * while updating the appropriate field maps.
      *----------------------------------------------------------------*/
-    int nIndex = 0;
     OGRFieldDefn *poFieldDefn = nullptr;
 
     m_poDefn = new OGRFeatureDefn(pszViewName);
@@ -1397,6 +1396,7 @@ int  TABRelation::Init(const char *pszViewName,
          papszSelectedFields != nullptr && papszSelectedFields[i] != nullptr;
          i++ )
     {
+        int nIndex;
         if (poMainDefn &&
             (nIndex=poMainDefn->GetFieldIndex(papszSelectedFields[i])) >=0)
         {

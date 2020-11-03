@@ -47,7 +47,7 @@
 #include "gdal_frmts.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: hdf5dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: hdf5dataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 constexpr size_t MAX_METADATA_LEN = 32768;
 
@@ -903,7 +903,6 @@ static herr_t HDF5AttrIterate( hid_t hH5ObjID,
     }
 
     char *szData = nullptr;
-    hsize_t nAttrSize = 0;
     char *szValue = nullptr;
 
     if( H5Tget_class(hAttrNativeType) == H5T_STRING )
@@ -933,7 +932,7 @@ static herr_t HDF5AttrIterate( hid_t hH5ObjID,
         }
         else
         {
-            nAttrSize = H5Aget_storage_size(hAttrID);
+            const hsize_t nAttrSize = H5Aget_storage_size(hAttrID);
             szValue = static_cast<char *>(CPLMalloc((size_t)(nAttrSize + 1)));
             H5Aread(hAttrID, hAttrNativeType, szValue);
             szValue[nAttrSize] = '\0';

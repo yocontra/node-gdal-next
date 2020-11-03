@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgeojsonwritelayer.cpp 56e004faba62c1e87c5595aaa1baec0d78b9a521 2020-04-16 20:02:53 +0200 Momtchil Momtchev $")
+CPL_CVSID("$Id: ogrgeojsonwritelayer.cpp 4c7be5ffcf20c86efd440130a96f62fc6c6c4878 2020-08-06 19:54:19 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRGeoJSONWriteLayer()                       */
@@ -195,7 +195,12 @@ OGRErr OGRGeoJSONWriteLayer::ICreateFeature( OGRFeature* poFeature )
         /* Separate "Feature" entries in "FeatureCollection" object. */
         VSIFPrintfL( fp, ",\n" );
     }
-    VSIFPrintfL( fp, "%s", json_object_to_json_string( poObj ) );
+    VSIFPrintfL( fp, "%s", json_object_to_json_string_ext( poObj,
+        JSON_C_TO_STRING_SPACED
+#ifdef JSON_C_TO_STRING_NOSLASHESCAPE
+        | JSON_C_TO_STRING_NOSLASHESCAPE
+#endif
+    ) );
 
     json_object_put( poObj );
 

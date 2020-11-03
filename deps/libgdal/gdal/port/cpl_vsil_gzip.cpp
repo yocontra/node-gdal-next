@@ -93,6 +93,10 @@
 #endif
 #include <zlib.h>
 
+#ifdef HAVE_LIBDEFLATE
+#include "libdeflate.h"
+#endif
+
 #include <algorithm>
 #include <list>
 #include <map>
@@ -111,7 +115,7 @@
 #include "cpl_vsi_virtual.h"
 #include "cpl_worker_thread_pool.h"
 
-CPL_CVSID("$Id: cpl_vsil_gzip.cpp a720b845266cdba8890ac2eb41a098693edd16e7 2020-03-13 09:23:33 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gzip.cpp c7d410f9e208c74b0935f54c97a82a8d1a434f17 2020-10-13 16:17:52 +0200 Even Rouault $")
 
 constexpr int Z_BUFSIZE = 65536;  // Original size is 16384
 constexpr int gz_magic[2] = {0x1f, 0x8b};  // gzip magic header
@@ -535,15 +539,16 @@ void VSIGZipHandle::check_header()
         }
     }
 
-    int c = 0;
     if( (flags & ORIG_NAME) != 0 )
     {
         // Skip the original file name.
+        int c;
         while( (c = get_byte()) != 0 && c != EOF ) {}
     }
     if( (flags & COMMENT) != 0 )
     {
         // skip the .gz file comment.
+        int c;
         while ((c = get_byte()) != 0 && c != EOF) {}
     }
     if( (flags & HEAD_CRC) != 0 )
@@ -3344,29 +3349,17 @@ void* CPLZLibDeflate( const void* ptr,
                       size_t nOutAvailableBytes,
                       size_t* pnOutBytes )
 {
-    z_stream strm;
-    strm.zalloc = nullptr;
-    strm.zfree = nullptr;
-    strm.opaque = nullptr;
-    int ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
-    if( ret != Z_OK )
-    {
-        if( pnOutBytes != nullptr )
-            *pnOutBytes = 0;
-        return nullptr;
-    }
+    if( pnOutBytes != nullptr )
+        *pnOutBytes = 0;
 
     size_t nTmpSize = 0;
     void* pTmp;
     if( outptr == nullptr )
     {
-        nTmpSize = 8 + nBytes * 2;
+        nTmpSize = 32 + nBytes * 2;
         pTmp = VSIMalloc(nTmpSize);
         if( pTmp == nullptr )
         {
-            deflateEnd(&strm);
-            if( pnOutBytes != nullptr )
-                *pnOutBytes = 0;
             return nullptr;
         }
     }
@@ -3374,6 +3367,38 @@ void* CPLZLibDeflate( const void* ptr,
     {
         pTmp = outptr;
         nTmpSize = nOutAvailableBytes;
+    }
+
+#ifdef HAVE_LIBDEFLATE
+    struct libdeflate_compressor* enc = libdeflate_alloc_compressor(7);
+    if( enc == nullptr )
+    {
+        if( pTmp != outptr )
+            VSIFree(pTmp);
+        return nullptr;
+    }
+    size_t nCompressedBytes = libdeflate_zlib_compress(
+                    enc, ptr, nBytes, pTmp, nTmpSize);
+    libdeflate_free_compressor(enc);
+    if( nCompressedBytes == 0 )
+    {
+        if( pTmp != outptr )
+            VSIFree(pTmp);
+        return nullptr;
+    }
+    if( pnOutBytes != nullptr )
+        *pnOutBytes = nCompressedBytes;
+#else
+    z_stream strm;
+    strm.zalloc = nullptr;
+    strm.zfree = nullptr;
+    strm.opaque = nullptr;
+    int ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
+    if( ret != Z_OK )
+    {
+        if( pTmp != outptr )
+            VSIFree(pTmp);
+        return nullptr;
     }
 
     strm.avail_in = static_cast<uInt>(nBytes);
@@ -3385,13 +3410,13 @@ void* CPLZLibDeflate( const void* ptr,
     {
         if( pTmp != outptr )
             VSIFree(pTmp);
-        if( pnOutBytes != nullptr )
-            *pnOutBytes = 0;
         return nullptr;
     }
     if( pnOutBytes != nullptr )
         *pnOutBytes = nTmpSize - strm.avail_out;
     deflateEnd(&strm);
+#endif
+
     return pTmp;
 }
 
@@ -3419,6 +3444,39 @@ void* CPLZLibInflate( const void* ptr, size_t nBytes,
                       void* outptr, size_t nOutAvailableBytes,
                       size_t* pnOutBytes )
 {
+    if( pnOutBytes != nullptr )
+        *pnOutBytes = 0;
+
+#ifdef HAVE_LIBDEFLATE
+    if( outptr )
+    {
+        struct libdeflate_decompressor* dec = libdeflate_alloc_decompressor();
+        if( dec == nullptr )
+        {
+            return nullptr;
+        }
+        enum libdeflate_result res;
+        if( nBytes > 2 &&
+            static_cast<const GByte*>(ptr)[0] == 0x1F &&
+            static_cast<const GByte*>(ptr)[1] == 0x8B )
+        {
+            res = libdeflate_gzip_decompress(
+                dec, ptr, nBytes, outptr, nOutAvailableBytes, pnOutBytes);
+        }
+        else
+        {
+            res = libdeflate_zlib_decompress(
+                dec, ptr, nBytes, outptr, nOutAvailableBytes, pnOutBytes);
+        }
+        libdeflate_free_decompressor(dec);
+        if( res != LIBDEFLATE_SUCCESS )
+        {
+            return nullptr;
+        }
+        return outptr;
+    }
+#endif
+
     z_stream strm;
     strm.zalloc = nullptr;
     strm.zfree = nullptr;
@@ -3428,8 +3486,6 @@ void* CPLZLibInflate( const void* ptr, size_t nBytes,
     int ret = inflateInit2(&strm, MAX_WBITS + 32);
     if( ret != Z_OK )
     {
-        if( pnOutBytes != nullptr )
-            *pnOutBytes = 0;
         return nullptr;
     }
 
@@ -3442,8 +3498,6 @@ void* CPLZLibInflate( const void* ptr, size_t nBytes,
         if( pszTmp == nullptr )
         {
             inflateEnd(&strm);
-            if( pnOutBytes != nullptr )
-                *pnOutBytes = 0;
             return nullptr;
         }
     }
@@ -3464,8 +3518,6 @@ void* CPLZLibInflate( const void* ptr, size_t nBytes,
             if( outptr == pszTmp )
             {
                 inflateEnd(&strm);
-                if( pnOutBytes != nullptr )
-                    *pnOutBytes = 0;
                 return nullptr;
             }
 
@@ -3477,8 +3529,6 @@ void* CPLZLibInflate( const void* ptr, size_t nBytes,
             {
                 VSIFree(pszTmp);
                 inflateEnd(&strm);
-                if( pnOutBytes != nullptr )
-                    *pnOutBytes = 0;
                 return nullptr;
             }
             pszTmp = pszTmpNew;
@@ -3505,8 +3555,6 @@ void* CPLZLibInflate( const void* ptr, size_t nBytes,
         if( outptr != pszTmp )
             VSIFree(pszTmp);
         inflateEnd(&strm);
-        if( pnOutBytes != nullptr )
-            *pnOutBytes = 0;
         return nullptr;
     }
 }

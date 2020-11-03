@@ -29,7 +29,7 @@
 #include "ogr_pgdump.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgdumpdriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdumpdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRPGDumpDriverCreate()                      */
@@ -70,7 +70,7 @@ void RegisterOGRPGDump()
     poDriver->SetDescription( "PGDUMP" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "PostgreSQL SQL dump" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_pgdump.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/pgdump.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "sql" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
@@ -122,7 +122,7 @@ void RegisterOGRPGDump()
     "  <Option name='FID64' type='boolean' description='Whether to create the FID column with BIGSERIAL type to handle 64bit wide ids' default='NO'/>"
     "  <Option name='EXTRACT_SCHEMA_FROM_LAYER_NAME' type='boolean' description='Whether a dot in a layer name should be considered as the separator for the schema and table name' default='YES'/>"
     "  <Option name='COLUMN_TYPES' type='string' description='A list of strings of format field_name=pg_field_type (separated by comma) to force the PG column type of fields to be created'/>"
-    "  <Option name='POSTGIS_VERSION' type='string' description='Can be set to 2.0 or 2.2 for PostGIS 2.0/2.2 compatibility. Important to set it correctly if using non-linear geometry types'/>"
+    "  <Option name='POSTGIS_VERSION' type='string' description='A string formatted as X.Y' default='2.2'/>"
     "  <Option name='DESCRIPTION' type='string' description='Description string to put in the pg_description system table'/>"
     "</LayerCreationOptionList>");
 
@@ -133,6 +133,7 @@ void RegisterOGRPGDump()
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATASUBTYPES, "Boolean Int16 Float32" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_UNIQUE_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );

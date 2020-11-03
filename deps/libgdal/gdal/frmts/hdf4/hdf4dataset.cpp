@@ -42,7 +42,7 @@
 #include "hdf4compat.h"
 #include "hdf4dataset.h"
 
-CPL_CVSID("$Id: hdf4dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: hdf4dataset.cpp 7efbb574f409465c908e5d83877fa36a501d434d 2020-10-14 11:56:55 +0200 Even Rouault $")
 
 extern const char * const pszGDALSignature;
 
@@ -793,7 +793,7 @@ GDALDataset *HDF4Dataset::Open( GDALOpenInfo * poOpenInfo )
 
     if( poOpenInfo->nOpenFlags & GDAL_OF_MULTIDIM_RASTER )
     {
-        poDS->OpenMultiDim(poOpenInfo->pszFilename);
+        poDS->OpenMultiDim(poOpenInfo->pszFilename, poOpenInfo->papszOpenOptions);
         return poDS;
     }
 
@@ -871,7 +871,6 @@ GDALDataset *HDF4Dataset::Open( GDALOpenInfo * poOpenInfo )
     int32 iRank = 0;
     int32 iNumType = 0;
     int32 nAttrs = 0;
-    bool bIsHDF = true;
 
     // Sometimes "HDFEOSVersion" attribute is not defined and we will
     // determine HDF-EOS datasets using other records
@@ -1127,13 +1126,14 @@ GDALDataset *HDF4Dataset::Open( GDALOpenInfo * poOpenInfo )
             CSLDestroy( papszGrids );
         }
         GDclose( hHDF4 );
-
-        bIsHDF = ( nSubDatasets == 0 ); // Try to read as HDF
     }
 
     char szName[VSNAMELENMAX + 1];
 
-    if( bIsHDF )
+    const char* pszListSDS =
+        CSLFetchNameValueDef(poOpenInfo->papszOpenOptions, "LIST_SDS", "AUTO");
+    if( (poDS->papszSubDatasets == nullptr && EQUAL(pszListSDS, "AUTO")) ||
+        (!EQUAL(pszListSDS, "AUTO") && CPLTestBool(pszListSDS)) )
     {
 
 /* -------------------------------------------------------------------- */
@@ -1354,6 +1354,16 @@ void GDALRegister_HDF4()
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_MULTIDIM_RASTER, "YES" );
+
+    poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
+"<OpenOptionList>"
+"  <Option name='LIST_SDS' type='string-select' "
+        "description='Whether to report Scientific Data Sets' default='AUTO'>"
+"       <Value>AUTO</Value>"
+"       <Value>YES</Value>"
+"       <Value>NO</Value>"
+"  </Option>"
+"</OpenOptionList>");
 
     poDriver->pfnOpen = HDF4Dataset::Open;
     poDriver->pfnIdentify = HDF4Dataset::Identify;

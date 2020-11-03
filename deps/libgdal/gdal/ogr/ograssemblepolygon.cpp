@@ -40,7 +40,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: ograssemblepolygon.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ograssemblepolygon.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
 
 /************************************************************************/
 /*                            CheckPoints()                             */
@@ -134,7 +134,7 @@ static void AddEdgeToRing( OGRLinearRing * poRing, OGRLineString * poLine,
  * @param dfTolerance tolerance into which two arcs are considered
  * close enough to be joined.
  * @param peErr OGRERR_NONE on success, or OGRERR_FAILURE on failure.
- * @return an handle to the new geometry, a polygon.
+ * @return a handle to the new geometry, a polygon.
  *
  */
 

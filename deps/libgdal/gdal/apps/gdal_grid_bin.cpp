@@ -31,7 +31,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdal_grid_bin.cpp 9bae05435e199592be48a2a6c8ef5f649fa5d113 2018-03-26 14:16:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_grid_bin.cpp 341cc25bc957b7f7a66c74e449511d87cda2a5b5 2020-08-13 21:49:16 +0200 Audifire $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -51,7 +51,7 @@ static void Usage(const char* pszErrorMsg = nullptr)
         "    [-clipsrcsql sql_statement] [-clipsrclayer layer]\n"
         "    [-clipsrcwhere expression]\n"
         "    [-l layername]* [-where expression] [-sql select_statement]\n"
-        "    [-txe xmin xmax] [-tye ymin ymax] [-outsize xsize ysize]\n"
+        "    [-txe xmin xmax] [-tye ymin ymax] [-tr xres yres] [-outsize xsize ysize]\n"
         "    [-a algorithm[:parameter1=value1]*]"
         "    [-q]\n"
         "    <src_datasource> <dst_filename>\n"

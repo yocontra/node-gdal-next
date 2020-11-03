@@ -46,7 +46,7 @@
 #include "../vrt/gdal_vrt.h"
 #include "../vrt/vrtdataset.h"
 
-CPL_CVSID("$Id: kmlsuperoverlaydataset.cpp d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: kmlsuperoverlaydataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 using namespace std;
 
@@ -1512,6 +1512,7 @@ CPLErr KmlSuperOverlayReadDataset::IRasterIO( GDALRWFlag eRWFlag,
 
             GDALRasterIOExtraArg sExtraArgs;
             INIT_RASTERIO_EXTRA_ARG(sExtraArgs);
+            // cppcheck-suppress redundantAssignment
             sExtraArgs.eResampleAlg = psExtraArg->eResampleAlg;
             CPLErr eErr = poVRTDS->RasterIO( eRWFlag,
                                              nReqXOff,
@@ -1568,6 +1569,7 @@ CPLErr KmlSuperOverlayReadDataset::IRasterIO( GDALRWFlag eRWFlag,
 
         GDALRasterIOExtraArg sExtraArgs;
         INIT_RASTERIO_EXTRA_ARG(sExtraArgs);
+        // cppcheck-suppress redundantAssignment
         sExtraArgs.eResampleAlg = psExtraArg->eResampleAlg;
         sExtraArgs.pfnProgress = GDALScaledProgress;
         sExtraArgs.pProgressData =

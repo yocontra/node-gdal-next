@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpdslayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpdslayer.cpp bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $")
 
 namespace OGRPDS {
 
@@ -476,30 +476,6 @@ void OGRPDSLayer::ResetReading()
 {
     nNextFID = 0;
     VSIFSeekL( fpPDS, nStartBytes, SEEK_SET );
-}
-
-/************************************************************************/
-/*                           GetNextFeature()                           */
-/************************************************************************/
-
-OGRFeature *OGRPDSLayer::GetNextFeature()
-{
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-        if (poFeature == nullptr)
-            return nullptr;
-
-        if((m_poFilterGeom == nullptr
-            || FilterGeometry( poFeature->GetGeometryRef() ) )
-        && (m_poAttrQuery == nullptr
-            || m_poAttrQuery->Evaluate( poFeature )) )
-        {
-            return poFeature;
-        }
-
-        delete poFeature;
-    }
 }
 
 /************************************************************************/

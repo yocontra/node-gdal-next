@@ -53,7 +53,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_minixml.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_minixml.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 typedef enum {
     TNone,
@@ -358,6 +358,7 @@ static XMLTokenType ReadToken( ParseContext *psContext, CPLErr& eLastErrorType )
              && psContext->pszInput[psContext->nInputOffset] == '>' )
     {
         chNext = ReadChar( psContext );
+        (void)chNext;
         CPLAssert( chNext == '>' );
 
         psContext->eTokenType = TSlashClose;
@@ -370,7 +371,7 @@ static XMLTokenType ReadToken( ParseContext *psContext, CPLErr& eLastErrorType )
              && psContext->pszInput[psContext->nInputOffset] == '>' )
     {
         chNext = ReadChar( psContext );
-
+        (void)chNext;
         CPLAssert( chNext == '>' );
 
         psContext->eTokenType = TQuestionClose;
@@ -1763,7 +1764,7 @@ int CPLRemoveXMLChild( CPLXMLNode *psParent, CPLXMLNode *psChild )
     CPLXMLNode *psThis = nullptr;
     for( psThis = psParent->psChild;
          psThis != nullptr;
-         psLast = psThis, psThis = psThis->psNext )
+         psThis = psThis->psNext )
     {
         if( psThis == psChild )
         {
@@ -1775,6 +1776,7 @@ int CPLRemoveXMLChild( CPLXMLNode *psParent, CPLXMLNode *psChild )
             psThis->psNext = nullptr;
             return TRUE;
         }
+        psLast = psThis;
     }
 
     return FALSE;

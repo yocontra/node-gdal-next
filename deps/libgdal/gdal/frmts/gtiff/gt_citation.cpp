@@ -45,7 +45,7 @@
 #include "gt_wkt_srs_priv.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gt_citation.cpp fb76410650e54adda139b18a4b294abc1809a378 2020-04-22 19:05:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_citation.cpp 806c52be89d281347440440e981922cc6758accd 2020-09-13 16:26:58 +0200 Even Rouault $")
 
 static const char * const apszUnitMap[] = {
     "meters", "1.0",
@@ -493,8 +493,11 @@ OGRBoolean SetCitationToSRS( GTIF* hGTIF, char* szCTString, int nCTStringLen,
                 }
             }
             if( unitSize == 0.0 )
-                GDALGTIFKeyGetDOUBLE( hGTIF, ProjLinearUnitSizeGeoKey,
-                                      &unitSize, 0, 1 );
+            {
+                CPL_IGNORE_RET_VAL(
+                    GDALGTIFKeyGetDOUBLE( hGTIF, ProjLinearUnitSizeGeoKey,
+                                      &unitSize, 0, 1 ));
+            }
             poSRS->SetLinearUnits( ctNames[CitLUnitsName], unitSize);
             *linearUnitIsSet = TRUE;
         }

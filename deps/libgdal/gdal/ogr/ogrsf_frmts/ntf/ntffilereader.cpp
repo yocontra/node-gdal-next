@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ntffilereader.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ntffilereader.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 #define DIGIT_ZERO '0'
 
@@ -389,7 +389,7 @@ int NTFFileReader::Open( const char * pszFilenameIn )
     {
         delete poRecord;
         CPLError( CE_Failure, CPLE_AppDefined,
-                  "Cound not find section header record in %s.\n",
+                  "Could not find section header record in %s.\n",
                   pszFilename );
         return FALSE;
     }
@@ -398,7 +398,7 @@ int NTFFileReader::Open( const char * pszFilenameIn )
     {
         delete poRecord;
         CPLError( CE_Failure, CPLE_AppDefined,
-                  "Cound not find product type in %s.\n",
+                  "Could not find product type in %s.\n",
                   pszFilename );
         return FALSE;
     }

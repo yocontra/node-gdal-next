@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pgdump.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_pgdump.h fd3419e06be3352c2e03cf8d1b220fedd595de1e 2020-05-28 22:47:11 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL dump driver.
@@ -33,6 +33,8 @@
 #include "ogrsf_frmts.h"
 #include "cpl_string.h"
 
+#include <vector>
+
 CPLString OGRPGDumpEscapeColumnName(const char* pszColumnName);
 CPLString OGRPGDumpEscapeString( const char* pszStrValue, int nMaxLength = -1,
                                  const char* pszFieldName = "");
@@ -58,6 +60,7 @@ OGRPGCommonAppendCopyFieldsExceptGeom(
     OGRFeature* poFeature,
     const char* pszFIDColumn,
     bool bFIDColumnInCopyFields,
+    const std::vector<bool>& abFieldsToInclude,
     OGRPGCommonEscapeStringCbk pfnEscapeString,
     void* userdata );
 

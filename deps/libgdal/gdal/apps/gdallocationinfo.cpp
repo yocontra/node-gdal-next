@@ -41,7 +41,7 @@
 #include <unistd.h>
 #endif
 
-CPL_CVSID("$Id: gdallocationinfo.cpp 99aaf0545dd1231ea33ecbc83e9fbf2a7886ba3e 2019-06-27 16:36:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdallocationinfo.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -526,8 +526,7 @@ MAIN_START(argc, argv)
         OCTDestroyCoordinateTransformation( hCT );
     }
 
-    if (hSrcDS)
-        GDALClose(hSrcDS);
+    GDALClose(hSrcDS);
 
     GDALDumpOpenDatasets( stderr );
     GDALDestroyDriverManager();

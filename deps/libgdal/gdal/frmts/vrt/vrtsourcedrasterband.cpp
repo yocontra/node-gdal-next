@@ -50,7 +50,7 @@
 #include "gdal_priv.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vrtsourcedrasterband.cpp 414463132a6fa8d2258b4b38a6dcea78da8d3e70 2020-04-02 13:20:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtsourcedrasterband.cpp 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -167,7 +167,9 @@ CPLErr VRTSourcedRasterBand::IRasterIO( GDALRWFlag eRWFlag,
 /*      Do we have overviews that would be appropriate to satisfy       */
 /*      this request?                                                   */
 /* ==================================================================== */
-    if( (nBufXSize < nXSize || nBufYSize < nYSize)
+    auto l_poDS = cpl::down_cast<VRTDataset*>(poDS);
+    if( l_poDS->m_apoOverviews.empty() &&
+        (nBufXSize < nXSize || nBufYSize < nYSize)
         && GetOverviewCount() > 0 )
     {
         if( OverviewRasterIO(
@@ -1117,8 +1119,24 @@ void VRTSourcedRasterBand::ConfigureSource( VRTSimpleSource *poSimpleSource,
 /* -------------------------------------------------------------------- */
 /*      If we can get the associated GDALDataset, add a reference to it.*/
 /* -------------------------------------------------------------------- */
-    if( poSrcBand->GetDataset() != nullptr )
-        poSrcBand->GetDataset()->Reference();
+    GDALDataset* poSrcBandDataset = poSrcBand->GetDataset();
+    if( poSrcBandDataset != nullptr )
+    {
+        VRTDataset* poVRTSrcBandDataset = dynamic_cast<VRTDataset*>(poSrcBandDataset);
+        if( poVRTSrcBandDataset && !poVRTSrcBandDataset->m_bCanTakeRef )
+        {
+            // Situation triggered by VRTDataset::AddVirtualOverview()
+            // We create an overview dataset that is a VRT of a reduction of
+            // ourselves. But we don't want to take a reference on ourselves,
+            // otherwise this will prevent us to be closed in number of
+            // circumstances
+            poSimpleSource->m_bDropRefOnSrcBand = false;
+        }
+        else
+        {
+            poSrcBandDataset->Reference();
+        }
+    }
 }
 
 /************************************************************************/
@@ -1706,8 +1724,10 @@ void VRTSourcedRasterBand::GetFileList( char*** ppapszFileList, int *pnSize,
 
 int VRTSourcedRasterBand::CloseDependentDatasets()
 {
+    int ret = VRTRasterBand::CloseDependentDatasets();
+
     if( nSources == 0 )
-        return FALSE;
+        return ret;
 
     for( int i = 0; i < nSources; i++ )
         delete papoSources[i];

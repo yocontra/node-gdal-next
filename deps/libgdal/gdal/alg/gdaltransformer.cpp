@@ -57,7 +57,7 @@
 #include "ogr_srs_api.h"
 
 
-CPL_CVSID("$Id: gdaltransformer.cpp 7294a96e7747b442cd7033280c2780cfd2bca572 2020-06-12 16:43:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaltransformer.cpp 7e3771089616198d9329cfc9ed8f0620f4e5ea66 2020-06-12 16:43:48 +0200 Even Rouault $")
 
 CPL_C_START
 void *GDALDeserializeGCPTransformer( CPLXMLNode *psTree );
@@ -3322,8 +3322,6 @@ static int GDALApproxTransformInternal( void *pCBData, int bDstToSrc,
                                         const double zSMETransformed[3] )
 {
     ApproxTransformInfo *psATInfo = static_cast<ApproxTransformInfo *>(pCBData);
-    int bSuccess = FALSE;  // TODO(schwehr): Split into each case.
-
     const int nMiddle = (nPoints - 1) / 2;
 
 #ifdef notdef_sanify_check
@@ -3333,7 +3331,7 @@ static int GDALApproxTransformInternal( void *pCBData, int bDstToSrc,
         double z2[3] = { z[0], z[nMiddle], z[nPoints-1] };
         int anSuccess2[3] = {};
 
-        bSuccess =
+        const int bSuccess =
             psATInfo->pfnBaseTransformer( psATInfo->pBaseCBData, bDstToSrc, 3,
                                         x2, y2, z2, anSuccess2 );
         CPLAssert(bSuccess);
@@ -3418,6 +3416,7 @@ static int GDALApproxTransformInternal( void *pCBData, int bDstToSrc,
             x[nMiddle] == x[nMiddle + (nPoints - nMiddle - 1) / 2];
 
         int anSuccess2[3] = {};
+        int bSuccess = FALSE;
         if( !bUseBaseTransformForHalf1 && !bUseBaseTransformForHalf2 )
             bSuccess =
                 psATInfo->pfnBaseTransformer(psATInfo->pBaseCBData,
@@ -3444,10 +3443,6 @@ static int GDALApproxTransformInternal( void *pCBData, int bDstToSrc,
                                              anSuccess2 + 2 );
             anSuccess2[0] = TRUE;
             anSuccess2[1] = TRUE;
-        }
-        else
-        {
-            bSuccess = FALSE;
         }
 
         if( !bSuccess || !anSuccess2[0] || !anSuccess2[1] || !anSuccess2[2] )

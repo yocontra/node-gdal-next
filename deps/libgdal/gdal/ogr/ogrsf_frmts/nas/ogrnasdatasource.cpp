@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_nas.h"
 
-CPL_CVSID("$Id: ogrnasdatasource.cpp e6fdbf29732751fe93e7593ec6a034ac84a3cc02 2020-04-06 13:45:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrnasdatasource.cpp 6d8e37ed69a412503d8b980944bca2ab49b9e14c 2020-09-19 16:50:46 +0200 Even Rouault $")
 
 static const char * const apszURNNames[] =
 {
@@ -110,6 +110,7 @@ int OGRNASDataSource::Open( const char * pszNewName )
                      pszNASTemplateName );
             return FALSE;
         }
+        bHaveSchema = true;
 
         CPLDebug("NAS", "Schema loaded.");
     }

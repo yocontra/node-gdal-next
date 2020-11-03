@@ -34,7 +34,7 @@
 
 /* g++ -Wall -g fmrts/jpegls/jpeglsdataset.cpp -shared -fPIC -o gdal_JPEGLS.so -Iport -Igcore -L. -lgdal -I/home/even/charls-1.0 -L/home/even/charls-1.0/build -lCharLS */
 
-CPL_CVSID("$Id: jpeglsdataset.cpp c0b4a47a2b5677eafc40b74c46b029ddbded4413 2020-04-28 17:46:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpeglsdataset.cpp 51724c47693d768ad59b10ed6a3061afcacdace4 2020-04-28 17:46:33 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */

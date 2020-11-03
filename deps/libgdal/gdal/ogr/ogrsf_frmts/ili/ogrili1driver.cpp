@@ -30,7 +30,7 @@
 #include "ogr_ili1.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrili1driver.cpp a0845a051c0cd1cc7dfbeebb776dc325af262cac 2018-06-14 16:22:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrili1driver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -101,7 +101,7 @@ void RegisterOGRILI1() {
     poDriver->SetDescription( "Interlis 1" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Interlis 1" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_ili.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/ili.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "itf ili" );
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
 "<OpenOptionList>"

@@ -49,7 +49,7 @@ constexpr double NULL3 = -3.4028226550889044521e+38;
 #include "cpl_safemaths.hpp"
 #include "vicardataset.h"
 
-CPL_CVSID("$Id: pdsdataset.cpp 78dcb03e448c6b4e28d9835d73c80660c0184b11 2020-05-08 18:25:02 +0200 Even Rouault $")
+CPL_CVSID("$Id: pdsdataset.cpp deff5f9197cbec2b0f66aa34ce85a2cafcc59d7a 2020-05-07 23:38:12 +0200 Even Rouault $")
 
 enum PDSLayout
 {
@@ -1336,7 +1336,7 @@ GDALDataset *PDSDataset::Open( GDALOpenInfo * poOpenInfo )
     }
     poDS->m_aosPDSMD.InsertString(
         0,
-        poDS->oKeywords.GetJsonObject().Format(CPLJSONObject::Pretty).c_str());
+        poDS->oKeywords.GetJsonObject().Format(CPLJSONObject::PrettyFormat::Pretty).c_str());
     VSIFCloseL( fpQube );
 
 /* -------------------------------------------------------------------- */

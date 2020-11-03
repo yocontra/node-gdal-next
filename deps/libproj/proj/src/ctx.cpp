@@ -24,6 +24,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
 
 #include <errno.h>
 #include <stdlib.h>
@@ -34,6 +37,7 @@
 #include "proj_experimental.h"
 #include "proj_internal.h"
 #include "filemanager.hpp"
+#include "proj/internal/io_internal.hpp"
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
@@ -109,6 +113,30 @@ projCtx_t projCtx_t::createDefault()
     return ctx;
 }
 
+/**************************************************************************/
+/*                           get_cpp_context()                            */
+/**************************************************************************/
+
+projCppContext* projCtx_t::get_cpp_context()
+{
+    if (cpp_context == nullptr) {
+        cpp_context = new projCppContext(this);
+    }
+    return cpp_context;
+}
+
+
+/**************************************************************************/
+/*                           safeAutoCloseDbIfNeeded()                      */
+/**************************************************************************/
+
+void projCtx_t::safeAutoCloseDbIfNeeded()
+{
+    if (cpp_context) {
+        cpp_context->autoCloseDbIfNeeded();
+    }
+}
+
 /************************************************************************/
 /*                           set_search_paths()                         */
 /************************************************************************/
@@ -126,22 +154,43 @@ void projCtx_t::set_search_paths(const std::vector<std::string>& search_paths_in
     }
 }
 
+/**************************************************************************/
+/*                           set_ca_bundle_path()                         */
+/**************************************************************************/
+
+void projCtx_t::set_ca_bundle_path(const std::string& ca_bundle_path_in)
+{
+    ca_bundle_path = ca_bundle_path_in;
+}
+
 /************************************************************************/
 /*                  projCtx_t(const projCtx_t& other)                   */
 /************************************************************************/
 
-projCtx_t::projCtx_t(const projCtx_t& other)
+projCtx_t::projCtx_t(const projCtx_t& other) :
+    debug_level(other.debug_level),
+    logger(other.logger),
+    logger_app_data(other.logger_app_data),
+    fileapi_legacy(other.fileapi_legacy),
+    cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
+    use_proj4_init_rules(other.use_proj4_init_rules),
+    epsg_file_exists(other.epsg_file_exists),
+    ca_bundle_path(other.ca_bundle_path),
+    env_var_proj_lib(other.env_var_proj_lib),
+    file_finder_legacy(other.file_finder_legacy),
+    file_finder(other.file_finder),
+    file_finder_user_data(other.file_finder_user_data),
+    custom_sqlite3_vfs_name(other.custom_sqlite3_vfs_name),
+    user_writable_directory(other.user_writable_directory),
+    // BEGIN ini file settings
+    iniFileLoaded(other.iniFileLoaded),
+    endpoint(other.endpoint),
+    networking(other.networking),
+    gridChunkCache(other.gridChunkCache),
+    defaultTmercAlgo(other.defaultTmercAlgo)
+    // END ini file settings
 {
-    debug_level = other.debug_level;
-    logger = other.logger;
-    logger_app_data = other.logger_app_data;
-    fileapi_legacy = other.fileapi_legacy;
-    epsg_file_exists = other.epsg_file_exists;
     set_search_paths(other.search_paths);
-    file_finder = other.file_finder;
-    file_finder_legacy = other.file_finder_legacy;
-    file_finder_user_data = other.file_finder_user_data;
-    networking = other.networking;
 }
 
 /************************************************************************/
@@ -174,6 +223,19 @@ projCtx pj_ctx_alloc()
 
 {
     return new (std::nothrow) projCtx_t(*pj_get_default_ctx());
+}
+
+/************************************************************************/
+/*                            proj_context_clone()                      */
+/*           Create a new context based on a custom context             */
+/************************************************************************/
+
+PJ_CONTEXT *proj_context_clone (PJ_CONTEXT *ctx) 
+{
+    if (nullptr==ctx)
+        return pj_ctx_alloc ();
+
+    return new (std::nothrow) projCtx_t(*ctx);
 }
 
 /************************************************************************/

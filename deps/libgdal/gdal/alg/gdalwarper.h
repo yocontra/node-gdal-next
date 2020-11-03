@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarper.h 3faf501a82260b41e85125d14b21ec3c54e319d7 2020-04-01 11:57:08 +0200 Even Rouault $
+ * $Id: gdalwarper.h 58843108fdd2c6fcd8c8391f370989c937c877dc 2020-05-19 22:26:59 +0200 Martin Dobias $
  *
  * Project:  GDAL High Performance Warper
  * Purpose:  Prototypes, and definitions for warping related work.
@@ -287,6 +287,13 @@ GDALAutoCreateWarpedVRT( GDALDatasetH hSrcDS,
                          const char *pszSrcWKT, const char *pszDstWKT,
                          GDALResampleAlg eResampleAlg,
                          double dfMaxError, const GDALWarpOptions *psOptions );
+
+GDALDatasetH CPL_DLL CPL_STDCALL
+GDALAutoCreateWarpedVRTEx( GDALDatasetH hSrcDS,
+                           const char *pszSrcWKT, const char *pszDstWKT,
+                           GDALResampleAlg eResampleAlg,
+                           double dfMaxError, const GDALWarpOptions *psOptions,
+                           CSLConstList papszTransformerOptions );
 
 GDALDatasetH CPL_DLL CPL_STDCALL
 GDALCreateWarpedVRT( GDALDatasetH hSrcDS,

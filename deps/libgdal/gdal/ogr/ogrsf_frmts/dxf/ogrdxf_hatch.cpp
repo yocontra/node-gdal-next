@@ -37,7 +37,7 @@
 #include <cmath>
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_hatch.cpp 4b39d4093be7b17ee65eec89e4881944c2a02ad3 2020-03-25 17:38:08 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdxf_hatch.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           TranslateHATCH()                           */
@@ -682,7 +682,7 @@ OGRErr OGRDXFLayer::CollectPolylinePath( OGRGeometryCollection *poGC,
     }
 
     oSmoothPolyline.SetUseMaxGapWhenTessellatingArcs( poDS->InlineBlocks() );
-    poGC->addGeometryDirectly( oSmoothPolyline.Tesselate() );
+    poGC->addGeometryDirectly( oSmoothPolyline.Tessellate() );
 
 /* -------------------------------------------------------------------- */
 /*      Skip through source boundary objects if present.                */

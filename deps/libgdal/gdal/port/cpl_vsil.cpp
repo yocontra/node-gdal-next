@@ -55,7 +55,7 @@
 #include "cpl_vsi_virtual.h"
 
 
-CPL_CVSID("$Id: cpl_vsil.cpp 3bd384f52281218f6b6528763aee1296b8cf7431 2020-03-19 12:29:06 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             VSIReadDir()                             */
@@ -121,6 +121,34 @@ char **VSIReadDirEx( const char *pszPath, int nMaxFiles )
         VSIFileManager::GetHandler( pszPath );
 
     return poFSHandler->ReadDirEx( pszPath, nMaxFiles );
+}
+
+/************************************************************************/
+/*                             VSISiblingFiles()                        */
+/************************************************************************/
+
+/**
+ * \brief Return related filenames
+  *
+  * This function is essentially meant at being used by GDAL internals.
+ *
+ * @param pszFilename the path of a filename to inspect
+ * UTF-8 encoded.
+ * @return The list of entries, relative to the directory, of all sidecar
+ * files available or NULL if the list is not known. 
+ * Filenames are returned in UTF-8 encoding.
+ * Most implementations will return NULL, and a subsequent ReadDir will
+ * list all files available in the file's directory. This function will be
+ * overridden by VSI FilesystemHandlers that wish to force e.g. an empty list
+ * to avoid opening non-existant files on slow filesystems. The return value shall be destroyed with CSLDestroy()
+ * @since GDAL 3.2
+ */
+char **VSISiblingFiles( const char *pszFilename)
+{
+    VSIFilesystemHandler *poFSHandler =
+        VSIFileManager::GetHandler( pszFilename );
+
+    return poFSHandler->SiblingFiles( pszFilename );
 }
 
 /************************************************************************/
@@ -600,7 +628,7 @@ int VSIRename( const char * oldpath, const char * newpath )
  * /vsis3/, /vsigs/ or /vsiaz/</li>
  * </ul>
  *
- * Similarly to rsync behaviour, if the source filename ends with a slash,
+ * Similarly to rsync behavior, if the source filename ends with a slash,
  * it means that the content of the directory must be copied, but not the
  * directory name. For example, assuming "/home/even/foo" contains a file "bar",
  * VSISync("/home/even/foo/", "/mnt/media", ...) will create a "/mnt/media/bar"
@@ -608,12 +636,12 @@ int VSIRename( const char * oldpath, const char * newpath )
  * "/mnt/media/foo" directory which contains a bar file.
  *
  * @param pszSource Source file or directory.  UTF-8 encoded.
- * @param pszTarget Target file or direcotry.  UTF-8 encoded.
+ * @param pszTarget Target file or directory.  UTF-8 encoded.
  * @param papszOptions Null terminated list of options, or NULL.
  * Currently accepted options are:
  * <ul>
  * <li>RECURSIVE=NO (the default is YES)</li>
- * <li>SYNC_STRATEGY=TIMESTAMP/ETAG. Determines which criterion is used to
+ * <li>SYNC_STRATEGY=TIMESTAMP/ETAG/OVERWRITE. Determines which criterion is used to
  *     determine if a target file must be replaced when it already exists and
  *     has the same file size as the source.
  *     Only applies for a source or target being a network filesystem.
@@ -629,15 +657,19 @@ int VSIRename( const char * oldpath, const char * newpath )
  *     for files not using KMS server side encryption and uploaded in a single
  *     PUT operation (so smaller than 50 MB given the default used by GDAL).
  *     Only to be used for /vsis3/, /vsigs/ or other filesystems using a
- *     MD5Sum as ETAG.</li>
+ *     MD5Sum as ETAG.
+ *
+ *     The OVERWRITE strategy (GDAL >= 3.2) will always overwrite the target file
+ *     with the source one.
+ * </li>
  * <li>NUM_THREADS=integer. Number of threads to use for parallel file copying.
  *     Only use for when /vsis3/, /vsigs/ or /vsiaz/ is in source or target.
  *     Since GDAL 3.1</li>
  * <li>CHUNK_SIZE=integer. Maximum size of chunk (in bytes) to use to split
  *     large objects when downloading them from /vsis3/, /vsigs/ or /vsiaz/ to
- *     local file system, or for upload to /vsis3/ from local file system.
+ *     local file system, or for upload to /vsis3/ or /vsiaz/ from local file system.
  *     Only used if NUM_THREADS > 1.
- *     For upload to /vsis3/, this chunk size will be set at least to 5 MB.
+ *     For upload to /vsis3/, this chunk size must be set at least to 5 MB.
  *     Since GDAL 3.1</li>
  * </ul>
  * @param pProgressFunc Progress callback, or NULL.
@@ -1513,39 +1545,43 @@ int* VSIFilesystemHandler::UnlinkBatch( CSLConstList papszFiles )
 
 int VSIFilesystemHandler::RmdirRecursive( const char* pszDirname )
 {
-    char** papszFiles = VSIReadDir(pszDirname);
-    for( char** papszIter = papszFiles; papszIter && *papszIter; ++papszIter )
+    CPLString osDirnameWithoutEndSlash(pszDirname);
+    if( !osDirnameWithoutEndSlash.empty() && osDirnameWithoutEndSlash.back() == '/' )
+        osDirnameWithoutEndSlash.resize( osDirnameWithoutEndSlash.size() - 1 );
+
+    CPLStringList aosOptions;
+    auto poDir = std::unique_ptr<VSIDIR>(OpenDir(pszDirname, -1, aosOptions.List()));
+    if( !poDir )
+        return -1;
+    std::vector<std::string> aosDirs;
+    while( true )
     {
-        if( (*papszIter)[0] == '\0' ||
-            strcmp(*papszIter, ".") == 0 ||
-            strcmp(*papszIter, "..") == 0 )
+        auto entry = poDir->NextDirEntry();
+        if( !entry )
+            break;
+
+        const CPLString osFilename(osDirnameWithoutEndSlash + '/' + entry->pszName);
+        if( (entry->nMode & S_IFDIR) )
         {
-            continue;
+            aosDirs.push_back(osFilename);
         }
-        VSIStatBufL sStat;
-        const CPLString osFilename(
-            CPLFormFilename(pszDirname, *papszIter, nullptr));
-        if( VSIStatL(osFilename, &sStat) == 0 )
+        else
         {
-            if( VSI_ISDIR(sStat.st_mode) )
-            {
-                if( RmdirRecursive(osFilename) != 0 )
-                {
-                    CSLDestroy(papszFiles);
-                    return -1;
-                }
-            }
-            else
-            {
-                if( VSIUnlink(osFilename) != 0 )
-                {
-                    CSLDestroy(papszFiles);
-                    return -1;
-                }
-            }
+            if( VSIUnlink(osFilename) != 0 )
+                return -1;
         }
     }
-    CSLDestroy(papszFiles);
+
+    // Sort in reverse order, so that inner-most directories are deleted first
+    std::sort(aosDirs.begin(), aosDirs.end(),
+              [](const std::string& a, const std::string& b) {return a > b; });
+
+    for(const auto& osDir: aosDirs )
+    {
+        if( VSIRmdir(osDir.c_str()) != 0 )
+            return -1;
+    }
+
     return VSIRmdir(pszDirname);
 }
 

@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrgrassdriver.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: ogrgrassdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          ~OGRGRASSDriver()                           */
@@ -90,7 +90,7 @@ void RegisterOGRGRASS()
     poDriver->SetDescription( "GRASS" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GRASS Vectors (5.7+)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_grass.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/grass.html" );
 
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver( poDriver );
 }

@@ -28,7 +28,7 @@
 
 #include "ogr_avc.h"
 
-CPL_CVSID("$Id: ogravcbindriver.cpp f93644db7bb54fe7f1b0bd28b3b6320e1331e74f 2018-03-03 19:24:43Z Even Rouault $")
+CPL_CVSID("$Id: ogravcbindriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -87,7 +87,7 @@ void RegisterOGRAVCBin()
     poDriver->SetDescription( "AVCBin" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Arc/Info Binary Coverage" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_avcbin.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/avcbin.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRAVCBinDriverOpen;

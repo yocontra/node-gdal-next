@@ -44,7 +44,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: gdalproxypool.cpp 48750f0a05e88eec700319b3e1a3146da6054e09 2019-09-20 20:55:41 +0300 drons $")
+CPL_CVSID("$Id: gdalproxypool.cpp 5d92959f1afafc273140671136adcc1f12d16160 2020-06-02 16:12:25 +0200 Even Rouault $")
 
 /* We *must* share the same mutex as the gdaldataset.cpp file, as we are */
 /* doing GDALOpen() calls that can indirectly call GDALOpenShared() on */
@@ -209,6 +209,7 @@ void GDALDatasetPool::CheckLinks()
         CPLAssert(cur->next != nullptr || cur == lastEntry);
         cur = cur->next;
     }
+    (void)i;
     CPLAssert(i == currentSize);
 }
 #endif

@@ -45,7 +45,7 @@
 #include "ogr_core.h"
 #include "ogr_feature.h"
 
-CPL_CVSID("$Id: ogrfeaturestyle.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrfeaturestyle.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
 
 /****************************************************************************/
 /*                Class Parameter (used in the String)                      */
@@ -150,7 +150,7 @@ OGRStyleMgr::OGRStyleMgr( OGRStyleTable *poDataSetStyleTable ):
  * @param hStyleTable pointer to OGRStyleTable or NULL if not working with
  *  a style table.
  *
- * @return an handle to the new style manager object.
+ * @return a handle to the new style manager object.
  */
 
 OGRStyleMgrH OGR_SM_Create( OGRStyleTableH hStyleTable )
@@ -779,7 +779,7 @@ OGRStyleTable::OGRStyleTable()
  * This function is the same as the C++ method OGRStyleTable::OGRStyleTable().
  *
  *
- * @return an handle to the new style table object.
+ * @return a handle to the new style table object.
  */
 
 OGRStyleTableH OGR_STBL_Create( void )
@@ -1360,7 +1360,7 @@ OGRStyleTool::OGRStyleTool( OGRSTClassId eClassId ) :
  * @param eClassId subclass of style tool to create. One of OGRSTCPen (1),
  * OGRSTCBrush (2), OGRSTCSymbol (3) or OGRSTCLabel (4).
  *
- * @return an handle to the new style tool object or NULL if the creation
+ * @return a handle to the new style tool object or NULL if the creation
  * failed.
  */
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hdf4dataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+ * $Id: hdf4dataset.h 7efbb574f409465c908e5d83877fa36a501d434d 2020-10-14 11:56:55 +0200 Even Rouault $
  *
  * Project:  Hierarchical Data Format Release 4 (HDF4)
  * Purpose:  Header file for HDF4 datasets reader.
@@ -75,7 +75,7 @@ class HDF4Dataset CPL_NON_FINAL: public GDALPamDataset
     static char **HDF4EOSGetObject( char **papszAttrList, char **ppszAttrName,
                                     char **ppszAttrClass, char **ppszAttrValue );
 
-    void OpenMultiDim(const char* pszFilename);
+    void OpenMultiDim(const char* pszFilename, CSLConstList papszOpenOptionsIn);
 
   protected:
 

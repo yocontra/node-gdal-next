@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hdf5imagedataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: hdf5imagedataset.cpp 6a29d59d705abb5c8fe71248cace9753d7ff34ab 2020-09-10 18:33:24 +0200 Even Rouault $")
 
 class HDF5ImageDataset final: public HDF5Dataset
 {
@@ -964,9 +964,11 @@ void HDF5ImageDataset::IdentifyProductType()
     // If there is a Mission_ID field.
     if(pszMissionId != nullptr && strstr(GetDescription(), "QLK") == nullptr)
     {
-        // Check if the mission type is CSK or KMPS.
+        // Check if the mission type is CSK, KMPS or CSG.
         // KMPS: Komsat-5 is Korean mission with a SAR instrument.
-        if(EQUAL(pszMissionId, "CSK") || EQUAL(pszMissionId, "KMPS"))
+        // CSG: Cosmo Skymed 2nd Generation
+        if(EQUAL(pszMissionId, "CSK") || EQUAL(pszMissionId, "KMPS")
+           || EQUAL(pszMissionId, "CSG"))
         {
             iSubdatasetType = CSK_PRODUCT;
 

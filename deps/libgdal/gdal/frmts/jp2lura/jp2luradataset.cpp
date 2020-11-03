@@ -229,7 +229,7 @@ JP2LuraDataset::~JP2LuraDataset()
 /*                            Identify()                                */
 /************************************************************************/
 
-constexpr unsigned char jpc_header[] = {0xff,0x4f};
+constexpr unsigned char jpc_header[] = {0xff,0x4f,0xff,0x51}; // SOC + RSIZ markers
 constexpr unsigned char jp2_box_jp[] = {0x6a,0x50,0x20,0x20}; /* 'jP  ' */
 
 int JP2LuraDataset::Identify( GDALOpenInfo * poOpenInfo )
@@ -955,7 +955,7 @@ GDALDataset * JP2LuraDataset::CreateCopy(const char * pszFilename,
             {
             CPLError(CE_Warning, CPLE_AppDefined,
             "INSPIRE_TG=YES implies following GMLJP2 specification which "
-            "recommends advertize reader requirement 67 feature, and thus JPX capability");
+            "recommends advertise reader requirement 67 feature, and thus JPX capability");
             }
             else */
             if (poGMLJP2Box != nullptr && bJPXOption)
@@ -1019,7 +1019,7 @@ GDALDataset * JP2LuraDataset::CreateCopy(const char * pszFilename,
             if (!bSamePrecision)
             {
                 bpccBox.SetType("bpcc");
-                bpccBox.AppendUInt8((1-1) | 0x80);
+                bpccBox.AppendUInt8(0x80);
                 bpccBox.AppendUInt8(8-1);
                 bpccBox.AppendUInt8(23-1);
             }
@@ -2538,7 +2538,7 @@ void GDALRegister_JP2Lura()
 "       <Value alias='J2K'>Codestream</Value>"
 "   </Option>"
 "   <Option name='JPX' type='boolean' description="
-        "'Whether to advertize JPX features when a GMLJP2 box is written "
+        "'Whether to advertise JPX features when a GMLJP2 box is written "
         "(or use JPX branding if GMLJP2 v2)' default='YES'/>"
 "   <Option name='GeoJP2' type='boolean' description="
                         "'Whether to emit a GeoJP2 box' default='NO'/>"

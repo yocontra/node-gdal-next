@@ -45,7 +45,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: mrf_util.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: mrf_util.cpp 81d88451b89a7cb8e02020005eb322b0cdaff4de 2020-08-10 08:52:54 -0700 Lucian Plesea $")
 
 // LERC is not ready for big endian hosts for now
 #if defined(LERC) && defined(WORDS_BIGENDIAN)
@@ -199,7 +199,7 @@ ILImage::ILImage() :
     pagecount(pcount(size, pagesize)),
     comp(IL_PNG),
     order(IL_Interleaved),
-    nbo(0),
+    nbo(false),
     hasNoData(FALSE),
     NoDataValue(0.0),
     dt(GDT_Unknown),
@@ -294,10 +294,10 @@ bool is_Endianess_Dependent(GDALDataType dt, ILCompression comp) {
     return false;
 }
 
-GDALMRFRasterBand *newMRFRasterBand(GDALMRFDataset *pDS, const ILImage &image, int b, int level)
+MRFRasterBand *newMRFRasterBand(MRFDataset *pDS, const ILImage &image, int b, int level)
 
 {
-    GDALMRFRasterBand *bnd = nullptr;
+    MRFRasterBand *bnd = nullptr;
     CPLErrorReset();
     switch(pDS->current.comp)
     {
@@ -655,10 +655,10 @@ void GDALRegister_mrf()
       "</OpenOptionList>"
       );
 
-    driver->pfnOpen = GDALMRFDataset::Open;
-    driver->pfnIdentify = GDALMRFDataset::Identify;
-    driver->pfnCreateCopy = GDALMRFDataset::CreateCopy;
-    driver->pfnCreate = GDALMRFDataset::Create;
-    driver->pfnDelete = GDALMRFDataset::Delete;
+    driver->pfnOpen = MRFDataset::Open;
+    driver->pfnIdentify = MRFDataset::Identify;
+    driver->pfnCreateCopy = MRFDataset::CreateCopy;
+    driver->pfnCreate = MRFDataset::Create;
+    driver->pfnDelete = MRFDataset::Delete;
     GetGDALDriverManager()->RegisterDriver(driver);
 }

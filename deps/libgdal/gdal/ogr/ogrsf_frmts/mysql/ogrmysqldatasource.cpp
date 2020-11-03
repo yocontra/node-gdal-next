@@ -34,7 +34,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrmysqldatasource.cpp d33d2ff27bc7fde2c005cc49cf973e60e989c7f4 2019-12-27 15:49:49 +0900 Hiroshi Miura $")
+CPL_CVSID("$Id: ogrmysqldatasource.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 /************************************************************************/
 /*                         OGRMySQLDataSource()                         */
 /************************************************************************/
@@ -697,11 +697,10 @@ int OGRMySQLDataSource::FetchSRSId( OGRSpatialReference * poSRS )
 /*      SRS ID.                                                         */
 /* -------------------------------------------------------------------- */
     CPLString osCommand;
-    int nAuthorityCode = 0;
     if( pszAuthorityName != nullptr )
     {
         /* Check that the authority code is integral */
-        nAuthorityCode = atoi( oSRS.GetAuthorityCode(nullptr) );
+        const int nAuthorityCode = atoi( oSRS.GetAuthorityCode(nullptr) );
         if( nAuthorityCode > 0 )
         {
             if( GetMajorVersion() < 8 || IsMariaDB() )

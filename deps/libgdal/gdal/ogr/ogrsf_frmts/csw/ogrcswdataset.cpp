@@ -33,7 +33,7 @@
 #include "ogr_p.h"
 #include "gmlutils.h"
 
-CPL_CVSID("$Id: ogrcswdataset.cpp 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcswdataset.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRCSW();
 
@@ -1059,7 +1059,7 @@ void RegisterOGRCSW()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "OGC CSW (Catalog  Service for the Web)" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_csw.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/csw.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "CSW:" );
 

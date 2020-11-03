@@ -33,7 +33,7 @@
 #include "cpl_string.h"
 #include <vector>
 
-CPL_CVSID("$Id: ogrgeomediadatasource.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeomediadatasource.cpp 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                       OGRGeomediaDataSource()                        */
@@ -111,42 +111,34 @@ int OGRGeomediaDataSource::Open( const char * pszNewName, int bUpdate,
 /*      get the DSN.                                                    */
 /*                                                                      */
 /* -------------------------------------------------------------------- */
-    char *pszDSN = nullptr;
     if( STARTS_WITH_CI(pszNewName, "GEOMEDIA:") )
-        pszDSN = CPLStrdup( pszNewName + 9 );
+    {
+        char *pszDSN = CPLStrdup( pszNewName + 9 );
+
+        CPLDebug( "Geomedia", "EstablishSession(%s)", pszDSN );
+        if( !oSession.EstablishSession( pszDSN, nullptr, nullptr ) )
+        {
+            CPLError( CE_Failure, CPLE_AppDefined,
+                      "Unable to initialize ODBC connection to DSN for %s,\n"
+                      "%s", pszDSN, oSession.GetLastError() );
+            CPLFree( pszDSN );
+            return FALSE;
+        }
+    }
     else
     {
-        const char *pszDSNStringTemplate = 
-            CPLGetConfigOption( "GEOMEDIA_DRIVER_TEMPLATE",
-                            "DRIVER=Microsoft Access Driver (*.mdb);DBQ=%s");
-        if (!CheckDSNStringTemplate(pszDSNStringTemplate))
+        const char* pszDSNStringTemplate = CPLGetConfigOption( "GEOMEDIA_DRIVER_TEMPLATE", nullptr );
+        if( pszDSNStringTemplate && !CheckDSNStringTemplate(pszDSNStringTemplate))
         {
             CPLError( CE_Failure, CPLE_AppDefined,
                       "Illegal value for GEOMEDIA_DRIVER_TEMPLATE option");
             return FALSE;
         }
-        pszDSN = (char *) CPLMalloc(strlen(pszNewName)+strlen(pszDSNStringTemplate)+100);
-        /* coverity[tainted_string] */
-        snprintf( pszDSN,
-                  strlen(pszNewName)+strlen(pszDSNStringTemplate)+100,
-                  pszDSNStringTemplate,  pszNewName );
+        if ( !oSession.ConnectToMsAccess( pszNewName, pszDSNStringTemplate ) )
+        {
+            return FALSE;
+        }
     }
-
-/* -------------------------------------------------------------------- */
-/*      Initialize based on the DSN.                                    */
-/* -------------------------------------------------------------------- */
-    CPLDebug( "Geomedia", "EstablishSession(%s)", pszDSN );
-
-    if( !oSession.EstablishSession( pszDSN, nullptr, nullptr ) )
-    {
-        CPLError( CE_Failure, CPLE_AppDefined,
-                  "Unable to initialize ODBC connection to DSN for %s,\n"
-                  "%s", pszDSN, oSession.GetLastError() );
-        CPLFree( pszDSN );
-        return FALSE;
-    }
-
-    CPLFree( pszDSN );
 
     pszName = CPLStrdup( pszNewName );
 

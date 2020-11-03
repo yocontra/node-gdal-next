@@ -51,7 +51,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: sentinel2dataset.cpp b846e11320355c1e9ba146b7f672f4ea597c704c 2020-04-16 12:25:02 +0300 an-ivanov $")
+CPL_CVSID("$Id: sentinel2dataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 CPL_C_START
 // TODO: Leave this declaration while Sentinel2 folks use this as a
@@ -1782,8 +1782,6 @@ GDALDataset *SENTINEL2Dataset::OpenL1BGranule( const char* pszFilename,
 
     SENTINEL2_CPLXMLNodeHolder oXMLHolder(psRoot);
     CPLStripXMLNamespace(psRoot, nullptr, TRUE);
-
-    CPLString osMainMTD(SENTINEL2GetMainMTDFilenameFromGranuleMTD(pszFilename));
 
     SENTINEL2DatasetContainer* poDS = new SENTINEL2DatasetContainer();
 

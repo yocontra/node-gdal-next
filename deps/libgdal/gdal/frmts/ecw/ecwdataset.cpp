@@ -38,13 +38,13 @@
 
 #include "../mem/memdataset.h"
 
-CPL_CVSID("$Id: ecwdataset.cpp 5eebbf721d5c84c8d68b27eaa295958671a4b3fd 2020-06-09 17:31:52 +0800 jbowman-hexagon $")
+CPL_CVSID("$Id: ecwdataset.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
 
 #undef NOISY_DEBUG
 
 #ifdef FRMT_ecw
 
-constexpr unsigned char jpc_header[] = {0xff,0x4f};
+constexpr unsigned char jpc_header[] = {0xff,0x4f,0xff,0x51}; // SOC + RSIZ markers
 constexpr unsigned char jp2_header[] =
     {0x00,0x00,0x00,0x0c,0x6a,0x50,0x20,0x20,0x0d,0x0a,0x87,0x0a};
 
@@ -2106,7 +2106,7 @@ CPLErr ECWDataset::IRasterIO( GDALRWFlag eRWFlag,
     {
         // This is tricky, because it expects the rest of the image
         // with this buffer width to be read. The preferred way to
-        // achieve this behaviour would be to call AdviseRead before
+        // achieve this behavior would be to call AdviseRead before
         // call IRasterIO.  The logic could be improved to detect
         // successive pattern of single line reading before doing an
         // AdviseRead.
@@ -3143,7 +3143,7 @@ void ECWDataset::ECW2WKTProjection()
 /* -------------------------------------------------------------------- */
     OGRSpatialReference oSRS;
 
-    /* For backward-compatible with previous behaviour. Should we only */
+    /* For backward-compatible with previous behavior. Should we only */
     /* restrict to those 2 values ? */
     if (psFileInfo->eCellSizeUnits != ECW_CELL_UNITS_METERS &&
         psFileInfo->eCellSizeUnits != ECW_CELL_UNITS_FEET)
@@ -3419,7 +3419,7 @@ void ECWInitialize()
     /*      Version 3.x and 4.x of the ECWJP2 SDK did not resolve datum and */
     /*      projection to EPSG code using internal mapping.                 */
     /*      Version 5.x do so we provide means to achieve old               */
-    /*      behaviour.                                                      */
+    /*      behavior.                                                      */
     /* -------------------------------------------------------------------- */
     #if ECWSDK_VERSION >= 50
     if( CPLTestBool( CPLGetConfigOption("ECW_DO_NOT_RESOLVE_DATUM_PROJECTION","NO") ) == TRUE)

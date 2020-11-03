@@ -29,7 +29,7 @@
 #include "ogr_arcgen.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ograrcgendriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ograrcgendriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRARCGEN();
 
@@ -118,7 +118,7 @@ void RegisterOGRARCGEN()
     poDriver->SetDescription( "ARCGEN" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Arc/Info Generate" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_arcgen.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/arcgen.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->pfnOpen = OGRARCGENDriverOpen;
 

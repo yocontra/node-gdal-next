@@ -59,7 +59,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: ogrcsvlayer.cpp 4dbc7d443508ffb1b9fee8027e4d9bc3b4d9d274 2019-10-26 23:13:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcsvlayer.cpp be0e7553d890b0ac876365f23b16d86de56a2aba 2020-10-03 23:21:47 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            CSVSplitLine()                            */
@@ -517,17 +517,22 @@ void OGRCSVLayer::BuildFeatureDefn( const char *pszNfdcGeomField,
     char **papszFieldTypes = nullptr;
     if( !bNew )
     {
-        char *dname = CPLStrdup(CPLGetDirname(pszFilename));
-        char *fname = CPLStrdup(CPLGetBasename(pszFilename));
-        VSILFILE *fpCSVT =
-            VSIFOpenL(CPLFormFilename(dname, fname, ".csvt"), "r");
-        CPLFree(dname);
-        CPLFree(fname);
-        if( fpCSVT != nullptr )
+        // Only try to read .csvt from files that have an extension
+        const char* pszExt = CPLGetExtension(pszFilename);
+        if( pszExt[0] )
         {
-            VSIRewindL(fpCSVT);
-            papszFieldTypes = OGRCSVReadParseLineL(fpCSVT, ',', false, false);
-            VSIFCloseL(fpCSVT);
+            char *dname = CPLStrdup(CPLGetDirname(pszFilename));
+            char *fname = CPLStrdup(CPLGetBasename(pszFilename));
+            VSILFILE *fpCSVT =
+                VSIFOpenL(CPLFormFilename(dname, fname, ".csvt"), "r");
+            CPLFree(dname);
+            CPLFree(fname);
+            if( fpCSVT != nullptr )
+            {
+                VSIRewindL(fpCSVT);
+                papszFieldTypes = OGRCSVReadParseLineL(fpCSVT, ',', false, false);
+                VSIFCloseL(fpCSVT);
+            }
         }
     }
 

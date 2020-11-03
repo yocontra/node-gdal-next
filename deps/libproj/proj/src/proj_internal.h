@@ -725,6 +725,7 @@ struct projCtx_t {
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
+    std::string ca_bundle_path{};
 
     std::string env_var_proj_lib{}; // content of PROJ_LIB environment variable. Use Filemanager::getProjLibEnvVar() to access
     std::vector<std::string> search_paths{};
@@ -734,22 +735,23 @@ struct projCtx_t {
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
-    projNetworkCallbacksAndData networking{};
-    bool defer_grid_opening = false; // set by pj_obj_create()
+    bool defer_grid_opening = false; // set transiently by pj_obj_create()
 
     projFileApiCallbackAndData fileApi{};
     std::string custom_sqlite3_vfs_name{};
+    std::string user_writable_directory{};
 
+    // BEGIN ini file settings
     bool iniFileLoaded = false;
     std::string endpoint{};
-
-    std::string user_writable_directory{};
+    projNetworkCallbacksAndData networking{};
     projGridChunkCache gridChunkCache{};
+    TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
+    // END ini file settings
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
     int pipelineInitRecursiongCounter = 0; // to avoid potential infinite recursion in pipeline.cpp
 
-    TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
 
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
@@ -757,7 +759,10 @@ struct projCtx_t {
 
     projCtx_t& operator= (const projCtx_t&) = delete;
 
+    projCppContext* get_cpp_context();
+    void safeAutoCloseDbIfNeeded();
     void set_search_paths(const std::vector<std::string>& search_paths_in);
+    void set_ca_bundle_path(const std::string& ca_bundle_path_in);
 
     static projCtx_t createDefault();
 };

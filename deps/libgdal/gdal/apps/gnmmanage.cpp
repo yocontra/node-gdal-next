@@ -38,7 +38,7 @@
 //#include "gnm.h"
 //#include "gnm_api.h"
 
-CPL_CVSID("$Id: gnmmanage.cpp 2dd182b498f0381aa3bc200928681dfbcf2ecfa6 2020-02-04 10:22:31 +0100 Enrico Weigelt, metux IT consult $")
+CPL_CVSID("$Id: gnmmanage.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 enum operation
 {
@@ -131,7 +131,7 @@ static void Usage(const char* pszAdditionalMsg, int bShort)
            "      -dsco NAME=VALUE: network creation option set as pair=value\n"
            "   import src_dataset_name: import external layer where src_dataset_name is a dataset name to copy from\n"
            "      -l layer_name: layer name in dataset. If unset, 0 layer is copied\n"
-           "   connect gfid_src gfid_tgt gfid_con: make a topological connection, where the gfid_src and gfid_tgt are vertexes and gfid_con is edge (gfid_con can be -1, so the virtual connection will be created)\n"
+           "   connect gfid_src gfid_tgt gfid_con: make a topological connection, where the gfid_src and gfid_tgt are vertices and gfid_con is edge (gfid_con can be -1, so the virtual connection will be created)\n"
            "      -c cost -ic inv_cost -dir dir: manually assign the following values: the cost (weight), inverse cost and direction of the edge (optional)\n"
            "   disconnect gfid_src gfid_tgt gfid_con: removes the connection from the graph\n"
            "   rule rule_str: creates a rule in the network by the given rule_str string\n"
@@ -535,28 +535,30 @@ MAIN_START(nArgc, papszArgv)
         {
             Usage( CPLSPrintf("%s driver not available", pszFormat) );
         }
-
-        char** papszMD = poDriver->GetMetadata();
-
-        if( !CPLFetchBool( papszMD, GDAL_DCAP_GNM, false ) )
-            Usage("not a GNM driver");
-
-        poDS = cpl::down_cast<GNMNetwork*>(poDriver->Create( pszPath, 0, 0, 0, GDT_Unknown,
-                                              papszDSCO ));
-
-        if (nullptr == poDS)
-        {
-            fprintf(stderr, "\nFAILURE: Failed to create network in a new dataset at "
-                    "%s and with driver %s\n", CPLFormFilename(pszPath,
-                    pszNetworkName, nullptr) ,pszFormat);
-            nRet = 1;
-        }
         else
         {
-            if (bQuiet == FALSE)
-                printf("\nNetwork created successfully in a "
-                   "new dataset at %s\n", CPLFormFilename(pszPath,
-                    pszNetworkName, nullptr));
+            char** papszMD = poDriver->GetMetadata();
+
+            if( !CPLFetchBool( papszMD, GDAL_DCAP_GNM, false ) )
+                Usage("not a GNM driver");
+
+            poDS = cpl::down_cast<GNMNetwork*>(poDriver->Create( pszPath, 0, 0, 0, GDT_Unknown,
+                                                papszDSCO ));
+
+            if (nullptr == poDS)
+            {
+                fprintf(stderr, "\nFAILURE: Failed to create network in a new dataset at "
+                        "%s and with driver %s\n", CPLFormFilename(pszPath,
+                        pszNetworkName, nullptr) ,pszFormat);
+                nRet = 1;
+            }
+            else
+            {
+                if (bQuiet == FALSE)
+                    printf("\nNetwork created successfully in a "
+                    "new dataset at %s\n", CPLFormFilename(pszPath,
+                        pszNetworkName, nullptr));
+            }
         }
     }
     else if(stOper == op_import)

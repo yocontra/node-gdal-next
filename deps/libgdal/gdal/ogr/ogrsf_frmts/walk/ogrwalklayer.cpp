@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrwalklayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrwalklayer.cpp bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRWalkLayer()                            */
@@ -184,27 +184,8 @@ void OGRWalkLayer::ResetReading()
 }
 
 /************************************************************************/
-/*                           GetNextFeature()                           */
+/*                         GetNextRawFeature()                          */
 /************************************************************************/
-
-OGRFeature *OGRWalkLayer::GetNextFeature()
-
-{
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-        if( poFeature == nullptr )
-            return nullptr;
-
-        if( (m_poFilterGeom == nullptr
-            || FilterGeometry( poFeature->GetGeometryRef() ) )
-            && (m_poAttrQuery == nullptr
-                || m_poAttrQuery->Evaluate( poFeature )) )
-            return poFeature;
-
-        delete poFeature;
-    }
-}
 
 OGRFeature *OGRWalkLayer::GetNextRawFeature()
 

@@ -35,7 +35,7 @@
 #include "cpl_multiproc.h"
 #include "ogrmutexeddatasource.h"
 
-CPL_CVSID("$Id: FGdbDriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: FGdbDriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRFileGDB();
 
@@ -814,7 +814,7 @@ void RegisterOGRFileGDB()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                 "ESRI FileGDB" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gdb" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_filegdb.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/filegdb.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
                                "<CreationOptionList/>" );

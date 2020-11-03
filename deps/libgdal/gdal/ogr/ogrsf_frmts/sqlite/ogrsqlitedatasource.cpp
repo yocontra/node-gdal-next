@@ -99,7 +99,7 @@ void GDALOpenInfoDeclareFileNotToOpen(const char* pszFilename,
 void GDALOpenInfoUnDeclareFileNotToOpen(const char* pszFilename);
 
 
-CPL_CVSID("$Id: ogrsqlitedatasource.cpp cad107b6efdc18ef6c094b0ad7f6333ebf6c4624 2020-04-02 13:10:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitedatasource.cpp c91c85854631084021f9a75fe6797fea2ac071c4 2020-09-21 15:20:58 +0200 Alessandro Pasotti $")
 
 /************************************************************************/
 /*                      OGRSQLiteInitOldSpatialite()                    */
@@ -944,6 +944,7 @@ void *OGRSQLiteBaseDataSource::GetInternalHandle( const char * pszKey )
     return nullptr;
 }
 
+
 /************************************************************************/
 /*                               Create()                               */
 /************************************************************************/
@@ -1425,7 +1426,7 @@ int OGRSQLiteDataSource::Open( GDALOpenInfo* poOpenInfo)
                 if( STARTS_WITH(pszLine, "--") )
                     continue;
 
-                // Blacklist a few words tat might have security implications
+                // Reject a few words tat might have security implications
                 // Basically we just want to allow CREATE TABLE and INSERT INTO
                 if( CPLString(pszLine).ifind("ATTACH") != std::string::npos ||
                     CPLString(pszLine).ifind("DETACH") != std::string::npos ||
@@ -1537,6 +1538,13 @@ int OGRSQLiteDataSource::Open( GDALOpenInfo* poOpenInfo)
         return OpenRasterSubDataset( pszNewName );
     }
 #endif
+
+    const char* pszPreludeStatements = CSLFetchNameValue(papszOpenOptions, "PRELUDE_STATEMENTS");
+    if( pszPreludeStatements )
+    {
+        if( SQLCommand(hDB, pszPreludeStatements) != OGRERR_NONE )
+            return FALSE;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      If we have a GEOMETRY_COLUMNS tables, initialize on the basis   */
@@ -3773,4 +3781,14 @@ void OGRSQLiteBaseDataSource::SetEnvelopeForSQL(const CPLString& osSQL,
                                             const OGREnvelope& oEnvelope)
 {
     oMapSQLEnvelope[osSQL] = oEnvelope;
+}
+
+/************************************************************************/
+/*                         AbortSQL()                                   */
+/************************************************************************/
+
+OGRErr OGRSQLiteBaseDataSource::AbortSQL()
+{
+    sqlite3_interrupt( hDB );
+    return OGRERR_NONE;
 }

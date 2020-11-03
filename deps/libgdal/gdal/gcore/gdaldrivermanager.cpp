@@ -45,6 +45,7 @@
 #include "gdal.h"
 #include "gdal_pam.h"
 #include "gdal_version.h"
+#include "gdal_thread_pool.h"
 #include "ogr_srs_api.h"
 #include "ograpispy.h"
 #ifdef HAVE_XERCES
@@ -61,7 +62,7 @@
 // FIXME: Disabled following code as it crashed on OSX CI test.
 // #include <mutex>
 
-CPL_CVSID("$Id: gdaldrivermanager.cpp 7cf5b3a5f04481d17143138fd736e7eb9d757603 2019-11-16 00:04:12 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdaldrivermanager.cpp 9771b16ddd8d2e577e1875984b0737b220964b99 2020-05-21 11:31:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -220,9 +221,9 @@ GDALDriverManager::~GDALDriverManager()
         delete poDriver;
     }
 
-    delete GDALGetAPIPROXYDriver();
-
     CleanupPythonDrivers();
+
+    GDALDestroyGlobalThreadPool();
 
 /* -------------------------------------------------------------------- */
 /*      Cleanup local memory.                                           */

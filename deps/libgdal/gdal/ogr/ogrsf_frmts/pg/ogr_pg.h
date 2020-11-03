@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pg.h 1210bf06cd5fb2b2b574ebf5f4a1cca0df7b3c64 2020-04-03 12:37:25 +0200 Even Rouault $
+ * $Id: ogr_pg.h c91c85854631084021f9a75fe6797fea2ac071c4 2020-09-21 15:20:58 +0200 Alessandro Pasotti $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL driver.
@@ -37,6 +37,8 @@
 
 #include "ogrpgutility.h"
 #include "ogr_pgdump.h"
+
+#include <vector>
 
 /* These are the OIDs for some builtin types, as returned by PQftype(). */
 /* They were copied from pg_type.h in src/include/catalog/pg_type.h */
@@ -309,6 +311,8 @@ class OGRPGTableLayer final: public OGRPGLayer
 
     CPLString           m_osFirstGeometryFieldName;
 
+    std::vector<bool>   m_abGeneratedColumns{};
+
     virtual CPLString   GetFromClauseForGetExtent() override { return pszSqlTableName; }
 
     OGRErr              RunAddGeometryColumn( OGRPGGeomFieldDefn *poGeomField );
@@ -560,6 +564,7 @@ class OGRPGDataSource final: public OGRDataSource
     virtual OGRLayer *  ExecuteSQL( const char *pszSQLCommand,
                                     OGRGeometry *poSpatialFilter,
                                     const char *pszDialect ) override;
+    virtual OGRErr      AbortSQL() override;
     virtual void        ReleaseResultSet( OGRLayer * poLayer ) override;
 
     virtual const char* GetMetadataItem(const char* pszKey,

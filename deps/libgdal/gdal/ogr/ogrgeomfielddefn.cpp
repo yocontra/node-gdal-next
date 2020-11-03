@@ -40,7 +40,7 @@
 #include "ogr_srs_api.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrgeomfielddefn.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeomfielddefn.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRGeomFieldDefn()                           */
@@ -613,7 +613,7 @@ int OGR_GFld_IsNullable( OGRGeomFieldDefnH hDefn )
  * By default, fields are nullable, so this method is generally called with
  * FALSE to set a not-null constraint.
  *
- * Drivers that support writing not-null constraint will advertize the
+ * Drivers that support writing not-null constraint will advertise the
  * GDAL_DCAP_NOTNULL_GEOMFIELDS driver metadata item.
  *
  * This method is the same as the C function OGR_GFld_SetNullable().
@@ -632,7 +632,7 @@ int OGR_GFld_IsNullable( OGRGeomFieldDefnH hDefn )
  * By default, fields are nullable, so this method is generally called with
  * FALSE to set a not-null constraint.
  *
- * Drivers that support writing not-null constraint will advertize the
+ * Drivers that support writing not-null constraint will advertise the
  * GDAL_DCAP_NOTNULL_GEOMFIELDS driver metadata item.
  *
  * This method is the same as the C++ method OGRGeomFieldDefn::SetNullable().

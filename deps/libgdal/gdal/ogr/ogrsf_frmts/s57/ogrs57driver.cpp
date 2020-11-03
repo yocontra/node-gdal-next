@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrs57driver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrs57driver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 S57ClassRegistrar *OGRS57Driver::poRegistrar = nullptr;
 static CPLMutex* hS57RegistrarMutex = nullptr;
@@ -172,7 +172,7 @@ void RegisterOGRS57()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "IHO S-57 (ENC)" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "000" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_s57.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/s57.html" );
 
     poDriver->SetMetadataItem(
         GDAL_DMD_OPENOPTIONLIST,
@@ -188,6 +188,7 @@ void RegisterOGRS57()
         "  <Option name='" S57O_LNAM_REFS "' type='boolean' description='Should LNAM and LNAM_REFS fields be attached to features capturing the feature to feature relationships in the FFPT group of the S-57 file' default='YES'/>"
         "  <Option name='" S57O_RETURN_LINKAGES "' type='boolean' description='Should additional attributes relating features to their underlying geometric primitives be attached' default='NO'/>"
         "  <Option name='" S57O_RECODE_BY_DSSI "' type='boolean' description='Should attribute values be recoded to UTF-8 from the character encoding specified in the S57 DSSI record.' default='NO'/>"
+        "  <Option name='" S57O_LIST_AS_STRING "' type='boolean' description='Whether attributes tagged as list in S57 dictionaries should be reported as a String field' default='NO'/>"
         "</OpenOptionList>");
     poDriver->SetMetadataItem(
         GDAL_DMD_CREATIONOPTIONLIST,

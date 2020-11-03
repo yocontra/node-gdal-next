@@ -48,7 +48,7 @@
 #include "cpl_error.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: cpl_virtualmem.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_virtualmem.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 #ifdef NDEBUG
 // Non NDEBUG: Ignore the result.
@@ -400,7 +400,10 @@ CPLVirtualMem* CPLVirtualMemNew( size_t nSize,
     CPLVirtualMemVMA* ctxt = static_cast<CPLVirtualMemVMA *>(
         VSI_CALLOC_VERBOSE(1, sizeof(CPLVirtualMemVMA)));
     if( ctxt == nullptr )
+    {
+        munmap(pData, nRoundedMappingSize);
         return nullptr;
+    }
     ctxt->sBase.nRefCount = 1;
     ctxt->sBase.eType = VIRTUAL_MEM_TYPE_VMA;
     ctxt->sBase.eAccessMode = eAccessMode;
@@ -679,6 +682,7 @@ void CPLVirtualMemAddPage( CPLVirtualMemVMA* ctxt, void* target_addr,
         const void * const pRet = mmap(addr, ctxt->sBase.nPageSize, PROT_NONE,
                     MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         IGNORE_OR_ASSERT_IN_DEBUG(pRet == addr);
+        // cppcheck-suppress memleak
     }
     ctxt->panLRUPageIndices[ctxt->iLRUStart] = iPage;
     ctxt->iLRUStart = (ctxt->iLRUStart + 1) % ctxt->nCacheMaxSizeInPages;
@@ -815,6 +819,7 @@ void CPLVirtualMemAddPage( CPLVirtualMemVMA* ctxt, void* target_addr,
         CPLReleaseMutex(ctxt->hMutexThreadArray);
 #endif
     }
+    // cppcheck-suppress memleak
 }
 
 /************************************************************************/

@@ -31,7 +31,7 @@
 #include "cpl_time.h"
 #include <map>
 
-CPL_CVSID("$Id: ogrvdvdatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrvdvdatasource.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 #ifndef STARTS_WITH_CI
 #define STARTS_WITH(a,b)               (strncmp(a,b,strlen(b)) == 0)
@@ -248,7 +248,7 @@ void OGRIDFDataSource::Parse()
     std::map<GIntBig, OGRLineString*> oMapLinkCoordinate; // map from LINK_ID to OGRLineString*
     CPLString osTablename, osAtr, osFrm;
     int iX = -1, iY = -1, iZ = -1;
-    bool bAdvertizeUTF8 = false;
+    bool bAdvertiseUTF8 = false;
     bool bRecodeFromLatin1 = false;
     int iNodeID = -1;
     int iLinkID = -1;
@@ -278,7 +278,7 @@ void OGRIDFDataSource::Parse()
 
         if( strcmp(pszLine, "chs;ISO_LATIN_1") == 0)
         {
-            bAdvertizeUTF8 = true;
+            bAdvertiseUTF8 = true;
             bRecodeFromLatin1 = true;
         }
         else if( STARTS_WITH(pszLine, "tbl;") )
@@ -309,7 +309,7 @@ void OGRIDFDataSource::Parse()
                 char** papszFrm = CSLTokenizeString2(osFrm,";",
                         CSLT_ALLOWEMPTYTOKENS|CSLT_STRIPLEADSPACES|CSLT_STRIPENDSPACES);
                 char* apszOptions[2] = { nullptr, nullptr };
-                if( bAdvertizeUTF8 && !bGPKG )
+                if( bAdvertiseUTF8 && !bGPKG )
                     apszOptions[0] = (char*)"ADVERTIZE_UTF8=YES";
                 else if( bGPKG && !bSpatialIndex )
                     apszOptions[0] = (char*)"SPATIAL_INDEX=NO";
@@ -2000,7 +2000,7 @@ void RegisterOGRVDV()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "VDV-451/VDV-452/INTREST Data Format" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_vdv.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/vdv.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "txt x10");
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES,

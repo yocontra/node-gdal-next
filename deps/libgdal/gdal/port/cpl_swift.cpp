@@ -37,7 +37,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_swift.cpp cef9fa9877a239d07b4aa8fa9aa3ae2d8b10b439 2020-03-10 20:09:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_swift.cpp 445f08141d6744557b1cd658d3989a97db5b8f27 2020-09-23 14:07:18 +0200 Even Rouault $")
 
 #ifdef HAVE_CURL
 
@@ -315,6 +315,7 @@ bool VSISwiftHandleHelper::AuthV3(CPLString& osStorageURL,
     CPLJSONObject postObject(CreateAuthV3RequestObject());
     std::string post = postObject.Format(CPLJSONObject::PrettyFormat::Plain);
 
+    // coverity[tainted_data]
     CPLString osAuthURL = CPLGetConfigOption("OS_AUTH_URL", "");
     std::string url = osAuthURL;
     if( !url.empty() && url.back() != '/' )

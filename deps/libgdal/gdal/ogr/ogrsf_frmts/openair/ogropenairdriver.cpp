@@ -30,7 +30,7 @@
 #include "ogr_openair.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogropenairdriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogropenairdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -118,7 +118,7 @@ void RegisterOGROpenAir()
     poDriver->SetDescription( "OpenAir" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "OpenAir" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_openair.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/openair.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_FEATURE_STYLES, "YES" );
 

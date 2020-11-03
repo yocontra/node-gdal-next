@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: hf2dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: hf2dataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -390,7 +390,7 @@ int HF2Dataset::Identify( GDALOpenInfo * poOpenInfo)
     GDALOpenInfo* poOpenInfoToDelete = nullptr;
     /*  GZipped .hf2 files are common, so automagically open them */
     /*  if the /vsigzip/ has not been explicitly passed */
-    CPLString osFilename(poOpenInfo->pszFilename);
+    CPLString osFilename; // keep in that scope
     if ((EQUAL(CPLGetExtension(poOpenInfo->pszFilename), "hfz") ||
         (strlen(poOpenInfo->pszFilename) > 6 &&
          EQUAL(poOpenInfo->pszFilename + strlen(poOpenInfo->pszFilename) - 6, "hf2.gz"))) &&

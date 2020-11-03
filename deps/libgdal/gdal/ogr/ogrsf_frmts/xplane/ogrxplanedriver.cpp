@@ -29,7 +29,7 @@
 #include "ogr_xplane.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrxplanedriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrxplanedriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              GetName()                               */
@@ -91,7 +91,7 @@ void RegisterOGRXPlane()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "X-Plane/Flightgear aeronautical data" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "dat" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_xplane.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/xplane.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver( poDriver );

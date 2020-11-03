@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vrtmultidim.cpp 791996ba42bb1936bcbc963840999355ce8000f8 2020-02-13 22:21:19 +0100 Even Rouault $
+ * $Id: vrtmultidim.cpp bf186edbcc2679a0120a774a8a184ad6b34bea7f 2020-08-12 11:08:32 +0200 Even Rouault $
  *
  * Name:     vrtmultidim.cpp
  * Purpose:  Implementation of VRTDriver
@@ -454,7 +454,7 @@ std::shared_ptr<GDALGroup> VRTGroup::CreateGroup(const std::string& osName,
     if( m_oMapGroups.find(osName) != m_oMapGroups.end() )
     {
         CPLError(CE_Failure, CPLE_AppDefined,
-                 "A group with same name already exists");
+                 "A group with same name (%s) already exists", osName.c_str());
         return nullptr;
     }
     SetDirty();
@@ -483,7 +483,7 @@ std::shared_ptr<GDALDimension> VRTGroup::CreateDimension(const std::string& osNa
     if( m_oMapDimensions.find(osName) != m_oMapDimensions.end() )
     {
         CPLError(CE_Failure, CPLE_AppDefined,
-                 "A dimension with same name already exists");
+                 "A dimension with same name (%s) already exists", osName.c_str());
         return nullptr;
     }
     SetDirty();
@@ -535,7 +535,7 @@ std::shared_ptr<GDALMDArray> VRTGroup::CreateMDArray(const std::string& osName,
     if( m_oMapMDArrays.find(osName) != m_oMapMDArrays.end() )
     {
         CPLError(CE_Failure, CPLE_AppDefined,
-                 "An array with same name already exists");
+                 "An array with same name (%s) already exists", osName.c_str());
         return nullptr;
     }
     for( auto& poDim: aoDimensions )
@@ -753,7 +753,7 @@ bool VRTAttribute::CreationCommonChecks(const std::string& osName,
     if( oMapAttributes.find(osName) != oMapAttributes.end() )
     {
         CPLError(CE_Failure, CPLE_AppDefined,
-                 "An attribute with same name already exists");
+                 "An attribute with same name (%s) already exists", osName.c_str());
         return false;
     }
     if( anDimensions.size() >= 2 )

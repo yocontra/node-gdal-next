@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogringreslayer.cpp 22f8ae3bf7bc3cccd970992655c63fc5254d3206 2018-04-08 20:13:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogringreslayer.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRIngresLayer()                            */
@@ -188,7 +188,7 @@ OGRGeometry *OGRIngresLayer::TranslateGeometry( const char *pszGeom )
 
         if( *pszNext == ')' )
         {
-            pszNext++;
+            //pszNext++;
             CPLAssert( nDepth == 1 );
             nDepth--;
             break;
@@ -225,6 +225,7 @@ OGRGeometry *OGRIngresLayer::TranslateGeometry( const char *pszGeom )
             pszNext++;
     }
 
+    (void)nDepth;
     CPLAssert( nDepth == 0 );
 
 /* -------------------------------------------------------------------- */

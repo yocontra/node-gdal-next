@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpgeolayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeolayer.cpp 085d851ca29ce323a5556449611935a5852cc9dc 2020-08-20 14:13:35 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                            OGRPGeoLayer()                            */
@@ -168,6 +168,7 @@ CPLErr OGRPGeoLayer::BuildFeatureDefn( const char *pszLayerName,
             break;
 
           case SQL_C_TIMESTAMP:
+          case SQL_C_TYPE_TIMESTAMP:
             oField.SetType( OFTDateTime );
             break;
 

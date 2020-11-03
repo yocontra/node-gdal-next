@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_expat.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogr_expat.h 960e631de2d440c518307009ab6ac3cd599fd709 2020-06-02 11:51:16 +0200 Yorick de Wid $
  *
  * Project:  OGR
  * Purpose:  Convenience function for parsing with Expat library
@@ -35,6 +35,8 @@
 #include "cpl_port.h"
 #include <expat.h>
 
+#include <memory>
+
 /* Compatibility stuff for expat >= 1.95.0 and < 1.95.7 */
 #ifndef XMLCALL
 #define XMLCALL
@@ -52,6 +54,20 @@
 
 /* Only for internal use ! */
 XML_Parser CPL_DLL OGRCreateExpatXMLParser(void);
+
+//
+//! @cond Doxygen_Suppress
+struct CPL_DLL OGRExpatUniquePtrDeleter
+{
+    void operator()(XML_Parser oParser) const
+        { XML_ParserFree(oParser); }
+};
+//! @endcond
+
+/** Unique pointer type for XML_Parser.
+ * @since GDAL 3.2
+ */
+using OGRExpatUniquePtr = std::unique_ptr<XML_ParserStruct, OGRExpatUniquePtrDeleter>;
 
 #endif /* HAVE_EXPAT */
 

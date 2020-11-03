@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrxlsxdatasource.cpp dd7780434ad6b6fcf185468f679c8ba1671926ee 2020-06-21 19:26:17 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrxlsxdatasource.cpp 255f08f93b70e23643aca62af61448f9295c67a8 2020-09-13 00:01:20 +0200 Even Rouault $")
 
 namespace OGRXLSX {
 
@@ -2296,6 +2296,8 @@ void OGRXLSXDataSource::FlushCache()
             return;
         }
     }
+
+    CPLConfigOptionSetter oZip64Disable("CPL_CREATE_ZIP64", "NO", false);
 
     /* Maintain new ZIP files opened */
     CPLString osTmpFilename(CPLSPrintf("/vsizip/%s", pszName));

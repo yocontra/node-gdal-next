@@ -19,7 +19,7 @@
 */
 
 #include "marfa.h"
-CPL_CVSID("$Id: JPNG_band.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: JPNG_band.cpp 81d88451b89a7cb8e02020005eb322b0cdaff4de 2020-08-10 08:52:54 -0700 Lucian Plesea $")
 
 CPL_C_START
 #include <jpeglib.h>
@@ -184,9 +184,9 @@ CPLErr JPNG_Band::Compress(buf_mgr &dst, buf_mgr &src)
 * The presence of the PNGColors and PNGAlpha is used as a flag for PPNG only
 */
 
-JPNG_Band::JPNG_Band( GDALMRFDataset *pDS, const ILImage &image,
+JPNG_Band::JPNG_Band( MRFDataset *pDS, const ILImage &image,
                       int b, int level ) :
-    GDALMRFRasterBand(pDS, image, b, level),
+    MRFRasterBand(pDS, image, b, level),
     rgb(FALSE),
     sameres(FALSE),
     optimize(false)

@@ -47,7 +47,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsil_cache.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_cache.cpp 8f8b78f53eb60d2032946126b661ebd362f21536 2020-10-03 23:19:54 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -412,7 +412,9 @@ int VSICachedFile::LoadBlocks( vsi_l_offset nStartBlock, size_t nBlockCount,
 size_t VSICachedFile::Read( void * pBuffer, size_t nSize, size_t nCount )
 
 {
-    if( nOffset >= nFileSize )
+    // nFileSize might be set wrongly to 0 by underlying layers, such as
+    // /vsicurl_streaming/https://query.data.world/s/jgsghstpphjhicstradhy5kpjwrnfy
+    if( nFileSize > 0 && nOffset >= nFileSize )
     {
         bEOF = true;
         return 0;

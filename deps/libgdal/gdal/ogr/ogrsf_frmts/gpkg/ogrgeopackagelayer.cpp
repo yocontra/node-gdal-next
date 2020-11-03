@@ -32,7 +32,7 @@
 #include "ogrsqliteutility.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrgeopackagelayer.cpp 9917ae7d7d11f9d2ba0438853ca81298d803c6fa 2020-01-22 00:58:48 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeopackagelayer.cpp 61d987943110d648f8c231783559e48a08303ff3 2020-10-17 20:56:24 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRGeoPackageLayer()                            */
@@ -77,6 +77,7 @@ void OGRGeoPackageLayer::ResetReading()
 {
     ClearStatement();
     iNextShapeId = 0;
+    m_bEOF = false;
 }
 
 /************************************************************************/
@@ -101,15 +102,18 @@ void OGRGeoPackageLayer::ClearStatement()
 OGRFeature *OGRGeoPackageLayer::GetNextFeature()
 
 {
+    if( m_bEOF )
+        return nullptr;
+
+    if( m_poQueryStatement == nullptr )
+    {
+        ResetStatement();
+        if (m_poQueryStatement == nullptr)
+            return nullptr;
+    }
+
     for( ; true; )
     {
-        if( m_poQueryStatement == nullptr )
-        {
-            ResetStatement();
-            if (m_poQueryStatement == nullptr)
-                return nullptr;
-        }
-
     /* -------------------------------------------------------------------- */
     /*      Fetch a record (unless otherwise instructed)                    */
     /* -------------------------------------------------------------------- */
@@ -127,6 +131,7 @@ OGRFeature *OGRGeoPackageLayer::GetNextFeature()
                 }
 
                 ClearStatement();
+                m_bEOF = true;
 
                 return nullptr;
             }
@@ -572,7 +577,7 @@ void OGRGeoPackageLayer::BuildFeatureDefn( const char *pszLayerName,
 
                     /* Read the SRS */
                     OGRSpatialReference *poSRS =
-                                        m_poDS->GetSpatialRef(nSRID);
+                                        m_poDS->GetSpatialRef(nSRID, true);
                     if ( poSRS )
                     {
                         oGeomField.SetSpatialRef(poSRS);

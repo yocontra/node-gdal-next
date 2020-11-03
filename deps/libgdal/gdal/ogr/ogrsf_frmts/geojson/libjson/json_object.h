@@ -50,6 +50,11 @@ extern "C" {
  */
 #define JSON_C_TO_STRING_NOZERO     (1<<2)
 
+/**
+ * Don't escape forward slashes.
+ */
+#define JSON_C_TO_STRING_NOSLASHESCAPE (1 << 4)
+
 #undef FALSE
 #define FALSE ((json_bool)0)
 
@@ -177,7 +182,7 @@ flags);
  * user_delete function is called before the new one is set.
  *
  * If to_string_func is NULL, the other parameters are ignored
- * and the default behaviour is reset.
+ * and the default behavior is reset.
  *
  * The userdata parameter is optional and may be passed as NULL.  If provided,
  * it is passed to to_string_func as-is.  This parameter may be NULL even

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: avc_e00read.cpp 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $
+ * $Id: avc_e00read.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $
  *
  * Name:     avc_e00read.c
  * Project:  Arc/Info vector coverage (AVC)  BIN->E00 conversion library
@@ -972,7 +972,7 @@ static void *_AVCE00ReadNextLineE00(AVCE00ReadE00Ptr psRead,
 static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
                                      char **papszCoverDir)
 {
-    int         iSect, iTable, numTables, iFile, nLen;
+    int         iTable, numTables, iFile, nLen;
     char      **papszTables, **papszFiles, szCWD[75]="", *pcTmp;
     char       *pszEXPPath=nullptr;
     int         nCoverPrecision = AVC_DEFAULT_PREC;
@@ -1024,10 +1024,12 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
     /*-----------------------------------------------------------------
      * EXP Header
      *----------------------------------------------------------------*/
-    iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+    {
+    const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                   &(psInfo->numSections), 1);
     psInfo->pasSections[iSect].eType = AVCFileUnknown;
     psInfo->pasSections[iSect].pszName = pszEXPPath;
+    }
 
     /*-----------------------------------------------------------------
      * We have to try to open each file as we go for 2 reasons:
@@ -1050,7 +1052,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
         if (nCoverPrecision == AVC_DEFAULT_PREC)
             nCoverPrecision = psFile->nPrecision;
         AVCBinReadClose(psFile);
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFileARC;
@@ -1071,7 +1073,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
         if (nCoverPrecision == AVC_DEFAULT_PREC)
             nCoverPrecision = psFile->nPrecision;
         AVCBinReadClose(psFile);
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFileCNT;
@@ -1092,7 +1094,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
         if (nCoverPrecision == AVC_DEFAULT_PREC)
             nCoverPrecision = psFile->nPrecision;
         AVCBinReadClose(psFile);
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFileLAB;
@@ -1113,7 +1115,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
         if (nCoverPrecision == AVC_DEFAULT_PREC)
             nCoverPrecision = psFile->nPrecision;
         AVCBinReadClose(psFile);
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFilePAL;
@@ -1134,7 +1136,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
         if (nCoverPrecision == AVC_DEFAULT_PREC)
             nCoverPrecision = psFile->nPrecision;
         AVCBinReadClose(psFile);
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFileTOL;
@@ -1152,7 +1154,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
         if (nCoverPrecision == AVC_DEFAULT_PREC)
             nCoverPrecision = psFile->nPrecision;
         AVCBinReadClose(psFile);
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFileTOL;
@@ -1173,7 +1175,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
         if (nCoverPrecision == AVC_DEFAULT_PREC)
             nCoverPrecision = psFile->nPrecision;
         AVCBinReadClose(psFile);
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFileTXT;
@@ -1213,7 +1215,8 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
     /*-----------------------------------------------------------------
      * SIN  2/3 and EOX lines ... ???
      *----------------------------------------------------------------*/
-    iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+    {
+    int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                   &(psInfo->numSections), 2);
     psInfo->pasSections[iSect].eType = AVCFileUnknown;
     psInfo->pasSections[iSect].pszName = CPLStrdup("SIN  X");
@@ -1221,7 +1224,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
     iSect++;
     psInfo->pasSections[iSect].eType = AVCFileUnknown;
     psInfo->pasSections[iSect].pszName = CPLStrdup("EOX");
-    iSect++;
+    }
 
     /*-----------------------------------------------------------------
      * LOG section (log.adf) (ends with EOL)
@@ -1234,7 +1237,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
                psInfo->eCoverType==AVCCoverPC2 ) ? "prj.adf": "prj";
     if ( (iFile=CSLFindString(papszCoverDir, szFname)) != -1 )
     {
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), 1);
 
         psInfo->pasSections[iSect].eType = AVCFilePRJ;
@@ -1312,7 +1315,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
 
     if (papszTables != nullptr && (numTables = CSLCount(papszTables)) > 0)
     {
-        iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+        int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                       &(psInfo->numSections), numTables+2);
 
         psInfo->pasSections[iSect].eType = AVCFileUnknown;
@@ -1334,7 +1337,6 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
 
         psInfo->pasSections[iSect].eType = AVCFileUnknown;
         psInfo->pasSections[iSect].pszName = CPLStrdup("EOI");
-        iSect++;
 
     }
     CSLDestroy(papszTables);
@@ -1343,7 +1345,7 @@ static int _AVCE00ReadBuildSqueleton(AVCE00ReadPtr psInfo,
     /*-----------------------------------------------------------------
      * File ends with EOS
      *----------------------------------------------------------------*/
-    iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
+    const int iSect = _AVCIncreaseSectionsArray(&(psInfo->pasSections),
                                   &(psInfo->numSections), 1);
     psInfo->pasSections[iSect].eType = AVCFileUnknown;
     psInfo->pasSections[iSect].pszName = CPLStrdup("EOS");

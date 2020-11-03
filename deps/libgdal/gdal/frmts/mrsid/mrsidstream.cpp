@@ -35,9 +35,9 @@
 #include "cpl_error.h"
 #include "mrsidstream.h"
 
-CPL_CVSID("$Id: mrsidstream.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: mrsidstream.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
-LT_USE_NAMESPACE(LizardTech)
+using namespace LizardTech;
 
 /************************************************************************/
 /* ==================================================================== */

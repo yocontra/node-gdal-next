@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalpansharpen.h cde29aa7b4807045c418e469b59b60f92af59468 2019-02-18 15:49:24 +0100 Even Rouault $
+ * $Id: gdalpansharpen.h 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $
  *
  * Project:  GDAL Pansharpening module
  * Purpose:  Prototypes, and definitions for pansharpening related work.
@@ -60,7 +60,7 @@ typedef struct
     /*! Resampling algorithm to upsample spectral bands to pan band resolution. */
     GDALRIOResampleAlg   eResampleAlg;
 
-    /*! Bit depth of the spectral bands. Can be let to 0 for default behaviour. */
+    /*! Bit depth of the spectral bands. Can be let to 0 for default behavior. */
     int                  nBitDepth;
 
     /*! Number of weight coefficients in padfWeights. */
@@ -265,6 +265,7 @@ class GDALPansharpenOperation
                                                      size_t nBandValues,
                                                      T nMaxValue ) const;
 
+        // cppcheck-suppress functionStatic
         CPLErr PansharpenChunk( GDALDataType eWorkDataType, GDALDataType eBufDataType,
                                                      const void* pPanBuffer,
                                                      const void* pUpsampledSpectralBuffer,

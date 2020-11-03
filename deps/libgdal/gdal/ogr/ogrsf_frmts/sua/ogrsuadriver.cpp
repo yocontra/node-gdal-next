@@ -29,7 +29,7 @@
 #include "ogr_sua.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrsuadriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsuadriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRSUA();
 
@@ -115,8 +115,7 @@ void RegisterOGRSUA()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Tim Newport-Peace's Special Use Airspace "
                                "Format" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "drv_sua.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/sua.html" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrmysqllayer.cpp f6ca9e699ebaf802a3a75608dfadc5f5464aff44 2019-12-16 23:52:17 +0900 Hiroshi Miura $")
+CPL_CVSID("$Id: ogrmysqllayer.cpp f890db52002f641b0c01872720a7473aa7c6c0cf 2020-05-27 23:21:17 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRMySQLLayer()                            */
@@ -97,6 +97,7 @@ void OGRMySQLLayer::ResetReading()
 
         poDS->InterruptLongResult();
     }
+    m_bEOF = false;
 }
 
 /************************************************************************/
@@ -106,6 +107,8 @@ void OGRMySQLLayer::ResetReading()
 OGRFeature *OGRMySQLLayer::GetNextFeature()
 
 {
+    if( m_bEOF )
+        return nullptr;
 
     while( true )
     {
@@ -113,7 +116,10 @@ OGRFeature *OGRMySQLLayer::GetNextFeature()
 
         poFeature = GetNextRawFeature();
         if( poFeature == nullptr )
+        {
+            m_bEOF = true;
             return nullptr;
+        }
 
         if( (m_poFilterGeom == nullptr
             || FilterGeometry( poFeature->GetGeometryRef() ) )

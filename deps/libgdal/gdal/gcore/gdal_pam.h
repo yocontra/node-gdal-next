@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_pam.h 69f25f253d141faf836c400676f9f94dd3f43707 2019-07-12 18:42:23 +0200 Even Rouault $
+ * $Id: gdal_pam.h 2e6733101e6356653e8c999cb7fe808abc22ed11 2020-08-11 14:57:51 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Declaration for Peristable Auxiliary Metadata classes.
@@ -33,6 +33,7 @@
 //! @cond Doxygen_Suppress
 
 #include "gdal_priv.h"
+#include <map>
 
 class GDALPamRasterBand;
 
@@ -103,6 +104,17 @@ public:
     CPLString   osAuxFilename{};
 
     int         bHasMetadata = false;
+
+    struct Statistics
+    {
+        bool bApproxStats;
+        double dfMin;
+        double dfMax;
+        double dfMean;
+        double dfStdDev;
+        GUInt64 nValidCount;
+    };
+    std::map<CPLString, Statistics> oMapMDArrayStatistics{};
 };
 //! @endcond
 
@@ -139,6 +151,8 @@ class CPL_DLL GDALPamDataset : public GDALDataset
 
     CPLErr  TryLoadAux(char **papszSiblingFiles = nullptr);
     CPLErr  TrySaveAux();
+
+    void SerializeMDArrayStatistics(CPLXMLNode* psDSTree);
 
     virtual const char *BuildPamFilename();
 
@@ -180,6 +194,8 @@ class CPL_DLL GDALPamDataset : public GDALDataset
 
     char **GetFileList(void) override;
 
+    void ClearStatistics() override;
+
 //! @cond Doxygen_Suppress
     virtual CPLErr CloneInfo( GDALDataset *poSrcDS, int nCloneInfoFlags );
 
@@ -188,6 +204,18 @@ class CPL_DLL GDALPamDataset : public GDALDataset
                             int nListBands, int *panBandList,
                             GDALProgressFunc pfnProgress,
                             void * pProgressData ) override;
+
+    bool GetMDArrayStatistics( const char* pszMDArrayId,
+                               bool *pbApprox,
+                               double *pdfMin, double *pdfMax,
+                               double *pdfMean, double *pdfStdDev,
+                               GUInt64 *pnValidCount );
+
+    void StoreMDArrayStatistics( const char* pszMDArrayId,
+                                 bool bApprox,
+                                 double dfMin, double dfMax,
+                                 double dfMean, double dfStdDev,
+                                 GUInt64 nValidCount );
 
     // "semi private" methods.
     void   MarkPamDirty() { nPamFlags |= GPF_DIRTY; }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rmfdataset.h 8924c82185ab30883949ccf90d27b3d64310de70 2020-05-22 19:09:55 +0200 Even Rouault $
+ * $Id: rmfdataset.h f34ff8b29818d5b90b868a0bbc9c95b520f2b02f 2020-10-20 23:07:32 +0300 drons $
  *
  * Project:  Raster Matrix Format
  * Purpose:  Private class declarations for the RMF classes used to read/write
@@ -199,6 +199,7 @@ private:
     GUInt32         *paiTiles;
     GByte           *pabyDecompressBuffer;
     GByte           *pabyCurrentTile;
+    bool            bCurrentTileIsNull;
     int             nCurrentTileXOff;
     int             nCurrentTileYOff;
     GUInt32         nCurrentTileBytes;
@@ -321,7 +322,8 @@ private:
                                      GByte* pabyData, size_t nBytes);
     CPLErr              ReadTile(int nBlockXOff, int nBlockYOff,
                                  GByte* pabyData, size_t nBytes,
-                                 GUInt32 nRawXSize, GUInt32 nRawYSize);
+                                 GUInt32 nRawXSize, GUInt32 nRawYSize,
+                                 bool& bNullTile);
     void                SetupNBits();
 };
 

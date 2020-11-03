@@ -44,7 +44,7 @@ constexpr double NULL3 = -32768.0;
 #include <limits>
 #include <string>
 
-CPL_CVSID("$Id: vicardataset.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: vicardataset.cpp 4b48f00bfb8e044a6e494a31bda4be43608bcad4 2020-07-19 18:41:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     OGRVICARBinaryPrefixesLayer                      */
@@ -880,7 +880,7 @@ CPLErr VICARBASICRasterBand::IReadBlock( int /*nXBlock*/, int nYBlock, void *pIm
         VSIFReadL( &nSize, 1, sizeof(nSize), poGDS->fpImage);
         CPL_LSBPTR32(&nSize);
         if( (poGDS->m_eCompress == VICARDataset::COMPRESS_BASIC &&
-             nSize < sizeof(GUInt32)) ||
+             nSize <= sizeof(GUInt32)) ||
             (poGDS->m_eCompress == VICARDataset::COMPRESS_BASIC2 &&
              nSize == 0) )
         {
@@ -1238,7 +1238,7 @@ char **VICARDataset::GetMetadata( const char* pszDomain )
                 BuildLabel();
             }
             CPLAssert( m_oJSonLabel.IsValid() );
-            const CPLString osJson = m_oJSonLabel.Format(CPLJSONObject::Pretty);
+            const CPLString osJson = m_oJSonLabel.Format(CPLJSONObject::PrettyFormat::Pretty);
             m_aosVICARMD.InsertString(0, osJson.c_str());
         }
         return m_aosVICARMD.List();
@@ -1359,7 +1359,7 @@ static void WriteLabelItemValue(std::string& osLabel,
     }
     else
     {
-        osLabel += SerializeString(obj.Format(CPLJSONObject::Plain));
+        osLabel += SerializeString(obj.Format(CPLJSONObject::PrettyFormat::Plain));
     }
 }
 
@@ -1581,7 +1581,7 @@ static CPLJSONObject GetOrCreateJSONObject(CPLJSONObject &oParent,
                                            const std::string &osKey)
 {
     CPLJSONObject oChild = oParent[osKey];
-    if( oChild.IsValid() && oChild.GetType() != CPLJSONObject::Object )
+    if( oChild.IsValid() && oChild.GetType() != CPLJSONObject::Type::Object )
     {
         oParent.Delete( osKey );
         oChild.Deinit();
@@ -1667,7 +1667,7 @@ void VICARDataset::BuildLabel()
     {
         auto oMap = oLabel.GetObj("PROPERTY/MAP");
         if( oMap.IsValid() &&
-            oMap.GetType() == CPLJSONObject::Object )
+            oMap.GetType() == CPLJSONObject::Type::Object )
         {
             if( !m_osTargetName.empty() )
                 oMap.Set( "TARGET_NAME", m_osTargetName );
@@ -2323,7 +2323,7 @@ GDALDataset *VICARDataset::Open( GDALOpenInfo * poOpenInfo )
         const int nRecords = poDS->nRasterYSize * nBands;
         try
         {
-            // + 1 to store implictly the size of the last record
+            // + 1 to store implicitly the size of the last record
             poDS->m_anRecordOffsets.resize( nRecords + 1 );
         }
         catch( const std::exception& e )
@@ -2725,7 +2725,7 @@ VICARDataset *VICARDataset::CreateInternal(const char* pszFilename,
         }
         try
         {
-            // + 1 to store implictly the size of the last record
+            // + 1 to store implicitly the size of the last record
             anRecordOffsets.resize( nYSize + 1 );
         }
         catch( const std::exception& e )

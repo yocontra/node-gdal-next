@@ -39,7 +39,7 @@
 #include "gdal_priv.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrshapedriver.cpp a7cdc486d524bef67fe59ab48bff81c8880be984 2019-06-22 19:30:01 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrshapedriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              Identify()                              */
@@ -333,7 +333,7 @@ void RegisterOGRShape()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ESRI Shapefile" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "shp" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "shp dbf shz shp.zip" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_shape.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/shapefile.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
 "<OpenOptionList>"
@@ -384,7 +384,7 @@ void RegisterOGRShape()
 "</LayerCreationOptionList>");
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES,
-                               "Integer Integer64 Real String Date DateTime" );
+                               "Integer Integer64 Real String Date" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRShapeDriverOpen;

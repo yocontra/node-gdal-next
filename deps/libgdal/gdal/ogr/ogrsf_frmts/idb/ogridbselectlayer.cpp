@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "ogr_idb.h"
 
-CPL_CVSID("$Id: ogridbselectlayer.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: ogridbselectlayer.cpp 417b66cdf50174fe8d59833c93710813f205d9ba 2020-08-30 12:18:19 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRIDBSelectLayer()                         */
@@ -45,12 +45,12 @@ OGRIDBSelectLayer::OGRIDBSelectLayer( OGRIDBDataSource *poDSIn,
 
     iNextShapeId = 0;
     nSRSId = -1;
-    poFeatureDefn = NULL;
+    poFeatureDefn = nullptr;
 
-    poCurr = poCurrIn;
+    m_poCurr = poCurrIn;
     pszBaseQuery = CPLStrdup( poCurrIn->Command() );
 
-    BuildFeatureDefn( "SELECT", poCurr );
+    BuildFeatureDefn( "SELECT", m_poCurr );
 }
 
 /************************************************************************/
@@ -70,10 +70,10 @@ OGRIDBSelectLayer::~OGRIDBSelectLayer()
 void OGRIDBSelectLayer::ClearQuery()
 
 {
-    if( poCurr != NULL )
+    if( m_poCurr != nullptr )
     {
-        delete poCurr;
-        poCurr = NULL;
+        delete m_poCurr;
+        m_poCurr = nullptr;
     }
 }
 
@@ -84,10 +84,10 @@ void OGRIDBSelectLayer::ClearQuery()
 ITCursor *OGRIDBSelectLayer::GetQuery()
 
 {
-    if( poCurr == NULL )
+    if( m_poCurr == nullptr )
         ResetQuery();
 
-    return poCurr;
+    return m_poCurr;
 }
 
 /************************************************************************/
@@ -102,15 +102,15 @@ OGRErr OGRIDBSelectLayer::ResetQuery()
     iNextShapeId = 0;
 
     CPLDebug( "OGR_IDB", "Recreating statement." );
-    poCurr = new ITCursor( *poDS->GetConnection() );
+    m_poCurr = new ITCursor( *poDS->GetConnection() );
 
-    if( poCurr->Prepare( pszBaseQuery ) &&
-        poCurr->Open( ITCursor::ReadOnly ) )
+    if( m_poCurr->Prepare( pszBaseQuery ) &&
+        m_poCurr->Open( ITCursor::ReadOnly ) )
         return OGRERR_NONE;
     else
     {
-        delete poCurr;
-        poCurr = NULL;
+        delete m_poCurr;
+        m_poCurr = nullptr;
         return OGRERR_FAILURE;
     }
 }

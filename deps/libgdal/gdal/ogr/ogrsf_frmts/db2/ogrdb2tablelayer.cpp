@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "ogr_db2.h"
 
-CPL_CVSID("$Id: ogrdb2tablelayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdb2tablelayer.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRDB2AppendEscaped( )                     */
@@ -39,7 +39,10 @@ void OGRDB2AppendEscaped( OGRDB2Statement* poStatement,
                           const char* pszStrValue)
 {
     if (!pszStrValue)
+    {
         poStatement->Append("null");
+        return;
+    }
 
     size_t  iIn, iOut , nTextLen = strlen(pszStrValue);
     char    *pszEscapedText = (char *) VSIMalloc(nTextLen*2 + 3);
@@ -490,7 +493,6 @@ void OGRDB2TableLayer::DropSpatialIndex()
 CPLString OGRDB2TableLayer::BuildFields()
 
 {
-    int i = 0;
     int nColumn = 0;
     CPLString osFieldList;
 
@@ -527,7 +529,7 @@ CPLString OGRDB2TableLayer::BuildFields()
         panFieldOrdinals = (int *) CPLMalloc( sizeof(int)
                                     * poFeatureDefn->GetFieldCount() );
 
-        for( i = 0; i < poFeatureDefn->GetFieldCount(); i++ )
+        for( int i = 0; i < poFeatureDefn->GetFieldCount(); i++ )
         {
             if ( poFeatureDefn->GetFieldDefn(i)->IsIgnored() )
                 continue;

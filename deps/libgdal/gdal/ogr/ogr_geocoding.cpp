@@ -86,7 +86,7 @@ int OGR_gettimeofday( struct timeval *tv, struct timezone * /* tzIgnored */ )
 #include <sys/time.h>
 #endif  // WIN32
 
-CPL_CVSID("$Id: ogr_geocoding.cpp e7a1f47c20721d288fcaa1a167bb823735e18c57 2019-08-15 15:38:50 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_geocoding.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
 
 struct _OGRGeocodingSessionHS
 {
@@ -244,7 +244,7 @@ bool OGRGeocodeHasStringValidFormat(const char* pszQueryTemplate)
  *
  * @param papszOptions NULL, or a NULL-terminated list of string options.
  *
- * @return an handle that should be freed with OGRGeocodeDestroySession(), or
+ * @return a handle that should be freed with OGRGeocodeDestroySession(), or
  *         NULL in case of failure.
  *
  * @since GDAL 1.10

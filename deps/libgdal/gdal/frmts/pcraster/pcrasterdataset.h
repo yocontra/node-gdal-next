@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcrasterdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+ * $Id: pcrasterdataset.h fa839b55f793867fe0bfe7239f18216793be4f7f 2020-09-18 16:59:11 +0200 Even Rouault $
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster CSF 2.0 raster file driver declarations.
@@ -113,7 +113,7 @@ public:
   // CREATORS
   //----------------------------------------------------------------------------
 
-  explicit          PCRasterDataset     (MAP* map);
+  explicit          PCRasterDataset     (MAP* map, GDALAccess eAccess);
 
   /* virtual */    ~PCRasterDataset    ();
 

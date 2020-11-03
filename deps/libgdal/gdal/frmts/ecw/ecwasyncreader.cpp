@@ -32,7 +32,7 @@
 
 #include "gdal_ecw.h"
 
-CPL_CVSID("$Id: ecwasyncreader.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ecwasyncreader.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 #if defined(FRMT_ecw) && (ECWSDK_VERSION >= 40)
 
@@ -422,7 +422,7 @@ ECWAsyncReader::GetNextUpdatedRegion( double dfTimeout,
     }
 
 /* -------------------------------------------------------------------- */
-/*      Return indication of complete or just buffer updateded.         */
+/*      Return indication of complete or just buffer updated.         */
 /* -------------------------------------------------------------------- */
 
     if( bComplete && !bUpdateReady )

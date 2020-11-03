@@ -37,7 +37,7 @@
 
 using namespace msg_native_format;
 
-CPL_CVSID("$Id: msgndataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: msgndataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 typedef enum {
     MODE_VISIR,     // Visible and Infrared bands (1 through 11) in 10-bit raw mode
@@ -220,11 +220,10 @@ CPLErr MSGNRasterBand::IReadBlock( CPL_UNUSED int nBlockXOff,
     unsigned char *cptr = (unsigned char*)pszRecord +
         (data_length - bytes_per_line);
     int bitsLeft = 8;
-    unsigned short value = 0;
 
     if (open_mode != MODE_RAD) {
         for (int c=0; c < nBlockXSize; c++) {
-            value = 0;
+            unsigned short value = 0;
             for (int bit=0; bit < 10; bit++) {
                 value <<= 1;
                 if (*cptr & 128) {
@@ -242,7 +241,7 @@ CPLErr MSGNRasterBand::IReadBlock( CPL_UNUSED int nBlockXOff,
     } else {
         // radiance mode
         for (int c=0; c < nBlockXSize; c++) {
-            value = 0;
+            unsigned short value = 0;
             for (int bit=0; bit < 10; bit++) {
                 value <<= 1;
                 if (*cptr & 128) {

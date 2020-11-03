@@ -29,7 +29,7 @@
 
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_win32.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_win32.cpp 08c9fb51f640a13b2e3a7d662ab676f08c57001e 2020-10-06 13:05:59 +0200 Even Rouault $")
 
 #if defined(WIN32)
 
@@ -438,16 +438,23 @@ VSIRangeStatus VSIWin32Handle::GetRangeStatus( vsi_l_offset
 /*                          CPLGetWineVersion()                         */
 /************************************************************************/
 
-static const char* CPLGetWineVersion()
+const char* CPLGetWineVersion(); // also used by cpl_aws.cpp
+
+const char* CPLGetWineVersion()
 {
     HMODULE hntdll = GetModuleHandle("ntdll.dll");
     if( hntdll == nullptr )
+    {
+        CPLDebug("CPLGetWineVersion", "Can't get handle to ntdll.dll.");
         return nullptr;
+    }
 
-    static const char * (CDECL *pwine_get_version)(void);
+    const char * (CDECL *pwine_get_version)(void);
     pwine_get_version = reinterpret_cast<const char* (*)(void)>(GetProcAddress(hntdll, "wine_get_version"));
     if( pwine_get_version == nullptr )
+    {
         return nullptr;
+    }
 
     return pwine_get_version();
 }

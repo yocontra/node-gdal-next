@@ -57,7 +57,7 @@
 #define UNUSED_IF_NO_GEOS
 #endif
 
-CPL_CVSID("$Id: ogrgeometry.cpp 7c7402f4226a5d821bfd6bf38af0e682c8720ba7 2020-04-27 13:06:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeometry.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
 
 //! @cond Doxygen_Suppress
 int OGRGeometry::bGenerate_DB2_V72_BYTE_ORDER = FALSE;
@@ -789,6 +789,10 @@ OGRwkbGeometryType OGRGeometry::getIsoGeometryType() const
  *
  * \brief Modify the geometry such it has no segment longer then the
  * given distance.
+ *
+ * This method modifies the geometry to add intermediate vertices if necessary
+ * so that the maximum length between 2 consecutive vertices is lower than
+ * dfMaxLength.
  *
  * Interpolated points will have Z and M values (if needed) set to 0.
  * Distance computation is performed in 2d only
@@ -1960,7 +1964,7 @@ const char *OGR_G_GetGeometryName( OGRGeometryH hGeom )
  * This function is the same as the CPP method OGRGeometry::clone().
  *
  * @param hGeom handle on the geometry to clone from.
- * @return an handle on the copy of the geometry with the spatial
+ * @return a handle on the copy of the geometry with the spatial
  * reference system as the original.
  */
 
@@ -4804,7 +4808,10 @@ OGRGeometry::Crosses( UNUSED_PARAMETER const OGRGeometry *poOtherGeom ) const
 
         sfcgal_geometry_t *poOther = OGRGeometry::OGRexportToSFCGAL(poOtherGeom);
         if (poOther == nullptr)
+        {
+            sfcgal_geometry_delete(poThis);
             return FALSE;
+        }
 
         int res = sfcgal_geometry_intersects_3d(poThis, poOther);
 
@@ -6136,18 +6143,6 @@ char* OGRGeometryToHexEWKB( OGRGeometry * poGeometry, int nSRSId,
 
     return pszTextBuf;
 }
-
-/**
- * \fn void OGRGeometry::segmentize(double dfMaxLength);
- *
- * \brief Add intermediate vertices to a geometry.
- *
- * This method modifies the geometry to add intermediate vertices if necessary
- * so that the maximum length between 2 consecutive vertices is lower than
- * dfMaxLength.
- *
- * @param dfMaxLength maximum length between 2 consecutive vertices.
- */
 
 /************************************************************************/
 /*                       importPreambleFromWkb()                       */

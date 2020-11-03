@@ -81,7 +81,7 @@
 #include "jpeg2000_vsil_io.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: jpeg2000_vsil_io.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpeg2000_vsil_io.cpp 9ef8e16e27c5fc4c491debe50bf2b7f3e94ed334 2020-10-05 12:11:52 +0200 Even Rouault $")
 
 /*
  * File descriptor file object.
@@ -94,13 +94,25 @@ typedef struct {
 * File stream object.
 \******************************************************************************/
 
+#if defined(PRIjas_seqent)
+// PRIjas_seqent macro is defined since Jasper 2.0.17
+static int JPEG2000_VSIL_read(jas_stream_obj_t *obj, char *buf, unsigned cnt)
+#else
 static int JPEG2000_VSIL_read(jas_stream_obj_t *obj, char *buf, int cnt)
+#endif
 {
     jas_stream_VSIFL_t *fileobj = JAS_CAST(jas_stream_VSIFL_t *, obj);
     return static_cast<int>(VSIFReadL(buf, 1, cnt, fileobj->fp));
 }
 
+#if defined(JAS_INCLUDE_JP2_CODEC)
+// Jasper 2.0.21
+static int JPEG2000_VSIL_write(jas_stream_obj_t *obj, const char *buf, unsigned int cnt)
+#elif defined(PRIjas_seqent)
+static int JPEG2000_VSIL_write(jas_stream_obj_t *obj, char *buf, unsigned int cnt)
+#else
 static int JPEG2000_VSIL_write(jas_stream_obj_t *obj, char *buf, int cnt)
+#endif
 {
     jas_stream_VSIFL_t *fileobj = JAS_CAST(jas_stream_VSIFL_t *, obj);
     return static_cast<int>(VSIFWriteL(buf, 1, cnt, fileobj->fp));

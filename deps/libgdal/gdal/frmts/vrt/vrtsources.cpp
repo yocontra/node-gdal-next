@@ -66,7 +66,7 @@
 #define isnan std::isnan
 #endif
 
-CPL_CVSID("$Id: vrtsources.cpp 791996ba42bb1936bcbc963840999355ce8000f8 2020-02-13 22:21:19 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtsources.cpp 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -111,7 +111,8 @@ VRTSimpleSource::VRTSimpleSource() :
     m_dfNoDataValue(VRT_NODATA_UNSET),
     m_nMaxValue(0),
     m_bRelativeToVRTOri(-1),
-    m_nExplicitSharedStatus(-1)
+    m_nExplicitSharedStatus(-1),
+    m_bDropRefOnSrcBand(true)
 {}
 
 /************************************************************************/
@@ -134,7 +135,8 @@ VRTSimpleSource::VRTSimpleSource( const VRTSimpleSource* poSrcSource,
     m_dfNoDataValue(poSrcSource->m_dfNoDataValue),
     m_nMaxValue(poSrcSource->m_nMaxValue),
     m_bRelativeToVRTOri(-1),
-    m_nExplicitSharedStatus(poSrcSource->m_nExplicitSharedStatus)
+    m_nExplicitSharedStatus(poSrcSource->m_nExplicitSharedStatus),
+    m_bDropRefOnSrcBand(poSrcSource->m_bDropRefOnSrcBand)
 {}
 
 /************************************************************************/
@@ -144,6 +146,9 @@ VRTSimpleSource::VRTSimpleSource( const VRTSimpleSource* poSrcSource,
 VRTSimpleSource::~VRTSimpleSource()
 
 {
+    if( !m_bDropRefOnSrcBand )
+        return;
+
     if( m_poMaskBandMainBand != nullptr )
     {
         if( m_poMaskBandMainBand->GetDataset() != nullptr )
@@ -215,7 +220,7 @@ void VRTSimpleSource::SetSrcMaskBand( GDALRasterBand *poNewSrcBand )
 static double RoundIfCloseToInt(double dfValue)
 {
     double dfClosestInt = floor(dfValue + 0.5);
-    return (fabs( dfValue - dfClosestInt ) < 1e-5) ? dfClosestInt : dfValue;
+    return (fabs( dfValue - dfClosestInt ) < 1e-3) ? dfClosestInt : dfValue;
 }
 
 /************************************************************************/

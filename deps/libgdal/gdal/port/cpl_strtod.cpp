@@ -38,7 +38,7 @@
 
 #include "cpl_config.h"
 
-CPL_CVSID("$Id: cpl_strtod.cpp 835000143e9aba57d80f961069b9dac38ff620ac 2020-05-25 14:36:21 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_strtod.cpp 2750a2a20b7024e64509cdbfc50fdd6b1a186550 2020-05-25 14:36:21 +0200 Even Rouault $")
 
 // XXX: with GCC 2.95 strtof() function is only available when in c99 mode.
 // Fix it here not touching the compiler options.
@@ -56,7 +56,7 @@ extern float strtof(const char *nptr, char **endptr);
  * Converts ASCII string to floating point number.
  *
  * This function converts the initial portion of the string pointed to
- * by nptr to double floating point representation. The behaviour is the
+ * by nptr to double floating point representation. The behavior is the
  * same as
  *
  *   CPLStrtodDelim(nptr, (char **)NULL, point);
@@ -83,7 +83,7 @@ double CPLAtofDelim(const char *nptr, char point)
  * Converts ASCII string to floating point number.
  *
  * This function converts the initial portion of the string pointed to
- * by nptr to double floating point representation. The behaviour is the
+ * by nptr to double floating point representation. The behavior is the
  * same as
  *
  *   CPLStrtod(nptr, (char **)NULL);

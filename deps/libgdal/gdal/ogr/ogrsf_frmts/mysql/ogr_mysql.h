@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mysql.h d33d2ff27bc7fde2c005cc49cf973e60e989c7f4 2019-12-27 15:49:49 +0900 Hiroshi Miura $
+ * $Id: ogr_mysql.h f890db52002f641b0c01872720a7473aa7c6c0cf 2020-05-27 23:21:17 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Declarations for MySQL OGR Driver Classes.
@@ -97,6 +97,7 @@ class OGRMySQLLayer CPL_NON_FINAL: public OGRLayer
     char                *pszFIDColumn;
 
     MYSQL_RES           *hResultSet;
+    bool                m_bEOF = false;
 
     int                 FetchSRSId();
 

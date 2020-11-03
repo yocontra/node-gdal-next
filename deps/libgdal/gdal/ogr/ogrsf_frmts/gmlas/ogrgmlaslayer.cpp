@@ -33,7 +33,7 @@
 #include "ogr_pgdump.h"
 #include "cpl_minixml.h"
 
-CPL_CVSID("$Id: ogrgmlaslayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlaslayer.cpp 6416d089f89c4ae1f04f3a8a6f9706715e44fe31 2020-09-14 09:37:26 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRGMLASLayer()                           */
@@ -1461,7 +1461,15 @@ OGRFeatureDefn* OGRGMLASLayer::GetLayerDefn()
             !m_poDS->GetConf().m_oXLinkResolution.m_aoURLSpecificRules.empty() )
         {
             if( m_poReader == nullptr )
+            {
                 InitReader();
+                // Avoid keeping too many file descriptor opened
+                if( m_fpGML != nullptr )
+                    m_poDS->PushUnusedGMLFilePointer(m_fpGML);
+                m_fpGML = nullptr;
+                delete m_poReader;
+                m_poReader = nullptr;
+            }
         }
     }
     return m_poFeatureDefn;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nasreaderp.h db901781979e7cc7f97439b5629fab38fd1e8e8d 2019-08-12 18:18:55 +0200 Even Rouault $
+ * $Id: nasreaderp.h a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $
  *
  * Project:  NAS Reader
  * Purpose:  Private Declarations for OGR NAS Reader code.
@@ -99,7 +99,7 @@ public:
         const   XMLCh* const    uri,
         const   XMLCh* const    localname,
         const   XMLCh* const    qname,
-        const   Attributes& attrs
+        const   Attributes&     attrs
     ) override;
     void endElement(
         const   XMLCh* const    uri,
@@ -206,7 +206,6 @@ public:
     bool             SaveClasses( const char *pszFile = nullptr ) override;
 
     bool             PrescanForSchema(bool bGetExtents = true,
-                                      bool bAnalyzeSRSPerFeature = true,
                                       bool bOnlyDetectSRS = false) override;
     bool             PrescanForTemplate() override;
     void             ResetReading() override;
@@ -241,6 +240,7 @@ public:
     bool        HasStoppedParsing() override { return m_bStopParsing; }
 
     void        CheckForFID( const Attributes &attrs, char **ppszCurField );
+    void        CheckForRID( const Attributes &attrs, char **ppszCurField );
     void        CheckForRelations( const char *pszElement,
                                    const Attributes &attrs,
                                    char **ppszCurField );

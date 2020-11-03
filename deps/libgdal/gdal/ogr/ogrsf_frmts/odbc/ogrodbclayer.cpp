@@ -31,7 +31,7 @@
 #include "ogr_odbc.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrodbclayer.cpp 90746662201ee68e467b9d85421ddfe3e169ca08 2018-04-08 22:45:56 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrodbclayer.cpp 085d851ca29ce323a5556449611935a5852cc9dc 2020-08-20 14:13:35 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                            OGRODBCLayer()                            */
@@ -153,6 +153,7 @@ CPLErr OGRODBCLayer::BuildFeatureDefn( const char *pszLayerName,
                 break;
 
             case SQL_C_TIMESTAMP:
+            case SQL_C_TYPE_TIMESTAMP:
                 oField.SetType( OFTDateTime );
                 break;
 

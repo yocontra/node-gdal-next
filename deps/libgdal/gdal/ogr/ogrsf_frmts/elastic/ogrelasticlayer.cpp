@@ -42,7 +42,7 @@
 #include <cstdlib>
 #include <set>
 
-CPL_CVSID("$Id: ogrelasticlayer.cpp c017dbc2e0f83ca1f7fedb61f325888721dfc206 2020-03-24 10:49:16 -0400 Tom Kralidis $")
+CPL_CVSID("$Id: ogrelasticlayer.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRElasticLayer()                          */
@@ -2065,7 +2065,7 @@ CPLString OGRElasticLayer::BuildJSonFromFeature(OGRFeature *poFeature)
                         bHasWarned = true;
                         CPLError(CE_Warning, CPLE_AppDefined,
                                  "At least one geometry has a bounding box outside "
-                                 "of [-180,180] longitude range and/or [-90,90] latitude range. Undefined behaviour");
+                                 "of [-180,180] longitude range and/or [-90,90] latitude range. Undefined behavior");
                     }
                 }
 

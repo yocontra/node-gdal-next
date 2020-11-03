@@ -30,7 +30,7 @@
 #include "gdal_pam.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ctgdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: ctgdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 constexpr int HEADER_LINE_COUNT = 5;
 
@@ -354,7 +354,7 @@ int CTGDataset::ReadImagery()
 
 int CTGDataset::Identify( GDALOpenInfo * poOpenInfo )
 {
-    CPLString osFilename(poOpenInfo->pszFilename);
+    CPLString osFilename; // let in that scope
 
     GDALOpenInfo* poOpenInfoToDelete = nullptr;
     /*  GZipped grid_cell.gz files are common, so automagically open them */

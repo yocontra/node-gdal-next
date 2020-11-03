@@ -29,7 +29,7 @@
 #include "ogr_xlsx.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrxlsxdriver.cpp a6bcd16f50889a2f1d03c735b29cced2c8b33b15 2019-07-04 17:37:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrxlsxdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRXLSX();
 
@@ -187,7 +187,7 @@ void RegisterOGRXLSX()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "MS Office Open XML spreadsheet" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "xlsx xlsm" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_xlsx.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/xlsx.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES,
                                "Integer Integer64 Real String Date DateTime "

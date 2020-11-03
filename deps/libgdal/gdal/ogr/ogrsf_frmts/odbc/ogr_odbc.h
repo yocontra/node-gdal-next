@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_odbc.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_odbc.h 2b7dd67cad092ba95547b0aa44cd7a3bebe4f015 2020-08-25 21:13:47 +1000 Nyall Dawson $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/ODBC driver.
@@ -205,6 +205,8 @@ class OGRODBCDataSource final: public OGRDataSource
                                     OGRGeometry *poSpatialFilter,
                                     const char *pszDialect ) override;
     virtual void        ReleaseResultSet( OGRLayer * poLayer ) override;
+
+    static bool         IsSupportedMsAccessFileExtension( const char* pszExtension );
 
     // Internal use
     CPLODBCSession     *GetSession() { return &oSession; }

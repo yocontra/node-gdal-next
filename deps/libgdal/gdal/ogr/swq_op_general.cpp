@@ -45,7 +45,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: swq_op_general.cpp 25f4fb073a8bb568aa3205f4a0a3943969b1ba5d 2020-05-18 10:03:16 +0200 Julien Cabieces $")
+CPL_CVSID("$Id: swq_op_general.cpp 6659c4d5c910df313ac451cd5ca687862eef040b 2020-10-01 15:37:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           swq_test_like()                            */
@@ -349,7 +349,7 @@ swq_expr_node *SWQGeneralEvaluator( swq_expr_node *node,
             }
         }
 
-        switch( static_cast<swq_op>(node->nOperation) )
+        switch( node->nOperation )
         {
           case SWQ_EQ:
             poRet->int_value = sub_node_values[0]->float_value
@@ -477,7 +477,7 @@ swq_expr_node *SWQGeneralEvaluator( swq_expr_node *node,
             }
         }
 
-        switch( static_cast<swq_op>(node->nOperation) )
+        switch( node->nOperation )
         {
           case SWQ_AND:
             poRet->int_value = sub_node_values[0]->int_value
@@ -656,7 +656,7 @@ swq_expr_node *SWQGeneralEvaluator( swq_expr_node *node,
             return nullptr;
         }
 
-        switch( static_cast<swq_op>(node->nOperation) )
+        switch( node->nOperation )
         {
           case SWQ_GT:
             poRet->int_value = OGRCompareDate(&sField0, &sField1) > 0;
@@ -734,7 +734,7 @@ swq_expr_node *SWQGeneralEvaluator( swq_expr_node *node,
             }
         }
 
-        switch( static_cast<swq_op>(node->nOperation) )
+        switch( node->nOperation )
         {
           case SWQ_EQ:
           {
@@ -1134,7 +1134,7 @@ swq_field_type SWQGeneralChecker( swq_expr_node *poNode,
     swq_field_type eArgType = SWQ_OTHER;
     // int nArgCount = -1;
 
-    switch( static_cast<swq_op>(poNode->nOperation) )
+    switch( poNode->nOperation )
     {
       case SWQ_AND:
       case SWQ_OR:
@@ -1277,7 +1277,7 @@ swq_field_type SWQGeneralChecker( swq_expr_node *poNode,
       default:
       {
           const swq_operation *poOp =
-              swq_op_registrar::GetOperator(static_cast<swq_op>(poNode->nOperation));
+              swq_op_registrar::GetOperator(poNode->nOperation);
 
           CPLError( CE_Failure, CPLE_AppDefined,
                     "SWQGeneralChecker() called on unsupported operation %s.",
@@ -1333,7 +1333,7 @@ swq_field_type SWQGeneralChecker( swq_expr_node *poNode,
                 }
 
                 const swq_operation *poOp =
-                    swq_op_registrar::GetOperator(static_cast<swq_op>(poNode->nOperation));
+                    swq_op_registrar::GetOperator(poNode->nOperation);
 
                 CPLError( CE_Failure, CPLE_AppDefined,
                           "Type mismatch or improper type of arguments "
@@ -1353,7 +1353,7 @@ swq_field_type SWQGeneralChecker( swq_expr_node *poNode,
         && nArgCount != poNode->nSubExprCount )
     {
         const swq_operation *poOp =
-            swq_op_registrar::GetOperator(static_cast<swq_op>(poNode->nOperation));
+            swq_op_registrar::GetOperator(poNode->nOperation);
 
         CPLError( CE_Failure, CPLE_AppDefined,
                   "Expected %d arguments to %s, but got %d arguments.",

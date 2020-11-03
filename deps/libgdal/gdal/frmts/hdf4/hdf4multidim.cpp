@@ -32,6 +32,8 @@
 
 #include "HdfEosDef.h"
 
+#include "cpl_string.h"
+
 #include <algorithm>
 #include <map>
 #include <set>
@@ -48,6 +50,7 @@ class HDF4SharedResources
     friend class ::HDF4Dataset;
     int32       m_hSD;
     std::string m_osFilename;
+    CPLStringList m_aosOpenOptions;
 
 public:
     HDF4SharedResources() = default;
@@ -55,6 +58,9 @@ public:
 
     int32       GetSDHandle() const { return m_hSD; }
     const std::string& GetFilename() const { return m_osFilename; }
+    const char*        FetchOpenOption(const char* pszName, const char* pszDefault) const {
+        return m_aosOpenOptions.FetchNameValueDef(pszName, pszDefault);
+    }
 };
 
 /************************************************************************/
@@ -900,6 +906,31 @@ std::vector<std::shared_ptr<GDALAttribute>> HDF4Group::GetAttributes(
     int32 nAttributes = 0;
     if ( SDfileinfo( m_poShared->GetSDHandle(), &nDatasets, &nAttributes ) != 0 )
         return ret;
+
+    std::map<CPLString, std::shared_ptr<GDALAttribute>> oMapAttrs;
+    const auto AddAttribute = [&ret, &oMapAttrs](const std::shared_ptr<GDALAttribute>& poNewAttr)
+    {
+        auto oIter = oMapAttrs.find(poNewAttr->GetName());
+        if( oIter != oMapAttrs.end() )
+        {
+            const char* pszOldVal = oIter->second->ReadAsString();
+            const char* pszNewVal = poNewAttr->ReadAsString();
+            // As found in MOD35_L2.A2017161.1525.061.2017315035809.hdf
+            // product of https://github.com/OSGeo/gdal/issues/2848,
+            // the identifier_product_doi attribute is found in a
+            // HDF4EOS attribute bundle, as well as a standalone attribute
+            if( pszOldVal && pszNewVal && strcmp(pszOldVal, pszNewVal) == 0 )
+                return;
+            // TODO
+            CPLDebug("HDF4",
+                     "Attribute with same name (%s) found, but different value",
+                     poNewAttr->GetName().c_str());
+        }
+        // cppcheck-suppress unreadVariable
+        oMapAttrs[poNewAttr->GetName()] = poNewAttr;
+        ret.emplace_back(poNewAttr);
+    };
+
     for( int32 iAttribute = 0; iAttribute < nAttributes; iAttribute++ )
     {
         int32 iNumType = 0;
@@ -932,7 +963,7 @@ std::vector<std::shared_ptr<GDALAttribute>> HDF4Group::GetAttributes(
                 const char* pszValue = CPLParseNameValue(*iter, &pszKey);
                 if( pszKey && pszValue )
                 {
-                    ret.emplace_back(std::make_shared<GDALAttributeString>(
+                    AddAttribute(std::make_shared<GDALAttributeString>(
                                                             GetFullName(),
                                                             pszKey,
                                                             pszValue));
@@ -950,7 +981,7 @@ std::vector<std::shared_ptr<GDALAttribute>> HDF4Group::GetAttributes(
         }
         else
         {
-            ret.emplace_back(std::make_shared<HDF4SDAttribute>(GetFullName(),
+            AddAttribute(std::make_shared<HDF4SDAttribute>(GetFullName(),
                                                              osAttrName,
                                                              m_poShared,
                                                              nullptr,
@@ -1001,7 +1032,10 @@ std::vector<std::string> HDF4Group::GetGroupNames(CSLConstList) const
         GDclose( gd_handle );
     }
 
-    if( res.empty() )
+    const char* pszListSDS =
+        m_poShared->FetchOpenOption("LIST_SDS", "AUTO");
+    if( (res.empty() && EQUAL(pszListSDS, "AUTO")) ||
+        (!EQUAL(pszListSDS, "AUTO") && CPLTestBool(pszListSDS)) )
     {
         int32 nDatasets = 0;
         int32 nAttrs = 0;
@@ -1317,7 +1351,8 @@ std::vector<std::shared_ptr<GDALAttribute>> HDF4SwathGroup::GetAttributes(
         int32 iNumType = 0;
         int32 nSize = 0;
 
-        if( SWattrinfo( m_poSwathHandle->m_handle, aosAttrs[i],
+        const auto& osAttrName = aosAttrs[i];
+        if( SWattrinfo( m_poSwathHandle->m_handle, osAttrName,
                         &iNumType, &nSize ) < 0 )
             continue;
         const int nDataTypeSize = HDF4Dataset::GetDataTypeSize(iNumType);
@@ -1325,7 +1360,7 @@ std::vector<std::shared_ptr<GDALAttribute>> HDF4SwathGroup::GetAttributes(
             continue;
 
         ret.emplace_back(std::make_shared<HDF4SwathAttribute>(GetFullName(),
-                                                        aosAttrs[i],
+                                                        osAttrName,
                                                         m_poShared,
                                                         m_poSwathHandle,
                                                         iNumType,
@@ -1500,7 +1535,6 @@ static bool ReadPixels(const GUInt64* arrayStartIdx,
         if( newBufferStride[i] != static_cast<GPtrDiff_t>(nExpectedStride) )
         {
             bContiguousStride = false;
-            break;
         }
         nExpectedStride *= count[i];
     }
@@ -1523,7 +1557,7 @@ static bool ReadPixels(const GUInt64* arrayStartIdx,
                    &sw_start[0], &sw_stride[0], &sw_edge[0],
                    pabyTemp) :
         readFunc.pReadData(handle, &sw_start[0], &sw_stride[0], &sw_edge[0],
-                  pabyDstBuffer);
+                  pabyTemp);
     if( status != 0 )
     {
         VSIFree(pabyTemp);
@@ -2409,7 +2443,7 @@ std::vector<std::shared_ptr<GDALDimension>> HDF4SDSGroup::GetDimensions(CSLConst
         SDendaccess(iSDS);
     }
 
-    // Instanciate dimensions
+    // Instantiate dimensions
     std::set<std::shared_ptr<GDALDimensionWeakIndexingVar>> oSetDimsWithVariable;
     for(const auto& iter: oMapDimIdToDimSize )
     {
@@ -3113,14 +3147,22 @@ bool HDF4GRPalette::IRead(const GUInt64* arrayStartIdx,
 /*                           OpenMultiDim()                             */
 /************************************************************************/
 
-void HDF4Dataset::OpenMultiDim(const char* pszFilename)
+void HDF4Dataset::OpenMultiDim(const char* pszFilename,
+                               CSLConstList papszOpenOptionsIn)
 {
     // under hHDF4Mutex
 
     auto poShared = std::make_shared<HDF4SharedResources>();
     poShared->m_osFilename = pszFilename;
     poShared->m_hSD = hSD;
+    poShared->m_aosOpenOptions = papszOpenOptionsIn;
+
     hSD = -1;
 
     m_poRootGroup = std::make_shared<HDF4Group>(std::string(), "/", poShared);
+
+    SetDescription(pszFilename);
+
+    // Setup/check for pam .aux.xml.
+    TryLoadXML();
 }

@@ -61,7 +61,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: gdaljp2metadata.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdaljp2metadata.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 static const unsigned char msi_uuid2[16] = {
     0xb1,0x4b,0xf8,0xbd,0x08,0x3d,0x4b,0x43,
@@ -949,26 +949,22 @@ int GDALJP2Metadata::ParseGMLCoverageDesc()
 /*      Extract origin location.                                        */
 /* -------------------------------------------------------------------- */
     OGRPoint *poOriginGeometry = nullptr;
-    const char *pszSRSName = nullptr;
 
-    if( psOriginPoint != nullptr )
+    OGRGeometry* poGeom = reinterpret_cast<OGRGeometry*>(
+        OGR_G_CreateFromGMLTree( psOriginPoint ));
+
+    if( poGeom != nullptr
+        && wkbFlatten(poGeom->getGeometryType()) == wkbPoint )
     {
-        OGRGeometry* poGeom = reinterpret_cast<OGRGeometry*>(
-            OGR_G_CreateFromGMLTree( psOriginPoint ));
-
-        if( poGeom != nullptr
-            && wkbFlatten(poGeom->getGeometryType()) == wkbPoint )
-        {
-            poOriginGeometry = poGeom->toPoint();
-        }
-        else
-        {
-            delete poGeom;
-        }
-
-        // SRS?
-        pszSRSName = CPLGetXMLValue( psOriginPoint, "srsName", nullptr );
+        poOriginGeometry = poGeom->toPoint();
     }
+    else
+    {
+        delete poGeom;
+    }
+
+    // SRS?
+    const char* pszSRSName = CPLGetXMLValue( psOriginPoint, "srsName", nullptr );
 
 /* -------------------------------------------------------------------- */
 /*      Extract offset(s)                                               */

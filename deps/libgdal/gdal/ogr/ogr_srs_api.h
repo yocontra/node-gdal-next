@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_srs_api.h 111ddab546748482d008cd057ff8ccfe5171a236 2020-04-23 21:09:58 +0200 Even Rouault $
+ * $Id: ogr_srs_api.h ef356bb0205870e819cb422bace9b5f8c39ae2cb 2020-10-07 19:56:50 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API and constant declarations for OGR Spatial References.
@@ -577,6 +577,7 @@ OGRErr CPL_DLL OSRSetCompoundCS( OGRSpatialReferenceH hSRS,
                                  OGRSpatialReferenceH hHorizSRS,
                                  OGRSpatialReferenceH hVertSRS );
 OGRErr CPL_DLL OSRPromoteTo3D( OGRSpatialReferenceH hSRS, const char* pszName );
+OGRErr CPL_DLL OSRDemoteTo2D( OGRSpatialReferenceH hSRS, const char* pszName );
 
 OGRErr CPL_DLL OSRSetGeogCS( OGRSpatialReferenceH hSRS,
                       const char * pszGeogName,

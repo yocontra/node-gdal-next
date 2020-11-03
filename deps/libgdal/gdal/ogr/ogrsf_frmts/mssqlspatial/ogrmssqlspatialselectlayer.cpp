@@ -39,7 +39,7 @@
 #define SQL_CA_SS_UDT_TYPE_NAME (SQL_CA_SS_BASE+20)
 #endif
 
-CPL_CVSID("$Id: ogrmssqlspatialselectlayer.cpp be692ceb73ba18355bdfbad1a0ced16c641bbfe7 2018-12-14 21:02:50 +0100 Tamas Szekeres $")
+CPL_CVSID("$Id: ogrmssqlspatialselectlayer.cpp 44f00f2525498bc2059c9cc0e6d86fe7accd9168 2020-05-27 22:13:37 +0200 Even Rouault $")
 /************************************************************************/
 /*                     OGRMSSQLSpatialSelectLayer()                     */
 /************************************************************************/
@@ -147,22 +147,7 @@ OGRMSSQLSpatialSelectLayer::OGRMSSQLSpatialSelectLayer( OGRMSSQLSpatialDataSourc
 OGRMSSQLSpatialSelectLayer::~OGRMSSQLSpatialSelectLayer()
 
 {
-    ClearStatement();
     CPLFree(pszBaseStatement);
-}
-
-/************************************************************************/
-/*                           ClearStatement()                           */
-/************************************************************************/
-
-void OGRMSSQLSpatialSelectLayer::ClearStatement()
-
-{
-    if( poStmt != nullptr )
-    {
-        delete poStmt;
-        poStmt = nullptr;
-    }
 }
 
 /************************************************************************/
@@ -173,47 +158,19 @@ CPLODBCStatement *OGRMSSQLSpatialSelectLayer::GetStatement()
 
 {
     if( poStmt == nullptr )
-        ResetStatement();
+    {
+        CPLDebug( "OGR_MSSQLSpatial", "Recreating statement." );
+        poStmt = new CPLODBCStatement( poDS->GetSession() );
+        poStmt->Append( pszBaseStatement );
+
+        if( !poStmt->ExecuteSQL() )
+        {
+            delete poStmt;
+            poStmt = nullptr;
+        }
+    }
 
     return poStmt;
-}
-
-/************************************************************************/
-/*                           ResetStatement()                           */
-/************************************************************************/
-
-OGRErr OGRMSSQLSpatialSelectLayer::ResetStatement()
-
-{
-    ClearStatement();
-
-    iNextShapeId = 0;
-
-    CPLDebug( "OGR_MSSQLSpatial", "Recreating statement." );
-    poStmt = new CPLODBCStatement( poDS->GetSession() );
-    poStmt->Append( pszBaseStatement );
-
-    if( poStmt->ExecuteSQL() )
-        return OGRERR_NONE;
-    else
-    {
-        delete poStmt;
-        poStmt = nullptr;
-        return OGRERR_FAILURE;
-    }
-}
-
-/************************************************************************/
-/*                            ResetReading()                            */
-/************************************************************************/
-
-void OGRMSSQLSpatialSelectLayer::ResetReading()
-
-{
-    if( iNextShapeId != 0 )
-        ClearStatement();
-
-    OGRMSSQLSpatialLayer::ResetReading();
 }
 
 /************************************************************************/

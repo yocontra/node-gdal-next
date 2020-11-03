@@ -2,7 +2,7 @@
  *
  * Project:  FMEObjects Translator
  * Purpose:  Implementation of the OGRFMELayer base class.  The class
- *           implements behaviour shared between database and spatial cached
+ *           implements behavior shared between database and spatial cached
  *           layer types.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
  *
@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrfmelayer.cpp 4971449609881d6ffdca70188292293852d12691 2017-12-17 16:48:14Z Even Rouault $")
+CPL_CVSID("$Id: ogrfmelayer.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRFMELayer()                             */

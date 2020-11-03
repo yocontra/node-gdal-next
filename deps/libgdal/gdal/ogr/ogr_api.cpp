@@ -36,7 +36,7 @@
 #include "cpl_error.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: ogr_api.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_api.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
 
 static bool bNonLinearGeometriesEnabled = true;
 
@@ -1284,7 +1284,7 @@ int OGR_G_GetGeometryCount( OGRGeometryH hGeom )
 /**
  * \brief Fetch geometry from a geometry container.
  *
- * This function returns an handle to a geometry within the container.
+ * This function returns a handle to a geometry within the container.
  * The returned geometry remains owned by the container, and should not be
  * modified.  The handle is only valid until the next change to the
  * geometry container.  Use OGR_G_Clone() to make a copy.
@@ -1819,7 +1819,7 @@ OGRGeometryH OGR_G_Value( OGRGeometryH hGeom, double dfDistance )
  * Libraries should generally *not* use that method, since that could interfere
  * with other libraries or applications.
  *
- * Note that it *does* not affect the behaviour of the C++ API.
+ * Note that it *does* not affect the behavior of the C++ API.
  *
  * @param bFlag TRUE if non-linear geometries might be returned (default value).
  *              FALSE to ask for non-linear geometries to be approximated as

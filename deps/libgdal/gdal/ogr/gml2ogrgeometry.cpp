@@ -57,7 +57,7 @@
 #include "ogr_srs_api.h"
 #include "ogr_geo_utils.h"
 
-CPL_CVSID("$Id: gml2ogrgeometry.cpp 27abfaab99b3c3b3d57cb2ab0a309d91d2942e3a 2020-04-07 18:23:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: gml2ogrgeometry.cpp ee1acc4fc798b75d5e6a6cf096428a769cf94974 2020-10-22 11:54:43 +0200 Even Rouault $")
 
 constexpr double kdfD2R = M_PI / 180.0;
 constexpr double kdf2PI = 2.0 * M_PI;
@@ -3376,7 +3376,8 @@ OGRGeometry *GML2OGRGeometry_XMLNode_Internal(
 /* -------------------------------------------------------------------- */
 /*      Surface                                                         */
 /* -------------------------------------------------------------------- */
-    if( EQUAL(pszBaseGeometry, "Surface") )
+    if( EQUAL(pszBaseGeometry, "Surface") ||
+        EQUAL(pszBaseGeometry, "ElevatedSurface") /* AIXM */ )
     {
         // Find outer ring.
         const CPLXMLNode *psChild = FindBareXMLChild( psNode, "patches" );

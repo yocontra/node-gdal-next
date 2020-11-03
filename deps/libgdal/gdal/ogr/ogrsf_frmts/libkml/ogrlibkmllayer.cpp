@@ -40,7 +40,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrlibkmllayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmllayer.cpp 302fafdd3a779d0c6c2cc714481b38e964fb45a9 2020-09-29 21:26:18 +0200 Even Rouault $")
 
 using kmldom::CameraPtr;
 using kmldom::ChangePtr;
@@ -384,36 +384,6 @@ OGRLIBKMLLayer::~OGRLIBKMLLayer()
     m_poOgrSRS->Release();
 
     m_poOgrFeatureDefn->Release();
-}
-
-/******************************************************************************
- Method to get the next feature on the layer.
-
- Args:          none
-
- Returns:       The next feature, or NULL if there is no more
-
- This function copied from the sqlite driver.
-******************************************************************************/
-
-OGRFeature *OGRLIBKMLLayer::GetNextFeature()
-{
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-        if( poFeature == nullptr )
-            return nullptr;
-
-        if( (m_poFilterGeom == nullptr
-             || FilterGeometry( poFeature->GetGeometryRef() ) )
-            && (m_poAttrQuery == nullptr
-                || m_poAttrQuery->Evaluate( poFeature )) )
-        {
-            return poFeature;
-        }
-
-        delete poFeature;
-    }
 }
 
 /******************************************************************************
@@ -884,7 +854,7 @@ int OGRLIBKMLLayer::TestCapability( const char *pszCap )
     else if( EQUAL( pszCap, OLCSequentialWrite ) )
         result = bUpdate;
     else if( EQUAL( pszCap, OLCRandomWrite ) )
-        result = bUpdate;
+        result = bUpdate && m_poKmlUpdate;
     else if( EQUAL( pszCap, OLCFastFeatureCount ) )
         result = FALSE;
     else if( EQUAL( pszCap, OLCFastSetNextByIndex ) )

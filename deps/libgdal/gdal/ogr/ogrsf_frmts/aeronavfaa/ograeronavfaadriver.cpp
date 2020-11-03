@@ -29,7 +29,7 @@
 #include "ogr_aeronavfaa.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ograeronavfaadriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ograeronavfaadriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 // g++ ogr/ogrsf_frmts/aeronavfaa/*.cpp -Wall -g -fPIC -shared -o ogr_AeronavFAA.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts/aernovfaa -Iogr/ogrsf_frmts
 
@@ -75,7 +75,7 @@ void RegisterOGRAeronavFAA()
     poDriver->SetDescription( "AeronavFAA" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Aeronav FAA" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_aeronavfaa.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/aeronavfaa.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRAeronavFAADriverOpen;

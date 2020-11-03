@@ -28,7 +28,7 @@
 
 #include "ogr_plscenes.h"
 
-CPL_CVSID("$Id: ogrplscenesdriver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrplscenesdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRPLScenesIdentify()                        */
@@ -89,7 +89,7 @@ void RegisterOGRPLSCENES()
     poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Planet Labs Scenes API" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_plscenes.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/plscenes.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "PLSCENES:" );
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
 "<OpenOptionList>"

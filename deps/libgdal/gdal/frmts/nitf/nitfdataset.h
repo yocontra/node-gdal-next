@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+ * $Id: nitfdataset.h b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
  *
  * Project:  NITF Read/Write Translator
  * Purpose:  GDALDataset/GDALRasterBand declarations.
@@ -339,7 +339,7 @@ class NITFProxyPamRasterBand CPL_NON_FINAL: public GDALPamRasterBand
 /* to make sure they keep the proper pointer to their "natural" dataset */
 /* This trick is no longer necessary with the NITFWrapperRasterBand */
 /* We just override the few specific methods where we want that */
-/* the NITFWrapperRasterBand behaviour differs from the JPEG/JPEG2000 one */
+/* the NITFWrapperRasterBand behavior differs from the JPEG/JPEG2000 one */
 
 class NITFWrapperRasterBand final: public NITFProxyPamRasterBand
 {

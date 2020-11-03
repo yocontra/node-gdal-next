@@ -32,7 +32,7 @@
 #include "ods_formula.h"
 #include "cpl_safemaths.hpp"
 
-CPL_CVSID("$Id: ods_formula_node.cpp 327ac75f35d58a7aebccdcdb88e23695a5aab39f 2020-05-22 19:48:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: ods_formula_node.cpp 3a0d5f82c70162bc7dd669cf264bbc4b9c724c27 2020-05-22 19:48:49 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          ods_formula_node()                          */

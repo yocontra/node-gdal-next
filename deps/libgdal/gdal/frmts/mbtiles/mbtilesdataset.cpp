@@ -48,7 +48,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: mbtilesdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: mbtilesdataset.cpp deff5f9197cbec2b0f66aa34ce85a2cafcc59d7a 2020-05-07 23:38:12 +0200 Even Rouault $")
 
 static const char * const apszAllowedDrivers[] = {"JPEG", "PNG", nullptr};
 
@@ -1932,7 +1932,7 @@ void MBTilesDataset::InitVector(double dfMinX, double dfMinY,
     {
         CPLJSONObject oId = oVectorLayers[i].GetObj("id");
         if( oId.IsValid() && oId.GetType() ==
-                CPLJSONObject::String )
+                CPLJSONObject::Type::String )
         {
             OGRwkbGeometryType eGeomType = wkbUnknown;
             if( oTileStatLayers.IsValid() )

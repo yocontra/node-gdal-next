@@ -44,7 +44,7 @@
 #include "gdal.h"
 #include "gdal_alg_priv.h"
 
-CPL_CVSID("$Id: gdalsievefilter.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalsievefilter.cpp 88fb6c783f68f1f529ef53ebcd53dc2f31972bd6 2020-05-25 21:31:50 +0300 uclaros $")
 
 #define MY_MAX_INT 2147483647
 
@@ -154,7 +154,7 @@ static inline void CompareNeighbour( int nPolyId1, int nPolyId2,
  * Removes small raster polygons.
  *
  * The function removes raster polygons smaller than a provided
- * threshold size (in pixels) and replaces replaces them with the pixel value
+ * threshold size (in pixels) and replaces them with the pixel value
  * of the largest neighbour polygon.
  *
  * Polygon are determined (per GDALRasterPolygonEnumerator) as regions of

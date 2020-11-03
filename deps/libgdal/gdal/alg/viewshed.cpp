@@ -46,7 +46,7 @@
 #include "ogr_core.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: viewshed.cpp 5edbcffeb5264d7981c2d896bf5417f7473639c5 2020-05-24 18:07:44 +0200 Even Rouault $")
+CPL_CVSID("$Id: viewshed.cpp be87276cb86253ca49d2ca9759db96d18aa6ba43 2020-05-24 18:07:44 +0200 Even Rouault $")
 
 
 inline static void SetVisibility(int iPixel, double dfZ, double dfZTarget, double* padfZVal,

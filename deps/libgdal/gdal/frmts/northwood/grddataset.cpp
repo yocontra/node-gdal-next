@@ -41,7 +41,7 @@
 #include "../../ogr/ogrsf_frmts/mitab/mitab.h"
 #endif
 
-CPL_CVSID("$Id: grddataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: grddataset.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 #define NODATA -1.e37f
 #define SCALE16BIT 65534.0
@@ -231,7 +231,7 @@ CPLErr NWT_GRDRasterBand::IWriteBlock(CPL_UNUSED int nBlockXOff, int nBlockYOff,
         return CE_Failure;
 
     // Ensure the blocksize is not beyond the system limits and
-    // initialise the size of the record
+    // initialize the size of the record
     if (nBlockXSize > INT_MAX / 2) {
         return CE_Failure;
     }
@@ -245,7 +245,7 @@ CPLErr NWT_GRDRasterBand::IWriteBlock(CPL_UNUSED int nBlockXOff, int nBlockYOff,
     // Cast pImage to float
     float *pfImage = reinterpret_cast<float *>(pImage);
 
-    // Initialise output array
+    // Initialize output array
     GByte *pabyRecord = reinterpret_cast<GByte *>(VSI_MALLOC_VERBOSE(
                     nRecordSize));
     if (pabyRecord == nullptr)

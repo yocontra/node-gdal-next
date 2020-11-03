@@ -36,7 +36,7 @@
 #include <map>
 #include <set>
 
-CPL_CVSID("$Id: gdalmdimtranslate_lib.cpp 15841279d82ea156e16522db2bcd65d88653b0a1 2019-11-26 03:45:52 -0500 Cody Benkoski $")
+CPL_CVSID("$Id: gdalmdimtranslate_lib.cpp adf0cd29fb7e479c33474ed88072945ad8c8cc69 2020-09-12 20:10:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALMultiDimTranslateOptions                     */
@@ -1629,7 +1629,7 @@ static GDALDatasetH CopyToNonMultiDimensionalDriver(
  * @param nSrcCount the number of input datasets.
  * @param pahSrcDS the list of input datasets.
  * @param psOptions the options struct returned by GDALMultiDimTranslateOptionsNew() or NULL.
- * @param pbUsageError the pointer to int variable to determine any usage error has occurred or NULL.
+ * @param pbUsageError pointer to a integer output variable to store if any usage error has occurred or NULL.
  * @return the output dataset (new dataset that must be closed using GDALClose(), or hDstDS is not NULL) or NULL in case of error.
  *
  * @since GDAL 3.1

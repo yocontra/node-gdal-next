@@ -32,7 +32,7 @@
 
 #include "tiff.h"
 
-CPL_CVSID("$Id: calsdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: calsdataset.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -501,7 +501,7 @@ GDALDataset *CALSDataset::CreateCopy( const char *pszFilename,
     VSIStatBufL sStat;
     if( VSIStatL(osTmpFilename, &sStat) != 0 )
     {
-        // Shoudln't happen really. Just to make Coverity happy.
+        // Shouldn't happen really. Just to make Coverity happy.
         CSLDestroy(papszOptions);
         return nullptr;
     }
@@ -526,7 +526,7 @@ GDALDataset *CALSDataset::CreateCopy( const char *pszFilename,
     // Now replace the TIFF header by the CALS header.
     VSILFILE* fp = VSIFOpenL(pszFilename, "rb+");
     if( fp == nullptr )
-        return nullptr; // Shoudln't happen normally.
+        return nullptr; // Shouldn't happen normally.
     memset(szBuffer, ' ', 2048);
     CPLString osField;
     osField = "srcdocid: NONE";

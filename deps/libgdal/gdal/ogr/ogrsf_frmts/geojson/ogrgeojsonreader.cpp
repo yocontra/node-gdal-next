@@ -41,7 +41,7 @@
 #include "cpl_json_streaming_parser.h"
 #include <ogr_api.h>
 
-CPL_CVSID("$Id: ogrgeojsonreader.cpp 6d34914732d5e9173582cc58ea553e349041d5c8 2020-06-27 13:32:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonreader.cpp a67b029b31dc3f1bb9c0a6ec90a47fa82c39e104 2020-06-27 13:32:58 +0200 Even Rouault $")
 
 static
 OGRGeometry* OGRGeoJSONReadGeometry( json_object* poObj,
@@ -1459,7 +1459,7 @@ OGRSpatialReference* OGRGeoJSONReadSpatialReference( json_object* poObj )
 
             const char* pszName = json_object_get_string( poNameURL );
 
-            // Mostly to emulate GDAL 2.x behaviour
+            // Mostly to emulate GDAL 2.x behavior
             // See https://github.com/OSGeo/gdal/issues/2035
             if( EQUAL(pszName, "urn:ogc:def:crs:OGC:1.3:CRS84") )
                 pszName = "EPSG:4326";

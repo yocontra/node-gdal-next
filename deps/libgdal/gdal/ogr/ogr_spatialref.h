@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_spatialref.h 8f0ebfd5b6f153a63b6e2186b68577937cedc02c 2020-06-14 00:21:08 +0200 Even Rouault $
+ * $Id: ogr_spatialref.h ef356bb0205870e819cb422bace9b5f8c39ae2cb 2020-10-07 19:56:50 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes for manipulating spatial reference systems in a
@@ -380,6 +380,8 @@ class CPL_DLL OGRSpatialReference
 
     // cppcheck-suppress functionStatic
     OGRErr      PromoteTo3D( const char* pszName );
+    // cppcheck-suppress functionStatic
+    OGRErr      DemoteTo2D( const char* pszName );
 
     OGRErr      SetFromUserInput( const char * );
 

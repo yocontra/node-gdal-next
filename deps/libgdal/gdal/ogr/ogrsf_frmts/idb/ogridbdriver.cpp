@@ -30,7 +30,7 @@
 #include "ogr_idb.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogridbdriver.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: ogridbdriver.cpp 417b66cdf50174fe8d59833c93710813f205d9ba 2020-08-30 12:18:19 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ~OGRIDBDriver()                            */
@@ -62,14 +62,14 @@ OGRDataSource *OGRIDBDriver::Open( const char * pszFilename,
     OGRIDBDataSource     *poDS;
 
     if( !STARTS_WITH_CI(pszFilename, "IDB:") )
-        return NULL;
+        return nullptr;
 
     poDS = new OGRIDBDataSource();
 
     if( !poDS->Open( pszFilename, bUpdate, TRUE ) )
     {
         delete poDS;
-        return NULL;
+        return nullptr;
     }
     else
         return poDS;
@@ -86,7 +86,7 @@ OGRDataSource *OGRIDBDriver::CreateDataSource( const char * pszName,
     OGRIDBDataSource     *poDS;
 
     if( !STARTS_WITH_CI(pszName, "IDB:") )
-        return NULL;
+        return nullptr;
 
     poDS = new OGRIDBDataSource();
 
@@ -95,7 +95,7 @@ OGRDataSource *OGRIDBDriver::CreateDataSource( const char * pszName,
         delete poDS;
         CPLError( CE_Failure, CPLE_AppDefined,
          "IDB driver doesn't currently support database creation.");
-        return NULL;
+        return nullptr;
     }
 
     return poDS;

@@ -31,7 +31,7 @@
 #include "ogr_pgeo.h"
 #include "ogrpgeogeometry.h"
 
-CPL_CVSID("$Id: ogrpgeotablelayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeotablelayer.cpp 94b866cf397d5b988c35f9cc76d126be054cd4b4 2020-08-26 10:25:17 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                          OGRPGeoTableLayer()                         */
@@ -90,7 +90,8 @@ CPLErr OGRPGeoTableLayer::Initialize( const char *pszTableName,
     sExtent.MinY = dfExtentBottom;
     sExtent.MaxY = dfExtentTop;
 
-    LookupSRID( nSRID );
+    if ( pszGeomCol )
+        LookupSRID( nSRID );
 
 /* -------------------------------------------------------------------- */
 /*      Setup geometry type.                                            */

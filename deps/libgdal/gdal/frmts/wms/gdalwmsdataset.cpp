@@ -46,7 +46,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: gdalwmsdataset.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwmsdataset.cpp 3bd09ca50b5110b7a65d618ec7a5da135cce8c51 2020-09-09 12:05:44 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALWMSDataset()                           */
@@ -156,6 +156,9 @@ CPLErr GDALWMSDataset::Initialize(CPLXMLNode *config, char **l_papszOpenOptions)
 
     if (ret == CE_None) {
         const char *max_conn = CPLGetXMLValue(config, "MaxConnections", "");
+        if (max_conn[0] == '\0') {
+            max_conn = CPLGetConfigOption("GDAL_MAX_CONNECTIONS", "");
+        }
         if (max_conn[0] != '\0') {
             m_http_max_conn = atoi(max_conn);
         }

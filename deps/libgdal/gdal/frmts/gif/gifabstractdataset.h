@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gifabstractdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+ * $Id: gifabstractdataset.h b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
  *
  * Project:  GIF Driver
  * Purpose:  GIF Abstract Dataset
@@ -116,7 +116,7 @@ class GIFAbstractRasterBand CPL_NON_FINAL: public GDALPamRasterBand
   public:
     GIFAbstractRasterBand(GIFAbstractDataset *poDS, int nBand,
                           SavedImage *psSavedImage, int nBackground,
-                          int bAdvertizeInterlacedMDI );
+                          int bAdvertiseInterlacedMDI );
     ~GIFAbstractRasterBand() override;
 
     double GetNoDataValue( int *pbSuccess = nullptr ) override;

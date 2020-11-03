@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogremulatedtransaction.h 40ea9cecccbfbe063a1b22181b0b9cd8e2788744 2016-10-24 14:08:24Z Kurt Schwehr $
+ * $Id: ogremulatedtransaction.h b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRDataSourceWithTransaction class
@@ -91,10 +91,10 @@ class CPL_DLL IOGRTransactionBehaviour
                                           int& bOutHasReopenedDS) = 0;
 };
 
-/** Returns a new datasource object that adds transactional behaviour to an existing datasource.
+/** Returns a new datasource object that adds transactional behavior to an existing datasource.
  *
  * The provided poTransactionBehaviour object should implement driver-specific
- * behaviour for transactions.
+ * behavior for transactions.
  *
  * The generic mechanisms offered by the wrapper class do not cover concurrent
  * updates (though different datasource connections) to the same datasource files.
@@ -106,12 +106,12 @@ class CPL_DLL IOGRTransactionBehaviour
  * Layer structural changes are not allowed after StartTransaction() if the
  * layer definition object has been returned previously with GetLayerDefn().
  *
- * @param poBaseDataSource the datasource to which to add transactional behaviour.
+ * @param poBaseDataSource the datasource to which to add transactional behavior.
  * @param poTransactionBehaviour an implementation of the IOGRTransactionBehaviour interface.
  * @param bTakeOwnershipDataSource whether the returned object should own the
  *                                 passed poBaseDataSource (and thus destroy it
  *                                 when it is destroyed itself).
- * @param bTakeOwnershipTransactionBehaviour whether the returned object should own
+ * @param bTakeOwnershipTransactionBehavior whether the returned object should own
  *                                           the passed poTransactionBehaviour
  *                                           (and thus destroy it when
  *                                           it is destroyed itself).
@@ -122,6 +122,6 @@ OGRDataSource CPL_DLL* OGRCreateEmulatedTransactionDataSourceWrapper(
                                 OGRDataSource* poBaseDataSource,
                                 IOGRTransactionBehaviour* poTransactionBehaviour,
                                 int bTakeOwnershipDataSource,
-                                int bTakeOwnershipTransactionBehaviour);
+                                int bTakeOwnershipTransactionBehavior);
 
 #endif // OGREMULATEDTRANSACTION_H_INCLUDED

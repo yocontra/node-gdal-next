@@ -34,7 +34,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: bmpdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: bmpdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 // Enable if you want to see lots of BMP debugging output.
 // #define BMP_DEBUG
@@ -760,7 +760,6 @@ BMPComprRasterBand::BMPComprRasterBand( BMPDataset *poDSIn, int nBandIn ) :
         pabyUncomprBuf = nullptr;
         return;
     }
-    unsigned int k = 0;
     unsigned int iLength = 0;
     unsigned int i = 0;
     unsigned int j = 0;
@@ -820,7 +819,7 @@ BMPComprRasterBand::BMPComprRasterBand( BMPDataset *poDSIn, int nBandIn ) :
                         iLength = pabyComprBuf[i++];
                     if( j == iUncomprSize )
                         break;
-                    for ( k = 0; k < iLength && j < iUncomprSize && i < iComprSize; k++ )
+                    for ( unsigned k = 0; k < iLength && j < iUncomprSize && i < iComprSize; k++ )
                         pabyUncomprBuf[j++] = pabyComprBuf[i++];
                     if ( i & 0x01 )
                         i++;
@@ -887,7 +886,7 @@ BMPComprRasterBand::BMPComprRasterBand( BMPDataset *poDSIn, int nBandIn ) :
                         iLength = pabyComprBuf[i++];
                     if( j == iUncomprSize )
                         break;
-                    for ( k = 0; k < iLength && j < iUncomprSize && i < iComprSize; k++ )
+                    for ( unsigned k = 0; k < iLength && j < iUncomprSize && i < iComprSize; k++ )
                     {
                         if ( k & 0x01 )
                             pabyUncomprBuf[j++] = pabyComprBuf[i++] & 0x0F;

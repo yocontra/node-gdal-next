@@ -67,7 +67,7 @@
 #include "ogrlayerdecorator.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogr2ogr_lib.cpp e5faee88208e3a1c1ce8da7d55cc174585eb808b 2020-04-27 18:07:56 +0200 Bas Couwenberg $")
+CPL_CVSID("$Id: ogr2ogr_lib.cpp 19947a8ab8ec9dad8643e2dd69d107a92ec51c9c 2020-10-19 00:23:20 +0200 Even Rouault $")
 
 typedef enum
 {
@@ -302,15 +302,15 @@ struct GDALVectorTranslateOptions
         source layer */
     bool bUnsetDefault;
 
-    /*! to prevent the new default behaviour that consists in, if the output driver has a FID layer
+    /*! to prevent the new default behavior that consists in, if the output driver has a FID layer
         creation option and we are not in append mode, to preserve the name of the source FID column
         and source feature IDs */
     bool bUnsetFid;
 
     /*! use the FID of the source features instead of letting the output driver to automatically
-        assign a new one. If not in append mode, this behaviour becomes the default if the output
+        assign a new one. If not in append mode, this behavior becomes the default if the output
         driver has a FID layer creation option. In which case the name of the source FID column will
-        be used and source feature IDs will be attempted to be preserved. This behaviour can be
+        be used and source feature IDs will be attempted to be preserved. This behavior can be
         disabled by option GDALVectorTranslateOptions::bUnsetFid */
     bool bPreserveFID;
 
@@ -943,6 +943,8 @@ class GCPCoordTransformation : public OGRCoordinateTransformation
             poSRS->Reference();
     }
 
+    GCPCoordTransformation& operator= (const GCPCoordTransformation&) = delete;
+
 public:
 
     void               *hTransformArg;
@@ -1015,6 +1017,8 @@ class CompositeCT : public OGRCoordinateTransformation
         bOwnCT1(true),
         poCT2(other.poCT2 ? other.poCT2->Clone(): nullptr),
         bOwnCT2(true) {}
+
+    CompositeCT& operator= (const CompositeCT&) = delete;
 
 public:
 
@@ -1556,7 +1560,7 @@ OGRLayer* GDALVectorTranslateWrappedDataset::GetLayerByName(const char* pszName)
     if( poLayer == nullptr )
         return nullptr;
 
-    // Replicate source dataset behaviour: if the fact of calling
+    // Replicate source dataset behavior: if the fact of calling
     // GetLayerByName() on a initially hidden layer makes it visible through
     // GetLayerCount()/GetLayer(), do the same. Otherwise we are going to
     // maintain it hidden as well.
@@ -1974,7 +1978,7 @@ static GDALDataset* GDALVectorTranslateCreateCopy(
  * @param nSrcCount the number of input datasets (only 1 supported currently)
  * @param pahSrcDS the list of input datasets.
  * @param psOptionsIn the options struct returned by GDALVectorTranslateOptionsNew() or NULL.
- * @param pbUsageError the pointer to int variable to determine any usage error has occurred
+ * @param pbUsageError pointer to a integer output variable to store if any usage error has occurred, or NULL.
  * @return the output dataset (new dataset that must be closed using GDALClose(), or hDstDS is not NULL) or NULL in case of error.
  *
  * @since GDAL 2.1
@@ -4391,10 +4395,6 @@ static bool SetupCT( TargetLayerInfo* psInfo,
                     return false;
                 }
                 poCT = new CompositeCT( poGCPCoordTrans, false, poCT, true );
-            }
-
-            if( poCT != psInfo->m_apoCT[iGeom].get() )
-            {
                 psInfo->m_apoCT[iGeom].reset(poCT);
             }
         }
@@ -4972,11 +4972,39 @@ static void RemoveSQLComments(char*& pszSQL)
     CPLString osSQL;
     for( char** papszIter = papszLines; papszIter && *papszIter; ++papszIter )
     {
-        if( !STARTS_WITH(*papszIter, "--") )
+        const char* pszLine = *papszIter;
+        char chQuote = 0;
+        int i = 0;
+        for(; pszLine[i] != '\0'; ++i )
         {
-            osSQL += *papszIter;
-            osSQL += " ";
+            if( chQuote )
+            {
+                if( pszLine[i] == chQuote )
+                {
+                    if( pszLine[i+1] == chQuote )
+                    {
+                        i++;
+                    }
+                    else
+                    {
+                        chQuote = 0;
+                    }
+                }
+            }
+            else if( pszLine[i] == '\'' || pszLine[i] == '"' )
+            {
+                chQuote = pszLine[i];
+            }
+            else if( pszLine[i] == '-' && pszLine[i+1] == '-' )
+            {
+                break;
+            }
         }
+        if( i > 0 )
+        {
+            osSQL.append(pszLine, i);
+        }
+        osSQL += ' ';
     }
     CSLDestroy(papszLines);
     CPLFree(pszSQL);
@@ -5011,7 +5039,7 @@ GDALVectorTranslateOptions *GDALVectorTranslateOptionsNew(char** papszArgv,
     psOptions->bSkipFailures = false;
     psOptions->nLayerTransaction = -1;
     psOptions->bForceTransaction = false;
-    psOptions->nGroupTransactions = 20000;
+    psOptions->nGroupTransactions = 100 * 1000;
     psOptions->nFIDToFetch = OGRNullFID;
     psOptions->bQuiet = false;
     psOptions->pszFormat = nullptr;
@@ -5265,7 +5293,7 @@ GDALVectorTranslateOptions *GDALVectorTranslateOptionsNew(char** papszArgv,
             psOptions->nLayerTransaction = FALSE;
             psOptions->bForceTransaction = true;
         }
-        /* Undocumented. Just a provision. Default behaviour should be OK */
+        /* Undocumented. Just a provision. Default behavior should be OK */
         else if ( EQUAL(papszArgv[i],"-lyr_transaction") )
         {
             psOptions->nLayerTransaction = TRUE;

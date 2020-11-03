@@ -29,7 +29,7 @@
 #include "ogr_svg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrsvgdriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsvgdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 CPL_C_START
 void RegisterOGRSVG();
@@ -80,7 +80,7 @@ void RegisterOGRSVG()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Scalable Vector Graphics" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "svg" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_svg.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/svg.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRSVGDriverOpen;

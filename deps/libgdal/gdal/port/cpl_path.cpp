@@ -49,7 +49,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_path.cpp 428925d6f580b65a1ab1d58528a0c7f3b9375409 2019-09-28 15:44:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_path.cpp c6d968cff9ac8a35496596945b63b5ca6fc74be5 2020-09-09 15:52:31 +0200 Thomas Bonfort $")
 
 // Should be size of larged possible filename.
 constexpr int CPL_PATH_BUF_SIZE = 2048;
@@ -818,7 +818,9 @@ int CPLIsFilenameRelative( const char *pszFilename )
 {
     if( (pszFilename[0] != '\0'
          && (STARTS_WITH(pszFilename+1, ":\\")
-             || STARTS_WITH(pszFilename+1, ":/")))
+             || STARTS_WITH(pszFilename+1, ":/")
+             || strstr(pszFilename+1,"://") // http://, ftp:// etc....
+            ))
         || STARTS_WITH(pszFilename, "\\\\?\\")  // Windows extended Length Path.
         || pszFilename[0] == '\\'
         || pszFilename[0] == '/' )

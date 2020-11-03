@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqliteutility.h 828fb5a356209714350c8e79a95a86741c6444b4 2017-03-20 15:28:41Z Even Rouault $
+ * $Id: ogrsqliteutility.h 455bf3c255ee78dc70116ca2e2b1a37aaecd0799 2020-05-30 17:43:05 +0200 Even Rouault $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Utility header for OGR GeoPackage driver.
@@ -34,6 +34,9 @@
 #include "cpl_string.h"
 #include "sqlite3.h"
 
+#include <set>
+#include <string>
+
 typedef struct
 {
     char** papszResult;
@@ -67,4 +70,6 @@ CPLString           SQLUnescape(const char* pszVal);
 
 char**              SQLTokenize( const char* pszSQL );
 
+std::set<std::string> SQLGetUniqueFieldUCConstraints(sqlite3* poDb,
+                                                     const char* pszTableName);
 #endif // OGR_SQLITEUTILITY_H_INCLUDED

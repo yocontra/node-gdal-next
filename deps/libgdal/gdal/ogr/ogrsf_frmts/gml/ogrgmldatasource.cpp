@@ -51,7 +51,7 @@
 #include "parsexsd.h"
 #include "../mem/ogr_mem.h"
 
-CPL_CVSID("$Id: ogrgmldatasource.cpp 978ba46f732b27073d5bbc30f427a311d9daed28 2020-04-08 01:11:41 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmldatasource.cpp a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                   ReplaceSpaceByPct20IfNeeded()                      */
@@ -547,7 +547,6 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
         strstr(szPtr, "xmlns:fme=\"http://www.safe.com/gml/fme\"") != nullptr;
 
     char szSRSName[128] = {};
-    bool bAnalyzeSRSPerFeature = true;
 
     // MTKGML.
     if( strstr(szPtr, "<Maastotiedot") != nullptr )
@@ -560,7 +559,6 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
                 "GML",
                 "Warning: a MTKGML file was detected, "
                 "but its namespace is unknown");
-        bAnalyzeSRSPerFeature = false;
         bUseGlobalSRSName = true;
         if( !ExtractSRSName(szPtr, szSRSName, sizeof(szSRSName)) )
             strcpy(szSRSName, "EPSG:3067");
@@ -699,13 +697,16 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
     if( szSRSName[0] != '\0' )
         poReader->SetGlobalSRSName(szSRSName);
 
+    const bool bIsWFSFromServer =
+        CPLString(pszFilename).ifind("SERVICE=WFS") != std::string::npos;
+
     // Resolve the xlinks in the source file and save it with the
     // extension ".resolved.gml". The source file will to set to that.
     char *pszXlinkResolvedFilename = nullptr;
     const char *pszOption = CPLGetConfigOption("GML_SAVE_RESOLVED_TO", nullptr);
     bool bResolve = true;
     bool bHugeFile = false;
-    if( pszOption != nullptr && STARTS_WITH_CI(pszOption, "SAME") )
+    if( bIsWFSFromServer || (pszOption != nullptr && STARTS_WITH_CI(pszOption, "SAME")) )
     {
         // "SAME" will overwrite the existing gml file.
         pszXlinkResolvedFilename = CPLStrdup(pszFilename);
@@ -820,12 +821,16 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
         }
     }
 
-    CPLString osGFSFilename = CPLResetExtension(pszFilename, "gfs");
-    if (STARTS_WITH(osGFSFilename, "/vsigzip/"))
-        osGFSFilename = osGFSFilename.substr(strlen("/vsigzip/"));
+    CPLString osGFSFilename;
+    if( !bIsWFSFromServer )
+    {
+        osGFSFilename = CPLResetExtension(pszFilename, "gfs");
+        if (STARTS_WITH(osGFSFilename, "/vsigzip/"))
+            osGFSFilename = osGFSFilename.substr(strlen("/vsigzip/"));
+    }
 
     // Can we find a GML Feature Schema (.gfs) for the input file?
-    if( !bHaveSchema && osXSDFilename.empty())
+    if( !osGFSFilename.empty() && !bHaveSchema && osXSDFilename.empty())
     {
         VSIStatBufL sGFSStatBuf;
         if( bCheckAuxFile && VSIStatL(osGFSFilename, &sGFSStatBuf) == 0 )
@@ -1236,8 +1241,7 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
                      false) )
     {
         bool bOnlyDetectSRS = bHaveSchema;
-        if( !poReader->PrescanForSchema(true, bAnalyzeSRSPerFeature,
-                                        bOnlyDetectSRS) )
+        if( !poReader->PrescanForSchema(true, bOnlyDetectSRS) )
         {
             // Assume an error was reported.
             return false;
@@ -1266,28 +1270,61 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
 
     // Save the schema file if possible.  Don't make a fuss if we
     // can't.  It could be read-only directory or something.
-    if( !bHaveSchema && !poReader->HasStoppedParsing() &&
-        !STARTS_WITH_CI(pszFilename, "/vsitar/") &&
-        !STARTS_WITH_CI(pszFilename, "/vsizip/") &&
-        !STARTS_WITH_CI(pszFilename, "/vsigzip/vsi") &&
-        !STARTS_WITH_CI(pszFilename, "/vsigzip//vsi") &&
-        !STARTS_WITH_CI(pszFilename, "/vsicurl/") &&
-        !STARTS_WITH_CI(pszFilename, "/vsicurl_streaming/"))
+    const char* pszWriteGFS = CSLFetchNameValueDef(
+        poOpenInfo->papszOpenOptions, "WRITE_GFS", "AUTO");
+    bool bWriteGFS = false;
+    if( EQUAL(pszWriteGFS, "AUTO") )
     {
-        VSILFILE *l_fp = nullptr;
-
-        VSIStatBufL sGFSStatBuf;
-        if( VSIStatExL(osGFSFilename, &sGFSStatBuf, VSI_STAT_EXISTS_FLAG) != 0 &&
-            (l_fp = VSIFOpenL(osGFSFilename, "wt")) != nullptr )
+        if( !bHaveSchema && !poReader->HasStoppedParsing() &&
+            !STARTS_WITH_CI(pszFilename, "/vsitar/") &&
+            !STARTS_WITH_CI(pszFilename, "/vsizip/") &&
+            !STARTS_WITH_CI(pszFilename, "/vsigzip/vsi") &&
+            !STARTS_WITH_CI(pszFilename, "/vsigzip//vsi") &&
+            !STARTS_WITH_CI(pszFilename, "/vsicurl") &&
+            !STARTS_WITH_CI(pszFilename, "/vsis3") &&
+            !STARTS_WITH_CI(pszFilename, "/vsigs") &&
+            !STARTS_WITH_CI(pszFilename, "/vsiaz") &&
+            !STARTS_WITH_CI(pszFilename, "/vsioss") )
         {
-            VSIFCloseL(l_fp);
-            poReader->SaveClasses(osGFSFilename);
+            VSIStatBufL sGFSStatBuf;
+            if( VSIStatExL(osGFSFilename, &sGFSStatBuf, VSI_STAT_EXISTS_FLAG) != 0 )
+            {
+                bWriteGFS = true;
+            }
+            else
+            {
+                CPLDebug("GML", "Not saving %s file: already exists.",
+                         osGFSFilename.c_str());
+            }
+        }
+    }
+    else if( CPLTestBool(pszWriteGFS) )
+    {
+        if( bHaveSchema || !poReader->HasStoppedParsing() )
+        {
+            bWriteGFS = true;
         }
         else
         {
-            CPLDebug("GML",
-                     "Not saving %s files already exists or can't be created.",
-                     osGFSFilename.c_str());
+            CPLError(CE_Warning, CPLE_AppDefined,
+                     "GFS file saving asked, but cannot be done");
+        }
+    }
+
+    if( bWriteGFS )
+    {
+        if( !poReader->SaveClasses(osGFSFilename) )
+        {
+            if( CPLTestBool(pszWriteGFS) )
+            {
+                CPLError(CE_Warning, CPLE_AppDefined,
+                     "GFS file saving asked, but failed");
+            }
+            else
+            {
+                CPLDebug("GML", "Not saving %s file: can't be created.",
+                        osGFSFilename.c_str());
+            }
         }
     }
 
@@ -1617,7 +1654,7 @@ OGRGMLLayer *OGRGMLDataSource::TranslateGMLSchema( GMLFeatureClass *poClass )
             oField.SetPrecision(poProperty->GetPrecision());
         if( !bEmptyAsNull )
             oField.SetNullable(poProperty->IsNullable() );
-
+        oField.SetUnique(poProperty->IsUnique());
         poLayer->GetLayerDefn()->AddFieldDefn(&oField);
     }
 
@@ -2169,31 +2206,83 @@ void OGRGMLDataSource::InsertHeader()
                   "<xs:import namespace=\"http://www.opengis.net/gml\" schemaLocation=\"http://schemas.opengis.net/gml/2.1.2/feature.xsd\"/>");
     }
 
-    // Define the FeatureCollection.
-    if (IsGML3Output() && !bGMLFeatureCollection)
+    // Define the FeatureCollection element
+    if (!bGMLFeatureCollection)
     {
-        if (IsGML32Output())
+        bool bHasUniqueConstraints = false;
+        for( int iLayer = 0; (iLayer < nLayerCount) && !bHasUniqueConstraints; iLayer++ )
         {
-            // GML Simple Features profile v2.0 mentions gml:AbstractGML as
-            // substitutionGroup but using gml:AbstractFeature makes it
-            // usablable by GMLJP2 v2.
-            PrintLine(fpSchema,
-                      "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:AbstractFeature\"/>",
-                      pszPrefix);
+            OGRFeatureDefn *poFDefn = papoLayers[iLayer]->GetLayerDefn();
+            const int nFieldCount = poFDefn->GetFieldCount();
+            for( int iField = 0; (iField < nFieldCount) && !bHasUniqueConstraints; iField++ )
+            {
+                const OGRFieldDefn* poFieldDefn = poFDefn->GetFieldDefn(iField);
+                if( poFieldDefn->IsUnique() )
+                    bHasUniqueConstraints = true;
+            }
         }
-        else if (IsGML3DeegreeOutput())
+
+        const char* pszFeatureMemberPrefix = pszPrefix;
+        if( IsGML3Output() )
         {
-            PrintLine(fpSchema,
-                      "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:_FeatureCollection\"/>",
-                      pszPrefix);
+            if (IsGML32Output())
+            {
+                // GML Simple Features profile v2.0 mentions gml:AbstractGML as
+                // substitutionGroup but using gml:AbstractFeature makes it
+                // usablable by GMLJP2 v2.
+                PrintLine(fpSchema,
+                        "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:AbstractFeature\"%s>",
+                        pszPrefix, bHasUniqueConstraints ? "" : "/");
+            }
+            else if (IsGML3DeegreeOutput())
+            {
+                PrintLine(fpSchema,
+                        "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:_FeatureCollection\"%s>",
+                        pszPrefix, bHasUniqueConstraints ? "" : "/");
+            }
+            else
+            {
+                PrintLine(fpSchema,
+                        "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:_GML\"%s>",
+                        pszPrefix, bHasUniqueConstraints ? "" : "/");
+            }
         }
         else
         {
+            pszFeatureMemberPrefix = "gml";
             PrintLine(fpSchema,
-                      "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:_GML\"/>",
-                      pszPrefix);
+                    "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:_FeatureCollection\"%s>",
+                    pszPrefix, bHasUniqueConstraints ? "" : "/");
         }
 
+        if( bHasUniqueConstraints )
+        {
+            for( int iLayer = 0; iLayer < nLayerCount; iLayer++ )
+            {
+                OGRFeatureDefn *poFDefn = papoLayers[iLayer]->GetLayerDefn();
+                const int nFieldCount = poFDefn->GetFieldCount();
+                for( int iField = 0; iField < nFieldCount; iField++ )
+                {
+                    const OGRFieldDefn* poFieldDefn = poFDefn->GetFieldDefn(iField);
+                    if( poFieldDefn->IsUnique() )
+                    {
+                        PrintLine(fpSchema, "  <xs:unique name=\"uniqueConstraint_%s_%s\">",
+                                  poFDefn->GetName(), poFieldDefn->GetNameRef());
+                        PrintLine(fpSchema, "    <xs:selector xpath=\"%s:featureMember/%s:%s\"/>",
+                                  pszFeatureMemberPrefix, pszPrefix, poFDefn->GetName());
+                        PrintLine(fpSchema, "    <xs:field xpath=\"%s:%s\"/>",
+                                  pszPrefix, poFieldDefn->GetNameRef());
+                        PrintLine(fpSchema, "  </xs:unique>");
+                    }
+                }
+            }
+            PrintLine(fpSchema, "</xs:element>");
+        }
+    }
+
+    // Define the FeatureCollectionType
+    if (IsGML3Output() && !bGMLFeatureCollection)
+    {
         PrintLine(fpSchema, "<xs:complexType name=\"FeatureCollectionType\">");
         PrintLine(fpSchema, "  <xs:complexContent>");
         if (IsGML3DeegreeOutput())
@@ -2235,10 +2324,6 @@ void OGRGMLDataSource::InsertHeader()
     }
     else if( !bGMLFeatureCollection )
     {
-        PrintLine(fpSchema,
-                  "<xs:element name=\"FeatureCollection\" type=\"%s:FeatureCollectionType\" substitutionGroup=\"gml:_FeatureCollection\"/>",
-                  pszPrefix);
-
         PrintLine(fpSchema, "<xs:complexType name=\"FeatureCollectionType\">");
         PrintLine(fpSchema, "  <xs:complexContent>");
         PrintLine(

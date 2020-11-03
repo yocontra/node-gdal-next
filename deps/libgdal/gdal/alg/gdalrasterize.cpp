@@ -53,7 +53,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdalrasterize.cpp 225923a5caa782d1543b7c0d7248b92dcc0bc8bf 2020-04-06 12:59:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterize.cpp 7925b72d646b6d81e38663dd97f012eda705df0f 2020-10-03 14:06:00 +0200 Even Rouault $")
 
 
 /************************************************************************/
@@ -662,10 +662,8 @@ static CPLErr GDALRasterizeOptions( char **papszOptions,
  * needs to transform the geometry locations into pixel/line coordinates
  * on the raster dataset.
  *
- * The output raster may be of any GDAL supported datatype, though currently
- * internally the burning is done either as GDT_Byte or GDT_Float32.  This
- * may be improved in the future.  An explicit list of burn values for
- * each geometry for each band must be passed in.
+ * The output raster may be of any GDAL supported datatype. An explicit list
+ * of burn values for each geometry for each band must be passed in.
  *
  * The papszOption list of options currently only supports one option. The
  * "ALL_TOUCHED" option may be enabled by setting it to "TRUE".
@@ -1129,10 +1127,8 @@ CPLErr GDALRasterizeGeometries( GDALDatasetH hDS,
  * needs to transform the geometry locations into pixel/line coordinates
  * on the raster dataset.
  *
- * The output raster may be of any GDAL supported datatype, though currently
- * internally the burning is done either as GDT_Byte or GDT_Float32.  This
- * may be improved in the future.  An explicit list of burn values for
- * each layer for each band must be passed in.
+ * The output raster may be of any GDAL supported datatype. An explicit list
+ * of burn values for each layer for each band must be passed in.
  *
  * @param hDS output data, must be opened in update mode.
  * @param nBandCount the number of bands to be updated.

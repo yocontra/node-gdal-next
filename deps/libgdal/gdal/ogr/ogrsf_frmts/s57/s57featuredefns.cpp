@@ -32,7 +32,7 @@
 #include "ogr_api.h"
 #include "s57.h"
 
-CPL_CVSID("$Id: s57featuredefns.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: s57featuredefns.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     S57GenerateGeomFeatureDefn()                     */
@@ -421,7 +421,15 @@ OGRFeatureDefn *S57GenerateObjectClassDefn(
             break;
 
           case SAT_LIST:
-            oField.SetType( OFTString );
+            if( (nOptionFlags & S57M_LIST_AS_STRING) )
+            {
+                // Legacy behavior
+                oField.SetType( OFTString );
+            }
+            else
+            {
+                oField.SetType( OFTStringList );
+            }
             break;
         }
 

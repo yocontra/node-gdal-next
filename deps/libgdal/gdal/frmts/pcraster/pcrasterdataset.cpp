@@ -33,7 +33,7 @@
 #include "pcrasterdataset.h"
 #include "pcrasterutil.h"
 
-CPL_CVSID("$Id: pcrasterdataset.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: pcrasterdataset.cpp fa839b55f793867fe0bfe7239f18216793be4f7f 2020-09-18 16:59:11 +0200 Even Rouault $")
 
 /*!
   \file
@@ -66,7 +66,7 @@ GDALDataset* PCRasterDataset::open(
 
     if(map) {
       CPLErrorReset();
-      dataset = new PCRasterDataset(map);
+      dataset = new PCRasterDataset(map, info->eAccess);
       if( CPLGetLastErrorType() != CE_None )
       {
           delete dataset;
@@ -286,7 +286,7 @@ GDALDataset* PCRasterDataset::createCopy(
 /*!
   \param     mapIn PCRaster map handle. It is ours to close.
 */
-PCRasterDataset::PCRasterDataset( MAP* mapIn) :
+PCRasterDataset::PCRasterDataset( MAP* mapIn, GDALAccess eAccessIn ) :
     GDALPamDataset(),
     d_map(mapIn),
     d_west(0.0),
@@ -298,6 +298,7 @@ PCRasterDataset::PCRasterDataset( MAP* mapIn) :
     d_location_changed(false)
 {
   // Read header info.
+  eAccess = eAccessIn;
   nRasterXSize = static_cast<int>(RgetNrCols(d_map));
   nRasterYSize = static_cast<int>(RgetNrRows(d_map));
   if( !GDALCheckDatasetDimensions(nRasterXSize, nRasterYSize) )

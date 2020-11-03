@@ -44,7 +44,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: ogrcsvdriver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcsvdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 static CPLMutex *hMutex = nullptr;
 static std::map<CPLString, GDALDataset *> *poMap = nullptr;
@@ -301,7 +301,7 @@ void RegisterOGRCSV()
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME,
                               "Comma Separated Value (.csv)");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "csv");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drv_csv.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/vector/csv.html");
 
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

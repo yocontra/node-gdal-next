@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hkvdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: hkvdataset.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -874,7 +874,7 @@ CPLErr HKVDataset::_SetProjection( const char * pszNewProjection )
     }
     else
     {
-        // Default to previous behaviour if spheroid not found by radius and
+        // Default to previous behavior if spheroid not found by radius and
         // inverse flattening.
         if( strstr(pszNewProjection,"Bessel") != nullptr )
         {

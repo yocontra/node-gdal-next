@@ -33,7 +33,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwg_hatch.cpp 98dfb4b4012c5ae4621e246e8eb393b3c05a3f48 2018-04-02 22:09:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdwg_hatch.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 static OGRErr DWGCollectBoundaryLoop( OdDbHatchPtr poHatch, int iLoop,
                                       OGRGeometryCollection *poGC );
@@ -149,7 +149,7 @@ static OGRErr DWGCollectBoundaryLoop( OdDbHatchPtr poHatch, int iLoop,
 
         oSmoothPolyline.Close();
 
-        OGRLineString *poLS = oSmoothPolyline.Tesselate()->toLineString();
+        OGRLineString *poLS = oSmoothPolyline.Tessellate()->toLineString();
         poGC->addGeometryDirectly( poLS );
 
         return OGRERR_NONE;

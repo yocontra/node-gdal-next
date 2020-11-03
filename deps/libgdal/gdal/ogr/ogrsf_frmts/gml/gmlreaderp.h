@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gmlreaderp.h 67428c7863250a072304ba6edb5f523f8a01aa64 2020-06-30 23:01:14 +0200 Even Rouault $
+ * $Id: gmlreaderp.h a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $
  *
  * Project:  GML Reader
  * Purpose:  Private Declarations for OGR free GML Reader code.
@@ -444,7 +444,6 @@ public:
                                        int iSqliteCacheMB ) override;
 
     bool             PrescanForSchema(bool bGetExtents = true,
-                                      bool bAnalyzeSRSPerFeature = true,
                                       bool bOnlyDetectSRS = false ) override;
     bool             PrescanForTemplate() override;
     bool             ReArrangeTemplateClasses( GFSTemplateList *pCC );

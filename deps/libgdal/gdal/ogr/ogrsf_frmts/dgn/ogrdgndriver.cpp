@@ -29,7 +29,7 @@
 #include "ogr_dgn.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdgndriver.cpp 4971449609881d6ffdca70188292293852d12691 2017-12-17 16:48:14Z Even Rouault $")
+CPL_CVSID("$Id: ogrdgndriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -107,7 +107,7 @@ void RegisterOGRDGN()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Microstation DGN" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "dgn" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_dgn.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/dgn.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

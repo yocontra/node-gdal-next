@@ -32,7 +32,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: eirdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: eirdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -206,9 +206,6 @@ CPLErr EIRDataset::GetGeoTransform( double * padfTransform )
 char **EIRDataset::GetFileList()
 
 {
-    const CPLString osPath = CPLGetPath( GetDescription() );
-    const CPLString osName = CPLGetBasename( GetDescription() );
-
     // Main data file, etc.
     char **papszFileList = GDALPamDataset::GetFileList();
 

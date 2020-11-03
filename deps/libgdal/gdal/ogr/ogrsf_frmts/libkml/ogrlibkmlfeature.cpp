@@ -38,7 +38,7 @@
 #include "ogrlibkmlgeometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrlibkmlfeature.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmlfeature.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 using kmldom::AliasPtr;
 using kmldom::CameraPtr;
@@ -92,12 +92,11 @@ static CameraPtr feat2kmlcamera( const struct fieldconfig& oFC,
     camera->set_latitude(poOgrFeat->GetFieldAsDouble(iCameraLatitudeField));
     camera->set_longitude(poOgrFeat->GetFieldAsDouble(iCameraLongitudeField));
     int isGX = FALSE;
-    int nAltitudeMode = kmldom::ALTITUDEMODE_CLAMPTOGROUND;
 
     if( iCameraAltitudeModeField >= 0 &&
         poOgrFeat->IsFieldSetAndNotNull(iCameraAltitudeModeField) )
     {
-        nAltitudeMode = kmlAltitudeModeFromString(
+        const int nAltitudeMode = kmlAltitudeModeFromString(
             poOgrFeat->GetFieldAsString(iCameraAltitudeModeField), isGX);
         camera->set_altitudemode(nAltitudeMode);
     }
@@ -628,10 +627,9 @@ FeaturePtr feat2kml(
         int isGX = FALSE;
         const int iAltitudeMode =
             poOgrFeat->GetFieldIndex(oFC.altitudeModefield);
-        int nAltitudeMode = kmldom::ALTITUDEMODE_CLAMPTOGROUND;
-        if( iAltitudeMode >= 0 && poOgrFeat->IsFieldSetAndNotNull(iAltitudeMode) )
+        if( poOgrFeat->IsFieldSetAndNotNull(iAltitudeMode) )
         {
-            nAltitudeMode = kmlAltitudeModeFromString(
+            const int nAltitudeMode = kmlAltitudeModeFromString(
                 poOgrFeat->GetFieldAsString(iAltitudeMode), isGX);
             model->set_altitudemode(nAltitudeMode);
 
@@ -785,10 +783,9 @@ FeaturePtr feat2kml(
         int isGX = FALSE;
         const int iAltitudeMode =
             poOgrFeat->GetFieldIndex(oFC.altitudeModefield);
-        int nAltitudeMode = kmldom::ALTITUDEMODE_CLAMPTOGROUND;
-        if( iAltitudeMode >= 0 && poOgrFeat->IsFieldSetAndNotNull(iAltitudeMode) )
+        if( poOgrFeat->IsFieldSetAndNotNull(iAltitudeMode) )
         {
-            nAltitudeMode = kmlAltitudeModeFromString(
+            const int nAltitudeMode = kmlAltitudeModeFromString(
                 poOgrFeat->GetFieldAsString(iAltitudeMode), isGX);
             camera->set_altitudemode(nAltitudeMode);
         }

@@ -35,7 +35,7 @@
 #include "ogr_p.h"
 #include "cpl_vsi_error.h"
 
-CPL_CVSID("$Id: ogrlibkmldatasource.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmldatasource.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 using kmlbase::Attributes;
 using kmldom::ContainerPtr;
@@ -92,7 +92,7 @@ OGRLIBKMLDataSource::OGRLIBKMLDataSource( KmlFactory * poKmlFactory ) :
     m_pszName(nullptr),
     papoLayers(nullptr),
     nLayers(0),
-    nAlloced(0),
+    nAllocated(0),
     bUpdate(false),
     bUpdated(false),
     m_papszOptions(nullptr),
@@ -798,11 +798,11 @@ OGRLIBKMLLayer *OGRLIBKMLDataSource::AddLayer(
     }
 
     /***** check to see if we have enough space to store the layer *****/
-    if( nLayers == nAlloced )
+    if( nLayers == nAllocated )
     {
-        nAlloced += nGuess;
+        nAllocated += nGuess;
         papoLayers = static_cast<OGRLIBKMLLayer **>(
-            CPLRealloc( papoLayers, sizeof(OGRLIBKMLLayer *) * nAlloced ) );
+            CPLRealloc( papoLayers, sizeof(OGRLIBKMLLayer *) * nAllocated ) );
     }
 
     /***** create the layer *****/

@@ -29,7 +29,7 @@
 #include "ogr_mssqlspatial.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrmssqlspatialdriver.cpp af87d0f739c0d9769410034858a8831d84c62915 2018-08-15 16:04:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatialdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           ~OGRMSSQLSpatialDriver()                   */
@@ -127,7 +127,7 @@ void RegisterOGRMSSQLSpatial()
                                " (BCP)"
 #endif
                                );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_mssqlspatial.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/mssqlspatial.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
                                "<CreationOptionList/>");
 

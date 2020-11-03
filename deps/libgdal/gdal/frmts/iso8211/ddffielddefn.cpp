@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ddffielddefn.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ddffielddefn.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 #define CPLE_DiscardedFormat   1301
 
@@ -609,7 +609,6 @@ char *DDFFieldDefn::ExpandFormat( const char * pszSrc )
 {
     size_t nDestMax = 32;
     char *pszDest = static_cast<char *>(CPLMalloc(nDestMax + 1));
-    int nRepeat = 0;
 
     size_t iSrc = 0;
     size_t iDst = 0;
@@ -665,7 +664,7 @@ char *DDFFieldDefn::ExpandFormat( const char * pszSrc )
         else if( (iSrc == 0 || pszSrc[iSrc-1] == ',')
                  && isdigit(pszSrc[iSrc]) )
         {
-            nRepeat = atoi(pszSrc+iSrc);
+            const int nRepeat = atoi(pszSrc+iSrc);
             // 100: arbitrary number. Higher values might cause performance
             // problems in the below loop
             if( nRepeat < 0 || nRepeat > 100 )

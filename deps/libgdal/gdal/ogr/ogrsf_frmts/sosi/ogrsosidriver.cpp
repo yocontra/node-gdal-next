@@ -32,7 +32,7 @@
 
 #include "ogr_sosi.h"
 
-CPL_CVSID("$Id: ogrsosidriver.cpp edd3634e17f91930384b2108e6fd8560d7ff1509 2019-09-02 17:33:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsosidriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 static int bFYBAInit = FALSE;
 static std::mutex oMutex;
@@ -133,7 +133,7 @@ void RegisterOGRSOSI() {
     poDriver->SetDescription( "SOSI" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Norwegian SOSI Standard" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_sosi.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/sosi.html" );
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,  "<OpenOptionList>"
     "<Option name='appendFieldsMap' type='string' description='Default is that all rows for equal field names will be appended in a feature, but with this parameter you select what field this should be valid for. With appendFieldsMap=f1&amp;f2, Append will be done for field f1 and f2 using a comma as delimiter.'/>"
     "</OpenOptionList>");

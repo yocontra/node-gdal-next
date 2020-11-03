@@ -45,7 +45,7 @@
 #include "ogr_geometry.h"
 #include "ogr_geos.h"
 
-CPL_CVSID("$Id: gdalcutline.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalcutline.cpp ab04d3bd6e63f3824c0d4a3bd40e3e3f3d84740a 2020-10-09 01:31:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         BlendMaskGenerator()                         */
@@ -309,7 +309,8 @@ GDALWarpCutlineMasker( void *pMaskFuncArg,
     if( wkbFlatten(OGR_G_GetGeometryType(hPolygon)) != wkbPolygon
         && wkbFlatten(OGR_G_GetGeometryType(hPolygon)) != wkbMultiPolygon )
     {
-        CPLAssert( false );
+        CPLError(CE_Failure, CPLE_NotSupported,
+                 "Cutline should be a polygon or a multipolygon");
         return CE_Failure;
     }
 

@@ -29,7 +29,7 @@
 #include "ogr_pg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgdriver.cpp 1210bf06cd5fb2b2b574ebf5f4a1cca0df7b3c64 2020-04-03 12:37:25 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              Identify()                              */
@@ -110,7 +110,7 @@ void RegisterOGRPG()
     poDriver->SetDescription( "PostgreSQL" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "PostgreSQL/PostGIS" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_pg.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/pg.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "PG:" );
 
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
@@ -169,6 +169,7 @@ void RegisterOGRPG()
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATASUBTYPES, "Boolean Int16 Float32" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_UNIQUE_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
 
     poDriver->pfnOpen = OGRPGDriverOpen;

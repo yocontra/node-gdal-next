@@ -35,25 +35,6 @@ namespace GDAL
 {
 
 /************************************************************************/
-/*                         HDF5SharedResources                          */
-/************************************************************************/
-
-class HDF5SharedResources
-{
-    friend class ::HDF5Dataset;
-
-    bool m_bReadOnly = true;
-    hid_t            m_hHDF5 = 0;
-    CPLString        m_osFilename{};
-public:
-    HDF5SharedResources() = default;
-    ~HDF5SharedResources();
-
-    inline hid_t GetHDF5() const { return m_hHDF5; }
-    inline bool IsReadOnly() const { return m_bReadOnly; }
-};
-
-/************************************************************************/
 /*                               HDF5Group                              */
 /************************************************************************/
 
@@ -291,7 +272,7 @@ class HDF5Array final: public GDALMDArray
 
     HDF5Array(const std::string& osParentName,
               const std::string& osName,
-              std::shared_ptr<HDF5SharedResources> poShared,
+              const std::shared_ptr<HDF5SharedResources>& poShared,
               hid_t hArray,
               const HDF5Group* poGroup,
               bool bSkipFullDimensionInstantiation);
@@ -324,7 +305,7 @@ public:
     static std::shared_ptr<HDF5Array> Create(
                    const std::string& osParentName,
                    const std::string& osName,
-                   std::shared_ptr<HDF5SharedResources> poShared,
+                   const std::shared_ptr<HDF5SharedResources>& poShared,
                    hid_t hArray,
                    const HDF5Group* poGroup,
                    bool bSkipFullDimensionInstantiation)
@@ -382,7 +363,7 @@ class HDF5Attribute final: public GDALAttribute
     HDF5Attribute(const std::string& osGroupFullName,
                   const std::string& osParentName,
                    const std::string& osName,
-                   std::shared_ptr<HDF5SharedResources> poShared,
+                   const std::shared_ptr<HDF5SharedResources>& poShared,
                    hid_t hAttribute):
         GDALAbstractMDArray(osParentName, osName),
         GDALAttribute(osParentName, osName),
@@ -451,7 +432,7 @@ public:
                    const std::string& osGroupFullName,
                    const std::string& osParentName,
                    const std::string& osName,
-                   std::shared_ptr<HDF5SharedResources> poShared,
+                   const std::shared_ptr<HDF5SharedResources>& poShared,
                    hid_t hAttribute)
     {
         auto ar(std::shared_ptr<HDF5Attribute>(new HDF5Attribute(
@@ -787,7 +768,7 @@ HDF5Array::~HDF5Array()
 
 HDF5Array::HDF5Array(const std::string& osParentName,
                    const std::string& osName,
-                   std::shared_ptr<HDF5SharedResources> poShared,
+                   const std::shared_ptr<HDF5SharedResources>& poShared,
                    hid_t hArray,
                    const HDF5Group* poGroup,
                    bool bSkipFullDimensionInstantiation):
@@ -1657,21 +1638,21 @@ bool HDF5Array::IRead(const GUInt64* arrayStartIdx,
     size_t nEltCount = 1;
     for( size_t i = 0; i < nDims; ++i )
     {
-        if( arrayStep[i] < 0 || bufferStride[i] < 0)
+        if( count[i] != 1 && (arrayStep[i] < 0 || bufferStride[i] < 0) )
         {
             return ReadSlow(arrayStartIdx, count, arrayStep, bufferStride,
                             bufferDataType, pDstBuffer);
         }
         anOffset[i] = static_cast<hsize_t>(arrayStartIdx[i]);
         anCount[i] = static_cast<hsize_t>(count[i]);
-        anStep[i] = static_cast<hsize_t>(arrayStep[i]);
+        anStep[i] = static_cast<hsize_t>(count[i] == 1 ? 1 : arrayStep[i]);
         nEltCount *= count[i];
     }
     size_t nCurStride = 1;
     for( size_t i = nDims; i > 0; )
     {
         --i;
-        if( static_cast<size_t>(bufferStride[i]) != nCurStride )
+        if( count[i] != 1 && static_cast<size_t>(bufferStride[i]) != nCurStride )
         {
             return ReadSlow(arrayStartIdx, count, arrayStep, bufferStride,
                             bufferDataType, pDstBuffer);
@@ -2089,25 +2070,45 @@ GDALDataset *HDF5Dataset::OpenMultiDim( GDALOpenInfo *poOpenInfo )
         return nullptr;
     }
 
-    H5G_stat_t oStatbuf;
-    if(  H5Gget_objinfo(hHDF5, "/", FALSE, &oStatbuf) < 0 )
-    {
-        return nullptr;
-    }
-    auto hGroup = H5Gopen(hHDF5, "/");
-    if( hGroup < 0 )
-    {
-        H5Fclose(hHDF5);
-        return nullptr;
-    }
-
     auto poSharedResources = std::make_shared<GDAL::HDF5SharedResources>();
     poSharedResources->m_hHDF5 = hHDF5;
 
+    auto poGroup(OpenGroup(poSharedResources));
+    if( poGroup == nullptr )
+    {
+        return nullptr;
+    }
+
     auto poDS(new HDF5Dataset());
-    poDS->m_poRootGroup.reset(new GDAL::HDF5Group(std::string(), "/",
-                                            poSharedResources, {},
-                                            hGroup,
-                                            oStatbuf.objno));
+    poDS->m_poRootGroup = poGroup;
+
+    poDS->SetDescription(poOpenInfo->pszFilename);
+
+    // Setup/check for pam .aux.xml.
+    poDS->TryLoadXML();
+
     return poDS;
+}
+
+/************************************************************************/
+/*                            OpenGroup()                               */
+/************************************************************************/
+
+std::shared_ptr<GDALGroup> HDF5Dataset::OpenGroup(std::shared_ptr<GDAL::HDF5SharedResources> poSharedResources)
+{
+    H5G_stat_t oStatbuf;
+    if(  H5Gget_objinfo(poSharedResources->m_hHDF5, "/", FALSE, &oStatbuf) < 0 )
+    {
+        return nullptr;
+    }
+    auto hGroup = H5Gopen(poSharedResources->m_hHDF5, "/");
+    if( hGroup < 0 )
+    {
+        return nullptr;
+    }
+
+    return std::shared_ptr<GDALGroup>(new GDAL::HDF5Group(std::string(), "/",
+                                                          poSharedResources, {},
+                                                          hGroup,
+                                                          oStatbuf.objno));
 }

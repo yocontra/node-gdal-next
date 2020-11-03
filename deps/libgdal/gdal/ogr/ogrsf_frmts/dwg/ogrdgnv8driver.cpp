@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "ogrteigha.h"
 
-CPL_CVSID("$Id: ogrdgnv8driver.cpp 0fe977e272dc43f48341e446d539dea902b39c29 2019-02-02 14:22:00 -0800 Lucian Plesea $")
+CPL_CVSID("$Id: ogrdgnv8driver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRDGNV8DriverUnload()                       */
@@ -147,7 +147,7 @@ void RegisterOGRDGNV8()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Microstation DGNv8" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "dgn" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_dgnv8.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/dgnv8.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_FEATURE_STYLES, "YES" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,

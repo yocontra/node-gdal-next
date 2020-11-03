@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_elastic.h ac79f4a7bb3dbbcff8bcd266cd516f24835d240a 2020-05-22 19:10:11 +0200 Even Rouault $
+ * $Id: ogr_elastic.h 2818ff0a49f65741a55b9cea79df496cc05f85e3 2020-05-22 19:10:11 +0200 Even Rouault $
  *
  * Project:  Elasticsearch Translator
  * Purpose:

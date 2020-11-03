@@ -92,7 +92,7 @@ void OGRAPISPYCPLSetThreadLocalConfigOption(const char*, const char*);
 // Uncomment to get list of options that have been fetched and set.
 // #define DEBUG_CONFIG_OPTIONS
 
-CPL_CVSID("$Id: cpl_conv.cpp 5f22744da4d967c5a4f8699997dc0a697df5ee35 2020-03-10 20:19:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_conv.cpp 668f56cc01956504b122f343cce80cf576ea48a9 2020-06-21 20:14:32 +0200 Even Rouault $")
 
 static CPLMutex *hConfigMutex = nullptr;
 static volatile char **g_papszConfigOptions = nullptr;
@@ -1053,6 +1053,8 @@ GIntBig CPLAtoGIntBigEx( const char* pszString, int bWarn, int *pbOverflow )
     errno = 0;
 #if defined(__MSVCRT__) || (defined(WIN32) && defined(_MSC_VER))
     GIntBig nVal = _atoi64(pszString);
+#elif HAVE_STRTOLL
+    GIntBig nVal = strtoll(pszString, nullptr, 10);
 #elif HAVE_ATOLL
     GIntBig nVal = atoll(pszString);
 #else

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_simplesurf.h fe2d81c8819bf9794bce0210098e637565728350 2018-05-06 00:49:51 +0200 Even Rouault $
+ * $Id: gdal_simplesurf.h 595fc490ff5c1572fd1e75b4d5840ef30a170e74 2020-06-19 18:24:16 +0200 Even Rouault $
  * Project:  GDAL
  * Purpose:  Correlator
  * Author:   Andrew Migal, migal.drew@gmail.com
@@ -87,7 +87,7 @@ public:
      * nIndex should be within range from 0 to DESC_SIZE (in current version - 64)
      *
      * @return Reference to value of descriptor in 'nIndex' position.
-     * If index is out of range then behaviour is undefined.
+     * If index is out of range then behavior is undefined.
      */
     double& operator[](int nIndex);
 
@@ -504,17 +504,25 @@ public:
     ExtractFeaturePoints(GDALIntegralImage *poImg, double dfThreshold);
 
     /**
-     * Find corresponding points (equal points in two collections).
-     *
-     * @param poMatchPairs Resulting collection for matched points
-     * @param poFirstCollect Points on the first image
-     * @param poSecondCollect Points on the second image
-     * @param dfThreshold Value from 0 to 1. Threshold affects to number of
-     * matched points. If threshold is lower, amount of corresponding
-     * points is larger, and vice versa
-     *
-     * @return CE_None or CE_Failure if error occurs.
-     */
+    * Find corresponding points (equal points in two collections).
+    *
+    * @param poMatchPairs Resulting collection for matched points
+    * @param poFirstCollect Points on the first image
+    * @param poSecondCollect Points on the second image
+    * @param dfThreshold Value from 0 to 1. Threshold affects to number of
+    * matched points. If threshold is higher, amount of corresponding
+    * points is larger, and vice versa
+    *
+    * @note Typical threshold's value is 0,1. BUT it's a very approximate guide.
+    * It can be 0,001 or even 1. This threshold provides direct adjustment
+    * of point matching.
+    * NOTICE that if threshold is lower, matches are more robust and correct, but
+    * number of matched points is smaller. Therefore if algorithm performs many
+    * false detections and produces bad results, reduce threshold.  Otherwise, if
+    * algorithm finds nothing, increase threshold.
+    *
+    * @return CE_None or CE_Failure if error occurs.
+    */
     static CPLErr MatchFeaturePoints(
         std::vector<GDALFeaturePoint*> *poMatchPairs,
         std::vector<GDALFeaturePoint> *poFirstCollect,

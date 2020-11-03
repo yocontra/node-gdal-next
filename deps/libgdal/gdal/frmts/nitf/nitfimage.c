@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfimage.c d7976d4611d69cb3b28a4d6cc623ec4e6826cae0 2019-10-28 09:12:28 +0100 Even Rouault $
+ * $Id: nitfimage.c b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Module responsible for implementation of most NITFImage
@@ -36,7 +36,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: nitfimage.c d7976d4611d69cb3b28a4d6cc623ec4e6826cae0 2019-10-28 09:12:28 +0100 Even Rouault $")
+CPL_CVSID("$Id: nitfimage.c b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 
@@ -2326,7 +2326,7 @@ static int NITFFormatRPC00BCoefficient( char* pszBuffer, double dfVal,
         }
         szTemp[11] = szTemp[13];
     }
-    else // behaviour of the standard: 2 digits for the exponent
+    else // behavior of the standard: 2 digits for the exponent
 #endif
     {
         CPLAssert( nLen == 13 );

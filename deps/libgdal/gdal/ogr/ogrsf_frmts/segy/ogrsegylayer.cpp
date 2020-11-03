@@ -32,7 +32,7 @@
 #include "ogr_p.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: ogrsegylayer.cpp 272416f0c3a7d14d2fb687b05724805578de4de0 2019-08-23 13:20:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsegylayer.cpp bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $")
 
 // #define SEGY_EXTENSIONS
 
@@ -324,30 +324,6 @@ void OGRSEGYLayer::ResetReading()
 
     VSIFSeekL( fp, 3200 + 400 + 3200 * sBFH.nNumberOfExtendedTextualFileHeader,
                SEEK_SET );
-}
-
-/************************************************************************/
-/*                           GetNextFeature()                           */
-/************************************************************************/
-
-OGRFeature *OGRSEGYLayer::GetNextFeature()
-{
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-        if( poFeature == nullptr )
-            return nullptr;
-
-        if( (m_poFilterGeom == nullptr
-             || FilterGeometry( poFeature->GetGeometryRef() ) )
-            && (m_poAttrQuery == nullptr
-                || m_poAttrQuery->Evaluate( poFeature )) )
-        {
-            return poFeature;
-        }
-
-        delete poFeature;
-    }
 }
 
 /************************************************************************/
@@ -910,32 +886,6 @@ void OGRSEGYHeaderLayer::ResetReading()
 
 {
     bEOF = false;
-}
-
-/************************************************************************/
-/*                           GetNextFeature()                           */
-/************************************************************************/
-
-OGRFeature *OGRSEGYHeaderLayer::GetNextFeature()
-{
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-        if( poFeature == nullptr )
-            return nullptr;
-
-        if( (m_poFilterGeom == nullptr
-             || FilterGeometry( poFeature->GetGeometryRef() ) )
-            && (m_poAttrQuery == nullptr
-                || m_poAttrQuery->Evaluate( poFeature )) )
-        {
-            return poFeature;
-        }
-        else
-        {
-            delete poFeature;
-        }
-    }
 }
 
 /************************************************************************/

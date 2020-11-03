@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gmlreader.h 8f2d9a25ddfba66412b29ced2eda889ef6bea5dd 2019-11-06 21:25:57 +0100 Even Rouault $
+ * $Id: gmlreader.h a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $
  *
  * Project:  GML Reader
  * Purpose:  Public Declarations for OGR free GML Reader code.
@@ -86,6 +86,7 @@ class CPL_DLL GMLPropertyDefn
     size_t            m_nSrcElementLen;
     char             *m_pszCondition;
     bool              m_bNullable;
+    bool              m_bUnique = false;
 
 public:
 
@@ -109,6 +110,9 @@ public:
 
     void        SetNullable( bool bNullable ) { m_bNullable = bNullable; }
     bool        IsNullable() const { return m_bNullable; }
+
+    void        SetUnique( bool bUnique ) { m_bUnique = bUnique; }
+    bool        IsUnique() const { return m_bUnique; }
 
     void        AnalysePropertyValue( const GMLProperty* psGMLProperty,
                                       bool bSetWidth = true );
@@ -315,7 +319,6 @@ class CPL_DLL IGMLReader
                                    int iSqliteCacheMB ) = 0;
 
     virtual bool PrescanForSchema( bool bGetExtents = true,
-                                  bool bAnalyzeSRSPerFeature = true,
                                   bool bOnlyDetectSRS = false ) = 0;
     virtual bool PrescanForTemplate() = 0;
 

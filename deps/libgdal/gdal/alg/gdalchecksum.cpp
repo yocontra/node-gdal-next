@@ -39,7 +39,7 @@
 #include "gdal.h"
 
 
-CPL_CVSID("$Id: gdalchecksum.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalchecksum.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALChecksumImage()                          */
@@ -116,7 +116,7 @@ GDALChecksumImage( GDALRasterBandH hBand,
                 }
                 else
                 {
-                    // Standard behaviour of GDALCopyWords when converting
+                    // Standard behavior of GDALCopyWords when converting
                     // from floating point to Int32.
                     dfVal += 0.5;
 

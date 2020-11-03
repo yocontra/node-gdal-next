@@ -49,7 +49,7 @@
 #include "gdalwarper.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vrtwarped.cpp ef49c00611235df0c1ce4f51344f00567a668661 2020-02-13 11:08:39 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtwarped.cpp 3f285a98bd8c75b5d0d5604f44b9269cb65e5dde 2020-05-17 17:49:27 +0200 Martin Dobias $")
 
 /************************************************************************/
 /*                      GDALAutoCreateWarpedVRT()                       */
@@ -107,7 +107,33 @@ GDALAutoCreateWarpedVRT( GDALDatasetH hSrcDS,
                          GDALResampleAlg eResampleAlg,
                          double dfMaxError,
                          const GDALWarpOptions *psOptionsIn )
+{
+  return GDALAutoCreateWarpedVRTEx(
+        hSrcDS, pszSrcWKT, pszDstWKT, eResampleAlg,
+        dfMaxError, psOptionsIn, nullptr );
+}
 
+/************************************************************************/
+/*                     GDALAutoCreateWarpedVRTEx()                      */
+/************************************************************************/
+
+/**
+ * Create virtual warped dataset automatically.
+ *
+ * Compared to GDALAutoCreateWarpedVRT() this function adds one extra
+ * argument: options to be passed to GDALCreateGenImgProjTransformer2().
+ *
+ * @since 3.2
+ */
+
+GDALDatasetH CPL_STDCALL
+GDALAutoCreateWarpedVRTEx( GDALDatasetH hSrcDS,
+                           const char *pszSrcWKT,
+                           const char *pszDstWKT,
+                           GDALResampleAlg eResampleAlg,
+                           double dfMaxError,
+                           const GDALWarpOptions *psOptionsIn,
+                           CSLConstList papszTransformerOptions )
 {
     VALIDATE_POINTER1( hSrcDS, "GDALAutoCreateWarpedVRT", nullptr );
 
@@ -167,10 +193,17 @@ GDALAutoCreateWarpedVRT( GDALDatasetH hSrcDS,
 /*      Create the transformer.                                         */
 /* -------------------------------------------------------------------- */
     psWO->pfnTransformer = GDALGenImgProjTransform;
+
+    char **papszOptions = nullptr;
+    if( pszSrcWKT != nullptr )
+        papszOptions = CSLSetNameValue( papszOptions, "SRC_SRS", pszSrcWKT );
+    if( pszDstWKT != nullptr )
+        papszOptions = CSLSetNameValue( papszOptions, "DST_SRS", pszDstWKT );
+    papszOptions = CSLMerge( papszOptions, papszTransformerOptions );
     psWO->pTransformerArg =
-        GDALCreateGenImgProjTransformer( psWO->hSrcDS, pszSrcWKT,
-                                         nullptr, pszDstWKT,
-                                         TRUE, 1.0, 0 );
+        GDALCreateGenImgProjTransformer2( psWO->hSrcDS, nullptr,
+                                          papszOptions );
+    CSLDestroy( papszOptions );
 
     if( psWO->pTransformerArg == nullptr )
     {

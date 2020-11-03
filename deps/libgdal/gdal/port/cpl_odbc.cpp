@@ -34,7 +34,7 @@
 #include "cpl_string.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_odbc.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_odbc.cpp 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $")
 
 #ifndef SQLColumns_TABLE_CAT
 #define SQLColumns_TABLE_CAT 1
@@ -85,19 +85,22 @@ int CPLODBCDriverInstaller::InstallDriver( const char* pszDriver,
                                      &m_nUsageCount ) )
     {
         const WORD nErrorNum = 1;  // TODO - a function param?
-        CPL_UNUSED RETCODE cRet = SQL_ERROR;
 
         // Failure is likely related to no write permissions to
         // system-wide default location, so try to install to HOME.
 
         static char* pszEnvIni = nullptr;
+
+        // Read HOME location.
+        const char* pszEnvHome = getenv("HOME");
+        CPLAssert( nullptr != pszEnvHome );
+        CPLDebug( "ODBC", "HOME=%s", pszEnvHome );
+
+        const char* pszEnvOdbcSysIni = nullptr;
         if( pszEnvIni == nullptr )
         {
-            // Read HOME location.
-            char* pszEnvHome = getenv("HOME");
-
-            CPLAssert( nullptr != pszEnvHome );
-            CPLDebug( "ODBC", "HOME=%s", pszEnvHome );
+            // record previous value, so we can rollback on failure
+            pszEnvOdbcSysIni = getenv("ODBCSYSINI");
 
             // Set ODBCSYSINI variable pointing to HOME location.
             const size_t nLen = strlen(pszEnvHome) + 12;
@@ -113,12 +116,41 @@ int CPLODBCDriverInstaller::InstallDriver( const char* pszDriver,
         }
 
         // Try to install ODBC driver in new location.
-        if( FALSE == SQLInstallDriverEx(pszDriver, nullptr, m_szPathOut,
+        if( FALSE == SQLInstallDriverEx(pszDriver, pszEnvHome, m_szPathOut,
                                         ODBC_FILENAME_MAX, nullptr, fRequest,
                                         &m_nUsageCount) )
         {
-            cRet = SQLInstallerError( nErrorNum, &m_nErrorCode,
+            // if installing the driver fails, we need to roll back the changes to ODBCSYSINI environment
+            // variable or all subsequent use of ODBC calls will fail
+            char * pszEnvRollback = nullptr;
+            if ( pszEnvOdbcSysIni )
+            {
+                const size_t nLen = strlen( pszEnvOdbcSysIni ) + 12;
+                pszEnvRollback = static_cast<char *>(CPLMalloc(nLen));
+                snprintf( pszEnvRollback, nLen, "ODBCSYSINI=%s", pszEnvOdbcSysIni );
+            }
+            else
+            {
+                // ODBCSYSINI not previously set, so remove
+#ifdef _MSC_VER
+                // for MSVC an environment variable is removed by setting to empty string
+                // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/putenv-wputenv?view=vs-2019
+                pszEnvRollback = CPLStrdup("ODBCSYSINI=");
+#else
+                // for gnuc an environment variable is removed by not including the equal sign
+                // https://man7.org/linux/man-pages/man3/putenv.3.html
+                pszEnvRollback = CPLStrdup("ODBCSYSINI");
+#endif
+            }
+
+            // A 'man putenv' shows that we cannot free pszEnvRollback
+            // because the pointer is used directly by putenv in old glibc.
+            // coverity[tainted_string]
+            putenv( pszEnvRollback );
+
+            CPL_UNUSED RETCODE cRet = SQLInstallerError( nErrorNum, &m_nErrorCode,
                             m_szError, SQL_MAX_MESSAGE_LENGTH, nullptr );
+            (void)cRet;
             CPLAssert( SQL_SUCCESS == cRet || SQL_SUCCESS_WITH_INFO == cRet );
 
             // FAIL
@@ -378,6 +410,78 @@ int CPLODBCSession::Failed( int nRetCode, HSTMT hStmt )
         RollbackTransaction();
 
     return TRUE;
+}
+
+/************************************************************************/
+/*                          ConnectToMsAccess()                          */
+/************************************************************************/
+
+/**
+ * Connects to a Microsoft Access database.
+ *
+ * @param pszName The file name of the Access database to connect to.  This is not
+ * optional.
+ *
+ * @param pszDSNStringTemplate optional DSN string template for Microsoft Access
+ * ODBC Driver. If not specified, then a set of known driver templates will
+ * be used automatically as a fallback. If specified, it is the caller's responsibility
+ * to ensure that the template is correctly formatted.
+ *
+ * @return TRUE on success or FALSE on failure. Errors will automatically be reported
+ * via CPLError.
+ *
+ * @since GDAL 3.2
+ */
+bool CPLODBCSession::ConnectToMsAccess(const char *pszName, const char *pszDSNStringTemplate)
+{
+    char *pszDSN = nullptr;
+
+    const bool usingAutomaticDSNStringTemplate = pszDSNStringTemplate == nullptr;
+
+    if( usingAutomaticDSNStringTemplate )
+    {
+#ifdef WIN32
+        pszDSNStringTemplate = "DRIVER=Microsoft Access Driver (*.mdb, *.accdb);DBQ=%s";
+#else
+        pszDSNStringTemplate = "DRIVER=Microsoft Access Driver (*.mdb, *.accdb);DBQ=\"%s\"";
+#endif
+    }
+    pszDSN = static_cast< char * >( CPLMalloc(strlen(pszName)+strlen(pszDSNStringTemplate)+100) );
+    /* coverity[tainted_string] */
+    snprintf( pszDSN,
+        strlen(pszName)+strlen(pszDSNStringTemplate)+100,
+        pszDSNStringTemplate,  pszName );
+
+    CPLDebug( "ODBC", "EstablishSession(%s)", pszDSN );
+    int bError = !EstablishSession( pszDSN, nullptr, nullptr );
+    if( bError && usingAutomaticDSNStringTemplate )
+    {
+        // Trying with another template (#5594)
+#ifdef WIN32
+        pszDSNStringTemplate = "DRIVER=Microsoft Access Driver (*.mdb);DBQ=%s";
+#else
+        pszDSNStringTemplate = "DRIVER=Microsoft Access Driver (*.mdb);DBQ=\"%s\"";
+#endif
+        CPLFree( pszDSN );
+        pszDSN = static_cast< char * >( CPLMalloc(strlen(pszName)+strlen(pszDSNStringTemplate)+100) );
+        snprintf( pszDSN,
+            strlen(pszName)+strlen(pszDSNStringTemplate)+100,
+            pszDSNStringTemplate,  pszName );
+        CPLDebug( "ODBC", "EstablishSession(%s)", pszDSN );
+        bError = !EstablishSession( pszDSN, nullptr, nullptr );
+    }
+
+    if ( bError )
+    {
+        CPLError( CE_Failure, CPLE_AppDefined,
+                  "Unable to initialize ODBC connection to DSN for %s,\n"
+                  "%s", pszDSN, GetLastError() );
+        CPLFree( pszDSN );
+        return false;
+    }
+
+    CPLFree( pszDSN );
+    return true;
 }
 
 /************************************************************************/

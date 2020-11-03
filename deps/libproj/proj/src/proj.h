@@ -171,7 +171,7 @@ extern "C" {
 
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 7
-#define PROJ_VERSION_MINOR 1
+#define PROJ_VERSION_MINOR 2
 #define PROJ_VERSION_PATCH 0
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
@@ -361,13 +361,14 @@ typedef struct projCtx_t PJ_CONTEXT;
 #endif
 PJ_CONTEXT PROJ_DLL *proj_context_create (void);
 PJ_CONTEXT PROJ_DLL *proj_context_destroy (PJ_CONTEXT *ctx);
+PJ_CONTEXT PROJ_DLL *proj_context_clone (PJ_CONTEXT *ctx);
 
 /** Callback to resolve a filename to a full path */
 typedef const char* (*proj_file_finder) (PJ_CONTEXT *ctx, const char*, void* user_data);
 
 void PROJ_DLL proj_context_set_file_finder(PJ_CONTEXT *ctx, proj_file_finder finder, void* user_data);
 void PROJ_DLL proj_context_set_search_paths(PJ_CONTEXT *ctx, int count_paths, const char* const* paths);
-
+void PROJ_DLL proj_context_set_ca_bundle_path(PJ_CONTEXT *ctx, const char *path);
 void PROJ_DLL proj_context_use_proj4_init_rules(PJ_CONTEXT *ctx, int enable);
 int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_path);
 
@@ -735,6 +736,10 @@ typedef enum
     PJ_TYPE_TRANSFORMATION,
     PJ_TYPE_CONCATENATED_OPERATION,
     PJ_TYPE_OTHER_COORDINATE_OPERATION,
+
+    PJ_TYPE_TEMPORAL_DATUM,
+    PJ_TYPE_ENGINEERING_DATUM,
+    PJ_TYPE_PARAMETRIC_DATUM,
 } PJ_TYPE;
 
 /** Comparison criterion. */
@@ -1244,6 +1249,23 @@ PJ PROJ_DLL *proj_crs_get_horizontal_datum(PJ_CONTEXT *ctx, const PJ *crs);
 PJ PROJ_DLL *proj_crs_get_sub_crs(PJ_CONTEXT *ctx, const PJ *crs, int index);
 
 PJ PROJ_DLL *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs);
+
+PJ PROJ_DLL *proj_crs_get_datum_ensemble(PJ_CONTEXT *ctx, const PJ *crs);
+
+PJ PROJ_DLL *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs);
+
+int PROJ_DLL proj_datum_ensemble_get_member_count(PJ_CONTEXT *ctx,
+                                                  const PJ *datum_ensemble);
+
+double PROJ_DLL proj_datum_ensemble_get_accuracy(PJ_CONTEXT *ctx,
+                                                 const PJ *datum_ensemble);
+
+PJ PROJ_DLL *proj_datum_ensemble_get_member(PJ_CONTEXT *ctx,
+                                            const PJ *datum_ensemble,
+                                            int member_index);
+
+double PROJ_DLL proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
+                                                     const PJ *datum);
 
 PJ PROJ_DLL *proj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ *crs);
 

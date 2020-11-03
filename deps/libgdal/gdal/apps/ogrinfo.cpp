@@ -53,7 +53,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id: ogrinfo.cpp f151b0f35b5f0b1394de38d0145a53907634a246 2019-12-18 12:11:59 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrinfo.cpp 4d6b3014e77f40ca702be655e3c0f7dbde8b1822 2020-09-09 12:00:38 +0200 Even Rouault $")
 
 bool bVerbose = true;
 bool bSuperQuiet = false;
@@ -162,7 +162,7 @@ static void GDALInfoReportMetadata( GDALMajorObjectH hObject,
 
             while( papszIter != nullptr && *papszIter != nullptr )
             {
-                if( !EQUAL(*papszIter, "") )
+                if( !EQUAL(*papszIter, "") && !EQUAL(*papszIter, "SUBDATASETS") )
                 {
                     papszExtraMDDomainsExpanded = CSLAddString(papszExtraMDDomainsExpanded, *papszIter);
                 }
@@ -189,6 +189,7 @@ static void GDALInfoReportMetadata( GDALMajorObjectH hObject,
 
         CSLDestroy(papszExtraMDDomainsExpanded);
     }
+    GDALInfoPrintMetadata(hObject, "SUBDATASETS", "Subdatasets", pszIndent);
 }
 
 /************************************************************************/
@@ -399,10 +400,15 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
                    pszType,
                    poField->GetWidth(),
                    poField->GetPrecision());
+            if( poField->IsUnique() )
+                printf(" UNIQUE");
             if( !poField->IsNullable() )
                 printf(" NOT NULL");
             if( poField->GetDefault() != nullptr )
                 printf(" DEFAULT %s", poField->GetDefault());
+            const char* pszAlias = poField->GetAlternativeNameRef();
+            if( pszAlias != nullptr && pszAlias[0])
+                printf(", alternative name=\"%s\"", pszAlias);
             printf("\n");
         }
     }
@@ -458,11 +464,39 @@ static void RemoveSQLComments(char*& pszSQL)
     CPLString osSQL;
     for( char** papszIter = papszLines; papszIter && *papszIter; ++papszIter )
     {
-        if( !STARTS_WITH(*papszIter, "--") )
+        const char* pszLine = *papszIter;
+        char chQuote = 0;
+        int i = 0;
+        for(; pszLine[i] != '\0'; ++i )
         {
-            osSQL += *papszIter;
-            osSQL += " ";
+            if( chQuote )
+            {
+                if( pszLine[i] == chQuote )
+                {
+                    if( pszLine[i+1] == chQuote )
+                    {
+                        i++;
+                    }
+                    else
+                    {
+                        chQuote = 0;
+                    }
+                }
+            }
+            else if( pszLine[i] == '\'' || pszLine[i] == '"' )
+            {
+                chQuote = pszLine[i];
+            }
+            else if( pszLine[i] == '-' && pszLine[i+1] == '-' )
+            {
+                break;
+            }
         }
+        if( i > 0 )
+        {
+            osSQL.append(pszLine, i);
+        }
+        osSQL += ' ';
     }
     CSLDestroy(papszLines);
     CPLFree(pszSQL);

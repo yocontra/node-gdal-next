@@ -58,7 +58,7 @@
 #include "ogrsf_frmts.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqlitelayer.cpp b0ed304647c15d9c0675cc46b1ec8fee6eda5372 2020-02-28 13:28:51 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitelayer.cpp d70d0fa171ed82055aaed96d8851cd9ecd71864d 2020-05-27 19:53:23 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRSQLiteLayer()                           */
@@ -618,6 +618,7 @@ void OGRSQLiteLayer::ResetReading()
 {
     ClearStatement();
     iNextShapeId = 0;
+    m_bEOF = false;
 }
 
 /************************************************************************/
@@ -627,11 +628,17 @@ void OGRSQLiteLayer::ResetReading()
 OGRFeature *OGRSQLiteLayer::GetNextFeature()
 
 {
+    if( m_bEOF )
+        return nullptr;
+
     while( true )
     {
         OGRFeature *poFeature = GetNextRawFeature();
         if( poFeature == nullptr )
+        {
+            m_bEOF = true;
             return nullptr;
+        }
 
         if( (m_poFilterGeom == nullptr
             || FilterGeometry( poFeature->GetGeomFieldRef(m_iGeomFieldFilter) ) )
@@ -3158,12 +3165,11 @@ int OGRSQLiteLayer::ExportSpatiaLiteGeometryInternal(const OGRGeometry *poGeomet
         case wkbPolygon:
         {
             const OGRPolygon* poPoly = poGeometry->toPolygon();
-            int nParts = 0;
             int nTotalSize = 4;
             if (poPoly->getExteriorRing() != nullptr)
             {
                 int nInteriorRingCount = poPoly->getNumInteriorRings();
-                nParts = 1 + nInteriorRingCount;
+                const int nParts = 1 + nInteriorRingCount;
                 memcpy(pabyData, &nParts, 4);
                 if (NEED_SWAP_SPATIALITE())
                     CPL_SWAP32PTR( pabyData );

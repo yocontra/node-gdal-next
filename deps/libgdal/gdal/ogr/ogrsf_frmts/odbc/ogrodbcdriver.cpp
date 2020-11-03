@@ -29,7 +29,7 @@
 #include "ogr_odbc.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrodbcdriver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrodbcdriver.cpp 2b7dd67cad092ba95547b0aa44cd7a3bebe4f015 2020-08-25 21:13:47 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                            ~OGRODBCDriver()                            */
@@ -58,11 +58,8 @@ OGRDataSource *OGRODBCDriver::Open( const char * pszFilename,
                                      int bUpdate )
 
 {
-    if( !STARTS_WITH_CI(pszFilename, "ODBC:")
-#ifdef WIN32
-        && !EQUAL(CPLGetExtension(pszFilename), "MDB")
-#endif
-        )
+    if( !STARTS_WITH_CI(pszFilename, "ODBC:") &&
+        !OGRODBCDataSource::IsSupportedMsAccessFileExtension( CPLGetExtension( pszFilename ) ) )
         return nullptr;
 
     OGRODBCDataSource *poDS = new OGRODBCDataSource();

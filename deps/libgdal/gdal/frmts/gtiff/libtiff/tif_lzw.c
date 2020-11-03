@@ -1161,6 +1161,7 @@ int
 TIFFInitLZW(TIFF* tif, int scheme)
 {
 	static const char module[] = "TIFFInitLZW";
+        (void)scheme;
 	assert(scheme == COMPRESSION_LZW);
 	/*
 	 * Allocate state block so tag methods have storage to record values.
@@ -1218,7 +1219,7 @@ bad:
  * from this software without specific prior written permission.
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 #endif /* LZW_SUPPORT */
 

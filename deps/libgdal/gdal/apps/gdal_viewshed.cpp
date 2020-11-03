@@ -34,7 +34,7 @@
 #include "ogr_srs_api.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdal_viewshed.cpp 60d13e19f89619ca16040b9a270d3837b8f0df63 2020-03-05 10:02:43 +0200 Ilmari Ayres $")
+CPL_CVSID("$Id: gdal_viewshed.cpp f09e810a3fa9b6cd76a050679bdb0349a11a7914 2020-08-29 10:33:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -44,15 +44,15 @@ static void Usage(const char* pszErrorMsg = nullptr)
 
 {
     printf(
-       "gdal_viewshed [-b <band>]\n"
-       "              [-a_nodata <value>] [-f <formatname>]\n"
-       "              [-oz <observer_height>] [-tz <target_height>] [-md <max_distance>]\n"
-       "              -ox <observer_x> -oy <observer_y>\n"
-       "              [-vv <visibility>] [-iv <invisibility>]\n"
-       "              [-ov <out_of_range>] [-cc <curvature_coef>]\n"
-       "              [[-co NAME=VALUE] ...]\n"
-       "              [-q] [-om <output mode>]\n"
-       "              <src_filename> <dst_filename>\n");
+       "Usage: gdal_viewshed [-b <band>]\n"
+       "                     [-a_nodata <value>] [-f <formatname>]\n"
+       "                     [-oz <observer_height>] [-tz <target_height>] [-md <max_distance>]\n"
+       "                     -ox <observer_x> -oy <observer_y>\n"
+       "                     [-vv <visibility>] [-iv <invisibility>]\n"
+       "                     [-ov <out_of_range>] [-cc <curvature_coef>]\n"
+       "                     [[-co NAME=VALUE] ...]\n"
+       "                     [-q] [-om <output mode>]\n"
+       "                     <src_filename> <dst_filename>\n");
 
     if( pszErrorMsg != nullptr )
         fprintf(stderr, "\nFAILURE: %s\n", pszErrorMsg);

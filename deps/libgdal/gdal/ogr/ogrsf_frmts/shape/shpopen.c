@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shpopen.c 353b92999513b5eaecc6ade580f428b6a5aa1578 2020-05-11 00:33:57 +0200 Even Rouault $
+ * $Id: shpopen.c 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $
  *
  * Project:  Shapelib
  * Purpose:  Implementation of core Shapefile read/write functions.
@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-SHP_CVSID("$Id: shpopen.c 353b92999513b5eaecc6ade580f428b6a5aa1578 2020-05-11 00:33:57 +0200 Even Rouault $")
+SHP_CVSID("$Id: shpopen.c 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 typedef unsigned char uchar;
 
@@ -705,7 +705,6 @@ SHPRestoreSHX ( const char * pszLayer, const char * pszAccess, SAHooks *psHooks 
     int             nLenWithoutExtension;
     unsigned int    nSHPFilesize;
 
-    unsigned int    nCurrentRecordOffset = 0;
     unsigned int    nCurrentSHPOffset = 100;
     unsigned int    nRealSHXContentSize = 100;
 
@@ -838,7 +837,6 @@ SHPRestoreSHX ( const char * pszLayer, const char * pszAccess, SAHooks *psHooks 
             if ( !bBigEndian ) SwapWord( 4, &nRecordOffset );
             if ( !bBigEndian ) SwapWord( 4, &nRecordLength );
             nRecordOffset += nRecordLength + 4;
-            nCurrentRecordOffset += 8;
             nCurrentSHPOffset += 8 + nRecordLength * 2;
 
             psHooks->FSeek( fpSHP, nCurrentSHPOffset, 0 );

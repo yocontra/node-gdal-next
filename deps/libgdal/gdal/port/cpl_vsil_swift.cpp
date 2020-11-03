@@ -33,6 +33,8 @@
 #include "cpl_vsil_curl_priv.h"
 #include "cpl_vsil_curl_class.h"
 
+#include <errno.h>
+
 #include <algorithm>
 #include <set>
 #include <map>
@@ -40,7 +42,7 @@
 
 #include "cpl_swift.h"
 
-CPL_CVSID("$Id: cpl_vsil_swift.cpp a68b4b9092dd4a42d8dcf77dabaacf23029e39c2 2020-02-14 10:00:34 +0100 Jiri Drbalek $")
+CPL_CVSID("$Id: cpl_vsil_swift.cpp 84033e049eee28696b553cb16258b3a196410e56 2020-06-29 20:48:45 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -99,7 +101,8 @@ void VSICurlFilesystemHandler::AnalyseSwiftFileList(
         if( !osName.empty() )
         {
             osNextMarker = osName;
-            if( osName.size() > osPrefix.size() && osName.find(osPrefix) == 0 )
+            if( osName.size() > osPrefix.size() &&
+                osName.substr(0, osPrefix.size()) == osPrefix )
             {
                 if( bHasCount )
                 {
@@ -289,12 +292,16 @@ VSIVirtualHandle* VSISwiftFSHandler::Open( const char *pszFilename,
 
     if( strchr(pszAccess, 'w') != nullptr || strchr(pszAccess, 'a') != nullptr )
     {
-        /*if( strchr(pszAccess, '+') != nullptr)
+        if( strchr(pszAccess, '+') != nullptr &&
+            !CPLTestBool(CPLGetConfigOption("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE", "NO")) )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
-                    "w+ not supported for /vsiSwift. Only w");
+                        "w+ not supported for /vsiswift, unless "
+                        "CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE is set to YES");
+            errno = EACCES;
             return nullptr;
-        }*/
+        }
+
         VSISwiftHandleHelper* poHandleHelper =
             VSISwiftHandleHelper::BuildFromURI(pszFilename + GetFSPrefix().size(),
                                             GetFSPrefix().c_str());
@@ -306,7 +313,11 @@ VSIVirtualHandle* VSISwiftFSHandler::Open( const char *pszFilename,
         if( !poHandle->IsOK() )
         {
             delete poHandle;
-            poHandle = nullptr;
+            return nullptr;
+        }
+        if( strchr(pszAccess, '+') != nullptr)
+        {
+            return VSICreateUploadOnCloseFile(poHandle);
         }
         return poHandle;
     }

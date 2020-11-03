@@ -28,7 +28,7 @@
 
 #include "ogr_oci.h"
 
-CPL_CVSID("$Id: ogrocidriver.cpp 000e648e500791c48d3df312cac32e30383828df 2019-01-25 15:11:29 +0100 hlaebe $")
+CPL_CVSID("$Id: ogrocidriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGROCIDriverIdentify()                        */
@@ -108,7 +108,7 @@ void RegisterOGROCI()
 
     poDriver->SetDescription( "OCI" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Oracle Spatial" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_oci.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/oci.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "OCI:" );
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,

@@ -61,7 +61,7 @@
 #include "ogr_core.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: nitfdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: nitfdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 static bool NITFPatchImageLength( const char *pszFilename,
                                   GUIntBig nImageOffset,
@@ -5888,6 +5888,7 @@ NITFWriteJPEGImage( GDALDataset *poSrcDS, VSILFILE *fp, vsi_l_offset nStartOffse
     nOffset ++;
     abyAPP6[nOffset] = 0;
     nOffset ++;
+    (void)nOffset;
 
     CPLAssert(nOffset == sizeof(abyAPP6));
 

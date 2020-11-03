@@ -29,7 +29,7 @@
 #include "ntf.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrntfdriver.cpp a0845a051c0cd1cc7dfbeebb776dc325af262cac 2018-06-14 16:22:26 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrntfdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -99,7 +99,7 @@ void RegisterOGRNTF()
     poDriver->SetDescription( "UK .NTF" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "UK .NTF" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_ntf.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/ntf.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRNTFDriverOpen;

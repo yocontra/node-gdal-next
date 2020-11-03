@@ -28,7 +28,7 @@
 
 #include "gifabstractdataset.h"
 
-CPL_CVSID("$Id: gifabstractdataset.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: gifabstractdataset.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 constexpr int InterlacedOffset[] = { 0, 4, 2, 1 };
 constexpr int InterlacedJumps[] = { 8, 8, 4, 2 };
@@ -453,7 +453,7 @@ GifRecordType GIFAbstractDataset::FindFirstImage( GifFileType* hGifFile )
 GIFAbstractRasterBand::GIFAbstractRasterBand(
     GIFAbstractDataset *poDSIn, int nBandIn,
     SavedImage *psSavedImage, int nBackground,
-    int bAdvertizeInterlacedMDI ) :
+    int bAdvertiseInterlacedMDI ) :
     psImage(psSavedImage),
     panInterlaceMap(nullptr),
     poColorTable(nullptr),
@@ -478,7 +478,7 @@ GIFAbstractRasterBand::GIFAbstractRasterBand(
     {
         int iLine = 0;
 
-        if( bAdvertizeInterlacedMDI )
+        if( bAdvertiseInterlacedMDI )
             poDS->SetMetadataItem( "INTERLACED", "YES", "IMAGE_STRUCTURE" );
 
         panInterlaceMap = (int *) CPLCalloc(poDSIn->nRasterYSize,sizeof(int));
@@ -491,7 +491,7 @@ GIFAbstractRasterBand::GIFAbstractRasterBand(
                 panInterlaceMap[j] = iLine++;
         }
     }
-    else if( bAdvertizeInterlacedMDI )
+    else if( bAdvertiseInterlacedMDI )
     {
         poDS->SetMetadataItem( "INTERLACED", "NO", "IMAGE_STRUCTURE" );
     }

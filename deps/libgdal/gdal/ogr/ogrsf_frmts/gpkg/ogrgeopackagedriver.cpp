@@ -28,7 +28,9 @@
 
 #include "ogr_geopackage.h"
 
-CPL_CVSID("$Id: ogrgeopackagedriver.cpp a0845a051c0cd1cc7dfbeebb776dc325af262cac 2018-06-14 16:22:26 +0200 Even Rouault $")
+#include "tilematrixset.hpp"
+
+CPL_CVSID("$Id: ogrgeopackagedriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 // g++ -g -Wall -fPIC -shared -o ogr_geopackage.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/gpkg ogr/ogrsf_frmts/gpkg/*.c* -L. -lgdal
 
@@ -286,25 +288,33 @@ static CPLErr OGRGeoPackageDriverDelete( const char *pszFilename )
 /*                         RegisterOGRGeoPackage()                       */
 /************************************************************************/
 
-void RegisterOGRGeoPackage()
+class GDALGPKGDriver final: public GDALDriver
 {
-    if( GDALGetDriverByName( "GPKG" ) != nullptr )
-        return;
+        bool m_bInitialized = false;
 
-    GDALDriver *poDriver = new GDALDriver();
+        void InitializeCreationOptionList();
 
-    poDriver->SetDescription( "GPKG" );
-    poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
-    poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
-    poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
+    public:
+        GDALGPKGDriver() = default;
 
-    poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GeoPackage" );
-    poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gpkg" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_geopackage.html" );
-    poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte Int16 UInt16 Float32" );
+        const char* GetMetadataItem(const char* pszName, const char* pszDomain) override
+        {
+            if( EQUAL(pszName, GDAL_DMD_CREATIONOPTIONLIST) )
+            {
+                InitializeCreationOptionList();
+            }
+            return GDALDriver::GetMetadataItem(pszName, pszDomain);
+        }
+
+        char** GetMetadata(const char* pszDomain) override
+        {
+            InitializeCreationOptionList();
+            return GDALDriver::GetMetadata(pszDomain);
+        }
+};
 
 #define COMPRESSION_OPTIONS \
-"  <Option name='TILE_FORMAT' type='string-select' description='Format to use to create tiles' default='AUTO'>" \
+"  <Option name='TILE_FORMAT' type='string-select' scope='raster' description='Format to use to create tiles' default='AUTO'>" \
 "    <Value>AUTO</Value>" \
 "    <Value>PNG_JPEG</Value>" \
 "    <Value>PNG</Value>" \
@@ -313,51 +323,40 @@ void RegisterOGRGeoPackage()
 "    <Value>WEBP</Value>" \
 "    <Value>TIFF</Value>" \
 "  </Option>" \
-"  <Option name='QUALITY' type='int' min='1' max='100' description='Quality for JPEG and WEBP tiles' default='75'/>" \
-"  <Option name='ZLEVEL' type='int' min='1' max='9' description='DEFLATE compression level for PNG tiles' default='6'/>" \
-"  <Option name='DITHER' type='boolean' description='Whether to apply Floyd-Steinberg dithering (for TILE_FORMAT=PNG8)' default='NO'/>"
+"  <Option name='QUALITY' type='int' min='1' max='100' scope='raster' description='Quality for JPEG and WEBP tiles' default='75'/>" \
+"  <Option name='ZLEVEL' type='int' min='1' max='9' scope='raster' description='DEFLATE compression level for PNG tiles' default='6'/>" \
+"  <Option name='DITHER' type='boolean' scope='raster' description='Whether to apply Floyd-Steinberg dithering (for TILE_FORMAT=PNG8)' default='NO'/>"
 
-    poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST, "<OpenOptionList>"
-"  <Option name='LIST_ALL_TABLES' type='string-select' description='Whether all tables, including those non listed in gpkg_contents, should be listed' default='AUTO'>"
-"    <Value>AUTO</Value>"
-"    <Value>YES</Value>"
-"    <Value>NO</Value>"
-"  </Option>"
-"  <Option name='TABLE' type='string' description='Name of tile user-table'/>"
-"  <Option name='ZOOM_LEVEL' type='integer' description='Zoom level of full resolution. If not specified, maximum non-empty zoom level'/>"
-"  <Option name='BAND_COUNT' type='int' min='1' max='4' description='Number of raster bands' default='4'/>"
-"  <Option name='MINX' type='float' description='Minimum X of area of interest'/>"
-"  <Option name='MINY' type='float' description='Minimum Y of area of interest'/>"
-"  <Option name='MAXX' type='float' description='Maximum X of area of interest'/>"
-"  <Option name='MAXY' type='float' description='Maximum Y of area of interest'/>"
-"  <Option name='USE_TILE_EXTENT' type='boolean' description='Use tile extent of content to determine area of interest' default='NO'/>"
-"  <Option name='WHERE' type='string' description='SQL WHERE clause to be appended to tile requests'/>"
-COMPRESSION_OPTIONS
-"</OpenOptionList>");
+void GDALGPKGDriver::InitializeCreationOptionList()
+{
+    if( m_bInitialized )
+        return;
+    m_bInitialized = true;
 
-    poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST, "<CreationOptionList>"
-"  <Option name='RASTER_TABLE' type='string' description='Name of tile user table'/>"
-"  <Option name='APPEND_SUBDATASET' type='boolean' description='Set to YES to add a new tile user table to an existing GeoPackage instead of replacing it' default='NO'/>"
-"  <Option name='RASTER_IDENTIFIER' type='string' description='Human-readable identifier (e.g. short name)'/>"
-"  <Option name='RASTER_DESCRIPTION' type='string' description='Human-readable description'/>"
-"  <Option name='BLOCKSIZE' type='int' description='Block size in pixels' default='256' max='4096'/>"
-"  <Option name='BLOCKXSIZE' type='int' description='Block width in pixels' default='256' max='4096'/>"
-"  <Option name='BLOCKYSIZE' type='int' description='Block height in pixels' default='256' max='4096'/>"
+    const char* pszCOBegin =
+"<CreationOptionList>"
+"  <Option name='RASTER_TABLE' type='string' scope='raster' description='Name of tile user table'/>"
+"  <Option name='APPEND_SUBDATASET' type='boolean' scope='raster' description='Set to YES to add a new tile user table to an existing GeoPackage instead of replacing it' default='NO'/>"
+"  <Option name='RASTER_IDENTIFIER' type='string' scope='raster' description='Human-readable identifier (e.g. short name)'/>"
+"  <Option name='RASTER_DESCRIPTION' type='string' scope='raster' description='Human-readable description'/>"
+"  <Option name='BLOCKSIZE' type='int' scope='raster' description='Block size in pixels' default='256' max='4096'/>"
+"  <Option name='BLOCKXSIZE' type='int' scope='raster' description='Block width in pixels' default='256' max='4096'/>"
+"  <Option name='BLOCKYSIZE' type='int' scope='raster' description='Block height in pixels' default='256' max='4096'/>"
 COMPRESSION_OPTIONS
-"  <Option name='TILING_SCHEME' type='string-select' description='Which tiling scheme to use' default='CUSTOM'>"
+"  <Option name='TILING_SCHEME' type='string' scope='raster' description='Which tiling scheme to use: pre-defined value or custom inline/outline JSON definition' default='CUSTOM'>"
 "    <Value>CUSTOM</Value>"
 "    <Value>GoogleCRS84Quad</Value>"
-"    <Value>GoogleMapsCompatible</Value>"
-"    <Value>InspireCRS84Quad</Value>"
 "    <Value>PseudoTMS_GlobalGeodetic</Value>"
-"    <Value>PseudoTMS_GlobalMercator</Value>"
+"    <Value>PseudoTMS_GlobalMercator</Value>";
+
+            const char* pszCOEnd =
 "  </Option>"
-"  <Option name='ZOOM_LEVEL_STRATEGY' type='string-select' description='Strategy to determine zoom level. Only used for TILING_SCHEME != CUSTOM' default='AUTO'>"
+"  <Option name='ZOOM_LEVEL_STRATEGY' type='string-select' scope='raster' description='Strategy to determine zoom level. Only used for TILING_SCHEME != CUSTOM' default='AUTO'>"
 "    <Value>AUTO</Value>"
 "    <Value>LOWER</Value>"
 "    <Value>UPPER</Value>"
 "  </Option>"
-"  <Option name='RESAMPLING' type='string-select' description='Resampling algorithm. Only used for TILING_SCHEME != CUSTOM' default='BILINEAR'>"
+"  <Option name='RESAMPLING' type='string-select' scope='raster' description='Resampling algorithm. Only used for TILING_SCHEME != CUSTOM' default='BILINEAR'>"
 "    <Value>NEAREST</Value>"
 "    <Value>BILINEAR</Value>"
 "    <Value>CUBIC</Value>"
@@ -381,10 +380,72 @@ COMPRESSION_OPTIONS
 "     <Value>1.1</Value>"
 "     <Value>1.2</Value>"
 "  </Option>"
+"  <Option name='DATETIME_FORMAT' type='string-select' description='How to encode DateTime not in UTC' default='WITH_TZ'>"
+"     <Value>WITH_TZ</Value>"
+"     <Value>UTC</Value>"
+"  </Option>"
 #ifdef ENABLE_GPKG_OGR_CONTENTS
 "  <Option name='ADD_GPKG_OGR_CONTENTS' type='boolean' description='Whether to add a gpkg_ogr_contents table to keep feature count' default='YES'/>"
 #endif
-"</CreationOptionList>");
+"</CreationOptionList>";
+
+    std::string osOptions(pszCOBegin);
+    const auto tmsList = gdal::TileMatrixSet::listPredefinedTileMatrixSets();
+    for( const auto& tmsName: tmsList )
+    {
+        const auto poTM = gdal::TileMatrixSet::parse(tmsName.c_str());
+        if( poTM &&
+            poTM->haveAllLevelsSameTopLeft() &&
+            poTM->haveAllLevelsSameTileSize() &&
+            poTM->hasOnlyPowerOfTwoVaryingScales() &&
+            !poTM->hasVariableMatrixWidth() )
+        {
+            osOptions += "    <Value>";
+            osOptions += tmsName;
+            osOptions += "</Value>";
+        }
+    }
+    osOptions += pszCOEnd;
+
+    SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST, osOptions.c_str());
+}
+
+
+void RegisterOGRGeoPackage()
+{
+    if( GDALGetDriverByName( "GPKG" ) != nullptr )
+        return;
+
+    GDALDriver *poDriver = new GDALGPKGDriver();
+
+    poDriver->SetDescription( "GPKG" );
+    poDriver->SetMetadataItem( GDAL_DCAP_RASTER, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
+    poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
+
+    poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GeoPackage" );
+    poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gpkg" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/geopackage.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte Int16 UInt16 Float32" );
+
+    poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST, "<OpenOptionList>"
+"  <Option name='LIST_ALL_TABLES' type='string-select' scope='vector' description='Whether all tables, including those non listed in gpkg_contents, should be listed' default='AUTO'>"
+"    <Value>AUTO</Value>"
+"    <Value>YES</Value>"
+"    <Value>NO</Value>"
+"  </Option>"
+"  <Option name='TABLE' type='string' scope='raster' description='Name of tile user-table'/>"
+"  <Option name='ZOOM_LEVEL' type='integer' scope='raster' description='Zoom level of full resolution. If not specified, maximum non-empty zoom level'/>"
+"  <Option name='BAND_COUNT' type='int' min='1' max='4' scope='raster' description='Number of raster bands' default='4'/>"
+"  <Option name='MINX' type='float' scope='raster' description='Minimum X of area of interest'/>"
+"  <Option name='MINY' type='float' scope='raster' description='Minimum Y of area of interest'/>"
+"  <Option name='MAXX' type='float' scope='raster' description='Maximum X of area of interest'/>"
+"  <Option name='MAXY' type='float' scope='raster' description='Maximum Y of area of interest'/>"
+"  <Option name='USE_TILE_EXTENT' type='boolean' scope='raster' description='Use tile extent of content to determine area of interest' default='NO'/>"
+"  <Option name='WHERE' type='string' scope='raster' description='SQL WHERE clause to be appended to tile requests'/>"
+COMPRESSION_OPTIONS
+"  <Option name='PRELUDE_STATEMENTS' type='string' scope='raster,vector' description='SQL statement(s) to send on the SQLite connection before any other ones'/>"
+"</OpenOptionList>");
 
     poDriver->SetMetadataItem( GDAL_DS_LAYER_CREATIONOPTIONLIST,
 "<LayerCreationOptionList>"
@@ -410,6 +471,7 @@ COMPRESSION_OPTIONS
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATASUBTYPES, "Boolean Int16 Float32" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_UNIQUE_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
 
 #ifdef ENABLE_SQL_GPKG_FORMAT

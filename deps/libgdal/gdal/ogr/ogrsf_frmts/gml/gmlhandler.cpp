@@ -54,7 +54,7 @@
 #  include "ogr_xerces.h"
 #endif
 
-CPL_CVSID("$Id: gmlhandler.cpp 978ba46f732b27073d5bbc30f427a311d9daed28 2020-04-08 01:11:41 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlhandler.cpp ee1acc4fc798b75d5e6a6cf096428a769cf94974 2020-10-22 11:54:43 +0200 Even Rouault $")
 
 #ifdef HAVE_XERCES
 
@@ -1300,7 +1300,7 @@ OGRErr GMLHandler::startElementDefault(const char *pszName, int nLenName, void* 
 /* -------------------------------------------------------------------- */
 /*      Is it a feature?  If so push a whole new state, and return.     */
 /* -------------------------------------------------------------------- */
-    int nClassIndex = 0;
+    int nClassIndex;
     const char* pszFilteredClassName = nullptr;
 
     if( nLenName == 9 && strcmp(pszName, "boundedBy") == 0 )
@@ -1870,8 +1870,11 @@ bool GMLHandler::IsGeometryElement( const char *pszElement )
     } while(nFirst <= nLast);
 
     if (eAppSchemaType == APPSCHEMA_AIXM &&
-        strcmp( pszElement, "ElevatedPoint") == 0)
+        ( strcmp( pszElement, "ElevatedPoint") == 0 ||
+          strcmp( pszElement, "ElevatedSurface") == 0 ) )
+    {
         return true;
+    }
 
     if( eAppSchemaType == APPSCHEMA_MTKGML &&
         ( strcmp( pszElement, "Piste") == 0 ||

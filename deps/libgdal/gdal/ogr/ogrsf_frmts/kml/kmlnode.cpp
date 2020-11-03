@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: kmlnode.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: kmlnode.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           Help functions                             */
@@ -425,8 +425,7 @@ void KMLNode::addContent(std::string const& text)
 
 void KMLNode::appendContent(std::string const& text)
 {
-    std::string& tmp = pvsContent_->back();
-    tmp += text;
+    pvsContent_->back() += text;
 }
 
 std::string KMLNode::getContent(std::size_t index) const
@@ -459,14 +458,13 @@ int KMLNode::getLayerNumber() const
 
 std::string KMLNode::getNameElement() const
 {
-    kml_nodes_t::size_type subsize = 0;
     const kml_nodes_t::size_type size = pvpoChildren_->size();
 
     for( kml_nodes_t::size_type i = 0; i < size; ++i )
     {
         if( (*pvpoChildren_)[i]->sName_.compare("name") == 0 )
         {
-            subsize = (*pvpoChildren_)[i]->pvsContent_->size();
+            const auto subsize = (*pvpoChildren_)[i]->pvsContent_->size();
             if( subsize > 0 )
             {
                 return (*(*pvpoChildren_)[i]->pvsContent_)[0];
@@ -479,13 +477,12 @@ std::string KMLNode::getNameElement() const
 
 std::string KMLNode::getDescriptionElement() const
 {
-    kml_nodes_t::size_type subsize = 0;
     const kml_nodes_t::size_type size = pvpoChildren_->size();
     for( kml_nodes_t::size_type i = 0; i < size; ++i )
     {
         if( (*pvpoChildren_)[i]->sName_.compare("description") == 0 )
         {
-            subsize = (*pvpoChildren_)[i]->pvsContent_->size();
+            const auto subsize = (*pvpoChildren_)[i]->pvsContent_->size();
             if ( subsize > 0 )
             {
                 return (*(*pvpoChildren_)[i]->pvsContent_)[0];

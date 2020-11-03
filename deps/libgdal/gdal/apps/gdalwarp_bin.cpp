@@ -36,7 +36,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: gdalwarp_bin.cpp 3faf501a82260b41e85125d14b21ec3c54e319d7 2020-04-01 11:57:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarp_bin.cpp 1c7b950fc8754f6ba1d027f031886063675d2927 2020-06-02 15:06:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               GDALExit()                             */
@@ -78,7 +78,7 @@ static void Usage(const char* pszErrorMsg = nullptr)
         "    [-r resampling_method] [-wm memory_in_mb] [-multi] [-q]\n"
         "    [-cutline datasource] [-cl layer] [-cwhere expression]\n"
         "    [-csql statement] [-cblend dist_in_pixels] [-crop_to_cutline]\n"
-        "    [-of format] [-co \"NAME=VALUE\"]* [-overwrite]\n"
+        "    [-if format]* [-of format] [-co \"NAME=VALUE\"]* [-overwrite]\n"
         "    [-nomd] [-cvmd meta_conflict_value] [-setci] [-oo NAME=VALUE]*\n"
         "    [-doo NAME=VALUE]*\n"
         "    srcfile* dstfile\n"
@@ -114,6 +114,7 @@ static void GDALWarpAppOptionsForBinaryFree( GDALWarpAppOptionsForBinary* psOpti
         CSLDestroy(psOptionsForBinary->papszOpenOptions);
         CSLDestroy(psOptionsForBinary->papszDestOpenOptions);
         CSLDestroy(psOptionsForBinary->papszCreateOptions);
+        CSLDestroy(psOptionsForBinary->papszAllowInputDrivers);
         CPLFree(psOptionsForBinary);
     }
 }
@@ -228,7 +229,8 @@ MAIN_START(argc, argv)
     {
         nSrcCount++;
         pahSrcDS = static_cast<GDALDatasetH *>(CPLRealloc(pahSrcDS, sizeof(GDALDatasetH) * nSrcCount));
-        pahSrcDS[nSrcCount-1] = GDALOpenEx( psOptionsForBinary->papszSrcFiles[i], GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR, nullptr,
+        pahSrcDS[nSrcCount-1] = GDALOpenEx( psOptionsForBinary->papszSrcFiles[i], GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
+                                            psOptionsForBinary->papszAllowInputDrivers,
                                             psOptionsForBinary->papszOpenOptions, nullptr );
 
         if( pahSrcDS[nSrcCount-1] == nullptr )

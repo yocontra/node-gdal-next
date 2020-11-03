@@ -66,7 +66,7 @@ CPL_C_END
 #include "BitMask2D.h"
 #include "Packer_RLE.h"
 
-CPL_CVSID("$Id: JPEG_band.cpp 71d76bef344fbf58e14e5817d80230acefc78e30 2018-11-07 03:00:41 +0100 Even Rouault $")
+CPL_CVSID("$Id: JPEG_band.cpp 81d88451b89a7cb8e02020005eb322b0cdaff4de 2020-08-10 08:52:54 -0700 Lucian Plesea $")
 
 NAMESPACE_MRF_START
 
@@ -656,9 +656,9 @@ CPLErr JPEG_Band::Compress(buf_mgr &dst, buf_mgr &src)
 }
 
 // PHOTOMETRIC == MULTISPECTRAL turns off YCbCr conversion and downsampling
-JPEG_Band::JPEG_Band( GDALMRFDataset *pDS, const ILImage &image,
+JPEG_Band::JPEG_Band( MRFDataset *pDS, const ILImage &image,
                       int b, int level ) :
-    GDALMRFRasterBand(pDS, image, b, int(level)),
+    MRFRasterBand(pDS, image, b, int(level)),
     codec(image)
 {
     const int nbands = image.pagesize.c;

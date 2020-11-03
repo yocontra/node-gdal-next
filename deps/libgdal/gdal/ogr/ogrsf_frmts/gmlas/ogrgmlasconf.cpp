@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlasconf.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasconf.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          GMLASConfiguration()                        */
@@ -283,6 +283,7 @@ bool GMLASConfiguration::Load(const char* pszFilename)
         return false;
     }
     CPLXMLTreeCloser oCloser(psRoot);
+    CPL_IGNORE_RET_VAL(oCloser);
 
     // Validate the configuration file
     if( CPLTestBool(CPLGetConfigOption("GDAL_XML_VALIDATION", "YES")) )

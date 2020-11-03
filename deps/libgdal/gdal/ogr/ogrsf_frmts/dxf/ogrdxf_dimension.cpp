@@ -34,7 +34,7 @@
 
 #include <stdexcept>
 
-CPL_CVSID("$Id: ogrdxf_dimension.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxf_dimension.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             PointDist()                              */
@@ -271,10 +271,6 @@ the approach is as above in all these cases.
 /*      direction vector 1, with the line through Arrow1 and            */
 /*      direction vector 2.                                             */
 /* -------------------------------------------------------------------- */
-    double dfL1M = 0.0;
-    double dfL1B = 0.0;
-    double dfL2M = 0.0;
-    double dfL2B = 0.0;
     double dfArrowX2 = 0.0;
     double dfArrowY2 = 0.0;
 
@@ -304,13 +300,13 @@ the approach is as above in all these cases.
     {
         // first convert vec1 + target2 into y = mx + b format: call this L1
 
-        dfL1M = dfVec1Y / dfVec1X;
-        dfL1B = dfTargetY2 - dfL1M * dfTargetX2;
+        const double dfL1M = dfVec1Y / dfVec1X;
+        const double dfL1B = dfTargetY2 - dfL1M * dfTargetX2;
 
         // convert vec2 + Arrow1 into y = mx + b format, call this L2
 
-        dfL2M = dfVec2Y / dfVec2X;
-        dfL2B = dfArrowY1 - dfL2M * dfArrowX1;
+        const double dfL2M = dfVec2Y / dfVec2X;
+        const double dfL2B = dfArrowY1 - dfL2M * dfArrowX1;
 
         // Compute intersection x = (b2-b1) / (m1-m2)
 

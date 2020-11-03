@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmtlayer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgmtlayer.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRGmtLayer()                             */
@@ -572,6 +572,8 @@ OGRFeature *OGRGmtLayer::GetNextRawFeature()
                     }
                 }
 
+                CPLAssert( poGeom != nullptr );
+                // cppcheck-suppress nullPointerRedundantCheck
                 switch( wkbFlatten(poGeom->getGeometryType()) )
                 {
                   case wkbPoint:
@@ -678,34 +680,6 @@ OGRFeature *OGRGmtLayer::GetNextRawFeature()
     m_nFeaturesRead++;
 
     return poFeature;
-}
-
-/************************************************************************/
-/*                           GetNextFeature()                           */
-/************************************************************************/
-
-OGRFeature *OGRGmtLayer::GetNextFeature()
-
-{
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-
-        if( poFeature == nullptr )
-            return nullptr;
-
-        if( (m_poFilterGeom == nullptr
-             || FilterGeometry( poFeature->GetGeometryRef() ) )
-            && (m_poAttrQuery == nullptr
-                || m_poAttrQuery->Evaluate( poFeature ) ) )
-        {
-            return poFeature;
-        }
-
-        delete poFeature;
-    }
-
-    return nullptr;
 }
 
 /************************************************************************/

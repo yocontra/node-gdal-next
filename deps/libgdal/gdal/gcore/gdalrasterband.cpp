@@ -53,7 +53,7 @@
 #include "gdal_rat.h"
 #include "gdal_priv_templates.hpp"
 
-CPL_CVSID("$Id: gdalrasterband.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterband.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALRasterBand()                           */
@@ -176,7 +176,7 @@ GDALRasterBand::~GDALRasterBand()
  *
  * @param psExtraArg (new in GDAL 2.0) pointer to a GDALRasterIOExtraArg structure with additional
  * arguments to specify resampling and progress callback, or NULL for default
- * behaviour. The GDAL_RASTERIO_RESAMPLING configuration option can also be defined
+ * behavior. The GDAL_RASTERIO_RESAMPLING configuration option can also be defined
  * to override the default resampling to one of BILINEAR, CUBIC, CUBICSPLINE,
  * LANCZOS, AVERAGE or MODE.
  *
@@ -247,7 +247,7 @@ GDALRasterBand::~GDALRasterBand()
  *
  * @param[in] psExtraArg (new in GDAL 2.0) pointer to a GDALRasterIOExtraArg structure with additional
  * arguments to specify resampling and progress callback, or NULL for default
- * behaviour. The GDAL_RASTERIO_RESAMPLING configuration option can also be defined
+ * behavior. The GDAL_RASTERIO_RESAMPLING configuration option can also be defined
  * to override the default resampling to one of BILINEAR, CUBIC, CUBICSPLINE,
  * LANCZOS, AVERAGE or MODE.
  *
@@ -455,7 +455,7 @@ GDALRasterIOEx( GDALRasterBandH hBand, GDALRWFlag eRWFlag,
  * The following code would efficiently compute a histogram of eight bit
  * raster data.  Note that the final block may be partial ... data beyond
  * the edge of the underlying raster band in these edge blocks is of an
- * undermined value.
+ * undetermined value.
  *
 \code{.cpp}
  CPLErr GetHistogram( GDALRasterBand *poBand, GUIntBig *panHistogram )
@@ -2974,7 +2974,7 @@ CPLErr GDALRasterBand::GetHistogram( double dfMin, double dfMax,
     const double dfNoDataValue = GetNoDataValue( &bGotNoDataValue );
     bGotNoDataValue = bGotNoDataValue && !CPLIsNan(dfNoDataValue);
     // Not advertized. May be removed at any time. Just as a provision if the
-    // old behaviour made sense sometimes.
+    // old behavior made sense sometimes.
     bGotNoDataValue = bGotNoDataValue &&
         !CPLTestBool(CPLGetConfigOption("GDAL_NODATA_IN_HISTOGRAM", "NO"));
     bool bGotFloatNoDataValue = false;
@@ -3766,9 +3766,6 @@ CPLErr GDALRasterBand::GetStatistics( int bApproxOK, int bForce,
                                       double *pdfMean, double *pdfStdDev )
 
 {
-    double dfMin = 0.0;
-    double dfMax = 0.0;
-
 /* -------------------------------------------------------------------- */
 /*      Do we already have metadata items for the requested values?     */
 /* -------------------------------------------------------------------- */
@@ -3800,8 +3797,8 @@ CPLErr GDALRasterBand::GetStatistics( int bApproxOK, int bForce,
         int bSuccessMin = FALSE;
         int bSuccessMax = FALSE;
 
-        dfMin = GetMinimum( &bSuccessMin );
-        dfMax = GetMaximum( &bSuccessMax );
+        const double dfMin = GetMinimum( &bSuccessMin );
+        const double dfMax = GetMaximum( &bSuccessMax );
 
         if( bSuccessMin && bSuccessMax )
         {
@@ -4868,6 +4865,8 @@ void GDALRasterBand::SetValidPercent(GUIntBig nSampleCount, GUIntBig nValidCount
  *
  * Once computed, the statistics will generally be "set" back on the
  * raster band using SetStatistics().
+ *
+ * Cached statistics can be cleared with GDALDataset::ClearStatistics().
  *
  * This method is the same as the C function GDALComputeRasterStatistics().
  *
@@ -6532,6 +6531,7 @@ void GDALRasterBand::IncDirtyBlocks( int nInc )
 /*                            ReportError()                             */
 /************************************************************************/
 
+#ifndef DOXYGEN_XML
 /**
  * \brief Emits an error related to a raster band.
  *
@@ -6572,6 +6572,7 @@ void GDALRasterBand::ReportError( CPLErr eErrClass, CPLErrorNum err_no,
     }
     va_end(args);
 }
+#endif
 
 /************************************************************************/
 /*                           GetVirtualMemAuto()                        */

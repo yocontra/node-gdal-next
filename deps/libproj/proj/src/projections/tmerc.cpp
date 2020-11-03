@@ -66,15 +66,6 @@ struct tmerc_data {
 /* Constant for "exact" transverse mercator */
 #define PROJ_ETMERC_ORDER 6
 
-// Determine if we should try to provide optimized versions for the Fused Multiply Addition
-// Intel instruction set. We use GCC 6 __attribute__((target_clones("fma","default")))
-// mechanism for that, where the compiler builds a default version, and one that
-// uses FMA. And at runtimes it figures out automatically which version can be used
-// by the current CPU. This allows to create general purpose binaries.
-#if defined(TARGET_CLONES_FMA_ALLOWED) && defined(__GNUC__) && __GNUC__ >= 6 && defined(__x86_64__) && !defined(__FMA__)
-#define BUILD_FMA_OPTIMIZED_VERSION
-#endif
-
 /*****************************************************************************/
 //
 //                  Approximate Transverse Mercator functions
@@ -82,10 +73,7 @@ struct tmerc_data {
 /*****************************************************************************/
 
 
-#ifdef BUILD_FMA_OPTIMIZED_VERSION
-__attribute__((target_clones("fma","default")))
-#endif
-inline static PJ_XY approx_e_fwd_internal (PJ_LP lp, PJ *P)
+static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
 {
     PJ_XY xy = {0.0, 0.0};
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
@@ -125,11 +113,6 @@ inline static PJ_XY approx_e_fwd_internal (PJ_LP lp, PJ *P)
         + FC8 * als * (1385. + t * ( t * (543. - t) - 3111.) )
         ))));
     return (xy);
-}
-
-static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
-{
-    return approx_e_fwd_internal(lp, P);
 }
 
 static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
@@ -177,10 +160,7 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     return xy;
 }
 
-#ifdef BUILD_FMA_OPTIMIZED_VERSION
-__attribute__((target_clones("fma","default")))
-#endif
-inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
+static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
 
@@ -210,10 +190,6 @@ inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
         ))) / cosphi;
     }
     return lp;
-}
-
-static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
-    return approx_e_inv_internal(xy, P);
 }
 
 static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
@@ -513,16 +489,13 @@ static PJ_LP exact_e_inv (PJ_XY xy, PJ *P) {
 }
 
 static PJ *setup_exact(PJ *P) {
-    double f, n, np, Z;
     auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->exact);
 
     assert( P->es > 0 );
 
-    /* flattening */
-    f = P->es / (1 + sqrt (1 -  P->es)); /* Replaces: f = 1 - sqrt(1-P->es); */
-
     /* third flattening */
-    np = n = f/(2 - f);
+    const double n = P->n;
+    double np = n;
 
     /* COEF. OF TRIG SERIES GEO <-> GAUSS */
     /* cgb := Gaussian -> Geodetic, KW p190 - 191 (61) - (62) */
@@ -587,7 +560,7 @@ static PJ *setup_exact(PJ *P) {
     Q->gtu[5] = np*(212378941/319334400.0);
 
     /* Gaussian latitude value of the origin latitude */
-    Z = gatg (Q->cbg, PROJ_ETMERC_ORDER, P->phi0, cos(2*P->phi0), sin(2*P->phi0));
+    const double Z = gatg (Q->cbg, PROJ_ETMERC_ORDER, P->phi0, cos(2*P->phi0), sin(2*P->phi0));
 
     /* Origin northing minus true northing at the origin latitude */
     /* i.e. true northing = N - P->Zb                         */

@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: ogrgeojsonseqdriver.cpp 9b933eb883a890c65a188e11f340a29416152d60 2020-01-04 19:04:07 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonseqdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 constexpr char RS = '\x1e';
 
@@ -880,7 +880,7 @@ void RegisterOGRGeoJSONSeq()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GeoJSON Sequence" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "geojsonl geojsons" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_geojsonseq.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/geojsonseq.html" );
 
     poDriver->SetMetadataItem( GDAL_DS_LAYER_CREATIONOPTIONLIST,
 "<LayerCreationOptionList>"

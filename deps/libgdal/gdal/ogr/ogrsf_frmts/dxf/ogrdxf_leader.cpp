@@ -33,7 +33,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxf_leader.cpp 8f015a72218c6be82993d44cd803ae54fec4a586 2020-06-27 14:09:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxf_leader.cpp 5f6d7d1878fd9ad64fb72525d1db843ae99856e1 2020-06-27 14:09:28 +0200 Even Rouault $")
 
 static void InterpolateSpline( OGRLineString* const poLine,
     const DXFTriple& oEndTangentDirection );
@@ -995,7 +995,7 @@ OGRDXFFeature *OGRDXFLayer::TranslateMLEADER()
     // Font name
     osStyle.Printf("LABEL(f:\"");
 
-    // Preserve legacy behaviour of specifying "Arial" as a default font name.
+    // Preserve legacy behavior of specifying "Arial" as a default font name.
     osStyle += poDS->LookupTextStyleProperty( osStyleName, "Font", "Arial" );
 
     osStyle += "\"";
@@ -1247,7 +1247,7 @@ namespace {
 /*      vector from the parameters as follows:                          */
 /*              0 0 ... 0 adfParameters 1 1 ... 1                       */
 /*        (nDegree zeros)               (nDegree ones)                  */
-/*      To fully match AutoCAD's behaviour, a chord-length              */
+/*      To fully match AutoCAD's behavior, a chord-length              */
 /*      parameterisation should be used, and the start and end          */
 /*      tangent vectors should be multiplied by the total chord         */
 /*      length of all chords.                                           */

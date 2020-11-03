@@ -23,6 +23,12 @@ matrix:
   include:
     # OSX
     - os: osx
+      env: NODE_NVM_VERSION="15" TARGET=STATIC
+    - os: osx
+      env: NODE_NVM_VERSION="15" TARGET=SHARED
+    - os: osx
+      env: NODE_NVM_VERSION="15" TARGET=TRUNK
+    - os: osx
       env: NODE_NVM_VERSION="14" TARGET=STATIC
     - os: osx
       env: NODE_NVM_VERSION="14" TARGET=SHARED
@@ -55,6 +61,12 @@ matrix:
 
     # Linux
     - os: linux
+      env: NODE_NVM_VERSION="15" TARGET=STATIC
+    - os: linux
+      env: NODE_NVM_VERSION="15" TARGET=SHARED
+    - os: linux
+      env: NODE_NVM_VERSION="15" TARGET=TRUNK
+    - os: linux
       env: NODE_NVM_VERSION="14" TARGET=STATIC
     - os: linux
       env: NODE_NVM_VERSION="14" TARGET=SHARED
@@ -86,6 +98,7 @@ matrix:
       env: NODE_NVM_VERSION="10" TARGET=TRUNK
 
   allow_failures:
+    - env: NODE_NVM_VERSION="15" TARGET=TRUNK
     - env: NODE_NVM_VERSION="14" TARGET=TRUNK
     - env: NODE_NVM_VERSION="13" TARGET=TRUNK
     - env: NODE_NVM_VERSION="12" TARGET=TRUNK

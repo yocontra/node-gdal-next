@@ -34,7 +34,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: pauxdataset.cpp 13897e11edeccc1ed3dc2a7a3dedb6419db4e294 2020-06-26 17:57:50 +0200 Even Rouault $")
+CPL_CVSID("$Id: pauxdataset.cpp 42ca0aca94398b2d286953f78cfeb150b0a8b69f 2020-06-26 17:57:50 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */

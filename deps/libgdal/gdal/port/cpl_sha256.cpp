@@ -41,7 +41,7 @@
 #include "cpl_sha256.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: cpl_sha256.cpp 274633c51fd3cdbadd5c6064755ef14683d4e3e8 2018-05-01 05:05:17 +0800 jerry73204 $")
+CPL_CVSID("$Id: cpl_sha256.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 #define ROTL(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 #define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
@@ -54,8 +54,8 @@ CPL_CVSID("$Id: cpl_sha256.cpp 274633c51fd3cdbadd5c6064755ef14683d4e3e8 2018-05-
 #define sigma1(x) (ROTR((x), 17) ^ ROTR((x), 19) ^ ((x) >> 10))
 
 #define DO_ROUND() {                                                    \
-                t1 = h + SIGMA1(e) + Ch(e, f, g) + *(Kp++) + *(W++);    \
-                t2 = SIGMA0(a) + Maj(a, b, c);                          \
+                GUInt32 t1 = h + SIGMA1(e) + Ch(e, f, g) + *(Kp++) + *(W++);    \
+                GUInt32 t2 = SIGMA0(a) + Maj(a, b, c);                          \
                 h = g;                                                  \
                 g = f;                                                  \
                 f = e;                                                  \
@@ -150,8 +150,6 @@ CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
 static void CPL_SHA256Guts(CPL_SHA256Context * sc, const GUInt32 * cbuf)
 {
         GUInt32 buf[64] = {};
-        GUInt32 t1 = 0;
-        GUInt32 t2 = 0;
 
         GUInt32 *W = buf;
 

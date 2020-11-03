@@ -51,7 +51,7 @@
 #include <assert.h>
 #include "zlib.h"
 
-CPL_CVSID("$Id: mrf_band.cpp a3179261a53707379057f4f4fb20ca54ec226507 2019-10-18 18:50:38 +0200 Even Rouault $")
+CPL_CVSID("$Id: mrf_band.cpp c493027f5b0e384cbe56afcd8c945da6e9c1639c 2020-09-05 03:14:45 -0700 Lucian Plesea $")
 
 using std::vector;
 using std::string;
@@ -197,7 +197,7 @@ static void *DeflateBlock(buf_mgr &src, size_t extrasize, int flags) {
 // itself is not set.  This allows for PNG features to be controlled, as well
 // as any other bands that use zlib by itself
 //
-GDALMRFRasterBand::GDALMRFRasterBand( GDALMRFDataset *parent_dataset,
+MRFRasterBand::MRFRasterBand( MRFDataset *parent_dataset,
                                       const ILImage &image, int band, int ov ) :
     poDS(parent_dataset),
     deflatep(GetOptlist().FetchBoolean("DEFLATE", FALSE)),
@@ -214,7 +214,7 @@ GDALMRFRasterBand::GDALMRFRasterBand( GDALMRFDataset *parent_dataset,
     nBlockYSize = img.pagesize.y;
     nBlocksPerRow = img.pagecount.x;
     nBlocksPerColumn = img.pagecount.y;
-    img.NoDataValue = GDALMRFRasterBand::GetNoDataValue(&img.hasNoData);
+    img.NoDataValue = MRFRasterBand::GetNoDataValue(&img.hasNoData);
 
     // Pick up the twists, aka GZ, RAWZ headers
     if( GetOptlist().FetchBoolean("GZ", FALSE) )
@@ -239,7 +239,7 @@ GDALMRFRasterBand::GDALMRFRasterBand( GDALMRFDataset *parent_dataset,
 }
 
 // Clean up the overviews if they exist
-GDALMRFRasterBand::~GDALMRFRasterBand()
+MRFRasterBand::~MRFRasterBand()
 {
     while( !overviews.empty() )
     {
@@ -249,7 +249,7 @@ GDALMRFRasterBand::~GDALMRFRasterBand()
 }
 
 // Look for a string from the dataset options or from the environment
-const char * GDALMRFRasterBand::GetOptionValue(const char *opt, const char *def) const
+const char * MRFRasterBand::GetOptionValue(const char *opt, const char *def) const
 {
     const char *optValue = poDS->optlist.FetchNameValue(opt);
     if (optValue) return optValue;
@@ -269,7 +269,7 @@ static double getBandValue(std::vector<double> &v,int idx)
 // It is not keeping track of how many values have been set,
 // so the application should set none or all the bands
 // This call is only valid during Create
-CPLErr  GDALMRFRasterBand::SetNoDataValue(double val)
+CPLErr  MRFRasterBand::SetNoDataValue(double val)
 {
     if (poDS->bCrystalized) {
         CPLError(CE_Failure, CPLE_AssertionFailed, "MRF: NoData can be set only during file create");
@@ -284,7 +284,7 @@ CPLErr  GDALMRFRasterBand::SetNoDataValue(double val)
     return CE_None;
 }
 
-double GDALMRFRasterBand::GetNoDataValue(int *pbSuccess)
+double MRFRasterBand::GetNoDataValue(int *pbSuccess)
 {
     std::vector<double> &v=poDS->vNoData;
     if (v.empty())
@@ -293,7 +293,7 @@ double GDALMRFRasterBand::GetNoDataValue(int *pbSuccess)
     return getBandValue(v, nBand - 1);
 }
 
-double GDALMRFRasterBand::GetMinimum(int *pbSuccess)
+double MRFRasterBand::GetMinimum(int *pbSuccess)
 {
     std::vector<double> &v=poDS->vMin;
     if (v.empty())
@@ -302,7 +302,7 @@ double GDALMRFRasterBand::GetMinimum(int *pbSuccess)
     return getBandValue(v, nBand - 1);
 }
 
-double GDALMRFRasterBand::GetMaximum(int *pbSuccess)
+double MRFRasterBand::GetMaximum(int *pbSuccess)
 {
     std::vector<double> &v=poDS->vMax;
     if (v.empty())
@@ -325,7 +325,7 @@ template<typename T> static CPLErr buff_fill(void *b, size_t count, const T ndv)
 *\brief Fills a buffer with no data
 *
 */
-CPLErr GDALMRFRasterBand::FillBlock(void *buffer)
+CPLErr MRFRasterBand::FillBlock(void *buffer)
 {
     int success;
     double ndv = GetNoDataValue(&success);
@@ -360,7 +360,7 @@ CPLErr GDALMRFRasterBand::FillBlock(void *buffer)
 *  The current band output goes directly into the buffer
 */
 
-CPLErr GDALMRFRasterBand::FillBlock(int xblk, int yblk, void *buffer) {
+CPLErr MRFRasterBand::FillBlock(int xblk, int yblk, void *buffer) {
     vector<GDALRasterBlock *> blocks;
 
     for (int i = 0; i < poDS->nBands; i++) {
@@ -394,7 +394,7 @@ CPLErr GDALMRFRasterBand::FillBlock(int xblk, int yblk, void *buffer) {
  *  The current band output goes directly into the buffer
  */
 
-CPLErr GDALMRFRasterBand::ReadInterleavedBlock(int xblk, int yblk, void *buffer) {
+CPLErr MRFRasterBand::ReadInterleavedBlock(int xblk, int yblk, void *buffer) {
     vector<GDALRasterBlock *> blocks;
 
     for (int i = 0; i < poDS->nBands; i++) {
@@ -445,7 +445,7 @@ CPLErr GDALMRFRasterBand::ReadInterleavedBlock(int xblk, int yblk, void *buffer)
 * @param buffer buffer
 *
 */
-CPLErr GDALMRFRasterBand::FetchBlock(int xblk, int yblk, void *buffer)
+CPLErr MRFRasterBand::FetchBlock(int xblk, int yblk, void *buffer)
 {
     assert(!poDS->source.empty());
     CPLDebug("MRF_IB", "FetchBlock %d,%d,0,%d, level  %d\n", xblk, yblk, nBand, m_l);
@@ -531,7 +531,9 @@ CPLErr GDALMRFRasterBand::FetchBlock(int xblk, int yblk, void *buffer)
     if (isAllVal(eDataType, ob, img.pageSizeBytes, val)) {
         // Mark it empty and checked, ignore the possible write error
         poDS->WriteTile((void *)1, infooffset, 0);
-        return CE_None;
+        if (1 == cstride)
+            return CE_None;
+        return ReadInterleavedBlock(xblk, yblk, buffer);
     }
 
     // Write the page in the local cache
@@ -580,14 +582,14 @@ CPLErr GDALMRFRasterBand::FetchBlock(int xblk, int yblk, void *buffer)
 *
 */
 
-CPLErr GDALMRFRasterBand::FetchClonedBlock(int xblk, int yblk, void *buffer)
+CPLErr MRFRasterBand::FetchClonedBlock(int xblk, int yblk, void *buffer)
 {
     CPLDebug("MRF_IB","FetchClonedBlock %d,%d,0,%d, level  %d\n", xblk, yblk, nBand, m_l);
 
     // Paranoid check
     assert(poDS->clonedSource);
 
-    GDALMRFDataset *poSrc = static_cast<GDALMRFDataset *>(poDS->GetSrcDS());
+    MRFDataset *poSrc = static_cast<MRFDataset *>(poDS->GetSrcDS());
     if( nullptr == poSrc )
     {
         CPLError( CE_Failure, CPLE_AppDefined, "MRF: Can't open source file %s", poDS->source.c_str());
@@ -596,9 +598,9 @@ CPLErr GDALMRFRasterBand::FetchClonedBlock(int xblk, int yblk, void *buffer)
 
     if (poDS->bypass_cache || GF_Read == DataMode()) {
         // Can't store, so just fetch from source, which is an MRF with identical structure
-        GDALMRFRasterBand *b = static_cast<GDALMRFRasterBand *>(poSrc->GetRasterBand(nBand));
+        MRFRasterBand *b = static_cast<MRFRasterBand *>(poSrc->GetRasterBand(nBand));
         if (b->GetOverviewCount() && m_l)
-            b = static_cast<GDALMRFRasterBand *>(b->GetOverview(m_l-1));
+            b = static_cast<MRFRasterBand *>(b->GetOverview(m_l-1));
         if( b == nullptr )
             return CE_Failure;
         return b->IReadBlock(xblk,yblk,buffer);
@@ -673,7 +675,7 @@ CPLErr GDALMRFRasterBand::FetchClonedBlock(int xblk, int yblk, void *buffer)
 *
 */
 
-CPLErr GDALMRFRasterBand::IReadBlock(int xblk, int yblk, void *buffer)
+CPLErr MRFRasterBand::IReadBlock(int xblk, int yblk, void *buffer)
 {
     ILIdx tinfo;
     GInt32 cstride = img.pagesize.c;
@@ -853,7 +855,7 @@ CPLErr GDALMRFRasterBand::IReadBlock(int xblk, int yblk, void *buffer)
 *
 */
 
-CPLErr GDALMRFRasterBand::IWriteBlock(int xblk, int yblk, void *buffer)
+CPLErr MRFRasterBand::IWriteBlock(int xblk, int yblk, void *buffer)
 
 {
     GInt32 cstride = img.pagesize.c;
@@ -865,7 +867,10 @@ CPLErr GDALMRFRasterBand::IWriteBlock(int xblk, int yblk, void *buffer)
 
     // Finish the Create call
     if (!poDS->bCrystalized)
-        poDS->Crystalize();
+        if (!poDS->Crystalize()) {
+            CPLError(CE_Failure, CPLE_AppDefined, "MRF: Error creating files");
+            return CE_Failure;
+        }
 
     if (1 == cstride) {     // Separate bands, we can write it as is
         // Empty page skip
@@ -930,7 +935,7 @@ CPLErr GDALMRFRasterBand::IWriteBlock(int xblk, int yblk, void *buffer)
             GDALRasterBand *band = poDS->GetRasterBand(iBand +1);
             // Pick the right overview
             if (m_l) band = band->GetOverview(m_l -1);
-            poBlock = (reinterpret_cast<GDALMRFRasterBand *>(band))->TryGetLockedBlockRef(xblk, yblk);
+            poBlock = (reinterpret_cast<MRFRasterBand *>(band))->TryGetLockedBlockRef(xblk, yblk);
             if (nullptr==poBlock) continue;
             // This is where the image data is for this band
 
@@ -1037,7 +1042,7 @@ CPLErr GDALMRFRasterBand::IWriteBlock(int xblk, int yblk, void *buffer)
 // Tests if a given block exists without reading it
 // returns false only when it is definitely not existing
 //
-bool GDALMRFRasterBand::TestBlock(int xblk, int yblk)
+bool MRFRasterBand::TestBlock(int xblk, int yblk)
 {
     // When bypassing the cache, assume all blocks are valid
     if (poDS->bypass_cache && !poDS->source.empty())
@@ -1064,7 +1069,7 @@ bool GDALMRFRasterBand::TestBlock(int xblk, int yblk)
     return (!poDS->source.empty() && 0 == tinfo.offset);
 }
 
-int GDALMRFRasterBand::GetOverviewCount()
+int MRFRasterBand::GetOverviewCount()
 {
     // First try internal overviews
     int nInternalOverviewCount = static_cast<int>(overviews.size());
@@ -1074,7 +1079,7 @@ int GDALMRFRasterBand::GetOverviewCount()
     return GDALPamRasterBand::GetOverviewCount();
 }
 
-GDALRasterBand* GDALMRFRasterBand::GetOverview(int n)
+GDALRasterBand* MRFRasterBand::GetOverview(int n)
 {
     // First try internal overviews
     if( n >= 0 && n < (int)overviews.size() )

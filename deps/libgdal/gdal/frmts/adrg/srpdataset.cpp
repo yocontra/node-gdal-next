@@ -39,7 +39,7 @@
 // Uncomment to recognize also .gen files in addition to .img files
 // #define OPEN_GEN
 
-CPL_CVSID("$Id: srpdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: srpdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 class SRPDataset final: public GDALPamDataset
 {
@@ -1219,8 +1219,6 @@ void SRPDataset::AddMetadatafromFromTHF(const char* pszFileName)
     int bSuccess=0;
     if (!module.Open(pszFileName, TRUE))
         return ;
-
-    CPLString osDirName(CPLGetDirname(pszFileName));
 
     while( true )
     {

@@ -30,7 +30,7 @@
 
 // g++ -g -Wall -fPIC -shared -o ogr_CouchDB.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/couchdb ogr/ogrsf_frmts/couchdb/*.c* -L. -lgdal -Iogr/ogrsf_frmts/geojson/jsonc
 
-CPL_CVSID("$Id: ogrcouchdbdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: ogrcouchdbdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRCouchDB();
 
@@ -111,7 +111,7 @@ void RegisterOGRCouchDB()
     poDriver->SetDescription( "CouchDB" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "CouchDB / GeoCouch" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_couchdb.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/couchdb.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "CouchDB:" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
                                "<CreationOptionList/>");

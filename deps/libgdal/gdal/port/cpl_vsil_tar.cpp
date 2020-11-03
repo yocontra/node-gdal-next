@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_tar.cpp fc7c34ea9ce55c9cbd09945314711e9fcb5c5544 2019-09-05 16:41:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_tar.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 #if (defined(DEBUG) || defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)) && !defined(HAVE_FUZZER_FRIENDLY_ARCHIVE)
 /* This is a completely custom archive format that is rather inefficient */
@@ -628,7 +628,7 @@ VSIVirtualHandle* VSITarFilesystemHandler::Open( const char *pszFilename,
  * For example gdalinfo /vsitar/myarchive.tar/subdir1/file1.tif
  *
  * Syntactic sugar : if the tar archive contains only one file located at its
- * root, just mentionning "/vsitar/path/to/the/file.tar" will work
+ * root, just mentioning "/vsitar/path/to/the/file.tar" will work
  *
  * VSIStatL() will return the uncompressed size in st_size member and file
  * nature- file or directory - in st_mode member.

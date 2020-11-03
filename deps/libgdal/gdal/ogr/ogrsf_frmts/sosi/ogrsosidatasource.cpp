@@ -31,7 +31,7 @@
 #include <map>
 #include <math.h>
 
-CPL_CVSID("$Id: ogrsosidatasource.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsosidatasource.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /* This is the most common encoding for SOSI files. Let's at least try if
  * it is supported, or generate a meaningful error message.               */
@@ -686,12 +686,9 @@ void OGRSOSIDataSource::buildOGRLineStringFromArc(long iSerial) {
     poLS->setNumPoints(npt);
     dth = dth / (npt-1);
 
-    int i;
-    double dfEast = 0, dfNorth = 0;
-
-    for (i=0; i<npt; i++) {
-        dfEast  = cE + r * cos(th1 + dth * i);
-        dfNorth = cN + r * sin(th1 + dth * i);
+    for (int i=0; i<npt; i++) {
+        const double dfEast  = cE + r * cos(th1 + dth * i);
+        const double dfNorth = cN + r * sin(th1 + dth * i);
         if (dfEast != dfEast) { /* which is a wonderful property of nans */
           CPLError( CE_Warning, CPLE_AppDefined,
                     "Calculated %lf for point %d of %d in curve %li.", dfEast, i, npt, iSerial);

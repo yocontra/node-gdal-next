@@ -31,7 +31,7 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id: rmfdem.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: rmfdem.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /*
  * The encoded data stream is a series of records.
@@ -95,7 +95,7 @@ GInt32 INV_INT4  = 0xFFFFFFF0L;
 GInt32 INV_INT12 = 0xFFFFF000L;
 GInt32 INV_INT24 = 0xFF000000L;
 
-// Not sure which behaviour we wish for int32 overflow, so just do the
+// Not sure which behavior we wish for int32 overflow, so just do the
 // addition as uint32 to workaround -ftrapv
 CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
 static GInt32 AddInt32( GInt32& nTarget, GInt32 nVal )

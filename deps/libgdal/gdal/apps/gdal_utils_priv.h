@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_utils_priv.h 9598f66a2ef90ef40fc3274e54d5d723ad597b0f 2019-07-13 00:03:57 +0200 Even Rouault $
+ * $Id: gdal_utils_priv.h 1c7b950fc8754f6ba1d027f031886063675d2927 2020-06-02 15:06:07 +0200 Even Rouault $
  *
  * Project:  GDAL Utilities
  * Purpose:  GDAL Utilities Private Declarations.
@@ -49,6 +49,9 @@ struct GDALInfoOptionsForBinary
 
     /* > for reporting on a particular subdataset */
     int nSubdataset;
+
+    /* Allowed input drivers. */
+    char** papszAllowInputDrivers;
 };
 
 struct GDALTranslateOptionsForBinary
@@ -59,6 +62,9 @@ struct GDALTranslateOptionsForBinary
     int bCopySubDatasets;
     char** papszOpenOptions;
     char* pszFormat;
+
+    /* Allowed input drivers. */
+    char** papszAllowInputDrivers;
 };
 
 struct GDALWarpAppOptionsForBinary
@@ -75,6 +81,9 @@ struct GDALWarpAppOptionsForBinary
 
     int bOverwrite;
     int bCreateOutput;
+
+    /* Allowed input drivers. */
+    char** papszAllowInputDrivers;
 };
 
 /* Access modes */

@@ -63,7 +63,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: hfadataset.cpp 6ae7f60a5914a2f16b8b1a94758f10e6621e4aca 2020-05-31 21:52:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfadataset.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
 
 constexpr double R2D = 180.0 / M_PI;
 constexpr double D2R = M_PI / 180.0;
@@ -5026,26 +5026,26 @@ HFAPCSStructToWKT( const Eprj_Datum *psDatum,
     // Try and set the GeogCS information.
     if( !oSRS.IsLocal() )
     {
-        bool bWellKnwonDatum = false;
+        bool bWellKnownDatum = false;
         if( pszDatumName == nullptr)
             oSRS.SetGeogCS(pszDatumName, pszDatumName, pszEllipsoidName,
                            psPro->proSpheroid.a, dfInvFlattening);
         else if( EQUAL(pszDatumName, "WGS 84")
             || EQUAL(pszDatumName,"WGS_1984") )
         {
-            bWellKnwonDatum = true;
+            bWellKnownDatum = true;
             oSRS.SetWellKnownGeogCS("WGS84" );
         }
         else if( strstr(pszDatumName, "NAD27") != nullptr
                  || EQUAL(pszDatumName,"North_American_Datum_1927") )
         {
-            bWellKnwonDatum = true;
+            bWellKnownDatum = true;
             oSRS.SetWellKnownGeogCS("NAD27");
         }
         else if( strstr(pszDatumName, "NAD83") != nullptr
                  || EQUAL(pszDatumName, "North_American_Datum_1983"))
         {
-            bWellKnwonDatum = true;
+            bWellKnownDatum = true;
             oSRS.SetWellKnownGeogCS("NAD83");
         }
         else
@@ -5054,7 +5054,7 @@ HFAPCSStructToWKT( const Eprj_Datum *psDatum,
 
         if( psDatum != nullptr && psDatum->type == EPRJ_DATUM_PARAMETRIC )
         {
-            if( bWellKnwonDatum &&
+            if( bWellKnownDatum &&
                 CPLTestBool(CPLGetConfigOption("OSR_STRIP_TOWGS84", "YES")) )
             {
                 CPLDebug("OSR", "TOWGS84 information has been removed. "

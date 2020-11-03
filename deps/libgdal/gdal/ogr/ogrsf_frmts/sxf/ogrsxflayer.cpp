@@ -37,7 +37,7 @@
 #include "ogr_srs_api.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrsxflayer.cpp 78f3bf72654dc87dc9f73c731edac98639f2ad41 2020-05-10 22:29:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsxflayer.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRSXFLayer()                                 */
@@ -815,7 +815,7 @@ OGRFeature *OGRSXFLayer::GetNextRawFeature(long nFID)
       return NULL;
     }
 #endif
-    else if (eGeomType == SXF_GT_TextTemplate ) // TODO realise this
+    else if (eGeomType == SXF_GT_TextTemplate ) // TODO realize this
     {
       CPLError( CE_Warning, CPLE_NotSupported,
       "SXF. Geometry type Text Template do not support." );
@@ -1174,7 +1174,6 @@ OGRFeature *OGRSXFLayer::TranslateLine(const SXFRecordDescription& certifInfo,
     double dfY = 1.0;
     double dfZ = 0.0;
     GUInt32 nOffset = 0;
-    GUInt32 nDelta = 0;
 
     //OGRFeatureDefn *fd = poFeatureDefn->Clone();
     //fd->SetGeomType( wkbMultiLineString );
@@ -1191,6 +1190,7 @@ OGRFeature *OGRSXFLayer::TranslateLine(const SXFRecordDescription& certifInfo,
     {
         const char * psCoords = psRecordBuf + nOffset ;
 
+        GInt32 nDelta;
         if (certifInfo.bDim == 1)
         {
             nDelta = TranslateXYH( certifInfo, psCoords, nBufLen - nOffset, &dfX, &dfY, &dfZ );
@@ -1231,7 +1231,8 @@ OGRFeature *OGRSXFLayer::TranslateLine(const SXFRecordDescription& certifInfo,
 
         for (GUInt16 i=0; i < nCoords ; i++)
         {
-            const char * psCoords = psRecordBuf + nOffset ;
+            const char * psCoords = psRecordBuf + nOffset;
+            GInt32 nDelta;
             if (certifInfo.bDim == 1)
             {
                 nDelta = TranslateXYH( certifInfo, psCoords, nBufLen - nOffset, &dfX, &dfY, &dfZ );
@@ -1279,7 +1280,6 @@ OGRFeature *OGRSXFLayer::TranslateVetorAngle(const SXFRecordDescription& certifI
     }
 
     GUInt32 nOffset = 0;
-    GUInt32 nDelta = 0;
 
     OGRFeature *poFeature = new OGRFeature(poFeatureDefn);
     OGRPoint *poPT = new OGRPoint();
@@ -1295,6 +1295,7 @@ OGRFeature *OGRSXFLayer::TranslateVetorAngle(const SXFRecordDescription& certifI
         double dfX = 1.0;
         double dfY = 1.0;
         double dfZ = 0.0;
+        GInt32 nDelta;
         if (certifInfo.bDim == 1)
         {
             nDelta = TranslateXYH( certifInfo, psCoords, nBufLen - nOffset, &dfX, &dfY, &dfZ );
@@ -1452,7 +1453,6 @@ OGRFeature *OGRSXFLayer::TranslateText(const SXFRecordDescription& certifInfo,
     double dfY = 1.0;
     double dfZ = 0.0;
     GUInt32 nOffset = 0;
-    GUInt32 nDelta = 0;
 
     OGRFeature *poFeature = new OGRFeature(poFeatureDefn);
     OGRMultiLineString *poMLS = new  OGRMultiLineString ();
@@ -1465,6 +1465,7 @@ OGRFeature *OGRSXFLayer::TranslateText(const SXFRecordDescription& certifInfo,
     {
         const char * psCoords = psRecordBuf + nOffset ;
 
+        GUInt32 nDelta;
         if (certifInfo.bDim == 1)
         {
             nDelta = TranslateXYH( certifInfo, psCoords, nBufLen - nOffset,
@@ -1535,6 +1536,7 @@ OGRFeature *OGRSXFLayer::TranslateText(const SXFRecordDescription& certifInfo,
         for (int i=0; i < nCoords ; i++)
         {
             const char * psCoords = psRecordBuf + nOffset ;
+            GUInt32 nDelta;
             if (certifInfo.bDim == 1)
             {
                 nDelta = TranslateXYH( certifInfo, psCoords, nBufLen - nOffset, &dfX, &dfY, &dfZ );

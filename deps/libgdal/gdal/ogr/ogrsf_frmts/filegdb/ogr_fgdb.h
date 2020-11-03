@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_fgdb.h 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $
+* $Id: ogr_fgdb.h 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Standard includes and class definitions ArcObjects OGR driver.
@@ -224,6 +224,8 @@ protected:
 
   bool GDBToOGRFields(CPLXMLNode* psFields);
   bool ParseGeometryDef(CPLXMLNode* psGeometryDef);
+
+  static
   bool ParseSpatialReference(CPLXMLNode* psSpatialRefNode, std::string* pOutWkt,
                              std::string* pOutWKID, std::string* pOutLatestWKID);
 
@@ -240,7 +242,6 @@ protected:
 
   std::wstring m_wstrSubfields;
   std::wstring m_wstrWhereClause;
-  OGRGeometry* m_pOGRFilterGeometry;
 
   bool        m_bFilterDirty; //optimization to avoid multiple calls to search until necessary
 

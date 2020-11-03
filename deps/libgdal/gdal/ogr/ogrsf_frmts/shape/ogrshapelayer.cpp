@@ -57,7 +57,7 @@
 #include "shapefil.h"
 #include "shp_vsi.h"
 
-CPL_CVSID("$Id: ogrshapelayer.cpp d49b121dc5f7143e85dd0ef747e6ac666b0e8f46 2020-02-11 15:51:48 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrshapelayer.cpp 7465a420517ca7053fd87ea6f16e76df2b9a4ce8 2020-08-07 17:22:47 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRShapeLayer()                            */
@@ -2224,6 +2224,33 @@ OGRSpatialReference *OGRShapeGeomFieldDefn::GetSpatialRef() const
                 }
                 else
                 {
+                    // If there are several matches >= 90%, take the only one
+                    // that is EPSG
+                    int iEPSG = -1;
+                    for(int i = 0; i < nEntries; i++ )
+                    {
+                        if( panConfidence[i] >= 90 )
+                        {
+                            const char* pszAuthName =
+                                reinterpret_cast<OGRSpatialReference*>(pahSRS[i])->GetAuthorityName(nullptr);
+                            if( pszAuthName != nullptr && EQUAL(pszAuthName, "EPSG") )
+                            {
+                                if( iEPSG < 0 )
+                                    iEPSG = i;
+                                else
+                                {
+                                    iEPSG = -1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if( iEPSG >= 0 )
+                    {
+                        poSRS->Release();
+                        poSRS = reinterpret_cast<OGRSpatialReference*>(pahSRS[iEPSG])->Clone();
+                        poSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+                    }
                     OSRFreeSRSArray(pahSRS);
                 }
                 CPLFree(panConfidence);

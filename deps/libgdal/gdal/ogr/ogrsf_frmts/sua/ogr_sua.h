@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sua.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_sua.h bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $
  *
  * Project:  SUA Translator
  * Purpose:  Definition of classes for OGR .sua driver.
@@ -36,7 +36,7 @@
 /*                             OGRSUALayer                              */
 /************************************************************************/
 
-class OGRSUALayer final: public OGRLayer
+class OGRSUALayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGRSUALayer>
 {
     OGRFeatureDefn*    poFeatureDefn;
     OGRSpatialReference *poSRS;
@@ -55,7 +55,7 @@ class OGRSUALayer final: public OGRLayer
                         virtual ~OGRSUALayer();
 
     virtual void                ResetReading() override;
-    virtual OGRFeature *        GetNextFeature() override;
+    DEFINE_GET_NEXT_FEATURE_THROUGH_RAW(OGRSUALayer)
 
     virtual OGRFeatureDefn *    GetLayerDefn() override { return poFeatureDefn; }
 

@@ -63,7 +63,7 @@
 #define va_copy __va_copy
 #endif
 
-CPL_CVSID("$Id: cpl_string.cpp 723164e9b6cffcb02cb84fc57a9cdba428929016 2019-11-08 22:30:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_string.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
 
 /*=====================================================================
                     StringList manipulation functions.
@@ -1451,7 +1451,11 @@ int CPLprintf( CPL_FORMAT_STRING(const char* fmt), ... )
   * @return the number of matched patterns;
   * @since GDAL 2.0
   */
+#ifdef DOXYGEN_XML
+int CPLsscanf( const char* str, const char* fmt, ... )
+#else
 int CPLsscanf( const char* str, CPL_SCANF_FORMAT_STRING(const char* fmt), ... )
+#endif
 {
     bool error = false;
     int ret = 0;

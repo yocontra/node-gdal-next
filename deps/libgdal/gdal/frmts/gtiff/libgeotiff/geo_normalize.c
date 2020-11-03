@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geo_normalize.c 9d15051620a915e80bd34be07f13e0d00301c298 2020-04-22 18:57:31 +0200 Even Rouault $
+ * $Id: geo_normalize.c faff6f84417cceda98b06fd532fea6c45547fbf3 2020-09-13 16:29:43 +0200 Even Rouault $
  *
  * Project:  libgeotiff
  * Purpose:  Code to normalize PCS and other composite codes in a GeoTIFF file.
@@ -465,10 +465,6 @@ int GTIFGetGCSInfoEx( void* ctxIn,
 
         return TRUE;
     }
-
-
-    if( nGCSCode == KvUserDefined )
-        return FALSE;
 
 /* -------------------------------------------------------------------- */
 /*      Search the database.                                            */
@@ -1062,6 +1058,9 @@ int GTIFGetUOMAngleInfoEx( void* ctxIn,
 
         return TRUE;
     }
+
+    if( nUOMAngleCode == KvUserDefined )
+        return FALSE;
 
 /* -------------------------------------------------------------------- */
 /*      Search the units database for this unit.  If we don't find      */

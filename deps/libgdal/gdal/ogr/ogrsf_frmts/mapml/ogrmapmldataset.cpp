@@ -78,7 +78,7 @@ class OGRMapMLReaderDataset final: public GDALPamDataset
 /*                         OGRMapMLReaderLayer                          */
 /************************************************************************/
 
-class OGRMapMLReaderLayer final: public OGRLayer
+class OGRMapMLReaderLayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGRMapMLReaderLayer>
 {
         OGRMapMLReaderDataset* m_poDS = nullptr;
         OGRFeatureDefn* m_poFeatureDefn = nullptr;
@@ -98,7 +98,7 @@ class OGRMapMLReaderLayer final: public OGRLayer
 
         OGRFeatureDefn* GetLayerDefn() override { return m_poFeatureDefn; }
         void ResetReading() override;
-        OGRFeature* GetNextFeature() override;
+        DEFINE_GET_NEXT_FEATURE_THROUGH_RAW(OGRMapMLReaderLayer)
         int TestCapability( const char * pszCap ) override;
 };
 
@@ -689,30 +689,6 @@ OGRFeature* OGRMapMLReaderLayer::GetNextRawFeature()
 }
 
 /************************************************************************/
-/*                            GetNextFeature()                          */
-/************************************************************************/
-
-OGRFeature* OGRMapMLReaderLayer::GetNextFeature()
-{
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-        if (poFeature == nullptr)
-            return nullptr;
-
-        if((m_poFilterGeom == nullptr
-            || FilterGeometry( poFeature->GetGeometryRef() ) )
-        && (m_poAttrQuery == nullptr
-            || m_poAttrQuery->Evaluate( poFeature )) )
-        {
-            return poFeature;
-        }
-
-        delete poFeature;
-    }
-}
-
-/************************************************************************/
 /*                         OGRMapMLWriterDataset()                      */
 /************************************************************************/
 
@@ -830,12 +806,14 @@ OGRMapMLWriterDataset::~OGRMapMLWriterDataset()
             if( psExtra )
             {
                 CPLXMLNode* psLastChild = m_psExtent->psChild;
-                while( psLastChild->psNext )
-                    psLastChild = psLastChild->psNext;
                 if( psLastChild == nullptr )
                     m_psExtent->psChild = psExtra;
                 else
+                {
+                    while( psLastChild->psNext )
+                        psLastChild = psLastChild->psNext;
                     psLastChild->psNext = psExtra;
+                }
             }
         }
 
@@ -1372,8 +1350,7 @@ void RegisterOGRMapML()
     poDriver->SetDescription( "MapML" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "MapML" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                               "drivers/vector/mapml.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/mapml.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnIdentify = OGRMapMLReaderDataset::Identify;

@@ -49,7 +49,7 @@
 #include "ogr_core.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqlitedriver.cpp c32973ee27efd67d5c5388c9866a7e688ce83257 2020-01-11 01:10:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitedriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     OGRSQLiteDriverIdentify()                        */
@@ -299,14 +299,17 @@ void RegisterOGRSQLite()
 #else
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "SQLite / Spatialite" );
 #endif
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_sqlite.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/sqlite.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "sqlite db" );
 
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
 "<OpenOptionList>"
 "  <Option name='LIST_ALL_TABLES' type='boolean' description='Whether all tables, including non-spatial ones, should be listed' default='NO'/>"
 "  <Option name='LIST_VIRTUAL_OGR' type='boolean' description='Whether VirtualOGR virtual tables should be listed. Should only be enabled on trusted datasources to avoid potential safety issues' default='NO'/>"
-"  <Option name='1BIT_AS_8BIT' type='boolean' description='Whether to promote 1-bit monochrome raster as 8-bit, so as to have higher quality overviews' default='YES'/>"
+"  <Option name='PRELUDE_STATEMENTS' type='string' description='SQL statement(s) to send on the SQLite connection before any other ones'/>"
+#ifdef HAVE_RASTERLITE2
+"  <Option name='1BIT_AS_8BIT' type='boolean' scope='raster' description='Whether to promote 1-bit monochrome raster as 8-bit, so as to have higher quality overviews' default='YES'/>"
+#endif
 "</OpenOptionList>");
 
     CPLString osCreationOptions(
@@ -337,8 +340,6 @@ void RegisterOGRSQLite()
         osCreationOptions += "    <Value>JPEG</Value>";
     if( rl2_is_supported_codec( RL2_COMPRESSION_LOSSY_WEBP ) )
         osCreationOptions += "    <Value>WEBP</Value>";
-    if( rl2_is_supported_codec( RL2_COMPRESSION_CHARLS ) )
-        osCreationOptions += "    <Value>CHARLS</Value>";
     if( rl2_is_supported_codec( RL2_COMPRESSION_LOSSY_JP2 ) )
         osCreationOptions += "    <Value>JPEG2000</Value>";
 #endif
@@ -397,6 +398,7 @@ void RegisterOGRSQLite()
 #endif
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_UNIQUE_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

@@ -373,7 +373,7 @@ static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
         return point.xyz;
     }
 
-    if (Q->no_rotation) {
+    if (Q->no_rotation && Q->scale == 0) {
         point.xyz.x = lpz.lam + Q->xyz.x;
         point.xyz.y = lpz.phi + Q->xyz.y;
         point.xyz.z = lpz.z   + Q->xyz.z;
@@ -413,7 +413,7 @@ static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
         return point.lpz;
     }
 
-    if (Q->no_rotation) {
+    if (Q->no_rotation && Q->scale == 0) {
         point.xyz.x  =  xyz.x - Q->xyz.x;
         point.xyz.y  =  xyz.y - Q->xyz.y;
         point.xyz.z  =  xyz.z - Q->xyz.z;
@@ -654,7 +654,7 @@ PJ *TRANSFORMATION(helmert, 0) {
     Q->scale  =  Q->scale_0;
     Q->theta  =  Q->theta_0;
 
-    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&
+    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) &&
         (Q->dopk.o==0) && (Q->dopk.p==0) && (Q->dopk.k==0)) {
         Q->no_rotation = 1;
     }
@@ -676,10 +676,6 @@ PJ *TRANSFORMATION(helmert, 0) {
         proj_log_trace(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
         proj_log_trace(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
         proj_log_trace(P, "ds= %8.5f  t_epoch=%8.5f", Q->dscale, Q->t_epoch);
-    }
-
-    if (Q->no_rotation) {
-        return P;
     }
 
     update_parameters(P);

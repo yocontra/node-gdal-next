@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcidskdataset2.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: pcidskdataset2.h 3b89063b95a18cfefb8dcf527a472987c52e6e3c 2020-05-27 19:53:42 +0200 Even Rouault $
  *
  * Project:  PCIDSK Database File
  * Purpose:  Read/write PCIDSK Database File used by the PCI software, using
@@ -165,14 +165,14 @@ class PCIDSK2Band final: public GDALPamRasterBand
 /*                             OGRPCIDSKLayer                              */
 /************************************************************************/
 
-class OGRPCIDSKLayer final: public OGRLayer
+class OGRPCIDSKLayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGRPCIDSKLayer>
 {
     PCIDSK::PCIDSKVectorSegment *poVecSeg;
     PCIDSK::PCIDSKSegment       *poSeg;
 
     OGRFeatureDefn     *poFeatureDefn;
 
-    OGRFeature *        GetNextUnfilteredFeature();
+    OGRFeature *        GetNextRawFeature();
 
     int                 iRingStartField;
     PCIDSK::ShapeId     hLastShapeId;
@@ -182,13 +182,15 @@ class OGRPCIDSKLayer final: public OGRLayer
     OGRSpatialReference *poSRS;
 
     std::unordered_map<std::string, int> m_oMapFieldNameToIdx{};
+    bool                m_bEOF = false;
 
   public:
     OGRPCIDSKLayer( PCIDSK::PCIDSKSegment*, PCIDSK::PCIDSKVectorSegment *, bool bUpdate );
     virtual ~OGRPCIDSKLayer();
 
     void                ResetReading() override;
-    OGRFeature *        GetNextFeature() override;
+    DEFINE_GET_NEXT_FEATURE_THROUGH_RAW(OGRPCIDSKLayer)
+
     OGRFeature         *GetFeature( GIntBig nFeatureId ) override;
     virtual OGRErr      ISetFeature( OGRFeature *poFeature ) override;
 

@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrgmtdriver.cpp 73408e4a938d6fb45b1a01af4812236e464c7159 2019-04-19 22:20:14 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmtdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                    OGRGMTDriverIdentify()                            */
@@ -107,7 +107,7 @@ void RegisterOGRGMT()
     poDriver->SetMetadataItem(GDAL_DCAP_VECTOR, "YES");
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GMT ASCII Vectors (.gmt)" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gmt" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_gmt.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/gmt.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRGMTDriverOpen;

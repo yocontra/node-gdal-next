@@ -51,7 +51,7 @@ CPL_C_START
 #endif
 CPL_C_END
 
-CPL_CVSID("$Id: PNG_band.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: PNG_band.cpp 81d88451b89a7cb8e02020005eb322b0cdaff4de 2020-08-10 08:52:54 -0700 Lucian Plesea $")
 
 NAMESPACE_MRF_START
 
@@ -344,9 +344,9 @@ CPLErr PNG_Band::Compress(buf_mgr &dst, buf_mgr &src)
  * The presence of the PNGColors and PNGAlpha is used as a flag for PPNG only
  */
 
-PNG_Band::PNG_Band( GDALMRFDataset *pDS, const ILImage &image,
+PNG_Band::PNG_Band( MRFDataset *pDS, const ILImage &image,
                     int b, int level ) :
-    GDALMRFRasterBand(pDS, image, b, level),
+    MRFRasterBand(pDS, image, b, level),
     codec(image)
 {   // Check error conditions
     if (image.dt != GDT_Byte && image.dt != GDT_Int16 && image.dt != GDT_UInt16)

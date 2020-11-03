@@ -30,7 +30,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: iscedataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: iscedataset.cpp 5c10fcc32da41b59ff86f7ed642236230a02497c 2020-07-19 18:23:15 +0200 Even Rouault $")
 
 static const char * const apszISCE2GDALDatatypes[] = {
     "BYTE:Byte",
@@ -647,6 +647,12 @@ GDALDataset *ISCEDataset::Open( GDALOpenInfo *poOpenInfo, bool bFileSizeCheck )
     }
     const GDALDataType eDataType = GDALGetDataTypeByName( pszDataType );
     const int nDTSize = GDALGetDataTypeSizeBytes(eDataType);
+    if( nDTSize == 0 )
+    {
+        delete poDS;
+        CSLDestroy( papszXmlProps );
+        return nullptr;
+    }
     const char *pszScheme = CSLFetchNameValue( papszXmlProps, "SCHEME" );
     int nPixelOffset = 0;
     int nLineOffset = 0;

@@ -44,7 +44,7 @@
 #include "ogr_core.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: gmlfeatureclass.cpp 8f2d9a25ddfba66412b29ced2eda889ef6bea5dd 2019-11-06 21:25:57 +0100 Even Rouault $")
+CPL_CVSID("$Id: gmlfeatureclass.cpp 0140f88defd409e1563c10183ee450d09c8419ca 2020-05-30 20:50:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          GMLFeatureClass()                           */
@@ -649,6 +649,8 @@ bool GMLFeatureClass::InitializeFromXML( CPLXMLNode *psRoot )
                 CPLGetXMLValue(psThis, "Condition", nullptr);
             const bool bNullable =
                 CPLTestBool(CPLGetXMLValue(psThis, "Nullable", "true"));
+            const bool bUnique =
+                CPLTestBool(CPLGetXMLValue(psThis, "Unique", "false"));
 
             if( pszName == nullptr )
             {
@@ -663,6 +665,7 @@ bool GMLFeatureClass::InitializeFromXML( CPLXMLNode *psRoot )
                 pszName, CPLGetXMLValue(psThis, "ElementPath", nullptr));
 
             poPDefn->SetNullable(bNullable);
+            poPDefn->SetUnique(bUnique);
             if( EQUAL(pszType, "Untyped") )
             {
                 poPDefn->SetType(GMLPT_Untyped);

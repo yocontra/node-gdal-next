@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_aws.h a0f6709dc75fe9cb5c842fd4395e6072db3d9620 2020-03-05 16:04:26 +0100 Even Rouault $
+ * $Id: cpl_aws.h f87673d2ac225e117fd6f6d5b32443cab1c7460b 2020-07-21 15:14:42 +0200 Even Rouault $
  *
  * Name:     cpl_aws.h
  * Project:  CPL - Common Portability Library
@@ -109,6 +109,7 @@ public:
                                        bool /*bSetError*/, bool* /*pbUpdateMap*/ = nullptr) { return false;}
 
         virtual const CPLString& GetURL() const = 0;
+        CPLString GetURLNoKVP() const;
 
         virtual CPLString GetCopySourceHeader() const { return std::string(); }
 

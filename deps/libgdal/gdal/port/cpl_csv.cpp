@@ -42,7 +42,7 @@
 #include "cpl_multiproc.h"
 #include "gdal_csv.h"
 
-CPL_CVSID("$Id: cpl_csv.cpp cb59cbc877cc671877362c711b73edf9f855fdc2 2020-01-30 00:45:57 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_csv.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
 
 /* ==================================================================== */
 /*      The CSVTable is a persistent set of info about an open CSV      */
@@ -498,7 +498,7 @@ static void CSVIngest( const char *pszFilename )
  * Currently, it can detect comma, semicolon, space or tabulation. In case of
  * ambiguity or no separator found, comma will be considered as the separator.
  *
- * @return ',', ';', ' ' or '\t'
+ * @return ',', ';', ' ' or tabulation character.
  */
 char CSVDetectSeperator( const char* pszLine )
 {
@@ -1421,11 +1421,7 @@ static const char *CSVFileOverride( const char * pszInput )
 {
     static char szPath[1024] = {};
 
-#ifdef WIN32
-    sprintf( szPath, "%s\\%s", CSVDirName, pszInput );
-#else
     sprintf( szPath, "%s/%s", CSVDirName, pszInput );
-#endif
 
     return szPath;
 }

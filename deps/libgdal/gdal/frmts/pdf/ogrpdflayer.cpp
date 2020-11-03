@@ -28,7 +28,7 @@
 
 #include "gdal_pdf.h"
 
-CPL_CVSID("$Id: ogrpdflayer.cpp 8fef404f981b5830fad78f1023c1d0c0964ed142 2020-05-28 14:16:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpdflayer.cpp 9c1c4c56303c06d9e18dbfd9412dab3ce58f3f03 2020-05-28 14:16:15 +0200 Even Rouault $")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 

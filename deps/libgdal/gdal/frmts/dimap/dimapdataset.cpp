@@ -38,7 +38,7 @@
 #include "vrtdataset.h"
 #include <map>
 
-CPL_CVSID("$Id: dimapdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: dimapdataset.cpp 13194b4d4129201bf822fe57887fd92e4cb3c2fa 2020-10-02 23:12:11 +0200 Thomas Bonfort $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -1098,6 +1098,7 @@ int DIMAPDataset::ReadImageInformation2()
          </Data_Files>
     */
     std::map< std::pair<int,int>, CPLString > oMapRowColumnToName;
+    int nImageDSRow=1, nImageDSCol=1;
     if( psDataFiles )
     {
         int nRows = 1;
@@ -1117,9 +1118,12 @@ int DIMAPDataset::ReadImageInformation2()
                 {
                     int nRow = atoi(pszR);
                     int nCol = atoi(pszC);
-                    if( nRow == 1 && nCol == 1 )
+                    if( (nRow == 1 && nCol == 1) || osImageDSFilename.empty() ) {
                         osImageDSFilename =
                             CPLFormCIFilename( osPath, pszHref, nullptr );
+                            nImageDSRow = nRow;
+                            nImageDSCol = nCol;
+                    }
                     if( nRow > nRows ) nRows = nRow;
                     if( nCol > nCols ) nCols = nCol;
                     oMapRowColumnToName[ std::pair<int,int>(nRow, nCol) ] =
@@ -1301,7 +1305,12 @@ int DIMAPDataset::ReadImageInformation2()
         if( poImageDS->GetGeoTransform(adfGeoTransform) == CE_None &&
             !(adfGeoTransform[0] <= 1.5 && fabs(adfGeoTransform[3]) <= 1.5) )
         {
-            bHaveGeoTransform = TRUE;
+                bHaveGeoTransform = TRUE;
+                //fix up the origin if we did not get the geotransform from the top-left tile
+                adfGeoTransform[0] -= (nImageDSCol-1) * adfGeoTransform[1] * nTileWidth +
+                    (nImageDSRow-1) * adfGeoTransform[2] * nTileHeight;
+                adfGeoTransform[3] -= (nImageDSCol-1) * adfGeoTransform[4] * nTileWidth +
+                    (nImageDSRow-1) * adfGeoTransform[5] * nTileHeight;
         }
     }
 

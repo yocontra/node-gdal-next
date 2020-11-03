@@ -33,7 +33,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdalmdiminfo_bin.cpp b309b2f9b4b2fe3551a58be94a6914b7f135ac78 2020-01-27 16:30:33 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalmdiminfo_bin.cpp 2e6733101e6356653e8c999cb7fe808abc22ed11 2020-08-11 14:57:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -44,7 +44,7 @@ static void Usage(const char* pszErrorMsg = nullptr)
 {
     printf( "Usage: gdalmdiminfo [--help-general] [-oo NAME=VALUE]* [-arrayoption NAME=VALUE]*\n"
             "                    [-detailed] [-nopretty] [-array {array_name}] [-limit {number}]\n"
-            "                    datasetname\n" );
+            "                    [-stats] datasetname\n" );
 
     if( pszErrorMsg != nullptr )
         fprintf(stderr, "\nFAILURE: %s\n", pszErrorMsg);

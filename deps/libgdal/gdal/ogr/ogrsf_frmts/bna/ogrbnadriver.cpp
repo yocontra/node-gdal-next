@@ -29,7 +29,7 @@
 #include "ogr_bna.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrbnadriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrbnadriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -122,7 +122,7 @@ void RegisterOGRBNA()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Atlas BNA" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "bna" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_bna.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/bna.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

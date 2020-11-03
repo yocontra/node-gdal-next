@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_subfile.cpp 9e000458e2e65eb90f6822b974e8f5aa21d355b7 2019-08-23 15:04:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_subfile.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -296,7 +296,7 @@ VSISubFileFilesystemHandler::DecomposePath( const char *pszPath,
         {
             // -1 is sometimes passed to mean that we don't know the file size
             // for example when creating a JPEG2000 datastream in a NITF file
-            // Transform it into 0 for correct behaviour of Read(), Write() and
+            // Transform it into 0 for correct behavior of Read(), Write() and
             // Eof().
             if( pszPath[i + 1] == '-' )
                 nSubFileSize = 0;

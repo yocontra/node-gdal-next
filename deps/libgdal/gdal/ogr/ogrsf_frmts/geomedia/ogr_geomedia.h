@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geomedia.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_geomedia.h bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Geomedia MDB driver.
@@ -42,7 +42,7 @@
 
 class OGRGeomediaDataSource;
 
-class OGRGeomediaLayer CPL_NON_FINAL: public OGRLayer
+class OGRGeomediaLayer CPL_NON_FINAL: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGRGeomediaLayer>
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
@@ -68,14 +68,14 @@ class OGRGeomediaLayer CPL_NON_FINAL: public OGRLayer
     virtual CPLODBCStatement *  GetStatement() { return poStmt; }
 
     void                LookupSRID( int );
+    OGRFeature          *GetNextRawFeature();
 
   public:
                         OGRGeomediaLayer();
     virtual             ~OGRGeomediaLayer();
 
     virtual void        ResetReading() override;
-    virtual OGRFeature *GetNextRawFeature();
-    virtual OGRFeature *GetNextFeature() override;
+    DEFINE_GET_NEXT_FEATURE_THROUGH_RAW(OGRGeomediaLayer)
 
     virtual OGRFeature *GetFeature( GIntBig nFeatureId ) override;
 

@@ -71,6 +71,10 @@ class Datum;
 using DatumPtr = std::shared_ptr<Datum>;
 using DatumNNPtr = util::nn<DatumPtr>;
 
+class DatumEnsemble;
+using DatumEnsemblePtr = std::shared_ptr<DatumEnsemble>;
+using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
+
 class Ellipsoid;
 using EllipsoidPtr = std::shared_ptr<Ellipsoid>;
 using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
@@ -252,6 +256,8 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL void startNode(const std::string &keyword, bool hasId);
     PROJ_INTERNAL void endNode();
 
+    PROJ_INTERNAL bool isAtTopLevel() const;
+
     PROJ_DLL WKTFormatter &simulCurNodeHasId();
 
     PROJ_INTERNAL void addQuotedString(const char *str);
@@ -380,6 +386,10 @@ class PROJ_GCC_DLL PROJStringFormatter {
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PROJStringFormatter();
     //! @endcond
+
+    PROJ_DLL PROJStringFormatter &setMultiLine(bool multiLine) noexcept;
+    PROJ_DLL PROJStringFormatter &setIndentationWidth(int width) noexcept;
+    PROJ_DLL PROJStringFormatter &setMaxLineLength(int maxLineLength) noexcept;
 
     PROJ_DLL void setUseApproxTMerc(bool flag);
 
@@ -873,6 +883,10 @@ class PROJ_GCC_DLL DatabaseContext {
     getNonDeprecated(const std::string &tableName, const std::string &authName,
                      const std::string &code) const;
 
+    PROJ_INTERNAL static std::vector<operation::CoordinateOperationNNPtr>
+    getTransformationsForGridName(const DatabaseContextNNPtr &databaseContext,
+                                  const std::string &gridName);
+
     //! @endcond
 
   protected:
@@ -925,6 +939,10 @@ class PROJ_GCC_DLL AuthorityFactory {
     createEllipsoid(const std::string &code) const;
 
     PROJ_DLL datum::DatumNNPtr createDatum(const std::string &code) const;
+
+    PROJ_DLL datum::DatumEnsembleNNPtr
+    createDatumEnsemble(const std::string &code,
+                        const std::string &type = std::string()) const;
 
     PROJ_DLL datum::GeodeticReferenceFrameNNPtr
     createGeodeticDatum(const std::string &code) const;
@@ -1010,6 +1028,10 @@ class PROJ_GCC_DLL AuthorityFactory {
         /** Object of type operation::ConcatenatedOperation (and derived
            classes) */
         CONCATENATED_OPERATION,
+        /** Object of type datum::DynamicGeodeticReferenceFrame */
+        DYNAMIC_GEODETIC_REFERENCE_FRAME,
+        /** Object of type datum::DynamicVerticalReferenceFrame */
+        DYNAMIC_VERTICAL_REFERENCE_FRAME,
     };
 
     PROJ_DLL std::set<std::string>
@@ -1184,6 +1206,7 @@ class PROJ_GCC_DLL AuthorityFactory {
                                 std::vector<ObjectType>(),
                             bool approximateMatch = true,
                             size_t limitResultCount = 0) const;
+
     //! @endcond
 
   protected:

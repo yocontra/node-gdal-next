@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_http.h 921541449c45622f0fbae99e2d6cc4269e59d182 2019-06-21 00:26:51 +0200 Even Rouault $
+ * $Id: cpl_http.h 5bf28e3bebd1032c4c8f50564d077f95cdf897d3 2020-09-30 14:07:46 +0200 Even Rouault $
  *
  * Project:  Common Portability Library
  * Purpose:  Function wrapper for libcurl HTTP access.
@@ -112,6 +112,39 @@ void CPL_DLL  CPLHTTPCleanup( void );
 void CPL_DLL  CPLHTTPDestroyResult( CPLHTTPResult *psResult );
 void CPL_DLL  CPLHTTPDestroyMultiResult( CPLHTTPResult **papsResults, int nCount );
 int  CPL_DLL  CPLHTTPParseMultipartMime( CPLHTTPResult *psResult );
+
+/* -------------------------------------------------------------------- */
+/* To install an alternate network layer to the default Curl one        */
+/* -------------------------------------------------------------------- */
+/** Callback function to process network requests.
+ *
+ * If CLOSE_PERSISTENT is found in papszOptions, no network request should be
+ * issued, but a dummy non-null CPLHTTPResult* should be returned by the callback.
+ *
+ * Its first arguments are the same as CPLHTTPFetchEx()
+ * @param pszURL See CPLHTTPFetchEx()
+ * @param papszOptions See CPLHTTPFetchEx()
+ * @param pfnProgress See CPLHTTPFetchEx()
+ * @param pProgressArg See CPLHTTPFetchEx()
+ * @param pfnWrite See CPLHTTPFetchEx()
+ * @param pWriteArg See CPLHTTPFetchEx()
+ * @param pUserData user data value that was passed during CPLHTTPPushFetchCallback()
+ * @return nullptr if the request cannot be processed, in which case the previous handler will be used.
+ */
+typedef CPLHTTPResult* (*CPLHTTPFetchCallbackFunc)( const char *pszURL,
+                                                    CSLConstList papszOptions,
+                                                    GDALProgressFunc pfnProgress,
+                                                    void *pProgressArg,
+                                                    CPLHTTPFetchWriteFunc pfnWrite,
+                                                    void *pWriteArg,
+                                                    void* pUserData );
+
+void CPL_DLL CPLHTTPSetFetchCallback( CPLHTTPFetchCallbackFunc pFunc,
+                                      void* pUserData );
+
+int CPL_DLL  CPLHTTPPushFetchCallback( CPLHTTPFetchCallbackFunc pFunc,
+                                       void* pUserData );
+int CPL_DLL  CPLHTTPPopFetchCallback(void);
 
 /* -------------------------------------------------------------------- */
 /*      The following is related to OAuth2 authorization around         */

@@ -91,7 +91,7 @@
 #include "gdal_pam.h"
 #include "gta_headers.h"
 
-CPL_CVSID("$Id: gtadataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: gtadataset.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /* Helper functions                                                     */
@@ -223,16 +223,17 @@ class GTADataset final: public GDALPamDataset
     GTAIO       oGTAIO;
     // GTA information
     gta::header oHeader;
-    vsi_l_offset DataOffset;
+    vsi_l_offset DataOffset = 0;
     // Metadata
-    bool        bHaveGeoTransform;
+    bool        bHaveGeoTransform = false;
     double      adfGeoTransform[6];
-    int         nGCPs;
-    char        *pszGCPProjection;
-    GDAL_GCP    *pasGCPs;
+    int         nGCPs = 0;
+    char        *pszGCPProjection = nullptr;
+    GDAL_GCP    *pasGCPs = nullptr;
     // Cached data block for block-based input/output
-    int         nLastBlockXOff, nLastBlockYOff;
-    void        *pBlock;
+    int         nLastBlockXOff = -1;
+    int         nLastBlockYOff = -1;
+    void        *pBlock = nullptr;
 
     // Block-based input/output of all bands at once. This is used
     // by the GTARasterBand input/output functions.
@@ -779,16 +780,6 @@ CPLErr GTARasterBand::IWriteBlock( int nBlockXOff, int nBlockYOff,
 GTADataset::GTADataset()
 
 {
-    // Initialize Metadata
-    bHaveGeoTransform = false;
-    nGCPs = 0;
-    pszGCPProjection = nullptr;
-    pasGCPs = nullptr;
-    // Initialize block-based input/output
-    nLastBlockXOff = -1;
-    nLastBlockYOff = -1;
-    pBlock = nullptr;
-    DataOffset = 0;
     memset( adfGeoTransform, 0, sizeof(adfGeoTransform) );
 }
 

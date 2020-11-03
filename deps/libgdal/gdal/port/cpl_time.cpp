@@ -28,7 +28,7 @@
 
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_time.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_time.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 constexpr int SECSPERMIN = 60;
 constexpr int MINSPERHOUR = 60;
@@ -82,8 +82,9 @@ struct tm * CPLUnixTimeToYMDHMS(GIntBig unixTime, struct tm* pRet)
     GIntBig days = unixTime / SECSPERDAY;
     GIntBig rem = unixTime % SECSPERDAY;
 
-    if( unixTime < -static_cast<GIntBig>(10000) * SECSPERDAY * DAYSPERLYEAR ||
-        unixTime > static_cast<GIntBig>(10000) * SECSPERDAY * DAYSPERLYEAR )
+    constexpr GIntBig TEN_THOUSAND_YEARS =
+        static_cast<GIntBig>(10000) * SECSPERDAY * DAYSPERLYEAR;
+    if( unixTime < -TEN_THOUSAND_YEARS || unixTime > TEN_THOUSAND_YEARS )
     {
         CPLError(CE_Failure, CPLE_NotSupported,
                  "Invalid unixTime = " CPL_FRMT_GIB,

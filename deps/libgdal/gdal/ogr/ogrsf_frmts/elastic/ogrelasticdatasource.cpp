@@ -35,7 +35,7 @@
 #include "ogrgeojsonreader.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrelasticdatasource.cpp b4ab2e8acad3c8b7d66050562d0ba528f67c30c0 2020-05-08 22:57:38 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrelasticdatasource.cpp 9f04f9afd78ad460b842da32dd6b2524e77fa7c6 2020-05-08 22:57:38 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRElasticDataSource()                        */
@@ -426,7 +426,7 @@ OGRLayer * OGRElasticDataSource::ICreateLayer(const char * pszLayerName,
                 CPLError(CE_Failure, CPLE_AppDefined,
                          "The index %s already exists. "
                          "You have to delete the whole index. You can do that "
-                         "with OVERWITE_INDEX=YES",
+                         "with OVERWRITE_INDEX=YES",
                          osLaunderedName.c_str());
                 return nullptr;
             }

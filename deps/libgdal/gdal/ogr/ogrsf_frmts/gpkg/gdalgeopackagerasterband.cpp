@@ -34,7 +34,7 @@
 #include <cassert>
 #include <limits>
 
-CPL_CVSID("$Id: gdalgeopackagerasterband.cpp 6c4b9d9b6447da74f5a92bcce47826a4e661c76f 2020-05-06 15:19:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalgeopackagerasterband.cpp 814736ec26adc43f1674af83d0100ccd2fc48b09 2020-10-09 15:32:46 +0200 Even Rouault $")
 
 #if !defined(DEBUG_VERBOSE) && defined(DEBUG_VERBOSE_GPKG)
 #define DEBUG_VERBOSE
@@ -1908,6 +1908,10 @@ CPLErr GDALGPKGMBTilesLikePseudoDataset::WriteTileInternal()
                         dfTileScale = (dfGlobalMax - dfGlobalMin) / 65535.0;
                     }
                 }
+                else
+                {
+                    dfTileOffset = dfGlobalMin;
+                }
 
                 for( GPtrDiff_t i = 0; i < static_cast<GPtrDiff_t>(nBlockXSize) * nBlockYSize; i++ )
                 {
@@ -2131,12 +2135,11 @@ CPLErr GDALGPKGMBTilesLikePseudoDataset::WriteTileInternal()
                 memset(m_pabyCachedTiles + 2 * nBandBlockSize, 0, nBlockXSize * iYOff);
                 memset(m_pabyCachedTiles + 3 * nBandBlockSize, 0, nBlockXSize * iYOff);
             }
-            GPtrDiff_t i = 0;  // TODO: Rename variable to make it clear what it is.
             for(GPtrDiff_t iY = iYOff; iY < iYOff + iYCount; iY ++)
             {
                 if( iXOff > 0 )
                 {
-                    i = iY * nBlockXSize;
+                    const GPtrDiff_t i = iY * nBlockXSize;
                     memset(m_pabyCachedTiles + 0 * nBandBlockSize + i, 0, iXOff);
                     memset(m_pabyCachedTiles + 1 * nBandBlockSize + i, 0, iXOff);
                     memset(m_pabyCachedTiles + 2 * nBandBlockSize + i, 0, iXOff);
@@ -2144,7 +2147,7 @@ CPLErr GDALGPKGMBTilesLikePseudoDataset::WriteTileInternal()
                 }
                 for(int iX = iXOff; iX < iXOff + iXCount; iX ++)
                 {
-                    i = iY * nBlockXSize + iX;
+                    const GPtrDiff_t i = iY * nBlockXSize + iX;
                     GByte byVal = m_pabyCachedTiles[i];
                     m_pabyCachedTiles[i] = abyCT[4*byVal];
                     m_pabyCachedTiles[i + 1 * nBandBlockSize] = abyCT[4*byVal+1];
@@ -2153,7 +2156,7 @@ CPLErr GDALGPKGMBTilesLikePseudoDataset::WriteTileInternal()
                 }
                 if( iXOff + iXCount < nBlockXSize )
                 {
-                    i = iY * nBlockXSize + iXOff + iXCount;
+                    const GPtrDiff_t i = iY * nBlockXSize + iXOff + iXCount;
                     memset(m_pabyCachedTiles + 0 * nBandBlockSize + i, 0, nBlockXSize - (iXOff + iXCount));
                     memset(m_pabyCachedTiles + 1 * nBandBlockSize + i, 0, nBlockXSize - (iXOff + iXCount));
                     memset(m_pabyCachedTiles + 2 * nBandBlockSize + i, 0, nBlockXSize - (iXOff + iXCount));
@@ -2162,7 +2165,7 @@ CPLErr GDALGPKGMBTilesLikePseudoDataset::WriteTileInternal()
             }
             if( iYOff + iYCount < nBlockYSize )
             {
-                i = (iYOff + iYCount) * nBlockXSize;
+                const GPtrDiff_t i = (iYOff + iYCount) * nBlockXSize;
                 memset(m_pabyCachedTiles + 0 * nBandBlockSize + i, 0, nBlockXSize * (nBlockYSize - (iYOff + iYCount)));
                 memset(m_pabyCachedTiles + 1 * nBandBlockSize + i, 0, nBlockXSize * (nBlockYSize - (iYOff + iYCount)));
                 memset(m_pabyCachedTiles + 2 * nBandBlockSize + i, 0, nBlockXSize * (nBlockYSize - (iYOff + iYCount)));

@@ -30,7 +30,7 @@
 
 // g++ -g -Wall -fPIC -shared -o ogr_CARTO.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/carto ogr/ogrsf_frmts/carto/*.c* -L. -lgdal -Iogr/ogrsf_frmts/geojson/libjson
 
-CPL_CVSID("$Id: ogrcartodriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcartodriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRCarto();
 
@@ -107,8 +107,7 @@ void RegisterOGRCarto()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                   "Carto" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC,
-                                    "drv_carto.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/carto.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "CARTO:" );
 

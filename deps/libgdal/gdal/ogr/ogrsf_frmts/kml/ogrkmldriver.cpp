@@ -38,7 +38,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: ogrkmldriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: ogrkmldriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRKMLDriverIdentify()                       */
@@ -138,7 +138,7 @@ void RegisterOGRKML()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Keyhole Markup Language (KML)" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "kml" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_kml.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/kml.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
 "<CreationOptionList>"

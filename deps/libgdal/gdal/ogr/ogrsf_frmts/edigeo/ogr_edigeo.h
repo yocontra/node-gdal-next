@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_edigeo.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_edigeo.h bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $
  *
  * Project:  EDIGEO Translator
  * Purpose:  Definition of classes for OGR .edigeo driver.
@@ -41,7 +41,7 @@
 
 class OGREDIGEODataSource;
 
-class OGREDIGEOLayer final: public OGRLayer
+class OGREDIGEOLayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGREDIGEOLayer>
 {
     OGREDIGEODataSource* poDS;
 
@@ -64,7 +64,7 @@ class OGREDIGEOLayer final: public OGRLayer
                         virtual ~OGREDIGEOLayer();
 
     virtual void                ResetReading() override;
-    virtual OGRFeature *        GetNextFeature() override;
+    DEFINE_GET_NEXT_FEATURE_THROUGH_RAW(OGREDIGEOLayer)
     virtual OGRFeature *        GetFeature(GIntBig nFID) override;
     virtual GIntBig             GetFeatureCount( int bForce ) override;
 

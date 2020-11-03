@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_proxy.h 48750f0a05e88eec700319b3e1a3146da6054e09 2019-09-20 20:55:41 +0300 drons $
+ * $Id: gdal_proxy.h b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  GDAL Core C++/Private declarations
@@ -276,7 +276,7 @@ class CPL_DLL GDALProxyPoolDataset : public GDALProxyDataset
     CPLErr GetGeoTransform( double * ) override;
     CPLErr SetGeoTransform( double * ) override;
 
-    // Special behaviour for the following methods : they return a pointer
+    // Special behavior for the following methods : they return a pointer
     // data type, that must be cached by the proxy, so it doesn't become invalid
     // when the underlying object get closed.
     char **GetMetadata( const char * pszDomain  ) override;
@@ -334,7 +334,7 @@ class CPL_DLL GDALProxyPoolRasterBand : public GDALProxyRasterBand
     void AddSrcMaskBandDescription( GDALDataType eDataType, int nBlockXSize,
                                     int nBlockYSize );
 
-    // Special behaviour for the following methods : they return a pointer
+    // Special behavior for the following methods : they return a pointer
     // data type, that must be cached by the proxy, so it doesn't become invalid
     // when the underlying object get closed.
     char **GetMetadata( const char * pszDomain ) override;

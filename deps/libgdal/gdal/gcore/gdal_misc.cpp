@@ -58,7 +58,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_geos.h"
 
-CPL_CVSID("$Id: gdal_misc.cpp e276f616fe9781899cbd57748498c002ac56c23f 2020-04-16 01:06:57 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_misc.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
 
 static int GetMinBitsForPair(
     const bool pabSigned[], const bool pabFloating[], const int panBits[])
@@ -1271,8 +1271,7 @@ GDAL_GCP * CPL_STDCALL GDALDuplicateGCPs( int nCount, const GDAL_GCP *pasGCPList
 /************************************************************************/
 
 /**
- * \fn GDALFindAssociatedFile(const char*, const char*, char**, int)
- * Find file with alternate extension.
+ * \brief Find file with alternate extension.
  *
  * Finds the file with the indicated extension, substituting it in place
  * of the extension of the base filename.  Generally used to search for
@@ -1303,12 +1302,13 @@ GDAL_GCP * CPL_STDCALL GDALDuplicateGCPs( int nCount, const GDAL_GCP *pasGCPList
 CPLString GDALFindAssociatedFile( const char *pszBaseFilename,
                                   const char *pszExt,
                                   CSLConstList papszSiblingFiles,
-                                  int /* nFlags */ )
+                                  CPL_UNUSED int nFlags )
 
 {
     CPLString osTarget = CPLResetExtension( pszBaseFilename, pszExt );
 
-    if( papszSiblingFiles == nullptr )
+    if( papszSiblingFiles == nullptr ||
+        !GDALCanReliablyUseSiblingFileList(osTarget.c_str()) )
     {
         VSIStatBufL sStatBuf;
 
@@ -1781,7 +1781,7 @@ int GDALReadTabFile2( const char * pszBaseFilename,
 
     const char *pszTAB = CPLResetExtension( pszBaseFilename, "tab" );
 
-    if (papszSiblingFiles)
+    if (papszSiblingFiles && GDALCanReliablyUseSiblingFileList(pszTAB))
     {
         int iSibling = CSLFindString(papszSiblingFiles, CPLGetFilename(pszTAB));
         if (iSibling >= 0)
@@ -2032,7 +2032,7 @@ int GDALReadWorldFile2( const char *pszBaseFilename, const char *pszExtension,
 
     const char *pszTFW = CPLResetExtension( pszBaseFilename, szExtLower );
 
-    if (papszSiblingFiles)
+    if (papszSiblingFiles && GDALCanReliablyUseSiblingFileList(pszTFW))
     {
         const int iSibling =
             CSLFindString(papszSiblingFiles, CPLGetFilename(pszTFW));
@@ -3234,6 +3234,8 @@ GDALGeneralCmdLineProcessor( int nArgc, char ***ppapszArgv, int nOptions )
                       CSLFetchNameValue( papszMD, GDAL_DMD_CREATIONFIELDDATASUBTYPES ) );
             if( CPLFetchBool( papszMD, GDAL_DCAP_NOTNULL_FIELDS, false ) )
                 printf( "  Supports: Creating fields with NOT NULL constraint.\n" );/*ok*/
+            if( CPLFetchBool( papszMD, GDAL_DCAP_UNIQUE_FIELDS, false ) )
+                printf( "  Supports: Creating fields with UNIQUE constraint.\n" );/*ok*/
             if( CPLFetchBool( papszMD, GDAL_DCAP_DEFAULT_FIELDS, false ) )
                 printf( "  Supports: Creating fields with DEFAULT values.\n" );/*ok*/
             if( CPLFetchBool( papszMD, GDAL_DCAP_NOTNULL_GEOMFIELDS, false ) )
@@ -4066,6 +4068,53 @@ int GDALCanFileAcceptSidecarFile(const char* pszFilename)
     if( strncmp(pszFilename, "/vsisubfile/", strlen("/vsisubfile/")) == 0 )
         return FALSE;
     return TRUE;
+}
+
+/************************************************************************/
+/*                   GDALCanReliablyUseSiblingFileList()                */
+/************************************************************************/
+
+/* Try to address https://github.com/OSGeo/gdal/issues/2903 */
+/* - On Apple HFS+ filesystem, filenames are stored in a variant of UTF-8 NFD */
+/*   (normalization form decomposed). The filesystem takes care of converting */
+/*   precomposed form as often coming from user interface to this NFD variant */
+/*   See https://stackoverflow.com/questions/6153345/different-utf8-encoding-in-filenames-os-x */
+/*   And readdir() will return such NFD variant encoding. Consequently comparing */
+/*   the user filename with ones with readdir() is not reliable */
+/* - APFS preserves both case and normalization of the filename on disk in all */
+/*   variants. In macOS High Sierra, APFS is normalization-insensitive in both */
+/*   the case-insensitive and case-sensitive variants, using a hash-based native */
+/*   normalization scheme. APFS preserves the normalization of the filename and */
+/*   uses hashes of the normalized form of the filename to provide normalization */
+/*   insensitivity. */
+/*   From https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/FAQ/FAQ.html */
+/*   Issues might still arise if the file has been created using one of the UTF-8 */
+/*   encoding (likely the decomposed one if using MacOS specific API), but the */
+/*   string passed to GDAL for opening would be with another one (likely the precomposed one) */
+bool GDALCanReliablyUseSiblingFileList(const char* pszFilename)
+{
+#ifdef __APPLE__
+    for( int i = 0; pszFilename[i] != 0; ++i )
+    {
+        if( reinterpret_cast<const unsigned char*>(pszFilename)[i] > 127 )
+        {
+            // non-ASCII character found
+
+            // if this is a network storage, assume no issue
+            if( strstr(pszFilename, "/vsicurl/") ||
+                strstr(pszFilename, "/vsis3/") ||
+                strstr(pszFilename, "/vsicurl/") )
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+    return true;
+#else
+    (void) pszFilename;
+    return true;
+#endif
 }
 
 /************************************************************************/

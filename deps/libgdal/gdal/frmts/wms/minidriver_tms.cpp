@@ -30,7 +30,7 @@
 #include "wmsdriver.h"
 #include "minidriver_tms.h"
 
-CPL_CVSID("$Id: minidriver_tms.cpp 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
+CPL_CVSID("$Id: minidriver_tms.cpp b22c0525633697f8dc25afb2b6b848c3ad372686 2020-09-24 14:51:49 +0200 Even Rouault $")
 
 WMSMiniDriver_TMS::WMSMiniDriver_TMS() {}
 
@@ -63,6 +63,9 @@ CPLErr WMSMiniDriver_TMS::Initialize(CPLXMLNode *config, CPL_UNUSED char **papsz
     const char *format = CPLGetXMLValue(config, "Format", "jpg");
     URLSearchAndReplace(&m_base_url, "${format}", "%s", format);
 
+    m_nTileXMultiplier = atoi(
+        CPLGetXMLValue(config, "TileXMultiplier", "1"));
+
     return ret;
 }
 
@@ -88,7 +91,7 @@ CPLErr WMSMiniDriver_TMS::TiledImageRequest(WMSHTTPRequest &request,
     // http://tms25.arc.nasa.gov/tile/tile.aspx?T=geocover2000&L=0&X=86&Y=39
     url = m_base_url;
 
-    URLSearchAndReplace(&url, "${x}", "%d", tiri.m_x);
+    URLSearchAndReplace(&url, "${x}", "%d", tiri.m_x * m_nTileXMultiplier);
     URLSearchAndReplace(&url, "${y}", "%d", tms_y);
     URLSearchAndReplace(&url, "${z}", "%d", tiri.m_level);
 

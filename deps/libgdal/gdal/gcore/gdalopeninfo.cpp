@@ -48,7 +48,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalopeninfo.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalopeninfo.cpp 63047152a3b5ceb7293ae884fb96be39cd428383 2020-09-30 13:00:56 +0200 Thomas Bonfort $")
 
 // Keep in sync prototype of those 2 functions between gdalopeninfo.cpp,
 // ogrsqlitedatasource.cpp and ogrgeopackagedatasource.cpp
@@ -345,25 +345,33 @@ retry:  // TODO(schwehr): Stop using goto.
     }
     else if( bStatOK && !bIsDirectory )
     {
-        const char* pszOptionVal =
-            CPLGetConfigOption( "GDAL_DISABLE_READDIR_ON_OPEN", "NO" );
-        if (EQUAL(pszOptionVal, "EMPTY_DIR"))
+        papszSiblingFiles = VSISiblingFiles(pszFilename);
+        if (papszSiblingFiles != nullptr)
         {
-            papszSiblingFiles =
-                CSLAddString( nullptr, CPLGetFilename(pszFilename) );
             bHasGotSiblingFiles = true;
         }
-        else if( CPLTestBool(pszOptionVal) )
+        else 
         {
-            /* skip reading the directory */
-            papszSiblingFiles = nullptr;
-            bHasGotSiblingFiles = true;
-        }
-        else
-        {
-            /* will be lazy loaded */
-            papszSiblingFiles = nullptr;
-            bHasGotSiblingFiles = false;
+            const char* pszOptionVal =
+                CPLGetConfigOption( "GDAL_DISABLE_READDIR_ON_OPEN", "NO" );
+            if (EQUAL(pszOptionVal, "EMPTY_DIR"))
+            {
+                papszSiblingFiles =
+                    CSLAddString( nullptr, CPLGetFilename(pszFilename) );
+                bHasGotSiblingFiles = true;
+            }
+            else if( CPLTestBool(pszOptionVal) )
+            {
+                /* skip reading the directory */
+                papszSiblingFiles = nullptr;
+                bHasGotSiblingFiles = true;
+            }
+            else
+            {
+                /* will be lazy loaded */
+                papszSiblingFiles = nullptr;
+                bHasGotSiblingFiles = false;
+            }
         }
     }
     else
@@ -401,6 +409,11 @@ char** GDALOpenInfo::GetSiblingFiles()
         return papszSiblingFiles;
     bHasGotSiblingFiles = true;
 
+    papszSiblingFiles = VSISiblingFiles( pszFilename );
+    if ( papszSiblingFiles != nullptr ) {
+        return papszSiblingFiles;
+    }
+
     CPLString osDir = CPLGetDirname( pszFilename );
     const int nMaxFiles =
         atoi(CPLGetConfigOption("GDAL_READDIR_LIMIT_ON_OPEN", "1000"));
@@ -413,14 +426,6 @@ char** GDALOpenInfo::GetSiblingFiles()
         papszSiblingFiles = nullptr;
     }
 
-    /* Small optimization to avoid unnecessary stat'ing from PAux or ENVI */
-    /* drivers. The MBTiles driver needs no companion file. */
-    if( papszSiblingFiles == nullptr &&
-        STARTS_WITH(pszFilename, "/vsicurl/") &&
-        EQUAL(CPLGetExtension( pszFilename ),"mbtiles") )
-    {
-        papszSiblingFiles = CSLAddString( nullptr, CPLGetFilename(pszFilename) );
-    }
 
     return papszSiblingFiles;
 }

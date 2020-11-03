@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: swq_expr_node.cpp ffd62ee1bdeed41a9301102c35b3c0eb30a36dc2 2019-11-28 16:56:51 +0100 Even Rouault $")
+CPL_CVSID("$Id: swq_expr_node.cpp 6659c4d5c910df313ac451cd5ca687862eef040b 2020-10-01 15:37:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           swq_expr_node()                            */
@@ -110,7 +110,7 @@ swq_expr_node::swq_expr_node( OGRGeometry *poGeomIn ):
 
 swq_expr_node::swq_expr_node( swq_op eOp ):
     eNodeType(SNT_OPERATION),
-    nOperation(static_cast<int>(eOp))
+    nOperation(eOp)
 {
 }
 
@@ -239,7 +239,7 @@ swq_expr_node::Check( swq_field_list *poFieldList,
     const swq_operation *poOp =
         (nOperation == SWQ_CUSTOM_FUNC && poCustomFuncRegistrar != nullptr ) ?
             poCustomFuncRegistrar->GetOperator(string_value) :
-            swq_op_registrar::GetOperator(static_cast<swq_op>(nOperation));
+            swq_op_registrar::GetOperator(nOperation);
 
     if( poOp == nullptr )
     {
@@ -323,7 +323,7 @@ void swq_expr_node::Dump( FILE * fp, int depth )
     CPLAssert( eNodeType == SNT_OPERATION );
 
     const swq_operation *op_def =
-        swq_op_registrar::GetOperator( static_cast<swq_op>(nOperation) );
+        swq_op_registrar::GetOperator( nOperation );
     if( op_def )
         fprintf( fp, "%s%s\n", spaces, op_def->pszName );
     else
@@ -523,7 +523,7 @@ CPLString swq_expr_node::UnparseOperationFromUnparsedSubExpr(char** apszSubExpr)
 /*      Put things together in a fashion depending on the operator.     */
 /* -------------------------------------------------------------------- */
     const swq_operation *poOp =
-        swq_op_registrar::GetOperator( static_cast<swq_op>(nOperation) );
+        swq_op_registrar::GetOperator( nOperation );
 
     if( poOp == nullptr && nOperation != SWQ_CUSTOM_FUNC )
     {
@@ -774,7 +774,7 @@ swq_expr_node *swq_expr_node::Evaluate( swq_field_fetcher pfnFetcher,
     if( !bError )
     {
         const swq_operation *poOp =
-            swq_op_registrar::GetOperator( static_cast<swq_op>(nOperation) );
+            swq_op_registrar::GetOperator( nOperation );
         if( poOp == nullptr )
         {
             if( nOperation == SWQ_CUSTOM_FUNC )

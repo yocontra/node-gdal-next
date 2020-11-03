@@ -35,7 +35,7 @@
 #include "gdal_frmts.h"
 #include "jpipkakdataset.h"
 
-CPL_CVSID("$Id: jpipkakdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: jpipkakdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /*
 ** The following are for testing premature stream termination support.
@@ -495,6 +495,8 @@ void JPIPKAKDataset::KakaduInitialize()
 
         jpipkak_kdu_cpl_error_message oErrHandler( CE_Failure );
         jpipkak_kdu_cpl_error_message oWarningHandler( CE_Warning );
+        CPL_IGNORE_RET_VAL(oErrHandler);
+        CPL_IGNORE_RET_VAL(oWarningHandler);
 
         kdu_customize_warnings(new jpipkak_kdu_cpl_error_message( CE_Warning ) );
         kdu_customize_errors(new jpipkak_kdu_cpl_error_message( CE_Failure ) );
@@ -847,7 +849,7 @@ int JPIPKAKDataset::Initialize(const char* pszDatasetName, int bReinitializing )
         }
         else
         {
-            // treat as cartesian, no geo metadata
+            // treat as Cartesian, no geo metadata
             CPLError(CE_Warning, CPLE_AppDefined,
                      "Parsed metadata boxes from jpip stream, geographic metadata not found - is the server using placeholders for this data?" );
         }

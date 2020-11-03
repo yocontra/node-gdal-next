@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_port.h 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $
+ * $Id: cpl_port.h 7a291205ed24a41c8f9a080fdd9630a6b565427d 2020-06-11 16:05:25 +0200 SpaceIm $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -344,7 +344,11 @@ typedef unsigned int  GUIntptr_t;
 
 #ifndef CPL_DLL
 #if defined(_MSC_VER) && !defined(CPL_DISABLE_DLL)
-#  define CPL_DLL     __declspec(dllexport)
+#  ifdef GDAL_COMPILATION
+#    define CPL_DLL __declspec(dllexport)
+#  else
+#    define CPL_DLL
+#  endif
 #  define CPL_INTERNAL
 #else
 #  if defined(USE_GCC_VISIBILITY_FLAG)
@@ -1053,7 +1057,7 @@ CPL_C_END
   static_cast<size_t>(!(sizeof(array) % sizeof(*(array)))))
 
 extern "C++" {
-template<class T> static void CPL_IGNORE_RET_VAL(T) {}
+template<class T> static void CPL_IGNORE_RET_VAL(const T&) {}
 inline static bool CPL_TO_BOOL(int x) { return x != 0; }
 } /* extern "C++" */
 

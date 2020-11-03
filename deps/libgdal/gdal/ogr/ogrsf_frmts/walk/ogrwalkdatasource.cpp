@@ -29,7 +29,7 @@
 #include "ogrwalk.h"
 #include <vector>
 
-CPL_CVSID("$Id: ogrwalkdatasource.cpp 4971449609881d6ffdca70188292293852d12691 2017-12-17 16:48:14Z Even Rouault $")
+CPL_CVSID("$Id: ogrwalkdatasource.cpp 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                         OGRWalkDataSource()                          */
@@ -70,37 +70,26 @@ int OGRWalkDataSource::Open( const char * pszNewName, int /* bUpdate */ )
 /*      appropriate connection string.  Otherwise clip of WALK: to      */
 /*      get the DSN.                                                    */
 /* -------------------------------------------------------------------- */
-    char *pszDSN = nullptr;
-
     if( STARTS_WITH_CI(pszNewName, "WALK:") )
     {
-        pszDSN = CPLStrdup( pszNewName + 5 );
+        char *pszDSN = CPLStrdup( pszNewName + 5 );
+        CPLDebug( "Walk", "EstablishSession(%s)", pszDSN );
+        if( !oSession.EstablishSession( pszDSN, nullptr, nullptr ) )
+        {
+            CPLError( CE_Failure, CPLE_AppDefined,
+                      "Unable to initialize ODBC connection to DSN for %s,\n"
+                      "%s", pszDSN, oSession.GetLastError() );
+            CPLFree( pszDSN );
+            return FALSE;
+        }
     }
     else
     {
-        const char *pszDSNStringTemplate = "DRIVER=Microsoft Access Driver (*.mdb);DBQ=%s";
-        pszDSN = (char *) CPLMalloc(strlen(pszNewName)+strlen(pszDSNStringTemplate)+100);
-
-        snprintf( pszDSN,
-                  strlen(pszNewName)+strlen(pszDSNStringTemplate)+100,
-                  pszDSNStringTemplate,  pszNewName );
+        if ( !oSession.ConnectToMsAccess( pszNewName, nullptr ) )
+        {
+           return FALSE;
+        }
     }
-
-/* -------------------------------------------------------------------- */
-/*      Initialize based on the DSN.                                    */
-/* -------------------------------------------------------------------- */
-    CPLDebug( "Walk", "EstablishSession(%s)", pszDSN );
-
-    if( !oSession.EstablishSession( pszDSN, nullptr, nullptr ) )
-    {
-        CPLError( CE_Failure, CPLE_AppDefined,
-                  "Unable to initialize ODBC connection to DSN for %s,\n"
-                  "%s", pszDSN, oSession.GetLastError() );
-        CPLFree( pszDSN );
-        return FALSE;
-    }
-
-    CPLFree( pszDSN );
 
     pszName = CPLStrdup( pszNewName );
 

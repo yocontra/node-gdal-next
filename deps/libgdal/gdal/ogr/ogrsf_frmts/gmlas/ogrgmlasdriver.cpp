@@ -33,7 +33,7 @@
 
 // g++ -I/usr/include/json -DxDEBUG_VERBOSE -DDEBUG   -g -DDEBUG -ftrapv  -Wall -Wextra -Winit-self -Wunused-parameter -Wformat -Werror=format-security -Wno-format-nonliteral -Wlogical-op -Wshadow -Werror=vla -Wmissing-declarations -Wnon-virtual-dtor -Woverloaded-virtual -fno-operator-names ogr/ogrsf_frmts/gmlas/*.cpp -fPIC -shared -o ogr_GMLAS.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/mem  -L. -lgdal   -I/home/even/spatialys/eea/inspire_gml/install-xerces-c-3.1.3/include
 
-CPL_CVSID("$Id: ogrgmlasdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: ogrgmlasdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRGMLASDriverIdentify()                      */
@@ -89,7 +89,7 @@ void RegisterOGRGMLAS()
                                "Geography Markup Language (GML) "
                                "driven by application schemas" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "gml xml" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_gmlas.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/gmlas.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, szGMLAS_PREFIX );
 

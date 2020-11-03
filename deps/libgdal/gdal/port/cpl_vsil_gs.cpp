@@ -32,6 +32,8 @@
 #include "cpl_vsil_curl_priv.h"
 #include "cpl_vsil_curl_class.h"
 
+#include <errno.h>
+
 #include <algorithm>
 #include <set>
 #include <map>
@@ -39,7 +41,7 @@
 
 #include "cpl_google_cloud.h"
 
-CPL_CVSID("$Id: cpl_vsil_gs.cpp 07f0cbf27fd991e2767873940c8a30f1b7e13f82 2018-08-17 18:52:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gs.cpp 84033e049eee28696b553cb16258b3a196410e56 2020-06-29 20:48:45 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -158,6 +160,16 @@ VSIVirtualHandle* VSIGSFSHandler::Open( const char *pszFilename,
 
     if( strchr(pszAccess, 'w') != nullptr || strchr(pszAccess, 'a') != nullptr )
     {
+        if( strchr(pszAccess, '+') != nullptr &&
+            !CPLTestBool(CPLGetConfigOption("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE", "NO")) )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                        "w+ not supported for /vsigs, unless "
+                        "CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE is set to YES");
+            errno = EACCES;
+            return nullptr;
+        }
+
         VSIGSHandleHelper* poHandleHelper =
             VSIGSHandleHelper::BuildFromURI(pszFilename + GetFSPrefix().size(),
                                             GetFSPrefix().c_str());
@@ -168,7 +180,11 @@ VSIVirtualHandle* VSIGSFSHandler::Open( const char *pszFilename,
         if( !poHandle->IsOK() )
         {
             delete poHandle;
-            poHandle = nullptr;
+            return nullptr;
+        }
+        if( strchr(pszAccess, '+') != nullptr)
+        {
+            return VSICreateUploadOnCloseFile(poHandle);
         }
         return poHandle;
     }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsf_frmts.h d57d88d30b5dee20ca1a533cbb2ecab1e6493180 2020-04-03 14:46:05 +0200 Even Rouault $
+ * $Id: ogrsf_frmts.h bca0a3e9973959f19849febb0281fa9ecf0ad51f 2020-09-02 20:47:32 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes related to format registration, and file opening.
@@ -291,6 +291,55 @@ inline OGRLayer::FeatureIterator begin(OGRLayer* poLayer) { return poLayer->begi
  */
 inline OGRLayer::FeatureIterator end(OGRLayer* poLayer) { return poLayer->end(); }
 
+/** Unique pointer type for OGRLayer.
+ * @since GDAL 3.2
+ */
+using OGRLayerUniquePtr = std::unique_ptr<OGRLayer>;
+
+/************************************************************************/
+/*                     OGRGetNextFeatureThroughRaw                      */
+/************************************************************************/
+
+/** Template class offering a GetNextFeature() implementation relying on
+ * GetNextRawFeature()
+ *
+ * @since GDAL 3.2
+ */
+template<class BaseLayer> class OGRGetNextFeatureThroughRaw
+{
+public:
+
+    /** Implement OGRLayer::GetNextFeature(), relying on BaseLayer::GetNextRawFeature() */
+    OGRFeature* GetNextFeature()
+    {
+        const auto poThis = static_cast<BaseLayer*>(this);
+        while( true )
+        {
+            OGRFeature *poFeature = poThis->GetNextRawFeature();
+            if (poFeature == nullptr)
+                return nullptr;
+
+            if((poThis->m_poFilterGeom == nullptr
+                || poThis->FilterGeometry( poFeature->GetGeometryRef() ) )
+            && (poThis->m_poAttrQuery == nullptr
+                || poThis->m_poAttrQuery->Evaluate( poFeature )) )
+            {
+                return poFeature;
+            }
+            else
+                delete poFeature;
+        }
+    }
+};
+
+/** Utility macro to define GetNextFeature() through GetNextRawFeature() */
+#define DEFINE_GET_NEXT_FEATURE_THROUGH_RAW(BaseLayer) \
+    private: \
+        friend class OGRGetNextFeatureThroughRaw<BaseLayer>; \
+    public: \
+        OGRFeature* GetNextFeature() override { return OGRGetNextFeatureThroughRaw<BaseLayer>::GetNextFeature(); }
+
+
 /************************************************************************/
 /*                            OGRDataSource                             */
 /************************************************************************/
@@ -467,7 +516,6 @@ void CPL_DLL RegisterOGRDXF();
 void CPL_DLL RegisterOGRCAD();
 void CPL_DLL RegisterOGRDWG();
 void CPL_DLL RegisterOGRDGNV8();
-void CPL_DLL RegisterOGRSDE();
 void CPL_DLL RegisterOGRIDB();
 void CPL_DLL RegisterOGRGMT();
 void CPL_DLL RegisterOGRBNA();
@@ -521,6 +569,7 @@ void CPL_DLL RegisterOGRGMLAS();
 void CPL_DLL RegisterOGRMVT();
 void CPL_DLL RegisterOGRNGW();
 void CPL_DLL RegisterOGRMapML();
+void CPL_DLL RegisterOGRLVBAG();
 // @endcond
 
 CPL_C_END

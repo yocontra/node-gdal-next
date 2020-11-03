@@ -29,7 +29,7 @@
 
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrregisterall.cpp d57d88d30b5dee20ca1a533cbb2ecab1e6493180 2020-04-03 14:46:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrregisterall.cpp bca0a3e9973959f19849febb0281fa9ecf0ad51f 2020-09-02 20:47:32 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRRegisterAll()                           */
@@ -53,6 +53,9 @@ void OGRRegisterAllInternal()
 #endif
 #ifdef NTF_ENABLED
     RegisterOGRNTF();
+#endif
+#ifdef LVBAG_ENABLED
+    RegisterOGRLVBAG();
 #endif
 #ifdef SDTS_ENABLED
     RegisterOGRSDTS();
@@ -148,9 +151,6 @@ void OGRRegisterAllInternal()
 #endif
 #ifdef INGRES_ENABLED
     RegisterOGRIngres();
-#endif
-#ifdef SDE_ENABLED
-    RegisterOGRSDE();
 #endif
 /* Register OpenFileGDB before FGDB as it is more capable for read-only */
 #ifdef OPENFILEGDB_ENABLED

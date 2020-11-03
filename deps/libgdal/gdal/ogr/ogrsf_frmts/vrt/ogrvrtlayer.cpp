@@ -53,10 +53,23 @@
 #include "ogrsf_frmts/ogrsf_frmts.h"
 #include "ogrsf_frmts/vrt/ogr_vrt.h"
 
-CPL_CVSID("$Id: ogrvrtlayer.cpp ac212d2bbf184ecfdc67fad3095222fed96344bf 2019-11-02 02:39:12 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtlayer.cpp 5ed5120015ed1d124d67c2b01d543d6554b05e1a 2020-07-10 15:04:53 +0200 Even Rouault $")
 
 #define UNSUPPORTED_OP_READ_ONLY \
     "%s : unsupported operation on a read-only datasource."
+
+/************************************************************************/
+/*                   GetFieldIndexCaseSensitiveFirst()                  */
+/************************************************************************/
+
+static int GetFieldIndexCaseSensitiveFirst( OGRFeatureDefn* poFDefn,
+                                            const char * pszFieldName )
+{
+    int idx = poFDefn->GetFieldIndexCaseSensitive(pszFieldName);
+    if( idx < 0 )
+        idx = poFDefn->GetFieldIndex(pszFieldName);
+    return idx;
+}
 
 /************************************************************************/
 /*                       OGRVRTGeomFieldProps()                         */
@@ -333,13 +346,13 @@ bool OGRVRTLayer::ParseGeometryField(CPLXMLNode *psNode,
         poProps->bUseSpatialSubquery = CPLTestBool(
             CPLGetXMLValue(psNode, "GeometryField.useSpatialSubquery", "TRUE"));
 
-        poProps->iGeomXField = GetSrcLayerDefn()->GetFieldIndex(
+        poProps->iGeomXField = GetFieldIndexCaseSensitiveFirst(GetSrcLayerDefn(),
             CPLGetXMLValue(psNode, "x", "missing"));
-        poProps->iGeomYField = GetSrcLayerDefn()->GetFieldIndex(
+        poProps->iGeomYField = GetFieldIndexCaseSensitiveFirst(GetSrcLayerDefn(),
             CPLGetXMLValue(psNode, "y", "missing"));
-        poProps->iGeomZField = GetSrcLayerDefn()->GetFieldIndex(
+        poProps->iGeomZField = GetFieldIndexCaseSensitiveFirst(GetSrcLayerDefn(),
             CPLGetXMLValue(psNode, "z", "missing"));
-        poProps->iGeomMField = GetSrcLayerDefn()->GetFieldIndex(
+        poProps->iGeomMField = GetFieldIndexCaseSensitiveFirst(GetSrcLayerDefn(),
             CPLGetXMLValue(psNode, "m", "missing"));
 
         if( poProps->iGeomXField == -1 || poProps->iGeomYField == -1 )
@@ -372,7 +385,8 @@ bool OGRVRTLayer::ParseGeometryField(CPLXMLNode *psNode,
     {
         const char *pszFieldName = CPLGetXMLValue(psNode, "field", "missing");
 
-        poProps->iGeomField = GetSrcLayerDefn()->GetFieldIndex(pszFieldName);
+        poProps->iGeomField = GetFieldIndexCaseSensitiveFirst(
+            GetSrcLayerDefn(), pszFieldName);
 
         if( poProps->iGeomField == -1 )
         {
@@ -825,7 +839,8 @@ try_again:
             const char* pszSrcFIDFieldName = CPLGetXMLValue(psFIDNode, nullptr, "");
             if( !EQUAL(pszSrcFIDFieldName, "") )
             {
-                iFIDField = GetSrcLayerDefn()->GetFieldIndex(pszSrcFIDFieldName);
+                iFIDField = GetFieldIndexCaseSensitiveFirst(
+                    GetSrcLayerDefn(), pszSrcFIDFieldName);
                 if( iFIDField == -1 )
                 {
                     CPLError(CE_Failure, CPLE_AppDefined,
@@ -852,7 +867,8 @@ try_again:
 
     if( pszStyleFieldName != nullptr )
     {
-        iStyleField = GetSrcLayerDefn()->GetFieldIndex(pszStyleFieldName);
+        iStyleField = GetFieldIndexCaseSensitiveFirst(
+            GetSrcLayerDefn(), pszStyleFieldName);
         if( iStyleField == -1 )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
@@ -969,6 +985,11 @@ try_again:
                 CPLTestBool(CPLGetXMLValue(psChild, "nullable", "true"));
             oFieldDefn.SetNullable(bNullable);
 
+            // Unique attribute.
+            const bool bUnique =
+                CPLTestBool(CPLGetXMLValue(psChild, "unique", "false"));
+            oFieldDefn.SetUnique(bUnique);
+
             // Default attribute.
             oFieldDefn.SetDefault(CPLGetXMLValue(psChild, "default", nullptr));
 
@@ -978,13 +999,15 @@ try_again:
             abDirectCopy.push_back(FALSE);
 
             // Source field.
-            int iSrcField = GetSrcLayerDefn()->GetFieldIndex(pszName);
+            int iSrcField = GetFieldIndexCaseSensitiveFirst(
+                GetSrcLayerDefn(), pszName);
 
             pszArg = CPLGetXMLValue(psChild, "src", nullptr);
 
             if( pszArg != nullptr )
             {
-                iSrcField = GetSrcLayerDefn()->GetFieldIndex(pszArg);
+                iSrcField = GetFieldIndexCaseSensitiveFirst(
+                    GetSrcLayerDefn(), pszArg);
                 if( iSrcField == -1 )
                 {
                     CPLError(CE_Failure, CPLE_AppDefined,
@@ -2347,7 +2370,8 @@ OGRErr OGRVRTLayer::SetIgnoredFields( const char **papszFields )
         }
         else
         {
-            int iVRTField = GetLayerDefn()->GetFieldIndex(pszFieldName);
+            int iVRTField = GetFieldIndexCaseSensitiveFirst(
+                GetLayerDefn(), pszFieldName);
             if( iVRTField >= 0 )
             {
                 int iSrcField = anSrcField[iVRTField];

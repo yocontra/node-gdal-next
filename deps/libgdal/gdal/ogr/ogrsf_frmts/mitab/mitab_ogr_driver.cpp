@@ -32,7 +32,7 @@
 
 #include "mitab_ogr_driver.h"
 
-CPL_CVSID("$Id: mitab_ogr_driver.cpp ee1ad78131c83cdc0b32088f11e98629fdb3c632 2020-01-20 01:29:33 +0300 Dmitry Baryshnikov $")
+CPL_CVSID("$Id: mitab_ogr_driver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                  OGRTABDriverIdentify()                              */
@@ -203,7 +203,7 @@ void RegisterOGRTAB()
     poDriver->SetMetadataItem(GDAL_DCAP_VECTOR, "YES");
     poDriver->SetMetadataItem(GDAL_DMD_LONGNAME, "MapInfo File");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSIONS, "tab mif mid");
-    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drv_mitab.html");
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/vector/mitab.html");
     poDriver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");
     poDriver->SetMetadataItem(GDAL_DS_LAYER_CREATIONOPTIONLIST,
 "<LayerCreationOptionList>"

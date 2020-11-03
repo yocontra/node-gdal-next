@@ -46,7 +46,7 @@
 #include "ogrgeojsonutils.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrgeojsondriver.cpp 56e004faba62c1e87c5595aaa1baec0d78b9a521 2020-04-16 20:02:53 +0200 Momtchil Momtchev $")
+CPL_CVSID("$Id: ogrgeojsondriver.cpp 43c6088653f28697e3a94f4bc2ee81b6f2f92b0d 2020-10-01 17:25:26 +0200 Even Rouault $")
 
 static CPLMutex* ghMutex = nullptr;
 static char* gpszSource = nullptr;
@@ -240,8 +240,9 @@ GIntBig OGRESRIFeatureServiceLayer::GetFeatureCount( int bForce )
     GIntBig nFeatureCount = -1;
     if( m_poAttrQuery == nullptr && m_poFilterGeom == nullptr )
     {
-        const CPLString osNewURL =
+        CPLString osNewURL =
             CPLURLAddKVP(poDS->GetURL(), "returnCountOnly", "true");
+        osNewURL = CPLURLAddKVP(osNewURL, "resultRecordCount", nullptr);
         CPLErrorReset();
         CPLHTTPResult* pResult = CPLHTTPFetch( osNewURL, nullptr );
         if( pResult != nullptr &&
@@ -278,6 +279,7 @@ OGRErr OGRESRIFeatureServiceLayer::GetExtent( OGREnvelope *psExtent,
     OGRErr eErr = OGRERR_FAILURE;
     CPLString osNewURL =
         CPLURLAddKVP(poDS->GetURL(), "returnExtentOnly", "true");
+    osNewURL = CPLURLAddKVP(osNewURL, "resultRecordCount", nullptr);
     osNewURL = CPLURLAddKVP(osNewURL, "f", "geojson");
     CPLErrorReset();
     CPLHTTPResult* pResult = CPLHTTPFetch( osNewURL, nullptr );
@@ -632,7 +634,7 @@ void RegisterOGRGeoJSON()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GeoJSON" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "json geojson" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_geojson.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/geojson.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
 "<OpenOptionList>"

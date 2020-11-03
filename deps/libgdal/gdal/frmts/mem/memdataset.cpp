@@ -47,7 +47,7 @@
 #include "gdal.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: memdataset.cpp 133f216aa490251caf2a6e2b97fe851b0e9e4793 2019-11-01 21:01:03 -0700 piyushrpt $")
+CPL_CVSID("$Id: memdataset.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 struct MEMDataset::Private
 {
@@ -93,7 +93,7 @@ MEMRasterBand::MEMRasterBand( GByte *pabyDataIn, GDALDataType eTypeIn,
                               int nXSizeIn, int nYSizeIn ) :
     GDALPamRasterBand(FALSE),
     pabyData(pabyDataIn),
-    nPixelOffset(0),
+    nPixelOffset(GDALGetDataTypeSizeBytes(eTypeIn)),
     nLineOffset(0),
     bOwnData(true),
     bNoDataSet(FALSE),
@@ -109,7 +109,6 @@ MEMRasterBand::MEMRasterBand( GByte *pabyDataIn, GDALDataType eTypeIn,
     nRasterYSize = nYSizeIn;
     nBlockXSize = nXSizeIn;
     nBlockYSize = 1;
-    nPixelOffset = GDALGetDataTypeSizeBytes(eTypeIn);
     nLineOffset = nPixelOffset * static_cast<size_t>(nBlockXSize);
 }
 
@@ -398,45 +397,11 @@ CPLErr MEMDataset::IRasterIO( GDALRWFlag eRWFlag,
                                    nPixelSpaceBuf, nLineSpaceBuf, nBandSpaceBuf,
                                    psExtraArg );
 
-    GDALProgressFunc pfnProgressGlobal = psExtraArg->pfnProgress;
-    void *pProgressDataGlobal = psExtraArg->pProgressData;
-
-    CPLErr eErr = CE_None;
-    for( int iBandIndex = 0;
-         iBandIndex < nBandCount && eErr == CE_None;
-         iBandIndex++ )
-    {
-        GDALRasterBand *poBand = GetRasterBand(panBandMap[iBandIndex]);
-
-        if (poBand == nullptr)
-        {
-            eErr = CE_Failure;
-            break;
-        }
-
-        GByte *pabyBandData
-            = reinterpret_cast<GByte *>(pData) + iBandIndex * nBandSpaceBuf;
-
-        psExtraArg->pfnProgress = GDALScaledProgress;
-        psExtraArg->pProgressData =
-            GDALCreateScaledProgress( 1.0 * iBandIndex / nBandCount,
-                                      1.0 * (iBandIndex + 1) / nBandCount,
-                                      pfnProgressGlobal,
-                                      pProgressDataGlobal );
-
-        eErr = poBand->RasterIO( eRWFlag, nXOff, nYOff, nXSize, nYSize,
-                                 reinterpret_cast<void *>( pabyBandData ),
-                                 nBufXSize, nBufYSize,
-                                 eBufType, nPixelSpaceBuf, nLineSpaceBuf,
-                                 psExtraArg );
-
-        GDALDestroyScaledProgress( psExtraArg->pProgressData );
-    }
-
-    psExtraArg->pfnProgress = pfnProgressGlobal;
-    psExtraArg->pProgressData = pProgressDataGlobal;
-
-    return eErr;
+    return GDALDataset::BandBasedRasterIO( eRWFlag, nXOff, nYOff, nXSize, nYSize,
+                                   pData, nBufXSize, nBufYSize,
+                                   eBufType, nBandCount, panBandMap,
+                                   nPixelSpaceBuf, nLineSpaceBuf, nBandSpaceBuf,
+                                   psExtraArg );
 }
 
 /************************************************************************/
@@ -2592,6 +2557,7 @@ MEMDimension::MEMDimension(const std::string& osParentName,
 /*                           SetIndexingVariable()                      */
 /************************************************************************/
 
+// cppcheck-suppress passedByValue
 bool MEMDimension::SetIndexingVariable(std::shared_ptr<GDALMDArray> poIndexingVariable)
 {
     m_poIndexingVariable = poIndexingVariable;

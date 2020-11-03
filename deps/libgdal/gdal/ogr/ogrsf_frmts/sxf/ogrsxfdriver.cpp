@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "ogr_sxf.h"
 
-CPL_CVSID("$Id: ogrsxfdriver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsxfdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRSXF();
 
@@ -143,7 +143,7 @@ void RegisterOGRSXF()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Storage and eXchange Format" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_sxf.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/sxf.html" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "sxf" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,

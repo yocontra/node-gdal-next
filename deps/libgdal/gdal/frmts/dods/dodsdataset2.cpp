@@ -44,7 +44,7 @@
 
 using namespace libdap;
 
-CPL_CVSID("$Id: dodsdataset2.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: dodsdataset2.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /** Attribute names used to encode geo-referencing information. Note that
     these are not C++ objects to avoid problems with static global
@@ -355,7 +355,7 @@ DODSDataset::connect_to_server() /*throw(Error)*/
 /*      Connect, and fetch version information.                         */
 /* -------------------------------------------------------------------- */
     AISConnect *poConnection = new AISConnect(oURL);
-    string version = poConnection->request_version();
+    /*string version = */ poConnection->request_version();
     /*    if (version.empty() || version.find("/3.") == string::npos)
     {
         CPLError( CE_Warning, CPLE_AppDefined,

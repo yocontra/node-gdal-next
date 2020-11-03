@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: 8211view.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: 8211view.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 static void ViewRecordField( DDFField * poField );
 static int ViewSubfield( DDFSubfieldDefn *poSFDefn,
@@ -194,20 +194,12 @@ static int ViewSubfield( DDFSubfieldDefn *poSFDefn,
 
       case DDFBinaryString:
       {
-          int   i;
-          //rjensen 19-Feb-2002 5 integer variables to decode NAME and LNAM
-          int vrid_rcnm=0;
-          int vrid_rcid=0;
-          int foid_agen=0;
-          int foid_find=0;
-          int foid_fids=0;
-
           GByte *pabyBString = (GByte *)
               poSFDefn->ExtractStringData( pachFieldData, nBytesRemaining,
                                            &nBytesConsumed );
 
           printf( "        %s = 0x", poSFDefn->GetName() );
-          for( i = 0; i < std::min(nBytesConsumed, 24); i++ )
+          for( int i = 0; i < std::min(nBytesConsumed, 24); i++ )
               printf( "%02X", pabyBString[i] );
 
           if( nBytesConsumed > 24 )
@@ -216,17 +208,17 @@ static int ViewSubfield( DDFSubfieldDefn *poSFDefn,
           // rjensen 19-Feb-2002 S57 quick hack. decode NAME and LNAM bitfields
           if ( EQUAL(poSFDefn->GetName(),"NAME") )
           {
-              vrid_rcnm=pabyBString[0];
-              vrid_rcid=pabyBString[1] + (pabyBString[2]*256)+
+              const int vrid_rcnm=pabyBString[0];
+              const int vrid_rcid=pabyBString[1] + (pabyBString[2]*256)+
                   (pabyBString[3]*65536)+ (pabyBString[4]*16777216);
               printf("\tVRID RCNM = %d,RCID = %d",vrid_rcnm,vrid_rcid);
           }
           else if ( EQUAL(poSFDefn->GetName(),"LNAM") )
           {
-              foid_agen=pabyBString[0] + (pabyBString[1]*256);
-              foid_find=pabyBString[2] + (pabyBString[3]*256)+
+              const int foid_agen=pabyBString[0] + (pabyBString[1]*256);
+              const int foid_find=pabyBString[2] + (pabyBString[3]*256)+
                   (pabyBString[4]*65536)+ (pabyBString[5]*16777216);
-              foid_fids=pabyBString[6] + (pabyBString[7]*256);
+              const int foid_fids=pabyBString[6] + (pabyBString[7]*256);
               printf("\tFOID AGEN = %d,FIDN = %d,FIDS = %d",
                      foid_agen,foid_find,foid_fids);
           }

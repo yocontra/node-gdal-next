@@ -35,7 +35,7 @@
 #include <map>
 #include <sstream>
 
-CPL_CVSID("$Id: ogrwasplayer.cpp f38c60bc8645c4d6273ff66e80afb41325e1b6c7 2019-05-15 07:42:43 -0500 Even Rouault $")
+CPL_CVSID("$Id: ogrwasplayer.cpp bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRWAsPLayer()                             */
@@ -721,10 +721,11 @@ OGRErr OGRWAsPLayer::CreateGeomField( OGRGeomFieldDefn *poGeomFieldIn,
 }
 
 /************************************************************************/
-/*                           GetNextFeature()                           */
+/*                           GetNextRawFeature()                        */
 /************************************************************************/
 
-OGRFeature *OGRWAsPLayer::GetNextFeature()
+OGRFeature *OGRWAsPLayer::GetNextRawFeature()
+
 {
     if ( READ_ONLY != eMode)
     {
@@ -732,33 +733,6 @@ OGRFeature *OGRWAsPLayer::GetNextFeature()
         return nullptr;
     }
 
-    GetLayerDefn();
-
-    while( true )
-    {
-        OGRFeature *poFeature = GetNextRawFeature();
-        if (poFeature == nullptr)
-            return nullptr;
-
-        if((m_poFilterGeom == nullptr
-            || FilterGeometry( poFeature->GetGeometryRef() ) )
-        && (m_poAttrQuery == nullptr
-            || m_poAttrQuery->Evaluate( poFeature )) )
-        {
-            return poFeature;
-        }
-        else
-            delete poFeature;
-    }
-}
-
-/************************************************************************/
-/*                           GetNextRawFeature()                        */
-/************************************************************************/
-
-OGRFeature *OGRWAsPLayer::GetNextRawFeature()
-
-{
     const char * pszLine = CPLReadLineL( hFile );
     if ( !pszLine ) return nullptr;
 

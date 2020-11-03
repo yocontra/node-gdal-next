@@ -40,7 +40,7 @@
 #include "cpl_minixml.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: resolvexlinks.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: resolvexlinks.cpp d9bbdfb6719682ac867fc00d6b708ca8e4405436 2020-09-29 11:53:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              GetID()                                 */
@@ -590,7 +590,8 @@ bool GMLReader::ResolveXlinks( const char *pszFile,
         bool bTryWithTempFile = false;
         if( STARTS_WITH_CI(pszFile, "/vsitar/") ||
             STARTS_WITH_CI(pszFile, "/vsigzip/") ||
-            STARTS_WITH_CI(pszFile, "/vsizip/") )
+            STARTS_WITH_CI(pszFile, "/vsizip/") ||
+            STARTS_WITH_CI(pszFile, "/vsicurl") )
         {
             bTryWithTempFile = true;
         }

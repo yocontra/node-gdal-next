@@ -38,7 +38,7 @@
 #include "ogrsqliteregexp.cpp" /* yes the .cpp file, to make it work on Windows with load_extension('gdalXX.dll') */
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrsqlitesqlfunctions.cpp 0536038c7e0b969f54957699d240911ec20e7a77 2020-04-18 20:48:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitesqlfunctions.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 #undef SQLITE_STATIC
 #define SQLITE_STATIC      ((sqlite3_destructor_type)nullptr)
@@ -315,7 +315,7 @@ void OGR2SQLITE_ogr_geocode_set_result(sqlite3_context* pContext,
         OGRLayer* poLayer = (OGRLayer*)hLayer;
         OGRFeatureDefn* poFDefn = poLayer->GetLayerDefn();
         OGRFeature* poFeature = poLayer->GetNextFeature();
-        int nIdx = -1;
+        int nIdx;
         if( poFeature == nullptr )
             sqlite3_result_null (pContext);
         else if( strcmp(pszField, "geometry") == 0 &&

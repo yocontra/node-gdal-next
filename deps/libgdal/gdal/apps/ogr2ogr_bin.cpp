@@ -53,7 +53,7 @@
 #include "ogr_p.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogr2ogr_bin.cpp d2777f108e5d735d0821dd77527a6edb2703ab9b 2020-05-15 19:56:11 +1000 Simon O'Keefe $")
+CPL_CVSID("$Id: ogr2ogr_bin.cpp 089f0515dfcdf7c7ff252f0c60efc03eacb569f8 2020-05-15 19:56:11 +1000 Simon O'Keefe $")
 
 /************************************************************************/
 /*                               Usage()                                */

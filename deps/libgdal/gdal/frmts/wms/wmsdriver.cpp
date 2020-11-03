@@ -41,13 +41,15 @@
 #include "minidriver_arcgis_server.h"
 #include "minidriver_iip.h"
 #include "minidriver_mrf.h"
+#include "minidriver_ogcapimaps.h"
+#include "minidriver_ogcapicoverage.h"
 
 #include "cpl_json.h"
 
 #include <limits>
 #include <utility>
 
-CPL_CVSID("$Id: wmsdriver.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: wmsdriver.cpp 18df30822243cf782434ddb77b214a8b7dde74f8 2020-10-01 14:55:00 +0200 Even Rouault $")
 
 //
 // A static map holding seen server GetTileService responses, per process
@@ -1057,6 +1059,8 @@ void GDALRegister_WMS()
     RegisterMinidriver(AGS);
     RegisterMinidriver(IIP);
     RegisterMinidriver(MRF);
+    RegisterMinidriver(OGCAPIMaps);
+    RegisterMinidriver(OGCAPICoverage);
 
     GDALDriver *poDriver = new GDALDriver();
 

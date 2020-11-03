@@ -44,12 +44,12 @@
 #include "ogr_core.h"
 #include "ogr_feature.h"
 #include "ogr_spatialref.h"
-#include "ogrlayerpool.h"
+#include "ogrlayerpool.h" 
 #include "ogrunionlayer.h"
 #include "ogrwarpedlayer.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrvrtdatasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtdatasource.cpp 8e2b7eaf348d5421dcca71045daed4c3888f85a6 2020-05-22 19:27:31 +0200 Yorick de Wid $")
 
 /************************************************************************/
 /*                       OGRVRTGetGeometryType()                        */

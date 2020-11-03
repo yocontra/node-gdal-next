@@ -31,7 +31,7 @@
 #include "nasreaderp.h"
 #include "ogr_nas.h"
 
-CPL_CVSID("$Id: ogrnasdriver.cpp 7c7e86d4dde07b3041902d7e8e3c65d433c03146 2018-07-27 17:17:52 +0200 Juergen E. Fischer $")
+CPL_CVSID("$Id: ogrnasdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     OGRNASDriverIdentify()                           */
@@ -133,7 +133,7 @@ void RegisterOGRNAS()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "NAS - ALKIS" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "xml" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_nas.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/nas.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRNASDriverOpen;

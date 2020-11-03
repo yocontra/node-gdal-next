@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_ecw.h 5eebbf721d5c84c8d68b27eaa295958671a4b3fd 2020-06-09 17:31:52 +0800 jbowman-hexagon $
+ * $Id: gdal_ecw.h 0f2d7e956f88679a2ff40c803c61a08c7c099089 2020-06-09 17:31:52 +0800 jbowman-hexagon $
  *
  * Project:  GDAL
  * Purpose:  ECW (ERDAS Wavelet Compression Format) Driver Definitions

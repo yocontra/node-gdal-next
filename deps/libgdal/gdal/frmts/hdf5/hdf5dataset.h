@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hdf5dataset.h a54fb26a959d72b97385564a81652988c305fd91 2019-09-02 17:34:02 +0200 Even Rouault $
+ * $Id: hdf5dataset.h 16c87cd95f27db3344c6c034950fdf285666d924 2020-08-18 15:37:19 +0200 Even Rouault $
  *
  * Project:  Hierarchical Data Format Release 5 (HDF5)
  * Purpose:  Header file for HDF5 datasets reader.
@@ -87,6 +87,34 @@ hid_t GDAL_HDF5Open(const std::string& osFilename );
 #  define H5OFFSET_TYPE  hsize_t
 #endif
 
+class HDF5Dataset;
+class BAGDataset;
+
+namespace GDAL
+{
+
+/************************************************************************/
+/*                         HDF5SharedResources                          */
+/************************************************************************/
+
+class HDF5SharedResources
+{
+    friend class ::HDF5Dataset;
+    friend class ::BAGDataset;
+
+    bool m_bReadOnly = true;
+    hid_t            m_hHDF5 = 0;
+    CPLString        m_osFilename{};
+public:
+    HDF5SharedResources() = default;
+    ~HDF5SharedResources();
+
+    inline hid_t GetHDF5() const { return m_hHDF5; }
+    inline bool IsReadOnly() const { return m_bReadOnly; }
+};
+
+} // namespace GDAL
+
 /************************************************************************/
 /* ==================================================================== */
 /*                              HDF5Dataset                             */
@@ -147,6 +175,7 @@ protected:
 
     static GDALDataset *Open(GDALOpenInfo *);
     static GDALDataset *OpenMultiDim(GDALOpenInfo *);
+    static std::shared_ptr<GDALGroup> OpenGroup(std::shared_ptr<GDAL::HDF5SharedResources> poSharedResources);
     static int Identify(GDALOpenInfo *);
 
     static GDALDataType GetDataType(hid_t);

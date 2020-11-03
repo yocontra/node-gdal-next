@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include <cassert>
 
-CPL_CVSID("$Id: ogrwaspdriver.cpp 98dfb4b4012c5ae4621e246e8eb393b3c05a3f48 2018-04-02 22:09:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrwaspdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -112,7 +112,7 @@ void RegisterOGRWAsP()
 
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "WAsP .map format" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "map" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_wasp.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/wasp.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver(poDriver);

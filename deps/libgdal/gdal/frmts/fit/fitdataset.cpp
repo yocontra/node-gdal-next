@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: fitdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: fitdataset.cpp 1067a535e11dffec61af74f0447d131c1281e03d 2020-10-23 20:59:18 +0200 Even Rouault $")
 
 constexpr size_t FIT_PAGE_SIZE = 128;
 
@@ -1150,7 +1150,7 @@ static GDALDataset *FITCreateCopy(const char * pszFilename,
         const char *str = CSLFetchNameValue(papszOptions,"PAGESIZE");
         int newBlockX, newBlockY;
         sscanf(str, "%i,%i", &newBlockX, &newBlockY);
-        if (newBlockX && newBlockY) {
+        if (newBlockX > 0 && newBlockY > 0) {
             blockX = newBlockX;
             blockY = newBlockY;
         }

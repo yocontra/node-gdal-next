@@ -39,7 +39,7 @@
 #include "cpl_string.h"
 
 
-CPL_CVSID("$Id: cpl_google_oauth2.cpp c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_google_oauth2.cpp 2202f38f9b5203c83f3f55a10610817b3044f3f3 2020-10-25 12:07:53 +0100 Even Rouault $")
 
 /* ==================================================================== */
 /*      Values related to OAuth2 authorization to use fusion            */
@@ -204,13 +204,23 @@ char CPL_DLL *GOA2GetRefreshToken( const char *pszAuthToken,
         strstr(reinterpret_cast<char *>(psResult->pabyData), "invalid_grant")
         != nullptr )
     {
-        CPLString osURL;
-        osURL.Seize(GOA2GetAuthorizationURL(pszScope));
-        CPLError(CE_Failure, CPLE_AppDefined,
-                 "Attempt to use a OAuth2 authorization code multiple times.  "
-                 "Request a fresh authorization token at %s.",
-                 osURL.c_str());
         CPLHTTPDestroyResult(psResult);
+        if( pszScope == nullptr )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Attempt to use a OAuth2 authorization code multiple times. "
+                     "Use GOA2GetAuthorizationURL(scope) with a valid scope to "
+                     "request a fresh authorization token.");
+        }
+        else
+        {
+            CPLString osURL;
+            osURL.Seize(GOA2GetAuthorizationURL(pszScope));
+            CPLError(CE_Failure, CPLE_AppDefined,
+                    "Attempt to use a OAuth2 authorization code multiple times. "
+                    "Request a fresh authorization token at %s.",
+                    osURL.c_str());
+        }
         return nullptr;
     }
 

@@ -39,7 +39,7 @@
 
 #include <limits.h>
 
-CPL_CVSID("$Id: keaband.cpp 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $")
+CPL_CVSID("$Id: keaband.cpp fab3246500a8fd0a11ed1f4ffe47c21dec1b8a2b 2020-09-13 16:32:52 +0200 Even Rouault $")
 
 // constructor
 KEARasterBand::KEARasterBand( KEADataset *pDataset, int nSrcBand, GDALAccess eAccessIn, kealib::KEAImageIO *pImageIO, LockedRefCount *pRefCount ):
@@ -198,8 +198,11 @@ CPLErr KEARasterBand::SetHistogramFromString(const char *pszString)
 
     GDALRasterAttributeTable *pTable = this->GetDefaultRAT();
     if( pTable == nullptr )
+    {
+        CPLFree(pszBinValues);
         return CE_Failure;
-        
+    }
+
     // find histogram column if it exists
     int nCol = pTable->GetColOfUsage(GFU_PixelCount);
     if( nCol == -1 )
@@ -441,7 +444,7 @@ CPLErr KEARasterBand::SetMetadataItem(const char *pszName, const char *pszValue,
     }
 }
 
-// get a single metdata item
+// get a single metadata item
 const char *KEARasterBand::GetMetadataItem (const char *pszName, const char *pszDomain)
 {
     CPLMutexHolderD( &m_hMutex );
@@ -474,7 +477,7 @@ char **KEARasterBand::GetMetadata(const char *pszDomain)
     return m_papszMetadataList;
 }
 
-// set the metdata as a CSLStringList
+// set the metadata as a CSLStringList
 CPLErr KEARasterBand::SetMetadata(char **papszMetadata, const char *pszDomain)
 {
     CPLMutexHolderD( &m_hMutex );

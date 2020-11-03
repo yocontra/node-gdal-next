@@ -30,7 +30,7 @@
 #include "ogr_oci.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrocisession.cpp 579264676e187f9d14759e1bc9e30986c8b2514c 2017-12-11 20:03:03Z Even Rouault $")
+CPL_CVSID("$Id: ogrocisession.cpp 71f41dc7b4840807cdf3c05ef435a4533c806898 2020-09-15 16:59:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRGetOCISession()                          */
@@ -316,7 +316,7 @@ int OGROCISession::EstablishSession( const char *pszUseridIn,
 /*      Set maximun name length (before 12.2 ? 30 : 128)                */
 /* -------------------------------------------------------------------- */
 
-    if( nServerVersion >= 12 && nServerRelease >= 2 )
+    if( nServerVersion > 12 || (nServerVersion == 12 && nServerRelease >= 2) )
     {
         nMaxNameLength = 128;
     }

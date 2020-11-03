@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_api.h 7c7402f4226a5d821bfd6bf38af0e682c8720ba7 2020-04-27 13:06:52 +0200 Even Rouault $
+ * $Id: ogr_api.h 4fb0702109acae09624f7ff9436ddcd456cb09e3 2020-07-01 19:14:52 +1000 Nyall Dawson $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API for OGR Geometry, Feature, Layers, DataSource and drivers.
@@ -326,6 +326,8 @@ void   CPL_DLL OGR_Fld_Destroy( OGRFieldDefnH );
 
 void   CPL_DLL OGR_Fld_SetName( OGRFieldDefnH, const char * );
 const char CPL_DLL *OGR_Fld_GetNameRef( OGRFieldDefnH );
+void   CPL_DLL OGR_Fld_SetAlternativeName( OGRFieldDefnH, const char * );
+const char CPL_DLL *OGR_Fld_GetAlternativeNameRef( OGRFieldDefnH );
 OGRFieldType CPL_DLL OGR_Fld_GetType( OGRFieldDefnH );
 void   CPL_DLL OGR_Fld_SetType( OGRFieldDefnH, OGRFieldType );
 OGRFieldSubType CPL_DLL OGR_Fld_GetSubType( OGRFieldDefnH );
@@ -342,6 +344,8 @@ int    CPL_DLL OGR_Fld_IsIgnored( OGRFieldDefnH hDefn );
 void   CPL_DLL OGR_Fld_SetIgnored( OGRFieldDefnH hDefn, int );
 int    CPL_DLL OGR_Fld_IsNullable( OGRFieldDefnH hDefn );
 void   CPL_DLL OGR_Fld_SetNullable( OGRFieldDefnH hDefn, int );
+int    CPL_DLL OGR_Fld_IsUnique( OGRFieldDefnH hDefn );
+void   CPL_DLL OGR_Fld_SetUnique( OGRFieldDefnH hDefn, int );
 const char CPL_DLL *OGR_Fld_GetDefault( OGRFieldDefnH hDefn );
 void   CPL_DLL OGR_Fld_SetDefault( OGRFieldDefnH hDefn, const char* );
 int    CPL_DLL OGR_Fld_IsDefaultDriverSpecific( OGRFieldDefnH hDefn );

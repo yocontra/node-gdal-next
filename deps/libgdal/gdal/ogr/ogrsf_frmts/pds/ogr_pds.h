@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pds.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogr_pds.h bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $
  *
  * Project:  PDS Translator
  * Purpose:  Definition of classes for OGR .pdstable driver.
@@ -58,7 +58,7 @@ typedef struct
     int nItems;
 } FieldDesc;
 
-class OGRPDSLayer final: public OGRLayer
+class OGRPDSLayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGRPDSLayer>
 {
     OGRFeatureDefn*    poFeatureDefn;
 
@@ -90,7 +90,7 @@ class OGRPDSLayer final: public OGRLayer
                         virtual ~OGRPDSLayer();
 
     virtual void                ResetReading() override;
-    virtual OGRFeature *        GetNextFeature() override;
+    DEFINE_GET_NEXT_FEATURE_THROUGH_RAW(OGRPDSLayer)
 
     virtual OGRFeatureDefn *    GetLayerDefn() override { return poFeatureDefn; }
 

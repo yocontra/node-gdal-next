@@ -35,7 +35,7 @@
    #include "gnm_frmts.h"
 #endif
 
-CPL_CVSID("$Id: gdalallregister.cpp fa9cbb747c2bf17876167ed747fd7e7757f8fc29 2020-02-03 18:04:27 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalallregister.cpp ea7e27cb335aea69decb920a492723aebf3eaf43 2020-09-24 14:51:54 +0200 Even Rouault $")
 
 #ifdef notdef
 // we may have a use for this some day
@@ -103,6 +103,10 @@ void CPL_STDCALL GDALAllRegister()
 
 #ifdef FRMT_elas
     GDALRegister_ELAS();
+#endif
+
+#ifdef FRMT_esric
+    GDALRegister_ESRIC();
 #endif
 
 #ifdef FRMT_aigrid
@@ -309,10 +313,6 @@ void CPL_STDCALL GDALAllRegister()
 
 #ifdef FRMT_wms
     GDALRegister_WMS();
-#endif
-
-#ifdef FRMT_sde
-    GDALRegister_SDE();
 #endif
 
 #ifdef FRMT_msgn
@@ -585,6 +585,18 @@ void CPL_STDCALL GDALAllRegister()
 
 #ifdef FRMT_exr
     GDALRegister_EXR();
+#endif
+
+#ifdef FRMT_heif
+    GDALRegister_HEIF();
+#endif
+
+#ifdef FRMT_tga
+    GDALRegister_TGA();
+#endif
+
+#ifdef FRMT_ogcapi
+    GDALRegister_OGCAPI();
 #endif
 
     // NOTE: you need to generally your own driver before that line.

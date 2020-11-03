@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: envidataset.h 2dafaa02cb29a8160bf4c22e17586b11529cac6d 2019-09-21 20:34:19 +0200 Even Rouault $
+ * $Id: envidataset.h a128daac892a6830951c5cbb43e8abf7f615aeeb 2020-07-13 11:54:59 +0200 Even Rouault $
  *
  * Project:  ENVI .hdr Driver
  * Purpose:  Implementation of ENVI .hdr labelled raw raster support.
@@ -163,6 +163,7 @@ class ENVIRasterBand final: public RawRasterBand
     ~ENVIRasterBand() override {}
 
     void SetDescription( const char * ) override;
+    CPLErr SetNoDataValue( double ) override;
 
     CPLErr SetCategoryNames( char ** ) override;
 };

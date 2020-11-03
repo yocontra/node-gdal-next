@@ -31,7 +31,7 @@
 #include "cpl_multiproc.h"
 #include "gmlreaderp.h"
 
-CPL_CVSID("$Id: ogrgmldriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: ogrgmldriver.cpp 7cd0bb02cab0da02e04d2317e3e3425f6b660534 2020-10-01 16:19:28 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRGMLDriverIdentify()                       */
@@ -142,12 +142,17 @@ void RegisterOGRGML()
                                "Geography Markup Language (GML)" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gml" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "gml xml" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_gml.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/gml.html" );
 
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST,
 "<OpenOptionList>"
 "  <Option name='XSD' type='string' description='Name of the related application schema file (.xsd).'/>"
-"  <Option name='GFS_TEMPLATE' type='string' description='Filename of a .gfs template file to appli.'/>"
+"  <Option name='GFS_TEMPLATE' type='string' description='Filename of a .gfs template file to apply.'/>"
+"  <Option name='WRITE_GFS' type='string-select' description='Whether to write a .gfs file' default='AUTO'>"
+"    <Value>AUTO</Value>"
+"    <Value>YES</Value>"
+"    <Value>NO</Value>"
+"  </Option>"
 "  <Option name='FORCE_SRS_DETECTION' type='boolean' description='Force a full scan to detect the SRS of layers.' default='NO'/>"
 "  <Option name='EMPTY_AS_NULL' type='boolean' description='Force empty fields to be reported as NULL. Set to NO so that not-nullable fields can be exposed' default='YES'/>"
 "  <Option name='GML_ATTRIBUTES_TO_OGR_FIELDS' type='boolean' description='Whether GML attributes should be reported as OGR fields' default='NO'/>"
@@ -224,6 +229,7 @@ void RegisterOGRGML()
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES, "Integer Integer64 Real String Date DateTime IntegerList Integer64List RealList StringList" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATASUBTYPES, "Boolean Int16 Float32" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_FIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_UNIQUE_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

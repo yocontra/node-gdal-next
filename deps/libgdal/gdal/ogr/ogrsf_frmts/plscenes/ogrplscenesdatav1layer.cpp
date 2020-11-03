@@ -30,7 +30,7 @@
 #include "ogrgeojsonreader.h"
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrplscenesdatav1layer.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrplscenesdatav1layer.cpp 6659c4d5c910df313ac451cd5ca687862eef040b 2020-10-01 15:37:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GetFieldCount()                            */
@@ -541,7 +541,7 @@ bool OGRPLScenesDataV1Layer::IsSimpleComparison(const swq_expr_node* poNode)
 /*                             GetOperatorText()                        */
 /************************************************************************/
 
-static const char* GetOperatorText(int nOp)
+static const char* GetOperatorText(swq_op nOp)
 {
     if( nOp == SWQ_LT )
         return "lt";

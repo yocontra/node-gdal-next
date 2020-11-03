@@ -30,6 +30,11 @@
 #include "zstd.h"
 #endif
 
+#if LIBDEFLATE_SUPPORT
+#include "libdeflate.h"
+#endif
+#define LIBDEFLATE_MAX_COMPRESSION_LEVEL 12
+
 #include <assert.h>
 
 #define LSTATE_INIT_DECODE 0x01
@@ -59,6 +64,11 @@ typedef struct {
 
         unsigned int    compressed_size;
         void           *compressed_buffer;
+
+#if LIBDEFLATE_SUPPORT
+        struct libdeflate_decompressor* libdeflate_dec;
+        struct libdeflate_compressor*   libdeflate_enc;
+#endif
 
         TIFFVGetMethod  vgetparent;            /* super-class method */
         TIFFVSetMethod  vsetparent;            /* super-class method */
@@ -221,17 +231,20 @@ static int SetupUncompressedBuffer(TIFF* tif, LERCState* sp,
         sp->uncompressed_alloc = new_alloc;
     }
 
-    if( td->td_planarconfig == PLANARCONFIG_CONTIG &&
-        td->td_extrasamples > 0 &&
-        td->td_sampleinfo[td->td_extrasamples-1] == EXTRASAMPLE_UNASSALPHA &&
-        GetLercDataType(tif) == 1 )
+    if( (td->td_planarconfig == PLANARCONFIG_CONTIG &&
+         td->td_extrasamples > 0 &&
+         td->td_sampleinfo[td->td_extrasamples-1] == EXTRASAMPLE_UNASSALPHA &&
+         GetLercDataType(tif) == 1 ) ||
+        (td->td_sampleformat == SAMPLEFORMAT_IEEEFP &&
+         (td->td_planarconfig == PLANARCONFIG_SEPARATE ||
+         td->td_samplesperpixel == 1) &&
+         (td->td_bitspersample == 32 || td->td_bitspersample == 64 )) )
     {
         unsigned int mask_size = sp->segment_width * sp->segment_height;
         if( sp->mask_size < mask_size )
         {
-            _TIFFfree(sp->mask_buffer);
-            sp->mask_buffer = _TIFFmalloc(mask_size);
-            if( !sp->mask_buffer )
+            void* mask_buffer = _TIFFrealloc(sp->mask_buffer, mask_size);
+            if( mask_buffer == NULL )
             {
                 TIFFErrorExt(tif->tif_clientdata, module,
                                 "Cannot allocate buffer");
@@ -241,6 +254,7 @@ static int SetupUncompressedBuffer(TIFF* tif, LERCState* sp,
                 sp->uncompressed_alloc = 0;
                 return 0;
             }
+            sp->mask_buffer = (uint8*)mask_buffer;
             sp->mask_size = mask_size;
         }
     }
@@ -293,6 +307,35 @@ LERCPreDecode(TIFF* tif, uint16 s)
 
         if( sp->additional_compression == LERC_ADD_COMPRESSION_DEFLATE )
         {
+#if LIBDEFLATE_SUPPORT
+            enum libdeflate_result res;
+            size_t lerc_data_sizet = 0;
+            if( sp->libdeflate_dec == NULL )
+            {
+                sp->libdeflate_dec = libdeflate_alloc_decompressor();
+                if( sp->libdeflate_dec == NULL )
+                {
+                    TIFFErrorExt(tif->tif_clientdata, module,
+                                 "Cannot allocate decompressor");
+                    return 0;
+                }
+            }
+
+            res = libdeflate_zlib_decompress(
+                sp->libdeflate_dec, tif->tif_rawcp, (size_t)tif->tif_rawcc,
+                sp->compressed_buffer, sp->compressed_size,
+                &lerc_data_sizet);
+            if( res != LIBDEFLATE_SUCCESS )
+            {
+                TIFFErrorExt(tif->tif_clientdata, module,
+                                "Decoding error at scanline %lu",
+                                (unsigned long) tif->tif_row);
+                return 0;
+            }
+            assert( lerc_data_sizet == (unsigned int)lerc_data_sizet );
+            lerc_data = sp->compressed_buffer;
+            lerc_data_size = (unsigned int)lerc_data_sizet;
+#else
             z_stream strm;
             int zlib_ret;
 
@@ -324,6 +367,7 @@ LERCPreDecode(TIFF* tif, uint16 s)
             lerc_data = sp->compressed_buffer;
             lerc_data_size = sp->compressed_size - strm.avail_out;
             inflateEnd(&strm);
+#endif
         }
         else if( sp->additional_compression == LERC_ADD_COMPRESSION_ZSTD )
         {
@@ -380,6 +424,13 @@ LERCPreDecode(TIFF* tif, uint16 s)
         {
             use_mask = 1;
             nomask_bands --;
+        }
+        else if( td->td_sampleformat == SAMPLEFORMAT_IEEEFP &&
+                 (td->td_planarconfig == PLANARCONFIG_SEPARATE ||
+                  td->td_samplesperpixel == 1) &&
+                 (td->td_bitspersample == 32 || td->td_bitspersample == 64) )
+        {
+            use_mask = 1;
         }
 
         ndims = td->td_planarconfig == PLANARCONFIG_CONTIG ?
@@ -455,7 +506,7 @@ LERCPreDecode(TIFF* tif, uint16 s)
         }
 
         /* Interleave alpha mask with other samples. */
-        if( use_mask )
+        if( use_mask && GetLercDataType(tif) == 1 )
         {
             unsigned src_stride =
                 (td->td_samplesperpixel - 1) * (td->td_bitspersample / 8);
@@ -483,6 +534,36 @@ LERCPreDecode(TIFF* tif, uint16 s)
                 memmove( sp->uncompressed_buffer + i * dst_stride,
                         sp->uncompressed_buffer + i * src_stride,
                         src_stride );
+            }
+        }
+        else if( use_mask && td->td_sampleformat == SAMPLEFORMAT_IEEEFP )
+        {
+            const unsigned nb_pixels = sp->segment_width * sp->segment_height;
+            unsigned i;
+#if HOST_BIGENDIAN
+            const unsigned char nan_bytes[] = {  0x7f, 0xc0, 0, 0 };
+#else
+            const unsigned char nan_bytes[] = {  0, 0, 0xc0, 0x7f };
+#endif
+            float nan_float32;
+            memcpy(&nan_float32, nan_bytes, 4);
+
+            if( td->td_bitspersample == 32 )
+            {
+                for( i = 0; i < nb_pixels; i++ )
+                {
+                    if( sp->mask_buffer[i] == 0 )
+                        ((float*)sp->uncompressed_buffer)[i] = nan_float32;
+                }
+            }
+            else
+            {
+                const double nan_float64 = nan_float32;
+                for( i = 0; i < nb_pixels; i++ )
+                {
+                    if( sp->mask_buffer[i] == 0 )
+                        ((double*)sp->uncompressed_buffer)[i] = nan_float64;
+                }
             }
         }
 
@@ -620,12 +701,12 @@ LERCPostEncode(TIFF* tif)
             td->td_sampleinfo[td->td_extrasamples-1] == EXTRASAMPLE_UNASSALPHA &&
             GetLercDataType(tif) == 1 )
         {
-            unsigned dst_stride = (td->td_samplesperpixel - 1) *
+            const unsigned dst_stride = (td->td_samplesperpixel - 1) *
                                             (td->td_bitspersample / 8);
-            unsigned src_stride = td->td_samplesperpixel *
+            const unsigned src_stride = td->td_samplesperpixel *
                                             (td->td_bitspersample / 8);
             unsigned i = 0;
-            unsigned nb_pixels = sp->segment_width * sp->segment_height;
+            const unsigned nb_pixels = sp->segment_width * sp->segment_height;
 
             use_mask = 1;
             for( i = 0 ; i < nb_pixels; i++)
@@ -661,6 +742,60 @@ LERCPostEncode(TIFF* tif)
                 }
             }
         }
+        else if( td->td_sampleformat == SAMPLEFORMAT_IEEEFP &&
+                 (td->td_planarconfig == PLANARCONFIG_SEPARATE ||
+                  dst_nbands == 1) &&
+                 (td->td_bitspersample == 32 || td->td_bitspersample == 64 ) )
+        {
+            /* Check for NaN values */
+            unsigned i;
+            const unsigned nb_pixels = sp->segment_width * sp->segment_height;
+            if( td->td_bitspersample == 32 )
+            {
+                for( i = 0; i < nb_pixels; i++ )
+                {
+                    const float val = ((float*)sp->uncompressed_buffer)[i];
+                    if( val != val )
+                    {
+                        use_mask = 1;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for( i = 0; i < nb_pixels; i++ )
+                {
+                    const double val = ((double*)sp->uncompressed_buffer)[i];
+                    if( val != val )
+                    {
+                        use_mask = 1;
+                        break;
+                    }
+                }
+            }
+
+            if( use_mask )
+            {
+                if( td->td_bitspersample == 32 )
+                {
+                    for( i = 0; i < nb_pixels; i++ )
+                    {
+                        const float val = ((float*)sp->uncompressed_buffer)[i];
+                        sp->mask_buffer[i] = ( val == val ) ? 255 : 0;
+                    }
+                }
+                else
+                {
+                    for( i = 0; i < nb_pixels; i++ )
+                    {
+                        const double val = ((double*)sp->uncompressed_buffer)[i];
+                        sp->mask_buffer[i] = ( val == val ) ? 255 : 0;
+                    }
+                }
+            }
+        }
+
 
 #if 0
         lerc_ret = lerc_computeCompressedSize(
@@ -721,14 +856,56 @@ LERCPostEncode(TIFF* tif)
 
         if( sp->additional_compression == LERC_ADD_COMPRESSION_DEFLATE )
         {
+#if LIBDEFLATE_SUPPORT
+            if( sp->libdeflate_enc == NULL )
+            {
+                /* To get results as good as zlib, we ask for an extra */
+                /* level of compression */
+                sp->libdeflate_enc = libdeflate_alloc_compressor(
+                    sp->zipquality == Z_DEFAULT_COMPRESSION ? 7 :
+                    sp->zipquality >= 6 && sp->zipquality <= 9 ? sp->zipquality + 1 :
+                    sp->zipquality);
+                if( sp->libdeflate_enc == NULL )
+                {
+                    TIFFErrorExt(tif->tif_clientdata, module,
+                                 "Cannot allocate compressor");
+                    return 0;
+                }
+            }
+
+            /* Should not happen normally */
+            if( libdeflate_zlib_compress_bound(sp->libdeflate_enc, numBytesWritten) >
+                     sp->uncompressed_alloc )
+            {
+                TIFFErrorExt(tif->tif_clientdata, module,
+                             "Output buffer for libdeflate too small");
+                return 0;
+            }
+
+            tif->tif_rawcc = libdeflate_zlib_compress(
+                sp->libdeflate_enc,
+                sp->compressed_buffer, numBytesWritten,
+                sp->uncompressed_buffer, sp->uncompressed_alloc);
+
+            if( tif->tif_rawcc == 0 )
+            {
+                TIFFErrorExt(tif->tif_clientdata, module,
+                                "Encoder error at scanline %lu",
+                                (unsigned long) tif->tif_row);
+                return 0;
+            }
+#else
             z_stream strm;
             int zlib_ret;
+            int cappedQuality = sp->zipquality;
+            if( cappedQuality > Z_BEST_COMPRESSION )
+                cappedQuality = Z_BEST_COMPRESSION;
 
             memset(&strm, 0, sizeof(strm));
             strm.zalloc = NULL;
             strm.zfree = NULL;
             strm.opaque = NULL;
-            zlib_ret = deflateInit(&strm, sp->zipquality);
+            zlib_ret = deflateInit(&strm, cappedQuality);
             if( zlib_ret != Z_OK )
             {
                 TIFFErrorExt(tif->tif_clientdata, module,
@@ -741,27 +918,29 @@ LERCPostEncode(TIFF* tif)
             strm.avail_out = sp->uncompressed_alloc;
             strm.next_out = sp->uncompressed_buffer;
             zlib_ret = deflate(&strm, Z_FINISH);
+            if( zlib_ret == Z_STREAM_END )
+            {
+                tif->tif_rawcc = sp->uncompressed_alloc - strm.avail_out;
+            }
+            deflateEnd(&strm);
             if( zlib_ret != Z_STREAM_END )
             {
                 TIFFErrorExt(tif->tif_clientdata, module,
                          "deflate() failed");
-                deflateEnd(&strm);
                 return 0;
             }
+#endif
             {
                 int ret;
                 uint8* tif_rawdata_backup = tif->tif_rawdata;
                 tif->tif_rawdata = sp->uncompressed_buffer;
-                tif->tif_rawcc = sp->uncompressed_alloc - strm.avail_out;
                 ret = TIFFFlushData1(tif);
                 tif->tif_rawdata = tif_rawdata_backup;
                 if( !ret )
                 {
-                    deflateEnd(&strm);
                     return 0;
                 }
             }
-            deflateEnd(&strm);
         }
         else if( sp->additional_compression == LERC_ADD_COMPRESSION_ZSTD )
         {
@@ -829,6 +1008,13 @@ LERCCleanup(TIFF* tif)
         _TIFFfree(sp->uncompressed_buffer);
         _TIFFfree(sp->compressed_buffer);
         _TIFFfree(sp->mask_buffer);
+
+#if LIBDEFLATE_SUPPORT
+        if( sp->libdeflate_dec )
+            libdeflate_free_decompressor(sp->libdeflate_dec);
+        if( sp->libdeflate_enc )
+            libdeflate_free_compressor(sp->libdeflate_enc);
+#endif
 
         _TIFFfree(sp);
         tif->tif_data = NULL;
@@ -952,6 +1138,22 @@ LERCVSetField(TIFF* tif, uint32 tag, va_list ap)
 	case TIFFTAG_ZIPQUALITY:
         {
                 sp->zipquality = (int) va_arg(ap, int);
+                if( sp->zipquality < Z_DEFAULT_COMPRESSION ||
+                    sp->zipquality > LIBDEFLATE_MAX_COMPRESSION_LEVEL ) {
+                    TIFFErrorExt(tif->tif_clientdata, module,
+                                 "Invalid ZipQuality value. Should be in [-1,%d] range",
+                                 LIBDEFLATE_MAX_COMPRESSION_LEVEL);
+                    return 0;
+                }
+
+#if LIBDEFLATE_SUPPORT
+                if( sp->libdeflate_enc )
+                {
+                    libdeflate_free_compressor(sp->libdeflate_enc);
+                    sp->libdeflate_enc = NULL;
+                }
+#endif
+
                 return (1);
         }
         default:

@@ -52,7 +52,7 @@
 #include "ogr_expat.h"
 #endif
 
-CPL_CVSID("$Id: osm_parser.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: osm_parser.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 // The buffer that are passed to GPB decoding are extended with 0's
 // to be sure that we will be able to read a single 64bit value without
@@ -1918,7 +1918,6 @@ static OSMRetCode PBF_ProcessBlock(OSMContext* psCtxt)
     psCtxt->nBlobOffset = 0;
     psCtxt->nBlobSize = 0;
 
-    bool nRet = false;
     int nBlobCount = 0;
     OSMRetCode eRetCode = OSM_OK;
     unsigned int nBlobSizeAcc = 0;
@@ -1956,10 +1955,10 @@ static OSMRetCode PBF_ProcessBlock(OSMContext* psCtxt)
         psCtxt->nBytesRead += nHeaderSize;
 
         memset(psCtxt->pabyBlobHeader + nHeaderSize, 0, EXTRA_BYTES);
-        nRet = ReadBlobHeader(psCtxt->pabyBlobHeader, 
+        const bool bRet = ReadBlobHeader(psCtxt->pabyBlobHeader, 
                               psCtxt->pabyBlobHeader + nHeaderSize,
                               &nBlobSize, &eType);
-        if( !nRet || eType == BLOB_UNKNOWN )
+        if( !bRet || eType == BLOB_UNKNOWN )
         {
             eRetCode = OSM_ERROR;
             break;
@@ -2020,8 +2019,8 @@ static OSMRetCode PBF_ProcessBlock(OSMContext* psCtxt)
     {
         psCtxt->nBlobOffset = 0;
         psCtxt->nBlobSize = nBlobSizeAcc;
-        nRet = ReadBlob(psCtxt, eType);
-        if( nRet )
+        const bool bRet = ReadBlob(psCtxt, eType);
+        if( bRet )
         {
             if( eRetCode == OSM_EOF &&
                 (psCtxt->iNextJob < psCtxt->nJobs ||

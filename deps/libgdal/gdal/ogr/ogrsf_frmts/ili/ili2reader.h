@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ili2reader.h 0680e53a52fd3f37ec274c60e698b033948e3c70 2020-05-15 10:00:42 +0900 Hiroshi Miura $
+ * $Id: ili2reader.h 4716a1dea416dd846e586f0ebfd0adae60616827 2020-05-15 10:00:42 +0900 Hiroshi Miura $
  *
  * Project:  Interlis 2 Reader
  * Purpose:  Public Declarations for Reader code.

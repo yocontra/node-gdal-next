@@ -33,7 +33,7 @@
 
 // g++ -DHAVE_EXPAT -fPIC -shared -Wall -g -DDEBUG ogr/ogrsf_frmts/jml/*.cpp -o ogr_JML.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/jml -L. -lgdal
 
-CPL_CVSID("$Id: ogrjmldataset.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrjmldataset.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRJMLDataset()                             */
@@ -222,7 +222,7 @@ void RegisterOGRJML()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "OpenJUMP JML" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "jml" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_jml.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/jml.html" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_FEATURE_STYLES, "YES" );

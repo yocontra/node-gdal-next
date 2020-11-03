@@ -28,7 +28,7 @@
 
 #include "ogr_avc.h"
 
-CPL_CVSID("$Id: ogravce00driver.cpp f93644db7bb54fe7f1b0bd28b3b6320e1331e74f 2018-03-03 19:24:43Z Even Rouault $")
+CPL_CVSID("$Id: ogravce00driver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             Identify()                               */
@@ -94,7 +94,7 @@ void RegisterOGRAVCE00()
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Arc/Info E00 (ASCII) Coverage" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "e00" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_avce00.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/avce00.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnIdentify = OGRAVCE00DriverIdentify;

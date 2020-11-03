@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_openfilegdb.h 63303d76d675c795cf21eee89e9666605b4ea483 2020-06-26 19:37:27 +0200 Even Rouault $
+* $Id: ogr_openfilegdb.h 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Implements Open FileGDB OGR driver.
@@ -81,12 +81,17 @@ class OGROpenFileGDBLayer final: public OGRLayer
 
     int               m_iFieldToReadAsBinary;
 
-    FileGDBIterator      *m_poIterator;
+    FileGDBIterator      *m_poAttributeIterator;
     int                   m_bIteratorSufficientToEvaluateFilter;
     FileGDBIterator*      BuildIteratorFromExprNode(swq_expr_node* poNode);
 
     FileGDBIterator*      m_poIterMinMax;
 
+    FileGDBSpatialIndexIterator* m_poSpatialIndexIterator = nullptr;
+    FileGDBIterator      *m_poCombinedIterator = nullptr;
+
+    // Legacy behavior prior to handling of .spx file
+    // To remove ultimately.
     SPIState            m_eSpatialIndexState;
     CPLQuadTree        *m_pQuadTree;
     void              **m_pahFilteredFeatures;
@@ -94,7 +99,9 @@ class OGROpenFileGDBLayer final: public OGRLayer
     static void         GetBoundsFuncEx(const void* hFeature,
                                         CPLRectObj* pBounds,
                                         void* pQTUserData);
+
     void                TryToDetectMultiPatchKind();
+    void                BuildCombinedIterator();
 
 public:
 
@@ -108,7 +115,7 @@ public:
 
   const std::string&    GetXMLDefinition() { return m_osDefinition; }
   const std::string&    GetXMLDocumentation() { return m_osDocumentation; }
-  int                   GetAttrIndexUse() { return (m_poIterator == nullptr) ? 0 : (m_bIteratorSufficientToEvaluateFilter) ? 2 : 1; }
+  int                   GetAttrIndexUse() { return (m_poAttributeIterator == nullptr) ? 0 : (m_bIteratorSufficientToEvaluateFilter) ? 2 : 1; }
   const OGRField*       GetMinMaxValue(OGRFieldDefn* poFieldDefn, int bIsMin,
                                        int& eOutType);
   int                   GetMinMaxSumCount(OGRFieldDefn* poFieldDefn,

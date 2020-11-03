@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h 8a31698d1a421c99c51b45e6fc72553817177c6a 2020-06-05 20:35:35 +0200 Even Rouault $
+ * $Id: ogr_geopackage.h da73c28660e8b191f129355e4190dc6b6ad2d93b 2020-10-19 00:24:15 +0200 Even Rouault $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -129,6 +129,8 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
     bool                m_bInFlushCache;
 
     bool                m_bTableCreated;
+
+    bool                m_bDateTimeWithTZ = true;
 
     CPLString           m_osTilingScheme;
 
@@ -282,11 +284,11 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
         virtual OGRErr      CommitTransaction() override;
         virtual OGRErr      RollbackTransaction() override;
 
-        bool                IsInTransaction() const;
+        inline bool         IsInTransaction() const { return nSoftTransactionLevel > 0; }
 
         int                 GetSrsId( const OGRSpatialReference& oSRS );
         const char*         GetSrsName( const OGRSpatialReference& oSRS );
-        OGRSpatialReference* GetSpatialRef( int iSrsId );
+        OGRSpatialReference* GetSpatialRef( int iSrsId, bool bFallbackToEPSG = false );
         OGRErr              CreateExtensionsTableIfNecessary();
         bool                HasExtensionsTable();
         OGRErr              CreateGDALAspatialExtension();
@@ -368,6 +370,7 @@ class OGRGeoPackageLayer CPL_NON_FINAL: public OGRLayer, public IOGRSQLiteGetSpa
 
     sqlite3_stmt        *m_poQueryStatement;
     bool                 bDoStep;
+    bool                 m_bEOF = false;
 
     char                *m_pszFidColumn;
 
@@ -449,6 +452,20 @@ class OGRGeoPackageTableLayer final : public OGRGeoPackageLayer
     GPKGASpatialVariant         m_eASPatialVariant;
     std::set<OGRwkbGeometryType> m_eSetBadGeomTypeWarned;
 
+    int                         m_nCountInsertInTransactionThreshold = -1;
+    GIntBig                     m_nCountInsertInTransaction = 0;
+    std::vector<CPLString >     m_aoRTreeTriggersSQL{};
+    typedef struct
+    {
+        GIntBig nId;
+        float   fMinX;
+        float   fMinY;
+        float   fMaxX;
+        float   fMaxY;
+    } GPKGRTreeEntry;
+    std::vector<GPKGRTreeEntry>  m_aoRTreeEntries{};
+
+
     virtual OGRErr      ResetStatement() override;
 
     void                BuildWhere();
@@ -469,6 +486,9 @@ class OGRGeoPackageTableLayer final : public OGRGeoPackageLayer
     void                InitView();
 
     bool                DoSpecialProcessingForColumnCreation(OGRFieldDefn* poField);
+
+    bool                StartDeferredSpatialIndexUpdate();
+    bool                FlushPendingSpatialIndexUpdate();
 
     public:
                         OGRGeoPackageTableLayer( GDALGeoPackageDataset *poDS,
@@ -559,6 +579,10 @@ class OGRGeoPackageTableLayer final : public OGRGeoPackageLayer
     void                SetTruncateFieldsFlag( int bFlag )
                                 { m_bTruncateFields = CPL_TO_BOOL( bFlag ); }
     OGRErr              RunDeferredCreationIfNecessary();
+    bool                RunDeferredDropRTreeTableIfNecessary();
+    bool                DoJobAtTransactionCommit();
+    bool                DoJobAtTransactionRollback();
+    bool                RunDeferredSpatialIndexUpdate();
 
 #ifdef ENABLE_GPKG_OGR_CONTENTS
     bool                GetAddOGRFeatureCountTriggers() const
@@ -603,7 +627,7 @@ class OGRGeoPackageSelectLayer final : public OGRGeoPackageLayer, public IOGRSQL
 {
     CPL_DISALLOW_COPY_ASSIGN(OGRGeoPackageSelectLayer)
 
-    OGRSQLiteSelectLayerCommonBehaviour* poBehaviour;
+    OGRSQLiteSelectLayerCommonBehaviour* poBehavior;
 
     virtual OGRErr      ResetStatement() override;
 

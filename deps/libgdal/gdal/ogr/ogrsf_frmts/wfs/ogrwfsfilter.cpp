@@ -29,7 +29,7 @@
 #include "ogr_wfs.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrwfsfilter.cpp ffd62ee1bdeed41a9301102c35b3c0eb30a36dc2 2019-11-28 16:56:51 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrwfsfilter.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 typedef struct
 {
@@ -205,13 +205,13 @@ static bool WFS_ExprDumpAsOGCFilter( CPLString& osFilter,
         }
 
         const char* pszFieldname = nullptr;
-        int nIndex = 0;
         const bool bSameTable =
             psOptions->poFDefn != nullptr &&
             ( poExpr->table_name == nullptr ||
               EQUAL(poExpr->table_name, psOptions->poFDefn->GetName()) );
         if( bSameTable )
         {
+            int nIndex;
             if( (nIndex = psOptions->poFDefn->GetFieldIndex(poExpr->string_value)) >= 0 )
             {
                 pszFieldname = psOptions->poFDefn->GetFieldDefn(nIndex)->GetNameRef();
@@ -227,6 +227,7 @@ static bool WFS_ExprDumpAsOGCFilter( CPLString& osFilter,
             if( poLayer )
             {
                 OGRFeatureDefn* poFDefn = poLayer->GetLayerDefn();
+                int nIndex;
                 if( (nIndex = poFDefn->GetFieldIndex(poExpr->string_value)) >= 0 )
                 {
                     pszFieldname = CPLSPrintf("%s/%s",

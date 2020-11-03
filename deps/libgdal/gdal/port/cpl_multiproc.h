@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_multiproc.h 414eb4b0da85f49941ed859db906162ead2be839 2020-02-01 16:06:00 +0100 Even Rouault $
+ * $Id: cpl_multiproc.h 5bf28e3bebd1032c4c8f50564d077f95cdf897d3 2020-09-30 14:07:46 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL Multi-Threading, and process handling portability functions.
@@ -228,6 +228,7 @@ class CPL_DLL CPLLockHolder
 #define CTLS_ERRORHANDLERACTIVEDATA     17         /* cpl_error.cpp */
 #define CTLS_PROJCONTEXTHOLDER          18         /* ogr_proj_p.cpp */
 #define CTLS_GDALDEFAULTOVR_ANTIREC     19         /* gdaldefaultoverviews.cpp */
+#define CTLS_HTTPFETCHCALLBACK          20         /* cpl_http.cpp */
 
 #define CTLS_MAX                        32
 

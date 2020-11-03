@@ -29,7 +29,7 @@
 #include "ogr_db2.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdb2driver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrdb2driver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRDB2DriverIdentify()                  */
@@ -119,7 +119,7 @@ void RegisterOGRDB2()
     poDriver->SetDescription( "DB2ODBC" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "IBM DB2 Spatial Database" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_db2.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/db2.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );
 #define COMPRESSION_OPTIONS \
 "  <Option name='TILE_FORMAT' type='string-select' description='Format to use to create tiles' default='PNG_JPEG'>" \

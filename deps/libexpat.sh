@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libexpat"
 
-EXPAT_VERSION=2.2.9
+EXPAT_VERSION=2.2.10
 dir_expat=./expat
 
 #

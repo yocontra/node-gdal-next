@@ -55,7 +55,7 @@
 
 // #define IMMEDIATE_OPENING 1
 
-CPL_CVSID("$Id: ogrshapedatasource.cpp 4ff31588bfc722f1bd002af0ddc940ff158b3f38 2020-05-17 19:21:20 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrshapedatasource.cpp c127cec2102033e7b45eace1a81fff277196da2e 2020-05-17 19:21:20 +0200 Even Rouault $")
 
 constexpr int knREFRESH_LOCK_FILE_DELAY_SEC = 10;
 
@@ -1418,10 +1418,10 @@ char** OGRShapeDataSource::GetFileList()
 }
 
 /************************************************************************/
-//                          RefeshLockFile()                            */
+//                          RefreshLockFile()                            */
 /************************************************************************/
 
-void OGRShapeDataSource::RefeshLockFile(void* _self)
+void OGRShapeDataSource::RefreshLockFile(void* _self)
 {
     OGRShapeDataSource* self = static_cast<OGRShapeDataSource*>(_self);
     CPLAssert(self->m_psLockFile);
@@ -1531,7 +1531,7 @@ bool OGRShapeDataSource::UncompressIfNeeded()
             CPLGetConfigOption("OGR_SHAPE_LOCK_DELAY",
                             CPLSPrintf("%d", knREFRESH_LOCK_FILE_DELAY_SEC)));
         m_hRefreshLockFileThread = CPLCreateJoinableThread(
-            OGRShapeDataSource::RefeshLockFile, this);
+            OGRShapeDataSource::RefreshLockFile, this);
         if( !m_hRefreshLockFileThread )
         {
             VSIFCloseL(m_psLockFile);

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_osm.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_osm.h f2db151194e327903a0b8f7bbfa01633cefa542f 2020-05-24 07:49:09 +0200 Kai Pastor $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/OpenStreeMap driver.
@@ -36,6 +36,7 @@
 #include "ogrsf_frmts.h"
 #include "cpl_string.h"
 
+#include <array>
 #include <set>
 #include <unordered_set>
 #include <map>
@@ -327,7 +328,9 @@ class OGROSMDataSource final: public OGRDataSource
     int                 nMinSizeKeysInSetClosedWaysArePolygons;
     int                 nMaxSizeKeysInSetClosedWaysArePolygons;
 
-    LonLat             *pasLonLatCache;
+    std::vector<LonLat> m_asLonLatCache{};
+
+    std::array<const char*, 7>  m_ignoredKeys;
 
     bool                bReportAllNodes;
     bool                bReportAllWays;
@@ -352,7 +355,7 @@ class OGROSMDataSource final: public OGRDataSource
 
     bool                bAttributeNameLaundering;
 
-    GByte              *pabyWayBuffer;
+    std::vector<GByte>  m_abyWayBuffer{};
 
     int                 nWaysProcessed;
     int                 nRelationsProcessed;
@@ -408,12 +411,13 @@ class OGROSMDataSource final: public OGRDataSource
     static const GIntBig FILESIZE_INVALID = -1;
     GIntBig             m_nFileSize;
 
-    int                 CompressWay (bool bIsArea, unsigned int nTags, IndexedKVP* pasTags,
+    void                CompressWay (bool bIsArea, unsigned int nTags, IndexedKVP* pasTags,
                                      int nPoints, LonLat* pasLonLatPairs,
                                      OSMInfo* psInfo,
-                                     GByte* pabyCompressedWay);
-    int                 UncompressWay( int nBytes, GByte* pabyCompressedWay,
-                                       bool *pbIsArea, LonLat* pasCoords,
+                                     std::vector<GByte> &abyCompressedWay);
+    void                UncompressWay( int nBytes, const GByte* pabyCompressedWay,
+                                       bool *pbIsArea,
+                                       std::vector<LonLat>& asCoords,
                                        unsigned int* pnTags, OSMTag* pasTags,
                                        OSMInfo* psInfo );
 

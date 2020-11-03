@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_virtual.h 3bd384f52281218f6b6528763aee1296b8cf7431 2020-03-19 12:29:06 +0100 Even Rouault $
+ * $Id: cpl_vsi_virtual.h 63047152a3b5ceb7293ae884fb96be39cd428383 2020-09-30 13:00:56 +0200 Thomas Bonfort $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Declarations for classes related to the virtual filesystem.
@@ -105,6 +105,8 @@ public:
                       { (void) pszDirname; return nullptr; }
     virtual char **ReadDirEx( const char *pszDirname, int /* nMaxFiles */ )
                       { return ReadDir(pszDirname); }
+    virtual char **SiblingFiles( const char * /*pszFilename*/ )
+                      { return nullptr; }
     virtual int Rename( const char *oldpath, const char *newpath )
                       { (void) oldpath; (void)newpath; errno=ENOENT; return -1; }
     virtual int IsCaseSensitive( const char* pszFilename )
@@ -273,5 +275,7 @@ const int CPL_DEFLATE_TYPE_GZIP = 0;
 const int CPL_DEFLATE_TYPE_ZLIB = 1;
 const int CPL_DEFLATE_TYPE_RAW_DEFLATE = 2;
 VSIVirtualHandle CPL_DLL *VSICreateGZipWritable( VSIVirtualHandle* poBaseHandle, int nDeflateType, int bAutoCloseBaseHandle );
+
+VSIVirtualHandle *VSICreateUploadOnCloseFile( VSIVirtualHandle* poBaseHandle );
 
 #endif /* ndef CPL_VSI_VIRTUAL_H_INCLUDED */

@@ -42,7 +42,7 @@
 #include "ogr_p.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrfeaturedefn.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrfeaturedefn.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
 
 /************************************************************************/
 /*                           OGRFeatureDefn()                           */
@@ -378,7 +378,7 @@ const OGRFieldDefn *OGRFeatureDefn::GetFieldDefn( int iField ) const
  * from.
  * @param iField the field to fetch, between 0 and GetFieldCount()-1.
  *
- * @return an handle to an internal field definition object or NULL if invalid
+ * @return a handle to an internal field definition object or NULL if invalid
  * index.  This object should not be modified or freed by the application.
  */
 
@@ -730,7 +730,7 @@ const OGRGeomFieldDefn *OGRFeatureDefn::GetGeomFieldDefn( int iGeomField ) const
  * @param iGeomField the geometry field to fetch, between 0 and
  * GetGeomFieldCount() - 1.
  *
- * @return an handle to an internal field definition object or NULL if invalid
+ * @return a handle to an internal field definition object or NULL if invalid
  * index.  This object should not be modified or freed by the application.
  *
  * @since GDAL 1.11
@@ -1581,7 +1581,7 @@ std::vector<int> OGRFeatureDefn::ComputeMapForSetFrom( const OGRFeatureDefn* poS
         const char* pszName = poFldDefn->GetNameRef();
 
         // In the insane case where there are several matches, arbitrarily
-        // decide for the first one (preserve past behaviour)
+        // decide for the first one (preserve past behavior)
         if( oMapNameToTargetFieldIndex.find(pszName) ==
                                         oMapNameToTargetFieldIndex.end() )
         {

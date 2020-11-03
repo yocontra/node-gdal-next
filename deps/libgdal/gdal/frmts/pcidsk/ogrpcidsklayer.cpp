@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpcidsklayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpcidsklayer.cpp 3b89063b95a18cfefb8dcf527a472987c52e6e3c 2020-05-27 19:53:42 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRPCIDSKLayer()                           */
@@ -198,46 +198,19 @@ void OGRPCIDSKLayer::ResetReading()
 
 {
     hLastShapeId = PCIDSK::NullShapeId;
+    m_bEOF = false;
 }
 
 /************************************************************************/
-/*                           GetNextFeature()                           */
+/*                         GetNextRawFeature()                          */
 /************************************************************************/
 
-OGRFeature *OGRPCIDSKLayer::GetNextFeature()
+OGRFeature *OGRPCIDSKLayer::GetNextRawFeature()
 
 {
-    OGRFeature  *poFeature = nullptr;
+    if( m_bEOF )
+        return nullptr;
 
-/* -------------------------------------------------------------------- */
-/*      Read features till we find one that satisfies our current       */
-/*      spatial criteria.                                               */
-/* -------------------------------------------------------------------- */
-    while( true )
-    {
-        poFeature = GetNextUnfilteredFeature();
-        if( poFeature == nullptr )
-            break;
-
-        if( (m_poFilterGeom == nullptr
-            || FilterGeometry( poFeature->GetGeometryRef() ) )
-            && (m_poAttrQuery == nullptr
-                || m_poAttrQuery->Evaluate( poFeature )) )
-            break;
-
-        delete poFeature;
-    }
-
-    return poFeature;
-}
-
-/************************************************************************/
-/*                      GetNextUnfilteredFeature()                      */
-/************************************************************************/
-
-OGRFeature *OGRPCIDSKLayer::GetNextUnfilteredFeature()
-
-{
     try
     {
 /* -------------------------------------------------------------------- */
@@ -249,7 +222,10 @@ OGRFeature *OGRPCIDSKLayer::GetNextUnfilteredFeature()
             hLastShapeId = poVecSeg->FindNext( hLastShapeId );
 
         if( hLastShapeId == PCIDSK::NullShapeId )
+        {
+            m_bEOF = true;
             return nullptr;
+        }
 
         return GetFeature( hLastShapeId );
     }

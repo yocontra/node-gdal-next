@@ -2,7 +2,7 @@
  *
  * Project:  FMEObjects Translator
  * Purpose:  Implementation of the OGRFMELayerCached class.  This is the
- *           class implementing behaviour for layers that are built into a
+ *           class implementing behavior for layers that are built into a
  *           temporary spatial cache (as opposed to live read database).
  * Author:   Frank Warmerdam, warmerdam@pobox.com
  *
@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrfmelayercached.cpp 6574497e5ddfd7c08c094a76756a0ef477cef6a1 2018-04-04 22:15:20 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrfmelayercached.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRFMELayerCached()                          */

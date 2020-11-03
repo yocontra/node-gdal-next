@@ -53,7 +53,7 @@
 #  include <wctype.h>      /* iswspace() */
 #endif
 
-CPL_CVSID("$Id: mitab_imapinfofile.cpp c193e4cfe2c0f57f00ced1413e356c83c5679605 2019-10-15 10:55:48 +0200 Bojan Bizjak $")
+CPL_CVSID("$Id: mitab_imapinfofile.cpp d12545162b34c742dcb8893783660a9e57cb2f1b 2020-10-21 12:28:12 +0200 Krister Wicksell $")
 
 /**********************************************************************
  *                   IMapInfoFile::IMapInfoFile()
@@ -257,13 +257,29 @@ TABFeature* IMapInfoFile::CreateTABFeature(OGRFeature *poFeature)
        * POINT
        *------------------------------------------------------------*/
       case wkbPoint:
-        poTABFeature = new TABPoint(poFeature->GetDefnRef());
         if(poFeature->GetStyleString())
         {
+            TABFeatureClass featureClass = ITABFeatureSymbol::GetSymbolFeatureClass(poFeature->GetStyleString());
+            if (featureClass == TABFCFontPoint) 
+            {
+                poTABFeature = new TABFontPoint(poFeature->GetDefnRef());
+            }
+            else if (featureClass == TABFCCustomPoint) 
+            {
+                poTABFeature = new TABCustomPoint(poFeature->GetDefnRef());
+            }
+            else 
+            {
+                poTABFeature = new TABPoint(poFeature->GetDefnRef());
+            }
             poTABPointFeature = cpl::down_cast<TABPoint*>(poTABFeature);
             poTABPointFeature->SetSymbolFromStyleString(
                 poFeature->GetStyleString());
         }
+        else 
+        {
+            poTABFeature = new TABPoint(poFeature->GetDefnRef());
+        }        
         break;
       /*-------------------------------------------------------------
        * REGION

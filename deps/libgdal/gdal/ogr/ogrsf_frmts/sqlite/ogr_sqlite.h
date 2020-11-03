@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sqlite.h 56ec16165469853a218575aa3b1f879caa9eebb5 2020-01-11 02:26:14 +0100 Even Rouault $
+ * $Id: ogr_sqlite.h c91c85854631084021f9a75fe6797fea2ac071c4 2020-09-21 15:20:58 +0200 Alessandro Pasotti $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/SQLite driver.
@@ -248,6 +248,7 @@ class OGRSQLiteLayer CPL_NON_FINAL: public OGRLayer, public IOGRSQLiteGetSpatial
 
     sqlite3_stmt        *hStmt;
     int                  bDoStep;
+    bool                 m_bEOF = false;
 
     OGRSQLiteDataSource *poDS;
 
@@ -611,7 +612,7 @@ class OGRSQLiteSelectLayerCommonBehaviour
 
 class OGRSQLiteSelectLayer CPL_NON_FINAL: public OGRSQLiteLayer, public IOGRSQLiteSelectLayer
 {
-    OGRSQLiteSelectLayerCommonBehaviour* poBehaviour;
+    OGRSQLiteSelectLayerCommonBehaviour* poBehavior;
 
     virtual OGRErr      ResetStatement() override;
 
@@ -739,13 +740,15 @@ class OGRSQLiteBaseDataSource CPL_NON_FINAL: public GDALPamDataset
 
     virtual std::pair<OGRLayer*, IOGRSQLiteGetSpatialWhere*> GetLayerWithGetSpatialWhereByName( const char* pszName ) = 0;
 
+    virtual OGRErr     AbortSQL() override;
+
     virtual OGRErr      StartTransaction(int bForce = FALSE) override;
     virtual OGRErr      CommitTransaction() override;
     virtual OGRErr      RollbackTransaction() override;
 
     virtual int         TestCapability( const char * ) override;
 
-    virtual void *GetInternalHandle( const char * ) override;
+    virtual void        *GetInternalHandle( const char * ) override;
 
     OGRErr              SoftStartTransaction();
     OGRErr              SoftCommitTransaction();

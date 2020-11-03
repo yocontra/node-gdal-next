@@ -62,7 +62,7 @@
 #include "vrtdataset.h"
 #include "../frmts/gtiff/cogdriver.h"
 
-CPL_CVSID("$Id: gdalwarp_lib.cpp 3faf501a82260b41e85125d14b21ec3c54e319d7 2020-04-01 11:57:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarp_lib.cpp 474414349ad14d918a620974947c5f061696bf0d 2020-09-18 12:57:06 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        GDALWarpAppOptions                            */
@@ -981,7 +981,6 @@ GDALDatasetH GDALWarpIndirect( const char *pszDest,
         !(EQUAL(psOptions->pszFormat, "COG") &&
           COGHasWarpingOptions(aosCreateOptions.List())) )
     {
-        CPLString osOutputFormat(psOptions->pszFormat);
         CPLFree(psOptions->pszFormat);
         psOptions->pszFormat = CPLStrdup("VRT");
         auto pfnProgress = psOptions->pfnProgress;
@@ -1119,7 +1118,7 @@ GDALDatasetH GDALWarpIndirect( const char *pszDest,
  * @param nSrcCount the number of input datasets.
  * @param pahSrcDS the list of input datasets.
  * @param psOptionsIn the options struct returned by GDALWarpAppOptionsNew() or NULL.
- * @param pbUsageError the pointer to int variable to determine any usage error has occurred.
+ * @param pbUsageError pointer to a integer output variable to store if any usage error has occurred, or NULL.
  * @return the output dataset (new dataset that must be closed using GDALClose(), or hDstDS if not NULL) or NULL in case of error.
  *
  * @since GDAL 2.1
@@ -2078,6 +2077,7 @@ GDALDatasetH GDALWarpDirect( const char *pszDest, GDALDatasetH hDstDS,
 #ifdef DEBUG
     GDALDataset* poDstDS = reinterpret_cast<GDALDataset*>(hDstDS);
     const int nExpectedRefCountAtEnd = ( poDstDS != nullptr ) ? poDstDS->GetRefCount() : 1;
+    (void)nExpectedRefCountAtEnd;
 #endif
     const bool bDropDstDSRef = (hDstDS != nullptr);
     if( hDstDS != nullptr )
@@ -2113,6 +2113,13 @@ GDALDatasetH GDALWarpDirect( const char *pszDest, GDALDatasetH hDstDS,
     void* hUniqueTransformArg = nullptr;
     const bool bInitDestSetByUser = ( CSLFetchNameValue( psOptions->papszWarpOptions, "INIT_DEST" ) != nullptr );
 
+    const bool bOutputBoundsAndResSetByUser =
+       ((psOptions->nForcePixels != 0 && psOptions->nForceLines != 0) ||
+        (psOptions->dfXRes != 0 && psOptions->dfYRes != 0)) &&
+        !(psOptions->dfMinX == 0.0 && psOptions->dfMinY == 0.0 &&
+            psOptions->dfMaxX == 0.0 && psOptions->dfMaxY == 0.0);
+    const bool bExistingOutputFile = (hDstDS != nullptr);
+
     if( hDstDS == nullptr )
     {
         hDstDS = CreateOutput(pszDest, nSrcCount, pahSrcDS, psOptions,
@@ -2124,6 +2131,7 @@ GDALDatasetH GDALWarpDirect( const char *pszDest, GDALDatasetH hDstDS,
             return nullptr;
         }
 #ifdef DEBUG
+        // Do not remove this if the #ifdef DEBUG before is still there !
         poDstDS = reinterpret_cast<GDALDataset*>(hDstDS);
 #endif
     }
@@ -2299,44 +2307,91 @@ GDALDatasetH GDALWarpDirect( const char *pszDest, GDALDatasetH hDstDS,
         int nOvCount = poSrcDS->GetRasterBand(1)->GetOverviewCount();
         if( psOptions->nOvLevel <= -2 && nOvCount > 0 )
         {
-            double adfSuggestedGeoTransform[6];
-            double adfExtent[4];
-            int    nPixels, nLines;
-            /* Compute what the "natural" output resolution (in pixels) would be for this */
-            /* input dataset */
-            if( GDALSuggestedWarpOutput2(hSrcDS, pfnTransformer, hTransformArg,
-                                         adfSuggestedGeoTransform, &nPixels, &nLines,
-                                         adfExtent, 0) == CE_None)
+            double dfTargetRatio = 0;
+            if( bOutputBoundsAndResSetByUser || bExistingOutputFile )
             {
-                double dfTargetRatio = 1.0 / adfSuggestedGeoTransform[1];
-                if( dfTargetRatio > 1.0 )
+                // If the user has explicitly set the target bounds and resolution,
+                // or we're updating an existing file, then figure out which
+                // source window corresponds to the target raster.
+                constexpr int nPointsOneDim = 10;
+                constexpr int nPoints = nPointsOneDim * nPointsOneDim;
+                std::vector<double> adfX(nPoints);
+                std::vector<double> adfY(nPoints);
+                std::vector<double> adfZ(nPoints);
+                const int nDstXSize = GDALGetRasterXSize( hDstDS );
+                const int nDstYSize = GDALGetRasterYSize( hDstDS );
+                int iPoint = 0;
+                for( int iX = 0; iX < nPointsOneDim; ++iX )
                 {
-                    int iOvr = -1;
-                    for( ; iOvr < nOvCount-1; iOvr++ )
+                    for( int iY = 0; iY < nPointsOneDim; ++iY )
                     {
-                        const double dfOvrRatio =
-                            iOvr < 0
-                            ? 1.0
-                            : static_cast<double>(poSrcDS->GetRasterXSize()) /
-                              poSrcDS->GetRasterBand(1)->GetOverview(iOvr)->
-                                  GetXSize();
-                        const double dfNextOvrRatio =
-                            static_cast<double>(poSrcDS->GetRasterXSize()) /
-                            poSrcDS->GetRasterBand(1)->GetOverview(iOvr+1)->
+                        adfX[iPoint] = nDstXSize * static_cast<double>(iX) / (nPointsOneDim-1);
+                        adfY[iPoint] = nDstYSize * static_cast<double>(iY) / (nPointsOneDim-1);
+                        iPoint++;
+                    }
+                }
+                std::vector<int> abSuccess(nPoints);
+                if( pfnTransformer( hTransformArg, TRUE, nPoints,
+                                    &adfX[0], &adfY[0], &adfZ[0], &abSuccess[0] ) )
+                {
+                    double dfMinSrcX = std::numeric_limits<double>::infinity();
+                    double dfMaxSrcX = -std::numeric_limits<double>::infinity();
+                    for( int i = 0; i < nPoints; i++ )
+                    {
+                        if( abSuccess[i] )
+                        {
+                            dfMinSrcX = std::min(dfMinSrcX, adfX[i]);
+                            dfMaxSrcX = std::max(dfMaxSrcX, adfX[i]);
+                        }
+                    }
+                    if( dfMaxSrcX > dfMinSrcX )
+                    {
+                        dfTargetRatio = (dfMaxSrcX - dfMinSrcX) / GDALGetRasterXSize(hDstDS);
+                    }
+                }
+            }
+            else
+            {
+                /* Compute what the "natural" output resolution (in pixels) would be for this */
+                /* input dataset */
+                double adfSuggestedGeoTransform[6];
+                double adfExtent[4];
+                int    nPixels, nLines;
+                if( GDALSuggestedWarpOutput2(hSrcDS, pfnTransformer, hTransformArg,
+                                         adfSuggestedGeoTransform, &nPixels, &nLines,
+                                         adfExtent, 0) == CE_None )
+                {
+                    dfTargetRatio = 1.0 / adfSuggestedGeoTransform[1];
+                }
+            }
+
+            if( dfTargetRatio > 1.0 )
+            {
+                int iOvr = -1;
+                for( ; iOvr < nOvCount-1; iOvr++ )
+                {
+                    const double dfOvrRatio =
+                        iOvr < 0
+                        ? 1.0
+                        : static_cast<double>(poSrcDS->GetRasterXSize()) /
+                            poSrcDS->GetRasterBand(1)->GetOverview(iOvr)->
                                 GetXSize();
-                        if( dfOvrRatio < dfTargetRatio &&
-                            dfNextOvrRatio > dfTargetRatio )
-                            break;
-                        if( fabs(dfOvrRatio - dfTargetRatio) < 1e-1 )
-                            break;
-                    }
-                    iOvr += (psOptions->nOvLevel+2);
-                    if( iOvr >= 0 )
-                    {
-                        CPLDebug("WARP", "Selecting overview level %d for %s",
-                                 iOvr, GDALGetDescription(hSrcDS));
-                        poSrcOvrDS = GDALCreateOverviewDataset( poSrcDS, iOvr, FALSE );
-                    }
+                    const double dfNextOvrRatio =
+                        static_cast<double>(poSrcDS->GetRasterXSize()) /
+                        poSrcDS->GetRasterBand(1)->GetOverview(iOvr+1)->
+                            GetXSize();
+                    if( dfOvrRatio < dfTargetRatio &&
+                        dfNextOvrRatio > dfTargetRatio )
+                        break;
+                    if( fabs(dfOvrRatio - dfTargetRatio) < 1e-1 )
+                        break;
+                }
+                iOvr += (psOptions->nOvLevel+2);
+                if( iOvr >= 0 )
+                {
+                    CPLDebug("WARP", "Selecting overview level %d for %s",
+                                iOvr, GDALGetDescription(hSrcDS));
+                    poSrcOvrDS = GDALCreateOverviewDataset( poSrcDS, iOvr, FALSE );
                 }
             }
         }
@@ -2903,6 +2958,13 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
            !(psOptions->dfMinX == 0.0 && psOptions->dfMinY == 0.0 &&
              psOptions->dfMaxX == 0.0 && psOptions->dfMaxY == 0.0) );
 
+    // If -te is specified, not not -tr and -ts
+    const bool bKnownTargetExtentButNotResolution =
+        !(psOptions->dfMinX == 0.0 && psOptions->dfMinY == 0.0 &&
+          psOptions->dfMaxX == 0.0 && psOptions->dfMaxY == 0.0) &&
+        psOptions->nForcePixels == 0 && psOptions->nForceLines == 0 &&
+        psOptions->dfXRes == 0 && psOptions->dfYRes == 0;
+
     if( phTransformArg )
         *phTransformArg = nullptr;
 
@@ -2956,21 +3018,24 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
 
     CPLStringList aoTOList(papszTO, FALSE);
 
+    double dfResFromSourceAndTargetExtent = std::numeric_limits<double>::infinity();
+
     for( int iSrc = 0; iSrc < nSrcCount; iSrc++ )
     {
 /* -------------------------------------------------------------------- */
 /*      Check that there's at least one raster band                     */
 /* -------------------------------------------------------------------- */
-        if ( GDALGetRasterCount(pahSrcDS[iSrc]) == 0 )
+        GDALDatasetH hSrcDS = pahSrcDS[iSrc];
+        if ( GDALGetRasterCount(hSrcDS) == 0 )
         {
-            CPLError(CE_Failure, CPLE_AppDefined, "Input file %s has no raster bands.", GDALGetDescription(pahSrcDS[iSrc]) );
+            CPLError(CE_Failure, CPLE_AppDefined, "Input file %s has no raster bands.", GDALGetDescription(hSrcDS) );
             if( hCT != nullptr )
                 GDALDestroyColorTable( hCT );
             return nullptr;
         }
 
         if( eDT == GDT_Unknown )
-            eDT = GDALGetRasterDataType(GDALGetRasterBand(pahSrcDS[iSrc],1));
+            eDT = GDALGetRasterDataType(GDALGetRasterBand(hSrcDS,1));
 
 /* -------------------------------------------------------------------- */
 /*      If we are processing the first file, and it has a raster        */
@@ -2978,7 +3043,7 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
 /* -------------------------------------------------------------------- */
         if( iSrc == 0 )
         {
-            hRAT = GDALGetDefaultRAT( GDALGetRasterBand(pahSrcDS[iSrc],1) );
+            hRAT = GDALGetDefaultRAT( GDALGetRasterBand(hSrcDS,1) );
             if( hRAT != nullptr )
             {
                 if ( psOptions->eResampleAlg != GRA_NearestNeighbour &&
@@ -2989,7 +3054,7 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
                     {
                         CPLError(CE_Warning, CPLE_AppDefined, "Warning: Input file %s has a thematic RAT, which will likely lead "
                             "to bad results when using a resampling method other than nearest neighbour "
-                            "or mode so we are discarding it.\n", GDALGetDescription(pahSrcDS[iSrc]));
+                            "or mode so we are discarding it.\n", GDALGetDescription(hSrcDS));
                     }
                     hRAT = nullptr;
                 }
@@ -2997,7 +3062,7 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
                 {
                     if( !psOptions->bQuiet )
                         printf( "Copying raster attribute table from %s to new file.\n",
-                              GDALGetDescription(pahSrcDS[iSrc]));
+                              GDALGetDescription(hSrcDS));
                 }
             }
         }
@@ -3008,20 +3073,20 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
 /* -------------------------------------------------------------------- */
         if( iSrc == 0 )
         {
-            nDstBandCount = GDALGetRasterCount(pahSrcDS[iSrc]);
-            hCT = GDALGetRasterColorTable( GDALGetRasterBand(pahSrcDS[iSrc],1) );
+            nDstBandCount = GDALGetRasterCount(hSrcDS);
+            hCT = GDALGetRasterColorTable( GDALGetRasterBand(hSrcDS,1) );
             if( hCT != nullptr )
             {
                 hCT = GDALCloneColorTable( hCT );
                 if( !psOptions->bQuiet )
                     printf( "Copying color table from %s to new file.\n",
-                            GDALGetDescription(pahSrcDS[iSrc]) );
+                            GDALGetDescription(hSrcDS) );
             }
 
             for(int iBand = 0; iBand < nDstBandCount; iBand++)
             {
                 GDALColorInterp eInterp =
-                    GDALGetRasterColorInterpretation(GDALGetRasterBand(pahSrcDS[iSrc],iBand+1));
+                    GDALGetRasterColorInterpretation(GDALGetRasterBand(hSrcDS,iBand+1));
                 apeColorInterpretations.push_back( eInterp );
             }
         }
@@ -3032,7 +3097,7 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
 /* -------------------------------------------------------------------- */
         if( iSrc == 0 && osThisTargetSRS.empty() )
         {
-            const auto osThisSourceSRS = GetSrcDSProjection( pahSrcDS[iSrc], papszTO );
+            const auto osThisSourceSRS = GetSrcDSProjection( hSrcDS, papszTO );
             if( !osThisSourceSRS.empty() )
             {
                 osThisTargetSRS = osThisSourceSRS;
@@ -3045,7 +3110,7 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
 /*      destination coordinate system.                                  */
 /* -------------------------------------------------------------------- */
         hTransformArg =
-            GDALCreateGenImgProjTransformer2( pahSrcDS[iSrc], nullptr, aoTOList.List() );
+            GDALCreateGenImgProjTransformer2( hSrcDS, nullptr, aoTOList.List() );
 
         if( hTransformArg == nullptr )
         {
@@ -3057,15 +3122,104 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
         GDALTransformerInfo* psInfo = static_cast<GDALTransformerInfo*>(hTransformArg);
 
 /* -------------------------------------------------------------------- */
+/*      Get approximate output resolution                               */
+/* -------------------------------------------------------------------- */
+
+        if( bKnownTargetExtentButNotResolution )
+        {
+            // Sample points along a grid
+            constexpr int nPointsX = 10;
+            constexpr int nPointsY = 10;
+            constexpr int nPoints = 3 * nPointsX * nPointsY;
+            std::vector<double> padfX;
+            std::vector<double> padfY;
+            std::vector<double> padfZ(nPoints);
+            std::vector<int> pabSuccess(nPoints);
+            const double dfEps = std::min(
+                psOptions->dfMaxX - psOptions->dfMinX,
+                std::abs(psOptions->dfMaxY - psOptions->dfMinY)) / 1000;
+            for(int iY = 0; iY < nPointsY; iY++)
+            {
+                for(int iX = 0; iX < nPointsX; iX++)
+                {
+                    const double dfX = psOptions->dfMinX +
+                        static_cast<double>(iX) * (psOptions->dfMaxX - psOptions->dfMinX) / (nPointsX - 1);
+                    const double dfY = psOptions->dfMinY +
+                        static_cast<double>(iY) * (psOptions->dfMaxY - psOptions->dfMinY) / (nPointsY - 1);
+
+                    // Reproject each destination sample point and its neighbours
+                    // at (x+1,y) and (x,y+1), so as to get the local scale.
+                    padfX.push_back( dfX );
+                    padfY.push_back( dfY );
+
+                    padfX.push_back( (iX == nPointsX - 1) ? dfX - dfEps : dfX + dfEps );
+                    padfY.push_back( dfY);
+
+                    padfX.push_back( dfX );
+                    padfY.push_back( (iY == nPointsY - 1) ? dfY - dfEps : dfY + dfEps );
+                }
+            }
+
+            psInfo->pfnTransform(hTransformArg, TRUE, nPoints,
+                                 &padfX[0], &padfY[0], &padfZ[0],
+                                 &pabSuccess[0]);
+
+            // Compute the resolution at sampling points
+            std::vector<double> adfRes;
+            const int nSrcXSize = GDALGetRasterXSize(hSrcDS);
+            const int nSrcYSize = GDALGetRasterYSize(hSrcDS);
+
+            const auto Distance = [](double x, double y)
+            {
+                return sqrt(x*x + y*y);
+            };
+
+            for( int i = 0; i < nPoints; i+=3 )
+            {
+                if( pabSuccess[i] && pabSuccess[i+1] && pabSuccess[i+2] &&
+                    padfX[i] >= 0 && padfX[i] <= nSrcXSize &&
+                    padfY[i] >= 0 && padfY[i] <= nSrcYSize )
+                {
+                    const double dfRes1 = std::abs(dfEps) /
+                        Distance(padfX[i+1] - padfX[i], padfY[i+1] - padfY[i]);
+                    const double dfRes2 = std::abs(dfEps) /
+                        Distance(padfX[i+2] - padfX[i], padfY[i+2] - padfY[i]);
+                    if( std::isfinite(dfRes1) && std::isfinite(dfRes2) )
+                    {
+                        adfRes.push_back((dfRes1 + dfRes2) / 2);
+                    }
+                }
+            }
+
+            // Find the minimum resolution that is at least 10 times greater
+            // than te median, to remove outliers.
+            std::sort(adfRes.begin(), adfRes.end());
+            if( !adfRes.empty() )
+            {
+                const double dfMedian = adfRes[ adfRes.size() / 2 ];
+                for( const double dfRes: adfRes )
+                {
+                    if( dfRes > dfMedian / 10 )
+                    {
+                        dfResFromSourceAndTargetExtent = std::min(
+                            dfResFromSourceAndTargetExtent, dfRes);
+                        break;
+                    }
+                }
+            }
+        }
+
+/* -------------------------------------------------------------------- */
 /*      Get approximate output definition.                              */
 /* -------------------------------------------------------------------- */
+
         if( bNeedsSuggestedWarpOutput )
         {
             double adfThisGeoTransform[6];
             double adfExtent[4];
             int    nThisPixels, nThisLines;
 
-            if ( GDALSuggestedWarpOutput2( pahSrcDS[iSrc],
+            if ( GDALSuggestedWarpOutput2( hSrcDS,
                                         psInfo->pfnTransform, hTransformArg,
                                         adfThisGeoTransform,
                                         &nThisPixels, &nThisLines,
@@ -3122,7 +3276,7 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
                     CPLDebug("WARP", "Recompute out extent with CHECK_WITH_INVERT_PROJ=TRUE");
 
                     const CPLErr eErr = GDALSuggestedWarpOutput2(
-                        pahSrcDS[iSrc],
+                        hSrcDS,
                         psInfo->pfnTransform, hTransformArg,
                         adfThisGeoTransform,
                         &nThisPixels, &nThisLines,
@@ -3171,6 +3325,12 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
         {
             GDALDestroyGenImgProjTransformer( hTransformArg );
         }
+    }
+
+    if( std::isfinite(dfResFromSourceAndTargetExtent) )
+    {
+        dfWrkResX = dfResFromSourceAndTargetExtent;
+        dfWrkResY = dfResFromSourceAndTargetExtent;
     }
 
 /* -------------------------------------------------------------------- */
@@ -4272,6 +4432,22 @@ GDALWarpAppOptions *GDALWarpAppOptionsNew(char** papszArgv,
         {
             psOptions->bNoVShiftGrid = true;
         }
+
+        else if( EQUAL(papszArgv[i], "-if") && i+1 < argc )
+        {
+            i++;
+            if( psOptionsForBinary )
+            {
+                if( GDALGetDriverByName(papszArgv[i]) == nullptr )
+                {
+                    CPLError(CE_Warning, CPLE_AppDefined,
+                             "%s is not a recognized driver", papszArgv[i]);
+                }
+                psOptionsForBinary->papszAllowInputDrivers = CSLAddString(
+                    psOptionsForBinary->papszAllowInputDrivers, papszArgv[i] );
+            }
+        }
+
         else if( papszArgv[i][0] == '-' )
         {
             CPLError(CE_Failure, CPLE_NotSupported,

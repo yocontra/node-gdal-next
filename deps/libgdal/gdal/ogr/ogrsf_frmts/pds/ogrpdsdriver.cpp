@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "ogr_pds.h"
 
-CPL_CVSID("$Id: ogrpdsdriver.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpdsdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 extern "C" void RegisterOGRPDS();
 
@@ -76,7 +76,7 @@ void RegisterOGRPDS()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME,
                                "Planetary Data Systems TABLE" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_pds.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/pds.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 
     poDriver->pfnOpen = OGRPDSDriverOpen;

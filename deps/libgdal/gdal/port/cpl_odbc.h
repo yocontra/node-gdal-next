@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_odbc.h 97890c6814b40588defbe147a3189f056d50cf97 2018-05-14 20:12:48 +0200 KovBal $
+ * $Id: cpl_odbc.h 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $
  *
  * Project:  OGR ODBC Driver
  * Purpose:  Declarations for ODBC Access Cover API.
@@ -195,6 +195,9 @@ class CPL_DLL CPLODBCSession {
     HDBC        GetConnection() { return m_hDBC; }
     /** Return GetEnvironment handle */
     HENV        GetEnvironment()  { return m_hEnv; }
+
+    bool ConnectToMsAccess( const char * pszName, const char* pszDSNStringTemplate );
+
 };
 
 /**

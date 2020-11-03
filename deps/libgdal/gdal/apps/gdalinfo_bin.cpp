@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdalinfo_bin.cpp 17973835a8fbc78d12e01cde249b8fca561efaeb 2019-11-16 00:02:55 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalinfo_bin.cpp 1c7b950fc8754f6ba1d027f031886063675d2927 2020-06-02 15:06:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -46,7 +46,7 @@ static void Usage(const char* pszErrorMsg = nullptr)
     printf( "Usage: gdalinfo [--help-general] [-json] [-mm] [-stats] [-hist] [-nogcp] [-nomd]\n"
             "                [-norat] [-noct] [-nofl] [-checksum] [-proj4]\n"
             "                [-listmdd] [-mdd domain|`all`] [-wkt_format WKT1|WKT2|...]*\n"
-            "                [-sd subdataset] [-oo NAME=VALUE]* datasetname\n" );
+            "                [-sd subdataset] [-oo NAME=VALUE]* [-if format]* datasetname\n" );
 
     if( pszErrorMsg != nullptr )
         fprintf(stderr, "\nFAILURE: %s\n", pszErrorMsg);
@@ -74,6 +74,7 @@ static void GDALInfoOptionsForBinaryFree( GDALInfoOptionsForBinary* psOptionsFor
     {
         CPLFree(psOptionsForBinary->pszFilename);
         CSLDestroy(psOptionsForBinary->papszOpenOptions);
+        CSLDestroy(psOptionsForBinary->papszAllowInputDrivers);
         CPLFree(psOptionsForBinary);
     }
 }
@@ -129,7 +130,9 @@ MAIN_START(argc, argv)
 #endif
 
     GDALDatasetH hDataset
-        = GDALOpenEx( psOptionsForBinary->pszFilename, GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR, nullptr,
+        = GDALOpenEx( psOptionsForBinary->pszFilename,
+                      GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
+                      psOptionsForBinary->papszAllowInputDrivers,
                       psOptionsForBinary->papszOpenOptions, nullptr );
 
     if( hDataset == nullptr )

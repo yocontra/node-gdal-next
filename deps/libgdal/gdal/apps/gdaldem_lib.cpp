@@ -116,7 +116,7 @@
 #include "emmintrin.h"
 #endif
 
-CPL_CVSID("$Id: gdaldem_lib.cpp 160d622335cd6554059376f442f57f92c42cbc49 2020-06-05 23:03:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldem_lib.cpp adf0cd29fb7e479c33474ed88072945ad8c8cc69 2020-09-12 20:10:58 +0200 Even Rouault $")
 
 static const double kdfDegreesToRadians = M_PI / 180.0;
 static const double kdfRadiansToDegrees = 180.0 / M_PI;
@@ -1572,7 +1572,7 @@ static void GDALColorReliefProcessColors(ColorAssociation **ppasColorAssociation
             }
             else
             {
-                // Fallback to the old behaviour: keep equivalent entries as
+                // Fallback to the old behavior: keep equivalent entries as
                 // they are.
             }
 
@@ -3330,7 +3330,7 @@ static Algorithm GetAlgorithm(const char* pszProcessing)
  * should be NULL otherwise)
  * @param psOptionsIn the options struct returned by
  * GDALDEMProcessingOptionsNew() or NULL.
- * @param pbUsageError the pointer to int variable to determine any usage
+ * @param pbUsageError pointer to a integer output variable to store if any usage
  * error has occurred or NULL.
  * @return the output dataset (new dataset that must be closed using
  * GDALClose()) or NULL in case of error.

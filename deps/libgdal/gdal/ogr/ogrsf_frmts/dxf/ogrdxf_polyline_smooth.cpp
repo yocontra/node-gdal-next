@@ -32,7 +32,7 @@
 #include "math.h"
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_polyline_smooth.cpp 7a9a0f43bd42f92cc79e0f626c04a9e9367b323d 2019-05-21 15:33:16 +1000 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxf_polyline_smooth.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                Local helper functions                                */
@@ -69,12 +69,11 @@ static double GetOGRangle(double angle)
             : -(angle + 180.0);
 }
 
-// TODO: Spelling Tesselate -> Tessellate
 /************************************************************************/
-/*                DXFSmoothPolyline::Tesselate()                        */
+/*                DXFSmoothPolyline::Tessellate()                        */
 /************************************************************************/
 
-OGRGeometry* DXFSmoothPolyline::Tesselate() const
+OGRGeometry* DXFSmoothPolyline::Tessellate() const
 {
     assert(!m_vertices.empty());
 

@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: mitab_utils.cpp 2b4a33db402bfe61e39bfa0840795364f6204b9e 2019-03-14 22:27:47 +0100 Even Rouault $")
+CPL_CVSID("$Id: mitab_utils.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 /**********************************************************************
  *                       TABGenerateArc()
@@ -159,7 +159,7 @@ static bool TABAdjustCaseSensitiveFilename(char *pszFname)
 
     CPLAssert(iTmpPtr >= 0);
 
-    // Assume that CWD is valid.  Therefor an empty path is a valid.
+    // Assume that CWD is valid.  Therefore an empty path is a valid.
     if (iTmpPtr == 0)
         bValidPath = true;
 

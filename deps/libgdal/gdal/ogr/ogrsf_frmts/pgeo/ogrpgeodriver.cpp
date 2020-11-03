@@ -30,7 +30,7 @@
 #include "ogr_pgeo.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgeodriver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeodriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ~OGRODBCDriver()                            */
@@ -206,18 +206,18 @@ bool OGRODBCMDBDriver::FindDriverLib()
     };
     const int nLibNames = sizeof(aszDefaultLibName) / sizeof(aszDefaultLibName[0]);
     const char* libPath[] = {
+        "/usr/lib64",
+        "/usr/local/lib64",
         "/usr/lib",
         "/usr/local/lib"
     };
     const int nLibPaths = sizeof(libPath) / sizeof(libPath[0]);
 
-    CPLString strLibPath("");
-
     const char* pszDrvCfg = CPLGetConfigOption("MDBDRIVER_PATH", nullptr);
     if ( nullptr != pszDrvCfg )
     {
         // Directory or file path
-        strLibPath = pszDrvCfg;
+        CPLString strLibPath(pszDrvCfg);
 
         VSIStatBuf sStatBuf;
         if ( VSIStat( pszDrvCfg, &sStatBuf ) == 0
@@ -297,7 +297,7 @@ void RegisterOGRPGeo()
 
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "ESRI Personal GeoDatabase" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "mdb" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_pgeo.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/pgeo.html" );
 
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver( poDriver );
 }

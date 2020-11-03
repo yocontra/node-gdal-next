@@ -35,7 +35,7 @@
 #include <vector>
 #include <algorithm>
 
-CPL_CVSID("$Id: imdreader.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: imdreader.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 typedef std::map<CPLString,CPLXMLNode*> StrNodeMap;
 typedef std::vector<CPLXMLNode*> NodeVector;
@@ -292,7 +292,7 @@ public:
                             AddGeomField(psName, wkbPolygon);
 
                             //We add the area helper point geometry after polygon
-                            //for better behaviour of clients with limited multi geometry support
+                            //for better behavior of clients with limited multi geometry support
                             CPLString areaPointGeomName = psName + CPLString("__Point");
                             AddCoord(areaPointGeomName, psElementNode);
                         } else if (EQUAL(psKind, "Surface"))

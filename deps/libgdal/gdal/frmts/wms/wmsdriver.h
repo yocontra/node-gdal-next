@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: wmsdriver.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+ * $Id: wmsdriver.h 816ac3854ae287862bcafe49aa66f201dda93274 2020-09-24 20:05:33 +0300 Idan Miara $
  *
  * Project:  WMS Client Driver
  * Purpose:  Implementation of Dataset and RasterBand classes for WMS
@@ -237,6 +237,7 @@ public:
     virtual GDALDataset* GetDataset(const char *pszKey,
                                     char **papszOpenOptions) const = 0;
     virtual void Clean() = 0;
+    virtual int GetCleanThreadRunTimeout() = 0;
 protected:
     CPLString m_soPath;
 };

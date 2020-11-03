@@ -56,7 +56,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: mitab_tabfile.cpp ee1ad78131c83cdc0b32088f11e98629fdb3c632 2020-01-20 01:29:33 +0300 Dmitry Baryshnikov $")
+CPL_CVSID("$Id: mitab_tabfile.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 static const char UNSUPPORTED_OP_READ_ONLY[] =
   "%s : unsupported operation on a read-only datasource.";
@@ -814,8 +814,6 @@ int TABFile::ParseTABFileFields()
     char **papszTok = nullptr;
 
     const int numLines = CSLCount(m_papszTABFile);
-    int numTok = 0;
-    int nStatus = 0;
     for( int iLine=0; iLine<numLines; iLine++ )
     {
         /*-------------------------------------------------------------
@@ -862,7 +860,7 @@ int TABFile::ParseTABFileFields()
                 papszTok = CSLTokenizeStringComplex(m_papszTABFile[iLine],
                                                     " \t(),;",
                                                     TRUE, FALSE);
-                numTok = CSLCount(papszTok);
+                const int numTok = CSLCount(papszTok);
 
                 CPLAssert(m_poDefn);
                 poFieldDefn = nullptr;
@@ -875,6 +873,7 @@ int TABFile::ParseTABFileFields()
                         osFieldName.Recode( GetEncoding(), CPL_ENC_UTF8 );
                 }
 
+                int nStatus = -1;
                 if (numTok >= 3 && EQUAL(papszTok[1], "char"))
                 {
                     /*-------------------------------------------------
@@ -1009,7 +1008,9 @@ int TABFile::ParseTABFileFields()
                     poFieldDefn->SetWidth(1);
                 }
                 else
-                    nStatus = -1; // Unrecognized field type or line corrupt
+                {
+                    // Unrecognized field type or line corrupt
+                }
 
                 if (nStatus != 0)
                 {

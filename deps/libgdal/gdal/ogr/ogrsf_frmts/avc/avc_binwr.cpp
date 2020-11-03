@@ -1,4 +1,4 @@
-/* $Id: avc_binwr.cpp b3cab3cdbb4ca6e7c9367f5c14081d1397374681 2018-03-01 20:32:51Z Even Rouault $
+/* $Id: avc_binwr.cpp b51dc28ab7da7c84c1cac3477560dbc9ba9f5c9e 2020-10-09 01:50:53 +0200 Momtchil Momtchev $
  *
  * Name:     avc_binwr.c
  * Project:  Arc/Info vector coverage (AVC)  E00->BIN conversion library
@@ -1516,7 +1516,7 @@ int _AVCBinWriteCreateArcDirEntry(const char *pszArcDirFile,
      * fixed by forcing a VSIFSeek() before the first fwrite()... we've
      * added it below.
      *----------------------------------------------------------------*/
-    FILE *fp;
+    VSILFILE *fp;
     if ((fp = VSIFOpenL(pszArcDirFile, "r")) != nullptr)
     {
         char buf[380];

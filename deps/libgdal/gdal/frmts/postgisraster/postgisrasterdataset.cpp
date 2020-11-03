@@ -7,7 +7,7 @@
  *
  * Author:       David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisrasterdataset.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $
+ * Last changes: $Id: postgisrasterdataset.cpp 99073ccfd03991e9b7b10618eb734fc3c593a4a7 2020-06-08 13:37:50 +0200 Yorick de Wid $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -41,7 +41,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: postgisrasterdataset.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: postgisrasterdataset.cpp 99073ccfd03991e9b7b10618eb734fc3c593a4a7 2020-06-08 13:37:50 +0200 Yorick de Wid $")
 
 #ifdef _WIN32
 #define rint(x) floor((x) + 0.5)
@@ -57,7 +57,7 @@ CPL_CVSID("$Id: postgisrasterdataset.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c79
 
      1) the table is registered in the raster_columns table and number of bands, minx,miny,maxx,maxy are available
         a) no where clause, the table has a primary key and a GIST index on the raster column.
-            If the raster_columns advertize a scale_x and scale_y, use it.
+            If the raster_columns advertise a scale_x and scale_y, use it.
             Otherwise take the metadata of 10 rasters and compute and average scale_x, scale_y
             With above information, we can build the dataset definition.
 
@@ -2104,8 +2104,6 @@ const char * pszValidConnectionString)
 {
     int l_nTiles = PQntuples(poResult);
     int i = 0;
-    double dfTileUpperLeftX = 0;
-    double dfTileUpperLeftY = 0;
 
     papszSubdatasets = static_cast<char**>(VSICalloc(2 * l_nTiles + 1, sizeof(char*)));
     if( papszSubdatasets == nullptr )
@@ -2153,8 +2151,8 @@ const char * pszValidConnectionString)
 
             CPLFree(pszRes);
 
-            dfTileUpperLeftX = CPLAtof(papszParams[POS_UPPERLEFTX]);
-            dfTileUpperLeftY = CPLAtof(papszParams[POS_UPPERLEFTY]);
+            const double dfTileUpperLeftX = CPLAtof(papszParams[POS_UPPERLEFTX]);
+            const double dfTileUpperLeftY = CPLAtof(papszParams[POS_UPPERLEFTY]);
 
             papszSubdatasets[2 * i] =
                 CPLStrdup(CPLSPrintf("SUBDATASET_%d_NAME=PG:%s schema=%s table=%s column=%s "
@@ -2902,6 +2900,21 @@ GetConnectionInfo(const char * pszFilename,
         osConnectionString += papszParams[i];
         osConnectionString += " ";
     }
+
+    /**********************************************************
+     * Set application name if not found in connection string
+     **********************************************************/
+
+    if (CSLFindName(papszParams, "application_name") == -1 &&
+        getenv("PGAPPNAME") == nullptr) {
+        osConnectionString += "application_name=";
+        osConnectionString += "'";
+        osConnectionString += "GDAL ";
+        osConnectionString += GDALVersionInfo("RELEASE_NAME");
+        osConnectionString += "'";
+        osConnectionString += " ";
+    }
+
     *ppszConnectionString = CPLStrdup(osConnectionString);
 
     nPos = CSLFindName(papszParams, "host");
@@ -3284,7 +3297,6 @@ CPLErr PostGISRasterDataset::_SetProjection(const char * pszProjectionRef) {
     VALIDATE_POINTER1(pszProjectionRef, "SetProjection", CE_Failure);
 
     CPLString osCommand;
-    int nFetchedSrid = -1;
 
     /*****************************************************************
      * Check if the dataset allows updating
@@ -3307,7 +3319,7 @@ CPLErr PostGISRasterDataset::_SetProjection(const char * pszProjectionRef) {
     if (poResult && PQresultStatus(poResult) == PGRES_TUPLES_OK
             && PQntuples(poResult) > 0) {
 
-        nFetchedSrid = atoi(PQgetvalue(poResult, 0, 0));
+        const int nFetchedSrid = atoi(PQgetvalue(poResult, 0, 0));
 
         // update class attribute
         nSrid = nFetchedSrid;
@@ -3338,7 +3350,7 @@ CPLErr PostGISRasterDataset::_SetProjection(const char * pszProjectionRef) {
         if (poResult && PQresultStatus(poResult) == PGRES_TUPLES_OK
                 && PQntuples(poResult) > 0) {
 
-            nFetchedSrid = atoi(PQgetvalue(poResult, 0, 0));
+            const int nFetchedSrid = atoi(PQgetvalue(poResult, 0, 0));
 
             // update class attribute
             nSrid = nFetchedSrid;

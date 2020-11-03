@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal.h 8f0ebfd5b6f153a63b6e2186b68577937cedc02c 2020-06-14 00:21:08 +0200 Even Rouault $
+ * $Id: gdal.h 2915efad7ff962b4a5dce37532d1c6e80bc24543 2020-10-02 16:03:07 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  GDAL Core C/Public declarations.
@@ -412,7 +412,7 @@ typedef struct GDALDimensionHS* GDALDimensionH;
  */
 #define GDAL_DCAP_CREATECOPY_MULTIDIMENSIONAL     "DCAP_CREATECOPY_MULTIDIMENSIONAL"
 
-/** Capability set by a driver that supports multidimensionnal data.
+/** Capability set by a driver that supports multidimensional data.
  * @since GDAL 3.1
  */
 #define GDAL_DCAP_MULTIDIM_RASTER     "DCAP_MULTIDIM_RASTER"
@@ -442,6 +442,11 @@ typedef struct GDALDimensionHS* GDALDimensionH;
  * @since GDAL 2.0
  */
 #define GDAL_DCAP_NOTNULL_FIELDS "DCAP_NOTNULL_FIELDS"
+
+/** Capability set by a driver that can create fields with UNIQUE constraint.
+ * @since GDAL 3.2
+ */
+#define GDAL_DCAP_UNIQUE_FIELDS "DCAP_UNIQUE_FIELDS"
 
 /** Capability set by a driver that can create fields with DEFAULT values.
  * @since GDAL 2.0
@@ -550,7 +555,7 @@ GDALDatasetH CPL_DLL CPL_STDCALL GDALOpenShared( const char *, GDALAccess ) CPL_
  */
 #define     GDAL_OF_GNM             0x08
 
-/** Allow multidimensionnal raster drivers to be used.
+/** Allow multidimensional raster drivers to be used.
  * Used by GDALOpenEx().
  * @since GDAL 3.1
  */
@@ -828,6 +833,7 @@ OGRFeatureH CPL_DLL GDALDatasetGetNextFeature( GDALDatasetH hDS,
 int    CPL_DLL GDALDatasetTestCapability( GDALDatasetH, const char * );
 OGRLayerH CPL_DLL GDALDatasetExecuteSQL( GDALDatasetH, const char *,
                                      OGRGeometryH, const char * );
+OGRErr CPL_DLL GDALDatasetAbortSQL( GDALDatasetH );
 void   CPL_DLL GDALDatasetReleaseResultSet( GDALDatasetH, OGRLayerH );
 OGRStyleTableH CPL_DLL GDALDatasetGetStyleTable( GDALDatasetH );
 void   CPL_DLL GDALDatasetSetStyleTableDirectly( GDALDatasetH, OGRStyleTableH );
@@ -835,6 +841,7 @@ void   CPL_DLL GDALDatasetSetStyleTable( GDALDatasetH, OGRStyleTableH );
 OGRErr CPL_DLL GDALDatasetStartTransaction(GDALDatasetH hDS, int bForce);
 OGRErr CPL_DLL GDALDatasetCommitTransaction(GDALDatasetH hDS);
 OGRErr CPL_DLL GDALDatasetRollbackTransaction(GDALDatasetH hDS);
+void CPL_DLL GDALDatasetClearStatistics(GDALDatasetH hDS);
 
 /* ==================================================================== */
 /*      GDALRasterBand ... one band/channel in a dataset.               */
@@ -1410,7 +1417,7 @@ CPLXMLNode CPL_DLL* GDALGetJPEG2000Structure(const char* pszFilename,
                                              CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
 
 /* ==================================================================== */
-/*      Multidimensionnal API_api                                       */
+/*      Multidimensional API_api                                       */
 /* ==================================================================== */
 
 GDALDatasetH CPL_DLL GDALCreateMultiDimensional( GDALDriverH hDriver,
@@ -1448,8 +1455,14 @@ const char CPL_DLL *GDALGroupGetName(GDALGroupH hGroup);
 const char CPL_DLL *GDALGroupGetFullName(GDALGroupH hGroup);
 char CPL_DLL **GDALGroupGetMDArrayNames(GDALGroupH hGroup, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
 GDALMDArrayH CPL_DLL GDALGroupOpenMDArray(GDALGroupH hGroup, const char* pszMDArrayName, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
+GDALMDArrayH CPL_DLL GDALGroupOpenMDArrayFromFullname(GDALGroupH hGroup, const char* pszMDArrayName, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
+GDALMDArrayH CPL_DLL  GDALGroupResolveMDArray(GDALGroupH hGroup,
+                                     const char* pszName,
+                                     const char* pszStartingPoint,
+                                     CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
 char CPL_DLL **GDALGroupGetGroupNames(GDALGroupH hGroup, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
 GDALGroupH CPL_DLL GDALGroupOpenGroup(GDALGroupH hGroup, const char* pszSubGroupName, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
+GDALGroupH CPL_DLL GDALGroupOpenGroupFromFullname(GDALGroupH hGroup, const char* pszMDArrayName, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
 GDALDimensionH CPL_DLL *GDALGroupGetDimensions(GDALGroupH hGroup, size_t* pnCount, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
 GDALAttributeH CPL_DLL GDALGroupGetAttribute(GDALGroupH hGroup, const char* pszName) CPL_WARN_UNUSED_RESULT;
 GDALAttributeH CPL_DLL *GDALGroupGetAttributes(GDALGroupH hGroup, size_t* pnCount, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
@@ -1501,6 +1514,9 @@ int CPL_DLL GDALMDArrayWrite(GDALMDArrayH hArray,
                             const void* pSrcBuffer,
                             const void* psrcBufferAllocStart,
                             size_t nSrcBufferllocSize);
+int CPL_DLL GDALMDArrayAdviseRead(GDALMDArrayH hArray,
+                                  const GUInt64* arrayStartIdx,
+                                  const size_t* count);
 GDALAttributeH CPL_DLL GDALMDArrayGetAttribute(GDALMDArrayH hArray, const char* pszName) CPL_WARN_UNUSED_RESULT;
 GDALAttributeH CPL_DLL *GDALMDArrayGetAttributes(GDALMDArrayH hArray, size_t* pnCount, CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
 GDALAttributeH CPL_DLL GDALMDArrayCreateAttribute(GDALMDArrayH hArray,
@@ -1535,6 +1551,18 @@ GDALMDArrayH CPL_DLL GDALMDArrayGetUnscaled(GDALMDArrayH hArray);
 GDALMDArrayH CPL_DLL GDALMDArrayGetMask(GDALMDArrayH hArray, CSLConstList papszOptions);
 GDALDatasetH CPL_DLL GDALMDArrayAsClassicDataset(GDALMDArrayH hArray,
                                                  size_t iXDim, size_t iYDim);
+CPLErr CPL_DLL GDALMDArrayGetStatistics(
+    GDALMDArrayH hArray, GDALDatasetH, int bApproxOK, int bForce,
+    double *pdfMin, double *pdfMax,
+    double *pdfMean, double *pdfStdDev,
+    GUInt64* pnValidCount,
+    GDALProgressFunc pfnProgress, void *pProgressData );
+int CPL_DLL GDALMDArrayComputeStatistics( GDALMDArrayH hArray, GDALDatasetH,
+                                    int bApproxOK,
+                                    double *pdfMin, double *pdfMax,
+                                    double *pdfMean, double *pdfStdDev,
+                                    GUInt64* pnValidCount,
+                                    GDALProgressFunc, void *pProgressData );
 
 void CPL_DLL GDALAttributeRelease(GDALAttributeH hAttr);
 void CPL_DLL GDALReleaseAttributes(GDALAttributeH* attributes, size_t nCount);

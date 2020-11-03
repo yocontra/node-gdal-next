@@ -29,7 +29,7 @@
 #include "ogr_elastic.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrelasticdriver.cpp 2b4ed5a1103094430f1b8c85f94eea10aaafec54 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: ogrelasticdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                   OGRElasticsearchDriverIdentify()                   */
@@ -96,7 +96,7 @@ void RegisterOGRElastic() {
     poDriver->SetDescription( "Elasticsearch" );
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "Elastic Search" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drv_elasticsearch.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/elasticsearch.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "ES:" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONOPTIONLIST,
                                "<CreationOptionList/>");

@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include "ogrgeojsonutils.h"
+#include <assert.h>
 #include <cpl_port.h>
 #include <cpl_conv.h>
 #include <ogr_geometry.h>
@@ -36,7 +37,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: ogrgeojsonutils.cpp 15b25126b5d1c4c3f1be56cbda197a97750f1717 2020-06-25 14:04:47 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonutils.cpp 6b26f975821bb4f969a697bc544ac251f9851bc7 2020-07-22 20:38:00 +0200 Even Rouault $")
 
 const char szESRIJSonPotentialStart1[] =
     "{\"features\":[{\"geometry\":{\"rings\":[";
@@ -191,7 +192,9 @@ static bool IsGeoJSONLikeObject( const char* pszText, bool* pbMightBeSequence )
     }
 
     // See https://github.com/OSGeo/gdal/issues/2720
-    if( osWithoutSpace.find("{\"coordinates\":[") == 0 )
+    if( osWithoutSpace.find("{\"coordinates\":[") == 0 ||
+        // and https://github.com/OSGeo/gdal/issues/2787
+        osWithoutSpace.find("{\"geometry\":{\"coordinates\":[") == 0 )
     {
         if( pbMightBeSequence )
             *pbMightBeSequence = false;
@@ -293,6 +296,7 @@ static bool IsLikelyNewlineSequenceGeoJSON( VSILFILE* fpL,
         {
             const char* pszText = pszFileContent ? pszFileContent:
                 reinterpret_cast<const char*>(pabyHeader);
+            assert(pszText);
             nRead = std::min(strlen(pszText), nBufferSize);
             memcpy(abyBuffer.data(), pszText, nRead);
             bFirstIter = false;

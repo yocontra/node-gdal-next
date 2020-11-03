@@ -62,7 +62,7 @@
 #   include <errno.h>
 #endif
 
-CPL_CVSID("$Id: cpl_minizip_zip.cpp edcdc5b0a57b4fab159b14180141ee42a0408830 2019-06-22 19:28:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_minizip_zip.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 #ifndef VERSIONMADEBY
 # define VERSIONMADEBY   (0x0) /* platform dependent */
@@ -140,7 +140,7 @@ typedef struct linkedlist_data_s
 typedef struct
 {
     z_stream stream;            /* zLib stream structure for inflate */
-    int  stream_initialised;    /* 1 is stream is initialised */
+    int  stream_initialised;    /* 1 is stream is initialized */
     uInt pos_in_buffered_data;  /* last written byte in buffered_data */
 
     ZPOS64_T pos_local_header;     /* offset of the local header of the file

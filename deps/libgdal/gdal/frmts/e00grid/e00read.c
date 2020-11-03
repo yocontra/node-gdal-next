@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: e00read.c cce4fc19bb553db2a40e1bad04a903fc2c4566a6 2017-06-20 17:57:04Z Even Rouault $
+ * $Id: e00read.c 38e9587ed7fc34d8e145b03a86ca0a2ec655fcce 2020-08-23 18:43:52 +0200 Even Rouault $
  *
  * Name:     e00read.c
  * Project:  Compressed E00 Read/Write library
@@ -400,16 +400,16 @@ static char _GetNextSourceChar(E00ReadPtr psInfo)
 {
     char c = '\0';
 
-    if (!psInfo->bEOF)
+    while (!psInfo->bEOF)
     {
         if (psInfo->szInBuf[psInfo->iInBufPtr] == '\0')
         {
             _ReadNextSourceLine(psInfo);
-            c = _GetNextSourceChar(psInfo);
         }
         else
         {
             c = psInfo->szInBuf[psInfo->iInBufPtr++];
+            break;
         }
     }
 

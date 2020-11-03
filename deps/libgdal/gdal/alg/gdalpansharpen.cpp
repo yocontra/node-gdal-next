@@ -51,7 +51,7 @@
 // Limit types to practical use cases.
 #define LIMIT_TYPES 1
 
-CPL_CVSID("$Id: gdalpansharpen.cpp 685b96644b37dcd526ccb68cbb763f67a4108800 2020-03-20 17:27:19 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalpansharpen.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALCreatePansharpenOptions()                    */
@@ -130,12 +130,13 @@ GDALPansharpenOptions* GDALClonePansharpenOptions(
     psNewOptions->nInputSpectralBands = psOptions->nInputSpectralBands;
     if( psOptions->pahInputSpectralBands )
     {
+        const size_t nSize = sizeof(GDALRasterBandH) *
+                                psOptions->nInputSpectralBands;
         psNewOptions->pahInputSpectralBands = static_cast<GDALRasterBandH *>(
-            CPLMalloc(sizeof(GDALRasterBandH) *
-                      psOptions->nInputSpectralBands));
+            CPLMalloc(nSize));
         memcpy(psNewOptions->pahInputSpectralBands,
                psOptions->pahInputSpectralBands,
-               sizeof(GDALRasterBandH) * psOptions->nInputSpectralBands);
+               nSize);
     }
     psNewOptions->nOutPansharpenedBands = psOptions->nOutPansharpenedBands;
     if( psOptions->panOutPansharpenedBands )
@@ -1098,6 +1099,7 @@ CPLErr GDALPansharpenOperation::ProcessRegion( int nXOff, int nYOff,
     GDALRasterIOExtraArg sExtraArg;
     INIT_RASTERIO_EXTRA_ARG(sExtraArg);
     const GDALRIOResampleAlg eResampleAlg = psOptions->eResampleAlg;
+    // cppcheck-suppress redundantAssignment
     sExtraArg.eResampleAlg = eResampleAlg;
     sExtraArg.bFloatingPointWindowValidity = TRUE;
     double dfRatioX =
@@ -1562,6 +1564,7 @@ void GDALPansharpenOperation::PansharpenResampleJobThreadFunc(void* pUserData)
 #else
     GDALRasterIOExtraArg sExtraArg;
     INIT_RASTERIO_EXTRA_ARG(sExtraArg);
+    // cppcheck-suppress redundantAssignment
     sExtraArg.eResampleAlg = psJob->eResampleAlg;
     sExtraArg.bFloatingPointWindowValidity = TRUE;
     sExtraArg.dfXOff = psJob->dfXOff;
