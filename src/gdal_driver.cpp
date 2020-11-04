@@ -242,7 +242,7 @@ void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool a
   }
   if (driver->uses_ogr) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
-    OGRDataSource *ds = raw->CreateDataSource(filename.c_str(), options.get());
+    OGRDataSource *ds = raw->CreateDataSource(filename.c_str(), options->get());
 
     if (!ds) {
       Nan::ThrowError("Error creating dataset");
@@ -377,7 +377,7 @@ void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, b
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *raw_ds = src_dataset->getDatasource();
 
-    OGRDataSource *ds = raw->CopyDataSource(raw_ds, filename.c_str(), options.get());
+    OGRDataSource *ds = raw->CopyDataSource(raw_ds, filename.c_str(), options->get());
 
     if (!ds) {
       Nan::ThrowError("Error copying dataset.");
@@ -588,13 +588,7 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
   GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
   GDALDataset *ds = raw->pfnOpen(open_info);
   delete open_info;
-
-  if (!ds) {
-    Nan::ThrowError("Error opening dataset");
-    return;
-  }
-#endif
-
+#else
   std::function<GDALDataset *()> doit = [raw, path, access]() {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
@@ -605,14 +599,16 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
     Nan::Callback *callback;
     NODE_ARG_CB(2, "callback", callback);
     Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
-  } else {
-    GDALDataset *ds = doit();
-    if (!ds) {
-      Nan::ThrowError("Error opening dataset");
-      return;
-    }
-    info.GetReturnValue().Set(Dataset::New(ds));
+    return;
   }
+
+  GDALDataset *ds = doit();
+#endif
+  if (!ds) {
+    Nan::ThrowError("Error opening dataset");
+    return;
+  }
+  info.GetReturnValue().Set(Dataset::New(ds));
 }
 
 /**

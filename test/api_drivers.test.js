@@ -143,6 +143,10 @@ describe('gdal.drivers', () => {
 
   describe('createCopyAsync', () => {
     it('should operate normally', () => {
+      // Not supported on GDAL 1.x
+      if (gdal.version.split('.')[0] < 2) {
+        return
+      }
       const driver = gdal.drivers.get('MEM')
       const outputFilename = '' // __dirname + '/data/12_791_1476.tif';
       driver.createCopyAsync(

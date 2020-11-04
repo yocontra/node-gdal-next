@@ -39,9 +39,11 @@ class AsyncRasterIO : public Nan::AsyncWorker {
   int nBufXSize;
   int nBufYSize;
   GDALDataType eBufType;
-  GSpacing nPixelSpace;
-  GSpacing nLineSpace;
+  int nPixelSpace;
+  int nLineSpace;
+#if GDAL_VERSION_MAJOR >= 2
   GDALRasterIOExtraArg *psExtraArg;
+#endif
   CPLErr eErr;
 
     public:
@@ -58,9 +60,12 @@ class AsyncRasterIO : public Nan::AsyncWorker {
     int nBufXSize,
     int nBufYSize,
     GDALDataType eBufType,
-    GSpacing nPixelSpace,
-    GSpacing nLineSpace,
-    GDALRasterIOExtraArg *psExtraArg = (GDALRasterIOExtraArg *)nullptr);
+    int nPixelSpace,
+    int nLineSpace
+#if GDAL_VERSION_MAJOR >= 2
+    ,GDALRasterIOExtraArg *psExtraArg = (GDALRasterIOExtraArg *)nullptr
+#endif
+  );
 
   void Execute();
   void HandleOKCallback();

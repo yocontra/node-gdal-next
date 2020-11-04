@@ -23,9 +23,12 @@ AsyncRasterIO::AsyncRasterIO(
   int nBufXSize,
   int nBufYSize,
   GDALDataType eBufType,
-  GSpacing nPixelSpace,
-  GSpacing nLineSpace,
-  GDALRasterIOExtraArg *psExtraArg)
+  int nPixelSpace,
+  int nLineSpace
+#if GDAL_VERSION_MAJOR >= 2
+  ,GDALRasterIOExtraArg *psExtraArg
+#endif
+  )
   : Nan::AsyncWorker(pCallback, AsyncRasterIOLabel),
     async_lock(pBand->async_lock),
     hDataPersistentHandle(*pObjectData),
@@ -42,7 +45,9 @@ AsyncRasterIO::AsyncRasterIO(
     eBufType(eBufType),
     nPixelSpace(nPixelSpace),
     nLineSpace(nLineSpace),
+#if GDAL_VERSION_MAJOR >= 2
     psExtraArg(psExtraArg),
+#endif
     eErr(CE_None) {
 }
 
@@ -56,7 +61,21 @@ AsyncRasterIO::AsyncRasterIO(
 void AsyncRasterIO::Execute() {
   uv_mutex_lock(async_lock);
   eErr = this->pBand->get()->RasterIO(
-    eRWFlag, nXOff, nYOff, nXSize, nYSize, pData, nBufXSize, nBufYSize, eBufType, nPixelSpace, nLineSpace, psExtraArg);
+    eRWFlag,
+    nXOff,
+    nYOff,
+    nXSize,
+    nYSize,
+    pData,
+    nBufXSize,
+    nBufYSize,
+    eBufType,
+    nPixelSpace,
+    nLineSpace
+#if GDAL_VERSION_MAJOR >= 2
+    ,psExtraArg
+#endif
+  );
 
   if (eErr != CE_None) { this->SetErrorMessage(std::to_string((int)eErr).c_str()); }
   uv_mutex_unlock(async_lock);
