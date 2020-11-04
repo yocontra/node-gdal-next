@@ -174,6 +174,8 @@ Local<Value> Dataset::New(OGRDataSource *raw) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(Dataset::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   datasource_cache.add(raw, obj);
+  wrapped->async_lock = new uv_mutex_t;
+  uv_mutex_init(wrapped->async_lock);
   wrapped->uid = ptr_manager.add(raw);
 
   return scope.Escape(obj);
