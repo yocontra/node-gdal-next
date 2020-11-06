@@ -530,7 +530,6 @@ describe('gdal.Dataset', () => {
     describe('executeSQL()', () => {
       it('should return Layer', () => {
         const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-        console.log(ds)
         const result_set = ds.executeSQL('SELECT name FROM sample')
 
         assert.instanceOf(result_set, gdal.Layer)
