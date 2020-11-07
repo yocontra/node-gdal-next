@@ -1,6 +1,7 @@
 #include "rasterband_pixels.hpp"
 #include "../gdal_common.hpp"
 #include "../gdal_rasterband.hpp"
+#include "../async/async_rasterio.hpp"
 #include "../utils/typed_array.hpp"
 
 #include <sstream>
@@ -20,7 +21,9 @@ void RasterBandPixels::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "get", get);
   Nan::SetPrototypeMethod(lcons, "set", set);
   Nan::SetPrototypeMethod(lcons, "read", read);
+  Nan::SetPrototypeMethod(lcons, "readAsync", readAsync);
   Nan::SetPrototypeMethod(lcons, "write", write);
+  Nan::SetPrototypeMethod(lcons, "writeAsync", writeAsync);
   Nan::SetPrototypeMethod(lcons, "readBlock", readBlock);
   Nan::SetPrototypeMethod(lcons, "writeBlock", writeBlock);
 
@@ -33,6 +36,17 @@ RasterBandPixels::RasterBandPixels() : Nan::ObjectWrap() {
 }
 
 RasterBandPixels::~RasterBandPixels() {
+}
+
+RasterBand *RasterBandPixels::parent(const Nan::FunctionCallbackInfo<v8::Value> &info) {
+  Local<Object> parent =
+    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
+  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
+  if (!band->isAlive()) {
+    Nan::ThrowError("RasterBand object has already been destroyed");
+    return nullptr;
+  }
+  return band;
 }
 
 /**
@@ -100,13 +114,8 @@ NAN_METHOD(RasterBandPixels::toString) {
 NAN_METHOD(RasterBandPixels::get) {
   Nan::HandleScope scope;
 
-  Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  RasterBand *band;
+  if ((band = parent(info)) == nullptr) return;
 
   int x, y;
   double val;
@@ -114,7 +123,9 @@ NAN_METHOD(RasterBandPixels::get) {
   NODE_ARG_INT(0, "x", x);
   NODE_ARG_INT(1, "y", y);
 
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->get()->RasterIO(GF_Read, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
+  uv_mutex_unlock(band->async_lock);
   if (err) {
     NODE_THROW_CPLERR(err);
     return;
@@ -134,13 +145,8 @@ NAN_METHOD(RasterBandPixels::get) {
 NAN_METHOD(RasterBandPixels::set) {
   Nan::HandleScope scope;
 
-  Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  RasterBand *band;
+  if ((band = parent(info)) == nullptr) return;
 
   int x, y;
   double val;
@@ -149,7 +155,9 @@ NAN_METHOD(RasterBandPixels::set) {
   NODE_ARG_INT(1, "y", y);
   NODE_ARG_DOUBLE(2, "val", val);
 
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->get()->RasterIO(GF_Write, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
+  uv_mutex_unlock(band->async_lock);
   if (err) {
     NODE_THROW_CPLERR(err);
     return;
@@ -159,38 +167,13 @@ NAN_METHOD(RasterBandPixels::set) {
 }
 
 /**
- * Reads a region of pixels.
- *
- * @method read
- * @throws Error
- * @param {Integer} x
- * @param {Integer} y
- * @param {Integer} width
- * @param {Integer} height
- * @param {TypedArray} [data] The
- * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * to put the data in. A new array is created if not given.
- * @param {Object} [options]
- * @param {Integer} [options.buffer_width=x_size]
- * @param {Integer} [options.buffer_height=y_size]
- * @param {String} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
- * constants{{/crossLink}}.
- * @param {Integer} [options.pixel_space]
- * @param {Integer} [options.line_space]
- * @return {TypedArray} A
- * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * of values.
+ * Low level read for both synchronous and asynchronous reading.
  */
-NAN_METHOD(RasterBandPixels::read) {
+void RasterBandPixels::_do_read(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
 
-  Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  RasterBand *band;
+  if ((band = parent(info)) == nullptr) return;
 
   int x, y, w, h;
   int buffer_w, buffer_h;
@@ -217,7 +200,7 @@ NAN_METHOD(RasterBandPixels::read) {
   NODE_ARG_OPT_STR(7, "data_type", type_name);
   if (!type_name.empty()) { type = GDALGetDataTypeByName(type_name.c_str()); }
 
-  if (info.Length() >= 5 && !info[4]->IsUndefined() && !info[4]->IsNull()) {
+  if (!info[4]->IsUndefined() && !info[4]->IsNull()) {
     NODE_ARG_OBJECT(4, "data", obj);
     type = TypedArray::Identify(obj);
     if (type == GDT_Unknown) {
@@ -261,43 +244,89 @@ NAN_METHOD(RasterBandPixels::read) {
     return; // TypedArray::Validate threw an error
   }
 
-  CPLErr err = band->get()->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-  if (err) {
-    NODE_THROW_CPLERR(err);
-    return;
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(10, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncRasterIO(
+      callback, band, GF_Read, x, y, w, h, &obj, data, buffer_w, buffer_h, type, pixel_space, line_space));
+  } else {
+    uv_mutex_lock(band->async_lock);
+    CPLErr err = band->get()->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+    uv_mutex_unlock(band->async_lock);
+    if (err) {
+      NODE_THROW_CPLERR(err);
+      return;
+    }
+    info.GetReturnValue().Set(obj);
   }
-
-  info.GetReturnValue().Set(obj);
 }
 
 /**
- * Writes a region of pixels.
+ * Reads a region of pixels.
  *
- * @method write
+ * @method read
  * @throws Error
  * @param {Integer} x
  * @param {Integer} y
  * @param {Integer} width
  * @param {Integer} height
- * @param {TypedArray} data The
+ * @param {TypedArray} [data] The
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * to write to the band.
+ * to put the data in. A new array is created if not given.
  * @param {Object} [options]
  * @param {Integer} [options.buffer_width=x_size]
  * @param {Integer} [options.buffer_height=y_size]
+ * @param {String} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
+ * constants{{/crossLink}}.
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
+ * @return {TypedArray} A
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * of values.
  */
-NAN_METHOD(RasterBandPixels::write) {
+NAN_METHOD(RasterBandPixels::read) {
+  RasterBandPixels::_do_read(info, false);
+}
+
+/**
+ * Asynchronously reads a region of pixels.
+ * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
+ * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
+ * as it is the last parameter. Otherwise the function returns a Promise resolved with the result.
+ *
+ * @method readAsync
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {TypedArray} [data] The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to put the data in. A new array is created if not given.
+ * @param {Object} [options]
+ * @param {Integer} [options.buffer_width=x_size]
+ * @param {Integer} [options.buffer_height=y_size]
+ * @param {String} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
+ * constants{{/crossLink}}.
+ * @param {Integer} [options.pixel_space]
+ * @param {Integer} [options.line_space]
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
+ * @return {TypedArray} A
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * of values.
+ */
+NAN_METHOD(RasterBandPixels::readAsync) {
+  RasterBandPixels::_do_read(info, true);
+}
+
+/**
+ * Low level read for both synchronous and asynchronous writing.
+ */
+void RasterBandPixels::_do_write(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
 
-  Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  RasterBand *band;
+  if ((band = parent(info)) == nullptr) return;
 
   int x, y, w, h;
   int buffer_w, buffer_h;
@@ -349,13 +378,71 @@ NAN_METHOD(RasterBandPixels::write) {
     return; // TypedArray::Validate threw an error
   }
 
-  CPLErr err = band->get()->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-  if (err) {
-    NODE_THROW_CPLERR(err);
-    return;
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(9, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncRasterIO(
+      callback, band, GF_Read, x, y, w, h, &passed_array, data, buffer_w, buffer_h, type, pixel_space, line_space));
+  } else {
+    uv_mutex_lock(band->async_lock);
+    CPLErr err = band->get()->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+    uv_mutex_unlock(band->async_lock);
+    if (err) {
+      NODE_THROW_CPLERR(err);
+      return;
+    }
   }
 
   return;
+}
+
+/**
+ * Writes a region of pixels.
+ *
+ * @method write
+ * @throws Error
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {TypedArray} data The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to write to the band.
+ * @param {Object} [options]
+ * @param {Integer} [options.buffer_width=x_size]
+ * @param {Integer} [options.buffer_height=y_size]
+ * @param {Integer} [options.pixel_space]
+ * @param {Integer} [options.line_space]
+ */
+NAN_METHOD(RasterBandPixels::write) {
+  _do_write(info, false);
+}
+
+/**
+ * Asynchronously writes a region of pixels.
+ * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
+ * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
+ as it is the last parameter.
+ * Otherwise the function returns a Promise resolved with the result.
+ *
+ * @method writeAsync
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {TypedArray} data The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to write to the band.
+ * @param {Object} [options]
+ * @param {Integer} [options.buffer_width=x_size]
+ * @param {Integer} [options.buffer_height=y_size]
+ * @param {Integer} [options.pixel_space]
+ * @param {Integer} [options.line_space]
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
+ */
+NAN_METHOD(RasterBandPixels::writeAsync) {
+  _do_write(info, true);
 }
 
 /**
@@ -375,13 +462,8 @@ NAN_METHOD(RasterBandPixels::write) {
 NAN_METHOD(RasterBandPixels::readBlock) {
   Nan::HandleScope scope;
 
-  Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  RasterBand *band;
+  if ((band = parent(info)) == nullptr) return;
 
   int x, y, w = 0, h = 0;
   NODE_ARG_INT(0, "block_x_offset", x);
@@ -410,7 +492,9 @@ NAN_METHOD(RasterBandPixels::readBlock) {
     return; // TypedArray::Validate threw an error
   }
 
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->get()->ReadBlock(x, y, data);
+  uv_mutex_unlock(band->async_lock);
   if (err) {
     NODE_THROW_CPLERR(err);
     return;
@@ -433,13 +517,8 @@ NAN_METHOD(RasterBandPixels::readBlock) {
 NAN_METHOD(RasterBandPixels::writeBlock) {
   Nan::HandleScope scope;
 
-  Local<Object> parent =
-    Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  RasterBand *band;
+  if ((band = parent(info)) == nullptr) return;
 
   int x, y, w = 0, h = 0;
 
@@ -457,7 +536,9 @@ NAN_METHOD(RasterBandPixels::writeBlock) {
     return; // TypedArray::Validate threw an error
   }
 
+  uv_mutex_lock(band->async_lock);
   CPLErr err = band->get()->WriteBlock(x, y, data);
+  uv_mutex_unlock(band->async_lock);
 
   if (err) {
     NODE_THROW_CPLERR(err);

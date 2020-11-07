@@ -152,5 +152,15 @@
       "error",
       "as-needed"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "test/*"
+      ],
+      "parserOptions": {
+        "ecmaVersion": 2017
+      }
+    }
+  ]
 }

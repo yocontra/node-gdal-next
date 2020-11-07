@@ -308,6 +308,18 @@ NAN_SETTER(READ_ONLY_SETTER);
   }                                                                                                                    \
   var = (*Nan::Utf8String(info[num]))
 
+// delete callback is in AsyncWorker::~AsyncWorker
+#define NODE_ARG_CB(num, name, var)                                                                                    \
+  if (info.Length() < num + 1) {                                                                                       \
+    Nan::ThrowError(name " must be given");                                                                            \
+    return;                                                                                                            \
+  }                                                                                                                    \
+  if (!info[num]->IsFunction()) {                                                                                      \
+    Nan::ThrowTypeError(name " must be a function");                                                                   \
+    return;                                                                                                            \
+  }                                                                                                                    \
+  var = new Nan::Callback(info[num].As<Function>())
+
 // ----- optional argument conversion -------
 
 #define NODE_ARG_INT_OPT(num, name, var)                                                                               \

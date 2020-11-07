@@ -2,6 +2,7 @@
 #include "gdal_common.hpp"
 #include "gdal_dataset.hpp"
 #include "gdal_majorobject.hpp"
+#include "async/async_open.hpp"
 #include "utils/string_list.hpp"
 
 namespace node_gdal {
@@ -21,8 +22,11 @@ void Driver::Initialize(Local<Object> target) {
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "open", open);
+  Nan::SetPrototypeMethod(lcons, "openAsync", openAsync);
   Nan::SetPrototypeMethod(lcons, "create", create);
+  Nan::SetPrototypeMethod(lcons, "createAsync", createAsync);
   Nan::SetPrototypeMethod(lcons, "createCopy", createCopy);
+  Nan::SetPrototypeMethod(lcons, "createCopyAsync", createCopyAsync);
   Nan::SetPrototypeMethod(lcons, "deleteDataset", deleteDataset);
   Nan::SetPrototypeMethod(lcons, "rename", rename);
   Nan::SetPrototypeMethod(lcons, "copyFiles", copyFiles);
@@ -201,6 +205,79 @@ NAN_METHOD(Driver::deleteDataset) {
   return;
 }
 
+/*
+ * Low-level common code for synchronous and asynchronous creation
+ */
+void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
+  Nan::HandleScope scope;
+  Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
+
+  std::string filename;
+  unsigned int x_size = 0, y_size = 0, n_bands = 0;
+  GDALDataType type = GDT_Byte;
+  std::string type_name = "";
+  StringList *options = new StringList;
+
+  NODE_ARG_STR(0, "filename", filename);
+
+  if (info.Length() < 3) {
+    if (info.Length() > 1 && options->parse(info[1])) {
+      return; // error parsing string list
+    }
+  } else {
+    NODE_ARG_INT(1, "x size", x_size);
+    NODE_ARG_INT(2, "y size", y_size);
+    NODE_ARG_INT_OPT(3, "number of bands", n_bands);
+    NODE_ARG_OPT_STR(4, "data type", type_name);
+    if (info.Length() > 5 && options->parse(info[5])) {
+      return; // error parsing string list
+    }
+    if (!type_name.empty()) { type = GDALGetDataTypeByName(type_name.c_str()); }
+  }
+
+#if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
+    return;
+  }
+  if (driver->uses_ogr) {
+    OGRSFDriver *raw = driver->getOGRSFDriver();
+    OGRDataSource *ds = raw->CreateDataSource(filename.c_str(), options->get());
+
+    if (!ds) {
+      Nan::ThrowError("Error creating dataset");
+      return;
+    }
+
+    info.GetReturnValue().Set(Dataset::New(ds));
+    return;
+  }
+#endif
+
+  GDALDriver *raw = driver->getGDALDriver();
+
+  // Very careful here
+  // we can't reference automatic variables, thus the *options object
+  std::function<GDALDataset *()> doit = [raw, filename, x_size, y_size, n_bands, type, options]() {
+    GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
+    delete options;
+    return ds;
+  };
+
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(6, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
+  } else {
+    GDALDataset *ds = doit();
+    if (!ds) {
+      Nan::ThrowError("Error creating dataset");
+      return;
+    }
+    info.GetReturnValue().Set(Dataset::New(ds));
+  }
+}
+
 /**
  * Create a new dataset with this driver.
  *
@@ -220,71 +297,36 @@ NAN_METHOD(Driver::deleteDataset) {
  * @return gdal.Dataset
  */
 NAN_METHOD(Driver::create) {
-  Nan::HandleScope scope;
-  Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
-
-  std::string filename;
-  unsigned int x_size = 0, y_size = 0, n_bands = 0;
-  GDALDataType type = GDT_Byte;
-  std::string type_name = "";
-  StringList options;
-
-  NODE_ARG_STR(0, "filename", filename);
-
-  if (info.Length() < 3) {
-    if (info.Length() > 1 && options.parse(info[1])) {
-      return; // error parsing string list
-    }
-  } else {
-    NODE_ARG_INT(1, "x size", x_size);
-    NODE_ARG_INT(2, "y size", y_size);
-    NODE_ARG_INT_OPT(3, "number of bands", n_bands);
-    NODE_ARG_OPT_STR(4, "data type", type_name);
-    if (info.Length() > 5 && options.parse(info[5])) {
-      return; // error parsing string list
-    }
-    if (!type_name.empty()) { type = GDALGetDataTypeByName(type_name.c_str()); }
-  }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (driver->uses_ogr) {
-    OGRSFDriver *raw = driver->getOGRSFDriver();
-    OGRDataSource *ds = raw->CreateDataSource(filename.c_str(), options.get());
-
-    if (!ds) {
-      Nan::ThrowError("Error creating dataset");
-      return;
-    }
-
-    info.GetReturnValue().Set(Dataset::New(ds));
-    return;
-  }
-#endif
-
-  GDALDriver *raw = driver->getGDALDriver();
-  GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options.get());
-
-  if (!ds) {
-    Nan::ThrowError("Error creating dataset");
-    return;
-  }
-
-  info.GetReturnValue().Set(Dataset::New(ds));
+  _do_create(info, false);
 }
 
 /**
- * Create a copy of a dataset.
+ * Asynchronously create a new dataset with this driver.
  *
  * @throws Error
- * @method createCopy
+ * @method createAsync
  * @param {String} filename
- * @param {gdal.Dataset} src
- * @param {Boolean} [strict=false]
- * @param {String[]|object} [options=null] An array or object containing
+ * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [band_count=0]
+ * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
+ * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
+ * types{{/crossLink}})
+ * @param {String[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
+ * @param {Callback} callback promisifiable callback
  * @return gdal.Dataset
  */
-NAN_METHOD(Driver::createCopy) {
+NAN_METHOD(Driver::createAsync) {
+  _do_create(info, true);
+}
+
+/*
+ * Low-level common code for synchronous and asynchronous creation by copying
+ */
+void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -296,7 +338,7 @@ NAN_METHOD(Driver::createCopy) {
   std::string filename;
   Dataset *src_dataset;
   unsigned int strict = 0;
-  StringList options;
+  StringList *options;
 
   NODE_ARG_STR(0, "filename", filename);
 
@@ -317,11 +359,16 @@ NAN_METHOD(Driver::createCopy) {
     return;
   }
 
-  if (info.Length() > 2 && options.parse(info[2])) {
+  options = new StringList;
+  if (info.Length() > 2 && options->parse(info[2])) {
     return; // error parsing string list
   }
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
+    return;
+  }
   if (driver->uses_ogr != src_dataset->uses_ogr) {
     Nan::ThrowError("Driver unable to copy dataset");
     return;
@@ -330,7 +377,7 @@ NAN_METHOD(Driver::createCopy) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *raw_ds = src_dataset->getDatasource();
 
-    OGRDataSource *ds = raw->CopyDataSource(raw_ds, filename.c_str(), options.get());
+    OGRDataSource *ds = raw->CopyDataSource(raw_ds, filename.c_str(), options->get());
 
     if (!ds) {
       Nan::ThrowError("Error copying dataset.");
@@ -343,15 +390,61 @@ NAN_METHOD(Driver::createCopy) {
 #endif
 
   GDALDriver *raw = driver->getGDALDriver();
-  GDALDataset *raw_ds = src_dataset->getDataset();
-  GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options.get(), NULL, NULL);
+  uv_mutex_t *async_lock = src_dataset->async_lock;
+  std::function<GDALDataset *()> doit = [raw, filename, src_dataset, strict, options, async_lock]() {
+    GDALDataset *raw_ds = src_dataset->getDataset();
+    uv_mutex_lock(async_lock);
+    GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
+    uv_mutex_unlock(async_lock);
+    delete options;
+    return ds;
+  };
 
-  if (!ds) {
-    Nan::ThrowError("Error copying dataset");
-    return;
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(3, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
+  } else {
+    GDALDataset *ds = doit();
+    if (!ds) {
+      Nan::ThrowError("Error copying dataset");
+      return;
+    }
+    info.GetReturnValue().Set(Dataset::New(ds));
   }
+}
 
-  info.GetReturnValue().Set(Dataset::New(ds));
+/**
+ * Create a copy of a dataset.
+ *
+ * @throws Error
+ * @method createCopy
+ * @param {String} filename
+ * @param {gdal.Dataset} src
+ * @param {Boolean} [strict=false]
+ * @param {String[]|object} [options=null] An array or object containing
+ * driver-specific dataset creation options
+ * @return gdal.Dataset
+ */
+NAN_METHOD(Driver::createCopy) {
+  _do_create_copy(info, false);
+}
+
+/**
+ * Asynchronously create a copy of a dataset.
+ *
+ * @throws Error
+ * @method createCopyAsync
+ * @param {String} filename
+ * @param {gdal.Dataset} src
+ * @param {Boolean} [strict=false]
+ * @param {String[]|object} [options=null] An array or object containing
+ * driver-specific dataset creation options
+ * @param {Callback} callback promisifiable callback
+ * @return gdal.Dataset
+ */
+NAN_METHOD(Driver::createCopyAsync) {
+  _do_create_copy(info, true);
 }
 
 /**
@@ -454,17 +547,10 @@ NAN_METHOD(Driver::getMetadata) {
   info.GetReturnValue().Set(result);
 }
 
-/**
- * Opens a dataset.
- *
- * @throws Error
- * @method open
- * @param {String} path
- * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
- * `"r+"`
- * @return {gdal.Dataset}
+/*
+ * Low-level common code for synchronous and asynchronous opening
  */
-NAN_METHOD(Driver::open) {
+void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -485,6 +571,10 @@ NAN_METHOD(Driver::open) {
   GDALDriver *raw = driver->getGDALDriver();
 
 #if GDAL_VERSION_MAJOR < 2
+  if (async) {
+    Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
+    return;
+  }
   if (driver->uses_ogr) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *ds = raw->Open(path.c_str(), static_cast<int>(access));
@@ -495,20 +585,59 @@ NAN_METHOD(Driver::open) {
     info.GetReturnValue().Set(Dataset::New(ds));
     return;
   }
-
   GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
   GDALDataset *ds = raw->pfnOpen(open_info);
   delete open_info;
 #else
-  const char *driver_list[2] = {raw->GetDescription(), nullptr};
-  GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
-#endif
+  std::function<GDALDataset *()> doit = [raw, path, access]() {
+    const char *driver_list[2] = {raw->GetDescription(), nullptr};
+    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
+    return ds;
+  };
 
+  if (async) {
+    Nan::Callback *callback;
+    NODE_ARG_CB(2, "callback", callback);
+    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
+    return;
+  }
+
+  GDALDataset *ds = doit();
+#endif
   if (!ds) {
     Nan::ThrowError("Error opening dataset");
     return;
   }
   info.GetReturnValue().Set(Dataset::New(ds));
+}
+
+/**
+ * Opens a dataset.
+ *
+ * @throws Error
+ * @method open
+ * @param {String} path
+ * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * `"r+"`
+ * @return {gdal.Dataset}
+ */
+NAN_METHOD(Driver::open) {
+  _do_open(info, false);
+}
+
+/**
+ * Opens a dataset.
+ *
+ * @throws Error
+ * @method openAsync
+ * @param {String} path
+ * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * `"r+"`
+ * @param {Callback} callback promisifiable callback
+ * @return {gdal.Dataset}
+ */
+NAN_METHOD(Driver::openAsync) {
+  _do_open(info, true);
 }
 
 } // namespace node_gdal
