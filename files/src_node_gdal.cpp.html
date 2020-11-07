@@ -336,6 +336,7 @@ static NAN_METHOD(isAlive) {
 static void Init(Local&lt;Object&gt; target, Local&lt;v8::Value&gt;, void *) {
 
   Nan::SetMethod(target, &quot;open&quot;, open);
+  Nan::SetMethod(target, &quot;openAsync&quot;, openAsync);
   Nan::SetMethod(target, &quot;setConfigOption&quot;, setConfigOption);
   Nan::SetMethod(target, &quot;getConfigOption&quot;, getConfigOption);
   Nan::SetMethod(target, &quot;decToDMS&quot;, decToDMS);
@@ -1202,14 +1203,17 @@ static void Init(Local&lt;Object&gt; target, Local&lt;v8::Value&gt;, void *) {
    * @property gdal.OFTInteger64
    * @type {String}
    */
-  Nan::Set(target, Nan::New(&quot;OFTInteger64&quot;).ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64)).ToLocalChecked());
+  Nan::Set(
+    target, Nan::New(&quot;OFTInteger64&quot;).ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64)).ToLocalChecked());
   /**
    * @final
    * @property gdal.OFTInteger64List
    * @type {String}
    */
   Nan::Set(
-    target, Nan::New(&quot;OFTInteger64List&quot;).ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger64List)).ToLocalChecked());
+    target,
+    Nan::New(&quot;OFTInteger64List&quot;).ToLocalChecked(),
+    Nan::New(getFieldTypeName(OFTInteger64List)).ToLocalChecked());
 #endif
   /**
    * @final

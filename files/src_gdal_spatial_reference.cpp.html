@@ -242,7 +242,7 @@ NAN_METHOD(SpatialReference::New) {
     // sets reference count to one
     srs = new OGRSpatialReference(wkt.empty() ? 0 : wkt.c_str());
     if (!wkt.empty()) {
-      OGRChar *wkt_c = (OGRChar*)wkt.c_str();
+      OGRChar *wkt_c = (OGRChar *)wkt.c_str();
       int err = srs-&gt;importFromWkt(&amp;wkt_c);
       if (err) {
         NODE_THROW_OGRERR(err);
@@ -638,7 +638,7 @@ NAN_METHOD(SpatialReference::fromWKT) {
 
   std::string wkt(&quot;&quot;);
   NODE_ARG_STR(0, &quot;wkt&quot;, wkt);
-  OGRChar *str = (OGRChar*)wkt.c_str();
+  OGRChar *str = (OGRChar *)wkt.c_str();
 
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs-&gt;importFromWkt(&amp;str);

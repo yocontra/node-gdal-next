@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Constants (DMD) - node-gdal-next</title>
+    <title>src/async/async_rasterio.hpp - node-gdal-next</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -118,200 +118,89 @@
                 <div id="docs-main">
                     <div class="content">
 <div class="page-header">
-    <h1>Constants (DMD)</h1>
+    <h1>src/async/async_rasterio.hpp <small>File</small></h1>
 </div>
 
+<div class="file">
+    <pre class="prettyprint linenums">
+#ifndef __NODE_GDAL_ASYNC_RASTERIO_H__
+#define __NODE_GDAL_ASYNC_RASTERIO_H__
 
+// node
+#include &lt;node.h&gt;
+#include &lt;node_object_wrap.h&gt;
 
+// nan
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored &quot;-Wunused-parameter&quot;
+#include &lt;nan.h&gt;
+#pragma GCC diagnostic pop
 
+// gdal
+#include &lt;gdal_priv.h&gt;
 
+namespace node_gdal {
 
+/**
+ * This class handles async RasterIO
+ *
+ * It keeps strong references on the JS objects
+ * data and the parent band
+ * in hDataPersistentHandle and hBandPersistentHandle
+ * to protect them from the garbage collector
+ */
+class AsyncRasterIO : public Nan::AsyncWorker {
+    private:
+  uv_mutex_t *async_lock;
+  Nan::Persistent&lt;v8::Object&gt; hDataPersistentHandle;
+  Nan::Persistent&lt;v8::Object&gt; hBandPersistentHandle;
+  RasterBand *pBand;
+  GDALRWFlag eRWFlag;
+  int nXOff;
+  int nYOff;
+  int nXSize;
+  int nYSize;
+  void *pData;
+  int nBufXSize;
+  int nBufYSize;
+  GDALDataType eBufType;
+  int nPixelSpace;
+  int nLineSpace;
+#if GDAL_VERSION_MAJOR &gt;= 2
+  GDALRasterIOExtraArg *psExtraArg;
+#endif
+  CPLErr eErr;
 
-<!-- table of contents -->
+    public:
+  explicit AsyncRasterIO(
+    Nan::Callback *pCallback,
+    RasterBand *pBand,
+    GDALRWFlag eRWFlag,
+    int nXOff,
+    int nYOff,
+    int nXSize,
+    int nYSize,
+    Local&lt;Object&gt; *pObjectData,
+    void *pData,
+    int nBufXSize,
+    int nBufYSize,
+    GDALDataType eBufType,
+    int nPixelSpace,
+    int nLineSpace
+#if GDAL_VERSION_MAJOR &gt;= 2
+    ,
+    GDALRasterIOExtraArg *psExtraArg = (GDALRasterIOExtraArg *)nullptr
+#endif
+  );
 
-<div id="class-toc" class="page-section">
-	<h2>Table of Contents</h2>
-    <ul>
-
-		<li>
-			<strong>Properties</strong>
-			<ul>
-				<li><a href="#prop-gdal.DMD_CREATIONDATATYPES"><span class="ip">gdal.DMD_CREATIONDATATYPES</span></a></li>
-				<li><a href="#prop-gdal.DMD_CREATIONOPTIONLIST"><span class="ip">gdal.DMD_CREATIONOPTIONLIST</span></a></li>
-				<li><a href="#prop-gdal.DMD_EXTENSION"><span class="ip">gdal.DMD_EXTENSION</span></a></li>
-				<li><a href="#prop-gdal.DMD_HELPTOPIC"><span class="ip">gdal.DMD_HELPTOPIC</span></a></li>
-				<li><a href="#prop-gdal.DMD_LONGNAME"><span class="ip">gdal.DMD_LONGNAME</span></a></li>
-				<li><a href="#prop-gdal.DMD_MIMETYPE"><span class="ip">gdal.DMD_MIMETYPE</span></a></li>
-			</ul>
-		</li>
-
-
-	</ul>
+  void Execute();
+  void HandleOKCallback();
+  void HandleErrorCallback();
+};
+} // namespace node_gdal
+#endif
+    </pre>
 </div>
-
-<!-- details -->
-
-
-
-    <div id="properties" class="page-section">
-        <h2 class="off-left">Properties</h2>
-
-        <div class="item-list">
-<div id="prop-gdal.DMD_CREATIONDATATYPES" class="property item">
-    <h3 class="name"><code>gdal.DMD_CREATIONDATATYPES</code></h3>
-    <span class="type">String</span>
-
-
-
-        <span class="flag final">const</span>
-
-
-    <div class="meta">
-                <p>
-                Defined in
-        <a href="../files/src_node_gdal.cpp.html#l304"><code>src&#x2F;node_gdal.cpp:304</code></a>
-        </p>
-
-
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-
-
-</div>
-<div id="prop-gdal.DMD_CREATIONOPTIONLIST" class="property item">
-    <h3 class="name"><code>gdal.DMD_CREATIONOPTIONLIST</code></h3>
-    <span class="type">String</span>
-
-
-
-        <span class="flag final">const</span>
-
-
-    <div class="meta">
-                <p>
-                Defined in
-        <a href="../files/src_node_gdal.cpp.html#l295"><code>src&#x2F;node_gdal.cpp:295</code></a>
-        </p>
-
-
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-
-
-</div>
-<div id="prop-gdal.DMD_EXTENSION" class="property item">
-    <h3 class="name"><code>gdal.DMD_EXTENSION</code></h3>
-    <span class="type">String</span>
-
-
-
-        <span class="flag final">const</span>
-
-
-    <div class="meta">
-                <p>
-                Defined in
-        <a href="../files/src_node_gdal.cpp.html#l289"><code>src&#x2F;node_gdal.cpp:289</code></a>
-        </p>
-
-
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-
-
-</div>
-<div id="prop-gdal.DMD_HELPTOPIC" class="property item">
-    <h3 class="name"><code>gdal.DMD_HELPTOPIC</code></h3>
-    <span class="type">String</span>
-
-
-
-        <span class="flag final">const</span>
-
-
-    <div class="meta">
-                <p>
-                Defined in
-        <a href="../files/src_node_gdal.cpp.html#l283"><code>src&#x2F;node_gdal.cpp:283</code></a>
-        </p>
-
-
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-
-
-</div>
-<div id="prop-gdal.DMD_LONGNAME" class="property item">
-    <h3 class="name"><code>gdal.DMD_LONGNAME</code></h3>
-    <span class="type">String</span>
-
-
-
-        <span class="flag final">const</span>
-
-
-    <div class="meta">
-                <p>
-                Defined in
-        <a href="../files/src_node_gdal.cpp.html#l271"><code>src&#x2F;node_gdal.cpp:271</code></a>
-        </p>
-
-
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-
-
-</div>
-<div id="prop-gdal.DMD_MIMETYPE" class="property item">
-    <h3 class="name"><code>gdal.DMD_MIMETYPE</code></h3>
-    <span class="type">String</span>
-
-
-
-        <span class="flag final">const</span>
-
-
-    <div class="meta">
-                <p>
-                Defined in
-        <a href="../files/src_node_gdal.cpp.html#l277"><code>src&#x2F;node_gdal.cpp:277</code></a>
-        </p>
-
-
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-
-
-</div>
-        </div>
-    </div>
-
-
-
                     </div>
                 </div>
             </div>

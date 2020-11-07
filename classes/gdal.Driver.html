@@ -145,10 +145,13 @@ be gateways to many formats through a secondary multi-library.</p>
 			<ul>
 				<li><a href="#method-copyFiles"><span class="im">copyFiles</span>(<span class="ia">name_old</span><span class="ia">name_new</span>)</a></li>
 				<li><a href="#method-create"><span class="im">create</span>(<span class="ia">filename</span><span class="ia">x_size</span><span class="ia">y_size</span><span class="ia">band_count</span><span class="ia">data_type</span><span class="ia">creation_options</span>)</a></li>
+				<li><a href="#method-createAsync"><span class="im">createAsync</span>(<span class="ia">filename</span><span class="ia">x_size</span><span class="ia">y_size</span><span class="ia">band_count</span><span class="ia">data_type</span><span class="ia">creation_options</span><span class="ia">callback</span>)</a></li>
 				<li><a href="#method-createCopy"><span class="im">createCopy</span>(<span class="ia">filename</span><span class="ia">src</span><span class="ia">strict</span><span class="ia">options</span>)</a></li>
+				<li><a href="#method-createCopyAsync"><span class="im">createCopyAsync</span>(<span class="ia">filename</span><span class="ia">src</span><span class="ia">strict</span><span class="ia">options</span><span class="ia">callback</span>)</a></li>
 				<li><a href="#method-deleteDataset"><span class="im">deleteDataset</span>(<span class="ia">filename</span>)</a></li>
 				<li><a href="#method-getMetadata"><span class="im">getMetadata</span>(<span class="ia">domain</span>)</a></li>
 				<li><a href="#method-open"><span class="im">open</span>(<span class="ia">path</span><span class="ia">mode</span>)</a></li>
+				<li><a href="#method-openAsync"><span class="im">openAsync</span>(<span class="ia">path</span><span class="ia">mode</span><span class="ia">callback</span>)</a></li>
 				<li><a href="#method-rename"><span class="im">rename</span>(<span class="ia">new_name</span><span class="ia">old_name</span>)</a></li>
 			</ul>
 		</li>
@@ -194,7 +197,7 @@ be gateways to many formats through a secondary multi-library.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_driver.cpp.html#l357"><code>src&#x2F;gdal_driver.cpp:357</code></a>
+		<a href="../files/src_gdal_driver.cpp.html#l450"><code>src&#x2F;gdal_driver.cpp:450</code></a>
 		</p>
 
 
@@ -270,7 +273,7 @@ be gateways to many formats through a secondary multi-library.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_driver.cpp.html#l204"><code>src&#x2F;gdal_driver.cpp:204</code></a>
+		<a href="../files/src_gdal_driver.cpp.html#l281"><code>src&#x2F;gdal_driver.cpp:281</code></a>
 		</p>
 
 
@@ -357,6 +360,144 @@ driver-specific dataset creation options</p>
 		</div>
 
 </div>
+<div id="method-createAsync" class="method item">
+	<div class="method-signature">
+	<span class="name"><code>createAsync</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>filename</code>
+				</li>
+				<li class="arg">
+						<code class="optional">x_size=0</code>
+				</li>
+				<li class="arg">
+						<code class="optional">y_size=0</code>
+				</li>
+				<li class="arg">
+						<code class="optional">band_count=0</code>
+				</li>
+				<li class="arg">
+						<code class="optional">data_type=gdal.GDT_Byte</code>
+				</li>
+				<li class="arg">
+						<code class="optional">creation_options</code>
+				</li>
+				<li class="arg">
+						<code>callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type"></span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/src_gdal_driver.cpp.html#l303"><code>src&#x2F;gdal_driver.cpp:303</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Asynchronously create a new dataset with this driver.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">filename</code>
+						<span class="type">String</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[x_size=0]</code>
+						<span class="type">Integer</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>raster width in pixels (ignored for vector
+datasets)</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[y_size=0]</code>
+						<span class="type">Integer</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>raster height in pixels (ignored for vector
+datasets)</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[band_count=0]</code>
+						<span class="type">Integer</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[data_type=gdal.GDT_Byte]</code>
+						<span class="type">Integer</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>pixel data type (ignored for
+vector datasets) (see <a href="../classes/Constants (GDT).html" class="crosslink">data
+types</a>)</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[creation_options]</code>
+						<span class="type">String[] |  Object</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>An array or object containing
+driver-specific dataset creation options</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">callback</code>
+						<span class="type">Callback</span>
+
+
+					<div class="param-description"><p>promisifiable callback</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+					<p>gdal.Dataset</p>
+
+			</div>
+		</div>
+
+</div>
 <div id="method-createCopy" class="method item">
 	<div class="method-signature">
 	<span class="name"><code>createCopy</code></span>
@@ -390,7 +531,7 @@ driver-specific dataset creation options</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_driver.cpp.html#l275"><code>src&#x2F;gdal_driver.cpp:275</code></a>
+		<a href="../files/src_gdal_driver.cpp.html#l417"><code>src&#x2F;gdal_driver.cpp:417</code></a>
 		</p>
 
 
@@ -450,6 +591,111 @@ driver-specific dataset creation options</p>
 		</div>
 
 </div>
+<div id="method-createCopyAsync" class="method item">
+	<div class="method-signature">
+	<span class="name"><code>createCopyAsync</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>filename</code>
+				</li>
+				<li class="arg">
+						<code>src</code>
+				</li>
+				<li class="arg">
+						<code class="optional">strict=false</code>
+				</li>
+				<li class="arg">
+						<code class="optional">options=null</code>
+				</li>
+				<li class="arg">
+						<code>callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type"></span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/src_gdal_driver.cpp.html#l433"><code>src&#x2F;gdal_driver.cpp:433</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Asynchronously create a copy of a dataset.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">filename</code>
+						<span class="type">String</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">src</code>
+						<span class="type"><a href="../classes/gdal.Dataset.html" class="crosslink">gdal.Dataset</a></span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[strict=false]</code>
+						<span class="type">Boolean</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[options=null]</code>
+						<span class="type">String[] |  Object</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>An array or object containing
+driver-specific dataset creation options</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">callback</code>
+						<span class="type">Callback</span>
+
+
+					<div class="param-description"><p>promisifiable callback</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+					<p>gdal.Dataset</p>
+
+			</div>
+		</div>
+
+</div>
 <div id="method-deleteDataset" class="method item">
 	<div class="method-signature">
 	<span class="name"><code>deleteDataset</code></span>
@@ -471,7 +717,7 @@ driver-specific dataset creation options</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_driver.cpp.html#l172"><code>src&#x2F;gdal_driver.cpp:172</code></a>
+		<a href="../files/src_gdal_driver.cpp.html#l176"><code>src&#x2F;gdal_driver.cpp:176</code></a>
 		</p>
 
 
@@ -519,7 +765,7 @@ driver-specific dataset creation options</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_driver.cpp.html#l423"><code>src&#x2F;gdal_driver.cpp:423</code></a>
+		<a href="../files/src_gdal_driver.cpp.html#l516"><code>src&#x2F;gdal_driver.cpp:516</code></a>
 		</p>
 
 
@@ -581,7 +827,7 @@ driver-specific dataset creation options</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_driver.cpp.html#l457"><code>src&#x2F;gdal_driver.cpp:457</code></a>
+		<a href="../files/src_gdal_driver.cpp.html#l614"><code>src&#x2F;gdal_driver.cpp:614</code></a>
 		</p>
 
 
@@ -625,6 +871,89 @@ driver-specific dataset creation options</p>
 		</div>
 
 </div>
+<div id="method-openAsync" class="method item">
+	<div class="method-signature">
+	<span class="name"><code>openAsync</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>path</code>
+				</li>
+				<li class="arg">
+						<code class="optional">mode=&#x60;&quot;r&quot;&#x60;</code>
+				</li>
+				<li class="arg">
+						<code>callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type"><a href="../classes/gdal.Dataset.html" class="crosslink">gdal.Dataset</a></span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/src_gdal_driver.cpp.html#l628"><code>src&#x2F;gdal_driver.cpp:628</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Opens a dataset.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">path</code>
+						<span class="type">String</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[mode=&#x60;&quot;r&quot;&#x60;]</code>
+						<span class="type">String</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>The mode to use to open the file: <code>"r"</code> or
+<code>"r+"</code></p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">callback</code>
+						<span class="type">Callback</span>
+
+
+					<div class="param-description"><p>promisifiable callback</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type"><a href="../classes/gdal.Dataset.html" class="crosslink">gdal.Dataset</a></span>
+			</div>
+		</div>
+
+</div>
 <div id="method-rename" class="method item">
 	<div class="method-signature">
 	<span class="name"><code>rename</code></span>
@@ -649,7 +978,7 @@ driver-specific dataset creation options</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_gdal_driver.cpp.html#l390"><code>src&#x2F;gdal_driver.cpp:390</code></a>
+		<a href="../files/src_gdal_driver.cpp.html#l483"><code>src&#x2F;gdal_driver.cpp:483</code></a>
 		</p>
 
 
@@ -709,7 +1038,7 @@ driver-specific dataset creation options</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_gdal_driver.cpp.html#l153"><code>src&#x2F;gdal_driver.cpp:153</code></a>
+        <a href="../files/src_gdal_driver.cpp.html#l157"><code>src&#x2F;gdal_driver.cpp:157</code></a>
         </p>
 
 

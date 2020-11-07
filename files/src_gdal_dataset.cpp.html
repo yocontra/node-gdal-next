@@ -273,7 +273,14 @@ Local&lt;Value&gt; Dataset::New(GDALDataset *raw) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(Dataset::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
 
   dataset_cache.add(raw, obj);
-  wrapped-&gt;uid = ptr_manager.add(raw);
+
+  /* The async locks must live outside the V8 memory management,
+   * otherwise they won&#x27;t be accessible from the async threads
+   */
+  wrapped-&gt;async_lock = new uv_mutex_t;
+  uv_mutex_init(wrapped-&gt;async_lock);
+
+  wrapped-&gt;uid = ptr_manager.add(raw, wrapped-&gt;async_lock);
 
   return scope.Escape(obj);
 }
@@ -292,6 +299,8 @@ Local&lt;Value&gt; Dataset::New(OGRDataSource *raw) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(Dataset::constructor)).ToLocalChecked(), 1, &amp;ext).ToLocalChecked();
 
   datasource_cache.add(raw, obj);
+  wrapped-&gt;async_lock = new uv_mutex_t;
+  uv_mutex_init(wrapped-&gt;async_lock);
   wrapped-&gt;uid = ptr_manager.add(raw);
 
   return scope.Escape(obj);
@@ -329,7 +338,9 @@ NAN_METHOD(Dataset::getMetadata) {
   GDALDataset *raw = ds-&gt;getDataset();
   std::string domain(&quot;&quot;);
   NODE_ARG_OPT_STR(0, &quot;domain&quot;, domain);
+  uv_mutex_lock(ds-&gt;async_lock);
   info.GetReturnValue().Set(MajorObject::getMetadata(raw, domain.empty() ? NULL : domain.c_str()));
+  uv_mutex_unlock(ds-&gt;async_lock);
 }
 
 /**
@@ -362,7 +373,9 @@ NAN_METHOD(Dataset::testCapability) {
   std::string capability(&quot;&quot;);
   NODE_ARG_STR(0, &quot;capability&quot;, capability);
 
+  uv_mutex_lock(ds-&gt;async_lock);
   info.GetReturnValue().Set(Nan::New&lt;Boolean&gt;(raw-&gt;TestCapability(capability.c_str())));
+  uv_mutex_unlock(ds-&gt;async_lock);
 }
 
 /**
@@ -388,7 +401,9 @@ NAN_METHOD(Dataset::getGCPProjection) {
 #endif
 
   GDALDataset *raw = ds-&gt;getDataset();
+  uv_mutex_lock(ds-&gt;async_lock);
   info.GetReturnValue().Set(SafeString::New(raw-&gt;GetGCPProjection()));
+  uv_mutex_unlock(ds-&gt;async_lock);
 }
 
 /**
@@ -441,7 +456,9 @@ NAN_METHOD(Dataset::flush) {
     Nan::ThrowError(&quot;Dataset object has already been destroyed&quot;);
     return;
   }
+  uv_mutex_lock(ds-&gt;async_lock);
   raw-&gt;FlushCache();
+  uv_mutex_unlock(ds-&gt;async_lock);
 
   return;
 }
@@ -488,13 +505,16 @@ NAN_METHOD(Dataset::executeSQL) {
   NODE_ARG_WRAPPED_OPT(1, &quot;spatial filter geometry&quot;, Geometry, spatial_filter);
   NODE_ARG_OPT_STR(2, &quot;sql dialect&quot;, sql_dialect);
 
+  uv_mutex_lock(ds-&gt;async_lock);
   OGRLayer *layer = raw-&gt;ExecuteSQL(
     sql.c_str(), spatial_filter ? spatial_filter-&gt;get() : NULL, sql_dialect.empty() ? NULL : sql_dialect.c_str());
 
   if (layer) {
     info.GetReturnValue().Set(Layer::New(layer, raw, true));
+    uv_mutex_unlock(ds-&gt;async_lock);
     return;
   } else {
+    uv_mutex_unlock(ds-&gt;async_lock);
     Nan::ThrowError(&quot;Error executing SQL&quot;);
     return;
   }
@@ -536,9 +556,11 @@ NAN_METHOD(Dataset::getFileList) {
     return;
   }
 
+  uv_mutex_lock(ds-&gt;async_lock);
   char **list = raw-&gt;GetFileList();
   if (!list) {
     info.GetReturnValue().Set(results);
+    uv_mutex_unlock(ds-&gt;async_lock);
     return;
   }
 
@@ -547,6 +569,7 @@ NAN_METHOD(Dataset::getFileList) {
     Nan::Set(results, i, SafeString::New(list[i]));
     i++;
   }
+  uv_mutex_unlock(ds-&gt;async_lock);
 
   CSLDestroy(list);
 
@@ -583,11 +606,13 @@ NAN_METHOD(Dataset::getGCPs) {
     return;
   }
 
+  uv_mutex_lock(ds-&gt;async_lock);
   int n = raw-&gt;GetGCPCount();
   const GDAL_GCP *gcps = raw-&gt;GetGCPs();
 
   if (!gcps) {
     info.GetReturnValue().Set(results);
+    uv_mutex_unlock(ds-&gt;async_lock);
     return;
   }
 
@@ -605,6 +630,7 @@ NAN_METHOD(Dataset::getGCPs) {
   }
 
   info.GetReturnValue().Set(results);
+  uv_mutex_unlock(ds-&gt;async_lock);
 }
 
 /**
@@ -673,7 +699,9 @@ NAN_METHOD(Dataset::setGCPs) {
     gcp++;
   }
 
+  uv_mutex_lock(ds-&gt;async_lock);
   CPLErr err = raw-&gt;SetGCPs(gcps-&gt;Length(), list, projection.c_str());
+  uv_mutex_unlock(ds-&gt;async_lock);
 
   if (list) {
     delete[] list;
@@ -740,6 +768,7 @@ NAN_METHOD(Dataset::buildOverviews) {
     o[i] = Nan::To&lt;int32_t&gt;(val).ToChecked();
   }
 
+  uv_mutex_lock(ds-&gt;async_lock);
   if (!bands.IsEmpty()) {
     n_bands = bands-&gt;Length();
     b = new int[n_bands];
@@ -748,6 +777,7 @@ NAN_METHOD(Dataset::buildOverviews) {
       if (!val-&gt;IsNumber()) {
         delete[] o;
         delete[] b;
+        uv_mutex_unlock(ds-&gt;async_lock);
         Nan::ThrowError(&quot;band array must only contain numbers&quot;);
         return;
       }
@@ -756,6 +786,7 @@ NAN_METHOD(Dataset::buildOverviews) {
         // BuildOverviews prints an error but segfaults before returning
         delete[] o;
         delete[] b;
+        uv_mutex_unlock(ds-&gt;async_lock);
         Nan::ThrowError(&quot;invalid band id&quot;);
         return;
       }
@@ -763,6 +794,7 @@ NAN_METHOD(Dataset::buildOverviews) {
   }
 
   CPLErr err = raw-&gt;BuildOverviews(resampling.c_str(), n_overviews, o, n_bands, b, NULL, NULL);
+  uv_mutex_unlock(ds-&gt;async_lock);
 
   delete[] o;
   if (b) delete[] b;
@@ -802,7 +834,9 @@ NAN_GETTER(Dataset::descriptionGetter) {
     Nan::ThrowError(&quot;Dataset object has already been destroyed&quot;);
     return;
   }
+  uv_mutex_lock(ds-&gt;async_lock);
   info.GetReturnValue().Set(SafeString::New(raw-&gt;GetDescription()));
+  uv_mutex_unlock(ds-&gt;async_lock);
 }
 
 /**
@@ -830,12 +864,14 @@ NAN_GETTER(Dataset::rasterSizeGetter) {
 
   GDALDataset *raw = ds-&gt;getDataset();
 
-// GDAL 2.x will return 512x512 for vector datasets... which doesn&#x27;t really make
-// sense in JS where we can return null instead of a number
-// https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
+  // GDAL 2.x will return 512x512 for vector datasets... which doesn&#x27;t really make
+  // sense in JS where we can return null instead of a number
+  // https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
+  uv_mutex_lock(ds-&gt;async_lock);
 #if GDAL_VERSION_MAJOR &gt;= 2
   if (raw-&gt;GetDriver() == nullptr || !raw-&gt;GetDriver()-&gt;GetMetadataItem(GDAL_DCAP_RASTER)) {
     info.GetReturnValue().Set(Nan::Null());
+    uv_mutex_unlock(ds-&gt;async_lock);
     return;
   }
 #endif
@@ -844,6 +880,7 @@ NAN_GETTER(Dataset::rasterSizeGetter) {
   Nan::Set(result, Nan::New(&quot;x&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(raw-&gt;GetRasterXSize()));
   Nan::Set(result, Nan::New(&quot;y&quot;).ToLocalChecked(), Nan::New&lt;Integer&gt;(raw-&gt;GetRasterYSize()));
   info.GetReturnValue().Set(result);
+  uv_mutex_unlock(ds-&gt;async_lock);
 }
 
 /**
@@ -870,9 +907,11 @@ NAN_GETTER(Dataset::srsGetter) {
 #endif
 
   GDALDataset *raw = ds-&gt;getDataset();
+  uv_mutex_lock(ds-&gt;async_lock);
   // get projection wkt and return null if not set
   OGRChar *wkt = (OGRChar *)raw-&gt;GetProjectionRef();
   if (*wkt == &#x27;\0&#x27;) {
+    uv_mutex_unlock(ds-&gt;async_lock);
     // getProjectionRef returns string of length 0 if no srs set
     info.GetReturnValue().Set(Nan::Null());
     return;
@@ -880,6 +919,7 @@ NAN_GETTER(Dataset::srsGetter) {
   // otherwise construct and return SpatialReference from wkt
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs-&gt;importFromWkt(&amp;wkt);
+  uv_mutex_unlock(ds-&gt;async_lock);
 
   if (err) {
     NODE_THROW_OGRERR(err);
@@ -920,7 +960,9 @@ NAN_GETTER(Dataset::geoTransformGetter) {
 
   GDALDataset *raw = ds-&gt;getDataset();
   double transform[6];
+  uv_mutex_lock(ds-&gt;async_lock);
   CPLErr err = raw-&gt;GetGeoTransform(transform);
+  uv_mutex_unlock(ds-&gt;async_lock);
   if (err) {
     // This is mostly (always?) a sign that it has not been set
     info.GetReturnValue().Set(Nan::Null());
@@ -1001,7 +1043,9 @@ NAN_SETTER(Dataset::srsSetter) {
     return;
   }
 
+  uv_mutex_lock(ds-&gt;async_lock);
   CPLErr err = raw-&gt;SetProjection(wkt.c_str());
+  uv_mutex_unlock(ds-&gt;async_lock);
 
   if (err) { NODE_THROW_CPLERR(err); }
 }
@@ -1045,7 +1089,10 @@ NAN_SETTER(Dataset::geoTransformSetter) {
     buffer[i] = Nan::To&lt;double&gt;(val).ToChecked();
   }
 
+  uv_mutex_lock(ds-&gt;async_lock);
   CPLErr err = raw-&gt;SetGeoTransform(buffer);
+  uv_mutex_unlock(ds-&gt;async_lock);
+
   if (err) { NODE_THROW_CPLERR(err); }
 }
 

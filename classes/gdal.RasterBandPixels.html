@@ -148,10 +148,13 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 				<li><a href="#method-get"><span class="im">get</span>(<span class="ia">x</span><span class="ia">y</span>)</a></li>
 				<li><a href="#method-read"><span class="im">read</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">width</span><span class="ia">height</span><span class="ia">[data] The
 [TypedArray]</span><span class="ia">options</span>)</a></li>
+				<li><a href="#method-readAsync"><span class="im">readAsync</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">width</span><span class="ia">height</span><span class="ia">[data] The
+[TypedArray]</span><span class="ia">options</span><span class="ia">callback</span>)</a></li>
 				<li><a href="#method-readBlock"><span class="im">readBlock</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">[data] The
 [TypedArray]</span>)</a></li>
 				<li><a href="#method-set"><span class="im">set</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">value</span>)</a></li>
 				<li><a href="#method-write"><span class="im">write</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">width</span><span class="ia">height</span><span class="ia">data</span><span class="ia">options</span>)</a></li>
+				<li><a href="#method-writeAsync"><span class="im">writeAsync</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">width</span><span class="ia">height</span><span class="ia">data</span><span class="ia">options</span><span class="ia">callback</span>)</a></li>
 				<li><a href="#method-writeBlock"><span class="im">writeBlock</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">data</span>)</a></li>
 			</ul>
 		</li>
@@ -194,7 +197,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l92"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:92</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l106"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:106</code></a>
 		</p>
 
 
@@ -274,7 +277,7 @@ band.pixels.read(0,0,16,16,data);<code>&#x60;</code></code></pre>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l161"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:161</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l264"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:264</code></a>
 		</p>
 
 
@@ -395,6 +398,184 @@ of values.</p>
 		</div>
 
 </div>
+<div id="method-readAsync" class="method item">
+	<div class="method-signature">
+	<span class="name"><code>readAsync</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>x</code>
+				</li>
+				<li class="arg">
+						<code>y</code>
+				</li>
+				<li class="arg">
+						<code>width</code>
+				</li>
+				<li class="arg">
+						<code>height</code>
+				</li>
+				<li class="arg">
+						<code>[data] The
+[TypedArray]</code>
+				</li>
+				<li class="arg">
+						<code class="optional">options</code>
+				</li>
+				<li class="arg">
+						<code class="optional">callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">TypedArray</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l291"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:291</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Asynchronously reads a region of pixels.
+If the last parameter is a callback, then this callback is called on completion and undefined is returned.
+All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
+as it is the last parameter. Otherwise the function returns a Promise resolved with the result.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">x</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">y</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">width</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">height</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">[data] The
+[TypedArray]</code>
+						<span class="type">TypedArray</span>
+
+
+					<div class="param-description"><p>(<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses</a>)
+to put the data in. A new array is created if not given.</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[options]</code>
+						<span class="type">Object</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+
+						<ul class="params-list">
+							<li class="param">
+									<code class="param-name optional">[buffer_width=x_size]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+							<li class="param">
+									<code class="param-name optional">[buffer_height=y_size]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+							<li class="param">
+									<code class="param-name optional">[data_type]</code>
+									<span class="type">String</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"><p>See <a href="../classes/Constants (GDT).html" class="crosslink">GDT
+constants</a>.</p>
+</div>
+
+							</li>
+							<li class="param">
+									<code class="param-name optional">[pixel_space]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+							<li class="param">
+									<code class="param-name optional">[line_space]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+						</ul>
+				</li>
+				<li class="param">
+						<code class="param-name optional">[callback]</code>
+						<span class="type">RequestCallback</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>Promisifiable callback, always the last parameter, can be specified even if
+certain optional parameters are omitted</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">TypedArray</span>:
+					<p>A
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a>
+of values.</p>
+
+			</div>
+		</div>
+
+</div>
 <div id="method-readBlock" class="method item">
 	<div class="method-signature">
 	<span class="name"><code>readBlock</code></span>
@@ -426,7 +607,7 @@ of values.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l361"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:361</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l448"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:448</code></a>
 		</p>
 
 
@@ -508,7 +689,7 @@ of values.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l126"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:126</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l137"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:137</code></a>
 		</p>
 
 
@@ -584,7 +765,7 @@ of values.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l273"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:273</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l399"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:399</code></a>
 		</p>
 
 
@@ -684,6 +865,160 @@ to write to the band.</p>
 
 
 </div>
+<div id="method-writeAsync" class="method item">
+	<div class="method-signature">
+	<span class="name"><code>writeAsync</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>x</code>
+				</li>
+				<li class="arg">
+						<code>y</code>
+				</li>
+				<li class="arg">
+						<code>width</code>
+				</li>
+				<li class="arg">
+						<code>height</code>
+				</li>
+				<li class="arg">
+						<code>data</code>
+				</li>
+				<li class="arg">
+						<code class="optional">options</code>
+				</li>
+				<li class="arg">
+						<code class="optional">callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l421"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:421</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Asynchronously writes a region of pixels.
+If the last parameter is a callback, then this callback is called on completion and undefined is returned.
+All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
+as it is the last parameter.
+Otherwise the function returns a Promise resolved with the result.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">x</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">y</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">width</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">height</code>
+						<span class="type">Integer</span>
+
+
+
+				</li>
+				<li class="param">
+						<code class="param-name">data</code>
+						<span class="type">TypedArray</span>
+
+
+					<div class="param-description"><p>The
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses">TypedArray</a>
+to write to the band.</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[options]</code>
+						<span class="type">Object</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+
+						<ul class="params-list">
+							<li class="param">
+									<code class="param-name optional">[buffer_width=x_size]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+							<li class="param">
+									<code class="param-name optional">[buffer_height=y_size]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+							<li class="param">
+									<code class="param-name optional">[pixel_space]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+							<li class="param">
+									<code class="param-name optional">[line_space]</code>
+									<span class="type">Integer</span>
+									<span class="flag optional" title="This parameter is optional.">optional</span>
+
+								<div class="param-description"></div>
+
+							</li>
+						</ul>
+				</li>
+				<li class="param">
+						<code class="param-name optional">[callback]</code>
+						<span class="type">RequestCallback</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>Promisifiable callback, always the last parameter, can be specified even if
+certain optional parameters are omitted</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+</div>
 <div id="method-writeBlock" class="method item">
 	<div class="method-signature">
 	<span class="name"><code>writeBlock</code></span>
@@ -711,7 +1046,7 @@ to write to the band.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_collections_rasterband_pixels.cpp.html#l422"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:422</code></a>
+		<a href="../files/src_collections_rasterband_pixels.cpp.html#l506"><code>src&#x2F;collections&#x2F;rasterband_pixels.cpp:506</code></a>
 		</p>
 
 

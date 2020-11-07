@@ -711,6 +711,192 @@ gdal.open = (function () {
   }
 })()
 
+/**
+ * Standard async request callback
+ * @callback requestCallback
+ * @param {error} error error or undefined when the operation is successful
+ * @param {object} result result of the asynchronous operation or undefined on error
+ */
+
+const promisify = require(&#x27;util&#x27;).promisify
+const callbackify = require(&#x27;util&#x27;).callbackify
+
+gdal.Driver.prototype.createAsync = (function () {
+  const driverCreateCb = gdal.Driver.prototype.createAsync
+  const driverCreatePromise = promisify(gdal.Driver.prototype.createAsync)
+  return function (
+    filename,
+    x_size,
+    y_size,
+    n_bands,
+    datatype,
+    options,
+    callback
+  ) {
+    if (typeof arguments[arguments.length - 1] === &#x27;function&#x27; &amp;&amp; callback === undefined) {
+      callback = arguments[arguments.length - 1]
+      arguments[arguments.length - 1] = undefined
+    }
+    if (callback) {
+      return driverCreateCb.call(this, filename, x_size, y_size,
+        n_bands, datatype, options, callback)
+    }
+    return driverCreatePromise.call(this, filename, x_size, y_size,
+      n_bands, datatype, options)
+  }
+})()
+
+gdal.Driver.prototype.createCopyAsync = (function () {
+  const driverCreateCopyCb = gdal.Driver.prototype.createCopyAsync
+  const driverCreateCopyPromise = promisify(gdal.Driver.prototype.createCopyAsync)
+  return function (
+    filename,
+    src,
+    options,
+    callback
+  ) {
+    if (typeof arguments[arguments.length - 1] === &#x27;function&#x27; &amp;&amp; callback === undefined) {
+      callback = arguments[arguments.length - 1]
+      arguments[arguments.length - 1] = undefined
+    }
+    if (callback) {
+      return driverCreateCopyCb.call(this, filename, src, options, callback)
+    }
+    return driverCreateCopyPromise.call(this, filename, src, options)
+  }
+})()
+
+gdal.Driver.prototype.openAsync = (function () {
+  const driverOpenCb = gdal.Driver.prototype.openAsync
+  const driverOpenPromise = promisify(gdal.Driver.prototype.openAsync)
+  return function (
+    filename,
+    mode,
+    callback
+  ) {
+    if (typeof arguments[arguments.length - 1] === &#x27;function&#x27; &amp;&amp; callback === undefined) {
+      callback = arguments[arguments.length - 1]
+      arguments[arguments.length - 1] = undefined
+    }
+    if (callback) {
+      return driverOpenCb.call(this, filename, mode, callback)
+    }
+    return driverOpenPromise.apply(this, filename, mode)
+  }
+})()
+
+/**
+ * Asynchronously creates or opens a dataset. Dataset should be explicitly closed with &#x60;dataset.close()&#x60; method if opened in &#x60;&quot;w&quot;&#x60; mode to flush any changes. Otherwise, datasets are closed when (and if) node decides to garbage collect them.
+ * If the last parameter is a callback, then this callback is called on completion and undefined is returned. Otherwise the function returns a Promise resolved with the result.
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * var dataset = await gdal.openAsync(&#x27;./data.shp&#x27;);&#x60;&#x60;&#x60;
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * gdal.openAsync(&#x27;./data.shp&#x27;, (err, ds) =&gt; {...});&#x60;&#x60;&#x60;
+ *
+ * @for gdal
+ * @method openAsync
+ * @static
+ * @param {String} path Path to dataset to open
+ * @param {String} [mode=&quot;r&quot;] The mode to use to open the file: &#x60;&quot;r&quot;&#x60;, &#x60;&quot;r+&quot;&#x60;, or &#x60;&quot;w&quot;&#x60;
+ * @param {String|Array} [drivers] Driver name, or list of driver names to attempt to use.
+ *
+ * @param {Integer} [x_size] Used when creating a raster dataset with the &#x60;&quot;w&quot;&#x60; mode.
+ * @param {Integer} [y_size] Used when creating a raster dataset with the &#x60;&quot;w&quot;&#x60; mode.
+ * @param {Integer} [band_count] Used when creating a raster dataset with the &#x60;&quot;w&quot;&#x60; mode.
+ * @param {Integer} [data_type] Used when creating a raster dataset with the &#x60;&quot;w&quot;&#x60; mode.
+ * @param {String[]|object} [creation_options] Used when creating a dataset with the &#x60;&quot;w&quot;&#x60; mode.
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
+ *
+ * @return {gdal.Dataset}
+ */
+gdal.openAsync = (function () {
+  const openPromise = (function () {
+    const openPromise = promisify(gdal.openAsync)
+
+    // add &#x27;w&#x27; mode to gdal.open() method and also GDAL2-style driver selection
+    return function (
+      filename,
+      mode,
+      drivers,
+      _x_size,
+      _y_size,
+      _n_bands,
+      _datatype,
+      _options
+    ) {
+      if (typeof drivers === &#x27;string&#x27;) {
+        drivers = [ drivers ]
+      } else if (drivers &amp;&amp; !Array.isArray(drivers)) {
+        throw new Error(&#x27;driver(s) must be a string or list of strings&#x27;)
+      }
+
+      if (mode === &#x27;w&#x27;) {
+        // create file with given driver
+        if (!drivers) {
+          throw new Error(&#x27;Driver must be specified&#x27;)
+        }
+        if (drivers.length !== 1) {
+          throw new Error(&#x27;Only one driver can be used to create a file&#x27;)
+        }
+        const driver = gdal.drivers.get(drivers[0])
+        if (!driver) {
+          throw new Error(&#x60;Cannot find driver: ${drivers[0]}&#x60;)
+        }
+
+        const args = Array.prototype.slice.call(arguments, 3) // x_size, y_size, ...
+        args.unshift(filename)
+        return gdal.Driver.prototype.createAsync.apply(driver, args)
+      }
+
+      if (arguments.length &gt; 2 &amp;&amp; drivers) {
+        const p = []
+        for (const driver_name of drivers) {
+          const driver = gdal.drivers.get(driver_name)
+          if (!driver) {
+            throw new Error(&#x60;Cannot find driver: ${driver_name}&#x60;)
+          }
+          p.push(gdal.Driver.prototype.openAsync.call(driver, filename, mode))
+        }
+        // first driver to open the file wins
+        // normally, there are no formats supported by two drivers
+        return Promise.any(p).catch(() =&gt; {
+          throw new Error(&#x27;Error opening dataset&#x27;)
+        })
+      }
+
+      // call gdal.open() method normally
+      return openPromise.call(gdal, filename, mode)
+    }
+  })()
+
+  const openCb = callbackify(openPromise)
+  return function (filename,
+    mode,
+    drivers,
+    x_size,
+    y_size,
+    n_bands,
+    datatype,
+    options,
+    callback) {
+    if (typeof arguments[arguments.length - 1] === &#x27;function&#x27; &amp;&amp; callback === undefined) {
+      callback = arguments[arguments.length - 1]
+      arguments[arguments.length - 1] = undefined
+    }
+    if (callback) {
+      const args = arguments
+      Array.prototype.push.call(args, callback)
+      return openCb.apply(gdal, args)
+    }
+    return openPromise.apply(gdal, arguments)
+  }
+})()
+
 function fieldTypeFromValue(val) {
   const type = typeof val
   if (type === &#x27;number&#x27;) {
@@ -826,12 +1012,91 @@ gdal.RasterBandPixels.prototype.read = (function () {
   }
 })()
 
+gdal.RasterBandPixels.prototype.readAsync = (function () {
+  const readCb = gdal.RasterBandPixels.prototype.readAsync
+  const readPromise = promisify(gdal.RasterBandPixels.prototype.readAsync)
+  return function (x, y, width, height, data, options, cb) {
+    if (typeof arguments[arguments.length - 1] === &#x27;function&#x27; &amp;&amp; cb === undefined) {
+      cb = arguments[arguments.length - 1]
+      /* This has the desired effect of unsetting that argument */
+      arguments[arguments.length - 1] = undefined
+    }
+    if (!options) options = {}
+    if (data) data._gdal_type = getTypedArrayType(data)
+    if (cb) {
+      return readCb.apply(this, [
+        x,
+        y,
+        width,
+        height,
+        data,
+        options.buffer_width,
+        options.buffer_height,
+        options.type,
+        options.pixel_space,
+        options.line_space,
+        cb
+      ])
+    }
+    return readPromise.apply(this, [
+      x,
+      y,
+      width,
+      height,
+      data,
+      options.buffer_width,
+      options.buffer_height,
+      options.type,
+      options.pixel_space,
+      options.line_space
+    ])
+  }
+})()
+
 gdal.RasterBandPixels.prototype.write = (function () {
   const write = gdal.RasterBandPixels.prototype.write
   return function (x, y, width, height, data, options) {
     if (!options) options = {}
     if (data) data._gdal_type = getTypedArrayType(data)
     return write.apply(this, [
+      x,
+      y,
+      width,
+      height,
+      data,
+      options.buffer_width,
+      options.buffer_height,
+      options.pixel_space,
+      options.line_space
+    ])
+  }
+})()
+
+gdal.RasterBandPixels.prototype.writeAsync = (function () {
+  const writeCb = gdal.RasterBandPixels.prototype.writeAsync
+  const writePromise = promisify(gdal.RasterBandPixels.prototype.writeAsync)
+  return function (x, y, width, height, data, options, cb) {
+    if (typeof arguments[arguments.length - 1] === &#x27;function&#x27; &amp;&amp; cb === undefined) {
+      cb = arguments[arguments.length - 1]
+      arguments[arguments.length - 1] = undefined
+    }
+    if (!options) options = {}
+    if (data) data._gdal_type = getTypedArrayType(data)
+    if (cb) {
+      return writeCb.apply(this, [
+        x,
+        y,
+        width,
+        height,
+        data,
+        options.buffer_width,
+        options.buffer_height,
+        options.pixel_space,
+        options.line_space,
+        cb
+      ])
+    }
+    return writePromise.apply(this, [
       x,
       y,
       width,
