@@ -7,6 +7,7 @@ This project is a fork of https://github.com/naturalatlas/node-gdal that:
 - Adds support for more formats
   - GPKG, sqlite, OSM, MBTiles, MVT
 - Adds `Geometry.fromGeoJson` to parse GeoJSON easily
+- Adds async support for raster data + opening/parsing files
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 

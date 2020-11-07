@@ -26,7 +26,8 @@ AsyncRasterIO::AsyncRasterIO(
   int nPixelSpace,
   int nLineSpace
 #if GDAL_VERSION_MAJOR >= 2
-  ,GDALRasterIOExtraArg *psExtraArg
+  ,
+  GDALRasterIOExtraArg *psExtraArg
 #endif
   )
   : Nan::AsyncWorker(pCallback, AsyncRasterIOLabel),
@@ -73,7 +74,8 @@ void AsyncRasterIO::Execute() {
     nPixelSpace,
     nLineSpace
 #if GDAL_VERSION_MAJOR >= 2
-    ,psExtraArg
+    ,
+    psExtraArg
 #endif
   );
 

@@ -63,7 +63,8 @@ class AsyncRasterIO : public Nan::AsyncWorker {
     int nPixelSpace,
     int nLineSpace
 #if GDAL_VERSION_MAJOR >= 2
-    ,GDALRasterIOExtraArg *psExtraArg = (GDALRasterIOExtraArg *)nullptr
+    ,
+    GDALRasterIOExtraArg *psExtraArg = (GDALRasterIOExtraArg *)nullptr
 #endif
   );
 
