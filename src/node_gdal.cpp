@@ -209,8 +209,11 @@ static NAN_METHOD(setPROJSearchPath) {
   NODE_ARG_STR(0, "path", path);
 
   const char *const paths[] = {path.c_str(), nullptr};
-
+#if GDAL_VERSION_MAJOR >= 3
   OSRSetPROJSearchPaths(paths);
+#else
+  LOG("OSRSetPROJSearchPaths not implemented in this version of GDAL [%s] ( minimum is 3.0.0 )", GDAL_RELEASE_NAME);
+#endif
 }
 
 static NAN_METHOD(ThrowDummyCPLError) {
