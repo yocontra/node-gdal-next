@@ -1,72 +1,89 @@
+# node-gdal-async
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Node.js CI](https://github.com/mmomtchev/node-gdal-async/workflows/Node.js%20CI/badge.svg)
+
+Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
+
 # Fork Notes
 
-This project is a fork of https://github.com/naturalatlas/node-gdal that:
+This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal> with:
 
-- Updates native dependencies (GDAL/PROJ/GEOS) to latest versions
-- Updates the build system/JS/prebuilds for newer versions of node
-- Adds support for more formats
-  - GPKG, sqlite, OSM, MBTiles, MVT
-- Adds `Geometry.fromGeoJson` to parse GeoJSON easily
-- Adds async support for raster data + opening/parsing files
+- **Support for asynchronous IO**
+
+## As of November 9th 2020, this project has been completely merged to <https://github.com/contra/node-gdal-next>
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
-### Breaking Changes
+### Breaking Changes relative to node-gdal
 
 - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
 longitude second. If you don't want to make large code changes, you can replace code like `gdal.SpatialReference.fromEPSG(4326)` with `gdal.SpatialReference.fromProj4('+init=epsg:4326')`
 
-# node-gdal-next
+### Breaking Changes relative to node-gdal-next
 
-[![NPM version](http://img.shields.io/npm/v/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
-[![Installs](http://img.shields.io/npm/dm/gdal-next.svg?style=flat)](https://www.npmjs.org/package/gdal-next)
-[![Build Status](https://travis-ci.org/contra/node-gdal-next.svg)](https://travis-ci.org/contra/node-gdal-next)
-[<img src="https://ci.appveyor.com/api/projects/status/8u9qlfu2cjor4idi?svg=true" height="20" alt="" />](https://ci.appveyor.com/project/contra/node-gdal-next)
+- None, this branch is currently merged into node-gdal-next
 
-Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
+## Installation
 
-```sh
-$ npm install gdal-next --save
-```
+If you need async support, you should install the official package from <https://github.com/contra/node-gdal-next>
+
+This project is not published on NPM, it is meant to support experimental development work on the async API
 
 By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed gdal you can use these flags when installing:
 
 ```sh
-# requires libgdal-dev (debian: sudo apt-get install libgdal-dev)
-$ npm install gdal-next --build-from-source --shared_gdal
+$ git clone https://github.com/mmomtchev/node-gdal-async.git
+$ cd node-gdal-async
+$ npm i
+$ npx node-pre-gyp configure
+$ npx node-pre-gyp build [--shared_gdal]  # --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev (debian: sudo apt-get install libgdal-dev)
 ```
 
 ## Sample Usage
 
-#### Raster
+Only asynchronous raster reading/writing and asynchrounous opening are supported in the current version.
+Mixing synchronous and asynchronous operations is supported.
 
+#### Safe mixing of asynchronous operations
+
+Simultaneous operations on distinct dataset objects are always safe and can run it parallel.
+Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects.
+
+**Does not support worker_threads**
+
+#### With callbacks
+
+If the last argument of an xxxAsync function is a callback,
+it will be called on completion with standard *(e,r)* semantics
+In this case the function will return a resolved *Promise*
 ```js
-const gdal = require("gdal-next")
-const dataset = gdal.open("sample.tif")
-
-console.log("number of bands: " + dataset.bands.count())
-console.log("width: " + dataset.rasterSize.x)
-console.log("height: " + dataset.rasterSize.y)
-console.log("geotransform: " + dataset.geoTransform)
-console.log("srs: " + (dataset.srs ? dataset.srs.toWKT() : 'null'))
+const gdal = require('../node-gdal-async') // Or where it is installed
+gdal.openAsync('sample.tif', (e, dataset) => {
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x,
+        dataset.rasterSize.y, (e, data) => {
+        if (e) {
+            console.error(e);
+            return;
+        }
+        console.log(data);
+    });
+});
 ```
 
-#### Vector
+#### With promises
 
+If there is no callback, the function will return a *Promise*
+then can be *then()*ed, *catch()*ed or *await*ed
 ```js
-const gdal = require("gdal-next")
-const dataset = gdal.open("sample.shp")
-const layer = dataset.layers.get(0)
-
-console.log("number of features: " + layer.features.count())
-console.log("fields: " + layer.fields.getNames())
-console.log("extent: " + JSON.stringify(layer.extent))
-console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
+gdal.openAsync('sample.tif').then((dataset) => {
+    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
+        .then((data) => {
+            console.log(data);
+        }).catch(e => console.error(e));
+}).catch(e => console.error(e));
 ```
 
-## Notes
-
-- This binding is *not* async, so it will block node's event loop. Be very careful (or avoid) using it in server code. We recommended using tools like [worker-farm](https://www.npmjs.com/package/worker-farm) to push expensive operations to a seperate process.
 
 ## Bundled Drivers
 
@@ -75,6 +92,10 @@ console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
 ## Contributors
 
 This binding is a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
+
+node-gdal-next is maintained by [@contra](https://github.com/contra)
+
+The async bindings are by [@mmomtchev](https://github.com/mmomtchev)
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
 
