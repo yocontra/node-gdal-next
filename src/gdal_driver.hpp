@@ -15,6 +15,7 @@
 #include <ogrsf_frmts.h>
 
 #include "utils/obj_cache.hpp"
+#include "async.hpp"
 
 using namespace v8;
 using namespace node;
@@ -32,26 +33,17 @@ class Driver : public Nan::ObjectWrap {
   static NAN_METHOD(New);
   static Local<Value> New(GDALDriver *driver);
   static NAN_METHOD(toString);
-  static NAN_METHOD(open);
-  static NAN_METHOD(openAsync);
-  static NAN_METHOD(create);
-  static NAN_METHOD(createAsync);
-  static NAN_METHOD(createCopy);
-  static NAN_METHOD(createCopyAsync);
+  GDAL_ASYNCABLE_DECLARE(open);
+  GDAL_ASYNCABLE_DECLARE(create);
+  GDAL_ASYNCABLE_DECLARE(createCopy);
   static NAN_METHOD(deleteDataset);
   static NAN_METHOD(rename);
-  static NAN_METHOD(copyFiles);
-  static NAN_METHOD(copyFilesAsync);
+  GDAL_ASYNCABLE_DECLARE(copyFiles);
   static NAN_METHOD(getMetadata);
 
   static ObjectCache<GDALDriver, Driver> cache;
 
   static NAN_GETTER(descriptionGetter);
-
-  static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
-  static void _do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
-  static void _do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
-  static void _do_copy_files(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async);
 
   Driver();
   Driver(GDALDriver *driver);

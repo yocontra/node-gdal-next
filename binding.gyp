@@ -52,9 +52,7 @@
 				"src/collections/linestring_points.cpp",
 				"src/collections/rasterband_overviews.cpp",
 				"src/collections/rasterband_pixels.cpp",
-				"src/collections/gdal_drivers.cpp",
-				"src/async/async_rasterio.cpp",
-				"src/async/async_open.cpp"
+				"src/collections/gdal_drivers.cpp"
 			],
 			"include_dirs": [
 				"<!(node -e \"require('nan')\")"

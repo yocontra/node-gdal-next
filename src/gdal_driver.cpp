@@ -2,7 +2,7 @@
 #include "gdal_common.hpp"
 #include "gdal_dataset.hpp"
 #include "gdal_majorobject.hpp"
-#include "async/async_open.hpp"
+#include "async.hpp"
 #include "utils/string_list.hpp"
 
 namespace node_gdal {
@@ -205,10 +205,50 @@ NAN_METHOD(Driver::deleteDataset) {
   return;
 }
 
-/*
- * Low-level common code for synchronous and asynchronous creation
+// These are shared across all Driver functions
+GDAL_ASYNCABLE_IFERR(GDALDataset *) = [](GDALDataset *ds) { return ds == nullptr; };
+GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds) { return Dataset::New(ds); };
+GDAL_ASYNCABLE_FINALLY = []() {};
+
+/**
+ * Create a new dataset with this driver.
+ *
+ * @throws Error
+ * @method create
+ * @param {String} filename
+ * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [band_count=0]
+ * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
+ * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
+ * types{{/crossLink}})
+ * @param {String[]|object} [creation_options] An array or object containing
+ * driver-specific dataset creation options
+ * @return gdal.Dataset
  */
-void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
+
+/**
+ * Asynchronously create a new dataset with this driver.
+ *
+ * @throws Error
+ * @method createAsync
+ * @param {String} filename
+ * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
+ * datasets)
+ * @param {Integer} [band_count=0]
+ * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
+ * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
+ * types{{/crossLink}})
+ * @param {String[]|object} [creation_options] An array or object containing
+ * driver-specific dataset creation options
+ * @param {Callback} callback promisifiable callback
+ * @return gdal.Dataset
+ */
+GDAL_ASYNCABLE_DEFINE(Driver::create) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -236,7 +276,7 @@ void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool a
   }
 
 #if GDAL_VERSION_MAJOR < 2
-  if (async) {
+  if (GDAL_ISASYNC) {
     Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
     return;
   }
@@ -258,75 +298,43 @@ void Driver::_do_create(const Nan::FunctionCallbackInfo<v8::Value> &info, bool a
 
   // Very careful here
   // we can't reference automatic variables, thus the *options object
-  std::function<GDALDataset *()> doit = [raw, filename, x_size, y_size, n_bands, type, options]() {
+  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, filename, x_size, y_size, n_bands, type, options]() {
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
     delete options;
     return ds;
   };
+  GDAL_ASYNCABLE_ERROR = []() { return "Error creating dataset"; };
 
-  if (async) {
-    Nan::Callback *callback;
-    NODE_ARG_CB(6, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
-  } else {
-    GDALDataset *ds = doit();
-    if (!ds) {
-      Nan::ThrowError("Error creating dataset");
-      return;
-    }
-    info.GetReturnValue().Set(Dataset::New(ds));
-  }
+  GDAL_ASYNCABLE_RETURN(6, GDALDataset *);
 }
 
 /**
- * Create a new dataset with this driver.
+ * Create a copy of a dataset.
  *
  * @throws Error
- * @method create
+ * @method createCopy
  * @param {String} filename
- * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
- * datasets)
- * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
- * datasets)
- * @param {Integer} [band_count=0]
- * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
- * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
- * types{{/crossLink}})
- * @param {String[]|object} [creation_options] An array or object containing
+ * @param {gdal.Dataset} src
+ * @param {Boolean} [strict=false]
+ * @param {String[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
  * @return gdal.Dataset
  */
-NAN_METHOD(Driver::create) {
-  _do_create(info, false);
-}
 
 /**
- * Asynchronously create a new dataset with this driver.
+ * Asynchronously create a copy of a dataset.
  *
  * @throws Error
- * @method createAsync
+ * @method createCopyAsync
  * @param {String} filename
- * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
- * datasets)
- * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
- * datasets)
- * @param {Integer} [band_count=0]
- * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
- * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
- * types{{/crossLink}})
- * @param {String[]|object} [creation_options] An array or object containing
+ * @param {gdal.Dataset} src
+ * @param {Boolean} [strict=false]
+ * @param {String[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
  * @param {Callback} callback promisifiable callback
  * @return gdal.Dataset
  */
-NAN_METHOD(Driver::createAsync) {
-  _do_create(info, true);
-}
-
-/*
- * Low-level common code for synchronous and asynchronous creation by copying
- */
-void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
+GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -365,7 +373,7 @@ void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, b
   }
 
 #if GDAL_VERSION_MAJOR < 2
-  if (async) {
+  if (GDAL_ISASYNC) {
     Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
     return;
   }
@@ -391,7 +399,7 @@ void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, b
 
   GDALDriver *raw = driver->getGDALDriver();
   uv_mutex_t *async_lock = src_dataset->async_lock;
-  std::function<GDALDataset *()> doit = [raw, filename, src_dataset, strict, options, async_lock]() {
+  GDAL_ASYNCABLE_MAIN(GDALDataset*) = [raw, filename, src_dataset, strict, options, async_lock]() {
     GDALDataset *raw_ds = src_dataset->getDataset();
     uv_mutex_lock(async_lock);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
@@ -399,52 +407,9 @@ void Driver::_do_create_copy(const Nan::FunctionCallbackInfo<v8::Value> &info, b
     delete options;
     return ds;
   };
+  GDAL_ASYNCABLE_ERROR = []() { return "Error creating dataset"; };
 
-  if (async) {
-    Nan::Callback *callback;
-    NODE_ARG_CB(3, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
-  } else {
-    GDALDataset *ds = doit();
-    if (!ds) {
-      Nan::ThrowError("Error copying dataset");
-      return;
-    }
-    info.GetReturnValue().Set(Dataset::New(ds));
-  }
-}
-
-/**
- * Create a copy of a dataset.
- *
- * @throws Error
- * @method createCopy
- * @param {String} filename
- * @param {gdal.Dataset} src
- * @param {Boolean} [strict=false]
- * @param {String[]|object} [options=null] An array or object containing
- * driver-specific dataset creation options
- * @return gdal.Dataset
- */
-NAN_METHOD(Driver::createCopy) {
-  _do_create_copy(info, false);
-}
-
-/**
- * Asynchronously create a copy of a dataset.
- *
- * @throws Error
- * @method createCopyAsync
- * @param {String} filename
- * @param {gdal.Dataset} src
- * @param {Boolean} [strict=false]
- * @param {String[]|object} [options=null] An array or object containing
- * driver-specific dataset creation options
- * @param {Callback} callback promisifiable callback
- * @return gdal.Dataset
- */
-NAN_METHOD(Driver::createCopyAsync) {
-  _do_create_copy(info, true);
+  GDAL_ASYNCABLE_RETURN(3, GDALDataset*);
 }
 
 /**
@@ -547,10 +512,29 @@ NAN_METHOD(Driver::getMetadata) {
   info.GetReturnValue().Set(result);
 }
 
-/*
- * Low-level common code for synchronous and asynchronous opening
+/**
+ * Opens a dataset.
+ *
+ * @throws Error
+ * @method open
+ * @param {String} path
+ * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * `"r+"`
+ * @return {gdal.Dataset}
  */
-void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
+
+/**
+ * Opens a dataset.
+ *
+ * @throws Error
+ * @method openAsync
+ * @param {String} path
+ * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * `"r+"`
+ * @param {Callback} callback promisifiable callback
+ * @return {gdal.Dataset}
+ */
+GDAL_ASYNCABLE_DEFINE(Driver::open) {
   Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
@@ -571,7 +555,7 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
   GDALDriver *raw = driver->getGDALDriver();
 
 #if GDAL_VERSION_MAJOR < 2
-  if (async) {
+  if (GDAL_ISASYNC) {
     Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
     return;
   }
@@ -588,56 +572,21 @@ void Driver::_do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asy
   GDALOpenInfo *open_info = new GDALOpenInfo(path.c_str(), access);
   GDALDataset *ds = raw->pfnOpen(open_info);
   delete open_info;
-#else
-  std::function<GDALDataset *()> doit = [raw, path, access]() {
-    const char *driver_list[2] = {raw->GetDescription(), nullptr};
-    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
-    return ds;
-  };
-
-  if (async) {
-    Nan::Callback *callback;
-    NODE_ARG_CB(2, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
-    return;
-  }
-
-  GDALDataset *ds = doit();
-#endif
   if (!ds) {
     Nan::ThrowError("Error opening dataset");
     return;
   }
   info.GetReturnValue().Set(Dataset::New(ds));
-}
+#else
+  GDAL_ASYNCABLE_MAIN(GDALDataset*) = [raw, path, access]() {
+    const char *driver_list[2] = {raw->GetDescription(), nullptr};
+    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
+    return ds;
+  };
+  GDAL_ASYNCABLE_ERROR = []() { return "Error opening dataset"; };
 
-/**
- * Opens a dataset.
- *
- * @throws Error
- * @method open
- * @param {String} path
- * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
- * `"r+"`
- * @return {gdal.Dataset}
- */
-NAN_METHOD(Driver::open) {
-  _do_open(info, false);
-}
-
-/**
- * Opens a dataset.
- *
- * @throws Error
- * @method openAsync
- * @param {String} path
- * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
- * `"r+"`
- * @param {Callback} callback promisifiable callback
- * @return {gdal.Dataset}
- */
-NAN_METHOD(Driver::openAsync) {
-  _do_open(info, true);
+  GDAL_ASYNCABLE_RETURN(2, GDALDataset*);
+#endif
 }
 
 } // namespace node_gdal
