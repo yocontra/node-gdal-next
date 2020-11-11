@@ -16,7 +16,7 @@
 #include "gdal_dataset.hpp"
 #include "gdal_driver.hpp"
 
-#include "async/async_open.hpp"
+#include "async.hpp"
 
 using namespace v8;
 using namespace node;
@@ -26,7 +26,8 @@ namespace node_gdal {
 /*
  * Common code for sync and async opening
  */
-static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
+GDAL_ASYNCABLE_DECLARE(open);
+GDAL_ASYNCABLE_DEFINE(open) {
   Nan::HandleScope scope;
 
   std::string path;
@@ -36,7 +37,7 @@ static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asyn
   NODE_ARG_OPT_STR(1, "mode", mode);
 
 #if GDAL_VERSION_MAJOR < 2
-  if (async) {
+  if (GDAL_ISASYNC) {
     Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
     return;
   }
@@ -60,6 +61,9 @@ static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asyn
     info.GetReturnValue().Set(Dataset::New(gdal_ds));
     return;
   }
+  Nan::ThrowError("Error opening dataset");
+  return;
+
 #else
   unsigned int flags = 0;
   if (mode == "r+") {
@@ -71,34 +75,20 @@ static void _do_open(const Nan::FunctionCallbackInfo<v8::Value> &info, bool asyn
     return;
   }
 
+  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [path, flags]() {
+    return (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+  };
+  GDAL_ASYNCABLE_IFERR(GDALDataset *) = [](GDALDataset *ds) { return ds == nullptr; };
+  GDAL_ASYNCABLE_ERROR = []() { return "Error opening dataset"; };
+  GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds) { return Dataset::New(ds); };
+  GDAL_ASYNCABLE_FINALLY = []() {};
+
+  GDAL_ASYNCABLE_RETURN(2, GDALDataset *);
+
   std::function<GDALDataset *()> doit = [path, flags]() {
     return (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
   };
-
-  if (async) {
-    Nan::Callback *callback;
-    NODE_ARG_CB(2, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncOpen(callback, doit));
-    return;
-  } else {
-    GDALDataset *ds = doit();
-    if (ds) {
-      info.GetReturnValue().Set(Dataset::New(ds));
-      return;
-    }
-  }
 #endif
-
-  Nan::ThrowError("Error opening dataset");
-  return;
-}
-
-static NAN_METHOD(open) {
-  _do_open(info, false);
-}
-
-static NAN_METHOD(openAsync) {
-  _do_open(info, true);
 }
 
 static NAN_METHOD(setConfigOption) {

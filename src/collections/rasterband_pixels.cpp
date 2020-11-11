@@ -1,7 +1,7 @@
 #include "rasterband_pixels.hpp"
 #include "../gdal_common.hpp"
 #include "../gdal_rasterband.hpp"
-#include "../async/async_rasterio.hpp"
+#include "../async.hpp"
 #include "../utils/typed_array.hpp"
 
 #include <sstream>
@@ -167,9 +167,57 @@ NAN_METHOD(RasterBandPixels::set) {
 }
 
 /**
- * Low level read for both synchronous and asynchronous reading.
+ * Reads a region of pixels.
+ *
+ * @method read
+ * @throws Error
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {TypedArray} [data] The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to put the data in. A new array is created if not given.
+ * @param {Object} [options]
+ * @param {Integer} [options.buffer_width=x_size]
+ * @param {Integer} [options.buffer_height=y_size]
+ * @param {String} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
+ * constants{{/crossLink}}.
+ * @param {Integer} [options.pixel_space]
+ * @param {Integer} [options.line_space]
+ * @return {TypedArray} A
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * of values.
  */
-void RasterBandPixels::_do_read(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
+
+/**
+ * Asynchronously reads a region of pixels.
+ * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
+ * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
+ * as it is the last parameter. Otherwise the function returns a Promise resolved with the result.
+ *
+ * @method readAsync
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {TypedArray} [data] The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to put the data in. A new array is created if not given.
+ * @param {Object} [options]
+ * @param {Integer} [options.buffer_width=x_size]
+ * @param {Integer} [options.buffer_height=y_size]
+ * @param {String} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
+ * constants{{/crossLink}}.
+ * @param {Integer} [options.pixel_space]
+ * @param {Integer} [options.line_space]
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
+ * @return {TypedArray} A
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * of values.
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   Nan::HandleScope scope;
 
   RasterBand *band;
@@ -244,85 +292,73 @@ void RasterBandPixels::_do_read(const Nan::FunctionCallbackInfo<v8::Value> &info
     return; // TypedArray::Validate threw an error
   }
 
-  if (async) {
-    Nan::Callback *callback;
-    NODE_ARG_CB(10, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncRasterIO(
-      callback, band, GF_Read, x, y, w, h, &obj, data, buffer_w, buffer_h, type, pixel_space, line_space));
-  } else {
-    uv_mutex_lock(band->async_lock);
-    CPLErr err = band->get()->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-    uv_mutex_unlock(band->async_lock);
-    if (err) {
-      NODE_THROW_CPLERR(err);
-      return;
-    }
-    info.GetReturnValue().Set(obj);
-  }
+  uv_mutex_t *async_lock = band->async_lock;
+  GDALRasterBand *gdal_band = band->get();
+  Nan::Persistent<Object> *persistBand = new Nan::Persistent<Object>(band->handle());
+  Nan::Persistent<Object> *persistData = new Nan::Persistent<Object>(obj);
+  GDAL_ASYNCABLE_MAIN(CPLErr) =
+    [gdal_band, async_lock, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+      uv_mutex_lock(async_lock);
+      CPLErr err = gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+      uv_mutex_unlock(async_lock);
+      return err;
+    };
+
+  GDAL_ASYNCABLE_IFERR(CPLErr) = [](CPLErr err) { return err != CE_None; };
+  GDAL_ASYNCABLE_ERROR = []() { return CPLGetLastErrorMsg(); };
+  GDAL_ASYNCABLE_FINALLY = [persistBand, persistData]() {
+    persistBand->Reset();
+    persistData->Reset();
+    delete persistBand;
+    delete persistData;
+  };
+  GDAL_ASYNCABLE_RVAL(CPLErr) = [persistData](CPLErr err) { return Nan::New(*persistData); };
+  GDAL_ASYNCABLE_RETURN(10, CPLErr);
 }
 
 /**
- * Reads a region of pixels.
+ * Writes a region of pixels.
  *
- * @method read
+ * @method write
  * @throws Error
  * @param {Integer} x
  * @param {Integer} y
  * @param {Integer} width
  * @param {Integer} height
- * @param {TypedArray} [data] The
+ * @param {TypedArray} data The
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * to put the data in. A new array is created if not given.
+ * to write to the band.
  * @param {Object} [options]
  * @param {Integer} [options.buffer_width=x_size]
  * @param {Integer} [options.buffer_height=y_size]
- * @param {String} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
- * constants{{/crossLink}}.
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
- * @return {TypedArray} A
- * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * of values.
  */
-NAN_METHOD(RasterBandPixels::read) {
-  RasterBandPixels::_do_read(info, false);
-}
 
 /**
- * Asynchronously reads a region of pixels.
+ * Asynchronously writes a region of pixels.
  * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
  * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
- * as it is the last parameter. Otherwise the function returns a Promise resolved with the result.
+ as it is the last parameter.
+ * Otherwise the function returns a Promise resolved with the result.
  *
- * @method readAsync
+ * @method writeAsync
  * @param {Integer} x
  * @param {Integer} y
  * @param {Integer} width
  * @param {Integer} height
- * @param {TypedArray} [data] The
+ * @param {TypedArray} data The
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * to put the data in. A new array is created if not given.
+ * to write to the band.
  * @param {Object} [options]
  * @param {Integer} [options.buffer_width=x_size]
  * @param {Integer} [options.buffer_height=y_size]
- * @param {String} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
- * constants{{/crossLink}}.
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
  * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
  * certain optional parameters are omitted
- * @return {TypedArray} A
- * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
- * of values.
  */
-NAN_METHOD(RasterBandPixels::readAsync) {
-  RasterBandPixels::_do_read(info, true);
-}
-
-/**
- * Low level read for both synchronous and asynchronous writing.
- */
-void RasterBandPixels::_do_write(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async) {
+GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   Nan::HandleScope scope;
 
   RasterBand *band;
@@ -378,22 +414,27 @@ void RasterBandPixels::_do_write(const Nan::FunctionCallbackInfo<v8::Value> &inf
     return; // TypedArray::Validate threw an error
   }
 
-  if (async) {
-    Nan::Callback *callback;
-    NODE_ARG_CB(9, "callback", callback);
-    Nan::AsyncQueueWorker(new AsyncRasterIO(
-      callback, band, GF_Read, x, y, w, h, &passed_array, data, buffer_w, buffer_h, type, pixel_space, line_space));
-  } else {
-    uv_mutex_lock(band->async_lock);
-    CPLErr err = band->get()->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-    uv_mutex_unlock(band->async_lock);
-    if (err) {
-      NODE_THROW_CPLERR(err);
-      return;
-    }
-  }
+  uv_mutex_t *async_lock = band->async_lock;
+  GDALRasterBand *gdal_band = band->get();
+  Nan::Persistent<Object> *persistBand = new Nan::Persistent<Object>(band->handle());
+  Nan::Persistent<Object> *persistData = new Nan::Persistent<Object>(passed_array);
+  GDAL_ASYNCABLE_MAIN(CPLErr) =
+    [gdal_band, async_lock, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+      uv_mutex_lock(async_lock);
+      CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+      uv_mutex_unlock(async_lock);
+      return err;
+    };
 
-  return;
+  GDAL_ASYNCABLE_IFERR(CPLErr) = [](CPLErr err) { return err != CE_None; };
+  GDAL_ASYNCABLE_ERROR = []() { return CPLGetLastErrorMsg(); };
+  GDAL_ASYNCABLE_FINALLY = [persistBand, persistData]() {
+    delete persistBand;
+    delete persistData;
+  };
+  GDAL_ASYNCABLE_RVAL(CPLErr) = [persistData](CPLErr err) { return Nan::New(*persistData); };
+
+  GDAL_ASYNCABLE_RETURN(9, CPLErr);
 }
 
 /**
@@ -414,9 +455,6 @@ void RasterBandPixels::_do_write(const Nan::FunctionCallbackInfo<v8::Value> &inf
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
  */
-NAN_METHOD(RasterBandPixels::write) {
-  _do_write(info, false);
-}
 
 /**
  * Asynchronously writes a region of pixels.
@@ -441,9 +479,6 @@ NAN_METHOD(RasterBandPixels::write) {
  * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
  * certain optional parameters are omitted
  */
-NAN_METHOD(RasterBandPixels::writeAsync) {
-  _do_write(info, true);
-}
 
 /**
  * Reads a block of pixels.

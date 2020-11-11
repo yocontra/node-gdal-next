@@ -154,7 +154,7 @@ describe('gdal.RasterBand', () => {
               const band = ds.bands.get(1)
               band.pixels.set(1, 1, 30)
               const data = new Float64Array(new ArrayBuffer(20 * 30 * 8))
-              band.pixels.readAsync(1, 1, 20, 30, data).then((data) => {
+              band.pixels.readAsync(1, 1, 20, 30, data).then(() => {
                 assert.equal(data[0], 30)
               })
             })
@@ -188,7 +188,7 @@ describe('gdal.RasterBand', () => {
                 await expect(band.pixels.readAsync(0, 0, 20, 30, data, {
                   buffer_width: 10,
                   buffer_height: 15
-                } /*Array length must be greater than.*/)).to.be.rejectedWith(Error)
+                })).to.be.rejectedWith(Error, /Array length must be greater than.*/)
               })
             })
           })
