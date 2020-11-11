@@ -3,6 +3,7 @@
 
 namespace node_gdal {
 
+#include <functional>
 #include "nan-wrapper.h"
 
 // This generates method definitions for 2 methods: sync and async version and a hidden common block
