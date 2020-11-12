@@ -1,10 +1,10 @@
 #ifndef __NODE_GDAL_ASYNC_WORKER_H__
 #define __NODE_GDAL_ASYNC_WORKER_H__
 
-namespace node_gdal {
-
 #include <functional>
 #include "nan-wrapper.h"
+
+namespace node_gdal {
 
 // This generates method definitions for 2 methods: sync and async version and a hidden common block
 #define GDAL_ASYNCABLE_DEFINE(method)        \
@@ -40,7 +40,7 @@ static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _
 #define GDAL_ASYNCABLE_RVAL(gdaltype) std::function<Local<Value>(gdaltype)> _gdal_rval
 
 // Execute the lambdas, either synchronously or asynchronously
-#define GDAL_ASYNCABLE_RETURN(arg, gdaltype)                \
+#define GDAL_ASYNCABLE_EXECUTE(arg, gdaltype)                \
 if (_gdal_async) {                                          \
   Nan::Callback *callback;                                  \
   NODE_ARG_CB(arg, "callback", callback);                   \
