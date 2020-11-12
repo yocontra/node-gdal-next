@@ -294,26 +294,18 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
 
   uv_mutex_t *async_lock = band->async_lock;
   GDALRasterBand *gdal_band = band->get();
-  Nan::Persistent<Object> *persistBand = new Nan::Persistent<Object>(band->handle());
-  Nan::Persistent<Object> *persistData = new Nan::Persistent<Object>(obj);
+  GDAL_ASYNCABLE_PERSIST(obj, band->handle());
   GDAL_ASYNCABLE_MAIN(CPLErr) =
     [gdal_band, async_lock, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
       uv_mutex_lock(async_lock);
       CPLErr err = gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
       uv_mutex_unlock(async_lock);
+      if (err != CE_None) throw CPLGetLastErrorMsg();
       return err;
     };
 
-  GDAL_ASYNCABLE_IFERR(CPLErr) = [](CPLErr err) { return err != CE_None; };
-  GDAL_ASYNCABLE_ERROR = []() { return CPLGetLastErrorMsg(); };
-  GDAL_ASYNCABLE_FINALLY = [persistBand, persistData]() {
-    persistBand->Reset();
-    persistData->Reset();
-    delete persistBand;
-    delete persistData;
-  };
-  GDAL_ASYNCABLE_RVAL(CPLErr) = [persistData](CPLErr err) { return Nan::New(*persistData); };
-  GDAL_ASYNCABLE_RETURN(10, CPLErr);
+  GDAL_ASYNCABLE_RVAL(CPLErr) = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  GDAL_ASYNCABLE_EXECUTE(10, CPLErr);
 }
 
 /**
@@ -416,25 +408,18 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
 
   uv_mutex_t *async_lock = band->async_lock;
   GDALRasterBand *gdal_band = band->get();
-  Nan::Persistent<Object> *persistBand = new Nan::Persistent<Object>(band->handle());
-  Nan::Persistent<Object> *persistData = new Nan::Persistent<Object>(passed_array);
+  GDAL_ASYNCABLE_PERSIST(passed_array, band->handle());
   GDAL_ASYNCABLE_MAIN(CPLErr) =
     [gdal_band, async_lock, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
       uv_mutex_lock(async_lock);
       CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
       uv_mutex_unlock(async_lock);
+      if (err != CE_None) throw CPLGetLastErrorMsg();
       return err;
     };
+  GDAL_ASYNCABLE_RVAL(CPLErr) = [](CPLErr, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
 
-  GDAL_ASYNCABLE_IFERR(CPLErr) = [](CPLErr err) { return err != CE_None; };
-  GDAL_ASYNCABLE_ERROR = []() { return CPLGetLastErrorMsg(); };
-  GDAL_ASYNCABLE_FINALLY = [persistBand, persistData]() {
-    delete persistBand;
-    delete persistData;
-  };
-  GDAL_ASYNCABLE_RVAL(CPLErr) = [persistData](CPLErr err) { return Nan::New(*persistData); };
-
-  GDAL_ASYNCABLE_RETURN(9, CPLErr);
+  GDAL_ASYNCABLE_EXECUTE(9, CPLErr);
 }
 
 /**
