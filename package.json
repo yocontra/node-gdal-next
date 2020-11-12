@@ -42,7 +42,8 @@
     "lint": "eslint lib test examples",
     "lint:fix": "eslint lib test examples --fix",
     "install": "node-pre-gyp install --fallback-to-build -j max",
-    "postpublish": "npm run publish-yuidoc",
+    "postpublish": "npm run tag && npm run publish-yuidoc",
+    "tag": "git tag -a \"v$npm_package_version\" -m \"tag version $npm_package_version\" && git push && git dontpush --tags",
     "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
     "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js"
   },
