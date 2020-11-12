@@ -207,8 +207,8 @@ NAN_METHOD(Driver::deleteDataset) {
 
 // These are shared across all Driver functions
 GDAL_ASYNCABLE_IFERR(GDALDataset *) = [](GDALDataset *ds) { return ds == nullptr; };
-GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds) { return Dataset::New(ds); };
-GDAL_ASYNCABLE_FINALLY = []() {};
+GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
+GDAL_ASYNCABLE_PERSIST();
 
 /**
  * Create a new dataset with this driver.
@@ -305,7 +305,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   };
   GDAL_ASYNCABLE_ERROR = []() { return "Error creating dataset"; };
 
-  GDAL_ASYNCABLE_RETURN(6, GDALDataset *);
+  GDAL_ASYNCABLE_EXECUTE(6, GDALDataset *);
 }
 
 /**
@@ -409,7 +409,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   };
   GDAL_ASYNCABLE_ERROR = []() { return "Error creating dataset"; };
 
-  GDAL_ASYNCABLE_RETURN(3, GDALDataset*);
+  GDAL_ASYNCABLE_EXECUTE(3, GDALDataset*);
 }
 
 /**
@@ -585,7 +585,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   };
   GDAL_ASYNCABLE_ERROR = []() { return "Error opening dataset"; };
 
-  GDAL_ASYNCABLE_RETURN(2, GDALDataset*);
+  GDAL_ASYNCABLE_EXECUTE(2, GDALDataset*);
 #endif
 }
 
