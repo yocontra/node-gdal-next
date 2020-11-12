@@ -7,28 +7,28 @@
 namespace node_gdal {
 
 // This generates method definitions for 2 methods: sync and async version and a hidden common block
-#define GDAL_ASYNCABLE_DEFINE(method)        \
-NAN_METHOD(method) {                         \
-  method##_do(info, false);                  \
-}                                            \
-NAN_METHOD(method##Async) {                  \
-  method##_do(info, true);                   \
-}                                            \
-void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _gdal_async)
+#define GDAL_ASYNCABLE_DEFINE(method)                                                                                  \
+  NAN_METHOD(method) {                                                                                                 \
+    method##_do(info, false);                                                                                          \
+  }                                                                                                                    \
+  NAN_METHOD(method##Async) {                                                                                          \
+    method##_do(info, true);                                                                                           \
+  }                                                                                                                    \
+  void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _gdal_async)
 
 // This generates method declarations for 2 methods: sync and async version and a hidden common block
-#define GDAL_ASYNCABLE_DECLARE(method)       \
-static NAN_METHOD(method);                   \
-static NAN_METHOD(method##Async);            \
-static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _gdal_async)
-
+#define GDAL_ASYNCABLE_DECLARE(method)                                                                                 \
+  static NAN_METHOD(method);                                                                                           \
+  static NAN_METHOD(method##Async);                                                                                    \
+  static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _gdal_async)
 
 /**
-* An asyncable method has to define the following lambdas
-*/
+ * An asyncable method has to define the following lambdas
+ */
 
 // Main execution block
 #define GDAL_ASYNCABLE_MAIN(gdaltype) std::function<gdaltype()> _gdal_doit
+
 // Generate JS object to be returned to the userland
 // Local<Object> is essentially a pointer and can be trivially copied
 #define GDAL_ASYNCABLE_OBJS std::vector<Local<Object>>
@@ -55,6 +55,13 @@ static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _
 
 /**
  * This class handles async operations
+ * 
+ * It takes the lambdas as input
+ * gdaltype is the type of the object that will be carred from
+ * the aux thread to the main thread
+ * 
+ * JS-visible object creation is possible only in the main thread while
+ * ths JS world is stopped
  *
  * The caller must ensure that all the lambdas can be executed in
  * another thread (no automatic variables)
@@ -63,7 +70,7 @@ template <class gdaltype> class GDALAsyncWorker : public Nan::AsyncWorker {
     private:
   const std::function<gdaltype()> doit;
   const std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval;
-  std::vector<Nan::Persistent<Object>*> persistent;
+  std::vector<Nan::Persistent<Object> *> persistent;
   gdaltype raw;
 
     public:
@@ -86,17 +93,21 @@ GDALAsyncWorker<gdaltype>::GDALAsyncWorker(
   std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
   std::vector<Local<Object>> objects)
   : Nan::AsyncWorker(pCallback, "node-gdal:GDALAsyncWorker"), doit(doit), rval(rval), persistent(objects.size()) {
+  // Main thread with the JS world stopped
+  // Get persistent handles
   for (long unsigned i = 0; i < objects.size(); i++) persistent[i] = new Nan::Persistent<Object>(objects[i]);
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::Execute() {
-  /* V8 objects are not acessible here */
+  // Aux thread with the JS world running
+  // V8 objects are not acessible here
   try {
     raw = doit();
   } catch (const char *err) { this->SetErrorMessage(err); }
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::Finally() {
+  // Release the persistent handles
   for (long unsigned i = 0; i < persistent.size(); i++) {
     persistent[i]->Reset();
     delete persistent[i];
@@ -104,16 +115,20 @@ template <class gdaltype> void GDALAsyncWorker<gdaltype>::Finally() {
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleOKCallback() {
+  // Back to the main thread with the JS world stopped
   Nan::HandleScope scope;
   GDAL_ASYNCABLE_OBJS original_obj(persistent.size());
 
+  // Get pointers to the original objects that were persisted
   for (long unsigned i = 0; i < persistent.size(); i++) { original_obj[i] = Nan::New(*persistent[i]); }
+
   v8::Local<v8::Value> argv[] = {Nan::Undefined(), rval(raw, original_obj)};
   Finally();
   Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleErrorCallback() {
+  // Back to the main thread with the JS world stopped
   v8::Local<v8::Value> argv[] = {Nan::New(this->ErrorMessage()).ToLocalChecked(), Nan::Undefined()};
   Finally();
   Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
