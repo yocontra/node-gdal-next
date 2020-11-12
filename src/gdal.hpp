@@ -75,19 +75,15 @@ GDAL_ASYNCABLE_DEFINE(open) {
     return;
   }
 
-  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [path, flags]() {
-    return (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
-  };
-  GDAL_ASYNCABLE_IFERR(GDALDataset *) = [](GDALDataset *ds) { return ds == nullptr; };
-  GDAL_ASYNCABLE_ERROR = []() { return "Error opening dataset"; };
   GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
   GDAL_ASYNCABLE_PERSIST();
 
-  GDAL_ASYNCABLE_EXECUTE(2, GDALDataset *);
-
-  std::function<GDALDataset *()> doit = [path, flags]() {
-    return (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [path, flags]() {
+    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+    if (!ds) throw "Error opening dataset";
+    return ds;
   };
+  GDAL_ASYNCABLE_EXECUTE(2, GDALDataset *);
 #endif
 }
 

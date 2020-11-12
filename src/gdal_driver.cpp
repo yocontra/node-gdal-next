@@ -206,7 +206,6 @@ NAN_METHOD(Driver::deleteDataset) {
 }
 
 // These are shared across all Driver functions
-GDAL_ASYNCABLE_IFERR(GDALDataset *) = [](GDALDataset *ds) { return ds == nullptr; };
 GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
 GDAL_ASYNCABLE_PERSIST();
 
@@ -301,9 +300,9 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, filename, x_size, y_size, n_bands, type, options]() {
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
     delete options;
+    if (!ds) throw "Error creating dataset";
     return ds;
   };
-  GDAL_ASYNCABLE_ERROR = []() { return "Error creating dataset"; };
 
   GDAL_ASYNCABLE_EXECUTE(6, GDALDataset *);
 }
@@ -405,9 +404,9 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
     uv_mutex_unlock(async_lock);
     delete options;
+    if (!ds) throw "Error creating dataset";
     return ds;
   };
-  GDAL_ASYNCABLE_ERROR = []() { return "Error creating dataset"; };
 
   GDAL_ASYNCABLE_EXECUTE(3, GDALDataset*);
 }
@@ -578,12 +577,12 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   }
   info.GetReturnValue().Set(Dataset::New(ds));
 #else
-  GDAL_ASYNCABLE_MAIN(GDALDataset*) = [raw, path, access]() {
+  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, path, access]() {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
     return ds;
+    if (!ds) throw "Error opening dataset";
   };
-  GDAL_ASYNCABLE_ERROR = []() { return "Error opening dataset"; };
 
   GDAL_ASYNCABLE_EXECUTE(2, GDALDataset*);
 #endif

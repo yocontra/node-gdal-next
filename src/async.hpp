@@ -29,10 +29,6 @@ static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _
 
 // Main execution block
 #define GDAL_ASYNCABLE_MAIN(gdaltype) std::function<gdaltype()> _gdal_doit
-// Check for error condition
-#define GDAL_ASYNCABLE_IFERR(gdaltype) std::function<bool(gdaltype)> _gdal_iferr
-// Generate error string
-#define GDAL_ASYNCABLE_ERROR std::function<const char *()> _gdal_error
 // Generate JS object to be returned to the userland
 // Local<Object> is essentially a pointer and can be trivially copied
 #define GDAL_ASYNCABLE_OBJS std::vector<Local<Object>>
@@ -42,20 +38,18 @@ static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _
 #define GDAL_ASYNCABLE_PERSIST(...) std::vector<v8::Local<Object>> _gdal_persist = {__VA_ARGS__};
 
 // Execute the lambdas, either synchronously or asynchronously
-#define GDAL_ASYNCABLE_EXECUTE(arg, gdaltype)                \
-if (_gdal_async) {                                          \
-  Nan::Callback *callback;                                  \
-  NODE_ARG_CB(arg, "callback", callback);                   \
-  Nan::AsyncQueueWorker(new GDALAsyncWorker<gdaltype>(callback, _gdal_doit, _gdal_iferr, _gdal_error, _gdal_rval, _gdal_persist)); \
-  return;                                                   \
-}                                                           \
-                                                            \
-gdaltype _gdal_obj = _gdal_doit();                          \
-if (_gdal_iferr(_gdal_obj)) {                               \
-  Nan::ThrowError(_gdal_error());                           \
-  return;                                                   \
-}                                                           \
-info.GetReturnValue().Set(_gdal_rval(_gdal_obj, _gdal_persist))
+#define GDAL_ASYNCABLE_EXECUTE(arg, gdaltype)                                                                          \
+  if (_gdal_async) {                                                                                                   \
+    Nan::Callback *callback;                                                                                           \
+    NODE_ARG_CB(arg, "callback", callback);                                                                            \
+    Nan::AsyncQueueWorker(new GDALAsyncWorker<gdaltype>(callback, _gdal_doit, _gdal_rval, _gdal_persist));             \
+    return;                                                                                                            \
+  }                                                                                                                    \
+  try {                                                                                                                \
+    gdaltype _gdal_obj = _gdal_doit();                                                                                 \
+    info.GetReturnValue().Set(_gdal_rval(_gdal_obj, _gdal_persist));                                                   \
+  } catch (const char *err) { Nan::ThrowError(err); }                                                                  \
+  return
 
 #define GDAL_ISASYNC _gdal_async
 
@@ -68,8 +62,6 @@ info.GetReturnValue().Set(_gdal_rval(_gdal_obj, _gdal_persist))
 template <class gdaltype> class GDALAsyncWorker : public Nan::AsyncWorker {
     private:
   const std::function<gdaltype()> doit;
-  const std::function<bool(gdaltype)> iferr;
-  const std::function<const char *()> error;
   const std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval;
   std::vector<Nan::Persistent<Object>*> persistent;
   gdaltype raw;
@@ -78,8 +70,6 @@ template <class gdaltype> class GDALAsyncWorker : public Nan::AsyncWorker {
   explicit GDALAsyncWorker(
     Nan::Callback *pCallback,
     const std::function<gdaltype()> doit,
-    const std::function<bool(gdaltype)> iferr,
-    const std::function<const char *()> error,
     const std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
     std::vector<Local<Object>> objects);
 
@@ -93,19 +83,17 @@ template <class gdaltype>
 GDALAsyncWorker<gdaltype>::GDALAsyncWorker(
   Nan::Callback *pCallback,
   const std::function<gdaltype()> doit,
-  const std::function<bool(gdaltype)> iferr,
-  const std::function<const char *()> error,
   std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
   std::vector<Local<Object>> objects)
-  : Nan::AsyncWorker(pCallback, "node-gdal:GDALAsyncWorker"), doit(doit), iferr(iferr), error(error), rval(rval), persistent(objects.size()) {
-  for (long unsigned i = 0; i < objects.size(); i++)
-    persistent[i] = new Nan::Persistent<Object>(objects[i]);
+  : Nan::AsyncWorker(pCallback, "node-gdal:GDALAsyncWorker"), doit(doit), rval(rval), persistent(objects.size()) {
+  for (long unsigned i = 0; i < objects.size(); i++) persistent[i] = new Nan::Persistent<Object>(objects[i]);
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::Execute() {
   /* V8 objects are not acessible here */
-  raw = doit();
-  if (iferr(raw)) { this->SetErrorMessage(error()); }
+  try {
+    raw = doit();
+  } catch (const char *err) { this->SetErrorMessage(err); }
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::Finally() {

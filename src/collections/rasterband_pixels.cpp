@@ -300,11 +300,9 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
       uv_mutex_lock(async_lock);
       CPLErr err = gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
       uv_mutex_unlock(async_lock);
+      if (err != CE_None) throw CPLGetLastErrorMsg();
       return err;
     };
-
-  GDAL_ASYNCABLE_IFERR(CPLErr) = [](CPLErr err) { return err != CE_None; };
-  GDAL_ASYNCABLE_ERROR = []() { return CPLGetLastErrorMsg(); };
 
   GDAL_ASYNCABLE_RVAL(CPLErr) = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
   GDAL_ASYNCABLE_EXECUTE(10, CPLErr);
@@ -416,13 +414,10 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
       uv_mutex_lock(async_lock);
       CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
       uv_mutex_unlock(async_lock);
+      if (err != CE_None) throw CPLGetLastErrorMsg();
       return err;
     };
-
-  GDAL_ASYNCABLE_IFERR(CPLErr) = [](CPLErr err) { return err != CE_None; };
-  GDAL_ASYNCABLE_ERROR = []() { return CPLGetLastErrorMsg(); };
-
-  GDAL_ASYNCABLE_RVAL(CPLErr) = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  GDAL_ASYNCABLE_RVAL(CPLErr) = [](CPLErr, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
 
   GDAL_ASYNCABLE_EXECUTE(9, CPLErr);
 }
