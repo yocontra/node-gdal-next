@@ -137,18 +137,18 @@ if (process.env.GDAL_DATA === undefined &amp;&amp; !fs.existsSync(data_path)) {
   )
 }
 
-if (process.env.PROJ_LIB === undefined &amp;&amp; !fs.existsSync(proj_path)) {
+const proj_lib_env_undefined = process.env.PROJ_LIB === undefined
+if (proj_lib_env_undefined &amp;&amp; !fs.existsSync(proj_path)) {
   throw new Error(
     &#x60;The bundled proj data path for node-gdal is missing &#x27;${proj_path}&#x27; and PROJ_LIB environment is not set&#x60;
   )
 }
 
-// needs to be set before the binding is loaded
-if (process.env.PROJ_LIB === undefined) {
-  process.env.PROJ_LIB = proj_path
-}
-
 const gdal = module.exports = require(binding_path)
+
+if (proj_lib_env_undefined) {
+  gdal.setPROJSearchPath(proj_path)
+}
 
 gdal.Point.Multi = gdal.MultiPoint
 gdal.LineString.Multi = gdal.MultiLineString

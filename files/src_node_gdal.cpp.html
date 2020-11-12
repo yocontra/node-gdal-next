@@ -319,6 +319,26 @@ static NAN_METHOD(Log) {
   return;
 }
 
+/**
+ * Set paths where proj will search it data.
+ *
+ * @for gdal
+ * @static
+ * @method setPROJSearchPaths
+ * @param {String} Path &#x60;c:\ProjData&#x60;
+ */
+static NAN_METHOD(setPROJSearchPath) {
+  Nan::HandleScope scope;
+  std::string path;
+
+  NODE_ARG_STR(0, &quot;path&quot;, path);
+
+  const char *const paths[] = {path.c_str(), nullptr};
+#if GDAL_VERSION_MAJOR &gt;= 3
+  OSRSetPROJSearchPaths(paths);
+#endif
+}
+
 static NAN_METHOD(ThrowDummyCPLError) {
   CPLError(CE_Failure, CPLE_AppDefined, &quot;Mock error&quot;);
   return;
@@ -340,6 +360,7 @@ static void Init(Local&lt;Object&gt; target, Local&lt;v8::Value&gt;, void *) {
   Nan::SetMethod(target, &quot;setConfigOption&quot;, setConfigOption);
   Nan::SetMethod(target, &quot;getConfigOption&quot;, getConfigOption);
   Nan::SetMethod(target, &quot;decToDMS&quot;, decToDMS);
+  Nan::SetMethod(target, &quot;setPROJSearchPath&quot;, setPROJSearchPath);
   Nan::SetMethod(target, &quot;_triggerCPLError&quot;, ThrowDummyCPLError); // for tests
   Nan::SetMethod(target, &quot;_isAlive&quot;, isAlive);                    // for tests
 
