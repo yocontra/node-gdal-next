@@ -13,7 +13,7 @@ This project is a fork of <https://github.com/contra/node-gdal-next> which is a 
 
 ## As of November 9th 2020, async support for raster data has been completely merged into <https://github.com/contra/node-gdal-next>
 The work on async support for vector data has started, but there is nothing usable at the moment
-I am currently working on the universal async framework on the universal-async branch
+I am currently working on the new universal async framework on the `universal-async` branch
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
