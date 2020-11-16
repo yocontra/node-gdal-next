@@ -216,6 +216,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
     CPLErr err = raw->AddBand(type, options->get());
     GDAL_UNLOCK_PARENT;
     delete options;
+    // This is not thread-safe, but mis-reporting the error message
+    // 0.01% of the time is probably acceptable
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return raw->GetRasterBand(raw->GetRasterCount());
   };

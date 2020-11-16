@@ -1,5 +1,8 @@
 const gdal = require('../lib/gdal.js')
-const assert = require('chai').assert
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const assert = chai.assert
+chai.use(chaiAsPromised)
 
 const WGS84 =
   'GEOGCS["WGS_84",DATUM["WGS_1984",SPHEROID["WGS_84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433],AXIS["Longitude",EAST],AXIS["Latitude",NORTH]]'
@@ -92,6 +95,14 @@ describe('gdal.Geometry', () => {
       assert.equal(point2d.y, 2)
     })
   })
+  describe('fromWKTAsync()', () => {
+    it('should return valid result', async () => {
+      const point2d = await gdal.Geometry.fromWKTAsync('POINT (1 2)')
+      assert.equal(point2d.wkbType, gdal.wkbPoint)
+      assert.equal(point2d.x, 1)
+      assert.equal(point2d.y, 2)
+    })
+  })
   describe('fromWKB()', () => {
     it('should return valid result', () => {
       const wkb = new gdal.Point(1, 2).toWKB()
@@ -101,10 +112,29 @@ describe('gdal.Geometry', () => {
       assert.equal(point2d.y, 2)
     })
   })
+  describe('fromWKBAsync()', () => {
+    it('should return valid result', async () => {
+      const wkb = new gdal.Point(1, 2).toWKB()
+      const point2d = await gdal.Geometry.fromWKBAsync(wkb)
+      assert.equal(point2d.wkbType, gdal.wkbPoint)
+      assert.equal(point2d.x, 1)
+      assert.equal(point2d.y, 2)
+    })
+  })
   if (parseFloat(gdal.version) >= 2.3) {
     describe('fromGeoJson()', () => {
       it('should return valid result', () => {
         const point2d = gdal.Geometry.fromGeoJson({ type: 'Point', coordinates: [ 2, 1 ] })
+        assert.equal(point2d.wkbType, gdal.wkbPoint)
+        assert.equal(point2d.x, 2)
+        assert.equal(point2d.y, 1)
+      })
+    })
+  }
+  if (parseFloat(gdal.version) >= 2.3) {
+    describe('fromGeoJsonAsync()', () => {
+      it('should return valid result', async () => {
+        const point2d = await gdal.Geometry.fromGeoJsonAsync({ type: 'Point', coordinates: [ 2, 1 ] })
         assert.equal(point2d.wkbType, gdal.wkbPoint)
         assert.equal(point2d.x, 2)
         assert.equal(point2d.y, 1)

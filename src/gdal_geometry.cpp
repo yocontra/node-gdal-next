@@ -30,8 +30,11 @@ void Geometry::Initialize(Local<Object> target) {
 
   // Nan::SetMethod(constructor, "fromWKBType", Geometry::create);
   Nan::SetMethod(lcons, "fromWKT", Geometry::createFromWkt);
+  Nan::SetMethod(lcons, "fromWKTAsync", Geometry::createFromWktAsync);
   Nan::SetMethod(lcons, "fromWKB", Geometry::createFromWkb);
+  Nan::SetMethod(lcons, "fromWKBAsync", Geometry::createFromWkbAsync);
   Nan::SetMethod(lcons, "fromGeoJson", Geometry::createFromGeoJson);
+  Nan::SetMethod(lcons, "fromGeoJsonAsync", Geometry::createFromGeoJsonAsync);
   Nan::SetMethod(lcons, "getName", Geometry::getName);
   Nan::SetMethod(lcons, "getConstructor", Geometry::getConstructor);
 
@@ -776,27 +779,42 @@ NAN_METHOD(Geometry::getEnvelope3D) {
  * @param {gdal.SpatialReference} [srs]
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::createFromWkt) {
+
+/**
+ * Creates a Geometry from a WKT string.
+ * {{{async}}}
+ *
+ * @static
+ * @method fromWKTAsync
+ * @param {String} wkt
+ * @param {gdal.SpatialReference} [srs]
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
   Nan::HandleScope scope;
 
-  std::string wkt_string;
+  std::string *wkt_string = new std::string;
   SpatialReference *srs = NULL;
 
-  NODE_ARG_STR(0, "wkt", wkt_string);
+  NODE_ARG_STR(0, "wkt", *wkt_string);
   NODE_ARG_WRAPPED_OPT(1, "srs", SpatialReference, srs);
 
-  OGRChar *wkt = (OGRChar *)wkt_string.c_str();
-  OGRGeometry *geom = NULL;
   OGRSpatialReference *ogr_srs = NULL;
   if (srs) { ogr_srs = srs->get(); }
 
-  OGRErr err = OGRGeometryFactory::createFromWkt(&wkt, ogr_srs, &geom);
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
-
-  info.GetReturnValue().Set(Geometry::New(geom, true));
+  GDAL_ASYNCABLE_PERSIST();
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [wkt_string, ogr_srs]() {
+    OGRGeometry *geom = NULL;
+    OGRChar *wkt = (OGRChar *)wkt_string->c_str();
+    OGRErr err = OGRGeometryFactory::createFromWkt(wkt, ogr_srs, &geom);
+    delete wkt_string;
+    if (err) throw getOGRErrMsg(err);
+    return geom;
+  };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  GDAL_ASYNCABLE_EXECUTE(2, OGRGeometry *);
 }
 
 /**
@@ -808,7 +826,20 @@ NAN_METHOD(Geometry::createFromWkt) {
  * @param {gdal.SpatialReference} [srs]
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::createFromWkb) {
+
+/**
+ * Creates a Geometry from a WKB buffer.
+ * {{{async}}}
+ *
+ * @static
+ * @method fromWKBAsync
+ * @param {Buffer} wkb
+ * @param {gdal.SpatialReference} [srs]
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
   Nan::HandleScope scope;
 
   std::string wkb_string;
@@ -828,17 +859,18 @@ NAN_METHOD(Geometry::createFromWkb) {
   unsigned char *data = (unsigned char *)Buffer::Data(wkb_obj);
   size_t length = Buffer::Length(wkb_obj);
 
-  OGRGeometry *geom = NULL;
   OGRSpatialReference *ogr_srs = NULL;
   if (srs) { ogr_srs = srs->get(); }
 
-  OGRErr err = OGRGeometryFactory::createFromWkb(data, ogr_srs, &geom, length);
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
-
-  info.GetReturnValue().Set(Geometry::New(geom, true));
+  GDAL_ASYNCABLE_PERSIST();
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [data, length, ogr_srs]() {
+    OGRGeometry *geom = NULL;
+    OGRErr err = OGRGeometryFactory::createFromWkb(data, ogr_srs, &geom, length);
+    if (err) throw getOGRErrMsg(err);
+    return geom;
+  };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  GDAL_ASYNCABLE_EXECUTE(2, OGRGeometry *);
 }
 
 /**
@@ -849,7 +881,25 @@ NAN_METHOD(Geometry::createFromWkb) {
  * @param {Object} geojson
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::createFromGeoJson) {
+
+/**
+ * Creates a Geometry from a GeoJSON string.
+ * {{{async}}}
+ * 
+ * Alas, the current implementation uses V8's JSON.Stringify
+ * and then converts the string to UTF-8 (from JS internal UTF-16)
+ * This part is neither async-compatible, neither parallelizable
+ * The GDAL part is async
+ * Pay attention to the event loop if you use this and need
+ * to remain low-latency
+ *
+ * @static
+ * @method fromGeoJsonAsync
+ * @param {Object} geojson
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
   Nan::HandleScope scope;
 #if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR <= 2 && GDAL_VERSION_MINOR < 3)
   Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
@@ -868,10 +918,20 @@ NAN_METHOD(Geometry::createFromGeoJson) {
     return;
   }
   Local<String> stringified = result.ToLocalChecked();
-  std::string val = *Nan::Utf8String(stringified);
+  std::string *val = new std::string(*Nan::Utf8String(stringified));
+  OGRGeometry *geom = NULL;
+  OGRSpatialReference *ogr_srs = NULL;
 
-  OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val.c_str());
-  info.GetReturnValue().Set(Geometry::New(geom, true));
+  GDAL_ASYNCABLE_PERSIST();
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [val, geom, ogr_srs]() {
+    OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val->c_str());
+    delete val;
+    return geom;
+  };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) {
+    return Geometry::New(geom, true);
+  };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 #endif
 }
 

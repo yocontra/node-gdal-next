@@ -11,6 +11,8 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "async.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -68,10 +70,10 @@ class Geometry : public Nan::ObjectWrap {
   static NAN_METHOD(transformTo);
 
   // static constructor methods
-  static NAN_METHOD(create);
-  static NAN_METHOD(createFromWkt);
-  static NAN_METHOD(createFromWkb);
-  static NAN_METHOD(createFromGeoJson);
+  GDAL_ASYNCABLE_DECLARE(create);
+  GDAL_ASYNCABLE_DECLARE(createFromWkt);
+  GDAL_ASYNCABLE_DECLARE(createFromWkb);
+  GDAL_ASYNCABLE_DECLARE(createFromGeoJson);
   static NAN_METHOD(getName);
   static NAN_METHOD(getConstructor);
 
