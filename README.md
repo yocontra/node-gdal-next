@@ -12,8 +12,8 @@ This project is a fork of <https://github.com/contra/node-gdal-next> which is a 
 - **Support for asynchronous IO**
 
 ## As of November 9th 2020, async support for raster data has been completely merged into <https://github.com/contra/node-gdal-next>
-The work on async support for vector data has started, but there is nothing usable at the moment
-I am currently working on the new universal async framework on the `universal-async` branch
+The work on async support for vector data has started, currently only `LayerFeatures` is async-compatible
+`master` is usually unit-tested, `universal-async` is cutting edge
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
@@ -24,7 +24,7 @@ longitude second. If you don't want to make large code changes, you can replace 
 
 ### Breaking Changes relative to node-gdal-next
 
-- None, this branch is currently merged into node-gdal-next
+- None, node-gdal-next is kept in sync
 
 ## Installation
 
@@ -50,7 +50,7 @@ Mixing synchronous and asynchronous operations is supported.
 #### Safe mixing of asynchronous operations
 
 Simultaneous operations on distinct dataset objects are always safe and can run it parallel.
-Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects.
+Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick up 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time.
 
 **Does not support worker_threads**
 
