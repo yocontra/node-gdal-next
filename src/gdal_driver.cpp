@@ -361,23 +361,26 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return;
   }
 
-  if (!src_dataset->isAlive()) {
-    Nan::ThrowError("Dataset object has already been destroyed");
-    return;
-  }
-
   options = new StringList;
   if (info.Length() > 2 && options->parse(info[2])) {
     return; // error parsing string list
   }
 
+  uv_mutex_t *async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
+  if (async_lock == nullptr) {
+    Nan::ThrowError("Dataset object has already been destroyed");
+    return;
+  }
+
 #if GDAL_VERSION_MAJOR < 2
   if (GDAL_ISASYNC) {
     Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
+    uv_mutex_unlock(async_lock);
     return;
   }
   if (driver->uses_ogr != src_dataset->uses_ogr) {
     Nan::ThrowError("Driver unable to copy dataset");
+    uv_mutex_unlock(async_lock);
     return;
   }
   if (driver->uses_ogr) {
@@ -388,19 +391,19 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
 
     if (!ds) {
       Nan::ThrowError("Error copying dataset.");
+      uv_mutex_unlock(async_lock);
       return;
     }
 
     info.GetReturnValue().Set(Dataset::New(ds));
+    uv_mutex_unlock(async_lock);
     return;
   }
 #endif
 
   GDALDriver *raw = driver->getGDALDriver();
-  uv_mutex_t *async_lock = src_dataset->async_lock;
-  GDAL_ASYNCABLE_MAIN(GDALDataset*) = [raw, filename, src_dataset, strict, options, async_lock]() {
-    GDALDataset *raw_ds = src_dataset->getDataset();
-    uv_mutex_lock(async_lock);
+  GDALDataset *raw_ds = src_dataset->getDataset();
+  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, filename, raw_ds, strict, options, async_lock]() {
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
     uv_mutex_unlock(async_lock);
     delete options;

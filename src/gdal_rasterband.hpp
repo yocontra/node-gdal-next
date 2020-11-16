@@ -87,11 +87,8 @@ class RasterBand : public Nan::ObjectWrap {
   }
   void dispose();
   long uid;
-  /* Dataset manages the async lock lifetime
-   * RasterBand carries it
-   * RasterBandPixels uses it
-   */
-  uv_mutex_t *async_lock;
+  // Dataset that will be locked
+  long parent_uid;
 
     private:
   ~RasterBand();

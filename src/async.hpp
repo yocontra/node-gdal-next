@@ -31,11 +31,11 @@ namespace node_gdal {
 
 // Generate JS object to be returned to the userland
 // Local<Object> is essentially a pointer and can be trivially copied
-#define GDAL_ASYNCABLE_OBJS std::vector<Local<Object>>
-#define GDAL_ASYNCABLE_RVAL(gdaltype) std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> _gdal_rval
+#define GDAL_ASYNCABLE_OBJS std::vector<v8::Local<v8::Object>>
+#define GDAL_ASYNCABLE_RVAL(gdaltype) std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> _gdal_rval
 
 // List of objects to be protected from the GC
-#define GDAL_ASYNCABLE_PERSIST(...) std::vector<v8::Local<Object>> _gdal_persist = {__VA_ARGS__};
+#define GDAL_ASYNCABLE_PERSIST(...) std::vector<v8::Local<v8::Object>> _gdal_persist = {__VA_ARGS__};
 
 // Execute the lambdas, either synchronously or asynchronously
 #define GDAL_ASYNCABLE_EXECUTE(arg, gdaltype)                                                                          \
@@ -53,13 +53,26 @@ namespace node_gdal {
 
 #define GDAL_ISASYNC _gdal_async
 
+// Handle locking
+#define GDAL_TRYLOCK_PARENT(p)                                                                                         \
+  uv_mutex_t *async_lock = ptr_manager.tryLockDataset((p)->parent_uid);                                                \
+  if (async_lock == nullptr) {                                                                                         \
+    Nan::ThrowError("Parent Dataset object has already been destroyed");                                               \
+    return;                                                                                                            \
+  }
+
+#define GDAL_UNLOCK_PARENT uv_mutex_unlock(async_lock)
+#define GDAL_ASYNCABLE_LOCK(uid)                                                                                       \
+  uv_mutex_t *async_lock = ptr_manager.tryLockDataset(uid);                                                            \
+  if (async_lock == nullptr) { throw "Parent Dataset object has already been destroyed"; }
+
 /**
  * This class handles async operations
- * 
+ *
  * It takes the lambdas as input
  * gdaltype is the type of the object that will be carred from
  * the aux thread to the main thread
- * 
+ *
  * JS-visible object creation is possible only in the main thread while
  * ths JS world is stopped
  *
@@ -69,16 +82,16 @@ namespace node_gdal {
 template <class gdaltype> class GDALAsyncWorker : public Nan::AsyncWorker {
     private:
   const std::function<gdaltype()> doit;
-  const std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval;
-  std::vector<Nan::Persistent<Object> *> persistent;
+  const std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval;
+  std::vector<Nan::Persistent<v8::Object> *> persistent;
   gdaltype raw;
 
     public:
   explicit GDALAsyncWorker(
     Nan::Callback *pCallback,
     const std::function<gdaltype()> doit,
-    const std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
-    std::vector<Local<Object>> objects);
+    const std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
+    std::vector<v8::Local<v8::Object>> objects);
 
   void Finally();
   void Execute();
@@ -90,12 +103,15 @@ template <class gdaltype>
 GDALAsyncWorker<gdaltype>::GDALAsyncWorker(
   Nan::Callback *pCallback,
   const std::function<gdaltype()> doit,
-  std::function<Local<Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
-  std::vector<Local<Object>> objects)
+  std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
+  std::vector<v8::Local<v8::Object>> objects)
   : Nan::AsyncWorker(pCallback, "node-gdal:GDALAsyncWorker"), doit(doit), rval(rval), persistent(objects.size()) {
   // Main thread with the JS world stopped
   // Get persistent handles
-  for (long unsigned i = 0; i < objects.size(); i++) persistent[i] = new Nan::Persistent<Object>(objects[i]);
+  for (long unsigned i = 0; i < objects.size(); i++) {
+    persistent[i] = new Nan::Persistent<v8::Object>(objects[i]);
+    persistent[i]->ClearWeak();
+  }
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::Execute() {

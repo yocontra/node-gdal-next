@@ -71,6 +71,7 @@ class Layer : public Nan::ObjectWrap {
 #endif
   void dispose();
   long uid;
+  long parent_uid;
 
     private:
   ~Layer();

@@ -48,6 +48,17 @@ namespace node_gdal {
 
 // A class for cleaning up GDAL objects that depend on open datasets
 
+// Async lock semantics:
+// * There is one global master lock
+// * There is one async lock per dataset
+// * All operations on the PtrManager should acquire the master_lock
+// - This implicit in all cases except isAlive()
+// - The caller should explicitly lock isAlive()
+// * All objects carry the dataset uid
+// * All I/O operations on the dataset require locking the dataset async_lock
+// - This is best accomplished though tryLockDataSet
+// * One should never lock the master lock while holding an async_lock (deadlock avoidance)
+
 class PtrManager {
     public:
   long add(GDALDataset *ptr, uv_mutex_t *async_lock);
@@ -58,12 +69,16 @@ class PtrManager {
   long add(OGRLayer *ptr, long parent_uid, bool is_result_set);
   void dispose(long uid);
   bool isAlive(long uid);
+  uv_mutex_t *tryLockDataset(long uid);
+  void lock();
+  void unlock();
 
   PtrManager();
   ~PtrManager();
 
     private:
   long uid;
+  uv_mutex_t master_lock;
   void dispose(PtrManagerLayerItem *item);
   void dispose(PtrManagerRasterBandItem *item);
   void dispose(PtrManagerDatasetItem *item);

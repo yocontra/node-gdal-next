@@ -16,12 +16,18 @@ void LayerFeatures::Initialize(Local<Object> target) {
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "count", count);
+  Nan::SetPrototypeMethod(lcons, "countAsync", countAsync);
   Nan::SetPrototypeMethod(lcons, "add", add);
+  Nan::SetPrototypeMethod(lcons, "addAsync", addAsync);
   Nan::SetPrototypeMethod(lcons, "get", get);
+  Nan::SetPrototypeMethod(lcons, "getAsync", getAsync);
   Nan::SetPrototypeMethod(lcons, "set", set);
   Nan::SetPrototypeMethod(lcons, "first", first);
+  Nan::SetPrototypeMethod(lcons, "firstAsync", firstAsync);
   Nan::SetPrototypeMethod(lcons, "next", next);
+  Nan::SetPrototypeMethod(lcons, "nextAsync", nextAsync);
   Nan::SetPrototypeMethod(lcons, "remove", remove);
+  Nan::SetPrototypeMethod(lcons, "removeAsync", removeAsync);
 
   ATTR_DONT_ENUM(lcons, "layer", layerGetter, READ_ONLY_SETTER);
 
@@ -91,7 +97,20 @@ NAN_METHOD(LayerFeatures::toString) {
  * @param {Integer} id The feature ID of the feature to read.
  * @return {gdal.Feature}
  */
-NAN_METHOD(LayerFeatures::get) {
+
+/**
+ * Fetch a feature by its identifier.
+ *
+ * **Important:** The `id` argument is not an index. In most cases it will be
+ * zero-based, but in some cases it will not. If iterating, it's best to use the
+ * `next()` method.
+ *
+ * @method getAsync
+ * @param {Integer} id The feature ID of the feature to read.
+ * @param {Callback} callback promisifiable callback
+ * @return {gdal.Feature}
+ */
+GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -104,9 +123,17 @@ NAN_METHOD(LayerFeatures::get) {
 
   int feature_id;
   NODE_ARG_INT(0, "feature id", feature_id);
-  OGRFeature *feature = layer->get()->GetFeature(feature_id);
-
-  info.GetReturnValue().Set(Feature::New(feature));
+  OGRLayer *gdal_layer = layer->get();
+  long ds_uid = layer->parent_uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(OGRFeature *) = [ds_uid, gdal_layer, feature_id]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    OGRFeature *feature = gdal_layer->GetFeature(feature_id);
+    GDAL_UNLOCK_PARENT;
+    return feature;
+  };
+  GDAL_ASYNCABLE_RVAL(OGRFeature *) = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRFeature *);
 }
 
 /**
@@ -116,7 +143,16 @@ NAN_METHOD(LayerFeatures::get) {
  * @method first
  * @return {gdal.Feature}
  */
-NAN_METHOD(LayerFeatures::first) {
+
+/**
+ * Resets the feature pointer used by `next()` and
+ * returns the first feature in the layer.
+ *
+ * @method firstAsync
+ * @param {Callback} callback promisifiable callback
+ * @return {gdal.Feature}
+ */
+GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -127,10 +163,18 @@ NAN_METHOD(LayerFeatures::first) {
     return;
   }
 
-  layer->get()->ResetReading();
-  OGRFeature *feature = layer->get()->GetNextFeature();
-
-  info.GetReturnValue().Set(Feature::New(feature));
+  OGRLayer *gdal_layer = layer->get();
+  long ds_uid = layer->parent_uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(OGRFeature *) = [ds_uid, gdal_layer]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    gdal_layer->ResetReading();
+    OGRFeature *feature = gdal_layer->GetNextFeature();
+    GDAL_UNLOCK_PARENT;
+    return feature;
+  };
+  GDAL_ASYNCABLE_RVAL(OGRFeature *) = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
+  GDAL_ASYNCABLE_EXECUTE(0, OGRFeature *);
 }
 
 /**
@@ -143,7 +187,19 @@ NAN_METHOD(LayerFeatures::first) {
  * @method next
  * @return {gdal.Feature}
  */
-NAN_METHOD(LayerFeatures::next) {
+
+/**
+ * Returns the next feature in the layer. Returns null if no more features.
+ *
+ * @example
+ * ```
+ * while (feature = layer.features.next()) { ... }```
+ *
+ * @method nextAsync
+ * @param {Callback} callback promisifiable callback
+ * @return {gdal.Feature}
+ */
+GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -154,9 +210,17 @@ NAN_METHOD(LayerFeatures::next) {
     return;
   }
 
-  OGRFeature *feature = layer->get()->GetNextFeature();
-
-  info.GetReturnValue().Set(Feature::New(feature));
+  OGRLayer *gdal_layer = layer->get();
+  long ds_uid = layer->parent_uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(OGRFeature *) = [ds_uid, gdal_layer]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    OGRFeature *feature = gdal_layer->GetNextFeature();
+    GDAL_UNLOCK_PARENT;
+    return feature;
+  };
+  GDAL_ASYNCABLE_RVAL(OGRFeature *) = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
+  GDAL_ASYNCABLE_EXECUTE(0, OGRFeature *);
 }
 
 /**
@@ -174,7 +238,25 @@ NAN_METHOD(LayerFeatures::next) {
  * @throws Error
  * @param {gdal.Feature} feature
  */
-NAN_METHOD(LayerFeatures::add) {
+
+/**
+ * Adds a feature to the layer. The feature should be created using the current
+ * layer as the definition.
+ *
+ * @example
+ * ```
+ * var feature = new gdal.Feature(layer);
+ * feature.setGeometry(new gdal.Point(0, 1));
+ * feature.fields.set('name', 'somestring');
+ * layer.features.add(feature);```
+ *
+ * @method addAsync
+ * @throws Error
+ * @param {gdal.Feature} feature
+ * @param {Callback} callback promisifiable callback
+ */
+
+GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -188,12 +270,19 @@ NAN_METHOD(LayerFeatures::add) {
   Feature *f;
   NODE_ARG_WRAPPED(0, "feature", Feature, f)
 
-  int err = layer->get()->CreateFeature(f->get());
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
-  return;
+  OGRLayer *gdal_layer = layer->get();
+  long ds_uid = layer->parent_uid;
+  OGRFeature *gdal_f = f->get();
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(int) = [ds_uid, gdal_layer, gdal_f]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    int err = gdal_layer->CreateFeature(gdal_f);
+    GDAL_UNLOCK_PARENT;
+    if (err != CE_None) throw getOGRErrMsg(err);
+    return err;
+  };
+  GDAL_ASYNCABLE_RVAL(int) = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  GDAL_ASYNCABLE_EXECUTE(1, int);
 }
 
 /**
@@ -203,7 +292,17 @@ NAN_METHOD(LayerFeatures::add) {
  * @param {Boolean} [force=true]
  * @return {Integer} Number of features in the layer.
  */
-NAN_METHOD(LayerFeatures::count) {
+
+/**
+ * Returns the number of features in the layer.
+ *
+ * @method countAsync
+ * @param {Boolean} [force=true]
+ * @param {Callback} callback promisifiable callback
+ * @return {Integer} Number of features in the layer.
+ */
+
+GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -214,10 +313,28 @@ NAN_METHOD(LayerFeatures::count) {
     return;
   }
 
+  Local<Object> ds;
+  if (Dataset::dataset_cache.has(layer->getParent())) { ds = Dataset::dataset_cache.get(layer->getParent()); }
+  if (!layer->isAlive()) {
+    Nan::ThrowError("Dataset object already destroyed");
+    return;
+  }
+
   int force = 1;
   NODE_ARG_BOOL_OPT(0, "force", force);
 
-  info.GetReturnValue().Set(Nan::New<Number>(layer->get()->GetFeatureCount(force)));
+  OGRLayer *gdal_layer = layer->get();
+  GDALDataset *gdal_dataset = layer->getParent();
+  long ds_uid = layer->parent_uid;
+  GDAL_ASYNCABLE_PERSIST(parent, ds);
+  GDAL_ASYNCABLE_MAIN(GIntBig) = [ds_uid, gdal_layer, force, gdal_dataset]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    GIntBig count = gdal_layer->GetFeatureCount(force);
+    GDAL_UNLOCK_PARENT;
+    return count;
+  };
+  GDAL_ASYNCABLE_RVAL(GIntBig) = [](GIntBig count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Number>(count); };
+  GDAL_ASYNCABLE_EXECUTE(1, int);
 }
 
 /**
@@ -278,7 +395,17 @@ NAN_METHOD(LayerFeatures::set) {
  * @throws Error
  * @param {Integer} id
  */
-NAN_METHOD(LayerFeatures::remove) {
+
+/**
+ * Removes a feature from the layer.
+ *
+ * @method removeAsync
+ * @throws Error
+ * @param {Integer} id
+ * @param {Callback} callback promisifiable callback
+ */
+
+GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -291,11 +418,21 @@ NAN_METHOD(LayerFeatures::remove) {
 
   int i;
   NODE_ARG_INT(0, "feature id", i);
-  int err = layer->get()->DeleteFeature(i);
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
+
+  OGRLayer *gdal_layer = layer->get();
+  long ds_uid = layer->parent_uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(int) = [ds_uid, gdal_layer, i]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    int err = gdal_layer->DeleteFeature(i);
+    GDAL_UNLOCK_PARENT;
+    if (err) {
+      throw getOGRErrMsg(err);
+    }
+    return err;
+  };
+  GDAL_ASYNCABLE_RVAL(int) = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  GDAL_ASYNCABLE_EXECUTE(1, int);
 
   return;
 }

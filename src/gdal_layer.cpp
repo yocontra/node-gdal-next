@@ -154,10 +154,12 @@ Local<Value> Layer::New(OGRLayer *raw, OGRDataSource *raw_parent, bool result_se
     // ds = Dataset::New(raw_parent); //should never happen
   }
 
-  long parent_uid = Nan::ObjectWrap::Unwrap<Dataset>(ds)->uid;
+  Dataset *unwrapped = Nan::ObjectWrap::Unwrap<Dataset>(ds);
+  long parent_uid = unwrapped->uid;
 
   wrapped->uid = ptr_manager.add(raw, parent_uid, result_set);
   wrapped->parent_ds = raw_parent;
+  wrapped->parent_uid = parent_uid;
   Nan::SetPrivate(obj, Nan::New("ds_").ToLocalChecked(), ds);
 
   return scope.Escape(obj);
