@@ -3,6 +3,9 @@ const gdal = require('../lib/gdal.js')
 const path = require('path')
 const assert = require('chai').assert
 const fileUtils = require('./utils/file.js')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
 
 const NAD83_WKT =
   'PROJCS["NAD_1983_UTM_Zone_10N",' +
@@ -54,6 +57,25 @@ describe('gdal.Dataset', () => {
           assert.throws(() => {
             ds.bands.count()
           })
+        })
+      })
+      describe('countAsync()', () => {
+        it('should return number', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          assert.becomes(ds.bands.countAsync(), 1)
+        })
+        it('should be 0 for vector datasets', () => {
+          const arr = []
+          for (let i = 0; i < 10000; i++) arr.push(i)
+          console.log('before')
+          const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
+          console.log('after')
+          assert.becomes(ds.bands.countAsync(), 0)
+        })
+        it('should throw if dataset is closed', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          ds.close()
+          assert.isRejected(ds.bands.countAsync())
         })
       })
       describe('get()', () => {

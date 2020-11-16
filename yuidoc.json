@@ -8,6 +8,6 @@
 		"paths": ["./lib","./src"],
 		"outdir": "./yuidocs",
 		"themedir": "node_modules/yuidoc-lucid-theme",
-		"helpers": ["node_modules/yuidoc-lucid-theme/helpers/helpers.js"]
+		"helpers": ["node_modules/yuidoc-lucid-theme/helpers/helpers.js", "scripts/yui-async.js"]
 	}
 }
