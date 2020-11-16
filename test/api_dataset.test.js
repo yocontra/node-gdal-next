@@ -95,6 +95,21 @@ describe('gdal.Dataset', () => {
           })
         })
       })
+      describe('getAsync()', () => {
+        it('should return RasterBand', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          assert.eventually.instanceOf(ds.bands.getAsync(1), gdal.RasterBand)
+        })
+        it('should return null if band id is out of range', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          assert.eventually.isNull(ds.bands.getAsync(0))
+        })
+        it('should throw if dataset is closed', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          ds.close()
+          assert.isRejected(ds.bands.getAsync(1))
+        })
+      })
       describe('forEach()', () => {
         it('should call callback for each RasterBand', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
