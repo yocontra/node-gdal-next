@@ -53,13 +53,26 @@ namespace node_gdal {
 
 #define GDAL_ISASYNC _gdal_async
 
+// Handle locking
+#define GDAL_TRYLOCK_PARENT(p)                                                                                         \
+  uv_mutex_t *async_lock = ptr_manager.tryLockDataset((p)->parent_uid);                                                \
+  if (async_lock == nullptr) {                                                                                         \
+    Nan::ThrowError("Parent Dataset object has already been destroyed");                                               \
+    return;                                                                                                            \
+  }
+
+#define GDAL_UNLOCK_PARENT uv_mutex_unlock(async_lock)
+#define GDAL_ASYNCABLE_LOCK(uid)                                                                                       \
+  uv_mutex_t *async_lock = ptr_manager.tryLockDataset(uid);                                                            \
+  if (async_lock == nullptr) { throw "Parent Dataset object has already been destroyed"; }
+
 /**
  * This class handles async operations
- * 
+ *
  * It takes the lambdas as input
  * gdaltype is the type of the object that will be carred from
  * the aux thread to the main thread
- * 
+ *
  * JS-visible object creation is possible only in the main thread while
  * ths JS world is stopped
  *
@@ -95,7 +108,10 @@ GDALAsyncWorker<gdaltype>::GDALAsyncWorker(
   : Nan::AsyncWorker(pCallback, "node-gdal:GDALAsyncWorker"), doit(doit), rval(rval), persistent(objects.size()) {
   // Main thread with the JS world stopped
   // Get persistent handles
-  for (long unsigned i = 0; i < objects.size(); i++) persistent[i] = new Nan::Persistent<v8::Object>(objects[i]);
+  for (long unsigned i = 0; i < objects.size(); i++) {
+    persistent[i] = new Nan::Persistent<v8::Object>(objects[i]);
+    persistent[i]->ClearWeak();
+  }
 }
 
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::Execute() {

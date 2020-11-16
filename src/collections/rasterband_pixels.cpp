@@ -123,9 +123,9 @@ NAN_METHOD(RasterBandPixels::get) {
   NODE_ARG_INT(0, "x", x);
   NODE_ARG_INT(1, "y", y);
 
-  uv_mutex_lock(band->async_lock);
+  GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->get()->RasterIO(GF_Read, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
-  uv_mutex_unlock(band->async_lock);
+  GDAL_UNLOCK_PARENT;
   if (err) {
     NODE_THROW_CPLERR(err);
     return;
@@ -155,9 +155,9 @@ NAN_METHOD(RasterBandPixels::set) {
   NODE_ARG_INT(1, "y", y);
   NODE_ARG_DOUBLE(2, "val", val);
 
-  uv_mutex_lock(band->async_lock);
+  GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->get()->RasterIO(GF_Write, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
-  uv_mutex_unlock(band->async_lock);
+  GDAL_UNLOCK_PARENT;
   if (err) {
     NODE_THROW_CPLERR(err);
     return;
@@ -292,14 +292,14 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
     return; // TypedArray::Validate threw an error
   }
 
-  uv_mutex_t *async_lock = band->async_lock;
+  long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
   GDAL_ASYNCABLE_PERSIST(obj, band->handle());
   GDAL_ASYNCABLE_MAIN(CPLErr) =
-    [gdal_band, async_lock, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
-      uv_mutex_lock(async_lock);
+    [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+      GDAL_ASYNCABLE_LOCK(ds_uid);
       CPLErr err = gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-      uv_mutex_unlock(async_lock);
+      GDAL_UNLOCK_PARENT;
       if (err != CE_None) throw CPLGetLastErrorMsg();
       return err;
     };
@@ -406,14 +406,14 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
     return; // TypedArray::Validate threw an error
   }
 
-  uv_mutex_t *async_lock = band->async_lock;
+  long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
   GDAL_ASYNCABLE_PERSIST(passed_array, band->handle());
   GDAL_ASYNCABLE_MAIN(CPLErr) =
-    [gdal_band, async_lock, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
-      uv_mutex_lock(async_lock);
+    [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+      GDAL_ASYNCABLE_LOCK(ds_uid);
       CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-      uv_mutex_unlock(async_lock);
+      GDAL_UNLOCK_PARENT;
       if (err != CE_None) throw CPLGetLastErrorMsg();
       return err;
     };
@@ -512,9 +512,9 @@ NAN_METHOD(RasterBandPixels::readBlock) {
     return; // TypedArray::Validate threw an error
   }
 
-  uv_mutex_lock(band->async_lock);
+  GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->get()->ReadBlock(x, y, data);
-  uv_mutex_unlock(band->async_lock);
+  GDAL_UNLOCK_PARENT;
   if (err) {
     NODE_THROW_CPLERR(err);
     return;
@@ -556,9 +556,9 @@ NAN_METHOD(RasterBandPixels::writeBlock) {
     return; // TypedArray::Validate threw an error
   }
 
-  uv_mutex_lock(band->async_lock);
+  GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->get()->WriteBlock(x, y, data);
-  uv_mutex_unlock(band->async_lock);
+  GDAL_UNLOCK_PARENT;
 
   if (err) {
     NODE_THROW_CPLERR(err);
