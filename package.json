@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/contra/node-gdal-next.git"
+    "url": "git://github.com/mmomtchev/node-gdal-async.git"
   },
   "author": {
     "name": "Brandon Reavis",
