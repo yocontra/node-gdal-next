@@ -373,15 +373,15 @@ describe('gdal.Dataset', () => {
         })
       })
       describe('createAsync()', () => {
-        it('should return Layer', async () => {
+        it('should return Layer', () => {
           const file = `${__dirname}/data/temp/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
           const srs = gdal.SpatialReference.fromEPSG(4326)
-          const lyr = await ds.layers.createAsync('layer_name', srs, gdal.wkbPoint)
-          assert.instanceOf(lyr, gdal.Layer)
-          assert.equal(lyr.geomType, gdal.wkbPoint)
+          const lyr = ds.layers.createAsync('layer_name', srs, gdal.wkbPoint)
+          assert.eventually.instanceOf(lyr, gdal.Layer)
+          assert.eventually.propertyVal(lyr, 'geomType', gdal.wkbPoint)
         })
       })
     })

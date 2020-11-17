@@ -404,7 +404,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return ds;
   };
 
-  GDAL_ASYNCABLE_EXECUTE(3, GDALDataset*);
+  GDAL_ASYNCABLE_EXECUTE(3, GDALDataset *);
 }
 
 /**
@@ -577,7 +577,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
     if (!ds) throw "Error opening dataset";
   };
 
-  GDAL_ASYNCABLE_EXECUTE(2, GDALDataset*);
+  GDAL_ASYNCABLE_EXECUTE(2, GDALDataset *);
 #endif
 }
 

@@ -98,6 +98,7 @@ class Geometry : public Nan::ObjectWrap {
   inline bool isAlive() {
     return this_;
   }
+
     protected:
   ~Geometry();
   OGRGeometry *this_;

@@ -218,7 +218,7 @@ describe('gdal.Envelope', () => {
       })
     })
     describe('toPolygon() w/Async', () => {
-      it('should return Polygon', async () => {
+      it('should return Polygon', () => {
         let envelope = new gdal.Envelope({
           minX: -1,
           maxX: 1,
@@ -226,12 +226,12 @@ describe('gdal.Envelope', () => {
           maxY: 2
         })
         const polygon = envelope.toPolygon()
-        envelope = await polygon.getEnvelopeAsync()
+        envelope = polygon.getEnvelopeAsync()
         assert.instanceOf(polygon, gdal.Polygon)
-        assert.equal(envelope.minX, -1)
-        assert.equal(envelope.maxX, 1)
-        assert.equal(envelope.minY, -2)
-        assert.equal(envelope.maxY, 2)
+        assert.eventually.propertyVal(envelope, 'minX', -1)
+        assert.eventually.propertyVal(envelope, 'maxX', 1)
+        assert.eventually.propertyVal(envelope, 'minY', -2)
+        assert.eventually.propertyVal(envelope, 'maxY', 2)
       })
     })
   })
