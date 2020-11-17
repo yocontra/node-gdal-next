@@ -66,7 +66,7 @@ console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
 
 ## Notes
 
-- This binding is *not* async, so it will block node's event loop. Be very careful (or avoid) using it in server code. We recommended using tools like [worker-farm](https://www.npmjs.com/package/worker-farm) to push expensive operations to a seperate process.
+- Currently only raster operations are async, everything else will block Node's event loop. The module is not worker-thread compatible so we recommend using [worker-farm](https://www.npmjs.com/package/worker-farm) to push expensive operations to a seperate process.
 
 ## Bundled Drivers
 
