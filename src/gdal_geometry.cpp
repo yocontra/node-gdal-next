@@ -1055,7 +1055,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
 /**
  * Creates a Geometry from a GeoJSON string.
  * {{{async}}}
- * 
+ *
  * Alas, the current implementation uses V8's JSON.Stringify
  * and then converts the string to UTF-8 (from JS internal UTF-16)
  * This part is neither async-compatible, neither parallelizable
@@ -1098,9 +1098,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
     delete val;
     return geom;
   };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) {
-    return Geometry::New(geom, true);
-  };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
   GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 #endif
 }

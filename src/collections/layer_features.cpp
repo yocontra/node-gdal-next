@@ -426,9 +426,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     int err = gdal_layer->DeleteFeature(i);
     GDAL_UNLOCK_PARENT;
-    if (err) {
-      throw getOGRErrMsg(err);
-    }
+    if (err) { throw getOGRErrMsg(err); }
     return err;
   };
   GDAL_ASYNCABLE_RVAL(int) = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };

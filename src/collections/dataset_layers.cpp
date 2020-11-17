@@ -161,9 +161,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
     return;
   }
 
-  GDAL_ASYNCABLE_RVAL(OGRLayer *) = [raw](OGRLayer *lyr, GDAL_ASYNCABLE_OBJS) {
-    return Layer::New(lyr, raw);
-  };
+  GDAL_ASYNCABLE_RVAL(OGRLayer *) = [raw](OGRLayer *lyr, GDAL_ASYNCABLE_OBJS) { return Layer::New(lyr, raw); };
   GDAL_ASYNCABLE_EXECUTE(1, OGRLayer *);
 }
 
@@ -367,9 +365,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
 
   NODE_ARG_WRAPPED(0, "layer to copy", Layer, layer_to_copy);
   NODE_ARG_STR(1, "new layer name", *new_name);
-  if (info.Length() > 2 && options->parse(info[2])) {
-    Nan::ThrowError("Error parsing string list");
-  }
+  if (info.Length() > 2 && options->parse(info[2])) { Nan::ThrowError("Error parsing string list"); }
 
   long ds_uid = ds->uid;
   GDAL_ASYNCABLE_PERSIST(parent, info[0].As<Object>());
@@ -384,9 +380,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
     return layer;
   };
 
-  GDAL_ASYNCABLE_RVAL(OGRLayer *) = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) {
-    return Layer::New(layer, raw);
-  };
+  GDAL_ASYNCABLE_RVAL(OGRLayer *) = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) { return Layer::New(layer, raw); };
 
   GDAL_ASYNCABLE_EXECUTE(3, OGRLayer *);
 }
