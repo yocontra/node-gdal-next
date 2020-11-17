@@ -217,7 +217,7 @@ describe('gdal.Envelope', () => {
         assert.equal(envelope.maxY, 2)
       })
     })
-    describe('toPolygon() w/async', () => {
+    describe('toPolygon() w/Async', () => {
       it('should return Polygon', async () => {
         let envelope = new gdal.Envelope({
           minX: -1,
