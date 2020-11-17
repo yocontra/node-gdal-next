@@ -57,7 +57,13 @@ namespace node_gdal {
 // * All objects carry the dataset uid
 // * All I/O operations on the dataset require locking the dataset async_lock
 // - This is best accomplished though tryLockDataSet
-// * One should never lock the master lock while holding an async_lock (deadlock avoidance)
+// * Deadlock avoidance strategy:
+// - One should never lock the master lock while holding an async_lock
+//
+// Weaknesses:
+// - A long-running operation has locked a dataset
+// - Another operation on that dataset tries to get its async_lock
+// - While the second operation is waiting, creating new datasets is blocked
 
 class PtrManager {
     public:
