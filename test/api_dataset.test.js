@@ -167,6 +167,21 @@ describe('gdal.Dataset', () => {
           })
         })
       })
+      describe('countAsync()', () => {
+        it('should return number', () => {
+          const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
+          assert.eventually.equal(ds.layers.countAsync(), 1)
+        })
+        it('should be 0 for raster datasets', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          assert.eventually.equal(ds.layers.countAsync(), 0)
+        })
+        it('should throw if dataset is closed', () => {
+          const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
+          ds.close()
+          assert.isRejected(ds.layers.countAsync())
+        })
+      })
       describe('get()', () => {
         describe('w/id argument', () => {
           it('should return Layer', () => {
@@ -200,6 +215,20 @@ describe('gdal.Dataset', () => {
             assert.throws(() => {
               ds.layers.get('sample')
             })
+          })
+        })
+      })
+      describe('getAsync()', () => {
+        describe('w/id argument', () => {
+          it('should return Layer', () => {
+            const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
+            assert.eventually.instanceOf(ds.layers.getAsync(0), gdal.Layer)
+          })
+        })
+        describe('w/name argument', () => {
+          it('should return Layer', () => {
+            const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
+            assert.eventually.instanceOf(ds.layers.getAsync('sample'), gdal.Layer)
           })
         })
       })
@@ -341,6 +370,18 @@ describe('gdal.Dataset', () => {
           assert.throws(() => {
             ds.layers.create('layer_name', null, gdal.wkbPoint)
           })
+        })
+      })
+      describe('createAsync()', () => {
+        it('should return Layer', async () => {
+          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+            Math.random()
+          ).substring(2)}.tmp.shp`
+          const ds = gdal.open(file, 'w', 'ESRI Shapefile')
+          const srs = gdal.SpatialReference.fromEPSG(4326)
+          const lyr = await ds.layers.createAsync('layer_name', srs, gdal.wkbPoint)
+          assert.instanceOf(lyr, gdal.Layer)
+          assert.equal(lyr.geomType, gdal.wkbPoint)
         })
       })
     })

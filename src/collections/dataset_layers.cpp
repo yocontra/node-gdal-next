@@ -18,10 +18,15 @@ void DatasetLayers::Initialize(Local<Object> target) {
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "count", count);
+  Nan::SetPrototypeMethod(lcons, "countAsync", countAsync);
   Nan::SetPrototypeMethod(lcons, "create", create);
+  Nan::SetPrototypeMethod(lcons, "createAsync", createAsync);
   Nan::SetPrototypeMethod(lcons, "copy", copy);
+  Nan::SetPrototypeMethod(lcons, "copyAsync", copyAsync);
   Nan::SetPrototypeMethod(lcons, "get", get);
+  Nan::SetPrototypeMethod(lcons, "getAsync", getAsync);
   Nan::SetPrototypeMethod(lcons, "remove", remove);
+  Nan::SetPrototypeMethod(lcons, "removeAsync", removeAsync);
 
   ATTR_DONT_ENUM(lcons, "ds", dsGetter, READ_ONLY_SETTER);
 
@@ -91,7 +96,18 @@ NAN_METHOD(DatasetLayers::toString) {
  * @param {String|Integer} key Layer name or ID.
  * @return {gdal.Layer}
  */
-NAN_METHOD(DatasetLayers::get) {
+
+/**
+ * Returns the layer with the given name or identifier.
+ * {{{async}}}
+ *
+ * @method getAsync
+ * @param {String|Integer} key Layer name or ID.
+ * @param {requestCallback} [callback] {{cb}}
+ * @return {gdal.Layer}
+ */
+
+GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -106,6 +122,7 @@ NAN_METHOD(DatasetLayers::get) {
 #if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
 #else
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   OGRDataSource *raw = ds->getDatasource();
   if (!ds->uses_ogr) {
     info.GetReturnValue().Set(Nan::Null());
@@ -118,19 +135,36 @@ NAN_METHOD(DatasetLayers::get) {
     return;
   }
 
-  OGRLayer *lyr;
+  long ds_uid = ds->uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
 
+  GDAL_ASYNCABLE_MAIN(OGRLayer *);
   if (info[0]->IsString()) {
-    std::string layer_name = *Nan::Utf8String(info[0]);
-    lyr = raw->GetLayerByName(layer_name.c_str());
+    std::string *layer_name = new std::string(*Nan::Utf8String(info[0]));
+    _gdal_doit = [ds_uid, raw, layer_name]() {
+      GDAL_ASYNCABLE_LOCK(ds_uid);
+      OGRLayer *lyr = raw->GetLayerByName(layer_name->c_str());
+      GDAL_UNLOCK_PARENT;
+      free(layer_name);
+      return lyr;
+    };
   } else if (info[0]->IsNumber()) {
-    lyr = raw->GetLayer(Nan::To<int64_t>(info[0]).ToChecked());
+    int64_t id = Nan::To<int64_t>(info[0]).ToChecked();
+    _gdal_doit = [ds_uid, raw, id]() {
+      GDAL_ASYNCABLE_LOCK(ds_uid);
+      OGRLayer *lyr = raw->GetLayer(id);
+      GDAL_UNLOCK_PARENT;
+      return lyr;
+    };
   } else {
     Nan::ThrowTypeError("method must be given integer or string");
     return;
   }
 
-  info.GetReturnValue().Set(Layer::New(lyr, raw));
+  GDAL_ASYNCABLE_RVAL(OGRLayer *) = [raw](OGRLayer *lyr, GDAL_ASYNCABLE_OBJS) {
+    return Layer::New(lyr, raw);
+  };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRLayer *);
 }
 
 /**
@@ -151,7 +185,29 @@ NAN_METHOD(DatasetLayers::get) {
  * options
  * @return {gdal.Layer}
  */
-NAN_METHOD(DatasetLayers::create) {
+
+/**
+ * Adds a new layer.
+ * {{{async}}}
+ *
+ * @example
+ * ```
+ * dataset.layers.createAsync('layername', null, gdal.Point);
+ * ```
+ *
+ * @method createAsync
+ * @throws Error
+ * @param {String} name Layer name
+ * @param {gdal.SpatialReference|null} srs Layer projection
+ * @param {Integer|Function} geomType Geometry type or constructor ({{#crossLink
+ * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
+ * @param {string[]|object} creation_options driver-specific layer creation
+ * options
+ * @param {requestCallback} [callback] {{cb}}
+ * @return {gdal.Layer}
+ */
+
+GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -166,6 +222,7 @@ NAN_METHOD(DatasetLayers::create) {
 #if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
 #else
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   OGRDataSource *raw = ds->getDatasource();
   if (!ds->uses_ogr) {
     Nan::ThrowError("Dataset does not support creating layers");
@@ -173,30 +230,38 @@ NAN_METHOD(DatasetLayers::create) {
   }
 #endif
 
-  std::string layer_name;
+  std::string *layer_name = new std::string;
   SpatialReference *spatial_ref = NULL;
   OGRwkbGeometryType geom_type = wkbUnknown;
-  StringList options;
+  StringList *options = new StringList;
 
-  NODE_ARG_STR(0, "layer name", layer_name);
+  NODE_ARG_STR(0, "layer name", *layer_name);
   NODE_ARG_WRAPPED_OPT(1, "spatial reference", SpatialReference, spatial_ref);
   NODE_ARG_ENUM_OPT(2, "geometry type", OGRwkbGeometryType, geom_type);
-  if (info.Length() > 3 && options.parse(info[3])) {
+  if (info.Length() > 3 && options->parse(info[3])) {
     return; // error parsing string list
   }
 
   OGRSpatialReference *srs = NULL;
   if (spatial_ref) srs = spatial_ref->get();
 
-  OGRLayer *layer = raw->CreateLayer(layer_name.c_str(), srs, geom_type, options.get());
+  long ds_uid = ds->uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(OGRLayer *) = [raw, ds_uid, layer_name, srs, geom_type, options]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    OGRLayer *layer = raw->CreateLayer(layer_name->c_str(), srs, geom_type, options->get());
+    GDAL_UNLOCK_PARENT;
+    delete layer_name;
+    delete options;
+    if (layer == nullptr) throw "Error creating layer";
+    return layer;
+  };
 
-  if (layer) {
-    info.GetReturnValue().Set(Layer::New(layer, raw, false));
-    return;
-  } else {
-    Nan::ThrowError("Error creating layer");
-    return;
-  }
+  GDAL_ASYNCABLE_RVAL(OGRLayer *) = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) {
+    return Layer::New(layer, raw, false);
+  };
+
+  GDAL_ASYNCABLE_EXECUTE(4, OGRLayer *);
 }
 
 /**
@@ -205,7 +270,17 @@ NAN_METHOD(DatasetLayers::create) {
  * @method count
  * @return {Integer}
  */
-NAN_METHOD(DatasetLayers::count) {
+
+/**
+ * Returns the number of layers.
+ * {{{async}}}
+ *
+ * @method countAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return {Integer}
+ */
+
+GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -220,6 +295,7 @@ NAN_METHOD(DatasetLayers::count) {
 #if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
 #else
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   OGRDataSource *raw = ds->getDatasource();
   if (!ds->uses_ogr) {
     info.GetReturnValue().Set(Nan::New<Integer>(0));
@@ -227,7 +303,17 @@ NAN_METHOD(DatasetLayers::count) {
   }
 #endif
 
-  info.GetReturnValue().Set(Nan::New<Integer>(raw->GetLayerCount()));
+  long ds_uid = ds->uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(int) = [raw, ds_uid]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    int count = raw->GetLayerCount();
+    GDAL_UNLOCK_PARENT;
+    return count;
+  };
+
+  GDAL_ASYNCABLE_RVAL(int) = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
+  GDAL_ASYNCABLE_EXECUTE(0, int);
 }
 
 /**
@@ -239,7 +325,20 @@ NAN_METHOD(DatasetLayers::count) {
  * @param {object|string[]} [options=null] layer creation options
  * @return {gdal.Layer}
  */
-NAN_METHOD(DatasetLayers::copy) {
+
+/**
+ * Copies a layer.
+ * {{{async}}}
+ *
+ * @method copyAsync
+ * @param {String} src_lyr_name
+ * @param {String} dst_lyr_name
+ * @param {object|string[]} [options=null] layer creation options
+ * @param {requestCallback} [callback] {{cb}}
+ * @return {gdal.Layer}
+ */
+
+GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -254,6 +353,7 @@ NAN_METHOD(DatasetLayers::copy) {
 #if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
 #else
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   OGRDataSource *raw = ds->getDatasource();
   if (!ds->uses_ogr) {
     Nan::ThrowError("Dataset does not support copying layers");
@@ -262,24 +362,33 @@ NAN_METHOD(DatasetLayers::copy) {
 #endif
 
   Layer *layer_to_copy;
-  std::string new_name = "";
-  StringList options;
+  std::string *new_name = new std::string("");
+  StringList *options = new StringList;
 
   NODE_ARG_WRAPPED(0, "layer to copy", Layer, layer_to_copy);
-  NODE_ARG_STR(1, "new layer name", new_name);
-  if (info.Length() > 2 && options.parse(info[2])) {
-    return; // error parsing string list
+  NODE_ARG_STR(1, "new layer name", *new_name);
+  if (info.Length() > 2 && options->parse(info[2])) {
+    Nan::ThrowError("Error parsing string list");
   }
 
-  OGRLayer *layer = raw->CopyLayer(layer_to_copy->get(), new_name.c_str(), options.get());
+  long ds_uid = ds->uid;
+  GDAL_ASYNCABLE_PERSIST(parent, info[0].As<Object>());
+  OGRLayer *src = layer_to_copy->get();
+  GDAL_ASYNCABLE_MAIN(OGRLayer *) = [raw, ds_uid, src, new_name, options]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    OGRLayer *layer = raw->CopyLayer(src, new_name->c_str(), options->get());
+    GDAL_UNLOCK_PARENT;
+    delete new_name;
+    delete options;
+    if (layer == nullptr) throw "Error copying layer";
+    return layer;
+  };
 
-  if (layer) {
-    info.GetReturnValue().Set(Layer::New(layer, raw));
-    return;
-  } else {
-    Nan::ThrowError("Error copying layer");
-    return;
-  }
+  GDAL_ASYNCABLE_RVAL(OGRLayer *) = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) {
+    return Layer::New(layer, raw);
+  };
+
+  GDAL_ASYNCABLE_EXECUTE(3, OGRLayer *);
 }
 
 /**
@@ -289,7 +398,18 @@ NAN_METHOD(DatasetLayers::copy) {
  * @throws Error
  * @param {Integer} index
  */
-NAN_METHOD(DatasetLayers::remove) {
+
+/**
+ * Removes a layer.
+ * {{{async}}}
+ *
+ * @method removeAsync
+ * @throws Error
+ * @param {Integer} index
+ * @param {requestCallback} [callback] {{cb}}
+ */
+
+GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -304,6 +424,7 @@ NAN_METHOD(DatasetLayers::remove) {
 #if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
 #else
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   OGRDataSource *raw = ds->getDatasource();
   if (!ds->uses_ogr) {
     Nan::ThrowError("Dataset does not support removing layers");
@@ -313,13 +434,18 @@ NAN_METHOD(DatasetLayers::remove) {
 
   int i;
   NODE_ARG_INT(0, "layer index", i);
-  OGRErr err = raw->DeleteLayer(i);
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
+  long ds_uid = ds->uid;
+  GDAL_ASYNCABLE_PERSIST(parent);
+  GDAL_ASYNCABLE_MAIN(OGRErr) = [raw, ds_uid, i]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    OGRErr err = raw->DeleteLayer(i);
+    GDAL_UNLOCK_PARENT;
+    if (err) throw getOGRErrMsg(err);
+    return err;
+  };
 
-  return;
+  GDAL_ASYNCABLE_RVAL(OGRErr) = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  GDAL_ASYNCABLE_EXECUTE(1, int);
 }
 
 /**
