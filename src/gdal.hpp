@@ -37,11 +37,7 @@ GDAL_ASYNCABLE_DEFINE(open) {
   NODE_ARG_OPT_STR(1, "mode", mode);
 
 #if GDAL_VERSION_MAJOR < 2
-  if (GDAL_ISASYNC) {
-    Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
-    return;
-  }
-
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   GDALAccess access = GA_ReadOnly;
   if (mode == "r+") {
     access = GA_Update;

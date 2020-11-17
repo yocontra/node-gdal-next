@@ -29,9 +29,13 @@ void MultiPoint::Initialize(Local<Object> target) {
 
 MultiPoint::MultiPoint(OGRMultiPoint *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created MultiPoint [%p]", geom);
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 MultiPoint::MultiPoint() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 MultiPoint::~MultiPoint() {
@@ -44,6 +48,8 @@ MultiPoint::~MultiPoint() {
     LOG("Disposed MultiPoint [%p]", this_);
     this_ = NULL;
   }
+  uv_mutex_destroy(async_lock);
+  delete async_lock;
 }
 
 /**

@@ -66,6 +66,12 @@ namespace node_gdal {
   uv_mutex_t *async_lock = ptr_manager.tryLockDataset(uid);                                                            \
   if (async_lock == nullptr) { throw "Parent Dataset object has already been destroyed"; }
 
+#define GDAL_ASYNCABLE_1x_UNSUPPORTED                                                                                  \
+  if (GDAL_ISASYNC) {                                                                                                  \
+    Nan::ThrowError("This asynchronous operation is not supported on GDAL 1.x");                                       \
+    return;                                                                                                            \
+  }
+
 //
 // This class handles async operations
 //

@@ -30,9 +30,13 @@ void Point::Initialize(Local<Object> target) {
 
 Point::Point(OGRPoint *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created Point [%p]", geom);
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 Point::Point() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 Point::~Point() {
@@ -45,6 +49,8 @@ Point::~Point() {
     LOG("Disposed Point [%p]", this_);
     this_ = NULL;
   }
+  uv_mutex_destroy(async_lock);
+  delete async_lock;
 }
 
 /**

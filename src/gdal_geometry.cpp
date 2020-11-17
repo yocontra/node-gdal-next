@@ -40,10 +40,15 @@ void Geometry::Initialize(Local<Object> target) {
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "toKML", exportToKML);
+  Nan::SetPrototypeMethod(lcons, "toKMLAsync", exportToKMLAsync);
   Nan::SetPrototypeMethod(lcons, "toGML", exportToGML);
+  Nan::SetPrototypeMethod(lcons, "toGMLAsync", exportToGMLAsync);
   Nan::SetPrototypeMethod(lcons, "toJSON", exportToJSON);
+  Nan::SetPrototypeMethod(lcons, "toJSONAsync", exportToJSONAsync);
   Nan::SetPrototypeMethod(lcons, "toWKT", exportToWKT);
+  Nan::SetPrototypeMethod(lcons, "toWKTAsync", exportToWKTAsync);
   Nan::SetPrototypeMethod(lcons, "toWKB", exportToWKB);
+  Nan::SetPrototypeMethod(lcons, "toWKBAsync", exportToWKBAsync);
   Nan::SetPrototypeMethod(lcons, "isEmpty", isEmpty);
   Nan::SetPrototypeMethod(lcons, "isValid", isValid);
   Nan::SetPrototypeMethod(lcons, "isSimple", isSimple);
@@ -68,12 +73,15 @@ void Geometry::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "difference", difference);
   Nan::SetPrototypeMethod(lcons, "symDifference", symDifference);
   Nan::SetPrototypeMethod(lcons, "centroid", centroid);
+  Nan::SetPrototypeMethod(lcons, "centroidAsync", centroidAsync);
   Nan::SetPrototypeMethod(lcons, "simplify", simplify);
   Nan::SetPrototypeMethod(lcons, "simplifyPreserveTopology", simplifyPreserveTopology);
   Nan::SetPrototypeMethod(lcons, "segmentize", segmentize);
   Nan::SetPrototypeMethod(lcons, "swapXY", swapXY);
   Nan::SetPrototypeMethod(lcons, "getEnvelope", getEnvelope);
+  Nan::SetPrototypeMethod(lcons, "getEnvelopeAsync", getEnvelopeAsync);
   Nan::SetPrototypeMethod(lcons, "getEnvelope3D", getEnvelope3D);
+  Nan::SetPrototypeMethod(lcons, "getEnvelope3DAsync", getEnvelope3DAsync);
   Nan::SetPrototypeMethod(lcons, "transform", transform);
   Nan::SetPrototypeMethod(lcons, "transformTo", transformTo);
 
@@ -91,9 +99,15 @@ void Geometry::Initialize(Local<Object> target) {
 
 Geometry::Geometry(OGRGeometry *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created Geometry [%p]", geom);
+  // The async locks must live outside the V8 memory management,
+  // otherwise they won't be accessible from the async threads
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 Geometry::Geometry() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 Geometry::~Geometry() {
@@ -106,6 +120,8 @@ Geometry::~Geometry() {
     LOG("Disposed Geometry [%p]", this_)
     this_ = NULL;
   }
+  uv_mutex_destroy(async_lock);
+  delete async_lock;
 }
 
 /**
@@ -542,24 +558,29 @@ NAN_METHOD(Geometry::buffer) {
  * @method toWKT
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::exportToWKT) {
+GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  char *text = NULL;
-  OGRErr err = geom->this_->exportToWkt(&text);
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
+  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+    char *text = NULL;
+    uv_mutex_lock(async_lock);
+    OGRErr err = gdal_geom->exportToWkt(&text);
+    uv_mutex_unlock(async_lock);
+    if (err) { throw getOGRErrMsg(err); }
+    return text;
+  };
 
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
-  if (text) {
-    info.GetReturnValue().Set(SafeString::New(text));
-    return;
-  }
+  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+    if (text) { return SafeString::New(text); }
+    return Nan::Undefined().As<Value>();
+  };
 
-  return;
+  GDAL_ASYNCABLE_EXECUTE(0, char *);
 }
 
 /**
@@ -572,7 +593,21 @@ NAN_METHOD(Geometry::exportToWKT) {
  * options{{/crossLink}})
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::exportToWKB) {
+
+/**
+ * Convert a geometry into well known binary format.
+ * {{{async}}}
+ *
+ * @method toWKBAsync
+ * @param {string} [byte_order="MSB"] ({{#crossLink "Constants
+ * (wkbByteOrder)"}}see options{{/crossLink}})
+ * @param {string} [variant="OGC"] ({{#crossLink "Constants (wkbVariant)"}}see
+ * options{{/crossLink}})
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
@@ -610,20 +645,37 @@ NAN_METHOD(Geometry::exportToWKB) {
     Nan::ThrowError("variant must be 'OGC' or 'ISO'");
     return;
   }
-  OGRErr err = geom->this_->exportToWkb(byte_order, data, wkb_variant);
-#else
-  OGRErr err = geom->this_->exportToWkb(byte_order, data);
-#endif
-
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
+  GDAL_ASYNCABLE_MAIN(unsigned char *) = [async_lock, gdal_geom, data, byte_order, wkb_variant]() {
+    uv_mutex_lock(async_lock);
+    OGRErr err = gdal_geom->exportToWkb(byte_order, data, wkb_variant);
+    uv_mutex_unlock(async_lock);
+    if (err) {
+      free(data);
+      throw getOGRErrMsg(err);
+    }
+    return data;
+  };
   //^^ export to wkb and fill buffer ^^
+  GDAL_ASYNCABLE_RVAL(unsigned char *) = [size](unsigned char *data, GDAL_ASYNCABLE_OBJS) {
+    Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
+    return result;
+  };
+  GDAL_ASYNCABLE_EXECUTE(2, unsigned char *);
+#else
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
+  OGRErr err = geom->this_->exportToWkb(byte_order, data);
   if (err) {
     free(data);
     NODE_THROW_OGRERR(err);
     return;
   }
-
+  //^^ export to wkb and fill buffer ^^
   Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
   info.GetReturnValue().Set(result);
+#endif
 }
 
 /**
@@ -632,20 +684,39 @@ NAN_METHOD(Geometry::exportToWKB) {
  * @method toKML
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::exportToKML) {
+
+/**
+ * Convert a geometry into KML format.
+ * {{{async}}}
+ *
+ * @method toKMLAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  char *text = geom->this_->exportToKML();
-  if (text) {
-    Local<Value> result = Nan::New(text).ToLocalChecked();
-    CPLFree(text);
-    info.GetReturnValue().Set(result);
-    return;
-  }
-
-  return;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
+  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+    uv_mutex_lock(async_lock);
+    char *text = gdal_geom->exportToKML();
+    uv_mutex_unlock(async_lock);
+    return text;
+  };
+  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+    if (text) {
+      Local<Value> result = Nan::New(text).ToLocalChecked();
+      CPLFree(text);
+      return result;
+    }
+    return Nan::Undefined().As<Value>();
+  };
+  GDAL_ASYNCABLE_EXECUTE(0, char *);
 }
 
 /**
@@ -654,20 +725,39 @@ NAN_METHOD(Geometry::exportToKML) {
  * @method toGML
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::exportToGML) {
+
+/**
+ * Convert a geometry into GML format.
+ * {{{async}}}
+ *
+ * @method toGMLAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  char *text = geom->this_->exportToGML();
-  if (text) {
-    Local<Value> result = Nan::New(text).ToLocalChecked();
-    CPLFree(text);
-    info.GetReturnValue().Set(result);
-    return;
-  }
-
-  return;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
+  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+    uv_mutex_lock(async_lock);
+    char *text = gdal_geom->exportToGML();
+    uv_mutex_unlock(async_lock);
+    return text;
+  };
+  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+    if (text) {
+      Local<Value> result = Nan::New(text).ToLocalChecked();
+      CPLFree(text);
+      return result;
+    }
+    return Nan::Undefined().As<Value>();
+  };
+  GDAL_ASYNCABLE_EXECUTE(0, char *);
 }
 
 /**
@@ -676,20 +766,39 @@ NAN_METHOD(Geometry::exportToGML) {
  * @method toJSON
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::exportToJSON) {
+
+/**
+ * Convert a geometry into JSON format.
+ * {{{async}}}
+ *
+ * @method toJSONAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  char *text = geom->this_->exportToJson();
-  if (text) {
-    Local<Value> result = Nan::New(text).ToLocalChecked();
-    CPLFree(text);
-    info.GetReturnValue().Set(result);
-    return;
-  }
-
-  return;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
+  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+    uv_mutex_lock(async_lock);
+    char *text = gdal_geom->exportToJson();
+    uv_mutex_unlock(async_lock);
+    return text;
+  };
+  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+    if (text) {
+      Local<Value> result = Nan::New(text).ToLocalChecked();
+      CPLFree(text);
+      return result;
+    }
+    return Nan::Undefined().As<Value>();
+  };
+  GDAL_ASYNCABLE_EXECUTE(0, char *);
 }
 
 /**
@@ -698,16 +807,40 @@ NAN_METHOD(Geometry::exportToJSON) {
  * @method centroid
  * @return gdal.Point
  */
-NAN_METHOD(Geometry::centroid) {
+
+/**
+ * Compute the centroid of the geometry.
+ * {{{async}}}
+ *
+ * @method centroidAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Point
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
   // The Centroid method wants the caller to create the point to fill in.
   // Instead of requiring the caller to create the point geometry to fill in, we
   // new up an OGRPoint and put the result into it and return that.
   Nan::HandleScope scope;
-  OGRPoint *point = new OGRPoint();
 
-  Nan::ObjectWrap::Unwrap<Geometry>(info.This())->this_->Centroid(point);
+  Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  info.GetReturnValue().Set(Point::New(point));
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
+  GDAL_ASYNCABLE_MAIN(OGRPoint *) = [async_lock, gdal_geom]() {
+    OGRPoint *point = new OGRPoint();
+    uv_mutex_lock(async_lock);
+    OGRErr err = gdal_geom->Centroid(point);
+    uv_mutex_unlock(async_lock);
+    if (err) {
+      delete point;
+      throw getOGRErrMsg(err);
+    }
+    return point;
+  };
+  GDAL_ASYNCABLE_RVAL(OGRPoint *) = [](OGRPoint *point, GDAL_ASYNCABLE_OBJS) { return Point::New(point); };
+  GDAL_ASYNCABLE_EXECUTE(0, OGRPoint *);
 }
 
 /**
@@ -716,7 +849,15 @@ NAN_METHOD(Geometry::centroid) {
  * @method getEnvelope
  * @return {gdal.Envelope} Bounding envelope
  */
-NAN_METHOD(Geometry::getEnvelope) {
+
+/**
+ * Computes the bounding box (envelope).
+ *
+ * @method getEnvelopeAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return {gdal.Envelope} Bounding envelope
+ */
+GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
   // returns object containing boundaries until complete OGREnvelope binding is
   // built
 
@@ -724,18 +865,28 @@ NAN_METHOD(Geometry::getEnvelope) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  OGREnvelope *envelope = new OGREnvelope();
-  geom->this_->getEnvelope(envelope);
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
 
-  Local<Object> obj = Nan::New<Object>();
-  Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
-  Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
-  Nan::Set(obj, Nan::New("minY").ToLocalChecked(), Nan::New<Number>(envelope->MinY));
-  Nan::Set(obj, Nan::New("maxY").ToLocalChecked(), Nan::New<Number>(envelope->MaxY));
+  GDAL_ASYNCABLE_MAIN(OGREnvelope *) = [async_lock, gdal_geom]() {
+    OGREnvelope *envelope = new OGREnvelope();
+    uv_mutex_lock(async_lock);
+    gdal_geom->getEnvelope(envelope);
+    uv_mutex_unlock(async_lock);
+    return envelope;
+  };
 
-  delete envelope;
-
-  info.GetReturnValue().Set(obj);
+  GDAL_ASYNCABLE_RVAL(OGREnvelope *) = [](OGREnvelope *envelope, GDAL_ASYNCABLE_OBJS) {
+    Local<Object> obj = Nan::New<Object>();
+    Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
+    Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
+    Nan::Set(obj, Nan::New("minY").ToLocalChecked(), Nan::New<Number>(envelope->MinY));
+    Nan::Set(obj, Nan::New("maxY").ToLocalChecked(), Nan::New<Number>(envelope->MaxY));
+    delete envelope;
+    return obj;
+  };
+  GDAL_ASYNCABLE_EXECUTE(0, OGREnvelope *);
 }
 
 /**
@@ -744,7 +895,16 @@ NAN_METHOD(Geometry::getEnvelope) {
  * @method getEnvelope3D
  * @return {gdal.Envelope3D} Bounding envelope
  */
-NAN_METHOD(Geometry::getEnvelope3D) {
+
+/**
+ * Computes the 3D bounding box (envelope).
+ *
+ * @method getEnvelope3DAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return {gdal.Envelope3D} Bounding envelope
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
   // returns object containing boundaries until complete OGREnvelope binding is
   // built
 
@@ -752,20 +912,30 @@ NAN_METHOD(Geometry::getEnvelope3D) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  OGREnvelope3D *envelope = new OGREnvelope3D();
-  geom->this_->getEnvelope(envelope);
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  uv_mutex_t *async_lock = geom->async_lock;
 
-  Local<Object> obj = Nan::New<Object>();
-  Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
-  Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
-  Nan::Set(obj, Nan::New("minY").ToLocalChecked(), Nan::New<Number>(envelope->MinY));
-  Nan::Set(obj, Nan::New("maxY").ToLocalChecked(), Nan::New<Number>(envelope->MaxY));
-  Nan::Set(obj, Nan::New("minZ").ToLocalChecked(), Nan::New<Number>(envelope->MinZ));
-  Nan::Set(obj, Nan::New("maxZ").ToLocalChecked(), Nan::New<Number>(envelope->MaxZ));
+  GDAL_ASYNCABLE_MAIN(OGREnvelope3D *) = [async_lock, gdal_geom]() {
+    OGREnvelope3D *envelope = new OGREnvelope3D();
+    uv_mutex_lock(async_lock);
+    gdal_geom->getEnvelope(envelope);
+    uv_mutex_unlock(async_lock);
+    return envelope;
+  };
 
-  delete envelope;
-
-  info.GetReturnValue().Set(obj);
+  GDAL_ASYNCABLE_RVAL(OGREnvelope3D *) = [](OGREnvelope3D *envelope, GDAL_ASYNCABLE_OBJS) {
+    Local<Object> obj = Nan::New<Object>();
+    Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
+    Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
+    Nan::Set(obj, Nan::New("minY").ToLocalChecked(), Nan::New<Number>(envelope->MinY));
+    Nan::Set(obj, Nan::New("maxY").ToLocalChecked(), Nan::New<Number>(envelope->MaxY));
+    Nan::Set(obj, Nan::New("minZ").ToLocalChecked(), Nan::New<Number>(envelope->MinZ));
+    Nan::Set(obj, Nan::New("maxZ").ToLocalChecked(), Nan::New<Number>(envelope->MaxZ));
+    delete envelope;
+    return obj;
+  };
+  GDAL_ASYNCABLE_EXECUTE(0, OGREnvelope3D *);
 }
 
 // --- JS static methods (OGRGeometryFactory) ---

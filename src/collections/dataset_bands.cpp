@@ -114,7 +114,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
-  if (GDAL_ISASYNC) Nan::ThrowError("Async operation not supported on GDAL 1.x");
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (ds->uses_ogr) {
     info.GetReturnValue().Set(Nan::Null());
     return;
@@ -178,7 +178,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
-  if (GDAL_ISASYNC) Nan::ThrowError("Async operation not supported on GDAL 1.x");
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (ds->uses_ogr) {
     Nan::ThrowError("Dataset does not support getting creating bands");
     return;
@@ -246,7 +246,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
-  if (GDAL_ISASYNC) Nan::ThrowError("Async operation not supported on GDAL 1.x");
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (ds->uses_ogr) {
     info.GetReturnValue().Set(Nan::New<Integer>(0));
     return;
