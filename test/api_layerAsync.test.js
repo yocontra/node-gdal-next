@@ -424,7 +424,7 @@ describe('gdal.LayerAsync', () => {
           )
         })
         it('should throw error if dataset is destroyed', () => {
-          prepare_dataset_layer_test('r', { autoclose: false }, async (dataset, layer) => {
+          prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
             dataset.close()
             assert.isRejected(layer.features.countAsync(), /already destroyed/)
           })
@@ -462,14 +462,13 @@ describe('gdal.LayerAsync', () => {
           })
         })
         it('should return null after last feature', () => {
-          prepare_dataset_layer_test('r', { autoclose: false }, async (dataset, layer) => {
-            const count = await layer.features.countAsync()
+          prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
+            const count = layer.features.count()
             const p = []
             for (let i = 0; i < count; i++) {
               p.push(layer.features.nextAsync())
             }
-            await Promise.all(p)
-            assert.eventually.isNull(layer.features.nextAsync())
+            assert.eventually.isNull(Promise.all(p).then(() => layer.features.nextAsync()))
           })
         })
         it('should throw error if dataset is destroyed', () => {
@@ -481,11 +480,10 @@ describe('gdal.LayerAsync', () => {
       })
       describe('firstAsync()', () => {
         it('should return a Feature and reset the iterator', () => {
-          prepare_dataset_layer_test('r', { autoclose: false }, async (dataset, layer) => {
-            await layer.features.nextAsync()
-            const f = await layer.features.firstAsync()
-            assert.instanceOf(f, gdal.Feature)
-            assert.equal(f.fid, 0)
+          prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
+            const f = layer.features.nextAsync().then(layer.features.firstAsync())
+            assert.eventually.instanceOf(f, gdal.Feature)
+            assert.eventually.propertyVal(f, 'fid', 0)
           })
         })
         it('should throw error if dataset is destroyed', () => {
@@ -533,9 +531,9 @@ describe('gdal.LayerAsync', () => {
       })
       describe('addAsync()', () => {
         it('should add Feature to layer', () => {
-          prepare_dataset_layer_test('w', { autoclose: false }, async (dataset, layer) => {
-            await layer.features.addAsync(new gdal.Feature(layer))
-            assert.equal(layer.features.count(), 1)
+          prepare_dataset_layer_test('w', { autoclose: false }, (dataset, layer) => {
+            const f = layer.features.addAsync(new gdal.Feature(layer))
+            assert.eventually.equal(f.then(() => layer.features.count()), 1)
           })
         })
         it('should throw error if layer doesnt support creating features', () => {
@@ -625,13 +623,12 @@ describe('gdal.LayerAsync', () => {
 
       describe('removeAsync()', () => {
         it('should make the feature at fid null', () => {
-          prepare_dataset_layer_test('w', { autoclose: false }, async (dataset, layer) => {
+          prepare_dataset_layer_test('w', { autoclose: false }, (dataset, layer) => {
             layer.features.add(new gdal.Feature(layer))
             layer.features.add(new gdal.Feature(layer))
 
             assert.instanceOf(layer.features.get(1), gdal.Feature)
-            await layer.features.removeAsync(1)
-            assert.isNull(layer.features.get(1))
+            assert.eventually.isNull(layer.features.removeAsync(1).then(() => layer.features.get(1)))
           })
         })
         it('should throw error if driver doesnt support deleting features', () => {

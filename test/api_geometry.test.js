@@ -25,17 +25,22 @@ describe('gdal.Geometry', () => {
     })
   })
   describe('toJSONAsync()', () => {
-    it('should return valid result', async () => {
+    it('should return valid result', () => {
       const point2d = new gdal.Point(1, 2)
-      assert.deepEqual(JSON.parse(await point2d.toJSONAsync()), {
+      const json2d = point2d.toJSONAsync()
+      assert.eventually.typeOf(json2d, 'string')
+      json2d.then((s) => assert.deepEqual(JSON.parse(s), {
         type: 'Point',
         coordinates: [ 1, 2 ]
-      })
+      }))
       const point3d = new gdal.Point(1, 2, 3)
-      assert.deepEqual(JSON.parse(await point3d.toJSONAsync()), {
-        type: 'Point',
-        coordinates: [ 1, 2, 3 ]
-      })
+      const json3d = point3d.toJSONAsync()
+      assert.eventually.typeOf(json3d, 'string')
+      json3d.then((s) =>
+        assert.deepEqual(JSON.parse(s), {
+          type: 'Point',
+          coordinates: [ 1, 2, 3 ]
+        }))
     })
   })
   describe('toObject()', () => {
@@ -125,16 +130,20 @@ describe('gdal.Geometry', () => {
     })
   })
   describe('toWKBAsync()', () => {
-    it('should return valid result', async () => {
+    it('should return valid result', () => {
       const point2d = new gdal.Point(1, 2)
-      const wkb = await point2d.toWKBAsync()
-      let expected
-      if (wkb[0] === 0) {
-        expected = '00000000013ff00000000000004000000000000000'
-      } else {
-        expected = '0101000000000000000000f03f0000000000000040'
-      }
-      assert.equal(wkb.toString('hex'), expected)
+      const wkb = point2d.toWKBAsync()
+      assert.isFulfilled(wkb)
+
+      wkb.then((wkb) => {
+        let expected
+        if (wkb[0] === 0) {
+          expected = '00000000013ff00000000000004000000000000000'
+        } else {
+          expected = '0101000000000000000000f03f0000000000000040'
+        }
+        assert.equal(wkb.toString('hex'), expected)
+      })
     })
   })
   describe('fromWKT()', () => {
@@ -146,11 +155,11 @@ describe('gdal.Geometry', () => {
     })
   })
   describe('fromWKTAsync()', () => {
-    it('should return valid result', async () => {
-      const point2d = await gdal.Geometry.fromWKTAsync('POINT (1 2)')
-      assert.equal(point2d.wkbType, gdal.wkbPoint)
-      assert.equal(point2d.x, 1)
-      assert.equal(point2d.y, 2)
+    it('should return valid result', () => {
+      const point2d = gdal.Geometry.fromWKTAsync('POINT (1 2)')
+      assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint)
+      assert.eventually.propertyVal(point2d, 'x', 1)
+      assert.eventually.propertyVal(point2d, 'y', 2)
     })
   })
   describe('fromWKB()', () => {
@@ -163,12 +172,12 @@ describe('gdal.Geometry', () => {
     })
   })
   describe('fromWKBAsync()', () => {
-    it('should return valid result', async () => {
+    it('should return valid result', () => {
       const wkb = new gdal.Point(1, 2).toWKB()
-      const point2d = await gdal.Geometry.fromWKBAsync(wkb)
-      assert.equal(point2d.wkbType, gdal.wkbPoint)
-      assert.equal(point2d.x, 1)
-      assert.equal(point2d.y, 2)
+      const point2d = gdal.Geometry.fromWKBAsync(wkb)
+      assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint)
+      assert.eventually.propertyVal(point2d, 'x', 1)
+      assert.eventually.propertyVal(point2d, 'y', 2)
     })
   })
   if (parseFloat(gdal.version) >= 2.3) {
@@ -183,11 +192,11 @@ describe('gdal.Geometry', () => {
   }
   if (parseFloat(gdal.version) >= 2.3) {
     describe('fromGeoJsonAsync()', () => {
-      it('should return valid result', async () => {
-        const point2d = await gdal.Geometry.fromGeoJsonAsync({ type: 'Point', coordinates: [ 2, 1 ] })
-        assert.equal(point2d.wkbType, gdal.wkbPoint)
-        assert.equal(point2d.x, 2)
-        assert.equal(point2d.y, 1)
+      it('should return valid result', () => {
+        const point2d = gdal.Geometry.fromGeoJsonAsync({ type: 'Point', coordinates: [ 2, 1 ] })
+        assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint)
+        assert.eventually.propertyVal(point2d, 'x', 2)
+        assert.eventually.propertyVal(point2d, 'y', 1)
       })
     })
   }
@@ -429,7 +438,7 @@ describe('gdal.Geometry', () => {
       })
     })
     describe('centroidAsync()', () => {
-      it('should return correct result', async () => {
+      it('should return correct result', () => {
         const ring = new gdal.LinearRing()
         ring.points.add({ x: 0, y: 0 })
         ring.points.add({ x: 20, y: 0 })
@@ -440,11 +449,11 @@ describe('gdal.Geometry', () => {
         const square = new gdal.Polygon()
         square.rings.add(ring)
 
-        const centroid = await square.centroidAsync()
+        const centroid = square.centroidAsync()
 
-        assert.instanceOf(centroid, gdal.Point)
-        assert.closeTo(centroid.x, 10, 0.0001)
-        assert.closeTo(centroid.y, 5, 0.0001)
+        assert.eventually.instanceOf(centroid, gdal.Point)
+        assert.eventually.propertyVal(centroid, 'x', 10)
+        assert.eventually.propertyVal(centroid, 'y', 5)
       })
     })
     describe('buffer()', () => {
