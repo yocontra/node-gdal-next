@@ -48,6 +48,7 @@ class Point : public Nan::ObjectWrap {
   OGRPoint *this_;
   bool owned_;
   int size_;
+  uv_mutex_t *async_lock;
 };
 
 } // namespace node_gdal

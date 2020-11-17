@@ -42,6 +42,7 @@ class LinearRing : public Nan::ObjectWrap {
   OGRLinearRing *this_;
   bool owned_;
   int size_;
+  uv_mutex_t *async_lock;
 };
 
 } // namespace node_gdal

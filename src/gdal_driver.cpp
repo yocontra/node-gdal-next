@@ -275,10 +275,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
-  if (GDAL_ISASYNC) {
-    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
-    return;
-  }
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (driver->uses_ogr) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *ds = raw->CreateDataSource(filename.c_str(), options->get());
@@ -373,11 +370,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
-  if (GDAL_ISASYNC) {
-    Nan::ThrowError("Asynchronous create not supported on GDAL 1.x");
-    uv_mutex_unlock(async_lock);
-    return;
-  }
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (driver->uses_ogr != src_dataset->uses_ogr) {
     Nan::ThrowError("Driver unable to copy dataset");
     uv_mutex_unlock(async_lock);
@@ -557,10 +550,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   GDALDriver *raw = driver->getGDALDriver();
 
 #if GDAL_VERSION_MAJOR < 2
-  if (GDAL_ISASYNC) {
-    Nan::ThrowError("Asynchronous opening is not supported on GDAL 1.x");
-    return;
-  }
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (driver->uses_ogr) {
     OGRSFDriver *raw = driver->getOGRSFDriver();
     OGRDataSource *ds = raw->Open(path.c_str(), static_cast<int>(access));

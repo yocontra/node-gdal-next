@@ -11,6 +11,8 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "async.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -33,11 +35,11 @@ class Geometry : public Nan::ObjectWrap {
   static NAN_METHOD(isRing);
   static NAN_METHOD(clone);
   static NAN_METHOD(empty);
-  static NAN_METHOD(exportToKML);
-  static NAN_METHOD(exportToGML);
-  static NAN_METHOD(exportToJSON);
-  static NAN_METHOD(exportToWKT);
-  static NAN_METHOD(exportToWKB);
+  GDAL_ASYNCABLE_DECLARE(exportToKML);
+  GDAL_ASYNCABLE_DECLARE(exportToGML);
+  GDAL_ASYNCABLE_DECLARE(exportToJSON);
+  GDAL_ASYNCABLE_DECLARE(exportToWKT);
+  GDAL_ASYNCABLE_DECLARE(exportToWKB);
   static NAN_METHOD(closeRings);
   static NAN_METHOD(segmentize);
   static NAN_METHOD(intersects);
@@ -56,22 +58,22 @@ class Geometry : public Nan::ObjectWrap {
   static NAN_METHOD(unionGeometry);
   static NAN_METHOD(difference);
   static NAN_METHOD(symDifference);
-  static NAN_METHOD(centroid);
+  GDAL_ASYNCABLE_DECLARE(centroid);
   static NAN_METHOD(simplify);
   static NAN_METHOD(simplifyPreserveTopology);
   static NAN_METHOD(polygonize);
   static NAN_METHOD(swapXY);
   static NAN_METHOD(getNumGeometries);
-  static NAN_METHOD(getEnvelope);
-  static NAN_METHOD(getEnvelope3D);
+  GDAL_ASYNCABLE_DECLARE(getEnvelope);
+  GDAL_ASYNCABLE_DECLARE(getEnvelope3D);
   static NAN_METHOD(transform);
   static NAN_METHOD(transformTo);
 
   // static constructor methods
-  static NAN_METHOD(create);
-  static NAN_METHOD(createFromWkt);
-  static NAN_METHOD(createFromWkb);
-  static NAN_METHOD(createFromGeoJson);
+  GDAL_ASYNCABLE_DECLARE(create);
+  GDAL_ASYNCABLE_DECLARE(createFromWkt);
+  GDAL_ASYNCABLE_DECLARE(createFromWkb);
+  GDAL_ASYNCABLE_DECLARE(createFromGeoJson);
   static NAN_METHOD(getName);
   static NAN_METHOD(getConstructor);
 
@@ -96,12 +98,12 @@ class Geometry : public Nan::ObjectWrap {
   inline bool isAlive() {
     return this_;
   }
-
     protected:
   ~Geometry();
   OGRGeometry *this_;
   bool owned_;
   int size_;
+  uv_mutex_t *async_lock;
 };
 
 #define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                         \

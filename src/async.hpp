@@ -22,9 +22,9 @@ namespace node_gdal {
   static NAN_METHOD(method##Async);                                                                                    \
   static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool _gdal_async)
 
-/**
- * An asyncable method has to define the following lambdas
- */
+//
+// An asyncable method has to define the following lambdas
+//
 
 // Main execution block
 #define GDAL_ASYNCABLE_MAIN(gdaltype) std::function<gdaltype()> _gdal_doit
@@ -66,19 +66,25 @@ namespace node_gdal {
   uv_mutex_t *async_lock = ptr_manager.tryLockDataset(uid);                                                            \
   if (async_lock == nullptr) { throw "Parent Dataset object has already been destroyed"; }
 
-/**
- * This class handles async operations
- *
- * It takes the lambdas as input
- * gdaltype is the type of the object that will be carred from
- * the aux thread to the main thread
- *
- * JS-visible object creation is possible only in the main thread while
- * ths JS world is stopped
- *
- * The caller must ensure that all the lambdas can be executed in
- * another thread (no automatic variables)
- */
+#define GDAL_ASYNCABLE_1x_UNSUPPORTED                                                                                  \
+  if (GDAL_ISASYNC) {                                                                                                  \
+    Nan::ThrowError("This asynchronous operation is not supported on GDAL 1.x");                                       \
+    return;                                                                                                            \
+  }
+
+//
+// This class handles async operations
+//
+// It takes the lambdas as input
+// gdaltype is the type of the object that will be carred from
+// the aux thread to the main thread
+//
+// JS-visible object creation is possible only in the main thread while
+// ths JS world is stopped
+//
+// The caller must ensure that all the lambdas can be executed in
+// another thread (no automatic variables)
+//
 template <class gdaltype> class GDALAsyncWorker : public Nan::AsyncWorker {
     private:
   const std::function<gdaltype()> doit;

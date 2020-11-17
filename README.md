@@ -12,10 +12,19 @@ This project is a fork of <https://github.com/contra/node-gdal-next> which is a 
 - **Support for asynchronous IO**
 
 ## As of November 9th 2020, async support for raster data has been completely merged into <https://github.com/contra/node-gdal-next>
-The work on async support for vector data has started, currently only `LayerFeatures` is async-compatible
+Async support for vector data is currently experimental, with the following classses being async-compatible on `master`
+* main `open`
+* `Dataset`
+* `DatasetBands`
+* `DatasetLayers`
+* `Driver`
+* `Geometry` (partial, and currently stalled, needs major reworking of the geometry classes)
+* `RasterBandPixels`
+* `LayerFeatures`
+
 `master` is usually unit-tested, `universal-async` is cutting edge
 
-See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
+Support for `worker_threads` is planned but it is not a priority project
 
 ### Breaking Changes relative to node-gdal
 
@@ -85,7 +94,6 @@ gdal.openAsync('sample.tif').then((dataset) => {
         }).catch(e => console.error(e));
 }).catch(e => console.error(e));
 ```
-
 
 ## Bundled Drivers
 

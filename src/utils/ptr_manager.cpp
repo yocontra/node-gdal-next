@@ -8,7 +8,7 @@
 namespace node_gdal {
 
 PtrManager::PtrManager() : uid(1), layers(), bands(), datasets() {
-  uv_mutex_init(&master_lock);
+  uv_mutex_init_recursive(&master_lock);
 }
 
 PtrManager::~PtrManager() {
@@ -55,6 +55,7 @@ long PtrManager::add(OGRLayer *ptr, long parent_uid, bool is_result_set) {
 }
 
 long PtrManager::add(GDALRasterBand *ptr, long parent_uid) {
+  lock();
   PtrManagerRasterBandItem *item = new PtrManagerRasterBandItem();
   item->uid = uid++;
   item->parent = datasets[parent_uid];
@@ -63,6 +64,7 @@ long PtrManager::add(GDALRasterBand *ptr, long parent_uid) {
 
   PtrManagerDatasetItem *parent = datasets[parent_uid];
   parent->bands.push_back(item);
+  unlock();
   return item->uid;
 }
 
@@ -88,12 +90,14 @@ long PtrManager::add(OGRDataSource *ptr) {
 #endif
 
 void PtrManager::dispose(long uid) {
+  lock();
   if (datasets.count(uid))
     dispose(datasets[uid]);
   else if (layers.count(uid))
     dispose(layers[uid]);
   else if (bands.count(uid))
     dispose(bands[uid]);
+  unlock();
 }
 
 void PtrManager::dispose(PtrManagerDatasetItem *item) {
@@ -101,7 +105,6 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
   uv_mutex_lock(item->async_lock);
   datasets.erase(item->uid);
   uv_mutex_unlock(item->async_lock);
-  unlock();
 
   while (!item->layers.empty()) { dispose(item->layers.back()); }
   while (!item->bands.empty()) { dispose(item->bands.back()); }
@@ -121,19 +124,23 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
     GDALClose(item->ptr);
   }
 
+  unlock();
   delete item;
 }
 
 void PtrManager::dispose(PtrManagerRasterBandItem *item) {
+  lock();
   uv_mutex_t *async_lock = tryLockDataset(item->parent->uid);
   RasterBand::cache.erase(item->ptr);
   bands.erase(item->uid);
   item->parent->bands.remove(item);
   if (async_lock != nullptr) uv_mutex_unlock(async_lock);
   delete item;
+  unlock();
 }
 
 void PtrManager::dispose(PtrManagerLayerItem *item) {
+  lock();
   uv_mutex_t *async_lock = tryLockDataset(item->parent->uid);
   Layer::cache.erase(item->ptr);
   layers.erase(item->uid);
@@ -148,6 +155,7 @@ void PtrManager::dispose(PtrManagerLayerItem *item) {
   if (item->is_result_set) { parent_ds->ReleaseResultSet(item->ptr); }
   if (async_lock != nullptr) uv_mutex_unlock(async_lock);
 
+  unlock();
   delete item;
 }
 

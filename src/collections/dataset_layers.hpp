@@ -11,6 +11,8 @@
 // gdal
 #include <gdal_priv.h>
 
+#include "../async.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -25,11 +27,11 @@ class DatasetLayers : public Nan::ObjectWrap {
   static Local<Value> New(Local<Value> ds_obj);
   static NAN_METHOD(toString);
 
-  static NAN_METHOD(get);
-  static NAN_METHOD(count);
-  static NAN_METHOD(create);
-  static NAN_METHOD(copy);
-  static NAN_METHOD(remove);
+  GDAL_ASYNCABLE_DECLARE(get);
+  GDAL_ASYNCABLE_DECLARE(count);
+  GDAL_ASYNCABLE_DECLARE(create);
+  GDAL_ASYNCABLE_DECLARE(copy);
+  GDAL_ASYNCABLE_DECLARE(remove);
 
   static NAN_GETTER(dsGetter);
 

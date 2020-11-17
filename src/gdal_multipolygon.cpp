@@ -30,9 +30,13 @@ void MultiPolygon::Initialize(Local<Object> target) {
 
 MultiPolygon::MultiPolygon(OGRMultiPolygon *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created MultiPolygon [%p]", geom);
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 MultiPolygon::MultiPolygon() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+  async_lock = new uv_mutex_t;
+  uv_mutex_init(async_lock);
 }
 
 MultiPolygon::~MultiPolygon() {
@@ -45,6 +49,8 @@ MultiPolygon::~MultiPolygon() {
     LOG("Disposed MultiPolygon [%p]", this_);
     this_ = NULL;
   }
+  uv_mutex_destroy(async_lock);
+  delete async_lock;
 }
 
 /**
