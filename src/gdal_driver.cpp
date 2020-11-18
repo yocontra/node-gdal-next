@@ -1,3 +1,4 @@
+#include <memory>
 #include "gdal_driver.hpp"
 #include "gdal_common.hpp"
 #include "gdal_dataset.hpp"
@@ -295,8 +296,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   // Very careful here
   // we can't reference automatic variables, thus the *options object
   GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, filename, x_size, y_size, n_bands, type, options]() {
+    std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
-    delete options;
     if (!ds) throw "Error creating dataset";
     return ds;
   };
@@ -397,9 +398,9 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   GDALDriver *raw = driver->getGDALDriver();
   GDALDataset *raw_ds = src_dataset->getDataset();
   GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, filename, raw_ds, strict, options, async_lock]() {
+    std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
     uv_mutex_unlock(async_lock);
-    delete options;
     if (!ds) throw "Error creating dataset";
     return ds;
   };

@@ -14,6 +14,7 @@
 
 #include <node_buffer.h>
 #include <ogr_core.h>
+#include <memory>
 #include <sstream>
 #include <stdlib.h>
 
@@ -976,10 +977,10 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
 
   GDAL_ASYNCABLE_PERSIST();
   GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [wkt_string, ogr_srs]() {
+    std::unique_ptr<std::string> wkt_string_ptr(wkt_string);
     OGRGeometry *geom = NULL;
     OGRChar *wkt = (OGRChar *)wkt_string->c_str();
     OGRErr err = OGRGeometryFactory::createFromWkt(wkt, ogr_srs, &geom);
-    delete wkt_string;
     if (err) throw getOGRErrMsg(err);
     return geom;
   };
@@ -1094,8 +1095,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
 
   GDAL_ASYNCABLE_PERSIST();
   GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [val, geom, ogr_srs]() {
+    std::unique_ptr<std::string> val_ptr(val);
     OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val->c_str());
-    delete val;
     return geom;
   };
   GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };

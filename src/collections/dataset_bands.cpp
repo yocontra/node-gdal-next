@@ -1,3 +1,4 @@
+#include <memory>
 #include "dataset_bands.hpp"
 #include "../gdal_common.hpp"
 #include "../gdal_dataset.hpp"
@@ -212,10 +213,10 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
 
   GDAL_ASYNCABLE_PERSIST(parent);
   GDAL_ASYNCABLE_MAIN(GDALRasterBand *) = [ds_uid, raw, type, options]() {
+    std::unique_ptr<StringList> options_ptr(options);
     GDAL_ASYNCABLE_LOCK(ds_uid);
     CPLErr err = raw->AddBand(type, options->get());
     GDAL_UNLOCK_PARENT;
-    delete options;
     // This is not thread-safe, but mis-reporting the error message
     // 0.01% of the time is probably acceptable
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
