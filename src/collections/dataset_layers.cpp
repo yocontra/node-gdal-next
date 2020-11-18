@@ -1,3 +1,4 @@
+#include <memory>
 #include "dataset_layers.hpp"
 #include "../gdal_common.hpp"
 #include "../gdal_dataset.hpp"
@@ -142,10 +143,10 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
   if (info[0]->IsString()) {
     std::string *layer_name = new std::string(*Nan::Utf8String(info[0]));
     _gdal_doit = [ds_uid, raw, layer_name]() {
+      std::unique_ptr<std::string> layer_name_ptr(layer_name);
       GDAL_ASYNCABLE_LOCK(ds_uid);
       OGRLayer *lyr = raw->GetLayerByName(layer_name->c_str());
       GDAL_UNLOCK_PARENT;
-      free(layer_name);
       return lyr;
     };
   } else if (info[0]->IsNumber()) {
@@ -246,11 +247,11 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
   long ds_uid = ds->uid;
   GDAL_ASYNCABLE_PERSIST(parent);
   GDAL_ASYNCABLE_MAIN(OGRLayer *) = [raw, ds_uid, layer_name, srs, geom_type, options]() {
+    std::unique_ptr<StringList> options_ptr(options);
+    std::unique_ptr<std::string> layer_name_ptr(layer_name);
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRLayer *layer = raw->CreateLayer(layer_name->c_str(), srs, geom_type, options->get());
     GDAL_UNLOCK_PARENT;
-    delete layer_name;
-    delete options;
     if (layer == nullptr) throw "Error creating layer";
     return layer;
   };
@@ -371,11 +372,11 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
   GDAL_ASYNCABLE_PERSIST(parent, info[0].As<Object>());
   OGRLayer *src = layer_to_copy->get();
   GDAL_ASYNCABLE_MAIN(OGRLayer *) = [raw, ds_uid, src, new_name, options]() {
+    std::unique_ptr<StringList> options_ptr(options);
+    std::unique_ptr<std::string> new_name_ptr(new_name);
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRLayer *layer = raw->CopyLayer(src, new_name->c_str(), options->get());
     GDAL_UNLOCK_PARENT;
-    delete new_name;
-    delete options;
     if (layer == nullptr) throw "Error copying layer";
     return layer;
   };
