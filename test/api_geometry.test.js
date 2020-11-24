@@ -418,6 +418,29 @@ describe('gdal.Geometry', () => {
         assert.instanceOf(boundary, gdal.MultiLineString)
       })
     })
+    describe('boundaryAsync()', () => {
+      it('should return geometry without inner rings', () => {
+        const outerRing = new gdal.LinearRing()
+        outerRing.points.add({ x: 0, y: 0 })
+        outerRing.points.add({ x: 20, y: 0 })
+        outerRing.points.add({ x: 20, y: 10 })
+        outerRing.points.add({ x: 0, y: 10 })
+        outerRing.closeRings()
+        const innerRing = new gdal.LinearRing()
+        innerRing.points.add({ x: 1, y: 9 })
+        innerRing.points.add({ x: 19, y: 9 })
+        innerRing.points.add({ x: 19, y: 1 })
+        innerRing.points.add({ x: 1, y: 1 })
+        innerRing.closeRings()
+
+        const squareDonut = new gdal.Polygon()
+        squareDonut.rings.add(outerRing)
+        squareDonut.rings.add(innerRing)
+
+        const boundary = squareDonut.boundaryAsync()
+        assert.eventually.instanceOf(boundary, gdal.MultiLineString)
+      })
+    })
     describe('centroid()', () => {
       it('should return correct result', () => {
         const ring = new gdal.LinearRing()
@@ -464,6 +487,14 @@ describe('gdal.Geometry', () => {
         assert.closeTo(circle.getArea(), 3.1415, 0.0001)
       })
     })
+    describe('bufferAsync()', () => {
+      it('should return correct result', () => {
+        const point = new gdal.Point(0, 0)
+        const circle = point.bufferAsync(1, 1000)
+        assert.eventually.instanceOf(circle, gdal.Polygon)
+        assert.eventually.closeTo(circle.then((r) => r.getArea()), 3.1415, 0.0001)
+      })
+    })
     describe('simplify()', () => {
       it('should return simplified LineString', () => {
         const line = new gdal.LineString()
@@ -484,6 +515,20 @@ describe('gdal.Geometry', () => {
         assert.closeTo(simplified.points.get(2).y, 2, 0.001)
         assert.closeTo(simplified.points.get(3).x, 5, 0.001)
         assert.closeTo(simplified.points.get(3).y, 5, 0.001)
+      })
+    })
+    describe('simplifyAsync()', () => {
+      it('should return simplified LineString', () => {
+        const line = new gdal.LineString()
+        line.points.add(0, 0)
+        line.points.add(1, 1)
+        line.points.add(10, 10)
+        line.points.add(2, 2)
+        line.points.add(5, 5)
+
+        const simplified = line.simplifyAsync(0.1)
+        assert.eventually.instanceOf(simplified, gdal.LineString)
+        assert.eventually.equal(simplified.then((r) => r.points.count()), 4)
       })
     })
     describe('union()', () => {
@@ -513,6 +558,33 @@ describe('gdal.Geometry', () => {
         assert.equal(result.getArea(), 200)
       })
     })
+    describe('unionAsync()', () => {
+      it('should merge geometries', () => {
+        const ring1 = new gdal.LinearRing()
+        ring1.points.add({ x: 0, y: 0 })
+        ring1.points.add({ x: 10, y: 0 })
+        ring1.points.add({ x: 10, y: 10 })
+        ring1.points.add({ x: 0, y: 10 })
+        ring1.closeRings()
+
+        const square1 = new gdal.Polygon()
+        square1.rings.add(ring1)
+
+        const ring2 = new gdal.LinearRing()
+        ring2.points.add({ x: 10, y: 0 })
+        ring2.points.add({ x: 20, y: 0 })
+        ring2.points.add({ x: 20, y: 10 })
+        ring2.points.add({ x: 10, y: 10 })
+        ring2.closeRings()
+
+        const square2 = new gdal.Polygon()
+        square2.rings.add(ring2)
+
+        const result = square1.unionAsync(square2)
+        assert.eventually.instanceOf(result, gdal.Polygon)
+        assert.eventually.equal(result.then((r) => r.getArea()), 200)
+      })
+    })
     describe('intersection()', () => {
       it('should return the intersection of two geometries', () => {
         const ring1 = new gdal.LinearRing()
@@ -538,6 +610,33 @@ describe('gdal.Geometry', () => {
         const result = square1.intersection(square2)
         assert.instanceOf(result, gdal.Polygon)
         assert.equal(result.getArea(), 50)
+      })
+    })
+    describe('intersectionAsync()', () => {
+      it('should return the intersection of two geometries', () => {
+        const ring1 = new gdal.LinearRing()
+        ring1.points.add({ x: 0, y: 0 })
+        ring1.points.add({ x: 10, y: 0 })
+        ring1.points.add({ x: 10, y: 10 })
+        ring1.points.add({ x: 0, y: 10 })
+        ring1.closeRings()
+
+        const square1 = new gdal.Polygon()
+        square1.rings.add(ring1)
+
+        const ring2 = new gdal.LinearRing()
+        ring2.points.add({ x: 5, y: 0 })
+        ring2.points.add({ x: 20, y: 0 })
+        ring2.points.add({ x: 20, y: 10 })
+        ring2.points.add({ x: 5, y: 10 })
+        ring2.closeRings()
+
+        const square2 = new gdal.Polygon()
+        square2.rings.add(ring2)
+
+        const result = square1.intersectionAsync(square2)
+        assert.eventually.instanceOf(result, gdal.Polygon)
+        assert.eventually.equal(result.then((r) => r.getArea()), 50)
       })
     })
   })

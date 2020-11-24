@@ -66,17 +66,26 @@ void Geometry::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "contains", contains);
   Nan::SetPrototypeMethod(lcons, "overlaps", overlaps);
   Nan::SetPrototypeMethod(lcons, "boundary", boundary);
+  Nan::SetPrototypeMethod(lcons, "boundaryAsync", boundaryAsync);
   Nan::SetPrototypeMethod(lcons, "distance", distance);
   Nan::SetPrototypeMethod(lcons, "convexHull", convexHull);
+  Nan::SetPrototypeMethod(lcons, "convexHullAsync", convexHullAsync);
   Nan::SetPrototypeMethod(lcons, "buffer", buffer);
+  Nan::SetPrototypeMethod(lcons, "bufferAsync", bufferAsync);
   Nan::SetPrototypeMethod(lcons, "intersection", intersection);
+  Nan::SetPrototypeMethod(lcons, "intersectionAsync", intersectionAsync);
   Nan::SetPrototypeMethod(lcons, "union", unionGeometry);
+  Nan::SetPrototypeMethod(lcons, "unionAsync", unionGeometryAsync);
   Nan::SetPrototypeMethod(lcons, "difference", difference);
+  Nan::SetPrototypeMethod(lcons, "differenceAsync", differenceAsync);
   Nan::SetPrototypeMethod(lcons, "symDifference", symDifference);
+  Nan::SetPrototypeMethod(lcons, "symDifferenceAsync", symDifferenceAsync);
   Nan::SetPrototypeMethod(lcons, "centroid", centroid);
   Nan::SetPrototypeMethod(lcons, "centroidAsync", centroidAsync);
   Nan::SetPrototypeMethod(lcons, "simplify", simplify);
+  Nan::SetPrototypeMethod(lcons, "simplifyAsync", simplifyAsync);
   Nan::SetPrototypeMethod(lcons, "simplifyPreserveTopology", simplifyPreserveTopology);
+  Nan::SetPrototypeMethod(lcons, "simplifyPreserveTopologyAsync", simplifyPreserveTopologyAsync);
   Nan::SetPrototypeMethod(lcons, "segmentize", segmentize);
   Nan::SetPrototypeMethod(lcons, "swapXY", swapXY);
   Nan::SetPrototypeMethod(lcons, "getEnvelope", getEnvelope);
@@ -403,10 +412,24 @@ NAN_METHOD(Geometry::clone) {
  * @method convexHull
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::convexHull) {
+
+/**
+ * Compute convex hull.
+ * {{{async}}}
+ *
+ * @method convexHullAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
   Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
-  info.GetReturnValue().Set(Geometry::New(geom->this_->ConvexHull()));
+  OGRGeometry *gdal_geom = geom->this_;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom]() { return gdal_geom->ConvexHull(); };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(0, OGRGeometry *);
 }
 
 /**
@@ -415,10 +438,24 @@ NAN_METHOD(Geometry::convexHull) {
  * @method boundary
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::boundary) {
+
+/**
+ * Compute boundary.
+ * {{{async}}}
+ *
+ * @method boundaryAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
   Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
-  info.GetReturnValue().Set(Geometry::New(geom->this_->Boundary()));
+  OGRGeometry *gdal_geom = geom->this_;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom]() { return gdal_geom->Boundary(); };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(0, OGRGeometry *);
 }
 
 /**
@@ -428,7 +465,18 @@ NAN_METHOD(Geometry::boundary) {
  * @param {gdal.Geometry} geometry
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::intersection) {
+
+/**
+ * Compute intersection with another geometry.
+ * {{{async}}}
+ *
+ * @method intersectionAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
@@ -436,7 +484,12 @@ NAN_METHOD(Geometry::intersection) {
 
   NODE_ARG_WRAPPED(0, "geometry to use for intersection", Geometry, x);
 
-  info.GetReturnValue().Set(Geometry::New(geom->this_->Intersection(x->this_)));
+  OGRGeometry *gdal_geom = geom->this_;
+  OGRGeometry *gdal_x = x->this_;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->Intersection(gdal_x); };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 }
 
 /**
@@ -446,7 +499,18 @@ NAN_METHOD(Geometry::intersection) {
  * @param {gdal.Geometry} geometry
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::unionGeometry) {
+
+/**
+ * Compute the union of this geometry with another.
+ * {{{async}}}
+ *
+ * @method unionAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
@@ -454,7 +518,12 @@ NAN_METHOD(Geometry::unionGeometry) {
 
   NODE_ARG_WRAPPED(0, "geometry to use for union", Geometry, x);
 
-  info.GetReturnValue().Set(Geometry::New(geom->this_->Union(x->this_)));
+  OGRGeometry *gdal_geom = geom->this_;
+  OGRGeometry *gdal_x = x->this_;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->Union(gdal_x); };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 }
 
 /**
@@ -464,7 +533,18 @@ NAN_METHOD(Geometry::unionGeometry) {
  * @param {gdal.Geometry} geometry
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::difference) {
+
+/**
+ * Compute the difference of this geometry with another.
+ * {{{async}}}
+ *
+ * @method differenceAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
@@ -472,7 +552,12 @@ NAN_METHOD(Geometry::difference) {
 
   NODE_ARG_WRAPPED(0, "geometry to use for difference", Geometry, x);
 
-  info.GetReturnValue().Set(Geometry::New(geom->this_->Difference(x->this_)));
+  OGRGeometry *gdal_geom = geom->this_;
+  OGRGeometry *gdal_x = x->this_;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->Difference(gdal_x); };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 }
 
 /**
@@ -482,7 +567,18 @@ NAN_METHOD(Geometry::difference) {
  * @param {gdal.Geometry} geometry
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::symDifference) {
+
+/**
+ * Computes the symmetric difference of this geometry and the second geometry.
+ * {{{async}}}
+ *
+ * @method symDifferenceAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
   Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
@@ -490,7 +586,12 @@ NAN_METHOD(Geometry::symDifference) {
 
   NODE_ARG_WRAPPED(0, "geometry to use for symDifference", Geometry, x);
 
-  info.GetReturnValue().Set(Geometry::New(geom->this_->SymDifference(x->this_)));
+  OGRGeometry *gdal_geom = geom->this_;
+  OGRGeometry *gdal_x = x->this_;
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->SymDifference(gdal_x); };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 }
 
 /**
@@ -500,16 +601,30 @@ NAN_METHOD(Geometry::symDifference) {
  * @param {Number} tolerance
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::simplify) {
+
+/**
+ * Reduces the geometry complexity.
+ * {{{async}}}
+ *
+ * @method simplifyAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
   Nan::HandleScope scope;
 
+  Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   double tolerance;
 
   NODE_ARG_DOUBLE(0, "tolerance", tolerance);
+  OGRGeometry *gdal_geom = geom->this_;
 
-  Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
-
-  info.GetReturnValue().Set(Geometry::New(geom->this_->Simplify(tolerance)));
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, tolerance]() { return gdal_geom->Simplify(tolerance); };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 }
 
 /**
@@ -519,16 +634,32 @@ NAN_METHOD(Geometry::simplify) {
  * @param {Number} tolerance
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::simplifyPreserveTopology) {
+
+/**
+ * Reduces the geometry complexity while preserving the topology.
+ * {{{async}}}
+ *
+ * @method simplifyPreserveTopologyAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
   Nan::HandleScope scope;
 
+  Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   double tolerance;
 
   NODE_ARG_DOUBLE(0, "tolerance", tolerance);
+  OGRGeometry *gdal_geom = geom->this_;
 
-  Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
-
-  info.GetReturnValue().Set(Geometry::New(geom->this_->SimplifyPreserveTopology(tolerance)));
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, tolerance]() {
+    return gdal_geom->SimplifyPreserveTopology(tolerance);
+  };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
 }
 
 /**
@@ -539,7 +670,19 @@ NAN_METHOD(Geometry::simplifyPreserveTopology) {
  * @param {integer} segments
  * @return gdal.Geometry
  */
-NAN_METHOD(Geometry::buffer) {
+
+/**
+ * Buffers the geometry by the given distance.
+ * {{{async}}}
+ *
+ * @method bufferAsync
+ * @param {Number} distance
+ * @param {integer} segments
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
   Nan::HandleScope scope;
 
   double distance;
@@ -550,7 +693,14 @@ NAN_METHOD(Geometry::buffer) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  info.GetReturnValue().Set(Geometry::New(geom->this_->Buffer(distance, number_of_segments)));
+  OGRGeometry *gdal_geom = geom->this_;
+
+  GDAL_ASYNCABLE_PERSIST(info.This());
+  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, distance, number_of_segments]() {
+    return gdal_geom->Buffer(distance, number_of_segments);
+  };
+  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  GDAL_ASYNCABLE_EXECUTE(2, OGRGeometry *);
 }
 
 /**
@@ -559,6 +709,16 @@ NAN_METHOD(Geometry::buffer) {
  * @method toWKT
  * @return gdal.Geometry
  */
+
+/**
+ * Convert a geometry into well known text format.
+ * {{{async}}}
+ *
+ * @method toWKTAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return gdal.Geometry
+ */
+
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
   Nan::HandleScope scope;
 
