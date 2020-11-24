@@ -569,16 +569,10 @@ Local<Value> FeatureFields::getFieldAsBinary(OGRFeature *feature, int field_inde
   if (count_of_bytes > 0) {
     // GDAL Feature->GetFieldAsBinary returns a pointer to an internal buffer
     // that should not be freed
-    // Nan::NewBuffer expects to receive ownership of the buffer
-    // =>
-    // So no other solution than copy :-(
-    char *reallocated_data = (char *)malloc(count_of_bytes);
-    if (!reallocated_data) {
-      Nan::ThrowError("Memory allocation failed");
-    } else {
-      memcpy(reallocated_data, data, count_of_bytes);
-      return scope.Escape(Nan::NewBuffer(reallocated_data, count_of_bytes).ToLocalChecked());
-    }
+    // The lifetime of this internal buffer does not match the lifetime of
+    // the returned buffer
+    // So we copy
+    return scope.Escape(Nan::CopyBuffer(data, count_of_bytes).ToLocalChecked());
   }
 
   return scope.Escape(Nan::Undefined());
