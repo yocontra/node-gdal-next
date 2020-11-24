@@ -335,6 +335,12 @@ describe('gdal.Geometry', () => {
           assert.equal(point_outer.disjoint(square), true)
         })
       })
+      describe('disjointAsync()', () => {
+        it('should return correct result', () => {
+          assert.eventually.equal(point_inner.disjointAsync(square), false)
+          assert.eventually.equal(point_outer.disjointAsync(square), true)
+        })
+      })
       describe('crosses()', () => {
         it('should return correct result', () => {
           const line_cross = new gdal.LineString()
@@ -376,6 +382,33 @@ describe('gdal.Geometry', () => {
           assert.equal(square2.overlaps(square), false)
         })
       })
+      describe('overlapsAsync()', () => {
+        it('should return correct result', () => {
+          const ring1 = new gdal.LinearRing()
+          ring1.points.add({ x: 1, y: 0 })
+          ring1.points.add({ x: 11, y: 0 })
+          ring1.points.add({ x: 11, y: 10 })
+          ring1.points.add({ x: 1, y: 10 })
+          ring1.closeRings()
+
+          const square1 = new gdal.Polygon()
+          square1.rings.add(ring1)
+
+          const ring2 = new gdal.LinearRing()
+          ring2.points.add({ x: 100, y: 0 })
+          ring2.points.add({ x: 110, y: 0 })
+          ring2.points.add({ x: 110, y: 10 })
+          ring2.points.add({ x: 100, y: 10 })
+          ring2.closeRings()
+
+          const square2 = new gdal.Polygon()
+          square2.rings.add(ring2)
+
+          assert.eventually.equal(square1.overlapsAsync(square), true)
+          assert.eventually.equal(square2.overlapsAsync(square), false)
+        })
+      })
+
       describe('touches()', () => {
         it('should return correct result', () => {
           const point_edge = new gdal.Point(10, 0)
@@ -393,6 +426,15 @@ describe('gdal.Geometry', () => {
         const distance_expected = Math.sqrt(10 * 10 + 10 * 10)
         const distance_actual = point1.distance(point2)
         assert.closeTo(distance_actual, distance_expected, 0.001)
+      })
+    })
+    describe('distanceAsync()', () => {
+      it('should return correct result', () => {
+        const point1 = new gdal.Point(0, 0)
+        const point2 = new gdal.Point(10, 10)
+        const distance_expected = Math.sqrt(10 * 10 + 10 * 10)
+        const distance_actual = point1.distanceAsync(point2)
+        assert.eventually.closeTo(distance_actual, distance_expected, 0.001)
       })
     })
     describe('boundary()', () => {

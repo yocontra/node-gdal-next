@@ -51,23 +51,38 @@ void Geometry::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "toWKB", exportToWKB);
   Nan::SetPrototypeMethod(lcons, "toWKBAsync", exportToWKBAsync);
   Nan::SetPrototypeMethod(lcons, "isEmpty", isEmpty);
+  Nan::SetPrototypeMethod(lcons, "isEmptyAsync", isEmptyAsync);
   Nan::SetPrototypeMethod(lcons, "isValid", isValid);
+  Nan::SetPrototypeMethod(lcons, "isValidAsync", isValidAsync);
   Nan::SetPrototypeMethod(lcons, "isSimple", isSimple);
+  Nan::SetPrototypeMethod(lcons, "isSimpleAsync", isSimpleAsync);
   Nan::SetPrototypeMethod(lcons, "isRing", isRing);
+  Nan::SetPrototypeMethod(lcons, "isRingAsync", isRingAsync);
   Nan::SetPrototypeMethod(lcons, "clone", clone);
   Nan::SetPrototypeMethod(lcons, "empty", empty);
+  Nan::SetPrototypeMethod(lcons, "emptyAsync", emptyAsync);
   Nan::SetPrototypeMethod(lcons, "closeRings", closeRings);
+  Nan::SetPrototypeMethod(lcons, "closeRingsAsync", closeRingsAsync);
   Nan::SetPrototypeMethod(lcons, "intersects", intersects);
+  Nan::SetPrototypeMethod(lcons, "intersectsAsync", intersectsAsync);
   Nan::SetPrototypeMethod(lcons, "equals", equals);
+  Nan::SetPrototypeMethod(lcons, "equalsAsync", equalsAsync);
   Nan::SetPrototypeMethod(lcons, "disjoint", disjoint);
+  Nan::SetPrototypeMethod(lcons, "disjointAsync", disjointAsync);
   Nan::SetPrototypeMethod(lcons, "touches", touches);
+  Nan::SetPrototypeMethod(lcons, "touchesAsync", touchesAsync);
   Nan::SetPrototypeMethod(lcons, "crosses", crosses);
+  Nan::SetPrototypeMethod(lcons, "crossesAsync", crossesAsync);
   Nan::SetPrototypeMethod(lcons, "within", within);
+  Nan::SetPrototypeMethod(lcons, "withinAsync", withinAsync);
   Nan::SetPrototypeMethod(lcons, "contains", contains);
+  Nan::SetPrototypeMethod(lcons, "containsAsync", containsAsync);
   Nan::SetPrototypeMethod(lcons, "overlaps", overlaps);
+  Nan::SetPrototypeMethod(lcons, "overlapsAsync", overlapsAsync);
   Nan::SetPrototypeMethod(lcons, "boundary", boundary);
   Nan::SetPrototypeMethod(lcons, "boundaryAsync", boundaryAsync);
   Nan::SetPrototypeMethod(lcons, "distance", distance);
+  Nan::SetPrototypeMethod(lcons, "distanceAsync", distanceAsync);
   Nan::SetPrototypeMethod(lcons, "convexHull", convexHull);
   Nan::SetPrototypeMethod(lcons, "convexHullAsync", convexHullAsync);
   Nan::SetPrototypeMethod(lcons, "buffer", buffer);
@@ -88,12 +103,15 @@ void Geometry::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "simplifyPreserveTopologyAsync", simplifyPreserveTopologyAsync);
   Nan::SetPrototypeMethod(lcons, "segmentize", segmentize);
   Nan::SetPrototypeMethod(lcons, "swapXY", swapXY);
+  Nan::SetPrototypeMethod(lcons, "swapXYAsync", swapXYAsync);
   Nan::SetPrototypeMethod(lcons, "getEnvelope", getEnvelope);
   Nan::SetPrototypeMethod(lcons, "getEnvelopeAsync", getEnvelopeAsync);
   Nan::SetPrototypeMethod(lcons, "getEnvelope3D", getEnvelope3D);
   Nan::SetPrototypeMethod(lcons, "getEnvelope3DAsync", getEnvelope3DAsync);
   Nan::SetPrototypeMethod(lcons, "transform", transform);
+  Nan::SetPrototypeMethod(lcons, "transformAsync", transformAsync);
   Nan::SetPrototypeMethod(lcons, "transformTo", transformTo);
+  Nan::SetPrototypeMethod(lcons, "transformToAsync", transformToAsync);
 
   ATTR(lcons, "srs", srsGetter, srsSetter);
   ATTR(lcons, "wkbSize", wkbSizeGetter, READ_ONLY_SETTER);
@@ -222,21 +240,48 @@ NAN_METHOD(Geometry::toString) {
  *
  * @method closeRings
  */
-NODE_WRAPPED_METHOD(Geometry, closeRings, closeRings);
+
+/**
+ * Closes any un-closed rings.
+ * {{{async}}}
+ *
+ * @param {requestCallback} [callback] {{cb}}
+ * @method closeRingsAsync
+ */
+
+NODE_WRAPPED_ASYNC_METHOD(Geometry, closeRings, closeRings);
 
 /**
  * Clears the geometry.
  *
  * @method empty
  */
-NODE_WRAPPED_METHOD(Geometry, empty, empty);
+
+/**
+ * Clears the geometry.
+ * {{{async}}}
+ *
+ * @param {requestCallback} [callback] {{cb}}
+ * @method emptyAsync
+ */
+
+NODE_WRAPPED_ASYNC_METHOD(Geometry, empty, empty);
 
 /**
  * Swaps x, y coordinates.
  *
  * @method swapXY
  */
-NODE_WRAPPED_METHOD(Geometry, swapXY, swapXY);
+
+/**
+ * Swaps x, y coordinates.
+ * {{{async}}}
+ *
+ * @param {requestCallback} [callback] {{cb}}
+ * @method swapXYAsync
+ */
+
+NODE_WRAPPED_ASYNC_METHOD(Geometry, swapXY, swapXY);
 
 /**
  * Determines if the geometry is empty.
@@ -244,7 +289,17 @@ NODE_WRAPPED_METHOD(Geometry, swapXY, swapXY);
  * @method isEmpty
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isEmpty, Boolean, IsEmpty);
+
+/**
+ * Determines if the geometry is empty.
+ * {{{async}}}
+ *
+ * @method isEmptyAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isEmpty, Boolean, IsEmpty);
 
 /**
  * Determines if the geometry is valid.
@@ -252,7 +307,17 @@ NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isEmpty, Boolean, IsEmpty);
  * @method isValid
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isValid, Boolean, IsValid);
+
+/**
+ * Determines if the geometry is valid.
+ * {{{async}}}
+ *
+ * @method isValidAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isValid, Boolean, IsValid);
 
 /**
  * Determines if the geometry is simple.
@@ -260,7 +325,17 @@ NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isValid, Boolean, IsValid);
  * @method isSimple
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isSimple, Boolean, IsSimple);
+
+/**
+ * Determines if the geometry is simple.
+ * {{{async}}}
+ *
+ * @method isSimpleAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isSimple, Boolean, IsSimple);
 
 /**
  * Determines if the geometry is a ring.
@@ -268,7 +343,17 @@ NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isSimple, Boolean, IsSimple);
  * @method isRing
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isRing, Boolean, IsRing);
+
+/**
+ * Determines if the geometry is a ring.
+ * {{{async}}}
+ *
+ * @method isRingAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isRing, Boolean, IsRing);
 
 /**
  * Determines if the two geometries intersect.
@@ -277,8 +362,19 @@ NODE_WRAPPED_METHOD_WITH_RESULT(Geometry, isRing, Boolean, IsRing);
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
-  Geometry, intersects, Boolean, Intersects, Geometry, "geometry to compare");
+
+/**
+ * Determines if the two geometries intersect.
+ * {{{async}}}
+ *
+ * @method intersectsAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, intersects, Boolean, Intersects, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries equal each other.
@@ -287,7 +383,18 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, equals, Boolean, Equals, Geometry, "geometry to compare");
+
+/**
+ * Determines if the two geometries equal each other.
+ * {{{async}}}
+ *
+ * @method equalsAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, equals, Boolean, Equals, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries are disjoint.
@@ -296,7 +403,18 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, equals, Boolean, Equal
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, disjoint, Boolean, Disjoint, Geometry, "geometry to compare");
+
+/**
+ * Determines if the two geometries are disjoint.
+ * {{{async}}}
+ *
+ * @method disjointAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, disjoint, Boolean, Disjoint, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries touch.
@@ -305,7 +423,18 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, disjoint, Boolean, Dis
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, touches, Boolean, Touches, Geometry, "geometry to compare");
+
+/**
+ * Determines if the two geometries touch.
+ * {{{async}}}
+ *
+ * @method touchesAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, touches, Boolean, Touches, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries cross.
@@ -314,7 +443,18 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, touches, Boolean, Touc
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, crosses, Boolean, Crosses, Geometry, "geometry to compare");
+
+/**
+ * Determines if the two geometries cross.
+ * {{{async}}}
+ *
+ * @method crossesAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, crosses, Boolean, Crosses, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry is within the provided geometry.
@@ -323,7 +463,18 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, crosses, Boolean, Cros
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, within, Boolean, Within, Geometry, "geometry to compare");
+
+/**
+ * Determines if the current geometry is within the provided geometry.
+ * {{{async}}}
+ *
+ * @method withinAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, within, Boolean, Within, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry contains the provided geometry.
@@ -332,7 +483,18 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, within, Boolean, Withi
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, contains, Boolean, Contains, Geometry, "geometry to compare");
+
+/**
+ * Determines if the current geometry contains the provided geometry.
+ * {{{async}}}
+ *
+ * @method containsAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, contains, Boolean, Contains, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry overlaps the provided geometry.
@@ -341,7 +503,18 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, contains, Boolean, Con
  * @param {gdal.Geometry} geometry
  * @return Boolean
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, overlaps, Boolean, Overlaps, Geometry, "geometry to compare");
+
+/**
+ * Determines if the current geometry overlaps the provided geometry.
+ * {{{async}}}
+ *
+ * @method overlapsAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Boolean
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, overlaps, Boolean, Overlaps, Geometry, "geometry to compare");
 
 /**
  * Computes the distance between the two geometries.
@@ -350,8 +523,19 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, overlaps, Boolean, Ove
  * @param {gdal.Geometry} geometry
  * @return Number
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
-  Geometry, distance, Number, Distance, Geometry, "geometry to use for distance calculation");
+
+/**
+ * Computes the distance between the two geometries.
+ * {{{async}}}
+ *
+ * @method distanceAsync
+ * @param {gdal.Geometry} geometry
+ * @param {requestCallback} [callback] {{cb}}
+ * @return Number
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, double, distance, Number, Distance, Geometry, "geometry to use for distance calculation");
 
 /**
  * Modify the geometry such it has no segment longer then the given distance.
@@ -380,8 +564,19 @@ NODE_WRAPPED_METHOD_WITH_1_DOUBLE_PARAM(Geometry, segmentize, segmentize, "segme
  * @method transform
  * @param {gdal.CoordinateTransformation} transformation
  */
-NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
-  Geometry, transform, transform, CoordinateTransformation, "transform");
+
+/**
+ * Apply arbitrary coordinate transformation to the geometry.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @method transformAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @param {gdal.CoordinateTransformation} transformation
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
+  Geometry, int, transform, transform, CoordinateTransformation, "transform");
 
 /**
  * Transforms the geometry to match the provided {{#crossLink
@@ -391,8 +586,20 @@ NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
  * @method transformTo
  * @param {gdal.SpatialReference} srs
  */
-NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
-  Geometry, transformTo, transformTo, SpatialReference, "spatial reference");
+
+/**
+ * Transforms the geometry to match the provided {{#crossLink
+ * "gdal.SpatialReference"}}SpatialReference{{/crossLink}}.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @method transformToAsync
+ * @param {requestCallback} [callback] {{cb}}
+ * @param {gdal.SpatialReference} srs
+ */
+
+NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
+  Geometry, int, transformTo, transformTo, SpatialReference, "spatial reference");
 
 /**
  * Clones the instance.
@@ -1013,6 +1220,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
 
 /**
  * Computes the bounding box (envelope).
+ * {{{async}}}
  *
  * @method getEnvelopeAsync
  * @param {requestCallback} [callback] {{cb}}
@@ -1059,6 +1267,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
 
 /**
  * Computes the 3D bounding box (envelope).
+ * {{{async}}}
  *
  * @method getEnvelope3DAsync
  * @param {requestCallback} [callback] {{cb}}
