@@ -309,6 +309,17 @@ NAN_SETTER(READ_ONLY_SETTER);
   }                                                                                                                    \
   var = (*Nan::Utf8String(info[num]))
 
+#define NODE_ARG_BUFFER(num, name, var)                                                                                \
+  if (info.Length() < num + 1) {                                                                                       \
+    Nan::ThrowError(name " must be given");                                                                            \
+    return;                                                                                                            \
+  }                                                                                                                    \
+  if (!info[num]->IsArrayBuffer()) {                                                                                   \
+    Nan::ThrowTypeError(name " must be a buffer");                                                                     \
+    return;                                                                                                            \
+  }                                                                                                                    \
+  var = info[num].As<Object>();
+
 // delete callback is in AsyncWorker::~AsyncWorker
 #define NODE_ARG_CB(num, name, var)                                                                                    \
   if (info.Length() < num + 1) {                                                                                       \
