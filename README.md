@@ -18,11 +18,13 @@ Async support for vector data is currently experimental, with the following clas
 * `DatasetBands`
 * `DatasetLayers`
 * `Driver`
-* `Geometry` (partial, and currently stalled, needs major reworking of the geometry classes)
+* `Geometry`
 * `RasterBandPixels`
 * `LayerFeatures`
 
-`master` is usually unit-tested, `universal-async` is cutting edge
+`master` is usually unit-tested and has all the working features
+`universal-async` is cutting edge for the vector async support
+`vsimem` has support for in-memory files - `gdal.open` supports opening a `Buffer`
 
 Support for `worker_threads` is planned but it is not a priority project
 
