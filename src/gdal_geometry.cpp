@@ -394,7 +394,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, equals, Boolean, Equals, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, equals, Boolean, Equals, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries are disjoint.
@@ -414,7 +415,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, equa
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, disjoint, Boolean, Disjoint, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, disjoint, Boolean, Disjoint, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries touch.
@@ -434,7 +436,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, disj
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, touches, Boolean, Touches, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, touches, Boolean, Touches, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries cross.
@@ -454,7 +457,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, touc
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, crosses, Boolean, Crosses, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, crosses, Boolean, Crosses, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry is within the provided geometry.
@@ -474,7 +478,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, cros
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, within, Boolean, Within, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, within, Boolean, Within, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry contains the provided geometry.
@@ -494,7 +499,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, with
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, contains, Boolean, Contains, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, contains, Boolean, Contains, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry overlaps the provided geometry.
@@ -514,7 +520,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, cont
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, overlaps, Boolean, Overlaps, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, overlaps, Boolean, Overlaps, Geometry, "geometry to compare");
 
 /**
  * Computes the distance between the two geometries.
