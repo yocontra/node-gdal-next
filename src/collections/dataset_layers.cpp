@@ -138,7 +138,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
 
   long ds_uid = ds->uid;
 
-  GDALAsyncableJob<OGRLayer *> job(info);
+  GDALAsyncableJob<OGRLayer *> job;
   job.persist(parent);
   if (info[0]->IsString()) {
     std::string *layer_name = new std::string(*Nan::Utf8String(info[0]));
@@ -163,7 +163,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
   }
 
   job.rval = [raw](OGRLayer *lyr, GDAL_ASYNCABLE_OBJS) { return Layer::New(lyr, raw); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**
@@ -245,7 +245,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
   if (spatial_ref) srs = spatial_ref->get();
 
   long ds_uid = ds->uid;
-  GDALAsyncableJob<OGRLayer *> job(info);
+  GDALAsyncableJob<OGRLayer *> job;
   job.persist(parent);
   job.main = [raw, ds_uid, layer_name, srs, geom_type, options]() {
     std::unique_ptr<StringList> options_ptr(options);
@@ -259,7 +259,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
 
   job.rval = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) { return Layer::New(layer, raw, false); };
 
-  job.run(async, 4);
+  job.run(info, async, 4);
 }
 
 /**
@@ -302,7 +302,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
 #endif
 
   long ds_uid = ds->uid;
-  GDALAsyncableJob<int> job(info);
+  GDALAsyncableJob<int> job;
   job.persist(parent);
   job.main = [raw, ds_uid]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -312,7 +312,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
   };
 
   job.rval = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
-  job.run(async, 0);
+  job.run(info, async, 0);
 }
 
 /**
@@ -370,7 +370,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
 
   long ds_uid = ds->uid;
   OGRLayer *src = layer_to_copy->get();
-  GDALAsyncableJob<OGRLayer *> job(info);
+  GDALAsyncableJob<OGRLayer *> job;
   job.persist(parent, info[0].As<Object>());
   job.main = [raw, ds_uid, src, new_name, options]() {
     std::unique_ptr<StringList> options_ptr(options);
@@ -384,7 +384,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
 
   job.rval = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) { return Layer::New(layer, raw); };
 
-  job.run(async, 3);
+  job.run(info, async, 3);
 }
 
 /**
@@ -431,7 +431,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
   int i;
   NODE_ARG_INT(0, "layer index", i);
   long ds_uid = ds->uid;
-  GDALAsyncableJob<OGRErr> job(info);
+  GDALAsyncableJob<OGRErr> job;
   job.persist(parent);
   job.main = [raw, ds_uid, i]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -442,7 +442,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
   };
 
   job.rval = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**

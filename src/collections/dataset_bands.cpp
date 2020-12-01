@@ -128,7 +128,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
     int band_id;
     NODE_ARG_INT(0, "band id", band_id);
 
-    GDALAsyncableJob<GDALRasterBand *> job(info);
+    GDALAsyncableJob<GDALRasterBand *> job;
     job.persist(parent);
     job.main = [ds_uid, raw, band_id]() {
       GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -137,7 +137,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
       return band;
     };
     job.rval = [raw](GDALRasterBand *band, GDAL_ASYNCABLE_OBJS) { return RasterBand::New(band, raw); };
-    job.run(async, 1);
+    job.run(info, async, 1);
   }
 }
 
@@ -210,7 +210,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
 
   long ds_uid = ds->uid;
 
-  GDALAsyncableJob<GDALRasterBand *> job(info);
+  GDALAsyncableJob<GDALRasterBand *> job;
   job.persist(parent);
   job.main = [ds_uid, raw, type, options]() {
     std::unique_ptr<StringList> options_ptr(options);
@@ -223,7 +223,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
     return raw->GetRasterBand(raw->GetRasterCount());
   };
   job.rval = [raw](GDALRasterBand *r, GDAL_ASYNCABLE_OBJS) { return RasterBand::New(r, raw); };
-  job.run(async, 2);
+  job.run(info, async, 2);
 }
 
 /**
@@ -254,7 +254,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
 
   long ds_uid = ds->uid;
   GDALDataset *raw = ds->getDataset();
-  GDALAsyncableJob<int> job(info);
+  GDALAsyncableJob<int> job;
   job.persist(parent);
   job.main = [ds_uid, raw]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -263,7 +263,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
     return count;
   };
   job.rval = [raw](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
-  job.run(async, 0);
+  job.run(info, async, 0);
 }
 
 /**

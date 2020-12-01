@@ -125,7 +125,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
   NODE_ARG_INT(0, "feature id", feature_id);
   OGRLayer *gdal_layer = layer->get();
   long ds_uid = layer->parent_uid;
-  GDALAsyncableJob<OGRFeature *> job(info);
+  GDALAsyncableJob<OGRFeature *> job;
   job.persist(parent);
   job.main = [ds_uid, gdal_layer, feature_id]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -134,7 +134,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
     return feature;
   };
   job.rval = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**
@@ -166,7 +166,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
 
   OGRLayer *gdal_layer = layer->get();
   long ds_uid = layer->parent_uid;
-  GDALAsyncableJob<OGRFeature *> job(info);
+  GDALAsyncableJob<OGRFeature *> job;
   job.persist(parent);
   job.main = [ds_uid, gdal_layer]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -176,7 +176,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
     return feature;
   };
   job.rval = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
-  job.run(async, 0);
+  job.run(info, async, 0);
 }
 
 /**
@@ -214,7 +214,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
 
   OGRLayer *gdal_layer = layer->get();
   long ds_uid = layer->parent_uid;
-  GDALAsyncableJob<OGRFeature *> job(info);
+  GDALAsyncableJob<OGRFeature *> job;
   job.persist(parent);
   job.main = [ds_uid, gdal_layer]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -223,7 +223,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
     return feature;
   };
   job.rval = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
-  job.run(async, 0);
+  job.run(info, async, 0);
 }
 
 /**
@@ -276,7 +276,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
   OGRLayer *gdal_layer = layer->get();
   long ds_uid = layer->parent_uid;
   OGRFeature *gdal_f = f->get();
-  GDALAsyncableJob<int> job(info);
+  GDALAsyncableJob<int> job;
   job.persist(parent);
   job.main = [ds_uid, gdal_layer, gdal_f]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -286,7 +286,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
     return err;
   };
   job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**
@@ -330,7 +330,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
   OGRLayer *gdal_layer = layer->get();
   GDALDataset *gdal_dataset = layer->getParent();
   long ds_uid = layer->parent_uid;
-  GDALAsyncableJob<GIntBig> job(info);
+  GDALAsyncableJob<GIntBig> job;
   job.persist(parent, ds);
   job.main = [ds_uid, gdal_layer, force, gdal_dataset]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -339,7 +339,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
     return count;
   };
   job.rval = [](GIntBig count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Number>(count); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**
@@ -426,7 +426,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
 
   OGRLayer *gdal_layer = layer->get();
   long ds_uid = layer->parent_uid;
-  GDALAsyncableJob<int> job(info);
+  GDALAsyncableJob<int> job;
   job.persist(parent);
   job.main = [ds_uid, gdal_layer, i]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -436,7 +436,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
     return err;
   };
   job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 
   return;
 }

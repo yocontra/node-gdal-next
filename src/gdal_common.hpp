@@ -482,14 +482,14 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     auto *gdal_obj = obj->this_;                                                                                       \
-    GDALAsyncableJob<int> job(info);                                                                                   \
+    GDALAsyncableJob<int> job;                                                                                   \
     job.persist(info.This());                                                                                          \
     job.main = [gdal_obj]() {                                                                                          \
       gdal_obj->wrapped_method();                                                                                      \
       return 0;                                                                                                        \
     };                                                                                                                 \
     job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };                                  \
-    job.run(async, 0);                                                                                                 \
+    job.run(info, async, 0);                                                                                                 \
   }
 
 // ----- wrapped asyncable methods w/ results-------
@@ -503,11 +503,11 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     auto *gdal_obj = obj->this_;                                                                                       \
-    GDALAsyncableJob<async_type> job(info);                                                                            \
+    GDALAsyncableJob<async_type> job;                                                                            \
     job.persist(info.This());                                                                                          \
     job.main = [gdal_obj]() { return gdal_obj->wrapped_method(); };                                                    \
     job.rval = [](async_type r, GDAL_ASYNCABLE_OBJS) { return Nan::New<result_type>(r); };                             \
-    job.run(async, 0);                                                                                                 \
+    job.run(info, async, 0);                                                                                                 \
   }
 
 // param_type must be a node-gdal type
@@ -521,11 +521,11 @@ NAN_SETTER(READ_ONLY_SETTER);
     if (!obj->isAlive()) return Nan::ThrowError(#klass " object has already been destroyed");                          \
     auto *gdal_obj = obj->this_;                                                                                       \
     auto *gdal_param = param->get();                                                                                   \
-    GDALAsyncableJob<async_type> job(info);                                                                            \
+    GDALAsyncableJob<async_type> job;                                                                            \
     job.persist(info.This(), info[0].As<Object>());                                                                    \
     job.main = [gdal_obj, gdal_param]() { return gdal_obj->wrapped_method(gdal_param); };                              \
     job.rval = [](async_type r, GDAL_ASYNCABLE_OBJS) { return Nan::New<result_type>(r); };                             \
-    job.run(async, 1);                                                                                                 \
+    job.run(info, async, 1);                                                                                                 \
   }
 
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_ENUM_PARAM(                                                            \
@@ -540,11 +540,11 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     auto *gdal_obj = obj->this_;                                                                                       \
-    GDALAsyncableJob<async_type> job(info);                                                                            \
+    GDALAsyncableJob<async_type> job;                                                                            \
     job.persist(info.This());                                                                                          \
     job.main = [gdal_obj, param]() { return gdal_obj->wrapped_method(param); };                                        \
     job.rval = [](async_type r, GDAL_ASYNCABLE_OBJS) { return Nan::New<result_type>(r); };                             \
-    job.run(async, 1);                                                                                                 \
+    job.run(info, async, 1);                                                                                                 \
   }
 
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(                                                  \
@@ -560,7 +560,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     auto gdal_obj = obj->this_;                                                                                        \
     auto gdal_param = param->get();                                                                                    \
-    GDALAsyncableJob<async_type> job(info);                                                                            \
+    GDALAsyncableJob<async_type> job;                                                                            \
     job.persist(info.This(), info[0].As<Object>());                                                                    \
     job.main = [gdal_obj, gdal_param]() {                                                                              \
       int err = gdal_obj->wrapped_method(gdal_param);                                                                  \
@@ -568,7 +568,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       return err;                                                                                                      \
     };                                                                                                                 \
     job.rval = [](async_type, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };                           \
-    job.run(async, 1);                                                                                                 \
+    job.run(info, async, 1);                                                                                                 \
   }
 
 // ----- wrapped methods w/ CPLErr result (throws) -------

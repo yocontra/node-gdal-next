@@ -294,7 +294,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
 
   // Very careful here
   // we can't reference automatic variables, thus the *options object
-  GDALAsyncableJob<GDALDataset *> job(info);
+  GDALAsyncableJob<GDALDataset *> job;
   job.main = [raw, filename, x_size, y_size, n_bands, type, options]() {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
@@ -303,7 +303,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   };
   job.rval = DatasetRval;
 
-  job.run(async, 6);
+  job.run(info, async, 6);
 }
 
 /**
@@ -400,7 +400,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
 
   GDALDriver *raw = driver->getGDALDriver();
   GDALDataset *raw_ds = src_dataset->getDataset();
-  GDALAsyncableJob<GDALDataset *> job(info);
+  GDALAsyncableJob<GDALDataset *> job;
   job.rval = DatasetRval;
   job.main = [raw, filename, raw_ds, strict, options, async_lock]() {
     std::unique_ptr<StringList> options_ptr(options);
@@ -409,7 +409,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     if (!ds) throw "Error creating dataset";
     return ds;
   };
-  job.run(async, 3);
+  job.run(info, async, 3);
 }
 
 /**
@@ -575,7 +575,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   }
   info.GetReturnValue().Set(Dataset::New(ds));
 #else
-  GDALAsyncableJob<GDALDataset *> job(info);
+  GDALAsyncableJob<GDALDataset *> job;
   job.main = [raw, path, access]() {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
@@ -584,7 +584,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   };
   job.rval = DatasetRval;
 
-  job.run(async, 2);
+  job.run(info, async, 2);
 #endif
 }
 

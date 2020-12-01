@@ -64,7 +64,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
   RasterBand *mask = NULL;
   double search_dist;
   int smooth_iterations = 0;
-  GDALAsyncableJob<CPLErr> job(info);
+  GDALAsyncableJob<CPLErr> job;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -87,7 +87,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
     return err;
   };
   job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**
@@ -200,7 +200,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   long src_uid = src->parent_uid;
   long dst_uid = dst->parent_uid;
 
-  GDALAsyncableJob<CPLErr> job(info);
+  GDALAsyncableJob<CPLErr> job;
   job.main = [src_uid,
               dst_uid,
               gdal_src,
@@ -232,7 +232,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
     return err;
   };
   job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**
@@ -307,7 +307,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   long dst_uid = dst->parent_uid;
   long mask_uid = mask ? mask->parent_uid : 0;
 
-  GDALAsyncableJob<CPLErr> job(info);
+  GDALAsyncableJob<CPLErr> job;
   job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_dst, gdal_mask, threshold, connectedness]() {
     GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid, mask_uid);
     CPLErr err = GDALSieveFilter(gdal_src, gdal_mask, gdal_dst, threshold, connectedness, NULL, NULL, NULL);
@@ -316,7 +316,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
     return err;
   };
   job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 
 /**
@@ -382,7 +382,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
   GDALRasterBand *gdal_src = src->get();
   long src_uid = src->parent_uid;
 
-  GDALAsyncableJob<int> job(info);
+  GDALAsyncableJob<int> job;
 
   job.main = [src_uid, gdal_src, x, y, w, h]() {
     GDAL_ASYNCABLE_LOCK(src_uid);
@@ -391,7 +391,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
     return r;
   };
   job.rval = [](int r, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(r); };
-  job.run(async, 5);
+  job.run(info, async, 5);
 }
 
 /**
@@ -451,7 +451,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   long dst_uid = dst->parent_uid;
   long mask_uid = mask ? mask->parent_uid : 0;
 
-  GDALAsyncableJob<CPLErr> job(info);
+  GDALAsyncableJob<CPLErr> job;
 
   if (
     Nan::HasOwnProperty(obj, Nan::New("useFloats").ToLocalChecked()).FromMaybe(false) &&
@@ -477,6 +477,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
     };
   }
   job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
-  job.run(async, 1);
+  job.run(info, async, 1);
 }
 } // namespace node_gdal

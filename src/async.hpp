@@ -168,7 +168,7 @@ template <class gdaltype> class GDALAsyncableJob {
   // This is the lambda that produces the JS return object from the <gdaltype> object
   gdal_rval rval;
 
-  GDALAsyncableJob(const Nan::FunctionCallbackInfo<v8::Value> &info) : main(), rval(), info(info), persistent(){};
+  GDALAsyncableJob() : main(), rval(), persistent(){};
 
   void persist(const v8::Local<v8::Object> &obj) {
     persistent.push_back(obj);
@@ -183,7 +183,7 @@ template <class gdaltype> class GDALAsyncableJob {
     persistent.insert(persistent.end(), objs.begin(), objs.end());
   }
 
-  void run(bool async, int cb_arg) {
+  void run(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async, int cb_arg) {
     if (async) {
       Nan::Callback *callback;
       NODE_ARG_CB(cb_arg, "callback", callback);
@@ -197,7 +197,6 @@ template <class gdaltype> class GDALAsyncableJob {
   }
 
     private:
-  const Nan::FunctionCallbackInfo<v8::Value> &info;
   std::vector<v8::Local<v8::Object>> persistent;
 };
 } // namespace node_gdal

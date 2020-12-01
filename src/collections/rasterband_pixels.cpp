@@ -294,7 +294,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
 
   long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
-  GDALAsyncableJob<CPLErr> job(info);
+  GDALAsyncableJob<CPLErr> job;
   job.persist(obj, band->handle());
   job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -305,7 +305,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   };
 
   job.rval = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
-  job.run(async, 10);
+  job.run(info, async, 10);
 }
 
 /**
@@ -408,7 +408,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
 
   long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
-  GDALAsyncableJob<CPLErr> job(info);
+  GDALAsyncableJob<CPLErr> job;
   job.persist(passed_array, band->handle());
   job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -419,7 +419,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   };
   job.rval = [](CPLErr, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
 
-  job.run(async, 9);
+  job.run(info, async, 9);
 }
 
 /**
