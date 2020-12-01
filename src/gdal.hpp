@@ -26,7 +26,7 @@ namespace node_gdal {
 /*
  * Common code for sync and async opening
  */
-GDAL_ASYNCABLE_DECLARE(open);
+GDAL_ASYNCABLE_GLOBAL(open);
 GDAL_ASYNCABLE_DEFINE(open) {
   Nan::HandleScope scope;
 

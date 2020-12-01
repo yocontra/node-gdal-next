@@ -365,9 +365,11 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return; // error parsing string list
   }
 
-  uv_mutex_t *async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
-  if (async_lock == nullptr) {
-    Nan::ThrowError("Dataset object has already been destroyed");
+  uv_mutex_t *async_lock = nullptr;
+  try {
+    async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
+  } catch (const char *err) {
+    Nan::ThrowError(err);
     return;
   }
 

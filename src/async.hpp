@@ -23,6 +23,11 @@ namespace node_gdal {
   static NAN_METHOD(method##Async);                                                                                    \
   static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async)
 
+#define GDAL_ASYNCABLE_GLOBAL(method)                                                                                  \
+  NAN_METHOD(method);                                                                                                  \
+  NAN_METHOD(method##Async);                                                                                           \
+  void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async)
+
 // Local<Object> is essentially a pointer and can be trivially copied
 #define GDAL_ASYNCABLE_OBJS std::vector<v8::Local<v8::Object>>
 
@@ -30,16 +35,19 @@ namespace node_gdal {
 
 // Handle locking
 #define GDAL_TRYLOCK_PARENT(p)                                                                                         \
-  uv_mutex_t *async_lock = ptr_manager.tryLockDataset((p)->parent_uid);                                                \
-  if (async_lock == nullptr) {                                                                                         \
-    Nan::ThrowError("Parent Dataset object has already been destroyed");                                               \
+  uv_mutex_t *async_lock = nullptr;                                                                                    \
+  try {                                                                                                                \
+    async_lock = ptr_manager.tryLockDataset((p)->parent_uid);                                                          \
+  } catch (const char *err) {                                                                                          \
+    Nan::ThrowError(err);                                                                                              \
     return;                                                                                                            \
   }
-
+#define GDAL_ASYNCABLE_LOCK(uid) uv_mutex_t *async_lock = ptr_manager.tryLockDataset(uid);
 #define GDAL_UNLOCK_PARENT uv_mutex_unlock(async_lock)
-#define GDAL_ASYNCABLE_LOCK(uid)                                                                                       \
-  uv_mutex_t *async_lock = ptr_manager.tryLockDataset(uid);                                                            \
-  if (async_lock == nullptr) { throw "Parent Dataset object has already been destroyed"; }
+#define GDAL_ASYNCABLE_LOCK_MANY(...)                                                                                  \
+  std::vector<uv_mutex_t *> async_locks = ptr_manager.tryLockDatasets({__VA_ARGS__});
+#define GDAL_UNLOCK_MANY                                                                                               \
+  for (uv_mutex_t * async_lock : async_locks) { uv_mutex_unlock(async_lock); }
 
 #define GDAL_ASYNCABLE_1x_UNSUPPORTED                                                                                  \
   if (GDAL_ISASYNC) {                                                                                                  \
@@ -141,7 +149,17 @@ template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleErrorCallback() 
 // across the context boundaries
 //
 // The caller must ensure that all the lambdas can be executed in
-// another thread (no capturing of automatic variables)
+// another thread:
+// * no capturing of automatic variables (C++ memory management)
+// * no referencing of JS-visible objects in main() (V8 memory management)
+// * protecting all JS-visible objects from the GC by calling persist() (V8 MM)
+// * locking all GDALDatasets (GDAL limitation)
+//
+// If a GDALDataset is locked, but not persisted, the GC could still
+// try to free it - in this case it will stop the JS world and then it will wait
+// on the Dataset lock in PtrManager::dispose() blocking the event loop - the situation
+// is safe but it is still best if it is avoided
+
 template <class gdaltype> class GDALAsyncableJob {
     public:
   typedef std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> gdal_rval;
@@ -159,6 +177,10 @@ template <class gdaltype> class GDALAsyncableJob {
   void persist(const v8::Local<v8::Object> &obj1, const v8::Local<v8::Object> &obj2) {
     persistent.push_back(obj1);
     persistent.push_back(obj2);
+  }
+
+  void persist(const std::vector<v8::Local<v8::Object>> &objs) {
+    persistent.insert(persistent.end(), objs.begin(), objs.end());
   }
 
   void run(bool async, int cb_arg) {

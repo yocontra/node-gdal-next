@@ -15,6 +15,8 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "async.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -26,11 +28,11 @@ namespace Algorithms {
 
 void Initialize(Local<Object> target);
 
-NAN_METHOD(fillNodata);
-NAN_METHOD(contourGenerate);
-NAN_METHOD(sieveFilter);
-NAN_METHOD(checksumImage);
-NAN_METHOD(polygonize);
+GDAL_ASYNCABLE_GLOBAL(fillNodata);
+GDAL_ASYNCABLE_GLOBAL(contourGenerate);
+GDAL_ASYNCABLE_GLOBAL(sieveFilter);
+GDAL_ASYNCABLE_GLOBAL(checksumImage);
+GDAL_ASYNCABLE_GLOBAL(polygonize);
 } // namespace Algorithms
 } // namespace node_gdal
 
