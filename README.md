@@ -14,6 +14,7 @@ This project is a fork of <https://github.com/contra/node-gdal-next> which is a 
 ## As of November 9th 2020, async support for raster data has been completely merged into <https://github.com/contra/node-gdal-next>
 Async support for vector data is currently experimental, with the following classses being async-compatible on `master`
 * main `open`
+* global `Algorithms`
 * `Dataset`
 * `DatasetBands`
 * `DatasetLayers`
