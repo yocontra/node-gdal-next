@@ -30,7 +30,6 @@ bool PtrManager::isAlive(long uid) {
 uv_mutex_t *PtrManager::tryLockDataset(long uid) {
   lock();
 
-  //bt();
   auto parent = datasets.find(uid);
   if (parent != datasets.end()) {
     uv_mutex_lock(parent->second->async_lock);
@@ -157,7 +156,7 @@ void PtrManager::dispose(PtrManagerRasterBandItem *item) {
   uv_mutex_t *async_lock = nullptr;
   try {
     async_lock = tryLockDataset(item->parent->uid);
-  } catch (const char*){};
+  } catch (const char *) {};
   RasterBand::cache.erase(item->ptr);
   bands.erase(item->uid);
   item->parent->bands.remove(item);
