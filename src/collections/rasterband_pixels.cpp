@@ -294,18 +294,18 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
 
   long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
-  GDAL_ASYNCABLE_PERSIST(obj, band->handle());
-  GDAL_ASYNCABLE_MAIN(CPLErr) =
-    [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
-      GDAL_ASYNCABLE_LOCK(ds_uid);
-      CPLErr err = gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-      GDAL_UNLOCK_PARENT;
-      if (err != CE_None) throw CPLGetLastErrorMsg();
-      return err;
-    };
+  GDALAsyncableJob<CPLErr> job(info);
+  job.persist(obj, band->handle());
+  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    CPLErr err = gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+    GDAL_UNLOCK_PARENT;
+    if (err != CE_None) throw CPLGetLastErrorMsg();
+    return err;
+  };
 
-  GDAL_ASYNCABLE_RVAL(CPLErr) = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
-  GDAL_ASYNCABLE_EXECUTE(10, CPLErr);
+  job.rval = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  job.run(async, 10);
 }
 
 /**
@@ -408,18 +408,18 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
 
   long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
-  GDAL_ASYNCABLE_PERSIST(passed_array, band->handle());
-  GDAL_ASYNCABLE_MAIN(CPLErr) =
-    [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
-      GDAL_ASYNCABLE_LOCK(ds_uid);
-      CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
-      GDAL_UNLOCK_PARENT;
-      if (err != CE_None) throw CPLGetLastErrorMsg();
-      return err;
-    };
-  GDAL_ASYNCABLE_RVAL(CPLErr) = [](CPLErr, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  GDALAsyncableJob<CPLErr> job(info);
+  job.persist(passed_array, band->handle());
+  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+    GDAL_UNLOCK_PARENT;
+    if (err != CE_None) throw CPLGetLastErrorMsg();
+    return err;
+  };
+  job.rval = [](CPLErr, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
 
-  GDAL_ASYNCABLE_EXECUTE(9, CPLErr);
+  job.run(async, 9);
 }
 
 /**
