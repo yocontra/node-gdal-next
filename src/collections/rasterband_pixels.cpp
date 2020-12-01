@@ -25,7 +25,9 @@ void RasterBandPixels::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "write", write);
   Nan::SetPrototypeMethod(lcons, "writeAsync", writeAsync);
   Nan::SetPrototypeMethod(lcons, "readBlock", readBlock);
+  Nan::SetPrototypeMethod(lcons, "readBlockAsync", readBlockAsync);
   Nan::SetPrototypeMethod(lcons, "writeBlock", writeBlock);
+  Nan::SetPrototypeMethod(lcons, "writeBlockAsync", writeBlockAsync);
 
   Nan::Set(target, Nan::New("RasterBandPixels").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
@@ -479,7 +481,26 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
  * of values.
  */
-NAN_METHOD(RasterBandPixels::readBlock) {
+
+/**
+ * Reads a block of pixels.
+ * {{{async}}}
+ *
+ * @method readBlockAsync
+ * @throws Error
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {TypedArray} [data] The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * to put the data in. A new array is created if not given.
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
+ * @return {TypedArray} A
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * of values.
+ */
+
+GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
   Nan::HandleScope scope;
 
   RasterBand *band;
@@ -496,7 +517,7 @@ NAN_METHOD(RasterBandPixels::readBlock) {
   Local<Value> array;
   Local<Object> obj;
 
-  if (info.Length() == 3 && !info[2]->IsUndefined() && !info[2]->IsNull()) {
+  if (info.Length() > 2 && !info[2]->IsUndefined() && !info[2]->IsNull()) {
     NODE_ARG_OBJECT(2, "data", obj);
     array = obj;
   } else {
@@ -512,15 +533,20 @@ NAN_METHOD(RasterBandPixels::readBlock) {
     return; // TypedArray::Validate threw an error
   }
 
-  GDAL_TRYLOCK_PARENT(band);
-  CPLErr err = band->get()->ReadBlock(x, y, data);
-  GDAL_UNLOCK_PARENT;
-  if (err) {
-    NODE_THROW_CPLERR(err);
-    return;
-  }
+  GDALRasterBand *gdal_band = band->get();
+  long parent_uid = band->parent_uid;
 
-  info.GetReturnValue().Set(array);
+  GDALAsyncableJob<CPLErr> job;
+  job.persist(obj, band->handle());
+  job.main = [gdal_band, parent_uid, x, y, data]() {
+    GDAL_ASYNCABLE_LOCK(parent_uid);
+    CPLErr err = gdal_band->ReadBlock(x, y, data);
+    GDAL_UNLOCK_PARENT;
+    if (err) { throw CPLGetLastErrorMsg(); }
+    return err;
+  };
+  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  job.run(info, async, 3);
 }
 
 /**
@@ -534,7 +560,22 @@ NAN_METHOD(RasterBandPixels::readBlock) {
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
  * of values to write to the band.
  */
-NAN_METHOD(RasterBandPixels::writeBlock) {
+
+/**
+ * Writes a block of pixels.
+ * {{{async}}}
+ *
+ * @method writeBlockAsync
+ * @throws Error
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {TypedArray} data The
+ * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
+ * of values to write to the band.
+ * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * certain optional parameters are omitted
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
   Nan::HandleScope scope;
 
   RasterBand *band;
@@ -556,16 +597,20 @@ NAN_METHOD(RasterBandPixels::writeBlock) {
     return; // TypedArray::Validate threw an error
   }
 
-  GDAL_TRYLOCK_PARENT(band);
-  CPLErr err = band->get()->WriteBlock(x, y, data);
-  GDAL_UNLOCK_PARENT;
+  GDALRasterBand *gdal_band = band->get();
+  long parent_uid = band->parent_uid;
 
-  if (err) {
-    NODE_THROW_CPLERR(err);
-    return;
-  }
-
-  return;
+  GDALAsyncableJob<CPLErr> job;
+  job.persist(obj, band->handle());
+  job.main = [gdal_band, parent_uid, x, y, data]() {
+    GDAL_ASYNCABLE_LOCK(parent_uid);
+    CPLErr err = gdal_band->WriteBlock(x, y, data);
+    GDAL_UNLOCK_PARENT;
+    if (err) { throw CPLGetLastErrorMsg(); }
+    return err;
+  };
+  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  job.run(info, async, 3);
 }
 
 } // namespace node_gdal
