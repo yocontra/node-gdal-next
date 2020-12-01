@@ -128,17 +128,16 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
     int band_id;
     NODE_ARG_INT(0, "band id", band_id);
 
-    GDAL_ASYNCABLE_PERSIST(parent);
-    GDAL_ASYNCABLE_MAIN(GDALRasterBand *) = [ds_uid, raw, band_id]() {
+    GDALAsyncableJob<GDALRasterBand *> job;
+    job.persist(parent);
+    job.main = [ds_uid, raw, band_id]() {
       GDAL_ASYNCABLE_LOCK(ds_uid);
       GDALRasterBand *band = raw->GetRasterBand(band_id);
       GDAL_UNLOCK_PARENT;
       return band;
     };
-    GDAL_ASYNCABLE_RVAL(GDALRasterBand *) = [raw](GDALRasterBand *band, GDAL_ASYNCABLE_OBJS) {
-      return RasterBand::New(band, raw);
-    };
-    GDAL_ASYNCABLE_EXECUTE(1, GDALRasterBand *);
+    job.rval = [raw](GDALRasterBand *band, GDAL_ASYNCABLE_OBJS) { return RasterBand::New(band, raw); };
+    job.run(info, async, 1);
   }
 }
 
@@ -211,8 +210,9 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
 
   long ds_uid = ds->uid;
 
-  GDAL_ASYNCABLE_PERSIST(parent);
-  GDAL_ASYNCABLE_MAIN(GDALRasterBand *) = [ds_uid, raw, type, options]() {
+  GDALAsyncableJob<GDALRasterBand *> job;
+  job.persist(parent);
+  job.main = [ds_uid, raw, type, options]() {
     std::unique_ptr<StringList> options_ptr(options);
     GDAL_ASYNCABLE_LOCK(ds_uid);
     CPLErr err = raw->AddBand(type, options->get());
@@ -222,10 +222,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return raw->GetRasterBand(raw->GetRasterCount());
   };
-  GDAL_ASYNCABLE_RVAL(GDALRasterBand *) = [raw](GDALRasterBand *r, GDAL_ASYNCABLE_OBJS) {
-    return RasterBand::New(r, raw);
-  };
-  GDAL_ASYNCABLE_EXECUTE(2, GDALRasterBand *);
+  job.rval = [raw](GDALRasterBand *r, GDAL_ASYNCABLE_OBJS) { return RasterBand::New(r, raw); };
+  job.run(info, async, 2);
 }
 
 /**
@@ -255,16 +253,17 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
 #endif
 
   long ds_uid = ds->uid;
-  GDAL_ASYNCABLE_PERSIST(parent);
   GDALDataset *raw = ds->getDataset();
-  GDAL_ASYNCABLE_MAIN(int) = [ds_uid, raw]() {
+  GDALAsyncableJob<int> job;
+  job.persist(parent);
+  job.main = [ds_uid, raw]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     int count = raw->GetRasterCount();
     GDAL_UNLOCK_PARENT;
     return count;
   };
-  GDAL_ASYNCABLE_RVAL(int) = [raw](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
-  GDAL_ASYNCABLE_EXECUTE(0, int);
+  job.rval = [raw](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
+  job.run(info, async, 0);
 }
 
 /**

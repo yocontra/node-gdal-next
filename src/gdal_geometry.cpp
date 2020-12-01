@@ -394,7 +394,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, equals, Boolean, Equals, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, equals, Boolean, Equals, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries are disjoint.
@@ -414,7 +415,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, equa
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, disjoint, Boolean, Disjoint, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, disjoint, Boolean, Disjoint, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries touch.
@@ -434,7 +436,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, disj
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, touches, Boolean, Touches, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, touches, Boolean, Touches, Geometry, "geometry to compare");
 
 /**
  * Determines if the two geometries cross.
@@ -454,7 +457,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, touc
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, crosses, Boolean, Crosses, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, crosses, Boolean, Crosses, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry is within the provided geometry.
@@ -474,7 +478,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, cros
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, within, Boolean, Within, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, within, Boolean, Within, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry contains the provided geometry.
@@ -494,7 +499,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, with
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, contains, Boolean, Contains, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, contains, Boolean, Contains, Geometry, "geometry to compare");
 
 /**
  * Determines if the current geometry overlaps the provided geometry.
@@ -514,7 +520,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, cont
  * @return Boolean
  */
 
-NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Geometry, OGRBoolean, overlaps, Boolean, Overlaps, Geometry, "geometry to compare");
+NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
+  Geometry, OGRBoolean, overlaps, Boolean, Overlaps, Geometry, "geometry to compare");
 
 /**
  * Computes the distance between the two geometries.
@@ -633,10 +640,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
   Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   OGRGeometry *gdal_geom = geom->this_;
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom]() { return gdal_geom->ConvexHull(); };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(0, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom]() { return gdal_geom->ConvexHull(); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 0);
 }
 
 /**
@@ -659,10 +667,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
   Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   OGRGeometry *gdal_geom = geom->this_;
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom]() { return gdal_geom->Boundary(); };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(0, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom]() { return gdal_geom->Boundary(); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 0);
 }
 
 /**
@@ -693,10 +702,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
 
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->Intersection(gdal_x); };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom, gdal_x]() { return gdal_geom->Intersection(gdal_x); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -727,10 +737,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
 
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->Union(gdal_x); };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom, gdal_x]() { return gdal_geom->Union(gdal_x); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -761,10 +772,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
 
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->Difference(gdal_x); };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom, gdal_x]() { return gdal_geom->Difference(gdal_x); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -795,10 +807,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
 
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, gdal_x]() { return gdal_geom->SymDifference(gdal_x); };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom, gdal_x]() { return gdal_geom->SymDifference(gdal_x); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -828,10 +841,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
   NODE_ARG_DOUBLE(0, "tolerance", tolerance);
   OGRGeometry *gdal_geom = geom->this_;
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, tolerance]() { return gdal_geom->Simplify(tolerance); };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom, tolerance]() { return gdal_geom->Simplify(tolerance); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -861,12 +875,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
   NODE_ARG_DOUBLE(0, "tolerance", tolerance);
   OGRGeometry *gdal_geom = geom->this_;
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, tolerance]() {
-    return gdal_geom->SimplifyPreserveTopology(tolerance);
-  };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom, tolerance]() { return gdal_geom->SimplifyPreserveTopology(tolerance); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -902,12 +915,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
 
   OGRGeometry *gdal_geom = geom->this_;
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [gdal_geom, distance, number_of_segments]() {
-    return gdal_geom->Buffer(distance, number_of_segments);
-  };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
-  GDAL_ASYNCABLE_EXECUTE(2, OGRGeometry *);
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.persist(info.This());
+  job.main = [gdal_geom, distance, number_of_segments]() { return gdal_geom->Buffer(distance, number_of_segments); };
+  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.run(info, async, 2);
 }
 
 /**
@@ -931,10 +943,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
-  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+  GDALAsyncableJob<char *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom]() {
     char *text = NULL;
     uv_mutex_lock(async_lock);
     OGRErr err = gdal_geom->exportToWkt(&text);
@@ -943,12 +956,12 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
     return text;
   };
 
-  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
     if (text) { return SafeString::New(text); }
     return Nan::Undefined().As<Value>();
   };
 
-  GDAL_ASYNCABLE_EXECUTE(0, char *);
+  job.run(info, async, 0);
 }
 
 /**
@@ -1013,10 +1026,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     Nan::ThrowError("variant must be 'OGC' or 'ISO'");
     return;
   }
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
-  GDAL_ASYNCABLE_MAIN(unsigned char *) = [async_lock, gdal_geom, data, byte_order, wkb_variant]() {
+  GDALAsyncableJob<unsigned char *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom, data, byte_order, wkb_variant]() {
     uv_mutex_lock(async_lock);
     OGRErr err = gdal_geom->exportToWkb(byte_order, data, wkb_variant);
     uv_mutex_unlock(async_lock);
@@ -1027,11 +1041,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     return data;
   };
   //^^ export to wkb and fill buffer ^^
-  GDAL_ASYNCABLE_RVAL(unsigned char *) = [size](unsigned char *data, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [size](unsigned char *data, GDAL_ASYNCABLE_OBJS) {
     Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
     return result;
   };
-  GDAL_ASYNCABLE_EXECUTE(2, unsigned char *);
+  job.run(info, async, 2);
 #else
   GDAL_ASYNCABLE_1x_UNSUPPORTED;
   OGRErr err = geom->this_->exportToWkb(byte_order, data);
@@ -1067,16 +1081,17 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
-  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+  GDALAsyncableJob<char *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom]() {
     uv_mutex_lock(async_lock);
     char *text = gdal_geom->exportToKML();
     uv_mutex_unlock(async_lock);
     return text;
   };
-  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1084,7 +1099,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
     }
     return Nan::Undefined().As<Value>();
   };
-  GDAL_ASYNCABLE_EXECUTE(0, char *);
+  job.run(info, async, 0);
 }
 
 /**
@@ -1108,16 +1123,17 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
-  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+  GDALAsyncableJob<char *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom]() {
     uv_mutex_lock(async_lock);
     char *text = gdal_geom->exportToGML();
     uv_mutex_unlock(async_lock);
     return text;
   };
-  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1125,7 +1141,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
     }
     return Nan::Undefined().As<Value>();
   };
-  GDAL_ASYNCABLE_EXECUTE(0, char *);
+  job.run(info, async, 0);
 }
 
 /**
@@ -1149,16 +1165,17 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
-  GDAL_ASYNCABLE_MAIN(char *) = [async_lock, gdal_geom]() {
+  GDALAsyncableJob<char *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom]() {
     uv_mutex_lock(async_lock);
     char *text = gdal_geom->exportToJson();
     uv_mutex_unlock(async_lock);
     return text;
   };
-  GDAL_ASYNCABLE_RVAL(char *) = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1166,7 +1183,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
     }
     return Nan::Undefined().As<Value>();
   };
-  GDAL_ASYNCABLE_EXECUTE(0, char *);
+  job.run(info, async, 0);
 }
 
 /**
@@ -1193,10 +1210,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
-  GDAL_ASYNCABLE_MAIN(OGRPoint *) = [async_lock, gdal_geom]() {
+  GDALAsyncableJob<OGRPoint *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom]() {
     OGRPoint *point = new OGRPoint();
     uv_mutex_lock(async_lock);
     OGRErr err = gdal_geom->Centroid(point);
@@ -1207,8 +1225,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
     }
     return point;
   };
-  GDAL_ASYNCABLE_RVAL(OGRPoint *) = [](OGRPoint *point, GDAL_ASYNCABLE_OBJS) { return Point::New(point); };
-  GDAL_ASYNCABLE_EXECUTE(0, OGRPoint *);
+  job.rval = [](OGRPoint *point, GDAL_ASYNCABLE_OBJS) { return Point::New(point); };
+  job.run(info, async, 0);
 }
 
 /**
@@ -1234,11 +1252,12 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
 
-  GDAL_ASYNCABLE_MAIN(OGREnvelope *) = [async_lock, gdal_geom]() {
+  GDALAsyncableJob<OGREnvelope *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom]() {
     OGREnvelope *envelope = new OGREnvelope();
     uv_mutex_lock(async_lock);
     gdal_geom->getEnvelope(envelope);
@@ -1246,7 +1265,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
     return envelope;
   };
 
-  GDAL_ASYNCABLE_RVAL(OGREnvelope *) = [](OGREnvelope *envelope, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](OGREnvelope *envelope, GDAL_ASYNCABLE_OBJS) {
     Local<Object> obj = Nan::New<Object>();
     Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
     Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
@@ -1255,7 +1274,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
     delete envelope;
     return obj;
   };
-  GDAL_ASYNCABLE_EXECUTE(0, OGREnvelope *);
+  job.run(info, async, 0);
 }
 
 /**
@@ -1282,11 +1301,12 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  GDAL_ASYNCABLE_PERSIST(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   uv_mutex_t *async_lock = geom->async_lock;
 
-  GDAL_ASYNCABLE_MAIN(OGREnvelope3D *) = [async_lock, gdal_geom]() {
+  GDALAsyncableJob<OGREnvelope3D *> job;
+  job.persist(info.This());
+  job.main = [async_lock, gdal_geom]() {
     OGREnvelope3D *envelope = new OGREnvelope3D();
     uv_mutex_lock(async_lock);
     gdal_geom->getEnvelope(envelope);
@@ -1294,7 +1314,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
     return envelope;
   };
 
-  GDAL_ASYNCABLE_RVAL(OGREnvelope3D *) = [](OGREnvelope3D *envelope, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](OGREnvelope3D *envelope, GDAL_ASYNCABLE_OBJS) {
     Local<Object> obj = Nan::New<Object>();
     Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
     Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
@@ -1305,7 +1325,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
     delete envelope;
     return obj;
   };
-  GDAL_ASYNCABLE_EXECUTE(0, OGREnvelope3D *);
+  job.run(info, async, 0);
 }
 
 // --- JS static methods (OGRGeometryFactory) ---
@@ -1344,8 +1364,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
   OGRSpatialReference *ogr_srs = NULL;
   if (srs) { ogr_srs = srs->get(); }
 
-  GDAL_ASYNCABLE_PERSIST();
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [wkt_string, ogr_srs]() {
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.main = [wkt_string, ogr_srs]() {
     std::unique_ptr<std::string> wkt_string_ptr(wkt_string);
     OGRGeometry *geom = NULL;
     OGRChar *wkt = (OGRChar *)wkt_string->c_str();
@@ -1353,8 +1373,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
     if (err) throw getOGRErrMsg(err);
     return geom;
   };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
-  GDAL_ASYNCABLE_EXECUTE(2, OGRGeometry *);
+  job.rval = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  job.run(info, async, 2);
 }
 
 /**
@@ -1402,15 +1422,15 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
   OGRSpatialReference *ogr_srs = NULL;
   if (srs) { ogr_srs = srs->get(); }
 
-  GDAL_ASYNCABLE_PERSIST();
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [data, length, ogr_srs]() {
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.main = [data, length, ogr_srs]() {
     OGRGeometry *geom = NULL;
     OGRErr err = OGRGeometryFactory::createFromWkb(data, ogr_srs, &geom, length);
     if (err) throw getOGRErrMsg(err);
     return geom;
   };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
-  GDAL_ASYNCABLE_EXECUTE(2, OGRGeometry *);
+  job.rval = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  job.run(info, async, 2);
 }
 
 /**
@@ -1462,14 +1482,14 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
   OGRGeometry *geom = NULL;
   OGRSpatialReference *ogr_srs = NULL;
 
-  GDAL_ASYNCABLE_PERSIST();
-  GDAL_ASYNCABLE_MAIN(OGRGeometry *) = [val, geom, ogr_srs]() {
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.main = [val, geom, ogr_srs]() {
     std::unique_ptr<std::string> val_ptr(val);
     OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val->c_str());
     return geom;
   };
-  GDAL_ASYNCABLE_RVAL(OGRGeometry *) = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
-  GDAL_ASYNCABLE_EXECUTE(1, OGRGeometry *);
+  job.rval = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  job.run(info, async, 1);
 #endif
 }
 

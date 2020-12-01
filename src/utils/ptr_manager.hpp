@@ -76,6 +76,7 @@ class PtrManager {
   void dispose(long uid);
   bool isAlive(long uid);
   uv_mutex_t *tryLockDataset(long uid);
+  std::vector<uv_mutex_t *> tryLockDatasets(std::vector<long> uids);
   void lock();
   void unlock();
 

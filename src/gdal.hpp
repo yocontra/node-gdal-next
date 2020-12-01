@@ -26,7 +26,7 @@ namespace node_gdal {
 /*
  * Common code for sync and async opening
  */
-GDAL_ASYNCABLE_DECLARE(open);
+GDAL_ASYNCABLE_GLOBAL(open);
 GDAL_ASYNCABLE_DEFINE(open) {
   Nan::HandleScope scope;
 
@@ -71,15 +71,14 @@ GDAL_ASYNCABLE_DEFINE(open) {
     return;
   }
 
-  GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
-  GDAL_ASYNCABLE_PERSIST();
-
-  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [path, flags]() {
+  GDALAsyncableJob<GDALDataset *> job;
+  job.rval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
+  job.main = [path, flags]() {
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
     if (!ds) throw "Error opening dataset";
     return ds;
   };
-  GDAL_ASYNCABLE_EXECUTE(2, GDALDataset *);
+  job.run(info, async, 2);
 #endif
 }
 

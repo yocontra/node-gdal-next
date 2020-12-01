@@ -59,7 +59,7 @@ describe('gdal.RasterBand', () => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
-            band.pixels.readAsync(190, 290, w, h, () => {})
+            band.pixels.readAsync(190, 290, w, h, () => { })
             ds.close()
           })
         })
@@ -314,6 +314,109 @@ describe('gdal.RasterBand', () => {
               const band = r.bands.get(1)
               r.close()
               assert.isRejected(band.pixels.readAsync(0, 0, 16, 16))
+            })
+          })
+          describe('readBlockAsync()', () => {
+            it('should return TypedArray', () => {
+              const ds = gdal.open(`${__dirname}/data/sample.tif`)
+              const band = ds.bands.get(1)
+
+              const data = band.pixels.readBlockAsync(0, 0)
+              assert.eventually.instanceOf(data, Uint8Array)
+              assert.eventually.equal(data.then((data) => data.length), band.blockSize.x * band.blockSize.y)
+            })
+            it('should throw error if offsets are out of range', () => {
+              const ds = gdal.open(`${__dirname}/data/sample.tif`)
+              const band = ds.bands.get(1)
+              assert.isRejected(band.pixels.readBlockAsync(-1, 0))
+            })
+            describe('w/ data argument', () => {
+              it('should read data into existing', () => {
+                const ds = gdal.open(`${__dirname}/data/sample.tif`)
+                const band = ds.bands.get(1)
+                const data = new Uint8Array(
+                  new ArrayBuffer(band.blockSize.x * band.blockSize.y)
+                )
+                const result = band.pixels.readBlockAsync(0, 0, data)
+                assert.eventually.equal(result, data)
+              })
+              it('should throw error if given array is not big enough', () => {
+                const ds = gdal.open(`${__dirname}/data/sample.tif`)
+                const band = ds.bands.get(1)
+                const data = new Uint8Array(
+                  new ArrayBuffer(band.blockSize.x * band.blockSize.y - 1)
+                )
+                assert.isRejected(band.pixels.readBlockAsync(0, 0, data))
+              })
+              it('should throw error if given array is not the right type', () => {
+                const ds = gdal.open(`${__dirname}/data/sample.tif`)
+                const band = ds.bands.get(1)
+                const data = new Float64Array(
+                  new ArrayBuffer(8 * band.blockSize.x * band.blockSize.y)
+                )
+                assert.isRejected(band.pixels.readBlockAsync(0, 0, data))
+              })
+            })
+            it('should throw error if dataset already closed', () => {
+              const ds = gdal.open(`${__dirname}/data/sample.tif`)
+              const band = ds.bands.get(1)
+              ds.close()
+              assert.isRejected(band.pixels.readBlockAsync(0, 0))
+            })
+          })
+          describe('writeBlockAsync()', () => {
+            it('should write data from TypedArray', () => {
+              let i
+              const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+              const band = ds.bands.get(1)
+
+              const length = band.blockSize.x * band.blockSize.y
+              const data = new Uint8Array(new ArrayBuffer(length))
+              for (i = 0; i < length; i++) data[i] = i
+
+              const p = band.pixels.writeBlockAsync(0, 0, data)
+              assert.isFulfilled(p.then(() => {
+                const result = band.pixels.readBlock(0, 0)
+                for (i = 0; i < length; i++) {
+                  assert.equal(result[i], data[i])
+                }
+              }))
+            })
+            it('should throw error if offsets are out of range', () => {
+              const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+              const band = ds.bands.get(1)
+
+              const length = band.blockSize.x * band.blockSize.y
+              const data = new Uint8Array(new ArrayBuffer(length))
+
+              assert.isRejected(band.pixels.writeBlockAsync(0, 100, data))
+            })
+            it('should throw error if given array is not big enough', () => {
+              const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+              const band = ds.bands.get(1)
+
+              const length = band.blockSize.x * band.blockSize.y - 1
+              const data = new Uint8Array(new ArrayBuffer(length))
+
+              assert.isRejected(band.pixels.writeBlockAsync(0, 0, data))
+            })
+            it('should throw error if given array is not the right type', () => {
+              const ds = gdal.open(`${__dirname}/data/sample.tif`)
+              const band = ds.bands.get(1)
+
+              const length = band.blockSize.x * band.blockSize.y
+              const data = new Float64Array(new ArrayBuffer(length * 8))
+
+              assert.isRejected(band.pixels.writeBlockAsync(0, 0, data))
+            })
+            it('should throw error if dataset already closed', () => {
+              const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+              const band = ds.bands.get(1)
+
+              const length = band.blockSize.x * band.blockSize.y
+              const data = new Uint8Array(new ArrayBuffer(length))
+              ds.close()
+              assert.isRejected(band.pixels.writeBlockAsync(0, 0, data))
             })
           })
         })

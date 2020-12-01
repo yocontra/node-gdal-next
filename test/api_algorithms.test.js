@@ -1,5 +1,8 @@
 const gdal = require('../lib/gdal.js')
-const assert = require('chai').assert
+const chai = require('chai')
+const assert = chai.assert
+const chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
 
 describe('gdal', () => {
   afterEach(gc)
@@ -88,6 +91,44 @@ describe('gdal', () => {
       assert.deepEqual(levels, actual_levels.sort(), 'all fixed levels used')
     })
   })
+  describe('contourGenerateAsync()', () => {
+    let src, srcband, dst, lyr
+
+    before(() => {
+      // create a simple ramp in memory
+      const w = 64
+      const h = 64
+      src = gdal.open('temp', 'w', 'MEM', w, h, 1)
+      srcband = src.bands.get(1)
+      for (let y = 0; y < h; y++) {
+        const buf = Buffer.alloc(w)
+        buf.fill(y * 4)
+        srcband.pixels.write(0, y, w, 1, new Uint8Array(buf))
+      }
+    })
+    beforeEach(() => {
+      dst = gdal.open('temp', 'w', 'Memory')
+
+      lyr = dst.layers.create('temp', null, gdal.Linestring)
+      lyr.fields.add(new gdal.FieldDefn('id', gdal.OFTInteger))
+      lyr.fields.add(new gdal.FieldDefn('elev', gdal.OFTReal))
+    })
+    it('should generate contours when passed an interval / base', () => {
+      const offset = 7
+      const interval = 32
+
+      const p = gdal.contourGenerateAsync({
+        src: srcband,
+        dst: lyr,
+        offset: offset,
+        interval: interval,
+        idField: 0,
+        elevField: 1
+      })
+
+      assert.eventually.isTrue(p.then(() => lyr.features.count() > 0), 'features were created')
+    })
+  })
   describe('fillNodata()', () => {
     let src, srcband
     const holes_x = [ 53, 61, 61, 1, 43, 44, 5 ]
@@ -130,6 +171,42 @@ describe('gdal', () => {
       }
     })
   })
+  describe('fillNodataAsync()', () => {
+    let src, srcband
+    const holes_x = [ 53, 61, 61, 1, 43, 44, 5 ]
+    const holes_y = [ 11, 5, 6, 33, 22, 11, 0 ]
+    const nodata = 33
+
+    beforeEach(() => {
+      const w = 64
+      const h = 64
+
+      src = gdal.open('temp', 'w', 'MEM', w, h, 1)
+      srcband = src.bands.get(1)
+      srcband.noDataValue = nodata
+
+      // sprinkle a solid fill with nodata
+      const buf = Buffer.alloc(w * h)
+      buf.fill(128)
+      srcband.pixels.write(0, 0, w, h, new Uint8Array(buf))
+      for (let i = 0; i < holes_x.length; i++) {
+        srcband.pixels.set(holes_x[i], holes_y[i], nodata)
+        assert.equal(srcband.pixels.get(holes_x[i], holes_y[i]), nodata)
+      }
+    })
+    it('should fill nodata values', () => {
+      const p = gdal.fillNodataAsync({
+        src: srcband,
+        searchDist: 3,
+        smoothingIterations: 2
+      })
+
+      for (let i = 0; i < holes_x.length; i++) {
+        assert.eventually.notEqual(p.then(() => srcband.pixels.get(holes_x[i], holes_y[i])), nodata)
+      }
+    })
+  })
+
   describe('checksumImage()', () => {
     let src, band
     const w = 16
@@ -161,6 +238,31 @@ describe('gdal', () => {
       assert.notEqual(b, c)
     })
   })
+  describe('checksumImageAsync()', () => {
+    let src, band
+    const w = 16
+    const h = 16
+    beforeEach(() => {
+      src = gdal.open('temp', 'w', 'MEM', w, h, 1)
+      band = src.bands.get(1)
+    })
+    it('should generate unique checksum for the given region', () => {
+      for (let x = 0; x < w; x++) {
+        for (let y = 0; y < h; y++) {
+          band.pixels.set(x, y, (x * h + y) % 255)
+        }
+      }
+      band.pixels.set(4, 4, 25)
+      const a = gdal.checksumImageAsync(band)
+      band.pixels.set(4, 4, 93)
+      const b = gdal.checksumImageAsync(band)
+      const c = gdal.checksumImageAsync(band, 8, 0, w / 2, h)
+
+      assert.eventually.notEqual(a, b)
+      assert.eventually.notEqual(b, c)
+    })
+  })
+
   describe('sieveFilter()', () => {
     let src, band
     const w = 64
@@ -196,6 +298,36 @@ describe('gdal', () => {
       })
 
       assert.equal(band.pixels.get(8, 8), 20)
+    })
+  })
+  describe('sieveFilterAsync()', () => {
+    let src, band
+    const w = 64
+    const h = 64
+    beforeEach(() => {
+      src = gdal.open('temp', 'w', 'MEM', w, h, 1)
+      band = src.bands.get(1)
+
+      // create two rectangles next to eachother of differing sizes
+      const small_buffer = Buffer.alloc(4 * 4)
+      small_buffer.fill(10)
+      const big_buffer = Buffer.alloc(32 * 32)
+      big_buffer.fill(20)
+
+      band.pixels.write(5, 5, 32, 32, new Uint8Array(big_buffer))
+      band.pixels.write(7, 7, 4, 4, new Uint8Array(small_buffer))
+    })
+    it('should fill smaller polygons with value from neighboring bigger polygon', () => {
+      assert.equal(band.pixels.get(8, 8), 10)
+
+      const p = gdal.sieveFilterAsync({
+        src: band,
+        dst: band, // in place
+        threshold: 4 * 4 + 1,
+        connectedness: 8
+      })
+
+      assert.eventually.equal(p.then(() => band.pixels.get(8, 8)), 20)
     })
   })
   describe('polygonize()', () => {

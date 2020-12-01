@@ -29,6 +29,7 @@ bool PtrManager::isAlive(long uid) {
 
 uv_mutex_t *PtrManager::tryLockDataset(long uid) {
   lock();
+
   auto parent = datasets.find(uid);
   if (parent != datasets.end()) {
     uv_mutex_lock(parent->second->async_lock);
@@ -36,7 +37,29 @@ uv_mutex_t *PtrManager::tryLockDataset(long uid) {
     return parent->second->async_lock;
   }
   unlock();
-  return nullptr;
+  throw "Parent Dataset object has already been destroyed";
+}
+
+std::vector<uv_mutex_t *> PtrManager::tryLockDatasets(std::vector<long> uids) {
+  // There is lots of copying around here but these vectors are never longer than 3 elements
+  std::vector<uv_mutex_t *> locks;
+  // Avoid deadlocks
+  std::sort(uids.begin(), uids.end());
+  // Eliminate dupes
+  uids.erase(std::unique(uids.begin(), uids.end()), uids.end());
+  lock();
+  for (long uid : uids) {
+    if (!uid) continue;
+    auto parent = datasets.find(uid);
+    if (parent == datasets.end()) {
+      unlock();
+      throw "Parent Dataset object has already been destroyed";
+    }
+    locks.push_back(parent->second->async_lock);
+  }
+  for (uv_mutex_t *async_lock : locks) { uv_mutex_lock(async_lock); }
+  unlock();
+  return locks;
 }
 
 long PtrManager::add(OGRLayer *ptr, long parent_uid, bool is_result_set) {
@@ -130,7 +153,10 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
 
 void PtrManager::dispose(PtrManagerRasterBandItem *item) {
   lock();
-  uv_mutex_t *async_lock = tryLockDataset(item->parent->uid);
+  uv_mutex_t *async_lock = nullptr;
+  try {
+    async_lock = tryLockDataset(item->parent->uid);
+  } catch (const char *) {};
   RasterBand::cache.erase(item->ptr);
   bands.erase(item->uid);
   item->parent->bands.remove(item);
@@ -141,7 +167,10 @@ void PtrManager::dispose(PtrManagerRasterBandItem *item) {
 
 void PtrManager::dispose(PtrManagerLayerItem *item) {
   lock();
-  uv_mutex_t *async_lock = tryLockDataset(item->parent->uid);
+  uv_mutex_t *async_lock = nullptr;
+  try {
+    async_lock = tryLockDataset(item->parent->uid);
+  } catch (const char *) {};
   Layer::cache.erase(item->ptr);
   layers.erase(item->uid);
   item->parent->layers.remove(item);

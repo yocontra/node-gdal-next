@@ -206,9 +206,8 @@ NAN_METHOD(Driver::deleteDataset) {
   return;
 }
 
-// These are shared across all Driver functions
-GDAL_ASYNCABLE_RVAL(GDALDataset *) = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
-GDAL_ASYNCABLE_PERSIST();
+// This is shared across all Driver functions
+auto DatasetRval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
 
 /**
  * Create a new dataset with this driver.
@@ -295,14 +294,16 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
 
   // Very careful here
   // we can't reference automatic variables, thus the *options object
-  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, filename, x_size, y_size, n_bands, type, options]() {
+  GDALAsyncableJob<GDALDataset *> job;
+  job.main = [raw, filename, x_size, y_size, n_bands, type, options]() {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
     if (!ds) throw "Error creating dataset";
     return ds;
   };
+  job.rval = DatasetRval;
 
-  GDAL_ASYNCABLE_EXECUTE(6, GDALDataset *);
+  job.run(info, async, 6);
 }
 
 /**
@@ -364,9 +365,11 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return; // error parsing string list
   }
 
-  uv_mutex_t *async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
-  if (async_lock == nullptr) {
-    Nan::ThrowError("Dataset object has already been destroyed");
+  uv_mutex_t *async_lock = nullptr;
+  try {
+    async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
+  } catch (const char *err) {
+    Nan::ThrowError(err);
     return;
   }
 
@@ -397,15 +400,16 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
 
   GDALDriver *raw = driver->getGDALDriver();
   GDALDataset *raw_ds = src_dataset->getDataset();
-  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, filename, raw_ds, strict, options, async_lock]() {
+  GDALAsyncableJob<GDALDataset *> job;
+  job.rval = DatasetRval;
+  job.main = [raw, filename, raw_ds, strict, options, async_lock]() {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
     uv_mutex_unlock(async_lock);
     if (!ds) throw "Error creating dataset";
     return ds;
   };
-
-  GDAL_ASYNCABLE_EXECUTE(3, GDALDataset *);
+  job.run(info, async, 3);
 }
 
 /**
@@ -571,14 +575,16 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   }
   info.GetReturnValue().Set(Dataset::New(ds));
 #else
-  GDAL_ASYNCABLE_MAIN(GDALDataset *) = [raw, path, access]() {
+  GDALAsyncableJob<GDALDataset *> job;
+  job.main = [raw, path, access]() {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
     return ds;
     if (!ds) throw "Error opening dataset";
   };
+  job.rval = DatasetRval;
 
-  GDAL_ASYNCABLE_EXECUTE(2, GDALDataset *);
+  job.run(info, async, 2);
 #endif
 }
 
