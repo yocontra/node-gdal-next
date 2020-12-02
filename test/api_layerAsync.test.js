@@ -6,12 +6,6 @@ const fileUtils = require('./utils/file.js')
 
 chai.use(chaiAsPromised)
 
-/* Without this, unhandledRejections are silently ignored!!!
-*/
-process.on('unhandledRejection', (e) => {
-  console.error(e); process.exit(1)
-})
-
 // Not supported on GDAL 1.x
 if (gdal.version.split('.')[0] < 2) {
   return

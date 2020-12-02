@@ -8,6 +8,7 @@ namespace node_gdal {
 
 void Warper::Initialize(Local<Object> target) {
   Nan::SetMethod(target, "reprojectImage", reprojectImage);
+  Nan::SetMethod(target, "reprojectImageAsync", reprojectImageAsync);
   Nan::SetMethod(target, "suggestedWarpOutput", suggestedWarpOutput);
 }
 
@@ -191,13 +192,45 @@ CPLErr GDALReprojectImageMulti(
  * @param {string[]|object} [options.options] Warp options (see:
  * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
  */
-NAN_METHOD(Warper::reprojectImage) {
+
+/**
+ * Reprojects a dataset.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @method reprojectImageAsync
+ * @static
+ * @for gdal
+ * @param {object} options
+ * @param {gdal.Dataset} options.src
+ * @param {gdal.Dataset} options.dst
+ * @param {gdal.SpatialReference} options.s_srs
+ * @param {gdal.SpatialReference} options.t_srs
+ * @param {String} [options.resampling] Resampling algorithm ({{#crossLink
+ * "Constants (GRA)"}}available options{{/crossLink}})
+ * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel
+ * coordinates. Use CoordinateTransformation to convert between georeferenced
+ * coordinates and pixel coordinates
+ * @param {Integer[]} [options.srcBands]
+ * @param {Integer[]} [options.dstBands]
+ * @param {Integer} [options.srcAlphaBand]
+ * @param {Integer} [options.dstAlphaBand]
+ * @param {Number} [options.srcNodata]
+ * @param {Number} [options.dstNodata]
+ * @param {Integer} [options.memoryLimit]
+ * @param {Number} [options.maxError]
+ * @param {Boolean} [options.multi]
+ * @param {string[]|object} [options.options] Warp options (see:
+ * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {requestCallback} [callback] {{cb}}
+ */
+GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
   Local<Value> prop;
 
-  WarpOptions options;
+  auto options = std::make_shared<WarpOptions>();
   GDALWarpOptions *opts;
   std::string s_srs_str;
   std::string t_srs_str;
@@ -207,10 +240,10 @@ NAN_METHOD(Warper::reprojectImage) {
 
   NODE_ARG_OBJECT(0, "Warp options", obj);
 
-  if (options.parse(obj)) {
+  if (options->parse(obj)) {
     return; // error parsing options object
   } else {
-    opts = options.get();
+    opts = options->get();
   }
   if (!opts->hDstDS) {
     Nan::ThrowTypeError("dst Dataset must be provided");
@@ -226,49 +259,64 @@ NAN_METHOD(Warper::reprojectImage) {
     Nan::ThrowError("Error converting s_srs to WKT");
     return;
   }
+  s_srs_str = std::string(s_srs_wkt);
+  CPLFree(s_srs_wkt);
   if (t_srs->get()->exportToWkt(&t_srs_wkt)) {
-    CPLFree(s_srs_wkt);
     Nan::ThrowError("Error converting t_srs to WKT");
     return;
   }
-
-  CPLErr err;
-
-  if (options.useMultithreading()) {
-    err = GDALReprojectImageMulti(
-      opts->hSrcDS,
-      s_srs_wkt,
-      opts->hDstDS,
-      t_srs_wkt,
-      opts->eResampleAlg,
-      opts->dfWarpMemoryLimit,
-      maxError,
-      NULL,
-      NULL,
-      opts);
-  } else {
-    err = GDALReprojectImage(
-      opts->hSrcDS,
-      s_srs_wkt,
-      opts->hDstDS,
-      t_srs_wkt,
-      opts->eResampleAlg,
-      opts->dfWarpMemoryLimit,
-      maxError,
-      NULL,
-      NULL,
-      opts);
-  }
-
-  CPLFree(s_srs_wkt);
+  t_srs_str = std::string(t_srs_wkt);
   CPLFree(t_srs_wkt);
 
-  if (err) {
-    NODE_THROW_CPLERR(err);
-    return;
+  GDALAsyncableJob<CPLErr> job;
+  Local<Object> src = Dataset::dataset_cache.get((GDALDataset *)opts->hSrcDS);
+  Local<Object> dst = Dataset::dataset_cache.get((GDALDataset *)opts->hDstDS);
+  long src_uid = Nan::ObjectWrap::Unwrap<Dataset>(src.As<Object>())->uid;
+  long dst_uid = Nan::ObjectWrap::Unwrap<Dataset>(dst.As<Object>())->uid;
+  job.persist(src, dst);
+
+  // opts is a pointer inside options memory space
+  // the lifetime of the options shared_ptr is limited by the lifetime of the lambda
+  if (options->useMultithreading()) {
+    job.main = [src_uid, dst_uid, options, opts, s_srs_str, t_srs_str, maxError]() {
+      GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid);
+      CPLErr err = GDALReprojectImageMulti(
+        opts->hSrcDS,
+        s_srs_str.c_str(),
+        opts->hDstDS,
+        t_srs_str.c_str(),
+        opts->eResampleAlg,
+        opts->dfWarpMemoryLimit,
+        maxError,
+        NULL,
+        NULL,
+        opts);
+      GDAL_UNLOCK_MANY;
+      if (err) { throw CPLGetLastErrorMsg(); }
+      return err;
+    };
+  } else {
+    job.main = [src_uid, dst_uid, options, opts, s_srs_str, t_srs_str, maxError]() {
+      GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid);
+      CPLErr err = GDALReprojectImage(
+        opts->hSrcDS,
+        s_srs_str.c_str(),
+        opts->hDstDS,
+        t_srs_str.c_str(),
+        opts->eResampleAlg,
+        opts->dfWarpMemoryLimit,
+        maxError,
+        NULL,
+        NULL,
+        opts);
+      GDAL_UNLOCK_MANY;
+      if (err) { throw CPLGetLastErrorMsg(); }
+      return err;
+    };
   }
 
-  return;
+  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  job.run(info, async, 1);
 }
 
 /**
