@@ -1,6 +1,6 @@
 {
   "name": "gdal-next",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Bindings to GDAL (Geospatial Data Abstraction Library) [Fork]",
   "license": "Apache-2.0",
   "url": "http://github.com/contra/node-gdal-next",
