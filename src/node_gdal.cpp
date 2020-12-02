@@ -56,6 +56,7 @@
 #include "gdal_point.hpp"
 #include "gdal_polygon.hpp"
 #include "gdal_spatial_reference.hpp"
+#include "gdal_memfile.hpp"
 
 #include "gdal.hpp"
 #include "utils/field_types.hpp"
@@ -228,6 +229,19 @@ static NAN_METHOD(isAlive) {
   info.GetReturnValue().Set(Nan::New(ptr_manager.isAlive(uid)));
 }
 
+static NAN_METHOD(getMemfileName) {
+  Nan::HandleScope scope;
+  Local<Object> buffer;
+
+  NODE_ARG_OBJECT(0, "buffer", buffer);
+
+  Memfile *memfile = Memfile::get(buffer);
+  if (memfile == nullptr)
+    Nan::ThrowError("Failed creating in-memory file");
+  else
+    info.GetReturnValue().Set(Nan::New<String>(memfile->filename).ToLocalChecked());
+}
+
 static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
   Nan::SetMethod(target, "open", open);
@@ -238,6 +252,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Nan::SetMethod(target, "setPROJSearchPath", setPROJSearchPath);
   Nan::SetMethod(target, "_triggerCPLError", ThrowDummyCPLError); // for tests
   Nan::SetMethod(target, "_isAlive", isAlive);                    // for tests
+  Nan::SetMethod(target, "_getMemFileName", getMemfileName);      // not a public API
 
   Warper::Initialize(target);
   Algorithms::Initialize(target);
