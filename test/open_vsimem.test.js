@@ -56,6 +56,8 @@ describe('Open', () => {
     })
   })
   describe('vsimem/Async', () => {
+    // Not supported on GDAL 1.x
+    if (parseFloat(gdal.version) < 2) return
     let filename, ds, buffer
 
     it('should not throw', () => {

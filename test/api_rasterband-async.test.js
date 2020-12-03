@@ -13,9 +13,7 @@ process.on('unhandledRejection', (e) => {
 })
 
 // Not supported on GDAL 1.x
-if (gdal.version.split('.')[0] < 2) {
-  return
-}
+if (parseFloat(gdal.version) < 2) return
 
 describe('gdal.RasterBand', () => {
   afterEach(gc)
