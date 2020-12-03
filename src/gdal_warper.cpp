@@ -269,17 +269,14 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   CPLFree(t_srs_wkt);
 
   GDALAsyncableJob<CPLErr> job;
-  Local<Object> src = Dataset::dataset_cache.get(GDALDataset::FromHandle(opts->hSrcDS));
-  Local<Object> dst = Dataset::dataset_cache.get(GDALDataset::FromHandle(opts->hDstDS));
-  long src_uid = Nan::ObjectWrap::Unwrap<Dataset>(src.As<Object>())->uid;
-  long dst_uid = Nan::ObjectWrap::Unwrap<Dataset>(dst.As<Object>())->uid;
-  job.persist(src, dst);
+  job.persist(options->datasetObjects());
+  std::vector<long> uids = options->datasetUids();
 
   // opts is a pointer inside options memory space
   // the lifetime of the options shared_ptr is limited by the lifetime of the lambda
   if (options->useMultithreading()) {
-    job.main = [src_uid, dst_uid, options, opts, s_srs_str, t_srs_str, maxError]() {
-      GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid);
+    job.main = [uids, options, opts, s_srs_str, t_srs_str, maxError]() {
+      GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
       CPLErr err = GDALReprojectImageMulti(
         opts->hSrcDS,
         s_srs_str.c_str(),
@@ -296,8 +293,8 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
       return err;
     };
   } else {
-    job.main = [src_uid, dst_uid, options, opts, s_srs_str, t_srs_str, maxError]() {
-      GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid);
+    job.main = [uids, options, opts, s_srs_str, t_srs_str, maxError]() {
+      GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
       CPLErr err = GDALReprojectImage(
         opts->hSrcDS,
         s_srs_str.c_str(),

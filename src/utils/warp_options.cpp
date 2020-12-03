@@ -1,12 +1,13 @@
 #include "warp_options.hpp"
 #include "../gdal_common.hpp"
-#include "../gdal_dataset.hpp"
 #include "../gdal_geometry.hpp"
 #include <stdio.h>
 namespace node_gdal {
 
 WarpOptions::WarpOptions()
   : options(NULL),
+    src(nullptr),
+    dst(nullptr),
     additional_options(),
     src_bands("src band ids"),
     dst_bands("dst band ids"),
@@ -125,8 +126,9 @@ int WarpOptions::parse(Local<Value> value) {
   if (Nan::HasOwnProperty(obj, Nan::New("src").ToLocalChecked()).FromMaybe(false)) {
     prop = Nan::Get(obj, Nan::New("src").ToLocalChecked()).ToLocalChecked();
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
-      Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(prop.As<Object>());
-      options->hSrcDS = GDALDataset::ToHandle(ds->getDataset());
+      this->src_obj = prop.As<Object>();
+      this->src = Nan::ObjectWrap::Unwrap<Dataset>(this->src_obj);
+      options->hSrcDS = GDALDataset::ToHandle(this->src->getDataset());
       if (!options->hSrcDS) {
 #if GDAL_VERSION_MAJOR < 2
         if (ds->getDatasource()) {
@@ -148,8 +150,9 @@ int WarpOptions::parse(Local<Value> value) {
   if (Nan::HasOwnProperty(obj, Nan::New("dst").ToLocalChecked()).FromMaybe(false)) {
     prop = Nan::Get(obj, Nan::New("dst").ToLocalChecked()).ToLocalChecked();
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
-      Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(prop.As<Object>());
-      options->hDstDS = GDALDataset::ToHandle(ds->getDataset());
+      this->dst_obj = prop.As<Object>();
+      this->dst = Nan::ObjectWrap::Unwrap<Dataset>(this->dst_obj);
+      options->hDstDS = GDALDataset::ToHandle(this->dst->getDataset());
       if (!options->hDstDS) {
 #if GDAL_VERSION_MAJOR < 2
         if (ds->getDatasource()) {
