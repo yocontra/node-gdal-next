@@ -61,20 +61,24 @@ describe('gdal', () => {
         }
       }
 
-      const output = gdal.suggestedWarpOutput({
+      const output = gdal.suggestedWarpOutputAsync({
         src: src,
         s_srs: s_srs,
         t_srs: t_srs
       })
 
-      assert.closeTo(output.rasterSize.x, expected.rasterSize.x, 1)
-      assert.closeTo(output.rasterSize.y, expected.rasterSize.y, 1)
-      assert.closeTo(output.geoTransform[0], expected.geoTransform[0], 0.001)
-      assert.closeTo(output.geoTransform[1], expected.geoTransform[1], 0.001)
-      assert.closeTo(output.geoTransform[2], expected.geoTransform[2], 0.001)
-      assert.closeTo(output.geoTransform[3], expected.geoTransform[3], 0.001)
-      assert.closeTo(output.geoTransform[4], expected.geoTransform[4], 0.001)
-      assert.closeTo(output.geoTransform[5], expected.geoTransform[5], 0.001)
+      assert.isFulfilled(output)
+
+      output.then((output) => {
+        assert.closeTo(output.rasterSize.x, expected.rasterSize.x, 1)
+        assert.closeTo(output.rasterSize.y, expected.rasterSize.y, 1)
+        assert.closeTo(output.geoTransform[0], expected.geoTransform[0], 0.001)
+        assert.closeTo(output.geoTransform[1], expected.geoTransform[1], 0.001)
+        assert.closeTo(output.geoTransform[2], expected.geoTransform[2], 0.001)
+        assert.closeTo(output.geoTransform[3], expected.geoTransform[3], 0.001)
+        assert.closeTo(output.geoTransform[4], expected.geoTransform[4], 0.001)
+        assert.closeTo(output.geoTransform[5], expected.geoTransform[5], 0.001)
+      })
     })
   })
   describe('reprojectImageAsync()', () => {
@@ -242,11 +246,13 @@ describe('gdal', () => {
         options.dst.geoTransform = info.geoTransform
         options.maxError = 4
 
-        gdal.reprojectImage(options)
+        gdal.reprojectImageAsync(options, (err) => {
+          assert.isUndefined(err)
 
-        const approx_checksum = gdal.checksumImage(options.dst.bands.get(1))
+          const approx_checksum = gdal.checksumImage(options.dst.bands.get(1))
 
-        assert.notEqual(approx_checksum, exact_checksum)
+          assert.notEqual(approx_checksum, exact_checksum)
+        })
       })
     })
     it('should produce same result using multi option', () => {

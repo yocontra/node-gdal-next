@@ -29,7 +29,7 @@ namespace Warper {
 void Initialize(Local<Object> target);
 
 GDAL_ASYNCABLE_GLOBAL(reprojectImage);
-NAN_METHOD(suggestedWarpOutput);
+GDAL_ASYNCABLE_GLOBAL(suggestedWarpOutput);
 
 } // namespace Warper
 } // namespace node_gdal

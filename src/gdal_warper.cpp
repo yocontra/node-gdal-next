@@ -10,6 +10,7 @@ void Warper::Initialize(Local<Object> target) {
   Nan::SetMethod(target, "reprojectImage", reprojectImage);
   Nan::SetMethod(target, "reprojectImageAsync", reprojectImageAsync);
   Nan::SetMethod(target, "suggestedWarpOutput", suggestedWarpOutput);
+  Nan::SetMethod(target, "suggestedWarpOutputAsync", suggestedWarpOutputAsync);
 }
 
 /**
@@ -332,7 +333,26 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @return {Object} An object containing `"rasterSize"` and `"geoTransform"`
  * properties.
  */
-NAN_METHOD(Warper::suggestedWarpOutput) {
+
+/**
+ * Used to determine the bounds and resolution of the output virtual file which
+ * should be large enough to include all the input image.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @method suggestedWarpOutputAsync
+ * @static
+ * @for gdal
+ * @param {object} options Warp options
+ * @param {gdal.Dataset} options.src
+ * @param {gdal.SpatialReference} options.s_srs
+ * @param {gdal.SpatialReference} options.t_srs
+ * @param {requestCallback} [callback] {{cb}}
+ * @param {Number} [options.maxError=0]
+ * @return {Object} An object containing `"rasterSize"` and `"geoTransform"`
+ * properties.
+ */
+GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
   Nan::HandleScope scope;
 
   Local<Object> obj;
@@ -342,8 +362,6 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
   SpatialReference *s_srs;
   SpatialReference *t_srs;
   double maxError = 0;
-  double geotransform[6];
-  int w = 0, h = 0;
 
   NODE_ARG_OBJECT(0, "Warp options", obj);
 
@@ -379,70 +397,87 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
     Nan::ThrowError("Error converting s_srs to WKT");
     return;
   }
+  std::string s_srs_str = std::string(s_srs_wkt);
+  CPLFree(s_srs_wkt);
   if (t_srs->get()->exportToWkt(&t_srs_wkt)) {
-    CPLFree(s_srs_wkt);
     Nan::ThrowError("Error converting t_srs to WKT");
     return;
   }
-
-  void *hTransformArg;
-  void *hGenTransformArg =
-    GDALCreateGenImgProjTransformer(ds->getDataset(), s_srs_wkt, NULL, t_srs_wkt, TRUE, 1000.0, 0);
-
-  if (!hGenTransformArg) {
-    CPLFree(s_srs_wkt);
-    CPLFree(t_srs_wkt);
-    Nan::ThrowError(CPLGetLastErrorMsg());
-    return;
-  }
-
-  GDALTransformerFunc pfnTransformer;
-
-  if (maxError > 0.0) {
-    hTransformArg = GDALCreateApproxTransformer(GDALGenImgProjTransform, hGenTransformArg, maxError);
-    pfnTransformer = GDALApproxTransform;
-
-    if (!hTransformArg) {
-      CPLFree(s_srs_wkt);
-      CPLFree(t_srs_wkt);
-      GDALDestroyGenImgProjTransformer(hGenTransformArg);
-      Nan::ThrowError(CPLGetLastErrorMsg());
-      return;
-    }
-  } else {
-    hTransformArg = hGenTransformArg;
-    pfnTransformer = GDALGenImgProjTransform;
-  }
-
-  CPLErr err = GDALSuggestedWarpOutput(ds->getDataset(), pfnTransformer, hTransformArg, geotransform, &w, &h);
-
-  CPLFree(s_srs_wkt);
+  std::string t_srs_str = std::string(t_srs_wkt);
   CPLFree(t_srs_wkt);
-  GDALDestroyGenImgProjTransformer(hGenTransformArg);
-  if (maxError > 0.0) { GDALDestroyApproxTransformer(hTransformArg); }
 
-  if (err) {
-    NODE_THROW_CPLERR(err);
-    return;
-  }
+  struct warpOutputResult {
+    double geotransform[6];
+    int w, h;
+  };
 
-  Local<Array> result_geotransform = Nan::New<Array>();
-  Nan::Set(result_geotransform, 0, Nan::New<Number>(geotransform[0]));
-  Nan::Set(result_geotransform, 1, Nan::New<Number>(geotransform[1]));
-  Nan::Set(result_geotransform, 2, Nan::New<Number>(geotransform[2]));
-  Nan::Set(result_geotransform, 3, Nan::New<Number>(geotransform[3]));
-  Nan::Set(result_geotransform, 4, Nan::New<Number>(geotransform[4]));
-  Nan::Set(result_geotransform, 5, Nan::New<Number>(geotransform[5]));
+  GDALDatasetH gdal_ds = GDALDataset::ToHandle(ds->getDataset());
+  long uid = ds->uid;
+  GDALAsyncableJob<warpOutputResult> job;
+  job.persist(ds->handle());
 
-  Local<Object> result_size = Nan::New<Object>();
-  Nan::Set(result_size, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(w));
-  Nan::Set(result_size, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(h));
+  job.main = [gdal_ds, uid, s_srs_str, t_srs_str, maxError]() {
+    struct warpOutputResult r;
 
-  Local<Object> result = Nan::New<Object>();
-  Nan::Set(result, Nan::New("rasterSize").ToLocalChecked(), result_size);
-  Nan::Set(result, Nan::New("geoTransform").ToLocalChecked(), result_geotransform);
+    GDAL_ASYNCABLE_LOCK(uid);
 
-  info.GetReturnValue().Set(result);
+    void *hTransformArg;
+    void *hGenTransformArg =
+      GDALCreateGenImgProjTransformer(gdal_ds, s_srs_str.c_str(), NULL, t_srs_str.c_str(), TRUE, 1000.0, 0);
+
+    if (!hGenTransformArg) {
+      GDAL_UNLOCK_PARENT;
+      throw CPLGetLastErrorMsg();
+    }
+
+    GDALTransformerFunc pfnTransformer;
+
+    if (maxError > 0.0) {
+      hTransformArg = GDALCreateApproxTransformer(GDALGenImgProjTransform, hGenTransformArg, maxError);
+      pfnTransformer = GDALApproxTransform;
+
+      if (!hTransformArg) {
+        GDALDestroyGenImgProjTransformer(hGenTransformArg);
+        GDAL_UNLOCK_PARENT;
+        throw CPLGetLastErrorMsg();
+      }
+    } else {
+      hTransformArg = hGenTransformArg;
+      pfnTransformer = GDALGenImgProjTransform;
+    }
+
+    CPLErr err = GDALSuggestedWarpOutput(gdal_ds, pfnTransformer, hTransformArg, r.geotransform, &r.w, &r.h);
+
+    GDALDestroyGenImgProjTransformer(hGenTransformArg);
+    if (maxError > 0.0) { GDALDestroyApproxTransformer(hTransformArg); }
+    GDAL_UNLOCK_PARENT;
+
+    if (err) { throw CPLGetLastErrorMsg(); }
+    return r;
+  };
+
+  job.rval = [](warpOutputResult r, GDAL_ASYNCABLE_OBJS o) {
+    Nan::EscapableHandleScope scope;
+    Local<Array> result_geotransform = Nan::New<Array>();
+    Nan::Set(result_geotransform, 0, Nan::New<Number>(r.geotransform[0]));
+    Nan::Set(result_geotransform, 1, Nan::New<Number>(r.geotransform[1]));
+    Nan::Set(result_geotransform, 2, Nan::New<Number>(r.geotransform[2]));
+    Nan::Set(result_geotransform, 3, Nan::New<Number>(r.geotransform[3]));
+    Nan::Set(result_geotransform, 4, Nan::New<Number>(r.geotransform[4]));
+    Nan::Set(result_geotransform, 5, Nan::New<Number>(r.geotransform[5]));
+
+    Local<Object> result_size = Nan::New<Object>();
+    Nan::Set(result_size, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(r.w));
+    Nan::Set(result_size, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(r.h));
+
+    Local<Object> result = Nan::New<Object>();
+    Nan::Set(result, Nan::New("rasterSize").ToLocalChecked(), result_size);
+    Nan::Set(result, Nan::New("geoTransform").ToLocalChecked(), result_geotransform);
+
+    return scope.Escape(result);
+  };
+
+  job.run(info, async, 1);
 }
 
 } // namespace node_gdal
