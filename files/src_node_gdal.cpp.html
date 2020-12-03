@@ -181,6 +181,7 @@
 #include &quot;gdal_point.hpp&quot;
 #include &quot;gdal_polygon.hpp&quot;
 #include &quot;gdal_spatial_reference.hpp&quot;
+#include &quot;gdal_memfile.hpp&quot;
 
 #include &quot;gdal.hpp&quot;
 #include &quot;utils/field_types.hpp&quot;
@@ -353,6 +354,19 @@ static NAN_METHOD(isAlive) {
   info.GetReturnValue().Set(Nan::New(ptr_manager.isAlive(uid)));
 }
 
+static NAN_METHOD(getMemfileName) {
+  Nan::HandleScope scope;
+  Local&lt;Object&gt; buffer;
+
+  NODE_ARG_OBJECT(0, &quot;buffer&quot;, buffer);
+
+  Memfile *memfile = Memfile::get(buffer);
+  if (memfile == nullptr)
+    Nan::ThrowError(&quot;Failed creating in-memory file&quot;);
+  else
+    info.GetReturnValue().Set(Nan::New&lt;String&gt;(memfile-&gt;filename).ToLocalChecked());
+}
+
 static void Init(Local&lt;Object&gt; target, Local&lt;v8::Value&gt;, void *) {
 
   Nan::SetMethod(target, &quot;open&quot;, open);
@@ -363,6 +377,7 @@ static void Init(Local&lt;Object&gt; target, Local&lt;v8::Value&gt;, void *) {
   Nan::SetMethod(target, &quot;setPROJSearchPath&quot;, setPROJSearchPath);
   Nan::SetMethod(target, &quot;_triggerCPLError&quot;, ThrowDummyCPLError); // for tests
   Nan::SetMethod(target, &quot;_isAlive&quot;, isAlive);                    // for tests
+  Nan::SetMethod(target, &quot;_getMemFileName&quot;, getMemfileName);      // not a public API
 
   Warper::Initialize(target);
   Algorithms::Initialize(target);

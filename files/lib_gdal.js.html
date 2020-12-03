@@ -636,11 +636,15 @@ gdal.PolygonRings.prototype.toArray = defaultToArray
  * &#x60;&#x60;&#x60;
  * var dataset = gdal.open(&#x27;./data.shp&#x27;);&#x60;&#x60;&#x60;
  *
+ * @example
+ * &#x60;&#x60;&#x60;
+ * var dataset = gdal.open(fs.readFileSync(&#x27;./data.shp&#x27;));&#x60;&#x60;&#x60;
+ *
  * @for gdal
  * @throws Error
  * @method open
  * @static
- * @param {String} path Path to dataset to open
+ * @param {String|Buffer} path Path to dataset or in-memory Buffer to open
  * @param {String} [mode=&quot;r&quot;] The mode to use to open the file: &#x60;&quot;r&quot;&#x60;, &#x60;&quot;r+&quot;&#x60;, or &#x60;&quot;w&quot;&#x60;
  * @param {String|Array} [drivers] Driver name, or list of driver names to attempt to use.
  *
@@ -661,6 +665,14 @@ gdal.open = (function () {
     mode,
     drivers /* , x_size, y_size, n_bands, datatype, options */
   ) {
+    if (filename instanceof Buffer) {
+      const buffer = filename
+      arguments[0] = gdal._getMemFileName(filename)
+      const ds = gdal.open.apply(gdal, arguments)
+      ds.buffer = buffer
+      return ds
+    }
+
     if (typeof drivers === &#x27;string&#x27;) {
       drivers = [ drivers ]
     } else if (drivers &amp;&amp; !Array.isArray(drivers)) {
@@ -795,12 +807,16 @@ gdal.Driver.prototype.openAsync = (function () {
  *
  * @example
  * &#x60;&#x60;&#x60;
+ * var dataset = await gdal.openAsync(await fd.readFile(&#x27;./data.shp&#x27;));&#x60;&#x60;&#x60;
+ *
+ * @example
+ * &#x60;&#x60;&#x60;
  * gdal.openAsync(&#x27;./data.shp&#x27;, (err, ds) =&gt; {...});&#x60;&#x60;&#x60;
  *
  * @for gdal
  * @method openAsync
  * @static
- * @param {String} path Path to dataset to open
+ * @param {String|Buffer} path Path to dataset or in-memory Buffer to open
  * @param {String} [mode=&quot;r&quot;] The mode to use to open the file: &#x60;&quot;r&quot;&#x60;, &#x60;&quot;r+&quot;&#x60;, or &#x60;&quot;w&quot;&#x60;
  * @param {String|Array} [drivers] Driver name, or list of driver names to attempt to use.
  *
@@ -829,6 +845,19 @@ gdal.openAsync = (function () {
       _datatype,
       _options
     ) {
+      if (filename instanceof Buffer) {
+        const buffer = filename
+        try {
+          // getMemFileName is always synchronous
+          arguments[0] = gdal._getMemFileName(filename)
+        } catch (e) {
+          return Promise.reject(e)
+        }
+        return gdal.openAsync.apply(gdal, arguments).then((ds) =&gt; {
+          ds.buffer = buffer
+          return ds
+        })
+      }
       if (typeof drivers === &#x27;string&#x27;) {
         drivers = [ drivers ]
       } else if (drivers &amp;&amp; !Array.isArray(drivers)) {

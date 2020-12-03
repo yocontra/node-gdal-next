@@ -213,7 +213,7 @@ height="20"></iframe></p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l277"><code>src&#x2F;node_gdal.cpp:277</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l292"><code>src&#x2F;node_gdal.cpp:292</code></a>
         </p>
 
 
@@ -239,7 +239,7 @@ height="20"></iframe></p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l1239"><code>src&#x2F;node_gdal.cpp:1239</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l1254"><code>src&#x2F;node_gdal.cpp:1254</code></a>
         </p>
 
 
@@ -267,7 +267,7 @@ will be null or an object containing three properties: "number",
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l1229"><code>src&#x2F;node_gdal.cpp:1229</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l1244"><code>src&#x2F;node_gdal.cpp:1244</code></a>
         </p>
 
 
@@ -302,7 +302,7 @@ will be null or an object containing three properties: "number",
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_node_gdal.cpp.html#l90"><code>src&#x2F;node_gdal.cpp:90</code></a>
+        <a href="../files/src_node_gdal.cpp.html#l91"><code>src&#x2F;node_gdal.cpp:91</code></a>
         </p>
 
 
@@ -922,10 +922,10 @@ artifacts.</p>
 			<ul class="params-list">
 				<li class="param">
 						<code class="param-name">path</code>
-						<span class="type">String</span>
+						<span class="type">String  |  Buffer</span>
 
 
-					<div class="param-description"><p>Path to dataset to open</p>
+					<div class="param-description"><p>Path to dataset or in-memory Buffer to open</p>
 </div>
 
 				</li>
@@ -1015,6 +1015,7 @@ artifacts.</p>
 
 			<div class="example-content">
 				<pre class="code prettyprint"><code>var dataset = gdal.open('./data.shp');<code>&#x60;</code></code></pre>
+<pre class="code prettyprint"><code>var dataset = gdal.open(fs.readFileSync('./data.shp'));<code>&#x60;</code></code></pre>
 
 			</div>
 		</div>
@@ -1067,7 +1068,7 @@ artifacts.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/lib_gdal.js.html#l663"><code>lib&#x2F;gdal.js:663</code></a>
+		<a href="../files/lib_gdal.js.html#l675"><code>lib&#x2F;gdal.js:675</code></a>
 		</p>
 
 
@@ -1084,10 +1085,10 @@ If the last parameter is a callback, then this callback is called on completion 
 			<ul class="params-list">
 				<li class="param">
 						<code class="param-name">path</code>
-						<span class="type">String</span>
+						<span class="type">String  |  Buffer</span>
 
 
-					<div class="param-description"><p>Path to dataset to open</p>
+					<div class="param-description"><p>Path to dataset or in-memory Buffer to open</p>
 </div>
 
 				</li>
@@ -1188,6 +1189,7 @@ certain optional parameters are omitted</p>
 
 			<div class="example-content">
 				<pre class="code prettyprint"><code>var dataset = await gdal.openAsync('./data.shp');<code>&#x60;</code></code></pre>
+<pre class="code prettyprint"><code>var dataset = await gdal.openAsync(await fd.readFile('./data.shp'));<code>&#x60;</code></code></pre>
 <pre class="code prettyprint"><code>gdal.openAsync('./data.shp', (err, ds) =&gt; {...});<code>&#x60;</code></code></pre>
 
 			</div>
@@ -1313,7 +1315,7 @@ of int buffers.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_node_gdal.cpp.html#l1257"><code>src&#x2F;node_gdal.cpp:1257</code></a>
+		<a href="../files/src_node_gdal.cpp.html#l1272"><code>src&#x2F;node_gdal.cpp:1272</code></a>
 		</p>
 
 
@@ -1530,7 +1532,7 @@ coordinates and pixel coordinates</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_node_gdal.cpp.html#l197"><code>src&#x2F;node_gdal.cpp:197</code></a>
+		<a href="../files/src_node_gdal.cpp.html#l198"><code>src&#x2F;node_gdal.cpp:198</code></a>
 		</p>
 
 
@@ -1762,7 +1764,7 @@ properties.</p>
 	<div class="meta">
 				<p>
 				Defined in
-		<a href="../files/src_node_gdal.cpp.html#l1266"><code>src&#x2F;node_gdal.cpp:1266</code></a>
+		<a href="../files/src_node_gdal.cpp.html#l1281"><code>src&#x2F;node_gdal.cpp:1281</code></a>
 		</p>
 
 
