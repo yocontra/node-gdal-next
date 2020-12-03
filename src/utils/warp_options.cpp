@@ -126,7 +126,7 @@ int WarpOptions::parse(Local<Value> value) {
     prop = Nan::Get(obj, Nan::New("src").ToLocalChecked()).ToLocalChecked();
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
       Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(prop.As<Object>());
-      options->hSrcDS = ds->getDataset();
+      options->hSrcDS = GDALDataset::ToHandle(ds->getDataset());
       if (!options->hSrcDS) {
 #if GDAL_VERSION_MAJOR < 2
         if (ds->getDatasource()) {
@@ -149,7 +149,7 @@ int WarpOptions::parse(Local<Value> value) {
     prop = Nan::Get(obj, Nan::New("dst").ToLocalChecked()).ToLocalChecked();
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
       Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(prop.As<Object>());
-      options->hDstDS = ds->getDataset();
+      options->hDstDS = GDALDataset::ToHandle(ds->getDataset());
       if (!options->hDstDS) {
 #if GDAL_VERSION_MAJOR < 2
         if (ds->getDatasource()) {

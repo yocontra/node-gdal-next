@@ -269,8 +269,8 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   CPLFree(t_srs_wkt);
 
   GDALAsyncableJob<CPLErr> job;
-  Local<Object> src = Dataset::dataset_cache.get((GDALDataset *)opts->hSrcDS);
-  Local<Object> dst = Dataset::dataset_cache.get((GDALDataset *)opts->hDstDS);
+  Local<Object> src = Dataset::dataset_cache.get(GDALDataset::FromHandle(opts->hSrcDS));
+  Local<Object> dst = Dataset::dataset_cache.get(GDALDataset::FromHandle(opts->hDstDS));
   long src_uid = Nan::ObjectWrap::Unwrap<Dataset>(src.As<Object>())->uid;
   long dst_uid = Nan::ObjectWrap::Unwrap<Dataset>(dst.As<Object>())->uid;
   job.persist(src, dst);
