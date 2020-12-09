@@ -9,6 +9,7 @@ This project is a fork of https://github.com/naturalatlas/node-gdal that:
 - Adds `Geometry.fromGeoJson` to parse GeoJSON easily
 - Adds async support for raster data + opening/parsing files
 - Adds support for vsimem files using buffers
+- Fixes loads of bugs, performance issues, and more
 
 See the [ROADMAP](ROADMAP.md) for more info about the future of this fork. All thanks and credit goes to the original maintainers!
 
