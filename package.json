@@ -1,9 +1,9 @@
 {
-  "name": "gdal-next",
+  "name": "gdal-async",
   "version": "2.6.2",
   "description": "Bindings to GDAL (Geospatial Data Abstraction Library) [Fork]",
   "license": "Apache-2.0",
-  "url": "http://github.com/contra/node-gdal-next",
+  "url": "https://github.com/mmomtchev/node-gdal-async",
   "main": "./lib/gdal.js",
   "keywords": [
     "gdal",
@@ -23,13 +23,17 @@
   "binary": {
     "module_name": "gdal",
     "module_path": "./lib/binding/{node_abi}-{platform}-{arch}",
-    "remote_path": "./{module_name}/v{version}/{toolset}/",
-    "host": "https://gdal-next-binary.s3.amazonaws.com",
-    "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
+    "remote_path": "{version}",
+    "host": "https://github.com/mmomtchev/node-gdal-async/releases/download/",
+    "package_name": "{node_abi}-{platform}-{arch}.tar.gz",
+    "hosting": {
+      "provider": "github",
+      "repo": "mmomtchev/node-gdal-async"
+    }
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mmomtchev/node-gdal-async.git"
+    "url": "https://github.com/mmomtchev/node-gdal-async.git"
   },
   "author": {
     "name": "Brandon Reavis",
