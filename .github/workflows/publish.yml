@@ -5,11 +5,12 @@ on: workflow_dispatch
 jobs:
   publish:
 
-    runs-on: [ ubuntu-20.04, ubuntu-18.04, ubuntu-16.04, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.platforms }}
 
     strategy:
       matrix:
         node-version: [10.x, 12.x, 13.x, 14.x, 15.x]
+        platforms: [ ubuntu-20.04, ubuntu-18.04, ubuntu-16.04, windows-latest, macos-latest ]
 
     steps:
     - uses: actions/checkout@v2
@@ -23,3 +24,6 @@ jobs:
     - run: npm test
     - run: npx node-pre-gyp package
     - run: npx node-pre-gyp-github publish
+      env:
+        NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+
