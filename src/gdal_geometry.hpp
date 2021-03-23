@@ -104,7 +104,7 @@ class Geometry : public Nan::ObjectWrap {
   OGRGeometry *this_;
   bool owned_;
   int size_;
-  uv_mutex_t *async_lock;
+  uv_sem_t *async_lock;
 };
 
 #define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                         \

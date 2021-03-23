@@ -27,12 +27,12 @@ bool PtrManager::isAlive(long uid) {
   return bands.count(uid) > 0 || layers.count(uid) > 0 || datasets.count(uid) > 0;
 }
 
-uv_mutex_t *PtrManager::tryLockDataset(long uid) {
+uv_sem_t *PtrManager::tryLockDataset(long uid) {
   lock();
 
   auto parent = datasets.find(uid);
   if (parent != datasets.end()) {
-    uv_mutex_lock(parent->second->async_lock);
+    uv_sem_wait(parent->second->async_lock);
     unlock();
     return parent->second->async_lock;
   }
@@ -40,9 +40,9 @@ uv_mutex_t *PtrManager::tryLockDataset(long uid) {
   throw "Parent Dataset object has already been destroyed";
 }
 
-std::vector<uv_mutex_t *> PtrManager::tryLockDatasets(std::vector<long> uids) {
+std::vector<uv_sem_t *> PtrManager::tryLockDatasets(std::vector<long> uids) {
   // There is lots of copying around here but these vectors are never longer than 3 elements
-  std::vector<uv_mutex_t *> locks;
+  std::vector<uv_sem_t *> locks;
   // Avoid deadlocks
   std::sort(uids.begin(), uids.end());
   // Eliminate dupes
@@ -57,7 +57,7 @@ std::vector<uv_mutex_t *> PtrManager::tryLockDatasets(std::vector<long> uids) {
     }
     locks.push_back(parent->second->async_lock);
   }
-  for (uv_mutex_t *async_lock : locks) { uv_mutex_lock(async_lock); }
+  for (uv_sem_t *async_lock : locks) { uv_sem_wait(async_lock); }
   unlock();
   return locks;
 }
@@ -91,7 +91,7 @@ long PtrManager::add(GDALRasterBand *ptr, long parent_uid) {
   return item->uid;
 }
 
-long PtrManager::add(GDALDataset *ptr, uv_mutex_t *async_lock) {
+long PtrManager::add(GDALDataset *ptr, uv_sem_t *async_lock) {
   lock();
   PtrManagerDatasetItem *item = new PtrManagerDatasetItem();
   item->uid = uid++;
@@ -125,9 +125,9 @@ void PtrManager::dispose(long uid) {
 
 void PtrManager::dispose(PtrManagerDatasetItem *item) {
   lock();
-  uv_mutex_lock(item->async_lock);
+  uv_sem_wait(item->async_lock);
   datasets.erase(item->uid);
-  uv_mutex_unlock(item->async_lock);
+  uv_sem_post(item->async_lock);
 
   while (!item->layers.empty()) { dispose(item->layers.back()); }
   while (!item->bands.empty()) { dispose(item->bands.back()); }
@@ -139,7 +139,7 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
   }
 #endif
   if (item->async_lock) {
-    uv_mutex_destroy(item->async_lock);
+    uv_sem_destroy(item->async_lock);
     delete item->async_lock;
   }
   if (item->ptr) {
@@ -153,21 +153,21 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
 
 void PtrManager::dispose(PtrManagerRasterBandItem *item) {
   lock();
-  uv_mutex_t *async_lock = nullptr;
+  uv_sem_t *async_lock = nullptr;
   try {
     async_lock = tryLockDataset(item->parent->uid);
   } catch (const char *) {};
   RasterBand::cache.erase(item->ptr);
   bands.erase(item->uid);
   item->parent->bands.remove(item);
-  if (async_lock != nullptr) uv_mutex_unlock(async_lock);
+  if (async_lock != nullptr) uv_sem_post(async_lock);
   delete item;
   unlock();
 }
 
 void PtrManager::dispose(PtrManagerLayerItem *item) {
   lock();
-  uv_mutex_t *async_lock = nullptr;
+  uv_sem_t *async_lock = nullptr;
   try {
     async_lock = tryLockDataset(item->parent->uid);
   } catch (const char *) {};
@@ -182,7 +182,7 @@ void PtrManager::dispose(PtrManagerLayerItem *item) {
 #endif
 
   if (item->is_result_set) { parent_ds->ReleaseResultSet(item->ptr); }
-  if (async_lock != nullptr) uv_mutex_unlock(async_lock);
+  if (async_lock != nullptr) uv_sem_post(async_lock);
 
   unlock();
   delete item;

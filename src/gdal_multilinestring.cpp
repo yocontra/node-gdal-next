@@ -30,13 +30,13 @@ void MultiLineString::Initialize(Local<Object> target) {
 
 MultiLineString::MultiLineString(OGRMultiLineString *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created MultiLineString [%p]", geom);
-  async_lock = new uv_mutex_t;
-  uv_mutex_init(async_lock);
+  async_lock = new uv_sem_t;
+  uv_sem_init(async_lock, 1);
 }
 
 MultiLineString::MultiLineString() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
-  async_lock = new uv_mutex_t;
-  uv_mutex_init(async_lock);
+  async_lock = new uv_sem_t;
+  uv_sem_init(async_lock, 1);
 }
 
 MultiLineString::~MultiLineString() {
@@ -49,7 +49,7 @@ MultiLineString::~MultiLineString() {
     LOG("Disposed GeometryCollection [%p]", this_);
     this_ = NULL;
   }
-  uv_mutex_destroy(async_lock);
+  uv_sem_destroy(async_lock);
   delete async_lock;
 }
 

@@ -129,13 +129,13 @@ Geometry::Geometry(OGRGeometry *geom) : Nan::ObjectWrap(), this_(geom), owned_(t
   LOG("Created Geometry [%p]", geom);
   // The async locks must live outside the V8 memory management,
   // otherwise they won't be accessible from the async threads
-  async_lock = new uv_mutex_t;
-  uv_mutex_init(async_lock);
+  async_lock = new uv_sem_t;
+  uv_sem_init(async_lock, 1);
 }
 
 Geometry::Geometry() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
-  async_lock = new uv_mutex_t;
-  uv_mutex_init(async_lock);
+  async_lock = new uv_sem_t;
+  uv_sem_init(async_lock, 1);
 }
 
 Geometry::~Geometry() {
@@ -148,7 +148,7 @@ Geometry::~Geometry() {
     LOG("Disposed Geometry [%p]", this_)
     this_ = NULL;
   }
-  uv_mutex_destroy(async_lock);
+  uv_sem_destroy(async_lock);
   delete async_lock;
 }
 
@@ -944,14 +944,14 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<char *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom]() {
     char *text = NULL;
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     OGRErr err = gdal_geom->exportToWkt(&text);
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     if (err) { throw getOGRErrMsg(err); }
     return text;
   };
@@ -1027,13 +1027,13 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     return;
   }
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<unsigned char *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom, data, byte_order, wkb_variant]() {
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     OGRErr err = gdal_geom->exportToWkb(byte_order, data, wkb_variant);
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     if (err) {
       free(data);
       throw getOGRErrMsg(err);
@@ -1082,13 +1082,13 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<char *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom]() {
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToKML();
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     return text;
   };
   job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
@@ -1124,13 +1124,13 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<char *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom]() {
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToGML();
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     return text;
   };
   job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
@@ -1166,13 +1166,13 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<char *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom]() {
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToJson();
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     return text;
   };
   job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
@@ -1211,14 +1211,14 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<OGRPoint *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom]() {
     OGRPoint *point = new OGRPoint();
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     OGRErr err = gdal_geom->Centroid(point);
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     if (err) {
       delete point;
       throw getOGRErrMsg(err);
@@ -1253,15 +1253,15 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
 
   GDALAsyncableJob<OGREnvelope *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom]() {
     OGREnvelope *envelope = new OGREnvelope();
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     gdal_geom->getEnvelope(envelope);
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     return envelope;
   };
 
@@ -1302,15 +1302,15 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRGeometry *gdal_geom = geom->this_;
-  uv_mutex_t *async_lock = geom->async_lock;
+  uv_sem_t *async_lock = geom->async_lock;
 
   GDALAsyncableJob<OGREnvelope3D *> job;
   job.persist(info.This());
   job.main = [async_lock, gdal_geom]() {
     OGREnvelope3D *envelope = new OGREnvelope3D();
-    uv_mutex_lock(async_lock);
+    uv_sem_wait(async_lock);
     gdal_geom->getEnvelope(envelope);
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     return envelope;
   };
 
