@@ -48,6 +48,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - run: sudo apt-get install libgdal-dev
     - run: npm install --ignore-scripts
     - run: npx node-pre-gyp configure
     - name: Build from sources
