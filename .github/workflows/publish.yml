@@ -22,7 +22,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install --ignore-scripts
     - run: npx node-pre-gyp configure
-    - run: npx node-pre-gyp build
+    - run: npx node-pre-gyp build -j max
     - run: npm test
     - run: npx node-pre-gyp package
     - run: npx node-pre-gyp-github publish

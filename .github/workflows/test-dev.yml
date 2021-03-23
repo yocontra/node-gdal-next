@@ -28,6 +28,6 @@ jobs:
     - run: npm install --ignore-scripts
     - run: npx node-pre-gyp configure
     - name: Build from sources
-      run: npx node-pre-gyp build
+      run: npx node-pre-gyp build -j max
     - name: Run unit tests
       run: npm test
