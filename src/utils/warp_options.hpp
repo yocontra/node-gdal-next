@@ -12,6 +12,7 @@
 #include <gdal_priv.h>
 #include <gdalwarper.h>
 
+#include "../gdal_dataset.hpp"
 #include "number_list.hpp"
 #include "string_list.hpp"
 
@@ -54,9 +55,19 @@ class WarpOptions {
   inline bool useMultithreading() {
     return multi;
   }
+  inline std::vector<Local<Object>> datasetObjects() {
+    return {src_obj, dst_obj};
+  }
+  inline std::vector<long> datasetUids() {
+    return {src ? src->uid : 0, dst ? dst->uid : 0};
+  }
 
     private:
   GDALWarpOptions *options;
+  Local<Object> src_obj;
+  Local<Object> dst_obj;
+  Dataset *src;
+  Dataset *dst;
   StringList additional_options;
   IntegerList src_bands;
   IntegerList dst_bands;

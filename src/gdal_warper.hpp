@@ -15,6 +15,8 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "async.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -26,8 +28,8 @@ namespace Warper {
 
 void Initialize(Local<Object> target);
 
-NAN_METHOD(reprojectImage);
-NAN_METHOD(suggestedWarpOutput);
+GDAL_ASYNCABLE_GLOBAL(reprojectImage);
+GDAL_ASYNCABLE_GLOBAL(suggestedWarpOutput);
 
 } // namespace Warper
 } // namespace node_gdal
