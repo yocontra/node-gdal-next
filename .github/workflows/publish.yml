@@ -1,8 +1,6 @@
 name: Github packages publish
 
-on:
-  release:
-    types: [ published ]
+on: workflow-dispatch
 
 jobs:
   publish:
