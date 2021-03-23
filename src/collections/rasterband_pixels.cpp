@@ -129,7 +129,7 @@ NAN_METHOD(RasterBandPixels::get) {
   CPLErr err = band->get()->RasterIO(GF_Read, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
   GDAL_UNLOCK_PARENT;
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 
@@ -161,7 +161,7 @@ NAN_METHOD(RasterBandPixels::set) {
   CPLErr err = band->get()->RasterIO(GF_Write, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
   GDAL_UNLOCK_PARENT;
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 

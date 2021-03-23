@@ -58,11 +58,9 @@ inline const char *getOGRErrMsg(int err) {
   }
 };
 
-#define NODE_THROW_CPLERR(err) Nan::ThrowError(CPLGetLastErrorMsg());
+#define NODE_THROW_LAST_CPLERR Nan::ThrowError(CPLGetLastErrorMsg())
 
-#define NODE_THROW_LAST_CPLERR NODE_THROW_CPLERR
-
-#define NODE_THROW_OGRERR(err) Nan::ThrowError(getOGRErrMsg(err));
+#define NODE_THROW_OGRERR(err) Nan::ThrowError(getOGRErrMsg(err))
 
 #define ATTR(t, name, get, set) Nan::SetAccessor(t->InstanceTemplate(), Nan::New(name).ToLocalChecked(), get, set);
 
@@ -593,7 +591,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     int err = obj->this_->wrapped_method();                                                                            \
     if (err) {                                                                                                         \
-      NODE_THROW_CPLERR(err);                                                                                          \
+      NODE_THROW_LAST_CPLERR;                                                                                          \
       return;                                                                                                          \
     }                                                                                                                  \
     return;                                                                                                            \
@@ -611,7 +609,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     int err = obj->this_->wrapped_method(param->get());                                                                \
     if (err) {                                                                                                         \
-      NODE_THROW_CPLERR(err);                                                                                          \
+      NODE_THROW_LAST_CPLERR;                                                                                          \
       return;                                                                                                          \
     }                                                                                                                  \
     return;                                                                                                            \
@@ -629,7 +627,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     int err = obj->this_->wrapped_method(param.c_str());                                                               \
     if (err) {                                                                                                         \
-      NODE_THROW_CPLERR(err);                                                                                          \
+      NODE_THROW_LAST_CPLERR;                                                                                          \
       return;                                                                                                          \
     }                                                                                                                  \
     return;                                                                                                            \
@@ -647,7 +645,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     int err = obj->this_->wrapped_method(param);                                                                       \
     if (err) {                                                                                                         \
-      NODE_THROW_CPLERR(err);                                                                                          \
+      NODE_THROW_LAST_CPLERR;                                                                                          \
       return;                                                                                                          \
     }                                                                                                                  \
     return;                                                                                                            \
@@ -665,7 +663,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     int err = obj->this_->wrapped_method(param);                                                                       \
     if (err) {                                                                                                         \
-      NODE_THROW_CPLERR(err);                                                                                          \
+      NODE_THROW_LAST_CPLERR;                                                                                          \
       return;                                                                                                          \
     }                                                                                                                  \
     return;                                                                                                            \

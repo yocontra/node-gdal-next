@@ -200,7 +200,7 @@ NAN_METHOD(Driver::deleteDataset) {
 
   CPLErr err = driver->getGDALDriver()->Delete(name.c_str());
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
   return;
@@ -438,7 +438,7 @@ NAN_METHOD(Driver::copyFiles) {
 
   CPLErr err = driver->getGDALDriver()->CopyFiles(new_name.c_str(), old_name.c_str());
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 
@@ -471,7 +471,7 @@ NAN_METHOD(Driver::rename) {
 
   CPLErr err = driver->getGDALDriver()->Rename(new_name.c_str(), old_name.c_str());
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 

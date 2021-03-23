@@ -264,7 +264,7 @@ NAN_METHOD(Warper::reprojectImage) {
   CPLFree(t_srs_wkt);
 
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 
@@ -377,7 +377,7 @@ NAN_METHOD(Warper::suggestedWarpOutput) {
   if (maxError > 0.0) { GDALDestroyApproxTransformer(hTransformArg); }
 
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 

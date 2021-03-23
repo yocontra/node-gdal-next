@@ -257,7 +257,7 @@ NAN_METHOD(RasterBand::fill) {
   GDAL_UNLOCK_PARENT;
 
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
   return;
@@ -322,7 +322,7 @@ NAN_METHOD(RasterBand::getStatistics) {
       Nan::ThrowError("Statistics cannot be efficiently computed without scanning raster");
       return;
     }
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 
@@ -370,7 +370,7 @@ NAN_METHOD(RasterBand::computeStatistics) {
   if (!stats_file_err.empty()) {
     Nan::ThrowError(stats_file_err.c_str());
   } else if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 
@@ -414,7 +414,7 @@ NAN_METHOD(RasterBand::setStatistics) {
   GDAL_UNLOCK_PARENT;
 
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
   return;
@@ -850,7 +850,7 @@ NAN_SETTER(RasterBand::unitTypeSetter) {
   GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->this_->SetUnitType(input.c_str());
   GDAL_UNLOCK_PARENT;
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_SETTER(RasterBand::noDataValueSetter) {
@@ -875,7 +875,7 @@ NAN_SETTER(RasterBand::noDataValueSetter) {
   GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->this_->SetNoDataValue(input);
   GDAL_UNLOCK_PARENT;
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_SETTER(RasterBand::scaleSetter) {
@@ -894,7 +894,7 @@ NAN_SETTER(RasterBand::scaleSetter) {
   GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->this_->SetScale(input);
   GDAL_UNLOCK_PARENT;
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_SETTER(RasterBand::offsetSetter) {
@@ -913,7 +913,7 @@ NAN_SETTER(RasterBand::offsetSetter) {
   GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->this_->SetOffset(input);
   GDAL_UNLOCK_PARENT;
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_SETTER(RasterBand::categoryNamesSetter) {
@@ -950,7 +950,7 @@ NAN_SETTER(RasterBand::categoryNamesSetter) {
 
   if (list) { delete[] list; }
 
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_SETTER(RasterBand::colorInterpretationSetter) {
@@ -974,7 +974,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
   GDAL_TRYLOCK_PARENT(band);
   CPLErr err = band->this_->SetColorInterpretation(ci);
   GDAL_UNLOCK_PARENT;
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_GETTER(RasterBand::uidGetter) {

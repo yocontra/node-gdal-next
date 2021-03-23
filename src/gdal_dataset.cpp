@@ -585,7 +585,7 @@ NAN_METHOD(Dataset::setGCPs) {
   }
 
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 
@@ -675,7 +675,7 @@ NAN_METHOD(Dataset::buildOverviews) {
   if (b) delete[] b;
 
   if (err) {
-    NODE_THROW_CPLERR(err);
+    NODE_THROW_LAST_CPLERR;
     return;
   }
 
@@ -842,7 +842,7 @@ NAN_GETTER(Dataset::geoTransformGetter) {
     // This is mostly (always?) a sign that it has not been set
     info.GetReturnValue().Set(Nan::Null());
     return;
-    // NODE_THROW_CPLERR(err);
+    // NODE_THROW_LAST_CPLERR;
   }
 
   Local<Array> result = Nan::New<Array>(6);
@@ -922,7 +922,7 @@ NAN_SETTER(Dataset::srsSetter) {
   CPLErr err = raw->SetProjection(wkt.c_str());
   uv_mutex_unlock(ds->async_lock);
 
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_SETTER(Dataset::geoTransformSetter) {
@@ -968,7 +968,7 @@ NAN_SETTER(Dataset::geoTransformSetter) {
   CPLErr err = raw->SetGeoTransform(buffer);
   uv_mutex_unlock(ds->async_lock);
 
-  if (err) { NODE_THROW_CPLERR(err); }
+  if (err) { NODE_THROW_LAST_CPLERR; }
 }
 
 /**
