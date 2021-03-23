@@ -365,7 +365,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return; // error parsing string list
   }
 
-  uv_mutex_t *async_lock = nullptr;
+  uv_sem_t *async_lock = nullptr;
   try {
     async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
   } catch (const char *err) {
@@ -377,7 +377,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (driver->uses_ogr != src_dataset->uses_ogr) {
     Nan::ThrowError("Driver unable to copy dataset");
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     return;
   }
   if (driver->uses_ogr) {
@@ -388,12 +388,12 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
 
     if (!ds) {
       Nan::ThrowError("Error copying dataset.");
-      uv_mutex_unlock(async_lock);
+      uv_sem_post(async_lock);
       return;
     }
 
     info.GetReturnValue().Set(Dataset::New(ds));
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     return;
   }
 #endif
@@ -405,7 +405,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   job.main = [raw, filename, raw_ds, strict, options, async_lock]() {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
-    uv_mutex_unlock(async_lock);
+    uv_sem_post(async_lock);
     if (!ds) throw "Error creating dataset";
     return ds;
   };

@@ -35,19 +35,19 @@ namespace node_gdal {
 
 // Handle locking
 #define GDAL_TRYLOCK_PARENT(p)                                                                                         \
-  uv_mutex_t *async_lock = nullptr;                                                                                    \
+  uv_sem_t *async_lock = nullptr;                                                                                    \
   try {                                                                                                                \
     async_lock = ptr_manager.tryLockDataset((p)->parent_uid);                                                          \
   } catch (const char *err) {                                                                                          \
     Nan::ThrowError(err);                                                                                              \
     return;                                                                                                            \
   }
-#define GDAL_ASYNCABLE_LOCK(uid) uv_mutex_t *async_lock = ptr_manager.tryLockDataset(uid);
-#define GDAL_UNLOCK_PARENT uv_mutex_unlock(async_lock)
+#define GDAL_ASYNCABLE_LOCK(uid) uv_sem_t *async_lock = ptr_manager.tryLockDataset(uid);
+#define GDAL_UNLOCK_PARENT uv_sem_post(async_lock)
 #define GDAL_ASYNCABLE_LOCK_MANY(...)                                                                                  \
-  std::vector<uv_mutex_t *> async_locks = ptr_manager.tryLockDatasets({__VA_ARGS__});
+  std::vector<uv_sem_t *> async_locks = ptr_manager.tryLockDatasets({__VA_ARGS__});
 #define GDAL_UNLOCK_MANY                                                                                               \
-  for (uv_mutex_t * async_lock : async_locks) { uv_mutex_unlock(async_lock); }
+  for (uv_sem_t * async_lock : async_locks) { uv_sem_post(async_lock); }
 
 #define GDAL_ASYNCABLE_1x_UNSUPPORTED                                                                                  \
   if (GDAL_ISASYNC) {                                                                                                  \

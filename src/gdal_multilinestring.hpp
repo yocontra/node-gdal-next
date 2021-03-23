@@ -42,7 +42,7 @@ class MultiLineString : public Nan::ObjectWrap {
   OGRMultiLineString *this_;
   bool owned_;
   int size_;
-  uv_mutex_t *async_lock;
+  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal
