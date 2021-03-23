@@ -28,7 +28,7 @@
 
 #include "cpl_port.h"
 
-CPL_CVSID("$Id: rasterio_ssse3.cpp 003ad4e9e410423af8b35843956f781e44a8daac 2019-02-18 15:48:35 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #if defined(HAVE_SSSE3_AT_COMPILE_TIME) && ( defined(__x86_64) || defined(_M_X64) )
 

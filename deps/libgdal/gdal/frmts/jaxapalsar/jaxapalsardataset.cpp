@@ -32,7 +32,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: jaxapalsardataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id$")
 
 #if defined(WIN32)
 #define SEP_STRING "\\"
@@ -132,6 +132,7 @@ CPL_CVSID("$Id: jaxapalsardataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2
 #define BOTTOM_LEFT_LAT_OFFSET 1168
 #define BOTTOM_LEFT_LON_OFFSET 1184
 
+namespace {
 /* a few useful enums */
 enum eFileType {
     level_11 = 0,
@@ -146,6 +147,7 @@ enum ePolarization {
     vh,
     vv
 };
+} // namespace
 
 /************************************************************************/
 /* ==================================================================== */

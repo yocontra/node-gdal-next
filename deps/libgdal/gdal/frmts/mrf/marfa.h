@@ -34,7 +34,7 @@
 */
 
 /******************************************************************************
- * $Id: marfa.h c493027f5b0e384cbe56afcd8c945da6e9c1639c 2020-09-05 03:14:45 -0700 Lucian Plesea $
+ * $Id$
  *
  * Project:  Meta Raster Format
  * Purpose:  MRF structures

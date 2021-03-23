@@ -37,7 +37,7 @@
 #include "cpl_string.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdaldefaultasync.cpp dca024c6230a7d7f29afd2818afdc23313a18542 2018-05-06 18:08:36 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 CPL_C_START
 GDALAsyncReader *

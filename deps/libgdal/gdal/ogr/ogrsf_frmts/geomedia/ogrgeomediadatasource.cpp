@@ -33,7 +33,7 @@
 #include "cpl_string.h"
 #include <vector>
 
-CPL_CVSID("$Id: ogrgeomediadatasource.cpp 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       OGRGeomediaDataSource()                        */

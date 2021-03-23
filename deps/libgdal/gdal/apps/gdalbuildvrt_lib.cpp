@@ -59,7 +59,7 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: gdalbuildvrt_lib.cpp acb1345e4fb1ef52f1395888f9bdb54a5189846b 2020-10-01 19:54:06 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #define GEOTRSFRM_TOPLEFT_X            0
 #define GEOTRSFRM_WE_RES               1
@@ -68,6 +68,7 @@ CPL_CVSID("$Id: gdalbuildvrt_lib.cpp acb1345e4fb1ef52f1395888f9bdb54a5189846b 20
 #define GEOTRSFRM_ROTATION_PARAM2      4
 #define GEOTRSFRM_NS_RES               5
 
+namespace {
 typedef enum
 {
     LOWEST_RESOLUTION,
@@ -119,6 +120,7 @@ struct BandProperty
     bool                   bHasScale = false;
     double                 dfScale = 0;
 };
+} // namespace
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */

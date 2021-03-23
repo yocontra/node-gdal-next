@@ -105,7 +105,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: geotiff.cpp 9e52ad241bade9e0b989281f186f01e8a17106de 2020-10-19 14:27:54 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static bool bGlobalInExternalOvr = false;
 

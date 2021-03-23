@@ -32,7 +32,7 @@
 #include "cpl_string.h"
 #include <vector>
 
-CPL_CVSID("$Id: multireadtest.cpp cf1507fcfdb6ef16ec9afab68cc0d7d969c7bcbd 2020-02-27 21:22:11 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static int nIterations = 1;
 static bool bLockOnOpen = false;

@@ -43,7 +43,7 @@
 #include <utility>
 #include <vector>
 
-CPL_CVSID("$Id: pdfcreatecopy.cpp 9c1c4c56303c06d9e18dbfd9412dab3ce58f3f03 2020-05-28 14:16:15 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        GDALPDFBaseWriter()                           */

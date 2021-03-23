@@ -59,7 +59,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: ogrcsvlayer.cpp be0e7553d890b0ac876365f23b16d86de56a2aba 2020-10-03 23:21:47 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            CSVSplitLine()                            */

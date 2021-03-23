@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrgrassdatasource.cpp a832da5b936bac8438f9c50e7c20e563fd94c9ff 2020-09-22 13:06:27 +0200 Markus Neteler $")
+CPL_CVSID("$Id$")
 
 
 /************************************************************************/

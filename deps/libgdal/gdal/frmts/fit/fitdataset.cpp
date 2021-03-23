@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: fitdataset.cpp 1067a535e11dffec61af74f0447d131c1281e03d 2020-10-23 20:59:18 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 constexpr size_t FIT_PAGE_SIZE = 128;
 
@@ -1153,6 +1153,18 @@ static GDALDataset *FITCreateCopy(const char * pszFilename,
         if (newBlockX > 0 && newBlockY > 0) {
             blockX = newBlockX;
             blockY = newBlockY;
+            try
+            {
+                CPL_IGNORE_RET_VAL(
+                    CPLSM(blockX) * CPLSM(blockY) * CPLSM(nDTSize) * CPLSM(nBands));
+            }
+            catch( ... )
+            {
+                CPLError(CE_Failure, CPLE_AppDefined,
+                         "Too big values in PAGESIZE");
+                CPL_IGNORE_RET_VAL(VSIFCloseL(fpImage));
+                return nullptr;
+            }
         }
         else {
             CPLError(CE_Failure, CPLE_OpenFailed,

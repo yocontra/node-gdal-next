@@ -36,7 +36,7 @@
 #include "ogrlibkmlstyle.h"
 #include "ogr_libkml.h"
 
-CPL_CVSID("$Id: ogrlibkmlstyle.cpp 42e75861098376755eeb48e4553e0e98ab0f1877 2019-08-15 21:19:06 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 using kmlbase::Color32;
 using kmldom::BalloonStylePtr;

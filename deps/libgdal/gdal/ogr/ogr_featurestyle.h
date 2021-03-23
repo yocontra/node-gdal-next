@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_featurestyle.h 1e082b59d067cf2edf5713e15101c0b369d37e9a 2018-12-02 22:16:23 +0300 drons $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define of Feature Representation

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: mgrs.c eaeeb697c56eb6457db51d373feac4d99e9db45d 2017-11-27 17:16:35Z Even Rouault $
+ * $Id$
  *
  * Project:  MGRS Converter
  * Purpose:  Geotrans code for MGRS translation (slightly adapted)

@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: sdtstransfer.cpp 2ace03ec48c36dae8ba74089d85617c095643428 2018-11-02 18:02:33 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            SDTSTransfer()                            */

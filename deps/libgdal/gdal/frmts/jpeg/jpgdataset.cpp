@@ -69,7 +69,7 @@ CPL_C_END
 #include "memdataset.h"
 #include "vsidataio.h"
 
-CPL_CVSID("$Id: jpgdataset.cpp 5c1e43bf51de52a666872792684b827d7ecd4438 2020-04-27 10:49:07 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 constexpr int TIFF_VERSION = 42;
 

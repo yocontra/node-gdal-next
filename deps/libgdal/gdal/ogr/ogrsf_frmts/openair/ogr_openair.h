@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_openair.h bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  OpenAir Translator
  * Purpose:  Definition of classes for OGR .sua driver.

@@ -51,7 +51,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: mitab_miffile.cpp d65d044c3b43c1ddd2a03672e8d105fa33717c2f 2019-08-15 21:28:08 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class MIFFile

@@ -35,7 +35,7 @@
 #include "cpl_aws.h"
 #include "cpl_json.h"
 
-CPL_CVSID("$Id: cpl_google_cloud.cpp 15091b7b8858bde622ce09badfbb15a1ac6def6d 2018-07-26 18:38:40 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_CURL
 

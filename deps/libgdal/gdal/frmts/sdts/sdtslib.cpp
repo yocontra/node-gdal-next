@@ -33,7 +33,7 @@
 
 #include <set>
 
-CPL_CVSID("$Id: sdtslib.cpp b45294c72549ddbba14dec8c6df485981dbed6d8 2019-10-20 13:14:07 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            SDTSFeature()                             */

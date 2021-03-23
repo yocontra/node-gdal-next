@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gh5_convenience.h de35b73572bc3545ba4b5c3c72a6e340249339cf 2018-08-27 15:05:29 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  Hierarchical Data Format Release 5 (HDF5)
  * Purpose:  HDF5 convenience functions.

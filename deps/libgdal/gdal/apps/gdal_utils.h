@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_utils.h 9598f66a2ef90ef40fc3274e54d5d723ad597b0f 2019-07-13 00:03:57 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  GDAL Utilities
  * Purpose:  GDAL Utilities Public Declarations.

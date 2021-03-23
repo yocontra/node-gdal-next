@@ -58,7 +58,7 @@
 #include "cpl_vsi.h"
 #include "nitflib.h"
 
-CPL_CVSID("$Id: rpftocfile.cpp 15693b8410ffe25e7494bab924af08bea59519e8 2019-10-26 23:01:10 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        RPFTOCTrim()                                    */

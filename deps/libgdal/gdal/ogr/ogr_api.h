@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_api.h 4fb0702109acae09624f7ff9436ddcd456cb09e3 2020-07-01 19:14:52 +1000 Nyall Dawson $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API for OGR Geometry, Feature, Layers, DataSource and drivers.

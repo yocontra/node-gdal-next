@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeopackageutility.h fc13138b976f8277cffa2f11b7c2a95811aa7ed6 2017-03-20 14:59:36Z Even Rouault $
+ * $Id$
  *
  * Project:  GeoPackage Translator
  * Purpose:  Utility header for OGR GeoPackage driver.

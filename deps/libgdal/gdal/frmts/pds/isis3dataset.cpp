@@ -107,7 +107,7 @@ static const char* const pszLABEL_BYTES_PLACEHOLDER = "!*^LABEL_BYTES^*!";
 static const char* const pszHISTORY_STARTBYTE_PLACEHOLDER =
                                                     "!*^HISTORY_STARTBYTE^*!";
 
-CPL_CVSID("$Id: isis3dataset.cpp c04e0ea92cfb521061e84b9c3ba75b0e30345ffd 2020-07-02 22:27:16 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /* ==================================================================== */

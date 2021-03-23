@@ -30,7 +30,7 @@
 #include "ogr_oci.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrocistatement.cpp 579264676e187f9d14759e1bc9e30986c8b2514c 2017-12-11 20:03:03Z Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGROCIStatement()                           */

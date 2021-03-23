@@ -56,7 +56,7 @@
 #include <algorithm>
 #include <vector>
 
-CPL_CVSID("$Id: marfa_dataset.cpp c493027f5b0e384cbe56afcd8c945da6e9c1639c 2020-09-05 03:14:45 -0700 Lucian Plesea $")
+CPL_CVSID("$Id$")
 
 using std::vector;
 using std::string;

@@ -44,7 +44,7 @@ constexpr double NULL3 = -32768.0;
 #include <limits>
 #include <string>
 
-CPL_CVSID("$Id: vicardataset.cpp 4b48f00bfb8e044a6e494a31bda4be43608bcad4 2020-07-19 18:41:00 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                     OGRVICARBinaryPrefixesLayer                      */

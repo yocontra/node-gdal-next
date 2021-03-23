@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dted_api.c fdb4a391f1fc6a50b13f11bbd47edc177d44f4a4 2020-04-15 15:55:30 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  DTED Translator
  * Purpose:  Implementation of DTED/CDED access functions.
@@ -31,7 +31,7 @@
 #include "dted_api.h"
 
 #ifndef AVOID_CPL
-CPL_CVSID("$Id: dted_api.c fdb4a391f1fc6a50b13f11bbd47edc177d44f4a4 2020-04-15 15:55:30 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 #endif
 
 static int bWarnedTwoComplement = FALSE;

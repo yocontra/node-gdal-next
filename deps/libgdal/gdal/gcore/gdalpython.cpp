@@ -51,8 +51,8 @@ static std::mutex gMutex;
 static bool gbHasInitializedPython = false;
 static PyThreadState* gphThreadState = nullptr;
 
-static PyGILState_STATE (*PyGILState_Ensure)(void) = nullptr;
-static void (*PyGILState_Release)(PyGILState_STATE) = nullptr;
+static PyGILState_STATE (*PyLibGILState_Ensure)(void) = nullptr;
+static void (*PyLibGILState_Release)(PyGILState_STATE) = nullptr;
 
 // Emulate Py_CompileString with Py_CompileStringExFlags
 // Probably just a temporary measure for a bug of Python 3.8.0 on Windows
@@ -415,16 +415,24 @@ static bool LoadPythonAPI()
     // First try in the current process in case the python symbols would
     // be already loaded
     HANDLE hProcess = GetCurrentProcess();
-    HMODULE ahModules[100];
-    DWORD nSizeNeeded = 0;
+    std::vector<HMODULE> ahModules;
 
-    EnumProcessModules(hProcess, ahModules, sizeof(ahModules),
-                        &nSizeNeeded);
+    // 100 is not large enough when GDAL is loaded from QGIS for example
+    ahModules.resize(1000);
+    for( int i = 0; i < 2; i++ )
+    {
+        DWORD nSizeNeeded = 0;
+        const DWORD nSizeIn = static_cast<DWORD>(
+                ahModules.size() * sizeof(HMODULE));
+        EnumProcessModules(hProcess, &ahModules[0], nSizeIn, &nSizeNeeded);
+        ahModules.resize(static_cast<size_t>(nSizeNeeded) / sizeof(HMODULE));
+        if( nSizeNeeded <= nSizeIn )
+        {
+            break;
+        }
+    }
 
-    const size_t nModules =
-        std::min(size_t(100),
-                 static_cast<size_t>(nSizeNeeded) / sizeof(HMODULE));
-    for( size_t i = 0; i < nModules; i++ )
+    for( size_t i = 0; i < ahModules.size(); i++ )
     {
         if( GetProcAddress(ahModules[i], "Py_SetProgramName") )
         {
@@ -735,8 +743,8 @@ static bool LoadPythonAPI()
     LOAD(libHandle, PySequence_Size);
     LOAD(libHandle, PySequence_GetItem);
     LOAD(libHandle, PyArg_ParseTuple);
-    LOAD(libHandle, PyGILState_Ensure);
-    LOAD(libHandle, PyGILState_Release);
+    LOAD_WITH_NAME(libHandle, PyLibGILState_Ensure, "PyGILState_Ensure");
+    LOAD_WITH_NAME(libHandle, PyLibGILState_Release, "PyGILState_Release");
     LOAD(libHandle, PyErr_Fetch);
     LOAD(libHandle, PyErr_Clear);
     LOAD(libHandle, Py_GetVersion);
@@ -815,7 +823,7 @@ GIL_Holder::GIL_Holder(bool bExclusiveLock):
     {
         gMutex.lock();
     }
-    m_eState = PyGILState_Ensure();
+    m_eState = PyLibGILState_Ensure();
 }
 
 /************************************************************************/
@@ -824,7 +832,7 @@ GIL_Holder::GIL_Holder(bool bExclusiveLock):
 
 GIL_Holder::~GIL_Holder()
 {
-    PyGILState_Release(m_eState);
+    PyLibGILState_Release(m_eState);
     if( m_bExclusiveLock )
     {
         gMutex.unlock();

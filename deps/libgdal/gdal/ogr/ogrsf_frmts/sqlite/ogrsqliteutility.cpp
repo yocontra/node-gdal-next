@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrsqliteutility.cpp 3554675bbce8dc00030bac33c99d92764d0f3844 2020-06-06 21:40:34 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /* Runs a SQL command and ignores the result (good for INSERT/UPDATE/CREATE) */
 OGRErr SQLCommand(sqlite3 * poDb, const char * pszSQL)

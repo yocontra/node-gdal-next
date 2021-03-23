@@ -36,7 +36,7 @@
 
 #include "cpl_safemaths.hpp"
 
-CPL_CVSID("$Id: rmfdataset.cpp f34ff8b29818d5b90b868a0bbc9c95b520f2b02f 2020-10-20 23:07:32 +0300 drons $")
+CPL_CVSID("$Id$")
 
 constexpr int RMF_DEFAULT_BLOCKXSIZE = 256;
 constexpr int RMF_DEFAULT_BLOCKYSIZE = 256;

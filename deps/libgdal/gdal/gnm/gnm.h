@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm.h 2854064296f013181ac011aa4f8473566a46fd4a 2019-08-15 15:36:49 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM general public declarations.

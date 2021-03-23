@@ -32,7 +32,7 @@
 
 #include "mitab_ogr_driver.h"
 
-CPL_CVSID("$Id: mitab_ogr_datasource.cpp ee1ad78131c83cdc0b32088f11e98629fdb3c632 2020-01-20 01:29:33 +0300 Dmitry Baryshnikov $")
+CPL_CVSID("$Id$")
 
 /*=======================================================================
  *                 OGRTABDataSource

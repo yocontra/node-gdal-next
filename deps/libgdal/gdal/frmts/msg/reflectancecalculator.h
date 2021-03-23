@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reflectancecalculator.h 0656ac04338d85679794256e2fa83ab31049d810 2016-11-22 12:56:01Z Even Rouault $
+ * $Id$
  *
  * Purpose:  Interface of ReflectanceCalculator class. Calculate reflectance
  *           values from radiance, for visual bands.

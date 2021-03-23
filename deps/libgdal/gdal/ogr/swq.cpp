@@ -40,7 +40,7 @@
 #include "cpl_time.h"
 #include "swq_parser.hpp"
 
-CPL_CVSID("$Id: swq.cpp 6659c4d5c910df313ac451cd5ca687862eef040b 2020-10-01 15:37:53 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #define YYSTYPE swq_expr_node *
 

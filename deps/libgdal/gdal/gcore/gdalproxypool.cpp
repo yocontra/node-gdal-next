@@ -44,7 +44,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: gdalproxypool.cpp 5d92959f1afafc273140671136adcc1f12d16160 2020-06-02 16:12:25 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /* We *must* share the same mutex as the gdaldataset.cpp file, as we are */
 /* doing GDALOpen() calls that can indirectly call GDALOpenShared() on */

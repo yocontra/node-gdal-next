@@ -50,7 +50,7 @@
 #include <cassert>
 #include <cmath>
 
-CPL_CVSID("$Id: gdallinearsystem.cpp f822c7e5ec2fc865dad2a8073054ca566984b16a 2020-08-21 22:50:35 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifndef HAVE_ARMADILLO
 namespace

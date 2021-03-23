@@ -31,7 +31,7 @@
 #include "gdal_simplesurf.h"
 
 //! @cond Doxygen_Suppress
-CPL_CVSID("$Id: gdalmatching.cpp 9ff327806cd64df6d73a6c91f92d12ca0c5e07df 2018-04-07 20:25:06 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 //! @endcond
 
 // TODO(schwehr): What?  This below: "0,001"

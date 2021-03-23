@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_string.h 237cce44e47cca3290bf053bbfa153856575017e 2019-08-17 15:01:52 +0200 Even Rouault $
+ * $Id$
  *
  * Name:     cpl_string.h
  * Project:  CPL - Common Portability Library

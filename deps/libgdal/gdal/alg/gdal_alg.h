@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg.h 60d13e19f89619ca16040b9a270d3837b8f0df63 2020-03-05 10:02:43 +0200 Ilmari Ayres $
+ * $Id$
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes, and definitions for various GDAL based algorithms.

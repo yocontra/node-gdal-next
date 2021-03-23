@@ -7,7 +7,7 @@
  *
  * Author:   David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisraster.h 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
+ * Last changes: $Id$
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -105,15 +105,6 @@
 #define POS_ISOUTDB         2
 #define POS_PATH            3
 
-typedef enum
-{
-    LOWEST_RESOLUTION,
-    HIGHEST_RESOLUTION,
-    AVERAGE_RESOLUTION,
-    USER_RESOLUTION,
-    AVERAGE_APPROX_RESOLUTION
-} ResolutionStrategy;
-
 /**
  * The driver can work in these modes:
  * - NO_MODE: Error case
@@ -203,6 +194,16 @@ class PostGISRasterDataset final: public VRTDataset {
     friend class PostGISRasterRasterBand;
     friend class PostGISRasterTileRasterBand;
 private:
+
+    typedef enum
+    {
+        LOWEST_RESOLUTION,
+        HIGHEST_RESOLUTION,
+        AVERAGE_RESOLUTION,
+        USER_RESOLUTION,
+        AVERAGE_APPROX_RESOLUTION
+    } ResolutionStrategy;
+
     char** papszSubdatasets;
     double adfGeoTransform[6];
     int nSrid;

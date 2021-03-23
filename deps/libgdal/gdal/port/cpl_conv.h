@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_conv.h bb8555c956c75e4f6ae50db6d28e40b660d9a777 2020-06-14 00:21:08 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Convenience functions declarations.

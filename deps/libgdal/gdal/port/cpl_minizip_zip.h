@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_minizip_zip.h 105d437a91a1a110bdeaba3bab046cd235701173 2018-07-02 12:01:26 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com

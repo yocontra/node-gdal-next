@@ -56,7 +56,7 @@
 
 /* g++ -fPIC -g -Wall frmts/pdf/pdfdataset.cpp -shared -o gdal_PDF.so -Iport -Igcore -Iogr -L. -lgdal -lpoppler -I/usr/include/poppler */
 
-CPL_CVSID("$Id: pdfdataset.cpp 89c531aaf52c96c494a45f15d4a0432a5d51bcc8 2020-09-23 21:58:32 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 

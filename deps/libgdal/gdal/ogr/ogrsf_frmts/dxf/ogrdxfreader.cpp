@@ -32,7 +32,7 @@
 #include "cpl_string.h"
 #include "cpl_csv.h"
 
-CPL_CVSID("$Id: ogrdxfreader.cpp ba6368e24932aa6a06251a57cbd5eb67ece798ea 2020-05-28 14:49:59 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRDXFReader()                            */

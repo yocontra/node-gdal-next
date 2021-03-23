@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp 84115d7a46d5d26f0da3c07744d5e04815e542c7 2020-10-03 23:21:18 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #if !defined(HAVE_CURL) || defined(CPL_MULTIPROC_STUB)
 
@@ -2152,7 +2152,7 @@ void VSICurlStreamingClearCache( void )
     // vsicurl/, /vsis3/, /vsigs/ . So each one has its own cache of regions,
     // file size, etc.
     const char* const apszFS[] = { "/vsicurl_streaming/", "/vsis3_streaming/",
-                                   "/vsigs_streaming/", "vsiaz_streaming/",
+                                   "/vsigs_streaming/", "/vsiaz_streaming/",
                                    "/vsioss_streaming/", "/vsiswift_streaming/" };
     for( size_t i = 0; i < CPL_ARRAYSIZE(apszFS); ++i )
     {

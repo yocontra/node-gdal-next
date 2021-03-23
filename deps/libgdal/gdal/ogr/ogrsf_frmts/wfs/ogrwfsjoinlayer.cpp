@@ -29,7 +29,7 @@
 #include "ogr_wfs.h"
 #include "cpl_md5.h"
 
-CPL_CVSID("$Id: ogrwfsjoinlayer.cpp 6729af20d757ebb9d16576c6777a780d903151ac 2017-12-20 20:39:50Z Dmitry Baryshnikov $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRWFSJoinLayer()                           */

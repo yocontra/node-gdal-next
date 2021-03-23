@@ -33,7 +33,7 @@
 #define SQUARE(x) ((x)*(x))
 #define EPSILON 1e-5
 
-CPL_CVSID("$Id: pdfreadvectors.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 

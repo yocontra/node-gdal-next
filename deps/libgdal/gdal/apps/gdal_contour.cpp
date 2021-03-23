@@ -37,7 +37,7 @@
 #include "ogr_srs_api.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdal_contour.cpp b04ca419afe96b637a7b77773997361cf605e88f 2019-11-28 16:14:29 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */

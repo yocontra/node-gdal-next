@@ -42,7 +42,7 @@
 #include "cpl_minixml.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: reader_pleiades.cpp 661dc7641bb5f9a51bf2cb075fb92dd7fa97876b 2020-07-16 11:36:24 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /**
  * GDALMDReaderPleiades()

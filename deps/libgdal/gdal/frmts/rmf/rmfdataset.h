@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rmfdataset.h f34ff8b29818d5b90b868a0bbc9c95b520f2b02f 2020-10-20 23:07:32 +0300 drons $
+ * $Id$
  *
  * Project:  Raster Matrix Format
  * Purpose:  Private class declarations for the RMF classes used to read/write

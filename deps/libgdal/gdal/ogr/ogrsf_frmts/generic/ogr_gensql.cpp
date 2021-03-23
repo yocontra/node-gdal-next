@@ -38,7 +38,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: ogr_gensql.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 class OGRGenSQLGeomFieldDefn final: public OGRGeomFieldDefn
 {
@@ -2042,7 +2042,7 @@ void OGRGenSQLResultsLayer::CreateOrderByIndex()
             }
             panFIDList = panNewFIDList;
 
-            memset(pasIndexFields + nFeaturesAlloc, 0,
+            memset(pasIndexFields + nFeaturesAlloc * nOrderItems, 0,
                    sizeof(OGRField) * nOrderItems *
                    static_cast<size_t>(nNewFeaturesAlloc - nFeaturesAlloc));
 

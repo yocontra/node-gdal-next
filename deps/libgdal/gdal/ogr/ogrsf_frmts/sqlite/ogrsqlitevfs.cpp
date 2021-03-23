@@ -40,7 +40,7 @@
 #include "cpl_vsi.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqlitevfs.cpp e665ed544d2c5572c03c44a7327d8b284c03d86b 2019-08-15 22:13:38 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifdef DEBUG_IO
 # define DEBUG_ONLY

@@ -1,4 +1,4 @@
-/* $Id: avc_mbyte.cpp b3cab3cdbb4ca6e7c9367f5c14081d1397374681 2018-03-01 20:32:51Z Even Rouault $
+/* $Id$
  *
  * Name:     avc_mbyte.c
  * Project:  Arc/Info vector coverage (AVC)  E00->BIN conversion library

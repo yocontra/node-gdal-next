@@ -32,7 +32,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: fastdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id$")
 
 // constexpr int ADM_STD_HEADER_SIZE = 4608;  // Format specification says it
 constexpr int ADM_HEADER_SIZE = 5000;  // Should be 4608, but some vendors

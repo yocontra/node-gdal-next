@@ -42,7 +42,7 @@
 #include "ogr_p.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrfeaturedefn.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRFeatureDefn()                           */

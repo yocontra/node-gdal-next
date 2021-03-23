@@ -37,7 +37,7 @@
 #include <cmath>
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_hatch.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           TranslateHATCH()                           */
@@ -681,8 +681,12 @@ OGRErr OGRDXFLayer::CollectPolylinePath( OGRGeometryCollection *poGC,
         return OGRERR_FAILURE;
     }
 
-    oSmoothPolyline.SetUseMaxGapWhenTessellatingArcs( poDS->InlineBlocks() );
-    poGC->addGeometryDirectly( oSmoothPolyline.Tessellate() );
+    // Only process polylines with at least 2 vertices
+    if( nVertexCount >= 2 )
+    {
+        oSmoothPolyline.SetUseMaxGapWhenTessellatingArcs( poDS->InlineBlocks() );
+        poGC->addGeometryDirectly( oSmoothPolyline.Tessellate() );
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Skip through source boundary objects if present.                */

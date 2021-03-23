@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: e00read.c 38e9587ed7fc34d8e145b03a86ca0a2ec655fcce 2020-08-23 18:43:52 +0200 Even Rouault $
+ * $Id$
  *
  * Name:     e00read.c
  * Project:  Compressed E00 Read/Write library

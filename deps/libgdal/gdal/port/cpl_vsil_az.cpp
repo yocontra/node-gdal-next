@@ -42,7 +42,7 @@
 
 #include "cpl_azure.h"
 
-CPL_CVSID("$Id: cpl_vsil_az.cpp 45abda3e83752d290a60e9f58d57e618d4463712 2020-09-08 19:17:12 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifndef HAVE_CURL
 

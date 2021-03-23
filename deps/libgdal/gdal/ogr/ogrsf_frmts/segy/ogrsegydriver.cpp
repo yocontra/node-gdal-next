@@ -29,7 +29,7 @@
 #include "ogr_segy.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrsegydriver.cpp 84e0e64d6a6d2492a144e604582043eec6119af6 2020-10-01 22:42:57 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           EBCDICToASCII                              */

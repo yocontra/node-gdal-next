@@ -36,7 +36,7 @@
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpgtablelayer.cpp 00ba8642f449a57bbef0c4203d4da34485453f90 2020-05-30 16:50:50 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #define USE_COPY_UNSET  -10
 
@@ -2909,7 +2909,9 @@ void OGRPGTableLayer::ResolveSRID(const OGRPGGeomFieldDefn* poGFldDefn)
         osGetSRID += OGRPGEscapeColumnName(poGFldDefn->GetNameRef());
         osGetSRID += ") FROM ";
         osGetSRID += pszSqlTableName;
-        osGetSRID += " LIMIT 1";
+        osGetSRID += " WHERE (";
+        osGetSRID += OGRPGEscapeColumnName(poGFldDefn->GetNameRef());
+        osGetSRID += " IS NOT NULL) LIMIT 1";
 
         hResult = OGRPG_PQexec(poDS->GetPGConn(), osGetSRID );
         if( hResult

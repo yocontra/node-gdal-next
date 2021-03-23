@@ -33,7 +33,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: ogrmssqlspatialtablelayer.cpp 44f00f2525498bc2059c9cc0e6d86fe7accd9168 2020-05-27 22:13:37 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #define UNSUPPORTED_OP_READ_ONLY "%s : unsupported operation on a read-only datasource."
 

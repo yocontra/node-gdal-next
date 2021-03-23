@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_vrt.h cad9c764a44d2b5383a70a341158b4518b25cedd 2016-11-30 01:46:53Z Kurt Schwehr $
+ * $Id$
  *
  * Project:  Virtual GDAL Datasets
  * Purpose:  C/Public declarations of virtual GDAL dataset objects.

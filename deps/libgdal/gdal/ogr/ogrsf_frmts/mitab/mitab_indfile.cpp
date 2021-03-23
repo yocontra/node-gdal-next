@@ -43,7 +43,7 @@
 #include "mitab_priv.h"
 #include "mitab_utils.h"
 
-CPL_CVSID("$Id: mitab_indfile.cpp 5d92959f1afafc273140671136adcc1f12d16160 2020-06-02 16:12:25 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class TABINDFile

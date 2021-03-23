@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_plscenes.h 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $
+ * $Id$
  *
  * Project:  PlanetLabs scene driver
  * Purpose:  PLScenes driver interface

@@ -61,7 +61,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: gdaljp2metadata.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static const unsigned char msi_uuid2[16] = {
     0xb1,0x4b,0xf8,0xbd,0x08,0x3d,0x4b,0x43,

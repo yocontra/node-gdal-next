@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "ogr_pg.h"
 
-CPL_CVSID("$Id: ogrpgresultlayer.cpp 66ac31a48902247bbf0f60205d975e17b764a749 2019-07-22 17:29:09 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #define PQexec this_is_an_error
 
@@ -400,9 +400,11 @@ void OGRPGResultLayer::ResolveSRID(const OGRPGGeomFieldDefn* poGFldDefn)
             osGetSRID += OGRPGEscapeColumnName(poGFldDefn->GetNameRef());
             if (poDS->sPostGISVersion.nMajor > 2 || (poDS->sPostGISVersion.nMajor == 2 && poDS->sPostGISVersion.nMinor >= 2))
                 osGetSRID += "::geometry";
-            osGetSRID += ") FROM(";
+            osGetSRID += ") FROM (";
             osGetSRID += pszRawStatement;
-            osGetSRID += ") AS ogrpggetsrid LIMIT 1";
+            osGetSRID += ") AS ogrpggetsrid WHERE (";
+            osGetSRID += OGRPGEscapeColumnName(poGFldDefn->GetNameRef());
+            osGetSRID += " IS NOT NULL) LIMIT 1";
 
             PGresult* hSRSIdResult = OGRPG_PQexec(poDS->GetPGConn(), osGetSRID );
 

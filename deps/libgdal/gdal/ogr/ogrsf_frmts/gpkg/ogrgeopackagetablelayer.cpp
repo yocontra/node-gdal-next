@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <cmath>
 
-CPL_CVSID("$Id: ogrgeopackagetablelayer.cpp da73c28660e8b191f129355e4190dc6b6ad2d93b 2020-10-19 00:24:15 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static const char UNSUPPORTED_OP_READ_ONLY[] =
   "%s : unsupported operation on a read-only datasource.";
@@ -310,7 +310,8 @@ OGRErr OGRGeoPackageTableLayer::FeatureBindParameters( OGRFeature *poFeature,
                             sField.Date.TZFlag = 100;
                         }
 
-                        char* pszXMLDateTime = OGRGetXMLDateTime(&sField);
+                        constexpr bool bAlwaysMillisecond = true;
+                        char* pszXMLDateTime = OGRGetXMLDateTime(&sField, bAlwaysMillisecond);
                         osTemp = pszXMLDateTime;
                         pszVal = osTemp.c_str();
                         nValLengthBytes = static_cast<int>(osTemp.size());

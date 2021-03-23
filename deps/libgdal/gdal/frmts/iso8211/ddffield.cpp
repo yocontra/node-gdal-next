@@ -36,7 +36,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ddffield.cpp 9dedf5b8948aeaec5518e1f4210f98a378c3d975 2019-03-17 13:17:53 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 // Note, we implement no constructor for this class to make instantiation
 // cheaper.  It is required that the Initialize() be called before anything

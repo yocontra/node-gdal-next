@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rdbdataset.cpp 95727499e1e118c5eeae7ca5bd5c4774ce32cb8a 2020-03-24 08:33:14 +0100 Kai Pastor $
+ * $Id$
  *
  * Project:  RIEGL RDB 2 driver
  * Purpose:  Add support for reading *.mpx RDB 2 files.

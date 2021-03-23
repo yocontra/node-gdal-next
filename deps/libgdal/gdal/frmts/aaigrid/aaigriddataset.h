@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: aaigriddataset.h 58d6ad3b40141636fc5b8307cc90f35a210c8b50 2019-12-29 12:31:59 +0100 Even Rouault $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  Implements Arc/Info ASCII Grid Format.

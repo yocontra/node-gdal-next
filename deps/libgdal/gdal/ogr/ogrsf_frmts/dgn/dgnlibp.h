@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dgnlibp.h 7762c6c3088eebb0b696d9e01c2329fd19b32c9f 2019-10-17 22:23:24 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  Microstation DGN Access Library
  * Purpose:  Internal (privatE) datastructures, and prototypes for DGN Access

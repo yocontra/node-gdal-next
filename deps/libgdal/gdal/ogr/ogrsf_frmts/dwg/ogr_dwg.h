@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dwg.h db7b8a03d90637c2f6ba5cbdb087e2819d8ec8dd 2018-05-12 22:34:30 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  DWG Translator
  * Purpose:  Definition of classes for OGR .dwg driver.

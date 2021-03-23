@@ -53,7 +53,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdalrasterize.cpp 7925b72d646b6d81e38663dd97f012eda705df0f 2020-10-03 14:06:00 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 
 /************************************************************************/

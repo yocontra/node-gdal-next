@@ -49,7 +49,7 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id: rmflzw.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 // Code marks that there is no predecessor in the string
 constexpr GUInt32 NO_PRED = 0xFFFF;

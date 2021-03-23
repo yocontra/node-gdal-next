@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ntv1dataset.cpp 6e221b5fd9bb196492f09e52fd257158573f93b3 2019-12-28 02:02:25 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_srs_api.h ef356bb0205870e819cb422bace9b5f8c39ae2cb 2020-10-07 19:56:50 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API and constant declarations for OGR Spatial References.

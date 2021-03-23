@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab_utils.h 6508d9ac778fff47e6ef4eef3a3e6b70556f3814 2018-03-27 14:28:44 +0200 Even Rouault $
+ * $Id$
  *
  * Name:     mitab_utils.h
  * Project:  MapInfo TAB Read/Write library

@@ -72,7 +72,7 @@
 
 #endif
 
-CPL_CVSID("$Id: gdalwarpkernel.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 constexpr double BAND_DENSITY_THRESHOLD = 0.0000000001;
 constexpr float SRC_DENSITY_THRESHOLD =  0.000000001f;
@@ -4773,10 +4773,14 @@ static CPL_INLINE bool GWKCheckAndComputeSrcOffsets(
         return false;
     }
 
-    const int iSrcX =
+    int iSrcX =
         static_cast<int>(_padfX[_iDstX] + 1.0e-10) - _poWK->nSrcXOff;
-    const int iSrcY =
+    int iSrcY =
         static_cast<int>(_padfY[_iDstX] + 1.0e-10) - _poWK->nSrcYOff;
+    if( iSrcX == _nSrcXSize )
+        iSrcX --;
+    if( iSrcY == _nSrcYSize )
+        iSrcY --;
 
     // Those checks should normally be OK given the previous ones.
     CPLAssert( iSrcX >= 0 );

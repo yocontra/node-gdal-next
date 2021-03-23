@@ -48,7 +48,7 @@
 #include "ogr_geojson.h"
 #include "ogrgeojsonreader.h"
 
-CPL_CVSID("$Id: ogrgeojsonlayer.cpp 245fbcca246f2fd183176dcacd68e3b4e98622df 2020-01-07 04:30:14 -0700 Sean Gillies $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       STATIC MEMBERS DEFINITION                      */

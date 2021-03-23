@@ -52,7 +52,7 @@
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrutils.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 // Returns whether a double fits within an int.
 // Unable to put this in cpl_port.h as include limit breaks grib.
@@ -1327,6 +1327,11 @@ char* OGRGetRFC822DateTime( const OGRField* psField )
 
 char* OGRGetXMLDateTime(const OGRField* psField)
 {
+    return OGRGetXMLDateTime(psField, false);
+}
+
+char* OGRGetXMLDateTime(const OGRField* psField, bool bAlwaysMillisecond)
+{
     const GInt16 year = psField->Date.Year;
     const GByte month = psField->Date.Month;
     const GByte day = psField->Date.Day;
@@ -1359,7 +1364,7 @@ char* OGRGetXMLDateTime(const OGRField* psField)
                      (TZFlag > 100) ? '+' : '-', TZHour, TZMinute);
     }
 
-    if( OGR_GET_MS(second) )
+    if( OGR_GET_MS(second) || bAlwaysMillisecond )
         pszRet = CPLStrdup(CPLSPrintf(
                                "%04d-%02u-%02uT%02u:%02u:%06.3f%s",
                                year, month, day, hour, minute, second,
@@ -1761,4 +1766,69 @@ OGRErr OGRReadWKBGeometryType( const unsigned char * pabyData,
     *peGeometryType = static_cast<OGRwkbGeometryType>(iRawType);
 
     return OGRERR_NONE;
+}
+
+/************************************************************************/
+/*                        OGRFormatFloat()                              */
+/************************************************************************/
+
+int  OGRFormatFloat(char *pszBuffer, int nBufferLen,
+                    float fVal, int nPrecision, char chConversionSpecifier)
+{
+    int nSize = 0;
+    char szFormatting[32] = {};
+    constexpr int MAX_SIGNIFICANT_DIGITS_FLOAT32 = 8;
+    const int nInitialSignificantFigures =
+        nPrecision >= 0 ? nPrecision : MAX_SIGNIFICANT_DIGITS_FLOAT32;
+
+    CPLsnprintf(szFormatting, sizeof(szFormatting),
+                "%%.%d%c",
+                nInitialSignificantFigures,
+                chConversionSpecifier);
+    nSize = CPLsnprintf(pszBuffer, nBufferLen, szFormatting, fVal);
+    const char* pszDot = strchr(pszBuffer, '.');
+
+    // Try to avoid 0.34999999 or 0.15000001 rounding issues by
+    // decreasing a bit precision.
+    if( nInitialSignificantFigures >= 8 &&
+        pszDot != nullptr &&
+        (strstr(pszDot, "99999") != nullptr ||
+         strstr(pszDot, "00000") != nullptr) )
+    {
+        const CPLString osOriBuffer(pszBuffer, nSize);
+
+        bool bOK = false;
+        for( int i = 1; i <= 3; i++ )
+        {
+            CPLsnprintf(szFormatting, sizeof(szFormatting),
+                        "%%.%d%c",
+                        nInitialSignificantFigures - i,
+                        chConversionSpecifier);
+            nSize = CPLsnprintf(pszBuffer, nBufferLen,
+                                szFormatting, fVal);
+            pszDot = strchr(pszBuffer, '.');
+            if( pszDot != nullptr &&
+                strstr(pszDot, "99999") == nullptr &&
+                strstr(pszDot, "00000") == nullptr &&
+                static_cast<float>(CPLAtof(pszBuffer)) == fVal )
+            {
+                bOK = true;
+                break;
+            }
+        }
+        if( !bOK )
+        {
+            memcpy(pszBuffer, osOriBuffer.c_str(), osOriBuffer.size()+1);
+            nSize = static_cast<int>(osOriBuffer.size());
+        }
+    }
+
+    if( nSize+2 < static_cast<int>(nBufferLen) &&
+        strchr(pszBuffer, '.') == nullptr &&
+        strchr(pszBuffer, 'e') == nullptr )
+    {
+        nSize += CPLsnprintf(pszBuffer + nSize, nBufferLen - nSize, ".0");
+    }
+
+    return nSize;
 }

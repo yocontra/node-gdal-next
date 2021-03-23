@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_simplesurf.h 595fc490ff5c1572fd1e75b4d5840ef30a170e74 2020-06-19 18:24:16 +0200 Even Rouault $
+ * $Id$
  * Project:  GDAL
  * Purpose:  Correlator
  * Author:   Andrew Migal, migal.drew@gmail.com

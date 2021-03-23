@@ -41,7 +41,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: vrtderivedrasterband.cpp 791996ba42bb1936bcbc963840999355ce8000f8 2020-02-13 22:21:19 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 using namespace GDALPy;
 

@@ -35,7 +35,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: ogr_srs_panorama.cpp 03ef20ef2cf10814a86d8601e9031c9d63462dd5 2020-02-09 18:10:31 +0300 drons $")
+CPL_CVSID("$Id$")
 
 constexpr double TO_DEGREES = 57.2957795130823208766;
 constexpr double TO_RADIANS = 0.017453292519943295769;

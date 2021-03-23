@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrs57datasource.cpp 342855360b69569556916db63ea417dd3514f258 2020-06-14 15:44:48 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRS57DataSource()                          */

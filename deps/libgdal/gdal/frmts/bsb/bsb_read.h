@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: bsb_read.h 05ec2ff9cd43cabf721a161bbc295f6c827eaedd 2016-10-24 06:23:09Z Kurt Schwehr $
+ * $Id$
  *
  * Project:  BSB Reader
  * Purpose:  non-GDAL BSB API Declarations

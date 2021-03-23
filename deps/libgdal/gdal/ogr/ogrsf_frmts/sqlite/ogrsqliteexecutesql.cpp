@@ -49,7 +49,7 @@
 #include "ogr_spatialref.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqliteexecutesql.cpp e665ed544d2c5572c03c44a7327d8b284c03d86b 2019-08-15 22:13:38 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       OGRSQLiteExecuteSQLLayer                       */

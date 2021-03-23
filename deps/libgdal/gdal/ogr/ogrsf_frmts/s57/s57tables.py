@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ******************************************************************************
-#  $Id: s57tables.py a1094f6d2898cd840a8a296ab7e1734c641a0dac 2018-05-07 10:02:54 +1000 Ben Elliston $
+#  $Id$
 #
 #  Project:  S-57 OGR Translator
 #  Purpose:  Script to translate s57 .csv files into C code "data" statements.

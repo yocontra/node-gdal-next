@@ -30,7 +30,7 @@
 #include "gnm.h"
 #include "gnm_priv.h"
 
-CPL_CVSID("$Id: gnmrule.cpp 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $")
+CPL_CVSID("$Id$")
 
 /*! @cond Doxygen_Suppress */
 GNMRule::GNMRule()

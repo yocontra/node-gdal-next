@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geo_normalize.c faff6f84417cceda98b06fd532fea6c45547fbf3 2020-09-13 16:29:43 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  libgeotiff
  * Purpose:  Code to normalize PCS and other composite codes in a GeoTIFF file.

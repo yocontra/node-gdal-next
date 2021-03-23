@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_core.h 406f7cad9f53fc3784101bbd54bd0d435f0cbe36 2020-05-29 21:01:59 +0200 Alessandro Pasotti $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define some core portability services for cross-platform OGR code.

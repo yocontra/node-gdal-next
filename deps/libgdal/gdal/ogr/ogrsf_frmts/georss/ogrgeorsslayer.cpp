@@ -52,7 +52,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrgeorsslayer.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static const char* const apszAllowedATOMFieldNamesWithSubElements[] =
     { "author", "contributor", nullptr };

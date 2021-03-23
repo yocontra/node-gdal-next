@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm_priv.h 4b4fd1f9a696b025228d6489fc94e964cfdaab19 2016-11-19 16:54:08Z Dmitry Baryshnikov $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM private and internal declarations.

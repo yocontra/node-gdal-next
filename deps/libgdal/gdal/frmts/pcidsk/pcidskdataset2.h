@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcidskdataset2.h 3b89063b95a18cfefb8dcf527a472987c52e6e3c 2020-05-27 19:53:42 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  PCIDSK Database File
  * Purpose:  Read/write PCIDSK Database File used by the PCI software, using

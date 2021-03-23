@@ -38,7 +38,7 @@ this file is only about 3k of object code.  */
 
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: cpl_md5.cpp 0f654dda9faabf9d86a44293f0f89903a8e97dd7 2018-04-15 20:18:32 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static GUInt32 getu32( const unsigned char *addr )
 {

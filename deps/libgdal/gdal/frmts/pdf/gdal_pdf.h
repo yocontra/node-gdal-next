@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_pdf.h 5afc2a1dfe5c2735beb1ff8f1ffb3fc125a93bf4 2020-01-12 23:57:04 +0100 Even Rouault $
+ * $Id$
  *
  * Project:  PDF Translator
  * Purpose:  Definition of classes for OGR .pdf driver.

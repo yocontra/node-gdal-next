@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgeomedialayer.cpp 085d851ca29ce323a5556449611935a5852cc9dc 2020-08-20 14:13:35 +1000 Nyall Dawson $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRGeomediaLayer()                          */

@@ -49,7 +49,7 @@
 #include <limits>
 #include <utility>
 
-CPL_CVSID("$Id: wmsdriver.cpp 18df30822243cf782434ddb77b214a8b7dde74f8 2020-10-01 14:55:00 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 //
 // A static map holding seen server GetTileService responses, per process
@@ -86,6 +86,18 @@ CPLXMLNode * GDALWMSDatasetGetConfigFromURL(GDALOpenInfo *poOpenInfo)
 
     CPLString osBaseURL = pszBaseURL;
     /* Remove all keywords to get base URL */
+
+    if( osBBOXOrder.empty() && !osCRS.empty() &&
+        VersionStringToInt(osVersion.c_str())>= VersionStringToInt("1.3.0") )
+    {
+        OGRSpatialReference oSRS;
+        oSRS.SetFromUserInput(osCRS);
+        oSRS.AutoIdentifyEPSG();
+        if( oSRS.EPSGTreatsAsLatLong() || oSRS.EPSGTreatsAsNorthingEasting() )
+        {
+            osBBOXOrder = "yxYX";
+        }
+    }
 
     osBaseURL = CPLURLAddKVP(osBaseURL, "VERSION", nullptr);
     osBaseURL = CPLURLAddKVP(osBaseURL, "REQUEST", nullptr);

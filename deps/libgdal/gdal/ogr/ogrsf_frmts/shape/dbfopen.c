@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dbfopen.c 7f900bc2a11e7f8a8bd9fb63584f199aa085cdcc 2020-09-30 12:49:13 -0700 Steve Lacy $
+ * $Id$
  *
  * Project:  Shapelib
  * Purpose:  Implementation of .dbf access API documented in dbf_api.html.
@@ -35,7 +35,6 @@
  ******************************************************************************/
 
 #include "shapefil.h"
-#include "cpl_port.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -67,7 +66,7 @@
 #define CPLsnprintf snprintf
 #endif
 
-SHP_CVSID("$Id: dbfopen.c 7f900bc2a11e7f8a8bd9fb63584f199aa085cdcc 2020-09-30 12:49:13 -0700 Steve Lacy $")
+SHP_CVSID("$Id$")
 
 #ifndef FALSE
 #  define FALSE		0

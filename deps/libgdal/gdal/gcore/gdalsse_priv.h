@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalsse_priv.h 60827fdad75b8bd6178c450fcc15ca6abdd467f0 2019-04-01 17:20:03 +0200 Raul Marin $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  SSE2 helper

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqliteutility.h 455bf3c255ee78dc70116ca2e2b1a37aaecd0799 2020-05-30 17:43:05 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  GeoPackage Translator
  * Purpose:  Utility header for OGR GeoPackage driver.

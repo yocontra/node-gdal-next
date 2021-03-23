@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gxfopen.h 013acb5f84267ffb6e42b03ccdb09045243cdf1a 2017-05-20 16:15:44Z Even Rouault $
+ * $Id$
  *
  * Project:  GXF Reader
  * Purpose:  GXF-3 access function declarations.

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * $Id: SWapi.c 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $
+ * $Id$
  *
  * This module has a number of additions and improvements over the original
  * implementation to be suitable for usage in GDAL HDF driver.

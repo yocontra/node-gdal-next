@@ -42,7 +42,7 @@
 #include "hdf4compat.h"
 #include "hdf4dataset.h"
 
-CPL_CVSID("$Id: hdf4dataset.cpp 7efbb574f409465c908e5d83877fa36a501d434d 2020-10-14 11:56:55 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 extern const char * const pszGDALSignature;
 

@@ -43,7 +43,7 @@
 #include "mitab_priv.h"
 #include "mitab_utils.h"
 
-CPL_CVSID("$Id: mitab_mapobjectblock.cpp fd5a52b3fb25239d417f2daed64aa6f8cbe38da9 2018-09-17 14:19:33 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class TABMAPObjectBlock
@@ -237,7 +237,20 @@ int TABMAPObjectBlock::AdvanceToNextObject( TABMAPHeaderBlock *poHeader )
     if( m_nCurObjectOffset + 5 < m_numDataBytes + 20 )
     {
         GotoByteInBlock( m_nCurObjectOffset );
-        m_nCurObjectType = static_cast<TABGeomType>(ReadByte());
+        const GByte byVal = ReadByte();
+        if( TABMAPFile::IsValidObjType(byVal) )
+        {
+            m_nCurObjectType = static_cast<TABGeomType>(byVal);
+        }
+        else
+        {
+            CPLError(CE_Warning,
+                static_cast<CPLErrorNum>(TAB_WarningFeatureTypeNotSupported),
+                "Unsupported object type %d (0x%2.2x).  Feature will be "
+                "returned with NONE geometry.",
+                byVal, byVal);
+            m_nCurObjectType = TAB_GEOM_NONE;
+        }
     }
     else
     {

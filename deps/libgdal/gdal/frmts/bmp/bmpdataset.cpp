@@ -34,7 +34,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: bmpdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 // Enable if you want to see lots of BMP debugging output.
 // #define BMP_DEBUG

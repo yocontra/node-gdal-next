@@ -53,7 +53,7 @@
 #include "ogrsf_frmts/ogrsf_frmts.h"
 #include "ogrsf_frmts/vrt/ogr_vrt.h"
 
-CPL_CVSID("$Id: ogrvrtlayer.cpp 5ed5120015ed1d124d67c2b01d543d6554b05e1a 2020-07-10 15:04:53 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #define UNSUPPORTED_OP_READ_ONLY \
     "%s : unsupported operation on a read-only datasource."

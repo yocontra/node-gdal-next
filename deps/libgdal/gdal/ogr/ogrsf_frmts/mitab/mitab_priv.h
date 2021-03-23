@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab_priv.h e42cbe72c215e11b47f6b30fe2f075279007508b 2019-01-31 11:07:40 +0100 Even Rouault $
+ * $Id$
  *
  * Name:     mitab_priv.h
  * Project:  MapInfo TAB Read/Write library
@@ -1497,6 +1497,8 @@ class TABMAPFile
 
     const CPLString& GetEncoding() const;
     void SetEncoding( const CPLString& );
+
+    static bool IsValidObjType(int nObjType);
 
 #ifdef DEBUG
     void Dump(FILE *fpOut = nullptr);

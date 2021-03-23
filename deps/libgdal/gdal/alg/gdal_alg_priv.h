@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg_priv.h 225923a5caa782d1543b7c0d7248b92dcc0bc8bf 2020-04-06 12:59:27 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes and definitions for various GDAL based algorithms:
@@ -166,6 +166,9 @@ void* GDALCreateTPSTransformerInt( int nGCPCount, const GDAL_GCP *pasGCPList,
                                    int bReversed, char** papszOptions );
 
 void CPL_DLL * GDALCloneTransformer( void *pTransformerArg );
+
+void GDALRefreshGenImgProjTransformer(void* hTransformArg);
+void GDALRefreshApproxTransformer(void* hTransformArg);
 
 /************************************************************************/
 /*      Color table related                                             */

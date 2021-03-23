@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nasreaderp.h a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  NAS Reader
  * Purpose:  Private Declarations for OGR NAS Reader code.

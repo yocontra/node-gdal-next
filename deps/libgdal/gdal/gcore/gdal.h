@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal.h 2915efad7ff962b4a5dce37532d1c6e80bc24543 2020-10-02 16:03:07 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  GDAL Core C/Public declarations.

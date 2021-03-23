@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_port.h 7a291205ed24a41c8f9a080fdd9630a6b565427d 2020-06-11 16:05:25 +0200 SpaceIm $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com

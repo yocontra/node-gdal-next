@@ -33,7 +33,7 @@
 #include "cpl_conv.h"
 #include "ods_formula.h"
 
-CPL_CVSID("$Id: ods_formula.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 namespace {
 #include "ods_formula_parser.hpp"

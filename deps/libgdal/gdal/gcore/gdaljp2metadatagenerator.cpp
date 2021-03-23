@@ -31,7 +31,7 @@
 
 #include <cstddef>
 
-CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp d1b96f561f28cb16ce6529b452926cc0de27f55d 2019-08-14 15:08:38 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_LIBXML2
 

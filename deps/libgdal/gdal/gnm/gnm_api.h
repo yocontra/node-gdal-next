@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm_api.h 80f31ac0b0753868ab421bf0ff62e6682ad9617e 2017-12-07 18:13:41Z Even Rouault $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM C API.

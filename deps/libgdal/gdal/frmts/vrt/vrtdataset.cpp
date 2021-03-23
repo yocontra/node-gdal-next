@@ -41,7 +41,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: vrtdataset.cpp 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #define VRT_PROTOCOL_PREFIX "vrt://"
 

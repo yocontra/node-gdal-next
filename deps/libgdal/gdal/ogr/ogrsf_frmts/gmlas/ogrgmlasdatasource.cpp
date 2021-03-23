@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlasdatasource.cpp af3afc62a3f68ecf9ad3460fcecd8692431d3452 2020-05-11 01:00:20 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRGMLASDataSource()                        */

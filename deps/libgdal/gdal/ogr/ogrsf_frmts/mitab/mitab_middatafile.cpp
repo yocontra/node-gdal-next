@@ -41,7 +41,7 @@
 #include "cpl_vsi.h"
 #include "mitab_priv.h"
 
-CPL_CVSID("$Id: mitab_middatafile.cpp 7355f684f451b09efde7b4c59aae57454fa85541 2019-03-17 12:47:10 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class MIDDATAFile

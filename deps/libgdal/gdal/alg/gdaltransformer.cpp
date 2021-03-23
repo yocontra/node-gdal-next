@@ -57,7 +57,7 @@
 #include "ogr_srs_api.h"
 
 
-CPL_CVSID("$Id: gdaltransformer.cpp 7e3771089616198d9329cfc9ed8f0620f4e5ea66 2020-06-12 16:43:48 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 CPL_C_START
 void *GDALDeserializeGCPTransformer( CPLXMLNode *psTree );
@@ -71,8 +71,6 @@ static void *GDALDeserializeReprojectionTransformer( CPLXMLNode *psTree );
 
 static CPLXMLNode *GDALSerializeGenImgProjTransformer( void *pTransformArg );
 static void *GDALDeserializeGenImgProjTransformer( CPLXMLNode *psTree );
-
-static void GDALRefreshGenImgProjTransformer(void* hTransformArg);
 
 static void *
 GDALCreateApproxTransformer2( GDALTransformerFunc pfnRawTransformer,
@@ -364,11 +362,15 @@ GDALSuggestedWarpOutput2( GDALDatasetH hSrcDS,
 /* -------------------------------------------------------------------- */
 /*      Setup sample points all around the edge of the input raster.    */
 /* -------------------------------------------------------------------- */
-    if( pfnTransformer == GDALGenImgProjTransform ||
-        pfnTransformer == GDALApproxTransform )
+    if( pfnTransformer == GDALGenImgProjTransform )
     {
         // In case CHECK_WITH_INVERT_PROJ has been modified.
         GDALRefreshGenImgProjTransformer(pTransformArg);
+    }
+    else if( pfnTransformer == GDALApproxTransform )
+    {
+        // In case CHECK_WITH_INVERT_PROJ has been modified.
+        GDALRefreshApproxTransformer(pTransformArg);
     }
 
     const int nInXSize = GDALGetRasterXSize( hSrcDS );
@@ -3306,6 +3308,21 @@ void GDALDestroyApproxTransformer( void * pCBData )
         GDALDestroyTransformer( psATInfo->pBaseCBData );
 
     CPLFree( pCBData );
+}
+
+/************************************************************************/
+/*                  GDALRefreshApproxTransformer()                      */
+/************************************************************************/
+
+void GDALRefreshApproxTransformer( void* hTransformArg )
+{
+    ApproxTransformInfo *psInfo =
+        static_cast<ApproxTransformInfo *>( hTransformArg );
+
+    if( psInfo->pfnBaseTransformer == GDALGenImgProjTransform )
+    {
+        GDALRefreshGenImgProjTransformer( psInfo->pBaseCBData );
+    }
 }
 
 /************************************************************************/

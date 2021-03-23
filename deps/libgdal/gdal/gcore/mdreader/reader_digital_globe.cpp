@@ -38,7 +38,7 @@
 #include "cpl_string.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: reader_digital_globe.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id$")
 
 /**
  * GDALMDReaderDigitalGlobe()

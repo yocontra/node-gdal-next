@@ -45,7 +45,7 @@
 
 #include "marfa.h"
 
-CPL_CVSID("$Id: Tif_band.cpp 81d88451b89a7cb8e02020005eb322b0cdaff4de 2020-08-10 08:52:54 -0700 Lucian Plesea $")
+CPL_CVSID("$Id$")
 
 NAMESPACE_MRF_START
 

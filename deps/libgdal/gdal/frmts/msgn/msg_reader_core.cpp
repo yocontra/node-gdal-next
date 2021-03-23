@@ -44,7 +44,7 @@
 #ifdef GDAL_SUPPORT
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: msg_reader_core.cpp b5174429691e01d1cff7ebc69f956b5cd9ffd6cc 2019-08-26 19:14:19 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #else
 #define VSIFSeek(fp, pos, ref)    CPL_IGNORE_RET_VAL(fseek(fp, pos, ref))

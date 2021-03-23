@@ -31,7 +31,7 @@
 #include "ogr_dods.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrdodssequencelayer.cpp 0f97d3a5c271e8972ea5dddc07421c7d083050b0 2019-03-24 13:50:30 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        OGRDODSSequenceLayer()                        */

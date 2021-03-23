@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_p.h c7d51c5ead794772b42f3c58c394bfff6045f8d6 2019-08-22 09:59:35 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Some private helper functions and stuff for OGR implementation.
@@ -97,6 +97,9 @@ void OGRFormatDouble( char *pszBuffer, int nBufferLen, double dfVal,
                       char chDecimalSep, int nPrecision = 15, char chConversionSpecifier = 'f' );
 std::string OGRFormatDouble(double val, const OGRWktOptions& opts);
 
+int OGRFormatFloat(char *pszBuffer, int nBufferLen, float fVal,
+                   int nPrecision, char chConversionSpecifier);
+
 /* -------------------------------------------------------------------- */
 /*      Date-time parsing and processing functions                      */
 /* -------------------------------------------------------------------- */
@@ -110,6 +113,7 @@ int CPL_DLL OGRParseRFC822DateTime( const char* pszRFC822DateTime,
                                     OGRField* psField );
 char CPL_DLL * OGRGetRFC822DateTime(const OGRField* psField);
 char CPL_DLL * OGRGetXMLDateTime(const OGRField* psField);
+char CPL_DLL * OGRGetXMLDateTime(const OGRField* psField, bool bAlwaysMillisecond);
 char CPL_DLL * OGRGetXML_UTF8_EscapedString(const char* pszString);
 
 int OGRCompareDate(const OGRField *psFirstTuple,

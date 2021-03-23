@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geo_normalize.h 48793b5613cf1bf789125516ba845947dc63098f 2019-07-17 17:40:29 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  libgeotiff
  * Purpose:  Include file related to geo_normalize.c containing Code to

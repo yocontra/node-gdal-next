@@ -48,7 +48,7 @@
 #  endif
 #endif
 
-CPL_CVSID("$Id: ili1reader.cpp 4051303afb8b2f6d3ec3e04ee7b7ebe197521342 2020-01-01 18:02:26 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 //
 // ILI1Reader

@@ -44,7 +44,7 @@
 #include <set>
 #include <vector>
 
-CPL_CVSID("$Id: ogrlineref.cpp ba6b40f6e6a9d787c27271bc6cacb3fe5733bc27 2019-08-12 22:23:27 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #if defined(HAVE_GEOS)
 #if GEOS_VERSION_MAJOR > 3 || (GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR >= 2)

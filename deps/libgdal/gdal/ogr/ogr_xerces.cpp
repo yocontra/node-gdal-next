@@ -40,7 +40,7 @@
 #include "cpl_multiproc.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogr_xerces.cpp 1b9f0a2e0fd3a222576b64436720029db466742f 2019-07-07 22:49:00 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_XERCES
 

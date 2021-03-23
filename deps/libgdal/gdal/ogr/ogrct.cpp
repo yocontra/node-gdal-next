@@ -47,7 +47,7 @@
 #include "proj.h"
 #include "proj_experimental.h"
 
-CPL_CVSID("$Id: ogrct.cpp 87bc645bde01cd1b9ad76e78bb4229637b90b6be 2020-10-08 21:40:02 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*             OGRCoordinateTransformationOptions::Private              */

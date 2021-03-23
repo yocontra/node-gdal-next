@@ -36,7 +36,7 @@
 #include <map>
 #include <set>
 
-CPL_CVSID("$Id: gdalmdimtranslate_lib.cpp adf0cd29fb7e479c33474ed88072945ad8c8cc69 2020-09-12 20:10:58 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                     GDALMultiDimTranslateOptions                     */

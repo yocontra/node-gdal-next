@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgeojsonwritelayer.cpp 4c7be5ffcf20c86efd440130a96f62fc6c6c4878 2020-08-06 19:54:19 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRGeoJSONWriteLayer()                       */
@@ -91,14 +91,25 @@ OGRGeoJSONWriteLayer::~OGRGeoJSONWriteLayer()
         CPLString osBBOX = "[ ";
         if( bRFC7946_ )
         {
-            osBBOX += CPLSPrintf("%.*f, ", nCoordPrecision_, sEnvelopeLayer.MinX);
-            osBBOX += CPLSPrintf("%.*f, ", nCoordPrecision_, sEnvelopeLayer.MinY);
+            char szFormat[32];
+            snprintf(szFormat, sizeof(szFormat), "%%.%df", nCoordPrecision_);
+            osBBOX += CPLSPrintf(szFormat, sEnvelopeLayer.MinX);
+            osBBOX += ", ";
+            osBBOX += CPLSPrintf(szFormat, sEnvelopeLayer.MinY);
+            osBBOX += ", ";
             if( bBBOX3D )
-                osBBOX += CPLSPrintf("%.*f, ", nCoordPrecision_, sEnvelopeLayer.MinZ);
-            osBBOX += CPLSPrintf("%.*f, ", nCoordPrecision_, sEnvelopeLayer.MaxX);
-            osBBOX += CPLSPrintf("%.*f", nCoordPrecision_, sEnvelopeLayer.MaxY);
+            {
+                osBBOX += CPLSPrintf(szFormat, sEnvelopeLayer.MinZ);
+                osBBOX += ", ";
+            }
+            osBBOX += CPLSPrintf(szFormat, sEnvelopeLayer.MaxX);
+            osBBOX += ", ";
+            osBBOX += CPLSPrintf(szFormat, sEnvelopeLayer.MaxY);
             if( bBBOX3D )
-                osBBOX += CPLSPrintf(", %.*f", nCoordPrecision_, sEnvelopeLayer.MaxZ);
+            {
+                osBBOX += ", ";
+                osBBOX += CPLSPrintf(szFormat, sEnvelopeLayer.MaxZ);
+            }
         }
         else
         {

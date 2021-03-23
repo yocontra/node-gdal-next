@@ -31,7 +31,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdal_grid_bin.cpp 341cc25bc957b7f7a66c74e449511d87cda2a5b5 2020-08-13 21:49:16 +0200 Audifire $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

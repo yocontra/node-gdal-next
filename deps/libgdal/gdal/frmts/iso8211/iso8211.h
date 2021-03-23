@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: iso8211.h e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $
+ * $Id$
  *
  * Project:  ISO 8211 Access
  * Purpose:  Main declarations for ISO 8211.

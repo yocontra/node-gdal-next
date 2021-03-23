@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-CPL_CVSID("$Id: bsbdataset.cpp c143c2516730456e48277e7e64b3cc5b8f2e41ba 2020-03-26 22:45:59 -0400 Daniel Morissette $")
+CPL_CVSID("$Id$")
 
 //Disabled as people may worry about the BSB patent
 //#define BSB_CREATE

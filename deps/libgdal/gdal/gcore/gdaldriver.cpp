@@ -46,7 +46,7 @@
 #include "ogr_core.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdaldriver.cpp d0a8c5016d6f8e3e890f5224284c890441b67feb 2020-10-12 12:26:30 +0200 Javier Jimenez Shaw $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             GDALDriver()                             */

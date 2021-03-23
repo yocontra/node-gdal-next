@@ -52,7 +52,7 @@
 #include "gdal_pam.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: rdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id$")
 
 // constexpr int R_NILSXP = 0;
 constexpr int R_LISTSXP = 2;

@@ -62,7 +62,7 @@
 #include "vrtdataset.h"
 #include "../frmts/gtiff/cogdriver.h"
 
-CPL_CVSID("$Id: gdalwarp_lib.cpp 474414349ad14d918a620974947c5f061696bf0d 2020-09-18 12:57:06 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        GDALWarpAppOptions                            */
@@ -1062,6 +1062,8 @@ GDALDatasetH GDALWarpIndirect( const char *pszDest,
             psOptions->papszCreateOptions, "COMPRESS=LZW");
         psOptions->papszCreateOptions = CSLAddString(
             psOptions->papszCreateOptions, "TILED=YES");
+        psOptions->papszCreateOptions = CSLAddString(
+            psOptions->papszCreateOptions, "BIGTIFF=YES");
         psOptions->pfnProgress = myScaledProgress;
         dfStartPctCreateCopy = 2. / 3;
         psOptions->pProgressData = GDALCreateScaledProgress(
@@ -3609,6 +3611,36 @@ GDALWarpCreateOutput( int nSrcCount, GDALDatasetH *pahSrcDS, const char *pszFile
     {
         GDALSetRasterColorTable( GDALGetRasterBand(hDstDS,1), hCT );
         GDALDestroyColorTable( hCT );
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Copy scale/offset if found on source                            */
+/* -------------------------------------------------------------------- */
+    if( nSrcCount == 1 )
+    {
+        GDALDataset* poSrcDS = GDALDataset::FromHandle(pahSrcDS[0]);
+        GDALDataset* poDstDS = GDALDataset::FromHandle(hDstDS);
+
+        int nBandsToCopy = nDstBandCount;
+        if ( psOptions->bEnableDstAlpha )
+            nBandsToCopy --;
+        nBandsToCopy = std::min(nBandsToCopy, poSrcDS->GetRasterCount());
+
+        for( int i = 0; i < nBandsToCopy; i++ )
+        {
+            auto poSrcBand = poSrcDS->GetRasterBand(i+1);
+            auto poDstBand = poDstDS->GetRasterBand(i+1);
+
+            int bHasScale = FALSE;
+            const double dfScale = poSrcBand->GetScale(&bHasScale);
+            if( bHasScale )
+                poDstBand->SetScale(dfScale);
+
+            int bHasOffset = FALSE;
+            const double dfOffset = poSrcBand->GetOffset(&bHasOffset);
+            if( bHasOffset )
+                poDstBand->SetOffset(dfOffset);
+        }
     }
 
     return hDstDS;

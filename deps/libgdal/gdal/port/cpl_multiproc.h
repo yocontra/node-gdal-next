@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_multiproc.h 5bf28e3bebd1032c4c8f50564d077f95cdf897d3 2020-09-30 14:07:46 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL Multi-Threading, and process handling portability functions.

@@ -77,7 +77,7 @@
 #define CAST_PCT(x) x
 #endif
 
-CPL_CVSID("$Id: gdaldither.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static int MAKE_COLOR_CODE( int r, int g, int b )
 {

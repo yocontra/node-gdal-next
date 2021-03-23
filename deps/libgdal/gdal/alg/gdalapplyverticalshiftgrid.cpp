@@ -40,7 +40,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: gdalapplyverticalshiftgrid.cpp 1a3d91b01e0ed56288092681ad40c6fa66aaedb3 2019-05-23 21:34:37 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        GDALApplyVSGDataset                           */

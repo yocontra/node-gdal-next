@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: subfile_source.h b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  JPEG-2000
  * Purpose:  Implements read-only virtual io on a subregion of a file.

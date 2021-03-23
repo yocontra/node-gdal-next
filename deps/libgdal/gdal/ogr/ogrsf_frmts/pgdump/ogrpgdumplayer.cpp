@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrpgdumplayer.cpp 0d0659fee36aee3fe80f19a79d3df8fe9befa234 2020-05-30 16:54:14 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 constexpr int USE_COPY_UNSET = -1;
 

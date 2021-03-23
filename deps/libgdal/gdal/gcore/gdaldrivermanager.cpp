@@ -62,7 +62,7 @@
 // FIXME: Disabled following code as it crashed on OSX CI test.
 // #include <mutex>
 
-CPL_CVSID("$Id: gdaldrivermanager.cpp 9771b16ddd8d2e577e1875984b0737b220964b99 2020-05-21 11:31:01 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /* ==================================================================== */

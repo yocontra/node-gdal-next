@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: northwood.h e8a617a416b9e849ba9aab8e3217178434ce7359 2019-08-21 15:21:57 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  GRC/GRD Reader
  * Purpose:  Northwood Technologies Grid format declarations

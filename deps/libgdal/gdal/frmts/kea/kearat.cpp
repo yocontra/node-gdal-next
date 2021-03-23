@@ -29,7 +29,7 @@
 
 #include "kearat.h"
 
-CPL_CVSID("$Id: kearat.cpp 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $")
+CPL_CVSID("$Id$")
 
 KEARasterAttributeTable::KEARasterAttributeTable(kealib::KEAAttributeTable *poKEATable,
                             KEARasterBand *poBand)

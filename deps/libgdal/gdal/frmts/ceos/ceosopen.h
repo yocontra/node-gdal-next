@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceosopen.h 05ec2ff9cd43cabf721a161bbc295f6c827eaedd 2016-10-24 06:23:09Z Kurt Schwehr $
+ * $Id$
  *
  * Project:  CEOS Translator
  * Purpose:  Public (C callable) interface for CEOS and related formats such

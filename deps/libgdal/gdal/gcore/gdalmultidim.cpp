@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalmultidim.cpp fc68dfb009505a82e1c09596f7267ce6287377d5 2020-10-14 15:43:56 +0200 Even Rouault $
+ * $Id$
  *
  * Name:     gdalmultidim.cpp
  * Project:  GDAL Core

@@ -53,7 +53,7 @@
 #include <cmath>
 #include <vector>
 
-CPL_CVSID("$Id: jp2kakdataset.cpp 005bba36b5380fb56d0dd1aeb16fd92050ad17bf 2020-06-28 16:14:44 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 // Before v7.5 Kakadu does not advertise its version well
 // After v7.5 Kakadu has KDU_{MAJOR,MINOR,PATCH}_VERSION defines so it is easier

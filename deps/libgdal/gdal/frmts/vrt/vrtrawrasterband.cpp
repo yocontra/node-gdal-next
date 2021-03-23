@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: vrtrawrasterband.cpp ef49c00611235df0c1ce4f51344f00567a668661 2020-02-13 11:08:39 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /*! @cond Doxygen_Suppress */
 

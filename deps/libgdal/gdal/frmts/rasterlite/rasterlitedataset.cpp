@@ -42,7 +42,7 @@
 #define ENABLE_SQL_SQLITE_FORMAT
 #endif
 
-CPL_CVSID("$Id: rasterlitedataset.cpp f447a31822e26ddf0cabcee0ce673a028550a2a0 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        RasterliteOpenSQLiteDB()                      */

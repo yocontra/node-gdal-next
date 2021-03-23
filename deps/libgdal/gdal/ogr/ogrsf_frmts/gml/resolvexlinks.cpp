@@ -40,7 +40,7 @@
 #include "cpl_minixml.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: resolvexlinks.cpp d9bbdfb6719682ac867fc00d6b708ca8e4405436 2020-09-29 11:53:53 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                              GetID()                                 */

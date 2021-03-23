@@ -41,7 +41,7 @@
 #include "ogr_geometry.h"
 #include "swq_parser.hpp"
 
-CPL_CVSID("$Id: swq_select.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/

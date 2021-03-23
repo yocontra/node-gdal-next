@@ -35,7 +35,7 @@
 #include "ogr_p.h"
 #include "ogr_api.h"
 
-CPL_CVSID("$Id: ogrgmllayer.cpp 10a13a410326b31194c7d87874e0d3174bd638b9 2020-08-28 19:34:11 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRGMLLayer()                              */

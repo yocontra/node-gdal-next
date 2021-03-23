@@ -40,7 +40,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrlibkmllayer.cpp 302fafdd3a779d0c6c2cc714481b38e964fb45a9 2020-09-29 21:26:18 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 using kmldom::CameraPtr;
 using kmldom::ChangePtr;

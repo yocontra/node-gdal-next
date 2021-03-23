@@ -28,7 +28,7 @@
 
 #include "wmsmetadataset.h"
 
-CPL_CVSID("$Id: wmsmetadataset.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 int VersionStringToInt(const char *version);
 
@@ -254,9 +254,6 @@ void GDALWMSMetaDataset::AddSubDataset( const char* pszLayerName,
     if(VersionStringToInt(osVersion.c_str())>= VersionStringToInt("1.3.0"))
     {
         osSubdatasetName = CPLURLAddKVP(osSubdatasetName, "CRS", pszSRS);
-        /* FIXME: this should apply to all SRS that need axis inversion */
-        if (strcmp(pszSRS, "EPSG:4326") == 0)
-            osSubdatasetName = CPLURLAddKVP(osSubdatasetName, "BBOXORDER", "yxYX");
     }
     else
         osSubdatasetName = CPLURLAddKVP(osSubdatasetName, "SRS", pszSRS);

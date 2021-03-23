@@ -57,7 +57,7 @@ char *GPJ_grass_to_wkt( const struct Key_Value *,
 
 #define GRASS_MAX_COLORS 100000  // what is the right value
 
-CPL_CVSID("$Id: grass.cpp a832da5b936bac8438f9c50e7c20e563fd94c9ff 2020-09-22 13:06:27 +0200 Markus Neteler $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         Grass2CPLErrorHook()                         */

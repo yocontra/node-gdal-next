@@ -33,7 +33,7 @@
 #include "ogr_srs_api.h"
 #include "ogr_geo_utils.h"
 
-CPL_CVSID("$Id: ogropenairlayer.cpp bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 const double NAUTICAL_MILE_TO_METER = 1852.0;
 

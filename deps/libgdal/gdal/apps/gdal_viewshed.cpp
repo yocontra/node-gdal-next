@@ -34,7 +34,7 @@
 #include "ogr_srs_api.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdal_viewshed.cpp f09e810a3fa9b6cd76a050679bdb0349a11a7914 2020-08-29 10:33:07 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

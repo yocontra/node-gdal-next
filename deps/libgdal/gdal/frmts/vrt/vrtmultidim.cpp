@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vrtmultidim.cpp bf186edbcc2679a0120a774a8a184ad6b34bea7f 2020-08-12 11:08:32 +0200 Even Rouault $
+ * $Id$
  *
  * Name:     vrtmultidim.cpp
  * Purpose:  Implementation of VRTDriver
@@ -2138,9 +2138,10 @@ bool VRTMDArray::IRead(const GUInt64* arrayStartIdx,
     {
         const bool bNeedsDynamicMemory = bufferDataType.NeedsFreeDynamicMemory();
         std::vector<size_t> anStackCount(nDims);
-        std::vector<GByte*> abyStackDstPtr(nDims+1);
+        std::vector<GByte*> abyStackDstPtr;
         size_t iDim = 0;
-        abyStackDstPtr[0] = static_cast<GByte*>(pDstBuffer);
+        abyStackDstPtr.push_back(static_cast<GByte*>(pDstBuffer));
+        abyStackDstPtr.resize(nDims+1);
 lbl_next_depth:
         if( iDim == nDims )
         {

@@ -53,7 +53,7 @@
 #include "gdal_pam.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gdalpamproxydb.cpp e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /* ==================================================================== */

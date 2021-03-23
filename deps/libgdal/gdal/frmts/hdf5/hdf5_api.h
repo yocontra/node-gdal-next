@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hdf5_api.h b3ec1e71415633add22044966b557b378e4d31a7 2018-08-25 17:48:10 +0200 Even Rouault $
+ * $Id$
  *
  * Project:  Hierarchical Data Format Release 5 (HDF5)
  * Purpose:  Import HDF5 public API

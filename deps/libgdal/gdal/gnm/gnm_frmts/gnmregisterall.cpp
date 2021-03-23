@@ -30,7 +30,7 @@
 
 #include "gnm_frmts.h"
 
-CPL_CVSID("$Id: gnmregisterall.cpp 98a60d744b13223d27fa49e36781d99c949a3cdd 2019-01-21 15:18:45Z Robert Coup $")
+CPL_CVSID("$Id$")
 
 void GNMRegisterAllInternal()
 {

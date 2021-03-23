@@ -33,7 +33,7 @@
 #include "ogr_pgdump.h"
 #include "cpl_minixml.h"
 
-CPL_CVSID("$Id: ogrgmlaslayer.cpp 6416d089f89c4ae1f04f3a8a6f9706715e44fe31 2020-09-14 09:37:26 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRGMLASLayer()                           */

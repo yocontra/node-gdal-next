@@ -48,7 +48,7 @@
 #include "cpl_http.h"
 #include "cpl_mem_cache.h"
 
-CPL_CVSID("$Id: cpl_vsil_curl.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 #ifndef HAVE_CURL
 

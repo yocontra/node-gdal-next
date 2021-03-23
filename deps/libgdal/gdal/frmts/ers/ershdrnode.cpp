@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "ershdrnode.h"
 
-CPL_CVSID("$Id: ershdrnode.cpp 681c3e492f9e8b4d60495c5038b583c8528c7d90 2019-08-23 12:48:40 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             ERSHdrNode()                             */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: internal_qhull_headers.h cc29591d87b5e927a2b981c4eae24b9ca97736ec 2016-07-12 10:54:28Z Even Rouault $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  Includes internal qhull headers

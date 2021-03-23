@@ -34,7 +34,7 @@
 
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: pdfio.cpp 2b10cb8700f8f187452f517bc82438d67714d4dd 2019-12-12 22:58:55 +0100 Even Rouault $")
+CPL_CVSID("$Id$")
 
 /* Poppler 0.31.0 is the first one that needs to know the file size */
 static vsi_l_offset VSIPDFFileStreamGetSize(VSILFILE* f)

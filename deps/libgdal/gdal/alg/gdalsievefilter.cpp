@@ -44,7 +44,7 @@
 #include "gdal.h"
 #include "gdal_alg_priv.h"
 
-CPL_CVSID("$Id: gdalsievefilter.cpp 88fb6c783f68f1f529ef53ebcd53dc2f31972bd6 2020-05-25 21:31:50 +0300 uclaros $")
+CPL_CVSID("$Id$")
 
 #define MY_MAX_INT 2147483647
 

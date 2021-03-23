@@ -47,7 +47,7 @@
  *
  */
 
-/* @(#) $Id: deflate.c 2745c181e0eeb90da48e3c27fde47f1cf7c75289 2016-11-21 14:25:42Z Even Rouault $ */
+/* @(#) $Id$ */
 
 #include "deflate.h"
 

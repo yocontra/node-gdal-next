@@ -62,7 +62,7 @@
 
 #include "proj.h"
 
-CPL_CVSID("$Id: gt_wkt_srs.cpp 1154f9d97988cfebbb44a518a702897c8d93dae3 2020-08-07 21:19:49 +0200 Even Rouault $")
+CPL_CVSID("$Id$")
 
 static const geokey_t ProjLinearUnitsInterpCorrectGeoKey =
     static_cast<geokey_t>(3059);
