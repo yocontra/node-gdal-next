@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  included_gdal:
 
     runs-on: ${{ matrix.platforms }}
 
@@ -29,5 +29,28 @@ jobs:
     - run: npx node-pre-gyp configure
     - name: Build from sources
       run: npx node-pre-gyp build -j max
+    - name: Run unit tests
+      run: npm test
+
+
+  shared_gdal:
+
+    runs-on: ${{ matrix.platforms }}
+
+    strategy:
+      matrix:
+        node-version: [ 10.x, 12.x, 14.x, 15.x ]
+        platforms: [ ubuntu-16.04, ubuntu-18.04, ubuntu-20.04 ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install --ignore-scripts
+    - run: npx node-pre-gyp configure
+    - name: Build from sources
+      run: npx node-pre-gyp build --shared_gdal -j max
     - name: Run unit tests
       run: npm test
