@@ -2,12 +2,4 @@
 
 ### Making a Release
 
-```
-# updates package.json, tags it, puts out new docs, publishes, pushes to git, etc
-$ make release version=0.9.1
-
-# once builds complete, run:
-$ npm publish
-```
-
-Afterwards just click the "Draft a New Release" button [here](https://github.com/contra/node-gdal-next/releases), select the tag, and type in the version and some notes and that should do it.
+Releases are created via Github Actions and will automatically appear in Releases

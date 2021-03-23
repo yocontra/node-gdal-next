@@ -7,11 +7,12 @@ Read and write raster and vector geospatial datasets straight from [Node.js](htt
 
 # Fork Notes
 
-This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal> with:
+This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal>.
+
+It adds a number of features, the main one being asynchronous operations.
 
 - **Support for asynchronous IO**
 
-## As of November 9th 2020, async support for raster data has been completely merged into <https://github.com/contra/node-gdal-next>
 Async support for vector data is currently experimental, with the following classses being async-compatible on `master`
 * main `open`
 * global `Algorithms`
@@ -36,40 +37,69 @@ longitude second. If you don't want to make large code changes, you can replace 
 
 ### Breaking Changes relative to node-gdal-next
 
-- None, node-gdal-next is kept in sync
+- None, node-gdal-next is usually kept in sync
 
 ## Installation
 
-If you need async support, you should install the official package from <https://github.com/contra/node-gdal-next>
-
-This project is not published on NPM, it is meant to support experimental development work on the async API
-
-By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed gdal you can use these flags when installing:
+Pre-built binaries are provided for most recent Linux distributions, Windows 64 bit and OS X 10.15:
 
 ```sh
-$ git clone https://github.com/mmomtchev/node-gdal-async.git
-$ cd node-gdal-async
-$ npm i
-$ npx node-pre-gyp configure
-$ npx node-pre-gyp build [--shared_gdal]  # --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev (debian: sudo apt-get install libgdal-dev)
+npm install gdal-async
+```
+
+By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed gdal you will have to rebuild it when installing using the following flags:
+
+```sh
+# --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev (debian: sudo apt-get install libgdal-dev)
+$ npm install gdal-next --build-from-source --shared_gdal  
 ```
 
 ## Sample Usage
 
-Only asynchronous raster reading/writing and asynchrounous opening are supported in the current version.
-Mixing synchronous and asynchronous operations is supported.
+### Synchronous
+
+#### Raster
+
+```js
+const gdal = require("gdal-next")
+const dataset = gdal.open("sample.tif")
+
+console.log("number of bands: " + dataset.bands.count())
+console.log("width: " + dataset.rasterSize.x)
+console.log("height: " + dataset.rasterSize.y)
+console.log("geotransform: " + dataset.geoTransform)
+console.log("srs: " + (dataset.srs ? dataset.srs.toWKT() : 'null'))
+```
+
+#### Vector
+
+```js
+const gdal = require("gdal-next")
+const dataset = gdal.open("sample.shp")
+const layer = dataset.layers.get(0)
+
+console.log("number of features: " + layer.features.count())
+console.log("fields: " + layer.fields.getNames())
+console.log("extent: " + JSON.stringify(layer.extent))
+console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
+```
+
+### Asynchronous
+
+Mixing of synchronous and asynchronous operations is supported.
 
 #### Safe mixing of asynchronous operations
 
 Simultaneous operations on distinct dataset objects are always safe and can run it parallel.
 Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick up 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time.
 
-**Does not support worker_threads**
+**Does not support `worker_threads` yet**
 
 #### With callbacks
 
-If the last argument of an xxxAsync function is a callback,
+If the last argument of an `xxxAsync` function is a callback,
 it will be called on completion with standard *(e,r)* semantics
+
 In this case the function will return a resolved *Promise*
 ```js
 const gdal = require('../node-gdal-async') // Or where it is installed
@@ -88,7 +118,7 @@ gdal.openAsync('sample.tif', (e, dataset) => {
 #### With promises
 
 If there is no callback, the function will return a *Promise*
-then can be *then()*ed, *catch()*ed or *await*ed
+
 ```js
 gdal.openAsync('sample.tif').then((dataset) => {
     dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
@@ -104,7 +134,7 @@ gdal.openAsync('sample.tif').then((dataset) => {
 
 ## Contributors
 
-This binding is a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
+This binding was originally the product of a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
 
 node-gdal-next is maintained by [@contra](https://github.com/contra)
 
