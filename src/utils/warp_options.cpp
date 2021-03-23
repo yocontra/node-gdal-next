@@ -135,7 +135,7 @@ int WarpOptions::parse(Local<Value> value) {
 #endif
       if (!options->hSrcDS) {
 #if GDAL_VERSION_MAJOR < 2
-        if (ds->getDatasource()) {
+        if (this->src->getDatasource()) {
           Nan::ThrowError("src dataset must be a raster dataset");
           return 1;
         }
@@ -163,7 +163,7 @@ int WarpOptions::parse(Local<Value> value) {
 #endif
       if (!options->hDstDS) {
 #if GDAL_VERSION_MAJOR < 2
-        if (ds->getDatasource()) {
+        if (this->dst->getDatasource()) {
           Nan::ThrowError("dst dataset must be a raster dataset");
           return 1;
         }
