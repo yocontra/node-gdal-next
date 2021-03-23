@@ -328,11 +328,10 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
   NODE_ARG_BOOL_OPT(0, "force", force);
 
   OGRLayer *gdal_layer = layer->get();
-  GDALDataset *gdal_dataset = layer->getParent();
   long ds_uid = layer->parent_uid;
   GDALAsyncableJob<GIntBig> job;
   job.persist(parent, ds);
-  job.main = [ds_uid, gdal_layer, force, gdal_dataset]() {
+  job.main = [ds_uid, gdal_layer, force]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     GIntBig count = gdal_layer->GetFeatureCount(force);
     GDAL_UNLOCK_PARENT;

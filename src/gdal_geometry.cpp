@@ -1479,11 +1479,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
   }
   Local<String> stringified = result.ToLocalChecked();
   std::string *val = new std::string(*Nan::Utf8String(stringified));
-  OGRGeometry *geom = NULL;
-  OGRSpatialReference *ogr_srs = NULL;
 
   GDALAsyncableJob<OGRGeometry *> job;
-  job.main = [val, geom, ogr_srs]() {
+  job.main = [val]() {
     std::unique_ptr<std::string> val_ptr(val);
     OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val->c_str());
     return geom;

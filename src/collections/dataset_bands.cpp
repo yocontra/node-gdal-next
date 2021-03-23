@@ -262,7 +262,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
     GDAL_UNLOCK_PARENT;
     return count;
   };
-  job.rval = [raw](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
+  job.rval = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
   job.run(info, async, 0);
 }
 

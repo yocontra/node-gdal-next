@@ -76,11 +76,11 @@ class GeoTransformTransformer : public OGRCoordinateTransformation {
   }
 
   // Latest GDAL
-  virtual int Transform(int nCount, double *x, double *y, double *z, double * /* t */, int *pabSuccess) {
+  virtual int Transform(int nCount, double *x, double *y, double *z, double * /* t */, int *pabSuccess) override {
     return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
 
-  virtual OGRCoordinateTransformation *Clone() const {
+  virtual OGRCoordinateTransformation *Clone() const override {
     return new GeoTransformTransformer(*this);
   }
 };
