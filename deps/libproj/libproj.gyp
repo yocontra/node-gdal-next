@@ -6,6 +6,8 @@
 		{
 			"target_name": "libproj",
 			"type": "static_library",
+			"cflags_cc": ["-Wno-attributes"],
+			"cflags": ["-Wno-attributes"],
 			"sources": [
 				'<!@(python ../glob-files.py "proj/src/*.c")',
 				'<!@(python ../glob-files.py "proj/src/*.cpp")',
