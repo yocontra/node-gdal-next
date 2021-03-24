@@ -103,11 +103,14 @@ long PtrManager::add(GDALDataset *ptr, uv_sem_t *async_lock) {
 }
 
 #if GDAL_VERSION_MAJOR < 2
-long PtrManager::add(OGRDataSource *ptr) {
+long PtrManager::add(OGRDataSource *ptr, uv_sem_t *async_lock) {
+  lock();
   PtrManagerDatasetItem *item = new PtrManagerDatasetItem();
   item->uid = uid++;
   item->ptr_datasource = ptr;
+  item->async_lock = async_lock;
   datasets[item->uid] = item;
+  unlock();
   return item->uid;
 }
 #endif

@@ -176,7 +176,7 @@ Local<Value> Dataset::New(OGRDataSource *raw) {
   datasource_cache.add(raw, obj);
   wrapped->async_lock = new uv_sem_t;
   uv_sem_init(wrapped->async_lock, 1);
-  wrapped->uid = ptr_manager.add(raw);
+  wrapped->uid = ptr_manager.add(raw, wrapped->async_lock);
 
   return scope.Escape(obj);
 }

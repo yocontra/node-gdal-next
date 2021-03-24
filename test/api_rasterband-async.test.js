@@ -5,7 +5,7 @@ const gdal = require('../lib/gdal.js')
 
 chai.use(chaiAsPromised)
 
-describe('gdal.RasterBand', () => {
+describe('gdal.RasterBandAsync', () => {
   afterEach(gc)
 
   it('should not be instantiable', () => {

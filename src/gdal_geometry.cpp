@@ -1369,7 +1369,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
     std::unique_ptr<std::string> wkt_string_ptr(wkt_string);
     OGRGeometry *geom = NULL;
     OGRChar *wkt = (OGRChar *)wkt_string->c_str();
-    OGRErr err = OGRGeometryFactory::createFromWkt(wkt, ogr_srs, &geom);
+    OGRErr err = OGRGeometryFactory::createFromWkt(&wkt, ogr_srs, &geom);
     if (err) throw getOGRErrMsg(err);
     return geom;
   };

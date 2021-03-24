@@ -3,10 +3,14 @@ const gdal = require('../lib/gdal.js')
 let skipAsync = (done) => done()
 // Skip async on GDAL 1.x
 if (gdal.version.split('.')[0] < 2) {
-  skipAsync = (done) => {
-    if (this.currentTest.parent.title && this.currentTest.parent.title.match(/Async/)) {
-      console.log(this.currentTest.parent.title)
-      this.skip()
+  skipAsync = function (done) {
+    let test = this.currentTest
+    while (test) {
+      if (test.title.match(/Async/)) {
+        console.log('skip on GDAL 1.x', test.title)
+        this.skip()
+      }
+      test = test.parent
     }
     done()
   }
