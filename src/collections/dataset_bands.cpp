@@ -18,9 +18,9 @@ void DatasetBands::Initialize(Local<Object> target) {
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "count", count);
-  Nan::SetPrototypeMethod(lcons, "countAsync", count);
+  Nan::SetPrototypeMethod(lcons, "countAsync", countAsync);
   Nan::SetPrototypeMethod(lcons, "create", create);
-  Nan::SetPrototypeMethod(lcons, "createAsync", create);
+  Nan::SetPrototypeMethod(lcons, "createAsync", createAsync);
   Nan::SetPrototypeMethod(lcons, "get", get);
   Nan::SetPrototypeMethod(lcons, "getAsync", getAsync);
 
