@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  included_gdal:
+  bundled_gdal:
 
     runs-on: ${{ matrix.platforms }}
 

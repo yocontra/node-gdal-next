@@ -76,6 +76,9 @@
 					]
 				}],
 				["shared_gdal == 'false'", {
+					"defines": [
+						"BUNDLED_GDAL=1"
+					],
 					"dependencies": [
 						"deps/libgdal/libgdal.gyp:libgdal"
 					]

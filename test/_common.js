@@ -1,6 +1,6 @@
 const gdal = require('../lib/gdal.js')
 
-console.log('GDAL Version:', gdal.version)
+console.log(`GDAL Version: ${gdal.version}, source: ${gdal.bundled ? 'bundled' : 'system library'}`)
 
 // gc tracing
 try {

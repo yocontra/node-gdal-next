@@ -1252,6 +1252,20 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Nan::Set(target, Nan::New("version").ToLocalChecked(), Nan::New(GDAL_RELEASE_NAME).ToLocalChecked());
 
   /**
+   * GDAL library - system library (false) or bundled (true)
+   *
+   * @final
+   * @for gdal
+   * @property gdal.bundled
+   * @type {Boolean}
+   */
+#ifdef BUNDLED_GDAL
+  Nan::Set(target, Nan::New("bundled").ToLocalChecked(), Nan::New(true));
+#else
+  Nan::Set(target, Nan::New("bundled").ToLocalChecked(), Nan::New(false));
+#endif
+
+  /**
    * Details about the last error that occurred. The property
    * will be null or an object containing three properties: "number",
    * "message", and "type".
