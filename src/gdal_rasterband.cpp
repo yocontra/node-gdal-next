@@ -678,7 +678,7 @@ NAN_GETTER(RasterBand::noDataValueGetter) {
   double result = band->this_->GetNoDataValue(&success);
   GDAL_UNLOCK_PARENT;
 
-  if (success && !CPLIsNan(result)) {
+  if (success && !std::isnan(result)) {
     info.GetReturnValue().Set(Nan::New<Number>(result));
     return;
   } else {
