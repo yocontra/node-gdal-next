@@ -82,6 +82,14 @@ describe('gdal', () => {
     })
   })
   describe('reprojectImageAsync()', () => {
+    if (gdal.version.split('.')[0] == 2 && gdal.version.split('.')[1] == 2) {
+      /* GDALReprojectImage with 1 band with different source and target number
+       * is bugged on GDAL 2.2.x
+       * https://github.com/OSGeo/gdal/commit/7bb8d37f1bfbb9c7bbcbe3050df55ef227bbc260#diff-3e9f012797a2e1a7d138afea7e967499799c6a65281b9769b5f56377119c919c
+       */
+      return
+    }
+
     let src
     beforeEach(() => {
       src = gdal.open(`${__dirname}/data/sample.tif`)
