@@ -22,7 +22,7 @@ void DatasetBands::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "create", create);
   Nan::SetPrototypeMethod(lcons, "createAsync", create);
   Nan::SetPrototypeMethod(lcons, "get", get);
-  Nan::SetPrototypeMethod(lcons, "getAsync", get);
+  Nan::SetPrototypeMethod(lcons, "getAsync", getAsync);
 
   ATTR_DONT_ENUM(lcons, "ds", dsGetter, READ_ONLY_SETTER);
 
