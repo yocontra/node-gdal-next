@@ -2,7 +2,7 @@ const gdal = require('../lib/gdal.js')
 
 let skipAsync = (done) => done()
 // Skip async on GDAL 1.x
-if (gdal.version.split('.')[0] < 2) {
+if (gdal.version.split('.')[0] < 2 || process.versions.node.split('.')[0] <= 10) {
   skipAsync = function (done) {
     let test = this.currentTest
     while (test) {
