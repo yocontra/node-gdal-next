@@ -126,7 +126,7 @@ describe('gdal', () => {
         elevField: 1
       })
 
-      assert.eventually.isTrue(p.then(() => lyr.features.count() > 0), 'features were created')
+      return assert.eventually.isTrue(p.then(() => lyr.features.count() > 0), 'features were created')
     })
   })
   describe('fillNodata()', () => {
@@ -201,9 +201,11 @@ describe('gdal', () => {
         smoothingIterations: 2
       })
 
+      const r = []
       for (let i = 0; i < holes_x.length; i++) {
-        assert.eventually.notEqual(p.then(() => srcband.pixels.get(holes_x[i], holes_y[i])), nodata)
+        r.push(assert.eventually.notEqual(p.then(() => srcband.pixels.get(holes_x[i], holes_y[i])), nodata))
       }
+      return Promise.allSettled(r)
     })
   })
 
@@ -258,8 +260,7 @@ describe('gdal', () => {
       const b = gdal.checksumImageAsync(band)
       const c = gdal.checksumImageAsync(band, 8, 0, w / 2, h)
 
-      assert.eventually.notEqual(a, b)
-      assert.eventually.notEqual(b, c)
+      return Promise.allSettled([ assert.eventually.notEqual(a, b), assert.eventually.notEqual(b, c) ])
     })
   })
 
@@ -327,7 +328,7 @@ describe('gdal', () => {
         connectedness: 8
       })
 
-      assert.eventually.equal(p.then(() => band.pixels.get(8, 8)), 20)
+      return assert.eventually.equal(p.then(() => band.pixels.get(8, 8)), 20)
     })
   })
   describe('polygonize()', () => {

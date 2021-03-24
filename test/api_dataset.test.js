@@ -98,16 +98,17 @@ describe('gdal.Dataset', () => {
       describe('getAsync()', () => {
         it('should return RasterBand', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
-          assert.eventually.instanceOf(ds.bands.getAsync(1), gdal.RasterBand)
+          const p = ds.bands.getAsync(1)
+          return assert.eventually.instanceOf(p, gdal.RasterBand)
         })
         it('should return null if band id is out of range', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
-          assert.eventually.isNull(ds.bands.getAsync(0))
+          return assert.eventually.isNull(ds.bands.getAsync(0))
         })
         it('should throw if dataset is closed', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
           ds.close()
-          assert.isRejected(ds.bands.getAsync(1))
+          return assert.isRejected(ds.bands.getAsync(1))
         })
       })
       describe('forEach()', () => {
@@ -170,16 +171,16 @@ describe('gdal.Dataset', () => {
       describe('countAsync()', () => {
         it('should return number', () => {
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-          assert.eventually.equal(ds.layers.countAsync(), 1)
+          return assert.eventually.equal(ds.layers.countAsync(), 1)
         })
         it('should be 0 for raster datasets', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
-          assert.eventually.equal(ds.layers.countAsync(), 0)
+          return assert.eventually.equal(ds.layers.countAsync(), 0)
         })
         it('should throw if dataset is closed', () => {
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
           ds.close()
-          assert.isRejected(ds.layers.countAsync())
+          return assert.isRejected(ds.layers.countAsync())
         })
       })
       describe('get()', () => {
@@ -222,13 +223,13 @@ describe('gdal.Dataset', () => {
         describe('w/id argument', () => {
           it('should return Layer', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-            assert.eventually.instanceOf(ds.layers.getAsync(0), gdal.Layer)
+            return assert.eventually.instanceOf(ds.layers.getAsync(0), gdal.Layer)
           })
         })
         describe('w/name argument', () => {
           it('should return Layer', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-            assert.eventually.instanceOf(ds.layers.getAsync('sample'), gdal.Layer)
+            return assert.eventually.instanceOf(ds.layers.getAsync('sample'), gdal.Layer)
           })
         })
       })
@@ -380,8 +381,8 @@ describe('gdal.Dataset', () => {
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
           const srs = gdal.SpatialReference.fromEPSG(4326)
           const lyr = ds.layers.createAsync('layer_name', srs, gdal.wkbPoint)
-          assert.eventually.instanceOf(lyr, gdal.Layer)
-          assert.eventually.propertyVal(lyr, 'geomType', gdal.wkbPoint)
+          return Promise.allSettled([ assert.eventually.instanceOf(lyr, gdal.Layer),
+            assert.eventually.propertyVal(lyr, 'geomType', gdal.wkbPoint) ])
         })
       })
     })

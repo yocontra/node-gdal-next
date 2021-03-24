@@ -18,7 +18,7 @@ describe('gdal.RasterBandAsync', () => {
       describe('getter', () => {
         it('should return string', () => {
           const ds = gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`)
-          assert.eventually.equal(ds.then((r) => r.bands.get(1).description), 'hshade17')
+          return assert.eventually.equal(ds.then((r) => r.bands.get(1).description), 'hshade17')
         })
         it('should throw error if dataset already closed', () => {
           const ds = gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`)
@@ -48,7 +48,7 @@ describe('gdal.RasterBandAsync', () => {
       describe('getter', () => {
         it('should return true on readOnly dataset', () => {
           const ds = gdal.openAsync(`${__dirname}/data/sample.tif`)
-          assert.eventually.isTrue(ds.then((r) => r.bands.get(1).readOnly))
+          return assert.eventually.isTrue(ds.then((r) => r.bands.get(1).readOnly))
         })
       })
     })
@@ -108,11 +108,12 @@ describe('gdal.RasterBandAsync', () => {
               const data = new Uint8Array(new ArrayBuffer(20 * 30))
               data[15] = 31
               const result = band.pixels.readAsync(0, 0, 20, 30, data)
-              assert.isFulfilled(result)
-              result.then((data) => {
-                assert.eventually.equal(result, data)
-                assert.equal(data[15], 0)
-              })
+              return Promise.allSettled([ assert.eventually.equal(result, data),
+                assert.isFulfilled(result),
+                result.then((data) => {
+                  assert.equal(data[15], 0)
+                })
+              ])
             })
           })
           it('should create new array if null', () => {
@@ -322,8 +323,9 @@ describe('gdal.RasterBandAsync', () => {
               const band = ds.bands.get(1)
 
               const data = band.pixels.readBlockAsync(0, 0)
-              assert.eventually.instanceOf(data, Uint8Array)
-              assert.eventually.equal(data.then((data) => data.length), band.blockSize.x * band.blockSize.y)
+              return Promise.allSettled([ assert.eventually.instanceOf(data, Uint8Array),
+                assert.eventually.equal(data.then((data) => data.length), band.blockSize.x * band.blockSize.y)
+              ])
             })
             it('should throw error if offsets are out of range', () => {
               const ds = gdal.open(`${__dirname}/data/sample.tif`)
@@ -338,7 +340,7 @@ describe('gdal.RasterBandAsync', () => {
                   new ArrayBuffer(band.blockSize.x * band.blockSize.y)
                 )
                 const result = band.pixels.readBlockAsync(0, 0, data)
-                assert.eventually.equal(result, data)
+                return assert.eventually.equal(result, data)
               })
               it('should throw error if given array is not big enough', () => {
                 const ds = gdal.open(`${__dirname}/data/sample.tif`)

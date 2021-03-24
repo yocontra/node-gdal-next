@@ -10,7 +10,7 @@ describe('Open', () => {
   afterEach(gc)
 
   describe('vsimem', () => {
-    let filename, ds, ds2, buffer
+    let filename, ds, buffer
 
     after(() => {
       ds.close()
@@ -65,20 +65,21 @@ describe('Open', () => {
       buffer = fs.readFileSync(filename)
       ds = gdal.openAsync(buffer)
     })
-    it('should be able to read band count', () => {
+    it('should be able to read band count', () =>
       assert.eventually.equal(ds.then((ds) => ds.layers.count()), 1)
-    })
-    it('should keep the buffer in the dataset', () => {
-      assert.eventually.instanceOf(ds.then((ds) => ds.buffer), Buffer)
-      assert.eventually.equal(ds.then((ds) => ds.buffer), buffer)
-    })
+    )
+    it('should keep the buffer in the dataset', () =>
+      Promise.allSettled([ assert.eventually.instanceOf(ds.then((ds) => ds.buffer), Buffer),
+        assert.eventually.equal(ds.then((ds) => ds.buffer), buffer)
+      ])
+    )
     it('should throw on an empty buffer', () => {
       buffer = Buffer.alloc(0)
-      assert.isRejected(gdal.openAsync(buffer))
+      return assert.isRejected(gdal.openAsync(buffer))
     })
     it('should throw on an invalid buffer', () => {
       buffer = Buffer.alloc(1024)
-      assert.isRejected(gdal.openAsync(buffer))
+      return assert.isRejected(gdal.openAsync(buffer))
     })
   })
 })

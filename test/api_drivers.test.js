@@ -153,7 +153,7 @@ describe('gdal.drivers', () => {
         outputFilename,
         gdal.open(`${__dirname}/data/12_791_1476.jpg`)
       )
-      assert.eventually.equal(p.then((r) => r.driver.description), 'MEM')
+      return assert.eventually.equal(p.then((r) => r.driver.description), 'MEM')
     })
   })
 })
