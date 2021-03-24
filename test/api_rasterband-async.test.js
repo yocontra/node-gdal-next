@@ -108,7 +108,7 @@ describe('gdal.RasterBandAsync', () => {
               const data = new Uint8Array(new ArrayBuffer(20 * 30))
               data[15] = 31
               const result = band.pixels.readAsync(0, 0, 20, 30, data)
-              return Promise.allSettled([ assert.eventually.equal(result, data),
+              return Promise.all([ assert.eventually.equal(result, data),
                 assert.isFulfilled(result),
                 result.then((data) => {
                   assert.equal(data[15], 0)
@@ -323,7 +323,7 @@ describe('gdal.RasterBandAsync', () => {
               const band = ds.bands.get(1)
 
               const data = band.pixels.readBlockAsync(0, 0)
-              return Promise.allSettled([ assert.eventually.instanceOf(data, Uint8Array),
+              return Promise.all([ assert.eventually.instanceOf(data, Uint8Array),
                 assert.eventually.equal(data.then((data) => data.length), band.blockSize.x * band.blockSize.y)
               ])
             })

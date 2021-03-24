@@ -451,7 +451,7 @@ describe('gdal.LayerAsync', () => {
           prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
             const f1 = layer.features.nextAsync()
             const f2 = layer.features.nextAsync()
-            return Promise.allSettled([ assert.eventually.instanceOf(f1, gdal.Feature),
+            return Promise.all([ assert.eventually.instanceOf(f1, gdal.Feature),
               assert.eventually.instanceOf(f2, gdal.Feature),
               assert.eventually.notEqual(f1, f2)
             ])
@@ -478,7 +478,7 @@ describe('gdal.LayerAsync', () => {
         it('should return a Feature and reset the iterator', () => {
           prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
             const f = layer.features.nextAsync().then(layer.features.firstAsync())
-            return Promise.allSettled([ assert.eventually.instanceOf(f, gdal.Feature),
+            return Promise.all([ assert.eventually.instanceOf(f, gdal.Feature),
               assert.eventually.propertyVal(f, 'fid', 0)
             ])
           })

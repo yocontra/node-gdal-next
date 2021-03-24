@@ -381,7 +381,7 @@ describe('gdal.Dataset', () => {
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
           const srs = gdal.SpatialReference.fromEPSG(4326)
           const lyr = ds.layers.createAsync('layer_name', srs, gdal.wkbPoint)
-          return Promise.allSettled([ assert.eventually.instanceOf(lyr, gdal.Layer),
+          return Promise.all([ assert.eventually.instanceOf(lyr, gdal.Layer),
             assert.eventually.propertyVal(lyr, 'geomType', gdal.wkbPoint) ])
         })
       })

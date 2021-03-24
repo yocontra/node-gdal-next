@@ -69,7 +69,7 @@ describe('Open', () => {
       assert.eventually.equal(ds.then((ds) => ds.layers.count()), 1)
     )
     it('should keep the buffer in the dataset', () =>
-      Promise.allSettled([ assert.eventually.instanceOf(ds.then((ds) => ds.buffer), Buffer),
+      Promise.all([ assert.eventually.instanceOf(ds.then((ds) => ds.buffer), Buffer),
         assert.eventually.equal(ds.then((ds) => ds.buffer), buffer)
       ])
     )

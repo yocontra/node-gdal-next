@@ -228,7 +228,7 @@ describe('gdal.Envelope', () => {
         const polygon = envelope.toPolygon()
         envelope = polygon.getEnvelopeAsync()
         assert.instanceOf(polygon, gdal.Polygon)
-        return Promise.allSettled([ assert.eventually.propertyVal(envelope, 'minX', -1),
+        return Promise.all([ assert.eventually.propertyVal(envelope, 'minX', -1),
           assert.eventually.propertyVal(envelope, 'maxX', 1),
           assert.eventually.propertyVal(envelope, 'minY', -2),
           assert.eventually.propertyVal(envelope, 'maxY', 2) ])

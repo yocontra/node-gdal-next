@@ -205,7 +205,7 @@ describe('gdal', () => {
       for (let i = 0; i < holes_x.length; i++) {
         r.push(assert.eventually.notEqual(p.then(() => srcband.pixels.get(holes_x[i], holes_y[i])), nodata))
       }
-      return Promise.allSettled(r)
+      return Promise.all(r)
     })
   })
 
@@ -260,7 +260,7 @@ describe('gdal', () => {
       const b = gdal.checksumImageAsync(band)
       const c = gdal.checksumImageAsync(band, 8, 0, w / 2, h)
 
-      return Promise.allSettled([ assert.eventually.notEqual(a, b), assert.eventually.notEqual(b, c) ])
+      return Promise.all([ assert.eventually.notEqual(a, b), assert.eventually.notEqual(b, c) ])
     })
   })
 
