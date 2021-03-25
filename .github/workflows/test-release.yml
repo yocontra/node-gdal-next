@@ -1,8 +1,6 @@
 name: Test published packages
 
-on:
-  release
-  workflow_dispatch
+on: [ release, workflow_dispatch ]
 
 jobs:
   bundled_gdal:
