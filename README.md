@@ -1,6 +1,8 @@
 # node-gdal-async
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![npm version](https://img.shields.io/npm/v/gdal-async)](https://www.npmjs.com/package/gdal-async)
+[![NPM package unit testing](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-release.yml/badge.svg?branch=master)](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-release.yml)
 ![Node.js CI](https://github.com/mmomtchev/node-gdal-async/workflows/Node.js%20CI/badge.svg)
 
 Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://contra.io/node-gdal-next/classes/gdal.html) or [examples](examples/).
