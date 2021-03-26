@@ -40,5 +40,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: sudo apt-get install libgdal-dev
     - run: npm install --ignore-scripts
-    - run: npx node-pre-gyp build --shared_gdal
+    - run: npx node-pre-gyp configure --shared_gdal
+    - run: npx node-pre-gyp build -j max --shared_gdal
     - run: npm test
