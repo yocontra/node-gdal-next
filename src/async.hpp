@@ -125,7 +125,7 @@ template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleOKCallback() {
   // Get pointers to the original objects that were persisted
   for (long unsigned i = 0; i < persistent.size(); i++) { original_obj[i] = Nan::New(*persistent[i]); }
 
-  v8::Local<v8::Value> argv[] = {Nan::Undefined(), rval(raw, original_obj)};
+  v8::Local<v8::Value> argv[] = {Nan::Null(), rval(raw, original_obj)};
   Finally();
   Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
 }
@@ -133,9 +133,9 @@ template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleOKCallback() {
 template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleErrorCallback() {
   // Back to the main thread with the JS world stopped
   Nan::HandleScope scope;
-  v8::Local<v8::Value> argv[] = {Nan::New(this->ErrorMessage()).ToLocalChecked(), Nan::Undefined()};
+  v8::Local<v8::Value> argv[] = {Nan::Error(this->ErrorMessage())};
   Finally();
-  Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
+  Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 1, argv);
 }
 
 // This the basic unit of the GDALAsyncable framework

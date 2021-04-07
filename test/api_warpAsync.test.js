@@ -237,7 +237,7 @@ describe('gdal', () => {
       options.dst.geoTransform = info.geoTransform
 
       gdal.reprojectImageAsync(options, (err) => {
-        assert.isUndefined(err)
+        assert.isNull(err)
 
         const exact_checksum = gdal.checksumImage(options.dst.bands.get(1))
 
@@ -255,7 +255,7 @@ describe('gdal', () => {
         options.maxError = 4
 
         gdal.reprojectImageAsync(options, (err) => {
-          assert.isUndefined(err)
+          assert.isNull(err)
 
           const approx_checksum = gdal.checksumImage(options.dst.bands.get(1))
 
@@ -289,7 +289,7 @@ describe('gdal', () => {
       options.dst.geoTransform = info.geoTransform
 
       gdal.reprojectImageAsync(options, (err) => {
-        assert.isUndefined(err)
+        assert.isNull(err)
 
         const expected_checksum = gdal.checksumImage(options.dst.bands.get(1))
 
