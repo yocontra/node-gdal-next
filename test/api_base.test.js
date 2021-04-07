@@ -101,7 +101,7 @@ describe('gdal', () => {
       assert.equal(gdal.decToDMS(14.12511, 'long', 1), " 14d 7'30.4\"E")
     })
   })
-  describe('Node.js callback error convention', () => {
+  describe('Node.js Async callback error convention', () => {
     it('should return null for error on success', () => {
       gdal.openAsync(`${__dirname}/data/sample.tif`, (error, result) => {
         assert.isNull(error)
