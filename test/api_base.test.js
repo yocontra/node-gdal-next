@@ -105,7 +105,7 @@ describe('gdal', () => {
     it('should return null for error on success', () => {
       gdal.openAsync(`${__dirname}/data/sample.tif`, (error, result) => {
         assert.isNull(error)
-        assert.isObject(result)
+        assert.instanceOf(result, gdal.Dataset)
       })
     })
     it('should return an Error object and an undefined result on error', () => {
