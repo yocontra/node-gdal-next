@@ -11,6 +11,7 @@ First release of `node-gdal-async`, forked from `node-gdal-next@2.6.2`
 
 ### Added
   - **Full support for asynchronous operations**
+  - GDAL 3.2.2
   - vsimem support
   - MVT writing
   - SQLite integration
