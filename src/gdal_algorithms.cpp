@@ -51,7 +51,7 @@ void Algorithms::Initialize(Local<Object> target) {
  * @param {Number} options.searchDist The maximum distance (in pixels) that the
  * algorithm will search out for values to interpolate.
  * @param {integer} [options.smoothingIterations=0] The number of 3x3 average
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * filter smoothing iterations to run after the interpolation to dampen
  * artifacts.
  */
@@ -151,7 +151,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * id should be written for each feature (contour) written.
  * @param {integer} [options.elevField] A field index to indicate where the
  * elevation value of the contour should be written.
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   Nan::HandleScope scope;
@@ -274,7 +274,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal
  * pixels are not considered directly adjacent for polygon membership purposes
  * or 8 indicating they are.
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   Nan::HandleScope scope;
@@ -346,7 +346,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
  * @param {integer} [y=0]
  * @param {integer} [w=src.width]
  * @param {integer} [h=src.height]
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return integer
  */
 

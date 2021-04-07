@@ -107,7 +107,7 @@ NAN_METHOD(LayerFeatures::toString) {
  *
  * @method getAsync
  * @param {Integer} id The feature ID of the feature to read.
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.Feature}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
@@ -150,7 +150,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
  * returns the first feature in the layer.
  *
  * @method firstAsync
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.Feature}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
@@ -195,10 +195,10 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
  *
  * @example
  * ```
- * while (feature = layer.features.next()) { ... }```
+ * while (feature = await layer.features.nextAsync()) { ... }```
  *
  * @method nextAsync
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.Feature}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
@@ -251,12 +251,12 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
  * var feature = new gdal.Feature(layer);
  * feature.setGeometry(new gdal.Point(0, 1));
  * feature.fields.set('name', 'somestring');
- * layer.features.add(feature);```
+ * await layer.features.addAsync(feature);```
  *
  * @method addAsync
  * @throws Error
  * @param {gdal.Feature} feature
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
@@ -302,7 +302,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
  *
  * @method countAsync
  * @param {Boolean} [force=true]
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {Integer} Number of features in the layer.
  */
 
@@ -410,7 +410,7 @@ NAN_METHOD(LayerFeatures::set) {
  * @method removeAsync
  * @throws Error
  * @param {Integer} id
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {

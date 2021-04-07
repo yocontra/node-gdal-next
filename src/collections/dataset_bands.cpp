@@ -99,7 +99,7 @@ NAN_METHOD(DatasetBands::toString) {
  * @method getAsync
  *
  * @param {Integer} id
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.RasterBand}
  */
 GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
@@ -161,7 +161,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  * @param {Integer} dataType Type of band ({{#crossLink "Constants (GDT)"}}see
  * GDT constants{{/crossLink}}).
  * @param {object} [options] Creation options
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.RasterBand}
  */
 

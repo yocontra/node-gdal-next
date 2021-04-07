@@ -213,7 +213,7 @@ NAN_METHOD(RasterBandPixels::set) {
  * constants{{/crossLink}}.
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
- * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * @param {callback} [callback=undefined] {{{cb}}}
  * certain optional parameters are omitted
  * @return {TypedArray} A
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
@@ -349,7 +349,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @param {Integer} [options.buffer_height=y_size]
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
- * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * @param {callback} [callback=undefined] {{{cb}}}
  * certain optional parameters are omitted
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
@@ -463,7 +463,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  * @param {Integer} [options.buffer_height=y_size]
  * @param {Integer} [options.pixel_space]
  * @param {Integer} [options.line_space]
- * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * @param {callback} [callback=undefined] {{{cb}}}
  * certain optional parameters are omitted
  */
 
@@ -493,7 +493,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  * @param {TypedArray} [data] The
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
  * to put the data in. A new array is created if not given.
- * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * @param {callback} [callback=undefined] {{{cb}}}
  * certain optional parameters are omitted
  * @return {TypedArray} A
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
@@ -572,7 +572,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
  * @param {TypedArray} data The
  * [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses)
  * of values to write to the band.
- * @param {requestCallback} [callback] Promisifiable callback, always the last parameter, can be specified even if
+ * @param {callback} [callback=undefined] {{{cb}}}
  * certain optional parameters are omitted
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {

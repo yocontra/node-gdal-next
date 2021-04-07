@@ -8,7 +8,7 @@ as it is the last parameter. Otherwise the function returns a Promise resolved w
 `,
   cb: () =>
     `
-Promisifiable callback, always the last parameter, can be specified even if
-certain optional parameters are omitted
+standard \`(error, result)\` callback. It is awalys the last paramater and can be specified even if certain optional parameters are omitted.
+The function returns a Promise when it is \`undefined\`.
 `
 }

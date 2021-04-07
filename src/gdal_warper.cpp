@@ -223,7 +223,7 @@ CPLErr GDALReprojectImageMulti(
  * @param {Boolean} [options.multi]
  * @param {string[]|object} [options.options] Warp options (see:
  * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   Nan::HandleScope scope;
@@ -347,7 +347,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @param {Number} [options.maxError=0]
  * @return {Object} An object containing `"rasterSize"` and `"geoTransform"`
  * properties.

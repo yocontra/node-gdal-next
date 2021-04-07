@@ -104,7 +104,7 @@ NAN_METHOD(DatasetLayers::toString) {
  *
  * @method getAsync
  * @param {String|Integer} key Layer name or ID.
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.Layer}
  */
 
@@ -191,7 +191,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  *
  * @example
  * ```
- * dataset.layers.createAsync('layername', null, gdal.Point);
+ * await dataset.layers.createAsync('layername', null, gdal.Point);
+ * dataset.layers.createAsync('layername', null, gdal.Point, (e, r) => console.log(e, r));
  * ```
  *
  * @method createAsync
@@ -202,7 +203,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
  * @param {string[]|object} creation_options driver-specific layer creation
  * options
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.Layer}
  */
 
@@ -274,7 +275,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
  * {{{async}}}
  *
  * @method countAsync
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {Integer}
  */
 
@@ -333,7 +334,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  * @param {String} src_lyr_name
  * @param {String} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.Layer}
  */
 
@@ -402,7 +403,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
  * @method removeAsync
  * @throws Error
  * @param {Integer} index
- * @param {requestCallback} [callback] {{cb}}
+ * @param {callback} [callback=undefined] {{{cb}}}
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {

@@ -244,7 +244,7 @@ auto DatasetRval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::Ne
  * types{{/crossLink}})
  * @param {String[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return gdal.Dataset
  */
 GDAL_ASYNCABLE_DEFINE(Driver::create) {
@@ -329,7 +329,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @param {Boolean} [strict=false]
  * @param {String[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return gdal.Dataset
  */
 GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
@@ -531,7 +531,7 @@ NAN_METHOD(Driver::getMetadata) {
  * @param {String} path
  * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
  * `"r+"`
- * @param {Callback} callback promisifiable callback
+ * @param {callback} [callback=undefined] {{{cb}}}
  * @return {gdal.Dataset}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::open) {
