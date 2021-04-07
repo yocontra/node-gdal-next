@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] Unreleased
+
+### Changed
+  - Follow the Node.js callback error convention, retuning `null` instead of `undefined` for the `error` argument on success and returning an `Error` object instead of a string on error
+  - Lots of minor documentation fixes
+
 # [3.0.0] 2021-03-26
 
 First release of `node-gdal-async`, forked from `node-gdal-next@2.6.2`
