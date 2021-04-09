@@ -152,5 +152,15 @@
       "error",
       "as-needed"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "scripts/publish-packages.js"
+      ],
+      "parserOptions": {
+        "ecmaVersion": 2018
+      }
+    }
+  ]
 }

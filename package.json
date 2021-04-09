@@ -46,9 +46,11 @@
     "lint": "eslint lib test examples",
     "lint:fix": "eslint lib test examples --fix",
     "install": "node-pre-gyp install --fallback-to-build -j max",
-    "postpublish": "npm run publish-yuidoc",
     "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
-    "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js"
+    "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js",
+    "preversion": "npm run test",
+    "version": "node ./scripts/publish-packages.js && git add package.json",
+    "postversion": "git push && git push --tags && npm run publish-yuidoc"
   },
   "dependencies": {
     "nan": "^2.14.0",
@@ -58,6 +60,7 @@
     "node-pre-gyp"
   ],
   "devDependencies": {
+    "@octokit/core": "^3.4.0",
     "aws-sdk": "^2.614.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
