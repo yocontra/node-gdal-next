@@ -49,8 +49,8 @@
     "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
     "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js",
     "preversion": "npm run test",
-    "version": "node ./scripts/publish-packages.js && git add package.json",
-    "postversion": "git push && git push --tags && npm run publish-yuidoc"
+    "version": "git add package.json",
+    "postversion": "git push && git push --tags && node ./scripts/publish-packages.js && npm run publish-yuidoc"
   },
   "dependencies": {
     "nan": "^2.14.0",
