@@ -53,11 +53,11 @@
     "postversion": "git push && git push --tags && node ./scripts/publish-packages.js && npm run publish-yuidoc"
   },
   "dependencies": {
-    "nan": "^2.14.0",
-    "node-pre-gyp": "^0.17.0"
+    "@mapbox/node-pre-gyp": "^1.0.3",
+    "nan": "^2.14.0"
   },
   "bundledDependencies": [
-    "node-pre-gyp"
+    "@mapbox/node-pre-gyp"
   ],
   "devDependencies": {
     "@octokit/core": "^3.4.0",
