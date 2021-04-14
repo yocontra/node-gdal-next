@@ -19,10 +19,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install --ignore-scripts
-    - run: npx node-pre-gyp configure
-    - run: npx node-pre-gyp build -j max
+    - run: npx @mapbox/node-pre-gyp configure
+    - run: npx @mapbox/node-pre-gyp build -j max
     - run: npm test
-    - run: npx node-pre-gyp package
-    - run: npx node-pre-gyp-github publish
+    - run: npx @mapbox/node-pre-gyp package
+    - run: npx @mapbox/node-pre-gyp-github publish
       env:
         NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}

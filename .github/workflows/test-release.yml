@@ -19,7 +19,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install --ignore-scripts
-    - run: npx node-pre-gyp install
+    - run: npx @mapbox/node-pre-gyp install
     - run: npm test
 
 
@@ -41,6 +41,6 @@ jobs:
     - run: sudo apt-get update
     - run: sudo apt-get install libgdal-dev
     - run: npm install --ignore-scripts
-    - run: npx node-pre-gyp configure --shared_gdal
-    - run: npx node-pre-gyp build -j max --shared_gdal
+    - run: npx @mapbox/node-pre-gyp configure --shared_gdal
+    - run: npx @mapbox/node-pre-gyp build -j max --shared_gdal
     - run: npm test

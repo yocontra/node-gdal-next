@@ -22,7 +22,7 @@ clean-test:
 	@rm -rf ./test/data/**/*.tmp*
 
 ./node_modules/.bin/node-pre-gyp:
-	npm install node-pre-gyp
+	npm install @mapbox/node-pre-gyp
 
 build: ./node_modules/.bin/node-pre-gyp
 	./node_modules/.bin/node-pre-gyp configure --silent
