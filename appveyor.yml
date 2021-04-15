@@ -9,9 +9,9 @@ matrix:
 
 environment:
   # Prebuild S3 keys
-  node_pre_gyp_accessKeyId:
+  AWS_ACCESS_KEY_ID:
     secure: fA8ogg68+lo8W2gqdyINqRWGCRmpnXuP7ZhqxALG38I=
-  node_pre_gyp_secretAccessKey:
+  AWS_SECRET_ACCESS_KEY:
     secure: jepVHzuEjGj5OSmBYDBBC/fj7fp2DhkBob7rHLvPKza4CyZUGP7y6WxO/6XLO0e7
   matrix:
     - nodejs_version: 10
@@ -23,6 +23,8 @@ environment:
     - nodejs_version: 13
       msvs_toolset: 14
     - nodejs_version: 14
+      msvs_toolset: 14
+    - nodejs_version: 15
       msvs_toolset: 14
 
 install:
