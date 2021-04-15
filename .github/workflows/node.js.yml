@@ -25,6 +25,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm i
-    - run: npx node-pre-gyp configure
-    - run: npx node-pre-gyp build
+    - run: npx -p @mapbox/node-pre-gyp node-pre-gyp configure
+    - run: npx -p @mapbox/node-pre-gyp node-pre-gyp build
     - run: npm test
