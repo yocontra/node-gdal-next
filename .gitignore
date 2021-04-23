@@ -29,6 +29,7 @@ lib/binding
 yuidocs
 package-lock.json
 yarn.lock
+.vscode
 
 
 deps/libgdal/gdal/wince

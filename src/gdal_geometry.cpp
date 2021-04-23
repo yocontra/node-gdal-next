@@ -71,6 +71,7 @@ void Geometry::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "swapXY", swapXY);
   Nan::SetPrototypeMethod(lcons, "getEnvelope", getEnvelope);
   Nan::SetPrototypeMethod(lcons, "getEnvelope3D", getEnvelope3D);
+  Nan::SetPrototypeMethod(lcons, "flattenTo2D", flattenTo2D);
   Nan::SetPrototypeMethod(lcons, "transform", transform);
   Nan::SetPrototypeMethod(lcons, "transformTo", transformTo);
 
@@ -764,6 +765,14 @@ NAN_METHOD(Geometry::getEnvelope3D) {
 
   info.GetReturnValue().Set(obj);
 }
+
+/**
+ * Convert geometry to strictly 2D
+ *
+ * @method flattenTo2D
+ * @return void
+ */
+NODE_WRAPPED_METHOD_WITH_NO_RESULT(Geometry, flattenTo2D, flattenTo2D);
 
 // --- JS static methods (OGRGeometryFactory) ---
 

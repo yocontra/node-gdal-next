@@ -64,6 +64,7 @@ class Geometry : public Nan::ObjectWrap {
   static NAN_METHOD(getNumGeometries);
   static NAN_METHOD(getEnvelope);
   static NAN_METHOD(getEnvelope3D);
+  static NAN_METHOD(flattenTo2D);
   static NAN_METHOD(transform);
   static NAN_METHOD(transformTo);
 
