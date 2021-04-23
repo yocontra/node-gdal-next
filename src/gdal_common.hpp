@@ -408,6 +408,17 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 // ----- wrapped methods w/ results-------
 
+#define NODE_WRAPPED_METHOD_WITH_NO_RESULT(klass, method, wrapped_method)                                              \
+  NAN_METHOD(klass::method) {                                                                                          \
+    Nan::HandleScope scope;                                                                                            \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    obj->this_->wrapped_method();                                                                                      \
+  }
+
 #define NODE_WRAPPED_METHOD_WITH_RESULT(klass, method, result_type, wrapped_method)                                    \
   NAN_METHOD(klass::method) {                                                                                          \
     Nan::HandleScope scope;                                                                                            \
