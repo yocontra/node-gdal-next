@@ -572,7 +572,7 @@ Local<Value> FeatureFields::getFieldAsBinary(OGRFeature *feature, int field_inde
     // Nan::NewBuffer expects to receive ownership of the buffer
     // =>
     // So no other solution than copy :-(
-    char *reallocated_data = (char*)malloc(count_of_bytes);
+    char *reallocated_data = (char *)malloc(count_of_bytes);
     if (!reallocated_data) {
       Nan::ThrowError("Memory allocation failed");
     } else {
