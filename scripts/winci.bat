@@ -84,9 +84,9 @@ SET CM=%APPVEYOR_REPO_COMMIT_MESSAGE%
 ECHO packaging ...
 CALL node_modules\.bin\node-pre-gyp package %TOOLSET_ARGS%
 IF %ERRORLEVEL% NEQ 0 ECHO error during packaging && GOTO ERROR
-IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing... && CALL node_modules\.bin\node-pre-gyp publish --msvs_version=%msvs_version% publish %TOOLSET_ARGS%) ELSE (ECHO not publishing)
+IF NOT "%CM%" == "%CM:[publish binary]=%" (ECHO publishing... && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% publish %TOOLSET_ARGS%) ELSE (ECHO not publishing)
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-IF NOT "%CM%" == "%CM:[republish binary]=%" (ECHO republishing ... && CALL node_modules\.bin\node-pre-gyp unpublish publish --msvs_version=%msvs_version% publish %TOOLSET_ARGS%) ELSE (ECHO not republishing)
+IF NOT "%CM%" == "%CM:[republish binary]=%" (ECHO republishing ... && CALL node_modules\.bin\node-pre-gyp --msvs_version=%msvs_version% unpublish publish %TOOLSET_ARGS%) ELSE (ECHO not republishing)
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 GOTO DONE
 :ERROR
