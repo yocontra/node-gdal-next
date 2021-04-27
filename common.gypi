@@ -4,8 +4,8 @@
 	},
 	"target_defaults": {
 		"default_configuration": "Release",
-		"cflags_cc!": ["-fno-exceptions"],
-		"cflags!": ["-fno-exceptions"],
+		"cflags_cc!": ["-fno-rtti", "-fno-exceptions"],
+		"cflags!": ["-fno-rtti", "-fno-exceptions"],
 		"defines": [
 			"NOGDI=1",
 			"HAVE_LIBZ"
