@@ -261,8 +261,7 @@ static NAN_METHOD(getMemfileName) {
 
 static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
-  Nan::SetMethod(target, "open", open);
-  Nan::SetMethod(target, "openAsync", openAsync);
+  Nan__SetAsyncableMethod(target, "open", open);
   Nan::SetMethod(target, "setConfigOption", setConfigOption);
   Nan::SetMethod(target, "getConfigOption", getConfigOption);
   Nan::SetMethod(target, "decToDMS", decToDMS);

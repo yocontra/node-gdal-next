@@ -20,14 +20,10 @@ void RasterBandPixels::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "get", get);
   Nan::SetPrototypeMethod(lcons, "set", set);
-  Nan::SetPrototypeMethod(lcons, "read", read);
-  Nan::SetPrototypeMethod(lcons, "readAsync", readAsync);
-  Nan::SetPrototypeMethod(lcons, "write", write);
-  Nan::SetPrototypeMethod(lcons, "writeAsync", writeAsync);
-  Nan::SetPrototypeMethod(lcons, "readBlock", readBlock);
-  Nan::SetPrototypeMethod(lcons, "readBlockAsync", readBlockAsync);
-  Nan::SetPrototypeMethod(lcons, "writeBlock", writeBlock);
-  Nan::SetPrototypeMethod(lcons, "writeBlockAsync", writeBlockAsync);
+  Nan__SetPrototypeAsyncableMethod(lcons, "read", read);
+  Nan__SetPrototypeAsyncableMethod(lcons, "write", write);
+  Nan__SetPrototypeAsyncableMethod(lcons, "readBlock", readBlock);
+  Nan__SetPrototypeAsyncableMethod(lcons, "writeBlock", writeBlock);
 
   Nan::Set(target, Nan::New("RasterBandPixels").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 

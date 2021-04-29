@@ -71,6 +71,15 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define IS_WRAPPED(obj, type) Nan::New(type::constructor)->HasInstance(obj)
 
+// ----- async method definition shortcuts ------
+#define Nan__SetAsyncableMethod(lcons, name, method)                                                                   \
+  Nan::SetMethod(lcons, name, method);                                                                                 \
+  Nan::SetMethod(lcons, name "Async", method##Async)
+
+#define Nan__SetPrototypeAsyncableMethod(lcons, name, method)                                                          \
+  Nan::SetPrototypeMethod(lcons, name, method);                                                                        \
+  Nan::SetPrototypeMethod(lcons, name "Async", method##Async)
+
 // ----- object property conversion -------
 
 #define NODE_DOUBLE_FROM_OBJ(obj, key, var)                                                                            \

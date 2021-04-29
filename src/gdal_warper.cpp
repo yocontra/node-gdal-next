@@ -7,10 +7,8 @@
 namespace node_gdal {
 
 void Warper::Initialize(Local<Object> target) {
-  Nan::SetMethod(target, "reprojectImage", reprojectImage);
-  Nan::SetMethod(target, "reprojectImageAsync", reprojectImageAsync);
-  Nan::SetMethod(target, "suggestedWarpOutput", suggestedWarpOutput);
-  Nan::SetMethod(target, "suggestedWarpOutputAsync", suggestedWarpOutputAsync);
+  Nan__SetAsyncableMethod(target, "reprojectImage", reprojectImage);
+  Nan__SetAsyncableMethod(target, "suggestedWarpOutput", suggestedWarpOutput);
 }
 
 /**

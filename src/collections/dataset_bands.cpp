@@ -17,12 +17,9 @@ void DatasetBands::Initialize(Local<Object> target) {
   lcons->SetClassName(Nan::New("DatasetBands").ToLocalChecked());
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
-  Nan::SetPrototypeMethod(lcons, "count", count);
-  Nan::SetPrototypeMethod(lcons, "countAsync", countAsync);
-  Nan::SetPrototypeMethod(lcons, "create", create);
-  Nan::SetPrototypeMethod(lcons, "createAsync", createAsync);
-  Nan::SetPrototypeMethod(lcons, "get", get);
-  Nan::SetPrototypeMethod(lcons, "getAsync", getAsync);
+  Nan__SetPrototypeAsyncableMethod(lcons, "count", count);
+  Nan__SetPrototypeAsyncableMethod(lcons, "create", create);
+  Nan__SetPrototypeAsyncableMethod(lcons, "get", get);
 
   ATTR_DONT_ENUM(lcons, "ds", dsGetter, READ_ONLY_SETTER);
 
