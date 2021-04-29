@@ -5,16 +5,37 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch unit testing (gdb)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/usr/bin/node",
+            "args": [
+                "--expose-gc", "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js", "test", "-R", "tap", "--timeout", "0", "--require", "./test/_common.js", "--require", "./test/_hook_skipAsync.js"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "type": "pwa-node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch unit testing (JS)",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "args": [
-                "/home/mmom/tmp/out.tiff"
+                "test", "-R", "tap", "--timeout", "0", "--expose-gc", "--require", "./test/_common.js", "--require", "./test/_hook_skipAsync.js"
             ],
-            "program": "${workspaceFolder}/index.js"
+            "program": "${workspaceFolder}/node_modules/.bin/mocha"
         }
     ]
 }
