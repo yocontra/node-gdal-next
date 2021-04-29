@@ -1,4 +1,5 @@
 {
     "editor.tabSize": 2,
-    "C_Cpp.errorSquiggles": "Enabled"
+    "C_Cpp.errorSquiggles": "Enabled",
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": true
 }

@@ -66,6 +66,7 @@ class Geometry : public Nan::ObjectWrap {
   static NAN_METHOD(getNumGeometries);
   GDAL_ASYNCABLE_DECLARE(getEnvelope);
   GDAL_ASYNCABLE_DECLARE(getEnvelope3D);
+  GDAL_ASYNCABLE_DECLARE(flattenTo2D);
   GDAL_ASYNCABLE_DECLARE(transform);
   GDAL_ASYNCABLE_DECLARE(transformTo);
 

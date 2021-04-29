@@ -11,6 +11,7 @@ examples
 build
 node_modules
 yuidocs
+.vscode
 
 deps/**/*.sh
 deps/**/*.py

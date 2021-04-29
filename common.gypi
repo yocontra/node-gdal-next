@@ -1,41 +1,29 @@
 {
 	"variables": {
-		"toolset%":"",
-		"deps_dir": "./deps",
-		"prefers_libcpp": "<!(python -c \"import os;import platform;u=platform.uname();print((u[0] == 'Darwin' and int(u[2][0:2]) >= 13) and '-stdlib=libstdc++' not in os.environ.get('CXXFLAGS','') and '-mmacosx-version-min' not in os.environ.get('CXXFLAGS',''))\")"
+		"deps_dir": "./deps"
 	},
 	"target_defaults": {
 		"default_configuration": "Release",
-		"msbuild_toolset":"<(toolset)",
 		"cflags_cc!": ["-fno-rtti", "-fno-exceptions"],
 		"cflags!": ["-fno-rtti", "-fno-exceptions"],
-		"defines!": ["_HAS_EXCEPTIONS=0"],
 		"defines": [
 			"NOGDI=1",
 			"HAVE_LIBZ"
 		],
 		"xcode_settings": {
 			"GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-			"CLANG_CXX_LANGUAGE_STANDARD": "c++11",
+      "CLANG_CXX_LIBRARY": "libc++",
+      "MACOSX_DEPLOYMENT_TARGET": "10.7",
 			"OTHER_CFLAGS": [
-				"-mmacosx-version-min=10.7",
 				"-Wno-deprecated-register",
 				"-Wno-unused-const-variable"
 			],
 			"OTHER_CPLUSPLUSFLAGS": [
-				"-mmacosx-version-min=10.7",
-				"-std=c++11",
-				"-stdlib=libc++",
 				"-Wno-deprecated-register",
 				"-Wno-unused-const-variable"
 			]
 		},
 		"conditions": [
-			["'<(prefers_libcpp)' == 'True'", {
-				"xcode_settings": {
-					"MACOSX_DEPLOYMENT_TARGET": "10.9"
-				}
-			}],
 			["OS == 'win'", {
 				"defines": [ "NOMINMAX", "WIN32" ]
 			}]
@@ -55,7 +43,7 @@
 				},
 				"msvs_settings": {
 					"VCCLCompilerTool": {
-						"ExceptionHandling": 2, # /EHsc
+						"ExceptionHandling": 1,
 						"RuntimeTypeInfo": "true"
 					}
 				}
@@ -78,7 +66,7 @@
 						"AdditionalOptions": [
 							"/MP", # compile across multiple CPUs
 						],
-						"ExceptionHandling": 2, # /EHsc
+						"ExceptionHandling": 1,
 						"RuntimeTypeInfo": "true",
 						"DebugInformationFormat": "0",
 					},

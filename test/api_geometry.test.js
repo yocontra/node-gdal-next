@@ -579,6 +579,55 @@ describe('gdal.Geometry', () => {
         ])
       })
     })
+    describe('flattenTo2D()', () => {
+      it('should flatten a LineString', () => {
+        const points = [
+          [ 0, 0, 1 ],
+          [ 1, 1, 2 ],
+          [ 10, 10, 3 ],
+          [ 2, 2, 0 ],
+          [ 5, 5, 10 ]
+        ]
+        const line = new gdal.LineString()
+        points.forEach((p) => line.points.add(...p))
+
+        line.flattenTo2D()
+        assert.instanceOf(line, gdal.LineString)
+        assert.equal(line.points.count(), points.length)
+
+        points.forEach((p, idx) => {
+          const p2 = line.points.get(idx)
+          assert.equal(p2.x, p[0])
+          assert.equal(p2.y, p[1])
+          assert.equal(p2.z, 0)
+        })
+      })
+    })
+    describe('flattenTo2DAsync()', () => {
+      it('should flatten a LineString', () => {
+        const points = [
+          [ 0, 0, 1 ],
+          [ 1, 1, 2 ],
+          [ 10, 10, 3 ],
+          [ 2, 2, 0 ],
+          [ 5, 5, 10 ]
+        ]
+        const line = new gdal.LineString()
+        points.forEach((p) => line.points.add(...p))
+
+        return assert.isFulfilled(line.flattenTo2DAsync().then(() => {
+          assert.instanceOf(line, gdal.LineString)
+          assert.equal(line.points.count(), points.length)
+
+          points.forEach((p, idx) => {
+            const p2 = line.points.get(idx)
+            assert.equal(p2.x, p[0])
+            assert.equal(p2.y, p[1])
+            assert.equal(p2.z, 0)
+          })
+        }))
+      })
+    })
     describe('union()', () => {
       it('should merge geometries', () => {
         const ring1 = new gdal.LinearRing()

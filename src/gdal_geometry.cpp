@@ -108,6 +108,8 @@ void Geometry::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "getEnvelopeAsync", getEnvelopeAsync);
   Nan::SetPrototypeMethod(lcons, "getEnvelope3D", getEnvelope3D);
   Nan::SetPrototypeMethod(lcons, "getEnvelope3DAsync", getEnvelope3DAsync);
+  Nan::SetPrototypeMethod(lcons, "flattenTo2D", flattenTo2D);
+  Nan::SetPrototypeMethod(lcons, "flattenTo2DAsync", flattenTo2DAsync);
   Nan::SetPrototypeMethod(lcons, "transform", transform);
   Nan::SetPrototypeMethod(lcons, "transformAsync", transformAsync);
   Nan::SetPrototypeMethod(lcons, "transformTo", transformTo);
@@ -1327,6 +1329,14 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
   };
   job.run(info, async, 0);
 }
+
+/**
+ * Convert geometry to strictly 2D
+ *
+ * @method flattenTo2D
+ * @return void
+ */
+NODE_WRAPPED_ASYNC_METHOD(Geometry, flattenTo2D, flattenTo2D);
 
 // --- JS static methods (OGRGeometryFactory) ---
 
