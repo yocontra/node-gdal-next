@@ -49,7 +49,7 @@
     "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
     "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js",
     "preversion": "npm run test",
-    "gcov": "cd coverage && gcov -o ../build/Debug/obj.target/gdal/src ../src/*",
+    "gcov": "mkdir -p coverage && cd coverage && gcov -o ../build/Debug/obj.target/gdal/src ../src/*",
     "codecov": "cd coverage && curl -s https://codecov.io/bash | bash",
     "version": "git add package.json",
     "postversion": "git push && git push --tags && node ./scripts/publish-packages.js && npm run publish-yuidoc"
