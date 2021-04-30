@@ -7,8 +7,8 @@
 		"cflags_cc!": ["-fno-rtti", "-fno-exceptions"],
 		"cflags!": ["-fno-rtti", "-fno-exceptions"],
 		"variables": {
-			"debug_extra_ccflags_cc": "",
-			"debug_extra_ldflags" : "",
+			"debug_extra_ccflags_cc%": "",
+			"debug_extra_ldflags%" : "",
 		},
 		"defines": [
 			"NOGDI=1",
@@ -40,8 +40,8 @@
 		"configurations": {
 			"Debug": {
 				"cflags_cc!": [ "-O3", "-Os" ],
-				"cflags_cc": [ "<(debug_extra_ccflags_cc)" ],
-				"ldflags": [ "<(debug_extra_ldflags)" ],
+				"cflags_cc": [ "<@(debug_extra_ccflags_cc)" ],
+				"ldflags": [ "<@(debug_extra_ldflags)" ],
 				"defines": [ "DEBUG" ],
 				"defines!": [ "NDEBUG" ],
 				"xcode_settings": {
