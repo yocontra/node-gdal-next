@@ -11,6 +11,7 @@ examples
 build
 node_modules
 yuidocs
+coverage
 .vscode
 
 deps/**/*.sh

@@ -6,6 +6,10 @@
 		"default_configuration": "Release",
 		"cflags_cc!": ["-fno-rtti", "-fno-exceptions"],
 		"cflags!": ["-fno-rtti", "-fno-exceptions"],
+		"variables": {
+			"debug_extra_ccflags_cc": "",
+			"debug_extra_ldflags" : "",
+		},
 		"defines": [
 			"NOGDI=1",
 			"HAVE_LIBZ"
@@ -35,9 +39,12 @@
 		},
 		"configurations": {
 			"Debug": {
-				"cflags_cc!": ["-O3", "-Os", "-DNDEBUG"],
+				"cflags_cc!": [ "-O3", "-Os" ],
+				"cflags_cc": [ "<(debug_extra_ccflags_cc)" ],
+				"ldflags": [ "<(debug_extra_ldflags)" ],
+				"defines": [ "DEBUG" ],
+				"defines!": [ "NDEBUG" ],
 				"xcode_settings": {
-					"OTHER_CPLUSPLUSFLAGS": ["-DDEBUG"],
 					"GCC_OPTIMIZATION_LEVEL": "0",
 					"GCC_GENERATE_DEBUGGING_SYMBOLS": "YES"
 				},
@@ -50,6 +57,7 @@
 			},
 			"Release": {
 				"defines": [ "NDEBUG" ],
+				"defines!": [ "DEBUG" ],
 				"xcode_settings": {
 					"GCC_OPTIMIZATION_LEVEL": "s",
 					"GCC_GENERATE_DEBUGGING_SYMBOLS": "NO",

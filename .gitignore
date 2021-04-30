@@ -27,6 +27,7 @@ deps/libexpat/expat*.tar.gz
 deps/libsqlite/sqlite*.tar.gz
 lib/binding
 yuidocs
+coverage
 package-lock.json
 yarn.lock
 
