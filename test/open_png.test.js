@@ -43,7 +43,7 @@ describe('Open', () => {
       assert.isNull(ds.srs)
     })
 
-    it.skip('should be able to read statistics', () => {
+    it('should be able to read statistics', () => {
       const band = ds.bands.get(1)
       const expected_stats = {
         min: 1,
@@ -74,10 +74,11 @@ describe('Open', () => {
       ]
 
       const actual_files = ds.getFileList()
-      actual_files.sort()
-      files.sort()
 
-      assert.deepEqual(actual_files, files)
+      // get statistics may or may not create an .aux.xml file
+      assert.include(actual_files, files[0])
+      assert.include(actual_files, files[1])
+      assert.isAtMost(actual_files.length, 3)
     })
   })
 })

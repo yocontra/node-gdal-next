@@ -62,8 +62,9 @@ describe('gdal', () => {
         assert.isFalse(feature.getGeometry().isEmpty())
       })
     })
-    it.skip('should accept an array of fixed levels', () => {
-      const levels = [ 53, 43, 193 ].sort()
+    it('should accept an array of fixed levels', () => {
+      const order = (a, b) => a - b
+      const levels = [ 53, 43, 193 ].sort(order)
 
       gdal.contourGenerate({
         src: srcband,
@@ -88,7 +89,7 @@ describe('gdal', () => {
         if (actual_levels.indexOf(elev) === -1) actual_levels.push(elev)
       })
 
-      assert.deepEqual(levels, actual_levels.sort(), 'all fixed levels used')
+      assert.deepEqual(levels, actual_levels.sort(order), 'all fixed levels used')
     })
   })
   describe('contourGenerateAsync()', () => {

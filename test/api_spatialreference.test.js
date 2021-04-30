@@ -61,7 +61,7 @@ describe('gdal.SpatialReference', () => {
       assert.instanceOf(ref, gdal.SpatialReference)
     })
   })
-  describe.skip('fromXML', () => {
+  describe('fromXML', () => {
     it('should return SpatialReference', () => {
       const gml = fs.readFileSync(`${__dirname}/data/srs/sample.gml`, 'utf8')
       const ref = gdal.SpatialReference.fromXML(gml)
@@ -75,16 +75,16 @@ describe('gdal.SpatialReference', () => {
       assert.instanceOf(ref, gdal.SpatialReference)
     })
   })
-  describe.skip('fromURN', () => {
+  describe('fromURN', () => {
     it('should return SpatialReference', () => {
       const wms = 'urn:ogc:def:crs:EPSG::26912'
-      const ref = gdal.SpatialReference.fromWMSAUTO(wms)
+      const ref = gdal.SpatialReference.fromURN(wms)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
   })
-  describe.skip('fromCRSURL', () => {
+  describe('fromCRSURL', () => {
     it('should return SpatialReference', () => {
-      const wms = 'CRS:84'
+      const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
       const ref = gdal.SpatialReference.fromCRSURL(wms)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
