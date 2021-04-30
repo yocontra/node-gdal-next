@@ -10,7 +10,12 @@
             "request": "launch",
             "program": "/usr/bin/node",
             "args": [
-                "--expose-gc", "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js", "test", "-R", "tap", "--timeout", "0", "--require", "./test/_common.js", "--require", "./test/_hook_skipAsync.js"
+                "--expose-gc",
+                "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
+                "test", "-R", "tap",
+                "--timeout", "0",
+                "--require", "./test/_common.js",
+                "--require", "./test/_hook_skipAsync.js"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -24,6 +29,26 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "Launch unit testing (lldb)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/usr/local/bin/node",
+            "args": [
+                "--expose-gc",
+                "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
+                "test", "-R", "tap",
+                "--timeout", "0",
+                "--require", "./test/_common.js",
+                "--require", "./test/_hook_skipAsync.js",
+                "-g", "PNG"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
         },
         {
             "type": "pwa-node",
