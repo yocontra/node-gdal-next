@@ -1,6 +1,9 @@
 const gdal = require('../lib/gdal.js')
 const path = require('path')
-const assert = require('chai').assert
+const chai = require('chai')
+const assert = chai.assert
+const chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
 
 describe('Open', () => {
   afterEach(gc)
@@ -59,6 +62,40 @@ describe('Open', () => {
           })
         })
       })
+    })
+  })
+
+  describe('vsigzip/Async', () => {
+    let filename, dsq
+
+    it('should not throw', () => {
+      filename = path.join(__dirname, 'data/vsigzip/hp40ne.gz')
+      dsq = gdal.openAsync(filename)
+      return assert.isFulfilled(dsq)
+    })
+    it('should be able to read layer count', () =>
+      assert.eventually.equal(dsq.then((ds) => ds.layers.count()), 4)
+    )
+
+    describe('layer', () => {
+      let layerq
+      before(() => {
+        layerq = dsq.then((ds) => ds.layers.get(0))
+      })
+      it('should have all fields defined', () =>
+        Promise.all([ assert.eventually.equal(layerq.then((layer) => layer.fields.count()), 8),
+          assert.eventually.deepEqual(layerq.then((layer) => layer.fields.getNames()), [
+            'fid',
+            'featureCode',
+            'featureDescription',
+            'anchorPosition',
+            'font',
+            'height',
+            'orientation',
+            'textString'
+          ])
+        ])
+      )
     })
   })
 })
