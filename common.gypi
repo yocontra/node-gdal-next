@@ -46,7 +46,8 @@
 				"defines!": [ "NDEBUG" ],
 				"xcode_settings": {
 					"GCC_OPTIMIZATION_LEVEL": "0",
-					"GCC_GENERATE_DEBUGGING_SYMBOLS": "YES"
+					"GCC_GENERATE_DEBUGGING_SYMBOLS": "YES",
+					"GCC_ENABLE_CPP_RTTI": "YES"
 				},
 				"msvs_settings": {
 					"VCCLCompilerTool": {
