@@ -57,7 +57,6 @@
 			"./gyp-formats/ngsgeoid.gyp:libgdal_ngsgeoid_frmt",
 			"./gyp-formats/iris.gyp:libgdal_iris_frmt",
 			"./gyp-formats/map.gyp:libgdal_map_frmt",
-			"./gyp-formats/zlib.gyp:libgdal_zlib_frmt",
 			"./gyp-formats/jpeg.gyp:libgdal_jpeg_frmt",
 			"./gyp-formats/png.gyp:libgdal_png_frmt",
 			"./gyp-formats/mbtiles.gyp:libgdal_mbtiles_frmt",
