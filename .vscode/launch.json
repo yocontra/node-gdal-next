@@ -41,8 +41,7 @@
                 "test", "-R", "tap",
                 "--timeout", "0",
                 "--require", "./test/_common.js",
-                "--require", "./test/_hook_skipAsync.js",
-                "-g", "PNG"
+                "--require", "./test/_hook_skipAsync.js"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
