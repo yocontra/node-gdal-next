@@ -78,12 +78,9 @@ describe('Open', () => {
     )
 
     describe('layer', () => {
-      let layerq
-      before(() => {
-        layerq = dsq.then((ds) => ds.layers.get(0))
-      })
-      it('should have all fields defined', () =>
-        Promise.all([ assert.eventually.equal(layerq.then((layer) => layer.fields.count()), 8),
+      it('should have all fields defined', () => {
+        const layerq = dsq.then((ds) => ds.layers.get(0))
+        return Promise.all([ assert.eventually.equal(layerq.then((layer) => layer.fields.count()), 8),
           assert.eventually.deepEqual(layerq.then((layer) => layer.fields.getNames()), [
             'fid',
             'featureCode',
@@ -95,7 +92,7 @@ describe('Open', () => {
             'textString'
           ])
         ])
-      )
+      })
     })
   })
 })
