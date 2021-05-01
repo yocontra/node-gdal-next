@@ -18,6 +18,41 @@ describe('gdal.Feature', () => {
     lyr.fields.add(fields)
   })
 
+  describe('gdal.FeatureDefn', () => {
+    it('count() should return the field count', () => {
+      assert.equal(defn.fields.count(), 3)
+    })
+    it('get() should accept an index', () => {
+      assert.propertyVal(defn.fields.get(0), 'name', 'id')
+    })
+    it('get() should accept an id', () => {
+      assert.propertyVal(defn.fields.get('id'), 'name', 'id')
+    })
+    it('indexOf() should find a field by id', () => {
+      assert.equal(defn.fields.indexOf('value'), 2)
+    })
+    it('remove() should remove a field by id', () => {
+      const field = new gdal.FieldDefn('fourth', gdal.OFTInteger)
+      defn.fields.add(field)
+      assert.equal(defn.fields.count(), 4)
+      defn.fields.remove('fourth')
+      assert.equal(defn.fields.count(), 3)
+    })
+    it('remove() should remove a field by index', () => {
+      const field = new gdal.FieldDefn('fourth', gdal.OFTInteger)
+      defn.fields.add(field)
+      assert.equal(defn.fields.count(), 4)
+      defn.fields.remove(3)
+      assert.equal(defn.fields.count(), 3)
+    })
+    it('reorder() should reorder the fields', () => {
+      defn.fields.reorder([ 2, 0, 1 ])
+      assert.equal(defn.fields.indexOf('id'), 1)
+      defn.fields.reorder([ 1, 2, 0 ])
+      assert.equal(defn.fields.indexOf('id'), 0)
+    })
+  })
+
   describe('constructor', () => {
     describe('w/Layer', () => {
       it('should create instance', () => {
