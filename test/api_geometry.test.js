@@ -447,6 +447,52 @@ describe('gdal.Geometry', () => {
         return assert.eventually.closeTo(distance_actual, distance_expected, 0.001)
       })
     })
+    describe('convexHull()', () => {
+      it('should return geometry without inner rings', () => {
+        const outerRing = new gdal.LinearRing()
+        outerRing.points.add({ x: 0, y: 0 })
+        outerRing.points.add({ x: 20, y: 0 })
+        outerRing.points.add({ x: 20, y: 10 })
+        outerRing.points.add({ x: 0, y: 10 })
+        outerRing.closeRings()
+        const innerRing = new gdal.LinearRing()
+        innerRing.points.add({ x: 1, y: 9 })
+        innerRing.points.add({ x: 19, y: 9 })
+        innerRing.points.add({ x: 19, y: 1 })
+        innerRing.points.add({ x: 1, y: 1 })
+        innerRing.closeRings()
+
+        const squareDonut = new gdal.Polygon()
+        squareDonut.rings.add(outerRing)
+        squareDonut.rings.add(innerRing)
+
+        const hull = squareDonut.convexHull()
+        assert.instanceOf(hull, gdal.Polygon)
+      })
+    })
+    describe('convexHullAsync()', () => {
+      it('should return geometry without inner rings', () => {
+        const outerRing = new gdal.LinearRing()
+        outerRing.points.add({ x: 0, y: 0 })
+        outerRing.points.add({ x: 20, y: 0 })
+        outerRing.points.add({ x: 20, y: 10 })
+        outerRing.points.add({ x: 0, y: 10 })
+        outerRing.closeRings()
+        const innerRing = new gdal.LinearRing()
+        innerRing.points.add({ x: 1, y: 9 })
+        innerRing.points.add({ x: 19, y: 9 })
+        innerRing.points.add({ x: 19, y: 1 })
+        innerRing.points.add({ x: 1, y: 1 })
+        innerRing.closeRings()
+
+        const squareDonut = new gdal.Polygon()
+        squareDonut.rings.add(outerRing)
+        squareDonut.rings.add(innerRing)
+
+        const hull = squareDonut.convexHullAsync()
+        return assert.eventually.instanceOf(hull, gdal.Polygon)
+      })
+    })
     describe('boundary()', () => {
       it('should return geometry without inner rings', () => {
         const outerRing = new gdal.LinearRing()
@@ -583,6 +629,45 @@ describe('gdal.Geometry', () => {
         const simplified = line.simplifyAsync(0.1)
         return Promise.all([ assert.eventually.instanceOf(simplified, gdal.LineString),
           assert.eventually.equal(simplified.then((r) => r.points.count()), 4)
+        ])
+      })
+    })
+    describe('simplifyPreserveTopology()', () => {
+      it('should return simplified LineString', () => {
+        const line = new gdal.LineString()
+        line.points.add(0, 0)
+        line.points.add(10, 10)
+        line.points.add(1, 1)
+        line.points.add(2, 2)
+        line.points.add(3, 3)
+        line.points.add(4, 4)
+        line.points.add(5, 5)
+
+        const simplified = line.simplifyPreserveTopology(0.1)
+        assert.instanceOf(simplified, gdal.LineString)
+        assert.equal(simplified.points.count(), 7)
+        assert.closeTo(simplified.points.get(0).x, 0, 0.001)
+        assert.closeTo(simplified.points.get(0).y, 0, 0.001)
+        assert.closeTo(simplified.points.get(1).x, 10, 0.001)
+        assert.closeTo(simplified.points.get(1).y, 10, 0.001)
+        assert.closeTo(simplified.points.get(6).x, 5, 0.001)
+        assert.closeTo(simplified.points.get(6).y, 5, 0.001)
+      })
+    })
+    describe('simplifyPreserveTopologyAsync()', () => {
+      it('should return simplified LineString', () => {
+        const line = new gdal.LineString()
+        line.points.add(0, 0)
+        line.points.add(10, 10)
+        line.points.add(1, 1)
+        line.points.add(2, 2)
+        line.points.add(3, 3)
+        line.points.add(4, 4)
+        line.points.add(5, 5)
+
+        const simplified = line.simplifyPreserveTopologyAsync(0.1)
+        return Promise.all([ assert.eventually.instanceOf(simplified, gdal.LineString),
+          assert.eventually.equal(simplified.then((r) => r.points.count()), 7)
         ])
       })
     })
@@ -740,6 +825,61 @@ describe('gdal.Geometry', () => {
         square2.rings.add(ring2)
 
         const result = square1.intersectionAsync(square2)
+        return Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
+          assert.eventually.equal(result.then((r) => r.getArea()), 50)
+        ])
+      })
+    })
+    describe('difference()', () => {
+      it('should return the difference of two geometries', () => {
+        const ring1 = new gdal.LinearRing()
+        ring1.points.add({ x: 0, y: 0 })
+        ring1.points.add({ x: 10, y: 0 })
+        ring1.points.add({ x: 10, y: 10 })
+        ring1.points.add({ x: 0, y: 10 })
+        ring1.closeRings()
+
+        const square1 = new gdal.Polygon()
+        square1.rings.add(ring1)
+
+        const ring2 = new gdal.LinearRing()
+        ring2.points.add({ x: 5, y: 0 })
+        ring2.points.add({ x: 20, y: 0 })
+        ring2.points.add({ x: 20, y: 10 })
+        ring2.points.add({ x: 5, y: 10 })
+        ring2.closeRings()
+
+        const square2 = new gdal.Polygon()
+        square2.rings.add(ring2)
+
+        const result = square1.difference(square2)
+        assert.instanceOf(result, gdal.Polygon),
+        assert.equal(result.getArea(), 50)
+      })
+    })
+    describe('differenceAsync()', () => {
+      it('should return the difference of two geometries', () => {
+        const ring1 = new gdal.LinearRing()
+        ring1.points.add({ x: 0, y: 0 })
+        ring1.points.add({ x: 10, y: 0 })
+        ring1.points.add({ x: 10, y: 10 })
+        ring1.points.add({ x: 0, y: 10 })
+        ring1.closeRings()
+
+        const square1 = new gdal.Polygon()
+        square1.rings.add(ring1)
+
+        const ring2 = new gdal.LinearRing()
+        ring2.points.add({ x: 5, y: 0 })
+        ring2.points.add({ x: 20, y: 0 })
+        ring2.points.add({ x: 20, y: 10 })
+        ring2.points.add({ x: 5, y: 10 })
+        ring2.closeRings()
+
+        const square2 = new gdal.Polygon()
+        square2.rings.add(ring2)
+
+        const result = square1.differenceAsync(square2)
         return Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
           assert.eventually.equal(result.then((r) => r.getArea()), 50)
         ])

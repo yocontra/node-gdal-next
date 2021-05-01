@@ -92,6 +92,46 @@ describe('gdal.Envelope3D', () => {
         assert.isFalse(envelope.isEmpty())
       })
     })
+    describe('getEnvelope3D', () => {
+      it('should return the 3D envelope', () => {
+        const ring = new gdal.LinearRing()
+        ring.points.add({ x: 0, y: 0, z: 0 })
+        ring.points.add({ x: 10, y: 0, z: 0 })
+        ring.points.add({ x: 10, y: 10, z: 10 })
+        ring.points.add({ x: 0, y: 10, z: 10 })
+        ring.closeRings()
+        const square = new gdal.Polygon()
+        square.rings.add(ring)
+
+        const envelope = square.getEnvelope3D()
+        assert.propertyVal(envelope, 'minX', 0),
+        assert.propertyVal(envelope, 'maxX', 10)
+        assert.propertyVal(envelope, 'minY', 0)
+        assert.propertyVal(envelope, 'maxY', 10)
+        assert.propertyVal(envelope, 'minZ', 0)
+        assert.propertyVal(envelope, 'maxZ', 10)
+      })
+    })
+    describe('getEnvelope3DAsync', () => {
+      it('should return the 3D envelope', () => {
+        const ring = new gdal.LinearRing()
+        ring.points.add({ x: 0, y: 0, z: 0 })
+        ring.points.add({ x: 10, y: 0, z: 0 })
+        ring.points.add({ x: 10, y: 10, z: 10 })
+        ring.points.add({ x: 0, y: 10, z: 10 })
+        ring.closeRings()
+        const square = new gdal.Polygon()
+        square.rings.add(ring)
+
+        const envelope = square.getEnvelope3DAsync()
+        return Promise.all([ assert.eventually.propertyVal(envelope, 'minX', 0),
+          assert.eventually.propertyVal(envelope, 'maxX', 10),
+          assert.eventually.propertyVal(envelope, 'minY', 0),
+          assert.eventually.propertyVal(envelope, 'maxY', 10),
+          assert.eventually.propertyVal(envelope, 'minZ', 0),
+          assert.eventually.propertyVal(envelope, 'maxZ', 10) ])
+      })
+    })
     describe('merge()', () => {
       describe('w/x,y,z arguments', () => {
         it('should expand envelope', () => {

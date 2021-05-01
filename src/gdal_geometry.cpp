@@ -824,7 +824,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
  * {{{async}}}
  *
  * @method simplifyPreserveTopologyAsync
- * @param {gdal.Geometry} geometry
+ * @param {Number} tolerance
  * @param {callback} [callback=undefined] {{{cb}}}
  * @return gdal.Geometry
  */
