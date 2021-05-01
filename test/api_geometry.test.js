@@ -3,6 +3,7 @@ const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const assert = chai.assert
 chai.use(chaiAsPromised)
+const semver = require('semver')
 
 const WGS84 =
   'GEOGCS["WGS_84",DATUM["WGS_1984",SPHEROID["WGS_84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433],AXIS["Longitude",EAST],AXIS["Latitude",NORTH]]'
@@ -55,6 +56,12 @@ describe('gdal.Geometry', () => {
         type: 'Point',
         coordinates: [ 1, 2, 3 ]
       })
+    })
+  })
+  describe('toString()', () => {
+    it('should return valid result', () => {
+      const point = new gdal.Point(1, 2)
+      assert.equal(point.toString(), 'Point')
     })
   })
   describe('toKML()', () => {
@@ -182,7 +189,7 @@ describe('gdal.Geometry', () => {
       ])
     })
   })
-  if (parseFloat(gdal.version) >= 2.3) {
+  if (semver.gte(gdal.version, '2.3.0')) {
     describe('fromGeoJson()', () => {
       it('should return valid result', () => {
         const point2d = gdal.Geometry.fromGeoJson({ type: 'Point', coordinates: [ 2, 1 ] })
@@ -192,7 +199,7 @@ describe('gdal.Geometry', () => {
       })
     })
   }
-  if (parseFloat(gdal.version) >= 2.3) {
+  if (semver.gte(gdal.version, '2.3.0')) {
     describe('fromGeoJsonAsync()', () => {
       it('should return valid result', () => {
         const point2d = gdal.Geometry.fromGeoJsonAsync({ type: 'Point', coordinates: [ 2, 1 ] })

@@ -3,11 +3,12 @@ const chai = require('chai')
 const assert = chai.assert
 const gdal = require('../lib/gdal.js')
 const fileUtils = require('./utils/file.js')
+const semver = require('semver')
 
 chai.use(chaiAsPromised)
 
 // Not supported on GDAL 1.x
-if (gdal.version.split('.')[0] < 2) {
+if (semver.lt(gdal.version, '2.0.0')) {
   return
 }
 

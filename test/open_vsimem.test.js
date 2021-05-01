@@ -5,6 +5,7 @@ const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const assert = chai.assert
 chai.use(chaiAsPromised)
+const semver = require('semver')
 
 describe('Open', () => {
   afterEach(gc)
@@ -57,7 +58,7 @@ describe('Open', () => {
   })
   describe('vsimem/Async', () => {
     // Not supported on GDAL 1.x
-    if (parseFloat(gdal.version) < 2) return
+    if (semver.lt(gdal.version, '2.0.0')) return
     let filename, ds, buffer
 
     it('should not throw', () => {

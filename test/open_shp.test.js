@@ -1,6 +1,7 @@
 const gdal = require('../lib/gdal.js')
 const path = require('path')
 const assert = require('chai').assert
+const semver = require('semver')
 
 describe('Open', () => {
   afterEach(gc)
@@ -44,11 +45,10 @@ describe('Open', () => {
           integerLayer = integerDs.layers.get(0)
         })
         it('should evaluate datatypes', () => {
-          const version_major = Number(gdal.version.split('.')[0])
           assert.equal(integerLayer.fields.get(0).type, 'string')
           assert.equal(
             integerLayer.fields.get(3).type,
-            version_major >= 2 ? 'integer64' : 'integer'
+            semver.gte(gdal.version, '2.0.0') ? 'integer64' : 'integer'
           )
           assert.equal(integerLayer.fields.get(5).type, 'real')
           assert.equal(integerLayer.fields.get(10).type, 'date')

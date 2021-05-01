@@ -1,5 +1,6 @@
 const gdal = require('../lib/gdal.js')
 const assert = require('chai').assert
+const semver = require('semver')
 
 describe('gdal', () => {
   afterEach(gc)
@@ -86,7 +87,7 @@ describe('gdal', () => {
       }
     })
     it('should write reprojected image into dst dataset', () => {
-      if (gdal.version.split('.')[0] == 2 && gdal.version.split('.')[1] == 2) {
+      if (semver.satisfies(gdal.version, '^2.2.0')) {
         /* GDALReprojectImage with 1 band with different source and target number
          * is bugged on GDAL 2.2.x
          * https://github.com/OSGeo/gdal/commit/7bb8d37f1bfbb9c7bbcbe3050df55ef227bbc260#diff-3e9f012797a2e1a7d138afea7e967499799c6a65281b9769b5f56377119c919c
@@ -303,7 +304,7 @@ describe('gdal', () => {
       assert.equal(result_checksum, expected_checksum)
     })
     it('should throw if cutline is wrong geometry type', () => {
-      if (gdal.version.split('.')[0] == 2 && gdal.version.split('.')[1] == 2) {
+      if (semver.satisfies(gdal.version, '^2.2.0')) {
         /* GDALReprojectImage with 1 band with different source and target number
          * is bugged on GDAL 2.2.x
          * https://github.com/OSGeo/gdal/commit/7bb8d37f1bfbb9c7bbcbe3050df55ef227bbc260#diff-3e9f012797a2e1a7d138afea7e967499799c6a65281b9769b5f56377119c919c
@@ -596,15 +597,7 @@ describe('gdal', () => {
       assert.equal(value, 123)
     })
 
-    function greaterThan2(version) {
-      const parts = version.split('.').map((part) => +part)
-      if (parts[0] >= 2) {
-        return true
-      }
-      return false
-    }
-
-    if (greaterThan2(gdal.version)) {
+    if (semver.gte(gdal.version, '2.0.0')) {
       it("should throw error if GDAL can't create transformer", () => {
         src = gdal.open(`${__dirname}/data/unsupported-srs.tif`)
 

@@ -1,6 +1,7 @@
 const gdal = require('../lib/gdal.js')
 const path = require('path')
 const assert = require('chai').assert
+const semver = require('semver')
 
 describe('Open', () => {
   afterEach(gc)
@@ -13,7 +14,7 @@ describe('Open', () => {
       ds = gdal.open(filename)
     })
 
-    if (gdal.version.split('.')[0] >= 2) {
+    if (semver.gte(gdal.version, '2.0.0')) {
       it('should be able to read raster size', () => {
         assert.equal(ds.rasterSize.x, 343)
         assert.equal(ds.rasterSize.y, 471)
@@ -21,7 +22,7 @@ describe('Open', () => {
       })
 
       it('should be able to read geotransform', () => {
-        const expected_geotransform = [658995, 30, 0, 4929375, 0, -30]
+        const expected_geotransform = [ 658995, 30, 0, 4929375, 0, -30 ]
 
         const actual_geotransform = ds.geoTransform
         const delta = 0.00001

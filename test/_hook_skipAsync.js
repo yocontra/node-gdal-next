@@ -1,8 +1,9 @@
 const gdal = require('../lib/gdal.js')
+const semver = require('semver')
 
 let skipAsync = (done) => done()
 // Skip async on GDAL 1.x
-if (gdal.version.split('.')[0] < 2) {
+if (semver.lt(gdal.version, '2.0.0')) {
   skipAsync = function (done) {
     let test = this.currentTest
     while (test) {
