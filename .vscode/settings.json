@@ -1,5 +1,7 @@
 {
     "editor.tabSize": 2,
     "C_Cpp.errorSquiggles": "Enabled",
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "eslint.format.enable": true,
+    "editor.formatOnSave": true
 }
