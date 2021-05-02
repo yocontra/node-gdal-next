@@ -78,7 +78,7 @@ template <class T, class OGRT> Local<Value> GeometryBase<T, OGRT>::New(OGRT *geo
 }
 
 template <class T, class OGRT> GeometryBase<T, OGRT>::GeometryBase(OGRT *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
-  LOG("Created Geometry [%p]", geom);
+  LOG("Created Geometry %s [%p]", typeid(T).name(), geom);
   // The async locks must live outside the V8 memory management,
   // otherwise they won't be accessible from the async threads
   async_lock = new uv_sem_t;
@@ -92,7 +92,7 @@ template <class T, class OGRT> GeometryBase<T, OGRT>::GeometryBase() : Nan::Obje
 
 template <class T, class OGRT> GeometryBase<T, OGRT>::~GeometryBase() {
   if (this_) {
-    LOG("Disposing Geometry [%p] (%s)", this_, owned_ ? "owned" : "unowned");
+    LOG("Disposing Geometry %s [%p] (%s)", typeid(T).name(), this_, owned_ ? "owned" : "unowned");
     if (owned_) {
       OGRGeometryFactory::destroyGeometry(this_);
       Nan::AdjustExternalMemory(-size_);
