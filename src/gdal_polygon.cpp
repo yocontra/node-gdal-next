@@ -28,19 +28,6 @@ void Polygon::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-Polygon::Polygon(OGRPolygon *geom) : Geometry(geom), this_(geom) {
-  LOG("Created Polygon [%p]", geom);
-}
-
-Polygon::Polygon() : Geometry(), this_(NULL) {
-}
-
-Polygon::~Polygon() {
-  if (this_) {
-    LOG("Disposing Polygon [%p] (%s)", this_, owned_ ? "owned" : "unowned");
-  }
-}
-
 /**
  * Concrete class representing polygons.
  *
@@ -75,36 +62,6 @@ NAN_METHOD(Polygon::New) {
 
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
-}
-
-Local<Value> Polygon::New(OGRPolygon *geom) {
-  Nan::EscapableHandleScope scope;
-  return scope.Escape(Polygon::New(geom, true));
-}
-
-Local<Value> Polygon::New(OGRPolygon *geom, bool owned) {
-  Nan::EscapableHandleScope scope;
-
-  if (!geom) { return scope.Escape(Nan::Null()); }
-
-  // make a copy of geometry owned by a feature
-  // + no need to track when a feature is destroyed
-  // + no need to throw errors when a method trys to modify an owned read-only
-  // geometry
-  // - is slower
-
-  if (!owned) { geom = static_cast<OGRPolygon *>(geom->clone()); }
-
-  Polygon *wrapped = new Polygon(geom);
-  wrapped->owned_ = true;
-
-  UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
-
-  Local<Value> ext = Nan::New<External>(wrapped);
-  Local<Object> obj =
-    Nan::NewInstance(Nan::GetFunction(Nan::New(Polygon::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
-
-  return scope.Escape(obj);
 }
 
 NAN_METHOD(Polygon::toString) {

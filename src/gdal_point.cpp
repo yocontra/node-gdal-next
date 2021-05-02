@@ -28,19 +28,6 @@ void Point::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-Point::Point(OGRPoint *geom) : Geometry(geom), this_(geom) {
-  LOG("Created Point [%p]", geom);
-}
-
-Point::Point() : Geometry(), this_(NULL) {
-}
-
-Point::~Point() {
-  if (this_) {
-    LOG("Disposing Point [%p] (%s)", this_, owned_ ? "owned" : "unowned");
-  }
-}
-
 /**
  * Point class.
  *
@@ -88,36 +75,6 @@ NAN_METHOD(Point::New) {
 
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
-}
-
-Local<Value> Point::New(OGRPoint *geom) {
-  Nan::EscapableHandleScope scope;
-  return scope.Escape(Point::New(geom, true));
-}
-
-Local<Value> Point::New(OGRPoint *geom, bool owned) {
-  Nan::EscapableHandleScope scope;
-
-  if (!geom) { return scope.Escape(Nan::Null()); }
-
-  // make a copy of geometry owned by a feature
-  // + no need to track when a feature is destroyed
-  // + no need to throw errors when a method trys to modify an owned read-only
-  // geometry
-  // - is slower
-
-  if (!owned) { geom = static_cast<OGRPoint *>(geom->clone()); }
-
-  Point *wrapped = new Point(geom);
-  wrapped->owned_ = true;
-
-  UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
-
-  Local<Value> ext = Nan::New<External>(wrapped);
-  Local<Object> obj =
-    Nan::NewInstance(Nan::GetFunction(Nan::New(Point::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
-
-  return scope.Escape(obj);
 }
 
 NAN_METHOD(Point::toString) {

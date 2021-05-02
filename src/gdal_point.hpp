@@ -18,15 +18,15 @@ using namespace node;
 
 namespace node_gdal {
 
-class Point : public Geometry {
+class Point : public GeometryBase<Point, OGRPoint> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryBase<Point, OGRPoint>::GeometryBase;
 
   static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
-  static Local<Value> New(OGRPoint *geom);
-  static Local<Value> New(OGRPoint *geom, bool owned);
+  using GeometryBase<Point, OGRPoint>::New;
   static NAN_METHOD(toString);
 
   static NAN_GETTER(xGetter);
@@ -35,20 +35,6 @@ class Point : public Geometry {
   static NAN_SETTER(xSetter);
   static NAN_SETTER(ySetter);
   static NAN_SETTER(zSetter);
-
-  Point();
-  Point(OGRPoint *geom);
-  inline OGRPoint *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    protected:
-  ~Point();
-    private:
-  OGRPoint *this_;
 };
 
 } // namespace node_gdal

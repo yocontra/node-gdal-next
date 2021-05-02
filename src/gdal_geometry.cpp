@@ -88,33 +88,6 @@ void Geometry::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-Geometry::Geometry(OGRGeometry *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
-  LOG("Created Geometry [%p]", geom);
-  // The async locks must live outside the V8 memory management,
-  // otherwise they won't be accessible from the async threads
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
-}
-
-Geometry::Geometry() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
-}
-
-Geometry::~Geometry() {
-  if (this_) {
-    LOG("Disposing Geometry [%p] (%s)", this_, owned_ ? "owned" : "unowned");
-    if (owned_) {
-      OGRGeometryFactory::destroyGeometry(this_);
-      Nan::AdjustExternalMemory(-size_);
-    }
-    LOG("Disposed Geometry [%p]", this_)
-    this_ = NULL;
-  }
-  uv_sem_destroy(async_lock);
-  delete async_lock;
-}
-
 /**
  * Abstract base class for all geometry classes.
  *
@@ -146,11 +119,6 @@ NAN_METHOD(Geometry::New) {
 
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
-}
-
-Local<Value> Geometry::New(OGRGeometry *geom) {
-  Nan::EscapableHandleScope scope;
-  return scope.Escape(Geometry::New(geom, true));
 }
 
 Local<Value> Geometry::New(OGRGeometry *geom, bool owned) {

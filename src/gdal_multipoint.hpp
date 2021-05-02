@@ -18,29 +18,15 @@ using namespace node;
 
 namespace node_gdal {
 
-class MultiPoint : public GeometryCollection {
+class MultiPoint : public GeometryCollectionBase<MultiPoint, OGRMultiPoint> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryCollectionBase<MultiPoint, OGRMultiPoint>::GeometryCollectionBase;
 
   static void Initialize(Local<Object> target);
-  static NAN_METHOD(New);
-  static Local<Value> New(OGRMultiPoint *geom);
-  static Local<Value> New(OGRMultiPoint *geom, bool owned);
+  using GeometryCollectionBase<MultiPoint, OGRMultiPoint>::New;
   static NAN_METHOD(toString);
-
-  MultiPoint();
-  MultiPoint(OGRMultiPoint *geom);
-  inline OGRMultiPoint *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    private:
-  ~MultiPoint();
-  OGRMultiPoint *this_;
 };
 
 } // namespace node_gdal

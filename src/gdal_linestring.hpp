@@ -18,35 +18,21 @@ using namespace node;
 
 namespace node_gdal {
 
-class LineString : public Geometry {
+class LineString : public GeometryBase<LineString, OGRLineString> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryBase<LineString, OGRLineString>::GeometryBase;
 
   static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
-  static Local<Value> New(OGRLineString *geom);
-  static Local<Value> New(OGRLineString *geom, bool owned);
+  using GeometryBase<LineString, OGRLineString>::New;
   static NAN_METHOD(toString);
   static NAN_METHOD(getLength);
   static NAN_METHOD(value);
   static NAN_METHOD(addSubLineString);
 
   static NAN_GETTER(pointsGetter);
-
-  LineString();
-  LineString(OGRLineString *geom);
-  inline OGRLineString *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    protected:
-  ~LineString();
-    private:
-  OGRLineString *this_;
 };
 
 } // namespace node_gdal

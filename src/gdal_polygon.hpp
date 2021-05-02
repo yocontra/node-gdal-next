@@ -18,33 +18,19 @@ using namespace node;
 
 namespace node_gdal {
 
-class Polygon : public Geometry {
+class Polygon : public GeometryBase<Polygon, OGRPolygon> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryBase<Polygon, OGRPolygon>::GeometryBase;
 
   static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
-  static Local<Value> New(OGRPolygon *geom);
-  static Local<Value> New(OGRPolygon *geom, bool owned);
+  using GeometryBase<Polygon, OGRPolygon>::New;
   static NAN_METHOD(toString);
   static NAN_METHOD(getArea);
 
   static NAN_GETTER(ringsGetter);
-
-  Polygon();
-  Polygon(OGRPolygon *geom);
-  inline OGRPolygon *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    protected:
-  ~Polygon();
-    private:
-  OGRPolygon *this_;
 };
 
 } // namespace node_gdal

@@ -18,31 +18,16 @@ using namespace node;
 
 namespace node_gdal {
 
-class MultiLineString : public GeometryCollection {
+class MultiLineString : public GeometryCollectionBase<MultiLineString, OGRMultiLineString> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryCollectionBase<MultiLineString, OGRMultiLineString>::GeometryCollectionBase;
 
   static void Initialize(Local<Object> target);
-  static NAN_METHOD(New);
-  static Local<Value> New(OGRMultiLineString *geom);
-  static Local<Value> New(OGRMultiLineString *geom, bool owned);
+  using GeometryCollectionBase<MultiLineString, OGRMultiLineString>::New;
   static NAN_METHOD(toString);
   static NAN_METHOD(polygonize);
-
-  MultiLineString();
-  MultiLineString(OGRMultiLineString *geom);
-  inline OGRMultiLineString *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    protected:
-  ~MultiLineString();
-    private:
-  OGRMultiLineString *this_;
 };
 
 } // namespace node_gdal

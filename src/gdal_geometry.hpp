@@ -18,15 +18,100 @@ using namespace node;
 
 namespace node_gdal {
 
-class Geometry : public Nan::ObjectWrap {
-  friend class Feature;
+#define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                       \
+{                                                                                                                    \
+  int new_size = geom->this_->WkbSize();                                                                             \
+  if (geom->owned_) Nan::AdjustExternalMemory(new_size - geom->size_);                                               \
+  geom->size_ = new_size;                                                                                            \
+}
 
+template <class T, class OGRT> class GeometryBase : public Nan::ObjectWrap {
+    public:
+  static Local<Value> New(OGRT *geom);
+  static Local<Value> New(OGRT *geom, bool owned);
+
+  GeometryBase();
+  GeometryBase(OGRT *geom);
+  inline OGRT *get() {
+    return this_;
+  }
+  inline bool isAlive() {
+    return this_;
+  }
+
+    protected:
+  ~GeometryBase();
+  OGRT *this_;
+  bool owned_;
+  int size_;
+  uv_sem_t *async_lock;
+};
+
+template <class T, class OGRT> Local<Value> GeometryBase<T, OGRT>::New(OGRT *geom) {
+  Nan::EscapableHandleScope scope;
+  return scope.Escape(T::New(geom, true));
+}
+
+template <class T, class OGRT> Local<Value> GeometryBase<T, OGRT>::New(OGRT *geom, bool owned) {
+  Nan::EscapableHandleScope scope;
+
+  if (!geom) { return scope.Escape(Nan::Null()); }
+
+  // make a copy of geometry owned by a feature
+  // + no need to track when a feature is destroyed
+  // + no need to throw errors when a method trys to modify an owned read-only
+  // geometry
+  // - is slower
+
+  if (!owned) { geom = static_cast<OGRT *>(geom->clone()); }
+
+  T *wrapped = new T(geom);
+  wrapped->owned_ = true;
+
+  UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
+
+  Local<Value> ext = Nan::New<External>(wrapped);
+  Local<Object> obj =
+    Nan::NewInstance(Nan::GetFunction(Nan::New(T::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
+
+  return scope.Escape(obj);
+}
+
+template <class T, class OGRT> GeometryBase<T, OGRT>::GeometryBase(OGRT *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+  LOG("Created Geometry [%p]", geom);
+  // The async locks must live outside the V8 memory management,
+  // otherwise they won't be accessible from the async threads
+  async_lock = new uv_sem_t;
+  uv_sem_init(async_lock, 1);
+}
+
+template <class T, class OGRT> GeometryBase<T, OGRT>::GeometryBase() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+  async_lock = new uv_sem_t;
+  uv_sem_init(async_lock, 1);
+}
+
+template <class T, class OGRT> GeometryBase<T, OGRT>::~GeometryBase() {
+  if (this_) {
+    LOG("Disposing Geometry [%p] (%s)", this_, owned_ ? "owned" : "unowned");
+    if (owned_) {
+      OGRGeometryFactory::destroyGeometry(this_);
+      Nan::AdjustExternalMemory(-size_);
+    }
+    LOG("Disposed Geometry [%p]", this_)
+    this_ = NULL;
+  }
+  uv_sem_destroy(async_lock);
+  delete async_lock;
+}
+
+class Geometry : public GeometryBase<Geometry, OGRGeometry> {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryBase<Geometry, OGRGeometry>::GeometryBase;
 
   static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
-  static Local<Value> New(OGRGeometry *geom);
+  using GeometryBase<Geometry, OGRGeometry>::New;
   static Local<Value> New(OGRGeometry *geom, bool owned);
   static NAN_METHOD(toString);
   GDAL_ASYNCABLE_DECLARE(isEmpty);
@@ -90,30 +175,7 @@ class Geometry : public Nan::ObjectWrap {
 
   static OGRwkbGeometryType getGeometryType_fixed(OGRGeometry *geom);
   static Local<Value> getConstructor(OGRwkbGeometryType type);
-
-  Geometry();
-  Geometry(OGRGeometry *geom);
-  inline OGRGeometry *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    protected:
-  ~Geometry();
-  OGRGeometry *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
-
-#define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                         \
-  {                                                                                                                    \
-    int new_size = geom->this_->WkbSize();                                                                             \
-    if (geom->owned_) Nan::AdjustExternalMemory(new_size - geom->size_);                                               \
-    geom->size_ = new_size;                                                                                            \
-  }
 
 } // namespace node_gdal
 #endif

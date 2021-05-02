@@ -11,37 +11,24 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_linestring.hpp"
+#include "gdal_geometry.hpp"
 
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class LinearRing : public LineString {
+class LinearRing : public GeometryBase<LinearRing, OGRLinearRing> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryBase<LinearRing, OGRLinearRing>::GeometryBase;
 
   static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
-  static Local<Value> New(OGRLinearRing *geom);
-  static Local<Value> New(OGRLinearRing *geom, bool owned);
+  using GeometryBase<LinearRing, OGRLinearRing>::New;
   static NAN_METHOD(toString);
   static NAN_METHOD(getArea);
-
-  LinearRing();
-  LinearRing(OGRLinearRing *geom);
-  inline OGRLinearRing *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    private:
-  ~LinearRing();
-  OGRLinearRing *this_;
 };
 
 } // namespace node_gdal

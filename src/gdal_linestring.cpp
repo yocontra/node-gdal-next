@@ -31,19 +31,6 @@ void LineString::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-LineString::LineString(OGRLineString *geom) : Geometry(geom), this_(geom) {
-  LOG("Created LineString [%p]", geom);
-}
-
-LineString::LineString() : Geometry(), this_(NULL) {
-}
-
-LineString::~LineString() {
-  if (this_) {
-    LOG("Disposing LineString [%p] (%s)", this_, owned_ ? "owned" : "unowned");
-  }
-}
-
 /**
  * Concrete representation of a multi-vertex line.
  *
@@ -84,36 +71,6 @@ NAN_METHOD(LineString::New) {
 
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
-}
-
-Local<Value> LineString::New(OGRLineString *geom) {
-  Nan::EscapableHandleScope scope;
-  return scope.Escape(LineString::New(geom, true));
-}
-
-Local<Value> LineString::New(OGRLineString *geom, bool owned) {
-  Nan::EscapableHandleScope scope;
-
-  if (!geom) { return scope.Escape(Nan::Null()); }
-
-  // make a copy of geometry owned by a feature
-  // + no need to track when a feature is destroyed
-  // + no need to throw errors when a method trys to modify an owned read-only
-  // geometry
-  // - is slower
-
-  if (!owned) { geom = static_cast<OGRLineString *>(geom->clone()); };
-
-  LineString *wrapped = new LineString(geom);
-  wrapped->owned_ = true;
-
-  UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(wrapped);
-
-  Local<Value> ext = Nan::New<External>(wrapped);
-  Local<Object> obj =
-    Nan::NewInstance(Nan::GetFunction(Nan::New(LineString::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
-
-  return scope.Escape(obj);
 }
 
 NAN_METHOD(LineString::toString) {
