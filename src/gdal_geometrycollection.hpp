@@ -14,9 +14,11 @@
 using namespace v8;
 using namespace node;
 
+#include "gdal_geometry.hpp"
+
 namespace node_gdal {
 
-class GeometryCollection : public Nan::ObjectWrap {
+class GeometryCollection : public Geometry {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -40,12 +42,10 @@ class GeometryCollection : public Nan::ObjectWrap {
     return this_;
   }
 
-    private:
+    protected:
   ~GeometryCollection();
+    private:
   OGRGeometryCollection *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal

@@ -11,12 +11,14 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "gdal_geometry.hpp"
+
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class LineString : public Nan::ObjectWrap {
+class LineString : public Geometry {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -41,12 +43,10 @@ class LineString : public Nan::ObjectWrap {
     return this_;
   }
 
-    private:
+    protected:
   ~LineString();
+    private:
   OGRLineString *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal

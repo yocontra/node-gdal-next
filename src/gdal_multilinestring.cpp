@@ -28,29 +28,17 @@ void MultiLineString::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-MultiLineString::MultiLineString(OGRMultiLineString *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+MultiLineString::MultiLineString(OGRMultiLineString *geom) : GeometryCollection(geom), this_(geom) {
   LOG("Created MultiLineString [%p]", geom);
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
 }
 
-MultiLineString::MultiLineString() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
+MultiLineString::MultiLineString() : GeometryCollection(), this_(NULL) {
 }
 
 MultiLineString::~MultiLineString() {
   if (this_) {
     LOG("Disposing GeometryCollection [%p] (%s)", this_, owned_ ? "owned" : "unowned");
-    if (owned_) {
-      OGRGeometryFactory::destroyGeometry(this_);
-      Nan::AdjustExternalMemory(-size_);
-    }
-    LOG("Disposed GeometryCollection [%p]", this_);
-    this_ = NULL;
   }
-  uv_sem_destroy(async_lock);
-  delete async_lock;
 }
 
 /**

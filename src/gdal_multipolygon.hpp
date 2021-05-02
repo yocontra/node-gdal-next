@@ -11,12 +11,14 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "gdal_geometrycollection.hpp"
+
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class MultiPolygon : public Nan::ObjectWrap {
+class MultiPolygon : public GeometryCollection {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -38,12 +40,10 @@ class MultiPolygon : public Nan::ObjectWrap {
     return this_;
   }
 
-    private:
+    protected:
   ~MultiPolygon();
+    private:
   OGRMultiPolygon *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal

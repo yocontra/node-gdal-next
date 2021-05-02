@@ -31,29 +31,17 @@ void LineString::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-LineString::LineString(OGRLineString *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+LineString::LineString(OGRLineString *geom) : Geometry(geom), this_(geom) {
   LOG("Created LineString [%p]", geom);
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
 }
 
-LineString::LineString() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
+LineString::LineString() : Geometry(), this_(NULL) {
 }
 
 LineString::~LineString() {
   if (this_) {
     LOG("Disposing LineString [%p] (%s)", this_, owned_ ? "owned" : "unowned");
-    if (owned_) {
-      OGRGeometryFactory::destroyGeometry(this_);
-      Nan::AdjustExternalMemory(-size_);
-    }
-    LOG("Disposed LineString [%p]", this_);
-    this_ = NULL;
   }
-  uv_sem_destroy(async_lock);
-  delete async_lock;
 }
 
 /**

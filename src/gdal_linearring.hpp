@@ -11,12 +11,14 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "gdal_linestring.hpp"
+
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class LinearRing : public Nan::ObjectWrap {
+class LinearRing : public LineString {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -40,9 +42,6 @@ class LinearRing : public Nan::ObjectWrap {
     private:
   ~LinearRing();
   OGRLinearRing *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal

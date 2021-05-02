@@ -27,29 +27,17 @@ void LinearRing::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-LinearRing::LinearRing(OGRLinearRing *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+LinearRing::LinearRing(OGRLinearRing *geom) : LineString(geom), this_(geom) {
   LOG("Created LinearRing [%p]", geom);
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
 }
 
-LinearRing::LinearRing() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
-  async_lock = new uv_sem_t;
-  uv_sem_init(async_lock, 1);
+LinearRing::LinearRing() : LineString(), this_(NULL) {
 }
 
 LinearRing::~LinearRing() {
   if (this_) {
     LOG("Disposing LinearRing [%p] (%s)", this_, owned_ ? "owned" : "unowned");
-    if (owned_) {
-      OGRGeometryFactory::destroyGeometry(this_);
-      Nan::AdjustExternalMemory(-size_);
-    }
-    LOG("Disposed LinearRing [%p]", this_);
-    this_ = NULL;
   }
-  uv_sem_destroy(async_lock);
-  delete async_lock;
 }
 
 /**

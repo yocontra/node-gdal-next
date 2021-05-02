@@ -11,12 +11,14 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "gdal_geometrycollection.hpp"
+
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class MultiPoint : public Nan::ObjectWrap {
+class MultiPoint : public GeometryCollection {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -39,9 +41,6 @@ class MultiPoint : public Nan::ObjectWrap {
     private:
   ~MultiPoint();
   OGRMultiPoint *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal

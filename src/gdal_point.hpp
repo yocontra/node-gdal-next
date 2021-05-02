@@ -11,12 +11,14 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "gdal_geometry.hpp"
+
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class Point : public Nan::ObjectWrap {
+class Point : public Geometry {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -43,12 +45,10 @@ class Point : public Nan::ObjectWrap {
     return this_;
   }
 
-    private:
+    protected:
   ~Point();
+    private:
   OGRPoint *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal

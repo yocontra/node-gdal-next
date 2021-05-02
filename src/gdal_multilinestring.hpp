@@ -11,12 +11,14 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "gdal_geometrycollection.hpp"
+
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class MultiLineString : public Nan::ObjectWrap {
+class MultiLineString : public GeometryCollection {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -37,12 +39,10 @@ class MultiLineString : public Nan::ObjectWrap {
     return this_;
   }
 
-    private:
+    protected:
   ~MultiLineString();
+    private:
   OGRMultiLineString *this_;
-  bool owned_;
-  int size_;
-  uv_sem_t *async_lock;
 };
 
 } // namespace node_gdal
