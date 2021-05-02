@@ -18,6 +18,24 @@ using namespace node;
 
 namespace node_gdal {
 
+/*
+ * Geometry class inheritance hierarchy
+ *
+ * C++
+ * GeometryBase<>
+ * |        \     \          \       \          \
+ * Geometry Point LineString Polygon LinearRing GeometryCollectionBase<>
+ *                                              |                  \
+ *                                              GeometryCollection Multi*
+ * 
+ * JS
+ * Geometry
+ * |     \          \       \          \
+ * Point LineString Polygon LinearRing GeometryCollection
+ *                                     |
+ *                                     Multi*
+ */
+
 #define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                       \
 {                                                                                                                    \
   int new_size = geom->this_->WkbSize();                                                                             \
