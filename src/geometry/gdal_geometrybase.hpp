@@ -24,25 +24,34 @@ namespace node_gdal {
  * C++
  * (maximizes code reuse)
  * 
- * 
  * GeometryBase<>
- * |        \     \                                                                         \
- * Geometry Point CurveBase<>                                                               GeometryCollectionBase<>
- *                |           \          \       \          \              \                |                  \
- *                SimpleCurve LineString Polygon LinearRing CircularString CompoundCurve    GeometryCollection Multi*
- * 
+ *    Geometry
+ *    Point
+ *    CurveBase<>
+ *        SimpleCurve
+ *        LineString
+ *        CircularString
+ *        LinearRing
+ *        Polygon
+ *        CompoundCurve
+ *    GeometryCollectionBase<>
+ *        GeometryCollection
+ *        Multi*
  * 
  * 
  * JS
  * (tries to follow GDAL and the ISO specification)
  * 
  * Geometry
- * |     \                            \        \                         \
- * Point SimpleCurve                  Polygon  CompoundCurve             GeometryCollection
- *       |          \                                                    |
- *       LineString CircularString                                       Multi*
- *       |
- *       LinearRing
+ *    Point
+ *    SimpleCurve
+ *        LineString
+ *            LinearRing
+ *        CircularString
+ *    Polygon
+ *    CompoundCurve
+ *    GeometryCollection
+ *        Multi*
  * 
  * 
  * The full GDAL OGRGeometry class hierarchy
