@@ -10,6 +10,7 @@ describe('gdal.LinearRing', () => {
   it('should inherit from LineString', () => {
     assert.instanceOf(new gdal.LinearRing(), gdal.LinearRing)
     assert.instanceOf(new gdal.LinearRing(), gdal.LineString)
+    assert.instanceOf(new gdal.LinearRing(), gdal.SimpleCurve)
     assert.instanceOf(new gdal.LinearRing(), gdal.Geometry)
   })
   describe('instance', () => {

@@ -65,6 +65,7 @@
 #include "geometry/gdal_geometry.hpp"
 #include "geometry/gdal_geometrycollection.hpp"
 #include "gdal_layer.hpp"
+#include "geometry/gdal_simplecurve.hpp"
 #include "geometry/gdal_linearring.hpp"
 #include "geometry/gdal_linestring.hpp"
 #include "geometry/gdal_circularstring.hpp"
@@ -284,6 +285,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   FieldDefn::Initialize(target);
   Geometry::Initialize(target);
   Point::Initialize(target);
+  SimpleCurve::Initialize(target);
   LineString::Initialize(target);
   CircularString::Initialize(target);
   LinearRing::Initialize(target);

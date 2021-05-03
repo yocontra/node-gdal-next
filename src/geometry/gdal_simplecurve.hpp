@@ -1,5 +1,5 @@
-#ifndef __NODE_OGR_CIRCULARSTRING_H__
-#define __NODE_OGR_CIRCULARSTRING_H__
+#ifndef __NODE_OGR_CURVE_H__
+#define __NODE_OGR_CURVE_H__
 
 // node
 #include <node.h>
@@ -19,15 +19,20 @@ using namespace node;
 
 namespace node_gdal {
 
-class CircularString : public CurveBase<CircularString, OGRCircularString, LineStringPoints> {
+class SimpleCurve : public CurveBase<SimpleCurve, OGRSimpleCurve, LineStringPoints> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  using CurveBase<CircularString, OGRCircularString, LineStringPoints>::CurveBase;
+  using CurveBase<SimpleCurve, OGRSimpleCurve, LineStringPoints>::CurveBase;
 
   static void Initialize(Local<Object> target);
-  using CurveBase<CircularString, OGRCircularString, LineStringPoints>::New;
+  static NAN_METHOD(New);
   static NAN_METHOD(toString);
+  static NAN_METHOD(value);
+  static NAN_METHOD(getLength);
+  static NAN_METHOD(addSubLineString);
+
+  static NAN_GETTER(pointsGetter);
 };
 
 } // namespace node_gdal

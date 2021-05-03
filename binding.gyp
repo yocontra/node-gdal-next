@@ -31,6 +31,7 @@
 				"src/gdal_field_defn.cpp",
 				"src/geometry/gdal_geometry.cpp",
 				"src/geometry/gdal_point.cpp",
+				"src/geometry/gdal_simplecurve.cpp",
 				"src/geometry/gdal_linestring.cpp",
 				"src/geometry/gdal_circularstring.cpp",
 				"src/geometry/gdal_linearring.cpp",

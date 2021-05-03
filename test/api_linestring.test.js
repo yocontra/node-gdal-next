@@ -9,6 +9,7 @@ describe('gdal.LineString', () => {
   })
   it('should inherit from Geometry', () => {
     assert.instanceOf(new gdal.LineString(), gdal.LineString)
+    assert.instanceOf(new gdal.LineString(), gdal.SimpleCurve)
     assert.instanceOf(new gdal.LineString(), gdal.Geometry)
   })
   describe('instance', () => {

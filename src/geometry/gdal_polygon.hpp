@@ -11,7 +11,7 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_curve.hpp"
+#include "gdal_curvebase.hpp"
 #include "../collections/polygon_rings.hpp"
 
 using namespace v8;
@@ -19,15 +19,15 @@ using namespace node;
 
 namespace node_gdal {
 
-class Polygon : public Curve<Polygon, OGRPolygon, PolygonRings> {
-  friend Curve;
+class Polygon : public CurveBase<Polygon, OGRPolygon, PolygonRings> {
+  friend CurveBase;
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  using Curve<Polygon, OGRPolygon, PolygonRings>::Curve;
+  using CurveBase<Polygon, OGRPolygon, PolygonRings>::CurveBase;
 
   static void Initialize(Local<Object> target);
-  using Curve<Polygon, OGRPolygon, PolygonRings>::New;
+  using CurveBase<Polygon, OGRPolygon, PolygonRings>::New;
   static NAN_METHOD(toString);
   static NAN_METHOD(getArea);
 

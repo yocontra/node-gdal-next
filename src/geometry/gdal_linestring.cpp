@@ -3,6 +3,7 @@
 #include "../collections/linestring_points.hpp"
 #include "../gdal_common.hpp"
 #include "gdal_geometry.hpp"
+#include "gdal_simplecurve.hpp"
 #include "gdal_point.hpp"
 
 #include <stdlib.h>
@@ -15,16 +16,11 @@ void LineString::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
 
   Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(LineString::New);
-  lcons->Inherit(Nan::New(Geometry::constructor));
+  lcons->Inherit(Nan::New(SimpleCurve::constructor));
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
   lcons->SetClassName(Nan::New("LineString").ToLocalChecked());
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
-  Nan::SetPrototypeMethod(lcons, "getLength", getLength);
-  Nan::SetPrototypeMethod(lcons, "value", value);
-  Nan::SetPrototypeMethod(lcons, "addSubLineString", addSubLineString);
-
-  ATTR(lcons, "points", pointsGetter, READ_ONLY_SETTER);
 
   Nan::Set(target, Nan::New("LineString").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
@@ -48,88 +44,6 @@ void LineString::Initialize(Local<Object> target) {
 NAN_METHOD(LineString::toString) {
   Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("LineString").ToLocalChecked());
-}
-
-/**
- * Computes the length of the line string.
- *
- * @method getLength
- * @return Number
- */
-NODE_WRAPPED_METHOD_WITH_RESULT(LineString, getLength, Number, get_Length);
-
-/**
- * Returns the point at the specified distance along the line string.
- *
- * @method value
- * @param {Number} distance
- * @return {gdal.Point}
- */
-NAN_METHOD(LineString::value) {
-  Nan::HandleScope scope;
-
-  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(info.This());
-
-  OGRPoint *pt = new OGRPoint();
-  double dist;
-
-  NODE_ARG_DOUBLE(0, "distance", dist);
-
-  geom->this_->Value(dist, pt);
-
-  info.GetReturnValue().Set(Point::New(pt));
-}
-
-/**
- * Add a segment of another linestring to this one.
- *
- * Adds the request range of vertices to the end of this line string in an
- * efficient manner. If the start index is larger than the end index then the
- * vertices will be reversed as they are copied.
- *
- * @method addSubLineString
- * @param {gdal.LineString} line the other linestring
- * @param {int} [start=0] the first vertex to copy, defaults to 0 to start with
- * the first vertex in the other linestring
- * @param {int} [end=-1] the last vertex to copy, defaults to -1 indicating the
- * last vertex of the other linestring
- * @return {void}
- */
-NAN_METHOD(LineString::addSubLineString) {
-  Nan::HandleScope scope;
-
-  LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(info.This());
-  LineString *other;
-  int start = 0;
-  int end = -1;
-
-  NODE_ARG_WRAPPED(0, "line", LineString, other);
-  NODE_ARG_INT_OPT(1, "start", start);
-  NODE_ARG_INT_OPT(2, "end", end);
-
-  int n = other->get()->getNumPoints();
-
-  if (start < 0 || end < -1 || start >= n || end >= n) {
-    Nan::ThrowRangeError("Invalid start or end index for linestring");
-    return;
-  }
-
-  geom->this_->addSubLineString(other->get(), start, end);
-
-  UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom);
-
-  return;
-}
-
-/**
- * Points that make up the line string.
- *
- * @attribute points
- * @type {gdal.LineStringPoints}
- */
-NAN_GETTER(LineString::pointsGetter) {
-  Nan::HandleScope scope;
-  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("points_").ToLocalChecked()).ToLocalChecked());
 }
 
 } // namespace node_gdal

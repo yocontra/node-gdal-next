@@ -11,7 +11,7 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_curve.hpp"
+#include "gdal_curvebase.hpp"
 #include "../collections/linestring_points.hpp"
 
 using namespace v8;
@@ -19,18 +19,15 @@ using namespace node;
 
 namespace node_gdal {
 
-class LineString : public Curve<LineString, OGRLineString, LineStringPoints> {
+class LineString : public CurveBase<LineString, OGRLineString, LineStringPoints> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  using Curve<LineString, OGRLineString, LineStringPoints>::Curve;
+  using CurveBase<LineString, OGRLineString, LineStringPoints>::CurveBase;
 
   static void Initialize(Local<Object> target);
-  using Curve<LineString, OGRLineString, LineStringPoints>::New;
+  using CurveBase<LineString, OGRLineString, LineStringPoints>::New;
   static NAN_METHOD(toString);
-  static NAN_METHOD(getLength);
-  static NAN_METHOD(value);
-  static NAN_METHOD(addSubLineString);
 
   static NAN_GETTER(pointsGetter);
 };

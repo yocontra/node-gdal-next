@@ -19,21 +19,30 @@ namespace node_gdal {
  * Geometry class inheritance hierarchy
  * It uses CRTP - https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
  * to get around the fact that the methods exposed to JS are static and cannot be virtual
+ * 
  *
  * C++
+ * (maximizes code reuse)
+ * 
  * GeometryBase<>
- * |        \     \                                               \
- * Geometry Point Curve<>                                         GeometryCollectionBase<>
- *                |          \       \          \                 |                  \
- *                LineString Polygon LinearRing CircularString    GeometryCollection Multi*
+ * |        \     \                                                           \
+ * Geometry Point CurveBase<>                                                 GeometryCollectionBase<>
+ *                |           \          \       \          \                 |                  \
+ *                SimpleCurve LineString Polygon LinearRing CircularString    GeometryCollection Multi*
+ * 
+ * 
  * 
  * JS
+ * (tries to follow GDAL and the ISO specification)
+ * 
  * Geometry
- * |     \          \       \              \
- * Point LineString Polygon CircularString GeometryCollection
- *       |                                 |
- *       LinearRing                        Multi*
- *
+ * |     \                         \                     \              
+ * Point SimpleCurve               Polygon               GeometryCollection
+ *       |          \                                    |
+ *       LineString CircularString                       Multi*
+ *       |
+ *       LinearRing
+ * 
  * 
  * The full GDAL OGRGeometry class hierarchy
  * https://gdal.org/doxygen/classOGRGeometry.html

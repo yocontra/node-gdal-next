@@ -1,5 +1,5 @@
-#ifndef __NODE_OGR_CURVE_H__
-#define __NODE_OGR_CURVE_H__
+#ifndef __NODE_OGR_CURVEBASE_H__
+#define __NODE_OGR_CURVEBASE_H__
 
 // node
 #include <node.h>
@@ -18,7 +18,7 @@ using namespace node;
 
 namespace node_gdal {
 
-template <class T, class OGRT, class STRING> class Curve : public GeometryBase<T, OGRT> {
+template <class T, class OGRT, class STRING> class CurveBase : public GeometryBase<T, OGRT> {
     public:
   using GeometryBase<T, OGRT>::GeometryBase;
   static NAN_METHOD(New);
@@ -28,7 +28,7 @@ template <class T, class OGRT, class STRING> class Curve : public GeometryBase<T
   static void SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE, v8::Local<v8::Value>);
 };
 
-template <class T, class OGRT, class STRING> NAN_METHOD((Curve<T, OGRT, STRING>::New)) {
+template <class T, class OGRT, class STRING> NAN_METHOD((CurveBase<T, OGRT, STRING>::New)) {
   Nan::HandleScope scope;
   T *f;
 
@@ -58,7 +58,7 @@ template <class T, class OGRT, class STRING> NAN_METHOD((Curve<T, OGRT, STRING>:
 }
 
 template <class T, class OGRT, class STRING>
-void Curve<T, OGRT, STRING>::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
+void CurveBase<T, OGRT, STRING>::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
   Nan::SetPrivate(_this, Nan::New("points_").ToLocalChecked(), value);
 };
 
