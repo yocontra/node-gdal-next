@@ -30,10 +30,10 @@ namespace node_gdal {
  * 
  * JS
  * Geometry
- * |     \          \       \          \
- * Point LineString Polygon LinearRing GeometryCollection
- *                                     |
- *                                     Multi*
+ * |     \          \       \
+ * Point LineString Polygon GeometryCollection
+ *       |                  |
+ *       LinearRing         Multi*
  */
 
 #define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                       \
