@@ -28,8 +28,13 @@ Async support for vector data is currently experimental, with the following clas
 * `LayerFeatures`
 
 `master` is usually unit-tested and has all the working features
-`universal-async` is cutting edge for the vector async support
-`vsimem` has support for in-memory files - `gdal.open` supports opening a `Buffer`
+
+`universal-async` is cutting edge for the vector async support (currently entirely merged)
+
+`vsimem` has support for in-memory files - `gdal.open` supports opening a `Buffer` (currently entirely merged)
+
+`curve-geoms` is where I am currently working on curve geometries
+
 
 Support for `worker_threads` is planned but it is not a priority project
 
