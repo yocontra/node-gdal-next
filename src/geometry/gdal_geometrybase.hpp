@@ -24,11 +24,12 @@ namespace node_gdal {
  * C++
  * (maximizes code reuse)
  * 
+ * 
  * GeometryBase<>
- * |        \     \                                                           \
- * Geometry Point CurveBase<>                                                 GeometryCollectionBase<>
- *                |           \          \       \          \                 |                  \
- *                SimpleCurve LineString Polygon LinearRing CircularString    GeometryCollection Multi*
+ * |        \     \                                                                         \
+ * Geometry Point CurveBase<>                                                               GeometryCollectionBase<>
+ *                |           \          \       \          \              \                |                  \
+ *                SimpleCurve LineString Polygon LinearRing CircularString CompoundCurve    GeometryCollection Multi*
  * 
  * 
  * 
@@ -36,10 +37,10 @@ namespace node_gdal {
  * (tries to follow GDAL and the ISO specification)
  * 
  * Geometry
- * |     \                         \                     \              
- * Point SimpleCurve               Polygon               GeometryCollection
- *       |          \                                    |
- *       LineString CircularString                       Multi*
+ * |     \                            \        \                         \
+ * Point SimpleCurve                  Polygon  CompoundCurve             GeometryCollection
+ *       |          \                                                    |
+ *       LineString CircularString                                       Multi*
  *       |
  *       LinearRing
  * 

@@ -1,5 +1,5 @@
-#ifndef __NODE_OGR_LINESTRING_H__
-#define __NODE_OGR_LINESTRING_H__
+#ifndef __NODE_OGR_MULTICURVE_H__
+#define __NODE_OGR_MULTICURVE_H__
 
 // node
 #include <node.h>
@@ -11,23 +11,23 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_curvebase.hpp"
-#include "../collections/linestring_points.hpp"
+#include "gdal_geometrycollectionbase.hpp"
 
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class LineString : public CurveBase<LineString, OGRLineString, LineStringPoints> {
+class MultiCurve : public GeometryCollectionBase<MultiCurve, OGRMultiCurve> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  using CurveBase<LineString, OGRLineString, LineStringPoints>::CurveBase;
+  using GeometryCollectionBase<MultiCurve, OGRMultiCurve>::GeometryCollectionBase;
 
   static void Initialize(Local<Object> target);
-  using CurveBase<LineString, OGRLineString, LineStringPoints>::New;
+  using GeometryCollectionBase<MultiCurve, OGRMultiCurve>::New;
   static NAN_METHOD(toString);
+  static NAN_METHOD(polygonize);
 };
 
 } // namespace node_gdal

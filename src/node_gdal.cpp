@@ -69,7 +69,9 @@
 #include "geometry/gdal_linearring.hpp"
 #include "geometry/gdal_linestring.hpp"
 #include "geometry/gdal_circularstring.hpp"
+#include "geometry/gdal_compoundcurve.hpp"
 #include "geometry/gdal_multilinestring.hpp"
+#include "geometry/gdal_multicurve.hpp"
 #include "geometry/gdal_multipoint.hpp"
 #include "geometry/gdal_multipolygon.hpp"
 #include "geometry/gdal_point.hpp"
@@ -91,6 +93,7 @@
 #include "collections/layer_fields.hpp"
 #include "collections/linestring_points.hpp"
 #include "collections/polygon_rings.hpp"
+#include "collections/compound_curves.hpp"
 #include "collections/rasterband_overviews.hpp"
 #include "collections/rasterband_pixels.hpp"
 
@@ -289,10 +292,12 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   LineString::Initialize(target);
   CircularString::Initialize(target);
   LinearRing::Initialize(target);
+  CompoundCurve::Initialize(target);
   Polygon::Initialize(target);
   GeometryCollection::Initialize(target);
   MultiPoint::Initialize(target);
   MultiLineString::Initialize(target);
+  MultiCurve::Initialize(target);
   MultiPolygon::Initialize(target);
   SpatialReference::Initialize(target);
   CoordinateTransformation::Initialize(target);
@@ -306,6 +311,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   GeometryCollectionChildren::Initialize(target);
   PolygonRings::Initialize(target);
   LineStringPoints::Initialize(target);
+  CompoundCurves::Initialize(target);
   RasterBandOverviews::Initialize(target);
   RasterBandPixels::Initialize(target);
 
@@ -1025,6 +1031,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {integer}
    */
   Nan::Set(target, Nan::New("wkbCircularString").ToLocalChecked(), Nan::New<Integer>(wkbCircularString));
+  /**
+   * @final
+   * @property gdal.wkbLineString
+   * @type {integer}
+   */
+  Nan::Set(target, Nan::New("wkbCompoundCurve").ToLocalChecked(), Nan::New<Integer>(wkbCompoundCurve));
+  /**
+   * @final
+   * @property gdal.wkbLineString
+   * @type {integer}
+   */
+  Nan::Set(target, Nan::New("wkbMultiCurve").ToLocalChecked(), Nan::New<Integer>(wkbMultiCurve));
   /**
    * @final
    * @property gdal.wkbPolygon

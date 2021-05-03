@@ -32,6 +32,7 @@
 				"src/geometry/gdal_geometry.cpp",
 				"src/geometry/gdal_point.cpp",
 				"src/geometry/gdal_simplecurve.cpp",
+				"src/geometry/gdal_compoundcurve.cpp",
 				"src/geometry/gdal_linestring.cpp",
 				"src/geometry/gdal_circularstring.cpp",
 				"src/geometry/gdal_linearring.cpp",
@@ -39,6 +40,7 @@
 				"src/geometry/gdal_geometrycollection.cpp",
 				"src/geometry/gdal_multipoint.cpp",
 				"src/geometry/gdal_multilinestring.cpp",
+				"src/geometry/gdal_multicurve.cpp",
 				"src/geometry/gdal_multipolygon.cpp",
 				"src/gdal_layer.cpp",
 				"src/gdal_coordinate_transformation.cpp",
@@ -55,6 +57,7 @@
 				"src/collections/geometry_collection_children.cpp",
 				"src/collections/polygon_rings.cpp",
 				"src/collections/linestring_points.cpp",
+				"src/collections/compound_curves.cpp",
 				"src/collections/rasterband_overviews.cpp",
 				"src/collections/rasterband_pixels.cpp",
 				"src/collections/gdal_drivers.cpp"
