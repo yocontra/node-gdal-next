@@ -1,7 +1,7 @@
 
 #include "gdal_geometrycollection.hpp"
-#include "collections/geometry_collection_children.hpp"
-#include "gdal_common.hpp"
+#include "../collections/geometry_collection_children.hpp"
+#include "../gdal_common.hpp"
 #include "gdal_geometry.hpp"
 
 #include <stdlib.h>

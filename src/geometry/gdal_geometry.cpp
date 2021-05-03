@@ -1,16 +1,17 @@
-#include "gdal_common.hpp"
+#include "../gdal_common.hpp"
 
-#include "gdal_coordinate_transformation.hpp"
+#include "../gdal_coordinate_transformation.hpp"
 #include "gdal_geometry.hpp"
 #include "gdal_geometrycollection.hpp"
 #include "gdal_linearring.hpp"
 #include "gdal_linestring.hpp"
+#include "gdal_circularstring.hpp"
 #include "gdal_multilinestring.hpp"
 #include "gdal_multipoint.hpp"
 #include "gdal_multipolygon.hpp"
 #include "gdal_point.hpp"
 #include "gdal_polygon.hpp"
-#include "gdal_spatial_reference.hpp"
+#include "../gdal_spatial_reference.hpp"
 
 #include <node_buffer.h>
 #include <ogr_core.h>
@@ -134,6 +135,7 @@ Local<Value> Geometry::New(OGRGeometry *geom, bool owned) {
     case wkbLineString: return scope.Escape(LineString::New(static_cast<OGRLineString *>(geom), owned));
     case wkbLinearRing: return scope.Escape(LinearRing::New(static_cast<OGRLinearRing *>(geom), owned));
     case wkbPolygon: return scope.Escape(Polygon::New(static_cast<OGRPolygon *>(geom), owned));
+    case wkbCircularString: return scope.Escape(CircularString::New(static_cast<OGRCircularString *>(geom), owned));
     case wkbGeometryCollection:
       return scope.Escape(GeometryCollection::New(static_cast<OGRGeometryCollection *>(geom), owned));
     case wkbMultiPoint: return scope.Escape(MultiPoint::New(static_cast<OGRMultiPoint *>(geom), owned));
@@ -1554,6 +1556,7 @@ Local<Value> Geometry::getConstructor(OGRwkbGeometryType type) {
   switch (type) {
     case wkbPoint: return scope.Escape(Nan::GetFunction(Nan::New(Point::constructor)).ToLocalChecked());
     case wkbLineString: return scope.Escape(Nan::GetFunction(Nan::New(LineString::constructor)).ToLocalChecked());
+    case wkbCircularString: return scope.Escape(Nan::GetFunction(Nan::New(CircularString::constructor)).ToLocalChecked());
     case wkbLinearRing: return scope.Escape(Nan::GetFunction(Nan::New(LinearRing::constructor)).ToLocalChecked());
     case wkbPolygon: return scope.Escape(Nan::GetFunction(Nan::New(Polygon::constructor)).ToLocalChecked());
     case wkbGeometryCollection:

@@ -6,31 +6,35 @@
 #include <node_object_wrap.h>
 
 // nan
-#include "nan-wrapper.h"
+#include "../nan-wrapper.h"
 
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_geometry.hpp"
+#include "gdal_curve.hpp"
+#include "../collections/polygon_rings.hpp"
 
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class Polygon : public GeometryBase<Polygon, OGRPolygon> {
+class Polygon : public Curve<Polygon, OGRPolygon, PolygonRings> {
+  friend Curve;
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  using GeometryBase<Polygon, OGRPolygon>::GeometryBase;
+  using Curve<Polygon, OGRPolygon, PolygonRings>::Curve;
 
   static void Initialize(Local<Object> target);
-  static NAN_METHOD(New);
-  using GeometryBase<Polygon, OGRPolygon>::New;
+  using Curve<Polygon, OGRPolygon, PolygonRings>::New;
   static NAN_METHOD(toString);
   static NAN_METHOD(getArea);
 
   static NAN_GETTER(ringsGetter);
+
+    protected:
+  static void SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE, v8::Local<v8::Value>);
 };
 
 } // namespace node_gdal

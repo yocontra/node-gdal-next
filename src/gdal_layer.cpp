@@ -7,7 +7,7 @@
 #include "gdal_feature.hpp"
 #include "gdal_feature_defn.hpp"
 #include "gdal_field_defn.hpp"
-#include "gdal_geometry.hpp"
+#include "geometry/gdal_geometry.hpp"
 #include "gdal_spatial_reference.hpp"
 
 #include <sstream>

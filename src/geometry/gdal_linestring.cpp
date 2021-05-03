@@ -1,7 +1,7 @@
 
 #include "gdal_linestring.hpp"
-#include "collections/linestring_points.hpp"
-#include "gdal_common.hpp"
+#include "../collections/linestring_points.hpp"
+#include "../gdal_common.hpp"
 #include "gdal_geometry.hpp"
 #include "gdal_point.hpp"
 
@@ -44,34 +44,6 @@ void LineString::Initialize(Local<Object> target) {
  * @class gdal.LineString
  * @extends gdal.Geometry
  */
-NAN_METHOD(LineString::New) {
-  Nan::HandleScope scope;
-  LineString *f;
-
-  if (!info.IsConstructCall()) {
-    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
-    return;
-  }
-
-  if (info[0]->IsExternal()) {
-    Local<External> ext = info[0].As<External>();
-    void *ptr = ext->Value();
-    f = static_cast<LineString *>(ptr);
-
-  } else {
-    if (info.Length() != 0) {
-      Nan::ThrowError("LineString constructor doesn't take any arguments");
-      return;
-    }
-    f = new LineString(new OGRLineString());
-  }
-
-  Local<Value> points = LineStringPoints::New(info.This());
-  Nan::SetPrivate(info.This(), Nan::New("points_").ToLocalChecked(), points);
-
-  f->Wrap(info.This());
-  info.GetReturnValue().Set(info.This());
-}
 
 NAN_METHOD(LineString::toString) {
   Nan::HandleScope scope;

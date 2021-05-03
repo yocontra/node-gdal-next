@@ -1,0 +1,66 @@
+#ifndef __NODE_OGR_CURVE_H__
+#define __NODE_OGR_CURVE_H__
+
+// node
+#include <node.h>
+#include <node_object_wrap.h>
+
+// nan
+#include "../nan-wrapper.h"
+
+// ogr
+#include <ogrsf_frmts.h>
+
+#include "gdal_geometrybase.hpp"
+
+using namespace v8;
+using namespace node;
+
+namespace node_gdal {
+
+template <class T, class OGRT, class STRING> class Curve : public GeometryBase<T, OGRT> {
+    public:
+  using GeometryBase<T, OGRT>::GeometryBase;
+  static NAN_METHOD(New);
+  using GeometryBase<T, OGRT>::New;
+
+    protected:
+  static void SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE, v8::Local<v8::Value>);
+};
+
+template <class T, class OGRT, class STRING> NAN_METHOD((Curve<T, OGRT, STRING>::New)) {
+  Nan::HandleScope scope;
+  T *f;
+
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
+    return;
+  }
+
+  if (info[0]->IsExternal()) {
+    Local<External> ext = info[0].As<External>();
+    void *ptr = ext->Value();
+    f = static_cast<T *>(ptr);
+
+  } else {
+    if (info.Length() != 0) {
+      Nan::ThrowError("String constructor doesn't take any arguments");
+      return;
+    }
+    f = new T(new OGRT());
+  }
+
+  Local<Value> points = STRING::New(info.This());
+  T::SetPrivate(info.This(), points);
+
+  f->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
+}
+
+template <class T, class OGRT, class STRING>
+void Curve<T, OGRT, STRING>::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
+  Nan::SetPrivate(_this, Nan::New("points_").ToLocalChecked(), value);
+};
+
+} // namespace node_gdal
+#endif

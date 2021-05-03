@@ -1,6 +1,6 @@
 #include "warp_options.hpp"
 #include "../gdal_common.hpp"
-#include "../gdal_geometry.hpp"
+#include "../geometry/gdal_geometry.hpp"
 #include <stdio.h>
 namespace node_gdal {
 

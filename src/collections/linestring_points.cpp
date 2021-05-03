@@ -1,8 +1,8 @@
 #include "linestring_points.hpp"
 #include "../gdal_common.hpp"
-#include "../gdal_geometry.hpp"
-#include "../gdal_linestring.hpp"
-#include "../gdal_point.hpp"
+#include "../geometry/gdal_geometry.hpp"
+#include "../geometry/gdal_linestring.hpp"
+#include "../geometry/gdal_point.hpp"
 
 namespace node_gdal {
 

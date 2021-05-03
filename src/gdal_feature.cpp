@@ -4,7 +4,7 @@
 #include "gdal_common.hpp"
 #include "gdal_feature_defn.hpp"
 #include "gdal_field_defn.hpp"
-#include "gdal_geometry.hpp"
+#include "geometry/gdal_geometry.hpp"
 #include "gdal_layer.hpp"
 
 namespace node_gdal {

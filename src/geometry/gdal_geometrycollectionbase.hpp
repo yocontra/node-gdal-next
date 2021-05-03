@@ -1,12 +1,12 @@
-#ifndef __NODE_OGR_GEOMETRYCOLLECTION_H__
-#define __NODE_OGR_GEOMETRYCOLLECTION_H__
+#ifndef __NODE_OGR_GEOMETRYCOLLECTIONBASE_H__
+#define __NODE_OGR_GEOMETRYCOLLECTIONBASE_H__
 
 // node
 #include <node.h>
 #include <node_object_wrap.h>
 
 // nan
-#include "nan-wrapper.h"
+#include "../nan-wrapper.h"
 
 // ogr
 #include <ogrsf_frmts.h>
@@ -14,14 +14,16 @@
 using namespace v8;
 using namespace node;
 
-#include "gdal_geometry.hpp"
-#include "collections/geometry_collection_children.hpp"
+#include "gdal_geometrybase.hpp"
+#include "../collections/geometry_collection_children.hpp"
 
 namespace node_gdal {
 
 template <class T, class OGRT> class GeometryCollectionBase : public GeometryBase<T, OGRT> {
+
     public:
   using GeometryBase<T, OGRT>::GeometryBase;
+
   static NAN_METHOD(New);
   using GeometryBase<T, OGRT>::New;
 };
@@ -54,21 +56,6 @@ template <class T, class OGRT> NAN_METHOD((GeometryCollectionBase<T, OGRT>::New)
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
-
-class GeometryCollection : public GeometryCollectionBase<GeometryCollection, OGRGeometryCollection> {
-
-    public:
-  static Nan::Persistent<FunctionTemplate> constructor;
-  using GeometryCollectionBase<GeometryCollection, OGRGeometryCollection>::GeometryCollectionBase;
-
-  static void Initialize(Local<Object> target);
-  using GeometryCollectionBase<GeometryCollection, OGRGeometryCollection>::New;
-  static NAN_METHOD(toString);
-  static NAN_METHOD(getArea);
-  static NAN_METHOD(getLength);
-
-  static NAN_GETTER(childrenGetter);
-};
 
 } // namespace node_gdal
 #endif

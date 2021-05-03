@@ -6,44 +6,29 @@
 #include <node_object_wrap.h>
 
 // nan
-#include "nan-wrapper.h"
+#include "../nan-wrapper.h"
 
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_geometrycollection.hpp"
+#include "gdal_geometrycollectionbase.hpp"
 
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class MultiPolygon : public GeometryCollection {
+class MultiPolygon : public GeometryCollectionBase<MultiPolygon, OGRMultiPolygon> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
+  using GeometryCollectionBase<MultiPolygon, OGRMultiPolygon>::GeometryCollectionBase;
 
   static void Initialize(Local<Object> target);
-  static NAN_METHOD(New);
-  static Local<Value> New(OGRMultiPolygon *geom);
-  static Local<Value> New(OGRMultiPolygon *geom, bool owned);
+  using GeometryCollectionBase<MultiPolygon, OGRMultiPolygon>::New;
   static NAN_METHOD(toString);
   static NAN_METHOD(unionCascaded);
   static NAN_METHOD(getArea);
-
-  MultiPolygon();
-  MultiPolygon(OGRMultiPolygon *geom);
-  inline OGRMultiPolygon *get() {
-    return this_;
-  }
-  inline bool isAlive() {
-    return this_;
-  }
-
-    protected:
-  ~MultiPolygon();
-    private:
-  OGRMultiPolygon *this_;
 };
 
 } // namespace node_gdal

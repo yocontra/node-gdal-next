@@ -1,5 +1,5 @@
 #include "gdal_point.hpp"
-#include "gdal_common.hpp"
+#include "../gdal_common.hpp"
 #include "gdal_geometry.hpp"
 
 #include <stdlib.h>

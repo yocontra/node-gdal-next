@@ -1,7 +1,7 @@
 #include "geometry_collection_children.hpp"
 #include "../gdal_common.hpp"
-#include "../gdal_geometry.hpp"
-#include "../gdal_geometrycollection.hpp"
+#include "../geometry/gdal_geometry.hpp"
+#include "../geometry/gdal_geometrycollection.hpp"
 
 namespace node_gdal {
 

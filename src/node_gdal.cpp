@@ -62,16 +62,17 @@
 #include "gdal_feature.hpp"
 #include "gdal_feature_defn.hpp"
 #include "gdal_field_defn.hpp"
-#include "gdal_geometry.hpp"
-#include "gdal_geometrycollection.hpp"
+#include "geometry/gdal_geometry.hpp"
+#include "geometry/gdal_geometrycollection.hpp"
 #include "gdal_layer.hpp"
-#include "gdal_linearring.hpp"
-#include "gdal_linestring.hpp"
-#include "gdal_multilinestring.hpp"
-#include "gdal_multipoint.hpp"
-#include "gdal_multipolygon.hpp"
-#include "gdal_point.hpp"
-#include "gdal_polygon.hpp"
+#include "geometry/gdal_linearring.hpp"
+#include "geometry/gdal_linestring.hpp"
+#include "geometry/gdal_circularstring.hpp"
+#include "geometry/gdal_multilinestring.hpp"
+#include "geometry/gdal_multipoint.hpp"
+#include "geometry/gdal_multipolygon.hpp"
+#include "geometry/gdal_point.hpp"
+#include "geometry/gdal_polygon.hpp"
 #include "gdal_spatial_reference.hpp"
 #include "gdal_memfile.hpp"
 
@@ -284,6 +285,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Geometry::Initialize(target);
   Point::Initialize(target);
   LineString::Initialize(target);
+  CircularString::Initialize(target);
   LinearRing::Initialize(target);
   Polygon::Initialize(target);
   GeometryCollection::Initialize(target);
@@ -1015,6 +1017,12 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {integer}
    */
   Nan::Set(target, Nan::New("wkbLineString").ToLocalChecked(), Nan::New<Integer>(wkbLineString));
+  /**
+   * @final
+   * @property gdal.wkbLineString
+   * @type {integer}
+   */
+  Nan::Set(target, Nan::New("wkbCircularString").ToLocalChecked(), Nan::New<Integer>(wkbCircularString));
   /**
    * @final
    * @property gdal.wkbPolygon
