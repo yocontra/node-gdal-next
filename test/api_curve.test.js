@@ -13,8 +13,10 @@ describe('gdal.CompoundCurve', () => {
   })
   describe('instance', () => {
     let compoundcurve
-    it('should be parsed from WKT', () => {
+    before(() => {
       compoundcurve = gdal.Geometry.fromWKT('COMPOUNDCURVE (CIRCULARSTRING (692012.37315768 594722.610031277,692057.127042054 594649.528941062,692067.186040178 594564.425636366),(692067.186040178 594564.425636366,692026.997800346 594156.751911029),CIRCULARSTRING (692026.997800346 594156.751911029,692061.574244064 594070.897749602,692151.782327678 594050.18617928))')
+    })
+    it('should be parsed from WKT', () => {
       assert.instanceOf(compoundcurve, gdal.CompoundCurve)
       assert.equal(compoundcurve.curves.count(), 3)
       assert.instanceOf(compoundcurve.curves.get(0), gdal.CircularString)
@@ -31,6 +33,14 @@ describe('gdal.CompoundCurve', () => {
       const curves = compoundcurve.curves.map((curve) => curve)
       assert.isArray(curves)
       assert.equal(curves.length, 3)
+    })
+    it('should have an iterator', () => {
+      let i = 0
+      for (const curve of compoundcurve.curves) {
+        assert.instanceOf(curve, gdal.SimpleCurve)
+        i++
+      }
+      assert.equal(i, 3)
     })
   })
 })

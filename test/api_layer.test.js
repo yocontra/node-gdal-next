@@ -490,6 +490,26 @@ describe('gdal.Layer', () => {
           })
         })
       })
+      describe('@@iterator()', () => {
+        it('should support iterating over the values', () => {
+          prepare_dataset_layer_test('r', (dataset, layer) => {
+            let count = 0
+            for (const feature of layer.features) {
+              assert.instanceOf(feature, gdal.Feature)
+              count++
+            }
+            assert.equal(count, layer.features.count())
+          })
+        })
+        it('should throw error if dataset is destroyed', () => {
+          prepare_dataset_layer_test('r', (dataset, layer) => {
+            dataset.close()
+            assert.throws(() => {
+              for (const l of layer.features) l
+            }, /already destroyed/)
+          })
+        })
+      })
       describe('map()', () => {
         it('should operate normally', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {

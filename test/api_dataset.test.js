@@ -132,6 +132,25 @@ describe('gdal.Dataset', () => {
           })
         })
       })
+      describe('@@iterator', () => {
+        it('should iterate over all values', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const expected_ids = [ 1 ]
+          const ids = []
+          for (const band of ds.bands) {
+            assert.instanceOf(band, gdal.RasterBand)
+            ids.push(band.id)
+          }
+          assert.deepEqual(ids, expected_ids)
+        })
+        it('should throw if dataset is closed', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          ds.close()
+          assert.throws(() => {
+            for (const band of ds.bands) band
+          })
+        })
+      })
       describe('map()', () => {
         it('should operate normally', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)

@@ -1105,6 +1105,33 @@ describe('gdal.RasterBand', () => {
           })
         })
       })
+      describe('@@iterator()', () => {
+        it('should iterate through the overviews', () => {
+          const ds = gdal.open(
+            fileUtils.clone(`${__dirname}/data/sample.tif`),
+            'r+'
+          )
+          const band = ds.bands.get(1)
+          ds.buildOverviews('NEAREST', [ 2, 4 ])
+          const w = []
+          for (const overview of band.overviews) {
+            w.push(overview.size.x)
+          }
+          assert.sameMembers(w, [ ds.rasterSize.x / 2, ds.rasterSize.x / 4 ])
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open(
+            fileUtils.clone(`${__dirname}/data/sample.tif`),
+            'r+'
+          )
+          const band = ds.bands.get(1)
+          ds.buildOverviews('NEAREST', [ 2 ])
+          ds.close()
+          assert.throws(() => {
+            for (const overview of band.overviews) overview
+          })
+        })
+      })
       describe('map()', () => {
         it('should operate normally', () => {
           const ds = gdal.open(

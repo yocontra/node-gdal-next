@@ -129,6 +129,18 @@ describe('gdal.drivers', () => {
       assert.equal(j, n)
     })
   })
+  describe('@@iterator()', () => {
+    it('should iterate through all Driver objects', () => {
+      const n = gdal.drivers.count()
+      let count = 0
+      for (const driver of gdal.drivers) {
+        assert.instanceOf(driver, gdal.Driver)
+        assert.equal(driver, gdal.drivers.get(count))
+        count++
+      }
+      assert.equal(count, n)
+    })
+  })
 
   describe('map()', () => {
     it('should operate normally', () => {
