@@ -19,6 +19,19 @@ describe('gdal.CompoundCurve', () => {
       assert.equal(compoundcurve.curves.count(), 3)
       assert.instanceOf(compoundcurve.curves.get(0), gdal.CircularString)
     })
+    it('should support forEach', () => {
+      let i = 0
+      compoundcurve.curves.forEach((curve) => {
+        assert.instanceOf(curve, gdal.SimpleCurve)
+        i++
+      })
+      assert.equal(i, 3)
+    })
+    it('should support map', () => {
+      const curves = compoundcurve.curves.map((curve) => curve)
+      assert.isArray(curves)
+      assert.equal(curves.length, 3)
+    })
   })
 })
 
