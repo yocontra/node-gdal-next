@@ -18,7 +18,7 @@ using namespace node;
 
 namespace node_gdal {
 
-template <class T, class OGRT, class STRING> class CurveBase : public GeometryBase<T, OGRT> {
+template <class T, class OGRT, class COLLECTIONT> class CurveBase : public GeometryBase<T, OGRT> {
     public:
   using GeometryBase<T, OGRT>::GeometryBase;
   static NAN_METHOD(New);
@@ -28,7 +28,7 @@ template <class T, class OGRT, class STRING> class CurveBase : public GeometryBa
   static void SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE, v8::Local<v8::Value>);
 };
 
-template <class T, class OGRT, class STRING> NAN_METHOD((CurveBase<T, OGRT, STRING>::New)) {
+template <class T, class OGRT, class COLLECTIONT> NAN_METHOD((CurveBase<T, OGRT, COLLECTIONT>::New)) {
   Nan::HandleScope scope;
   T *f;
 
@@ -50,15 +50,15 @@ template <class T, class OGRT, class STRING> NAN_METHOD((CurveBase<T, OGRT, STRI
     f = new T(new OGRT());
   }
 
-  Local<Value> points = STRING::New(info.This());
+  Local<Value> points = COLLECTIONT::New(info.This());
   T::SetPrivate(info.This(), points);
 
   f->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
 
-template <class T, class OGRT, class STRING>
-void CurveBase<T, OGRT, STRING>::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
+template <class T, class OGRT, class COLLECTIONT>
+void CurveBase<T, OGRT, COLLECTIONT>::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
   Nan::SetPrivate(_this, Nan::New("points_").ToLocalChecked(), value);
 };
 

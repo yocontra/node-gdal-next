@@ -14,9 +14,11 @@
 using namespace v8;
 using namespace node;
 
-// Polygon.rings
+// CompoundCurve.curves
 
 namespace node_gdal {
+
+#if GDAL_VERSION_MAJOR >= 2
 
 class CompoundCurves : public Nan::ObjectWrap {
     public:
@@ -36,6 +38,8 @@ class CompoundCurves : public Nan::ObjectWrap {
     private:
   ~CompoundCurves();
 };
+
+#endif
 
 } // namespace node_gdal
 #endif

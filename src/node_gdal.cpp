@@ -231,8 +231,8 @@ static NAN_METHOD(setPROJSearchPath) {
 
   NODE_ARG_STR(0, "path", path);
 
-  const char *const paths[] = {path.c_str(), nullptr};
 #if GDAL_VERSION_MAJOR >= 3
+  const char *const paths[] = {path.c_str(), nullptr};
   OSRSetPROJSearchPaths(paths);
 #endif
 }
@@ -290,15 +290,19 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Point::Initialize(target);
   SimpleCurve::Initialize(target);
   LineString::Initialize(target);
-  CircularString::Initialize(target);
   LinearRing::Initialize(target);
-  CompoundCurve::Initialize(target);
   Polygon::Initialize(target);
   GeometryCollection::Initialize(target);
   MultiPoint::Initialize(target);
   MultiLineString::Initialize(target);
-  MultiCurve::Initialize(target);
   MultiPolygon::Initialize(target);
+#if GDAL_VERSION_MAJOR >= 2
+  CircularString::Initialize(target);
+  CompoundCurve::Initialize(target);
+  MultiCurve::Initialize(target);
+
+  CompoundCurves::Initialize(target);
+#endif
   SpatialReference::Initialize(target);
   CoordinateTransformation::Initialize(target);
 
@@ -311,7 +315,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   GeometryCollectionChildren::Initialize(target);
   PolygonRings::Initialize(target);
   LineStringPoints::Initialize(target);
-  CompoundCurves::Initialize(target);
   RasterBandOverviews::Initialize(target);
   RasterBandPixels::Initialize(target);
 
@@ -1025,6 +1028,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {integer}
    */
   Nan::Set(target, Nan::New("wkbLineString").ToLocalChecked(), Nan::New<Integer>(wkbLineString));
+#if GDAL_VERSION_MAJOR >= 2
   /**
    * @final
    * @property gdal.wkbLineString
@@ -1043,6 +1047,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {integer}
    */
   Nan::Set(target, Nan::New("wkbMultiCurve").ToLocalChecked(), Nan::New<Integer>(wkbMultiCurve));
+#endif
   /**
    * @final
    * @property gdal.wkbPolygon

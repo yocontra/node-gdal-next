@@ -19,6 +19,8 @@ using namespace node;
 
 namespace node_gdal {
 
+#if GDAL_VERSION_MAJOR >= 2
+
 class CircularString : public CurveBase<CircularString, OGRCircularString, LineStringPoints> {
 
     public:
@@ -29,6 +31,8 @@ class CircularString : public CurveBase<CircularString, OGRCircularString, LineS
   using CurveBase<CircularString, OGRCircularString, LineStringPoints>::New;
   static NAN_METHOD(toString);
 };
+
+#endif
 
 } // namespace node_gdal
 #endif

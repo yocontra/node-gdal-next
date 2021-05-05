@@ -7,7 +7,7 @@ if (semver.lt(gdal.version, '2.0.0')) {
   skipAsync = function (done) {
     let test = this.currentTest
     while (test) {
-      if (test.title.match(/Async/)) {
+      if (test.title.match(/Async|CircularString|CompoundCurve|MultiCurve/)) {
         console.log('skip on GDAL 1.x', test.title)
         this.skip()
       }

@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.1.0] Unreleased
 
 ### Added
-  - Complete reworking of the Geometry code adding support for Curve, CompoundCurve and MultiCurve
+  - Complete reworking of the Geometry code adding support for CircularString, CompoundCurve and MultiCurve
   - Add JS iterators to all collections
 
 ### Changed

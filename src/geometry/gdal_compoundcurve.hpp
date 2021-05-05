@@ -19,6 +19,8 @@ using namespace node;
 
 namespace node_gdal {
 
+#if GDAL_VERSION_MAJOR >= 2
+
 class CompoundCurve : public CurveBase<CompoundCurve, OGRCompoundCurve, CompoundCurves> {
   friend CurveBase;
 
@@ -35,6 +37,8 @@ class CompoundCurve : public CurveBase<CompoundCurve, OGRCompoundCurve, Compound
     protected:
   static void SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE, v8::Local<v8::Value>);
 };
+
+#endif
 
 } // namespace node_gdal
 #endif
