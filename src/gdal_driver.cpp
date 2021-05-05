@@ -576,8 +576,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   job.main = [raw, path, access]() {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
-    return ds;
     if (!ds) throw "Error opening dataset";
+    return ds;
   };
   job.rval = DatasetRval;
 
