@@ -3,7 +3,7 @@
 #include "collections/dataset_layers.hpp"
 #include "gdal_common.hpp"
 #include "gdal_driver.hpp"
-#include "gdal_geometry.hpp"
+#include "geometry/gdal_geometry.hpp"
 #include "gdal_layer.hpp"
 #include "gdal_majorobject.hpp"
 #include "gdal_rasterband.hpp"

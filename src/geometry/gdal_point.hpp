@@ -6,12 +6,12 @@
 #include <node_object_wrap.h>
 
 // nan
-#include "nan-wrapper.h"
+#include "../nan-wrapper.h"
 
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_geometry.hpp"
+#include "gdal_geometrybase.hpp"
 
 using namespace v8;
 using namespace node;
@@ -19,7 +19,6 @@ using namespace node;
 namespace node_gdal {
 
 class Point : public GeometryBase<Point, OGRPoint> {
-
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
   using GeometryBase<Point, OGRPoint>::GeometryBase;

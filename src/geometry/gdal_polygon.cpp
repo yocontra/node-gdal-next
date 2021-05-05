@@ -1,7 +1,7 @@
 
 #include "gdal_polygon.hpp"
-#include "collections/polygon_rings.hpp"
-#include "gdal_common.hpp"
+#include "../collections/polygon_rings.hpp"
+#include "../gdal_common.hpp"
 #include "gdal_geometry.hpp"
 
 #include <stdlib.h>
@@ -28,6 +28,10 @@ void Polygon::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
+void Polygon::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
+  Nan::SetPrivate(_this, Nan::New("rings_").ToLocalChecked(), value);
+};
+
 /**
  * Concrete class representing polygons.
  *
@@ -35,34 +39,6 @@ void Polygon::Initialize(Local<Object> target) {
  * @class gdal.Polygon
  * @extends gdal.Geometry
  */
-NAN_METHOD(Polygon::New) {
-  Nan::HandleScope scope;
-  Polygon *f;
-
-  if (!info.IsConstructCall()) {
-    Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
-    return;
-  }
-
-  if (info[0]->IsExternal()) {
-    Local<External> ext = info[0].As<External>();
-    void *ptr = ext->Value();
-    f = static_cast<Polygon *>(ptr);
-
-  } else {
-    if (info.Length() != 0) {
-      Nan::ThrowError("Polygon constructor doesn't take any arguments");
-      return;
-    }
-    f = new Polygon(new OGRPolygon());
-  }
-
-  Local<Value> rings = PolygonRings::New(info.This());
-  Nan::SetPrivate(info.This(), Nan::New("rings_").ToLocalChecked(), rings);
-
-  f->Wrap(info.This());
-  info.GetReturnValue().Set(info.This());
-}
 
 NAN_METHOD(Polygon::toString) {
   Nan::HandleScope scope;

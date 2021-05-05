@@ -78,31 +78,55 @@ describe('gdal.Polygon', () => {
           assert.equal(polygon.rings.count(), 2)
         })
       })
-      describe('forEach()', () => {
-        let polygon
-        before(() => {
-          const ring1 = new gdal.LinearRing()
-          ring1.points.add(0, 0, 0)
-          ring1.points.add(10, 0, 0)
-          ring1.points.add(10, 11, 0)
-          ring1.points.add(0, 10, 0)
-          ring1.points.add(0, 0, 0)
-          const ring2 = new gdal.LinearRing()
-          ring2.points.add(1, 0, 0)
-          ring2.points.add(11, 0, 0)
-          ring2.points.add(11, 11, 0)
-          ring2.points.add(1, 10, 0)
-          ring2.points.add(1, 0, 0)
-          const ring3 = new gdal.LinearRing()
-          ring3.points.add(2, 0, 0)
-          ring3.points.add(20, 0, 0)
-          ring3.points.add(20, 11, 0)
-          ring3.points.add(3, 10, 0)
-          ring3.points.add(3, 0, 0)
+      let polygon
+      const createRings = () => {
+        const ring1 = new gdal.LinearRing()
+        ring1.points.add(0, 0, 0)
+        ring1.points.add(10, 0, 0)
+        ring1.points.add(10, 11, 0)
+        ring1.points.add(0, 10, 0)
+        ring1.points.add(0, 0, 0)
+        const ring2 = new gdal.LinearRing()
+        ring2.points.add(1, 0, 0)
+        ring2.points.add(11, 0, 0)
+        ring2.points.add(11, 11, 0)
+        ring2.points.add(1, 10, 0)
+        ring2.points.add(1, 0, 0)
+        const ring3 = new gdal.LinearRing()
+        ring3.points.add(2, 0, 0)
+        ring3.points.add(20, 0, 0)
+        ring3.points.add(20, 11, 0)
+        ring3.points.add(3, 10, 0)
+        ring3.points.add(3, 0, 0)
 
-          polygon = new gdal.Polygon()
-          polygon.rings.add([ ring1, ring2, ring3 ])
-        })
+        polygon = new gdal.Polygon()
+        polygon.rings.add([ ring1, ring2, ring3 ])
+      }
+      const original = [
+        [
+          '{ "type": "Point", "coordinates": [ 0.0, 0.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 10.0, 0.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 10.0, 11.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 0.0, 10.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 0.0, 0.0, 0.0 ] }'
+        ],
+        [
+          '{ "type": "Point", "coordinates": [ 1.0, 0.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 11.0, 0.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 11.0, 11.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 1.0, 10.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 1.0, 0.0, 0.0 ] }'
+        ],
+        [
+          '{ "type": "Point", "coordinates": [ 2.0, 0.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 20.0, 0.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 20.0, 11.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 3.0, 10.0, 0.0 ] }',
+          '{ "type": "Point", "coordinates": [ 3.0, 0.0, 0.0 ] }'
+        ]
+      ]
+      describe('forEach()', () => {
+        before(createRings)
         it('should stop if callback returns false', () => {
           let count = 0
           polygon.rings.forEach((pt, i) => {
@@ -118,29 +142,7 @@ describe('gdal.Polygon', () => {
             result.push(ring.points.toArray().map((pt) => pt.toJSON()))
           })
 
-          assert.deepEqual(result, [
-            [
-              '{ "type": "Point", "coordinates": [ 0.0, 0.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 10.0, 0.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 10.0, 11.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 0.0, 10.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 0.0, 0.0, 0.0 ] }'
-            ],
-            [
-              '{ "type": "Point", "coordinates": [ 1.0, 0.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 11.0, 0.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 11.0, 11.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 1.0, 10.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 1.0, 0.0, 0.0 ] }'
-            ],
-            [
-              '{ "type": "Point", "coordinates": [ 2.0, 0.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 20.0, 0.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 20.0, 11.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 3.0, 10.0, 0.0 ] }',
-              '{ "type": "Point", "coordinates": [ 3.0, 0.0, 0.0 ] }'
-            ]
-          ])
+          assert.deepEqual(result, original)
         })
       })
       describe('map()', () => {
@@ -163,6 +165,17 @@ describe('gdal.Polygon', () => {
           assert.isArray(result)
           assert.lengthOf(result, 1)
           assert.equal(result[0], 'a')
+        })
+      })
+      describe('@@iterator()', () => {
+        before(createRings)
+        it('should iterate through all points', () => {
+          const result = []
+          for (const ring of polygon.rings) {
+            result.push(ring.points.toArray().map((pt) => pt.toJSON()))
+          }
+
+          assert.deepEqual(result, original)
         })
       })
       describe('toArray()', () => {

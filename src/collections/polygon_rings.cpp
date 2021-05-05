@@ -1,8 +1,8 @@
 #include "polygon_rings.hpp"
 #include "../gdal_common.hpp"
-#include "../gdal_geometry.hpp"
-#include "../gdal_linearring.hpp"
-#include "../gdal_polygon.hpp"
+#include "../geometry/gdal_geometry.hpp"
+#include "../geometry/gdal_linearring.hpp"
+#include "../geometry/gdal_polygon.hpp"
 
 namespace node_gdal {
 

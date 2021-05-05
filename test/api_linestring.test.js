@@ -9,6 +9,7 @@ describe('gdal.LineString', () => {
   })
   it('should inherit from Geometry', () => {
     assert.instanceOf(new gdal.LineString(), gdal.LineString)
+    assert.instanceOf(new gdal.LineString(), gdal.SimpleCurve)
     assert.instanceOf(new gdal.LineString(), gdal.Geometry)
   })
   describe('instance', () => {
@@ -231,6 +232,20 @@ describe('gdal.LineString', () => {
             assert.isNumber(i)
             x_actual.push(pt.x)
           })
+          assert.deepEqual(x_actual, x_expected)
+        })
+      })
+      describe('@@iterator()', () => {
+        it('should iterate through all points', () => {
+          const x_expected = [ 1, 2, 3 ]
+          const x_actual = []
+          const line = new gdal.LineString()
+          line.points.add(1, 2, 3)
+          line.points.add(2, 3, 4)
+          line.points.add(3, 4, 5)
+          for (const pt of line.points) {
+            x_actual.push(pt.x)
+          }
           assert.deepEqual(x_actual, x_expected)
         })
       })

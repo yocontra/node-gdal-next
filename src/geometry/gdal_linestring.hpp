@@ -6,33 +6,28 @@
 #include <node_object_wrap.h>
 
 // nan
-#include "nan-wrapper.h"
+#include "../nan-wrapper.h"
 
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_geometry.hpp"
+#include "gdal_curvebase.hpp"
+#include "../collections/linestring_points.hpp"
 
 using namespace v8;
 using namespace node;
 
 namespace node_gdal {
 
-class LineString : public GeometryBase<LineString, OGRLineString> {
+class LineString : public CurveBase<LineString, OGRLineString, LineStringPoints> {
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  using GeometryBase<LineString, OGRLineString>::GeometryBase;
+  using CurveBase<LineString, OGRLineString, LineStringPoints>::CurveBase;
 
   static void Initialize(Local<Object> target);
-  static NAN_METHOD(New);
-  using GeometryBase<LineString, OGRLineString>::New;
+  using CurveBase<LineString, OGRLineString, LineStringPoints>::New;
   static NAN_METHOD(toString);
-  static NAN_METHOD(getLength);
-  static NAN_METHOD(value);
-  static NAN_METHOD(addSubLineString);
-
-  static NAN_GETTER(pointsGetter);
 };
 
 } // namespace node_gdal

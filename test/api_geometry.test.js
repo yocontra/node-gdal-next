@@ -225,6 +225,9 @@ describe('gdal.Geometry', () => {
       assert.equal(gdal.Geometry.getConstructor(5), gdal.MultiLineString)
       assert.equal(gdal.Geometry.getConstructor(6), gdal.MultiPolygon)
       assert.equal(gdal.Geometry.getConstructor(7), gdal.GeometryCollection)
+      assert.equal(gdal.Geometry.getConstructor(8), gdal.CircularString)
+      assert.equal(gdal.Geometry.getConstructor(9), gdal.CompoundCurve)
+      assert.equal(gdal.Geometry.getConstructor(11), gdal.MultiCurve)
       assert.equal(gdal.Geometry.getConstructor(101), gdal.LinearRing)
     })
   })
@@ -237,6 +240,9 @@ describe('gdal.Geometry', () => {
       assert.equal(gdal.MultiLineString.wkbType, 5)
       assert.equal(gdal.MultiPolygon.wkbType, 6)
       assert.equal(gdal.GeometryCollection.wkbType, 7)
+      assert.equal(gdal.CircularString.wkbType, 8)
+      assert.equal(gdal.CompoundCurve.wkbType, 9)
+      assert.equal(gdal.MultiCurve.wkbType, 11)
       assert.equal(gdal.LinearRing.wkbType, 101)
     })
   })
@@ -251,6 +257,9 @@ describe('gdal.Geometry', () => {
         assert.equal(new gdal.MultiLineString().wkbType, 5)
         assert.equal(new gdal.MultiPolygon().wkbType, 6)
         assert.equal(new gdal.GeometryCollection().wkbType, 7)
+        assert.equal(new gdal.CircularString().wkbType, 8)
+        assert.equal(new gdal.CompoundCurve().wkbType, 9)
+        assert.equal(new gdal.MultiCurve().wkbType, 11)
         assert.equal(new gdal.LinearRing().wkbType, 101)
       })
     })
@@ -291,7 +300,7 @@ describe('gdal.Geometry', () => {
 
     // comparison functions
     (function () {
-      let ring, square, point_inner, point_inner_clone, point_outer
+      let ring, square, point_inner, point_inner_clone, point_outer, arc
       before(() => {
         ring = new gdal.LinearRing()
         ring.points.add({ x: 0, y: 0 })
@@ -306,6 +315,11 @@ describe('gdal.Geometry', () => {
         point_inner = new gdal.Point(5, 5)
         point_outer = new gdal.Point(0, 20)
         point_inner_clone = new gdal.Point(5, 5)
+
+        arc = new gdal.CircularString()
+        arc.points.add({ x: 0, y: 5 })
+        arc.points.add({ x: 10, y: 0 })
+        arc.points.add({ x: 0, y: -5 })
       })
       describe('contains()', () => {
         it('should return correct result', () => {
@@ -363,6 +377,8 @@ describe('gdal.Geometry', () => {
           assert.equal(point_outer.crosses(square), false)
           assert.equal(line_cross.crosses(square), true)
           assert.equal(line_nocross.crosses(square), false)
+          assert.equal(line_cross.crosses(arc), true)
+          assert.equal(line_nocross.crosses(arc), false)
         })
       })
       describe('overlaps()', () => {

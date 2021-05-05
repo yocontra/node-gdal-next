@@ -6,12 +6,12 @@
 #include <node_object_wrap.h>
 
 // nan
-#include "nan-wrapper.h"
+#include "../nan-wrapper.h"
 
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "gdal_geometrycollection.hpp"
+#include "gdal_geometrycollectionbase.hpp"
 
 using namespace v8;
 using namespace node;
