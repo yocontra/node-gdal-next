@@ -80,7 +80,7 @@ describe('Open', () => {
     describe('layer', () => {
       it('should have all fields defined', () => {
         const layerq = dsq.then((ds) => ds.layers.get(0))
-        return Promise.all([ assert.eventually.equal(layerq.then((layer) => layer.fields.count()), 8),
+        return assert.isFulfilled(Promise.all([ assert.eventually.equal(layerq.then((layer) => layer.fields.count()), 8),
           assert.eventually.deepEqual(layerq.then((layer) => layer.fields.getNames()), [
             'fid',
             'featureCode',
@@ -91,7 +91,7 @@ describe('Open', () => {
             'orientation',
             'textString'
           ])
-        ])
+        ]))
       })
     })
   })

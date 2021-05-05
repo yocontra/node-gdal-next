@@ -221,6 +221,28 @@ describe('gdal.Layer', () => {
       })
     })
 
+    describe('copy()', () => {
+      it('should copy a layer', () => {
+        prepare_dataset_layer_test('w', (dataset, layer) => {
+          const newLayer = dataset.layers.copy(layer, 'newlayer')
+          assert.instanceOf(newLayer, gdal.Layer)
+          assert.equal(newLayer.features.count(), layer.features.count())
+          assert.equal(newLayer.geomType, layer.geomType)
+          assert.equal(newLayer.name, 'newlayer')
+        })
+      })
+    })
+
+    describe('remove()', () => {
+      it('should remove a layer', () => {
+        prepare_dataset_layer_test('w', (dataset, _) => {
+          const layers = dataset.layers.count()
+          dataset.layers.remove(0)
+          assert.equal(dataset.layers.count(), layers - 1)
+        })
+      })
+    })
+
     describe('getExtent()', () => {
       it('should return Envelope', () => {
         prepare_dataset_layer_test('r', (dataset, layer) => {

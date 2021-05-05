@@ -124,12 +124,12 @@ describe('gdal.Envelope3D', () => {
         square.rings.add(ring)
 
         const envelope = square.getEnvelope3DAsync()
-        return Promise.all([ assert.eventually.propertyVal(envelope, 'minX', 0),
+        return assert.isFulfilled(Promise.all([ assert.eventually.propertyVal(envelope, 'minX', 0),
           assert.eventually.propertyVal(envelope, 'maxX', 10),
           assert.eventually.propertyVal(envelope, 'minY', 0),
           assert.eventually.propertyVal(envelope, 'maxY', 10),
           assert.eventually.propertyVal(envelope, 'minZ', 0),
-          assert.eventually.propertyVal(envelope, 'maxZ', 10) ])
+          assert.eventually.propertyVal(envelope, 'maxZ', 10) ]))
       })
     })
     describe('merge()', () => {

@@ -31,7 +31,7 @@ describe('gdal.Geometry', () => {
       const json2d = point2d.toJSONAsync()
       const point3d = new gdal.Point(1, 2, 3)
       const json3d = point3d.toJSONAsync()
-      return Promise.all([ assert.eventually.typeOf(json2d, 'string'),
+      return assert.isFulfilled(Promise.all([ assert.eventually.typeOf(json2d, 'string'),
         json2d.then((s) => assert.deepEqual(JSON.parse(s), {
           type: 'Point',
           coordinates: [ 1, 2 ]
@@ -41,7 +41,7 @@ describe('gdal.Geometry', () => {
           assert.deepEqual(JSON.parse(s), {
             type: 'Point',
             coordinates: [ 1, 2, 3 ]
-          })) ])
+          })) ]))
     })
   })
   describe('toObject()', () => {
@@ -82,14 +82,14 @@ describe('gdal.Geometry', () => {
     it('should return valid result', () => {
       const point2d = new gdal.Point(1, 2)
       const point3d = new gdal.Point(1, 2, 3)
-      return Promise.all([ assert.eventually.equal(
+      return assert.isFulfilled(Promise.all([ assert.eventually.equal(
         point2d.toKMLAsync(),
         '<Point><coordinates>1,2</coordinates></Point>'
       ),
       assert.eventually.equal(
         point3d.toKMLAsync(),
         '<Point><coordinates>1,2,3</coordinates></Point>'
-      ) ])
+      ) ]))
     })
   })
   describe('toWKT()', () => {
@@ -104,8 +104,8 @@ describe('gdal.Geometry', () => {
     it('should return valid result', () => {
       const point2d = new gdal.Point(1, 2)
       const point3d = new gdal.Point(1, 2, 3)
-      return Promise.all([ assert.eventually.equal(point2d.toWKTAsync(), 'POINT (1 2)'),
-        assert.eventually.equal(point3d.toWKTAsync(), 'POINT (1 2 3)') ])
+      return assert.isFulfilled(Promise.all([ assert.eventually.equal(point2d.toWKTAsync(), 'POINT (1 2)'),
+        assert.eventually.equal(point3d.toWKTAsync(), 'POINT (1 2 3)') ]))
     })
   })
   describe('toGML()', () => {
@@ -126,14 +126,14 @@ describe('gdal.Geometry', () => {
     it('should return valid result', () => {
       const point2d = new gdal.Point(1, 2)
       const point3d = new gdal.Point(1, 2, 3)
-      return Promise.all([ assert.eventually.equal(
+      return assert.isFulfilled(Promise.all([ assert.eventually.equal(
         point2d.toGMLAsync(),
         '<gml:Point><gml:coordinates>1,2</gml:coordinates></gml:Point>'
       ),
       assert.eventually.equal(
         point3d.toGMLAsync(),
         '<gml:Point><gml:coordinates>1,2,3</gml:coordinates></gml:Point>'
-      ) ])
+      ) ]))
     })
   })
   describe('toWKBAsync()', () => {
@@ -164,10 +164,10 @@ describe('gdal.Geometry', () => {
   describe('fromWKTAsync()', () => {
     it('should return valid result', () => {
       const point2d = gdal.Geometry.fromWKTAsync('POINT (1 2)')
-      return Promise.all([ assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint),
+      return assert.isFulfilled(Promise.all([ assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint),
         assert.eventually.propertyVal(point2d, 'x', 1),
         assert.eventually.propertyVal(point2d, 'y', 2)
-      ])
+      ]))
     })
   })
   describe('fromWKB()', () => {
@@ -183,10 +183,10 @@ describe('gdal.Geometry', () => {
     it('should return valid result', () => {
       const wkb = new gdal.Point(1, 2).toWKB()
       const point2d = gdal.Geometry.fromWKBAsync(wkb)
-      return Promise.all([ assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint),
+      return assert.isFulfilled(Promise.all([ assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint),
         assert.eventually.propertyVal(point2d, 'x', 1),
         assert.eventually.propertyVal(point2d, 'y', 2)
-      ])
+      ]))
     })
   })
   if (semver.gte(gdal.version, '2.3.0')) {
@@ -203,10 +203,10 @@ describe('gdal.Geometry', () => {
     describe('fromGeoJsonAsync()', () => {
       it('should return valid result', () => {
         const point2d = gdal.Geometry.fromGeoJsonAsync({ type: 'Point', coordinates: [ 2, 1 ] })
-        return Promise.all([ assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint),
+        return assert.isFulfilled(Promise.all([ assert.eventually.propertyVal(point2d, 'wkbType', gdal.wkbPoint),
           assert.eventually.propertyVal(point2d, 'x', 2),
           assert.eventually.propertyVal(point2d, 'y', 1)
-        ])
+        ]))
       })
     })
   }
@@ -439,9 +439,9 @@ describe('gdal.Geometry', () => {
           const square2 = new gdal.Polygon()
           square2.rings.add(ring2)
 
-          return Promise.all([ assert.eventually.equal(square1.overlapsAsync(square), true),
+          return assert.isFulfilled(Promise.all([ assert.eventually.equal(square1.overlapsAsync(square), true),
             assert.eventually.equal(square2.overlapsAsync(square), false)
-          ])
+          ]))
         })
       })
 
@@ -598,10 +598,10 @@ describe('gdal.Geometry', () => {
 
         const centroid = square.centroidAsync()
 
-        return Promise.all([ assert.eventually.instanceOf(centroid, gdal.Point),
+        return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(centroid, gdal.Point),
           assert.eventually.propertyVal(centroid, 'x', 10),
           assert.eventually.propertyVal(centroid, 'y', 5)
-        ])
+        ]))
       })
     })
     describe('buffer()', () => {
@@ -616,9 +616,9 @@ describe('gdal.Geometry', () => {
       it('should return correct result', () => {
         const point = new gdal.Point(0, 0)
         const circle = point.bufferAsync(1, 1000)
-        return Promise.all([ assert.eventually.instanceOf(circle, gdal.Polygon),
+        return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(circle, gdal.Polygon),
           assert.eventually.closeTo(circle.then((r) => r.getArea()), 3.1415, 0.0001)
-        ])
+        ]))
       })
     })
     describe('simplify()', () => {
@@ -653,9 +653,9 @@ describe('gdal.Geometry', () => {
         line.points.add(5, 5)
 
         const simplified = line.simplifyAsync(0.1)
-        return Promise.all([ assert.eventually.instanceOf(simplified, gdal.LineString),
+        return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(simplified, gdal.LineString),
           assert.eventually.equal(simplified.then((r) => r.points.count()), 4)
-        ])
+        ]))
       })
     })
     describe('simplifyPreserveTopology()', () => {
@@ -692,9 +692,9 @@ describe('gdal.Geometry', () => {
         line.points.add(5, 5)
 
         const simplified = line.simplifyPreserveTopologyAsync(0.1)
-        return Promise.all([ assert.eventually.instanceOf(simplified, gdal.LineString),
+        return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(simplified, gdal.LineString),
           assert.eventually.equal(simplified.then((r) => r.points.count()), 7)
-        ])
+        ]))
       })
     })
     describe('flattenTo2D()', () => {
@@ -796,9 +796,9 @@ describe('gdal.Geometry', () => {
         square2.rings.add(ring2)
 
         const result = square1.unionAsync(square2)
-        return Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
+        return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
           assert.eventually.equal(result.then((r) => r.getArea()), 200)
-        ])
+        ]))
       })
     })
     describe('intersection()', () => {
@@ -851,9 +851,9 @@ describe('gdal.Geometry', () => {
         square2.rings.add(ring2)
 
         const result = square1.intersectionAsync(square2)
-        return Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
+        return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
           assert.eventually.equal(result.then((r) => r.getArea()), 50)
-        ])
+        ]))
       })
     })
     describe('difference()', () => {
@@ -906,9 +906,9 @@ describe('gdal.Geometry', () => {
         square2.rings.add(ring2)
 
         const result = square1.differenceAsync(square2)
-        return Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
+        return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
           assert.eventually.equal(result.then((r) => r.getArea()), 50)
-        ])
+        ]))
       })
     })
   })

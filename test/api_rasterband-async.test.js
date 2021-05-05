@@ -108,12 +108,12 @@ describe('gdal.RasterBandAsync', () => {
               const data = new Uint8Array(new ArrayBuffer(20 * 30))
               data[15] = 31
               const result = band.pixels.readAsync(0, 0, 20, 30, data)
-              return Promise.all([ assert.eventually.equal(result, data),
+              return assert.isFulfilled(Promise.all([ assert.eventually.equal(result, data),
                 assert.isFulfilled(result),
                 result.then((data) => {
                   assert.equal(data[15], 0)
                 })
-              ])
+              ]))
             })
           })
           it('should create new array if null', () => {
@@ -323,9 +323,9 @@ describe('gdal.RasterBandAsync', () => {
               const band = ds.bands.get(1)
 
               const data = band.pixels.readBlockAsync(0, 0)
-              return Promise.all([ assert.eventually.instanceOf(data, Uint8Array),
+              return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(data, Uint8Array),
                 assert.eventually.equal(data.then((data) => data.length), band.blockSize.x * band.blockSize.y)
-              ])
+              ]))
             })
             it('should throw error if offsets are out of range', () => {
               const ds = gdal.open(`${__dirname}/data/sample.tif`)
