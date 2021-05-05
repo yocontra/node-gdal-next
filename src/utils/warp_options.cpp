@@ -21,7 +21,7 @@ WarpOptions::~WarpOptions() {
 
   // Dont use: GDALDestroyWarpOptions( options ); - it assumes ownership of
   // everything
-  if (options) delete options;
+  if (options) CPLFree(options);
   if (src_nodata) delete src_nodata;
   if (dst_nodata) delete dst_nodata;
 }

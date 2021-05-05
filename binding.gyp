@@ -5,7 +5,9 @@
 		"runtime_link%": "shared",
 		"enable_logging%": "false",
 		"debug_extra_ccflags_cc": ["-fprofile-arcs", "-ftest-coverage" ],
-		"debug_extra_ldflags" : ["-lgcov", "--coverage"],
+		"debug_extra_ldflags" : ["-lgcov", "--coverage" ]
+		#"debug_extra_ccflags_cc": ["-fprofile-arcs", "-ftest-coverage", "-fsanitize=address" ],
+		#"debug_extra_ldflags" : ["-lgcov", "--coverage", "-fsanitize=address" ]
 	},
 	"targets": [
 		{

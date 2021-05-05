@@ -151,7 +151,9 @@ Local<Value> SpatialReference::New(OGRSpatialReference *raw, bool owned) {
   // srs
   // - is slower
 
-  OGRSpatialReference *cloned_srs = raw->Clone();
+  OGRSpatialReference *cloned_srs = raw;
+  if (!owned)
+    cloned_srs = raw->Clone();
 
   SpatialReference *wrapped = new SpatialReference(cloned_srs);
   wrapped->owned_ = true;

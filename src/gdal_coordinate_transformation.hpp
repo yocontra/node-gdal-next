@@ -83,6 +83,13 @@ class GeoTransformTransformer : public OGRCoordinateTransformation {
   virtual OGRCoordinateTransformation *Clone() const {
     return new GeoTransformTransformer(*this);
   }
+
+  ~GeoTransformTransformer() {
+    if (hSrcImageTransformer) {
+      GDALDestroyGenImgProjTransformer(hSrcImageTransformer);
+      hSrcImageTransformer = nullptr;
+    }
+  }
 };
 } // namespace node_gdal
 #endif

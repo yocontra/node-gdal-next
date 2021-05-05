@@ -894,7 +894,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
   };
 
   job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
-    if (text) { return SafeString::New(text); }
+    if (text) {
+       auto r = SafeString::New(text);
+       CPLFree(text);
+       return r;
+    }
     return Nan::Undefined().As<Value>();
   };
 

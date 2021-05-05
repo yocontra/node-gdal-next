@@ -218,8 +218,8 @@ NAN_METHOD(Layer::getExtent) {
   int force = 1;
   NODE_ARG_BOOL_OPT(0, "force", force);
 
-  OGREnvelope *envelope = new OGREnvelope();
-  OGRErr err = layer->this_->GetExtent(envelope, force);
+  std::unique_ptr<OGREnvelope> envelope(new OGREnvelope());
+  OGRErr err = layer->this_->GetExtent(envelope.get(), force);
   if (err) {
     Nan::ThrowError("Can't get layer extent without computing it");
     return;
@@ -230,8 +230,6 @@ NAN_METHOD(Layer::getExtent) {
   Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
   Nan::Set(obj, Nan::New("minY").ToLocalChecked(), Nan::New<Number>(envelope->MinY));
   Nan::Set(obj, Nan::New("maxY").ToLocalChecked(), Nan::New<Number>(envelope->MaxY));
-
-  delete envelope;
 
   info.GetReturnValue().Set(obj);
 }

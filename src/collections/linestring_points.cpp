@@ -146,7 +146,7 @@ NAN_METHOD(LineStringPoints::get) {
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
   LineString *geom = Nan::ObjectWrap::Unwrap<LineString>(parent);
 
-  OGRPoint *pt = new OGRPoint();
+  OGRPoint pt;
   int i;
 
   NODE_ARG_INT(0, "index", i);
@@ -155,9 +155,10 @@ NAN_METHOD(LineStringPoints::get) {
     return;
   }
 
-  geom->get()->getPoint(i, pt);
+  geom->get()->getPoint(i, &pt);
 
-  info.GetReturnValue().Set(Point::New(pt));
+  // New will copy the point with GDAL clone()
+  info.GetReturnValue().Set(Point::New(&pt, false));
 }
 
 /**

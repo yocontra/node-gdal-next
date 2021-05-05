@@ -17,6 +17,12 @@ if (semver.lt(gdal.version, '2.0.0')) {
   }
 }
 
+const cleanup = () => {
+  delete gdal.drivers
+  gc()
+}
+
 exports.mochaHooks = {
-  beforeEach: skipAsync
+  beforeEach: skipAsync,
+  afterAll: cleanup
 }

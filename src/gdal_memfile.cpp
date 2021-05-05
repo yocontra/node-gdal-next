@@ -15,21 +15,21 @@ void Memfile::weakCallback(const Nan::WeakCallbackInfo<Memfile> &file) {
   Memfile *mem = file.GetParameter();
   memfile_collection.erase(mem->data);
   VSIUnlink(mem->filename.c_str());
+  delete mem->weakHandle;
   delete mem;
 }
 
 Memfile *Memfile::get(Local<Object> buffer) {
   void *data = node::Buffer::Data(buffer);
+  if (data == nullptr) {
+    return nullptr;
+  }
   if (memfile_collection.count(data)) return memfile_collection.find(data)->second;
 
   size_t len = node::Buffer::Length(buffer);
   Memfile *mem = new Memfile(data, len);
 
   VSILFILE *vsi = VSIFileFromMemBuffer(mem->filename.c_str(), (GByte *)data, len, 0);
-  if (mem->data == nullptr) {
-    delete mem;
-    return nullptr;
-  }
   VSIFCloseL(vsi);
 
   mem->weakHandle = new Nan::Persistent<Object>(buffer);

@@ -67,21 +67,23 @@ describe('gdal', () => {
         assert.equal(gdal.config.get('GDAL_DATA'), data_path)
       })
       it('should respect GDAL_DATA environment over locally bundled path', (done) => {
-        process.env.GDAL_DATA = 'bogus'
+        const env = Object.assign({}, process.env)
+        env.GDAL_DATA = 'bogus'
         const cp = require('child_process')
+        // The manual delete/gc() allows for error-free unit testing of the ASAN build
         const command =
-          "\"var gdal = require('./lib/gdal.js'); console.log(gdal.config.get('GDAL_DATA'));\""
+          "\"const gdal = require('./lib/gdal.js'); console.log(gdal.config.get('GDAL_DATA')); delete gdal.drivers; gc();\""
         let execPath = process.execPath
         if (process.platform === 'win32') {
           // quotes to avoid errors like ''C:\Program' is not recognized as an internal or external command'
           execPath = `"${execPath}"`
         }
         cp.exec(
-          `${execPath} ${[ '-e', command ].join(' ')}`,
-          { env: { GDAL_DATA: 'bogus' } },
+          `${execPath} ${[ '--expose_gc', '-e', command ].join(' ')}`,
+          { env },
           (err, stdout) => {
             if (err) throw err
-            assert.equal(process.env.GDAL_DATA, stdout.trim())
+            assert.equal(env.GDAL_DATA, stdout.trim())
             done()
           }
         )
