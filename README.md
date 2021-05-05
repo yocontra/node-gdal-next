@@ -12,9 +12,11 @@ Read and write raster and vector geospatial datasets straight from [Node.js](htt
 
 This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal>.
 
-It adds a number of features, the main one being asynchronous operations.
+It adds a number of features:
 
 - **Support for asynchronous IO**
+- Support for curve geometries
+- Numerous small bugfixes
 
 Async support for vector data is currently experimental, with the following classses being async-compatible on `master`
 * main `open`
