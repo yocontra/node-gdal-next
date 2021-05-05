@@ -249,7 +249,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRLayer *layer = raw->CreateLayer(layer_name->c_str(), srs, geom_type, options->get());
     GDAL_UNLOCK_PARENT;
-    if (layer == nullptr) throw "Error creating layer";
+    if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
   };
 
@@ -374,7 +374,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRLayer *layer = raw->CopyLayer(src, new_name->c_str(), options->get());
     GDAL_UNLOCK_PARENT;
-    if (layer == nullptr) throw "Error copying layer";
+    if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
   };
 

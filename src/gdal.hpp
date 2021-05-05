@@ -75,7 +75,7 @@ GDAL_ASYNCABLE_DEFINE(open) {
   job.rval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
   job.main = [path, flags]() {
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
-    if (!ds) throw "Error opening dataset";
+    if (!ds) throw CPLGetLastErrorMsg();
     return ds;
   };
   job.run(info, async, 2);

@@ -295,7 +295,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   job.main = [raw, filename, x_size, y_size, n_bands, type, options]() {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
-    if (!ds) throw "Error creating dataset";
+    if (!ds) throw CPLGetLastErrorMsg();
     return ds;
   };
   job.rval = DatasetRval;
@@ -403,7 +403,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
     uv_sem_post(async_lock);
-    if (!ds) throw "Error creating dataset";
+    if (!ds) CPLGetLastErrorMsg();
     return ds;
   };
   job.run(info, async, 3);
@@ -576,7 +576,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   job.main = [raw, path, access]() {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
-    if (!ds) throw "Error opening dataset";
+    if (!ds) throw CPLGetLastErrorMsg();
     return ds;
   };
   job.rval = DatasetRval;

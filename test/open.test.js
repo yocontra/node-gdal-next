@@ -9,6 +9,6 @@ describe('Open', () => {
     const filename = path.join(__dirname, 'data/invalid')
     assert.throws(() => {
       gdal.open(filename)
-    }, /Error opening dataset/)
+    }, /Error/)
   })
 })
