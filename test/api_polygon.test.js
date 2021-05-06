@@ -1,5 +1,6 @@
 const assert = require('chai').assert
 const gdal = require('../lib/gdal.js')
+const semver = require('semver')
 
 describe('gdal.Polygon', () => {
   afterEach(gc)
@@ -71,14 +72,16 @@ describe('gdal.Polygon', () => {
           polygon.rings.add([ ring1, ring2 ])
           assert.equal(polygon.rings.count(), 2)
         })
-        it('should reject invalid geometries', () => {
-          const polygon = new gdal.Polygon()
-          polygon.rings.add(ring1)
-          const ring2 = new gdal.LineString()
-          assert.throws(() => {
-            polygon.rings.add(ring2)
-          }, /must be a LinearRing/)
-        })
+        if (semver.gte(gdal.version, '2.0.0')) {
+          it('should reject invalid geometries', () => {
+            const polygon = new gdal.Polygon()
+            polygon.rings.add(ring1)
+            const ring2 = new gdal.LineString()
+            assert.throws(() => {
+              polygon.rings.add(ring2)
+            }, /must be a LinearRing/)
+          })
+        }
       })
       let polygon
       const createRings = () => {
