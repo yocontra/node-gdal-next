@@ -150,7 +150,7 @@ NAN_METHOD(CompoundCurves::add) {
   SimpleCurve *ring;
 
   if (info.Length() < 1) {
-    Nan::ThrowError("ring(s) must be given");
+    Nan::ThrowError("curve(s) must be given");
     return;
   }
   if (info[0]->IsArray()) {
@@ -161,7 +161,11 @@ NAN_METHOD(CompoundCurves::add) {
       Local<Value> element = Nan::Get(array, i).ToLocalChecked();
       if (IS_WRAPPED(element, SimpleCurve)) {
         ring = Nan::ObjectWrap::Unwrap<SimpleCurve>(element.As<Object>());
-        geom->get()->addCurve(ring->get());
+        OGRErr err = geom->get()->addCurve(ring->get());
+        if (err) {
+          NODE_THROW_OGRERR(err);
+          return;
+        }
       } else {
         Nan::ThrowError("All array elements must be SimpleCurves");
         return;
@@ -169,9 +173,13 @@ NAN_METHOD(CompoundCurves::add) {
     }
   } else if (IS_WRAPPED(info[0], SimpleCurve)) {
     ring = Nan::ObjectWrap::Unwrap<SimpleCurve>(info[0].As<Object>());
-    geom->get()->addCurve(ring->get());
+    OGRErr err = geom->get()->addCurve(ring->get());
+    if (err) {
+      NODE_THROW_OGRERR(err);
+      return;
+    }
   } else {
-    Nan::ThrowError("ring(s) must be a SimpleCurve or array of SimpleCurves");
+    Nan::ThrowError("curve(s) must be a SimpleCurve or array of SimpleCurves");
     return;
   }
 

@@ -167,7 +167,11 @@ NAN_METHOD(PolygonRings::add) {
       Local<Value> element = Nan::Get(array, i).ToLocalChecked();
       if (IS_WRAPPED(element, LinearRing)) {
         ring = Nan::ObjectWrap::Unwrap<LinearRing>(element.As<Object>());
-        geom->get()->addRing(ring->get());
+        OGRErr err = geom->get()->addRing(ring->get());
+        if (err) {
+          NODE_THROW_OGRERR(err);
+          return;
+        }
       } else {
         Nan::ThrowError("All array elements must be LinearRings");
         return;
@@ -175,7 +179,11 @@ NAN_METHOD(PolygonRings::add) {
     }
   } else if (IS_WRAPPED(info[0], LinearRing)) {
     ring = Nan::ObjectWrap::Unwrap<LinearRing>(info[0].As<Object>());
-    geom->get()->addRing(ring->get());
+    OGRErr err = geom->get()->addRing(ring->get());
+    if (err) {
+      NODE_THROW_OGRERR(err);
+      return;
+    }
   } else {
     Nan::ThrowError("ring(s) must be a LinearRing or array of LinearRings");
     return;

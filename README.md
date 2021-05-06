@@ -148,7 +148,7 @@ This binding was originally the product of a collaboration between [Natural Atla
 
 node-gdal-next is maintained by [@contra](https://github.com/contra)
 
-The async bindings are by [@mmomtchev](https://github.com/mmomtchev)
+The async bindings are by [@mmomtchev](https://github.com/mmomtchev) who is the current maintainer.
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
 

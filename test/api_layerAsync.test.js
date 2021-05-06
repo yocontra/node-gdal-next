@@ -244,6 +244,21 @@ describe('gdal.LayerAsync', () => {
           ]))
         })
       )
+      it('should gracefully handle closing the dataset before the operation has started', () =>
+        prepare_dataset_layer_test('w', (dataset, layer) =>
+          assert.isRejected(new Promise((resolve, reject) =>
+            process.nextTick(() => {
+              try {
+                dataset.layers.copyAsync(layer, 'newlayer', (e, r) => {
+                  if (e) reject(e)
+                  resolve(r)
+                })
+              } catch (e) {
+                reject(e)
+              }
+            })))
+        )
+      )
     })
 
     describe('removeAsync()', () => {

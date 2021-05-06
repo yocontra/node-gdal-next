@@ -1171,5 +1171,62 @@ describe('gdal.RasterBand', () => {
         })
       })
     })
+    describe('statistics', () => {
+      const statsBand = () => {
+        const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+        const band = ds.bands.get(1)
+        band.fill(5)
+        band.pixels.set(10, 10, 20)
+        band.pixels.set(0, 0, 0)
+        return band
+      }
+      describe('computeStatistics()', () => {
+        it('should compute statistics', () => {
+          const band = statsBand()
+          const stats = band.computeStatistics(false)
+          assert.equal(stats.min, 0)
+          assert.equal(stats.max, 20)
+          assert.closeTo(stats.mean, 5, 0.1)
+          assert.closeTo(stats.std_dev, 1, 0.1)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          assert.throws(() => {
+            band.computeStatistics(5)
+          })
+        })
+      })
+      describe('setStatistics()', () => {
+        it('should allow to manually set (false) statistics', () => {
+          const band = statsBand()
+          const stats = { min: -10, max: 30, mean: 15, std_dev: 2 }
+          band.setStatistics(stats.min, stats.max, stats.mean, stats.std_dev)
+          assert.deepEqual(band.getStatistics(false, true), stats)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          assert.throws(() => {
+            band.setStatistics(0, 0, 0, 0)
+          })
+        })
+      })
+    })
+    describe('getMetadata()', () => {
+      it('should retrieve the band metadata', () => {
+        const band = gdal.open(`${__dirname}/data/sample.tif`).bands.get(1)
+        const meta = band.getMetadata()
+        assert.deepEqual(meta, {
+          STATISTICS_MAXIMUM: '100',
+          STATISTICS_MEAN: '29.725628716175',
+          STATISTICS_MINIMUM: '0',
+          STATISTICS_STDDEV: '36.988859543635',
+          STATISTICS_VALID_PERCENT: '100'
+        })
+      })
+    })
   })
 })

@@ -3,5 +3,8 @@
     "C_Cpp.errorSquiggles": "Enabled",
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "eslint.format.enable": true,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    }
 }
