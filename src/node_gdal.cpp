@@ -301,7 +301,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   CompoundCurve::Initialize(target);
   MultiCurve::Initialize(target);
 
-  CompoundCurves::Initialize(target);
+  CompoundCurveCurves::Initialize(target);
 #endif
   SpatialReference::Initialize(target);
   CoordinateTransformation::Initialize(target);

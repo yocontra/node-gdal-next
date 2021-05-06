@@ -9,38 +9,38 @@ namespace node_gdal {
 
 #if GDAL_VERSION_MAJOR >= 2
 
-Nan::Persistent<FunctionTemplate> CompoundCurves::constructor;
+Nan::Persistent<FunctionTemplate> CompoundCurveCurves::constructor;
 
-void CompoundCurves::Initialize(Local<Object> target) {
+void CompoundCurveCurves::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
 
-  Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(CompoundCurves::New);
+  Local<FunctionTemplate> lcons = Nan::New<FunctionTemplate>(CompoundCurveCurves::New);
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
-  lcons->SetClassName(Nan::New("CompoundCurves").ToLocalChecked());
+  lcons->SetClassName(Nan::New("CompoundCurveCurves").ToLocalChecked());
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
   Nan::SetPrototypeMethod(lcons, "count", count);
   Nan::SetPrototypeMethod(lcons, "get", get);
   Nan::SetPrototypeMethod(lcons, "add", add);
 
-  Nan::Set(target, Nan::New("CompoundCurves").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
+  Nan::Set(target, Nan::New("CompoundCurveCurves").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
 }
 
-CompoundCurves::CompoundCurves() : Nan::ObjectWrap() {
+CompoundCurveCurves::CompoundCurveCurves() : Nan::ObjectWrap() {
 }
 
-CompoundCurves::~CompoundCurves() {
+CompoundCurveCurves::~CompoundCurveCurves() {
 }
 
 /**
  * A collection of connected curves, used by {{#crossLink
  * "gdal.CompoundCurve"}}gdal.CompoundCurve{{/crossLink}}.
  *
- * @class gdal.CompoundCurves
+ * @class gdal.CompoundCurveCurves
  */
-NAN_METHOD(CompoundCurves::New) {
+NAN_METHOD(CompoundCurveCurves::New) {
   Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
@@ -50,32 +50,33 @@ NAN_METHOD(CompoundCurves::New) {
   if (info[0]->IsExternal()) {
     Local<External> ext = info[0].As<External>();
     void *ptr = ext->Value();
-    CompoundCurves *geom = static_cast<CompoundCurves *>(ptr);
+    CompoundCurveCurves *geom = static_cast<CompoundCurveCurves *>(ptr);
     geom->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
     return;
   } else {
-    Nan::ThrowError("Cannot create CompoundCurves directly");
+    Nan::ThrowError("Cannot create CompoundCurveCurves directly");
     return;
   }
 }
 
-Local<Value> CompoundCurves::New(Local<Value> geom) {
+Local<Value> CompoundCurveCurves::New(Local<Value> geom) {
   Nan::EscapableHandleScope scope;
 
-  CompoundCurves *wrapped = new CompoundCurves();
+  CompoundCurveCurves *wrapped = new CompoundCurveCurves();
 
   v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
-    Nan::NewInstance(Nan::GetFunction(Nan::New(CompoundCurves::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
+    Nan::NewInstance(Nan::GetFunction(Nan::New(CompoundCurveCurves::constructor)).ToLocalChecked(), 1, &ext)
+      .ToLocalChecked();
   Nan::SetPrivate(obj, Nan::New("parent_").ToLocalChecked(), geom);
 
   return scope.Escape(obj);
 }
 
-NAN_METHOD(CompoundCurves::toString) {
+NAN_METHOD(CompoundCurveCurves::toString) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(Nan::New("CompoundCurves").ToLocalChecked());
+  info.GetReturnValue().Set(Nan::New("CompoundCurveCurves").ToLocalChecked());
 }
 
 /**
@@ -84,7 +85,7 @@ NAN_METHOD(CompoundCurves::toString) {
  * @method count
  * @return Integer
  */
-NAN_METHOD(CompoundCurves::count) {
+NAN_METHOD(CompoundCurveCurves::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -95,7 +96,7 @@ NAN_METHOD(CompoundCurves::count) {
 }
 
 /**
- * Returns the curve at the specified index. 
+ * Returns the curve at the specified index.
  *
  * @example
  * ```
@@ -105,7 +106,7 @@ NAN_METHOD(CompoundCurves::count) {
  * @method get
  * @return {gdal.CompoundCurve|gdal.SimpleCurve}
  */
-NAN_METHOD(CompoundCurves::get) {
+NAN_METHOD(CompoundCurveCurves::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -140,7 +141,7 @@ NAN_METHOD(CompoundCurves::get) {
  * @method add
  * @param {gdal.CompoundCurve|gdal.SimpleCurve} curve(s)
  */
-NAN_METHOD(CompoundCurves::add) {
+NAN_METHOD(CompoundCurveCurves::add) {
   Nan::HandleScope scope;
 
   Local<Object> parent =

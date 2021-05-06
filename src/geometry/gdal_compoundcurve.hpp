@@ -21,15 +21,15 @@ namespace node_gdal {
 
 #if GDAL_VERSION_MAJOR >= 2
 
-class CompoundCurve : public CurveBase<CompoundCurve, OGRCompoundCurve, CompoundCurves> {
+class CompoundCurve : public CurveBase<CompoundCurve, OGRCompoundCurve, CompoundCurveCurves> {
   friend CurveBase;
 
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
-  using CurveBase<CompoundCurve, OGRCompoundCurve, CompoundCurves>::CurveBase;
+  using CurveBase<CompoundCurve, OGRCompoundCurve, CompoundCurveCurves>::CurveBase;
 
   static void Initialize(Local<Object> target);
-  using CurveBase<CompoundCurve, OGRCompoundCurve, CompoundCurves>::New;
+  using CurveBase<CompoundCurve, OGRCompoundCurve, CompoundCurveCurves>::New;
   static NAN_METHOD(toString);
 
   static NAN_GETTER(curvesGetter);
