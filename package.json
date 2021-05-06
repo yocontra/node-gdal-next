@@ -53,13 +53,10 @@
     "codecov": "cd coverage && curl -s https://codecov.io/bash | bash",
     "version": "git add package.json",
     "postversion": "git push && git push --tags && node ./scripts/publish-packages.js && npm run publish-yuidoc",
-    "buildcontainer:u16": "docker build -t ubuntu-node-gdal:16.04 -f test/platforms/ubuntu16-gdal1/Dockerfile test/platforms",
-    "test:u16": "npm run buildcontainer:u16 && docker run -v $INIT_CWD:/src ubuntu-node-gdal:16.04",
-    "buildcontainer:u18": "docker build -t ubuntu-node-gdal:18.04 -f test/platforms/ubuntu18-gdal2/Dockerfile test/platforms",
-    "test:u18": "npm run buildcontainer:u18 && docker run -v $INIT_CWD:/src ubuntu-node-gdal:18.04",
-    "buildcontainer:u20": "docker build -t ubuntu-node-gdal:20.04 -f test/platforms/ubuntu20-gdal3/Dockerfile test/platforms",
-    "test:u20": "npm run buildcontainer:u20 && docker run -v $INIT_CWD:/src ubuntu-node-gdal:20.04",
-    "test:all": "npm run test:u16 && npm run test:u18 && npm run test:u20"
+    "container": "bash scripts/container.sh",
+    "test:gdal1": "npm run container all 16.04 10 && npm run container all 16.04 12",
+    "test:gdal2": "npm run container all 18.04 10 && npm run container all 18.04 12 && npm run container all 18.04 14",
+    "test:gdal3": "npm run container all 20.04 10 && npm run container all 20.04 12 && npm run container all 20.04 14 && npm run container all 20.04 16"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.3",

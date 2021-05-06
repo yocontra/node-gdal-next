@@ -1217,13 +1217,9 @@ describe('gdal.RasterBand', () => {
     })
     describe('getMetadata()', () => {
       it('should retrieve the band metadata', () => {
-        const band = gdal.open(`${__dirname}/data/sample.tif`).bands.get(1)
+        const band = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`).bands.get(1)
         const meta = band.getMetadata()
-        assert.closeTo(+meta.STATISTICS_MAXIMUM, 100, 0.001)
-        assert.closeTo(+meta.STATISTICS_MINIMUM, 0, 0.001)
-        assert.closeTo(+meta.STATISTICS_MEAN, 29.726, 0.001)
-        assert.closeTo(+meta.STATISTICS_STDDEV, 36.989, 0.001)
-        assert.closeTo(+meta.STATISTICS_VALID_PERCENT, 100, 0.001)
+        assert.equal(meta.LAYER_TYPE, 'athematic')
       })
     })
   })
