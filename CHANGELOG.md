@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Complete reworking of the Geometry code adding support for CircularString, CompoundCurve and MultiCurve
   - Add JS iterators to all collections
+  - Enable MapInfo TAB and MIF/MID
 
 ### Changed
   - Process the unit testing suite with ASAN and fix all memory leaks

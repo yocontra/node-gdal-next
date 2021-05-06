@@ -1,6 +1,7 @@
 const fs = require('fs')
 const gdal = require('../lib/gdal.js')
 const assert = require('chai').assert
+const semver = require('semver')
 
 // http://epsg.io/
 // http://spatialreference.org/ref/
@@ -89,12 +90,35 @@ describe('gdal.SpatialReference', () => {
       assert.instanceOf(ref, gdal.SpatialReference)
     })
   })
+  describe('fromMICoordSys', () => {
+    it('should return SpatialReference', () => {
+      const micoordsys = 'Earth Projection 10, 157, "m", 0'
+      const ref = gdal.SpatialReference.fromMICoordSys(micoordsys)
+      assert.instanceOf(ref, gdal.SpatialReference)
+    })
+  })
   describe('validate', () => {
-    it('should validate a SpatialReference', () => {
+    it('should validate a valid SpatialReference', () => {
       const epsg = 4326
       const ref = gdal.SpatialReference.fromEPSG(epsg)
       assert.isNull(ref.validate())
     })
+    if (semver.gte(gdal.version, '3.0.0')) {
+      it('should not validate an invalid SpatialReference', () => {
+        const wkt =
+          'PROJCS["NAD_1983_UTM_Zone_10N",' +
+          'GEOGCS["GCS_North_American_1983",' +
+          'DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137,298.257222101]],' +
+          'PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],' +
+          'PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],' +
+          'PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-123.0],' +
+          'PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_of_Origin",0.0],' +
+          'PARAMETER["Roshavi_Gargi", 2]' +
+          'UNIT["Meter",1.0]]'
+        const ref = gdal.SpatialReference.fromWKT(wkt)
+        assert.isNotNull(ref.validate())
+      })
+    }
   })
   describe('exportToPrettyWKT', () => {
     it('should pretty-print WKT', () => {
@@ -104,12 +128,19 @@ describe('gdal.SpatialReference', () => {
     })
   })
   describe('getAngularUnits', () => {
-    it('should validate a SpatialReference', () => {
-      const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
-      const ref = gdal.SpatialReference.fromCRSURL(wms)
-      const angular = ref.getAngularUnits()
-      assert.closeTo(angular.value, 0.0174, 0.001)
-      assert.equal(angular.units, 'degree')
+    it('should retrieve the angular units of a SpatialReference', () => {
+      const ref = gdal.SpatialReference.fromEPSG(3857)
+      const units = ref.getAngularUnits()
+      assert.closeTo(units.value, 0.0174, 0.001)
+      assert.equal(units.units, 'degree')
+    })
+  })
+  describe('getLinearUnits', () => {
+    it('should retrieve the linear units of a SpatialReference', () => {
+      const ref = gdal.SpatialReference.fromEPSG(3857)
+      const units = ref.getLinearUnits()
+      assert.closeTo(units.value, 1, 0.001)
+      assert.equal(units.units, 'metre')
     })
   })
   describe('getAuthorityCode', () => {

@@ -1222,5 +1222,28 @@ describe('gdal.RasterBand', () => {
         assert.equal(meta.LAYER_TYPE, 'athematic')
       })
     })
+    describe('getMaskBand()', () => {
+      it('should retrieve the band nodata mask', () => {
+        const band = gdal.open(`${__dirname}/data/test_with_mask_1bit.tif`).bands.get(1)
+        const mask = band.getMaskBand()
+        assert.equal(mask.pixels.get(0, 0), 0)
+        assert.equal(mask.pixels.get(10, 10), 255)
+      })
+    })
+    describe('"categoryNames" propetry', () => {
+      it('should allow setting and retrieving the category names', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
+        const cats = [ 'dry', 'humid', 'wet', 'soaking' ]
+        band.categoryNames = cats
+        assert.deepEqual(band.categoryNames, cats)
+      })
+    })
+    describe('"hasArbitraryOverviews" property', () => {
+      // node-gdal doesn't support (yet) networking so this method is not really useful
+      it('should always return false', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
+        assert.equal(band.hasArbitraryOverviews, false)
+      })
+    })
   })
 })

@@ -56,7 +56,9 @@
     "container": "bash scripts/container.sh",
     "test:gdal1": "npm run container all 16.04 10 && npm run container all 16.04 12",
     "test:gdal2": "npm run container all 18.04 10 && npm run container all 18.04 12 && npm run container all 18.04 14",
-    "test:gdal3": "npm run container all 20.04 10 && npm run container all 20.04 12 && npm run container all 20.04 14 && npm run container all 20.04 16"
+    "test:gdal3": "npm run container all 20.04 10 && npm run container all 20.04 12 && npm run container all 20.04 14 && npm run container all 20.04 16",
+    "test:all": "npm run test:gdal1 && npm run test:gdal2 && npm run test:gdal3",
+    "test:fast": "npm run container all 16.04 10 && npm run container all 18.04 12 && npm run container all 20.04 16"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.3",
