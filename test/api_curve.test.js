@@ -47,23 +47,7 @@ describe('gdal.CompoundCurve', () => {
       assert.equal(i, 3)
     })
     describe('adding curves', () => {
-      const arc = new gdal.CircularString()
-      arc.points.add(-5, 0)
-      arc.points.add(0, 2.5)
-      arc.points.add(5, 0)
-
-      const line = new gdal.LineString()
-      line.points.add(5, 0, 0)
-      line.points.add(10, 10, 0)
-      line.points.add(10, 20, 0)
-      it('should reject non-contiguous curves', () => {
-        assert.throws(() => {
-          compoundcurve.curves.add(arc)
-          compoundcurve.curves.add(line)
-        }, /contiguous/)
-      })
-      it('should support adding curves it', () => {
-        const newcompound = new gdal.CompoundCurve()
+      const makeCurves = () => {
         const arc = new gdal.CircularString()
         arc.points.add(-5, 0)
         arc.points.add(0, 2.5)
@@ -73,6 +57,19 @@ describe('gdal.CompoundCurve', () => {
         line.points.add(5, 0, 0)
         line.points.add(10, 10, 0)
         line.points.add(10, 20, 0)
+
+        return { arc, line }
+      }
+      it('should reject non-contiguous curves', () => {
+        const { arc, line } = makeCurves()
+        assert.throws(() => {
+          compoundcurve.curves.add(arc)
+          compoundcurve.curves.add(line)
+        }, /contiguous/)
+      })
+      it('should support adding curves it', () => {
+        const newcompound = new gdal.CompoundCurve()
+        const { arc, line } = makeCurves()
 
         newcompound.curves.add(arc)
         newcompound.curves.add(line)
