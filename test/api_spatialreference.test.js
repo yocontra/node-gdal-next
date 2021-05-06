@@ -127,6 +127,13 @@ describe('gdal.SpatialReference', () => {
       assert.include(ref.toPrettyWKT(), 'WGS 84 / Pseudo-Mercato')
     })
   })
+  describe('exportToXML', () => {
+    it('should export to XML', () => {
+      const epsg = 3857
+      const ref = gdal.SpatialReference.fromEPSG(epsg)
+      assert.include(ref.toXML(), 'WGS 84 / Pseudo-Mercato')
+    })
+  })
   describe('getAngularUnits', () => {
     it('should retrieve the angular units of a SpatialReference', () => {
       const ref = gdal.SpatialReference.fromEPSG(3857)
@@ -184,6 +191,20 @@ describe('gdal.SpatialReference', () => {
       assert.strictEqual(srs.getAuthorityName(), 'EPSG')
     })
   })
+  describe('getAttrValue', () => {
+    it('should support default index argument', () => {
+      const srs = gdal.SpatialReference.fromEPSG(3857)
+      assert.strictEqual(srs.getAttrValue('DATUM'), 'WGS_1984')
+    })
+    it('should support custom index argument', () => {
+      const srs = gdal.SpatialReference.fromEPSG(3857)
+      assert.strictEqual(srs.getAttrValue('DATUM', 1), 'SPHEROID')
+    })
+    it('should support invalid index argument', () => {
+      const srs = gdal.SpatialReference.fromEPSG(3857)
+      assert.isNull(srs.getAttrValue('DATUM', 20))
+    })
+  })
   describe('toProj4', () => {
     it('should return string', () => {
       const srs = gdal.SpatialReference.fromUserInput('NAD83')
@@ -200,6 +221,60 @@ describe('gdal.SpatialReference', () => {
     })
     it('should return false if not geographic coordinate system', () => {
       assert.equal(gdal.SpatialReference.fromEPSG(2154).isGeographic(), false)
+    })
+  })
+  describe('isGeocentric', () => {
+    it('should return true if geocentric coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(4328).isGeocentric(), true)
+    })
+    it('should return false if not geocentric coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(2154).isGeocentric(), false)
+    })
+  })
+  describe('isProjected', () => {
+    it('should return true if projected coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(3857).isProjected(), true)
+    })
+    it('should return false if not projected coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(4326).isProjected(), false)
+    })
+  })
+  describe('isLocal', () => {
+    it('should return true if local coordinate system', () => {
+      const local = 'LOCAL_CS["PAM",UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]'
+      assert.equal(gdal.SpatialReference.fromWKT(local).isLocal(), true)
+    })
+    it('should return false if not local coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(2154).isLocal(), false)
+    })
+  })
+  const compoundVertical = 'COMPD_CS["NAD27 / UTM zone 11N + EGM2008 height",PROJCS["NAD27 / UTM zone 11N",GEOGCS["NAD27",DATUM["North_American_Datum_1927",SPHEROID["Clarke 1866",6378206.4,294.978698213898,AUTHORITY["EPSG","7008"]],AUTHORITY["EPSG","6267"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4267"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-117],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","26711"]],VERT_CS["EGM2008 height",VERT_DATUM["EGM2008 geoid",2005,AUTHORITY["EPSG","1027"]],UNIT["foot",0.3048,AUTHORITY["EPSG","9002"]],AXIS["Up",UP]]]'
+  describe('isVertical', () => {
+    it('should return true if vertical coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromWKT(compoundVertical).isVertical(), true)
+      // This is a typo that will probably stay until 4.x
+      assert.equal(gdal.SpatialReference.fromWKT(compoundVertical).isVectical(), true)
+    })
+    it('should return false if not vertical coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(2154).isVertical(), false)
+    })
+  })
+  describe('isCompound', () => {
+    it('should return true if compound coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromWKT(compoundVertical).isCompound(), true)
+    })
+    it('should return false if not compound coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(2154).isCompound(), false)
+    })
+  })
+  describe('isSame', () => {
+    it('should return true if compound coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(3857)
+        .isSame(gdal.SpatialReference.fromCRSURL('http://www.opengis.net/def/crs/EPSG/0/3857')), true)
+    })
+    it('should return false if not compound coordinate system', () => {
+      assert.equal(gdal.SpatialReference.fromEPSG(4326)
+        .isSame(gdal.SpatialReference.fromCRSURL('http://www.opengis.net/def/crs/EPSG/0/3857')), false)
     })
   })
 })

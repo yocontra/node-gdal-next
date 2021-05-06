@@ -48,6 +48,7 @@ void SpatialReference::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "isProjected", isProjected);
   Nan::SetPrototypeMethod(lcons, "isLocal", isLocal);
   Nan::SetPrototypeMethod(lcons, "isVectical", isVertical);
+  Nan::SetPrototypeMethod(lcons, "isVertical", isVertical);
   Nan::SetPrototypeMethod(lcons, "isCompound", isCompound);
   Nan::SetPrototypeMethod(lcons, "isSameGeogCS", isSameGeogCS);
   Nan::SetPrototypeMethod(lcons, "isSameVertCS", isSameVertCS);
@@ -152,8 +153,7 @@ Local<Value> SpatialReference::New(OGRSpatialReference *raw, bool owned) {
   // - is slower
 
   OGRSpatialReference *cloned_srs = raw;
-  if (!owned)
-    cloned_srs = raw->Clone();
+  if (!owned) cloned_srs = raw->Clone();
 
   SpatialReference *wrapped = new SpatialReference(cloned_srs);
   wrapped->owned_ = true;

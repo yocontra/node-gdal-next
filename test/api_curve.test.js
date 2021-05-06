@@ -67,12 +67,21 @@ describe('gdal.CompoundCurve', () => {
           compoundcurve.curves.add(line)
         }, /contiguous/)
       })
-      it('should support adding curves it', () => {
+      it('should support adding curves', () => {
         const newcompound = new gdal.CompoundCurve()
         const { arc, line } = makeCurves()
 
         newcompound.curves.add(arc)
         newcompound.curves.add(line)
+        assert.equal(newcompound.curves.count(), 2)
+        assert.equal(newcompound.curves.get(0).toJSON(), arc.toJSON())
+        assert.equal(newcompound.curves.get(1).toJSON(), line.toJSON())
+      })
+      it('should support adding multiple curves', () => {
+        const newcompound = new gdal.CompoundCurve()
+        const { arc, line } = makeCurves()
+
+        newcompound.curves.add([ arc, line ])
         assert.equal(newcompound.curves.count(), 2)
         assert.equal(newcompound.curves.get(0).toJSON(), arc.toJSON())
         assert.equal(newcompound.curves.get(1).toJSON(), line.toJSON())
