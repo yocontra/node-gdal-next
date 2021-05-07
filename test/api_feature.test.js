@@ -1,5 +1,7 @@
 const gdal = require('../lib/gdal.js')
 const assert = require('chai').assert
+const path = require('path')
+const semver = require('semver')
 
 describe('gdal.Feature', () => {
   afterEach(gc)
@@ -356,6 +358,12 @@ describe('gdal.Feature', () => {
           })
         })
       })
+      describe('"feature" property', () => {
+        it('should contain a reference to the parent feature', () => {
+          const feature = new gdal.Feature(defn)
+          assert.strictEqual(feature.fields.feature, feature)
+        })
+      })
     })
 
     describe('clone()', () => {
@@ -425,6 +433,22 @@ describe('gdal.Feature', () => {
         assert.equal(feature2.fields.get(0), 5)
         assert.equal(feature2.fields.get(1), 'test')
         assert.closeTo(feature2.fields.get(2), 3.14, 0.0001)
+      })
+    })
+    describe('FieldDefn list properties', () => {
+      it('should parse list properties', () => {
+        const ds = gdal.open(path.join(__dirname, 'data', 'complexfields.geo.json'))
+        const layer = ds.layers.get(0)
+
+        if (semver.gte(gdal.version, '2.0.0')) {
+          assert.deepEqual(layer.features.get(0).fields.get('OFTInteger64List'), [
+            281474976710656,
+            281474976710657
+          ])
+        }
+        assert.deepEqual(layer.features.get(0).fields.get('OFTIntegerList'), [ 1, 2, 3 ])
+        assert.deepEqual(layer.features.get(0).fields.get('OFTRealList'), [ 1.2, 1.3, 1.4 ])
+        assert.deepEqual(layer.features.get(0).fields.get('OFTStringList'), [ 'a', 'b', 'c' ])
       })
     })
   })
