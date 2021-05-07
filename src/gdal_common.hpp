@@ -58,6 +58,13 @@ inline const char *getOGRErrMsg(int err) {
   }
 };
 
+// deleter for C++14 shared_ptr which does not have built-in array support
+template <typename T> struct array_deleter {
+  void operator()(T const *p) {
+    delete[] p;
+  }
+};
+
 #define NODE_THROW_LAST_CPLERR Nan::ThrowError(CPLGetLastErrorMsg())
 
 #define NODE_THROW_OGRERR(err) Nan::ThrowError(getOGRErrMsg(err))

@@ -931,15 +931,15 @@ NAN_SETTER(RasterBand::categoryNamesSetter) {
   Local<Array> names = value.As<Array>();
 
   char **list = NULL;
-  std::string *strlist = NULL;
+  std::shared_ptr<std::string> strlist;
 
   if (names->Length() > 0) {
     list = new char *[names->Length() + 1];
-    strlist = new std::string[names->Length()];
+    strlist = std::shared_ptr<std::string>(new std::string[names->Length()], array_deleter<std::string>());
     unsigned int i;
     for (i = 0; i < names->Length(); i++) {
-      strlist[i] = *Nan::Utf8String(Nan::Get(names, i).ToLocalChecked());
-      list[i] = (char *)strlist[i].c_str();
+      strlist.get()[i] = *Nan::Utf8String(Nan::Get(names, i).ToLocalChecked());
+      list[i] = (char *)strlist.get()[i].c_str();
     }
     list[i] = NULL;
   }
