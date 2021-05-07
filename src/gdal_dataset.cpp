@@ -29,12 +29,12 @@ void Dataset::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "getGCPs", getGCPs);
   Nan::SetPrototypeMethod(lcons, "getGCPProjection", getGCPProjection);
   Nan::SetPrototypeMethod(lcons, "getFileList", getFileList);
-  Nan::SetPrototypeMethod(lcons, "flush", flush);
+  Nan__SetPrototypeAsyncableMethod(lcons, "flush", flush);
   Nan::SetPrototypeMethod(lcons, "close", close);
   Nan::SetPrototypeMethod(lcons, "getMetadata", getMetadata);
   Nan::SetPrototypeMethod(lcons, "testCapability", testCapability);
-  Nan::SetPrototypeMethod(lcons, "executeSQL", executeSQL);
-  Nan::SetPrototypeMethod(lcons, "buildOverviews", buildOverviews);
+  Nan__SetPrototypeAsyncableMethod(lcons, "executeSQL", executeSQL);
+  Nan__SetPrototypeAsyncableMethod(lcons, "buildOverviews", buildOverviews);
 
   ATTR_DONT_ENUM(lcons, "_uid", uidGetter, READ_ONLY_SETTER);
   ATTR(lcons, "description", descriptionGetter, READ_ONLY_SETTER);
@@ -283,6 +283,12 @@ NAN_METHOD(Dataset::getGCPProjection) {
 
 /**
  * Closes the dataset to further operations.
+ * This is normally an instantenous atomic operation that won't block the event loop
+ * except if there is an operation running on this dataset in asynchronous context.
+ *
+ * If this could potentially be the case and blocking the event loop is not possible (server code),
+ * then the best option is to simply unreference it (ds = null) and leave
+ * the garbage collector to expire it.
  *
  * @method close
  */
@@ -305,7 +311,16 @@ NAN_METHOD(Dataset::close) {
  * @throws Error
  * @method flush
  */
-NAN_METHOD(Dataset::flush) {
+
+/**
+ * Flushes all changes to disk.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @param {callback} [callback=undefined] {{{cb}}}
+ * @method flushAsync
+ */
+GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
   Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
@@ -315,9 +330,12 @@ NAN_METHOD(Dataset::flush) {
   }
 
 #if GDAL_VERSION_MAJOR < 2
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   if (ds->uses_ogr) {
     OGRDataSource *raw = ds->getDatasource();
+    uv_sem_wait(ds->async_lock);
     OGRErr err = raw->SyncToDisk();
+    uv_sem_post(ds->async_lock);
     if (err) {
       NODE_THROW_OGRERR(err);
       return;
@@ -331,9 +349,17 @@ NAN_METHOD(Dataset::flush) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-  uv_sem_wait(ds->async_lock);
-  raw->FlushCache();
-  uv_sem_post(ds->async_lock);
+  GDALAsyncableJob<int> job;
+  long ds_uid = ds->uid;
+  job.persist(info.This());
+  job.main = [raw, ds_uid]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    raw->FlushCache();
+    GDAL_UNLOCK_PARENT;
+    return 0;
+  };
+  job.rval = [raw](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.run(info, async, 0);
 
   return;
 }
@@ -353,7 +379,25 @@ NAN_METHOD(Dataset::flush) {
  * used.
  * @return {gdal.Layer}
  */
-NAN_METHOD(Dataset::executeSQL) {
+
+/**
+ * Execute an SQL statement against the data store.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @method executeSQLAsync
+ * @param {String} statement SQL statement to execute.
+ * @param {gdal.Geometry} [spatial_filter=null] Geometry which represents a
+ * spatial filter.
+ * @param {String} [dialect=null] Allows control of the statement dialect. If
+ * set to `null`, the OGR SQL engine will be used, except for RDBMS drivers that
+ * will use their dedicated SQL engine, unless `"OGRSQL"` is explicitely passed
+ * as the dialect. Starting with OGR 1.10, the `"SQLITE"` dialect can also be
+ * used.
+ * @param {callback} [callback=undefined] {{{cb}}}
+ * @return {gdal.Layer}
+ */
+GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
   Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
@@ -365,6 +409,7 @@ NAN_METHOD(Dataset::executeSQL) {
 #if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
 #else
+  GDAL_ASYNCABLE_1x_UNSUPPORTED;
   OGRDataSource *raw = ds->getDatasource();
   if (!ds->uses_ogr) {
     Nan::ThrowError("Dataset does not support executing a SQL query");
@@ -380,19 +425,20 @@ NAN_METHOD(Dataset::executeSQL) {
   NODE_ARG_WRAPPED_OPT(1, "spatial filter geometry", Geometry, spatial_filter);
   NODE_ARG_OPT_STR(2, "sql dialect", sql_dialect);
 
-  uv_sem_wait(ds->async_lock);
-  OGRLayer *layer = raw->ExecuteSQL(
-    sql.c_str(), spatial_filter ? spatial_filter->get() : NULL, sql_dialect.empty() ? NULL : sql_dialect.c_str());
+  GDALAsyncableJob<OGRLayer *> job;
+  OGRGeometry *geom_filter = spatial_filter ? spatial_filter->get() : NULL;
+  long ds_uid = ds->uid;
+  job.persist(info.This());
+  job.main = [raw, ds_uid, sql, sql_dialect, geom_filter]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    OGRLayer *layer = raw->ExecuteSQL(sql.c_str(), geom_filter, sql_dialect.empty() ? NULL : sql_dialect.c_str());
+    GDAL_UNLOCK_PARENT;
+    if (layer == nullptr) throw CPLGetLastErrorMsg();
+    return layer;
+  };
+  job.rval = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) { return Layer::New(layer, raw, true); };
 
-  if (layer) {
-    info.GetReturnValue().Set(Layer::New(layer, raw, true));
-    uv_sem_post(ds->async_lock);
-    return;
-  } else {
-    uv_sem_post(ds->async_lock);
-    Nan::ThrowError("Error executing SQL");
-    return;
-  }
+  job.run(info, async, 3);
 }
 
 /**
@@ -603,7 +649,21 @@ NAN_METHOD(Dataset::setGCPs) {
  * @param {Integer[]} [bands] Note: Generation of overviews in external TIFF
  * currently only supported when operating on all bands.
  */
-NAN_METHOD(Dataset::buildOverviews) {
+
+/**
+ * Builds dataset overviews.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @method buildOverviewsAsync
+ * @param {String} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
+ * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
+ * @param {Integer[]} overviews
+ * @param {Integer[]} [bands] Note: Generation of overviews in external TIFF
+ * currently only supported when operating on all bands.
+ * @param {callback} [callback=undefined] {{{cb}}}
+ */
+GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
@@ -628,58 +688,62 @@ NAN_METHOD(Dataset::buildOverviews) {
   NODE_ARG_ARRAY(1, "overviews", overviews);
   NODE_ARG_ARRAY_OPT(2, "bands", bands);
 
-  int *o, *b = NULL;
   int n_overviews = overviews->Length();
   int i, n_bands = 0;
 
-  o = new int[n_overviews];
+  // shared_ptr to array is C++17 :(
+  std::shared_ptr<int> o(new int[n_overviews], array_deleter<int>());
+  std::shared_ptr<int> b;
   for (i = 0; i < n_overviews; i++) {
     Local<Value> val = Nan::Get(overviews, i).ToLocalChecked();
     if (!val->IsNumber()) {
-      delete[] o;
+      printf("Throw\n");
       Nan::ThrowError("overviews array must only contain numbers");
       return;
     }
-    o[i] = Nan::To<int32_t>(val).ToChecked();
+    printf("%d of %d\n", i, n_overviews);
+    o.get()[i] = Nan::To<int32_t>(val).ToChecked();
   }
 
   uv_sem_wait(ds->async_lock);
   if (!bands.IsEmpty()) {
     n_bands = bands->Length();
-    b = new int[n_bands];
+    b = std::shared_ptr<int>(new int[n_bands], array_deleter<int>());
     for (i = 0; i < n_bands; i++) {
       Local<Value> val = Nan::Get(bands, i).ToLocalChecked();
       if (!val->IsNumber()) {
-        delete[] o;
-        delete[] b;
         uv_sem_post(ds->async_lock);
         Nan::ThrowError("band array must only contain numbers");
         return;
       }
-      b[i] = Nan::To<int32_t>(val).ToChecked();
-      if (b[i] > raw->GetRasterCount() || b[i] < 1) {
+      b.get()[i] = Nan::To<int32_t>(val).ToChecked();
+      if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) {
         // BuildOverviews prints an error but segfaults before returning
-        delete[] o;
-        delete[] b;
         uv_sem_post(ds->async_lock);
         Nan::ThrowError("invalid band id");
         return;
       }
     }
   }
-
-  CPLErr err = raw->BuildOverviews(resampling.c_str(), n_overviews, o, n_bands, b, NULL, NULL);
   uv_sem_post(ds->async_lock);
 
-  delete[] o;
-  if (b) delete[] b;
+  GDALAsyncableJob<CPLErr> job;
+  long ds_uid = ds->uid;
+  job.persist(info.This());
+  // Alas one cannot capture-move a unique_ptr and assign the lambda to a variable
+  // because the lambda becomes non-copyable
+  // But we can use a shared_ptr because the lifetime of the lambda is limited by the lifetime
+  // of the async worker
+  job.main = [raw, ds_uid, resampling, n_overviews, o, n_bands, b]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    CPLErr err = raw->BuildOverviews(resampling.c_str(), n_overviews, o.get(), n_bands, b.get(), NULL, NULL);
+    GDAL_UNLOCK_PARENT;
+    if (err != CE_None) { throw CPLGetLastErrorMsg(); }
+    return err;
+  };
+  job.rval = [raw](CPLErr, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
 
-  if (err) {
-    NODE_THROW_LAST_CPLERR;
-    return;
-  }
-
-  return;
+  job.run(info, async, 3);
 }
 
 /**

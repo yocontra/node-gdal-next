@@ -15,6 +15,7 @@
 #include <ogrsf_frmts.h>
 
 #include "utils/obj_cache.hpp"
+#include "async.hpp"
 
 using namespace v8;
 using namespace node;
@@ -32,15 +33,15 @@ class Dataset : public Nan::ObjectWrap {
   static NAN_METHOD(New);
   static Local<Value> New(GDALDataset *ds);
   static NAN_METHOD(toString);
-  static NAN_METHOD(flush);
+  GDAL_ASYNCABLE_DECLARE(flush);
   static NAN_METHOD(getMetadata);
   static NAN_METHOD(getFileList);
   static NAN_METHOD(getGCPProjection);
   static NAN_METHOD(getGCPs);
   static NAN_METHOD(setGCPs);
-  static NAN_METHOD(executeSQL);
+  GDAL_ASYNCABLE_DECLARE(executeSQL);
   static NAN_METHOD(testCapability);
-  static NAN_METHOD(buildOverviews);
+  GDAL_ASYNCABLE_DECLARE(buildOverviews);
   static NAN_METHOD(close);
 
   static NAN_GETTER(bandsGetter);

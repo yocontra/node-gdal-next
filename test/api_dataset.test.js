@@ -649,6 +649,21 @@ describe('gdal.Dataset', () => {
         })
       })
     })
+    describe('executeSQLAsync()', () => {
+      it('should return Layer', () => {
+        const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
+        const result_set = ds.executeSQLAsync('SELECT name FROM sample')
+
+        return assert.isFulfilled(Promise.all([
+          assert.eventually.instanceOf(result_set, gdal.Layer),
+          assert.eventually.deepEqual(result_set.then((r) => r.fields.getNames()), [ 'name' ]) ]))
+      })
+      it('should reject if dataset already closed', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.vrt`)
+        ds.close()
+        return assert.isRejected(ds.executeSQLAsync('SELECT name FROM sample'))
+      })
+    })
     describe('getFileList()', () => {
       it('should return list of filenames', () => {
         const ds = gdal.open(path.join(__dirname, 'data', 'sample.vrt'))
@@ -664,6 +679,30 @@ describe('gdal.Dataset', () => {
         assert.throws(() => {
           ds.getFileList()
         })
+      })
+    })
+    describe('flush()', () => {
+      it('should return without error', () => {
+        const ds = gdal.open(path.join(__dirname, 'data', 'sample.vrt'))
+        ds.flush()
+      })
+      it('should throw if dataset already closed', () => {
+        const ds = gdal.open(path.join(__dirname, 'data', 'sample.vrt'))
+        ds.close()
+        assert.throws(() => {
+          ds.flush()
+        })
+      })
+    })
+    describe('flushAsync()', () => {
+      it('should fulfill without error', () => {
+        const ds = gdal.open(path.join(__dirname, 'data', 'sample.vrt'))
+        return assert.isFulfilled(ds.flushAsync())
+      })
+      it('should throw if dataset already closed', () => {
+        const ds = gdal.open(path.join(__dirname, 'data', 'sample.vrt'))
+        ds.close()
+        return assert.isRejected(ds.flushAsync('SELECT name FROM sample'))
       })
     })
     describe('getMetadata()', () => {
@@ -702,6 +741,92 @@ describe('gdal.Dataset', () => {
           assert.sameMembers(w, expected_w)
         })
         ds.close()
+      })
+      it('should not fail hard if invalid overview is given', () => {
+        // 1.11 introduced an error for this, but 1.10 and lower
+        // fail silently - so really all we can do is make sure
+        // nothing fatal (segfault, etc) happens
+        const ds = gdal.open(
+          fileUtils.clone(`${__dirname}/data/sample.tif`),
+          'r+'
+        )
+        try {
+          ds.buildOverviews('NEAREST', [ 2, 4, -3 ])
+        } catch (e) {
+          /* ignore (see above) */
+        }
+      })
+      it('should throw if overview is not a number', () => {
+        const ds = gdal.open(
+          fileUtils.clone(`${__dirname}/data/sample.tif`),
+          'r+'
+        )
+        assert.throws(() => {
+          ds.buildOverviews('NEAREST', [ 2, 4, {} ])
+        })
+      })
+      describe('w/bands argument', () => {
+        it('should generate overviews only for the given bands', () => {
+          gdal.config.set('USE_RRD', 'YES')
+          const ds = gdal.open(
+            fileUtils.clone(`${__dirname}/data/multiband.tif`),
+            'r+'
+          )
+          ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 1 ])
+          assert.equal(ds.bands.get(1).overviews.count(), 3)
+        })
+        it('should throw if invalid band given', () => {
+          const ds = gdal.open(
+            fileUtils.clone(`${__dirname}/data/sample.tif`),
+            'r+'
+          )
+          assert.throws(() => {
+            ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 4 ])
+          })
+        })
+        it('should throw if band id is not a number', () => {
+          const ds = gdal.open(
+            fileUtils.clone(`${__dirname}/data/sample.tif`),
+            'r+'
+          )
+          assert.throws(() => {
+            ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ {} ])
+          })
+        })
+      })
+      it('should throw if dataset already closed', () => {
+        const ds = gdal.open(
+          fileUtils.clone(`${__dirname}/data/sample.tif`),
+          'r+'
+        )
+        ds.close()
+        assert.throws(() => {
+          ds.buildOverviews('NEAREST', [ 2, 4, 8 ])
+        })
+      })
+    })
+    describe('buildOverviewsAsync()', () => {
+      it('should generate overviews for all bands', () => {
+        const ds = gdal.open(
+          fileUtils.clone(`${__dirname}/data/multiband.tif`),
+          'r+'
+        )
+        const expected_w = [
+          ds.rasterSize.x / 2,
+          ds.rasterSize.x / 4,
+          ds.rasterSize.x / 8
+        ]
+        return assert.isFulfilled(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ]).then(() => {
+          ds.bands.forEach((band) => {
+            const w = []
+            assert.equal(band.overviews.count(), 3)
+            band.overviews.forEach((overview) => {
+              w.push(overview.size.x)
+            })
+            assert.sameMembers(w, expected_w)
+          })
+          ds.close()
+        }))
       })
       it('should not fail hard if invalid overview is given', () => {
         // 1.11 introduced an error for this, but 1.10 and lower
