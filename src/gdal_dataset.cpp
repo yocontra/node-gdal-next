@@ -697,11 +697,9 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   for (i = 0; i < n_overviews; i++) {
     Local<Value> val = Nan::Get(overviews, i).ToLocalChecked();
     if (!val->IsNumber()) {
-      printf("Throw\n");
       Nan::ThrowError("overviews array must only contain numbers");
       return;
     }
-    printf("%d of %d\n", i, n_overviews);
     o.get()[i] = Nan::To<int32_t>(val).ToChecked();
   }
 
