@@ -297,10 +297,9 @@ NAN_METHOD(Feature::destroy) {
  * @throws Error
  * @method setFrom
  * @param {gdal.Feature} feature
- * @param {Array} [*index_map] Array of the indices (integers) of the feature's
- * fields stored at the corresponding index of the source feature's fields. A
- * value of -1 should be used to ignore the source's field. The array should not
- * be `null` and be as long as the number of fields in the source feature.
+ * @param {Array} [*index_map] Array mapping each field from the source feature
+ * to the given index in the destination feature. -1 ignores the source field.
+ * The field types must still match otherwise the behavior is undefined.
  * @param {Boolean} [forgiving=true] `true` if the operation should continue
  * despite lacking output fields matching some of the source fields.
  */
@@ -319,7 +318,7 @@ NAN_METHOD(Feature::setFrom) {
     return;
   }
 
-  if (info.Length() <= 2) {
+  if (!info[1]->IsArray()) {
     NODE_ARG_BOOL_OPT(1, "forgiving", forgiving);
 
     err = feature->this_->SetFrom(other_feature->this_, forgiving ? TRUE : FALSE);
@@ -337,14 +336,14 @@ NAN_METHOD(Feature::setFrom) {
     for (unsigned index = 0; index < index_map->Length(); index++) {
       Local<Value> field_index(Nan::Get(index_map, Nan::New<Integer>(index)).ToLocalChecked());
 
-      if (!field_index->IsUint32()) {
+      if (!field_index->IsInt32()) {
         delete[] index_map_ptr;
         Nan::ThrowError("index map must contain only integer values");
         return;
       }
 
-      int val = (int)Nan::To<uint32_t>(field_index).ToChecked(); // todo: validate index? perhaps ogr already
-                                                                 // does this and throws an error
+      int val = (int)Nan::To<int32_t>(field_index).ToChecked(); // todo: validate index? perhaps ogr already
+                                                                // does this and throws an error
 
       index_map_ptr[index] = val;
     }

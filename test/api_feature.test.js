@@ -434,6 +434,28 @@ describe('gdal.Feature', () => {
         assert.equal(feature2.fields.get(1), 'test')
         assert.closeTo(feature2.fields.get(2), 3.14, 0.0001)
       })
+      it('should support reordering/ignoring fields when copying from another feature', () => {
+        const fields = [
+          new gdal.FieldDefn('id1', gdal.OFTInteger),
+          new gdal.FieldDefn('id2', gdal.OFTInteger),
+          new gdal.FieldDefn('id3', gdal.OFTInteger)
+        ]
+        const defn = new gdal.FeatureDefn()
+        defn.fields.add(fields)
+
+        const feature1 = new gdal.Feature(defn)
+        const feature2 = new gdal.Feature(defn)
+        feature1.setGeometry(new gdal.Point(5, 10))
+        feature1.fields.set([ 0, 1, 2 ])
+        feature2.setFrom(feature1, [ 0, -1, 1 ], false)
+
+        const pt = feature2.getGeometry()
+        assert.equal(pt.x, 5)
+        assert.equal(pt.y, 10)
+        assert.equal(feature2.fields.get(0), 0)
+        assert.equal(feature2.fields.get(1), 2)
+        assert.isNull(feature2.fields.get(2))
+      })
     })
     describe('FieldDefn list properties', () => {
       it('should parse list properties', () => {
