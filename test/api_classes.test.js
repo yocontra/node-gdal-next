@@ -3,7 +3,6 @@ const gdal = require('../lib/gdal.js')
 
 // create = function -> class cannot be directly instantiated
 // create = array -> these are the arguments for the new
-// create = object -> abstract class with a toString prototype
 const create = {
   CircularString: [],
   CompoundCurve: [],
@@ -17,7 +16,7 @@ const create = {
   FeatureDefnFields: () => new gdal.FeatureDefn().fields,
   FeatureFields: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0).features.get(0).fields,
   GDALDrivers: () => gdal.drivers,
-  Geometry: new gdal.LineString(),
+  Geometry: () => new gdal.LineString(),
   GeometryCollection: [],
   GeometryCollectionChildren: () => new gdal.GeometryCollection().children,
   Layer: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0),
@@ -35,7 +34,7 @@ const create = {
   RasterBand: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte).bands.get(1),
   RasterBandOverviews: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte).bands.get(1).overviews,
   RasterBandPixels: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte).bands.get(1).pixels,
-  SimpleCurve: new gdal.LineString(),
+  SimpleCurve: () => new gdal.LineString(),
   SpatialReference: []
 }
 
@@ -49,15 +48,10 @@ describe('Class semantics', () => {
         o = create[name]()
         assert.throws(() => {
           new gdal[name]()
-        }, /Cannot create .* directly/)
+        }, /Cannot create .* directly|doesnt have a constructor|abstract/)
       } else if (Array.isArray(create[name])) {
         // This is a technique for calling apply on the new operator
         o = new (Function.prototype.bind.apply(gdal[name], [ null, ...create[name] ]))()
-      } else if (typeof create[name] === 'object') {
-        o = create[name]
-        assert.throws(() => {
-          new gdal[name]()
-        }, /doesnt have a constructor|abstract/)
       }
       assert.instanceOf(o, gdal[name])
       assert.match(gdal[name].prototype.toString.call(o), new RegExp(name))
