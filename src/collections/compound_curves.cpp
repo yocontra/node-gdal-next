@@ -83,7 +83,7 @@ NAN_METHOD(CompoundCurveCurves::toString) {
  * Returns the number of curves that exist in the collection.
  *
  * @method count
- * @return Integer
+ * @return {number}
  */
 NAN_METHOD(CompoundCurveCurves::count) {
   Nan::HandleScope scope;
@@ -139,7 +139,7 @@ NAN_METHOD(CompoundCurveCurves::get) {
  * compound.curves.add([ring1, ...]);```
  *
  * @method add
- * @param {gdal.CompoundCurve|gdal.SimpleCurve} curve(s)
+ * @param {gdal.SimpleCurve|gdal.SimpleCurve[]} curves
  */
 NAN_METHOD(CompoundCurveCurves::add) {
   Nan::HandleScope scope;

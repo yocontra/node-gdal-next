@@ -112,8 +112,8 @@ inline bool setField(OGRFeature *f, int field_index, Local<Value> val) {
  *
  * @method set
  * @throws Error
- * @param {String|Integer} key Field name or index
- * @param {mixed} value
+ * @param {string|number} key Field name or index
+ * @param {any} value
  */
 NAN_METHOD(FeatureFields::set) {
   Nan::HandleScope scope;
@@ -212,8 +212,8 @@ NAN_METHOD(FeatureFields::set) {
  *
  * @method reset
  * @throws Error
- * @param {Object} [values]
- * @param {mixed} value
+ * @param {object} [values]
+ * @param {any} value
  */
 NAN_METHOD(FeatureFields::reset) {
   Nan::HandleScope scope;
@@ -272,7 +272,7 @@ NAN_METHOD(FeatureFields::reset) {
  * feature.fields.count();```
  *
  * @method count
- * @return {Integer}
+ * @return {number}
  */
 NAN_METHOD(FeatureFields::count) {
   Nan::HandleScope scope;
@@ -296,8 +296,8 @@ NAN_METHOD(FeatureFields::count) {
  * var index = feature.fields.indexOf('field');```
  *
  * @method indexOf
- * @param {String} name
- * @return {Integer} Index or, `-1` if it cannot be found.
+ * @param {string} name
+ * @return {number} Index or, `-1` if it cannot be found.
  */
 NAN_METHOD(FeatureFields::indexOf) {
   Nan::HandleScope scope;
@@ -320,8 +320,8 @@ NAN_METHOD(FeatureFields::indexOf) {
  * Outputs the field data as a pure JS object.
  *
  * @throws Error
- * @method toObject
- * @return {Object}
+ * @method toobject
+ * @return {object}
  */
 NAN_METHOD(FeatureFields::toObject) {
   Nan::HandleScope scope;
@@ -426,8 +426,8 @@ Local<Value> FeatureFields::get(OGRFeature *f, int field_index) {
  * value = feature.fields.get('field');```
  *
  * @method get
- * @param {String|Integer} key Feature name or index.
- * @return {mixed|Undefined}
+ * @param {string|number} key Feature name or index.
+ * @return {any}
  */
 NAN_METHOD(FeatureFields::get) {
   Nan::HandleScope scope;

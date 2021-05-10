@@ -30,7 +30,7 @@ void MultiLineString::Initialize(Local<Object> target) {
 
 /**
  * @constructor
- * @class gdal.MultiLineString
+ * @class gdal.MultiLinestring
  * @extends gdal.GeometryCollection
  */
 

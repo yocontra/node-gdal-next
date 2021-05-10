@@ -1,8 +1,10 @@
 AccessModifierOffset: 2
+AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Right
 AlignTrailingComments: true
+AlignOperands: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
@@ -25,9 +27,8 @@ ContinuationIndentWidth: 2
 CompactNamespaces: false
 IndentCaseLabels: true
 IndentWidth: 2
+ReflowComments: false
 TabWidth: 2
 UseTab: Never
 SortIncludes: false
 SortUsingDeclarations: true
-AlignAfterOpenBracket: AlwaysBreak
-AlignOperands: false

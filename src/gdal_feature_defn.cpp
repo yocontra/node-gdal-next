@@ -132,7 +132,7 @@ NAN_METHOD(FeatureDefn::clone) {
 /**
  * @readOnly
  * @attribute name
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(FeatureDefn::nameGetter) {
   Nan::HandleScope scope;
@@ -145,7 +145,7 @@ NAN_GETTER(FeatureDefn::nameGetter) {
  * table{{/crossLink}})
  *
  * @attribute geomType
- * @type {Integer}
+ * @type {number}
  */
 NAN_GETTER(FeatureDefn::geomTypeGetter) {
   Nan::HandleScope scope;
@@ -155,7 +155,7 @@ NAN_GETTER(FeatureDefn::geomTypeGetter) {
 
 /**
  * @attribute geomIgnored
- * @type {Boolean}
+ * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
   Nan::HandleScope scope;
@@ -165,7 +165,7 @@ NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
 
 /**
  * @attribute styleIgnored
- * @type {Boolean}
+ * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
   Nan::HandleScope scope;

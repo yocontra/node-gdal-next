@@ -85,7 +85,7 @@ NAN_METHOD(GDALDrivers::toString) {
  * fetch the raster VRT driver.
  *
  * @method get
- * @param {Integer|string} index 0-based index or driver name
+ * @param {number|string} index 0-based index or driver name
  * @return {gdal.Driver}
  */
 NAN_METHOD(GDALDrivers::get) {
@@ -209,7 +209,7 @@ NAN_METHOD(GDALDrivers::getNames) {
  * Returns the number of drivers registered with GDAL.
  *
  * @method count
- * @return {Integer}
+ * @return {number}
  */
 NAN_METHOD(GDALDrivers::count) {
   Nan::HandleScope scope;

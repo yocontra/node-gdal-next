@@ -191,7 +191,7 @@ NAN_METHOD(Feature::getGeometry) {
  * Returns the definition of a particular field at an index.
  *
  * @method getFieldDefn
- * @param {Integer} index Field index (0-based)
+ * @param {number} index Field index (0-based)
  * @return {gdal.FieldDefn}
  */
 NAN_METHOD(Feature::getFieldDefn) {
@@ -246,7 +246,7 @@ NAN_METHOD(Feature::setGeometry) {
  *
  * @method equals
  * @param {gdal.Feature} feature
- * @return {Boolean} `true` if the features are the same, `false` if different
+ * @return {boolean} `true` if the features are the same, `false` if different
  */
 NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Feature, equals, Boolean, Equal, Feature, "feature");
 
@@ -297,10 +297,10 @@ NAN_METHOD(Feature::destroy) {
  * @throws Error
  * @method setFrom
  * @param {gdal.Feature} feature
- * @param {Array} [*index_map] Array mapping each field from the source feature
+ * @param {number[]} [index_map] Array mapping each field from the source feature
  * to the given index in the destination feature. -1 ignores the source field.
  * The field types must still match otherwise the behavior is undefined.
- * @param {Boolean} [forgiving=true] `true` if the operation should continue
+ * @param {boolean} [forgiving=true] `true` if the operation should continue
  * despite lacking output fields matching some of the source fields.
  */
 NAN_METHOD(Feature::setFrom) {
@@ -372,7 +372,7 @@ NAN_GETTER(Feature::fieldsGetter) {
 
 /**
  * @attribute fid
- * @type {Number}
+ * @type {number}
  */
 NAN_GETTER(Feature::fidGetter) {
   Nan::HandleScope scope;

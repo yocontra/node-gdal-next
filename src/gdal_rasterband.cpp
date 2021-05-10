@@ -188,7 +188,7 @@ NODE_WRAPPED_METHOD(RasterBand, flush, FlushCache);
  * from nodata values. (mutually exclusive of `GMF_ALPHA`)
  *
  * @method getMaskFlags
- * @return {Integer} Mask flags
+ * @return {number} Mask flags
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(RasterBand, getMaskFlags, Integer, GetMaskFlags);
 // TODO: expose GMF constants in API
@@ -199,7 +199,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(RasterBand, getMaskFlags, Integer, GetMaskFlags)
  *
  * @throws Error
  * @method createMaskBand
- * @param {Integer} flags Mask flags
+ * @param {number} flags Mask flags
  */
 NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM(RasterBand, createMaskBand, CreateMaskBand, "mask flags");
 // TODO: expose GMF constants in API
@@ -237,8 +237,8 @@ NAN_METHOD(RasterBand::getMaskBand) {
  *
  * @throws Error
  * @method fill
- * @param {Number} real_value
- * @param {Number} [imaginary_value]
+ * @param {number} real_value
+ * @param {number} [imaginary_value]
  */
 NAN_METHOD(RasterBand::fill) {
   Nan::HandleScope scope;
@@ -290,11 +290,11 @@ void popStatsErrorHandler() {
  *
  * @throws Error
  * @method getStatistics
- * @param {Boolean} allow_approximation If `true` statistics may be computed
+ * @param {boolean} allow_approximation If `true` statistics may be computed
  * based on overviews or a subset of all tiles.
- * @param {Boolean} force If `false` statistics will only be returned if it can
+ * @param {boolean} force If `false` statistics will only be returned if it can
  * be done without rescanning the image.
- * @return {Object} Statistics containing `"min"`, `"max"`, `"mean"`,
+ * @return {object} Statistics containing `"min"`, `"max"`, `"mean"`,
  * `"std_dev"` properties.
  */
 NAN_METHOD(RasterBand::getStatistics) {
@@ -345,9 +345,9 @@ NAN_METHOD(RasterBand::getStatistics) {
  *
  * @throws Error
  * @method computeStatistics
- * @param {Boolean} allow_approximation If `true` statistics may be computed
+ * @param {boolean} allow_approximation If `true` statistics may be computed
  * based on overviews or a subset of all tiles.
- * @return {Object} Statistics containing `"min"`, `"max"`, `"mean"`,
+ * @return {object} Statistics containing `"min"`, `"max"`, `"mean"`,
  * `"std_dev"` properties.
  */
 NAN_METHOD(RasterBand::computeStatistics) {
@@ -389,10 +389,10 @@ NAN_METHOD(RasterBand::computeStatistics) {
  *
  * @throws Error
  * @method setStatistics
- * @param {Number} min
- * @param {Number} max
- * @param {Number} mean
- * @param {Number} std_dev
+ * @param {number} min
+ * @param {number} max
+ * @param {number} mean
+ * @param {number} std_dev
  */
 NAN_METHOD(RasterBand::setStatistics) {
   Nan::HandleScope scope;
@@ -477,7 +477,7 @@ NAN_GETTER(RasterBand::pixelsGetter) {
 /**
  * @readOnly
  * @attribute id
- * @type {Integer|null}
+ * @type {number|null}
  */
 NAN_GETTER(RasterBand::idGetter) {
   Nan::HandleScope scope;
@@ -527,7 +527,7 @@ NAN_GETTER(RasterBand::descriptionGetter) {
  *
  * @readOnly
  * @attribute size
- * @type {Object}
+ * @type {object}
  */
 NAN_GETTER(RasterBand::sizeGetter) {
   Nan::HandleScope scope;
@@ -552,7 +552,7 @@ NAN_GETTER(RasterBand::sizeGetter) {
  *
  * @readOnly
  * @attribute blockSize
- * @type {Object}
+ * @type {object}
  */
 NAN_GETTER(RasterBand::blockSizeGetter) {
   Nan::HandleScope scope;
@@ -578,7 +578,7 @@ NAN_GETTER(RasterBand::blockSizeGetter) {
  *
  * @readOnly
  * @attribute minimum
- * @type {Number}
+ * @type {number}
  */
 NAN_GETTER(RasterBand::minimumGetter) {
   Nan::HandleScope scope;
@@ -600,7 +600,7 @@ NAN_GETTER(RasterBand::minimumGetter) {
  *
  * @readOnly
  * @attribute maximum
- * @type {Number}
+ * @type {number}
  */
 NAN_GETTER(RasterBand::maximumGetter) {
   Nan::HandleScope scope;
@@ -621,7 +621,7 @@ NAN_GETTER(RasterBand::maximumGetter) {
  * Raster value offset.
  *
  * @attribute offset
- * @type {Number}
+ * @type {number}
  */
 NAN_GETTER(RasterBand::offsetGetter) {
   Nan::HandleScope scope;
@@ -642,7 +642,7 @@ NAN_GETTER(RasterBand::offsetGetter) {
  * Raster value scale.
  *
  * @attribute scale
- * @type {Number}
+ * @type {number}
  */
 NAN_GETTER(RasterBand::scaleGetter) {
   Nan::HandleScope scope;
@@ -663,7 +663,7 @@ NAN_GETTER(RasterBand::scaleGetter) {
  * No data value for this band.
  *
  * @attribute noDataValue
- * @type {Number|null}
+ * @type {number|null}
  */
 NAN_GETTER(RasterBand::noDataValueGetter) {
   Nan::HandleScope scope;
@@ -694,7 +694,7 @@ NAN_GETTER(RasterBand::noDataValueGetter) {
  * will be returned.
  *
  * @attribute unitType
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(RasterBand::unitTypeGetter) {
   Nan::HandleScope scope;
@@ -716,7 +716,7 @@ NAN_GETTER(RasterBand::unitTypeGetter) {
  *
  * @readOnly
  * @attribute dataType
- * @type {String|Undefined}
+ * @type {string|Undefined}
  */
 NAN_GETTER(RasterBand::dataTypeGetter) {
   Nan::HandleScope scope;
@@ -739,7 +739,7 @@ NAN_GETTER(RasterBand::dataTypeGetter) {
  *
  * @readOnly
  * @attribute readOnly
- * @type {Boolean}
+ * @type {boolean}
  */
 NAN_GETTER(RasterBand::readOnlyGetter) {
   Nan::HandleScope scope;
@@ -764,7 +764,7 @@ NAN_GETTER(RasterBand::readOnlyGetter) {
  *
  * @readOnly
  * @attribute hasArbitraryOverviews
- * @type {Boolean}
+ * @type {boolean}
  */
 NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
   Nan::HandleScope scope;

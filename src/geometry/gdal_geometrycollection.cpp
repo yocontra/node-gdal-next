@@ -45,7 +45,7 @@ NAN_METHOD(GeometryCollection::toString) {
  * Computes the combined area of the geometries.
  *
  * @method getArea
- * @return Number
+ * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getArea, Number, get_Area);
 
@@ -53,7 +53,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getArea, Number, get_Area);
  * Compute the length of a multicurve.
  *
  * @method getLength
- * @return Number
+ * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getLength, Number, get_Length);
 

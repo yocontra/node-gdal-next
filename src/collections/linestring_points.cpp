@@ -6,6 +6,10 @@
 
 namespace node_gdal {
 
+/**
+ * @interface _point { x: number, y: number }
+ */
+
 Nan::Persistent<FunctionTemplate> LineStringPoints::constructor;
 
 void LineStringPoints::Initialize(Local<Object> target) {
@@ -83,7 +87,7 @@ NAN_METHOD(LineStringPoints::toString) {
  * Returns the number of points that are part of the line string.
  *
  * @method count
- * @return {Integer}
+ * @return {number}
  */
 NAN_METHOD(LineStringPoints::count) {
   Nan::HandleScope scope;
@@ -116,7 +120,7 @@ NAN_METHOD(LineStringPoints::reverse) {
  * Adjusts the number of points that make up the line string.
  *
  * @method resize
- * @param {Integer} count
+ * @param {number} count
  */
 NAN_METHOD(LineStringPoints::resize) {
   Nan::HandleScope scope;
@@ -136,7 +140,7 @@ NAN_METHOD(LineStringPoints::resize) {
  * Returns the point at the specified index.
  *
  * @method get
- * @param {Integer} index 0-based index
+ * @param {number} index 0-based index
  * @return {gdal.Point}
  */
 NAN_METHOD(LineStringPoints::get) {
@@ -170,7 +174,7 @@ NAN_METHOD(LineStringPoints::get) {
  *
  * @method set
  * @throws Error
- * @param {Integer} index 0-based index
+ * @param {number} index 0-based index
  * @param {gdal.Point} point
  */
 NAN_METHOD(LineStringPoints::set) {
@@ -263,7 +267,7 @@ NAN_METHOD(LineStringPoints::set) {
  *
  * @method add
  * @throws Error
- * @param {gdal.Point|object|Array} point(s)
+ * @param {gdal.Point|_point|(gdal.Point|_point)[]} points
  */
 NAN_METHOD(LineStringPoints::add) {
   Nan::HandleScope scope;

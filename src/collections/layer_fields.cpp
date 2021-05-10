@@ -82,7 +82,7 @@ NAN_METHOD(LayerFields::toString) {
  * Returns the number of fields.
  *
  * @method count
- * @return {Integer}
+ * @return {number}
  */
 NAN_METHOD(LayerFields::count) {
   Nan::HandleScope scope;
@@ -108,8 +108,8 @@ NAN_METHOD(LayerFields::count) {
  * Find the index of field in the layer.
  *
  * @method indexOf
- * @param {String} field
- * @return {Integer} Field index, or -1 if the field doesn't exist
+ * @param {string} field
+ * @return {number} Field index, or -1 if the field doesn't exist
  */
 NAN_METHOD(LayerFields::indexOf) {
   Nan::HandleScope scope;
@@ -139,7 +139,7 @@ NAN_METHOD(LayerFields::indexOf) {
  *
  * @throws Error
  * @method get
- * @param {String|integer} field Field name or index (0-based)
+ * @param {string|number} field Field name or index (0-based)
  * @return {gdal.FieldDefn}
  */
 NAN_METHOD(LayerFields::get) {
@@ -210,7 +210,7 @@ NAN_METHOD(LayerFields::getNames) {
  *
  * @throws Error
  * @method remove
- * @param {String|integer} field Field name or index (0-based)
+ * @param {string|number} field Field name or index (0-based)
  */
 NAN_METHOD(LayerFields::remove) {
   Nan::HandleScope scope;
@@ -251,9 +251,9 @@ NAN_METHOD(LayerFields::remove) {
  *
  * @throws Error
  * @method add
- * @param {gdal.FieldDefn|Array} def(s) A field definition, or array of field
+ * @param {gdal.FieldDefn|gdal.FieldDefn[]} defs A field definition, or array of field
  * definitions.
- * @param {Boolean} [approx=true]
+ * @param {boolean} [approx=true]
  */
 NAN_METHOD(LayerFields::add) {
   Nan::HandleScope scope;
@@ -317,7 +317,7 @@ NAN_METHOD(LayerFields::add) {
  *
  * @throws Error
  * @method reorder
- * @param {Array} map An array of new indexes (integers)
+ * @param {number[]} map An array of new indexes (integers)
  */
 NAN_METHOD(LayerFields::reorder) {
   Nan::HandleScope scope;

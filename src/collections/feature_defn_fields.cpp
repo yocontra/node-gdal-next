@@ -86,7 +86,7 @@ NAN_METHOD(FeatureDefnFields::toString) {
  * Returns the number of fields.
  *
  * @method count
- * @return {Integer}
+ * @return {number}
  */
 NAN_METHOD(FeatureDefnFields::count) {
   Nan::HandleScope scope;
@@ -106,8 +106,8 @@ NAN_METHOD(FeatureDefnFields::count) {
  * Returns the index of field definition.
  *
  * @method indexOf
- * @param {String} name
- * @return {Integer} Index or `-1` if not found.
+ * @param {string} name
+ * @return {number} Index or `-1` if not found.
  */
 NAN_METHOD(FeatureDefnFields::indexOf) {
   Nan::HandleScope scope;
@@ -130,7 +130,7 @@ NAN_METHOD(FeatureDefnFields::indexOf) {
  * Returns a field definition.
  *
  * @method get
- * @param {String|Integer} key Field name or index
+ * @param {string|number} key Field name or index
  * @return {gdal.FieldDefn}
  */
 NAN_METHOD(FeatureDefnFields::get) {
@@ -188,7 +188,7 @@ NAN_METHOD(FeatureDefnFields::getNames) {
  *
  * @method remove
  * @throws Error
- * @param {String|Integer} key Field name or index
+ * @param {string|number} key Field name or index
  */
 NAN_METHOD(FeatureDefnFields::remove) {
   Nan::HandleScope scope;
@@ -223,7 +223,7 @@ NAN_METHOD(FeatureDefnFields::remove) {
  *
  * @method add
  * @throws Error
- * @param {gdal.FieldDefn|Array} field(s)
+ * @param {gdal.FieldDefn|gdal.FieldDefn[]} fields
  */
 NAN_METHOD(FeatureDefnFields::add) {
   Nan::HandleScope scope;
@@ -276,7 +276,7 @@ NAN_METHOD(FeatureDefnFields::add) {
  *
  * @method reorder
  * @throws Error
- * @param {Array} map An array representing the new field order.
+ * @param {number[]} map An array representing the new field order.
  */
 NAN_METHOD(FeatureDefnFields::reorder) {
   Nan::HandleScope scope;

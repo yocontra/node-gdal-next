@@ -45,8 +45,8 @@ FieldDefn::~FieldDefn() {
 /**
  * @constructor
  * @class gdal.FieldDefn
- * @param {String} name Field name
- * @param {String} type Data type (see {{#crossLink "Constants (OFT)"}}OFT
+ * @param {string} name Field name
+ * @param {string} type Data type (see {{#crossLink "Constants (OFT)"}}OFT
  * constants{{/crossLink}})
  */
 NAN_METHOD(FieldDefn::New) {
@@ -120,7 +120,7 @@ NAN_METHOD(FieldDefn::toString) {
 
 /**
  * @attribute name
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(FieldDefn::nameGetter) {
   Nan::HandleScope scope;
@@ -132,7 +132,7 @@ NAN_GETTER(FieldDefn::nameGetter) {
  * Data type (see {{#crossLink "Constants (OFT)"}}OFT constants{{/crossLink}})
  *
  * @attribute type
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(FieldDefn::typeGetter) {
   Nan::HandleScope scope;
@@ -142,7 +142,7 @@ NAN_GETTER(FieldDefn::typeGetter) {
 
 /**
  * @attribute ignored
- * @type {Boolean}
+ * @type {boolean}
  */
 NAN_GETTER(FieldDefn::ignoredGetter) {
   Nan::HandleScope scope;
@@ -155,7 +155,7 @@ NAN_GETTER(FieldDefn::ignoredGetter) {
  * constants{{/crossLink}})
  *
  * @attribute justification
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(FieldDefn::justificationGetter) {
   Nan::HandleScope scope;
@@ -174,7 +174,7 @@ NAN_GETTER(FieldDefn::justificationGetter) {
 
 /**
  * @attribute width
- * @type {Integer}
+ * @type {number}
  */
 NAN_GETTER(FieldDefn::widthGetter) {
   Nan::HandleScope scope;
@@ -184,7 +184,7 @@ NAN_GETTER(FieldDefn::widthGetter) {
 
 /**
  * @attribute precision
- * @type {Integer}
+ * @type {number}
  */
 NAN_GETTER(FieldDefn::precisionGetter) {
   Nan::HandleScope scope;

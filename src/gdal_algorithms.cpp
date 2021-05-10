@@ -22,12 +22,12 @@ void Algorithms::Initialize(Local<Object> target) {
  * @method fillNodata
  * @static
  * @for gdal
- * @param {Object} options
+ * @param {object} options
  * @param {gdal.RasterBand} options.src This band to be updated in-place.
  * @param {gdal.RasterBand} [options.mask] Mask band
- * @param {Number} options.searchDist The maximum distance (in pixels) that the
+ * @param {number} options.searchDist The maximum distance (in pixels) that the
  * algorithm will search out for values to interpolate.
- * @param {integer} [options.smoothingIterations=0] The number of 3x3 average
+ * @param {number} [options.smoothingIterations=0] The number of 3x3 average
  * filter smoothing iterations to run after the interpolation to dampen
  * artifacts.
  */
@@ -40,13 +40,14 @@ void Algorithms::Initialize(Local<Object> target) {
  * @method fillNodataAsync
  * @static
  * @for gdal
- * @param {Object} options
+ * @param {object} options
  * @param {gdal.RasterBand} options.src This band to be updated in-place.
  * @param {gdal.RasterBand} [options.mask] Mask band
- * @param {Number} options.searchDist The maximum distance (in pixels) that the
+ * @param {number} options.searchDist The maximum distance (in pixels) that the
  * algorithm will search out for values to interpolate.
- * @param {integer} [options.smoothingIterations=0] The number of 3x3 average
- * @param {callback} [callback=undefined] {{{cb}}}
+ * @param {number} [options.smoothingIterations=0] The number of 3x3 average
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  * filter smoothing iterations to run after the interpolation to dampen
  * artifacts.
  */
@@ -97,22 +98,22 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @method contourGenerate
  * @static
  * @for gdal
- * @param {Object} options
+ * @param {object} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
- * @param {Number} [options.offset=0] The "offset" relative to which contour
+ * @param {number} [options.offset=0] The "offset" relative to which contour
  * intervals are applied. This is normally zero, but could be different. To
  * generate 10m contours at 5, 15, 25, ... the offset would be 5.
- * @param {Number} [options.interval=100] The elevation interval between
+ * @param {number} [options.interval=100] The elevation interval between
  * contours generated.
- * @param {Number[]} [options.fixedLevels] A list of fixed contour levels at
+ * @param {number[]} [options.fixedLevels] A list of fixed contour levels at
  * which contours should be generated. Overrides interval/base options if set.
- * @param {Number} [options.nodata] The value to use as a "nodata" value. That
+ * @param {number} [options.nodata] The value to use as a "nodata" value. That
  * is, a pixel value which should be ignored in generating contours as if the
  * value of the pixel were not known.
- * @param {integer} [options.idField] A field index to indicate where a unique
+ * @param {number} [options.idField] A field index to indicate where a unique
  * id should be written for each feature (contour) written.
- * @param {integer} [options.elevField] A field index to indicate where the
+ * @param {number} [options.elevField] A field index to indicate where the
  * elevation value of the contour should be written.
  */
 
@@ -129,24 +130,25 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @method contourGenerateAsync
  * @static
  * @for gdal
- * @param {Object} options
+ * @param {object} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
- * @param {Number} [options.offset=0] The "offset" relative to which contour
+ * @param {number} [options.offset=0] The "offset" relative to which contour
  * intervals are applied. This is normally zero, but could be different. To
  * generate 10m contours at 5, 15, 25, ... the offset would be 5.
- * @param {Number} [options.interval=100] The elevation interval between
+ * @param {number} [options.interval=100] The elevation interval between
  * contours generated.
- * @param {Number[]} [options.fixedLevels] A list of fixed contour levels at
+ * @param {number[]} [options.fixedLevels] A list of fixed contour levels at
  * which contours should be generated. Overrides interval/base options if set.
- * @param {Number} [options.nodata] The value to use as a "nodata" value. That
+ * @param {number} [options.nodata] The value to use as a "nodata" value. That
  * is, a pixel value which should be ignored in generating contours as if the
  * value of the pixel were not known.
- * @param {integer} [options.idField] A field index to indicate where a unique
+ * @param {number} [options.idField] A field index to indicate where a unique
  * id should be written for each feature (contour) written.
- * @param {integer} [options.elevField] A field index to indicate where the
+ * @param {number} [options.elevField] A field index to indicate where the
  * elevation value of the contour should be written.
- * @param {callback} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   Nan::HandleScope scope;
@@ -237,15 +239,15 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @method sieveFilter
  * @static
  * @for gdal
- * @param {Object} options
+ * @param {object} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.RasterBand} options.dst Output raster band. It may be the same
  * as src band to update the source in place.
  * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a
  * value other than zero will be considered suitable for inclusion in polygons.
- * @param {Number} options.threshold Raster polygons with sizes smaller than
+ * @param {number} options.threshold Raster polygons with sizes smaller than
  * this will be merged into their largest neighbour.
- * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal
+ * @param {number} [options.connectedness=4] Either 4 indicating that diagonal
  * pixels are not considered directly adjacent for polygon membership purposes
  * or 8 indicating they are.
  */
@@ -258,18 +260,19 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @method sieveFilterAsync
  * @static
  * @for gdal
- * @param {Object} options
+ * @param {object} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.RasterBand} options.dst Output raster band. It may be the same
  * as src band to update the source in place.
  * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a
  * value other than zero will be considered suitable for inclusion in polygons.
- * @param {Number} options.threshold Raster polygons with sizes smaller than
+ * @param {number} options.threshold Raster polygons with sizes smaller than
  * this will be merged into their largest neighbour.
- * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal
+ * @param {number} [options.connectedness=4] Either 4 indicating that diagonal
  * pixels are not considered directly adjacent for polygon membership purposes
  * or 8 indicating they are.
- * @param {callback} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   Nan::HandleScope scope;
@@ -322,11 +325,11 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
  * @static
  * @for gdal
  * @param {gdal.RasterBand} src
- * @param {integer} [x=0]
- * @param {integer} [y=0]
- * @param {integer} [w=src.width]
- * @param {integer} [h=src.height]
- * @return integer
+ * @param {number} [x=0]
+ * @param {number} [y=0]
+ * @param {number} [w=src.width]
+ * @param {number} [h=src.height]
+ * @return {number}
  */
 
 /**
@@ -337,12 +340,13 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
  * @static
  * @for gdal
  * @param {gdal.RasterBand} src
- * @param {integer} [x=0]
- * @param {integer} [y=0]
- * @param {integer} [w=src.width]
- * @param {integer} [h=src.height]
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return integer
+ * @param {number} [x=0]
+ * @param {number} [y=0]
+ * @param {number} [w=src.width]
+ * @param {number} [h=src.height]
+ * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @return {number}
+ * @return {Promise<number>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
@@ -399,17 +403,17 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @method polygonize
  * @static
  * @for gdal
- * @param {Object} options
+ * @param {object} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
  * @param {gdal.RasterBand} [options.mask]
- * @param {integer} options.pixValField The attribute field index indicating the
+ * @param {number} options.pixValField The attribute field index indicating the
  * feature attribute into which the pixel value of the polygon should be
  * written.
- * @param {integer} [options.connectedness=4] Either 4 indicating that diagonal
+ * @param {number} [options.connectedness=4] Either 4 indicating that diagonal
  * pixels are not considered directly adjacent for polygon membership purposes
  * or 8 indicating they are.
- * @param {Boolean} [options.useFloats=false] Use floating point buffers instead
+ * @param {boolean} [options.useFloats=false] Use floating point buffers instead
  * of int buffers.
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {

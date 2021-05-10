@@ -57,7 +57,7 @@ NAN_METHOD(MultiPolygon::unionCascaded) {
  * Computes the combined area of the collection.
  *
  * @method getArea
- * @return {Number}
+ * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(MultiPolygon, getArea, Number, get_Area);
 

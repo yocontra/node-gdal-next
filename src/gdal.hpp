@@ -121,10 +121,10 @@ static NAN_METHOD(getConfigOption) {
  * @for gdal
  * @static
  * @method decToDMS
- * @param {Number} angle
- * @param {String} axis `"lat"` or `"long"`
- * @param {Integer} [precision=2]
- * @return {String} A string nndnn'nn.nn'"L where n is a number and L is either
+ * @param {number} angle
+ * @param {string} axis `"lat"` or `"long"`
+ * @param {number} [precision=2]
+ * @return {string} A string nndnn'nn.nn'"L where n is a number and L is either
  * N or E
  */
 static NAN_METHOD(decToDMS) {

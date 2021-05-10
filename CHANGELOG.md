@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.1.0] Unreleased
 
 ### Added
+  - Add full TypeScript support
   - Complete reworking of the Geometry code adding support for CircularString, CompoundCurve and MultiCurve
   - Add JS iterators to all collections
   - Enable MapInfo TAB and MIF/MID

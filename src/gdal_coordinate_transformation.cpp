@@ -166,10 +166,10 @@ NAN_METHOD(CoordinateTransformation::toString) {
  * pt = transform.transformPoint({x: 0, y: 0, z: 0});```
  *
  * @method transformPoint
- * @param {Number} x
- * @param {Number} y
- * @param {Number} [z]
- * @return {Object} A regular object containing `x`, `y`, `z` properties.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} [z]
+ * @return {object} A regular object containing `x`, `y`, `z` properties.
  */
 NAN_METHOD(CoordinateTransformation::transformPoint) {
   Nan::HandleScope scope;

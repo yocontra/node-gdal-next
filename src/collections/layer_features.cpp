@@ -88,7 +88,7 @@ NAN_METHOD(LayerFeatures::toString) {
  * `next()` method.
  *
  * @method get
- * @param {Integer} id The feature ID of the feature to read.
+ * @param {number} id The feature ID of the feature to read.
  * @return {gdal.Feature}
  */
 
@@ -100,9 +100,9 @@ NAN_METHOD(LayerFeatures::toString) {
  * `next()` method.
  *
  * @method getAsync
- * @param {Integer} id The feature ID of the feature to read.
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {gdal.Feature}
+ * @param {number} id The feature ID of the feature to read.
+ * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
   Nan::HandleScope scope;
@@ -144,8 +144,8 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
  * returns the first feature in the layer.
  *
  * @method firstAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {gdal.Feature}
+ * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
   Nan::HandleScope scope;
@@ -192,8 +192,8 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
  * while (feature = await layer.features.nextAsync()) { ... }```
  *
  * @method nextAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {gdal.Feature}
+ * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
   Nan::HandleScope scope;
@@ -250,7 +250,8 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
  * @method addAsync
  * @throws Error
  * @param {gdal.Feature} feature
- * @param {callback} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
@@ -287,17 +288,17 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
  * Returns the number of features in the layer.
  *
  * @method count
- * @param {Boolean} [force=true]
- * @return {Integer} Number of features in the layer.
+ * @param {boolean} [force=true]
+ * @return {number} number of features in the layer.
  */
 
 /**
  * Returns the number of features in the layer.
  *
  * @method countAsync
- * @param {Boolean} [force=true]
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {Integer} Number of features in the layer.
+ * @param {boolean} [force=true]
+ * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @return {Promise<number>} number of features in the layer.
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
@@ -344,7 +345,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  *
  * @method set
  * @throws Error
- * @param {Integer} [id]
+ * @param {number} [id]
  * @param {gdal.Feature} feature
  */
 NAN_METHOD(LayerFeatures::set) {
@@ -395,7 +396,7 @@ NAN_METHOD(LayerFeatures::set) {
  *
  * @method remove
  * @throws Error
- * @param {Integer} id
+ * @param {number} id
  */
 
 /**
@@ -403,8 +404,9 @@ NAN_METHOD(LayerFeatures::set) {
  *
  * @method removeAsync
  * @throws Error
- * @param {Integer} id
- * @param {callback} [callback=undefined] {{{cb}}}
+ * @param {number} id
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {

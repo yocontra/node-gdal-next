@@ -44,7 +44,7 @@ NAN_METHOD(LinearRing::toString) {
  * Computes the area enclosed by the ring.
  *
  * @method getArea
- * @return Number
+ * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(LinearRing, getArea, Number, get_Area);
 

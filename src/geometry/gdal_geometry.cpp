@@ -184,8 +184,9 @@ NAN_METHOD(Geometry::toString) {
  * Closes any un-closed rings.
  * {{{async}}}
  *
- * @param {callback} [callback=undefined] {{{cb}}}
  * @method closeRingsAsync
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD(Geometry, closeRings, closeRings);
@@ -200,8 +201,9 @@ NODE_WRAPPED_ASYNC_METHOD(Geometry, closeRings, closeRings);
  * Clears the geometry.
  * {{{async}}}
  *
- * @param {callback} [callback=undefined] {{{cb}}}
  * @method emptyAsync
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD(Geometry, empty, empty);
@@ -216,8 +218,9 @@ NODE_WRAPPED_ASYNC_METHOD(Geometry, empty, empty);
  * Swaps x, y coordinates.
  * {{{async}}}
  *
- * @param {callback} [callback=undefined] {{{cb}}}
  * @method swapXYAsync
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD(Geometry, swapXY, swapXY);
@@ -226,7 +229,7 @@ NODE_WRAPPED_ASYNC_METHOD(Geometry, swapXY, swapXY);
  * Determines if the geometry is empty.
  *
  * @method isEmpty
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -234,8 +237,8 @@ NODE_WRAPPED_ASYNC_METHOD(Geometry, swapXY, swapXY);
  * {{{async}}}
  *
  * @method isEmptyAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isEmpty, Boolean, IsEmpty);
@@ -244,7 +247,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isEmpty, Boolean, Is
  * Determines if the geometry is valid.
  *
  * @method isValid
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -252,8 +255,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isEmpty, Boolean, Is
  * {{{async}}}
  *
  * @method isValidAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isValid, Boolean, IsValid);
@@ -262,7 +265,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isValid, Boolean, Is
  * Determines if the geometry is simple.
  *
  * @method isSimple
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -270,8 +273,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isValid, Boolean, Is
  * {{{async}}}
  *
  * @method isSimpleAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isSimple, Boolean, IsSimple);
@@ -280,7 +283,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isSimple, Boolean, I
  * Determines if the geometry is a ring.
  *
  * @method isRing
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -288,8 +291,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isSimple, Boolean, I
  * {{{async}}}
  *
  * @method isRingAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isRing, Boolean, IsRing);
@@ -299,7 +302,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isRing, Boolean, IsR
  *
  * @method intersects
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -308,8 +311,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(Geometry, OGRBoolean, isRing, Boolean, IsR
  *
  * @method intersectsAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -320,7 +323,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method equals
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -329,8 +332,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method equalsAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -341,7 +344,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method disjoint
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -350,8 +353,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method disjointAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -362,7 +365,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method touches
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -371,8 +374,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method touchesAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -383,7 +386,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method crosses
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -392,8 +395,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method crossesAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -404,7 +407,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method within
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -413,8 +416,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method withinAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -425,7 +428,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method contains
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -434,8 +437,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method containsAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -446,7 +449,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method overlaps
  * @param {gdal.Geometry} geometry
- * @return Boolean
+ * @return {boolean}
  */
 
 /**
@@ -455,8 +458,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method overlapsAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Boolean
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -467,7 +470,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method distance
  * @param {gdal.Geometry} geometry
- * @return Number
+ * @return {number}
  */
 
 /**
@@ -476,8 +479,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method distanceAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return Number
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @return {Promise<boolean>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -487,8 +490,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  * Modify the geometry such it has no segment longer then the given distance.
  *
  * @method segmentize
- * @param {Number} segment_length
- * @return Number
+ * @param {number} segment_length
+ * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_1_DOUBLE_PARAM(Geometry, segmentize, segmentize, "segment length");
 
@@ -517,8 +520,9 @@ NODE_WRAPPED_METHOD_WITH_1_DOUBLE_PARAM(Geometry, segmentize, segmentize, "segme
  *
  * @throws Error
  * @method transformAsync
- * @param {callback} [callback=undefined] {{{cb}}}
  * @param {gdal.CoordinateTransformation} transformation
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
@@ -540,8 +544,9 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
  *
  * @throws Error
  * @method transformToAsync
- * @param {callback} [callback=undefined] {{{cb}}}
  * @param {gdal.SpatialReference} srs
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
@@ -551,7 +556,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
  * Clones the instance.
  *
  * @method clone
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 NAN_METHOD(Geometry::clone) {
   Nan::HandleScope scope;
@@ -563,7 +568,7 @@ NAN_METHOD(Geometry::clone) {
  * Compute convex hull.
  *
  * @method convexHull
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -571,8 +576,8 @@ NAN_METHOD(Geometry::clone) {
  * {{{async}}}
  *
  * @method convexHullAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
@@ -590,7 +595,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
  * Compute boundary.
  *
  * @method boundary
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -598,8 +603,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
  * {{{async}}}
  *
  * @method boundaryAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
@@ -618,7 +623,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
  *
  * @method intersection
  * @param {gdal.Geometry} geometry
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -627,8 +632,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
  *
  * @method intersectionAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
@@ -653,7 +658,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
  *
  * @method union
  * @param {gdal.Geometry} geometry
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -662,8 +667,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
  *
  * @method unionAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
@@ -688,7 +693,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
  *
  * @method difference
  * @param {gdal.Geometry} geometry
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -697,8 +702,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
  *
  * @method differenceAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
@@ -723,7 +728,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
  *
  * @method symDifference
  * @param {gdal.Geometry} geometry
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -732,8 +737,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
  *
  * @method symDifferenceAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
@@ -757,8 +762,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
  * Reduces the geometry complexity.
  *
  * @method simplify
- * @param {Number} tolerance
- * @return gdal.Geometry
+ * @param {number} tolerance
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -767,8 +772,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
  *
  * @method simplifyAsync
  * @param {gdal.Geometry} geometry
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
@@ -791,8 +796,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
  * Reduces the geometry complexity while preserving the topology.
  *
  * @method simplifyPreserveTopology
- * @param {Number} tolerance
- * @return gdal.Geometry
+ * @param {number} tolerance
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -800,9 +805,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
  * {{{async}}}
  *
  * @method simplifyPreserveTopologyAsync
- * @param {Number} tolerance
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {number} tolerance
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
@@ -825,9 +830,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
  * Buffers the geometry by the given distance.
  *
  * @method buffer
- * @param {Number} distance
- * @param {integer} segments
- * @return gdal.Geometry
+ * @param {number} distance
+ * @param {number} segments
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -835,10 +840,10 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
  * {{{async}}}
  *
  * @method bufferAsync
- * @param {Number} distance
- * @param {integer} segments
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {number} distance
+ * @param {number} segments
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
@@ -865,7 +870,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
  * Convert a geometry into well known text format.
  *
  * @method toWKT
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -873,8 +878,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
  * {{{async}}}
  *
  * @method toWKTAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
@@ -897,9 +902,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
 
   job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
     if (text) {
-       auto r = SafeString::New(text);
-       CPLFree(text);
-       return r;
+      auto r = SafeString::New(text);
+      CPLFree(text);
+      return r;
     }
     return Nan::Undefined().As<Value>();
   };
@@ -915,7 +920,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
  * (wkbByteOrder)"}}see options{{/crossLink}})
  * @param {string} [variant="OGC"] ({{#crossLink "Constants (wkbVariant)"}}see
  * options{{/crossLink}})
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -927,8 +932,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
  * (wkbByteOrder)"}}see options{{/crossLink}})
  * @param {string} [variant="OGC"] ({{#crossLink "Constants (wkbVariant)"}}see
  * options{{/crossLink}})
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
@@ -1007,7 +1012,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
  * Convert a geometry into KML format.
  *
  * @method toKML
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -1015,8 +1020,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
  * {{{async}}}
  *
  * @method toKMLAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
@@ -1049,7 +1054,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
  * Convert a geometry into GML format.
  *
  * @method toGML
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -1057,8 +1062,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
  * {{{async}}}
  *
  * @method toGMLAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
@@ -1091,7 +1096,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
  * Convert a geometry into JSON format.
  *
  * @method toJSON
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -1099,8 +1104,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
  * {{{async}}}
  *
  * @method toJSONAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
@@ -1133,7 +1138,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
  * Compute the centroid of the geometry.
  *
  * @method centroid
- * @return gdal.Point
+ * @return {gdal.Point}
  */
 
 /**
@@ -1141,8 +1146,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
  * {{{async}}}
  *
  * @method centroidAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Point
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
@@ -1184,8 +1189,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
  * {{{async}}}
  *
  * @method getEnvelopeAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {gdal.Envelope} Bounding envelope
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
   // returns object containing boundaries until complete OGREnvelope binding is
@@ -1232,8 +1237,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
  * {{{async}}}
  *
  * @method getEnvelope3DAsync
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {gdal.Envelope3D} Bounding envelope
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
@@ -1275,7 +1280,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
  * Convert geometry to strictly 2D
  *
  * @method flattenTo2D
- * @return void
+ * @return {void}
  */
 NODE_WRAPPED_ASYNC_METHOD(Geometry, flattenTo2D, flattenTo2D);
 
@@ -1286,9 +1291,9 @@ NODE_WRAPPED_ASYNC_METHOD(Geometry, flattenTo2D, flattenTo2D);
  *
  * @static
  * @method fromWKT
- * @param {String} wkt
+ * @param {string} wkt
  * @param {gdal.SpatialReference} [srs]
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -1297,10 +1302,10 @@ NODE_WRAPPED_ASYNC_METHOD(Geometry, flattenTo2D, flattenTo2D);
  *
  * @static
  * @method fromWKTAsync
- * @param {String} wkt
+ * @param {string} wkt
  * @param {gdal.SpatialReference} [srs]
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
@@ -1335,7 +1340,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
  * @method fromWKB
  * @param {Buffer} wkb
  * @param {gdal.SpatialReference} [srs]
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -1346,8 +1351,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
  * @method fromWKBAsync
  * @param {Buffer} wkb
  * @param {gdal.SpatialReference} [srs]
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
@@ -1389,8 +1394,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
  *
  * @static
  * @method fromGeoJson
- * @param {Object} geojson
- * @return gdal.Geometry
+ * @param {object} geojson
+ * @return {gdal.Geometry}
  */
 
 /**
@@ -1406,9 +1411,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
  *
  * @static
  * @method fromGeoJsonAsync
- * @param {Object} geojson
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Geometry
+ * @param {object} geojson
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
  */
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
   Nan::HandleScope scope;
@@ -1447,9 +1452,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
  *
  * @static
  * @method create
- * @param {Integer} type WKB geometry type ({{#crossLink "Constants
+ * @param {number} type WKB geometry type ({{#crossLink "Constants
  * (wkbGeometryType)"}}available options{{/crossLink}})
- * @return gdal.Geometry
+ * @return {gdal.Geometry}
  */
 NAN_METHOD(Geometry::create) {
   Nan::HandleScope scope;
@@ -1462,7 +1467,7 @@ NAN_METHOD(Geometry::create) {
 
 /**
  * @attribute srs
- * @type gdal.SpatialReference
+ * @type {gdal.SpatialReference}
  */
 NAN_GETTER(Geometry::srsGetter) {
   Nan::HandleScope scope;
@@ -1489,7 +1494,7 @@ NAN_SETTER(Geometry::srsSetter) {
 /**
  * @readOnly
  * @attribute name
- * @type String
+ * @type {string}
  */
 NAN_GETTER(Geometry::nameGetter) {
   Nan::HandleScope scope;
@@ -1502,7 +1507,7 @@ NAN_GETTER(Geometry::nameGetter) {
  * (wkbGeometryType)"}}wkbGeometryTypes{{/crossLink}}.
  * @readOnly
  * @attribute wkbType
- * @type integer
+ * @type {number}
  */
 NAN_GETTER(Geometry::typeGetter) {
   Nan::HandleScope scope;
@@ -1513,7 +1518,7 @@ NAN_GETTER(Geometry::typeGetter) {
 /**
  * @readOnly
  * @attribute wkbSize
- * @type Integer
+ * @type {number}
  */
 NAN_GETTER(Geometry::wkbSizeGetter) {
   Nan::HandleScope scope;
@@ -1524,7 +1529,7 @@ NAN_GETTER(Geometry::wkbSizeGetter) {
 /**
  * @readOnly
  * @attribute dimension
- * @type Integer
+ * @type {number}
  */
 NAN_GETTER(Geometry::dimensionGetter) {
   Nan::HandleScope scope;
@@ -1534,7 +1539,7 @@ NAN_GETTER(Geometry::dimensionGetter) {
 
 /**
  * @attribute coordinateDimension
- * @type Integer
+ * @type {number}
  */
 NAN_GETTER(Geometry::coordinateDimensionGetter) {
   Nan::HandleScope scope;
@@ -1575,10 +1580,10 @@ Local<Value> Geometry::getConstructor(OGRwkbGeometryType type) {
       return scope.Escape(Nan::GetFunction(Nan::New(MultiLineString::constructor)).ToLocalChecked());
     case wkbMultiPolygon: return scope.Escape(Nan::GetFunction(Nan::New(MultiPolygon::constructor)).ToLocalChecked());
 #if GDAL_VERSION_MAJOR >= 2
-    case wkbCircularString: return scope.Escape(Nan::GetFunction(Nan::New(CircularString::constructor)).ToLocalChecked());
+    case wkbCircularString:
+      return scope.Escape(Nan::GetFunction(Nan::New(CircularString::constructor)).ToLocalChecked());
     case wkbCompoundCurve: return scope.Escape(Nan::GetFunction(Nan::New(CompoundCurve::constructor)).ToLocalChecked());
-    case wkbMultiCurve:
-      return scope.Escape(Nan::GetFunction(Nan::New(MultiCurve::constructor)).ToLocalChecked());
+    case wkbMultiCurve: return scope.Escape(Nan::GetFunction(Nan::New(MultiCurve::constructor)).ToLocalChecked());
 #endif
     default: return scope.Escape(Nan::Null());
   }
@@ -1590,9 +1595,9 @@ Local<Value> Geometry::getConstructor(OGRwkbGeometryType type) {
  *
  * @static
  * @method getConstructor
- * @param {Integer} type WKB geometry type ({{#crossLink "Constants
+ * @param {number} type WKB geometry type ({{#crossLink "Constants
  * (wkbGeometryType)"}}available options{{/crossLink}})
- * @return Function
+ * @return {Function}
  */
 NAN_METHOD(Geometry::getConstructor) {
   Nan::HandleScope scope;
@@ -1607,9 +1612,9 @@ NAN_METHOD(Geometry::getConstructor) {
  *
  * @static
  * @method getName
- * @param {Integer} type WKB geometry type ({{#crossLink "Constants
+ * @param {number} type WKB geometry type ({{#crossLink "Constants
  * (wkbGeometryType)"}}available options{{/crossLink}})
- * @return String
+ * @return {string}
  */
 NAN_METHOD(Geometry::getName) {
   Nan::HandleScope scope;

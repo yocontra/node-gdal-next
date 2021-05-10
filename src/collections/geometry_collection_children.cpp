@@ -80,7 +80,7 @@ NAN_METHOD(GeometryCollectionChildren::toString) {
  * Returns the number of items.
  *
  * @method count
- * @return Integer
+ * @return {number}
  */
 NAN_METHOD(GeometryCollectionChildren::count) {
   Nan::HandleScope scope;
@@ -96,7 +96,7 @@ NAN_METHOD(GeometryCollectionChildren::count) {
  * Returns the geometry at the specified index.
  *
  * @method get
- * @param {Integer} index 0-based index
+ * @param {number} index 0-based index
  * @return {gdal.Geometry}
  */
 NAN_METHOD(GeometryCollectionChildren::get) {
@@ -116,7 +116,7 @@ NAN_METHOD(GeometryCollectionChildren::get) {
  * Removes the geometry at the specified index.
  *
  * @method remove
- * @param {Integer} index 0-based index
+ * @param {number} index 0-based index
  */
 NAN_METHOD(GeometryCollectionChildren::remove) {
   Nan::HandleScope scope;
@@ -152,7 +152,7 @@ NAN_METHOD(GeometryCollectionChildren::remove) {
  * ]);```
  *
  * @method add
- * @param {mixed} geometry
+ * @param {gdal.Geometry|gdal.Geometry[]} geometry
  */
 NAN_METHOD(GeometryCollectionChildren::add) {
   Nan::HandleScope scope;

@@ -174,20 +174,20 @@ CPLErr GDALReprojectImageMulti(
  * @param {gdal.Dataset} options.dst
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {String} [options.resampling] Resampling algorithm ({{#crossLink
+ * @param {string} [options.resampling] Resampling algorithm ({{#crossLink
  * "Constants (GRA)"}}available options{{/crossLink}})
  * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel
  * coordinates. Use CoordinateTransformation to convert between georeferenced
  * coordinates and pixel coordinates
- * @param {Integer[]} [options.srcBands]
- * @param {Integer[]} [options.dstBands]
- * @param {Integer} [options.srcAlphaBand]
- * @param {Integer} [options.dstAlphaBand]
- * @param {Number} [options.srcNodata]
- * @param {Number} [options.dstNodata]
- * @param {Integer} [options.memoryLimit]
- * @param {Number} [options.maxError]
- * @param {Boolean} [options.multi]
+ * @param {number[]} [options.srcBands]
+ * @param {number[]} [options.dstBands]
+ * @param {number} [options.srcAlphaBand]
+ * @param {number} [options.dstAlphaBand]
+ * @param {number} [options.srcNodata]
+ * @param {number} [options.dstNodata]
+ * @param {number} [options.memoryLimit]
+ * @param {number} [options.maxError]
+ * @param {boolean} [options.multi]
  * @param {string[]|object} [options.options] Warp options (see:
  * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
  */
@@ -205,23 +205,24 @@ CPLErr GDALReprojectImageMulti(
  * @param {gdal.Dataset} options.dst
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {String} [options.resampling] Resampling algorithm ({{#crossLink
+ * @param {string} [options.resampling] Resampling algorithm ({{#crossLink
  * "Constants (GRA)"}}available options{{/crossLink}})
  * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel
  * coordinates. Use CoordinateTransformation to convert between georeferenced
  * coordinates and pixel coordinates
- * @param {Integer[]} [options.srcBands]
- * @param {Integer[]} [options.dstBands]
- * @param {Integer} [options.srcAlphaBand]
- * @param {Integer} [options.dstAlphaBand]
- * @param {Number} [options.srcNodata]
- * @param {Number} [options.dstNodata]
- * @param {Integer} [options.memoryLimit]
- * @param {Number} [options.maxError]
- * @param {Boolean} [options.multi]
+ * @param {number[]} [options.srcBands]
+ * @param {number[]} [options.dstBands]
+ * @param {number} [options.srcAlphaBand]
+ * @param {number} [options.dstAlphaBand]
+ * @param {number} [options.srcNodata]
+ * @param {number} [options.dstNodata]
+ * @param {number} [options.memoryLimit]
+ * @param {number} [options.maxError]
+ * @param {boolean} [options.multi]
  * @param {string[]|object} [options.options] Warp options (see:
  * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
- * @param {callback} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   Nan::HandleScope scope;
@@ -327,8 +328,8 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {Number} [options.maxError=0]
- * @return {Object} An object containing `"rasterSize"` and `"geoTransform"`
+ * @param {number} [options.maxError=0]
+ * @return {object} An object containing `"rasterSize"` and `"geoTransform"`
  * properties.
  */
 
@@ -345,10 +346,9 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {callback} [callback=undefined] {{{cb}}}
- * @param {Number} [options.maxError=0]
- * @return {Object} An object containing `"rasterSize"` and `"geoTransform"`
- * properties.
+ * @param {number} [options.maxError=0]
+ * @param {callback<object>} [callback=undefined] {{{cb}}}
+ * @return {Promise<object>}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
   Nan::HandleScope scope;

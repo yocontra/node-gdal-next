@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "url": "https://github.com/mmomtchev/node-gdal-async",
   "main": "./lib/gdal.js",
+  "types": "./lib/index.d.ts",
   "keywords": [
     "gdal",
     "libgdal",
@@ -48,7 +49,7 @@
     "install": "node-pre-gyp install --fallback-to-build -j max",
     "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
     "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js",
-    "preversion": "npm run test",
+    "preversion": "npm run test && npx yatag",
     "gcov": "mkdir -p coverage && cd coverage && gcov -o ../build/Debug/obj.target/gdal/src ../src/*",
     "codecov": "cd coverage && curl -s https://codecov.io/bash | bash",
     "version": "git add package.json",
@@ -82,6 +83,7 @@
     "node-pre-gyp-github": "^1.4.3",
     "segfault-handler": "^1.3.0",
     "semver": "^7.3.5",
+    "yatag": "^1.0.1",
     "yuidoc-lucid-theme": "~0.1.2",
     "yuidocjs": "^0.10.2"
   },

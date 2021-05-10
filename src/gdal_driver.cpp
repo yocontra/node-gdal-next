@@ -155,7 +155,7 @@ NAN_METHOD(Driver::toString) {
 /**
  * @readOnly
  * @attribute description
- * @type String
+ * @type {string}
  */
 NAN_GETTER(Driver::descriptionGetter) {
   Nan::HandleScope scope;
@@ -211,18 +211,18 @@ auto DatasetRval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::Ne
  *
  * @throws Error
  * @method create
- * @param {String} filename
- * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
+ * @param {string} filename
+ * @param {number} [x_size=0] raster width in pixels (ignored for vector
  * datasets)
- * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
+ * @param {number} [y_size=0] raster height in pixels (ignored for vector
  * datasets)
- * @param {Integer} [band_count=0]
- * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
+ * @param {number} [band_count=0]
+ * @param {number} [data_type=gdal.GDT_Byte] pixel data type (ignored for
  * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
  * types{{/crossLink}})
- * @param {String[]|object} [creation_options] An array or object containing
+ * @param {string[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
- * @return gdal.Dataset
+ * @return {gdal.Dataset}
  */
 
 /**
@@ -230,19 +230,19 @@ auto DatasetRval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::Ne
  *
  * @throws Error
  * @method createAsync
- * @param {String} filename
- * @param {Integer} [x_size=0] raster width in pixels (ignored for vector
+ * @param {string} filename
+ * @param {number} [x_size=0] raster width in pixels (ignored for vector
  * datasets)
- * @param {Integer} [y_size=0] raster height in pixels (ignored for vector
+ * @param {number} [y_size=0] raster height in pixels (ignored for vector
  * datasets)
- * @param {Integer} [band_count=0]
- * @param {Integer} [data_type=gdal.GDT_Byte] pixel data type (ignored for
+ * @param {number} [band_count=0]
+ * @param {number} [data_type=gdal.GDT_Byte] pixel data type (ignored for
  * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
  * types{{/crossLink}})
- * @param {String[]|object} [creation_options] An array or object containing
+ * @param {string[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Dataset
+ * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::create) {
   Nan::HandleScope scope;
@@ -308,12 +308,12 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  *
  * @throws Error
  * @method createCopy
- * @param {String} filename
+ * @param {string} filename
  * @param {gdal.Dataset} src
- * @param {Boolean} [strict=false]
- * @param {String[]|object} [options=null] An array or object containing
+ * @param {boolean} [strict=false]
+ * @param {string[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
- * @return gdal.Dataset
+ * @return {gdal.Dataset}
  */
 
 /**
@@ -321,13 +321,13 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  *
  * @throws Error
  * @method createCopyAsync
- * @param {String} filename
+ * @param {string} filename
  * @param {gdal.Dataset} src
- * @param {Boolean} [strict=false]
- * @param {String[]|object} [options=null] An array or object containing
+ * @param {boolean} [strict=false]
+ * @param {string[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return gdal.Dataset
+ * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   Nan::HandleScope scope;
@@ -414,8 +414,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
  *
  * @throws Error
  * @method copyFiles
- * @param {String} name_old New name for the dataset.
- * @param {String} name_new Old name of the dataset.
+ * @param {string} name_old New name for the dataset.
+ * @param {string} name_new Old name of the dataset.
  */
 NAN_METHOD(Driver::copyFiles) {
   Nan::HandleScope scope;
@@ -447,8 +447,8 @@ NAN_METHOD(Driver::copyFiles) {
  *
  * @throws Error
  * @method rename
- * @param {String} new_name New name for the dataset.
- * @param {String} old_name Old name of the dataset.
+ * @param {string} new_name New name for the dataset.
+ * @param {string} old_name Old name of the dataset.
  */
 NAN_METHOD(Driver::rename) {
   Nan::HandleScope scope;
@@ -480,8 +480,8 @@ NAN_METHOD(Driver::rename) {
  *
  * @throws Error
  * @method getMetadata
- * @param {String} [domain]
- * @return Object
+ * @param {string} [domain]
+ * @return {object}
  */
 NAN_METHOD(Driver::getMetadata) {
   Nan::HandleScope scope;
@@ -514,8 +514,8 @@ NAN_METHOD(Driver::getMetadata) {
  *
  * @throws Error
  * @method open
- * @param {String} path
- * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * @param {string} path
+ * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
  * @return {gdal.Dataset}
  */
@@ -525,11 +525,11 @@ NAN_METHOD(Driver::getMetadata) {
  *
  * @throws Error
  * @method openAsync
- * @param {String} path
- * @param {String} [mode=`"r"`] The mode to use to open the file: `"r"` or
+ * @param {string} path
+ * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {gdal.Dataset}
+ * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::open) {
   Nan::HandleScope scope;

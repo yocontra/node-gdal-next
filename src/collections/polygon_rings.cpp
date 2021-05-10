@@ -79,7 +79,7 @@ NAN_METHOD(PolygonRings::toString) {
  * Returns the number of rings that exist in the collection.
  *
  * @method count
- * @return Integer
+ * @return {number}
  */
 NAN_METHOD(PolygonRings::count) {
   Nan::HandleScope scope;
@@ -144,7 +144,7 @@ NAN_METHOD(PolygonRings::get) {
  * polygon.rings.add([ring1, ...]);```
  *
  * @method add
- * @param {gdal.LinearRing} ring(s)
+ * @param {gdal.LinearRing|gdal.LinearRing[]} rings
  */
 NAN_METHOD(PolygonRings::add) {
   Nan::HandleScope scope;

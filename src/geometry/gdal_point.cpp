@@ -34,9 +34,9 @@ void Point::Initialize(Local<Object> target) {
  * @constructor
  * @class gdal.Point
  * @extends gdal.Geometry
- * @param {Number} x
- * @param {Number} y
- * @param {Number} [z]
+ * @param {number} x
+ * @param {number} y
+ * @param {number} [z]
  */
 NAN_METHOD(Point::New) {
   Nan::HandleScope scope;
@@ -84,7 +84,7 @@ NAN_METHOD(Point::toString) {
 
 /**
  * @attribute x
- * @type Number
+ * @type {number}
  */
 NAN_GETTER(Point::xGetter) {
   Nan::HandleScope scope;
@@ -107,7 +107,7 @@ NAN_SETTER(Point::xSetter) {
 
 /**
  * @attribute y
- * @type Number
+ * @type {number}
  */
 NAN_GETTER(Point::yGetter) {
   Nan::HandleScope scope;
@@ -130,7 +130,7 @@ NAN_SETTER(Point::ySetter) {
 
 /**
  * @attribute z
- * @type Number
+ * @type {number}
  */
 NAN_GETTER(Point::zGetter) {
   Nan::HandleScope scope;

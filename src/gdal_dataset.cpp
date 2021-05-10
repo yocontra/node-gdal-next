@@ -192,7 +192,7 @@ NAN_METHOD(Dataset::toString) {
  *
  * @method getMetadata
  * @param {string} [domain]
- * @return {Object}
+ * @return {object}
  */
 NAN_METHOD(Dataset::getMetadata) {
   Nan::HandleScope scope;
@@ -224,7 +224,7 @@ NAN_METHOD(Dataset::getMetadata) {
  * @method testCapability
  * @param {string} capability (see {{#crossLink "Constants (ODsC)"}}capability
  * list{{/crossLink}})
- * @return {Boolean}
+ * @return {boolean}
  */
 NAN_METHOD(Dataset::testCapability) {
   Nan::HandleScope scope;
@@ -257,7 +257,7 @@ NAN_METHOD(Dataset::testCapability) {
  * Get output projection for GCPs.
  *
  * @method getGCPProjection
- * @return {String}
+ * @return {string}
  */
 NAN_METHOD(Dataset::getGCPProjection) {
   Nan::HandleScope scope;
@@ -316,9 +316,10 @@ NAN_METHOD(Dataset::close) {
  * Flushes all changes to disk.
  * {{{async}}}
  *
- * @throws Error
- * @param {callback} [callback=undefined] {{{cb}}}
  * @method flushAsync
+ * @throws Error
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
   Nan::HandleScope scope;
@@ -369,10 +370,10 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  *
  * @throws Error
  * @method executeSQL
- * @param {String} statement SQL statement to execute.
+ * @param {string} statement SQL statement to execute.
  * @param {gdal.Geometry} [spatial_filter=null] Geometry which represents a
  * spatial filter.
- * @param {String} [dialect=null] Allows control of the statement dialect. If
+ * @param {string} [dialect=null] Allows control of the statement dialect. If
  * set to `null`, the OGR SQL engine will be used, except for RDBMS drivers that
  * will use their dedicated SQL engine, unless `"OGRSQL"` is explicitely passed
  * as the dialect. Starting with OGR 1.10, the `"SQLITE"` dialect can also be
@@ -386,16 +387,16 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  *
  * @throws Error
  * @method executeSQLAsync
- * @param {String} statement SQL statement to execute.
+ * @param {string} statement SQL statement to execute.
  * @param {gdal.Geometry} [spatial_filter=null] Geometry which represents a
  * spatial filter.
- * @param {String} [dialect=null] Allows control of the statement dialect. If
+ * @param {string} [dialect=null] Allows control of the statement dialect. If
  * set to `null`, the OGR SQL engine will be used, except for RDBMS drivers that
  * will use their dedicated SQL engine, unless `"OGRSQL"` is explicitely passed
  * as the dialect. Starting with OGR 1.10, the `"SQLITE"` dialect can also be
  * used.
- * @param {callback} [callback=undefined] {{{cb}}}
- * @return {gdal.Layer}
+ * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Layer>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
   Nan::HandleScope scope;
@@ -451,7 +452,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
  * Returns an empty array for vector datasets if GDAL version is below 2.0
  *
  * @method getFileList
- * @return {String[]}
+ * @return {string[]}
  */
 NAN_METHOD(Dataset::getFileList) {
   Nan::HandleScope scope;
@@ -501,7 +502,7 @@ NAN_METHOD(Dataset::getFileList) {
  * Fetches GCPs.
  *
  * @method getGCPs
- * @return {Object[]}
+ * @return {object[]}
  */
 NAN_METHOD(Dataset::getGCPs) {
   Nan::HandleScope scope;
@@ -559,8 +560,8 @@ NAN_METHOD(Dataset::getGCPs) {
  *
  * @throws Error
  * @method setGCPs
- * @param {Object[]} gcps
- * @param {String} projection
+ * @param {object[]} gcps
+ * @param {string} projection
  */
 NAN_METHOD(Dataset::setGCPs) {
   Nan::HandleScope scope;
@@ -643,10 +644,10 @@ NAN_METHOD(Dataset::setGCPs) {
  *
  * @throws Error
  * @method buildOverviews
- * @param {String} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
+ * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
- * @param {Integer[]} overviews
- * @param {Integer[]} [bands] Note: Generation of overviews in external TIFF
+ * @param {number[]} overviews
+ * @param {number[]} [bands] Note: Generation of overviews in external TIFF
  * currently only supported when operating on all bands.
  */
 
@@ -656,12 +657,13 @@ NAN_METHOD(Dataset::setGCPs) {
  *
  * @throws Error
  * @method buildOverviewsAsync
- * @param {String} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
+ * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
- * @param {Integer[]} overviews
- * @param {Integer[]} [bands] Note: Generation of overviews in external TIFF
+ * @param {number[]} overviews
+ * @param {number[]} [bands] Note: Generation of overviews in external TIFF
  * currently only supported when operating on all bands.
- * @param {callback} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   Nan::HandleScope scope;
@@ -747,7 +749,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
 /**
  * @readOnly
  * @attribute description
- * @type String
+ * @type {string}
  */
 NAN_GETTER(Dataset::descriptionGetter) {
   Nan::HandleScope scope;
@@ -781,7 +783,7 @@ NAN_GETTER(Dataset::descriptionGetter) {
  *
  * @readOnly
  * @attribute rasterSize
- * @type Object
+ * @type {object}
  */
 NAN_GETTER(Dataset::rasterSizeGetter) {
   Nan::HandleScope scope;

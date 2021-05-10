@@ -194,7 +194,7 @@ NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(Layer, syncToDisk, SyncToDisk);
  * @method testCapability
  * @param {string} capability (see {{#crossLink "Constants (OLC)"}}capability
  * list{{/crossLink}})
- * @return {Boolean}
+ * @return {boolean}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM(Layer, testCapability, Boolean, TestCapability, "capability");
 
@@ -203,7 +203,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM(Layer, testCapability, Boolean, T
  *
  * @throws Error
  * @method getExtent
- * @param {Boolean} [force=true]
+ * @param {boolean} [force=true]
  * @return {gdal.Envelope} Bounding envelope
  */
 NAN_METHOD(Layer::getExtent) {
@@ -323,7 +323,7 @@ NAN_METHOD(Layer::setSpatialFilter) {
  *
  * @throws Error
  * @method setAttributeFilter
- * @param {String} filter
+ * @param {string} filter
  */
 NAN_METHOD(Layer::setAttributeFilter) {
   Nan::HandleScope scope;
@@ -396,7 +396,7 @@ NAN_GETTER(Layer::srsGetter) {
 /**
  * @readOnly
  * @attribute name
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(Layer::nameGetter) {
   Nan::HandleScope scope;
@@ -411,7 +411,7 @@ NAN_GETTER(Layer::nameGetter) {
 /**
  * @readOnly
  * @attribute geomColumn
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(Layer::geomColumnGetter) {
   Nan::HandleScope scope;
@@ -426,7 +426,7 @@ NAN_GETTER(Layer::geomColumnGetter) {
 /**
  * @readOnly
  * @attribute fidColumn
- * @type {String}
+ * @type {string}
  */
 NAN_GETTER(Layer::fidColumnGetter) {
   Nan::HandleScope scope;
@@ -441,7 +441,7 @@ NAN_GETTER(Layer::fidColumnGetter) {
 /**
  * @readOnly
  * @attribute geomType
- * @type {Integer} (see {{#crossLink "Constants (wkb)"}}geometry
+ * @type {number} (see {{#crossLink "Constants (wkb)"}}geometry
  * types{{/crossLink}})
  */
 NAN_GETTER(Layer::geomTypeGetter) {

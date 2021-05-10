@@ -79,7 +79,7 @@ NAN_METHOD(RasterBandOverviews::toString) {
  *
  * @method get
  * @throws Error
- * @param {Integer} index 0-based index
+ * @param {number} index 0-based index
  * @return {gdal.RasterBand}
  */
 NAN_METHOD(RasterBandOverviews::get) {
@@ -117,7 +117,7 @@ NAN_METHOD(RasterBandOverviews::get) {
  * overviews have enough samples.
  *
  * @method getBySampleCount
- * @param {Integer} samples
+ * @param {number} samples
  * @return {gdal.RasterBand}
  */
 NAN_METHOD(RasterBandOverviews::getBySampleCount) {
@@ -143,7 +143,7 @@ NAN_METHOD(RasterBandOverviews::getBySampleCount) {
  * Returns the number of overviews.
  *
  * @method count
- * @return {Integer}
+ * @return {number}
  */
 NAN_METHOD(RasterBandOverviews::count) {
   Nan::HandleScope scope;

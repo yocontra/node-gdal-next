@@ -53,7 +53,7 @@ NAN_METHOD(SimpleCurve::toString) {
  * Returns the point at the specified distance along the SimpleCurve.
  *
  * @method value
- * @param {Number} distance
+ * @param {number} distance
  * @return {gdal.Point}
  */
 NAN_METHOD(SimpleCurve::value) {
@@ -75,10 +75,9 @@ NAN_METHOD(SimpleCurve::value) {
  * Compute the length of a multiSimpleCurve.
  *
  * @method getLength
- * @return Number
+ * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(SimpleCurve, getLength, Number, get_Length);
-
 
 /**
  * The points that make up the SimpleCurve geometry.
@@ -98,7 +97,7 @@ NAN_GETTER(SimpleCurve::pointsGetter) {
  * efficient manner. If the start index is larger than the end index then the
  * vertices will be reversed as they are copied.
  *
- * @method addSubLineString
+ * @method addSubLinestring
  * @param {gdal.LineString} LineString to be added
  * @param {int} [start=0] the first vertex to copy, defaults to 0 to start with
  * the first vertex in the other LineString

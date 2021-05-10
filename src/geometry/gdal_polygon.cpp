@@ -49,7 +49,7 @@ NAN_METHOD(Polygon::toString) {
  * Computes the area of the polygon.
  *
  * @method getArea
- * @return Number
+ * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(Polygon, getArea, Number, get_Area);
 
