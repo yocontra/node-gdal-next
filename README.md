@@ -15,8 +15,9 @@ This project is a fork of <https://github.com/contra/node-gdal-next> which is a 
 It adds a number of features:
 
 - **Support for asynchronous IO**
+- **Full native TypeScript support** and autocompletion in VS Code
 - Support for curve geometries
-- Numerous small bugfixes
+- Numerous bugfixes including a number of memory leaks
 
 Async support for vector data is currently experimental, with the following classses being async-compatible on `master`
 * main `open`
@@ -28,6 +29,8 @@ Async support for vector data is currently experimental, with the following clas
 * `Geometry`
 * `RasterBandPixels`
 * `LayerFeatures`
+
+TypeScript is currently available only from git, launch `npx yatag` after checkout to generate `index.d.ts`
 
 `master` is usually unit-tested and has all the working features
 
