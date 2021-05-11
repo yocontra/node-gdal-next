@@ -30,6 +30,14 @@ describe('gdal.SpatialReference', () => {
       const ref = gdal.SpatialReference.fromWKT(wkt)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
+    it('should throw on invalid WKT', () => {
+      if (semver.gte(gdal.version, '2.0.0')) {
+        const wkt = 'Corneilles["ébouriffées"]'
+        assert.throws(() => {
+          gdal.SpatialReference.fromWKT(wkt)
+        })
+      }
+    })
   })
   describe('fromProj4()', () => {
     it('should return SpatialReference', () => {
@@ -38,6 +46,13 @@ describe('gdal.SpatialReference', () => {
       const ref = gdal.SpatialReference.fromProj4(proj)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
+    it('should throw on invalid Proj4', () => {
+      const proj =
+        '+proj=stereo +lat_ts=-37 +lat_0=-90 +lon_0=145 +k_0=1.0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
+      assert.throws(() => {
+        gdal.SpatialReference.fromWKT(proj)
+      })
+    })
   })
   describe('fromEPSG()', () => {
     it('should return SpatialReference', () => {
@@ -45,12 +60,22 @@ describe('gdal.SpatialReference', () => {
       const ref = gdal.SpatialReference.fromEPSG(epsg)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
+    it('should throw on invalid EPSG', () => {
+      assert.throws(() => {
+        gdal.SpatialReference.fromEPSG(99191)
+      })
+    })
   })
   describe('fromEPSGA()', () => {
     it('should return SpatialReference', () => {
       const epsga = 26910
       const ref = gdal.SpatialReference.fromEPSGA(epsga)
       assert.instanceOf(ref, gdal.SpatialReference)
+    })
+    it('should throw on invalid EPSGA', () => {
+      assert.throws(() => {
+        gdal.SpatialReference.fromEPSGA(99191)
+      })
     })
   })
   describe('fromESRI', () => {
@@ -61,12 +86,23 @@ describe('gdal.SpatialReference', () => {
       const ref = gdal.SpatialReference.fromESRI(esri)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
+    it('should throw on invalid EPSGA', () => {
+      const esri = 'Corneilles["ébouriffées"]'
+      assert.throws(() => {
+        gdal.SpatialReference.fromESRI(esri)
+      })
+    })
   })
   describe('fromXML', () => {
     it('should return SpatialReference', () => {
       const gml = fs.readFileSync(`${__dirname}/data/srs/sample.gml`, 'utf8')
       const ref = gdal.SpatialReference.fromXML(gml)
       assert.instanceOf(ref, gdal.SpatialReference)
+    })
+    it('should throw on invalid XML', () => {
+      assert.throws(() => {
+        gdal.SpatialReference.fromXML('<gml:GeographicCRS gml:id="ogrcrs1"></gml:GeographicCRS>')
+      })
     })
   })
   describe('fromWMSAUTO', () => {
@@ -75,12 +111,24 @@ describe('gdal.SpatialReference', () => {
       const ref = gdal.SpatialReference.fromWMSAUTO(wms)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
+    it('should throw on invalid WMS', () => {
+      const wms = 'AUTO:00001,XX,invalid'
+      assert.throws(() => {
+        gdal.SpatialReference.fromWMSAUTO(wms)
+      })
+    })
   })
   describe('fromURN', () => {
     it('should return SpatialReference', () => {
       const wms = 'urn:ogc:def:crs:EPSG::26912'
       const ref = gdal.SpatialReference.fromURN(wms)
       assert.instanceOf(ref, gdal.SpatialReference)
+    })
+    it('should throw on invalid URN', () => {
+      const wms = 'urn:ogc:def:crs:EPSG::99912'
+      assert.throws(() => {
+        gdal.SpatialReference.fromURN(wms)
+      })
     })
   })
   describe('fromCRSURL', () => {
@@ -89,12 +137,24 @@ describe('gdal.SpatialReference', () => {
       const ref = gdal.SpatialReference.fromCRSURL(wms)
       assert.instanceOf(ref, gdal.SpatialReference)
     })
+    it('should throw on invalid crs URL', () => {
+      const wms = 'http://www.opengis.cz/def/crs/EPSG/0/3857'
+      assert.throws(() => {
+        gdal.SpatialReference.fromCRSURL(wms)
+      })
+    })
   })
   describe('fromMICoordSys', () => {
     it('should return SpatialReference', () => {
       const micoordsys = 'Earth Projection 10, 157, "m", 0'
       const ref = gdal.SpatialReference.fromMICoordSys(micoordsys)
       assert.instanceOf(ref, gdal.SpatialReference)
+    })
+    it('should throw on invalid crs URL', () => {
+      const micoordsys = 'Mars Projection 10, 157, "m", 0'
+      assert.throws(() => {
+        gdal.SpatialReference.fromMICoordSys(micoordsys)
+      })
     })
   })
   describe('validate', () => {
