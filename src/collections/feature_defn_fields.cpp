@@ -159,7 +159,7 @@ NAN_METHOD(FeatureDefnFields::get) {
  * Returns a list of field names.
  *
  * @method getNames
- * @return {Array} List of field names.
+ * @return {string[]} List of field names.
  */
 NAN_METHOD(FeatureDefnFields::getNames) {
   Nan::HandleScope scope;

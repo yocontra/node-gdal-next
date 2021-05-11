@@ -112,7 +112,7 @@ inline bool setField(OGRFeature *f, int field_index, Local<Value> val) {
  *
  * @method set
  * @throws Error
- * @param {string|number} key Field name or index
+ * @param {string|number|object} key Field name or index
  * @param {any} value
  */
 NAN_METHOD(FeatureFields::set) {
@@ -213,7 +213,7 @@ NAN_METHOD(FeatureFields::set) {
  * @method reset
  * @throws Error
  * @param {object} [values]
- * @param {any} value
+ * @return {void}
  */
 NAN_METHOD(FeatureFields::reset) {
   Nan::HandleScope scope;
@@ -363,7 +363,7 @@ NAN_METHOD(FeatureFields::toObject) {
  *
  * @throws Error
  * @method toArray
- * @return {Array}
+ * @return {any[]}
  */
 NAN_METHOD(FeatureFields::toArray) {
   Nan::HandleScope scope;
@@ -463,7 +463,7 @@ NAN_METHOD(FeatureFields::get) {
  *
  * @method getNames
  * @throws Error
- * @return {Array} List of field names.
+ * @return {string[]} List of field names.
  */
 NAN_METHOD(FeatureFields::getNames) {
   Nan::HandleScope scope;

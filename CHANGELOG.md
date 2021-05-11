@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
   - Add full TypeScript support
+  
   - Complete reworking of the Geometry code adding support for CircularString, CompoundCurve and MultiCurve
   - Add JS iterators to all collections
   - Enable MapInfo TAB and MIF/MID
   - Fixed a typo in `gdal.SpatialReference`, `isVectical()` method should be `isVertical()`, the misspelled method will be kept until the next major release
+  - Expanded unit testing, code coverage is 81% up from 70%
 
 ### Changed
   - Process the unit testing suite with ASAN and fix all memory leaks

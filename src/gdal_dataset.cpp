@@ -879,7 +879,7 @@ NAN_GETTER(Dataset::srsGetter) {
  * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];```
  *
  * @attribute geoTransform
- * @type {Array}
+ * @type {number[]}
  */
 NAN_GETTER(Dataset::geoTransformGetter) {
   Nan::HandleScope scope;

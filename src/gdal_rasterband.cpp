@@ -784,7 +784,7 @@ NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
  * List of list of category names for this raster.
  *
  * @attribute categoryNames
- * @type {Array}
+ * @type {string[]}
  */
 NAN_GETTER(RasterBand::categoryNamesGetter) {
   Nan::HandleScope scope;

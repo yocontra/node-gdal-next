@@ -175,7 +175,7 @@ NAN_METHOD(LayerFields::get) {
  *
  * @throws Error
  * @method getNames
- * @return {Array} List of strings.
+ * @return {string[]} List of strings.
  */
 NAN_METHOD(LayerFields::getNames) {
   Nan::HandleScope scope;
