@@ -20,6 +20,51 @@ describe('gdal.Feature', () => {
     lyr.fields.add(fields)
   })
 
+  describe('gdal.FieldDefn', () => {
+    it('constructor should throw on invalid field types', () => {
+      assert.throw(() => {
+        new gdal.FieldDefn('invalid', 'invalid')
+      }, /Unrecognized field type/)
+    })
+    it('"ignored" property', () => {
+      const def = fields[0].ignored
+      assert.isBoolean(def)
+      fields[0].ignored = !def
+      assert.strictEqual(fields[0].ignored, !def)
+    })
+    it('"justification" property', () => {
+      const def = fields[0].justification
+      assert.isUndefined(def)
+      fields[0].justification = gdal.OJRight
+      assert.strictEqual(fields[0].justification, gdal.OJRight)
+      fields[0].justification = gdal.OJLeft
+      assert.strictEqual(fields[0].justification, gdal.OJLeft)
+      assert.throws(() => {
+        fields[0].justification = 'invalid'
+      }, /Unrecognized justification/)
+      assert.strictEqual(fields[0].justification, gdal.OJLeft)
+    })
+    it('"width" property', () => {
+      const def = fields[0].width
+      assert.isNumber(def)
+      fields[0].width = 10
+      assert.strictEqual(fields[0].width, 10)
+    })
+    it('"precision" property', () => {
+      const def = fields[0].precision
+      assert.isNumber(def)
+      fields[0].precision = 1
+      assert.strictEqual(fields[0].precision, 1)
+    })
+    it('"name" property', () => {
+      const def = fields[0].name
+      assert.equal(def, 'id')
+      fields[0].name = 'newname'
+      assert.equal(fields[0].name, 'newname')
+      fields[0].name = 'id'
+    })
+  })
+
   describe('gdal.FeatureDefn', () => {
     it('count() should return the field count', () => {
       assert.equal(defn.fields.count(), 3)
