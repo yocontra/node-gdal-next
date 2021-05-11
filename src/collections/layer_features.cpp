@@ -345,7 +345,15 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  *
  * @method set
  * @throws Error
- * @param {number} [id]
+ * @param {gdal.Feature} feature
+ */
+
+/**
+ * Sets a feature in the layer.
+ *
+ * @method set
+ * @throws Error
+ * @param {number} id
  * @param {gdal.Feature} feature
  */
 NAN_METHOD(LayerFeatures::set) {

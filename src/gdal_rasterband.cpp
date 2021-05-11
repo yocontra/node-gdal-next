@@ -716,7 +716,7 @@ NAN_GETTER(RasterBand::unitTypeGetter) {
  *
  * @readOnly
  * @attribute dataType
- * @type {string|Undefined}
+ * @type {string|undefined}
  */
 NAN_GETTER(RasterBand::dataTypeGetter) {
   Nan::HandleScope scope;

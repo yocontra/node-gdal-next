@@ -57,7 +57,7 @@ NAN_METHOD(CompoundCurve::toString) {
  * Points that make up the compound curve.
  *
  * @attribute points
- * @type {gdal.CompoundCurvePoints}
+ * @type {gdal.CompoundCurveCurves}
  */
 NAN_GETTER(CompoundCurve::curvesGetter) {
   Nan::HandleScope scope;

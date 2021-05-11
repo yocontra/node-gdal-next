@@ -177,7 +177,7 @@ NAN_METHOD(RasterBandPixels::set) {
  * @param {number} y
  * @param {number} width
  * @param {number} height
- * @param {TypedArray} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
+ * @param {ArrayBufferView} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
  * @param {_readOptions} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
@@ -185,7 +185,7 @@ NAN_METHOD(RasterBandPixels::set) {
  * constants{{/crossLink}}.
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
- * @return {TypedArray} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
+ * @return {ArrayBufferView} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 
 /**
@@ -199,7 +199,7 @@ NAN_METHOD(RasterBandPixels::set) {
  * @param {number} y
  * @param {number} width
  * @param {number} height
- * @param {TypedArray} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
+ * @param {ArrayBufferView} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
  * @param {object} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
@@ -207,8 +207,8 @@ NAN_METHOD(RasterBandPixels::set) {
  * constants{{/crossLink}}.
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
- * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
- * @return {Promise<TypedArray>} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
+ * @param {callback<ArrayBufferView>} [callback=undefined] {{{cb}}}
+ * @return {Promise<ArrayBufferView>} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   Nan::HandleScope scope;
@@ -314,7 +314,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @param {number} y
  * @param {number} width
  * @param {number} height
- * @param {TypedArray} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to write to the band.
+ * @param {ArrayBufferView} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to write to the band.
  * @param {_writeOptions} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
@@ -335,7 +335,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @param {number} y
  * @param {number} width
  * @param {number} height
- * @param {TypedArray} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to write to the band.
+ * @param {ArrayBufferView} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to write to the band.
  * @param {_writeOptions} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
@@ -423,8 +423,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  * @throws Error
  * @param {number} x
  * @param {number} y
- * @param {TypedArray} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
- * @return {TypedArray} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
+ * @param {ArrayBufferView} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
+ * @return {ArrayBufferView} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 
 /**
@@ -435,9 +435,9 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  * @throws Error
  * @param {number} x
  * @param {number} y
- * @param {TypedArray} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
- * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
- * @return {Promise<TypedArray>} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
+ * @param {ArrayBufferView} [data] The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
+ * @param {callback<ArrayBufferView>} [callback=undefined] {{{cb}}}
+ * @return {Promise<ArrayBufferView>} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
@@ -496,7 +496,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
  * @throws Error
  * @param {number} x
  * @param {number} y
- * @param {TypedArray} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values to write to the band.
+ * @param {ArrayBufferView} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values to write to the band.
  */
 
 /**
@@ -507,7 +507,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
  * @throws Error
  * @param {number} x
  * @param {number} y
- * @param {TypedArray} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values to write to the band.
+ * @param {ArrayBufferView} data The [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values to write to the band.
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {

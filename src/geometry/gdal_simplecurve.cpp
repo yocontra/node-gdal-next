@@ -82,8 +82,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT(SimpleCurve, getLength, Number, get_Length);
 /**
  * The points that make up the SimpleCurve geometry.
  *
- * @attribute rings
- * @type {gdal.SimpleCurveRings}
+ * @attribute points
+ * @type {gdal.LineStringPoints}
  */
 NAN_GETTER(SimpleCurve::pointsGetter) {
   Nan::HandleScope scope;
@@ -99,9 +99,9 @@ NAN_GETTER(SimpleCurve::pointsGetter) {
  *
  * @method addSubLinestring
  * @param {gdal.LineString} LineString to be added
- * @param {int} [start=0] the first vertex to copy, defaults to 0 to start with
+ * @param {number} [start=0] the first vertex to copy, defaults to 0 to start with
  * the first vertex in the other LineString
- * @param {int} [end=-1] the last vertex to copy, defaults to -1 indicating the
+ * @param {number} [end=-1] the last vertex to copy, defaults to -1 indicating the
  * last vertex of the other LineString
  * @return {void}
  */
