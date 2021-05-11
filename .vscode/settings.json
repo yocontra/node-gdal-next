@@ -4,6 +4,9 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "eslint.format.enable": true,
     "editor.formatOnSave": true,
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
     "[cpp]": {
         "editor.defaultFormatter": "ms-vscode.cpptools"
     }
