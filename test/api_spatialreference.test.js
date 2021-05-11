@@ -31,7 +31,7 @@ describe('gdal.SpatialReference', () => {
       assert.instanceOf(ref, gdal.SpatialReference)
     })
     it('should throw on invalid WKT', () => {
-      if (semver.gte(gdal.version, '2.0.0')) {
+      if (semver.gte(gdal.version, '3.0.0')) {
         const wkt = 'Corneilles["ébouriffées"]'
         assert.throws(() => {
           gdal.SpatialReference.fromWKT(wkt)
