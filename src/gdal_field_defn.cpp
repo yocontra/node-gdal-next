@@ -20,6 +20,7 @@ void FieldDefn::Initialize(Local<Object> target) {
   ATTR(lcons, "width", widthGetter, widthSetter);
   ATTR(lcons, "precision", precisionGetter, precisionSetter);
   ATTR(lcons, "ignored", ignoredGetter, ignoredSetter);
+  Nan::SetPrototypeMethod(lcons, "toString", toString);
 
   Nan::Set(target, Nan::New("FieldDefn").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 

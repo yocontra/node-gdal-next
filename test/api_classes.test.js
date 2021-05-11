@@ -15,6 +15,7 @@ const create = {
   FeatureDefn: [],
   FeatureDefnFields: () => new gdal.FeatureDefn().fields,
   FeatureFields: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0).features.get(0).fields,
+  FieldDefn: [ 'id', gdal.OFTInteger ],
   GDALDrivers: () => gdal.drivers,
   Geometry: () => new gdal.LineString(),
   GeometryCollection: [],
