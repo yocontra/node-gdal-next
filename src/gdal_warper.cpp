@@ -163,13 +163,17 @@ CPLErr GDALReprojectImageMulti(
 }
 
 /**
+ * @interface _reprojectOptions { src: gdal.Dataset, dst: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, resampling?: string, cutline?: gdal.Geometry, srcBands?: number[], dstBands?: number[], srcNodata?: number, dstNodata?: number, memoryLimit?: number, maxError?: number, multi?: boolean, options?: object }
+ */
+
+/**
  * Reprojects a dataset.
  *
  * @throws Error
  * @method reprojectImage
  * @static
  * @for gdal
- * @param {object} options
+ * @param {_reprojectOptions} options
  * @param {gdal.Dataset} options.src
  * @param {gdal.Dataset} options.dst
  * @param {gdal.SpatialReference} options.s_srs
@@ -200,7 +204,7 @@ CPLErr GDALReprojectImageMulti(
  * @method reprojectImageAsync
  * @static
  * @for gdal
- * @param {object} options
+ * @param {_reprojectOptions} options
  * @param {gdal.Dataset} options.src
  * @param {gdal.Dataset} options.dst
  * @param {gdal.SpatialReference} options.s_srs
@@ -317,6 +321,10 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
 }
 
 /**
+ * @interface _warpOptions { src: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, maxError?: number }
+ */
+
+/**
  * Used to determine the bounds and resolution of the output virtual file which
  * should be large enough to include all the input image.
  *
@@ -324,7 +332,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @method suggestedWarpOutput
  * @static
  * @for gdal
- * @param {object} options Warp options
+ * @param {_warpOptions} options Warp options
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
@@ -342,7 +350,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @method suggestedWarpOutputAsync
  * @static
  * @for gdal
- * @param {object} options Warp options
+ * @param {_warpOptions} options Warp options
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
