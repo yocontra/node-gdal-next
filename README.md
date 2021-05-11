@@ -30,7 +30,9 @@ Async support for vector data is currently experimental, with the following clas
 * `RasterBandPixels`
 * `LayerFeatures`
 
-TypeScript is currently available only from git, launch `npx yatag` after checkout to generate `index.d.ts`
+TypeScript is currently available only in 3.1.0, install with `npm install gdal-async@beta`
+
+The default install, `@latest`, is currently 3.0.3
 
 `master` is usually unit-tested and has all the working features
 
