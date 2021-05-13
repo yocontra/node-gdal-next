@@ -220,6 +220,12 @@ describe('gdal.Feature', () => {
               feature.fields.set(100, 'test')
             })
           })
+          it('should throw an error if the value type is not supported', () => {
+            const feature = new gdal.Feature(defn)
+            assert.throws(() => {
+              feature.fields.set(1, { invalid: true })
+            }, /Unsupported type/)
+          })
         })
         describe('w/name argument', () => {
           it('should properly set values', () => {
@@ -245,6 +251,12 @@ describe('gdal.Feature', () => {
               feature.fields.set('bogus', 'test')
             })
           })
+          it('should throw an error if the value type is not supported', () => {
+            const feature = new gdal.Feature(defn)
+            assert.throws(() => {
+              feature.fields.set('name', { invalid: true })
+            }, /Unsupported type/)
+          })
         })
         describe('w/array argument', () => {
           it('should properly set all fields', () => {
@@ -254,6 +266,12 @@ describe('gdal.Feature', () => {
             assert.equal(feature.fields.get(1), 'test')
             assert.closeTo(feature.fields.get(2), 3.14, 0.0001)
           })
+          it('should throw an error if the value type is not supported', () => {
+            const feature = new gdal.Feature(defn)
+            assert.throws(() => {
+              feature.fields.set([ { name: { invalid: true } } ])
+            }, /Unsupported type/)
+          })
         })
         describe('w/object argument', () => {
           it('should properly set all fields', () => {
@@ -262,6 +280,26 @@ describe('gdal.Feature', () => {
             assert.equal(feature.fields.get(0), 5)
             assert.equal(feature.fields.get(1), 'test')
             assert.closeTo(feature.fields.get(2), 3.14, 0.0001)
+          })
+          it('should properly one field', () => {
+            const feature = new gdal.Feature(defn)
+            feature.fields.set({ name: 'test2' })
+            assert.equal(feature.fields.get(1), 'test2')
+          })
+          it('should throw an error if the value type is not supported', () => {
+            const feature = new gdal.Feature(defn)
+            assert.throws(() => {
+              feature.fields.set({ name: { invalid: true } })
+            }, /Unsupported type/)
+          })
+          it('should throw an error if the arguments are invalid', () => {
+            const feature = new gdal.Feature(defn)
+            assert.throws(() => {
+              feature.fields.set(42)
+            }, /expected an object/)
+            assert.throws(() => {
+              feature.fields.set(0, 1, 2)
+            }, /Invalid number of arguments/)
           })
         })
       })
@@ -290,6 +328,12 @@ describe('gdal.Feature', () => {
             assert.throws(() => {
               feature.fields.get(100)
             })
+          })
+          it('should throw an error with no arguments', () => {
+            const feature = new gdal.Feature(defn)
+            assert.throws(() => {
+              feature.fields.get()
+            }, /Field index or name must be given/)
           })
         })
         describe('w/name argument', () => {
@@ -400,6 +444,15 @@ describe('gdal.Feature', () => {
             assert.isNull(feature.fields.get(0))
             assert.equal(feature.fields.get(1), 'reset')
             assert.isNull(feature.fields.get(2))
+          })
+          it('should throw an error if arguments are invalid', () => {
+            const feature = new gdal.Feature(defn)
+            assert.throws(() => {
+              feature.fields.reset('bogus')
+            }, /fields must be an object/)
+            assert.throws(() => {
+              feature.fields.reset({ name: { invalid: true } })
+            }, /Unsupported type of field value/)
           })
         })
       })
