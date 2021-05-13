@@ -417,6 +417,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   /**
    * Error level: Fatal
    *
+   * @final
    * @property gdal.CE_Fatal
    * @type {number}
    */
