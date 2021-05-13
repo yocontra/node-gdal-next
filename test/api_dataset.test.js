@@ -165,6 +165,49 @@ describe('gdal.Dataset', () => {
           assert.equal(result.length, ds.bands.count())
         })
       })
+      describe('create()', () => {
+        it('should create a new RasterBand', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.create(gdal.GDTByte)
+          assert.instanceOf(band, gdal.RasterBand)
+          assert.equal(ds.bands.count(), 2)
+        })
+        it('should throw if the dataset has been closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          ds.close()
+          assert.throws(() => {
+            ds.bands.create(gdal.GDTByte)
+          }, /Dataset object has already been destroyed/)
+        })
+        it('should throw if the arguments are invalid', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          assert.throws(() => {
+            ds.bands.create(42)
+          }, /data type must be string/)
+          assert.throws(() => {
+            ds.bands.create()
+          }, /data type argument needed/)
+        })
+        it('should throw if the options cannot be parsed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          assert.throws(() => {
+            ds.bands.create(gdal.GDTByte, 'invalid=true')
+          }, /String list must be an array or object/)
+        })
+      })
+      describe('createAsync()', () => {
+        it('should create a new RasterBand', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.createAsync(gdal.GDTByte)
+          return assert.eventually.instanceOf(band, gdal.RasterBand)
+        })
+        it('should throw if the dataset has been closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          ds.close()
+          const band = ds.bands.createAsync(gdal.GDTByte)
+          return assert.isRejected(band, /Dataset object has already been destroyed/)
+        })
+      })
     })
     describe('"layers" property', () => {
       it('should exist', () => {

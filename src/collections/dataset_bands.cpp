@@ -202,7 +202,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
   }
 
   if (info.Length() > 1 && options->parse(info[1])) {
-    return; // error parsing creation options
+    return; // error parsing creation options, options->parse does the throwing
   }
 
   long ds_uid = ds->uid;

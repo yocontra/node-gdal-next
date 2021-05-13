@@ -9,6 +9,7 @@ const create = {
   CompoundCurveCurves: () => new gdal.CompoundCurve().curves,
   CoordinateTransformation: [ gdal.SpatialReference.fromEPSG(4326), gdal.SpatialReference.fromEPSG(3857) ],
   Dataset: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte),
+  DatasetBands: () => gdal.open(`${__dirname}/data/sample.tif`).bands,
   DatasetLayers: () => gdal.open(`${__dirname}/data/park.geo.json`).layers,
   Driver: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte).driver,
   Feature: [ new gdal.FeatureDefn() ],
