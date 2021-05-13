@@ -561,7 +561,7 @@ NAN_METHOD(Dataset::getGCPs) {
  * @throws Error
  * @method setGCPs
  * @param {object[]} gcps
- * @param {string} projection
+ * @param {string} [projection]
  */
 NAN_METHOD(Dataset::setGCPs) {
   Nan::HandleScope scope;
@@ -590,18 +590,13 @@ NAN_METHOD(Dataset::setGCPs) {
   NODE_ARG_ARRAY(0, "gcps", gcps);
   NODE_ARG_OPT_STR(1, "projection", projection);
 
-  GDAL_GCP *list = new GDAL_GCP[gcps->Length()];
-  std::string *pszId_list = new std::string[gcps->Length()];
-  std::string *pszInfo_list = new std::string[gcps->Length()];
-  GDAL_GCP *gcp = list;
+  std::shared_ptr<GDAL_GCP> list(new GDAL_GCP[gcps->Length()], array_deleter<GDAL_GCP>());
+  std::shared_ptr<std::string> pszId_list(new std::string[gcps->Length()], array_deleter<std::string>());
+  std::shared_ptr<std::string> pszInfo_list(new std::string[gcps->Length()], array_deleter<std::string>());
+  GDAL_GCP *gcp = list.get();
   for (unsigned int i = 0; i < gcps->Length(); ++i) {
     Local<Value> val = Nan::Get(gcps, i).ToLocalChecked();
     if (!val->IsObject()) {
-      if (list) {
-        delete[] list;
-        delete[] pszId_list;
-        delete[] pszInfo_list;
-      }
       Nan::ThrowError("GCP array must only include objects");
       return;
     }
@@ -612,24 +607,18 @@ NAN_METHOD(Dataset::setGCPs) {
     NODE_DOUBLE_FROM_OBJ(obj, "dfGCPX", gcp->dfGCPX);
     NODE_DOUBLE_FROM_OBJ(obj, "dfGCPY", gcp->dfGCPY);
     NODE_DOUBLE_FROM_OBJ_OPT(obj, "dfGCPZ", gcp->dfGCPZ);
-    NODE_STR_FROM_OBJ_OPT(obj, "pszId", pszId_list[i]);
-    NODE_STR_FROM_OBJ_OPT(obj, "pszInfo", pszInfo_list[i]);
+    NODE_STR_FROM_OBJ_OPT(obj, "pszId", pszId_list.get()[i]);
+    NODE_STR_FROM_OBJ_OPT(obj, "pszInfo", pszInfo_list.get()[i]);
 
-    gcp->pszId = (char *)pszId_list[i].c_str();
-    gcp->pszInfo = (char *)pszInfo_list[i].c_str();
+    gcp->pszId = (char *)pszId_list.get()[i].c_str();
+    gcp->pszInfo = (char *)pszInfo_list.get()[i].c_str();
 
     gcp++;
   }
 
   uv_sem_wait(ds->async_lock);
-  CPLErr err = raw->SetGCPs(gcps->Length(), list, projection.c_str());
+  CPLErr err = raw->SetGCPs(gcps->Length(), list.get(), projection.c_str());
   uv_sem_post(ds->async_lock);
-
-  if (list) {
-    delete[] list;
-    delete[] pszId_list;
-    delete[] pszInfo_list;
-  }
 
   if (err) {
     NODE_THROW_LAST_CPLERR;

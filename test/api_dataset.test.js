@@ -524,7 +524,19 @@ describe('gdal.Dataset', () => {
         })
       })
     })
-
+    describe('"description" property', () => {
+      it('should return the description field', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.tif`)
+        assert.strictEqual(ds.description, `${__dirname}/data/sample.tif`)
+      })
+      it('should throw if dataset is already closed', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.tif`)
+        ds.close()
+        assert.throws(() => {
+          console.log(ds.description)
+        })
+      })
+    })
     describe('"geoTransform" property', () => {
       describe('getter', () => {
         it('should return array', () => {
@@ -621,6 +633,12 @@ describe('gdal.Dataset', () => {
           })
           assert.throws(() => {
             ds.geoTransform = [ 0, 1 ]
+          })
+        })
+        it('should throw if geotransform is not an array', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          assert.throws(() => {
+            ds.geoTransform = '42'
           })
         })
       })
@@ -900,7 +918,8 @@ describe('gdal.Dataset', () => {
         outputFilename,
         gdal.open(`${__dirname}/data/12_791_1476.jpg`)
       )
-      ds.srs = gdal.SpatialReference.fromEPSG(4326)
+      const srs = gdal.SpatialReference.fromEPSG(4326)
+      ds.srs = srs
       const bounds = {
         minX: -110.478515625,
         maxX: -110.390625,
@@ -938,7 +957,8 @@ describe('gdal.Dataset', () => {
         }
       ]
 
-      ds.setGCPs(expectedGCPs)
+      console.log()
+      ds.setGCPs(expectedGCPs, srs.toWKT())
       const actualGCPs = ds.getGCPs()
 
       expectedGCPs.forEach((expectedGCP, i) => {
@@ -950,8 +970,37 @@ describe('gdal.Dataset', () => {
         assert.closeTo(actualGCP.dfGCPY, expectedGCP.dfGCPY, delta)
         assert.closeTo(actualGCP.dfGCPZ, expectedGCP.dfGCPZ, delta)
       })
+      assert.strictEqual(ds.getGCPProjection(), srs.toWKT())
 
       ds.close()
+    })
+  })
+  describe('testCapability()', () => {
+    it("should return false when layer doesn't support capability", () => {
+      const ds = gdal.open(`${__dirname}/data/sample.tif`)
+      assert.isFalse(ds.testCapability(gdal.ODrCCreateDataSource))
+      assert.isFalse(ds.testCapability(gdal.ODrCDeleteDataSource))
+      assert.isFalse(ds.testCapability(gdal.ODsCCreateGeomFieldAfterCreateLayer))
+      assert.isFalse(ds.testCapability(gdal.ODsCCreateLayer))
+      assert.isFalse(ds.testCapability(gdal.ODsCDeleteLayer))
+    })
+    it('should return true when layer does support capability', () => {
+      const file = `${__dirname}/data/temp/ds_layer_test.${String(
+        Math.random()
+      ).substring(2)}.tmp.shp`
+      const ds = gdal.open(file, 'w', 'ESRI Shapefile')
+      assert.isFalse(ds.testCapability(gdal.ODrCCreateDataSource))
+      assert.isFalse(ds.testCapability(gdal.ODrCDeleteDataSource))
+      assert.isFalse(ds.testCapability(gdal.ODsCCreateGeomFieldAfterCreateLayer))
+      assert.isTrue(ds.testCapability(gdal.ODsCCreateLayer))
+      assert.isTrue(ds.testCapability(gdal.ODsCDeleteLayer))
+    })
+    it('should throw error if dataset is destroyed', () => {
+      const ds = gdal.open(`${__dirname}/data/sample.tif`)
+      ds.close()
+      assert.throws(() => {
+        ds.testCapability(gdal.ODrCCreateDataSource)
+      }, /already been destroyed/)
     })
   })
 })
