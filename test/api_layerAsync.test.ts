@@ -16,18 +16,14 @@ describe('gdal.LayerAsync', () => {
 
   describe('instance', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const prepare_dataset_layer_test = function (_arg1: string, _arg2: unknown, _arg3?: unknown) {
-      let ds, layer, mode, options, callback, err, file, dir, driver
+    const prepare_dataset_layer_test = function (mode: string, _arg2: unknown, _arg3?: unknown) {
+      let ds, layer, options, callback, err, file, dir, driver
 
       if (arguments.length === 2) {
-        // eslint-disable-next-line prefer-rest-params
-        mode = arguments[0]
         options = {}
         // eslint-disable-next-line prefer-rest-params
         callback = arguments[1]
       } else {
-        // eslint-disable-next-line prefer-rest-params
-        mode = arguments[0]
         // eslint-disable-next-line prefer-rest-params
         options = arguments[1] || {}
         // eslint-disable-next-line prefer-rest-params
