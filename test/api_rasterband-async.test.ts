@@ -59,7 +59,7 @@ describe('gdal.RasterBandAsync', () => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
-            band.pixels.readAsync(190, 290, w, h, () => { })
+            band.pixels.readAsync(190, 290, w, h, () => undefined)
             ds.close()
           })
         })

@@ -58,12 +58,12 @@ namespace node_gdal {
  * https://gdal.org/doxygen/classOGRGeometry.html
  */
 
-#define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                       \
-{                                                                                                                    \
-  int new_size = geom->this_->WkbSize();                                                                             \
-  if (geom->owned_) Nan::AdjustExternalMemory(new_size - geom->size_);                                               \
-  geom->size_ = new_size;                                                                                            \
-}
+#define UPDATE_AMOUNT_OF_GEOMETRY_MEMORY(geom)                                                                         \
+  {                                                                                                                    \
+    int new_size = geom->this_->WkbSize();                                                                             \
+    if (geom->owned_) Nan::AdjustExternalMemory(new_size - geom->size_);                                               \
+    geom->size_ = new_size;                                                                                            \
+  }
 
 template <class T, class OGRT> class GeometryBase : public Nan::ObjectWrap {
     public:
@@ -117,7 +117,8 @@ template <class T, class OGRT> Local<Value> GeometryBase<T, OGRT>::New(OGRT *geo
   return scope.Escape(obj);
 }
 
-template <class T, class OGRT> GeometryBase<T, OGRT>::GeometryBase(OGRT *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
+template <class T, class OGRT>
+GeometryBase<T, OGRT>::GeometryBase(OGRT *geom) : Nan::ObjectWrap(), this_(geom), owned_(true), size_(0) {
   LOG("Created Geometry %s [%p]", typeid(T).name(), geom);
   // The async locks must live outside the V8 memory management,
   // otherwise they won't be accessible from the async threads
@@ -125,7 +126,8 @@ template <class T, class OGRT> GeometryBase<T, OGRT>::GeometryBase(OGRT *geom) :
   uv_sem_init(async_lock, 1);
 }
 
-template <class T, class OGRT> GeometryBase<T, OGRT>::GeometryBase() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
+template <class T, class OGRT>
+GeometryBase<T, OGRT>::GeometryBase() : Nan::ObjectWrap(), this_(NULL), owned_(true), size_(0) {
   async_lock = new uv_sem_t;
   uv_sem_init(async_lock, 1);
 }

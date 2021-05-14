@@ -35,7 +35,7 @@ namespace node_gdal {
 
 // Handle locking
 #define GDAL_TRYLOCK_PARENT(p)                                                                                         \
-  uv_sem_t *async_lock = nullptr;                                                                                    \
+  uv_sem_t *async_lock = nullptr;                                                                                      \
   try {                                                                                                                \
     async_lock = ptr_manager.tryLockDataset((p)->parent_uid);                                                          \
   } catch (const char *err) {                                                                                          \
@@ -44,8 +44,7 @@ namespace node_gdal {
   }
 #define GDAL_ASYNCABLE_LOCK(uid) uv_sem_t *async_lock = ptr_manager.tryLockDataset(uid);
 #define GDAL_UNLOCK_PARENT uv_sem_post(async_lock)
-#define GDAL_ASYNCABLE_LOCK_MANY(...)                                                                                  \
-  std::vector<uv_sem_t *> async_locks = ptr_manager.tryLockDatasets({__VA_ARGS__});
+#define GDAL_ASYNCABLE_LOCK_MANY(...) std::vector<uv_sem_t *> async_locks = ptr_manager.tryLockDatasets({__VA_ARGS__});
 #define GDAL_UNLOCK_MANY                                                                                               \
   for (uv_sem_t * async_lock : async_locks) { uv_sem_post(async_lock); }
 

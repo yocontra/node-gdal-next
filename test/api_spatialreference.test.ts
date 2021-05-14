@@ -87,7 +87,7 @@ describe('gdal.SpatialReference', () => {
       assert.instanceOf(ref, gdal.SpatialReference)
     })
     it('should throw on invalid EPSGA', () => {
-      const esri = ['Corneilles["ébouriffées"]']
+      const esri = [ 'Corneilles["ébouriffées"]' ]
       assert.throws(() => {
         gdal.SpatialReference.fromESRI(esri)
       })
@@ -313,6 +313,7 @@ describe('gdal.SpatialReference', () => {
     it('should return true if vertical coordinate system', () => {
       assert.equal(gdal.SpatialReference.fromWKT(compoundVertical).isVertical(), true)
       // This is a typo that will probably stay until 4.x
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       assert.equal((gdal.SpatialReference.fromWKT(compoundVertical) as any).isVectical(), true)
     })
     it('should return false if not vertical coordinate system', () => {

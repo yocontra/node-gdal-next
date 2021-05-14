@@ -33,9 +33,9 @@ describe('gdal', () => {
       const lr = tx.transformPoint(gt[0] + gt[1] * w, gt[3] + gt[5] * h)
       const ll = tx.transformPoint(gt[0], gt[3] + gt[5] * h)
 
-      let extent = new gdal.Polygon()
+      const extent = new gdal.Polygon()
       const ring = new gdal.LinearRing()
-      ring.points.add([ul, ur, lr, ll, ul])
+      ring.points.add([ ul, ur, lr, ll, ul ])
       extent.rings.add(ring)
       const envelope = extent.getEnvelope()
 
@@ -54,7 +54,7 @@ describe('gdal', () => {
       // compute expected size / geotransform with computed resolution
 
       const expected = {
-        geoTransform: [envelope.minX, tr, gt[2], envelope.maxY, gt[4], -tr],
+        geoTransform: [ envelope.minX, tr, gt[2], envelope.maxY, gt[4], -tr ],
         rasterSize: {
           x: Math.ceil(Math.max(envelope.maxX - envelope.minX) / tr),
           y: Math.ceil(Math.max(envelope.maxY - envelope.minY) / tr)
@@ -138,9 +138,9 @@ describe('gdal', () => {
       const lr = tx.transformPoint(gt[0] + gt[1] * w, gt[3] + gt[5] * h)
       const ll = tx.transformPoint(gt[0], gt[3] + gt[5] * h)
 
-      let extent = new gdal.Polygon()
+      const extent = new gdal.Polygon()
       const ring = new gdal.LinearRing()
-      ring.points.add([ul, ur, lr, ll, ul])
+      ring.points.add([ ul, ur, lr, ll, ul ])
       extent.rings.add(ring)
       const envelope = extent.getEnvelope()
 
@@ -149,7 +149,7 @@ describe('gdal', () => {
 
       const dst = gdal.open('temp', 'w', 'MEM', tw, th, 2, gdal.GDT_Int16)
       dst.srs = t_srs
-      dst.geoTransform = [envelope.minX, tr.x, gt[2], envelope.maxY, gt[4], -tr.y]
+      dst.geoTransform = [ envelope.minX, tr.x, gt[2], envelope.maxY, gt[4], -tr.y ]
 
       // warp
       const p = gdal.reprojectImageAsync({
@@ -161,8 +161,8 @@ describe('gdal', () => {
         cutline: cutline,
         dstAlphaBand: 1,
         blend: 0,
-        srcBands: [1],
-        dstBands: [2]
+        srcBands: [ 1 ],
+        dstBands: [ 2 ]
       })
 
       assert.isFulfilled(p)
@@ -367,27 +367,27 @@ describe('gdal', () => {
           /must be a raster dataset|There is no affine transformation and no GCPs/)
       })
       it('should throw if srcBands option is provided but dstBands isnt', () => {
-        reprojectOptions.srcBands = [1]
+        reprojectOptions.srcBands = [ 1 ]
 
         assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'dstBands must be provided if srcBands option is used')
       })
       it('should throw if dstBands option is provided but srcBands isnt', () => {
-        reprojectOptions.dstBands = [1]
+        reprojectOptions.dstBands = [ 1 ]
 
         assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'srcBands must be provided if dstBands option is used')
       })
       it('should throw if srcBands option is invalid', () => {
-        reprojectOptions.srcBands = [3]
-        reprojectOptions.dstBands = [1]
+        reprojectOptions.srcBands = [ 3 ]
+        reprojectOptions.dstBands = [ 1 ]
 
         assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'out of range for dataset')
       })
       it('should throw if dstBands option is invalid', () => {
-        reprojectOptions.srcBands = [1]
-        reprojectOptions.dstBands = [3]
+        reprojectOptions.srcBands = [ 1 ]
+        reprojectOptions.dstBands = [ 3 ]
 
         assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'out of range for dataset')
@@ -434,7 +434,7 @@ describe('gdal', () => {
           }, /(Cannot find coordinate operations from)|(Mercator_1SP)/)
         })
       } else {
-        it.skip("should throw error if GDAL can't create transformer (skipped)", () => { })
+        it.skip("should throw error if GDAL can't create transformer (skipped)", () => undefined)
       }
     })
   })

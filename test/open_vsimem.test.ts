@@ -14,6 +14,7 @@ describe('Open', () => {
   // This simulates the buffer going out of scope
   describe('vsimem', () => {
     let filename, ds
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const bufferHolder = {} as any
 
     after(() => {
@@ -46,7 +47,9 @@ describe('Open', () => {
     })
     it('should be shareable across datasets', () => {
       const ds2 = gdal.open(bufferHolder.buffer)
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       assert.equal((ds2 as any).buffer, ds.buffer)
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       delete (ds2 as any).buffer
       ds2.close()
     })
@@ -69,6 +72,7 @@ describe('Open', () => {
     // Not supported on GDAL 1.x
     if (semver.lt(gdal.version, '2.0.0')) return
     let filename, ds
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const bufferHolder = {} as any
     after(() => {
       ds.then((r) => {

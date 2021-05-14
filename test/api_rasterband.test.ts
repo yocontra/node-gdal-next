@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import * as gdal from '..'
-const fileUtils = require('./utils/file.js')
+import * as fileUtils from './utils/file.js'
 
 describe('gdal.RasterBand', () => {
   afterEach(global.gc)
@@ -24,6 +24,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).ds = null
           })
         })
@@ -83,6 +84,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).description = 'test'
           })
         })
@@ -109,6 +111,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).id = 5
           })
         })
@@ -135,6 +138,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).size = { x: 128, y: 128 }
           })
         })
@@ -161,6 +165,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).blockSize = { x: 128, y: 128 }
           })
         })
@@ -228,6 +233,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).dataType = gdal.GDT_Float64
           })
         })
@@ -259,6 +265,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).readOnly = true
           })
         })
@@ -285,6 +292,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).minimum = 5
           })
         })
@@ -311,6 +319,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).maximum = 5
           })
         })
@@ -433,6 +442,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).pixels = null
           })
         })
@@ -1024,6 +1034,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (band as any).overviews = null
           })
         })
@@ -1101,7 +1112,7 @@ describe('gdal.RasterBand', () => {
           ds.buildOverviews('NEAREST', [ 2 ])
           ds.close()
           assert.throws(() => {
-            band.overviews.forEach(() => {})
+            band.overviews.forEach(() => undefined)
           })
         })
       })

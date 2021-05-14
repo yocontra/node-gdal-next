@@ -1,6 +1,6 @@
 import * as gdal from '..'
 import * as path from 'path'
-const assert = require('assert')
+import * as assert from 'assert'
 
 describe('Open', () => {
   afterEach(global.gc)

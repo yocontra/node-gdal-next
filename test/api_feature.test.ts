@@ -168,6 +168,8 @@ describe('gdal.Feature', () => {
         it('should throw error', () => {
           const feature = new gdal.Feature(defn)
           assert.throws(() => {
+            // In TypeScript these exceptions require disabling the type checks
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (feature as any).defn = null
           })
         })
@@ -185,6 +187,7 @@ describe('gdal.Feature', () => {
         it('should throw error', () => {
           const feature = new gdal.Feature(defn)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (feature as any).fields = null
           }, /fields is a read-only property/)
         })
@@ -295,9 +298,11 @@ describe('gdal.Feature', () => {
           it('should throw an error if the arguments are invalid', () => {
             const feature = new gdal.Feature(defn)
             assert.throws(() => {
+              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               (feature.fields as any).set(42)
             }, /expected an object/)
             assert.throws(() => {
+              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               (feature.fields as any).set(0, 1, 2)
             }, /Invalid number of arguments/)
           })
@@ -332,6 +337,7 @@ describe('gdal.Feature', () => {
           it('should throw an error with no arguments', () => {
             const feature = new gdal.Feature(defn)
             assert.throws(() => {
+              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               (feature.fields as any).get()
             }, /Field index or name must be given/)
           })
@@ -448,6 +454,7 @@ describe('gdal.Feature', () => {
           it('should throw an error if arguments are invalid', () => {
             const feature = new gdal.Feature(defn)
             assert.throws(() => {
+              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               (feature.fields as any).reset('bogus')
             }, /fields must be an object/)
             assert.throws(() => {

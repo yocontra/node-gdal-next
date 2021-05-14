@@ -1,21 +1,27 @@
 import * as gdal from '..'
 import { assert } from 'chai'
-const fileUtils = require('./utils/file.js')
+import * as fileUtils from './utils/file.js'
 
 describe('gdal.Layer', () => {
   afterEach(global.gc)
 
   describe('instance', () => {
-    const prepare_dataset_layer_test = function (arg1: string, arg2: object|Function, arg3?: Function) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const prepare_dataset_layer_test = function (_arg1: string, _arg2: unknown, _arg3?: unknown) {
       let ds, layer, mode, options, callback, err, file, dir, driver
 
       if (arguments.length === 2) {
+        // eslint-disable-next-line prefer-rest-params
         mode = arguments[0]
         options = {}
+        // eslint-disable-next-line prefer-rest-params
         callback = arguments[1]
       } else {
+        // eslint-disable-next-line prefer-rest-params
         mode = arguments[0]
+        // eslint-disable-next-line prefer-rest-params
         options = arguments[1] || {}
+        // eslint-disable-next-line prefer-rest-params
         callback = arguments[2]
       }
 
@@ -235,7 +241,7 @@ describe('gdal.Layer', () => {
 
     describe('remove()', () => {
       it('should remove a layer', () => {
-        prepare_dataset_layer_test('w', (dataset, _) => {
+        prepare_dataset_layer_test('w', (dataset) => {
           const layers = dataset.layers.count()
           dataset.layers.remove(0)
           assert.equal(dataset.layers.count(), layers - 1)
@@ -507,7 +513,7 @@ describe('gdal.Layer', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             dataset.close()
             assert.throws(() => {
-              layer.features.forEach(() => {})
+              layer.features.forEach(() => undefined)
             }, /already destroyed/)
           })
         })
@@ -757,7 +763,7 @@ describe('gdal.Layer', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             dataset.close()
             assert.throws(() => {
-              layer.fields.forEach(() => {})
+              layer.fields.forEach(() => undefined)
             }, /already destroyed/)
           })
         })

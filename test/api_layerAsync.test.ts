@@ -2,7 +2,7 @@ import * as chaiAsPromised from 'chai-as-promised'
 import * as chai from 'chai'
 const assert = chai.assert
 import * as gdal from '..'
-const fileUtils = require('./utils/file.js')
+import * as fileUtils from './utils/file.js'
 import * as semver from 'semver'
 
 chai.use(chaiAsPromised)
@@ -15,16 +15,22 @@ describe('gdal.LayerAsync', () => {
   afterEach(global.gc)
 
   describe('instance', () => {
-    const prepare_dataset_layer_test = function (arg1: string, arg2: object|Function, arg3?: Function) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const prepare_dataset_layer_test = function (_arg1: string, _arg2: unknown, _arg3?: unknown) {
       let ds, layer, mode, options, callback, err, file, dir, driver
 
       if (arguments.length === 2) {
+        // eslint-disable-next-line prefer-rest-params
         mode = arguments[0]
         options = {}
+        // eslint-disable-next-line prefer-rest-params
         callback = arguments[1]
       } else {
+        // eslint-disable-next-line prefer-rest-params
         mode = arguments[0]
+        // eslint-disable-next-line prefer-rest-params
         options = arguments[1] || {}
+        // eslint-disable-next-line prefer-rest-params
         callback = arguments[2]
       }
 
@@ -262,7 +268,7 @@ describe('gdal.LayerAsync', () => {
 
     describe('removeAsync()', () => {
       it('should remove a layer/Async', () =>
-        prepare_dataset_layer_test('w', { autoclose: false }, (dataset, _) => {
+        prepare_dataset_layer_test('w', { autoclose: false }, (dataset) => {
           const layers = dataset.layers.count()
           const r = dataset.layers.removeAsync(0)
           return assert.isFulfilled(Promise.all([
@@ -549,7 +555,7 @@ describe('gdal.LayerAsync', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             dataset.close()
             assert.throws(() => {
-              layer.features.forEach(() => {})
+              layer.features.forEach(() => undefined)
             }, /already destroyed/)
           })
         })
@@ -775,7 +781,7 @@ describe('gdal.LayerAsync', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             dataset.close()
             assert.throws(() => {
-              layer.fields.forEach(() => {})
+              layer.fields.forEach(() => undefined)
             }, /already destroyed/)
           })
         })

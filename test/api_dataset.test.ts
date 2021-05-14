@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as gdal from '..'
 import * as path from 'path'
 import { assert } from 'chai'
-const fileUtils = require('./utils/file.js')
+import * as fileUtils from './utils/file.js'
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
 chai.use(chaiAsPromised)
@@ -128,7 +128,7 @@ describe('gdal.Dataset', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
           ds.close()
           assert.throws(() => {
-            ds.bands.forEach(() => {})
+            ds.bands.forEach(() => undefined)
           })
         })
       })
@@ -182,15 +182,19 @@ describe('gdal.Dataset', () => {
         it('should throw if the arguments are invalid', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           assert.throws(() => {
+            // In TypeScript these exceptions require disabling the type checks
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (ds.bands as any).create(42)
           }, /data type must be string/)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (ds.bands as any).create()
           }, /data type argument needed/)
         })
         it('should throw if the options cannot be parsed', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.bands.create(gdal.GDT_Byte, 'invalid=true' as any)
           }, /String list must be an array or object/)
         })
@@ -311,7 +315,7 @@ describe('gdal.Dataset', () => {
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
           ds.close()
           assert.throws(() => {
-            ds.layers.forEach(() => {})
+            ds.layers.forEach(() => undefined)
           })
         })
       })
@@ -474,6 +478,7 @@ describe('gdal.Dataset', () => {
         it('should throw when not an SpatialReference object', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.srs = '`1`inoinawfawfian!@121' as any
           }, /srs must be SpatialReference object/)
         })
@@ -532,6 +537,7 @@ describe('gdal.Dataset', () => {
         it('should throw', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (ds as any).rasterSize = { x: 0, y: 0 }
           }, /rasterSize is a read-only property/)
         })
@@ -562,6 +568,7 @@ describe('gdal.Dataset', () => {
         it('should throw', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (ds as any).driver = null
           })
         })
@@ -672,6 +679,7 @@ describe('gdal.Dataset', () => {
         it('should throw if geotransform is invalid', () => {
           const ds = gdal.open(fileUtils.clone(`${__dirname}/data/sample.vrt`))
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.geoTransform = [ 0, 1, 'bad_value' as any, 0, 0, 1 ]
           })
           assert.throws(() => {
@@ -681,6 +689,7 @@ describe('gdal.Dataset', () => {
         it('should throw if geotransform is not an array', () => {
           const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.geoTransform = '42' as any
           })
         })
@@ -823,6 +832,7 @@ describe('gdal.Dataset', () => {
           'r+'
         )
         assert.throws(() => {
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           ds.buildOverviews('NEAREST', [ 2, 4, {} as any ])
         })
       })
@@ -851,6 +861,7 @@ describe('gdal.Dataset', () => {
             'r+'
           )
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ {} as any ])
           })
         })
@@ -909,6 +920,7 @@ describe('gdal.Dataset', () => {
           'r+'
         )
         assert.throws(() => {
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           ds.buildOverviews('NEAREST', [ 2, 4, {} as any ])
         })
       })
@@ -937,6 +949,7 @@ describe('gdal.Dataset', () => {
             'r+'
           )
           assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ {} as any ])
           })
         })

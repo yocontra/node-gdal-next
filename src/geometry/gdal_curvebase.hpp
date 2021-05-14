@@ -58,7 +58,8 @@ template <class T, class OGRT, class COLLECTIONT> NAN_METHOD((CurveBase<T, OGRT,
 }
 
 template <class T, class OGRT, class COLLECTIONT>
-void CurveBase<T, OGRT, COLLECTIONT>::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
+void CurveBase<T, OGRT, COLLECTIONT>::SetPrivate(
+  Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local<v8::Value> value) {
   Nan::SetPrivate(_this, Nan::New("points_").ToLocalChecked(), value);
 };
 

@@ -219,7 +219,7 @@ describe('gdal.Envelope', () => {
     })
     describe('toPolygon() w/Async', () => {
       it('should return Polygon', () => {
-        let envelope = new gdal.Envelope({
+        const envelope = new gdal.Envelope({
           minX: -1,
           maxX: 1,
           minY: -2,

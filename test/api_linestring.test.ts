@@ -62,6 +62,7 @@ describe('gdal.LineString', () => {
         assert.instanceOf(a, gdal.LineString)
         assert.instanceOf(b, gdal.Point)
         assert.throws(() => {
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           a.addSubLineString(b as any)
         })
       })

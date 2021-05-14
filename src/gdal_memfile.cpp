@@ -21,9 +21,7 @@ void Memfile::weakCallback(const Nan::WeakCallbackInfo<Memfile> &file) {
 
 Memfile *Memfile::get(Local<Object> buffer) {
   void *data = node::Buffer::Data(buffer);
-  if (data == nullptr) {
-    return nullptr;
-  }
+  if (data == nullptr) { return nullptr; }
   if (memfile_collection.count(data)) return memfile_collection.find(data)->second;
 
   size_t len = node::Buffer::Length(buffer);

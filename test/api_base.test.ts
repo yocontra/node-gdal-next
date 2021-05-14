@@ -18,6 +18,8 @@ describe('gdal', () => {
         assert.isNull(gdal.lastError)
       })
       it('should return an object normally', () => {
+        // This is not a public API
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         (gdal as any)._triggerCPLError()
 
         assert.deepEqual(gdal.lastError, {
@@ -29,14 +31,17 @@ describe('gdal', () => {
     })
     describe('set()', () => {
       it('should allow reset by setting to null', () => {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         (gdal as any)._triggerCPLError()
 
         assert.equal(!!gdal.lastError, true);
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         (gdal as any).lastError = null
         assert.isNull(gdal.lastError)
       })
       it('should throw when not null', () => {
         assert.throws(() => {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           (gdal as any).lastError = {}
         }, /null/)
       })
@@ -69,6 +74,7 @@ describe('gdal', () => {
       it('should respect GDAL_DATA environment over locally bundled path', (done) => {
         const env = Object.assign({}, process.env)
         env.GDAL_DATA = 'bogus'
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const cp = require('child_process')
         // The manual delete/global.gc() allows for error-free unit testing of the ASAN build
         const command =
@@ -93,6 +99,7 @@ describe('gdal', () => {
   describe('decToDMS()', () => {
     it('should throw when axis not provided', () => {
       assert.throws(() => {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         (gdal as any).decToDMS(12.2)
       })
     })
