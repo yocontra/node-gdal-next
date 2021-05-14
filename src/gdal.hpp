@@ -70,6 +70,7 @@ GDAL_ASYNCABLE_DEFINE(open) {
     Nan::ThrowError("Invalid open mode. Must be \"r\" or \"r+\"");
     return;
   }
+  flags |= GDAL_OF_VERBOSE_ERROR;
 
   GDALAsyncableJob<GDALDataset *> job;
   job.rval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
