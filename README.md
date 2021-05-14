@@ -15,33 +15,11 @@ This project is a fork of <https://github.com/contra/node-gdal-next> which is a 
 It adds a number of features:
 
 - **Support for asynchronous IO**
-- **Full native TypeScript support** and autocompletion in VS Code
+- **Full native TypeScript support** with autocompletion in IDEs that support it
 - Support for curve geometries
 - Numerous bugfixes including a number of memory leaks
 
-Async support for vector data is currently experimental, with the following classses being async-compatible on `master`
-* main `open`
-* global `Algorithms`
-* `Dataset`
-* `DatasetBands`
-* `DatasetLayers`
-* `Driver`
-* `Geometry`
-* `RasterBandPixels`
-* `LayerFeatures`
-
-TypeScript is currently available only in 3.1.0, install with `npm install gdal-async@beta`
-
-The default install, `@latest`, is currently 3.0.3
-
-`master` is usually unit-tested and has all the working features
-
-`universal-async` is cutting edge for the vector async support (currently entirely merged)
-
-`vsimem` has support for in-memory files - `gdal.open` supports opening a `Buffer` (currently entirely merged)
-
-`curve-geoms` is where I am currently working on curve geometries
-
+TypeScript is currently available only in 3.1, install with `npm install gdal-async@beta`
 
 Support for `worker_threads` is planned but it is not a priority project
 
@@ -76,7 +54,7 @@ $ npm install gdal-next --build-from-source --shared_gdal
 #### Raster
 
 ```js
-const gdal = require("gdal-next")
+const gdal = require("gdal-async")
 const dataset = gdal.open("sample.tif")
 
 console.log("number of bands: " + dataset.bands.count())
@@ -89,7 +67,7 @@ console.log("srs: " + (dataset.srs ? dataset.srs.toWKT() : 'null'))
 #### Vector
 
 ```js
-const gdal = require("gdal-next")
+const gdal = require("gdal-async")
 const dataset = gdal.open("sample.shp")
 const layer = dataset.layers.get(0)
 
@@ -117,7 +95,7 @@ it will be called on completion with standard *(e,r)* semantics
 
 In this case the function will return a resolved *Promise*
 ```js
-const gdal = require('../node-gdal-async') // Or where it is installed
+const gdal = require('gdal-async')
 gdal.openAsync('sample.tif', (e, dataset) => {
     dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x,
         dataset.rasterSize.y, (e, data) => {
@@ -135,6 +113,7 @@ gdal.openAsync('sample.tif', (e, dataset) => {
 If there is no callback, the function will return a *Promise*
 
 ```js
+const gdal = require('gdal-async')
 gdal.openAsync('sample.tif').then((dataset) => {
     dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
         .then((data) => {
@@ -143,6 +122,16 @@ gdal.openAsync('sample.tif').then((dataset) => {
 }).catch(e => console.error(e));
 ```
 
+### TypeScript
+
+TypeScript support is available beginning with `gdal-async@3.1.0`
+
+```ts
+import * as gdal from 'gdal-async'
+
+const ds1: gdal.Dataset = gdal.open('sample.tif')
+const ds2: Promise<gdal.Dataset> = gdal.openAsync('sample.tif')
+```
 ## Bundled Drivers
 
 `AAIGrid`, `ACE2`, `ADRG`, `AIG`, `AVCBin`, `AVCE00`, `AeronavFAA`, `AirSAR`, `BLX`, `BMP`, `BNA`, `BT`, `CEOS`, `COASP`, `COSAR`, `CPG`, `CSV`, `CTG`, `CTable2`, `DGN`, `DIMAP`, `DIPEx`, `DOQ1`, `DOQ2`, `DTED`, `DXF`, `E00GRID`, `ECRGTOC`, `EDIGEO`, `EHdr`, `EIR`, `ELAS`, `ENVI`, `ERS`, `ESAT`, `ESRI Shapefile`, `MapInfo File`, `MBTiles`, `FAST`, `FIT`, `FujiBAS`, `GFF`, `GML`, `GPSBabel`, `GPSTrackMaker`, `GPX`, `GRASSASCIIGrid`, `GS7BG`, `GSAG`, `GSBG`, `GSC`, `GTX`, `GTiff`, `GenBin`, `GeoJSON`, `GeoRSS`, `Geoconcept`, `GPKG`, `HF2`, `HFA`, `HTF`, `IDA`, `ILWIS`, `INGR`, `IRIS`, `ISIS2`, `ISIS3`, `Idrisi`, `JAXAPALSAR`, `JDEM`, `JPEG`, `KMLSUPEROVERLAY`, `KML`, `KRO`, `L1B`, `LAN`, `LCP`, `LOSLAS`, `Leveller`, `MAP`, `MEM`, `Memory`, `MFF2`, `MFF`, `MITAB`, `MVT`, `NDF`, `NGSGEOID`, `NITF`, `NTv2`, `NWT_GRC`, `NWT_GRD`, `OGR_GMT`, `OGR_PDS`, `OGR_SDTS`, `OGR_VRT`, `OSM`, `OpenAir`, `OpenFileGDB`, `PAux`, `PCIDSK`, `PDS`, `PGDUMP`, `PNG`, `PNM`, `REC`, `RMF`, `ROI_PAC`, `RPFTOC`, `RS2`, `RST`, `R`, `S57`, `SAGA`, `SAR_CEOS`, `SDTS`, `SEGUKOOA`, `SEGY`, `SGI`, `SNODAS`, `SQLite`, `SRP`, `SRTMHGT`, `SUA`, `SVG`, `SXF`, `TIL`, `TSX`, `Terragen`, `UK .NTF`, `USGSDEM`, `VICAR`, `VRT`, `WAsP`, `XPM`, `XPlane`, `XYZ`, `ZMap`
@@ -153,7 +142,7 @@ This binding was originally the product of a collaboration between [Natural Atla
 
 node-gdal-next is maintained by [@contra](https://github.com/contra)
 
-The async bindings are by [@mmomtchev](https://github.com/mmomtchev) who is the current maintainer.
+The async bindings, the curve geometries and the TypeScript support are by [@mmomtchev](https://github.com/mmomtchev) who is the current maintainer.
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
 
