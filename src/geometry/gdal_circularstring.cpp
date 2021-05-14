@@ -40,7 +40,7 @@ void CircularString::Initialize(Local<Object> target) {
  * CircularString.points.add(new gdal.Point(0,10));```
  *
  * @constructor
- * @class gdal.Circularstring
+ * @class gdal.CircularString
  * @extends gdal.Geometry
  */
 
