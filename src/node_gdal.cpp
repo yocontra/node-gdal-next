@@ -1067,7 +1067,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Nan::Set(target, Nan::New("wkbMultiPoint").ToLocalChecked(), Nan::New<Integer>(wkbMultiPoint));
   /**
    * @final
-   * @property gdal.wkbMultiLinestring
+   * @property gdal.wkbMultiLineString
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiLineString").ToLocalChecked(), Nan::New<Integer>(wkbMultiLineString));

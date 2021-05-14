@@ -28,7 +28,7 @@ describe('gdal', () => {
     beforeEach(() => {
       dst = gdal.open('temp', 'w', 'Memory')
 
-      lyr = dst.layers.create('temp', null, gdal.Linestring)
+      lyr = dst.layers.create('temp', null, gdal.LineString)
       lyr.fields.add(new gdal.FieldDefn('id', gdal.OFTInteger))
       lyr.fields.add(new gdal.FieldDefn('elev', gdal.OFTReal))
     })
@@ -110,7 +110,7 @@ describe('gdal', () => {
     beforeEach(() => {
       dst = gdal.open('temp', 'w', 'Memory')
 
-      lyr = dst.layers.create('temp', null, gdal.Linestring)
+      lyr = dst.layers.create('temp', null, gdal.LineString)
       lyr.fields.add(new gdal.FieldDefn('id', gdal.OFTInteger))
       lyr.fields.add(new gdal.FieldDefn('elev', gdal.OFTReal))
     })

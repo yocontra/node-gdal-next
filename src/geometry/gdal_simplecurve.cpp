@@ -97,7 +97,7 @@ NAN_GETTER(SimpleCurve::pointsGetter) {
  * efficient manner. If the start index is larger than the end index then the
  * vertices will be reversed as they are copied.
  *
- * @method addSubLinestring
+ * @method addSubLineString
  * @param {gdal.LineString} LineString to be added
  * @param {number} [start=0] the first vertex to copy, defaults to 0 to start with
  * the first vertex in the other LineString

@@ -21,19 +21,19 @@
 
 #include <geos/export.h>
 #include <geos/algorithm/distance/PointPairDistance.h> // for composition
-#include <geos/algorithm/distance/DistanceToPoint.h> // for composition
-#include <geos/util/IllegalArgumentException.h> // for inlines
-#include <geos/geom/Geometry.h> // for inlines
-#include <geos/util/math.h> // for inlines
-#include <geos/geom/CoordinateFilter.h> // for inheritance
-#include <geos/geom/CoordinateSequenceFilter.h> // for inheritance
+#include <geos/algorithm/distance/DistanceToPoint.h>   // for composition
+#include <geos/util/IllegalArgumentException.h>        // for inlines
+#include <geos/geom/Geometry.h>                        // for inlines
+#include <geos/util/math.h>                            // for inlines
+#include <geos/geom/CoordinateFilter.h>                // for inheritance
+#include <geos/geom/CoordinateSequenceFilter.h>        // for inheritance
 
 #include <cstddef>
 #include <vector>
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4251) // warning C4251: needs to have dll-interface to be used by clients of class
+#pragma warning(disable : 4251) // warning C4251: needs to have dll-interface to be used by clients of class
 #endif
 
 namespace geos {
@@ -44,17 +44,17 @@ namespace geom {
 class Geometry;
 class Coordinate;
 //class CoordinateSequence;
-}
+} // namespace geom
 namespace index {
 namespace intervalrtree {
 //class SortedPackedIntervalRTree;
 }
-}
-}
+} // namespace index
+} // namespace geos
 
 namespace geos {
 namespace algorithm { // geos::algorithm
-namespace distance { // geos::algorithm::distance
+namespace distance {  // geos::algorithm::distance
 
 /** \brief
  * An algorithm for computing a distance metric
@@ -83,7 +83,7 @@ namespace distance { // geos::algorithm::distance
  * useful cases.
  * Examples of these are:
  *
- * - computing distance between Linestrings that are roughly parallel to
+ * - computing distance between LineStrings that are roughly parallel to
  *   each other, and roughly equal in length.  This occurs in matching
  *   linear networks.
  * - Testing similarity of geometries.
@@ -98,24 +98,16 @@ namespace distance { // geos::algorithm::distance
  * </pre>
  */
 class GEOS_DLL DiscreteHausdorffDistance {
-public:
+    public:
+  static double distance(const geom::Geometry &g0, const geom::Geometry &g1);
 
-    static double distance(const geom::Geometry& g0,
-                           const geom::Geometry& g1);
+  static double distance(const geom::Geometry &g0, const geom::Geometry &g1, double densifyFrac);
 
-    static double distance(const geom::Geometry& g0,
-                           const geom::Geometry& g1, double densifyFrac);
+  DiscreteHausdorffDistance(const geom::Geometry &p_g0, const geom::Geometry &p_g1)
+    : g0(p_g0), g1(p_g1), ptDist(), densifyFrac(0.0) {
+  }
 
-    DiscreteHausdorffDistance(const geom::Geometry& p_g0,
-                              const geom::Geometry& p_g1)
-        :
-        g0(p_g0),
-        g1(p_g1),
-        ptDist(),
-        densifyFrac(0.0)
-    {}
-
-    /**
+  /**
      * Sets the fraction by which to densify each segment.
      * Each segment will be (virtually) split into a number of equal-length
      * subsegments, whose fraction of the total length is closest
@@ -123,149 +115,112 @@ public:
      *
      * @param dFrac
      */
-    void
-    setDensifyFraction(double dFrac)
-    {
-        if(dFrac > 1.0 || dFrac <= 0.0) {
-            throw util::IllegalArgumentException(
-                "Fraction is not in range (0.0 - 1.0]");
-        }
+  void setDensifyFraction(double dFrac) {
+    if (dFrac > 1.0 || dFrac <= 0.0) { throw util::IllegalArgumentException("Fraction is not in range (0.0 - 1.0]"); }
 
-        densifyFrac = dFrac;
+    densifyFrac = dFrac;
+  }
+
+  double distance() {
+    compute(g0, g1);
+    return ptDist.getDistance();
+  }
+
+  double orientedDistance() {
+    computeOrientedDistance(g0, g1, ptDist);
+    return ptDist.getDistance();
+  }
+
+  const std::array<geom::Coordinate, 2> getCoordinates() const {
+    return ptDist.getCoordinates();
+  }
+
+  class MaxPointDistanceFilter : public geom::CoordinateFilter {
+      public:
+    MaxPointDistanceFilter(const geom::Geometry &p_geom) : geom(p_geom) {
     }
 
-    double
-    distance()
-    {
-        compute(g0, g1);
-        return ptDist.getDistance();
+    void filter_ro(const geom::Coordinate *pt) override {
+      minPtDist.initialize();
+      DistanceToPoint::computeDistance(geom, *pt, minPtDist);
+      maxPtDist.setMaximum(minPtDist);
     }
 
-    double
-    orientedDistance()
-    {
-        computeOrientedDistance(g0, g1, ptDist);
-        return ptDist.getDistance();
+    const PointPairDistance &getMaxPointDistance() const {
+      return maxPtDist;
     }
 
-    const std::array<geom::Coordinate, 2>
-    getCoordinates() const
-    {
-        return ptDist.getCoordinates();
-    }
-
-    class MaxPointDistanceFilter : public geom::CoordinateFilter {
-    public:
-        MaxPointDistanceFilter(const geom::Geometry& p_geom)
-            :
-            geom(p_geom)
-        {}
-
-        void
-        filter_ro(const geom::Coordinate* pt) override
-        {
-            minPtDist.initialize();
-            DistanceToPoint::computeDistance(geom, *pt,
-                                             minPtDist);
-            maxPtDist.setMaximum(minPtDist);
-        }
-
-        const PointPairDistance&
-        getMaxPointDistance() const
-        {
-            return maxPtDist;
-        }
-
-    private:
-        PointPairDistance maxPtDist;
-        PointPairDistance minPtDist;
-        DistanceToPoint euclideanDist;
-        const geom::Geometry& geom;
-
-        // Declare type as noncopyable
-        MaxPointDistanceFilter(const MaxPointDistanceFilter& other);
-        MaxPointDistanceFilter& operator=(const MaxPointDistanceFilter& rhs);
-    };
-
-    class MaxDensifiedByFractionDistanceFilter
-        : public geom::CoordinateSequenceFilter {
-    public:
-
-        MaxDensifiedByFractionDistanceFilter(
-            const geom::Geometry& p_geom, double fraction)
-            :
-            geom(p_geom),
-            numSubSegs(std::size_t(util::round(1.0 / fraction)))
-        {
-        }
-
-        void filter_ro(const geom::CoordinateSequence& seq,
-                       std::size_t index) override;
-
-        bool
-        isGeometryChanged() const override
-        {
-            return false;
-        }
-
-        bool
-        isDone() const override
-        {
-            return false;
-        }
-
-        const PointPairDistance&
-        getMaxPointDistance() const
-        {
-            return maxPtDist;
-        }
-
-    private:
-        PointPairDistance maxPtDist;
-        PointPairDistance minPtDist;
-        const geom::Geometry& geom;
-        std::size_t numSubSegs; // = 0;
-
-        // Declare type as noncopyable
-        MaxDensifiedByFractionDistanceFilter(const MaxDensifiedByFractionDistanceFilter& other);
-        MaxDensifiedByFractionDistanceFilter& operator=(const MaxDensifiedByFractionDistanceFilter& rhs);
-    };
-
-private:
-
-    void
-    compute(const geom::Geometry& p_g0,
-            const geom::Geometry& p_g1)
-    {
-        computeOrientedDistance(p_g0, p_g1, ptDist);
-        computeOrientedDistance(p_g1, p_g0, ptDist);
-    }
-
-    void computeOrientedDistance(const geom::Geometry& discreteGeom,
-                                 const geom::Geometry& geom,
-                                 PointPairDistance& ptDist);
-
-    const geom::Geometry& g0;
-
-    const geom::Geometry& g1;
-
-    PointPairDistance ptDist;
-
-    /// Value of 0.0 indicates that no densification should take place
-    double densifyFrac; // = 0.0;
+      private:
+    PointPairDistance maxPtDist;
+    PointPairDistance minPtDist;
+    DistanceToPoint euclideanDist;
+    const geom::Geometry &geom;
 
     // Declare type as noncopyable
-    DiscreteHausdorffDistance(const DiscreteHausdorffDistance& other) = delete;
-    DiscreteHausdorffDistance& operator=(const DiscreteHausdorffDistance& rhs) = delete;
+    MaxPointDistanceFilter(const MaxPointDistanceFilter &other);
+    MaxPointDistanceFilter &operator=(const MaxPointDistanceFilter &rhs);
+  };
+
+  class MaxDensifiedByFractionDistanceFilter : public geom::CoordinateSequenceFilter {
+      public:
+    MaxDensifiedByFractionDistanceFilter(const geom::Geometry &p_geom, double fraction)
+      : geom(p_geom), numSubSegs(std::size_t(util::round(1.0 / fraction))) {
+    }
+
+    void filter_ro(const geom::CoordinateSequence &seq, std::size_t index) override;
+
+    bool isGeometryChanged() const override {
+      return false;
+    }
+
+    bool isDone() const override {
+      return false;
+    }
+
+    const PointPairDistance &getMaxPointDistance() const {
+      return maxPtDist;
+    }
+
+      private:
+    PointPairDistance maxPtDist;
+    PointPairDistance minPtDist;
+    const geom::Geometry &geom;
+    std::size_t numSubSegs; // = 0;
+
+    // Declare type as noncopyable
+    MaxDensifiedByFractionDistanceFilter(const MaxDensifiedByFractionDistanceFilter &other);
+    MaxDensifiedByFractionDistanceFilter &operator=(const MaxDensifiedByFractionDistanceFilter &rhs);
+  };
+
+    private:
+  void compute(const geom::Geometry &p_g0, const geom::Geometry &p_g1) {
+    computeOrientedDistance(p_g0, p_g1, ptDist);
+    computeOrientedDistance(p_g1, p_g0, ptDist);
+  }
+
+  void
+  computeOrientedDistance(const geom::Geometry &discreteGeom, const geom::Geometry &geom, PointPairDistance &ptDist);
+
+  const geom::Geometry &g0;
+
+  const geom::Geometry &g1;
+
+  PointPairDistance ptDist;
+
+  /// Value of 0.0 indicates that no densification should take place
+  double densifyFrac; // = 0.0;
+
+  // Declare type as noncopyable
+  DiscreteHausdorffDistance(const DiscreteHausdorffDistance &other) = delete;
+  DiscreteHausdorffDistance &operator=(const DiscreteHausdorffDistance &rhs) = delete;
 };
 
-} // geos::algorithm::distance
-} // geos::algorithm
-} // geos
+} // namespace distance
+} // namespace algorithm
+} // namespace geos
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
 #endif // GEOS_ALGORITHM_DISTANCE_DISCRETEHAUSDORFFDISTANCE_H
-
