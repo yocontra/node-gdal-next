@@ -175,7 +175,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * @param {gdal.SpatialReference|null} srs Layer projection
  * @param {number|Function} geomType Geometry type or constructor ({{#crossLink
  * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
- * @param {string[]|object} creation_options driver-specific layer creation
+ * @param {string[]|object} [creation_options] driver-specific layer creation
  * options
  * @return {gdal.Layer}
  */
@@ -196,7 +196,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * @param {gdal.SpatialReference|null} srs Layer projection
  * @param {number|Function} geomType Geometry type or constructor ({{#crossLink
  * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
- * @param {string[]|object} creation_options driver-specific layer creation
+ * @param {string[]|object} [creation_options] driver-specific layer creation
  * options
  * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Layer>}

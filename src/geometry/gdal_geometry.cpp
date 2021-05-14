@@ -479,8 +479,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method distanceAsync
  * @param {gdal.Geometry} geometry
- * @param {callback<boolean>} [callback=undefined] {{{cb}}}
- * @return {Promise<boolean>}
+ * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @return {Promise<number>}
  */
 
 NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
@@ -771,7 +771,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
  * {{{async}}}
  *
  * @method simplifyAsync
- * @param {gdal.Geometry} geometry
+ * @param {number} tolerance
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Geometry>}
  */
@@ -870,7 +870,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
  * Convert a geometry into well known text format.
  *
  * @method toWKT
- * @return {gdal.Geometry}
+ * @return {string}
  */
 
 /**
@@ -878,8 +878,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
  * {{{async}}}
  *
  * @method toWKTAsync
- * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Geometry>}
+ * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @return {Promise<string>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
@@ -920,7 +920,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
  * (wkbByteOrder)"}}see options{{/crossLink}})
  * @param {string} [variant="OGC"] ({{#crossLink "Constants (wkbVariant)"}}see
  * options{{/crossLink}})
- * @return {gdal.Geometry}
+ * @return {Buffer}
  */
 
 /**
@@ -932,8 +932,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
  * (wkbByteOrder)"}}see options{{/crossLink}})
  * @param {string} [variant="OGC"] ({{#crossLink "Constants (wkbVariant)"}}see
  * options{{/crossLink}})
- * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Geometry>}
+ * @param {callback<Buffer>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Buffer>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
@@ -1012,7 +1012,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
  * Convert a geometry into KML format.
  *
  * @method toKML
- * @return {gdal.Geometry}
+ * @return {string}
  */
 
 /**
@@ -1020,8 +1020,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
  * {{{async}}}
  *
  * @method toKMLAsync
- * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Geometry>}
+ * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @return {Promise<string>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
@@ -1054,7 +1054,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
  * Convert a geometry into GML format.
  *
  * @method toGML
- * @return {gdal.Geometry}
+ * @return {string}
  */
 
 /**
@@ -1062,8 +1062,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
  * {{{async}}}
  *
  * @method toGMLAsync
- * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Geometry>}
+ * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @return {Promise<string>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
@@ -1096,7 +1096,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
  * Convert a geometry into JSON format.
  *
  * @method toJSON
- * @return {gdal.Geometry}
+ * @return {string}
  */
 
 /**
@@ -1104,8 +1104,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
  * {{{async}}}
  *
  * @method toJSONAsync
- * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Geometry>}
+ * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @return {Promise<string>}
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
@@ -1189,8 +1189,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
  * {{{async}}}
  *
  * @method getEnvelopeAsync
- * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Geometry>}
+ * @param {callback<gdal.Envelope>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Envelope>}
  */
 GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
   // returns object containing boundaries until complete OGREnvelope binding is
@@ -1282,6 +1282,16 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
  * @method flattenTo2D
  * @return {void}
  */
+
+/**
+ * Convert geometry to strictly 2D
+ * {{{async}}}
+ *
+ * @method flattenTo2DAsync
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
+ */
+
 NODE_WRAPPED_ASYNC_METHOD(Geometry, flattenTo2D, flattenTo2D);
 
 // --- JS static methods (OGRGeometryFactory) ---

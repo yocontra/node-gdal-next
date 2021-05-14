@@ -192,7 +192,7 @@ NAN_METHOD(Dataset::toString) {
  *
  * @method getMetadata
  * @param {string} [domain]
- * @return {object}
+ * @return {any}
  */
 NAN_METHOD(Dataset::getMetadata) {
   Nan::HandleScope scope;
@@ -502,7 +502,7 @@ NAN_METHOD(Dataset::getFileList) {
  * Fetches GCPs.
  *
  * @method getGCPs
- * @return {object[]}
+ * @return {any[]}
  */
 NAN_METHOD(Dataset::getGCPs) {
   Nan::HandleScope scope;
@@ -772,7 +772,7 @@ NAN_GETTER(Dataset::descriptionGetter) {
  *
  * @readOnly
  * @attribute rasterSize
- * @type {object}
+ * @type {xyz}
  */
 NAN_GETTER(Dataset::rasterSizeGetter) {
   Nan::HandleScope scope;

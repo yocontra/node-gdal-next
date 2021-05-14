@@ -104,6 +104,7 @@ NAN_METHOD(CompoundCurveCurves::count) {
  * var curve1 = compound.curves.get(1);```
  *
  * @method get
+ * @param {number} index
  * @return {gdal.CompoundCurve|gdal.SimpleCurve}
  */
 NAN_METHOD(CompoundCurveCurves::get) {

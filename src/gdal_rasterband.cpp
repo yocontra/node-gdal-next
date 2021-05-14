@@ -347,7 +347,7 @@ NAN_METHOD(RasterBand::getStatistics) {
  * @method computeStatistics
  * @param {boolean} allow_approximation If `true` statistics may be computed
  * based on overviews or a subset of all tiles.
- * @return {object} Statistics containing `"min"`, `"max"`, `"mean"`,
+ * @return {any} Statistics containing `"min"`, `"max"`, `"mean"`,
  * `"std_dev"` properties.
  */
 NAN_METHOD(RasterBand::computeStatistics) {
@@ -425,6 +425,7 @@ NAN_METHOD(RasterBand::setStatistics) {
  *
  * @method getMetadata
  * @param {string} [domain]
+ * @return {any}
  */
 NAN_METHOD(RasterBand::getMetadata) {
   Nan::HandleScope scope;
@@ -527,7 +528,7 @@ NAN_GETTER(RasterBand::descriptionGetter) {
  *
  * @readOnly
  * @attribute size
- * @type {object}
+ * @type {xyz}
  */
 NAN_GETTER(RasterBand::sizeGetter) {
   Nan::HandleScope scope;
@@ -552,7 +553,7 @@ NAN_GETTER(RasterBand::sizeGetter) {
  *
  * @readOnly
  * @attribute blockSize
- * @type {object}
+ * @type {xyz}
  */
 NAN_GETTER(RasterBand::blockSizeGetter) {
   Nan::HandleScope scope;

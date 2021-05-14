@@ -104,6 +104,7 @@ NAN_METHOD(PolygonRings::count) {
  * var interior = polygon.rings.get(1);```
  *
  * @method get
+ * @param {number} index
  * @return {gdal.LinearRing}
  */
 NAN_METHOD(PolygonRings::get) {

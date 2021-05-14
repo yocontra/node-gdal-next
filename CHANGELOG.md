@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.1.1] Unreleased
 
 ### Changed
+  - Fully unit-tested TypeScript definitions with many method signatures fixed
   - Properties without setters are now correctly identified as being read-only in the TypeScript bindings
+  - Exported all previously internal _options types used for methods such as RasterBand.read or reprojectImage
 
 ## [3.1.0] 2021-05-11
 

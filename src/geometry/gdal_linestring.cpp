@@ -38,7 +38,7 @@ void LineString::Initialize(Local<Object> target) {
  *
  * @constructor
  * @class gdal.LineString
- * @extends gdal.Geometry
+ * @extends gdal.SimpleCurve
  */
 
 NAN_METHOD(LineString::toString) {

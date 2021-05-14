@@ -112,8 +112,14 @@ inline bool setField(OGRFeature *f, int field_index, Local<Value> val) {
  *
  * @method set
  * @throws Error
- * @param {string|number|object} key Field name or index
+ * @param {string|number} key Field name or index
  * @param {any} value
+ */
+
+/**
+ * @method set
+ * @throws Error
+ * @param {object} fields
  */
 NAN_METHOD(FeatureFields::set) {
   Nan::HandleScope scope;
@@ -320,8 +326,8 @@ NAN_METHOD(FeatureFields::indexOf) {
  * Outputs the field data as a pure JS object.
  *
  * @throws Error
- * @method toobject
- * @return {object}
+ * @method toObject
+ * @return {any}
  */
 NAN_METHOD(FeatureFields::toObject) {
   Nan::HandleScope scope;

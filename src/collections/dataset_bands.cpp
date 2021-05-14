@@ -143,8 +143,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  *
  * @method create
  * @throws Error
- * @param {number} dataType Type of band ({{#crossLink "Constants (GDT)"}}see
- * GDT constants{{/crossLink}}).
+ * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
  * @param {object} [options] Creation options
  * @return {gdal.RasterBand}
  */
@@ -155,8 +154,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  *
  * @method createAsync
  * @throws Error
- * @param {number} dataType Type of band ({{#crossLink "Constants (GDT)"}}see
- * GDT constants{{/crossLink}}).
+ * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
  * @param {object} [options] Creation options
  * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.RasterBand>}
@@ -228,6 +226,17 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
  *
  * @method count
  * @return {number}
+ */
+
+/**
+ * 
+ * Returns the number of bands.
+ * {{{async}}}
+ *
+ * @method countAsync
+ *
+ * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
   Nan::HandleScope scope;

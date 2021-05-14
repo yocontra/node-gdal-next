@@ -169,7 +169,7 @@ NAN_METHOD(CoordinateTransformation::toString) {
  * @param {number} x
  * @param {number} y
  * @param {number} [z]
- * @return {object} A regular object containing `x`, `y`, `z` properties.
+ * @return {xyz} A regular object containing `x`, `y`, `z` properties.
  */
 NAN_METHOD(CoordinateTransformation::transformPoint) {
   Nan::HandleScope scope;

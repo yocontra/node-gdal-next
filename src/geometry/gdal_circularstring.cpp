@@ -41,7 +41,7 @@ void CircularString::Initialize(Local<Object> target) {
  *
  * @constructor
  * @class gdal.CircularString
- * @extends gdal.Geometry
+ * @extends gdal.SimpleCurve
  */
 
 NAN_METHOD(CircularString::toString) {

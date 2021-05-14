@@ -336,9 +336,7 @@ NAN_METHOD(SpatialReference::cloneGeogCS) {
  * Get the authority name for a node. The most common authority is "EPSG".
  *
  * @method getAuthorityName
- * @param {string} target_key The partial or complete path to the node to get an
- * authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to
- * search for an authority node on the root element.
+ * @param {string} [target_key] The partial or complete path to the node to get an authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to search for an authority node on the root element.
  * @return {string}
  */
 NAN_METHOD(SpatialReference::getAuthorityName) {
@@ -356,9 +354,7 @@ NAN_METHOD(SpatialReference::getAuthorityName) {
  * Get the authority code for a node.
  *
  * @method getAuthorityCode
- * @param {string} target_key The partial or complete path to the node to get an
- * authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to
- * search for an authority node on the root element.
+ * @param {string} [target_key] The partial or complete path to the node to get an authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to search for an authority node on the root element.
  * @return {string}
  */
 NAN_METHOD(SpatialReference::getAuthorityCode) {
@@ -758,7 +754,7 @@ NAN_METHOD(SpatialReference::fromUserInput) {
  * @static
  * @throws Error
  * @method fromEPSG
- * @param {string} input
+ * @param {number} input
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromEPSG) {
@@ -858,10 +854,14 @@ NAN_METHOD(SpatialReference::fromESRI) {
 }
 
 /**
+ * @typedef units { units: string, value: number }
+ */
+
+/**
  * Fetch linear geographic coordinate system units.
  *
  * @method getLinearUnits
- * @return {object} An object containing `value` and `unit` properties.
+ * @return {units} An object containing `value` and `unit` properties.
  */
 NAN_METHOD(SpatialReference::getLinearUnits) {
   Nan::HandleScope scope;
@@ -882,7 +882,7 @@ NAN_METHOD(SpatialReference::getLinearUnits) {
  * Fetch angular geographic coordinate system units.
  *
  * @method getAngularUnits
- * @return {object} An object containing `value` and `unit` properties.
+ * @return {units} An object containing `value` and `unit` properties.
  */
 NAN_METHOD(SpatialReference::getAngularUnits) {
   Nan::HandleScope scope;

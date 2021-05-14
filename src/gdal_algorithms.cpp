@@ -16,7 +16,7 @@ void Algorithms::Initialize(Local<Object> target) {
 }
 
 /**
- * @interface _fillOptions { src: gdal.RasterBand, mask?: gdal.RasterBand, searchDist: number, smoothingIterations?: number }
+ * @typedef FillOptions { src: gdal.RasterBand, mask?: gdal.RasterBand, searchDist: number, smoothingIterations?: number }
  */
 
 /**
@@ -26,7 +26,7 @@ void Algorithms::Initialize(Local<Object> target) {
  * @method fillNodata
  * @static
  * @for gdal
- * @param {_fillOptions} options
+ * @param {FillOptions} options
  * @param {gdal.RasterBand} options.src This band to be updated in-place.
  * @param {gdal.RasterBand} [options.mask] Mask band
  * @param {number} options.searchDist The maximum distance (in pixels) that the algorithm will search out for values to interpolate.
@@ -41,7 +41,7 @@ void Algorithms::Initialize(Local<Object> target) {
  * @method fillNodataAsync
  * @static
  * @for gdal
- * @param {_fillOptions} options
+ * @param {FillOptions} options
  * @param {gdal.RasterBand} options.src This band to be updated in-place.
  * @param {gdal.RasterBand} [options.mask] Mask band
  * @param {number} options.searchDist The maximum distance (in pixels) that the algorithm will search out for values to interpolate.
@@ -85,7 +85,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
 }
 
 /**
- * @interface _contourOptions { src: gdal.RasterBand, dst: gdal.Layer, offset?: number, interval?: number, fixedLevels?: number, nodata?: number, idField?: number, elevField?: number }
+ * @typedef ContourOptions { src: gdal.RasterBand, dst: gdal.Layer, offset?: number, interval?: number, fixedLevels?: number[], nodata?: number, idField?: number, elevField?: number }
  */
 
 /**
@@ -100,7 +100,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @method contourGenerate
  * @static
  * @for gdal
- * @param {_contourOptions} options
+ * @param {ContourOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
  * @param {number} [options.offset=0] The "offset" relative to which contour intervals are applied. This is normally zero, but could be different. To generate 10m contours at 5, 15, 25, ... the offset would be 5.
@@ -124,7 +124,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @method contourGenerateAsync
  * @static
  * @for gdal
- * @param {_contourOptions} options
+ * @param {ContourOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
  * @param {number} [options.offset=0] The "offset" relative to which contour intervals are applied. This is normally zero, but could be different. To generate 10m contours at 5, 15, 25, ... the offset would be 5.
@@ -219,7 +219,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
 }
 
 /**
- * @interface _sieveOptions { src: gdal.RasterBand, dst: gdal.RasterBand, mask?: gdal.RasterBand, threshold: number, connectedness?: number }
+ * @typedef SieveOptions { src: gdal.RasterBand, dst: gdal.RasterBand, mask?: gdal.RasterBand, threshold: number, connectedness?: number }
  */
 
 /**
@@ -229,7 +229,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @method sieveFilter
  * @static
  * @for gdal
- * @param {_sieveOptions} options
+ * @param {SieveOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.RasterBand} options.dst Output raster band. It may be the same as src band to update the source in place.
  * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.
@@ -245,7 +245,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @method sieveFilterAsync
  * @static
  * @for gdal
- * @param {_sieveOptions} options
+ * @param {SieveOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.RasterBand} options.dst Output raster band. It may be the same as src band to update the source in place.
  * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.
@@ -374,7 +374,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
 }
 
 /**
- * @interface _polygonizeOptions { src: gdal.RasterBand, dst: gdal.Layer, mask?: gdal.RasterBand, pixValField: number, connectedness?: number, useFloats?:boolean }
+ * @typedef PolygonizeOptions { src: gdal.RasterBand, dst: gdal.Layer, mask?: gdal.RasterBand, pixValField: number, connectedness?: number, useFloats?:boolean }
  */
 
 /**
@@ -387,7 +387,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @method polygonize
  * @static
  * @for gdal
- * @param {_polygonizeOptions} options
+ * @param {PolygonizeOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
  * @param {gdal.RasterBand} [options.mask]
@@ -406,7 +406,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @method polygonizeAsync
  * @static
  * @for gdal
- * @param {_polygonizeOptions} options
+ * @param {PolygonizeOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
  * @param {gdal.RasterBand} [options.mask]

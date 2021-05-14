@@ -481,7 +481,7 @@ NAN_METHOD(Driver::rename) {
  * @throws Error
  * @method getMetadata
  * @param {string} [domain]
- * @return {object}
+ * @return {any}
  */
 NAN_METHOD(Driver::getMetadata) {
   Nan::HandleScope scope;

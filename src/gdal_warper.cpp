@@ -163,7 +163,7 @@ CPLErr GDALReprojectImageMulti(
 }
 
 /**
- * @interface _reprojectOptions { src: gdal.Dataset, dst: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, resampling?: string, cutline?: gdal.Geometry, srcBands?: number[], dstBands?: number[], srcNodata?: number, dstNodata?: number, memoryLimit?: number, maxError?: number, multi?: boolean, options?: object }
+ * @typedef ReprojectOptions { src: gdal.Dataset, dst: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, resampling?: string, cutline?: gdal.Geometry, srcBands?: number[], dstBands?: number[], srcAlphaBand?: number, dstAlphaBand?: number, srcNodata?: number, dstNodata?: number, blend?: number, memoryLimit?: number, maxError?: number, multi?: boolean, options?: object }
  */
 
 /**
@@ -173,16 +173,13 @@ CPLErr GDALReprojectImageMulti(
  * @method reprojectImage
  * @static
  * @for gdal
- * @param {_reprojectOptions} options
+ * @param {ReprojectOptions} options
  * @param {gdal.Dataset} options.src
  * @param {gdal.Dataset} options.dst
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {string} [options.resampling] Resampling algorithm ({{#crossLink
- * "Constants (GRA)"}}available options{{/crossLink}})
- * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel
- * coordinates. Use CoordinateTransformation to convert between georeferenced
- * coordinates and pixel coordinates
+ * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
+ * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel coordinates. Use CoordinateTransformation to convert between georeferenced coordinates and pixel coordinates
  * @param {number[]} [options.srcBands]
  * @param {number[]} [options.dstBands]
  * @param {number} [options.srcAlphaBand]
@@ -192,8 +189,7 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.memoryLimit]
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
- * @param {string[]|object} [options.options] Warp options (see:
- * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {string[]|object} [options.options] Warp options (see: [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
  */
 
 /**
@@ -204,16 +200,13 @@ CPLErr GDALReprojectImageMulti(
  * @method reprojectImageAsync
  * @static
  * @for gdal
- * @param {_reprojectOptions} options
+ * @param {ReprojectOptions} options
  * @param {gdal.Dataset} options.src
  * @param {gdal.Dataset} options.dst
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
- * @param {string} [options.resampling] Resampling algorithm ({{#crossLink
- * "Constants (GRA)"}}available options{{/crossLink}})
- * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel
- * coordinates. Use CoordinateTransformation to convert between georeferenced
- * coordinates and pixel coordinates
+ * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
+ * @param {gdal.Geometry} [options.cutline] Must be in src dataset pixel coordinates. Use CoordinateTransformation to convert between georeferenced coordinates and pixel coordinates
  * @param {number[]} [options.srcBands]
  * @param {number[]} [options.dstBands]
  * @param {number} [options.srcAlphaBand]
@@ -223,8 +216,7 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.memoryLimit]
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
- * @param {string[]|object} [options.options] Warp options (see:
- * [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {string[]|object} [options.options] Warp options (see:[reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -321,7 +313,11 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
 }
 
 /**
- * @interface _warpOptions { src: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, maxError?: number }
+ * @typedef WarpOptions { src: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, maxError?: number }
+ */
+
+/**
+ * @typedef WarpOutput { rasterSize: xyz, geoTransform: number[] }
  */
 
 /**
@@ -332,12 +328,12 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @method suggestedWarpOutput
  * @static
  * @for gdal
- * @param {_warpOptions} options Warp options
+ * @param {WarpOptions} options Warp options
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
  * @param {number} [options.maxError=0]
- * @return {object} An object containing `"rasterSize"` and `"geoTransform"`
+ * @return {WarpOutput} An object containing `"rasterSize"` and `"geoTransform"`
  * properties.
  */
 
@@ -350,13 +346,13 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @method suggestedWarpOutputAsync
  * @static
  * @for gdal
- * @param {_warpOptions} options Warp options
+ * @param {WarpOptions} options Warp options
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
  * @param {gdal.SpatialReference} options.t_srs
  * @param {number} [options.maxError=0]
- * @param {callback<object>} [callback=undefined] {{{cb}}}
- * @return {Promise<object>}
+ * @param {callback<WarpOutput>} [callback=undefined] {{{cb}}}
+ * @return {Promise<WarpOutput>}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
   Nan::HandleScope scope;
