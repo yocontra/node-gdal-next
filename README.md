@@ -136,6 +136,7 @@ const ds2: Promise<gdal.Dataset> = gdal.openAsync('sample.tif')
 
 `AAIGrid`, `ACE2`, `ADRG`, `AIG`, `AVCBin`, `AVCE00`, `AeronavFAA`, `AirSAR`, `BLX`, `BMP`, `BNA`, `BT`, `CEOS`, `COASP`, `COSAR`, `CPG`, `CSV`, `CTG`, `CTable2`, `DGN`, `DIMAP`, `DIPEx`, `DOQ1`, `DOQ2`, `DTED`, `DXF`, `E00GRID`, `ECRGTOC`, `EDIGEO`, `EHdr`, `EIR`, `ELAS`, `ENVI`, `ERS`, `ESAT`, `ESRI Shapefile`, `MapInfo File`, `MBTiles`, `FAST`, `FIT`, `FujiBAS`, `GFF`, `GML`, `GPSBabel`, `GPSTrackMaker`, `GPX`, `GRASSASCIIGrid`, `GS7BG`, `GSAG`, `GSBG`, `GSC`, `GTX`, `GTiff`, `GenBin`, `GeoJSON`, `GeoRSS`, `Geoconcept`, `GPKG`, `HF2`, `HFA`, `HTF`, `IDA`, `ILWIS`, `INGR`, `IRIS`, `ISIS2`, `ISIS3`, `Idrisi`, `JAXAPALSAR`, `JDEM`, `JPEG`, `KMLSUPEROVERLAY`, `KML`, `KRO`, `L1B`, `LAN`, `LCP`, `LOSLAS`, `Leveller`, `MAP`, `MEM`, `Memory`, `MFF2`, `MFF`, `MITAB`, `MVT`, `NDF`, `NGSGEOID`, `NITF`, `NTv2`, `NWT_GRC`, `NWT_GRD`, `OGR_GMT`, `OGR_PDS`, `OGR_SDTS`, `OGR_VRT`, `OSM`, `OpenAir`, `OpenFileGDB`, `PAux`, `PCIDSK`, `PDS`, `PGDUMP`, `PNG`, `PNM`, `REC`, `RMF`, `ROI_PAC`, `RPFTOC`, `RS2`, `RST`, `R`, `S57`, `SAGA`, `SAR_CEOS`, `SDTS`, `SEGUKOOA`, `SEGY`, `SGI`, `SNODAS`, `SQLite`, `SRP`, `SRTMHGT`, `SUA`, `SVG`, `SXF`, `TIL`, `TSX`, `Terragen`, `UK .NTF`, `USGSDEM`, `VICAR`, `VRT`, `WAsP`, `XPM`, `XPlane`, `XYZ`, `ZMap`
 
+
 ## Contributors
 
 This binding was originally the product of a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
@@ -160,3 +161,51 @@ Copyright &copy; 2020-2021 [Momtchil Momtchev, @mmomtchev](https://github.com/mm
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+## Unit-tested platforms with pre-built binaries
+Currently packages are built and unit tested for all possible combinations of:
+
+---
+| Node | OS | GDAL |
+| --- | --- | --- |
+| Node.js 10.x | Ubuntu 16.04 | system installed GDAL 1.11.3
+| Node.js 12.x | Ubuntu 16.04 | system installed GDAL 1.11.3
+| Node.js 14.x | Ubuntu 16.04 | system installed GDAL 1.11.3
+| Node.js 15.x | Ubuntu 16.04 | system installed GDAL 1.11.3
+| Node.js 16.x | Ubuntu 16.04 | system installed GDAL 1.11.3
+| Node.js 10.x | Ubuntu 16.04 | bundled GDAL 3.2.2
+| Node.js 12.x | Ubuntu 16.04 | bundled GDAL 3.2.2
+| Node.js 14.x | Ubuntu 16.04 | bundled GDAL 3.2.2
+| Node.js 15.x | Ubuntu 16.04 | bundled GDAL 3.2.2
+| Node.js 16.x | Ubuntu 16.04 | bundled GDAL 3.2.2
+| Node.js 10.x | Ubuntu 18.04 | system installed GDAL 2.2.3
+| Node.js 12.x | Ubuntu 18.04 | system installed GDAL 2.2.3
+| Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
+| Node.js 15.x | Ubuntu 18.04 | system installed GDAL 2.2.3
+| Node.js 16.x | Ubuntu 18.04 | system installed GDAL 2.2.3
+| Node.js 10.x | Ubuntu 18.04 | bundled GDAL 3.2.2
+| Node.js 12.x | Ubuntu 18.04 | bundled GDAL 3.2.2
+| Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.2
+| Node.js 15.x | Ubuntu 18.04 | bundled GDAL 3.2.2
+| Node.js 16.x | Ubuntu 18.04 | bundled GDAL 3.2.2
+| Node.js 10.x | Ubuntu 20.04 | system installed GDAL 3.0.4
+| Node.js 12.x | Ubuntu 20.04 | system installed GDAL 3.0.4
+| Node.js 14.x | Ubuntu 20.04 | system installed GDAL 3.0.4
+| Node.js 15.x | Ubuntu 20.04 | system installed GDAL 3.0.4
+| Node.js 16.x | Ubuntu 20.04 | system installed GDAL 3.0.4
+| Node.js 10.x | Ubuntu 20.04 | bundled GDAL 3.2.2
+| Node.js 12.x | Ubuntu 20.04 | bundled GDAL 3.2.2
+| Node.js 14.x | Ubuntu 20.04 | bundled GDAL 3.2.2 (*code coverage platform*)
+| Node.js 15.x | Ubuntu 20.04 | bundled GDAL 3.2.2
+| Node.js 16.x | Ubuntu 20.04 | bundled GDAL 3.2.2
+| Node.js 10.x | Windows Server 2019 | bundled GDAL 3.2.2
+| Node.js 12.x | Windows Server 2019 | bundled GDAL 3.2.2
+| Node.js 14.x | Windows Server 2019 | bundled GDAL 3.2.2
+| Node.js 15.x | Windows Server 2019 | bundled GDAL 3.2.2
+| Node.js 16.x | Windows Server 2019 | bundled GDAL 3.2.2
+| Node.js 10.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
+| Node.js 12.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
+| Node.js 14.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
+| Node.js 15.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
+| Node.js 16.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
+---
