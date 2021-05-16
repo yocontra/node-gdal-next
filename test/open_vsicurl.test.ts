@@ -5,7 +5,7 @@ import { assert } from 'chai'
 describe('Open', () => {
   afterEach(global.gc)
 
-  if (os.type() !== 'Linux') {
+  if (os.type() !== 'Linux' && os.type() !== 'Darwin') {
     return
   }
 

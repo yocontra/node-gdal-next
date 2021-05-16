@@ -72,6 +72,10 @@
 				"include_dirs": ["./arch/unix"]
 			}],
 			["OS == 'mac'", {
+				"defines": ["HAVE_CURL=1"],
+				"dependencies": [
+					"<(deps_dir)/libcurl/libcurl.gyp:libcurl"
+				],
 				"xcode_settings": {
 					"GCC_ENABLE_CPP_RTTI": "YES",
 					"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
