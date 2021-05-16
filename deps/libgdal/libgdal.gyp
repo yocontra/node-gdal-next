@@ -128,6 +128,7 @@
 				"./gdal/port/cpl_vsil_gs.cpp",
 				"./gdal/port/cpl_vsil_curl_streaming.cpp",
 				"./gdal/port/cpl_vsil_curl.cpp",
+				"./gdal/port/cpl_vsil_uploadonclose.cpp",
 				"./gdal/port/cpl_vsil_crypt.cpp",
 				"./gdal/port/cpl_vsil_cache.cpp",
 				"./gdal/port/cpl_vsil_buffered_reader.cpp",

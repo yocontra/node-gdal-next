@@ -1,3 +1,13 @@
+
+# 3.2
+- Native support without rebuilding for libcurl, Amazon S3, Google Cloud, Microsoft Azure and Alibaba COSS at least on Linux and OSX, Windows is a stretch target
+
+# 3.3
+- GDAL 3.3
+- *Dropping support for Node.js 10.x, GDAL 1.x, Python 2 and Ubuntu 16.04*
+
+# One day, maybe
+
 - Switch from nan to N-API
   - Normalize the build system for this package to match more recent native modules like node-sqlite
 - Switch off of G++ to Clang for all CI work

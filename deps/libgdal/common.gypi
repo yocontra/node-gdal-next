@@ -59,6 +59,12 @@
 					"GenerateDebugInformation": "false",
 				},
 			}],
+			["OS == 'linux'", {
+				"defines": ["HAVE_CURL=1"],
+				"dependencies": [
+					"<(deps_dir)/libcurl/libcurl.gyp:libcurl"
+				],
+			}],
 			["OS == 'freebsd'", {
 				"include_dirs": ["./arch/bsd"]
 			}],
