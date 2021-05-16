@@ -30,6 +30,9 @@
 		"conditions": [
 			["OS == 'win'", {
 				"defines": [ "NOMINMAX", "WIN32" ]
+			}],
+			["OS == 'mac'", {
+				"libraries": [ "-framework Security" ]
 			}]
 		],
 		"link_settings": {

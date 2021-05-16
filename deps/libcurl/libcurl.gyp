@@ -48,8 +48,6 @@
 						"HAVE_TERMIO_H=1",
 						"HAVE_TIME_H=1",
 						"RETSIGTYPE=void",
-						"SELECT_TYPE_ARG234=fd_set *",
-						"SELECT_TYPE_ARG5=struct timeval *",
 						"TIME_WITH_SYS_TIME=1",
 						"USE_OPENSSL=1",
 						"USE_TLS_SRP=1"
@@ -204,6 +202,8 @@
 				"RECV_TYPE_ARG3=size_t",
 				"RECV_TYPE_ARG4=int",
 				"RECV_TYPE_RETV=ssize_t",
+				"SELECT_TYPE_ARG234=fd_set *",
+				"SELECT_TYPE_ARG5=struct timeval *",
 				"SELECT_QUAL_ARG5=",
 				"SELECT_TYPE_ARG1=int",
 				"SELECT_TYPE_RETV=int",
