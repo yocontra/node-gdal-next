@@ -139,6 +139,8 @@ When using the bundled GDAL version, the following drivers will be available:
 
 If rebuilding the module against the system-installed shared GDAL library, all drivers supported by it would also be supported by this module. Currently this is the only way to have HTTP, Amazon S3, Google Cloud, Microsoft Azure and Alibaba COSS support.
 
+`node-gdal-async@3.2` should have built-in networking support at least on Linux and OSX. Early experimental support for `/vsicurl/` URLs is already available on Linux on `git@master`.
+
 ## Contributors
 
 This binding was originally the product of a collaboration between [Natural Atlas](https://github.com/naturalatlas) and [Mapbox](https://github.com/mapbox). Its contributors are [Brandon Reavis](https://github.com/brandonreavis), [Brian Reavis](https://github.com/brianreavis), [Dane Springmeyer](https://github.com/springmeyer), [Zac McCormick](https://github.com/zhm), and [others](https://github.com/naturalatlas/node-gdal/graphs/contributors).
