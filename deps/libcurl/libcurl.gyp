@@ -183,7 +183,6 @@
 				["OS == 'linux'", {
 					"defines": [
 						"OS=\"x86_64-pc-linux-gnu\"",
-						"CURL_CA_BUNDLE=\"/etc/ssl/certs/ca-certificates.crt\"",
 						"CURL_EXTERN_SYMBOL=__attribute__ ((__visibility__ (\"default\")))",
 						"GETSERVBYPORT_R_ARGS=6",
 						"GETSERVBYPORT_R_BUFSIZE=4096",

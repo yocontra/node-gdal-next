@@ -18,3 +18,6 @@ if [[ ! -f curl-${CURL_VERSION}.tar.gz ]]; then
 fi
 tar -xzf curl-${CURL_VERSION}.tar.gz
 mv curl-${CURL_VERSION} $dir_curl
+
+# update the CA bundle
+curl -L https://curl.se/ca/cacert.pem -o cacert.pem
