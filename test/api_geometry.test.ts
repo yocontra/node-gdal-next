@@ -140,9 +140,8 @@ describe('gdal.Geometry', () => {
     it('should return valid result', () => {
       const point2d = new gdal.Point(1, 2)
       const wkb = point2d.toWKBAsync()
-      assert.isFulfilled(wkb)
 
-      wkb.then((wkb) => {
+      return assert.isFulfilled(wkb.then((wkb) => {
         let expected
         if (wkb[0] === 0) {
           expected = '00000000013ff00000000000004000000000000000'
@@ -150,7 +149,7 @@ describe('gdal.Geometry', () => {
           expected = '0101000000000000000000f03f0000000000000040'
         }
         assert.equal(wkb.toString('hex'), expected)
-      })
+      }))
     })
   })
   describe('fromWKT()', () => {

@@ -466,7 +466,7 @@ describe('gdal.LayerAsync', () => {
         it('should throw error if dataset is destroyed', () =>
           prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
             dataset.close()
-            assert.isRejected(layer.features.countAsync(), /already destroyed/)
+            return assert.isRejected(layer.features.countAsync(), /already destroyed/)
           })
         )
       })

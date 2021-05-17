@@ -67,9 +67,7 @@ describe('gdal', () => {
         t_srs: t_srs
       })
 
-      assert.isFulfilled(output)
-
-      output.then((output) => {
+      return assert.isFulfilled(output.then((output) => {
         assert.closeTo(output.rasterSize.x, expected.rasterSize.x, 1)
         assert.closeTo(output.rasterSize.y, expected.rasterSize.y, 1)
         assert.closeTo(output.geoTransform[0], expected.geoTransform[0], 0.001)
@@ -78,7 +76,7 @@ describe('gdal', () => {
         assert.closeTo(output.geoTransform[3], expected.geoTransform[3], 0.001)
         assert.closeTo(output.geoTransform[4], expected.geoTransform[4], 0.001)
         assert.closeTo(output.geoTransform[5], expected.geoTransform[5], 0.001)
-      })
+      }))
     })
   })
   describe('reprojectImageAsync()', () => {
@@ -165,8 +163,7 @@ describe('gdal', () => {
         dstBands: [ 2 ]
       })
 
-      assert.isFulfilled(p)
-      p.then(() => {
+      return assert.isFulfilled(p.then(() => {
         // compare with result of gdalwarp
 
         // gdalwarp might pick the output size slightly differently (+/- 1 px)
@@ -208,7 +205,7 @@ describe('gdal', () => {
         dst.close()
         cutline_ds.close()
         expected.close()
-      })
+      }))
     })
     it('should use approx transformer if maxError is given', () => {
       const options = {
@@ -409,13 +406,12 @@ describe('gdal', () => {
         reprojectOptions.options = { INIT_DEST: 123 }
 
         const p = gdal.reprojectImageAsync(reprojectOptions)
-        assert.isFulfilled(p)
 
-        p.then(() => {
+        assert.isFulfilled(p.then(() => {
           const value = reprojectOptions.dst.bands.get(1).pixels.get(0, 0)
 
           assert.equal(value, 123)
-        })
+        }))
       })
 
       if (semver.gte(gdal.version, '2.0.0')) {

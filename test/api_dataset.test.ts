@@ -75,7 +75,7 @@ describe('gdal.Dataset', () => {
         it('should throw if dataset is closed', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
           ds.close()
-          assert.isRejected(ds.bands.countAsync())
+          return assert.isRejected(ds.bands.countAsync())
         })
       })
       describe('get()', () => {

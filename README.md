@@ -139,7 +139,7 @@ When using the bundled GDAL version, the following drivers will be available:
 
 If rebuilding the module against the system-installed shared GDAL library, all drivers supported by it would also be supported by this module. Currently this is the only way to have HTTP, Amazon S3, Google Cloud, Microsoft Azure and Alibaba COSS support.
 
-`node-gdal-async@3.2` should have built-in networking support. Early experimental support for `/vsicurl/` URLs is already available on Linux and OSX on `git@master`.
+`node-gdal-async@3.2` should have built-in networking support. Early experimental support for `/vsicurl/` URLs is already available on `git@master`.
 
 ## Contributors
 
