@@ -6,7 +6,7 @@ import * as chaiAsPromised from 'chai-as-promised'
 chai.use(chaiAsPromised)
 
 describe('Open', () => {
-  if (!semver.gte(gdal.version, '2.1.0')) {
+  if (!semver.gte(gdal.version, '2.3.0')) {
     return
   }
 
