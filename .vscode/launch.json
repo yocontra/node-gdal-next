@@ -54,6 +54,26 @@
             "MIMode": "lldb",
         },
         {
+            "name": "Launch unit testing (vsdbg)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "node.exe",
+            "args": [
+                "--expose-gc",
+                "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
+                "test", "-R", "tap",
+                "--timeout", "0",
+                "--require", "ts-node/register",
+                "--require", "./test/_common.js",
+                "--require", "./test/_hooks.js",
+                "test/*.ts"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal"
+        },
+        {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch unit testing (JS)",
