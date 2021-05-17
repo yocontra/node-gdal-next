@@ -1,10 +1,15 @@
 import * as gdal from '..'
 import * as chai from 'chai'
+import * as semver from 'semver'
 const assert = chai.assert
 import * as chaiAsPromised from 'chai-as-promised'
 chai.use(chaiAsPromised)
 
 describe('Open', () => {
+  if (!semver.gte(gdal.version, '2.1.0')) {
+    return
+  }
+
   afterEach(global.gc)
   before(() => {
     gdal.config.set('AWS_NO_SIGN_REQUEST', 'YES')
