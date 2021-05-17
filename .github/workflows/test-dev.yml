@@ -83,3 +83,22 @@ jobs:
       run: npx @mapbox/node-pre-gyp rebuild --shared_gdal -j max
     - name: Run unit tests
       run: npm test
+
+
+  container_test_centos:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 14, 16 ]
+        centos-version: [ 8 ]
+        gdal-version: [ '--shared', '' ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - run: npm run container all centos ${{ matrix.centos-version }} ${{ matrix.node-version }} ${{ matrix.gdal-version }}

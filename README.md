@@ -153,7 +153,7 @@ Before submitting pull requests, please update the [tests](test) and make sure t
 
 ```sh
 $ npm test # test against bundled gdal
-$ npm run container all 16.04|18.04|20.04 10|12|14|15|16|lts  # test against shared gdal on given Ubuntu version and Node.js version
+$ npm run container all ubuntu|centos {16.04|18.04|20.04}|{6|7|8} 10|12|14|15|16|lts --shared  # test against shared gdal on given Ubuntu/CentOS version and Node.js version
 ```
 
 ## License
@@ -202,6 +202,10 @@ Currently packages are built and unit tested for the following targets:
 | Node.js 14.x | Ubuntu 20.04 | bundled GDAL 3.2.2 (*code coverage platform*)
 | Node.js 15.x | Ubuntu 20.04 | bundled GDAL 3.2.2
 | Node.js 16.x | Ubuntu 20.04 | bundled GDAL 3.2.2
+| Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
+| Node.js 16.x | CentOS 8 | system installed GDAL 3.0.4
+| Node.js 14.x | CentOS 8 | bundled GDAL 3.2.2
+| Node.js 16.x | CentOS 8 | bundled GDAL 3.2.2
 | Node.js 10.x | Windows Server 2019 | bundled GDAL 3.2.2
 | Node.js 12.x | Windows Server 2019 | bundled GDAL 3.2.2
 | Node.js 14.x | Windows Server 2019 | bundled GDAL 3.2.2

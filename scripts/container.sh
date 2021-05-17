@@ -1,37 +1,45 @@
 #!/bin/sh
 
 OP=$1
-UBUNTU=$2
-NODEJS=$3
+DIST=$2
+VERSION=$3
+NODEJS=$4
+GDAL=$5
 if [ -z "${OP}" ]; then
   OP=all
 fi
-if [ -z "${UBUNTU}" ]; then
-  UBUNTU=20.04
+if [ -z "${DIST}" ]; then
+  DIST=ubuntu
+fi
+if [ -z "${VERSION}" ]; then
+  VERSION=20.04
 fi
 if [ -z "${NODEJS}" ]; then
   NODEJS=lts
+fi
+if [ -z "${GDAL}" ]; then
+  GDAL=""
 fi
 
 SEP="\n=======================================================\n"
 case ${OP} in
   all|build)
     echo -e ${SEP}
-    echo "Building container ubuntu-node-gdal:${UBUNTU}_${NODEJS}"
+    echo "Building container ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL}"
     echo -e ${SEP}
-    docker build --build-arg UBUNTU=${UBUNTU} --build-arg NODEJS=${NODEJS} -t ubuntu-node-gdal:${UBUNTU}_${NODEJS} test/platforms/ubuntu
+    docker build --build-arg VERSION=${VERSION} --build-arg NODEJS=${NODEJS} --build-arg GDAL=${GDAL} -t ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL} -f test/platforms/${DIST}/Dockerfile test/platforms
 esac
 case ${OP} in
   all|test)
     echo -e ${SEP}
-    echo "Testing in ubuntu-node-gdal:${UBUNTU}_${NODEJS}"
+    echo "Testing in ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL}"
     echo -e ${SEP}
-    docker run -v `pwd`:/src ubuntu-node-gdal:16.04
+    docker run -v `pwd`:/src ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL}
     ;;
   shell)
     echo -e ${SEP}
-    echo "Testing in ubuntu-node-gdal:${UBUNTU}_${NODEJS} and running a shell"
+    echo "Testing in ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL} and running a shell"
     echo -e ${SEP}
-    docker run -it -v `pwd`:/src ubuntu-node-gdal:16.04 /bin/bash
+    docker run -it -v `pwd`:/src ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL} /bin/bash
     ;;
 esac
