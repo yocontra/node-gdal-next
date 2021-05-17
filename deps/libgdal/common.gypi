@@ -38,6 +38,7 @@
 			"HAVE_GEOS=1",
 			"HAVE_SQLITE=1",
 			"HAVE_MITAB=1",
+			"HAVE_CURL=1",
 			"PROJ_STATIC=1",
 			"CPU_<(endianness)_ENDIAN=1",
 			"BIGTIFF_SUPPORT=1",
@@ -47,7 +48,8 @@
 		"dependencies": [
 			"<(deps_dir)/libexpat/libexpat.gyp:libexpat",
 			"<(deps_dir)/libproj/libproj.gyp:libproj",
-			"<(deps_dir)/libsqlite/libsqlite.gyp:libsqlite"
+			"<(deps_dir)/libsqlite/libsqlite.gyp:libsqlite",
+			"<(deps_dir)/libcurl/libcurl.gyp:libcurl"
 		],
 		"conditions": [
 			["OS == 'win'", {
@@ -59,12 +61,6 @@
 					"GenerateDebugInformation": "false",
 				},
 			}],
-			["OS == 'linux'", {
-				"defines": ["HAVE_CURL=1"],
-				"dependencies": [
-					"<(deps_dir)/libcurl/libcurl.gyp:libcurl"
-				],
-			}],
 			["OS == 'freebsd'", {
 				"include_dirs": ["./arch/bsd"]
 			}],
@@ -72,10 +68,6 @@
 				"include_dirs": ["./arch/unix"]
 			}],
 			["OS == 'mac'", {
-				"defines": ["HAVE_CURL=1"],
-				"dependencies": [
-					"<(deps_dir)/libcurl/libcurl.gyp:libcurl"
-				],
 				"xcode_settings": {
 					"GCC_ENABLE_CPP_RTTI": "YES",
 					"GCC_ENABLE_CPP_EXCEPTIONS": "YES"

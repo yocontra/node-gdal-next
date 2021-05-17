@@ -94,12 +94,6 @@
 				}, {
 					"conditions": [
 						['OS == "win"', {
-							"libraries": [
-								"-lsecur32.lib",
-								"-lws2_32.lib",
-								"-lodbccp32.lib",
-								"-lodbc32.lib"
-							],
 							"include_dirs": [
 								"deps/libgdal/arch/win",
 								"deps/libgdal/gdal",

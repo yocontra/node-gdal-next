@@ -1,13 +1,12 @@
 import * as gdal from '..'
 import * as os from 'os'
-import { assert } from 'chai'
+import * as chai from 'chai'
+const assert = chai.assert
+import * as chaiAsPromised from 'chai-as-promised'
+chai.use(chaiAsPromised)
 
 describe('Open', () => {
   afterEach(global.gc)
-
-  if (os.type() !== 'Linux' && os.type() !== 'Darwin') {
-    return
-  }
 
   describe('vsicurl', () => {
     let ds
@@ -24,6 +23,43 @@ describe('Open', () => {
 
     it('should have projection', () => {
       assert.isTrue(ds.srs.isSame(gdal.SpatialReference.fromEPSG(3857)))
+    })
+  })
+
+  describe('vsicurl/Async', () => {
+    let ds
+
+    it('should not throw', () => {
+      ds = gdal.openAsync('/vsicurl/https://s3.amazonaws.com/elevation-tiles-prod/geotiff/1/1/1.tif')
+      return assert.isFulfilled(ds)
+    })
+
+    it('should be able to read raster size', () => {
+      return assert.isFulfilled(Promise.all([assert.eventually.equal(ds.then(r => r.rasterSize.x), 512),
+        assert.eventually.equal(ds.then(r => r.rasterSize.y), 512),
+        assert.eventually.equal(ds.then(r => r.bands.count()), 1)]))
+    })
+
+    it('should have projection', () => {
+      assert.eventually.isTrue(ds.then(r => r.srs.isSame(gdal.SpatialReference.fromEPSG(3857))))
+    })
+  })
+
+  describe('vsigzip/vsicurl chaining', () => {
+    let ds
+
+    it('should not throw', () => {
+      ds = gdal.open('/vsigzip//vsicurl/https://s3.amazonaws.com/elevation-tiles-prod/skadi/N40/N40E001.hgt.gz')
+    })
+
+    it('should be able to read raster size', () => {
+      assert.equal(ds.rasterSize.x, 3601)
+      assert.equal(ds.rasterSize.y, 3601)
+      assert.equal(ds.bands.count(), 1)
+    })
+
+    it('should have projection', () => {
+      assert.isTrue(ds.srs.isSame(gdal.SpatialReference.fromEPSG(4326)))
     })
   })
 })

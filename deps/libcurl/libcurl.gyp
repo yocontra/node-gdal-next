@@ -2,87 +2,11 @@
 	"includes": [
 		"../../common.gypi"
 	],
-	"targets": [
-		{
-			"target_name": "libcurl",
-			"type": "static_library",
-			"sources": [
-				'<!@(python ../glob-files.py "curl/lib/*.c")',
-				'<!@(python ../glob-files.py "curl/lib/**/*.c")'
-			],
-			"include_dirs": [
-				"./curl/include",
-				"./curl/lib"
-			],
-			"conditions": [
-				["OS == 'win'", {
-					"defines": ["WIN32"]
-				}],
-				["OS == 'linux'", {
-					"defines": [
-						"OS=\"x86_64-pc-linux-gnu\"",
-						"CURL_CA_BUNDLE=\"/etc/ssl/certs/ca-certificates.crt\"",
-						"GETSERVBYPORT_R_ARGS=6",
-						"GETSERVBYPORT_R_BUFSIZE=4096",
-						"HAVE_FSETXATTR_5=1",
-						"HAVE_GETHOSTBYADDR_R=1",
-						"HAVE_GETHOSTBYADDR_R_8=1",
-						"HAVE_GETHOSTBYNAME_R=1",
-						"HAVE_GETHOSTBYNAME_R_6=1",
-						"HAVE_GETSERVBYPORT_R=1",
-						"HAVE_LIBSSL=1",
-						"HAVE_LINUX_TCP_H=1",
-						"HAVE_MALLOC_H=1",
-						"HAVE_MSG_NOSIGNAL=1",
-						"HAVE_OPENSSL_CRYPTO_H=1",
-						"HAVE_OPENSSL_ERR_H=1",
-						"HAVE_OPENSSL_PEM_H=1",
-						"HAVE_OPENSSL_RSA_H=1",
-						"HAVE_OPENSSL_SRP=1",
-						"HAVE_OPENSSL_SSL_H=1",
-						"HAVE_OPENSSL_VERSION=1",
-						"HAVE_OPENSSL_X509_H=1",
-						"HAVE_POLL=1",
-						"HAVE_POLL_FINE=1",
-						"HAVE_STRNCASECMP=1",
-						"HAVE_TERMIO_H=1",
-						"HAVE_TIME_H=1",
-						"RETSIGTYPE=void",
-						"TIME_WITH_SYS_TIME=1",
-						"USE_OPENSSL=1",
-						"USE_TLS_SRP=1"
-					]
-				}],
-				["OS == 'mac'", {
-					"defines": [
-						"OS=\"x86_64-apple-darwin\"",
-						"HAVE_BUILTIN_AVAILABLE=1",
-						"HAVE_FSETXATTR_6=1",
-						"HAVE_MACH_ABSOLUTE_TIME=1",
-						"HAVE_SETMODE=1",
-						"HAVE_SYS_FILIO_H=1",
-						"HAVE_SYS_SOCKIO_H=1",
-						"SELECT_TYPE_ARG234 fd_set=*",
-						"SELECT_TYPE_ARG5 struct timeval=*",
-						"USE_SECTRANSP=1"
-					]
-				}]
-			],
-			# This is what happens when you still keep the support for VAX VMS, Xenix, Windows CE and OS/2 in 2021
-			# Cmon, seriously, the last version of Xenix was in 1989
-			"defines": [	
-				"BUILDING_LIBCURL=1",
-				"CURL_DISABLE_GOPHER=1",
-				"CURL_DISABLE_IMAP=1",
-				"CURL_DISABLE_LDAP=1",
-				"CURL_DISABLE_LDAPS=1",
-				"CURL_DISABLE_MQTT=1",
-				"CURL_DISABLE_POP3=1",
-				"CURL_DISABLE_RTSP=1",
-				"CURL_DISABLE_SMB=1",
-				"CURL_EXTERN_SYMBOL=__attribute__ ((__visibility__ (\"default\")))",
+	"variables": {
+		# This is what happens when you still keep the support for VAX VMS, Xenix, Windows CE and OS/2 in 2021
+		# Cmon, seriously, the last version of Xenix was in 1989
+		"UNIX_defines%": [
 				"CURL_SA_FAMILY_T=sa_family_t",
-				"ENABLE_IPV6=1",
 				"GETHOSTNAME_TYPE_ARG2=size_t",
 				"HAVE_ALARM=1",
 				"HAVE_ALLOCA_H=1",
@@ -196,16 +120,15 @@
 				"HAVE_VARIADIC_MACROS_GCC=1",
 				"HAVE_WRITABLE_ARGV=1",
 				"HAVE_WRITEV=1",
-				"HAVE_ZLIB_H=1",
 				"RECV_TYPE_ARG1=int",
 				"RECV_TYPE_ARG2 void=*",
 				"RECV_TYPE_ARG3=size_t",
 				"RECV_TYPE_ARG4=int",
 				"RECV_TYPE_RETV=ssize_t",
-				"SELECT_TYPE_ARG234=fd_set *",
-				"SELECT_TYPE_ARG5=struct timeval *",
 				"SELECT_QUAL_ARG5=",
 				"SELECT_TYPE_ARG1=int",
+				"SELECT_TYPE_ARG234=fd_set *",
+				"SELECT_TYPE_ARG5=struct timeval *",
 				"SELECT_TYPE_RETV=int",
 				"SEND_QUAL_ARG2=const",
 				"SEND_TYPE_ARG1=int",
@@ -223,6 +146,90 @@
 				"STDC_HEADERS=1",
 				"STRERROR_R_TYPE_ARG3=size_t",
 				"USE_UNIX_SOCKETS=1"
+			],
+	},
+	"targets": [
+		{
+			"target_name": "libcurl",
+			"type": "static_library",
+			"sources": [
+				'<!@(python ../glob-files.py "curl/lib/*.c")',
+				'<!@(python ../glob-files.py "curl/lib/**/*.c")'
+			],
+			"include_dirs": [
+				"./curl/include",
+				"./curl/lib"
+			],
+			"defines": [
+				"BUILDING_LIBCURL=1",
+				"CURL_DISABLE_GOPHER=1",
+				"CURL_DISABLE_IMAP=1",
+				"CURL_DISABLE_LDAP=1",
+				"CURL_DISABLE_LDAPS=1",
+				"CURL_DISABLE_MQTT=1",
+				"CURL_DISABLE_POP3=1",
+				"CURL_DISABLE_RTSP=1",
+				"CURL_DISABLE_SMB=1",
+				"ENABLE_IPV6=1",
+				"HAVE_ZLIB_H=1"
+			],
+			"conditions": [
+				["OS == 'win'", {
+					"defines": [
+						"USE_WINDOWS_SSPI=1",
+						"USE_SCHANNEL=1"
+					]
+				}],
+				["OS == 'linux'", {
+					"defines": [
+						"OS=\"x86_64-pc-linux-gnu\"",
+						"CURL_CA_BUNDLE=\"/etc/ssl/certs/ca-certificates.crt\"",
+						"CURL_EXTERN_SYMBOL=__attribute__ ((__visibility__ (\"default\")))",
+						"GETSERVBYPORT_R_ARGS=6",
+						"GETSERVBYPORT_R_BUFSIZE=4096",
+						"HAVE_FSETXATTR_5=1",
+						"HAVE_GETHOSTBYADDR_R=1",
+						"HAVE_GETHOSTBYADDR_R_8=1",
+						"HAVE_GETHOSTBYNAME_R=1",
+						"HAVE_GETHOSTBYNAME_R_6=1",
+						"HAVE_GETSERVBYPORT_R=1",
+						"HAVE_LIBSSL=1",
+						"HAVE_LINUX_TCP_H=1",
+						"HAVE_MALLOC_H=1",
+						"HAVE_MSG_NOSIGNAL=1",
+						"HAVE_OPENSSL_CRYPTO_H=1",
+						"HAVE_OPENSSL_ERR_H=1",
+						"HAVE_OPENSSL_PEM_H=1",
+						"HAVE_OPENSSL_RSA_H=1",
+						"HAVE_OPENSSL_SRP=1",
+						"HAVE_OPENSSL_SSL_H=1",
+						"HAVE_OPENSSL_VERSION=1",
+						"HAVE_OPENSSL_X509_H=1",
+						"HAVE_POLL=1",
+						"HAVE_POLL_FINE=1",
+						"HAVE_STRNCASECMP=1",
+						"HAVE_TERMIO_H=1",
+						"HAVE_TIME_H=1",
+						"RETSIGTYPE=void",
+						"TIME_WITH_SYS_TIME=1",
+						"USE_OPENSSL=1",
+						"USE_TLS_SRP=1",
+						 "<@(UNIX_defines)"
+					]
+				}],
+				["OS == 'mac'", {
+					"defines": [
+						"OS=\"x86_64-apple-darwin\"",
+						"HAVE_BUILTIN_AVAILABLE=1",
+						"HAVE_FSETXATTR_6=1",
+						"HAVE_MACH_ABSOLUTE_TIME=1",
+						"HAVE_SETMODE=1",
+						"HAVE_SYS_FILIO_H=1",
+						"HAVE_SYS_SOCKIO_H=1",
+						"USE_SECTRANSP=1",
+						 "<@(UNIX_defines)"
+					]
+				}]
 			],
 			"xcode_settings": {
 				"GCC_ENABLE_CPP_RTTI": "YES",

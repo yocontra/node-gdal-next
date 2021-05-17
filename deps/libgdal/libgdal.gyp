@@ -175,6 +175,7 @@
 				"./gdal/port/cpl_base64.cpp",
 				"./gdal/port/cpl_azure.cpp",
 				"./gdal/port/cpl_aws.cpp",
+				"./gdal/port/cpl_aws_win32.cpp",
 				"./gdal/port/cpl_atomic_ops.cpp",
 				"./gdal/port/cpl_alibaba_oss.cpp",
         "./gdal/port/cpl_vax.cpp",

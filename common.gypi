@@ -29,7 +29,16 @@
 		},
 		"conditions": [
 			["OS == 'win'", {
-				"defines": [ "NOMINMAX", "WIN32" ]
+				"defines": [ "NOMINMAX", "WIN32", "CURL_STATICLIB" ],
+				"libraries": [
+					"secur32.lib",
+					"odbccp32.lib",
+					"odbc32.lib",
+					"crypt32.lib",
+					"ws2_32.lib",
+					"advapi32.lib",
+					"wbemuuid.lib"
+				],
 			}],
 			["OS == 'mac'", {
 				"libraries": [ "-framework Security" ]
