@@ -168,8 +168,28 @@ NAN_METHOD(RasterBandPixels::set) {
   return;
 }
 
+#if GDAL_VERSION_MAJOR >= 2
+inline GDALRIOResampleAlg parseResamplingAlg(Local<Value> value) {
+  if (value->IsUndefined() || value->IsNull()) { return GRIORA_NearestNeighbour; }
+  if (!value->IsString()) { throw "resampling property must be a string"; }
+  std::string name = *Nan::Utf8String(value);
+
+  if (name == "NearestNeighbor") { return GRIORA_NearestNeighbour; }
+  if (name == "NearestNeighbour") { return GRIORA_NearestNeighbour; }
+  if (name == "Bilinear") { return GRIORA_Bilinear; }
+  if (name == "Cubic") { return GRIORA_Cubic; }
+  if (name == "CubicSpline") { return GRIORA_CubicSpline; }
+  if (name == "Lanczos") { return GRIORA_Lanczos; }
+  if (name == "Average") { return GRIORA_Average; }
+  if (name == "Mode") { return GRIORA_Mode; }
+  if (name == "Gauss") { return GRIORA_Gauss; }
+
+  throw "Invalid resampling algorithm";
+}
+#endif
+
 /**
- * @typedef ReadOptions { buffer_width?: number, buffer_height?: number, type?: string, pixel_space?: number, line_space?: number }
+ * @typedef ReadOptions { buffer_width?: number, buffer_height?: number, type?: string, pixel_space?: number, line_space?: number, resampling?: string }
  */
 
 /**
@@ -189,6 +209,7 @@ NAN_METHOD(RasterBandPixels::set) {
  * constants{{/crossLink}}.
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
+ * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
  * @return {TypedArray} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 
@@ -211,6 +232,7 @@ NAN_METHOD(RasterBandPixels::set) {
  * constants{{/crossLink}}.
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
+ * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
  * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
  * @return {Promise<TypedArray>} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
@@ -259,6 +281,22 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   NODE_ARG_INT_OPT(8, "pixel_space", pixel_space);
   line_space = pixel_space * buffer_w;
   NODE_ARG_INT_OPT(9, "line_space", line_space);
+#if GDAL_VERSION_MAJOR >= 2
+  GDALRIOResampleAlg resampling;
+  try {
+    resampling = parseResamplingAlg(info[10]);
+  } catch (const char *e) {
+    Nan::ThrowError(e);
+    return;
+  }
+#else
+  std::string resampling;
+  NODE_ARG_OPT_STR(10, "resampling", resampling);
+  if (resampling.length() > 0) {
+    Nan::ThrowError("Specifying resampling algorithm not supported on GDAL 1.x");
+    return;
+  }
+#endif
 
   if (pixel_space < bytes_per_pixel) {
     Nan::ThrowError("pixel_space must be greater than or equal to size of data_type");
@@ -293,16 +331,30 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   GDALRasterBand *gdal_band = band->get();
   GDALAsyncableJob<CPLErr> job;
   job.persist(obj, band->handle());
-  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, resampling]() {
+#if GDAL_VERSION_MAJOR >= 2
+    std::shared_ptr<GDALRasterIOExtraArg> extra(new GDALRasterIOExtraArg);
+    INIT_RASTERIO_EXTRA_ARG(*extra);
+    extra->eResampleAlg = resampling;
+    extra->nVersion = RASTERIO_EXTRA_ARG_CURRENT_VERSION;
+#endif
+
     GDAL_ASYNCABLE_LOCK(ds_uid);
+
+#if GDAL_VERSION_MAJOR >= 2
+    CPLErr err =
+      gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, extra.get());
+#else
     CPLErr err = gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+#endif
+
     GDAL_UNLOCK_PARENT;
     if (err != CE_None) throw CPLGetLastErrorMsg();
     return err;
   };
 
   job.rval = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
-  job.run(info, async, 10);
+  job.run(info, async, 11);
 }
 
 /**

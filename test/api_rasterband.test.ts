@@ -1,5 +1,6 @@
 import { assert } from 'chai'
 import * as gdal from '..'
+import * as semver from 'semver'
 import * as fileUtils from './utils/file.js'
 
 describe('gdal.RasterBand', () => {
@@ -881,6 +882,50 @@ describe('gdal.RasterBand', () => {
                   write_options
                 )
               })
+            })
+          })
+          describe('"resampling"', () => {
+            const w = 8,
+              h = 8
+            const stripes = new Uint8Array(new ArrayBuffer(w * h))
+
+            let band_stripes, band_solid
+            before(() => {
+              for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                  stripes[x + y * w] = (x % 2) ? 100 : 0
+                }
+              }
+              const ds = gdal.open('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte)
+              band_stripes = ds.bands.get(1)
+              band_solid = ds.bands.get(2)
+
+              band_stripes.pixels.write(0, 0, w, h, stripes)
+              band_solid.pixels.write(0, 0, w, h, stripes.subarray(1, 2), { buffer_width: 1, buffer_height: 1 })
+            })
+            it('should support default resampling', () => {
+              let i
+
+              let data
+              data = band_stripes.pixels.read(0, 0, w, h)
+              for (i = 0; i < data.length; i++) assert.equal(data[i], stripes[i])
+              data = band_solid.pixels.read(0, 0, w, h)
+              for (i = 0; i < data.length; i++) assert.equal(data[i], 100)
+            })
+            it('should support non-standard resampling', () => {
+              if (semver.lt(gdal.version, '2.0.0')) {
+                assert.throws(() => {
+                  data = band_stripes.pixels.read(0, 0, w, h, undefined, { buffer_width: w / 4, buffer_height: h / 4, resampling: gdal.GRA_Bilinear })
+                }, /not supported on GDAL 1/)
+                return
+              }
+              let i
+
+              let data
+              data = band_stripes.pixels.read(0, 0, w, h, undefined, { buffer_width: w / 4, buffer_height: h / 4, resampling: gdal.GRA_Average })
+              for (i = 0; i < data.length; i++) assert.equal(data[i], 50)
+              data = band_stripes.pixels.read(0, 0, w, h, undefined, { buffer_width: w / 4, buffer_height: h / 4, resampling: gdal.GRA_Bilinear })
+              for (i = 0; i < data.length; i++) assert.include([ 46, 54 ], data[i])
             })
           })
         })

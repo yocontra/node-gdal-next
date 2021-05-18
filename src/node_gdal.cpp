@@ -1247,7 +1247,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Nan::Set(target, Nan::New("OFTDateTime").ToLocalChecked(), Nan::New(getFieldTypeName(OFTDateTime)).ToLocalChecked());
 
   /**
-   * Resampling options that can be used with the gdal.reprojectImage() method.
+   * Resampling options that can be used with the gdal.reprojectImage() and gdal.RasterBandPixels.read methods.
    *
    * @class Constants (GRA)
    */

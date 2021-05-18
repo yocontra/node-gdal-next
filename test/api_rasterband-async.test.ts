@@ -244,6 +244,50 @@ describe('gdal.RasterBandAsync', () => {
                   }))
               }))
             })
+            describe('"resampling"', () => {
+              const w = 8,
+                h = 8
+              const stripes = new Uint8Array(new ArrayBuffer(w * h))
+
+              let band_stripes: gdal.RasterBand, band_solid: gdal.RasterBand
+              before(() => {
+                for (let y = 0; y < h; y++) {
+                  for (let x = 0; x < w; x++) {
+                    stripes[x + y * w] = (x % 2) ? 100 : 0
+                  }
+                }
+                const ds = gdal.open('temp', 'w', 'MEM', w, h, 2, gdal.GDT_Byte)
+                band_stripes = ds.bands.get(1)
+                band_solid = ds.bands.get(2)
+
+                band_stripes.pixels.write(0, 0, w, h, stripes)
+                band_solid.pixels.write(0, 0, w, h, stripes.subarray(1, 2), { buffer_width: 1, buffer_height: 1 })
+              })
+              it('should support default resampling', () => {
+                let i
+
+                const q1 = band_stripes.pixels.readAsync(0, 0, w, h, undefined, { buffer_width: w, buffer_height: h })
+                const q2 = band_solid.pixels.readAsync(0, 0, w, h, undefined, { buffer_width: w, buffer_height: h })
+                return assert.isFulfilled(Promise.all([ q1, q2 ]).then((data) => {
+                  const [ data1, data2 ] = data
+                  assert.equal(data1.length, w*h)
+                  for (i = 0; i < data1.length; i++) assert.equal(data1[i], stripes[i])
+                  for (i = 0; i < data2.length; i++) assert.equal(data2[i], 100)
+                }))
+              })
+              it('should support non-standard resampling', () => {
+                let i
+
+                const q1 = band_stripes.pixels.readAsync(0, 0, w, h, undefined, { buffer_width: w / 4, buffer_height: h / 4, resampling: gdal.GRA_Average })
+                const q2 = band_stripes.pixels.readAsync(0, 0, w, h, undefined, { buffer_width: w / 4, buffer_height: h / 4, resampling: gdal.GRA_Bilinear })
+                return assert.isFulfilled(Promise.all([ q1, q2 ]).then((data) => {
+                  const [ data1, data2 ] = data
+                  assert.equal(data1.length, w*h / 16)
+                  for (i = 0; i < data1.length; i++) assert.equal(data1[i], 50)
+                  for (i = 0; i < data2.length; i++) assert.include([ 46, 54 ], data2[i])
+                }))
+              })
+            })
             it('should throw error if array is not long enough to store result', () => {
               const w = 16,
                 h = 16

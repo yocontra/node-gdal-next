@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - GDAL 3.2.3
  - built-in vsicurl and major cloud services (Amazon, Google, Microsoft and Alibaba) support on all platforms
+ - Support different algorithms when resampling on-the-fly
  - add gdal.LayerFeatures.setAsync()
 
 ## [3.1.1] 2021-05-14
