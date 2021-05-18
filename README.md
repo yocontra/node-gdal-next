@@ -153,7 +153,8 @@ Before submitting pull requests, please update the [tests](test) and make sure t
 
 ```sh
 $ npm test # test against bundled gdal
-$ npm run container all ubuntu|centos {16.04|18.04|20.04}|{6|7|8} 10|12|14|15|16|lts --shared  # test against shared gdal on given Ubuntu/CentOS version and Node.js version
+$ npm run test:shared # test against most major versions
+$ npm run container dev {ubuntu|centos|fedora|debian|archlinux}:{version} 10|12|14|15|16|lts shared  # test against shared gdal on given Linux version and Node.js version
 ```
 
 ## License
@@ -172,26 +173,18 @@ Currently packages are built and unit tested for the following targets:
 ---
 | Node | OS | GDAL |
 | --- | --- | --- |
-| Node.js 10.x | Ubuntu 16.04 | system installed GDAL 1.11.3
-| Node.js 12.x | Ubuntu 16.04 | system installed GDAL 1.11.3
 | Node.js 14.x | Ubuntu 16.04 | system installed GDAL 1.11.3
-| Node.js 15.x | Ubuntu 16.04 | system installed GDAL 1.11.3
-| Node.js 16.x | Ubuntu 16.04 | system installed GDAL 1.11.3
-| Node.js 10.x | Ubuntu 16.04 | bundled GDAL 3.2.2
-| Node.js 12.x | Ubuntu 16.04 | bundled GDAL 3.2.2
 | Node.js 14.x | Ubuntu 16.04 | bundled GDAL 3.2.2
-| Node.js 15.x | Ubuntu 16.04 | bundled GDAL 3.2.2
-| Node.js 16.x | Ubuntu 16.04 | bundled GDAL 3.2.2
-| Node.js 10.x | Ubuntu 18.04 | system installed GDAL 2.2.3
-| Node.js 12.x | Ubuntu 18.04 | system installed GDAL 2.2.3
 | Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
-| Node.js 15.x | Ubuntu 18.04 | system installed GDAL 2.2.3
-| Node.js 16.x | Ubuntu 18.04 | system installed GDAL 2.2.3
-| Node.js 10.x | Ubuntu 18.04 | bundled GDAL 3.2.2
-| Node.js 12.x | Ubuntu 18.04 | bundled GDAL 3.2.2
 | Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.2
-| Node.js 15.x | Ubuntu 18.04 | bundled GDAL 3.2.2
-| Node.js 16.x | Ubuntu 18.04 | bundled GDAL 3.2.2
+| Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
+| Node.js 14.x | CentOS 8 | bundled GDAL 3.2.2
+| Node.js 14.x | Debian 10 buster | system installed GDAL 2.1.2
+| Node.js 14.x | Debian 10 buster | bundled GDAL 3.2.2
+| Node.js 14.x | Fedora 33 | system installed GDAL 3.1.4
+| Node.js 14.x | Fedora 33 | bundled GDAL 3.2.2
+| Node.js 16.x | Arch Linux current | system installed GDAL 3.2.3
+| Node.js 16.x | Arch Linux current | bundled GDAL 3.2.2
 | Node.js 10.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 12.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 14.x | Ubuntu 20.04 | system installed GDAL 3.0.4
@@ -202,10 +195,6 @@ Currently packages are built and unit tested for the following targets:
 | Node.js 14.x | Ubuntu 20.04 | bundled GDAL 3.2.2 (*code coverage platform*)
 | Node.js 15.x | Ubuntu 20.04 | bundled GDAL 3.2.2
 | Node.js 16.x | Ubuntu 20.04 | bundled GDAL 3.2.2
-| Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
-| Node.js 16.x | CentOS 8 | system installed GDAL 3.0.4
-| Node.js 14.x | CentOS 8 | bundled GDAL 3.2.2
-| Node.js 16.x | CentOS 8 | bundled GDAL 3.2.2
 | Node.js 10.x | Windows Server 2019 | bundled GDAL 3.2.2
 | Node.js 12.x | Windows Server 2019 | bundled GDAL 3.2.2
 | Node.js 14.x | Windows Server 2019 | bundled GDAL 3.2.2

@@ -1,13 +1,53 @@
 #!/bin/bash
 
-echo "Preparing source tree"
-cp -a /src /target
+SEP="\n=======================================================\n"
+echo -e "${SEP}Preparing source tree${SEP}"
+cp -dR /src /target
 cd /target
-rm -rf build node_modules package-lock.json test/data
+rm -rf lib/binding build node_modules package-lock.json test/data
 git checkout test/data
 npm install --ignore-scripts
-npx @mapbox/node-pre-gyp configure ${GDAL}
-npx @mapbox/node-pre-gyp build -j max
-npm test
+
+if [ "${GDAL}" == "shared" ]; then
+  GDAL_OPT="--shared_gdal"
+  GDAL_NAME="system-installed"
+else
+  GDAL_OPT=""
+  GDAL_NAME="bundled"
+fi
+
+case ${1} in
+  DEV)
+    echo -e "${SEP}Testing current version against ${GDAL_NAME} GDAL${SEP}"
+    echo npx @mapbox/node-pre-gyp configure ${GDAL_OPT}
+    npx @mapbox/node-pre-gyp configure ${GDAL_OPT}
+    npx @mapbox/node-pre-gyp build -j max
+    npm test
+    R=$?
+    ;;
+
+  RELEASE)
+    echo -e "${SEP}Testing pre-built binary${SEP}"
+    npx @mapbox/node-pre-gyp install
+    npm test
+    R=$?
+    ;;
+
+  PUBLISH)
+    echo -e "${SEP}Publishing pre-built binary${SEP}"
+    npx @mapbox/node-pre-gyp configure
+    npx @mapbox/node-pre-gyp build -j max
+    npm test
+    npx @mapbox/node-pre-gyp package
+    npx node-pre-gyp-github publish
+    R=$?
+    ;;
+esac
+
 # Launch docker -it ... /bin/bash to get a shell after running the test
-exec $@
+if [ ! -z "${2}" ]; then
+  shift
+  exec $@
+fi
+
+exit $R

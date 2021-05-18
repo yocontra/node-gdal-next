@@ -2,44 +2,50 @@
 
 OP=$1
 DIST=$2
-VERSION=$3
-NODEJS=$4
-GDAL=$5
+NODEJS=$3
+GDAL=$4
 if [ -z "${OP}" ]; then
-  OP=all
+  echo "container.sh <release|dev|shell> [<ubuntu:{16.04|18.04|20.04}|centos:8|fedora:{34|35}>] [shared]"
+  exit 1
 fi
+if [ ! -d "test/platforms" ]; then
+  echo "This command must be run from the node-gdal-async root directory"
+  exit 1
+fi
+
 if [ -z "${DIST}" ]; then
   DIST=ubuntu
-fi
-if [ -z "${VERSION}" ]; then
-  VERSION=20.04
+  VERSION=16.04
+else
+  VERSION=`echo ${DIST} | cut -f 2 -d":"`
+  DIST=`echo ${DIST} | cut -f 1 -d":"`
 fi
 if [ -z "${NODEJS}" ]; then
   NODEJS=lts
 fi
 if [ -z "${GDAL}" ]; then
-  GDAL=""
+  GDAL="bundled"
 fi
 
+CONTAINER="${DIST}-node-gdal:${VERSION}_${NODEJS}_${GDAL}"
 SEP="\n=======================================================\n"
+echo -e "${SEP}Building container ${CONTAINER}${SEP}"
+docker build --build-arg VERSION=${VERSION} --build-arg NODEJS=${NODEJS} --build-arg GDAL=${GDAL} -t ${CONTAINER} -f test/platforms/Dockerfile.${DIST} test/platforms
 case ${OP} in
-  all|build)
-    echo -e ${SEP}
-    echo "Building container ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL}"
-    echo -e ${SEP}
-    docker build --build-arg VERSION=${VERSION} --build-arg NODEJS=${NODEJS} --build-arg GDAL=${GDAL} -t ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL} -f test/platforms/${DIST}/Dockerfile test/platforms
-esac
-case ${OP} in
-  all|test)
-    echo -e ${SEP}
-    echo "Testing in ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL}"
-    echo -e ${SEP}
-    docker run -v `pwd`:/src ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL}
+  release)
+    echo -e "${SEP}Testing in ${CONTAINER}${SEP}"
+    docker run -v `pwd`:/src ${CONTAINER} RELEASE || exit 1
+    ;;
+  dev)
+    echo -e "${SEP}Testing in ${CONTAINER}${SEP}"
+    docker run -v `pwd`:/src ${CONTAINER} DEV || exit 1
+    ;;
+  publish)
+    echo -e "${SEP}Publishing in ${CONTAINER}${SEP}"
+    docker run --env NODE_PRE_GYP_GITHUB_TOKEN -v `pwd`:/src ${CONTAINER} PUBLISH || exit 1
     ;;
   shell)
-    echo -e ${SEP}
-    echo "Testing in ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL} and running a shell"
-    echo -e ${SEP}
-    docker run -it -v `pwd`:/src ${DIST}-node-gdal:${VERSION}_${NODEJS}${GDAL} /bin/bash
+    echo -e "${SEP}Testing in ${CONTAINER} and running a shell${SEP}"
+    docker run -it -v `pwd`:/src ${CONTAINER} DEV /bin/bash
     ;;
 esac
