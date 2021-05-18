@@ -19,8 +19,6 @@ It adds a number of features:
 - Support for curve geometries
 - Numerous bugfixes including a number of memory leaks
 
-TypeScript is currently available only in 3.1, install with `npm install gdal-async@beta`
-
 Support for `worker_threads` is planned but it is not a priority project
 
 ### Breaking Changes relative to node-gdal
