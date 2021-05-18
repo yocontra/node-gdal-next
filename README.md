@@ -14,9 +14,10 @@ This project is a fork of <https://github.com/contra/node-gdal-next> which is a 
 
 It adds a number of features:
 
-- **Support for asynchronous IO**
-- **Full native TypeScript support** with autocompletion in IDEs that support it
-- Support for curve geometries
+- **Support for asynchronous IO** (since 3.0)
+- **Full native TypeScript support** with autocompletion in IDEs that support it (since 3.1)
+- **Built-in networking support** with native support for cloud services (will appear in 3.2)
+- Support for curve geometries (since 3.1)
 - Numerous bugfixes including a number of memory leaks
 
 Support for `worker_threads` is planned but it is not a priority project
@@ -82,7 +83,7 @@ Mixing of synchronous and asynchronous operations is supported.
 #### Safe mixing of asynchronous operations
 
 Simultaneous operations on distinct dataset objects are always safe and can run it parallel.
-Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick up 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time.
+Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node.js/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time.
 
 **Does not support `worker_threads` yet**
 
@@ -130,14 +131,20 @@ import * as gdal from 'gdal-async'
 const ds1: gdal.Dataset = gdal.open('sample.tif')
 const ds2: Promise<gdal.Dataset> = gdal.openAsync('sample.tif')
 ```
+
+### Built-in networking (starting from 3.2)
+
+Built-in networking uses an embedded version of `libcurl`. It supports `zlib` compression through Node.js' own `zlib` support. It does not support `brotli` or `zstd`. Node.js includes `brotli`, but as of Node.js 16 it still does not export these symbols for use by add-ons (yes, go bug them - ask them for c-ares too).
+SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted root CA store by default and another store can be provided through the `CURL_CA_BUNDLE` enviornment variable or GDAL config option. SSL on Windows and OSX uses the OS-provided mechanisms - Schannel and SecureTransport respectively - and thus the trusted root CA store will be the one provided by the OS.
+
 ## Bundled Drivers
 
 When using the bundled GDAL version, the following drivers will be available:
 `AAIGrid`, `ACE2`, `ADRG`, `AIG`, `AVCBin`, `AVCE00`, `AeronavFAA`, `AirSAR`, `BLX`, `BMP`, `BNA`, `BT`, `CEOS`, `COASP`, `COSAR`, `CPG`, `CSV`, `CTG`, `CTable2`, `DGN`, `DIMAP`, `DIPEx`, `DOQ1`, `DOQ2`, `DTED`, `DXF`, `E00GRID`, `ECRGTOC`, `EDIGEO`, `EHdr`, `EIR`, `ELAS`, `ENVI`, `ERS`, `ESAT`, `ESRI Shapefile`, `MapInfo File`, `MBTiles`, `FAST`, `FIT`, `FujiBAS`, `GFF`, `GML`, `GPSBabel`, `GPSTrackMaker`, `GPX`, `GRASSASCIIGrid`, `GS7BG`, `GSAG`, `GSBG`, `GSC`, `GTX`, `GTiff`, `GenBin`, `GeoJSON`, `GeoRSS`, `Geoconcept`, `GPKG`, `HF2`, `HFA`, `HTF`, `IDA`, `ILWIS`, `INGR`, `IRIS`, `ISIS2`, `ISIS3`, `Idrisi`, `JAXAPALSAR`, `JDEM`, `JPEG`, `KMLSUPEROVERLAY`, `KML`, `KRO`, `L1B`, `LAN`, `LCP`, `LOSLAS`, `Leveller`, `MAP`, `MEM`, `Memory`, `MFF2`, `MFF`, `MITAB`, `MVT`, `NDF`, `NGSGEOID`, `NITF`, `NTv2`, `NWT_GRC`, `NWT_GRD`, `OGR_GMT`, `OGR_PDS`, `OGR_SDTS`, `OGR_VRT`, `OSM`, `OpenAir`, `OpenFileGDB`, `PAux`, `PCIDSK`, `PDS`, `PGDUMP`, `PNG`, `PNM`, `REC`, `RMF`, `ROI_PAC`, `RPFTOC`, `RS2`, `RST`, `R`, `S57`, `SAGA`, `SAR_CEOS`, `SDTS`, `SEGUKOOA`, `SEGY`, `SGI`, `SNODAS`, `SQLite`, `SRP`, `SRTMHGT`, `SUA`, `SVG`, `SXF`, `TIL`, `TSX`, `Terragen`, `UK .NTF`, `USGSDEM`, `VICAR`, `VRT`, `vsimem`, `vsigzip`, `WAsP`, `XPM`, `XPlane`, `XYZ`, `ZMap`
 
-If rebuilding the module against the system-installed shared GDAL library, all drivers supported by it would also be supported by this module. Currently this is the only way to have HTTP, Amazon S3, Google Cloud, Microsoft Azure and Alibaba COSS support.
+If rebuilding the module against the system-installed shared GDAL library, all drivers supported by it would also be supported by this module. Currently this is the only way to have HTTP, Amazon S3, Google Cloud, Microsoft Azure and Alibaba Cloud support.
 
-`node-gdal-async@3.2` should have built-in networking support. Early experimental support for `/vsicurl/` URLs is already available on `git@master`.
+`node-gdal-async@3.2` will have built-in networking support. Refer to the **Built-in networking** section above.
 
 ## Contributors
 
@@ -145,7 +152,7 @@ This binding was originally the product of a collaboration between [Natural Atla
 
 node-gdal-next is maintained by [@contra](https://github.com/contra)
 
-The async bindings, the curve geometries and the TypeScript support are by [@mmomtchev](https://github.com/mmomtchev) who is the current maintainer.
+The async bindings, the curve geometries, the TypeScript support and the built-in networking are by [@mmomtchev](https://github.com/mmomtchev) who is the current maintainer.
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
 
@@ -179,7 +186,7 @@ Development versions are unit tested for the following targets:
 | Node | OS | GDAL |
 | --- | --- | --- |
 | Node.js 14.x | Ubuntu 16.04 | system installed GDAL 1.11.3
-| Node.js 14.x | Ubuntu 16.04 | bundled GDAL 3.2.3
+| Node.js 14.x | Ubuntu 16.04 | bundled GDAL 3.2.3 (*glibc target platform*)
 | Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
 | Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.3
 | Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
