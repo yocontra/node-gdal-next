@@ -179,36 +179,36 @@ Development versions are unit tested for the following targets:
 | Node | OS | GDAL |
 | --- | --- | --- |
 | Node.js 14.x | Ubuntu 16.04 | system installed GDAL 1.11.3
-| Node.js 14.x | Ubuntu 16.04 | bundled GDAL 3.2.2
+| Node.js 14.x | Ubuntu 16.04 | bundled GDAL 3.2.3
 | Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
-| Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.2
+| Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.3
 | Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
-| Node.js 14.x | CentOS 8 | bundled GDAL 3.2.2
+| Node.js 14.x | CentOS 8 | bundled GDAL 3.2.3
 | Node.js 14.x | Debian 10 buster | system installed GDAL 2.1.2
-| Node.js 14.x | Debian 10 buster | bundled GDAL 3.2.2
+| Node.js 14.x | Debian 10 buster | bundled GDAL 3.2.3
 | Node.js 14.x | Fedora 33 | system installed GDAL 3.1.4
-| Node.js 14.x | Fedora 33 | bundled GDAL 3.2.2
+| Node.js 14.x | Fedora 33 | bundled GDAL 3.2.3
 | Node.js 16.x | Arch Linux current | system installed GDAL 3.2.3
-| Node.js 16.x | Arch Linux current | bundled GDAL 3.2.2
+| Node.js 16.x | Arch Linux current | bundled GDAL 3.2.3
 | Node.js 10.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 12.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 14.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 15.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 16.x | Ubuntu 20.04 | system installed GDAL 3.0.4
-| Node.js 10.x | Ubuntu 20.04 | bundled GDAL 3.2.2
-| Node.js 12.x | Ubuntu 20.04 | bundled GDAL 3.2.2
-| Node.js 14.x | Ubuntu 20.04 | bundled GDAL 3.2.2 (*code coverage platform*)
-| Node.js 15.x | Ubuntu 20.04 | bundled GDAL 3.2.2
-| Node.js 16.x | Ubuntu 20.04 | bundled GDAL 3.2.2
-| Node.js 10.x | Windows Server 2019 | bundled GDAL 3.2.2
-| Node.js 12.x | Windows Server 2019 | bundled GDAL 3.2.2
-| Node.js 14.x | Windows Server 2019 | bundled GDAL 3.2.2
-| Node.js 15.x | Windows Server 2019 | bundled GDAL 3.2.2
-| Node.js 16.x | Windows Server 2019 | bundled GDAL 3.2.2
-| Node.js 10.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
-| Node.js 12.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
-| Node.js 14.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
-| Node.js 15.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
-| Node.js 16.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
+| Node.js 10.x | Ubuntu 20.04 | bundled GDAL 3.2.3
+| Node.js 12.x | Ubuntu 20.04 | bundled GDAL 3.2.3
+| Node.js 14.x | Ubuntu 20.04 | bundled GDAL 3.2.3 (*code coverage platform*)
+| Node.js 15.x | Ubuntu 20.04 | bundled GDAL 3.2.3
+| Node.js 16.x | Ubuntu 20.04 | bundled GDAL 3.2.3
+| Node.js 10.x | Windows Server 2019 | bundled GDAL 3.2.3
+| Node.js 12.x | Windows Server 2019 | bundled GDAL 3.2.3
+| Node.js 14.x | Windows Server 2019 | bundled GDAL 3.2.3
+| Node.js 15.x | Windows Server 2019 | bundled GDAL 3.2.3
+| Node.js 16.x | Windows Server 2019 | bundled GDAL 3.2.3
+| Node.js 10.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
+| Node.js 12.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
+| Node.js 14.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
+| Node.js 15.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
+| Node.js 16.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
 ---
 

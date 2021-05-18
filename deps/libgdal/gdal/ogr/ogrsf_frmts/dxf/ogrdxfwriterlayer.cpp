@@ -35,7 +35,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrdxfwriterlayer.cpp 6e02f1b3c3a0e8d3518630ddba7679f566b2e1e5 2020-03-25 18:28:12 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRDXFWriterLayer()                          */

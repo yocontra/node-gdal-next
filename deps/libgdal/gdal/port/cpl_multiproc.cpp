@@ -57,7 +57,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_multiproc.cpp ca8f3391c4d76c9e8d94b871f042d46676b74184 2019-06-22 19:27:56 +0200 Even Rouault $")
 
 #if defined(CPL_MULTIPROC_STUB) && !defined(DEBUG)
 #  define MUTEX_NONE

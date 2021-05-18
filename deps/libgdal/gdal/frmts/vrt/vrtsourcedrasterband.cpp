@@ -50,7 +50,7 @@
 #include "gdal_priv.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: vrtsourcedrasterband.cpp 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 

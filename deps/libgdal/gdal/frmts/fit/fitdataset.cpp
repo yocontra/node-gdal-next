@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: fitdataset.cpp 675000ff23559b090e1057dd120ec127dfe9381d 2020-11-06 20:26:14 +0100 Even Rouault $")
 
 constexpr size_t FIT_PAGE_SIZE = 128;
 

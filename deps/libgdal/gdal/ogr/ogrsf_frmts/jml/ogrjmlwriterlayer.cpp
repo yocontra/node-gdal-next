@@ -31,7 +31,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrjmlwriterlayer.cpp 2bfaf0a5dc110c2fb51198f07eff4f165c3be22e 2018-02-03 13:06:36Z Even Rouault $")
 
 /************************************************************************/
 /*                           OGRJMLWriterLayer()                        */

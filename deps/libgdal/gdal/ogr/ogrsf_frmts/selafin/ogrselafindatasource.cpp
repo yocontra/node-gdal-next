@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <ctime>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrselafindatasource.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          Range                                       */

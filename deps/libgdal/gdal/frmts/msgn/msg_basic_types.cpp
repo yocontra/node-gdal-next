@@ -30,7 +30,7 @@
 #include "cpl_error.h"
 #include "msg_basic_types.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: msg_basic_types.cpp 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
 
 #include <stdio.h>
 

@@ -35,7 +35,7 @@
    #include "gnm_frmts.h"
 #endif
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalallregister.cpp ea7e27cb335aea69decb920a492723aebf3eaf43 2020-09-24 14:51:54 +0200 Even Rouault $")
 
 #ifdef notdef
 // we may have a use for this some day

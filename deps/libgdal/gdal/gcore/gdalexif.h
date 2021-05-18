@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdalexif.h 45d3d60d2b90c52d7ef69f5a9336219e4c6069d7 2017-09-14 09:50:30Z Even Rouault $
  *
  * Project:  JPEG JFIF Driver
  * Purpose:  Implement GDAL JPEG Support based on IJG libjpeg.

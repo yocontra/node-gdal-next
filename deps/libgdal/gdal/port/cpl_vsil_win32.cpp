@@ -29,7 +29,7 @@
 
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_vsil_win32.cpp 08c9fb51f640a13b2e3a7d662ab676f08c57001e 2020-10-06 13:05:59 +0200 Even Rouault $")
 
 #if defined(WIN32)
 

@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrpgdumpdatasource.cpp 75c37a9a5aba2c07737afe42b81988095e8dcbf2 2020-05-05 14:47:51 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRPGDumpDataSource()                           */

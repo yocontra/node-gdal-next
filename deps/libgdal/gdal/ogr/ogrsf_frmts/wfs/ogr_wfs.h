@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ogr_wfs.h 2818ff0a49f65741a55b9cea79df496cc05f85e3 2020-05-22 19:10:11 +0200 Even Rouault $
  *
  * Project:  WFS Translator
  * Purpose:  Definition of classes for OGR WFS driver.

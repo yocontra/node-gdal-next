@@ -33,7 +33,7 @@
 
 #include "keacopy.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: keacopy.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
 
 // Support functions for CreateCopy()
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gtiff.h 7e9a593460d00a8e3ad3dd06bec239be55c85f20 2020-10-05 11:18:58 +0200 Thomas Bonfort $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  GDAL GeoTIFF support.

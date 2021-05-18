@@ -31,7 +31,7 @@
 #include "memdataset.h"
 #include "pdfcreatefromcomposition.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: pdfwritabledataset.cpp 3583f56e13546beb20b7f0d16a5f13b6940a70d1 2019-08-10 12:12:12 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      PDFWritableVectorDataset()                      */

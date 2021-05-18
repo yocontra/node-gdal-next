@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: kearat.h 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $
  *  kearat.h
  *
  *  Created by Pete Bunting on 01/08/2012.

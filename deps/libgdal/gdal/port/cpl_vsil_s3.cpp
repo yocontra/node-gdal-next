@@ -46,7 +46,7 @@
 
 #include "cpl_aws.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_vsil_s3.cpp a9ee7ea8116fd33015cdcf75ac88cd74f42f83d2 2020-09-23 14:05:11 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 

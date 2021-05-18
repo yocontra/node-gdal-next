@@ -45,7 +45,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: swq_op_general.cpp 6659c4d5c910df313ac451cd5ca687862eef040b 2020-10-01 15:37:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           swq_test_like()                            */

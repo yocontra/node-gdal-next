@@ -55,7 +55,7 @@
 
 // #define IMMEDIATE_OPENING 1
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrshapedatasource.cpp c127cec2102033e7b45eace1a81fff277196da2e 2020-05-17 19:21:20 +0200 Even Rouault $")
 
 constexpr int knREFRESH_LOCK_FILE_DELAY_SEC = 10;
 

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: mitab_priv.h fb72478d87f412c15ac4b3b5180efbef9a680c5f 2020-11-06 21:56:04 +0100 Even Rouault $
  *
  * Name:     mitab_priv.h
  * Project:  MapInfo TAB Read/Write library

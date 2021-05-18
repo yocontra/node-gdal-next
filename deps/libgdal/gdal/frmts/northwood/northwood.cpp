@@ -35,7 +35,7 @@
 #include <limits>
 #include <string>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: northwood.cpp 6e3d6eff53731ab5a9b5ec7c8136366ed8e3d35b 2021-03-27 10:49:34 +0100 Even Rouault $")
 
 int nwt_ParseHeader( NWT_GRID * pGrd, const unsigned char *nwtHeader )
 {
@@ -439,7 +439,7 @@ void createIP( int index, unsigned char r, unsigned char g, unsigned char b,
 }
 
 void nwt_HillShade( unsigned char *r, unsigned char *g, unsigned char *b,
-                    char *h )
+                    unsigned char *h )
 {
     HLS hls;
     NWT_RGB rgb;
@@ -447,7 +447,7 @@ void nwt_HillShade( unsigned char *r, unsigned char *g, unsigned char *b,
     rgb.g = *g;
     rgb.b = *b;
     hls = RGBtoHLS( rgb );
-    hls.l += ((short) *h) * HLSMAX / 256;
+    hls.l = static_cast<short>(hls.l + (*h) * HLSMAX / 256);
     rgb = HLStoRGB( hls );
 
     *r = rgb.r;

@@ -43,7 +43,7 @@
 #include "mitab_priv.h"
 #include "mitab_utils.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: mitab_mapobjectblock.cpp fb72478d87f412c15ac4b3b5180efbef9a680c5f 2020-11-06 21:56:04 +0100 Even Rouault $")
 
 /*=====================================================================
  *                      class TABMAPObjectBlock

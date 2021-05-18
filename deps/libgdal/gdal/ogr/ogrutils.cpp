@@ -52,7 +52,7 @@
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrutils.cpp 3b83dfb59dba8a1b3ba3d18b396d6a6582fae8c0 2021-02-03 11:25:41 +0100 Even Rouault $")
 
 // Returns whether a double fits within an int.
 // Unable to put this in cpl_port.h as include limit breaks grib.

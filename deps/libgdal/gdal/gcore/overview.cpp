@@ -59,7 +59,7 @@
 #include "gdalsse_priv.h"
 #endif
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: overview.cpp 2f25ccbeeac9816fe95d5f63a657c3b9b8a42c80 2021-01-05 15:39:22 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALResampleChunk32R_Near()                      */

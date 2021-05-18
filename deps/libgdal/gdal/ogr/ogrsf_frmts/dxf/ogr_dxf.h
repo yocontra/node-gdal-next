@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ogr_dxf.h 23ce60aecb9a6eb91f9dda2e4075215e70e971ca 2020-07-25 21:34:53 +1000 Alan Thomas $
  *
  * Project:  DXF Translator
  * Purpose:  Definition of classes for OGR .dxf driver.

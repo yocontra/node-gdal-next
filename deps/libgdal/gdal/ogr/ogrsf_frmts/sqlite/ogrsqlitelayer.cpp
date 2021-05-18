@@ -58,7 +58,7 @@
 #include "ogrsf_frmts.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrsqlitelayer.cpp d70d0fa171ed82055aaed96d8851cd9ecd71864d 2020-05-27 19:53:23 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRSQLiteLayer()                           */

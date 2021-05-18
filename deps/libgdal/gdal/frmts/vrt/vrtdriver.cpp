@@ -34,7 +34,7 @@
 #include "gdal_alg_priv.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: vrtdriver.cpp f447a31822e26ddf0cabcee0ce673a028550a2a0 2020-06-09 11:01:20 +0200 René Buffat $")
 
 /*! @cond Doxygen_Suppress */
 

@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ntv2dataset.cpp 5d2753a91a0a6d24c06938181a890487daae3833 2020-01-01 21:04:35 +0100 Even Rouault $")
 
 // Format documentation: https://github.com/Esri/ntv2-file-routines
 // Original archived specification: https://web.archive.org/web/20091227232322/http://www.mgs.gov.on.ca/stdprodconsume/groups/content/@mgs/@iandit/documents/resourcelist/stel02_047447.pdf

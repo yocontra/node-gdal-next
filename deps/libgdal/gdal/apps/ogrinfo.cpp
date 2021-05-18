@@ -53,7 +53,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrinfo.cpp 4d6b3014e77f40ca702be655e3c0f7dbde8b1822 2020-09-09 12:00:38 +0200 Even Rouault $")
 
 bool bVerbose = true;
 bool bSuperQuiet = false;

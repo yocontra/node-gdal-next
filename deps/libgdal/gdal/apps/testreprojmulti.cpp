@@ -33,7 +33,7 @@
 #include "cpl_multiproc.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: testreprojmulti.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
 
 double* padfRefX = nullptr;
 double* padfRefY = nullptr;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: pcrasterdataset.h fa839b55f793867fe0bfe7239f18216793be4f7f 2020-09-18 16:59:11 +0200 Even Rouault $
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster CSF 2.0 raster file driver declarations.

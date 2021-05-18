@@ -32,7 +32,7 @@
 #include "ogr_idb.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogridblayer.cpp 417b66cdf50174fe8d59833c93710813f205d9ba 2020-08-30 12:18:19 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRIDBLayer()                            */

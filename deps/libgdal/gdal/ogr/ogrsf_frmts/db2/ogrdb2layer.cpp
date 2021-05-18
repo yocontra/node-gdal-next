@@ -29,7 +29,7 @@
 
 #include "ogr_db2.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrdb2layer.cpp 7d078e0357d2998edfa713422e607cbadf77f9ff 2018-04-08 22:11:28 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRDB2Layer()                        */

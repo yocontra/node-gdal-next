@@ -34,7 +34,7 @@
 
 #include <set>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gnmgenericnetwork.cpp b878db8a22b3c59c80ab68c91b785227f347eced 2020-02-11 23:08:41 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 GNMGenericNetwork::GNMGenericNetwork() :

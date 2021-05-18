@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ogr_core.h cf7ac1b48089a3ef06e2f4d514300968c7b36c47 2021-04-02 19:42:56 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define some core portability services for cross-platform OGR code.
@@ -821,6 +821,7 @@ int CPL_DLL OGRParseDate( const char *pszInput, OGRField *psOutput,
 #define ODsCEmulatedTransactions "EmulatedTransactions" /**< Dataset capability for emulated dataset transactions */
 #define ODsCMeasuredGeometries "MeasuredGeometries"     /**< Dataset capability for measured geometries support */
 #define ODsCRandomLayerRead     "RandomLayerRead"   /**< Dataset capability for GetNextFeature() returning features from random layers */
+/* Note the unfortunate trailing space at the end of the string */
 #define ODsCRandomLayerWrite    "RandomLayerWrite " /**< Dataset capability for supporting CreateFeature on layer in random order */
 
 #define ODrCCreateDataSource   "CreateDataSource"   /**< Driver capability for datasource creation */

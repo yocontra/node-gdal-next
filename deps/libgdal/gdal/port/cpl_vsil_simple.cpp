@@ -31,7 +31,7 @@
 
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_vsil_simple.cpp 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $")
 
 #ifdef WIN32
 #  include <sys/stat.h>

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdal_frmts.h ea7e27cb335aea69decb920a492723aebf3eaf43 2020-09-24 14:51:54 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  Prototypes for all format specific driver initialization.

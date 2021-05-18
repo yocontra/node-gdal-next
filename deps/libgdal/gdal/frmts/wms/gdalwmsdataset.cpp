@@ -46,7 +46,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalwmsdataset.cpp 3bd09ca50b5110b7a65d618ec7a5da135cce8c51 2020-09-09 12:05:44 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALWMSDataset()                           */

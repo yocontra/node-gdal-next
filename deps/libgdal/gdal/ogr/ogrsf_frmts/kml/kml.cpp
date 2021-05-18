@@ -41,7 +41,7 @@
 #  include "expat.h"
 #endif
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: kml.cpp c99a871a7bdedc751c503bb8cf508d9016510fe0 2020-01-08 14:54:05 +0100 Even Rouault $")
 
 KML::KML() :
     poTrunk_(nullptr),

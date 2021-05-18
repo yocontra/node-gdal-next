@@ -50,7 +50,7 @@
 #include "ogrgeojsonutils.h"
 // #include "symbol_renames.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogresrijsonreader.cpp 38b0feed67f80ded32be6c508323d862e1a14474 2020-04-07 12:01:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRESRIJSONReader()                         */

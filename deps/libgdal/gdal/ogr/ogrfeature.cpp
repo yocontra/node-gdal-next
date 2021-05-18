@@ -56,7 +56,7 @@
 
 #include "cpl_json_header.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrfeature.cpp abbdb7ff7a84bdb2177a70981b817f6347daa9c0 2020-10-27 21:35:24 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                             OGRFeature()                             */

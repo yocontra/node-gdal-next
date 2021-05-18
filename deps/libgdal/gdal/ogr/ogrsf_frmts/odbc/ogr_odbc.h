@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ogr_odbc.h 2b7dd67cad092ba95547b0aa44cd7a3bebe4f015 2020-08-25 21:13:47 +1000 Nyall Dawson $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/ODBC driver.

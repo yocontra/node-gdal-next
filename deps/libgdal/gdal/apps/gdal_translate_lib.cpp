@@ -55,7 +55,7 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdal_translate_lib.cpp ea54dac8b8ea1f5a7b3b818d590de7356a16038b 2020-11-02 19:51:01 +0100 Even Rouault $")
 
 static int ArgIsNumeric( const char * );
 static void AttachMetadata( GDALDatasetH, char ** );

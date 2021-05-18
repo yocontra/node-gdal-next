@@ -62,7 +62,7 @@
 #include "vrtdataset.h"
 #include "../frmts/gtiff/cogdriver.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalwarp_lib.cpp f888c96b46126e6b4c02ec1eec86f59e6a2cf433 2020-11-27 14:40:01 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        GDALWarpAppOptions                            */

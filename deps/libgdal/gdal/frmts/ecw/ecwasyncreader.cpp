@@ -32,7 +32,7 @@
 
 #include "gdal_ecw.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ecwasyncreader.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
 
 #if defined(FRMT_ecw) && (ECWSDK_VERSION >= 40)
 

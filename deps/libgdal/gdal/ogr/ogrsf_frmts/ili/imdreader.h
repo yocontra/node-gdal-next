@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: imdreader.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
  *
  * Project:  Interlis 1/2 Translator
  * Purpose:  IlisMeta model reader.

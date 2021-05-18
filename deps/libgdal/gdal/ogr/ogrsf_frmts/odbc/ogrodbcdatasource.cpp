@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrodbcdatasource.cpp 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $")
 /************************************************************************/
 /*                         OGRODBCDataSource()                          */
 /************************************************************************/

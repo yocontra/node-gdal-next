@@ -72,7 +72,7 @@
 #include "../sqlite/ogrsqliteexecutesql.h"
 #endif
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdaldataset.cpp 66858a03ff715bea7cde7a27e97c5c7d7f4e4a4d 2020-10-22 08:03:40 +0200 Kai Pastor $")
 
 CPL_C_START
 GDALAsyncReader *

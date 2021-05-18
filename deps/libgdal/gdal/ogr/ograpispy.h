@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ograpispy.h ba3554dcc5a5f63eb7bc2a92a6cbb3f995b729ee 2020-10-21 15:43:49 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  OGR C API "Spy"

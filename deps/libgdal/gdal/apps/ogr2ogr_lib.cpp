@@ -67,7 +67,7 @@
 #include "ogrlayerdecorator.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogr2ogr_lib.cpp 19947a8ab8ec9dad8643e2dd69d107a92ec51c9c 2020-10-19 00:23:20 +0200 Even Rouault $")
 
 typedef enum
 {

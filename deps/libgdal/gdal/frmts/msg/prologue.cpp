@@ -30,7 +30,7 @@
 
 #include "prologue.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: prologue.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
 
 static
 int size_SatelliteStatus()

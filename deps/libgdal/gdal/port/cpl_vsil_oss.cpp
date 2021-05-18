@@ -41,7 +41,7 @@
 
 #include "cpl_alibaba_oss.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_vsil_oss.cpp 84033e049eee28696b553cb16258b3a196410e56 2020-06-29 20:48:45 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 

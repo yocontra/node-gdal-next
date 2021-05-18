@@ -41,7 +41,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cplstringlist.cpp 237cce44e47cca3290bf053bbfa153856575017e 2019-08-17 15:01:52 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           CPLStringList()                            */

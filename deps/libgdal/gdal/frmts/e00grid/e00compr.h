@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: e00compr.h 05ec2ff9cd43cabf721a161bbc295f6c827eaedd 2016-10-24 06:23:09Z Kurt Schwehr $
  *
  * Name:     e00compr.h
  * Project:  Compressed E00 Read/Write library

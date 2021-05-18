@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: cpl_sha256.h 4066b56114dce5dd680e28b43526396ce43a6d7e 2018-02-14 12:47:28Z Even Rouault $ */
 
 /* The MIT License
 

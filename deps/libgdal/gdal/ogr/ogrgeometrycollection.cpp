@@ -42,7 +42,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrgeometrycollection.cpp 1c79ed79d823cc484fef669536f6241048a37fe2 2019-10-28 10:42:11 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRGeometryCollection()                        */

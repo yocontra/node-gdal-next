@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: geo_extra.c 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $
  *
  * Project:  libgeotiff
  * Purpose:  Code to normalize a few common PCS values

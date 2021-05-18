@@ -31,7 +31,7 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: rmfdem.cpp bbf1cce4f18f433b927254d86af39efd178952da 2021-03-26 21:46:09 +0100 Even Rouault $")
 
 /*
  * The encoded data stream is a series of records.
@@ -100,10 +100,8 @@ GInt32 INV_INT24 = 0xFF000000L;
 CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
 static GInt32 AddInt32( GInt32& nTarget, GInt32 nVal )
 {
-    GUInt32 nTargetU = 0;
-    memcpy(&nTargetU, &nTarget, 4);
-    GUInt32 nValU = 0;
-    memcpy(&nValU, &nVal, 4);
+    GUInt32 nTargetU = static_cast<GUInt32>(nTarget);
+    GUInt32 nValU = static_cast<GUInt32>(nVal);
     nTargetU += nValU;
     memcpy(&nTarget, &nTargetU, 4);
     return nTarget;
@@ -125,7 +123,7 @@ size_t RMFDataset::DEMDecompress(const GByte* pabyIn, GUInt32 nSizeIn,
 
     GInt32 iPrev = 0;  // The last data value decoded.
 
-    const char* pabyTempIn  = reinterpret_cast<const char *>(pabyIn);
+    const signed char* pabyTempIn  = reinterpret_cast<const signed char *>(pabyIn);
     GInt32* paiOut = reinterpret_cast<GInt32 *>(pabyOut);
     nSizeOut /= sizeof(GInt32);
 

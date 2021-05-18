@@ -53,7 +53,7 @@
 #include "gdal_rat.h"
 #include "gdal_priv_templates.hpp"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalrasterband.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALRasterBand()                           */

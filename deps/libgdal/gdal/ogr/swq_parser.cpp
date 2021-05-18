@@ -112,7 +112,7 @@
 #include "ogr_core.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: swq_parser.cpp fa01e48290b6aaaf0574b9e363bd0e0d131d7377 2020-10-01 15:32:53 +0200 Even Rouault $")
 
 #define YYSTYPE swq_expr_node *
 

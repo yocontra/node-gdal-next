@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gpb.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Author:   Even Rouault, <even dot rouault at spatialys.com>

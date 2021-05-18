@@ -47,7 +47,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrgpxdatasource.cpp 6c20fa95d33fd0452329067f766b2d71a5ebd87f 2019-09-06 02:00:10 +0200 Even Rouault $")
 
 constexpr int SPACE_FOR_METADATA = 160;
 

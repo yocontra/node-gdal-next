@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: northwood.h 6e3d6eff53731ab5a9b5ec7c8136366ed8e3d35b 2021-03-27 10:49:34 +0100 Even Rouault $
  *
  * Project:  GRC/GRD Reader
  * Purpose:  Northwood Technologies Grid format declarations
@@ -126,8 +126,8 @@ typedef struct
     bool bHillShadeExists;
     bool bShowGradient;
     bool bShowHillShade;
-    char cHillShadeBrightness;
-    char cHillShadeContrast;
+    unsigned char cHillShadeBrightness;
+    unsigned char cHillShadeContrast;
     float fHillShadeAzimuth;
     float fHillShadeAngle;
     NWT_CLASSIFIED_DICT *stClassDict;
@@ -141,7 +141,7 @@ void nwtCloseGrid( NWT_GRID * pGrd );
 void nwtPrintGridHeader( NWT_GRID * pGrd );
 int nwt_LoadColors( NWT_RGB * pMap, int mapSize, NWT_GRID * pGrd );
 void nwt_HillShade( unsigned char *r, unsigned char *g, unsigned char *b,
-                    char *h );
+                    unsigned char *h );
 
 void createIP( int index, unsigned char r, unsigned char g, unsigned char b,
                NWT_RGB * map, int *pnWarkerMark );

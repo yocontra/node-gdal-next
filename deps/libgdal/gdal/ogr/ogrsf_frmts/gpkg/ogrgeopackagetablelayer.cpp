@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <cmath>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrgeopackagetablelayer.cpp 5ba03d148d85d7b4ffa367e0df2c8ef1ae884c51 2021-04-08 19:30:45 +0200 Even Rouault $")
 
 static const char UNSUPPORTED_OP_READ_ONLY[] =
   "%s : unsupported operation on a read-only datasource.";
@@ -4175,20 +4175,16 @@ OGRErr OGRGeoPackageTableLayer::RunDeferredCreationIfNecessary()
         const char* pszDescription = GetMetadataItem("DESCRIPTION");
         if( pszDescription == nullptr )
             pszDescription = "";
-        const char* pszCurrentDate = CPLGetConfigOption("OGR_CURRENT_DATE", nullptr);
-        CPLString osInsertGpkgContentsFormatting("INSERT INTO gpkg_contents "
-                 "(table_name,data_type,identifier,description,last_change,srs_id) VALUES "
-                "('%q','%q','%q','%q',");
-        osInsertGpkgContentsFormatting += ( pszCurrentDate ) ? "'%q'" : "%s";
-        osInsertGpkgContentsFormatting += ",%d)";
 
         pszSQL = sqlite3_mprintf(
-            osInsertGpkgContentsFormatting.c_str(),
+            "INSERT INTO gpkg_contents "
+            "(table_name,data_type,identifier,description,last_change,srs_id) VALUES "
+            "('%q','%q','%q','%q',%s,%d)",
             pszLayerName, (bIsSpatial ? "features":
                           (m_eASPatialVariant == GPKG_ATTRIBUTES) ? "attributes" :
                           "aspatial"),
             pszIdentifier, pszDescription,
-            pszCurrentDate ? pszCurrentDate : "strftime('%Y-%m-%dT%H:%M:%fZ','now')",
+            GDALGeoPackageDataset::GetCurrentDateEscapedSQL().c_str(),
             m_iSrs);
 
         err = SQLCommand(m_poDS->GetDB(), pszSQL);

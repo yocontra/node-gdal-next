@@ -45,7 +45,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrgeojsonwriter.cpp 1316179cb4c140cd2d3cc757a327d6ab201659a1 2020-11-11 21:27:28 +0100 Even Rouault $")
 
 static json_object *
 json_object_new_float_with_significant_figures( float fVal,

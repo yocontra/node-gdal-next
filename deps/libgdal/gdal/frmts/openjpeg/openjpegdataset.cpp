@@ -61,7 +61,7 @@
 
 //#define DEBUG_IO
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: openjpegdataset.cpp 5b59b828b1abe7229e145116e7b344d3e9fe70a7 2020-10-09 13:26:03 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                  JP2OpenJPEGDataset_ErrorCallback()                  */

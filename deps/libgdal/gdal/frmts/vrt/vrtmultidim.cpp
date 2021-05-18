@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: vrtmultidim.cpp 5e31601cb001d310bd54ea50f8c7c94a9d3225bd 2020-11-05 10:24:43 +0100 Even Rouault $
  *
  * Name:     vrtmultidim.cpp
  * Purpose:  Implementation of VRTDriver

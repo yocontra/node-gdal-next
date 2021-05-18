@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ogr_bna.h d51185b155f90b5ca3be0d08e37fa46891151965 2019-10-20 13:42:46 +0200 Even Rouault $
  *
  * Project:  BNA Translator
  * Purpose:  Definition of classes for OGR .bna driver.

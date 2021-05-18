@@ -28,7 +28,7 @@
 
 #include "wmsdriver.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: wmsutils.cpp 4acd10754e950208aeca32134bd83b6df4aa6805 2017-12-20 11:30:20Z Dmitry Baryshnikov $")
 
 CPLString ProjToWKT(const CPLString &proj) {
     char* wkt = nullptr;

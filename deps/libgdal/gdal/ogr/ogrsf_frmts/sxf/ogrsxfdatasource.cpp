@@ -40,7 +40,7 @@
 #include <map>
 #include <string>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrsxfdatasource.cpp 72283073050017cb03dc8b6b52421417086671b9 2020-05-10 22:29:46 +0200 Even Rouault $")
 
 // EPSG code range http://gis.stackexchange.com/a/18676/9904
 constexpr int MIN_EPSG = 1000;

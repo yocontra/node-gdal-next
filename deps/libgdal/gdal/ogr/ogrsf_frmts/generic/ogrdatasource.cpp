@@ -31,7 +31,7 @@
 #include "ogr_api.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrdatasource.cpp ba3554dcc5a5f63eb7bc2a92a6cbb3f995b729ee 2020-10-21 15:43:49 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           ~OGRDataSource()                           */

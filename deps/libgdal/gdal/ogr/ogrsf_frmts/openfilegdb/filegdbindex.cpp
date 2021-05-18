@@ -48,7 +48,7 @@
 #include "ogr_core.h"
 #include "filegdbtable.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: filegdbindex.cpp 3662d8ee920725c704a5c5be562b5fc3a93c4f4a 2020-07-16 16:07:33 +0200 Even Rouault $")
 
 namespace OpenFileGDB
 {

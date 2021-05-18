@@ -39,7 +39,7 @@
 #include "gdal_mdreader.h"
 #include "gdal_proxy.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdaloverviewdataset.cpp 56dfaadcb7a4bb39320872cfe5901f35d403a329 2019-11-15 14:18:50 +0100 Even Rouault $")
 
 /** In GDAL, GDALRasterBand::GetOverview() returns a stand-alone band, that may
     have no parent dataset. This can be inconvenient in certain contexts, where

@@ -60,7 +60,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: aaigriddataset.cpp 8974f3510aa0c9e0f98429e509a0b0205b829f50 2020-10-13 10:22:34 +0200 Even Rouault $")
 
 namespace {
 

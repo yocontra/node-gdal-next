@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_auto_close.h 928c6bcbd3901094d5680a73a623acc194f55afc 2018-10-07 18:11:27 +0800 小旋风 $
  *
  * Name:     cpl_auto_close.h
  * Project:  CPL - Common Portability Library

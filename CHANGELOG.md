@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.2.0] Unreleased
 
 ### Added
+ - GDAL 3.2.3
  - built-in vsicurl and major cloud services (Amazon, Google, Microsoft and Alibaba) support on all platforms
 
 ## [3.1.1] 2021-05-14

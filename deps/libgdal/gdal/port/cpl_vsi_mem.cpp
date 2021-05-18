@@ -55,7 +55,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_vsi_mem.cpp 440139adbd1cbb61e3395c7b2beee94cb77ffd99 2020-12-08 19:13:46 +0100 Even Rouault $")
 
 /*
 ** Notes on Multithreading:

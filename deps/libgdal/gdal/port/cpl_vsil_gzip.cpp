@@ -115,7 +115,7 @@
 #include "cpl_vsi_virtual.h"
 #include "cpl_worker_thread_pool.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_vsil_gzip.cpp c7d410f9e208c74b0935f54c97a82a8d1a434f17 2020-10-13 16:17:52 +0200 Even Rouault $")
 
 constexpr int Z_BUFSIZE = 65536;  // Original size is 16384
 constexpr int gz_magic[2] = {0x1f, 0x8b};  // gzip magic header

@@ -65,7 +65,7 @@
 #include "ogr_proj_p.h"
 #include "proj.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: hfadataset.cpp 0c76919b53a23ed62e4ad48d8c613d66dfee98ae 2020-10-26 17:31:29 +0100 Even Rouault $")
 
 constexpr double R2D = 180.0 / M_PI;
 constexpr double D2R = M_PI / 180.0;

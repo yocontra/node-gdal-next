@@ -49,7 +49,7 @@
 #include <ctype.h>
 #include <math.h>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: delaunay.c d38086d97f76b283f7c6ba57abd60da9e279cbde 2018-10-06 19:02:19 +0200 Even Rouault $")
 
 #if defined(INTERNAL_QHULL) || defined(EXTERNAL_QHULL)
 #define HAVE_INTERNAL_OR_EXTERNAL_QHULL 1

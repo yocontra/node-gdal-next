@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: mitab.h d12545162b34c742dcb8893783660a9e57cb2f1b 2020-10-21 12:28:12 +0200 Krister Wicksell $
  *
  * Name:     mitab.h
  * Project:  MapInfo TAB Read/Write library

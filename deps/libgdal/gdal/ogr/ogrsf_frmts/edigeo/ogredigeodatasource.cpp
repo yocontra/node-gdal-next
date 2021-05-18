@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogredigeodatasource.cpp ac74af497ac5f6f08d69354dfcc93e79213c0ba4 2019-08-15 15:47:49 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGREDIGEODataSource()                         */

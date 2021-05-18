@@ -38,7 +38,7 @@
 #include "cpl_sha1.h"
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_alibaba_oss.cpp 5318f6d39d2006a10cb6c1410334c56d76a74aa6 2018-06-20 16:38:42 +0200 Even Rouault $")
 
 // #define DEBUG_VERBOSE 1
 

@@ -35,7 +35,7 @@
 #include <mutex>
 #include <vector>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: xyzdataset.cpp e8c183169c1dc4f2b5932557372de20c9af201fd 2020-11-22 00:24:18 +0100 Even Rouault $")
 
 constexpr double RELATIVE_ERROR = 1e-3;
 

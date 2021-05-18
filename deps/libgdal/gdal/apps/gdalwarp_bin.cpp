@@ -36,7 +36,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalwarp_bin.cpp 1c7b950fc8754f6ba1d027f031886063675d2927 2020-06-02 15:06:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               GDALExit()                             */

@@ -35,7 +35,7 @@
 #include "gdal.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalallvalidmaskband.cpp bcf6af1006f48771999512f1bfed906e3c509edf 2018-07-09 00:07:02 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/

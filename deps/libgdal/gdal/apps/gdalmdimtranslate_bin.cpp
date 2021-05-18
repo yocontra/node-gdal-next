@@ -32,7 +32,7 @@
 #include "gdal_utils_priv.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalmdimtranslate_bin.cpp 9598f66a2ef90ef40fc3274e54d5d723ad597b0f 2019-07-13 00:03:57 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */

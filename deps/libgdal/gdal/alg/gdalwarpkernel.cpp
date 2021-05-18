@@ -72,7 +72,7 @@
 
 #endif
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalwarpkernel.cpp cd49440fdbc5b3b15ed1d1dfc032ea6517f0f927 2020-12-04 19:11:39 +0100 Even Rouault $")
 
 constexpr double BAND_DENSITY_THRESHOLD = 0.0000000001;
 constexpr float SRC_DENSITY_THRESHOLD =  0.000000001f;

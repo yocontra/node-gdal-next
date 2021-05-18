@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: doq1dataset.cpp 7bbb931bede80cf3ccc83eb4ccf3039271fe57db 2020-11-05 10:24:24 +0100 Even Rouault $")
 
 static const char UTM_FORMAT[] =
     "PROJCS[\"%s / UTM zone %dN\",GEOGCS[%s,PRIMEM[\"Greenwich\",0],"

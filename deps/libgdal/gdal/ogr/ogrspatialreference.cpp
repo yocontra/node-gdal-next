@@ -57,7 +57,7 @@
 #include "proj_experimental.h"
 #include "proj_constants.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrspatialreference.cpp 073331754b49c88219cc7d3726455b0106fb4c14 2020-12-28 18:24:22 +0100 Even Rouault $")
 
 #define STRINGIFY(s) #s
 #define XSTRINGIFY(s) STRINGIFY(s)

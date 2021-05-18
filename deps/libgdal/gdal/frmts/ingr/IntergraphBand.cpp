@@ -42,7 +42,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: IntergraphBand.cpp e1050e4c829d75d3913ed2c37d26bf84ebf8e5d1 2020-02-27 01:40:46 +0100 Even Rouault $")
 
 using std::fill;
 

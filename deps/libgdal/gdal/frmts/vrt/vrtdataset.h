@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: vrtdataset.h 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $
  *
  * Project:  Virtual GDAL Datasets
  * Purpose:  Declaration of virtual gdal dataset classes.

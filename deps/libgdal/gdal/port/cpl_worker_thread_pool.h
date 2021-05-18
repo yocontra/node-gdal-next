@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_worker_thread_pool.h 1df63aa4d30bc389133c38822002d5ecfb91c314 2020-05-21 11:30:55 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL worker thread pool

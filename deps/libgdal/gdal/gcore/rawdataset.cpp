@@ -52,7 +52,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: rawdataset.cpp 0ce239f27fb438e8f3300e97e004c5a698f58ce6 2020-12-28 23:38:31 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           RawRasterBand()                            */

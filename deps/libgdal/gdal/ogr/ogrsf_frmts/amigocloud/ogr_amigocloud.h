@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ogr_amigocloud.h abcd03be837d5bd1c9ada635fcda974745bf3714 2021-02-25 05:19:28 -0500 Victor Chernetsky $
  *
  * Project:  AMIGOCLOUD Translator
  * Purpose:  Definition of classes for OGR AmigoCloud driver.

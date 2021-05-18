@@ -76,7 +76,7 @@
 
 #endif // HAVE_CURL
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_http.cpp 27940914131dc11c08426f68f6cee3dd84cf3c8a 2020-10-07 16:48:33 -0500 Alan D. Snow $")
 
 // list of named persistent http sessions
 

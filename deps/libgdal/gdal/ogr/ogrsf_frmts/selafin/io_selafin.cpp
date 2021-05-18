@@ -32,7 +32,7 @@
 #include "cpl_error.h"
 #include "cpl_quad_tree.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: io_selafin.cpp 0fb16ebc687101c0beda924366f28b1473474ab3 2019-08-23 16:44:59 +0200 Even Rouault $")
 
 namespace Selafin {
 

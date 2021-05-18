@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: dted_create.c 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $
  *
  * Project:  DTED Translator
  * Purpose:  Implementation of DTEDCreate() portion of DTED API.
@@ -30,7 +30,7 @@
 #include "dted_api.h"
 #include <assert.h>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: dted_create.c 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
 
 #define DTED_ABS_VERT_ACC "NA  "
 #define DTED_SECURITY     "U"

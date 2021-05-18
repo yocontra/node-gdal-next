@@ -47,7 +47,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: thinplatespline.cpp 5426fbb5939ec949739e29d63c02930a2e1788a2 2019-09-02 21:19:22 +0200 mamofejo $")
 
 //////////////////////////////////////////////////////////////////////////////
 //// vizGeorefSpline2D

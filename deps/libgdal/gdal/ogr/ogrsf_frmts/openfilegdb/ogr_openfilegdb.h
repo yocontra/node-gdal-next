@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id$
+* $Id: ogr_openfilegdb.h 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Implements Open FileGDB OGR driver.

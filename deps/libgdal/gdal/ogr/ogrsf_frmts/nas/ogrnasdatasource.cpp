@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_nas.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrnasdatasource.cpp 0aa0910b4edd04752e2dbc60a22403dc56f24d27 2020-12-20 18:19:30 +0100 Juergen E. Fischer $")
 
 static const char * const apszURNNames[] =
 {

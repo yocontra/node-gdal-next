@@ -53,7 +53,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrpgeogeometry.cpp 7b696b9c2cac0fdbedad1ba343e3f3aa26a172e2 2020-12-23 21:49:01 +0100 Even Rouault $")
 
 constexpr int SHPP_TRISTRIP  = 0;
 constexpr int SHPP_TRIFAN    = 1;

@@ -39,7 +39,7 @@
 
 #include "ogr_core.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: mitab_geometry.cpp 43b6061a355c4bce2283b787b28d5f3ae6b9e2af 2018-05-06 14:19:59 +0200 Even Rouault $")
 
 #define OGR_NUM_RINGS(poly)   (poly->getNumInteriorRings()+1)
 #define OGR_GET_RING(poly, i) (i==0?poly->getExteriorRing():poly->getInteriorRing(i-1))

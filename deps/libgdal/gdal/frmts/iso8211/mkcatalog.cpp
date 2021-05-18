@@ -28,7 +28,7 @@
 
 #include "iso8211.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: mkcatalog.cpp 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
 
 /************************************************************************/
 /*                               mk_s57()                               */

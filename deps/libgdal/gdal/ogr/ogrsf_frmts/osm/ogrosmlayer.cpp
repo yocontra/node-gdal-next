@@ -55,7 +55,7 @@
 #include "osm_parser.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrosmlayer.cpp 69420abb83c679f4f5c84daaca222375a5829f4c 2019-12-12 15:26:23 +0100 Even Rouault $")
 
 constexpr int SWITCH_THRESHOLD = 10000;
 constexpr int MAX_THRESHOLD = 100000;

@@ -61,7 +61,7 @@
 #include "mdreader/reader_rdk1.h"
 #include "mdreader/reader_spot.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdal_mdreader.cpp 5f6ced88218cd95f728604eaf145ff3516708ec2 2018-08-24 17:32:52 +0200 Even Rouault $")
 
 /**
  * The RPC parameters names

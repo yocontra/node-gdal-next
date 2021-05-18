@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_aws.h f87673d2ac225e117fd6f6d5b32443cab1c7460b 2020-07-21 15:14:42 +0200 Even Rouault $
  *
  * Name:     cpl_aws.h
  * Project:  CPL - Common Portability Library

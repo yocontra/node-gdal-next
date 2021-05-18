@@ -33,7 +33,7 @@
 #include "zconf.h"
 #include "zlib.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_minizip_ioapi.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
 
 static
 voidpf ZCALLBACK fopen_file_func ( voidpf /* opaque */ ,

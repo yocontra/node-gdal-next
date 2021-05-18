@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdalwarper.h 58843108fdd2c6fcd8c8391f370989c937c877dc 2020-05-19 22:26:59 +0200 Martin Dobias $
  *
  * Project:  GDAL High Performance Warper
  * Purpose:  Prototypes, and definitions for warping related work.

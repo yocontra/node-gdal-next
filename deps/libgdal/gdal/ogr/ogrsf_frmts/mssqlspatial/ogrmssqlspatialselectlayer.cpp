@@ -39,7 +39,7 @@
 #define SQL_CA_SS_UDT_TYPE_NAME (SQL_CA_SS_BASE+20)
 #endif
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrmssqlspatialselectlayer.cpp 44f00f2525498bc2059c9cc0e6d86fe7accd9168 2020-05-27 22:13:37 +0200 Even Rouault $")
 /************************************************************************/
 /*                     OGRMSSQLSpatialSelectLayer()                     */
 /************************************************************************/

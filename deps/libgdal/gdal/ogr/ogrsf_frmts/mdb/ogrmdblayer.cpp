@@ -32,7 +32,7 @@
 #include "ogrpgeogeometry.h"
 #include "ogrgeomediageometry.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrmdblayer.cpp bcbf5d514c5224cd13de7c697f66e7f6cc52df27 2020-06-23 23:09:29 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRMDBLayer()                            */

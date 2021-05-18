@@ -35,7 +35,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogravce00layer.cpp 79184515dce9423c42e128d82d1d3136018d79b6 2019-08-17 11:53:00 +0200 Even Rouault $")
 
 constexpr int SERIAL_ACCESS_FID = INT_MIN;
 

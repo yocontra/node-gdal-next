@@ -36,7 +36,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: swq_op_registrar.cpp ffd62ee1bdeed41a9301102c35b3c0eb30a36dc2 2019-11-28 16:56:51 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 static swq_field_type SWQColumnFuncChecker(

@@ -39,7 +39,7 @@
 #include <stdexcept>
 #include <memory>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrdxflayer.cpp aec1416cd2f05d571cceffb663d7761849337754 2020-07-18 20:32:36 +1000 Alan Thomas $")
 
 
 /************************************************************************/

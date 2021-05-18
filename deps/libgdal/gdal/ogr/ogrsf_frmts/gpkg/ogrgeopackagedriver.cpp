@@ -30,7 +30,7 @@
 
 #include "tilematrixset.hpp"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrgeopackagedriver.cpp 5df592a8d2ffb66455270555b586a067a7e400ff 2021-04-04 13:36:33 +0200 Even Rouault $")
 
 // g++ -g -Wall -fPIC -shared -o ogr_geopackage.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/gpkg ogr/ogrsf_frmts/gpkg/*.c* -L. -lgdal
 
@@ -116,8 +116,12 @@ static int OGRGeoPackageDriverIdentify( GDALOpenInfo* poOpenInfo, bool bEmitWarn
     }
     else if(nApplicationId == GPKG_APPLICATION_ID &&
             // Accept any 102XX version
-            !(nUserVersion >= GPKG_1_2_VERSION &&
-              nUserVersion < GPKG_1_2_VERSION + 99))
+            !((nUserVersion >= GPKG_1_2_VERSION &&
+               nUserVersion < GPKG_1_2_VERSION + 99) ||
+            // Accept any 103XX version
+              (nUserVersion >= GPKG_1_3_VERSION &&
+               nUserVersion < GPKG_1_3_VERSION + 99)
+              ))
     {
 #ifdef DEBUG
         if( EQUAL(CPLGetFilename(poOpenInfo->pszFilename), ".cur_input")  )
@@ -138,7 +142,7 @@ static int OGRGeoPackageDriverIdentify( GDALOpenInfo* poOpenInfo, bool bEmitWarn
                             "GPKG_WARN_UNRECOGNIZED_APPLICATION_ID", "YES"));
             if( bWarn )
             {
-                if( nUserVersion > GPKG_1_2_VERSION )
+                if( nUserVersion > GPKG_1_3_VERSION )
                 {
                     CPLError( CE_Warning, CPLE_AppDefined,
                               "This version of GeoPackage "
@@ -166,7 +170,7 @@ static int OGRGeoPackageDriverIdentify( GDALOpenInfo* poOpenInfo, bool bEmitWarn
             }
             else
             {
-                if( nUserVersion > GPKG_1_2_VERSION )
+                if( nUserVersion > GPKG_1_3_VERSION )
                 {
                     CPLDebug( "GPKG",
                               "This version of GeoPackage "

@@ -30,7 +30,7 @@
 #include "ogrgeojsonreader.h"
 #include "ogrgeojsonutils.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrcouchdblayer.cpp a67b029b31dc3f1bb9c0a6ec90a47fa82c39e104 2020-06-27 13:32:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRCouchDBLayer()                             */

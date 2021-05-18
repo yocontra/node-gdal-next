@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: dgnlib.h 59ac0f6876270b8fc7508be94297ab7d94aac470 2017-05-22 15:27:41Z Even Rouault $
  *
  * Project:  Microstation DGN Access Library
  * Purpose:  Definitions of public structures and API of DGN Library.

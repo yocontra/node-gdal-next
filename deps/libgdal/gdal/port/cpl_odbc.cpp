@@ -34,7 +34,7 @@
 #include "cpl_string.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_odbc.cpp 78db15d6c0eda569a90a155b84cdd14ac280928f 2021-02-15 11:39:14 +1000 Nyall Dawson $")
 
 #ifndef SQLColumns_TABLE_CAT
 #define SQLColumns_TABLE_CAT 1

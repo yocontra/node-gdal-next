@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdal_ecw.h 3cf5a95617ba9ec82fcfaea3f8ef27a97de2f73c 2021-03-22 15:02:53 +0100 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  ECW (ERDAS Wavelet Compression Format) Driver Definitions
@@ -125,9 +125,11 @@ public:
 
 class VSIIOStream final: public CNCSJPCIOStream
 {
-#if ECWSDK_VERSION >= 54
-    NCS_DELETE_ALL_COPY_AND_MOVE(VSIIOStream)
-#endif
+    VSIIOStream(const VSIIOStream &) = delete;
+    VSIIOStream& operator= (const VSIIOStream&) = delete;
+    VSIIOStream(VSIIOStream &&) = delete;
+    VSIIOStream& operator= (VSIIOStream &&) = delete;
+
     char     *m_Filename;
   public:
 
@@ -186,7 +188,7 @@ class VSIIOStream final: public CNCSJPCIOStream
         {
             return nullptr;
         }
-        
+
         VSIIOStream *pDst = new VSIIOStream();
         pDst->Access(fpNewVSIL, bWritable, bSeekable, m_Filename, startOfJPData, lengthOfJPData);
         return pDst;

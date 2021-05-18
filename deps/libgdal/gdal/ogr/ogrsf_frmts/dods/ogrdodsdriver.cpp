@@ -29,7 +29,7 @@
 #include "ogr_dods.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrdodsdriver.cpp 103562a4b99e01eef1f5cb350b2dccaa6fe01e81 2017-12-14 19:39:15Z Even Rouault $")
 
 /************************************************************************/
 /*                            ~OGRDODSDriver()                            */

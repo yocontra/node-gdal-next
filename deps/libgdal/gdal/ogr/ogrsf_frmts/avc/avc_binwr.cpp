@@ -1,4 +1,4 @@
-/* $Id$
+/* $Id: avc_binwr.cpp b51dc28ab7da7c84c1cac3477560dbc9ba9f5c9e 2020-10-09 01:50:53 +0200 Momtchil Momtchev $
  *
  * Name:     avc_binwr.c
  * Project:  Arc/Info vector coverage (AVC)  E00->BIN conversion library

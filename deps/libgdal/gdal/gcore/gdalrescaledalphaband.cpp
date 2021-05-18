@@ -36,7 +36,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalrescaledalphaband.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/

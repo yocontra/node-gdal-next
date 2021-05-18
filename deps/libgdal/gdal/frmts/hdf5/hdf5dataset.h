@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: hdf5dataset.h 16c87cd95f27db3344c6c034950fdf285666d924 2020-08-18 15:37:19 +0200 Even Rouault $
  *
  * Project:  Hierarchical Data Format Release 5 (HDF5)
  * Purpose:  Header file for HDF5 datasets reader.

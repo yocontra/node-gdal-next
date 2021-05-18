@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_error.h 065bfd22aef8960c05d9ec0e1e72a1e3f4e36b82 2020-02-27 14:12:04 +0100 Even Rouault $
  *
  * Name:     cpl_error.h
  * Project:  CPL - Common Portability Library

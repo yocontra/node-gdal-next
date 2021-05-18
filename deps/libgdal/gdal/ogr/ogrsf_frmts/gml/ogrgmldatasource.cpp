@@ -51,7 +51,7 @@
 #include "parsexsd.h"
 #include "../mem/ogr_mem.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrgmldatasource.cpp a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                   ReplaceSpaceByPct20IfNeeded()                      */

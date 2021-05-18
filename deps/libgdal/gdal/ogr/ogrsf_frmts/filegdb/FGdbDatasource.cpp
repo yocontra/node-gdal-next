@@ -36,7 +36,7 @@
 #include "FGdbUtils.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: FGdbDatasource.cpp 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $")
 
 using std::vector;
 using std::wstring;

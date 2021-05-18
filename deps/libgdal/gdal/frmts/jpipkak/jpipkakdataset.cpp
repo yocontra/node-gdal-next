@@ -35,7 +35,7 @@
 #include "gdal_frmts.h"
 #include "jpipkakdataset.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: jpipkakdataset.cpp 49fb5567e2bc851b5b3c64476d80e7e23cffd0e7 2021-03-08 22:49:55 +0100 Even Rouault $")
 
 /*
 ** The following are for testing premature stream termination support.
@@ -553,9 +553,9 @@ int JPIPKAKDataset::Initialize(const char* pszDatasetName, int bReinitializing )
 
     if (psResult->nStatus != 0)
     {
-        CPLHTTPDestroyResult( psResult );
         CPLError(CE_Failure, CPLE_AppDefined,
                  "Curl reports error: %d: %s", psResult->nStatus, psResult->pszErrBuf );
+        CPLHTTPDestroyResult( psResult );
         return FALSE;
     }
 

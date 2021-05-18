@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrocitablelayer.cpp c368bc9fdb1a0067d4400be15c08501137dab367 2018-05-18 05:10:17Z Ryan Oliver $")
 
 static int nDiscarded = 0;
 static int nHits = 0;

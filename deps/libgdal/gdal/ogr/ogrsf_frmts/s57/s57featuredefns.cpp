@@ -32,7 +32,7 @@
 #include "ogr_api.h"
 #include "s57.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: s57featuredefns.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     S57GenerateGeomFeatureDefn()                     */

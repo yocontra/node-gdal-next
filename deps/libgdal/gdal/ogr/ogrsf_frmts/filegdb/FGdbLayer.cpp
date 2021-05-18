@@ -36,7 +36,7 @@
 #include "FGdbUtils.h"
 #include "cpl_minixml.h" // the only way right now to extract schema information
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: FGdbLayer.cpp 9953406c1be0d385a920244c3e2fe4f805bd67c3 2020-07-13 17:13:24 +0200 Even Rouault $")
 
 using std::string;
 using std::wstring;

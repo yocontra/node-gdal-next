@@ -7,7 +7,7 @@
  *
  * Author:       David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id$
+ * Last changes: $Id: postgisrastertools.cpp 3f1104ba8bc923329abf3cd3a5b17211e2818c47 2018-05-07 20:12:57 +0200 Even Rouault $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -34,7 +34,7 @@
  **********************************************************************/
  #include "postgisraster.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: postgisrastertools.cpp 3f1104ba8bc923329abf3cd3a5b17211e2818c47 2018-05-07 20:12:57 +0200 Even Rouault $")
 
  /**********************************************************************
  * \brief Replace the quotes by single quotes in the input string

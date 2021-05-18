@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ogr_osm.h f2db151194e327903a0b8f7bbfa01633cefa542f 2020-05-24 07:49:09 +0200 Kai Pastor $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/OpenStreeMap driver.

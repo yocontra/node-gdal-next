@@ -29,7 +29,7 @@
 
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrregisterall.cpp bca0a3e9973959f19849febb0281fa9ecf0ad51f 2020-09-02 20:47:32 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRRegisterAll()                           */

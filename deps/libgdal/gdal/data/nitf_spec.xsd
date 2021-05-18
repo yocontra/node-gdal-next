@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /******************************************************************************
- * $Id$
+ * $Id: nitf_spec.xsd 220fb188536106a9992284cd5629363c064f624e 2020-10-13 17:23:11 -0400 matthew-baran $
  *
  * Project:  NITF Library
  * Purpose:  Schema of description of NITF TREs

@@ -57,7 +57,7 @@
 #include "ogr_srs_api.h"
 #include "ogr_geo_utils.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gml2ogrgeometry.cpp e3d9c5a8029a9537c6f812945deaf51795fedafe 2020-11-29 01:23:31 +0100 Even Rouault $")
 
 constexpr double kdfD2R = M_PI / 180.0;
 constexpr double kdf2PI = 2.0 * M_PI;

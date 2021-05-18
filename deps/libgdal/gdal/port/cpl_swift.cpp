@@ -37,7 +37,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_swift.cpp 445f08141d6744557b1cd658d3989a97db5b8f27 2020-09-23 14:07:18 +0200 Even Rouault $")
 
 #ifdef HAVE_CURL
 

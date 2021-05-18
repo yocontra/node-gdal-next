@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: netcdfdataset.h fca5a7550aae6310aeed67b9c8174215c7284e88 2020-07-29 21:32:17 +0200 Even Rouault $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.

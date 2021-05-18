@@ -52,7 +52,7 @@
 #include <unistd.h>
 #endif
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdaltransform.cpp 900cac300559af80bca19917f9acd1915c13995e 2019-08-12 22:17:29 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */

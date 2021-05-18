@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gt_wkt_srs_priv.h fb76410650e54adda139b18a4b294abc1809a378 2020-04-22 19:05:15 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Internal methods of gt_wkt_srs.cpp shared with gt_citation.cpp

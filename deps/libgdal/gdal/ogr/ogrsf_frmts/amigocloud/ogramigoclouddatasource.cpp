@@ -31,7 +31,7 @@
 #include "ogrgeojsonreader.h"
 #include <sstream>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogramigoclouddatasource.cpp 10ee1d2f93b8c47936da4ff666ea040fc43b6af6 2021-03-11 11:23:57 +0100 Even Rouault $")
 
 CPLString OGRAMIGOCLOUDGetOptionValue(const char* pszFilename, const char* pszOptionName);
 
@@ -760,8 +760,8 @@ json_object* OGRAmigoCloudDataSource::RunSQL(const char* pszUnescapedSQL)
     } else {
         osSQL += "?query=";
         char * pszEscaped = CPLEscapeString( pszUnescapedSQL, -1, CPLES_URL );
-        std::string escapedSql = pszEscaped;
-        osSQL += escapedSql;
+        osSQL += pszEscaped;
+        CPLFree(pszEscaped);
         return RunGET(osSQL.c_str());
     }
 }

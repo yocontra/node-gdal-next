@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: geotiff_proj4.c ce8307f8c6b8314d82f2cd4a38837ccd6538c29d 2019-04-19 19:51:41 +0200 Even Rouault $
  *
  * Project:  libgeotiff
  * Purpose:  Code to convert a normalized GeoTIFF definition into a PROJ.4

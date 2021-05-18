@@ -42,7 +42,7 @@
 #include "cpl_multiproc.h"
 #include "gdal_csv.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_csv.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
 
 /* ==================================================================== */
 /*      The CSVTable is a persistent set of info about an open CSV      */

@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp 2ca06da8696021bcf9dda40f61bca581104da015 2020-12-04 22:35:24 +0100 Even Rouault $")
 
 #if !defined(HAVE_CURL) || defined(CPL_MULTIPROC_STUB)
 

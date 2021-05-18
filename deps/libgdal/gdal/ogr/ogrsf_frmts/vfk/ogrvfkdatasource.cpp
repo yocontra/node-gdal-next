@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrvfkdatasource.cpp 1cfeb033bf33dceff1ca7e1fafa13e63149c1de5 2018-05-02 20:13:02 +0200 Martin Landa $")
 
 /*!
   \brief OGRVFKDataSource constructor

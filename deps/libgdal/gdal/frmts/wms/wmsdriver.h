@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: wmsdriver.h 816ac3854ae287862bcafe49aa66f201dda93274 2020-09-24 20:05:33 +0300 Idan Miara $
  *
  * Project:  WMS Client Driver
  * Purpose:  Implementation of Dataset and RasterBand classes for WMS

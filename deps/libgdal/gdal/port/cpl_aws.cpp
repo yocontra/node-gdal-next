@@ -38,7 +38,7 @@
 #include "cpl_http.h"
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: cpl_aws.cpp f3f6c7bc5289c916ba239ab8ca7b52f137343629 2020-10-06 12:40:34 +0200 Even Rouault $")
 
 // #define DEBUG_VERBOSE 1
 

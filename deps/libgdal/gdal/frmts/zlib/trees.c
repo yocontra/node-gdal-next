@@ -29,7 +29,7 @@
  *          Addison-Wesley, 1983. ISBN 0-201-06672-6.
  */
 
-/* @(#) $Id$ */
+/* @(#) $Id: trees.c e3e172f16826700de01402fc4b0813db0fd1794c 2016-11-21 16:04:04Z Even Rouault $ */
 
 /* #define GEN_TREES_H */
 

@@ -53,7 +53,7 @@
 
 using std::vector;
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalexif.cpp ff10c4fc31b658510a8ea7b6224a806705367c03 2019-12-19 19:53:27 +0100 Even Rouault $")
 
 constexpr int MAXSTRINGLENGTH = 65535;
 constexpr int EXIFOFFSETTAG = 0x8769;
@@ -457,6 +457,7 @@ static int EXIF_TIFFDataWidth(int /* GDALEXIFTIFFDataType */ type)
 /*                                                                      */
 /*      Extract all entry from a IFD                                    */
 /************************************************************************/
+#pragma optimize("", off)
 CPLErr EXIFExtractMetadata(char**& papszMetadata,
                            void *fpInL, int nOffset,
                            int bSwabflag, int nTIFFHEADER,
@@ -760,6 +761,7 @@ CPLErr EXIFExtractMetadata(char**& papszMetadata,
 
     return CE_None;
 }
+#pragma optimize("", on)
 
 /************************************************************************/
 /*                        WriteLEUInt16()                               */

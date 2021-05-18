@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: armadillo_headers.h dd1e0e25c2d41bbb0b63061751483276ab5da090 2019-04-27 15:27:04 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  Includes armadillo header

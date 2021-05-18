@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrxlsxdatasource.cpp bddee02cadaed842e6760d814b5d7156da4394a0 2021-04-23 21:22:42 +0200 Even Rouault $")
 
 namespace OGRXLSX {
 
@@ -1004,7 +1004,7 @@ void OGRXLSXDataSource::endElementRow(CPL_UNUSED const char *pszNameIn)
                         }
                         else if( eFieldType == OFTInteger &&
                                  poFieldDefn->GetSubType() == OFSTBoolean &&
-                                 eValType == OFTInteger && 
+                                 eValType == OFTInteger &&
                                  eValSubType != OFSTBoolean )
                         {
                             poFieldDefn->SetSubType(OFSTNone);
@@ -1174,10 +1174,18 @@ void OGRXLSXDataSource::startElementSSCbk(const char *pszNameIn,
     {
         case STATE_DEFAULT:
         {
+            if (strcmp(pszNameIn,"si") == 0)
+            {
+                PushState(STATE_SI);
+                osCurrentString = "";
+            }
+            break;
+        }
+        case STATE_SI:
+        {
             if (strcmp(pszNameIn,"t") == 0)
             {
                 PushState(STATE_T);
-                osCurrentString = "";
             }
             break;
         }
@@ -1206,7 +1214,8 @@ void OGRXLSXDataSource::endElementSSCbk(CPL_UNUSED const char *pszNameIn)
     switch(stateStack[nStackDepth].eVal)
     {
         case STATE_DEFAULT: break;
-        case STATE_T:
+        case STATE_T: break;
+        case STATE_SI:
         {
             if (stateStack[nStackDepth].nBeginDepth == nDepth)
             {
@@ -1249,6 +1258,7 @@ void OGRXLSXDataSource::dataHandlerSSCbk(const char *data, int nLen)
     switch(stateStack[nStackDepth].eVal)
     {
         case STATE_DEFAULT: break;
+        case STATE_SI:      break;
         case STATE_T:       osCurrentString.append(data, nLen); break;
         default:            break;
     }

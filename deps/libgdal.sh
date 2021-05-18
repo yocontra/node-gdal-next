@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libgdal"
 
-GDAL_VERSION=3.2.2
+GDAL_VERSION=3.2.3
 dir_gdal=./gdal
 dir_formats_gyp=./gyp-formats
 dir_gyp_templates=./gyp-templates
@@ -44,7 +44,7 @@ GDAL_FORMATS="gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm
 	nitf bmp pcidsk airsar rs2 ilwis rmf leveller sgi srtmhgt
 	idrisi gsg ingr ers jaxapalsar dimap gff cosar pds adrg
 	coasp tsx terragen blx til r northwood saga xyz hf2
-	kmlsuperoverlay ctg e00grid zmap ngsgeoid iris map zlib
+	kmlsuperoverlay ctg e00grid zmap ngsgeoid iris map
 	jpeg png mbtiles
 	${OPT_GDAL_FORMATS:-}"
 

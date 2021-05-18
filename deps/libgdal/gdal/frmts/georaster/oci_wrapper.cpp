@@ -29,7 +29,7 @@
 
 #include "oci_wrapper.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: oci_wrapper.cpp 0022fc591f3de6528cc6de3bbbec4bdd8122cbaa 2019-03-23 17:01:14 +0100 Even Rouault $")
 
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},

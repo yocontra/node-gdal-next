@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "ogr_pg.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrpgresultlayer.cpp 6a5200c516960ea966594fb50dffe5c51edd940f 2020-11-27 09:29:53Z Robert Coup $")
 
 #define PQexec this_is_an_error
 

@@ -33,7 +33,7 @@
 #include "cpl_http.h"
 #include "parsexsd.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrwfslayer.cpp 6624daf834a8ea1a3bed016ad9e87dbd54db767c 2020-12-28 18:04:01 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRWFSRecursiveUnlink()                         */

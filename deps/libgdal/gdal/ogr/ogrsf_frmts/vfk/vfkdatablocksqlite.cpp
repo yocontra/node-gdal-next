@@ -39,7 +39,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: vfkdatablocksqlite.cpp b40b498665057e539d0c4afb34ab27a25ecd891e 2019-08-13 21:05:33 +0200 Even Rouault $")
 
 /*!
   \brief VFKDataBlockSQLite constructor

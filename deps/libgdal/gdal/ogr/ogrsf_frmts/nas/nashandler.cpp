@@ -33,7 +33,7 @@
 #include "cpl_string.h"
 #include "ogr_xerces.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: nashandler.cpp 6b45c44413aa670d70f39ad9419d2eb01b3bfb16 2020-07-22 09:17:34 +0200 Juergen E. Fischer $")
 
 /*
   Update modes:

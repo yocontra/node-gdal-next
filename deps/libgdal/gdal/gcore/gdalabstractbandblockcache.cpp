@@ -39,7 +39,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdalabstractbandblockcache.cpp 2cef454ab06723a32379690b46581a40eb2e5af2 2019-11-13 16:36:03 +0100 Even Rouault $")
 
 #ifdef DEBUG_VERBOSE_ABBC
 static int nAllBandsKeptAlivedBlocks = 0;

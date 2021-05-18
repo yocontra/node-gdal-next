@@ -40,7 +40,7 @@
 
 void CPL_DLL CPL_STDCALL GDALRegister_RASDAMAN();
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: rasdamandataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
 
 // cppcheck-suppress copyCtorAndEqOperator
 class Subset

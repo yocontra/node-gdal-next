@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id$
+* $Id: minidriver_mrf.cpp e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $
 *
 * Project:  WMS Client Mini Driver
 * Purpose:  Implementation of Dataset and RasterBand classes for WMS
@@ -33,7 +33,7 @@
 #include "wmsdriver.h"
 #include "minidriver_mrf.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: minidriver_mrf.cpp e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $")
 
 using namespace WMSMiniDriver_MRF_ns;
 

@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: reader_geo_eye.cpp 67e459b8519f44a70d2d7ce774553b59442f5097 2020-06-29 20:35:34 +0200 Even Rouault $")
 
 /**
  * GDALMDReaderGeoEye()

@@ -34,7 +34,7 @@
 #include "pcrasterutil.h"
 #include "pcrtypes.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: pcrasterutil.cpp a427351bd985b170e6e51265fc97c7f217089a2b 2018-01-22 17:21:15Z Kurt Schwehr $")
 
 //! Converts PCRaster data type to GDAL data type.
 /*!

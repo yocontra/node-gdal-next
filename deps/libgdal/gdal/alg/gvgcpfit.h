@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: gvgcpfit.h de59b35db67113437ccb089ebab8dc4b9628d5f0 2016-10-24 04:10:14Z Kurt Schwehr $ */
 
 #ifndef GVGCPFIT_H_INCLUDED
 #define GVGCPFIT_H_INCLUDED

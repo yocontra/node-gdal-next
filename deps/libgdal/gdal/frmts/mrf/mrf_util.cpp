@@ -45,7 +45,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: mrf_util.cpp 81d88451b89a7cb8e02020005eb322b0cdaff4de 2020-08-10 08:52:54 -0700 Lucian Plesea $")
 
 // LERC is not ready for big endian hosts for now
 #if defined(LERC) && defined(WORDS_BIGENDIAN)

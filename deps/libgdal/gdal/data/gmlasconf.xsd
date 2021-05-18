@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id$
+ * $Id: gmlasconf.xsd 6ef13199b493973da285decbfcd5e2a763954b97 2018-06-07 05:46:42 -0400 luzpaz $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for gmlasconf.xml

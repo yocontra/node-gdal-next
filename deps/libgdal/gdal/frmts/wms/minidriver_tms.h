@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: minidriver_tms.h 42ff6f24875f8c5459298840613f5b538c815934 2020-09-24 14:51:51 +0200 Even Rouault $
  *
  * Project:  WMS Client Driver
  * Purpose:  Implementation of Dataset and RasterBand classes for WMS

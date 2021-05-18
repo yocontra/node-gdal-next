@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: ods_formula.h 3a0d5f82c70162bc7dd669cf264bbc4b9c724c27 2020-05-22 19:48:49 +0200 Even Rouault $
  *
  * Component: ODS formula Engine
  * Purpose: Implementation of the ods_formula_node class used to represent a

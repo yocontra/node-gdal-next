@@ -47,7 +47,7 @@
 #include "gdal_frmts.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: hdf5dataset.cpp 7bfecfa72d986a33e07ea3110f2e5d38803a167a 2020-11-23 17:07:35 +0100 Even Rouault $")
 
 constexpr size_t MAX_METADATA_LEN = 32768;
 

@@ -32,7 +32,7 @@
 #include "ogr_srs_api.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: loslasdataset.cpp 86fc87cb5dbe16f6a72624564de23da35426ed67 2019-12-29 00:41:16 +0100 Even Rouault $")
 
 /**
 

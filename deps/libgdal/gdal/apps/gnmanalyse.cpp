@@ -33,7 +33,7 @@
 #include "gnm_priv.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gnmanalyse.cpp 2dd182b498f0381aa3bc200928681dfbcf2ecfa6 2020-02-04 10:22:31 +0100 Enrico Weigelt, metux IT consult $")
 
 enum operation
 {

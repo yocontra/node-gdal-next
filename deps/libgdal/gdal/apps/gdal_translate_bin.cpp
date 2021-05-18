@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: gdal_translate_bin.cpp c3800f4cf2092dc8cefe57697b5071170663e392 2020-10-12 12:29:50 +0200 Even Rouault $")
 
 /*  ******************************************************************* */
 /*                               Usage()                                */

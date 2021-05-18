@@ -166,7 +166,7 @@ size_t GetMaxTotalAllocs();
 
 static void WriteVarSInt64(GIntBig nSVal, GByte** ppabyData);
 
-CPL_CVSID("$Id$")
+CPL_CVSID("$Id: ogrosmdatasource.cpp b31781c0ecc65c1f0acb57dcc55b221d9fa86627 2020-05-24 09:43:07 +0200 Kai Pastor $")
 
 class DSToBeOpened
 {

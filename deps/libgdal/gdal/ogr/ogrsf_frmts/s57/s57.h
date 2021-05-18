@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: s57.h 342855360b69569556916db63ea417dd3514f258 2020-06-14 15:44:48 +0200 Even Rouault $
  *
  * Project:  S-57 Translator
  * Purpose:  Declarations for S-57 translator not including the
