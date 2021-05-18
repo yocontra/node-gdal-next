@@ -32,7 +32,7 @@ class LayerFeatures : public Nan::ObjectWrap {
   GDAL_ASYNCABLE_DECLARE(next);
   GDAL_ASYNCABLE_DECLARE(count);
   GDAL_ASYNCABLE_DECLARE(add);
-  static NAN_METHOD(set);
+  GDAL_ASYNCABLE_DECLARE(set);
   GDAL_ASYNCABLE_DECLARE(remove);
 
   static NAN_GETTER(layerGetter);

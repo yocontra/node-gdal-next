@@ -23,6 +23,7 @@ const create = {
   GeometryCollectionChildren: () => new gdal.GeometryCollection().children,
   Layer: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0),
   LayerFields: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0).fields,
+  LayerFeatures: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0).features,
   LinearRing: [],
   LineString: [],
   LineStringPoints: () => new gdal.LineString().points,

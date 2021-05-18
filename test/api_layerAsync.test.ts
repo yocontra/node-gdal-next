@@ -595,7 +595,7 @@ describe('gdal.LayerAsync', () => {
         )
       })
 
-      describe('set()', () => {
+      describe('setAsync()', () => {
         let f0, f1, f1_new, layer, dataset
         beforeEach(() => {
           prepare_dataset_layer_test('w', { autoclose: false }, (ds, lyr) => {
@@ -625,42 +625,27 @@ describe('gdal.LayerAsync', () => {
         })
 
         describe('w/feature argument', () => {
-          it('should replace existing feature', () => {
-            f1_new.fid = 1
-
-            assert.equal(
-              layer.features.get(1).fields.get('status'),
-              'unchanged'
-            )
-            layer.features.set(f1_new)
-            assert.equal(layer.features.get(1).fields.get('status'), 'changed')
-          })
-        })
-        describe('w/fid,feature arguments', () => {
-          it('should replace existing feature', () => {
-            assert.equal(
-              layer.features.get(1).fields.get('status'),
-              'unchanged'
-            )
-            layer.features.set(1, f1_new)
-            assert.equal(layer.features.get(1).fields.get('status'), 'changed')
-          })
-        })
-        it('should throw error if layer doesnt support changing features', () => {
-          prepare_dataset_layer_test('r', (dataset, layer) => {
-            assert.throws(() => {
-              layer.features.set(1, new gdal.Feature(layer))
-            }, /read-only/)
-          })
-        })
-        it('should throw error if dataset is destroyed', () => {
-          prepare_dataset_layer_test('r', (dataset, layer) => {
-            dataset.close()
-            assert.throws(() => {
-              layer.features.set(1, new gdal.Feature(layer))
+          describe('w/fid,feature arguments', () => {
+            it('should replace existing feature', () => {
+              assert.equal(
+                layer.features.get(1).fields.get('status'),
+                'unchanged'
+              )
+              const q = layer.features.setAsync(1, f1_new)
+              return assert.eventually.equal(q.then(() => layer.features.get(1).fields.get('status')), 'changed')
             })
           })
+          it('should reject if layer doesnt support changing features', () =>
+            prepare_dataset_layer_test('r', (dataset, layer) =>
+              assert.isRejected(layer.features.setAsync(1, new gdal.Feature(layer), /read-only/))
+            ))
         })
+        it('should reject if dataset is destroyed', () =>
+          prepare_dataset_layer_test('r', (dataset, layer: gdal.Layer) => {
+            const newFeature = new gdal.Feature(layer)
+            dataset.close()
+            return assert.isRejected(layer.features.setAsync(1, newFeature), /already destroyed/)
+          }))
       })
 
       describe('removeAsync()', () => {
@@ -673,13 +658,13 @@ describe('gdal.LayerAsync', () => {
             return assert.eventually.isNull(layer.features.removeAsync(1).then(() => layer.features.get(1)))
           })
         )
-        it('should throw error if driver doesnt support deleting features', () => {
+        it('should throw error if driver doesnt support deleting features', () =>
           prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
             assert.throws(() => {
               layer.features.remove(1)
             }, /read-only/)
           })
-        })
+        )
         it('should throw error if dataset is destroyed', () =>
           prepare_dataset_layer_test('w', { autoclose: false }, (dataset, layer) => {
             dataset.close()

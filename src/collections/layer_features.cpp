@@ -18,7 +18,7 @@ void LayerFeatures::Initialize(Local<Object> target) {
   Nan__SetPrototypeAsyncableMethod(lcons, "count", count);
   Nan__SetPrototypeAsyncableMethod(lcons, "add", add);
   Nan__SetPrototypeAsyncableMethod(lcons, "get", get);
-  Nan::SetPrototypeMethod(lcons, "set", set);
+  Nan__SetPrototypeAsyncableMethod(lcons, "set", set);
   Nan__SetPrototypeAsyncableMethod(lcons, "first", first);
   Nan__SetPrototypeAsyncableMethod(lcons, "next", next);
   Nan__SetPrototypeAsyncableMethod(lcons, "remove", remove);
@@ -98,6 +98,7 @@ NAN_METHOD(LayerFeatures::toString) {
  * **Important:** The `id` argument is not an index. In most cases it will be
  * zero-based, but in some cases it will not. If iterating, it's best to use the
  * `next()` method.
+ * {{{async}}}
  *
  * @method getAsync
  * @param {number} id The feature ID of the feature to read.
@@ -142,6 +143,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
 /**
  * Resets the feature pointer used by `next()` and
  * returns the first feature in the layer.
+ * {{{async}}}
  *
  * @method firstAsync
  * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
@@ -186,6 +188,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
 
 /**
  * Returns the next feature in the layer. Returns null if no more features.
+ * {{{async}}}
  *
  * @example
  * ```
@@ -239,6 +242,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
 /**
  * Adds a feature to the layer. The feature should be created using the current
  * layer as the definition.
+ * {{{async}}}
  *
  * @example
  * ```
@@ -294,6 +298,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
 
 /**
  * Returns the number of features in the layer.
+ * {{{async}}}
  *
  * @method countAsync
  * @param {boolean} [force=true]
@@ -356,7 +361,19 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  * @param {number} id
  * @param {gdal.Feature} feature
  */
-NAN_METHOD(LayerFeatures::set) {
+
+/**
+ * Sets a feature in the layer.
+ * {{{async}}}
+ *
+ * @method setAsync
+ * @throws Error
+ * @param {number} id
+ * @param {gdal.Feature} feature
+ * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Feature>}
+ */
+GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
@@ -367,23 +384,36 @@ NAN_METHOD(LayerFeatures::set) {
     return;
   }
 
+  Local<Object> ds;
+#if GDAL_VERSION_MAJOR < 2
+  if (Dataset::datasource_cache.has(layer->getParent())) { ds = Dataset::datasource_cache.get(layer->getParent()); }
+#else
+  if (Dataset::dataset_cache.has(layer->getParent())) { ds = Dataset::dataset_cache.get(layer->getParent()); }
+#endif
+  if (!layer->isAlive()) {
+    Nan::ThrowError("Dataset object already destroyed");
+    return;
+  }
+
   int err;
   Feature *f;
-  int argc = info.Length();
 
-  if (argc == 1) {
+  Local<Object> feature;
+  if (info[0]->IsObject()) {
     NODE_ARG_WRAPPED(0, "feature", Feature, f);
-  } else if (argc == 2) {
+    feature = info[0].As<Object>();
+  } else if (info[0]->IsNumber()) {
     int i = 0;
     NODE_ARG_INT(0, "feature id", i);
     NODE_ARG_WRAPPED(1, "feature", Feature, f);
+    feature = info[1].As<Object>();
     err = f->get()->SetFID(i);
     if (err) {
       Nan::ThrowError("Error setting feature id");
       return;
     }
   } else {
-    Nan::ThrowError("Invalid number of arguments");
+    Nan::ThrowError("Invalid arguments");
     return;
   }
 
@@ -391,12 +421,22 @@ NAN_METHOD(LayerFeatures::set) {
     Nan::ThrowError("Feature already destroyed");
     return;
   }
-  err = layer->get()->SetFeature(f->get());
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
-  return;
+
+  OGRLayer *gdal_layer = layer->get();
+  OGRFeature *gdal_feature = f->get();
+  long ds_uid = layer->parent_uid;
+  GDALAsyncableJob<OGRErr> job;
+  job.persist({parent, feature, ds});
+  job.main = [ds_uid, gdal_layer, gdal_feature]() {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    OGRErr err = gdal_layer->SetFeature(gdal_feature);
+    GDAL_UNLOCK_PARENT;
+    if (err != CE_None) throw getOGRErrMsg(err);
+    return err;
+  };
+
+  job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  job.run(info, async, 2);
 }
 
 /**
