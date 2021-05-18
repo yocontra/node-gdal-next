@@ -166,7 +166,14 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 ## Unit-tested platforms with pre-built binaries
-Currently packages are built and unit tested for the following targets:
+
+Release binaries with pre-built bundled GDAL are tested against the full matrix of:
+
+* Node.js versions: 10.x, 12.x, 14.x, 15.x, 16.x
+* OS: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, CentOS 8, Fedora 33, Debian 10 buster, Arch Linux current, Windows Server 2019, macOS Catalina 10.15
+
+
+Development versions are unit tested for the following targets:
 
 ---
 | Node | OS | GDAL |
@@ -204,3 +211,4 @@ Currently packages are built and unit tested for the following targets:
 | Node.js 15.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
 | Node.js 16.x | macOS Catalina 10.15 | bundled GDAL 3.2.2
 ---
+

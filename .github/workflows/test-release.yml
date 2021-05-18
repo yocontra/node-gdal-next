@@ -3,14 +3,32 @@ name: Test published packages
 on: [ release, workflow_dispatch ]
 
 jobs:
-  bundled_gdal:
+  test_linux:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        linux-version: [ 'ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'centos:8', 'debian:buster', 'fedora:33', 'archlinux:latest' ]
+        node-version: [ 10, 12, 14, 15, 16 ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - run: npm run container release ${{ matrix.linux-version }} ${{ matrix.node-version }}
+
+
+  test_winmac:
 
     runs-on: ${{ matrix.platforms }}
 
     strategy:
       matrix:
+        platforms: [ windows-2019, macos-10.15 ]
         node-version: [ 10.x, 12.x, 14.x, 15.x, 16.x ]
-        platforms: [ ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, windows-2019, macos-10.15 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -20,27 +38,4 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp install
-    - run: npm test
-
-
-  shared_gdal:
-
-    runs-on: ${{ matrix.platforms }}
-    
-    strategy:
-      matrix:
-        node-version: [ 10.x, 12.x, 14.x, 15.x, 16.x ]
-        platforms: [ ubuntu-16.04, ubuntu-18.04, ubuntu-20.04 ]
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: sudo apt-get update
-    - run: sudo apt-get install libgdal-dev
-    - run: npm install --ignore-scripts
-    - run: npx @mapbox/node-pre-gyp configure --shared_gdal
-    - run: npx @mapbox/node-pre-gyp build -j max --shared_gdal
     - run: npm test
