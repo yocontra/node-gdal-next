@@ -114,14 +114,14 @@ template <class GDALType> void GDALAsyncWorker<GDALType>::HandleOKCallback() {
   // we give it a lambda that can access the persistent storage created for this operation
   v8::Local<v8::Value> argv[] = {
     Nan::Null(), rval(raw, [this](const char *key) { return this->GetFromPersistent(key); })};
-  Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
+  callback->Call(2, argv, async_resource);
 }
 
 template <class GDALType> void GDALAsyncWorker<GDALType>::HandleErrorCallback() {
   // Back to the main thread with the JS world stopped
   Nan::HandleScope scope;
   v8::Local<v8::Value> argv[] = {Nan::Error(this->ErrorMessage())};
-  Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 1, argv);
+  callback->Call(1, argv, async_resource);
 }
 
 // This the basic unit of the GDALAsyncable framework
@@ -156,7 +156,7 @@ template <class GDALType> class GDALAsyncableJob {
 
   GDALAsyncableJob() : main(), rval(), persistent(), autoIndex(0){};
 
-  void persist(const std::string key, const v8::Local<v8::Object> &obj) {
+  void persist(const std::string &key, const v8::Local<v8::Object> &obj) {
     persistent[key] = obj;
   }
 
