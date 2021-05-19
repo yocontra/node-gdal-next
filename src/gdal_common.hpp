@@ -513,7 +513,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       gdal_obj->wrapped_method();                                                                                      \
       return 0;                                                                                                        \
     };                                                                                                                 \
-    job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };                                  \
+    job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };                                \
     job.run(info, async, 0);                                                                                           \
   }
 
@@ -531,7 +531,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     GDALAsyncableJob<async_type> job;                                                                                  \
     job.persist(info.This());                                                                                          \
     job.main = [gdal_obj]() { return gdal_obj->wrapped_method(); };                                                    \
-    job.rval = [](async_type r, GDAL_ASYNCABLE_OBJS) { return Nan::New<result_type>(r); };                             \
+    job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 0);                                                                                           \
   }
 
@@ -549,7 +549,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     GDALAsyncableJob<async_type> job;                                                                                  \
     job.persist(info.This(), info[0].As<Object>());                                                                    \
     job.main = [gdal_obj, gdal_param]() { return gdal_obj->wrapped_method(gdal_param); };                              \
-    job.rval = [](async_type r, GDAL_ASYNCABLE_OBJS) { return Nan::New<result_type>(r); };                             \
+    job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 1);                                                                                           \
   }
 
@@ -568,7 +568,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     GDALAsyncableJob<async_type> job;                                                                                  \
     job.persist(info.This());                                                                                          \
     job.main = [gdal_obj, param]() { return gdal_obj->wrapped_method(param); };                                        \
-    job.rval = [](async_type r, GDAL_ASYNCABLE_OBJS) { return Nan::New<result_type>(r); };                             \
+    job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 1);                                                                                           \
   }
 
@@ -592,7 +592,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       if (err) throw getOGRErrMsg(err);                                                                                \
       return err;                                                                                                      \
     };                                                                                                                 \
-    job.rval = [](async_type, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };                           \
+    job.rval = [](async_type, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };                         \
     job.run(info, async, 1);                                                                                           \
   }
 

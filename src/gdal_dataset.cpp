@@ -359,7 +359,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
     GDAL_UNLOCK_PARENT;
     return 0;
   };
-  job.rval = [raw](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.rval = [raw](int, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 0);
 
   return;
@@ -437,7 +437,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
     if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
   };
-  job.rval = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) { return Layer::New(layer, raw, true); };
+  job.rval = [raw](OGRLayer *layer, GetFromPersistentFunc) { return Layer::New(layer, raw, true); };
 
   job.run(info, async, 3);
 }
@@ -730,7 +730,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [raw](CPLErr, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.rval = [raw](CPLErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
 
   job.run(info, async, 3);
 }

@@ -157,7 +157,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
     return;
   }
 
-  job.rval = [raw](OGRLayer *lyr, GDAL_ASYNCABLE_OBJS) { return Layer::New(lyr, raw); };
+  job.rval = [raw](OGRLayer *lyr, GetFromPersistentFunc) { return Layer::New(lyr, raw); };
   job.run(info, async, 1);
 }
 
@@ -253,7 +253,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
     return layer;
   };
 
-  job.rval = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) { return Layer::New(layer, raw, false); };
+  job.rval = [raw](OGRLayer *layer, GetFromPersistentFunc) { return Layer::New(layer, raw, false); };
 
   job.run(info, async, 4);
 }
@@ -307,7 +307,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
     return count;
   };
 
-  job.rval = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
+  job.rval = [](int count, GetFromPersistentFunc) { return Nan::New<Integer>(count); };
   job.run(info, async, 0);
 }
 
@@ -378,7 +378,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
     return layer;
   };
 
-  job.rval = [raw](OGRLayer *layer, GDAL_ASYNCABLE_OBJS) { return Layer::New(layer, raw); };
+  job.rval = [raw](OGRLayer *layer, GetFromPersistentFunc) { return Layer::New(layer, raw); };
 
   job.run(info, async, 3);
 }
@@ -438,7 +438,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
     return err;
   };
 
-  job.rval = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](int count, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
 

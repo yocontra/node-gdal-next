@@ -587,7 +587,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom]() { return gdal_geom->ConvexHull(); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
 
@@ -614,7 +614,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom]() { return gdal_geom->Boundary(); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
 
@@ -649,7 +649,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom, gdal_x]() { return gdal_geom->Intersection(gdal_x); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -684,7 +684,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom, gdal_x]() { return gdal_geom->Union(gdal_x); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -719,7 +719,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom, gdal_x]() { return gdal_geom->Difference(gdal_x); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -754,7 +754,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom, gdal_x]() { return gdal_geom->SymDifference(gdal_x); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -788,7 +788,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom, tolerance]() { return gdal_geom->Simplify(tolerance); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -822,7 +822,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom, tolerance]() { return gdal_geom->SimplifyPreserveTopology(tolerance); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -862,7 +862,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
   GDALAsyncableJob<OGRGeometry *> job;
   job.persist(info.This());
   job.main = [gdal_geom, distance, number_of_segments]() { return gdal_geom->Buffer(distance, number_of_segments); };
-  job.rval = [](OGRGeometry *r, GDAL_ASYNCABLE_OBJS) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 2);
 }
 
@@ -900,7 +900,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
     return text;
   };
 
-  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GetFromPersistentFunc) {
     if (text) {
       auto r = SafeString::New(text);
       CPLFree(text);
@@ -989,7 +989,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     return data;
   };
   //^^ export to wkb and fill buffer ^^
-  job.rval = [size](unsigned char *data, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [size](unsigned char *data, GetFromPersistentFunc) {
     Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
     return result;
   };
@@ -1039,7 +1039,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
     uv_sem_post(async_lock);
     return text;
   };
-  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GetFromPersistentFunc) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1081,7 +1081,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
     uv_sem_post(async_lock);
     return text;
   };
-  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GetFromPersistentFunc) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1123,7 +1123,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
     uv_sem_post(async_lock);
     return text;
   };
-  job.rval = [](char *text, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](char *text, GetFromPersistentFunc) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1173,7 +1173,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
     }
     return point;
   };
-  job.rval = [](OGRPoint *point, GDAL_ASYNCABLE_OBJS) { return Point::New(point); };
+  job.rval = [](OGRPoint *point, GetFromPersistentFunc) { return Point::New(point); };
   job.run(info, async, 0);
 }
 
@@ -1213,7 +1213,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
     return envelope;
   };
 
-  job.rval = [](OGREnvelope *envelope, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](OGREnvelope *envelope, GetFromPersistentFunc) {
     Local<Object> obj = Nan::New<Object>();
     Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
     Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
@@ -1262,7 +1262,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
     return envelope;
   };
 
-  job.rval = [](OGREnvelope3D *envelope, GDAL_ASYNCABLE_OBJS) {
+  job.rval = [](OGREnvelope3D *envelope, GetFromPersistentFunc) {
     Local<Object> obj = Nan::New<Object>();
     Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
     Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
@@ -1339,7 +1339,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
     if (err) throw getOGRErrMsg(err);
     return geom;
   };
-  job.rval = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
   job.run(info, async, 2);
 }
 
@@ -1395,7 +1395,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
     if (err) throw getOGRErrMsg(err);
     return geom;
   };
-  job.rval = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
   job.run(info, async, 2);
 }
 
@@ -1452,7 +1452,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
     OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val->c_str());
     return geom;
   };
-  job.rval = [](OGRGeometry *geom, GDAL_ASYNCABLE_OBJS) { return Geometry::New(geom, true); };
+  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
   job.run(info, async, 1);
 #endif
 }

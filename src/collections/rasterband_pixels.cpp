@@ -330,7 +330,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
   GDALAsyncableJob<CPLErr> job;
-  job.persist(obj, band->handle());
+  job.persist("array", obj);
+  job.persist(band->handle());
   job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, resampling]() {
 #if GDAL_VERSION_MAJOR >= 2
     std::shared_ptr<GDALRasterIOExtraArg> extra(new GDALRasterIOExtraArg);
@@ -353,7 +354,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
     return err;
   };
 
-  job.rval = [](CPLErr err, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  job.rval = [](CPLErr err, GetFromPersistentFunc getter) { return getter("array"); };
   job.run(info, async, 11);
 }
 
@@ -459,7 +460,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   long ds_uid = band->parent_uid;
   GDALRasterBand *gdal_band = band->get();
   GDALAsyncableJob<CPLErr> job;
-  job.persist(passed_array, band->handle());
+  job.persist("array", passed_array);
+  job.persist(band->handle());
   job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
@@ -467,7 +469,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
     if (err != CE_None) throw CPLGetLastErrorMsg();
     return err;
   };
-  job.rval = [](CPLErr, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  job.rval = [](CPLErr, GetFromPersistentFunc getter) { return getter("array"); };
 
   job.run(info, async, 9);
 }
@@ -533,7 +535,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
   long parent_uid = band->parent_uid;
 
   GDALAsyncableJob<CPLErr> job;
-  job.persist(obj, band->handle());
+  job.persist("array", obj);
+  job.persist(band->handle());
   job.main = [gdal_band, parent_uid, x, y, data]() {
     GDAL_ASYNCABLE_LOCK(parent_uid);
     CPLErr err = gdal_band->ReadBlock(x, y, data);
@@ -541,7 +544,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS o) { return o[0]; };
+  job.rval = [](CPLErr r, GetFromPersistentFunc getter) { return getter("array"); };
   job.run(info, async, 3);
 }
 
@@ -601,7 +604,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
   job.run(info, async, 3);
 }
 

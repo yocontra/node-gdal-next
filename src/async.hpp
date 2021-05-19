@@ -28,9 +28,6 @@ namespace node_gdal {
   NAN_METHOD(method##Async);                                                                                           \
   void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async)
 
-// Local<Object> is essentially a pointer and can be trivially copied
-#define GDAL_ASYNCABLE_OBJS std::vector<v8::Local<v8::Object>>
-
 #define GDAL_ISASYNC async
 
 // Handle locking
@@ -54,53 +51,54 @@ namespace node_gdal {
     return;                                                                                                            \
   }
 
+typedef std::function<v8::Local<v8::Value>(const char *)> GetFromPersistentFunc;
+
 //
 // This class handles async operations
 // It is meant to be used by GDALAsyncableJob defined below
 //
 // It takes the lambdas as input
-// gdaltype is the type of the object that will be carried from
+// GDALType is the type of the object that will be carried from
 // the aux thread to the main thread
 //
 // JS-visible object creation is possible only in the main thread while
 // ths JS world is stopped
 //
-template <class gdaltype> class GDALAsyncWorker : public Nan::AsyncWorker {
+template <class GDALType> class GDALAsyncWorker : public Nan::AsyncWorker {
+    public:
+  typedef std::function<v8::Local<v8::Value>(const GDALType, const GetFromPersistentFunc &)> GDALRValFunc;
+
     private:
-  const std::function<gdaltype()> doit;
-  const std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval;
-  std::vector<Nan::Persistent<v8::Object> *> persistent;
-  gdaltype raw;
+  const std::function<GDALType()> doit;
+  const GDALRValFunc rval;
+  GDALType raw;
   void Finally();
 
     public:
   explicit GDALAsyncWorker(
     Nan::Callback *pCallback,
-    const std::function<gdaltype()> doit,
-    const std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
-    const std::vector<v8::Local<v8::Object>> &objects);
+    const std::function<GDALType()> doit,
+    const GDALRValFunc rval,
+    const std::map<std::string, v8::Local<v8::Object>> &objects);
 
   void Execute();
   void HandleOKCallback();
   void HandleErrorCallback();
 };
 
-template <class gdaltype>
-GDALAsyncWorker<gdaltype>::GDALAsyncWorker(
+template <class GDALType>
+GDALAsyncWorker<GDALType>::GDALAsyncWorker(
   Nan::Callback *pCallback,
-  const std::function<gdaltype()> doit,
-  const std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> rval,
-  const std::vector<v8::Local<v8::Object>> &objects)
-  : Nan::AsyncWorker(pCallback, "node-gdal:GDALAsyncWorker"), doit(doit), rval(rval), persistent(objects.size()) {
+  const std::function<GDALType()> doit,
+  const GDALRValFunc rval,
+  const std::map<std::string, v8::Local<v8::Object>> &objects)
+  : Nan::AsyncWorker(pCallback, "node-gdal:GDALAsyncWorker"), doit(doit), rval(rval) {
   // Main thread with the JS world stopped
   // Get persistent handles
-  for (long unsigned i = 0; i < objects.size(); i++) {
-    persistent[i] = new Nan::Persistent<v8::Object>(objects[i]);
-    persistent[i]->ClearWeak();
-  }
+  for (auto i = objects.begin(); i != objects.end(); i++) SaveToPersistent(i->first.c_str(), i->second);
 }
 
-template <class gdaltype> void GDALAsyncWorker<gdaltype>::Execute() {
+template <class GDALType> void GDALAsyncWorker<GDALType>::Execute() {
   // Aux thread with the JS world running
   // V8 objects are not acessible here
   try {
@@ -108,32 +106,21 @@ template <class gdaltype> void GDALAsyncWorker<gdaltype>::Execute() {
   } catch (const char *err) { this->SetErrorMessage(err); }
 }
 
-template <class gdaltype> void GDALAsyncWorker<gdaltype>::Finally() {
-  // Release the persistent handles
-  for (long unsigned i = 0; i < persistent.size(); i++) {
-    persistent[i]->Reset();
-    delete persistent[i];
-  }
-}
-
-template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleOKCallback() {
+template <class GDALType> void GDALAsyncWorker<GDALType>::HandleOKCallback() {
   // Back to the main thread with the JS world stopped
   Nan::HandleScope scope;
-  GDAL_ASYNCABLE_OBJS original_obj(persistent.size());
 
-  // Get pointers to the original objects that were persisted
-  for (long unsigned i = 0; i < persistent.size(); i++) { original_obj[i] = Nan::New(*persistent[i]); }
-
-  v8::Local<v8::Value> argv[] = {Nan::Null(), rval(raw, original_obj)};
-  Finally();
+  // rval is the user function that will create the returned value
+  // we give it a lambda that can access the persistent storage created for this operation
+  v8::Local<v8::Value> argv[] = {
+    Nan::Null(), rval(raw, [this](const char *key) { return this->GetFromPersistent(key); })};
   Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
 }
 
-template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleErrorCallback() {
+template <class GDALType> void GDALAsyncWorker<GDALType>::HandleErrorCallback() {
   // Back to the main thread with the JS world stopped
   Nan::HandleScope scope;
   v8::Local<v8::Value> argv[] = {Nan::Error(this->ErrorMessage())};
-  Finally();
   Nan::Call(callback->GetFunction(), Nan::GetCurrentContext()->Global(), 1, argv);
 }
 
@@ -144,7 +131,7 @@ template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleErrorCallback() 
 // It handles persistence of the referenced objects and
 // can be executed both synchronously and asynchronously
 //
-// gdaltype is the intermediary type that will be carried
+// GDALType is the intermediary type that will be carried
 // across the context boundaries
 //
 // The caller must ensure that all the lambdas can be executed in
@@ -159,44 +146,51 @@ template <class gdaltype> void GDALAsyncWorker<gdaltype>::HandleErrorCallback() 
 // on the Dataset lock in PtrManager::dispose() blocking the event loop - the situation
 // is safe but it is still best if it is avoided
 
-template <class gdaltype> class GDALAsyncableJob {
+template <class GDALType> class GDALAsyncableJob {
     public:
-  typedef std::function<v8::Local<v8::Value>(gdaltype, GDAL_ASYNCABLE_OBJS)> gdal_rval;
-  // This is the lambda that produces the <gdaltype> object
-  std::function<gdaltype()> main;
-  // This is the lambda that produces the JS return object from the <gdaltype> object
-  gdal_rval rval;
+  typedef std::function<v8::Local<v8::Value>(const GDALType, const GetFromPersistentFunc &)> GDALRValFunc;
+  // This is the lambda that produces the <GDALType> object
+  std::function<GDALType()> main;
+  // This is the lambda that produces the JS return object from the <GDALType> object
+  GDALRValFunc rval;
 
-  GDALAsyncableJob() : main(), rval(), persistent(){};
+  GDALAsyncableJob() : main(), rval(), persistent(), autoIndex(0){};
+
+  void persist(const std::string key, const v8::Local<v8::Object> &obj) {
+    persistent[key] = obj;
+  }
 
   void persist(const v8::Local<v8::Object> &obj) {
-    persistent.push_back(obj);
+    persistent[std::to_string(autoIndex++)] = obj;
   }
 
   void persist(const v8::Local<v8::Object> &obj1, const v8::Local<v8::Object> &obj2) {
-    persistent.push_back(obj1);
-    persistent.push_back(obj2);
+    persist(obj1);
+    persist(obj2);
   }
 
   void persist(const std::vector<v8::Local<v8::Object>> &objs) {
-    persistent.insert(persistent.end(), objs.begin(), objs.end());
+    for (auto const i : objs) persist(i);
   }
 
   void run(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async, int cb_arg) {
     if (async) {
       Nan::Callback *callback;
       NODE_ARG_CB(cb_arg, "callback", callback);
-      Nan::AsyncQueueWorker(new GDALAsyncWorker<gdaltype>(callback, main, rval, persistent));
+      Nan::AsyncQueueWorker(new GDALAsyncWorker<GDALType>(callback, main, rval, persistent));
       return;
     }
     try {
-      gdaltype obj = main();
-      info.GetReturnValue().Set(rval(obj, persistent));
+      GDALType obj = main();
+      // rval is the user function that will create the returned value
+      // we give it a lambda that can access the persistent storage created for this operation
+      info.GetReturnValue().Set(rval(obj, [this](const char *key) { return this->persistent[key]; }));
     } catch (const char *err) { Nan::ThrowError(err); }
   }
 
     private:
-  std::vector<v8::Local<v8::Object>> persistent;
+  std::map<std::string, v8::Local<v8::Object>> persistent;
+  unsigned autoIndex;
 };
 } // namespace node_gdal
 #endif

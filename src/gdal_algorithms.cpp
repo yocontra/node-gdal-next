@@ -80,7 +80,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
 
@@ -214,7 +214,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
 
@@ -293,7 +293,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
 
@@ -369,7 +369,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
     GDAL_UNLOCK_PARENT;
     return r;
   };
-  job.rval = [](int r, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(r); };
+  job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Integer>(r); };
   job.run(info, async, 5);
 }
 
@@ -475,7 +475,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
       return err;
     };
   }
-  job.rval = [](CPLErr r, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
 } // namespace node_gdal

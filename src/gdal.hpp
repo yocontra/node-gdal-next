@@ -73,7 +73,7 @@ GDAL_ASYNCABLE_DEFINE(open) {
   flags |= GDAL_OF_VERBOSE_ERROR;
 
   GDALAsyncableJob<GDALDataset *> job;
-  job.rval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
+  job.rval = [](GDALDataset *ds, GetFromPersistentFunc) { return Dataset::New(ds); };
   job.main = [path, flags]() {
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
     if (!ds) throw CPLGetLastErrorMsg();

@@ -128,7 +128,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
     GDAL_UNLOCK_PARENT;
     return feature;
   };
-  job.rval = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
+  job.rval = [](OGRFeature *feature, GetFromPersistentFunc) { return Feature::New(feature); };
   job.run(info, async, 1);
 }
 
@@ -171,7 +171,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
     GDAL_UNLOCK_PARENT;
     return feature;
   };
-  job.rval = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
+  job.rval = [](OGRFeature *feature, GetFromPersistentFunc) { return Feature::New(feature); };
   job.run(info, async, 0);
 }
 
@@ -219,7 +219,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
     GDAL_UNLOCK_PARENT;
     return feature;
   };
-  job.rval = [](OGRFeature *feature, GDAL_ASYNCABLE_OBJS) { return Feature::New(feature); };
+  job.rval = [](OGRFeature *feature, GetFromPersistentFunc) { return Feature::New(feature); };
   job.run(info, async, 0);
 }
 
@@ -284,7 +284,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
     if (err != CE_None) throw getOGRErrMsg(err);
     return err;
   };
-  job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined(); };
   job.run(info, async, 1);
 }
 
@@ -341,7 +341,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
     GDAL_UNLOCK_PARENT;
     return count;
   };
-  job.rval = [](GIntBig count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Number>(count); };
+  job.rval = [](GIntBig count, GetFromPersistentFunc) { return Nan::New<Number>(count); };
   job.run(info, async, 1);
 }
 
@@ -435,7 +435,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
     return err;
   };
 
-  job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined(); };
   job.run(info, async, 2);
 }
 
@@ -482,7 +482,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
     if (err) { throw getOGRErrMsg(err); }
     return err;
   };
-  job.rval = [](int, GDAL_ASYNCABLE_OBJS) { return Nan::Undefined(); };
+  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined(); };
   job.run(info, async, 1);
 
   return;

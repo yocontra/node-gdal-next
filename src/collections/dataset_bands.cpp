@@ -133,7 +133,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
       GDAL_UNLOCK_PARENT;
       return band;
     };
-    job.rval = [raw](GDALRasterBand *band, GDAL_ASYNCABLE_OBJS) { return RasterBand::New(band, raw); };
+    job.rval = [raw](GDALRasterBand *band, GetFromPersistentFunc) { return RasterBand::New(band, raw); };
     job.run(info, async, 1);
   }
 }
@@ -217,7 +217,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return raw->GetRasterBand(raw->GetRasterCount());
   };
-  job.rval = [raw](GDALRasterBand *r, GDAL_ASYNCABLE_OBJS) { return RasterBand::New(r, raw); };
+  job.rval = [raw](GDALRasterBand *r, GetFromPersistentFunc) { return RasterBand::New(r, raw); };
   job.run(info, async, 2);
 }
 
@@ -268,7 +268,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
     GDAL_UNLOCK_PARENT;
     return count;
   };
-  job.rval = [](int count, GDAL_ASYNCABLE_OBJS) { return Nan::New<Integer>(count); };
+  job.rval = [](int count, GetFromPersistentFunc) { return Nan::New<Integer>(count); };
   job.run(info, async, 0);
 }
 

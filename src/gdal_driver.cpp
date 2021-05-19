@@ -204,7 +204,7 @@ NAN_METHOD(Driver::deleteDataset) {
 }
 
 // This is shared across all Driver functions
-auto DatasetRval = [](GDALDataset *ds, GDAL_ASYNCABLE_OBJS) { return Dataset::New(ds); };
+auto DatasetRval = [](GDALDataset *ds, GetFromPersistentFunc) { return Dataset::New(ds); };
 
 /**
  * Create a new dataset with this driver.
