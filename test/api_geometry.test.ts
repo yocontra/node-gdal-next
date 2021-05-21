@@ -1,6 +1,8 @@
 import * as gdal from '..'
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
+import * as fs from 'fs'
+import * as path from 'path'
 const assert = chai.assert
 chai.use(chaiAsPromised)
 import * as semver from 'semver'
@@ -196,9 +198,12 @@ describe('gdal.Geometry', () => {
         assert.equal(point2d.x, 2)
         assert.equal(point2d.y, 1)
       })
+      it('should throw on error', () => {
+        assert.throws(() => {
+          gdal.Geometry.fromGeoJson({ type: 'Garga', quantity: [ 2 ] })
+        })
+      })
     })
-  }
-  if (semver.gte(gdal.version, '2.3.0')) {
     describe('fromGeoJsonAsync()', () => {
       it('should return valid result', () => {
         const point2d = gdal.Geometry.fromGeoJsonAsync({ type: 'Point', coordinates: [ 2, 1 ] })
@@ -206,6 +211,29 @@ describe('gdal.Geometry', () => {
           assert.eventually.propertyVal(point2d, 'x', 2),
           assert.eventually.propertyVal(point2d, 'y', 1)
         ]))
+      })
+      it('should reject on error', () =>
+        assert.isRejected(gdal.Geometry.fromGeoJsonAsync({ type: 'Garga', quantity: [ 2 ] }))
+      )
+    })
+    describe('fromGeoJsonBuffer()', () => {
+      it('should return valid result', () => {
+        const polygon = gdal.Geometry.fromGeoJsonBuffer(fs.readFileSync(path.join(__dirname, 'data', 'Ain.json'))) as gdal.Polygon
+        assert.equal(polygon.wkbType, gdal.wkbPolygon)
+      })
+      it('should throw on error', () => {
+        assert.throws(() => {
+          gdal.Geometry.fromGeoJsonBuffer(Buffer.from('Garga'))
+        })
+      })
+    })
+    describe('fromGeoJsonBufferAsync()', () => {
+      it('should return valid result', () => {
+        const geom = gdal.Geometry.fromGeoJsonBufferAsync(fs.readFileSync(path.join(__dirname, 'data', 'Ain.json')))
+        return assert.eventually.propertyVal(geom, 'wkbType', gdal.wkbPolygon)
+      })
+      it('should throw on error', () => {
+        assert.isRejected(gdal.Geometry.fromGeoJsonBufferAsync(Buffer.from('Garga')))
       })
     })
   }

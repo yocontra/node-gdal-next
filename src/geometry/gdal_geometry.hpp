@@ -75,6 +75,7 @@ class Geometry : public GeometryBase<Geometry, OGRGeometry> {
   GDAL_ASYNCABLE_DECLARE(createFromWkt);
   GDAL_ASYNCABLE_DECLARE(createFromWkb);
   GDAL_ASYNCABLE_DECLARE(createFromGeoJson);
+  GDAL_ASYNCABLE_DECLARE(createFromGeoJsonBuffer);
   static NAN_METHOD(getName);
   static NAN_METHOD(getConstructor);
 

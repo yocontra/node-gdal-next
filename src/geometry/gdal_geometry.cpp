@@ -36,6 +36,7 @@ void Geometry::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(lcons, "fromWKT", Geometry::createFromWkt);
   Nan__SetAsyncableMethod(lcons, "fromWKB", Geometry::createFromWkb);
   Nan__SetAsyncableMethod(lcons, "fromGeoJson", Geometry::createFromGeoJson);
+  Nan__SetAsyncableMethod(lcons, "fromGeoJsonBuffer", Geometry::createFromGeoJsonBuffer);
   Nan::SetMethod(lcons, "getName", Geometry::getName);
   Nan::SetMethod(lcons, "getConstructor", Geometry::getConstructor);
 
@@ -1400,27 +1401,32 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
 }
 
 /**
- * Creates a Geometry from a GeoJSON string.
+ * Creates a Geometry from a GeoJSON object fragment.
+ * The async version depends on V8 for object serialization and this part is not parallelizable.
+ * V8 objects cannot be accessed outside of the main thread. This function should not be used
+ * for importing objects of more than few tens of Kbytes when low latency is needed. If you need
+ * to import very large GeoJSON geometries in server code, use the much faster and completely
+ * parallel fromGeoJonBuffer(Async)
  *
  * @static
  * @method fromGeoJson
+ * @throws Error
  * @param {object} geojson
  * @return {gdal.Geometry}
  */
 
 /**
- * Creates a Geometry from a GeoJSON string.
+ * Creates a Geometry from a GeoJSON object fragment.
+ * The async version depends on V8 for object serialization and this part is not parallelizable.
+ * V8 objects cannot be accessed outside of the main thread. This function should not be used
+ * for importing objects of more than few tens of Kbytes when low latency is needed. If you need
+ * to import very large GeoJSON geometries in server code, use the much faster and completely
+ * parallel fromGeoJonBuffer(Async)
  * {{{async}}}
- *
- * Alas, the current implementation uses V8's JSON.Stringify
- * and then converts the string to UTF-8 (from JS internal UTF-16)
- * This part is neither async-compatible, neither parallelizable
- * The GDAL part is async
- * Pay attention to the event loop if you use this and need
- * to remain low-latency
  *
  * @static
  * @method fromGeoJsonAsync
+ * @throws Error
  * @param {object} geojson
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Geometry>}
@@ -1450,6 +1456,64 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
   job.main = [val]() {
     std::unique_ptr<std::string> val_ptr(val);
     OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val->c_str());
+    if (geom == nullptr) throw CPLGetLastErrorMsg();
+    return geom;
+  };
+  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
+  job.run(info, async, 1);
+#endif
+}
+
+/**
+ * Creates a Geometry from a buffer containing a GeoJSON fragment in UT8 format.
+ *
+ * @static
+ * @method fromGeoJsonBuffer
+ * @param {Buffer} geojson
+ * @return {gdal.Geometry}
+ */
+
+/**
+ * Creates a Geometry from a buffer containing a GeoJSON fragment in UT8 format.
+ * {{{async}}}
+ *
+ * @static
+ * @method fromGeoJsonBufferAsync
+ * @param {Buffer} geojson
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJsonBuffer) {
+  Nan::HandleScope scope;
+#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR <= 2 && GDAL_VERSION_MINOR < 3)
+  Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
+  return;
+#else
+  std::string geojson_string;
+
+  Local<Object> geojson_obj;
+  NODE_ARG_OBJECT(0, "geojson", geojson_obj);
+
+  std::string obj_type = *Nan::Utf8String(geojson_obj->GetConstructorName());
+
+  if (obj_type != "Buffer" && obj_type != "Uint8Array") {
+    Nan::ThrowError("Argument must be a buffer object");
+    return;
+  }
+
+  char *data = Buffer::Data(geojson_obj);
+  size_t length = Buffer::Length(geojson_obj);
+
+  GDALAsyncableJob<OGRGeometry *> job;
+  job.main = [data, length]() {
+    CPLJSONDocument oDocument;
+    if (!oDocument.LoadMemory(reinterpret_cast<const GByte *>(data), length)) {
+      throw "Parsing the GeoJSON fragment failed";
+    }
+    OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(oDocument.GetRoot());
+
+    if (geom == nullptr) throw CPLGetLastErrorMsg();
     return geom;
   };
   job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };

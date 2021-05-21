@@ -12,7 +12,6 @@
 - Switch off of G++ to Clang for all CI work
 - Improve performance by reducing parse/serialize flows
   - `Geometry.toObject()`
-  - `Geometry.fromGeoJson()`
 - Add a streaming API for parsing files
 - Find a way to keep the dependency source code out of the repository to reduce noise
 - Reduce the manual patching done in the gdal format gyp files

@@ -12,7 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - built-in vsicurl and major cloud services (Amazon, Google, Microsoft and Alibaba) support on all platforms
  - Support async_hooks
  - Support different algorithms when resampling on-the-fly
- - add gdal.LayerFeatures.setAsync()
+ - add `gdal.Geometry.fromGeoJsonBuffer(Async)()`, a completely parallelizable alternative to `gdal.Geometry.fromGeoJson()` for importing large GeoJSON geometries without blocking the event loop
+ - add `gdal.LayerFeatures.setAsync()`
+
+### Changed
+ - gdal.Geometry.fromGeoJson throws an `Error` on error instead of simply returning a null geometry 
 
 ## [3.1.1] 2021-05-14
 
