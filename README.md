@@ -8,6 +8,8 @@
 
 Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://mmomtchev.github.io/node-gdal-async/classes/gdal.html) or [examples](examples/).
 
+When in doubt on how to use a method, check also the [unit tests](https://github.com/mmomtchev/node-gdal-async/tree/master/test).
+
 # Fork Notes
 
 This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal>.
@@ -16,9 +18,12 @@ It adds a number of features:
 
 - **Support for asynchronous IO** (since 3.0)
 - **Full native TypeScript support** with autocompletion in IDEs that support it (since 3.1)
-- **Built-in networking support** with native support for cloud services (will appear in 3.2)
+- **Built-in networking support** with native support for cloud services (since 3.2)
 - Support for curve geometries (since 3.1)
+- Progress callbacks (since 3.2)
 - Numerous bugfixes including a number of memory leaks
+
+The default install is currently `gdal-async@3.1.1`, `gdal-async@3.2.0` is available as `gdal-async@beta`
 
 Support for `worker_threads` is planned but it is not a priority project
 
@@ -29,7 +34,7 @@ longitude second. If you don't want to make large code changes, you can replace 
 
 ### Breaking Changes relative to node-gdal-next
 
-- None, node-gdal-next is usually kept in sync
+- Starting from 3.2, `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry
 
 ## Installation
 
@@ -121,7 +126,7 @@ gdal.openAsync('sample.tif').then((dataset) => {
 }).catch(e => console.error(e));
 ```
 
-### TypeScript
+### TypeScript (starting from 3.1)
 
 TypeScript support is available beginning with `gdal-async@3.1.0`
 

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.0] Unreleased
+## [3.2.0] 2021-05-21
 
 ### Added
  - GDAL 3.2.3
@@ -14,12 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Support progress callbacks
  - Support different algorithms when resampling on-the-fly
  - Add `gdal.Geometry.fromGeoJsonBuffer(Async)()`, a completely parallelizable alternative to `gdal.Geometry.fromGeoJson()` for importing large GeoJSON geometries without blocking the event loop
-   
-   Previously all `gdal.Geometry.from*` functions except `fromGeoJson` threw undocumented errors, now all of them, including `fromGeoJson` throw documented errors
  - Add `gdal.LayerFeatures.setAsync()`
 
 ### Changed
- - gdal.Geometry.fromGeoJson throws an `Error` on error instead of simply returning a null geometry 
+ - `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry 
+   
+   Previously all `gdal.Geometry.from*` functions except `fromGeoJson` threw undocumented errors, now all of them, including `fromGeoJson` throw documented errors
 
 ## [3.1.1] 2021-05-14
 
