@@ -242,20 +242,20 @@ template <class GDALType> class GDALAsyncableJob {
 
   GDALAsyncableJob() : main(), rval(), progress(nullptr), persistent(), autoIndex(0){};
 
-  void persist(const std::string &key, const v8::Local<v8::Object> &obj) {
+  inline void persist(const std::string &key, const v8::Local<v8::Object> &obj) {
     persistent[key] = obj;
   }
 
-  void persist(const v8::Local<v8::Object> &obj) {
+  inline void persist(const v8::Local<v8::Object> &obj) {
     persistent[std::to_string(autoIndex++)] = obj;
   }
 
-  void persist(const v8::Local<v8::Object> &obj1, const v8::Local<v8::Object> &obj2) {
+  inline void persist(const v8::Local<v8::Object> &obj1, const v8::Local<v8::Object> &obj2) {
     persist(obj1);
     persist(obj2);
   }
 
-  void persist(const std::vector<v8::Local<v8::Object>> &objs) {
+  inline void persist(const std::vector<v8::Local<v8::Object>> &objs) {
     for (auto const &i : objs) persist(i);
   }
 
