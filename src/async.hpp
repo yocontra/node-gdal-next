@@ -256,7 +256,7 @@ template <class GDALType> class GDALAsyncableJob {
   }
 
   void persist(const std::vector<v8::Local<v8::Object>> &objs) {
-    for (auto const i : objs) persist(i);
+    for (auto const &i : objs) persist(i);
   }
 
   void run(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async, int cb_arg) {
