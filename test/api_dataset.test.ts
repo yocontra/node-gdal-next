@@ -5,6 +5,7 @@ import { assert } from 'chai'
 import * as fileUtils from './utils/file.js'
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
+import * as semver from 'semver'
 chai.use(chaiAsPromised)
 
 const NAD83_WKT =
@@ -837,8 +838,8 @@ describe('gdal.Dataset', () => {
         })
       })
       describe('w/bands argument', () => {
+        before(() => gdal.config.set('USE_RRD', 'YES'))
         it('should generate overviews only for the given bands', () => {
-          gdal.config.set('USE_RRD', 'YES')
           const ds = gdal.open(
             fileUtils.clone(`${__dirname}/data/multiband.tif`),
             'r+'
@@ -874,6 +875,26 @@ describe('gdal.Dataset', () => {
         ds.close()
         assert.throws(() => {
           ds.buildOverviews('NEAREST', [ 2, 4, 8 ])
+        })
+      })
+      describe('w/progress_cb option', () => {
+        before(() => gdal.config.set('USE_RRD', 'YES'))
+        it('should invoke the progress callback', () => {
+          const ds = gdal.open(
+            fileUtils.clone(`${__dirname}/data/multiband.tif`),
+            'r+'
+          )
+          let calls = 0
+          ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 1 ], { progress_cb: (complete) => {
+            calls++
+            if (semver.gte(gdal.version, '3.2.0')) {
+              // GDAL < 3.0.0 will sometimes report weird values
+              assert.isAtLeast(complete, 0)
+              assert.isAtMost(complete, 1)
+            }
+          } })
+          assert.isAbove(calls, 0)
+          assert.equal(ds.bands.get(1).overviews.count(), 3)
         })
       })
     })
@@ -900,29 +921,13 @@ describe('gdal.Dataset', () => {
           ds.close()
         }))
       })
-      it('should not fail hard if invalid overview is given', () => {
-        // 1.11 introduced an error for this, but 1.10 and lower
-        // fail silently - so really all we can do is make sure
-        // nothing fatal (segfault, etc) happens
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/sample.tif`),
-          'r+'
-        )
-        try {
-          ds.buildOverviews('NEAREST', [ 2, 4, -3 ])
-        } catch (e) {
-          /* ignore (see above) */
-        }
-      })
       it('should throw if overview is not a number', () => {
         const ds = gdal.open(
           fileUtils.clone(`${__dirname}/data/sample.tif`),
           'r+'
         )
-        assert.throws(() => {
-          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-          ds.buildOverviews('NEAREST', [ 2, 4, {} as any ])
-        })
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, {} as any ]))
       })
       describe('w/bands argument', () => {
         it('should generate overviews only for the given bands', () => {
@@ -939,19 +944,15 @@ describe('gdal.Dataset', () => {
             fileUtils.clone(`${__dirname}/data/sample.tif`),
             'r+'
           )
-          assert.throws(() => {
-            ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 4 ])
-          })
+          return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ], [ 4 ]))
         })
         it('should throw if band id is not a number', () => {
           const ds = gdal.open(
             fileUtils.clone(`${__dirname}/data/sample.tif`),
             'r+'
           )
-          assert.throws(() => {
-            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-            ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ {} as any ])
-          })
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+          return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ], [ {} as any ]))
         })
       })
       it('should throw if dataset already closed', () => {
@@ -960,9 +961,7 @@ describe('gdal.Dataset', () => {
           'r+'
         )
         ds.close()
-        assert.throws(() => {
-          ds.buildOverviews('NEAREST', [ 2, 4, 8 ])
-        })
+        return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ]))
       })
     })
   })

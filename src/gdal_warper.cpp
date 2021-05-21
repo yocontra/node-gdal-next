@@ -135,7 +135,7 @@ CPLErr GDALReprojectImageMulti(
   /* -------------------------------------------------------------------- */
   /*      Set the progress function.                                      */
   /* -------------------------------------------------------------------- */
-  if (pfnProgress != NULL) {
+  if (pfnProgress != nullptr) {
     psWOptions->pfnProgress = pfnProgress;
     psWOptions->pProgressArg = pProgressArg;
   }
@@ -163,7 +163,7 @@ CPLErr GDALReprojectImageMulti(
 }
 
 /**
- * @typedef ReprojectOptions { src: gdal.Dataset, dst: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, resampling?: string, cutline?: gdal.Geometry, srcBands?: number[], dstBands?: number[], srcAlphaBand?: number, dstAlphaBand?: number, srcNodata?: number, dstNodata?: number, blend?: number, memoryLimit?: number, maxError?: number, multi?: boolean, options?: object }
+ * @typedef ReprojectOptions { src: gdal.Dataset, dst: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, resampling?: string, cutline?: gdal.Geometry, srcBands?: number[], dstBands?: number[], srcAlphaBand?: number, dstAlphaBand?: number, srcNodata?: number, dstNodata?: number, blend?: number, memoryLimit?: number, maxError?: number, multi?: boolean, options?: object, progress_cb?: ProgressCb }
  */
 
 /**
@@ -190,6 +190,7 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
  * @param {string[]|object} [options.options] Warp options (see: [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  */
 
 /**
@@ -217,6 +218,7 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
  * @param {string[]|object} [options.options] Warp options (see:[reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -233,6 +235,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   SpatialReference *s_srs;
   SpatialReference *t_srs;
   double maxError = 0;
+  Nan::Callback *progress_cb = nullptr;
 
   NODE_ARG_OBJECT(0, "Warp options", obj);
 
@@ -249,6 +252,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   NODE_WRAPPED_FROM_OBJ(obj, "s_srs", SpatialReference, s_srs);
   NODE_WRAPPED_FROM_OBJ(obj, "t_srs", SpatialReference, t_srs);
   NODE_DOUBLE_FROM_OBJ_OPT(obj, "maxError", maxError);
+  NODE_CB_FROM_OBJ_OPT(obj, "progress_cb", progress_cb);
 
   char *s_srs_wkt, *t_srs_wkt;
   if (s_srs->get()->exportToWkt(&s_srs_wkt)) {
@@ -268,44 +272,56 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   job.persist(options->datasetObjects());
   std::vector<long> uids = options->datasetUids();
 
+  if (progress_cb) {
+#if GDAL_VERSION_MAJOR < 2
+    Nan::ThrowError("Progress callback not supported on GDAL 1.x");
+    return;
+#else
+    job.persist(progress_cb->GetFunction());
+    job.progress = progress_cb;
+#endif
+  }
+
   // opts is a pointer inside options memory space
   // the lifetime of the options shared_ptr is limited by the lifetime of the lambda
   if (options->useMultithreading()) {
-    job.main = [uids, options, opts, s_srs_str, t_srs_str, maxError]() {
-      GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
-      CPLErr err = GDALReprojectImageMulti(
-        opts->hSrcDS,
-        s_srs_str.c_str(),
-        opts->hDstDS,
-        t_srs_str.c_str(),
-        opts->eResampleAlg,
-        opts->dfWarpMemoryLimit,
-        maxError,
-        NULL,
-        NULL,
-        opts);
-      GDAL_UNLOCK_MANY;
-      if (err) { throw CPLGetLastErrorMsg(); }
-      return err;
-    };
+    job.main =
+      [uids, options, opts, s_srs_str, t_srs_str, maxError, progress_cb](const GDALExecutionProgress &progress) {
+        GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
+        CPLErr err = GDALReprojectImageMulti(
+          opts->hSrcDS,
+          s_srs_str.c_str(),
+          opts->hDstDS,
+          t_srs_str.c_str(),
+          opts->eResampleAlg,
+          opts->dfWarpMemoryLimit,
+          maxError,
+          progress_cb ? ProgressTrampoline : nullptr,
+          progress_cb ? (void *)&progress : nullptr,
+          opts);
+        GDAL_UNLOCK_MANY;
+        if (err) { throw CPLGetLastErrorMsg(); }
+        return err;
+      };
   } else {
-    job.main = [uids, options, opts, s_srs_str, t_srs_str, maxError]() {
-      GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
-      CPLErr err = GDALReprojectImage(
-        opts->hSrcDS,
-        s_srs_str.c_str(),
-        opts->hDstDS,
-        t_srs_str.c_str(),
-        opts->eResampleAlg,
-        opts->dfWarpMemoryLimit,
-        maxError,
-        NULL,
-        NULL,
-        opts);
-      GDAL_UNLOCK_MANY;
-      if (err) { throw CPLGetLastErrorMsg(); }
-      return err;
-    };
+    job.main =
+      [uids, options, opts, s_srs_str, t_srs_str, maxError, progress_cb](const GDALExecutionProgress &progress) {
+        GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
+        CPLErr err = GDALReprojectImage(
+          opts->hSrcDS,
+          s_srs_str.c_str(),
+          opts->hDstDS,
+          t_srs_str.c_str(),
+          opts->eResampleAlg,
+          opts->dfWarpMemoryLimit,
+          maxError,
+          progress_cb ? ProgressTrampoline : nullptr,
+          progress_cb ? (void *)&progress : nullptr,
+          opts);
+        GDAL_UNLOCK_MANY;
+        if (err) { throw CPLGetLastErrorMsg(); }
+        return err;
+      };
   }
 
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
@@ -422,7 +438,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
   GDALAsyncableJob<warpOutputResult> job;
   job.persist(ds->handle());
 
-  job.main = [gdal_ds, uid, s_srs_str, t_srs_str, maxError]() {
+  job.main = [gdal_ds, uid, s_srs_str, t_srs_str, maxError](const GDALExecutionProgress &) {
     struct warpOutputResult r;
 
     GDAL_ASYNCABLE_LOCK(uid);

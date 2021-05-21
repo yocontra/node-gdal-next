@@ -91,14 +91,37 @@ describe('gdal', () => {
 
       assert.deepEqual(levels, actual_levels.sort(order), 'all fixed levels used')
     })
+    it('should accept a "progress_cb"', () => {
+      const offset = 7
+      const interval = 32
+
+      let calls = 0
+      gdal.contourGenerate({
+        src: srcband,
+        dst: lyr,
+        offset: offset,
+        interval: interval,
+        idField: 0,
+        elevField: 1,
+        progress_cb: () => {
+          calls++
+        }
+      })
+
+      assert.isAbove(calls, 0)
+    })
   })
   describe('contourGenerateAsync()', () => {
     let src, srcband, dst, lyr
 
     before(() => {
       // create a simple ramp in memory
-      const w = 64
-      const h = 64
+      // because when the full test suite is running, there is a lot of sync work going around
+      // and sometimes the event loop will be tied down for more than a few seconds at a time
+      // so the file must be big enough to always trigger the async progress callbacks
+      // otherwise we get a flaky test and everyone hates flaky unit tests
+      const w = 1024
+      const h = 1024
       src = gdal.open('temp', 'w', 'MEM', w, h, 1)
       srcband = src.bands.get(1)
       for (let y = 0; y < h; y++) {
@@ -128,6 +151,25 @@ describe('gdal', () => {
       })
 
       return assert.eventually.isTrue(p.then(() => lyr.features.count() > 0), 'features were created')
+    })
+    it('should accept a "progress_cb"', () => {
+      const offset = 7
+      const interval = 32
+
+      let calls = 0
+      const p = gdal.contourGenerateAsync({
+        src: srcband,
+        dst: lyr,
+        offset: offset,
+        interval: interval,
+        idField: 0,
+        elevField: 1,
+        progress_cb: () => {
+          calls++
+        }
+      })
+
+      return assert.isFulfilled(p.then(() => assert.isAbove(calls, 0)))
     })
   })
   describe('fillNodata()', () => {
@@ -301,11 +343,29 @@ describe('gdal', () => {
 
       assert.equal(band.pixels.get(8, 8), 20)
     })
+    it('accept "progress_cb"', () => {
+      assert.equal(band.pixels.get(8, 8), 10)
+
+      let calls = 0
+      gdal.sieveFilter({
+        src: band,
+        dst: band, // in place
+        threshold: 4 * 4 + 1,
+        connectedness: 8,
+        progress_cb: () => {
+          calls++
+        }
+      })
+      assert.isAbove(calls, 0)
+
+      assert.equal(band.pixels.get(8, 8), 20)
+    })
   })
   describe('sieveFilterAsync()', () => {
     let src, band
-    const w = 64
-    const h = 64
+    // size matters when testing async progess callbacks, see the note above
+    const w = 1024
+    const h = 1024
     beforeEach(() => {
       src = gdal.open('temp', 'w', 'MEM', w, h, 1)
       band = src.bands.get(1)
@@ -330,6 +390,22 @@ describe('gdal', () => {
       })
 
       return assert.eventually.equal(p.then(() => band.pixels.get(8, 8)), 20)
+    })
+    it('should accept "progress_cb"', () => {
+      assert.equal(band.pixels.get(8, 8), 10)
+
+      let calls = 0
+      const p = gdal.sieveFilterAsync({
+        src: band,
+        dst: band, // in place
+        threshold: 4 * 4 + 1,
+        connectedness: 8,
+        progress_cb: () => {
+          calls++
+        }
+      })
+
+      return assert.isFulfilled(p.then(() => assert.isAbove(calls, 0)))
     })
   })
   describe('polygonize()', () => {
@@ -380,6 +456,19 @@ describe('gdal', () => {
         assert.isFalse(geom.isEmpty())
         assert.instanceOf(geom, gdal.Polygon)
       })
+    })
+    it('should accept a "progress_cb"', () => {
+      let calls = 0
+      gdal.polygonize({
+        src: srcband,
+        dst: lyr,
+        pixValField: 0,
+        connectedness: 8,
+        progress_cb: () => {
+          calls++
+        }
+      })
+      assert.isAbove(calls, 0)
     })
   })
 })

@@ -189,7 +189,7 @@ inline GDALRIOResampleAlg parseResamplingAlg(Local<Value> value) {
 #endif
 
 /**
- * @typedef ReadOptions { buffer_width?: number, buffer_height?: number, type?: string, pixel_space?: number, line_space?: number, resampling?: string }
+ * @typedef ReadOptions { buffer_width?: number, buffer_height?: number, type?: string, pixel_space?: number, line_space?: number, resampling?: string, progress_cb?: ProgressCb }
  */
 
 /**
@@ -210,14 +210,13 @@ inline GDALRIOResampleAlg parseResamplingAlg(Local<Value> value) {
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
  * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @return {TypedArray} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 
 /**
  * Asynchronously reads a region of pixels.
- * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
- * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
- * as it is the last parameter. Otherwise the function returns a Promise resolved with the result.
+ * {{{async}}}
  *
  * @method readAsync
  * @param {number} x
@@ -233,6 +232,7 @@ inline GDALRIOResampleAlg parseResamplingAlg(Local<Value> value) {
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
  * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
  * @return {Promise<TypedArray>} A [TypedArray](https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
@@ -250,6 +250,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   void *data;
   Local<Value> array;
   Local<Object> obj;
+  Nan::Callback *cb = nullptr;
   GDALDataType type;
 
   NODE_ARG_INT(0, "x_offset", x);
@@ -281,6 +282,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   NODE_ARG_INT_OPT(8, "pixel_space", pixel_space);
   line_space = pixel_space * buffer_w;
   NODE_ARG_INT_OPT(9, "line_space", line_space);
+  NODE_ARG_CB_OPT(11, "progress_cb", cb);
 #if GDAL_VERSION_MAJOR >= 2
   GDALRIOResampleAlg resampling;
   try {
@@ -294,6 +296,10 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   NODE_ARG_OPT_STR(10, "resampling", resampling);
   if (resampling.length() > 0) {
     Nan::ThrowError("Specifying resampling algorithm not supported on GDAL 1.x");
+    return;
+  }
+  if (cb) {
+    Nan::ThrowError("Progress callback not supported on GDAL 1.x");
     return;
   }
 #endif
@@ -332,12 +338,21 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   GDALAsyncableJob<CPLErr> job;
   job.persist("array", obj);
   job.persist(band->handle());
-  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, resampling]() {
+  if (cb) {
+    job.persist(cb->GetFunction());
+    job.progress = cb;
+  }
+
+  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, resampling, cb](
+               const GDALExecutionProgress &progress) {
 #if GDAL_VERSION_MAJOR >= 2
     std::shared_ptr<GDALRasterIOExtraArg> extra(new GDALRasterIOExtraArg);
     INIT_RASTERIO_EXTRA_ARG(*extra);
     extra->eResampleAlg = resampling;
-    extra->nVersion = RASTERIO_EXTRA_ARG_CURRENT_VERSION;
+    if (cb) {
+      extra->pfnProgress = ProgressTrampoline;
+      extra->pProgressData = (void *)&progress;
+    }
 #endif
 
     GDAL_ASYNCABLE_LOCK(ds_uid);
@@ -355,11 +370,11 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   };
 
   job.rval = [](CPLErr err, GetFromPersistentFunc getter) { return getter("array"); };
-  job.run(info, async, 11);
+  job.run(info, async, 12);
 }
 
 /**
- * @typedef WriteOptions { buffer_width?: number, buffer_height?: number, pixel_space?: number, line_space?: number }
+ * @typedef WriteOptions { buffer_width?: number, buffer_height?: number, pixel_space?: number, line_space?: number, progress_cb?: ProgressCb }
  */
 
 /**
@@ -377,15 +392,12 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @param {number} [options.buffer_height=y_size]
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  */
 
 /**
  * Asynchronously writes a region of pixels.
- * If the last parameter is a callback, then this callback is called on completion and undefined is returned.
- * All optional parameters before the callback can be omitted so the callback parameter can be at any position as long
- as it is the last parameter.
- * Otherwise the function returns a Promise resolved with the result.
- * certain optional parameters are omitted
+ * {{{async}}}
  *
  * @method writeAsync
  * @param {number} x
@@ -398,6 +410,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @param {number} [options.buffer_height=y_size]
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -415,6 +428,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   void *data;
   Local<Object> passed_array;
   GDALDataType type;
+  Nan::Callback *cb = nullptr;
 
   NODE_ARG_INT(0, "x_offset", x);
   NODE_ARG_INT(1, "y_offset", y);
@@ -438,6 +452,13 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   NODE_ARG_INT_OPT(7, "pixel_space", pixel_space);
   line_space = pixel_space * buffer_w;
   NODE_ARG_INT_OPT(8, "line_space", line_space);
+  NODE_ARG_CB_OPT(9, "progress_cb", cb);
+#if GDAL_VERSION_MAJOR < 2
+  if (cb) {
+    Nan::ThrowError("Progress callback not supported on GDAL 1.x");
+    return;
+  }
+#endif
 
   size = line_space * buffer_h;                      // bytes
   min_size = size - (pixel_space - bytes_per_pixel); // subtract away padding on last pixel that wont be read
@@ -462,16 +483,36 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   GDALAsyncableJob<CPLErr> job;
   job.persist("array", passed_array);
   job.persist(band->handle());
-  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space]() {
+  if (cb) {
+    job.persist(cb->GetFunction());
+    job.progress = cb;
+  }
+
+  job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, cb](
+               const GDALExecutionProgress &progress) {
+#if GDAL_VERSION_MAJOR >= 2
+    std::shared_ptr<GDALRasterIOExtraArg> extra(new GDALRasterIOExtraArg);
+    INIT_RASTERIO_EXTRA_ARG(*extra);
+    if (cb) {
+      extra->pfnProgress = ProgressTrampoline;
+      extra->pProgressData = (void *)&progress;
+    }
+#endif
+
     GDAL_ASYNCABLE_LOCK(ds_uid);
+#if GDAL_VERSION_MAJOR >= 2
+    CPLErr err =
+      gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, extra.get());
+#else
     CPLErr err = gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space);
+#endif
     GDAL_UNLOCK_PARENT;
     if (err != CE_None) throw CPLGetLastErrorMsg();
     return err;
   };
   job.rval = [](CPLErr, GetFromPersistentFunc getter) { return getter("array"); };
 
-  job.run(info, async, 9);
+  job.run(info, async, 10);
 }
 
 /**
@@ -537,7 +578,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
   GDALAsyncableJob<CPLErr> job;
   job.persist("array", obj);
   job.persist(band->handle());
-  job.main = [gdal_band, parent_uid, x, y, data]() {
+  job.main = [gdal_band, parent_uid, x, y, data](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(parent_uid);
     CPLErr err = gdal_band->ReadBlock(x, y, data);
     GDAL_UNLOCK_PARENT;
@@ -597,7 +638,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
 
   GDALAsyncableJob<CPLErr> job;
   job.persist(obj, band->handle());
-  job.main = [gdal_band, parent_uid, x, y, data]() {
+  job.main = [gdal_band, parent_uid, x, y, data](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(parent_uid);
     CPLErr err = gdal_band->WriteBlock(x, y, data);
     GDAL_UNLOCK_PARENT;

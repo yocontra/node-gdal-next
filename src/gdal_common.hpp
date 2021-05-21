@@ -210,6 +210,21 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
   }
 
+#define NODE_CB_FROM_OBJ_OPT(obj, key, var)                                                                            \
+  {                                                                                                                    \
+    var = nullptr;                                                                                                     \
+    Local<String> sym = Nan::New(key).ToLocalChecked();                                                                \
+    if (Nan::HasOwnProperty(obj, sym).FromMaybe(false)) {                                                              \
+      Local<Value> val = Nan::Get(obj, sym).ToLocalChecked();                                                          \
+      if (!val->IsFunction()) {                                                                                        \
+        Nan::ThrowTypeError("Property \"" key "\" must be a function");                                                \
+        return;                                                                                                        \
+      } else {                                                                                                         \
+        var = new Nan::Callback(val.As<Function>());                                                                   \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
 // ----- argument conversion -------
 
 // determine field index based on string/numeric js argument
@@ -420,6 +435,51 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
   }
 
+#define NODE_ARG_OBJECT_OPT(num, name, var)                                                                            \
+  if (info.Length() > num && !info[num]->IsNull() && !info[num]->IsUndefined()) {                                      \
+    if (!info[num]->IsObject()) { return Nan::ThrowTypeError((std::string(name) + " must be an object").c_str()); }    \
+    var = info[num].As<Object>();                                                                                      \
+  }
+
+// delete is in GDALAsyncWorker::~GDALAsyncWorker
+#define NODE_ARG_CB_OPT(num, name, var)                                                                                \
+  if (!info[num]->IsNull() && !info[num]->IsUndefined()) {                                                             \
+    if (info[num]->IsFunction()) {                                                                                     \
+      var = new Nan::Callback(info[num].As<Function>());                                                               \
+    } else {                                                                                                           \
+      Nan::ThrowTypeError(name " must be a function");                                                                 \
+      return;                                                                                                          \
+    }                                                                                                                  \
+  }
+
+// ----- special case: progress callback in [options] argument -------
+
+#define __NODE_PROGRESS_CB_OPT(num, progress_cb, job)                                                                  \
+  {                                                                                                                    \
+    Local<Object> progress_obj;                                                                                        \
+    progress_cb = nullptr;                                                                                             \
+    if (info.Length() > num && !info[num]->IsNull() && !info[num]->IsUndefined()) {                                    \
+      if (!info[num]->IsObject()) { return Nan::ThrowTypeError("options must be an object"); }                         \
+      progress_obj = info[num].As<Object>();                                                                           \
+      NODE_CB_FROM_OBJ_OPT(progress_obj, "progress_cb", progress_cb);                                                  \
+    }                                                                                                                  \
+    if (progress_cb) {                                                                                                 \
+      job.persist(progress_cb->GetFunction());                                                                         \
+      job.progress = progress_cb;                                                                                      \
+    }                                                                                                                  \
+  }
+
+#if GDAL_VERSION_MAJOR < 2
+#define NODE_PROGRESS_CB_OPT(num, progress_cb, job)                                                                    \
+  __NODE_PROGRESS_CB_OPT(num, progress_cb, job)                                                                        \
+  if (progress_cb) {                                                                                                   \
+    Nan::ThrowError("Progress callback not supported on GDAL 1.x");                                                    \
+    return;                                                                                                            \
+  }
+#else
+#define NODE_PROGRESS_CB_OPT(num, progress_cb, job) __NODE_PROGRESS_CB_OPT(num, progress_cb, job)
+#endif
+
 // ----- wrapped methods w/ results-------
 
 #define NODE_WRAPPED_METHOD_WITH_RESULT(klass, method, result_type, wrapped_method)                                    \
@@ -509,7 +569,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     auto *gdal_obj = obj->this_;                                                                                       \
     GDALAsyncableJob<int> job;                                                                                         \
     job.persist(info.This());                                                                                          \
-    job.main = [gdal_obj]() {                                                                                          \
+    job.main = [gdal_obj](const GDALExecutionProgress &) {                                                             \
       gdal_obj->wrapped_method();                                                                                      \
       return 0;                                                                                                        \
     };                                                                                                                 \
@@ -530,7 +590,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     auto *gdal_obj = obj->this_;                                                                                       \
     GDALAsyncableJob<async_type> job;                                                                                  \
     job.persist(info.This());                                                                                          \
-    job.main = [gdal_obj]() { return gdal_obj->wrapped_method(); };                                                    \
+    job.main = [gdal_obj](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(); };                       \
     job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 0);                                                                                           \
   }
@@ -548,7 +608,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     auto *gdal_param = param->get();                                                                                   \
     GDALAsyncableJob<async_type> job;                                                                                  \
     job.persist(info.This(), info[0].As<Object>());                                                                    \
-    job.main = [gdal_obj, gdal_param]() { return gdal_obj->wrapped_method(gdal_param); };                              \
+    job.main = [gdal_obj, gdal_param](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(gdal_param); }; \
     job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 1);                                                                                           \
   }
@@ -567,7 +627,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     auto *gdal_obj = obj->this_;                                                                                       \
     GDALAsyncableJob<async_type> job;                                                                                  \
     job.persist(info.This());                                                                                          \
-    job.main = [gdal_obj, param]() { return gdal_obj->wrapped_method(param); };                                        \
+    job.main = [gdal_obj, param](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(param); };           \
     job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 1);                                                                                           \
   }
@@ -587,7 +647,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     auto gdal_param = param->get();                                                                                    \
     GDALAsyncableJob<async_type> job;                                                                                  \
     job.persist(info.This(), info[0].As<Object>());                                                                    \
-    job.main = [gdal_obj, gdal_param]() {                                                                              \
+    job.main = [gdal_obj, gdal_param](const GDALExecutionProgress &) {                                                 \
       int err = gdal_obj->wrapped_method(gdal_param);                                                                  \
       if (err) throw getOGRErrMsg(err);                                                                                \
       return err;                                                                                                      \

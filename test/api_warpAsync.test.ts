@@ -414,6 +414,17 @@ describe('gdal', () => {
         }))
       })
 
+      it('should call a "progress_cb" when provided', () => {
+        let calls = 0
+        reprojectOptions.progress_cb = () => {
+          calls++
+        }
+
+        const p = gdal.reprojectImageAsync(reprojectOptions)
+
+        assert.isFulfilled(p.then(() => assert.isAbove(calls, 0)))
+      })
+
       if (semver.gte(gdal.version, '2.0.0')) {
         it("should throw error if GDAL can't create transformer", () => {
           src = gdal.open(`${__dirname}/data/unsupported-srs.tif`)

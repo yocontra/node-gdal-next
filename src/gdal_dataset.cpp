@@ -353,7 +353,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
   GDALAsyncableJob<int> job;
   long ds_uid = ds->uid;
   job.persist(info.This());
-  job.main = [raw, ds_uid]() {
+  job.main = [raw, ds_uid](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     raw->FlushCache();
     GDAL_UNLOCK_PARENT;
@@ -430,7 +430,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
   OGRGeometry *geom_filter = spatial_filter ? spatial_filter->get() : NULL;
   long ds_uid = ds->uid;
   job.persist(info.This());
-  job.main = [raw, ds_uid, sql, sql_dialect, geom_filter]() {
+  job.main = [raw, ds_uid, sql, sql_dialect, geom_filter](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRLayer *layer = raw->ExecuteSQL(sql.c_str(), geom_filter, sql_dialect.empty() ? NULL : sql_dialect.c_str());
     GDAL_UNLOCK_PARENT;
@@ -636,8 +636,9 @@ NAN_METHOD(Dataset::setGCPs) {
  * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
  * @param {number[]} overviews
- * @param {number[]} [bands] Note: Generation of overviews in external TIFF
- * currently only supported when operating on all bands.
+ * @param {number[]} [bands] Note: Generation of overviews in external TIFF currently only supported when operating on all bands.
+ * @param {ProgressOptions} [options] options
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  */
 
 /**
@@ -649,8 +650,9 @@ NAN_METHOD(Dataset::setGCPs) {
  * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
  * @param {number[]} overviews
- * @param {number[]} [bands] Note: Generation of overviews in external TIFF
- * currently only supported when operating on all bands.
+ * @param {number[]} [bands] Note: Generation of overviews in external TIFF currently only supported when operating on all bands.
+ * @param {ProgressOptions} [options] options
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -719,20 +721,30 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   GDALAsyncableJob<CPLErr> job;
   long ds_uid = ds->uid;
   job.persist(info.This());
+
+  Nan::Callback *progress_cb;
+  NODE_PROGRESS_CB_OPT(3, progress_cb, job);
   // Alas one cannot capture-move a unique_ptr and assign the lambda to a variable
   // because the lambda becomes non-copyable
   // But we can use a shared_ptr because the lifetime of the lambda is limited by the lifetime
   // of the async worker
-  job.main = [raw, ds_uid, resampling, n_overviews, o, n_bands, b]() {
+  job.main = [raw, ds_uid, resampling, n_overviews, o, n_bands, b, progress_cb](const GDALExecutionProgress &progress) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
-    CPLErr err = raw->BuildOverviews(resampling.c_str(), n_overviews, o.get(), n_bands, b.get(), NULL, NULL);
+    CPLErr err = raw->BuildOverviews(
+      resampling.c_str(),
+      n_overviews,
+      o.get(),
+      n_bands,
+      b.get(),
+      progress_cb ? ProgressTrampoline : nullptr,
+      progress_cb ? (void *)&progress : nullptr);
     GDAL_UNLOCK_PARENT;
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return err;
   };
   job.rval = [raw](CPLErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
 
-  job.run(info, async, 3);
+  job.run(info, async, 4);
 }
 
 /**

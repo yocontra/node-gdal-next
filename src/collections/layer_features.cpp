@@ -122,7 +122,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
   long ds_uid = layer->parent_uid;
   GDALAsyncableJob<OGRFeature *> job;
   job.persist(parent);
-  job.main = [ds_uid, gdal_layer, feature_id]() {
+  job.main = [ds_uid, gdal_layer, feature_id](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRFeature *feature = gdal_layer->GetFeature(feature_id);
     GDAL_UNLOCK_PARENT;
@@ -164,7 +164,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
   long ds_uid = layer->parent_uid;
   GDALAsyncableJob<OGRFeature *> job;
   job.persist(parent);
-  job.main = [ds_uid, gdal_layer]() {
+  job.main = [ds_uid, gdal_layer](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     gdal_layer->ResetReading();
     OGRFeature *feature = gdal_layer->GetNextFeature();
@@ -213,7 +213,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
   long ds_uid = layer->parent_uid;
   GDALAsyncableJob<OGRFeature *> job;
   job.persist(parent);
-  job.main = [ds_uid, gdal_layer]() {
+  job.main = [ds_uid, gdal_layer](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRFeature *feature = gdal_layer->GetNextFeature();
     GDAL_UNLOCK_PARENT;
@@ -277,7 +277,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
   OGRFeature *gdal_f = f->get();
   GDALAsyncableJob<int> job;
   job.persist(parent);
-  job.main = [ds_uid, gdal_layer, gdal_f]() {
+  job.main = [ds_uid, gdal_layer, gdal_f](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     int err = gdal_layer->CreateFeature(gdal_f);
     GDAL_UNLOCK_PARENT;
@@ -335,7 +335,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
   long ds_uid = layer->parent_uid;
   GDALAsyncableJob<GIntBig> job;
   job.persist(parent, ds);
-  job.main = [ds_uid, gdal_layer, force]() {
+  job.main = [ds_uid, gdal_layer, force](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     GIntBig count = gdal_layer->GetFeatureCount(force);
     GDAL_UNLOCK_PARENT;
@@ -427,7 +427,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
   long ds_uid = layer->parent_uid;
   GDALAsyncableJob<OGRErr> job;
   job.persist({parent, feature, ds});
-  job.main = [ds_uid, gdal_layer, gdal_feature]() {
+  job.main = [ds_uid, gdal_layer, gdal_feature](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     OGRErr err = gdal_layer->SetFeature(gdal_feature);
     GDAL_UNLOCK_PARENT;
@@ -475,7 +475,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
   long ds_uid = layer->parent_uid;
   GDALAsyncableJob<int> job;
   job.persist(parent);
-  job.main = [ds_uid, gdal_layer, i]() {
+  job.main = [ds_uid, gdal_layer, i](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     int err = gdal_layer->DeleteFeature(i);
     GDAL_UNLOCK_PARENT;

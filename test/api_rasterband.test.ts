@@ -928,6 +928,40 @@ describe('gdal.RasterBand', () => {
               for (i = 0; i < data.length; i++) assert.include([ 46, 54 ], data[i])
             })
           })
+          describe('"progress_cb"', () => {
+            let data, ds1, ds2
+            it('should call the read() progress callback when one is provided', () => {
+              ds1 = gdal.open(`${__dirname}/data/sample.tif`)
+              const band = ds1.bands.get(1)
+              let calls = 0
+              let prevComplete = 0
+              data = band.pixels.read(0, 0, ds1.rasterSize.x, ds1.rasterSize.y, undefined, {
+                progress_cb: (complete): void => {
+                  calls++
+                  assert.isAbove(complete, prevComplete)
+                  assert.isAtMost(complete, 1)
+                  prevComplete = complete
+                } })
+              assert.isAtLeast(calls, 1)
+            })
+            it('should call the write() progress callback when one is provided', () => {
+              const file = `${__dirname}/data/temp/write_progress_test.${String(
+                Math.random()
+              ).substring(2)}.tmp.tif`
+              ds2 = gdal.open(file, 'w', 'GTiff', ds1.rasterSize.x, ds1.rasterSize.y, 1)
+              const band = ds2.bands.get(1)
+              let calls = 0
+              let prevComplete = 0
+              band.pixels.write(0, 0, ds1.rasterSize.x, ds1.rasterSize.y, data, {
+                progress_cb: (complete): void => {
+                  calls++
+                  assert.isAbove(complete, prevComplete)
+                  assert.isAtMost(complete, 1)
+                  prevComplete = complete
+                } })
+              assert.isAtLeast(calls, 1)
+            })
+          })
         })
         it('should throw an error if region is out of bounds', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)

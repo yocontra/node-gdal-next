@@ -73,7 +73,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
   long src_uid = src->parent_uid;
   long mask_uid = mask ? mask->parent_uid : 0;
 
-  job.main = [src_uid, mask_uid, gdal_src, gdal_mask, search_dist, smooth_iterations]() {
+  job.main = [src_uid, mask_uid, gdal_src, gdal_mask, search_dist, smooth_iterations](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK_MANY(src_uid, mask_uid);
     CPLErr err = GDALFillNodata(gdal_src, gdal_mask, search_dist, 0, smooth_iterations, NULL, NULL, NULL);
     GDAL_UNLOCK_MANY;
@@ -85,7 +85,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
 }
 
 /**
- * @typedef ContourOptions { src: gdal.RasterBand, dst: gdal.Layer, offset?: number, interval?: number, fixedLevels?: number[], nodata?: number, idField?: number, elevField?: number }
+ * @typedef ContourOptions { src: gdal.RasterBand, dst: gdal.Layer, offset?: number, interval?: number, fixedLevels?: number[], nodata?: number, idField?: number, elevField?: number, progress_cb?: ProgressCb }
  */
 
 /**
@@ -109,7 +109,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @param {number} [options.nodata] The value to use as a "nodata" value. That is, a pixel value which should be ignored in generating contours as if the value of the pixel were not known.
  * @param {number} [options.idField] A field index to indicate where a unique id should be written for each feature (contour) written.
  * @param {number} [options.elevField] A field index to indicate where the elevation value of the contour should be written.
- */
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+*/
 
 /**
  * Create vector contours from raster DEM.
@@ -133,6 +134,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @param {number} [options.nodata] The value to use as a "nodata" value. That is, a pixel value which should be ignored in generating contours as if the value of the pixel were not known.
  * @param {number} [options.idField] A field index to indicate where a unique id should be written for each feature (contour) written.
  * @param {number} [options.elevField] A field index to indicate where the elevation value of the contour should be written.
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -150,6 +152,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   int use_nodata = 0;
   double nodata = 0;
   int id_field = -1, elev_field = -1;
+  Nan::Callback *progress_cb = nullptr;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -159,6 +162,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   NODE_INT_FROM_OBJ_OPT(obj, "elevField", elev_field);
   NODE_DOUBLE_FROM_OBJ_OPT(obj, "interval", interval);
   NODE_DOUBLE_FROM_OBJ_OPT(obj, "offset", base);
+  NODE_CB_FROM_OBJ_OPT(obj, "progress_cb", progress_cb);
   if (Nan::HasOwnProperty(obj, Nan::New("fixedLevels").ToLocalChecked()).FromMaybe(false)) {
     if (fixed_level_array.parse(Nan::Get(obj, Nan::New("fixedLevels").ToLocalChecked()).ToLocalChecked())) {
       return; // error parsing double list
@@ -184,6 +188,15 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   long dst_uid = dst->parent_uid;
 
   GDALAsyncableJob<CPLErr> job;
+  if (progress_cb) {
+#if GDAL_VERSION_MAJOR < 2
+    Nan::ThrowError("Progress callback not supported on GDAL 1.x");
+    return;
+#else
+    job.persist(progress_cb->GetFunction());
+    job.progress = progress_cb;
+#endif
+  }
   job.main = [src_uid,
               dst_uid,
               gdal_src,
@@ -195,7 +208,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
               nodata,
               gdal_dst,
               id_field,
-              elev_field]() {
+              elev_field,
+              progress_cb](const GDALExecutionProgress &progress) {
     GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid);
     CPLErr err = GDALContourGenerate(
       gdal_src,
@@ -208,8 +222,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
       gdal_dst,
       id_field,
       elev_field,
-      NULL,
-      NULL);
+      progress_cb ? ProgressTrampoline : nullptr,
+      progress_cb ? (void *)&progress : nullptr);
     GDAL_UNLOCK_MANY;
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -219,7 +233,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
 }
 
 /**
- * @typedef SieveOptions { src: gdal.RasterBand, dst: gdal.RasterBand, mask?: gdal.RasterBand, threshold: number, connectedness?: number }
+ * @typedef SieveOptions { src: gdal.RasterBand, dst: gdal.RasterBand, mask?: gdal.RasterBand, threshold: number, connectedness?: number, progress_cb?: ProgressCb }
  */
 
 /**
@@ -235,6 +249,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.
  * @param {number} options.threshold Raster polygons with sizes smaller than this will be merged into their largest neighbour.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  */
 
 /**
@@ -251,6 +266,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @param {gdal.RasterBand} [options.mask] All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.
  * @param {number} options.threshold Raster polygons with sizes smaller than this will be merged into their largest neighbour.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -263,6 +279,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   RasterBand *mask = NULL;
   int threshold;
   int connectedness = 4;
+  Nan::Callback *progress_cb = nullptr;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -271,6 +288,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   NODE_WRAPPED_FROM_OBJ_OPT(obj, "mask", RasterBand, mask);
   NODE_INT_FROM_OBJ(obj, "threshold", threshold);
   NODE_INT_FROM_OBJ_OPT(obj, "connectedness", connectedness);
+  NODE_CB_FROM_OBJ_OPT(obj, "progress_cb", progress_cb);
 
   if (connectedness != 4 && connectedness != 8) {
     Nan::ThrowError("connectedness option must be 4 or 8");
@@ -286,9 +304,27 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   long mask_uid = mask ? mask->parent_uid : 0;
 
   GDALAsyncableJob<CPLErr> job;
-  job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_dst, gdal_mask, threshold, connectedness]() {
+  if (progress_cb) {
+#if GDAL_VERSION_MAJOR < 2
+    Nan::ThrowError("Progress callback not supported on GDAL 1.x");
+    return;
+#else
+    job.persist(progress_cb->GetFunction());
+    job.progress = progress_cb;
+#endif
+  }
+  job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_dst, gdal_mask, threshold, connectedness, progress_cb](
+               const GDALExecutionProgress &progress) {
     GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid, mask_uid);
-    CPLErr err = GDALSieveFilter(gdal_src, gdal_mask, gdal_dst, threshold, connectedness, NULL, NULL, NULL);
+    CPLErr err = GDALSieveFilter(
+      gdal_src,
+      gdal_mask,
+      gdal_dst,
+      threshold,
+      connectedness,
+      NULL,
+      progress_cb ? ProgressTrampoline : nullptr,
+      progress_cb ? (void *)&progress : nullptr);
     GDAL_UNLOCK_MANY;
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -363,7 +399,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
 
   GDALAsyncableJob<int> job;
 
-  job.main = [src_uid, gdal_src, x, y, w, h]() {
+  job.main = [src_uid, gdal_src, x, y, w, h](const GDALExecutionProgress &) {
     GDAL_ASYNCABLE_LOCK(src_uid);
     int r = GDALChecksumImage(gdal_src, x, y, w, h);
     GDAL_UNLOCK_PARENT;
@@ -374,7 +410,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
 }
 
 /**
- * @typedef PolygonizeOptions { src: gdal.RasterBand, dst: gdal.Layer, mask?: gdal.RasterBand, pixValField: number, connectedness?: number, useFloats?:boolean }
+ * @typedef PolygonizeOptions { src: gdal.RasterBand, dst: gdal.Layer, mask?: gdal.RasterBand, pixValField: number, connectedness?: number, useFloats?: boolean, progress_cb?: ProgressCb }
  */
 
 /**
@@ -394,6 +430,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @param {number} options.pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
  * @param {boolean} [options.useFloats=false] Use floating point buffers instead of int buffers.
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  */
 
 /**
@@ -413,6 +450,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @param {number} options.pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
  * @param {boolean} [options.useFloats=false] Use floating point buffers instead of int buffers.
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -426,6 +464,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   int connectedness = 4;
   int pix_val_field = 0;
   char **papszOptions = NULL;
+  Nan::Callback *progress_cb = nullptr;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -434,6 +473,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   NODE_WRAPPED_FROM_OBJ_OPT(obj, "mask", RasterBand, mask);
   NODE_INT_FROM_OBJ_OPT(obj, "connectedness", connectedness)
   NODE_INT_FROM_OBJ(obj, "pixValField", pix_val_field);
+  NODE_CB_FROM_OBJ_OPT(obj, "progress_cb", progress_cb);
 
   if (connectedness == 8) {
     papszOptions = CSLSetNameValue(papszOptions, "8CONNECTED", "8");
@@ -451,24 +491,47 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   long mask_uid = mask ? mask->parent_uid : 0;
 
   GDALAsyncableJob<CPLErr> job;
+  if (progress_cb) {
+#if GDAL_VERSION_MAJOR < 2
+    Nan::ThrowError("Progress callback not supported on GDAL 1.x");
+    return;
+#else
+    job.persist(progress_cb->GetFunction());
+    job.progress = progress_cb;
+#endif
+  }
 
   if (
     Nan::HasOwnProperty(obj, Nan::New("useFloats").ToLocalChecked()).FromMaybe(false) &&
     Nan::To<bool>(Nan::Get(obj, Nan::New("useFloats").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
-    job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions]() {
+    job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](
+                 const GDALExecutionProgress &progress) {
       GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid, mask_uid);
       CPLErr err = GDALFPolygonize(
-        gdal_src, gdal_mask, reinterpret_cast<OGRLayerH>(gdal_dst), pix_val_field, papszOptions, NULL, NULL);
+        gdal_src,
+        gdal_mask,
+        reinterpret_cast<OGRLayerH>(gdal_dst),
+        pix_val_field,
+        papszOptions,
+        progress_cb ? ProgressTrampoline : nullptr,
+        progress_cb ? (void *)&progress : nullptr);
       GDAL_UNLOCK_MANY;
       if (papszOptions) CSLDestroy(papszOptions);
       if (err) throw CPLGetLastErrorMsg();
       return err;
     };
   } else {
-    job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions]() {
+    job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](
+                 const GDALExecutionProgress &progress) {
       GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid, mask_uid);
       CPLErr err = GDALPolygonize(
-        gdal_src, gdal_mask, reinterpret_cast<OGRLayerH>(gdal_dst), pix_val_field, papszOptions, NULL, NULL);
+        gdal_src,
+        gdal_mask,
+        reinterpret_cast<OGRLayerH>(gdal_dst),
+        pix_val_field,
+        papszOptions,
+        progress_cb ? ProgressTrampoline : nullptr,
+        progress_cb ? (void *)&progress : nullptr);
       GDAL_UNLOCK_MANY;
       if (papszOptions) CSLDestroy(papszOptions);
       if (err) throw CPLGetLastErrorMsg();

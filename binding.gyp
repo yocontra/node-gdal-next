@@ -23,6 +23,7 @@
 				"src/utils/warp_options.cpp",
 				"src/utils/ptr_manager.cpp",
 				"src/node_gdal.cpp",
+				"src/async.cpp",
 				"src/gdal_common.cpp",
 				"src/gdal_dataset.cpp",
 				"src/gdal_driver.cpp",
