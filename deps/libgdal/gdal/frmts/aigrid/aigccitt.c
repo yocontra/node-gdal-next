@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: aigccitt.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: aigccitt.c 044a11ee4d018f526644c342c3f483ddd1e6d688 2020-12-15 20:56:11 +0100 Even Rouault $
  *
  * Project:  Arc/Info Binary Grid Translator
  * Purpose:  Code for decoding CCITT RLE (G1) compressed data.
@@ -1539,8 +1539,9 @@ typedef struct {
     sp->bit = BitsAvail;						\
     sp->data = BitAcc;							\
     sp->EOLcnt = EOLcnt;						\
-    rawcc -= (int)((unsigned char *) cp - rawcp);			\
-    rawcp = (unsigned char *) cp;					\
+    /* below updates not needed in AIG case */                          \
+    /* rawcc -= (int)((unsigned char *) cp - rawcp); */			\
+    /* rawcp = (unsigned char *) cp; */					\
 } while (0)
 
 /*

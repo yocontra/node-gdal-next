@@ -32,7 +32,7 @@
 #include "gdal_version.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdalbuildvrt_bin.cpp 5da1c4d1b6c7e38f7f5917fff3ddbc8ad42af7aa 2018-03-30 21:59:13 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalbuildvrt_bin.cpp 8c8864a6008b3f523a8e96017e87482904fa665b 2020-12-18 18:51:04 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -51,6 +51,7 @@ static void Usage(const char* pszErrorMsg)
             "                    [-allow_projection_difference] [-q]\n"
             "                    [-addalpha] [-hidenodata]\n"
             "                    [-srcnodata \"value [value...]\"] [-vrtnodata \"value [value...]\"] \n"
+            "                    [-ignore_srcmaskband]\n"
             "                    [-a_srs srs_def]\n"
             "                    [-r {nearest,bilinear,cubic,cubicspline,lanczos,average,mode}]\n"
             "                    [-oo NAME=VALUE]*\n"

@@ -38,7 +38,9 @@
 #include "ogrsqliteregexp.cpp" /* yes the .cpp file, to make it work on Windows with load_extension('gdalXX.dll') */
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrsqlitesqlfunctions.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+#include <limits>
+
+CPL_CVSID("$Id: ogrsqlitesqlfunctions.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
 
 #undef SQLITE_STATIC
 #define SQLITE_STATIC      ((sqlite3_destructor_type)nullptr)
@@ -748,12 +750,19 @@ void OGR2SQLITE_ST_AsBinary(sqlite3_context* pContext,
     OGRGeometry* poGeom = OGR2SQLITE_GetGeom(pContext, argc, argv, nullptr);
     if( poGeom != nullptr )
     {
-        int nBLOBLen = poGeom->WkbSize();
+        const size_t nBLOBLen = poGeom->WkbSize();
+        if( nBLOBLen > static_cast<size_t>(std::numeric_limits<int>::max()) )
+        {
+            CPLError(CE_Failure, CPLE_NotSupported, "Too large geometry");
+            sqlite3_result_null (pContext);
+            return;
+        }
         GByte* pabyGeomBLOB = (GByte*) VSI_MALLOC_VERBOSE(nBLOBLen);
         if( pabyGeomBLOB != nullptr )
         {
             if( poGeom->exportToWkb(wkbNDR, pabyGeomBLOB) == OGRERR_NONE )
-                sqlite3_result_blob( pContext, pabyGeomBLOB, nBLOBLen, CPLFree);
+                sqlite3_result_blob( pContext, pabyGeomBLOB,
+                                     static_cast<int>(nBLOBLen), CPLFree);
             else
             {
                 VSIFree(pabyGeomBLOB);

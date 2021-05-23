@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: envisat_dump.c bde879dd6c2dd67ecf317ad588846089f0905cb9 2016-03-15 00:39:53Z Kurt Schwehr $
+ * $Id: envisat_dump.c fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  APP ENVISAT Support
  * Purpose:  Test mainline for dumping ENVISAT format files.
@@ -100,7 +100,7 @@ int main( int argc, char ** argv )
                                         &dsr_size ) == 1 )
             break;
 
-        printf( "\nDatset %d\n", i );
+        printf( "\nDataset %d\n", i );
 
         printf( "ds_name = %s\n", ds_name );
         printf( "ds_type = %s\n", ds_type );

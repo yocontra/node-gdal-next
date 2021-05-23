@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab.h d12545162b34c742dcb8893783660a9e57cb2f1b 2020-10-21 12:28:12 +0200 Krister Wicksell $
+ * $Id: mitab.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Name:     mitab.h
  * Project:  MapInfo TAB Read/Write library
@@ -308,7 +308,7 @@ class TABFile final : public IMapInfoFile
 
     static OGRSpatialReference* GetSpatialRefFromTABProj(const TABProjInfo& sTABProj);
     static int                  GetTABProjFromSpatialRef(const OGRSpatialReference* poSpatialRef,
-                                                         TABProjInfo& sTABProj, int& nParmCount);
+                                                         TABProjInfo& sTABProj, int& nParamCount);
 
     virtual int GetFeatureCountByType(int &numPoints, int &numLines,
                                       int &numRegions, int &numTexts,

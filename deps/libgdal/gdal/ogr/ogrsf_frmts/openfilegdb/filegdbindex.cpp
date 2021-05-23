@@ -48,7 +48,7 @@
 #include "ogr_core.h"
 #include "filegdbtable.h"
 
-CPL_CVSID("$Id: filegdbindex.cpp 3662d8ee920725c704a5c5be562b5fc3a93c4f4a 2020-07-16 16:07:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: filegdbindex.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 namespace OpenFileGDB
 {
@@ -876,7 +876,7 @@ int FileGDBIndexIterator::SetConstraint(int nFieldIdx,
     nValueCountInIdx = GetUInt32(abyTrailer + 10, 0);
     /* CPLDebug("OpenFileGDB", "nValueCountInIdx = %u", nValueCountInIdx); */
     /* negative like in sample_clcV15_esri_v10.gdb/a00000005.FDO_UUID.atx */
-    if( (int)nValueCountInIdx < 0 )
+    if( (nValueCountInIdx >> (8 * sizeof(nValueCountInIdx) - 1)) != 0 )
         return FALSE;
     /* QGIS_TEST_101.gdb/a00000006.FDO_UUID.atx */
     if( nValueCountInIdx == 0 )
@@ -2042,7 +2042,7 @@ bool FileGDBSpatialIndexIteratorImpl::Init()
     nValueCountInIdx = GetUInt32(abyTrailer + 10, 0);
     /* CPLDebug("OpenFileGDB", "nValueCountInIdx = %u", nValueCountInIdx); */
     /* negative like in sample_clcV15_esri_v10.gdb/a00000005.FDO_UUID.atx */
-    if( (int)nValueCountInIdx < 0 )
+    if( (nValueCountInIdx >> (8 * sizeof(nValueCountInIdx) - 1)) != 0 )
         return false;
 
     return ResetInternal();

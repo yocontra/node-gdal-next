@@ -59,7 +59,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: ogrcsvlayer.cpp be0e7553d890b0ac876365f23b16d86de56a2aba 2020-10-03 23:21:47 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcsvlayer.cpp 69220282e5fb46befc506c5ca9e7d3f619587ed9 2021-04-04 14:59:19 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            CSVSplitLine()                            */
@@ -2129,6 +2129,8 @@ OGRErr OGRCSVLayer::WriteHeader()
                 poFeatureDefn->GetFieldDefn(iField)->GetNameRef(), -1,
                 m_eStringQuoting == StringQuoting::ALWAYS ?
                     CPLES_CSV_FORCE_QUOTING : CPLES_CSV);
+            if( pszEscaped == nullptr )
+                return OGRERR_FAILURE;
 
             if( fpCSV )
             {
@@ -2450,8 +2452,11 @@ OGRErr OGRCSVLayer::ICreateFeature( OGRFeature *poNewFeature )
                             CPLES_CSV_FORCE_QUOTING : CPLES_CSV);
             }
         }
-
-        const int nLen = static_cast<int>(strlen(pszEscaped));
+        if( pszEscaped == nullptr )
+        {
+            return OGRERR_FAILURE;
+        }
+        const size_t nLen = strlen(pszEscaped);
         bNonEmptyLine |= nLen != 0;
         bool bAddDoubleQuote = false;
         if( chDelimiter == ' ' && pszEscaped[0] != '"' &&

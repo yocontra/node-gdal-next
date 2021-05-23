@@ -49,7 +49,7 @@ constexpr double NULL3 = -3.4028226550889044521e+38;
 #include "cpl_safemaths.hpp"
 #include "vicardataset.h"
 
-CPL_CVSID("$Id: pdsdataset.cpp deff5f9197cbec2b0f66aa34ce85a2cafcc59d7a 2020-05-07 23:38:12 +0200 Even Rouault $")
+CPL_CVSID("$Id: pdsdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 enum PDSLayout
 {
@@ -131,7 +131,7 @@ public:
     static GDALDataset *Open( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
-                                GDALDataType eType, char ** papszParmList );
+                                GDALDataType eType, char ** papszParamList );
 };
 
 /************************************************************************/

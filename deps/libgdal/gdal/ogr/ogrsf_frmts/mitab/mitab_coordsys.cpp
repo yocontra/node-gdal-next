@@ -44,7 +44,7 @@
 #include "mitab_priv.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: mitab_coordsys.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: mitab_coordsys.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 extern const MapInfoDatumInfo asDatumInfoList[];
 extern const MapInfoSpheroidInfo asSpheroidInfoList[];
@@ -96,8 +96,8 @@ char *MITABSpatialRef2CoordSys( const OGRSpatialReference * poSR )
         return nullptr;
 
     TABProjInfo sTABProj;
-    int nParmCount = 0;
-    TABFile::GetTABProjFromSpatialRef(poSR, sTABProj, nParmCount);
+    int nParamCount = 0;
+    TABFile::GetTABProjFromSpatialRef(poSR, sTABProj, nParamCount);
 
     // Do coordsys lookup.
     double dXMin = 0.0;
@@ -160,9 +160,9 @@ char *MITABSpatialRef2CoordSys( const OGRSpatialReference * poSR )
         osCoordSys += CPLSPrintf(" \"%s\"", pszMIFUnits);
     }
 
-    // Append Projection Parms.
-    for( int iParm = 0; iParm < nParmCount; iParm++ )
-        osCoordSys += CPLSPrintf(", %.15g", sTABProj.adProjParams[iParm]);
+    // Append Projection Params.
+    for( int iParam = 0; iParam < nParamCount; iParam++ )
+        osCoordSys += CPLSPrintf(", %.15g", sTABProj.adProjParams[iParam]);
 
     // Append user bounds.
     if( bHasBounds )

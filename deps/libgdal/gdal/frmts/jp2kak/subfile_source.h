@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: subfile_source.h b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $
+ * $Id: subfile_source.h 1cf1d423c3d6dbfc5508add0879fb578ac65d67e 2021-03-08 22:44:27 +0100 Even Rouault $
  *
  * Project:  JPEG-2000
  * Purpose:  Implements read-only virtual io on a subregion of a file.
@@ -33,6 +33,7 @@
 
 #include "kdu_file_io.h"
 #include "cpl_error.h"
+#include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
 #include <assert.h>
@@ -72,15 +73,15 @@ class subfile_source : public kdu_compressed_source {
 
           if( EQUALN( fname, "J2K_SUBFILE:",12) )
           {
-              char** papszTokens = CSLTokenizeString2(fname + 12, ",", 0);
-              if (CSLCount(papszTokens) >= 2)
+              const CPLStringList aosTokens(CSLTokenizeString2(fname + 12, ",", 0));
+              if (aosTokens.size() >= 2)
               {
                   subfile_offset = static_cast<int>(
-                      CPLScanUIntBig(papszTokens[0],
-                                     static_cast<int>(strlen(papszTokens[0]))));
+                      CPLScanUIntBig(aosTokens[0],
+                                     static_cast<int>(strlen(aosTokens[0]))));
                   subfile_size = static_cast<int>(
-                      CPLScanUIntBig(papszTokens[1],
-                                     static_cast<int>(strlen(papszTokens[1]))));
+                      CPLScanUIntBig(aosTokens[1],
+                                     static_cast<int>(strlen(aosTokens[1]))));
               }
               else
               {
@@ -89,7 +90,6 @@ class subfile_source : public kdu_compressed_source {
                   e << "Corrupt subfile definition:" << fname;
                   return;
               }
-              CSLDestroy(papszTokens);
 
               real_filename = strstr(fname,",");
               if( real_filename != nullptr )

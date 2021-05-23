@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp 481c42e96f78c7f5d022441cdb48acef8474090a 2021-03-08 21:35:37 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalwarper.cpp f9fa3b2765778367d2210d5c053009d5ef53ba54 2021-03-08 21:35:37 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */
@@ -1315,7 +1315,7 @@ namespace
     {
         if( nBandCount <= 0 ) { return; }
         if( *ppdNoDataReal != nullptr ) { return; }
-        
+
         *ppdNoDataReal = static_cast<double *>(
             CPLMalloc(sizeof(double) * nBandCount));
 
@@ -1336,9 +1336,9 @@ namespace
  *
  * @param psOptionsIn options to initialize.
  * @param dNoDataReal value to initialize to.
- * 
+ *
  */
-void CPL_STDCALL 
+void CPL_STDCALL
 GDALWarpInitDstNoDataReal( GDALWarpOptions * psOptionsIn, double dNoDataReal )
 {
     VALIDATE_POINTER0(psOptionsIn, "GDALWarpInitDstNoDataReal");
@@ -1356,9 +1356,9 @@ GDALWarpInitDstNoDataReal( GDALWarpOptions * psOptionsIn, double dNoDataReal )
  *
  * @param psOptionsIn options to initialize.
  * @param dNoDataReal value to initialize to.
- * 
+ *
  */
-void CPL_STDCALL 
+void CPL_STDCALL
 GDALWarpInitSrcNoDataReal( GDALWarpOptions * psOptionsIn, double dNoDataReal )
 {
     VALIDATE_POINTER0(psOptionsIn, "GDALWarpInitSrcNoDataReal");
@@ -1376,9 +1376,9 @@ GDALWarpInitSrcNoDataReal( GDALWarpOptions * psOptionsIn, double dNoDataReal )
  *
  * @param psOptionsIn options to initialize.
  * @param dNoDataReal value to initialize to.
- * 
+ *
  */
-void CPL_STDCALL 
+void CPL_STDCALL
 GDALWarpInitNoDataReal(GDALWarpOptions * psOptionsIn, double  dNoDataReal)
 {
     GDALWarpInitDstNoDataReal(psOptionsIn, dNoDataReal);
@@ -1394,9 +1394,9 @@ GDALWarpInitNoDataReal(GDALWarpOptions * psOptionsIn, double  dNoDataReal)
  *
  * @param psOptionsIn options to initialize.
  * @param dNoDataImag value to initialize to.
- * 
+ *
  */
-void CPL_STDCALL 
+void CPL_STDCALL
 GDALWarpInitDstNoDataImag( GDALWarpOptions * psOptionsIn, double dNoDataImag )
 {
     VALIDATE_POINTER0(psOptionsIn, "GDALWarpInitDstNoDataImag");
@@ -1413,9 +1413,9 @@ GDALWarpInitDstNoDataImag( GDALWarpOptions * psOptionsIn, double dNoDataImag )
  *
  * @param psOptionsIn options to initialize.
  * @param dNoDataImag value to initialize to.
- * 
+ *
  */
-void CPL_STDCALL 
+void CPL_STDCALL
 GDALWarpInitSrcNoDataImag( GDALWarpOptions * psOptionsIn, double dNoDataImag )
 {
     VALIDATE_POINTER0(psOptionsIn, "GDALWarpInitSrcNoDataImag");
@@ -1430,10 +1430,10 @@ GDALWarpInitSrcNoDataImag( GDALWarpOptions * psOptionsIn, double dNoDataImag )
 /**
  * \brief If the working data type is unknown, this method will determine
  *  a valid working data type to support the data in the src and dest
- *  data sets and any noData values. 
+ *  data sets and any noData values.
  *
  * @param psOptions options to initialize.
- * 
+ *
  */
 void CPL_STDCALL
 GDALWarpResolveWorkingDataType( GDALWarpOptions *psOptions )
@@ -1447,7 +1447,7 @@ GDALWarpResolveWorkingDataType( GDALWarpOptions *psOptions )
 /* -------------------------------------------------------------------- */
     if( psOptions->eWorkingDataType != GDT_Unknown ) { return; }
 
-    
+
     psOptions->eWorkingDataType = GDT_Byte;
 
     for( int iBand = 0; iBand < psOptions->nBandCount; iBand++ )
@@ -1456,7 +1456,7 @@ GDALWarpResolveWorkingDataType( GDALWarpOptions *psOptions )
         {
             GDALRasterBandH hDstBand = GDALGetRasterBand(
                 psOptions->hDstDS, psOptions->panDstBands[iBand] );
-            
+
             if( hDstBand != nullptr )
             {
                 psOptions->eWorkingDataType =
@@ -1479,35 +1479,35 @@ GDALWarpResolveWorkingDataType( GDALWarpOptions *psOptions )
 
         if( psOptions->padfSrcNoDataReal != nullptr )
         {
-            psOptions->eWorkingDataType = GDALDataTypeUnionWithValue( 
-                psOptions->eWorkingDataType, 
-                psOptions->padfSrcNoDataReal[iBand], 
+            psOptions->eWorkingDataType = GDALDataTypeUnionWithValue(
+                psOptions->eWorkingDataType,
+                psOptions->padfSrcNoDataReal[iBand],
                 false );
         }
 
         if( psOptions->padfSrcNoDataImag != nullptr &&
             psOptions->padfSrcNoDataImag[iBand] != 0.0 )
         {
-           psOptions->eWorkingDataType = GDALDataTypeUnionWithValue( 
-                psOptions->eWorkingDataType, 
-                psOptions->padfSrcNoDataImag[iBand], 
+           psOptions->eWorkingDataType = GDALDataTypeUnionWithValue(
+                psOptions->eWorkingDataType,
+                psOptions->padfSrcNoDataImag[iBand],
                 true );
         }
 
         if( psOptions->padfDstNoDataReal != nullptr )
         {
-            psOptions->eWorkingDataType = GDALDataTypeUnionWithValue( 
-                psOptions->eWorkingDataType, 
-                psOptions->padfDstNoDataReal[iBand], 
+            psOptions->eWorkingDataType = GDALDataTypeUnionWithValue(
+                psOptions->eWorkingDataType,
+                psOptions->padfDstNoDataReal[iBand],
                 false );
         }
 
         if( psOptions->padfDstNoDataImag != nullptr &&
             psOptions->padfDstNoDataImag[iBand] != 0.0 )
         {
-            psOptions->eWorkingDataType = GDALDataTypeUnionWithValue( 
-                psOptions->eWorkingDataType, 
-                psOptions->padfDstNoDataImag[iBand], 
+            psOptions->eWorkingDataType = GDALDataTypeUnionWithValue(
+                psOptions->eWorkingDataType,
+                psOptions->padfDstNoDataImag[iBand],
                 true );
         }
     }
@@ -1524,13 +1524,13 @@ GDALWarpResolveWorkingDataType( GDALWarpOptions *psOptions )
  *
  * @param psOptionsIn options to initialize.
  * @param nBandCount bands to initialize for.
- * 
+ *
  */
 void CPL_STDCALL
 GDALWarpInitDefaultBandMapping( GDALWarpOptions * psOptionsIn, int nBandCount )
 {
     if( psOptionsIn->nBandCount != 0 ) { return; }
-    
+
     psOptionsIn->nBandCount = nBandCount;
 
     psOptionsIn->panSrcBands = static_cast<int *>(
@@ -1583,6 +1583,8 @@ GDALSerializeWarpOptions( const GDALWarpOptions *psWO )
         pszAlgName = "Lanczos";
     else if( psWO->eResampleAlg == GRA_Average )
         pszAlgName = "Average";
+    else if( psWO->eResampleAlg == GRA_RMS )
+        pszAlgName = "RootMeanSquare";
     else if( psWO->eResampleAlg == GRA_Mode )
         pszAlgName = "Mode";
     else if( psWO->eResampleAlg == GRA_Max )
@@ -1835,6 +1837,8 @@ GDALWarpOptions * CPL_STDCALL GDALDeserializeWarpOptions( CPLXMLNode *psTree )
         psWO->eResampleAlg = GRA_Lanczos;
     else if( EQUAL(pszValue, "Average") )
         psWO->eResampleAlg = GRA_Average;
+    else if( EQUAL(pszValue, "RootMeanSquare") )
+        psWO->eResampleAlg = GRA_RMS;
     else if( EQUAL(pszValue, "Mode") )
         psWO->eResampleAlg = GRA_Mode;
     else if( EQUAL(pszValue, "Maximum") )
@@ -1936,7 +1940,7 @@ GDALWarpOptions * CPL_STDCALL GDALDeserializeWarpOptions( CPLXMLNode *psTree )
 /*      Now actually process each bandmapping.                          */
 /* ==================================================================== */
     int iBand = 0;
-    
+
     psBand = psBandTree ? psBandTree->psChild : nullptr;
 
     for( ; psBand != nullptr; psBand = psBand->psNext )

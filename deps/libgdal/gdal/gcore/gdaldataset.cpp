@@ -72,7 +72,7 @@
 #include "../sqlite/ogrsqliteexecutesql.h"
 #endif
 
-CPL_CVSID("$Id: gdaldataset.cpp 66858a03ff715bea7cde7a27e97c5c7d7f4e4a4d 2020-10-22 08:03:40 +0200 Kai Pastor $")
+CPL_CVSID("$Id: gdaldataset.cpp 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $")
 
 CPL_C_START
 GDALAsyncReader *
@@ -122,6 +122,8 @@ class GDALDataset::Private
     OGRSpatialReference *m_poSRSGCPCached = nullptr;
 
     GDALDataset* poParentDataset = nullptr;
+
+    bool m_bOverviewsEnabled = true;
 
     Private() = default;
 };
@@ -342,6 +344,7 @@ GDALDataset::~GDALDataset()
     {
         if( papoBands[i] != nullptr )
             delete papoBands[i];
+        papoBands[i] = nullptr;
     }
 
     CPLFree(papoBands);
@@ -895,7 +898,9 @@ const char *GDALDataset::_GetProjectionRef() { return (""); }
  *
  * Same as the C function GDALGetSpatialRef().
  *
- * When a projection definition is not available, null is returned
+ * When a projection definition is not available, null is returned. If used on
+ * a dataset where there are GCPs and not a geotransform, this method returns
+ * null. Use GetGCPSpatialRef() instead.
  *
  * @since GDAL 3.0
  *
@@ -1528,7 +1533,7 @@ int CPL_STDCALL GDALGetGCPCount( GDALDatasetH hDS )
  *
  * The projection string follows the normal rules from GetProjectionRef().
  *
- * \note Startig with GDAL 3.0, this is a compatibility layer around
+ * \note Starting with GDAL 3.0, this is a compatibility layer around
  * GetGCPSpatialRef()
  *
  * @return internal projection string or "" if there are no GCPs.
@@ -1583,7 +1588,9 @@ const char *GDALDataset::_GetGCPProjection() { return ""; }
  *
  * Same as the C function GDALGetGCPSpatialRef().
  *
- * When a SRS is not available, null is returned
+ * When a SRS is not available, null is returned. If used on
+ * a dataset where there is a geotransform, and not GCPs, this method returns
+ * null. Use GetSpatialRef() instead.
  *
  * @since GDAL 3.0
  *
@@ -1900,9 +1907,9 @@ CPLErr GDALSetGCPs2( GDALDatasetH hDS, int nGCPCount,
  *
  * This method is the same as the C function GDALBuildOverviews().
  *
- * @param pszResampling one of "AVERAGE", "AVERAGE_MAGPHASE", "BILINEAR",
- * "CUBIC", "CUBICSPLINE", "GAUSS", "LANCZOS", "MODE", "NEAREST", or "NONE"
- * controlling the downsampling method applied.
+ * @param pszResampling one of "AVERAGE", "AVERAGE_MAGPHASE", "RMS",
+ * "BILINEAR", "CUBIC", "CUBICSPLINE", "GAUSS", "LANCZOS", "MODE", "NEAREST",
+ * or "NONE" controlling the downsampling method applied.
  * @param nOverviews number of overviews to build, or 0 to clean overviews.
  * @param panOverviewList the list of overview decimation factors to build, or
  *                        NULL if nOverviews == 0.
@@ -2060,7 +2067,7 @@ CPLErr GDALDataset::IRasterIO( GDALRWFlag eRWFlag,
          psExtraArg->eResampleAlg == GRIORA_Lanczos) &&
         !(nXSize == nBufXSize && nYSize == nBufYSize) && nBandCount > 1 )
     {
-        if( nBufXSize < nXSize && nBufYSize < nYSize )
+        if( nBufXSize < nXSize && nBufYSize < nYSize && AreOverviewsEnabled() )
         {
             int bTried = FALSE;
             const CPLErr eErr =
@@ -2560,7 +2567,7 @@ CPLErr GDALDataset::RasterIO( GDALRWFlag eRWFlag,
 /* -------------------------------------------------------------------- */
 /*      Call the format specific function.                              */
 /* -------------------------------------------------------------------- */
-    else if( eErr == CE_None )
+    else
     {
         eErr = IRasterIO(eRWFlag, nXOff, nYOff, nXSize, nYSize, pData,
                          nBufXSize, nBufYSize, eBufType, nBandCount, panBandMap,
@@ -3047,7 +3054,7 @@ char ** CPL_STDCALL GDALGetFileList( GDALDatasetH hDS )
  *                 specified.
  * @return CE_None on success or CE_Failure on an error.
  *
- * @see http://trac.osgeo.org/gdal/wiki/rfc15_nodatabitmask
+ * @see https://gdal.org/development/rfc/rfc15_nodatabitmask.html
  * @see GDALRasterBand::CreateMaskBand()
  *
  */
@@ -3223,6 +3230,8 @@ GDALOpen( const char * pszFilename, GDALAccess eAccess )
  * VALIDATE_OPEN_OPTIONS can be set to NO to avoid such warnings. Alternatively,
  * since GDAL 2.1, an option name can be preceded by the @ character to indicate
  * that it may not cause a warning if the driver doesn't declare this option.
+ * Starting with GDAL 3.3, OVERVIEW_LEVEL=NONE is supported to indicate that
+ * no overviews should be exposed.
  *
  * @param papszSiblingFiles NULL, or a NULL terminated list of strings that are
  * filenames that are auxiliary to the main filename. If NULL is passed, a
@@ -3486,9 +3495,9 @@ GDALDatasetH CPL_STDCALL GDALOpenEx( const char *pszFilename,
             {
                 CPLString osVal(
                     CSLFetchNameValue(papszOpenOptions, "OVERVIEW_LEVEL"));
-                const int nOvrLevel = atoi(osVal);
+                const int nOvrLevel = EQUAL(osVal, "NONE") ? -1 : atoi(osVal);
                 const bool bThisLevelOnly =
-                    osVal.ifind("only") != std::string::npos;
+                    nOvrLevel == -1 || osVal.ifind("only") != std::string::npos;
                 GDALDataset *poOvrDS = GDALCreateOverviewDataset(
                     poDS, nOvrLevel, bThisLevelOnly);
                 poDS->ReleaseRef();
@@ -3803,7 +3812,7 @@ int CPL_STDCALL GDALDumpOpenDatasets( FILE *fp )
  * should be deallocated by the application at that point.
  *
  * Additional information on asynchronous IO in GDAL may be found at:
- *   http://trac.osgeo.org/gdal/wiki/rfc24_progressive_data_support
+ *   https://gdal.org/development/rfc/rfc24_progressive_data_support.html
  *
  * This method is the same as the C GDALBeginAsyncReader() function.
  *
@@ -3894,7 +3903,7 @@ GDALAsyncReader *GDALDataset::BeginAsyncReader(
  * should be deallocated by the application at that point.
  *
  * Additional information on asynchronous IO in GDAL may be found at:
- *   http://trac.osgeo.org/gdal/wiki/rfc24_progressive_data_support
+ *   https://gdal.org/development/rfc/rfc24_progressive_data_support.html
  *
  * This method is the same as the C++ GDALDataset::BeginAsyncReader() method.
  *
@@ -4655,10 +4664,10 @@ OGRLayerH GDALDatasetCopyLayer( GDALDatasetH hDS,
  This method is the same as the C++ method GDALDataset::ExecuteSQL()
 
  For more information on the SQL dialect supported internally by OGR
- review the <a href="ogr_sql.html">OGR SQL</a> document.  Some drivers (i.e.
+ review the <a href="https://gdal.org/user/ogr_sql_dialect.html">OGR SQL</a> document.  Some drivers (i.e.
  Oracle and PostGIS) pass the SQL directly through to the underlying RDBMS.
 
- Starting with OGR 1.10, the <a href="ogr_sql_sqlite.html">SQLITE dialect</a>
+ Starting with OGR 1.10, the <a href="https://gdal.org/user/sql_sqlite_dialect.html">SQLITE dialect</a>
  can also be used.
 
  @since GDAL 2.0
@@ -4705,9 +4714,9 @@ OGRLayerH GDALDatasetExecuteSQL( GDALDatasetH hDS,
 
 /**
  \brief Abort any SQL statement running in the data store.
- 
+
  This function can be safely called from any thread (pending that the dataset object is still alive). Driver implementations will make sure that it can be called in a thread-safe way.
- 
+
  This might not be implemented by all drivers. At time of writing, only SQLite, GPKG and PG drivers implement it
 
  This method is the same as the C++ method GDALDataset::AbortSQL()
@@ -6128,10 +6137,10 @@ OGRErr GDALDataset::ProcessSQLAlterTableAlterColumn( const char *pszSQLCommand )
  deprecated OGR_DS_ExecuteSQL().
 
  For more information on the SQL dialect supported internally by OGR
- review the <a href="ogr_sql.html">OGR SQL</a> document.  Some drivers (i.e.
+ review the <a href="https://gdal.org/user/ogr_sql_dialect.html">OGR SQL</a> document.  Some drivers (i.e.
  Oracle and PostGIS) pass the SQL directly through to the underlying RDBMS.
 
- Starting with OGR 1.10, the <a href="ogr_sql_sqlite.html">SQLITE dialect</a>
+ Starting with OGR 1.10, the <a href="https://gdal.org/user/sql_sqlite_dialect.html">SQLITE dialect</a>
  can also be used.
 
  In GDAL 1.X, this method used to be in the OGRDataSource class.
@@ -6328,7 +6337,7 @@ GDALDataset::ExecuteSQL( const char *pszStatement,
 */
 
 OGRErr GDALDataset::AbortSQL(  )
-{  
+{
   CPLError(CE_Failure, CPLE_NotSupported, "AbortSQL is not supported for this driver.");
   return OGRERR_UNSUPPORTED_OPERATION;
 }
@@ -8216,7 +8225,7 @@ GDALRasterBand* GDALDataset::Bands::operator[](size_t iBand)
  \brief Return the root GDALGroup of this dataset.
 
  Only valid for multidimensional datasets.
- 
+
  This is the same as the C function GDALDatasetGetRootGroup().
 
  @since GDAL 3.1
@@ -8284,3 +8293,142 @@ void GDALDatasetClearStatistics(GDALDatasetH hDS)
     VALIDATE_POINTER0(hDS, __func__);
     GDALDataset::FromHandle(hDS)->ClearStatistics();
 }
+
+/************************************************************************/
+/*                        GetFieldDomain()                              */
+/************************************************************************/
+
+/** Get a field domain from its name.
+ *
+ * @return the field domain, or nullptr if not found.
+ * @since GDAL 3.3
+ */
+const OGRFieldDomain* GDALDataset::GetFieldDomain(const std::string& name) const
+{
+    const auto iter = m_oMapFieldDomains.find(name);
+    if( iter == m_oMapFieldDomains.end() )
+        return nullptr;
+    return iter->second.get();
+}
+
+/************************************************************************/
+/*                      GDALDatasetGetFieldDomain()                     */
+/************************************************************************/
+
+/** Get a field domain from its name.
+ *
+ * This is the same as the C++ method GDALDataset::GetFieldDomain().
+ *
+ * @param hDS Dataset handle.
+ * @param pszName Name of field domain.
+ * @return the field domain (ownership remains to the dataset), or nullptr if not found.
+ * @since GDAL 3.3
+ */
+OGRFieldDomainH GDALDatasetGetFieldDomain(GDALDatasetH hDS,
+                                          const char* pszName)
+{
+    VALIDATE_POINTER1(hDS, __func__, nullptr);
+    VALIDATE_POINTER1(pszName, __func__, nullptr);
+    return OGRFieldDomain::ToHandle(
+        const_cast<OGRFieldDomain*>(
+            GDALDataset::FromHandle(hDS)->GetFieldDomain(pszName)));
+}
+
+/************************************************************************/
+/*                         AddFieldDomain()                             */
+/************************************************************************/
+
+/** Add a field domain to the dataset.
+ *
+ * Only a few drivers will support this operation, and some of them might only
+ * support it only for some types of field domains.
+ * At the time of writing (GDAL 3.3), only the Memory and GeoPackage drivers
+ * support this operation. A dataset having at least some support for this
+ * operation should report the ODsCAddFieldDomain dataset capability.
+ *
+ * Anticipated failures will not be emitted through the CPLError()
+ * infrastructure, but will be reported in the failureReason output parameter.
+ *
+ * @param domain The domain definition.
+ * @param failureReason      Output parameter. Will contain an error message if
+ *                           an error occurs.
+ * @return true in case of success.
+ * @since GDAL 3.3
+ */
+bool GDALDataset::AddFieldDomain(CPL_UNUSED std::unique_ptr<OGRFieldDomain>&& domain,
+                                 std::string& failureReason)
+{
+    failureReason = "AddFieldDomain not supported by this driver";
+    return false;
+}
+
+/************************************************************************/
+/*                     GDALDatasetAddFieldDomain()                      */
+/************************************************************************/
+
+/** Add a field domain to the dataset.
+ *
+ * Only a few drivers will support this operation, and some of them might only
+ * support it only for some types of field domains.
+ * At the time of writing (GDAL 3.3), only the Memory and GeoPackage drivers
+ * support this operation. A dataset having at least some support for this
+ * operation should report the ODsCAddFieldDomain dataset capability.
+ *
+ * Anticipated failures will not be emitted through the CPLError()
+ * infrastructure, but will be reported in the ppszFailureReason output parameter.
+ *
+ * @param hDS                Dataset handle.
+ * @param hFieldDomain       The domain definition. Contrary to the C++ version,
+ *                           the passed object is copied.
+ * @param ppszFailureReason  Output parameter. Will contain an error message if
+ *                           an error occurs (*ppszFailureReason to be freed
+ *                           with CPLFree). May be NULL.
+ * @return true in case of success.
+ * @since GDAL 3.3
+ */
+bool GDALDatasetAddFieldDomain(GDALDatasetH hDS,
+                               OGRFieldDomainH hFieldDomain,
+                               char** ppszFailureReason)
+{
+    VALIDATE_POINTER1(hDS, __func__, false);
+    VALIDATE_POINTER1(hFieldDomain, __func__, false);
+    auto poDomain = std::unique_ptr<OGRFieldDomain>(
+                 OGRFieldDomain::FromHandle(hFieldDomain)->Clone());
+    if( poDomain == nullptr )
+        return false;
+    std::string failureReason;
+    const bool bRet =
+        GDALDataset::FromHandle(hDS)->AddFieldDomain(
+             std::move(poDomain), failureReason);
+    if( ppszFailureReason )
+    {
+        *ppszFailureReason = failureReason.empty() ?
+                                nullptr : CPLStrdup(failureReason.c_str());
+    }
+    return bRet;
+}
+
+//! @cond Doxygen_Suppress
+
+/************************************************************************/
+/*                       SetEnableOverviews()                           */
+/************************************************************************/
+
+void GDALDataset::SetEnableOverviews(bool bEnable)
+{
+    if( m_poPrivate )
+    {
+        m_poPrivate->m_bOverviewsEnabled = bEnable;
+    }
+}
+
+/************************************************************************/
+/*                      AreOverviewsEnabled()                           */
+/************************************************************************/
+
+bool GDALDataset::AreOverviewsEnabled() const
+{
+    return m_poPrivate ? m_poPrivate->m_bOverviewsEnabled : true;
+}
+
+//! @endcond

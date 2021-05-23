@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: northwood.h 6e3d6eff53731ab5a9b5ec7c8136366ed8e3d35b 2021-03-27 10:49:34 +0100 Even Rouault $
+ * $Id: northwood.h edff0f6ff69efb760c7e123f7ca2e2b2038d3a7e 2021-03-27 10:49:34 +0100 Even Rouault $
  *
  * Project:  GRC/GRD Reader
  * Purpose:  Northwood Technologies Grid format declarations
@@ -84,8 +84,8 @@ typedef struct
 typedef struct
 {
     unsigned int nNumClassifiedItems;
-//  NWT_CLASSIFIED_ITEM *stClassifedItem[4096]; //hack - it could be up to 64K
-    NWT_CLASSIFIED_ITEM **stClassifedItem;    //hack - it could be up to 64K
+//  NWT_CLASSIFIED_ITEM *stClassifiedItem[4096]; //hack - it could be up to 64K
+    NWT_CLASSIFIED_ITEM **stClassifiedItem;    //hack - it could be up to 64K
 } NWT_CLASSIFIED_DICT;
 
 typedef struct {

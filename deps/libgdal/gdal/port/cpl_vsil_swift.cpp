@@ -42,7 +42,7 @@
 
 #include "cpl_swift.h"
 
-CPL_CVSID("$Id: cpl_vsil_swift.cpp 84033e049eee28696b553cb16258b3a196410e56 2020-06-29 20:48:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_swift.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -227,7 +227,7 @@ protected:
         IVSIS3LikeHandleHelper* CreateHandleHelper(
             const char* pszURI, bool bAllowNoObject) override;
 
-        CPLString GetFSPrefix() override { return "/vsiswift/"; }
+        CPLString GetFSPrefix() const override { return "/vsiswift/"; }
 
         char** GetFileList( const char *pszFilename,
                             int nMaxFiles,
@@ -241,7 +241,8 @@ public:
 
         VSIVirtualHandle *Open( const char *pszFilename,
                                 const char *pszAccess,
-                                bool bSetError ) override;
+                                bool bSetError,
+                                CSLConstList papszOptions ) override;
 
         int Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
                 int nFlags ) override;
@@ -285,7 +286,8 @@ class VSISwiftHandle final : public IVSIS3LikeHandle
 
 VSIVirtualHandle* VSISwiftFSHandler::Open( const char *pszFilename,
                                         const char *pszAccess,
-                                        bool bSetError)
+                                        bool bSetError,
+                                        CSLConstList papszOptions )
 {
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
         return nullptr;
@@ -309,7 +311,7 @@ VSIVirtualHandle* VSISwiftFSHandler::Open( const char *pszFilename,
             return nullptr;
         UpdateHandleFromMap(poHandleHelper);
         VSIS3WriteHandle* poHandle =
-            new VSIS3WriteHandle(this, pszFilename, poHandleHelper, true);
+            new VSIS3WriteHandle(this, pszFilename, poHandleHelper, true, papszOptions);
         if( !poHandle->IsOK() )
         {
             delete poHandle;
@@ -323,7 +325,7 @@ VSIVirtualHandle* VSISwiftFSHandler::Open( const char *pszFilename,
     }
 
     return
-        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError);
+        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError, papszOptions);
 }
 
 /************************************************************************/

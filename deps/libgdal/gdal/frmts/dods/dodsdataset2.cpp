@@ -44,7 +44,7 @@
 
 using namespace libdap;
 
-CPL_CVSID("$Id: dodsdataset2.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: dodsdataset2.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /** Attribute names used to encode geo-referencing information. Note that
     these are not C++ objects to avoid problems with static global
@@ -1066,6 +1066,12 @@ DODSDataset::Open(GDALOpenInfo *poOpenInfo)
         CPLError( CE_Failure, CPLE_NotSupported,
                   "The DODS driver does not support update access to existing"
                   " datasets.\n" );
+        return nullptr;
+    }
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("DODS") )
+    {
+        delete poDS;
         return nullptr;
     }
 

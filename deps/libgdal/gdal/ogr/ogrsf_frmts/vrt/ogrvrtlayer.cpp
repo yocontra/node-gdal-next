@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -53,7 +54,7 @@
 #include "ogrsf_frmts/ogrsf_frmts.h"
 #include "ogrsf_frmts/vrt/ogr_vrt.h"
 
-CPL_CVSID("$Id: ogrvrtlayer.cpp 5ed5120015ed1d124d67c2b01d543d6554b05e1a 2020-07-10 15:04:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtlayer.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
 
 #define UNSUPPORTED_OP_READ_ONLY \
     "%s : unsupported operation on a read-only datasource."
@@ -1797,23 +1798,30 @@ OGRVRTLayer::TranslateVRTFeatureToSrcFeature(OGRFeature *poVRTFeature)
             OGRGeometry *poGeom = poVRTFeature->GetGeomFieldRef(i);
             if( poGeom != nullptr )
             {
-                const int nSize = poGeom->WkbSize();
-                GByte *pabyData = static_cast<GByte *>(CPLMalloc(nSize));
-                if( poGeom->exportToWkb(wkbNDR, pabyData) == OGRERR_NONE )
+                const size_t nSize = poGeom->WkbSize();
+                if( nSize > static_cast<size_t>(std::numeric_limits<int>::max()) )
                 {
-                    if( poSrcFeat->GetFieldDefnRef(iGeomField)->GetType() ==
-                        OFTBinary )
-                    {
-                        poSrcFeat->SetField(iGeomField, nSize, pabyData);
-                    }
-                    else
-                    {
-                        char *pszHexWKB = CPLBinaryToHex(nSize, pabyData);
-                        poSrcFeat->SetField(iGeomField, pszHexWKB);
-                        CPLFree(pszHexWKB);
-                    }
                 }
-                CPLFree(pabyData);
+                else
+                {
+                    GByte *pabyData = static_cast<GByte *>(VSI_MALLOC_VERBOSE(nSize));
+                    if( pabyData &&
+                        poGeom->exportToWkb(wkbNDR, pabyData) == OGRERR_NONE )
+                    {
+                        if( poSrcFeat->GetFieldDefnRef(iGeomField)->GetType() ==
+                            OFTBinary )
+                        {
+                            poSrcFeat->SetField(iGeomField, static_cast<int>(nSize), pabyData);
+                        }
+                        else
+                        {
+                            char *pszHexWKB = CPLBinaryToHex(static_cast<int>(nSize), pabyData);
+                            poSrcFeat->SetField(iGeomField, pszHexWKB);
+                            CPLFree(pszHexWKB);
+                        }
+                    }
+                    CPLFree(pabyData);
+                }
             }
         }
         else if( eGeometryStyle == VGS_Shape )

@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "ogr_ingres.h"
 
-CPL_CVSID("$Id: ogringrestablelayer.cpp 002b050d9a9ef403a732c1210784736ef97216d4 2018-04-09 21:34:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogringrestablelayer.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRIngresTableLayer()                         */
@@ -990,13 +990,15 @@ OGRErr OGRIngresTableLayer::ICreateFeature( OGRFeature *poFeature )
     if( !osGeomText.empty() && poDS->IsNewIngres() == TRUE )
     {
         GByte * pabyWKB;
-        int nSize = poFeature->GetGeometryRef()->WkbSize();
-        pabyWKB = (GByte *) CPLMalloc(nSize);
+        const auto nSize = poFeature->GetGeometryRef()->WkbSize();
+        pabyWKB = (GByte *) VSI_MALLOC_VERBOSE(nSize);
+        if( pabyWKB )
+        {
+            poFeature->GetGeometryRef()->exportToWkb(wkbNDR, pabyWKB);
 
-        poFeature->GetGeometryRef()->exportToWkb(wkbNDR, pabyWKB);
-
-        oStmt.addInputParameter( IIAPI_LBYTE_TYPE, nSize, pabyWKB );
-        CPLFree(pabyWKB);
+            oStmt.addInputParameter( IIAPI_LBYTE_TYPE, nSize, pabyWKB );
+            CPLFree(pabyWKB);
+        }
 /*
  * Test code
         char * pszWKT;

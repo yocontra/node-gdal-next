@@ -65,7 +65,7 @@
 #include "ogr_proj_p.h"
 #include "proj.h"
 
-CPL_CVSID("$Id: hfadataset.cpp 0c76919b53a23ed62e4ad48d8c613d66dfee98ae 2020-10-26 17:31:29 +0100 Even Rouault $")
+CPL_CVSID("$Id: hfadataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 constexpr double R2D = 180.0 / M_PI;
 constexpr double D2R = M_PI / 180.0;
@@ -5737,16 +5737,16 @@ char **HFADataset::GetFileList()
 GDALDataset *HFADataset::Create( const char * pszFilenameIn,
                                  int nXSize, int nYSize, int nBands,
                                  GDALDataType eType,
-                                 char ** papszParmList )
+                                 char ** papszParamList )
 
 {
     const int nBits =
-        CSLFetchNameValue(papszParmList, "NBITS") != nullptr
-        ? atoi(CSLFetchNameValue(papszParmList, "NBITS"))
+        CSLFetchNameValue(papszParamList, "NBITS") != nullptr
+        ? atoi(CSLFetchNameValue(papszParamList, "NBITS"))
         : 0;
 
     const char *pszPixelType =
-        CSLFetchNameValue(papszParmList, "PIXELTYPE");
+        CSLFetchNameValue(papszParamList, "PIXELTYPE");
     if( pszPixelType == nullptr )
         pszPixelType = "";
 
@@ -5808,7 +5808,7 @@ GDALDataset *HFADataset::Create( const char * pszFilenameIn,
 
     // Create the new file.
     HFAHandle hHFA = HFACreate(pszFilenameIn, nXSize, nYSize, nBands,
-                                eHfaDataType, papszParmList);
+                                eHfaDataType, papszParamList);
     if( hHFA == nullptr )
         return nullptr;
 
@@ -5826,7 +5826,7 @@ GDALDataset *HFADataset::Create( const char * pszFilenameIn,
     // hack for sam.gillingham@nrm.qld.gov.au.
     if( poDS != nullptr )
     {
-        poDS->bIgnoreUTM = CPLFetchBool(papszParmList, "IGNOREUTM", false);
+        poDS->bIgnoreUTM = CPLFetchBool(papszParamList, "IGNOREUTM", false);
     }
 
     // Sometimes we can improve ArcGIS compatibility by forcing
@@ -5835,7 +5835,7 @@ GDALDataset *HFADataset::Create( const char * pszFilenameIn,
     if( poDS != nullptr )
     {
         poDS->bForceToPEString =
-            CPLFetchBool(papszParmList, "FORCETOPESTRING", false);
+            CPLFetchBool(papszParamList, "FORCETOPESTRING", false);
     }
 
     return poDS;

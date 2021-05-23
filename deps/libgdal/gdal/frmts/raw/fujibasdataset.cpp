@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: fujibasdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: fujibasdataset.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -109,6 +109,9 @@ GDALDataset *FujiBASDataset::Open( GDALOpenInfo * poOpenInfo )
                          "[Raw data]")
         || strstr(reinterpret_cast<char *>(poOpenInfo->pabyHeader), "Fuji BAS")
         == nullptr )
+        return nullptr;
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("FUJIBAS") )
         return nullptr;
 
 /* -------------------------------------------------------------------- */

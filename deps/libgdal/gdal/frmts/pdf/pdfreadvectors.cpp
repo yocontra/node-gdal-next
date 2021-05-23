@@ -33,7 +33,7 @@
 #define SQUARE(x) ((x)*(x))
 #define EPSILON 1e-5
 
-CPL_CVSID("$Id: pdfreadvectors.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: pdfreadvectors.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 
@@ -1414,8 +1414,8 @@ OGRGeometry* PDFDataset::BuildGeometry(std::vector<double>& oCoords,
 
         if (poCenter == nullptr && poMLS != nullptr && poMLS->getNumGeometries() == 2)
         {
-            OGRLineString* poLS1 = poMLS->getGeometryRef(0)->toLineString();
-            OGRLineString* poLS2 = poMLS->getGeometryRef(1)->toLineString();
+            const OGRLineString* poLS1 = poMLS->getGeometryRef(0);
+            const OGRLineString* poLS2 = poMLS->getGeometryRef(1);
 
             // Recognize points as written by GDAL (ogr-sym-0: cross (+) ).
             if (poLS1->getNumPoints() == 2 && poLS2->getNumPoints() == 2 &&

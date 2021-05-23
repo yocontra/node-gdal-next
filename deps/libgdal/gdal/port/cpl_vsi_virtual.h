@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_virtual.h 63047152a3b5ceb7293ae884fb96be39cd428383 2020-09-30 13:00:56 +0200 Thomas Bonfort $
+ * $Id: cpl_vsi_virtual.h a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Declarations for classes related to the virtual filesystem.
@@ -91,7 +91,8 @@ public:
 
     virtual VSIVirtualHandle *Open( const char *pszFilename,
                                     const char *pszAccess,
-                                    bool bSetError ) = 0;
+                                    bool bSetError,
+                                    CSLConstList papszOptions ) = 0;
     virtual int Stat( const char *pszFilename, VSIStatBufL *pStatBuf, int nFlags) = 0;
     virtual int Unlink( const char *pszFilename )
                       { (void) pszFilename; errno=ENOENT; return -1; }

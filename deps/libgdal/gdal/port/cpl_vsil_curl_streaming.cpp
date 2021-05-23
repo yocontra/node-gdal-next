@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp 2ca06da8696021bcf9dda40f61bca581104da015 2020-12-04 22:35:24 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 #if !defined(HAVE_CURL) || defined(CPL_MULTIPROC_STUB)
 
@@ -224,7 +224,8 @@ public:
 
     virtual VSIVirtualHandle *Open( const char *pszFilename,
                                     const char *pszAccess,
-                                    bool bSetError ) override;
+                                    bool bSetError,
+                                    CSLConstList /* papszOptions */ ) override;
     virtual int      Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
                            int nFlags ) override;
 
@@ -1596,7 +1597,8 @@ VSICurlStreamingFSHandler::CreateFileHandle( const char* pszURL )
 
 VSIVirtualHandle* VSICurlStreamingFSHandler::Open( const char *pszFilename,
                                                    const char *pszAccess,
-                                                   bool /* bSetError */ )
+                                                   bool /* bSetError */,
+                                                   CSLConstList /* papszOptions */ )
 {
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
         return nullptr;
@@ -1665,13 +1667,13 @@ int VSICurlStreamingFSHandler::Stat( const char *pszFilename,
 
 const char* VSICurlStreamingFSHandler::GetActualURL(const char* pszFilename)
 {
-    VSICurlStreamingHandle* poHandle = dynamic_cast<VSICurlStreamingHandle*>(
-        Open(pszFilename, "rb", false));
+    if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
+        return pszFilename;
+    auto poHandle = std::unique_ptr<VSICurlStreamingHandle>(
+        CreateFileHandle(pszFilename + GetFSPrefix().size()));
     if( poHandle == nullptr )
         return pszFilename;
-    CPLString osURL(poHandle->GetURL());
-    delete poHandle;
-    return CPLSPrintf("%s", osURL.c_str());
+    return CPLSPrintf("%s", poHandle->GetURL());
 }
 
 /************************************************************************/
@@ -1940,11 +1942,7 @@ void VSIOSSStreamingFSHandler::UpdateMapFromHandle(
     CPLMutexHolder oHolder( &hMutex );
 
     VSIOSSHandleHelper * poOSSHandleHelper =
-        dynamic_cast<VSIOSSHandleHelper *>(poHandleHelper);
-    CPLAssert( poOSSHandleHelper );
-    if( !poOSSHandleHelper )
-        return;
-
+        cpl::down_cast<VSIOSSHandleHelper *>(poHandleHelper);
     oMapBucketsToOSSParams[ poOSSHandleHelper->GetBucket() ] =
         VSIOSSUpdateParams ( poOSSHandleHelper );
 }
@@ -1959,11 +1957,7 @@ void VSIOSSStreamingFSHandler::UpdateHandleFromMap(
     CPLMutexHolder oHolder( &hMutex );
 
     VSIOSSHandleHelper * poOSSHandleHelper =
-        dynamic_cast<VSIOSSHandleHelper *>(poHandleHelper);
-    CPLAssert( poOSSHandleHelper );
-    if( !poOSSHandleHelper )
-        return;
-
+        cpl::down_cast<VSIOSSHandleHelper *>(poHandleHelper);
     std::map< CPLString, VSIOSSUpdateParams>::iterator oIter =
         oMapBucketsToOSSParams.find(poOSSHandleHelper->GetBucket());
     if( oIter != oMapBucketsToOSSParams.end() )
@@ -2151,14 +2145,12 @@ void VSICurlStreamingClearCache( void )
     // FIXME ? Currently we have different filesystem instances for
     // vsicurl/, /vsis3/, /vsigs/ . So each one has its own cache of regions,
     // file size, etc.
-    const char* const apszFS[] = { "/vsicurl_streaming/", "/vsis3_streaming/",
-                                   "/vsigs_streaming/", "/vsiaz_streaming/",
-                                   "/vsioss_streaming/", "/vsiswift_streaming/" };
-    for( size_t i = 0; i < CPL_ARRAYSIZE(apszFS); ++i )
+    CSLConstList papszPrefix = VSIFileManager::GetPrefixes();
+    for( size_t i = 0; papszPrefix && papszPrefix[i]; ++i )
     {
-        VSICurlStreamingFSHandler *poFSHandler =
+        auto poFSHandler =
             dynamic_cast<VSICurlStreamingFSHandler*>(
-                VSIFileManager::GetHandler( apszFS[i] ));
+                VSIFileManager::GetHandler( papszPrefix[i] ));
 
         if( poFSHandler )
             poFSHandler->ClearCache();

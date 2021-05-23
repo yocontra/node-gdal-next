@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: ddfmodule.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ddfmodule.cpp 2e181dbda919d9059fb16063dad144504ff8e248 2021-03-08 22:03:00 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                             DDFModule()                              */
@@ -465,7 +465,7 @@ int DDFModule::Create( const char *pszFilename )
         papoFieldDefns[iField]->GenerateDDREntry( this, nullptr, &nLength );
 
         CPLAssert( (int)strlen(papoFieldDefns[iField]->GetName()) == _sizeFieldTag );
-        strcpy( achDirEntry, papoFieldDefns[iField]->GetName() );
+        snprintf( achDirEntry, sizeof(achDirEntry), "%s", papoFieldDefns[iField]->GetName() );
         snprintf(szFormat, sizeof(szFormat), "%%0%dd", (int)_sizeFieldLength);
         snprintf( achDirEntry + _sizeFieldTag, sizeof(achDirEntry) - _sizeFieldTag,
                   szFormat, nLength );

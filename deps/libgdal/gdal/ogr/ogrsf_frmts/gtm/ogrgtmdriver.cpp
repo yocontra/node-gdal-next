@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: ogrgtmdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgtmdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -68,6 +68,13 @@ static GDALDataset *OGRGTMDriverOpen( GDALOpenInfo* poOpenInfo )
         delete poDS;
         poDS = nullptr;
     }
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("GTM") )
+    {
+        delete poDS;
+        return nullptr;
+    }
+
     return poDS;
 }
 
@@ -82,6 +89,11 @@ static GDALDataset *OGRGTMDriverCreate( const char * pszName,
                                         CPL_UNUSED GDALDataType eDT,
                                         char **papszOptions )
 {
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("GTM") )
+    {
+        return nullptr;
+    }
+
     CPLAssert( nullptr != pszName );
     CPLDebug( "GTM", "Attempt to create: %s", pszName );
 

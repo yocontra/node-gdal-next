@@ -48,7 +48,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: hfafield.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfafield.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 constexpr int MAX_ENTRY_REPORT = 16;
 
@@ -944,9 +944,9 @@ HFAField::ExtractInstValue( const char *pszField, int nIndexValue,
           dfDoubleRet = nIntRet;
 
           if( chItemType == 'e'
-              && nIntRet >= 0 && nIntRet < CSLCount(papszEnumNames) )
+              && nNumber < static_cast<unsigned>(CSLCount(papszEnumNames)) )
           {
-              pszStringRet = papszEnumNames[nIntRet];
+              pszStringRet = papszEnumNames[nNumber];
           }
       }
       break;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_overview.h 7e9a593460d00a8e3ad3dd06bec239be55c85f20 2020-10-05 11:18:58 +0200 Thomas Bonfort $
+ * $Id: gt_overview.h d80d9db4c465d5a3a22407e3a07d85ea4b583ced 2021-03-07 13:00:13 +0100 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Code to build overviews of external databases as a TIFF file.
@@ -32,6 +32,8 @@
 #ifndef GT_OVERVIEW_H_INCLUDED
 #define GT_OVERVIEW_H_INCLUDED
 
+#include <cstdint>
+
 #include "gdal_priv.h"
 #include "tiffio.h"
 
@@ -53,7 +55,7 @@ toff_t GTIFFWriteDirectory( TIFF *hTIFF, int nSubfileType,
                             const char* pszJPEGQuality,
                             const char* pszJPEGTablesMode,
                             const char* pszNoData,
-                            const uint32* panLercAddCompressionAndVersion,
+                            const uint32_t* panLercAddCompressionAndVersion,
                             bool DeferStrileArrayWriting,
                             const char * pszWebpLevel );
 

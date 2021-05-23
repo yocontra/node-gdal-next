@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_nas.h"
 
-CPL_CVSID("$Id: ogrnasdatasource.cpp 0aa0910b4edd04752e2dbc60a22403dc56f24d27 2020-12-20 18:19:30 +0100 Juergen E. Fischer $")
+CPL_CVSID("$Id: ogrnasdatasource.cpp 538cefca18e29a3b75cffe97823475177ca71cd0 2021-03-11 11:43:45 +0100 Even Rouault $")
 
 static const char * const apszURNNames[] =
 {
@@ -385,7 +385,8 @@ void OGRNASDataSource::PopulateRelations()
             const char *pszValue = CPLParseNameValue( papszOBProperties[i],
                                                       &l_pszName );
 
-            if( STARTS_WITH_CI(pszValue, "urn:adv:oid:")
+            if( l_pszName != nullptr && pszValue != nullptr
+                && STARTS_WITH_CI(pszValue, "urn:adv:oid:")
                 && psGMLId != nullptr && psGMLId->nSubProperties == 1 )
             {
                 poRelationLayer->AddRelation( psGMLId->papszSubProperties[0],

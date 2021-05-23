@@ -44,7 +44,7 @@ void CPL_DLL VSIInstallCryptFileHandler();
 void CPL_DLL VSISetCryptKey( const GByte* pabyKey, int nKeySize );
 CPL_C_END
 
-CPL_CVSID("$Id: cpl_vsil_crypt.cpp c7b080012506c537b1620279ed1c1ac7079ba447 2019-08-17 23:54:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_crypt.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 constexpr char VSICRYPT_PREFIX[] = "/vsicrypt/";
 
@@ -243,7 +243,7 @@ static VSICryptAlg GetAlg( const char* pszName )
     CASE_ALG(DES_EDE2)
     CASE_ALG(DES_EDE3)
     // CASE_ALG(DES_XEX3) (obsolete)
-    // CASE_ALG(Gost) (obsolete)
+    // CASE_ALG(Ghost) (obsolete)
     CASE_ALG(MARS)
     CASE_ALG(IDEA)
     // CASE_ALG(RC2) (obsolete)
@@ -1435,7 +1435,8 @@ public:
 
     VSIVirtualHandle *Open( const char *pszFilename,
                             const char *pszAccess,
-                            bool bSetError ) override;
+                            bool bSetError,
+                            CSLConstList /* papszOptions */ ) override;
     int Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
               int nFlags ) override;
     int Unlink( const char *pszFilename ) override;
@@ -1546,7 +1547,8 @@ static CPLString GetKey( const char* pszFilename )
 
 VSIVirtualHandle *VSICryptFilesystemHandler::Open( const char *pszFilename,
                                                    const char *pszAccess,
-                                                   bool /* bSetError */ )
+                                                   bool /* bSetError */,
+                                                   CSLConstList /* papszOptions */ )
 {
 #ifdef VERBOSE_VSICRYPT
     CPLDebug("VSICRYPT", "Open(%s, %s)", pszFilename, pszAccess);
@@ -2076,7 +2078,8 @@ public:
 
     VSIVirtualHandle *Open( const char * /* pszFilename */,
                             const char * /* pszAccess */,
-                            bool /* bSetError */ ) override
+                            bool /* bSetError */,
+                            CSLConstList /* papszOptions */ ) override
     {
         CPLError(CE_Failure, CPLE_NotSupported,
                  "%s support not available in this build", VSICRYPT_PREFIX);

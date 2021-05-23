@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: commonutils.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: commonutils.h 9bdd970e68dc2f9974afd1994c414e449acedcae 2020-11-20 14:09:34 +0100 Even Rouault $
  *
  * Project:  GDAL Utilities
  * Purpose:  Common utility routines
@@ -43,7 +43,10 @@
 
 class ARGVDestroyer
 {
-        char** m_papszList;
+        char** m_papszList = nullptr;
+        ARGVDestroyer(const ARGVDestroyer&) = delete;
+        ARGVDestroyer& operator= (const ARGVDestroyer&) = delete;
+
     public:
         explicit ARGVDestroyer(char** papszList) : m_papszList(papszList) {}
         ~ARGVDestroyer() { CSLDestroy(m_papszList); }

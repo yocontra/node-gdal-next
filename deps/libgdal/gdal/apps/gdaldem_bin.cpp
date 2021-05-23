@@ -37,7 +37,7 @@
 #include "gdal_priv.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdaldem_bin.cpp 4cc601c05cc367a0d604c31a3c480e43d37b46ae 2019-08-12 22:03:02 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldem_bin.cpp 8b28df9af2074d6be4a77d5ee87aa32ff980c433 2020-12-30 15:33:55 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -75,6 +75,7 @@ static void Usage(const char* pszErrorMsg = nullptr)
             "\n"
             " - To generate a Terrain Ruggedness Index (TRI) map from any GDAL-supported elevation raster\n"
             "     gdaldem TRI input_dem output_TRI_map\n"
+            "                 [-alg Wilson|Riley]\n"
             "                 [-compute_edges] [-b Band (default=1)] [-of format] [-co \"NAME=VALUE\"]* [-q]\n"
             "\n"
             " - To generate a Topographic Position Index (TPI) map from any GDAL-supported elevation raster\n"

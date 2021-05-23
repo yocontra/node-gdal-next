@@ -50,7 +50,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: gt_overview.cpp 7e9a593460d00a8e3ad3dd06bec239be55c85f20 2020-10-05 11:18:58 +0200 Thomas Bonfort $")
+CPL_CVSID("$Id: gt_overview.cpp db9c615f39e4da0623e12f467ff74d7946f17e24 2021-04-21 13:16:57 +0200 Even Rouault $")
 
 // TODO(schwehr): Explain why 128 and not 127.
 constexpr int knMaxOverviews = 128;
@@ -85,7 +85,7 @@ toff_t GTIFFWriteDirectory( TIFF *hTIFF, int nSubfileType,
                             const char* pszJPEGQuality,
                             const char* pszJPEGTablesMode,
                             const char* pszNoData,
-                            CPL_UNUSED const uint32* panLercAddCompressionAndVersion,
+                            CPL_UNUSED const uint32_t* panLercAddCompressionAndVersion,
                             bool bDeferStrileArrayWriting,
                             const char *pszWebpLevel)
 
@@ -133,9 +133,7 @@ toff_t GTIFFWriteDirectory( TIFF *hTIFF, int nSubfileType,
                       panExtraSampleValues );
     }
 
-    if( nCompressFlag == COMPRESSION_LZW ||
-        nCompressFlag == COMPRESSION_ADOBE_DEFLATE ||
-        nCompressFlag == COMPRESSION_ZSTD )
+    if( GTIFFSupportsPredictor(nCompressFlag) )
         TIFFSetField( hTIFF, TIFFTAG_PREDICTOR, nPredictor );
 
 /* -------------------------------------------------------------------- */
@@ -180,13 +178,11 @@ toff_t GTIFFWriteDirectory( TIFF *hTIFF, int nSubfileType,
             TIFFSetField( hTIFF, TIFFTAG_WEBP_LEVEL, nWebpLevel );
     }
 
-#ifdef HAVE_LERC
     if( nCompressFlag == COMPRESSION_LERC && panLercAddCompressionAndVersion )
     {
         TIFFSetField(hTIFF, TIFFTAG_LERC_PARAMETERS, 2,
                      panLercAddCompressionAndVersion);
     }
-#endif
 
 /* -------------------------------------------------------------------- */
 /*      Write no data value if we have one.                             */
@@ -657,8 +653,7 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
 /*      Figure out the predictor value to use.                          */
 /* -------------------------------------------------------------------- */
     int nPredictor = PREDICTOR_NONE;
-    if( nCompression == COMPRESSION_LZW ||
-        nCompression == COMPRESSION_ADOBE_DEFLATE )
+    if( GTIFFSupportsPredictor(nCompression) )
     {
         const char* pszPredictor = papszOptions ?
             CSLFetchNameValue(papszOptions, "PREDICTOR") :
@@ -859,7 +854,7 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
         pszNoData = osNoData.c_str();
     }
 
-    std::vector<uint16> anExtraSamples;
+    std::vector<uint16_t> anExtraSamples;
     for( int i = GTIFFGetMaxColorChannels(nPhotometric)+1; i <= nBands; i++ )
     {
         if( papoBandList[i-1]->GetColorInterpretation() == GCI_AlphaBand )
@@ -1030,6 +1025,7 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
          papoBandList[0]->GetColorTable() == nullptr &&
          (STARTS_WITH_CI(pszResampling, "NEAR") ||
           EQUAL(pszResampling, "AVERAGE") ||
+          EQUAL(pszResampling, "RMS") ||
           EQUAL(pszResampling, "GAUSS") ||
           EQUAL(pszResampling, "CUBIC") ||
           EQUAL(pszResampling, "CUBICSPLINE") ||

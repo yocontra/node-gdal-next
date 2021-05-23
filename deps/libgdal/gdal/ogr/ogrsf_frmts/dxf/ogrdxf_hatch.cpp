@@ -37,7 +37,7 @@
 #include <cmath>
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_hatch.cpp 74fb4406b2290575cac9131205427df1b4dead7e 2020-11-26 19:31:13 +1100 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxf_hatch.cpp c1d42d41a98f8c766a50dba7758dcaf6cc72b4ba 2021-03-15 14:44:14 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           TranslateHATCH()                           */
@@ -105,7 +105,7 @@ OGRDXFFeature *OGRDXFLayer::TranslateHATCH()
 
     if( nCode == 0 )
         poDS->UnreadValue();
-   
+
 /* -------------------------------------------------------------------- */
 /*      Obtain a tolerance value used when building the polygon.        */
 /* -------------------------------------------------------------------- */
@@ -637,7 +637,7 @@ OGRErr OGRDXFLayer::CollectPolylinePath( OGRGeometryCollection *poGC,
             }
             dfY = CPLAtof(szLineBuf);
             bHaveY = true;
-            if( bHaveX && bHaveY && !bHaveBulges )
+            if( bHaveX /* && bHaveY */ && !bHaveBulges )
             {
                 oSmoothPolyline.AddPoint( dfX, dfY, dfElevation, dfBulge );
                 dfBulge = 0.0;

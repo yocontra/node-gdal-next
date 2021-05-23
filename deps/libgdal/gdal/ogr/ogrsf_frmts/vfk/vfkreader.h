@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vfkreader.h 75aca682806c29c78cf341ea527db1aea3be90dc 2020-04-08 14:59:53 +0200 Even Rouault $
+ * $Id: vfkreader.h 724b809239deccfbdeb1c7eb80d57d91d37d53bd 2021-03-15 00:42:44 +0100 Even Rouault $
  *
  * Project:  VFK Reader
  * Purpose:  Public Declarations for OGR free VFK Reader code.
@@ -310,7 +310,7 @@ private:
 public:
     VFKDataBlock(const char *pszName, const IVFKReader *poReader) : IVFKDataBlock(pszName, poReader) {}
 
-    VFKFeature        *GetFeature(int, GUIntBig, VFKFeatureList* = nullptr);
+    VFKFeature        *GetFeature(int, GUIntBig, VFKFeatureList* poList = nullptr);
     VFKFeatureList     GetFeatures(int, GUIntBig);
     VFKFeatureList     GetFeatures(int, int, GUIntBig);
 

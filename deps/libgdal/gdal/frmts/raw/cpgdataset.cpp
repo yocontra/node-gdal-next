@@ -34,7 +34,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: cpgdataset.cpp d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpgdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 enum Interleave { BSQ, BIL, BIP };
 
@@ -975,7 +975,7 @@ GDALDataset *CPGDataset::InitializeType3Dataset( const char *pszFilename )
     {
         CPLError( CE_Failure, CPLE_AppDefined,
                   "%s is missing a required parameter (number of pixels, "
-                  "number of lines,\nnumber of bands, bytes per pixel, or "
+                  "number of lines,\number of bands, bytes per pixel, or "
                   "data organization).",
                   pszWorkname );
         CPLFree(pszWorkname);

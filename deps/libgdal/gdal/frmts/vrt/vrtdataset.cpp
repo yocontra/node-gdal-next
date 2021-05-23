@@ -41,7 +41,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: vrtdataset.cpp 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtdataset.cpp 9c76f54836aeca57bc60bfd7ef7f75664317bb15 2020-11-13 17:04:02 +0100 Even Rouault $")
 
 #define VRT_PROTOCOL_PREFIX "vrt://"
 
@@ -1280,10 +1280,15 @@ CPLErr VRTDataset::AddBand( GDALDataType eType, char **papszOptions )
             poBand = poDerivedBand;
         }
         else {
+            int nBlockXSizeIn = atoi(
+                CSLFetchNameValueDef(papszOptions, "BLOCKXSIZE", "0"));
+            int nBlockYSizeIn = atoi(
+                CSLFetchNameValueDef(papszOptions, "BLOCKYSIZE", "0"));
             /* ---- Standard sourced band ---- */
             poBand = new VRTSourcedRasterBand(
                 this, GetRasterCount() + 1, eType,
-                GetRasterXSize(), GetRasterYSize());
+                GetRasterXSize(), GetRasterYSize(),
+                nBlockXSizeIn, nBlockYSizeIn);
         }
 
         SetBand( GetRasterCount() + 1, poBand );

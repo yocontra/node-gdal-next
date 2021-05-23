@@ -42,7 +42,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogr_srs_usgs.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_srs_usgs.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /*  GCTP projection codes.                                              */
@@ -353,7 +353,7 @@ static double OGRSpatialReferenceUSGSUnpackRadian( double dfVal )
  * @param iDatum Input spheroid.<p>
  *
  * If the datum code is negative, the first two values in the parameter array
- * (parm) are used to define the values as follows:
+ * (param) are used to define the values as follows:
  *
  * <ul>
  *

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: memdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+ * $Id: memdataset.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  Memory Array Translator
  * Purpose:  Declaration of MEMDataset, and MEMRasterBand.
@@ -134,7 +134,7 @@ class CPL_DLL MEMDataset CPL_NON_FINAL: public GDALDataset
     static GDALDataset *Open( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
-                                GDALDataType eType, char ** papszParmList );
+                                GDALDataType eType, char ** papszParamList );
     static GDALDataset *CreateMultiDimensional( const char * pszFilename,
                                                 CSLConstList papszRootGroupOptions,
                                                 CSLConstList papszOptions );

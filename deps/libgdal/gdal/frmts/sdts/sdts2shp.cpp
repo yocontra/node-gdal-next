@@ -30,7 +30,7 @@
 #include "shapefil.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: sdts2shp.cpp 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
+CPL_CVSID("$Id: sdts2shp.cpp 33cf0e31a992be112b3091f012368d15605ed51d 2021-03-16 17:51:59 -0500 ben $")
 
 static int  bVerbose = FALSE;
 
@@ -687,7 +687,7 @@ AddPrimaryAttrToDBFSchema( DBFHandle hDBF, SDTSTransfer *poTransfer,
 
             switch( poSFDefn->GetType() )
             {
-              case DDFString: {
+              case DDFString:
                 if( nWidth == 0 )
                 {
                     int         nMaxBytes;
@@ -701,26 +701,25 @@ AddPrimaryAttrToDBFSchema( DBFHandle hDBF, SDTSTransfer *poTransfer,
 
                 DBFAddField( hDBF, poSFDefn->GetName(), FTString, nWidth, 0 );
                 break;
-              }
-              case DDFInt: {
+
+              case DDFInt:
                 if( nWidth == 0 )
                     nWidth = 9;
 
                 DBFAddField( hDBF, poSFDefn->GetName(), FTInteger, nWidth, 0 );
                 break;
-              }
-              case DDFFloat: {
+
+              case DDFFloat:
                 DBFAddField( hDBF, poSFDefn->GetName(), FTDouble, 18, 6 );
                 break;
-              }
-              default: {
+
+              default:
                 fprintf( stderr,
                          "Dropping attribute `%s' of module `%s'.  "
                          "Type unsupported\n",
                          poSFDefn->GetName(),
                          papszModuleList[iModule] );
                 break;
-              }
             }
         }
 
@@ -789,38 +788,41 @@ WriteAttrRecordToDBF( DBFHandle hDBF, int iRecord,
 /* -------------------------------------------------------------------- */
 /*      Handle each of the types.                                       */
 /* -------------------------------------------------------------------- */
-        switch( poSFDefn->GetType() )
+        switch (poSFDefn->GetType())
         {
-          case DDFString: {
-            const char *pszValue
-                = poSFDefn->ExtractStringData(pachData, nMaxBytes, NULL);
+            case DDFString:
+            {
+                const char *pszValue = poSFDefn->ExtractStringData(pachData, nMaxBytes, NULL);
 
-            if( iField != -1 )
-                DBFWriteStringAttribute(hDBF, iRecord, iField, pszValue );
+                if (iField != -1)
+                    DBFWriteStringAttribute(hDBF, iRecord, iField, pszValue);
+            }
+        break;
+
+        case DDFFloat:
+            {
+                double dfValue;
+
+                dfValue = poSFDefn->ExtractFloatData(pachData, nMaxBytes,
+                                                     NULL);
+
+                if (iField != -1)
+                    DBFWriteDoubleAttribute(hDBF, iRecord, iField, dfValue);
+            }
             break;
-          }
-          case DDFFloat: {
-            double      dfValue;
 
-            dfValue = poSFDefn->ExtractFloatData(pachData, nMaxBytes,
-                                                 NULL);
+        case DDFInt:
+            {
+                int nValue;
 
-            if( iField != -1 )
-                DBFWriteDoubleAttribute( hDBF, iRecord, iField, dfValue );
+                nValue = poSFDefn->ExtractIntData(pachData, nMaxBytes, NULL);
+
+                if (iField != -1)
+                    DBFWriteIntegerAttribute(hDBF, iRecord, iField, nValue);
+            }
             break;
-          }
-          case DDFInt: {
-            int         nValue;
-
-            nValue = poSFDefn->ExtractIntData(pachData, nMaxBytes, NULL);
-
-            if( iField != -1 )
-                DBFWriteIntegerAttribute( hDBF, iRecord, iField, nValue );
+        default:
             break;
-          }
-          default: {
-            break;
-          }
         }
     } /* next subfield */
 }

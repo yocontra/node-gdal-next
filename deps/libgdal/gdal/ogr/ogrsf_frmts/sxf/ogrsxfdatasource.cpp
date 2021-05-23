@@ -40,7 +40,7 @@
 #include <map>
 #include <string>
 
-CPL_CVSID("$Id: ogrsxfdatasource.cpp 72283073050017cb03dc8b6b52421417086671b9 2020-05-10 22:29:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsxfdatasource.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 // EPSG code range http://gis.stackexchange.com/a/18676/9904
 constexpr int MIN_EPSG = 1000;
@@ -490,8 +490,8 @@ OGRErr OGRSXFDataSource::ReadSXFMapDescription(VSILFILE* fpSXFIn, SXFPassport& p
         short nNoObjClass, nNoSemClass;
         /* nObjectsRead = */ VSIFReadL(&nNoObjClass, 2, 1, fpSXFIn);
         /* nObjectsRead = */ VSIFReadL(&nNoSemClass, 2, 1, fpSXFIn);
-        GByte baMask[8];
-        /* nObjectsRead = */ VSIFReadL(&baMask, 8, 1, fpSXFIn);
+        GByte byMask[8];
+        /* nObjectsRead = */ VSIFReadL(&byMask, 8, 1, fpSXFIn);
 
         int nCorners[8];
 

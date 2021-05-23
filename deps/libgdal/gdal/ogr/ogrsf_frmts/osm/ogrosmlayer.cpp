@@ -55,7 +55,7 @@
 #include "osm_parser.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrosmlayer.cpp 69420abb83c679f4f5c84daaca222375a5829f4c 2019-12-12 15:26:23 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrosmlayer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 constexpr int SWITCH_THRESHOLD = 10000;
 constexpr int MAX_THRESHOLD = 100000;
@@ -125,8 +125,8 @@ OGROSMLayer::~OGROSMLayer()
     for( int i=0; i<static_cast<int>(apszNames.size()); i++ )
         CPLFree(apszNames[i]);
 
-    for( int i=0; i<static_cast<int>(apszUnsignificantKeys.size()); i++ )
-        CPLFree(apszUnsignificantKeys[i]);
+    for( int i=0; i<static_cast<int>(apszInsignificantKeys.size()); i++ )
+        CPLFree(apszInsignificantKeys[i]);
 
     for( int i=0; i<static_cast<int>(apszIgnoreKeys.size()); i++ )
         CPLFree(apszIgnoreKeys[i]);
@@ -952,14 +952,14 @@ const OGREnvelope* OGROSMLayer::GetSpatialFilterEnvelope()
 }
 
 /************************************************************************/
-/*                        AddUnsignificantKey()                         */
+/*                        AddInsignificantKey()                         */
 /************************************************************************/
 
-void OGROSMLayer::AddUnsignificantKey( const char* pszK )
+void OGROSMLayer::AddInsignificantKey( const char* pszK )
 {
     char* pszKDup = CPLStrdup(pszK);
-    apszUnsignificantKeys.push_back(pszKDup);
-    aoSetUnsignificantKeys[pszKDup] = 1;
+    apszInsignificantKeys.push_back(pszKDup);
+    aoSetInsignificantKeys[pszKDup] = 1;
 }
 
 /************************************************************************/

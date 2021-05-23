@@ -32,7 +32,7 @@
 
 #include "rasterlitedataset.h"
 
-CPL_CVSID("$Id: rasterlitecreatecopy.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: rasterlitecreatecopy.cpp 05578039b5938dd4bf099cc17167195a98369c9d 2021-02-27 23:15:12 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                  RasterliteGetTileDriverOptions ()                   */
@@ -69,11 +69,6 @@ char** RasterliteGetTileDriverOptions(char** papszOptions)
         CSLFetchNameValueDef(papszOptions, "DRIVER", "GTiff");
 
     char** papszTileDriverOptions = nullptr;
-    if (EQUAL(pszDriverName, "EPSILON"))
-    {
-        papszTileDriverOptions = CSLSetNameValue(papszTileDriverOptions,
-                                                "RASTERLITE_OUTPUT", "YES");
-    }
 
     const char* pszQuality = CSLFetchNameValue(papszOptions, "QUALITY");
     if (pszQuality)
@@ -100,10 +95,6 @@ char** RasterliteGetTileDriverOptions(char** papszOptions)
                 papszOptions, papszTileDriverOptions, "COMPRESS", "GTiff");
     papszTileDriverOptions = RasterliteAddTileDriverOptionsForDriver(
                 papszOptions, papszTileDriverOptions, "PHOTOMETRIC", "GTiff");
-    papszTileDriverOptions = RasterliteAddTileDriverOptionsForDriver(
-                papszOptions, papszTileDriverOptions, "TARGET", "EPSILON");
-    papszTileDriverOptions = RasterliteAddTileDriverOptionsForDriver(
-                papszOptions, papszTileDriverOptions, "FILTER", "EPSILON");
 
     return papszTileDriverOptions;
 }

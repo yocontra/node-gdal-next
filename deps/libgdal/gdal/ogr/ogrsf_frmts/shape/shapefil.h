@@ -2,7 +2,7 @@
 #define SHAPEFILE_H_INCLUDED
 
 /******************************************************************************
- * $Id: shapefil.h 5b6e8ef05d9b27fc2448da6907ce63210612cf70 2019-11-23 09:58:42 +0100 Even Rouault $
+ * $Id: shapefil.h 88e27ffd9f44b53e6ded32072365c2bce6d45ddd 2021-02-27 03:20:57 -0800 Kurt Schwehr $
  *
  * Project:  Shapelib
  * Purpose:  Primary include file for Shapelib.
@@ -36,6 +36,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
+ *
  */
 
 #include <stdio.h>

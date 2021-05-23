@@ -35,7 +35,7 @@
 #include <mutex>
 #include <vector>
 
-CPL_CVSID("$Id: xyzdataset.cpp e8c183169c1dc4f2b5932557372de20c9af201fd 2020-11-22 00:24:18 +0100 Even Rouault $")
+CPL_CVSID("$Id: xyzdataset.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
 
 constexpr double RELATIVE_ERROR = 1e-3;
 
@@ -446,8 +446,8 @@ CPLErr XYZRasterBand::IReadBlock( CPL_UNUSED int nBlockXOff,
                 else
                 {
                     nLastYOff = nBlockYOff;
-                    return CE_None;
                 }
+                return CE_None;
             }
             poGDS->nLineNum ++;
 

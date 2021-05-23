@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnmgraph.h 80f31ac0b0753868ab421bf0ff62e6682ad9617e 2017-12-07 18:13:41Z Even Rouault $
+ * $Id: gnmgraph.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM graph implementation.
@@ -63,14 +63,14 @@ struct GNMStdEdge
     bool bIsBidir;         /**< Whether the edge is bidirectonal */
     double dfDirCost;      /**< Direct cost */
     double dfInvCost;      /**< Inverse cost */
-    bool bIsBloked;        /**< Whether the edge is blocked */
+    bool bIsBlocked;        /**< Whether the edge is blocked */
 };
 
 /** Vertex */
 struct GNMStdVertex
 {
     GNMVECTOR anOutEdgeFIDs; /**< TODO */
-    bool bIsBloked;          /**< Whether the vertex is blocked */
+    bool bIsBlocked;          /**< Whether the vertex is blocked */
 };
 
 /**

@@ -57,7 +57,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ehdrdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: ehdrdataset.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 constexpr int HAS_MIN_FLAG = 0x1;
 constexpr int HAS_MAX_FLAG = 0x2;
@@ -1674,7 +1674,7 @@ GDALDataset *EHdrDataset::Open( GDALOpenInfo * poOpenInfo, bool bFileSizeCheck )
         for( int i = 1; i <= poDS->nBands; i++ )
         {
             EHdrRasterBand *poBand =
-                    dynamic_cast<EHdrRasterBand*>(poDS->GetRasterBand(i));
+                    cpl::down_cast<EHdrRasterBand*>(poDS->GetRasterBand(i));
             poBand->m_poColorTable = poDS->m_poColorTable;
             poBand->m_poRAT = poDS->m_poRAT;
             poBand->SetColorInterpretation(GCI_PaletteIndex);
@@ -1702,7 +1702,7 @@ GDALDataset *EHdrDataset::Open( GDALOpenInfo * poOpenInfo, bool bFileSizeCheck )
 GDALDataset *EHdrDataset::Create( const char * pszFilename,
                                   int nXSize, int nYSize, int nBands,
                                   GDALDataType eType,
-                                  char **papszParmList )
+                                  char **papszParamList )
 
 {
     // Verify input options.
@@ -1763,13 +1763,13 @@ GDALDataset *EHdrDataset::Create( const char * pszFilename,
     // Decide how many bits the file should have.
     int nBits = GDALGetDataTypeSize(eType);
 
-    if( CSLFetchNameValue(papszParmList, "NBITS") != nullptr )
-        nBits = atoi(CSLFetchNameValue(papszParmList, "NBITS"));
+    if( CSLFetchNameValue(papszParamList, "NBITS") != nullptr )
+        nBits = atoi(CSLFetchNameValue(papszParamList, "NBITS"));
 
     const int nRowBytes = (nBits * nXSize + 7) / 8;
 
     // Check for signed byte.
-    const char *pszPixelType = CSLFetchNameValue(papszParmList, "PIXELTYPE");
+    const char *pszPixelType = CSLFetchNameValue(papszParamList, "PIXELTYPE");
     if( pszPixelType == nullptr )
         pszPixelType = "";
 

@@ -49,7 +49,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: mbtilesdataset.cpp d712a530aa1b0dabf9717dd935996dd7b9fd8ced 2020-11-15 15:12:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: mbtilesdataset.cpp 0dd501fa3344b020e317356a7d770ee731fa5fe1 2021-03-08 22:59:49 +0100 Even Rouault $")
 
 static const char * const apszAllowedDrivers[] = {"JPEG", "PNG", nullptr};
 
@@ -502,7 +502,13 @@ char* MBTilesDataset::FindKey(int iPixel, int iLine)
 
     z_stream sStream;
     memset(&sStream, 0, sizeof(sStream));
-    inflateInit(&sStream);
+    if( inflateInit(&sStream) != Z_OK )
+    {
+        OGR_F_Destroy(hFeat);
+        OGR_DS_ReleaseResultSet(hDS, hSQLLyr);
+        CPLFree(pabyUncompressed);
+        return nullptr;
+    }
     sStream.next_in   = pabyData;
     sStream.avail_in  = nDataSize;
     sStream.next_out  = pabyUncompressed;
@@ -3055,6 +3061,7 @@ static const WarpResamplingAlg asResamplingAlg[] =
     { "LANCZOS", GRA_Lanczos },
     { "MODE", GRA_Mode },
     { "AVERAGE", GRA_Average },
+    { "RMS", GRA_RMS },
 };
 
 GDALDataset* MBTilesDataset::CreateCopy( const char *pszFilename,

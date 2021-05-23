@@ -1588,7 +1588,7 @@ NAN_GETTER(Geometry::typeGetter) {
 NAN_GETTER(Geometry::wkbSizeGetter) {
   Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
-  info.GetReturnValue().Set(Nan::New<Integer>(geom->this_->WkbSize()));
+  info.GetReturnValue().Set(Nan::New<Integer>(static_cast<int>(geom->this_->WkbSize())));
 }
 
 /**

@@ -50,7 +50,7 @@
 #include "ogr_geometry.h"
 #include "ogrpgeogeometry.h"
 
-CPL_CVSID("$Id: filegdbtable.cpp 3662d8ee920725c704a5c5be562b5fc3a93c4f4a 2020-07-16 16:07:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: filegdbtable.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 #define TEST_BIT(ar, bit)                       (ar[(bit) / 8] & (1 << ((bit) % 8)))
 #define BIT_ARRAY_SIZE_IN_BYTES(bitsize)        (((bitsize)+7)/8)
@@ -210,15 +210,15 @@ int FileGDBTable::GetFieldIdx(const std::string& osName) const
 /*                          ReadVarUInt()                               */
 /************************************************************************/
 
-template < class OutType, class ControleType >
+template < class OutType, class ControlType >
 static int ReadVarUInt(GByte*& pabyIter, GByte* pabyEnd, OutType& nOutVal)
 {
     const int errorRetValue = FALSE;
-    if( !(ControleType::check_bounds) )
+    if( !(ControlType::check_bounds) )
     {
         /* nothing */
     }
-    else if( ControleType::verbose_error )
+    else if( ControlType::verbose_error )
     {
         returnErrorIf(pabyIter >= pabyEnd);
     }
@@ -239,11 +239,11 @@ static int ReadVarUInt(GByte*& pabyIter, GByte* pabyEnd, OutType& nOutVal)
     OutType nVal = ( b & 0x7F );
     while( true )
     {
-        if( !(ControleType::check_bounds) )
+        if( !(ControlType::check_bounds) )
         {
             /* nothing */
         }
-        else if( ControleType::verbose_error )
+        else if( ControlType::verbose_error )
         {
             returnErrorIf(pabyLocalIter >= pabyEnd);
         }
@@ -272,7 +272,7 @@ static int ReadVarUInt(GByte*& pabyIter, GByte* pabyEnd, OutType& nOutVal)
     }
 }
 
-struct ControleTypeVerboseErrorTrue
+struct ControlTypeVerboseErrorTrue
 {
     // cppcheck-suppress unusedStructMember
     static const EMULATED_BOOL check_bounds = true;
@@ -280,7 +280,7 @@ struct ControleTypeVerboseErrorTrue
     static const EMULATED_BOOL verbose_error = true;
 };
 
-struct ControleTypeVerboseErrorFalse
+struct ControlTypeVerboseErrorFalse
 {
     // cppcheck-suppress unusedStructMember
     static const EMULATED_BOOL check_bounds = true;
@@ -288,7 +288,7 @@ struct ControleTypeVerboseErrorFalse
     static const EMULATED_BOOL verbose_error = false;
 };
 
-struct ControleTypeNone
+struct ControlTypeNone
 {
     // cppcheck-suppress unusedStructMember
     static const EMULATED_BOOL check_bounds = false;
@@ -298,24 +298,24 @@ struct ControleTypeNone
 
 static int ReadVarUInt32(GByte*& pabyIter, GByte* pabyEnd, GUInt32& nOutVal)
 {
-    return ReadVarUInt<GUInt32, ControleTypeVerboseErrorTrue>(pabyIter, pabyEnd, nOutVal);
+    return ReadVarUInt<GUInt32, ControlTypeVerboseErrorTrue>(pabyIter, pabyEnd, nOutVal);
 }
 
 static void ReadVarUInt32NoCheck(GByte*& pabyIter, GUInt32& nOutVal)
 {
     GByte* pabyEnd = nullptr;
-    ReadVarUInt<GUInt32, ControleTypeNone>(pabyIter, pabyEnd, nOutVal);
+    ReadVarUInt<GUInt32, ControlTypeNone>(pabyIter, pabyEnd, nOutVal);
 }
 
 static int ReadVarUInt32Silent(GByte*& pabyIter, GByte* pabyEnd, GUInt32& nOutVal)
 {
-    return ReadVarUInt<GUInt32, ControleTypeVerboseErrorFalse>(pabyIter, pabyEnd, nOutVal);
+    return ReadVarUInt<GUInt32, ControlTypeVerboseErrorFalse>(pabyIter, pabyEnd, nOutVal);
 }
 
 static void ReadVarUInt64NoCheck(GByte*& pabyIter, GUIntBig& nOutVal)
 {
     GByte* pabyEnd = nullptr;
-    ReadVarUInt<GUIntBig, ControleTypeNone>(pabyIter, pabyEnd, nOutVal);
+    ReadVarUInt<GUIntBig, ControlTypeNone>(pabyIter, pabyEnd, nOutVal);
 }
 
 /************************************************************************/
@@ -338,7 +338,8 @@ int FileGDBTable::IsLikelyFeatureAtOffset(vsi_l_offset nOffset,
         nRowBlobLength > 10 * (nFileSize / nValidRecordCount) )
     {
         /* Is it a deleted record ? */
-        if( (int)nRowBlobLength < 0 && nRowBlobLength != 0x80000000U )
+        if( (nRowBlobLength >> (8 * sizeof(nRowBlobLength) - 1)) != 0 &&
+            nRowBlobLength != 0x80000000U )
         {
             nRowBlobLength = (GUInt32) (-(int)nRowBlobLength);
             if( nRowBlobLength < (GUInt32)nNullableFieldsSizeInBytes ||
@@ -2401,7 +2402,7 @@ class ZMultiPointSetter
 
         void set(int i, double dfZ)
         {
-            poMPoint->getGeometryRef(i)->toPoint()->setZ(dfZ);
+            poMPoint->getGeometryRef(i)->setZ(dfZ);
         }
 };
 
@@ -2474,7 +2475,7 @@ class MMultiPointSetter
 
         void set(int i, double dfM)
         {
-            poMPoint->getGeometryRef(i)->toPoint()->setM(dfM);
+            poMPoint->getGeometryRef(i)->setM(dfM);
         }
 };
 
@@ -2736,12 +2737,11 @@ OGRGeometry* FileGDBOGRGeometryConverterImpl::GetAsGeometry(const OGRField* psFi
                 CPLUnsanitizedAdd<GUIntBig>(x, -1) / poGeomField->GetXYScale() + poGeomField->GetXOrigin();
             const double dfY =
                 CPLUnsanitizedAdd<GUIntBig>(y, -1) / poGeomField->GetXYScale() + poGeomField->GetYOrigin();
-            double dfZ = 0.0;
             if( bHasZ )
             {
                 ReadVarUInt64NoCheck(pabyCur, z);
                 const double dfZScale = SanitizeScale(poGeomField->GetZScale());
-                dfZ = CPLUnsanitizedAdd<GUIntBig>(z, -1) / dfZScale + poGeomField->GetZOrigin();
+                const double dfZ = CPLUnsanitizedAdd<GUIntBig>(z, -1) / dfZScale + poGeomField->GetZOrigin();
                 if( bHasM )
                 {
                     GUIntBig m = 0;

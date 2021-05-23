@@ -41,7 +41,7 @@
 
 #include "cpl_google_cloud.h"
 
-CPL_CVSID("$Id: cpl_vsil_gs.cpp 84033e049eee28696b553cb16258b3a196410e56 2020-06-29 20:48:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gs.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -71,7 +71,7 @@ class VSIGSFSHandler final : public IVSIS3LikeFSHandler
     VSICurlHandle* CreateFileHandle( const char* pszFilename ) override;
     const char* GetDebugKey() const override { return "GS"; }
 
-    CPLString GetFSPrefix() override { return "/vsigs/"; }
+    CPLString GetFSPrefix() const override { return "/vsigs/"; }
     CPLString GetURLFromFilename( const CPLString& osFilename ) override;
 
     IVSIS3LikeHandleHelper* CreateHandleHelper(
@@ -85,7 +85,8 @@ class VSIGSFSHandler final : public IVSIS3LikeFSHandler
 
     VSIVirtualHandle *Open( const char *pszFilename,
                             const char *pszAccess,
-                            bool bSetError ) override;
+                            bool bSetError,
+                            CSLConstList papszOptions ) override;
 
     const char* GetOptions() override;
 
@@ -153,7 +154,8 @@ VSICurlHandle* VSIGSFSHandler::CreateFileHandle(const char* pszFilename)
 
 VSIVirtualHandle* VSIGSFSHandler::Open( const char *pszFilename,
                                         const char *pszAccess,
-                                        bool bSetError)
+                                        bool bSetError,
+                                        CSLConstList papszOptions )
 {
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
         return nullptr;
@@ -176,7 +178,7 @@ VSIVirtualHandle* VSIGSFSHandler::Open( const char *pszFilename,
         if( poHandleHelper == nullptr )
             return nullptr;
         VSIS3WriteHandle* poHandle =
-            new VSIS3WriteHandle(this, pszFilename, poHandleHelper, true);
+            new VSIS3WriteHandle(this, pszFilename, poHandleHelper, true, papszOptions);
         if( !poHandle->IsOK() )
         {
             delete poHandle;
@@ -190,7 +192,7 @@ VSIVirtualHandle* VSIGSFSHandler::Open( const char *pszFilename,
     }
 
     return
-        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError);
+        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError, papszOptions);
 }
 
 /************************************************************************/

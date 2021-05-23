@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: minidriver_virtualearth.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: minidriver_virtualearth.cpp 3dbe795c18976a2a7378fa6124abf419b28c2245 2021-02-03 20:32:39 +0100 Denis Rykov $")
 
 // These should be global, they are used all over the place
 const double SPHERICAL_RADIUS = 6378137.0;
@@ -59,10 +59,10 @@ CPLErr WMSMiniDriver_VirtualEarth::Initialize(CPLXMLNode *config, CPL_UNUSED cha
 
     m_parent_dataset->WMSSetDefaultBlockSize(256, 256);
     m_parent_dataset->WMSSetDefaultDataWindowCoordinates(-MAX_GM, MAX_GM, MAX_GM, -MAX_GM);
-    m_parent_dataset->WMSSetDefaultTileLevel(19);
-    m_parent_dataset->WMSSetDefaultOverviewCount(18);
+    m_parent_dataset->WMSSetDefaultTileLevel(21);
+    m_parent_dataset->WMSSetDefaultOverviewCount(20);
     m_parent_dataset->WMSSetNeedsDataWindow(FALSE);
-    m_projection_wkt = ProjToWKT("EPSG:900913");
+    m_projection_wkt = ProjToWKT("EPSG:3857");
     return CE_None;
 }
 

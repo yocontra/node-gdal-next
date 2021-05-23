@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrocitablelayer.cpp c368bc9fdb1a0067d4400be15c08501137dab367 2018-05-18 05:10:17Z Ryan Oliver $")
+CPL_CVSID("$Id: ogrocitablelayer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 static int nDiscarded = 0;
 static int nHits = 0;
@@ -265,17 +265,17 @@ OGRFeatureDefn *OGROCITableLayer::ReadTableDefinition( const char * pszTable )
     for( int iRawFld = 0; true; iRawFld++ )
     {
         OGRFieldDefn    oField( "", OFTString);
-        OCIParam     *hParmDesc;
+        OCIParam     *hParamDesc;
         ub2          nOCIType;
         ub4          nOCILen;
 
         nStatus = OCIParamGet( hAttrList, OCI_DTYPE_PARAM,
-                               poSession->hError, (dvoid**)&hParmDesc,
+                               poSession->hError, (dvoid**)&hParamDesc,
                                (ub4) iRawFld+1 );
         if( nStatus != OCI_SUCCESS )
             break;
 
-        if( poSession->GetParmInfo( hParmDesc, &oField, &nOCIType, &nOCILen )
+        if( poSession->GetParamInfo( hParamDesc, &oField, &nOCIType, &nOCILen )
             != CE_None )
             return poDefn;
 

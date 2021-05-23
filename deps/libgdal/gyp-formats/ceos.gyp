@@ -8,8 +8,7 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/frmts/ceos/ceosdataset.cpp",
-				"../gdal/frmts/ceos/ceosopen.c",
-				# "../gdal/frmts/ceos/ceostest.c"
+				"../gdal/frmts/ceos/ceosopen.c"
 			],
 			"include_dirs": [
 				"../gdal/frmts/ceos"

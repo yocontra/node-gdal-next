@@ -29,7 +29,7 @@
 #include "ogr_wfs.h"
 #include "cpl_md5.h"
 
-CPL_CVSID("$Id: ogrwfsjoinlayer.cpp 6729af20d757ebb9d16576c6777a780d903151ac 2017-12-20 20:39:50Z Dmitry Baryshnikov $")
+CPL_CVSID("$Id: ogrwfsjoinlayer.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRWFSJoinLayer()                           */
@@ -602,22 +602,22 @@ OGRFeature* OGRWFSJoinLayer::GetNextFeature()
                     if( eType == OFTInteger )
                     {
                         int nVal = poNewFeature->GetFieldAsInteger(i);
-                        CPLMD5Update( &sMD5Context, (const GByte*)&nVal, sizeof(nVal));
+                        CPLMD5Update( &sMD5Context, &nVal, sizeof(nVal));
                     }
                     else if( eType == OFTInteger64 )
                     {
                         GIntBig nVal = poNewFeature->GetFieldAsInteger64(i);
-                        CPLMD5Update( &sMD5Context, (const GByte*)&nVal, sizeof(nVal));
+                        CPLMD5Update( &sMD5Context, &nVal, sizeof(nVal));
                     }
                     else if( eType == OFTReal )
                     {
                         double dfVal = poNewFeature->GetFieldAsDouble(i);
-                        CPLMD5Update( &sMD5Context, (const GByte*)&dfVal, sizeof(dfVal));
+                        CPLMD5Update( &sMD5Context, &dfVal, sizeof(dfVal));
                     }
                     else
                     {
                         const char* pszStr = poNewFeature->GetFieldAsString(i);
-                        CPLMD5Update( &sMD5Context, (const GByte*)pszStr, static_cast<int>(strlen(pszStr)));
+                        CPLMD5Update( &sMD5Context, pszStr, strlen(pszStr));
                     }
                 }
             }
@@ -634,11 +634,14 @@ OGRFeature* OGRWFSJoinLayer::GetNextFeature()
 
                     if( bDistinct )
                     {
-                        int nSize = poGeom->WkbSize();
-                        GByte* pabyGeom = (GByte*)CPLMalloc(nSize);
-                        poGeom->exportToWkb(wkbNDR, pabyGeom);
-                        CPLMD5Update( &sMD5Context, (const GByte*)pabyGeom, nSize);
-                        CPLFree(pabyGeom);
+                        const size_t nSize = poGeom->WkbSize();
+                        GByte* pabyGeom = (GByte*)VSI_MALLOC_VERBOSE(nSize);
+                        if( pabyGeom )
+                        {
+                            poGeom->exportToWkb(wkbNDR, pabyGeom);
+                            CPLMD5Update( &sMD5Context, pabyGeom, nSize);
+                            CPLFree(pabyGeom);
+                        }
                     }
 
                     poNewFeature->SetGeomFieldDirectly(i, poGeom);

@@ -53,7 +53,7 @@
 #include "ogr_p.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogr2ogr_bin.cpp 089f0515dfcdf7c7ff252f0c60efc03eacb569f8 2020-05-15 19:56:11 +1000 Simon O'Keefe $")
+CPL_CVSID("$Id: ogr2ogr_bin.cpp 4548fc91ad259c4d2f3ff0ea47dbd74f0f13ed08 2021-04-02 22:24:34 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -91,12 +91,13 @@ static void Usage( const char* pszAdditionalMsg = nullptr, bool bShort = true )
         "               [-wrapdateline][-datelineoffset val]\n"
         "               [[-simplify tolerance] | [-segmentize max_dist]]\n"
         "               [-makevalid]\n"
-        "               [-addfields] [-unsetFid]\n"
+        "               [-addfields] [-unsetFid] [-emptyStrAsNull]\n"
         "               [-relaxedFieldNameMatch] [-forceNullable] [-unsetDefault]\n"
         "               [-fieldTypeToString All|(type1[,type2]*)] [-unsetFieldWidth]\n"
         "               [-mapFieldType srctype|All=dsttype[,srctype2=dsttype2]*]\n"
         "               [-fieldmap identity | index1[,index2]*]\n"
         "               [-splitlistfields] [-maxsubfields val]\n"
+        "               [-resolveDomains]\n"
         "               [-explodecollections] [-zfield field_name]\n"
         "               [-gcp ungeoref_x ungeoref_y georef_x georef_y [elevation]]* [-order n | -tps]\n"
         "               [-nomd] [-mo \"META-TAG=VALUE\"]* [-noNativeData]\n");

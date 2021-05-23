@@ -55,7 +55,7 @@
 #include "ogr_featurestyle.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: mitab_feature.cpp d12545162b34c742dcb8893783660a9e57cb2f1b 2020-10-21 12:28:12 +0200 Krister Wicksell $")
+CPL_CVSID("$Id: mitab_feature.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
 
 /*=====================================================================
  *                      class TABFeature
@@ -403,11 +403,9 @@ int TABFeature::ReadRecordFromDATFile(TABDATFile *poDATFile)
             int nYear = 0;
             int nMonth = 0;
             int nDay = 0;
-            int status = 0;
-
-            if((status =
-                    poDATFile->ReadDateField(poDATFile->GetFieldWidth(iField),
-                                             &nYear, &nMonth, &nDay)) == 0)
+            const int status = poDATFile->ReadDateField(
+                poDATFile->GetFieldWidth(iField), &nYear, &nMonth, &nDay);
+            if( status == 0)
             {
                 SetField(iField, nYear, nMonth, nDay, 0, 0, 0, 0);
             }
@@ -1834,14 +1832,14 @@ void TABCustomPoint::SetSymbolFromStyle(OGRStyleSymbol* poSymbolStyle)
     {
         const int nSymbolStyle = atoi(pszSymbolId+19);
         SetCustomSymbolStyle(static_cast<GByte>(nSymbolStyle));
-        
+
         const char* pszPtr = pszSymbolId+19;
-        while (*pszPtr != '-') 
+        while (*pszPtr != '-')
         {
             pszPtr++;
         }
         pszPtr++;
-        
+
         char szSymbolName[256] = "";
         int  i;
         for(i=0; i < 255 && *pszPtr != '\0' && *pszPtr != ',' && *pszPtr != '"'; i++, pszPtr++)
@@ -1985,7 +1983,7 @@ OGRLineString *TABPolyline::GetPartRef(int nPartIndex)
         if (nPartIndex >= 0 &&
             nPartIndex < poMultiLine->getNumGeometries())
         {
-            return poMultiLine->getGeometryRef(nPartIndex)->toLineString();
+            return poMultiLine->getGeometryRef(nPartIndex);
         }
         else
             return nullptr;
@@ -2183,7 +2181,7 @@ int TABPolyline::ReadGeometryFromMAPFile(TABMAPFile *poMapFile,
 
         GInt32 nCoordBlockPtr = poPLineHdr->m_nCoordBlockPtr;
         const GUInt32 nCoordDataSize = poPLineHdr->m_nCoordDataSize;
-        if( nCoordDataSize > 1024 * 1024 && 
+        if( nCoordDataSize > 1024 * 1024 &&
             nCoordDataSize > poMapFile->GetFileSize() )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
@@ -2306,7 +2304,7 @@ int TABPolyline::ReadGeometryFromMAPFile(TABMAPFile *poMapFile,
         }
         const GUInt32 nMinimumBytesForSections =
                                 nMinSizeOfSection * numLineSections;
-        if( nMinimumBytesForSections > 1024 * 1024 && 
+        if( nMinimumBytesForSections > 1024 * 1024 &&
             nMinimumBytesForSections > poMapFile->GetFileSize() )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
@@ -2343,7 +2341,7 @@ int TABPolyline::ReadGeometryFromMAPFile(TABMAPFile *poMapFile,
 
         const GUInt32 nMinimumBytesForPoints =
                         (bComprCoord ? 4 : 8) * numPointsTotal;
-        if( nMinimumBytesForPoints > 1024 * 1024 && 
+        if( nMinimumBytesForPoints > 1024 * 1024 &&
             nMinimumBytesForPoints > poMapFile->GetFileSize() )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
@@ -2891,7 +2889,7 @@ int TABPolyline::GetCenter( double &dX, double &dY )
         {
             OGRMultiLineString *poMultiLine = poGeom->toMultiLineString();
             if (poMultiLine->getNumGeometries() > 0)
-                poLine = poMultiLine->getGeometryRef(0)->toLineString();
+                poLine = poMultiLine->getGeometryRef(0);
         }
 
         if (poLine && poLine->getNumPoints() > 0)
@@ -3153,7 +3151,7 @@ int TABRegion::ReadGeometryFromMAPFile(TABMAPFile *poMapFile,
         }
         const GUInt32 nMinimumBytesForSections =
                                 nMinSizeOfSection * numLineSections;
-        if( nMinimumBytesForSections > 1024 * 1024 && 
+        if( nMinimumBytesForSections > 1024 * 1024 &&
             nMinimumBytesForSections > poMapFile->GetFileSize() )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
@@ -3188,7 +3186,7 @@ int TABRegion::ReadGeometryFromMAPFile(TABMAPFile *poMapFile,
 
         const GUInt32 nMinimumBytesForPoints =
                         (bComprCoord ? 4 : 8) * numPointsTotal;
-        if( nMinimumBytesForPoints > 1024 * 1024 && 
+        if( nMinimumBytesForPoints > 1024 * 1024 &&
             nMinimumBytesForPoints > poMapFile->GetFileSize() )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
@@ -3698,7 +3696,7 @@ OGRLinearRing *TABRegion::GetRingRef(int nRequestedRingIndex)
         {
             OGRPolygon *poPolygon = nullptr;
             if (poMultiPolygon)
-                poPolygon = poMultiPolygon->getGeometryRef(iPoly)->toPolygon();
+                poPolygon = poMultiPolygon->getGeometryRef(iPoly);
             else
                 poPolygon = poGeom->toPolygon();
 
@@ -3758,7 +3756,7 @@ GBool TABRegion::IsInteriorRing(int nRequestedRingIndex)
         {
             OGRPolygon* poPolygon = nullptr;
             if (poMultiPolygon)
-                poPolygon = poMultiPolygon->getGeometryRef(iPoly)->toPolygon();
+                poPolygon = poMultiPolygon->getGeometryRef(iPoly);
             else
                 poPolygon = poGeom->toPolygon();
 
@@ -3893,7 +3891,7 @@ int TABRegion::GetCenter( double &dX, double &dY )
         {
             OGRMultiPolygon *poMultiPolygon = poGeom->toMultiPolygon();
             if (poMultiPolygon->getNumGeometries() > 0)
-                poPolygon = poMultiPolygon->getGeometryRef(0)->toPolygon();
+                poPolygon = poMultiPolygon->getGeometryRef(0);
         }
         else if (wkbFlatten(poGeom->getGeometryType()) == wkbPolygon)
         {
@@ -6546,10 +6544,10 @@ int TABMultiPoint::ReadGeometryFromMAPFile(TABMAPFile *poMapFile,
          * Copy data from poObjHdr
          *------------------------------------------------------------*/
         TABMAPObjMultiPoint *poMPointHdr = cpl::down_cast<TABMAPObjMultiPoint *>(poObjHdr);
- 
+
         const GUInt32 nMinimumBytesForPoints =
                         (bComprCoord ? 4 : 8) * poMPointHdr->m_nNumPoints;
-        if( nMinimumBytesForPoints > 1024 * 1024 && 
+        if( nMinimumBytesForPoints > 1024 * 1024 &&
             nMinimumBytesForPoints > poMapFile->GetFileSize() )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
@@ -8412,17 +8410,20 @@ const char *ITABFeaturePen::GetPenStyleString() const
         break;
     }
 
+    // note - MapInfo renders all lines using a round pen cap and round pen join
+    // which are not the default values for OGR pen cap/join styles. So we need to explicitly
+    // include the cap/j parameters in these strings
     if (strlen(szPattern) != 0)
     {
       if(m_sPenDef.nPointWidth > 0)
         pszStyle =CPLSPrintf("PEN(w:%dpt,c:#%6.6x,id:\"mapinfo-pen-%d,"
-                             "ogr-pen-%d\",p:\"%spx\")",
+                             "ogr-pen-%d\",p:\"%spx\",cap:r,j:r)",
                              static_cast<int>(GetPenWidthPoint()),
                              m_sPenDef.rgbColor,GetPenPattern(),nOGRStyle,
                              szPattern);
       else
         pszStyle =CPLSPrintf("PEN(w:%dpx,c:#%6.6x,id:\"mapinfo-pen-%d,"
-                             "ogr-pen-%d\",p:\"%spx\")",
+                             "ogr-pen-%d\",p:\"%spx\",cap:r,j:r)",
                              GetPenWidthPixel(),
                              m_sPenDef.rgbColor,GetPenPattern(),nOGRStyle,
                              szPattern);
@@ -8431,12 +8432,12 @@ const char *ITABFeaturePen::GetPenStyleString() const
     {
       if(m_sPenDef.nPointWidth > 0)
         pszStyle =CPLSPrintf("PEN(w:%dpt,c:#%6.6x,id:\""
-                             "mapinfo-pen-%d,ogr-pen-%d\")",
+                             "mapinfo-pen-%d,ogr-pen-%d\",cap:r,j:r)",
                              static_cast<int>(GetPenWidthPoint()),
                              m_sPenDef.rgbColor,GetPenPattern(),nOGRStyle);
       else
         pszStyle =CPLSPrintf("PEN(w:%dpx,c:#%6.6x,id:\""
-                             "mapinfo-pen-%d,ogr-pen-%d\")",
+                             "mapinfo-pen-%d,ogr-pen-%d\",cap:r,j:r)",
                              GetPenWidthPixel(),
                              m_sPenDef.rgbColor,GetPenPattern(),nOGRStyle);
     }
@@ -9158,7 +9159,7 @@ TABFeatureClass ITABFeatureSymbol::GetSymbolFeatureClass(const char *pszStyleStr
             poStylePart = nullptr;
         }
     }
-    
+
     TABFeatureClass result = TABFCPoint;
 
     // If the no Symbol found, do nothing.

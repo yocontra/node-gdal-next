@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PNM Driver
- * Purpose:  Portable anymap file format imlementation
+ * Purpose:  Portable anymap file format implementation
  * Author:   Frank Warmerdam, warmerdam@pobox.com
  *
  ******************************************************************************
@@ -32,7 +32,7 @@
 #include "rawdataset.h"
 #include <cctype>
 
-CPL_CVSID("$Id: pnmdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: pnmdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */

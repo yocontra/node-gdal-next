@@ -29,7 +29,7 @@
 #include "ogrgeopackageutility.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrgeopackageutility.cpp 90746662201ee68e467b9d85421ddfe3e169ca08 2018-04-08 22:45:56 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeopackageutility.cpp d3e6dd3f97d6cab122f5d8a42fe05267326af746 2021-04-03 04:38:18 +0200 Even Rouault $")
 
 /* Requirement 20: A GeoPackage SHALL store feature table geometries */
 /* with the basic simple feature geometry types (Geometry, Point, */
@@ -110,6 +110,11 @@ OGRFieldType GPkgFieldToOGR(const char *pszGpkgType, OGRFieldSubType& eSubType,
     else if ( EQUAL("DOUBLE", pszGpkgType) )
         return OFTReal;
     else if ( EQUAL("REAL", pszGpkgType) )
+        return OFTReal;
+
+    // Only used normally in gpkg_data_column_constraints table, and we
+    // need this only is reading it through ExecuteSQL()
+    else if ( EQUAL("NUMERIC", pszGpkgType) )
         return OFTReal;
 
     /* String/binary types */

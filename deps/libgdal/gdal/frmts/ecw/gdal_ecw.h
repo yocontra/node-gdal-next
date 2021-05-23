@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_ecw.h 3cf5a95617ba9ec82fcfaea3f8ef27a97de2f73c 2021-03-22 15:02:53 +0100 Even Rouault $
+ * $Id: gdal_ecw.h 0d8c4003fd3291dd14fad164eef25599b684a0ae 2021-03-22 15:02:53 +0100 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  ECW (ERDAS Wavelet Compression Format) Driver Definitions

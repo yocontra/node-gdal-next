@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_spatialref.h ef356bb0205870e819cb422bace9b5f8c39ae2cb 2020-10-07 19:56:50 +0200 Even Rouault $
+ * $Id: ogr_spatialref.h 56ffce3410a916e1f0c3e583141c7bef9d7b4bbe 2021-04-10 20:16:53 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes for manipulating spatial reference systems in a
@@ -148,9 +148,9 @@ class CPL_DLL OGR_SRSNode
  *
  * See <a href="https://gdal.org/tutorials/osr_api_tut.html">the tutorial
  * </a> for more information on how to use this class.
- * 
+ *
  * Consult also the <a href="https://gdal.org/tutorials/wktproblems.html">
- * OGC WKT Coordinate System Issues</a> page for implementation details of 
+ * OGC WKT Coordinate System Issues</a> page for implementation details of
  * WKT in OGR.
  */
 
@@ -161,6 +161,7 @@ class CPL_DLL OGRSpatialReference
 
     void        GetNormInfo() const;
 
+    // No longer used with PROJ >= 8.1.0
     OGRErr      importFromURNPart(const char* pszAuthority,
                                   const char* pszCode,
                                   const char* pszURN);
@@ -792,6 +793,28 @@ public:
                            double *z, double *t,
                            int *pabSuccess ) = 0;
 
+    /**
+     * Transform points from source to destination space.
+     *
+     * This method is the same as the C function OCTTransform4DWithErrorCodes().
+     *
+     * @param nCount number of points to transform.
+     * @param x array of nCount X vertices, modified in place. Should not be NULL.
+     * @param y array of nCount Y vertices, modified in place. Should not be NULL.
+     * @param z array of nCount Z vertices, modified in place. Might be NULL.
+     * @param t array of nCount time values, modified in place. Might be NULL.
+     * @param panErrorCodes Output array of nCount value that will be set to 0 for
+     *                      success, or a non-zero value for failure. Refer to
+     *                      PROJ 8 public error codes. Might be NULL
+     * @return TRUE if some or all points transform successfully, or FALSE if
+     * if none transform.
+     * @since GDAL 3.3, and PROJ 8 to be able to use PROJ public error codes
+     */
+    virtual int TransformWithErrorCodes( int nCount,
+                                         double *x, double *y,
+                                         double *z, double *t,
+                                         int *panErrorCodes );
+
     /** Convert a OGRCoordinateTransformation* to a OGRCoordinateTransformationH.
      * @since GDAL 2.3
      */
@@ -808,6 +831,17 @@ public:
      * @since GDAL 3.1
      */
     virtual OGRCoordinateTransformation* Clone() const = 0;
+
+    /** Return a coordinate transformation that performs the inverse transformation
+     * of the current one.
+     *
+     * In some cases, this is not possible, and this method might return nullptr,
+     * or fail to perform the transformations.
+     *
+     * @return the new coordinate transformation, or nullptr in case of error.
+     * @since GDAL 3.3
+     */
+    virtual OGRCoordinateTransformation* GetInverse() const = 0;
 };
 
 OGRCoordinateTransformation CPL_DLL *
@@ -817,7 +851,7 @@ OGRCreateCoordinateTransformation( const OGRSpatialReference *poSource,
 
 /**
  * Context for coordinate transformation.
- * 
+ *
  * @since GDAL 3.0
  */
 
@@ -840,6 +874,8 @@ public:
                            double dfSouthLatitudeDeg,
                            double dfEastLongitudeDeg,
                            double dfNorthLatitudeDeg);
+    bool SetDesiredAccuracy(double dfAccuracy);
+    bool SetBallparkAllowed(bool bAllowBallpark);
 
     bool SetCoordinateOperation(const char* pszCT, bool bReverseCT);
 /*! @cond Doxygen_Suppress */

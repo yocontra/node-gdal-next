@@ -34,7 +34,7 @@
 #include "gdal_alg_priv.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: vrtdriver.cpp f447a31822e26ddf0cabcee0ce673a028550a2a0 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: vrtdriver.cpp d83599e9d76b3a12acd9d519fa8bd21c7f9be44b 2020-11-13 17:05:11 +0100 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -311,6 +311,21 @@ VRTCreateCopy( const char * pszFilename,
     if( papszMD )
         poVRTDS->SetMetadata( papszMD, "GEOLOCATION" );
 
+    {
+        const char* pszInterleave = poSrcDS->GetMetadataItem("INTERLEAVE", "IMAGE_STRUCTURE");
+        if (pszInterleave)
+        {
+            poVRTDS->SetMetadataItem("INTERLEAVE", pszInterleave, "IMAGE_STRUCTURE");
+        }
+    }
+    {
+        const char* pszCompression = poSrcDS->GetMetadataItem("COMPRESSION", "IMAGE_STRUCTURE");
+        if( pszCompression )
+        {
+            poVRTDS->SetMetadataItem("COMPRESSION", pszCompression, "IMAGE_STRUCTURE");
+        }
+    }
+
 /* -------------------------------------------------------------------- */
 /*      GCPs                                                            */
 /* -------------------------------------------------------------------- */
@@ -331,7 +346,12 @@ VRTCreateCopy( const char * pszFilename,
 /* -------------------------------------------------------------------- */
 /*      Create the band with the appropriate band type.                 */
 /* -------------------------------------------------------------------- */
-        poVRTDS->AddBand( poSrcBand->GetRasterDataType(), nullptr );
+        CPLStringList aosAddBandOptions;
+        int nSrcBlockXSize, nSrcBlockYSize;
+        poSrcBand->GetBlockSize(&nSrcBlockXSize, &nSrcBlockYSize);
+        aosAddBandOptions.SetNameValue("BLOCKXSIZE", CPLSPrintf("%d", nSrcBlockXSize));
+        aosAddBandOptions.SetNameValue("BLOCKYSIZE", CPLSPrintf("%d", nSrcBlockYSize));
+        poVRTDS->AddBand( poSrcBand->GetRasterDataType(), aosAddBandOptions );
 
         VRTSourcedRasterBand *poVRTBand
             = static_cast<VRTSourcedRasterBand *>(
@@ -346,6 +366,12 @@ VRTCreateCopy( const char * pszFilename,
 /*      Emit various band level metadata.                               */
 /* -------------------------------------------------------------------- */
         poVRTBand->CopyCommonInfoFrom( poSrcBand );
+
+        const char* pszCompression = poSrcBand->GetMetadataItem("COMPRESSION", "IMAGE_STRUCTURE");
+        if( pszCompression )
+        {
+            poVRTBand->SetMetadataItem("COMPRESSION", pszCompression, "IMAGE_STRUCTURE");
+        }
 
 /* -------------------------------------------------------------------- */
 /*      Add specific mask band.                                         */

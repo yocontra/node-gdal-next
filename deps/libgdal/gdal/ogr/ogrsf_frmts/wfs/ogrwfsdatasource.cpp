@@ -38,7 +38,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrwfsdatasource.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrwfsdatasource.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 constexpr int DEFAULT_BASE_START_INDEX = 0;
 constexpr int DEFAULT_PAGE_SIZE = 100;
@@ -971,49 +971,49 @@ int OGRWFSDataSource::Open( const char * pszFilename, int bUpdateIn,
 /* -------------------------------------------------------------------- */
 /*      Capture other parameters.                                       */
 /* -------------------------------------------------------------------- */
-        const char *pszParm = CPLGetXMLValue( psRoot, "Timeout", nullptr );
-        if( pszParm )
+        const char *pszParam = CPLGetXMLValue( psRoot, "Timeout", nullptr );
+        if( pszParam )
             papszHttpOptions =
                 CSLSetNameValue(papszHttpOptions,
-                                "TIMEOUT", pszParm );
+                                "TIMEOUT", pszParam );
 
-        pszParm = CPLGetXMLValue( psRoot, "HTTPAUTH", nullptr );
-        if( pszParm )
+        pszParam = CPLGetXMLValue( psRoot, "HTTPAUTH", nullptr );
+        if( pszParam )
             papszHttpOptions =
                 CSLSetNameValue( papszHttpOptions,
-                                "HTTPAUTH", pszParm );
+                                "HTTPAUTH", pszParam );
 
-        pszParm = CPLGetXMLValue( psRoot, "USERPWD", nullptr );
-        if( pszParm )
+        pszParam = CPLGetXMLValue( psRoot, "USERPWD", nullptr );
+        if( pszParam )
             papszHttpOptions =
                 CSLSetNameValue( papszHttpOptions,
-                                "USERPWD", pszParm );
+                                "USERPWD", pszParam );
 
-        pszParm = CPLGetXMLValue( psRoot, "COOKIE", nullptr );
-        if( pszParm )
+        pszParam = CPLGetXMLValue( psRoot, "COOKIE", nullptr );
+        if( pszParam )
             papszHttpOptions =
                 CSLSetNameValue( papszHttpOptions,
-                                "COOKIE", pszParm );
+                                "COOKIE", pszParam );
 
-        pszParm = CPLGetXMLValue( psRoot, "Version", nullptr );
-        if( pszParm )
-            osVersion = pszParm;
+        pszParam = CPLGetXMLValue( psRoot, "Version", nullptr );
+        if( pszParam )
+            osVersion = pszParam;
 
-        pszParm = CPLGetXMLValue( psRoot, "PagingAllowed", nullptr );
-        if( pszParm )
-            bPagingAllowed = CPLTestBool(pszParm);
+        pszParam = CPLGetXMLValue( psRoot, "PagingAllowed", nullptr );
+        if( pszParam )
+            bPagingAllowed = CPLTestBool(pszParam);
 
-        pszParm = CPLGetXMLValue( psRoot, "PageSize", nullptr );
-        if( pszParm )
+        pszParam = CPLGetXMLValue( psRoot, "PageSize", nullptr );
+        if( pszParam )
         {
-            nPageSize = atoi(pszParm);
+            nPageSize = atoi(pszParam);
             if (nPageSize <= 0)
                 nPageSize = DEFAULT_PAGE_SIZE;
         }
 
-        pszParm = CPLGetXMLValue( psRoot, "BaseStartIndex", nullptr );
-        if( pszParm )
-            nBaseStartIndex = atoi(pszParm);
+        pszParam = CPLGetXMLValue( psRoot, "BaseStartIndex", nullptr );
+        if( pszParam )
+            nBaseStartIndex = atoi(pszParam);
 
         CPLString strOriginalTypeName = CPLURLGetValue(pszBaseURL, "TYPENAME");
         if( strOriginalTypeName.empty() )

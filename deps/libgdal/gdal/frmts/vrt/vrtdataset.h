@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vrtdataset.h 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $
+ * $Id: vrtdataset.h 8c8864a6008b3f523a8e96017e87482904fa665b 2020-12-18 18:51:04 +0100 Even Rouault $
  *
  * Project:  Virtual GDAL Datasets
  * Purpose:  Declaration of virtual gdal dataset classes.
@@ -596,6 +596,10 @@ class CPL_DLL VRTSourcedRasterBand CPL_NON_FINAL: public VRTRasterBand
                    VRTSourcedRasterBand( GDALDataset *poDS, int nBand,
                                          GDALDataType eType,
                                          int nXSize, int nYSize );
+                   VRTSourcedRasterBand( GDALDataset *poDS, int nBand,
+                                         GDALDataType eType,
+                                         int nXSize, int nYSize,
+                                         int nBlockXSizeIn, int nBlockYSizeIn );
     virtual        ~VRTSourcedRasterBand();
 
     virtual CPLErr IRasterIO( GDALRWFlag, int, int, int, int,
@@ -905,8 +909,8 @@ protected:
     double              m_dfDstXSize;
     double              m_dfDstYSize;
 
-    int                 m_bNoDataSet;
-    double              m_dfNoDataValue;
+    int                 m_bNoDataSet;       // should really be a member of VRTComplexSource as only taken into account by it
+    double              m_dfNoDataValue;    // same as above
     CPLString           m_osResampling{};
 
     int                 m_nMaxValue;
@@ -933,7 +937,7 @@ public:
     void           SetSrcMaskBand( GDALRasterBand * );
     void           SetSrcWindow( double, double, double, double );
     void           SetDstWindow( double, double, double, double );
-    void           SetNoDataValue( double dfNoDataValue );
+    void           SetNoDataValue( double dfNoDataValue );  // should really be a member of VRTComplexSource
     const CPLString& GetResampling() const { return m_osResampling; }
     void           SetResampling( const char* pszResampling );
 
@@ -1066,6 +1070,8 @@ protected:
 
     int            m_nColorTableComponent;
 
+    bool           m_bUseMaskBand = false;
+
     template <class WorkingDT>
     CPLErr          RasterIOInternal( int nReqXOff, int nReqYOff,
                                       int nReqXSize, int nReqYSize,
@@ -1111,6 +1117,8 @@ public:
     virtual const char* GetType() override { return "ComplexSource"; }
 
     double  LookupValue( double dfInput );
+
+    void    SetUseMaskBand(bool bUseMaskBand) { m_bUseMaskBand = bUseMaskBand; }
 
     void    SetLinearScaling( double dfOffset, double dfScale );
     void    SetPowerScaling( double dfExponent,
@@ -1580,22 +1588,24 @@ public:
     bool SetUnit(const std::string& osUnit) override {
         m_osUnit = osUnit; return true; }
 
-    double GetOffset(bool* pbHasOffset) const override
+    double GetOffset(bool* pbHasOffset, GDALDataType* peStorageType) const override
     {
         if( pbHasOffset) *pbHasOffset = m_bHasOffset;
+        if( peStorageType ) *peStorageType = GDT_Unknown;
         return m_dfOffset;
     }
 
-    double GetScale(bool* pbHasScale) const override
+    double GetScale(bool* pbHasScale, GDALDataType* peStorageType) const override
     {
         if( pbHasScale) *pbHasScale = m_bHasScale;
+        if( peStorageType ) *peStorageType = GDT_Unknown;
         return m_dfScale;
     }
 
-    bool SetOffset(double dfOffset) override
+    bool SetOffset(double dfOffset, GDALDataType /* eStorageType */ = GDT_Unknown) override
     { SetDirty(); m_bHasOffset = true; m_dfOffset = dfOffset; return true; }
 
-    bool SetScale(double dfScale) override
+    bool SetScale(double dfScale, GDALDataType /* eStorageType */ = GDT_Unknown) override
     { SetDirty(); m_bHasScale = true; m_dfScale = dfScale; return true; }
 
     void AddSource(std::unique_ptr<VRTMDArraySource>&& poSource);

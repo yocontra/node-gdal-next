@@ -36,7 +36,7 @@
 
 #include "cpl_safemaths.hpp"
 
-CPL_CVSID("$Id: rmfdataset.cpp bbf1cce4f18f433b927254d86af39efd178952da 2021-03-26 21:46:09 +0100 Even Rouault $")
+CPL_CVSID("$Id: rmfdataset.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 constexpr int RMF_DEFAULT_BLOCKXSIZE = 256;
 constexpr int RMF_DEFAULT_BLOCKYSIZE = 256;
@@ -1093,13 +1093,13 @@ int RMFDataset::Identify( GDALOpenInfo *poOpenInfo )
 
 GDALDataset *RMFDataset::Open( GDALOpenInfo * poOpenInfo )
 {
-    GDALDataset* poDS = Open( poOpenInfo, nullptr, 0 );
+    auto poDS = Open( poOpenInfo, nullptr, 0 );
     if( poDS == nullptr )
     {
         return nullptr;
     }
 
-    RMFDataset* poCurrentLayer = dynamic_cast<RMFDataset*>( poDS );
+    RMFDataset* poCurrentLayer = poDS;
     RMFDataset* poParent = poCurrentLayer;
     const int   nMaxPossibleOvCount = 64;
 
@@ -1114,11 +1114,11 @@ GDALDataset *RMFDataset::Open( GDALOpenInfo * poOpenInfo )
     return poDS;
 }
 
-GDALDataset *RMFDataset::Open(GDALOpenInfo * poOpenInfo,
+RMFDataset *RMFDataset::Open(GDALOpenInfo * poOpenInfo,
                               RMFDataset* poParentDS,
                               vsi_l_offset nNextHeaderOffset )
 {
-    if( !Identify(poOpenInfo) || 
+    if( !Identify(poOpenInfo) ||
         (poParentDS == nullptr && poOpenInfo->fpL == nullptr) )
         return nullptr;
 
@@ -1744,7 +1744,7 @@ do {                                                                    \
             CSLFetchNameValueDef(poOpenInfo->papszOpenOptions,
                                 "RMF_SET_VERTCS",
                                  CPLGetConfigOption("RMF_SET_VERTCS", "NO"));
-        if(CPLTestBool(pszSetVertCS) && res == OGRERR_NONE && 
+        if(CPLTestBool(pszSetVertCS) && res == OGRERR_NONE &&
            poDS->sExtHeader.nVertDatum > 0)
         {
             oSRS.importVertCSFromPanorama(poDS->sExtHeader.nVertDatum);
@@ -1816,15 +1816,15 @@ do {                                                                    \
 /************************************************************************/
 GDALDataset *RMFDataset::Create( const char * pszFilename,
                                  int nXSize, int nYSize, int nBands,
-                                 GDALDataType eType, char **papszParmList )
+                                 GDALDataType eType, char **papszParamList )
 {
     return Create( pszFilename, nXSize, nYSize, nBands,
-                   eType, papszParmList, nullptr, 1.0 );
+                   eType, papszParamList, nullptr, 1.0 );
 }
 
 GDALDataset *RMFDataset::Create( const char * pszFilename,
                                  int nXSize, int nYSize, int nBands,
-                                 GDALDataType eType, char **papszParmList,
+                                 GDALDataType eType, char **papszParamList,
                                  RMFDataset* poParentDS, double dfOvFactor )
 
 {
@@ -1891,13 +1891,13 @@ GDALDataset *RMFDataset::Create( const char * pszFilename,
         dfResolution = RMF_DEFAULT_RESOLUTION;
         dfPixelSize = 1;
 
-        if( CPLFetchBool( papszParmList, "MTW", false) )
+        if( CPLFetchBool( papszParamList, "MTW", false) )
             poDS->eRMFType = RMFT_MTW;
         else
             poDS->eRMFType = RMFT_RSW;
 
         GUInt32 iVersion = RMF_VERSION;
-        const char *pszRMFHUGE = CSLFetchNameValue(papszParmList, "RMFHUGE");
+        const char *pszRMFHUGE = CSLFetchNameValue(papszParamList, "RMFHUGE");
 
         if( pszRMFHUGE == nullptr )
             pszRMFHUGE = "NO";// Keep old behavior by default
@@ -1927,13 +1927,13 @@ GDALDataset *RMFDataset::Create( const char * pszFilename,
             }
         }
 
-        const char *pszValue = CSLFetchNameValue(papszParmList,"BLOCKXSIZE");
+        const char *pszValue = CSLFetchNameValue(papszParamList,"BLOCKXSIZE");
         if( pszValue != nullptr )
             nBlockXSize = atoi( pszValue );
         if( static_cast<int>(nBlockXSize) <= 0 )
             nBlockXSize = RMF_DEFAULT_BLOCKXSIZE;
 
-        pszValue = CSLFetchNameValue(papszParmList,"BLOCKYSIZE");
+        pszValue = CSLFetchNameValue(papszParamList,"BLOCKYSIZE");
         if( pszValue != nullptr )
             nBlockYSize = atoi( pszValue );
         if( static_cast<int>(nBlockYSize) <= 0 )
@@ -2091,9 +2091,9 @@ GDALDataset *RMFDataset::Create( const char * pszFilename,
         poDS->sHeader.adfElevMinMax[1] = 0.0;
         poDS->sHeader.dfNoData = 0.0;
         poDS->sHeader.iCompression = GetCompressionType(
-                                        CSLFetchNameValue(papszParmList,
+                                        CSLFetchNameValue(papszParamList,
                                                           "COMPRESS"));
-        if(CE_None != poDS->InitCompressorData(papszParmList))
+        if(CE_None != poDS->InitCompressorData(papszParamList))
         {
             delete poDS;
             return nullptr;
@@ -2101,7 +2101,7 @@ GDALDataset *RMFDataset::Create( const char * pszFilename,
 
         if(poDS->sHeader.iCompression == RMF_COMPRESSION_JPEG)
         {
-            const char* pszJpegQuality = CSLFetchNameValue(papszParmList,
+            const char* pszJpegQuality = CSLFetchNameValue(papszParamList,
                                                            "JPEG_QUALITY");
             if(pszJpegQuality == nullptr)
             {
@@ -2674,9 +2674,9 @@ void RMFDataset::WriteTileJobFunc(void* pData)
     }
 }
 
-CPLErr RMFDataset::InitCompressorData(char **papszParmList)
+CPLErr RMFDataset::InitCompressorData(char **papszParamList)
 {
-    const char* pszNumThreads = CSLFetchNameValue(papszParmList, "NUM_THREADS");
+    const char* pszNumThreads = CSLFetchNameValue(papszParamList, "NUM_THREADS");
     if(pszNumThreads == nullptr)
         pszNumThreads = CPLGetConfigOption("GDAL_NUM_THREADS", nullptr);
 
@@ -2691,6 +2691,10 @@ CPLErr RMFDataset::InitCompressorData(char **papszParmList)
     if(nThreads < 0)
     {
         nThreads = 0;
+    }
+    if( nThreads > 1024 )
+    {
+        nThreads = 1024;
     }
 
     poCompressData = std::make_shared<RMFCompressData>();
@@ -2903,7 +2907,7 @@ CPLErr RMFDataset::WriteRawTile(int nBlockXOff, int nBlockYOff,
 
 CPLErr RMFDataset::ReadTile(int nBlockXOff, int nBlockYOff,
                             GByte* pabyData, size_t nRawBytes,
-                            GUInt32 nRawXSize, GUInt32 nRawYSize, 
+                            GUInt32 nRawXSize, GUInt32 nRawYSize,
                             bool& bNullTile)
 {
     bNullTile = false;

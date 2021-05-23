@@ -38,7 +38,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gsbgdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: gsbgdataset.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -71,7 +71,7 @@ class GSBGDataset final: public GDALPamDataset
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
                                 GDALDataType eType,
-                                char **papszParmList );
+                                char **papszParamList );
     static GDALDataset *CreateCopy( const char *pszFilename,
                                     GDALDataset *poSrcDS,
                                     int bStrict, char **papszOptions,
@@ -307,8 +307,7 @@ CPLErr GSBGRasterBand::IWriteBlock( int nBlockXOff, int nBlockYOff,
     if( nBlockYOff < 0 || nBlockYOff > nRasterYSize - 1 || nBlockXOff != 0 )
         return CE_Failure;
 
-    GSBGDataset *poGDS = dynamic_cast<GSBGDataset *>(poDS);
-    assert( poGDS != nullptr );
+    GSBGDataset *poGDS = cpl::down_cast<GSBGDataset *>(poDS);
 
     if( pafRowMinZ == nullptr || pafRowMaxZ == nullptr
         || nMinZRow < 0 || nMaxZRow < 0 )
@@ -658,18 +657,7 @@ CPLErr GSBGDataset::GetGeoTransform( double *padfGeoTransform )
     if( padfGeoTransform == nullptr )
         return CE_Failure;
 
-    GSBGRasterBand *poGRB = dynamic_cast<GSBGRasterBand *>(GetRasterBand( 1 ));
-
-    if( poGRB == nullptr )
-    {
-        padfGeoTransform[0] = 0;
-        padfGeoTransform[1] = 1;
-        padfGeoTransform[2] = 0;
-        padfGeoTransform[3] = 0;
-        padfGeoTransform[4] = 0;
-        padfGeoTransform[5] = 1;
-        return CE_Failure;
-    }
+    GSBGRasterBand *poGRB = cpl::down_cast<GSBGRasterBand *>(GetRasterBand( 1 ));
 
     /* check if we have a PAM GeoTransform stored */
     CPLPushErrorHandler( CPLQuietErrorHandler );
@@ -710,9 +698,9 @@ CPLErr GSBGDataset::SetGeoTransform( double *padfGeoTransform )
         return CE_Failure;
     }
 
-    GSBGRasterBand *poGRB = dynamic_cast<GSBGRasterBand *>(GetRasterBand( 1 ));
+    GSBGRasterBand *poGRB = cpl::down_cast<GSBGRasterBand *>(GetRasterBand( 1 ));
 
-    if( poGRB == nullptr || padfGeoTransform == nullptr)
+    if( padfGeoTransform == nullptr)
         return CE_Failure;
 
     /* non-zero transform 2 or 4 or negative 1 or 5 not supported natively */
@@ -854,7 +842,7 @@ GDALDataset *GSBGDataset::Create( const char * pszFilename,
                                   int nYSize,
                                   CPL_UNUSED int nBands,
                                   GDALDataType eType,
-                                  CPL_UNUSED char **papszParmList )
+                                  CPL_UNUSED char **papszParamList )
 {
     if( nXSize <= 0 || nYSize <= 0 )
     {

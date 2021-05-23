@@ -34,7 +34,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: bmpdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: bmpdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 // Enable if you want to see lots of BMP debugging output.
 // #define BMP_DEBUG
@@ -251,7 +251,7 @@ class BMPDataset final: public GDALPamDataset
     static GDALDataset *Open( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
-                                GDALDataType eType, char ** papszParmList );
+                                GDALDataType eType, char ** papszParamList );
 
     CPLErr GetGeoTransform( double * padfTransform ) override;
     CPLErr SetGeoTransform( double * ) override;

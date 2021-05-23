@@ -41,7 +41,7 @@
 #include "cpl_json_streaming_parser.h"
 #include <ogr_api.h>
 
-CPL_CVSID("$Id: ogrgeojsonreader.cpp a67b029b31dc3f1bb9c0a6ec90a47fa82c39e104 2020-06-27 13:32:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonreader.cpp 044a11ee4d018f526644c342c3f483ddd1e6d688 2020-12-15 20:56:11 +0100 Even Rouault $")
 
 static
 OGRGeometry* OGRGeoJSONReadGeometry( json_object* poObj,
@@ -2705,23 +2705,14 @@ lh_entry* OGRGeoJSONFindMemberEntryByName( json_object* poObj,
     if( nullptr == pszName || nullptr == poObj)
         return nullptr;
 
-    json_object* poTmp = poObj;
-
-    json_object_iter it;
-    it.key = nullptr;
-    it.val = nullptr;
-    it.entry = nullptr;
-    if( nullptr != json_object_get_object(poTmp) &&
-        nullptr != json_object_get_object(poTmp)->head )
+    if( nullptr != json_object_get_object(poObj) )
     {
-        it.entry = json_object_get_object(poTmp)->head;
-        while( it.entry != nullptr )
+        lh_entry* entry = json_object_get_object(poObj)->head;
+        while( entry != nullptr )
         {
-            it.key = (char*)it.entry->k;
-            it.val = (json_object*)it.entry->v;
-            if( EQUAL( it.key, pszName ) )
-                return it.entry;
-            it.entry = it.entry->next;
+            if( EQUAL( static_cast<const char*>(entry->k), pszName ) )
+                return entry;
+            entry = entry->next;
         }
     }
 

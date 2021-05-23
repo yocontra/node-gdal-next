@@ -45,7 +45,7 @@
 #include <stdio.h>
 #endif
 
-CPL_CVSID("$Id: msgdataset.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: msgdataset.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
 
 const double MSGDataset::rCentralWvl[12] = {0.635, 0.810, 1.640, 3.900, 6.250, 7.350, 8.701, 9.660, 10.800, 12.000, 13.400, 0.750};
 const double MSGDataset::rVc[12] = {-1, -1, -1, 2569.094, 1598.566, 1362.142, 1149.083, 1034.345, 930.659, 839.661, 752.381, -1};
@@ -426,7 +426,6 @@ MSGRasterBand::MSGRasterBand( MSGDataset *poDSIn, int nBandIn )
     }
     else // also first band is missing .. do something for fail-safety
     {
-      eDataType = GDT_Byte; // default .. always works
       if (poDSIn->command.cDataConversion == 'N')
         eDataType = GDT_UInt16; // normal case: MSG 10 bits data
       else if (poDSIn->command.cDataConversion == 'B')

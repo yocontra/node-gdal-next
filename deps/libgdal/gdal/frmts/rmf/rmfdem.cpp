@@ -31,7 +31,7 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id: rmfdem.cpp bbf1cce4f18f433b927254d86af39efd178952da 2021-03-26 21:46:09 +0100 Even Rouault $")
+CPL_CVSID("$Id: rmfdem.cpp a4c5f347548234b2307046a4a97aff83db0a4493 2021-03-26 21:46:09 +0100 Even Rouault $")
 
 /*
  * The encoded data stream is a series of records.

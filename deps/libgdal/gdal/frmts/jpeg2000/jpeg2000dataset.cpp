@@ -44,7 +44,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: jpeg2000dataset.cpp 9ef8e16e27c5fc4c491debe50bf2b7f3e94ed334 2020-10-05 12:11:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpeg2000dataset.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 // XXX: Part of code below extracted from the JasPer internal headers and
 // must be in sync with JasPer version (this one works with JasPer 1.900.1)
@@ -624,6 +624,9 @@ GDALDataset *JPEG2000Dataset::Open( GDALOpenInfo * poOpenInfo )
         return nullptr;
     }
 
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("JPEG2000", "You should consider using another driver, in particular the JP2OpenJPEG driver that is a better free and open source alternative. ") )
+        return nullptr;
+
 /* -------------------------------------------------------------------- */
 /*      Confirm the requested access is supported.                      */
 /* -------------------------------------------------------------------- */
@@ -848,6 +851,9 @@ JPEG2000CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
                     GDALProgressFunc pfnProgress, void * pProgressData )
 
 {
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("JPEG2000", "You should consider using another driver, in particular the JP2OpenJPEG driver that is a better free and open source alternative. ") )
+        return nullptr;
+
     int  nBands = poSrcDS->GetRasterCount();
     int  nXSize = poSrcDS->GetRasterXSize();
     int  nYSize = poSrcDS->GetRasterYSize();

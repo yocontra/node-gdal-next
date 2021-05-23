@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gmlreaderp.h a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $
+ * $Id: gmlreaderp.h 2b939583852d95f8724a939c927361cf40e81500 2020-10-22 11:42:59 +0200 Even Rouault $
  *
  * Project:  GML Reader
  * Purpose:  Private Declarations for OGR free GML Reader code.

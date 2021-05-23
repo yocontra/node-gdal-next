@@ -69,7 +69,7 @@ CPL_C_END
 #include "ogr_spatialref.h"
 #include "memdataset.h"
 
-CPL_CVSID("$Id: gribdataset.cpp 583930fafd35914fac204ff5ca801e135cb0f3c0 2020-10-25 19:22:12 +0100 Even Rouault $")
+CPL_CVSID("$Id: gribdataset.cpp cba2f929b5aa5164bac8dc3d03c0a05f40973581 2020-10-25 19:22:12 +0100 Even Rouault $")
 
 static CPLMutex *hGRIBMutex = nullptr;
 

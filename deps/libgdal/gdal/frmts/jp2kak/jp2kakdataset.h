@@ -27,7 +27,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// $Id: jp2kakdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+// $Id: jp2kakdataset.h 395d2d5b0be66d950e2700b4f56a1645694c7226 2021-03-08 22:24:31 +0100 Even Rouault $
 
 #ifdef DEBUG_BOOL
 #define DO_NOT_USE_DEBUG_BOOL
@@ -71,21 +71,21 @@ class JP2KAKDataset final: public GDALJP2AbstractDataset
     friend class JP2KAKRasterBand;
 
     kdu_codestream oCodeStream;
-    kdu_compressed_source *poInput;
-    kdu_compressed_source *poRawInput;
-    jp2_family_src  *family;
-    kdu_client      *jpip_client;
+    kdu_compressed_source *poInput = nullptr;
+    kdu_compressed_source *poRawInput = nullptr;
+    jp2_family_src  *family = nullptr;
+    kdu_client      *jpip_client = nullptr;
     kdu_dims dims;
-    int            nResCount;
-    bool           bPreferNPReads;
-    kdu_thread_env *poThreadEnv;
+    int            nResCount = 0;
+    bool           bPreferNPReads = false;
+    kdu_thread_env *poThreadEnv = nullptr;
 
-    bool           bCached;
-    bool           bResilient;
-    bool           bFussy;
-    bool           bUseYCC;
+    bool           bCached = false;
+    bool           bResilient = false;
+    bool           bFussy = false;
+    bool           bUseYCC = false;
 
-    bool           bPromoteTo8Bit;
+    bool           bPromoteTo8Bit = false;
 
     bool        TestUseBlockIO( int, int, int, int, int, int,
                                 GDALDataType, int, int * );

@@ -51,7 +51,7 @@
 #include "parsexsd.h"
 #include "../mem/ogr_mem.h"
 
-CPL_CVSID("$Id: ogrgmldatasource.cpp a3aad911aa32cb3fe61804ba96ca44eedbdd9071 2020-10-22 11:42:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmldatasource.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                   ReplaceSpaceByPct20IfNeeded()                      */
@@ -861,7 +861,7 @@ bool OGRGMLDataSource::Open( GDALOpenInfo *poOpenInfo )
         }
     }
 
-    // Can we find an xsd which might conform to tbe GML3 Level 0
+    // Can we find an xsd which might conform to the GML3 Level 0
     // profile?  We really ought to look for it based on the rules
     // schemaLocation in the GML feature collection but for now we
     // just hopes it is in the same director with the same name.

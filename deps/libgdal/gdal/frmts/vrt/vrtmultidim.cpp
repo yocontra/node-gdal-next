@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vrtmultidim.cpp 5e31601cb001d310bd54ea50f8c7c94a9d3225bd 2020-11-05 10:24:43 +0100 Even Rouault $
+ * $Id: vrtmultidim.cpp 83e59184469ced8aa92602cfad377c2e09a88ed2 2021-03-15 00:39:54 +0100 Even Rouault $
  *
  * Name:     vrtmultidim.cpp
  * Purpose:  Implementation of VRTDriver
@@ -981,7 +981,7 @@ std::shared_ptr<VRTMDArray> VRTMDArray::Create(const std::shared_ptr<VRTGroup>& 
     }
 
     auto array(std::make_shared<VRTMDArray>(poThisGroup->GetRef(),
-                                            osParentName, pszName, 
+                                            osParentName, pszName,
                                             dt,
                                             std::move(dims),
                                             std::move(oMapAttributes)));
@@ -1129,17 +1129,19 @@ std::unique_ptr<VRTMDArraySourceInlinedValues> VRTMDArraySourceInlinedValues::Cr
     const bool bIsConstantValue = strcmp(psNode->pszValue, "ConstantValue") == 0;
     const auto& dt(array->GetDataType());
     const size_t nDTSize = dt.GetSize();
+    if( nDTSize == 0 )
+        return nullptr;
     if( strcmp(psNode->pszValue, "InlineValuesWithValueElement") == 0 )
     {
-        if( (dt.GetClass() != GEDTC_NUMERIC &&
-             dt.GetClass() != GEDTC_STRING) || nDTSize == 0 )
+        if( dt.GetClass() != GEDTC_NUMERIC &&
+            dt.GetClass() != GEDTC_STRING )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
                     "Only numeric or string data type handled for InlineValuesWithValueElement");
             return nullptr;
         }
     }
-    else if( dt.GetClass() != GEDTC_NUMERIC || nDTSize == 0 )
+    else if( dt.GetClass() != GEDTC_NUMERIC )
     {
         CPLError(CE_Failure, CPLE_AppDefined,
                  "Only numeric data type handled for InlineValues");
@@ -2007,7 +2009,7 @@ bool VRTMDArraySourceFromArray::Read(const GUInt64* arrayStartIdx,
         }
         anReqCount[i] = 1 + static_cast<size_t>(
             (std::min(nRightDstOffsetFromConfig - 1,
-                                  start_i + (count[i] - 1) * step_i) 
+                                  start_i + (count[i] - 1) * step_i)
                                             - anReqDstStart[i]) / step_i);
         if( arrayStep[i] < 0 )
         {

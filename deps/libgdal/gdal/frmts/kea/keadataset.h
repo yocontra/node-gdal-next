@@ -1,5 +1,5 @@
 /*
- * $Id: keadataset.h 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $
+ * $Id: keadataset.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *  keadataset.h
  *
  *  Created by Pete Bunting on 01/08/2012.
@@ -43,7 +43,7 @@ class KEADataset final: public GDALPamDataset
     static H5::H5File *CreateLL( const char * pszFilename,
                                   int nXSize, int nYSize, int nBands,
                                   GDALDataType eType,
-                                  char ** papszParmList  );
+                                  char ** papszParamList  );
 
 public:
     // constructor/destructor
@@ -57,9 +57,9 @@ public:
     static GDALDataset *Create( const char * pszFilename,
                                   int nXSize, int nYSize, int nBands,
                                   GDALDataType eType,
-                                  char **  papszParmList );
+                                  char **  papszParamList );
     static GDALDataset *CreateCopy( const char * pszFilename, GDALDataset *pSrcDs,
-                                int bStrict, char **  papszParmList,
+                                int bStrict, char **  papszParamList,
                                 GDALProgressFunc pfnProgress, void *pProgressData );
 
     // virtual methods for dealing with transform and projection

@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.3.0] Unreleased
+## [3.3.0] Work in progress
+
+### Added
+  - GDAL 3.3.0
+  - Carto, FlatGeobuf, WMS and WMTS drivers
 
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library
  - Drop support for Ubuntu 16.04
  - Drop support for Node.js 10.x and 15.x
+ - Drop support for Python 2
+ - Drop support for the drivers removed in GDAL 3.3: AeronavFAA, BNA, E00Grid, HTF, OpenAir, SEGUKOOA, SEGY, SUA and XPlane
 
 ## [3.2.0] 2021-05-21
 

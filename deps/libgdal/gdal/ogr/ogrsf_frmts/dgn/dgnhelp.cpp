@@ -28,7 +28,7 @@
 
 #include "dgnlibp.h"
 
-CPL_CVSID("$Id: dgnhelp.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: dgnhelp.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 static const unsigned char abyDefaultPCT[256][3] =
 {
@@ -435,7 +435,7 @@ void DGNRad50ToAscii(unsigned short sRad50, char *str )
         /* Map 0..39 to ASCII */
         if (sValue==0)
             ch = ' ';          /* space */
-        else if (sValue >= 1 && sValue <= 26)
+        else if (/*sValue >= 1 &&*/ sValue <= 26)
             ch = (char) (sValue-1+'A');/* printable alpha A..Z */
         else if (sValue == 27)
             ch = '$';          /* dollar */
@@ -443,7 +443,7 @@ void DGNRad50ToAscii(unsigned short sRad50, char *str )
             ch = '.';          /* period */
         else if (sValue == 29)
             ch = ' ';          /* unused char, emit a space instead */
-        else if (sValue >= 30 && sValue <= 39)
+        else if (/*sValue >= 30 &&*/ sValue <= 39)
             ch = (char) (sValue-30+'0');   /* digit 0..9 */
         *str = ch;
         str++;
@@ -1018,6 +1018,7 @@ void DGNDumpElement( DGNHandle hDGN, DGNElemCore *psElement, FILE *fp )
             int nEntityNum = 0;
             int nMSLink = 0;
             int nLinkSize = 0;
+            // coverity[tained_data]
             unsigned char *pabyData =
                 DGNGetLinkage( hDGN, psElement, iLink, &nLinkType,
                                &nEntityNum, &nMSLink, &nLinkSize );

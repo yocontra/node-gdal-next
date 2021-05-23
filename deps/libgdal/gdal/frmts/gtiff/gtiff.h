@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gtiff.h 7e9a593460d00a8e3ad3dd06bec239be55c85f20 2020-10-05 11:18:58 +0200 Thomas Bonfort $
+ * $Id: gtiff.h db9c615f39e4da0623e12f467ff74d7946f17e24 2021-04-21 13:16:57 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  GDAL GeoTIFF support.
@@ -33,6 +33,7 @@
 
 #include "cpl_port.h"
 #include "cpl_string.h"
+#include <cstdint>
 
 #include "gdal.h"
 #include "tiffio.h"
@@ -49,6 +50,7 @@ void    GTIFFSetWebPLevel( GDALDatasetH hGTIFFDS, int nWebPLevel );
 void    GTIFFSetJpegTablesMode( GDALDatasetH hGTIFFDS, int nJpegTablesMode );
 int     GTIFFGetCompressionMethod( const char* pszValue,
                                    const char* pszVariableName );
+bool    GTIFFSupportsPredictor(int nCompression);
 
 void GTiffDatasetWriteRPCTag( TIFF *hTIFF, char **papszRPCMD );
 char** GTiffDatasetReadRPCTag( TIFF *hTIFF );
@@ -62,9 +64,9 @@ CPLString GTiffFormatGDALNoDataTagValue( double dfNoData );
 const int knGTIFFJpegTablesModeDefault = 1; /* JPEGTABLESMODE_QUANT */
 
 // Note: Was EXTRASAMPLE_ASSOCALPHA in GDAL < 1.10.
-constexpr uint16 DEFAULT_ALPHA_TYPE = EXTRASAMPLE_UNASSALPHA;
+constexpr uint16_t DEFAULT_ALPHA_TYPE = EXTRASAMPLE_UNASSALPHA;
 
-uint16 GTiffGetAlphaValue(const char* pszValue, uint16 nDefault);
+uint16_t GTiffGetAlphaValue(const char* pszValue, uint16_t nDefault);
 
 CPLString CPL_DLL GTiffGetCompressValues(bool& bHasLZW,
                                  bool& bHasDEFLATE,
@@ -72,6 +74,7 @@ CPLString CPL_DLL GTiffGetCompressValues(bool& bHasLZW,
                                  bool& bHasZSTD,
                                  bool& bHasJPEG,
                                  bool& bHasWebP,
+                                 bool& bHasLERC,
                                  bool bForCOG);
 
 #if !defined(TIFFTAG_GDAL_METADATA)
@@ -108,9 +111,24 @@ CPLString CPL_DLL GTiffGetCompressValues(bool& bHasLZW,
 #if !defined(TIFFTAG_ZSTD_LEVEL)
 #define TIFFTAG_ZSTD_LEVEL      65564    /* ZSTD compression level */
 #endif
- 
+
 #if !defined(COMPRESSION_LERC)
 #define     COMPRESSION_LERC        34887   /* LERC */
+#endif
+
+#ifndef TIFFTAG_LERC_VERSION
+#define TIFFTAG_LERC_PARAMETERS         50674   /* Stores LERC version and additional compression method */
+#endif
+
+#ifndef TIFFTAG_LERC_VERSION
+/* Pseudo tags */
+#define TIFFTAG_LERC_VERSION            65565 /* LERC version */
+#define     LERC_VERSION_2_4            4
+#define TIFFTAG_LERC_ADD_COMPRESSION    65566 /* LERC additional compression */
+#define     LERC_ADD_COMPRESSION_NONE    0
+#define     LERC_ADD_COMPRESSION_DEFLATE 1
+#define     LERC_ADD_COMPRESSION_ZSTD    2
+#define TIFFTAG_LERC_MAXZERROR      65567    /* LERC maximum error */
 #endif
 
 #if !defined(COMPRESSION_WEBP)

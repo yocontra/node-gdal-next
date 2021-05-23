@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sqlite.h c91c85854631084021f9a75fe6797fea2ac071c4 2020-09-21 15:20:58 +0200 Alessandro Pasotti $
+ * $Id: ogr_sqlite.h be7fac6445d8606b05cb151ded7460fe18d60830 2021-04-04 21:42:47 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/SQLite driver.
@@ -262,6 +262,7 @@ class OGRSQLiteLayer CPL_NON_FINAL: public OGRLayer, public IOGRSQLiteGetSpatial
     int                 bIsVirtualShape;
 
     void                BuildFeatureDefn( const char *pszLayerName,
+                                          bool bIsSelect,
                                           sqlite3_stmt *hStmt,
                                           const std::set<CPLString>* paosGeomCols,
                                           const std::set<CPLString>& aosIgnoredCols);
@@ -769,8 +770,6 @@ class OGRSQLiteDataSource final : public OGRSQLiteBaseDataSource
     int                 nKnownSRID;
     int                *panSRID;
     OGRSpatialReference **papoSRS;
-
-    char              **papszOpenOptions;
 
     void                AddSRIDToCache(int nId, OGRSpatialReference * poSRS );
 

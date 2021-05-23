@@ -1,5 +1,5 @@
 /*****************************************************************************
-* $Id: IntergraphBand.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+* $Id: IntergraphBand.h 827267a53e141f284b6be9f8cf6ccba59221eb96 2021-03-07 12:59:39 +0100 Even Rouault $
 *
 * Project:  Intergraph Raster Format support
 * Purpose:  Read selected types of Intergraph Raster Format
@@ -40,10 +40,10 @@ class IntergraphRasterBand CPL_NON_FINAL: public GDALPamRasterBand
 
 protected:
     GDALColorTable *poColorTable;
-    uint32          nDataOffset;
-    uint32          nBlockBufSize;
-    uint32          nBandStart;
-    uint8           nRGBIndex;
+    uint32_t          nDataOffset;
+    uint32_t          nBlockBufSize;
+    uint32_t          nBandStart;
+    uint8_t           nRGBIndex;
 
     INGR_Format     eFormat;
     bool            bTiled;
@@ -51,7 +51,7 @@ protected:
     int             nFullBlocksY;
 
     GByte          *pabyBlockBuf;
-    uint32          nTiles;
+    uint32_t          nTiles;
 
     INGR_TileItem  *pahTiles;
 
@@ -110,7 +110,7 @@ class IntergraphBitmapBand final: public IntergraphRasterBand
 
 private:
     GByte          *pabyBMPBlock;
-    uint32          nBMPSize;
+    uint32_t          nBMPSize;
     int             nQuality;
     int             nRGBBand;
 
@@ -135,9 +135,9 @@ class IntergraphRLEBand final: public IntergraphRasterBand
 
 private:
     GByte          *pabyRLEBlock;
-    uint32          nRLESize;
+    uint32_t          nRLESize;
     int             bRLEBlockLoaded;
-    uint32         *panRLELineOffset;
+    uint32_t         *panRLELineOffset;
 
 public:
     IntergraphRLEBand( IntergraphDataset *poDS,

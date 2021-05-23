@@ -36,7 +36,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: gdalwarp_bin.cpp 1c7b950fc8754f6ba1d027f031886063675d2927 2020-06-02 15:06:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarp_bin.cpp 9000eb0cdd0a06084ea41b1d4f7f885b64cc1cd2 2021-03-16 22:36:21 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                               GDALExit()                             */
@@ -84,7 +84,8 @@ static void Usage(const char* pszErrorMsg = nullptr)
         "    srcfile* dstfile\n"
         "\n"
         "Available resampling methods:\n"
-        "    near (default), bilinear, cubic, cubicspline, lanczos, average, mode,  max, min, med, Q1, Q3, sum.\n" );
+        "    near (default), bilinear, cubic, cubicspline, lanczos, average, rms,\n"
+        "    mode,  max, min, med, Q1, Q3, sum.\n" );
 
     if( pszErrorMsg != nullptr )
         fprintf(stderr, "\nFAILURE: %s\n", pszErrorMsg);
@@ -155,6 +156,7 @@ MAIN_START(argc, argv)
     int nSrcCount = 0;
 
     EarlySetConfigOptions(argc, argv);
+    CPLDebugOnly("GDAL", "Start");
 
 /* -------------------------------------------------------------------- */
 /*      Register standard GDAL drivers, and process generic GDAL        */

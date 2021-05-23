@@ -77,7 +77,7 @@ static double GetTimestamp()
     return tv.tv_sec + tv.tv_usec * 1e-6;
 }
 
-CPL_CVSID("$Id: ogrelasticlayer.cpp 8ec31974e64be960f78f3ac5f960fa37150ba37e 2021-02-04 17:23:54 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrelasticlayer.cpp e243cb96b4330dcbba3f089219968107aa9b1ef6 2021-02-04 17:23:54 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRElasticLayer()                          */

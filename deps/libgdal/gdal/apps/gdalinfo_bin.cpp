@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdalinfo_bin.cpp 1c7b950fc8754f6ba1d027f031886063675d2927 2020-06-02 15:06:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalinfo_bin.cpp d0052b5856982d5b0f42239ad15094f81c2b92d6 2020-12-18 19:11:05 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -43,7 +43,7 @@ CPL_CVSID("$Id: gdalinfo_bin.cpp 1c7b950fc8754f6ba1d027f031886063675d2927 2020-0
 static void Usage(const char* pszErrorMsg = nullptr)
 
 {
-    printf( "Usage: gdalinfo [--help-general] [-json] [-mm] [-stats] [-hist] [-nogcp] [-nomd]\n"
+    printf( "Usage: gdalinfo [--help-general] [-json] [-mm] [-stats | -approx_stats] [-hist] [-nogcp] [-nomd]\n"
             "                [-norat] [-noct] [-nofl] [-checksum] [-proj4]\n"
             "                [-listmdd] [-mdd domain|`all`] [-wkt_format WKT1|WKT2|...]*\n"
             "                [-sd subdataset] [-oo NAME=VALUE]* [-if format]* datasetname\n" );

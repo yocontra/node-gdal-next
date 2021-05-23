@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrpgdumpdatasource.cpp 75c37a9a5aba2c07737afe42b81988095e8dcbf2 2020-05-05 14:47:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdumpdatasource.cpp 379fc8667418dc54e864d828ea35be513e69abc9 2021-04-03 21:58:21 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRPGDumpDataSource()                           */
@@ -39,14 +39,7 @@ CPL_CVSID("$Id: ogrpgdumpdatasource.cpp 75c37a9a5aba2c07737afe42b81988095e8dcbf2
 
 OGRPGDumpDataSource::OGRPGDumpDataSource( const char* pszNameIn,
                                           char** papszOptions ) :
-    nLayers(0),
-    papoLayers(nullptr),
-    pszName(CPLStrdup(pszNameIn)),
-    bTriedOpen(false),
-    fp(nullptr),
-    bInTransaction(false),
-    poLayerInCopyMode(nullptr),
-    pszEOL("\n")
+    pszName(CPLStrdup(pszNameIn))
 {
     const char *pszCRLFFormat = CSLFetchNameValue( papszOptions, "LINEFORMAT");
 

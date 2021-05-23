@@ -38,7 +38,7 @@ this file is only about 3k of object code.  */
 
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: cpl_md5.cpp 0f654dda9faabf9d86a44293f0f89903a8e97dd7 2018-04-15 20:18:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_md5.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
 
 static GUInt32 getu32( const unsigned char *addr )
 {
@@ -73,14 +73,22 @@ void CPLMD5Init( struct CPLMD5Context *context )
 * Update context to reflect the concatenation of another buffer full
 * of bytes.
 */
-void CPLMD5Update( struct CPLMD5Context *context, unsigned char const *buf,
-                   unsigned len )
+void CPLMD5Update( struct CPLMD5Context *context, const void *buf,
+                   size_t len )
 {
+    const GByte* pabyBuf = static_cast<const GByte*>(buf);
+    while( len > 0xffffffffU )
+    {
+        CPLMD5Update(context, pabyBuf, 0xffffffffU);
+        pabyBuf += 0xffffffffU;
+        len -= 0xffffffffU;
+    }
+
     // Update bitcount
     GUInt32 t = context->bits[0];
     if ((context->bits[0] = (t + (static_cast<GUInt32>(len) << 3)) & 0xffffffff) < t)
         context->bits[1]++;  /* Carry from low to high */
-    context->bits[1] += len >> 29;
+    context->bits[1] += static_cast<GUInt32>(len >> 29);
 
     t = (t >> 3) & 0x3f;  /* Bytes already in shsInfo->data */
 
@@ -93,28 +101,28 @@ void CPLMD5Update( struct CPLMD5Context *context, unsigned char const *buf,
         t = 64 - t;
         if( len < t )
         {
-            memcpy(p, buf, len);
+            memcpy(p, pabyBuf, len);
             return;
         }
-        memcpy(p, buf, t);
+        memcpy(p, pabyBuf, t);
         CPLMD5Transform(context->buf, context->in);
-        buf += t;
-        len -= static_cast<unsigned>(t);
+        pabyBuf += t;
+        len -= t;
     }
 
     /* Process data in 64-byte chunks */
 
     while( len >= 64 )
     {
-        memcpy(context->in, buf, 64);
+        memcpy(context->in, pabyBuf, 64);
         CPLMD5Transform(context->buf, context->in);
-        buf += 64;
+        pabyBuf += 64;
         len -= 64;
     }
 
     /* Handle any remaining bytes of data. */
 
-    memcpy(context->in, buf, len);
+    memcpy(context->in, pabyBuf, len);
 }
 
 /*
@@ -274,8 +282,7 @@ const char *CPLMD5String( const char *pszText )
 {
     struct CPLMD5Context context;
     CPLMD5Init(&context);
-    CPLMD5Update(&context, reinterpret_cast<unsigned char const *>(pszText),
-                  static_cast<int>(strlen(pszText)));
+    CPLMD5Update(&context, pszText, strlen(pszText));
     unsigned char hash[16];
     CPLMD5Final(hash, &context);
 

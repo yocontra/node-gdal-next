@@ -58,7 +58,7 @@
 #include "cpl_vsi.h"
 #include "nitflib.h"
 
-CPL_CVSID("$Id: rpftocfile.cpp 15693b8410ffe25e7494bab924af08bea59519e8 2019-10-26 23:01:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: rpftocfile.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        RPFTOCTrim()                                    */
@@ -589,7 +589,7 @@ RPFToc* RPFTOCReadFromBuffer(const char* pszFilename, VSILFILE* fp, const char* 
             return nullptr;
         }
         frameEntry->directory[pathLength] = 0;
-        if (pathLength > 0 && frameEntry->directory[pathLength-1] == '/')
+        if (frameEntry->directory[pathLength-1] == '/')
             frameEntry->directory[pathLength-1] = 0;
 
         if (frameEntry->directory[0] == '.' && frameEntry->directory[1] == '/')

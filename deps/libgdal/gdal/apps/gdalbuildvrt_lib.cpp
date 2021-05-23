@@ -34,6 +34,7 @@
 #include "gdal_utils.h"
 #include "gdal_utils_priv.h"
 
+#include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -59,7 +60,7 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: gdalbuildvrt_lib.cpp 74c26e1c9176bd5d83cd024cfa427249ffab6304 2021-03-04 17:59:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalbuildvrt_lib.cpp fd1069c44fb0272714707b766cbb228d4b099f65 2021-03-07 19:08:43 +0100 Even Rouault $")
 
 #define GEOTRSFRM_TOPLEFT_X            0
 #define GEOTRSFRM_WE_RES               1
@@ -91,6 +92,7 @@ struct DatasetProperty
     std::vector<bool>   abHasOffset{};
     std::vector<double> adfOffset{};
     std::vector<bool>   abHasScale{};
+    std::vector<bool>   abHasMaskBand{};
     std::vector<double> adfScale{};
     int    bHasDatasetMask = 0;
     int    nMaskBlockXSize = 0;
@@ -242,6 +244,7 @@ class VRTBuilder
     char               *pszOutputSRS = nullptr;
     char               *pszResampling = nullptr;
     char              **papszOpenOptions = nullptr;
+    bool                bUseSrcMaskBand = true;
 
     /* Internal variables */
     char               *pszProjectionRef = nullptr;
@@ -280,6 +283,7 @@ class VRTBuilder
                            int bSeparate, int bAllowProjectionDifference,
                            int bAddAlpha, int bHideNoData, int nSubdataset,
                            const char* pszSrcNoData, const char* pszVRTNoData,
+                           bool bUseSrcMaskBand,
                            const char* pszOutputSRS,
                            const char* pszResampling,
                            const char* const* papszOpenOptionsIn );
@@ -305,6 +309,7 @@ VRTBuilder::VRTBuilder(const char* pszOutputFilenameIn,
                        int bSeparateIn, int bAllowProjectionDifferenceIn,
                        int bAddAlphaIn, int bHideNoDataIn, int nSubdatasetIn,
                        const char* pszSrcNoDataIn, const char* pszVRTNoDataIn,
+                       bool bUseSrcMaskBandIn,
                        const char* pszOutputSRSIn,
                        const char* pszResamplingIn,
                        const char* const * papszOpenOptionsIn )
@@ -361,6 +366,7 @@ VRTBuilder::VRTBuilder(const char* pszOutputFilenameIn,
     pszVRTNoData = (pszVRTNoDataIn) ? CPLStrdup(pszVRTNoDataIn) : nullptr;
     pszOutputSRS = (pszOutputSRSIn) ? CPLStrdup(pszOutputSRSIn) : nullptr;
     pszResampling = (pszResamplingIn) ? CPLStrdup(pszResamplingIn) : nullptr;
+    bUseSrcMaskBand = bUseSrcMaskBandIn;
 }
 
 /************************************************************************/
@@ -608,6 +614,8 @@ int VRTBuilder::AnalyseRaster( GDALDatasetH hDS, DatasetProperty* psDatasetPrope
     psDatasetProperties->adfScale.resize(_nBands);
     psDatasetProperties->abHasScale.resize(_nBands);
 
+    psDatasetProperties->abHasMaskBand.resize(_nBands);
+
     psDatasetProperties->bHasDatasetMask = poFirstBand->GetMaskFlags() == GMF_PER_DATASET;
     if (psDatasetProperties->bHasDatasetMask)
         bHasDatasetMask = TRUE;
@@ -670,6 +678,11 @@ int VRTBuilder::AnalyseRaster( GDALDatasetH hDS, DatasetProperty* psDatasetPrope
         psDatasetProperties->adfScale[j] = poBand->GetScale(&bHasScale);
         psDatasetProperties->abHasScale[j] = bHasScale != 0 &&
                             psDatasetProperties->adfScale[j] != 1.0;
+
+        const int nMaskFlags = poBand->GetMaskFlags();
+        psDatasetProperties->abHasMaskBand[j] =
+                    (nMaskFlags != GMF_ALL_VALID && nMaskFlags != GMF_NODATA) ||
+                    poBand->GetColorInterpretation() == GCI_AlphaBand;
     }
 
     if (bFirst)
@@ -1006,6 +1019,12 @@ void VRTBuilder::CreateVRTSeparate(VRTDatasetH hVRTDS)
                 poSimpleSource->SetNoDataValue( psDatasetProperties->adfNoDataValues[0] );
             }
         }
+        else if( bUseSrcMaskBand && psDatasetProperties->abHasMaskBand[0] )
+        {
+            auto poSource = new VRTComplexSource();
+            poSource->SetUseMaskBand(true);
+            poSimpleSource = poSource;
+        }
         else
             poSimpleSource = new VRTSimpleSource();
 
@@ -1175,6 +1194,12 @@ void VRTBuilder::CreateVRTNonSeparate(VRTDatasetH hVRTDS)
                 poSimpleSource = new VRTComplexSource();
                 poSimpleSource->SetNoDataValue( psDatasetProperties->adfNoDataValues[nSelBand] );
             }
+            else if( bUseSrcMaskBand && psDatasetProperties->abHasMaskBand[nSelBand] )
+            {
+                auto poSource = new VRTComplexSource();
+                poSource->SetUseMaskBand(true);
+                poSimpleSource = poSource;
+            }
             else
                 poSimpleSource = new VRTSimpleSource();
             if( pszResampling )
@@ -1206,10 +1231,21 @@ void VRTBuilder::CreateVRTNonSeparate(VRTDatasetH hVRTDS)
         }
         else if (bHasDatasetMask)
         {
-            VRTSimpleSource* poSimpleSource = new VRTSimpleSource();
+            VRTSimpleSource* poSource;
+            if( bUseSrcMaskBand )
+            {
+                auto poComplexSource = new VRTComplexSource();
+                poComplexSource->SetUseMaskBand(true);
+                poSource = poComplexSource;
+            }
+            else
+            {
+                poSource =  new VRTSimpleSource();
+            }
             if( pszResampling )
-                poSimpleSource->SetResampling(pszResampling);
-            poMaskVRTBand->ConfigureSource( poSimpleSource,
+                poSource->SetResampling(pszResampling);
+            assert( poMaskVRTBand );
+            poMaskVRTBand->ConfigureSource( poSource,
                                             static_cast<GDALRasterBand*>(GDALGetRasterBand(hSourceDS, 1)),
                                             TRUE,
                                             dfSrcXOff, dfSrcYOff,
@@ -1217,7 +1253,7 @@ void VRTBuilder::CreateVRTNonSeparate(VRTDatasetH hVRTDS)
                                             dfDstXOff, dfDstYOff,
                                             dfDstXSize, dfDstYSize );
 
-            poMaskVRTBand->AddSource( poSimpleSource );
+            poMaskVRTBand->AddSource( poSource );
         }
 
         if( bDropRef )
@@ -1585,6 +1621,7 @@ struct GDALBuildVRTOptions
     int nMaxBandNo;
     char* pszResampling;
     char** papszOpenOptions;
+    bool bUseSrcMaskBand;
 
     /*! allow or suppress progress monitor and other non-error output */
     int bQuiet;
@@ -1729,6 +1766,7 @@ GDALDatasetH GDALBuildVRT( const char *pszDest,
                         psOptions->bSeparate, psOptions->bAllowProjectionDifference,
                         psOptions->bAddAlpha, psOptions->bHideNoData, psOptions->nSubdataset,
                         psOptions->pszSrcNoData, psOptions->pszVRTNoData,
+                        psOptions->bUseSrcMaskBand,
                         psOptions->pszOutputSRS, psOptions->pszResampling,
                         psOptions->papszOpenOptions);
 
@@ -1797,6 +1835,7 @@ GDALBuildVRTOptions *GDALBuildVRTOptionsNew(char** papszArgv,
     psOptions->bQuiet = TRUE;
     psOptions->pfnProgress = GDALDummyProgress;
     psOptions->pProgressData = nullptr;
+    psOptions->bUseSrcMaskBand = true;
 
 /* -------------------------------------------------------------------- */
 /*      Parse arguments.                                                */
@@ -1972,6 +2011,10 @@ GDALBuildVRTOptions *GDALBuildVRTOptionsNew(char** papszArgv,
             psOptions->papszOpenOptions =
                     CSLAddString( psOptions->papszOpenOptions,
                                   papszArgv[++iArg] );
+        }
+        else if( EQUAL(papszArgv[iArg],"-ignore_srcmaskband") )
+        {
+            psOptions->bUseSrcMaskBand = false;
         }
         else if( papszArgv[iArg][0] == '-' )
         {

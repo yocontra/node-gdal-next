@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdfdataset.h fca5a7550aae6310aeed67b9c8174215c7284e88 2020-07-29 21:32:17 +0200 Even Rouault $
+ * $Id: netcdfdataset.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.
@@ -832,6 +832,7 @@ class netCDFDataset final: public GDALPamDataset
 #ifdef ENABLE_UFFD
     cpl_uffd_context *pCtx = nullptr;
 #endif
+    VSILFILE     *fpVSIMEM = nullptr;
     int           nSubDatasets;
     char          **papszSubDatasets;
     char          **papszMetadata;
@@ -926,8 +927,8 @@ class netCDFDataset final: public GDALPamDataset
 
     static double       rint( double );
 
-    double       FetchCopyParm( const char *pszGridMappingValue,
-                                const char *pszParm, double dfDefault,
+    double       FetchCopyParam( const char *pszGridMappingValue,
+                                const char *pszParam, double dfDefault,
                                 bool *pbFound=nullptr );
 
     char **      FetchStandardParallels( const char *pszGridMappingValue );
@@ -978,7 +979,7 @@ class netCDFDataset final: public GDALPamDataset
 
     CPLErr DetectAndFillSGLayers( int ncid );
     CPLErr LoadSGVarIntoLayer( int ncid, int nc_basevarId );
-    
+
 
 #ifdef NETCDF_HAS_NC4
     static GDALDataset *OpenMultiDim( GDALOpenInfo * );

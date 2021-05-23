@@ -50,7 +50,7 @@
 #include "sqlite3.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrsqliteselectlayer.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqliteselectlayer.cpp be7fac6445d8606b05cb151ded7460fe18d60830 2021-04-04 21:42:47 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                   OGRSQLiteSelectLayerCommonBehaviour()              */
@@ -89,7 +89,7 @@ OGRSQLiteSelectLayer::OGRSQLiteSelectLayer( OGRSQLiteDataSource *poDSIn,
     bAllowMultipleGeomFields = bAllowMultipleGeomFieldsIn;
 
     std::set<CPLString> aosEmpty;
-    BuildFeatureDefn( "SELECT", hStmtIn, nullptr, aosEmpty );
+    BuildFeatureDefn( "SELECT", true, hStmtIn, nullptr, aosEmpty );
     SetDescription( "SELECT" );
 
     if( bUseStatementForGetNextFeature )

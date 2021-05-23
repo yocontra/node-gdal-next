@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_subfile.cpp 67d829e09129fcc74229258b17c7c6fb674023b3 2020-12-14 02:22:23 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_subfile.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -93,7 +93,8 @@ class VSISubFileFilesystemHandler final: public VSIFilesystemHandler
 
     VSIVirtualHandle *Open( const char *pszFilename,
                             const char *pszAccess,
-                            bool bSetError ) override;
+                            bool bSetError,
+                            CSLConstList /* papszOptions */ ) override;
     int Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
               int nFlags ) override;
     int Unlink( const char *pszFilename ) override;
@@ -110,7 +111,7 @@ class VSISubFileFilesystemHandler final: public VSIFilesystemHandler
 
 VSISubFileHandle::~VSISubFileHandle()
 {
-    Close();
+    VSISubFileHandle::Close();
 }
 
 /************************************************************************/
@@ -334,7 +335,8 @@ VSISubFileFilesystemHandler::DecomposePath( const char *pszPath,
 VSIVirtualHandle *
 VSISubFileFilesystemHandler::Open( const char *pszFilename,
                                    const char *pszAccess,
-                                   bool /* bSetError */ )
+                                   bool /* bSetError */,
+                                   CSLConstList /* papszOptions */ )
 
 {
     if( !STARTS_WITH_CI(pszFilename, "/vsisubfile/") )

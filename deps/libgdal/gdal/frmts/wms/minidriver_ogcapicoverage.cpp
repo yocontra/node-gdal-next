@@ -28,7 +28,7 @@
 #include "wmsdriver.h"
 #include "minidriver_ogcapicoverage.h"
 
-CPL_CVSID("$Id: minidriver_ogcapicoverage.cpp 18df30822243cf782434ddb77b214a8b7dde74f8 2020-10-01 14:55:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: minidriver_ogcapicoverage.cpp dfd3042c13a9dc18cc6f5191521679e77383b1cf 2021-01-13 23:36:33 +0100 Even Rouault $")
 
 CPLErr WMSMiniDriver_OGCAPICoverage::Initialize(CPLXMLNode *config, CPL_UNUSED char **papszOpenOptions) {
     CPLErr ret = CE_None;
@@ -60,6 +60,10 @@ CPLErr WMSMiniDriver_OGCAPICoverage::TiledImageRequest(WMSHTTPRequest &request,
     URLSearchAndReplace(&url, "${miny}", "%.18g", iri.m_y1);
     URLSearchAndReplace(&url, "${maxx}", "%.18g", iri.m_x1);
     URLSearchAndReplace(&url, "${maxy}", "%.18g", iri.m_y0);
+    /*URLSearchAndReplace(&url, "${minx_centerpixel}", "%.18g", iri.m_x0 + 0.5 * (iri.m_x1 - iri.m_x0) / iri.m_sx);
+    URLSearchAndReplace(&url, "${miny_centerpixel}", "%.18g", iri.m_y1 - 0.5 * (iri.m_y1 - iri.m_y0) / iri.m_sy);
+    URLSearchAndReplace(&url, "${maxx_centerpixel}", "%.18g", iri.m_x1 - 0.5 * (iri.m_x1 - iri.m_x0) / iri.m_sx);
+    URLSearchAndReplace(&url, "${maxy_centerpixel}", "%.18g", iri.m_y0 + 0.5 * (iri.m_y1 - iri.m_y0) / iri.m_sy);*/
 
     return CE_None;
 }

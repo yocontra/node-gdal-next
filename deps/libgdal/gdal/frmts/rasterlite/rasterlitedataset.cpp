@@ -42,7 +42,7 @@
 #define ENABLE_SQL_SQLITE_FORMAT
 #endif
 
-CPL_CVSID("$Id: rasterlitedataset.cpp f447a31822e26ddf0cabcee0ce673a028550a2a0 2020-06-09 11:01:20 +0200 René Buffat $")
+CPL_CVSID("$Id: rasterlitedataset.cpp 05578039b5938dd4bf099cc17167195a98369c9d 2021-02-27 23:15:12 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        RasterliteOpenSQLiteDB()                      */
@@ -871,15 +871,12 @@ int RasterliteDataset::GetBlockParams(OGRLayerH hRasterLyr, int nLevelIn,
         STARTS_WITH_CI(reinterpret_cast<const char *>(pabyData),
                        "StartWaveletsImage$$"))
     {
-        if (GDALGetDriverByName("EPSILON") == nullptr)
-        {
             CPLError(CE_Failure, CPLE_NotSupported,
-                     "Rasterlite driver doesn't support WAVELET compressed "
-                     "images if EPSILON driver is not compiled");
+                     "Rasterlite driver no longer support WAVELET compressed "
+                     "images");
             OGR_F_Destroy(hFeat);
             OGR_DS_ReleaseResultSet(hDS, hSQLLyr);
             return FALSE;
-        }
     }
 
     CPLString osMemFileName;
@@ -1497,8 +1494,6 @@ void GDALRegister_Rasterlite()
 "       <Value>ICCLAB</Value>"
 "       <Value>ITULAB</Value>"
 "   </Option>"
-"   <Option name='TARGET' type='int' description='(EPSILON driver) target size reduction as a percentage of the original (0-100)' default='96'/>"
-"   <Option name='FILTER' type='string' description='(EPSILON driver) Filter ID' default='daub97lift'/>"
 "</CreationOptionList>" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
 

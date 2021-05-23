@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_priv.h f02356245e81e2f9d95069b6d126219d1d85736b 2020-10-13 23:40:17 +0200 Even Rouault $
+ * $Id: gdal_priv.h 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $
  *
  * Name:     gdal_priv.h
  * Project:  GDAL Core
@@ -375,6 +375,8 @@ class CPL_DLL GDALDataset : public GDALMajorObject
     bool        bIsInternal = true;
     bool        bSuppressOnClose = false;
 
+    mutable std::map<std::string, std::unique_ptr<OGRFieldDomain>> m_oMapFieldDomains{};
+
                 GDALDataset(void);
     explicit    GDALDataset(int bForceCachedIO);
 
@@ -670,6 +672,14 @@ class CPL_DLL GDALDataset : public GDALMajorObject
         OGRLayer* layer = nullptr;
     };
 
+//! @cond Doxygen_Suppress
+    // SetEnableOverviews() only to be used by GDALOverviewDataset
+    void SetEnableOverviews(bool bEnable);
+
+    // Only to be used by driver's GetOverviewCount() method.
+    bool AreOverviewsEnabled() const;
+//! @endcond
+
 private:
     class Private;
     Private *m_poPrivate;
@@ -783,6 +793,11 @@ private:
     Features            GetFeatures();
 
     virtual int         TestCapability( const char * );
+
+    virtual const OGRFieldDomain* GetFieldDomain(const std::string& name) const;
+
+    virtual bool        AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                       std::string& failureReason);
 
     virtual OGRLayer   *CreateLayer( const char *pszName,
                                      OGRSpatialReference *poSpatialRef = nullptr,
@@ -1801,33 +1816,33 @@ public:
     bool operator!= (const GDALExtendedDataType& other) const { return !(operator==(other)); }
 
     /** Return type name.
-     * 
+     *
      * This is the same as the C function GDALExtendedDataTypeGetName()
      */
     const std::string&        GetName() const { return m_osName; }
 
     /** Return type class.
-     * 
+     *
      * This is the same as the C function GDALExtendedDataTypeGetClass()
      */
     GDALExtendedDataTypeClass GetClass() const { return m_eClass; }
 
     /** Return numeric data type (only valid when GetClass() == GEDTC_NUMERIC)
-     * 
+     *
      * This is the same as the C function GDALExtendedDataTypeGetNumericDataType()
      */
     GDALDataType              GetNumericDataType() const { return m_eNumericDT;  }
 
     /** Return the components of the data type (only valid when GetClass() == GEDTC_COMPOUND)
-     * 
+     *
      * This is the same as the C function GDALExtendedDataTypeGetComponents()
      */
     const std::vector<std::unique_ptr<GDALEDTComponent>>& GetComponents() const { return m_aoComponents; }
 
     /** Return data type size in bytes.
-     * 
+     *
      * For a string, this will be size of a char* pointer.
-     * 
+     *
      * This is the same as the C function GDALExtendedDataTypeGetSize()
      */
     size_t                    GetSize() const { return m_nSize; }
@@ -1940,7 +1955,7 @@ public:
 /**
  * Class modeling a named container of GDALAttribute, GDALMDArray or other
  * GDALGroup. Hence GDALGroup can describe a hierarchy of objects.
- * 
+ *
  * This is based on the <a href="https://portal.opengeospatial.org/files/81716#_hdf5_group">HDF5 group concept</a>
  *
  * @since GDAL 3.1
@@ -2003,11 +2018,12 @@ public:
     virtual bool CopyFrom(const std::shared_ptr<GDALGroup>& poDstRootGroup,
                           GDALDataset* poSrcDS,
                           const std::shared_ptr<GDALGroup>& poSrcGroup,
-                            bool bStrict,
-                            GUInt64& nCurCost,
-                            const GUInt64 nTotalCost,
-                            GDALProgressFunc pfnProgress,
-                            void * pProgressData);
+                          bool bStrict,
+                          GUInt64& nCurCost,
+                          const GUInt64 nTotalCost,
+                          GDALProgressFunc pfnProgress,
+                          void * pProgressData,
+                          CSLConstList papszOptions = nullptr);
 
     virtual CSLConstList GetStructuralInfo() const;
 
@@ -2211,7 +2227,7 @@ public:
  * typically used to describe a metadata item. The value can be (for the
  * HDF5 format) in the general case a multidimensional array of "any" type
  * (in most cases, this will be a single value of string or numeric type)
- * 
+ *
  * This is based on the <a href="https://portal.opengeospatial.org/files/81716#_hdf5_attribute">HDF5 attribute concept</a>
  *
  * @since GDAL 3.1
@@ -2328,7 +2344,7 @@ public:
 /**
  * Class modeling a multi-dimensional array. It has a name, values organized
  * as an array and a list of GDALAttribute.
- * 
+ *
  * This is based on the <a href="https://portal.opengeospatial.org/files/81716#_hdf5_dataset">HDF5 dataset concept</a>
  *
  * @since GDAL 3.1
@@ -2399,13 +2415,13 @@ public:
 
     bool SetNoDataValue(double dfNoData);
 
-    virtual double GetOffset(bool* pbHasOffset = nullptr) const;
+    virtual double GetOffset(bool* pbHasOffset = nullptr, GDALDataType* peStorageType = nullptr) const;
 
-    virtual double GetScale(bool* pbHasScale = nullptr) const;
+    virtual double GetScale(bool* pbHasScale = nullptr, GDALDataType* peStorageType = nullptr) const;
 
-    virtual bool SetOffset(double dfOffset);
+    virtual bool SetOffset(double dfOffset, GDALDataType eStorageType = GDT_Unknown);
 
-    virtual bool SetScale(double dfScale);
+    virtual bool SetScale(double dfScale, GDALDataType eStorageType = GDT_Unknown);
 
     std::shared_ptr<GDALMDArray> GetView(const std::string& viewExpr) const;
 
@@ -2572,7 +2588,7 @@ public:
     const std::string& GetFullName() const { return m_osFullName; }
 
     /** Return the axis type.
-     * 
+     *
      * Predefined values are:
      * HORIZONTAL_X, HORIZONTAL_Y, VERTICAL, TEMPORAL, PARAMETRIC
      * Other values might be returned. Empty value means unknown.
@@ -2582,7 +2598,7 @@ public:
     const std::string& GetType() const { return m_osType; }
 
     /** Return the axis direction.
-     * 
+     *
      * Predefined values are:
      * EAST, WEST, SOUTH, NORTH, UP, DOWN, FUTURE, PAST
      * Other values might be returned. Empty value means unknown.
@@ -2799,6 +2815,8 @@ char** GDALDeserializeOpenOptionsFromXML( CPLXMLNode* psParentNode );
 int GDALCanFileAcceptSidecarFile(const char* pszFilename);
 
 bool GDALCanReliablyUseSiblingFileList(const char* pszFilename);
+
+bool CPL_DLL GDALIsDriverDeprecatedForGDAL35StillEnabled(const char* pszDriverName, const char* pszExtraMsg = "");
 
 //! @endcond
 

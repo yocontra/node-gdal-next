@@ -29,7 +29,7 @@
 #include "ogr_rec.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrrecdriver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: ogrrecdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -40,6 +40,11 @@ static GDALDataset *OGRRECDriverOpen( GDALOpenInfo* poOpenInfo )
 {
     if( poOpenInfo->fpL == nullptr ||
         !EQUAL(CPLGetExtension(poOpenInfo->pszFilename), "REC") )
+    {
+        return nullptr;
+    }
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("REC") )
     {
         return nullptr;
     }

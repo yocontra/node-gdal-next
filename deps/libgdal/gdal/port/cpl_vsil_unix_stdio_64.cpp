@@ -87,7 +87,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_error.h"
 
-CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
 
 #if defined(UNIX_STDIO_64)
 
@@ -156,7 +156,8 @@ public:
 
     VSIVirtualHandle *Open( const char *pszFilename,
                             const char *pszAccess,
-                            bool bSetError ) override;
+                            bool bSetError,
+                            CSLConstList /* papszOptions */ ) override;
     int Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
               int nFlags ) override;
     int Unlink( const char *pszFilename ) override;
@@ -612,7 +613,8 @@ VSIUnixStdioFilesystemHandler::~VSIUnixStdioFilesystemHandler()
 VSIVirtualHandle *
 VSIUnixStdioFilesystemHandler::Open( const char *pszFilename,
                                      const char *pszAccess,
-                                     bool bSetError )
+                                     bool bSetError,
+                                     CSLConstList /* papszOptions */ )
 
 {
     FILE *fp = VSI_FOPEN64( pszFilename, pszAccess );

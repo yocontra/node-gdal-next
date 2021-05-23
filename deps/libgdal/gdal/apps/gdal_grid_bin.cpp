@@ -31,7 +31,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdal_grid_bin.cpp 341cc25bc957b7f7a66c74e449511d87cda2a5b5 2020-08-13 21:49:16 +0200 Audifire $")
+CPL_CVSID("$Id: gdal_grid_bin.cpp c17f25180e5c2a58a0932695021766cdc93a5e3e 2021-03-15 00:58:12 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -164,9 +164,6 @@ MAIN_START(argc, argv)
     if( psOptionsForBinary->pszDest== nullptr )
         Usage("No output file specified.");
 
-    if( psOptionsForBinary->pszDest == nullptr )
-        psOptionsForBinary->pszDest = CPLStrdup(psOptionsForBinary->pszSource);
- 
 /* -------------------------------------------------------------------- */
 /*      Open input file.                                                */
 /* -------------------------------------------------------------------- */

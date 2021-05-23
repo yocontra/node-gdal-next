@@ -37,7 +37,7 @@
 #include <limits>
 
 // g++ -DDEBUG -g -Wall -fPIC -shared -o ogr_MongoDB.so -I/home/even/boost_1_53_0 -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/mongodb ogr/ogrsf_frmts/mongodb/*.c* -L. -lgdal -I/home/even/mongo-cxx-1.0.2-install/include -L/home/even/mongo-cxx-1.0.2-install/lib -lmongoclient -L/home/even/boost_1_53_0/stage/lib -lboost_system -lboost_thread -lboost_regex
-CPL_CVSID("$Id: ogrmongodbdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmongodbdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 #define MAX_DOCS_IN_BULK                1000
 
@@ -2768,6 +2768,9 @@ static GDALDataset* OGRMongoDBDriverOpen( GDALOpenInfo* poOpenInfo )
 
 {
     if( !OGRMongoDBDriverIdentify(poOpenInfo) )
+        return nullptr;
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("MONGODB", "You should consider using the MongoDBV3 driver instead.") )
         return nullptr;
 
     OGRMongoDBDataSource *m_poDS = new OGRMongoDBDataSource();

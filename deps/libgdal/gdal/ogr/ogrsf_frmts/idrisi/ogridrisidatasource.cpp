@@ -31,7 +31,7 @@
 #include "idrisi.h"
 #include "ogr_idrisi.h"
 
-CPL_CVSID("$Id: ogridrisidatasource.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogridrisidatasource.cpp ce778433e8ac725886855a39d2fe26f25aaf1fa4 2021-03-12 12:42:06 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRIdrisiDataSource()                         */
@@ -91,8 +91,6 @@ int OGRIdrisiDataSource::Open( const char * pszFilename )
     if (fpVCT == nullptr)
         return FALSE;
 
-    char* pszWTKString = nullptr;
-
 // --------------------------------------------------------------------
 //      Look for .vdc file
 // --------------------------------------------------------------------
@@ -118,6 +116,7 @@ int OGRIdrisiDataSource::Open( const char * pszFilename )
 
     OGRwkbGeometryType eType = wkbUnknown;
 
+    char* pszWTKString = nullptr;
     if (papszVDC != nullptr)
     {
         CSLSetNameValueSeparator( papszVDC, ":" );
@@ -145,6 +144,7 @@ int OGRIdrisiDataSource::Open( const char * pszFilename )
     {
         VSIFCloseL(fpVCT);
         CSLDestroy( papszVDC );
+        CPLFree(pszWTKString);
         return FALSE;
     }
 
@@ -160,6 +160,7 @@ int OGRIdrisiDataSource::Open( const char * pszFilename )
                   static_cast<int>(chType) );
         VSIFCloseL(fpVCT);
         CSLDestroy( papszVDC );
+        CPLFree(pszWTKString);
         return FALSE;
     }
 

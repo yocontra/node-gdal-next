@@ -30,7 +30,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: iscedataset.cpp 5c10fcc32da41b59ff86f7ed642236230a02497c 2020-07-19 18:23:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: iscedataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 static const char * const apszISCE2GDALDatatypes[] = {
     "BYTE:Byte",
@@ -317,7 +317,7 @@ void ISCEDataset::FlushCache( void )
                                  "createCoordinate" );
     CPLCreateXMLElementAndValue( psCoordinate1Node,
                                  "doc",
-                                 "First coordinate of a 2D image (witdh)." );
+                                 "First coordinate of a 2D image (width)." );
     /* Property name */
     psTmpNode = CPLCreateXMLNode( psCoordinate1Node,
                                   CXT_Element,

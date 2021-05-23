@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcrasterdataset.h fa839b55f793867fe0bfe7239f18216793be4f7f 2020-09-18 16:59:11 +0200 Even Rouault $
+ * $Id: pcrasterdataset.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster CSF 2.0 raster file driver declarations.
@@ -67,7 +67,7 @@ public:
                                         int nr_rows,
                                         int nrBands,
                                         GDALDataType gdalType,
-                                        char** papszParmList);
+                                        char** papszParamList);
 
   static GDALDataset* createCopy       (char const* filename,
                                         GDALDataset* source,

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_xlsx.h bddee02cadaed842e6760d814b5d7156da4394a0 2021-04-23 21:22:42 +0200 Even Rouault $
+ * $Id: ogr_xlsx.h 01a361c7662f881f73db6edcc8c739d79174049c 2021-04-23 21:22:42 +0200 Even Rouault $
  *
  * Project:  XLSX Translator
  * Purpose:  Definition of classes for OGR OpenOfficeSpreadsheet .xlsx driver.

@@ -36,7 +36,7 @@
 #include <map>
 #include <set>
 
-CPL_CVSID("$Id: gdalmdimtranslate_lib.cpp adf0cd29fb7e479c33474ed88072945ad8c8cc69 2020-09-12 20:10:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalmdimtranslate_lib.cpp 35484f86aa4de17ff9caf11c3e9442ca30e4963f 2021-03-15 14:52:04 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALMultiDimTranslateOptions                     */
@@ -1661,7 +1661,7 @@ GDALDatasetH GDALMultiDimTranslate( const char* pszDest,
     }
 
     CPLString osFormat(psOptions ? psOptions->osFormat : "");
-    if( pszDest == nullptr && hDstDS == nullptr )
+    if( pszDest == nullptr /* && hDstDS == nullptr */ )
     {
         CPLError(CE_Failure, CPLE_NotSupported,
                  "Both pszDest and hDstDS are NULL.");
@@ -1670,14 +1670,17 @@ GDALDatasetH GDALMultiDimTranslate( const char* pszDest,
         return nullptr;
     }
 
-    const bool bCloseOutDSOnError = hDstDS == nullptr;
+    GDALDriver* poDriver = nullptr;
+
 #ifdef this_is_dead_code_for_now
+    const bool bCloseOutDSOnError = hDstDS == nullptr;
     if( pszDest == nullptr )
         pszDest = GDALGetDescription(hDstDS);
 #endif
 
-    GDALDriver* poDriver = nullptr;
+#ifdef this_is_dead_code_for_now
     if( hDstDS == nullptr )
+#endif
     {
         if( osFormat.empty() )
         {
@@ -1720,7 +1723,9 @@ GDALDatasetH GDALMultiDimTranslate( const char* pszDest,
         auto poVRTDriver = GDALDriver::FromHandle(GDALGetDriverByName("VRT"));
         if( !poVRTDriver )
         {
+#ifdef this_is_dead_code_for_now
             if( bCloseOutDSOnError )
+#endif
             {
                 GDALClose(hDstDS);
                 hDstDS = nullptr;
@@ -1737,7 +1742,9 @@ GDALDatasetH GDALMultiDimTranslate( const char* pszDest,
 
         if( !TranslateInternal(poDstRootGroup, poSrcDS, psOptions) )
         {
+#ifdef this_is_dead_code_for_now
             if( bCloseOutDSOnError )
+#endif
             {
                 GDALClose(hDstDS);
                 hDstDS = nullptr;

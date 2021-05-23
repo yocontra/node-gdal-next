@@ -54,7 +54,7 @@
 #include "ogr_api.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gdalwarpoperation.cpp 6870b2268feb97e8fa059f9ab4d03d813c2ed80d 2020-10-28 00:35:10 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalwarpoperation.cpp e984e8fba5b45396cfe0e8872911a2d894ca7429 2020-12-04 20:15:54 +0100 GOACOLOU Manuel $")
 
 struct _GDALWarpChunk {
     int dx, dy, dsx, dsy;
@@ -263,6 +263,7 @@ int GDALWarpOperation::ValidateOptions()
         && psOptions->eResampleAlg != GRA_CubicSpline
         && psOptions->eResampleAlg != GRA_Lanczos
         && psOptions->eResampleAlg != GRA_Average
+        && psOptions->eResampleAlg != GRA_RMS
         && psOptions->eResampleAlg != GRA_Mode
         && psOptions->eResampleAlg != GRA_Max
         && psOptions->eResampleAlg != GRA_Min

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrtriangulatedsurface.cpp e7a90bdc58142dd21dfe6d7bf960e96b3f79de5d 2018-05-10 22:33:56 +0200 Even Rouault $
+ * $Id: ogrtriangulatedsurface.cpp 464e5bd63b59963407c8adc30fcbd5899731eddc 2021-03-16 15:06:30 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  The OGRTriangulatedSurface geometry class.
@@ -32,7 +32,7 @@
 #include "ogr_p.h"
 #include "ogr_api.h"
 
-CPL_CVSID("$Id: ogrtriangulatedsurface.cpp e7a90bdc58142dd21dfe6d7bf960e96b3f79de5d 2018-05-10 22:33:56 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrtriangulatedsurface.cpp 464e5bd63b59963407c8adc30fcbd5899731eddc 2021-03-16 15:06:30 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRTriangulatedSurface()                      */
@@ -100,6 +100,16 @@ OGRTriangulatedSurface& OGRTriangulatedSurface::operator=(
         }
     }
     return *this;
+}
+
+/************************************************************************/
+/*                               clone()                                */
+/************************************************************************/
+
+OGRTriangulatedSurface *OGRTriangulatedSurface::clone() const
+
+{
+    return new (std::nothrow) OGRTriangulatedSurface(*this);
 }
 
 /************************************************************************/

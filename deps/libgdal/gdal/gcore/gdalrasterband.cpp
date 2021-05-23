@@ -53,7 +53,7 @@
 #include "gdal_rat.h"
 #include "gdal_priv_templates.hpp"
 
-CPL_CVSID("$Id: gdalrasterband.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterband.cpp 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALRasterBand()                           */
@@ -323,7 +323,7 @@ CPLErr GDALRasterBand::RasterIO( GDALRWFlag eRWFlag,
     }
 
 /* -------------------------------------------------------------------- */
-/*      If pixel and line spaceing are defaulted assign reasonable      */
+/*      If pixel and line spacing are defaulted assign reasonable      */
 /*      value assuming a packed buffer.                                 */
 /* -------------------------------------------------------------------- */
     if( nPixelSpace == 0 )
@@ -2184,7 +2184,7 @@ int CPL_STDCALL GDALHasArbitraryOverviews( GDALRasterBandH hBand )
 int GDALRasterBand::GetOverviewCount()
 
 {
-    if( poDS != nullptr && poDS->oOvManager.IsInitialized() )
+    if( poDS != nullptr && poDS->oOvManager.IsInitialized() && poDS->AreOverviewsEnabled() )
         return poDS->oOvManager.GetOverviewCount( nBand );
 
     return 0;
@@ -2226,7 +2226,7 @@ int CPL_STDCALL GDALGetOverviewCount( GDALRasterBandH hBand )
 GDALRasterBand * GDALRasterBand::GetOverview( int i )
 
 {
-    if( poDS != nullptr && poDS->oOvManager.IsInitialized() )
+    if( poDS != nullptr && poDS->oOvManager.IsInitialized() && poDS->AreOverviewsEnabled() )
         return poDS->oOvManager.GetOverview( nBand, i );
 
     return nullptr;
@@ -2369,7 +2369,7 @@ GDALGetRasterSampleOverviewEx( GDALRasterBandH hBand, GUIntBig nDesiredSamples )
  * from a practical point of view.
  *
  * @param pszResampling one of "NEAREST", "GAUSS", "CUBIC", "AVERAGE", "MODE",
- * "AVERAGE_MAGPHASE" or "NONE" controlling the downsampling method applied.
+ * "AVERAGE_MAGPHASE" "RMS" or "NONE" controlling the downsampling method applied.
  * @param nOverviews number of overviews to build.
  * @param panOverviewList the list of overview decimation factors to build.
  * @param pfnProgress a function to call to report progress, or NULL.
@@ -5948,7 +5948,7 @@ CPLErr CPL_STDCALL GDALSetDefaultRAT( GDALRasterBandH hBand,
  *
  * @since GDAL 1.5.0
  *
- * @see http://trac.osgeo.org/gdal/wiki/rfc15_nodatabitmask
+ * @see https://gdal.org/development/rfc/rfc15_nodatabitmask.html
  *
  */
 GDALRasterBand *GDALRasterBand::GetMaskBand()
@@ -6213,7 +6213,7 @@ GDALRasterBandH CPL_STDCALL GDALGetMaskBand( GDALRasterBandH hBand )
  *
  * @return a valid mask band.
  *
- * @see http://trac.osgeo.org/gdal/wiki/rfc15_nodatabitmask
+ * @see https://gdal.org/development/rfc/rfc15_nodatabitmask.html
  *
  */
 int GDALRasterBand::GetMaskFlags()
@@ -6292,7 +6292,7 @@ void GDALRasterBand::InvalidateMaskBand()
  *
  * @return CE_None on success or CE_Failure on an error.
  *
- * @see http://trac.osgeo.org/gdal/wiki/rfc15_nodatabitmask
+ * @see https://gdal.org/development/rfc/rfc15_nodatabitmask.html
  * @see GDALDataset::CreateMaskBand()
  *
  */
@@ -7232,21 +7232,25 @@ public:
     const void* GetRawNoDataValue() const override
     { return m_pabyNoData.empty() ? nullptr: m_pabyNoData.data(); }
 
-    double GetOffset(bool* pbHasOffset) const override
+    double GetOffset(bool* pbHasOffset, GDALDataType* peStorageType) const override
     {
         int bHasOffset = false;
         double dfRes = m_poBand->GetOffset(&bHasOffset);
         if( pbHasOffset )
             *pbHasOffset = CPL_TO_BOOL(bHasOffset);
+        if( peStorageType )
+            *peStorageType = GDT_Unknown;
         return dfRes;
     }
 
-    double GetScale(bool* pbHasScale) const override
+    double GetScale(bool* pbHasScale, GDALDataType* peStorageType) const override
     {
         int bHasScale = false;
         double dfRes = m_poBand->GetScale(&bHasScale);
         if( pbHasScale )
             *pbHasScale = CPL_TO_BOOL(bHasScale);
+        if( peStorageType )
+            *peStorageType = GDT_Unknown;
         return dfRes;
     }
 

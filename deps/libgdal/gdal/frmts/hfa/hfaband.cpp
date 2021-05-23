@@ -47,7 +47,7 @@
 #include "hfa.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: hfaband.cpp cffe9a3ef14da777687074350c870fa121122cac 2019-08-26 18:48:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfaband.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              HFABand()                               */
@@ -605,16 +605,9 @@ static CPLErr UncompressBlock( GByte *pabyCData, int nSrcBytes,
 {
     CHECK_ENOUGH_BYTES(13);
 
-    GUInt32 nTmp = 0;
-
-    memcpy(&nTmp, pabyCData, 4);
-    const GUInt32 nDataMin = CPL_LSBWORD32(nTmp);
-
-    memcpy(&nTmp, pabyCData + 4, 4);
-    const GInt32 nNumRuns = CPL_LSBWORD32(nTmp);
-
-    memcpy(&nTmp, pabyCData + 8, 4);
-    const GInt32 nDataOffset = CPL_LSBWORD32(nTmp);
+    const GUInt32 nDataMin = CPL_LSBUINT32PTR(pabyCData);
+    const GInt32 nNumRuns = CPL_LSBSINT32PTR(pabyCData + 4);
+    const GInt32 nDataOffset = CPL_LSBSINT32PTR(pabyCData + 8);
 
     const int nNumBits = pabyCData[12];
 

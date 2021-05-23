@@ -33,6 +33,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <new>
 
 #include "cpl_conv.h"
 #include "cpl_error.h"
@@ -40,7 +41,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrmultipoint.cpp c7d51c5ead794772b42f3c58c394bfff6045f8d6 2019-08-22 09:59:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmultipoint.cpp 464e5bd63b59963407c8adc30fcbd5899731eddc 2021-03-16 15:06:30 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRMultiPoint()                            */
@@ -93,6 +94,16 @@ OGRMultiPoint& OGRMultiPoint::operator=( const OGRMultiPoint& other )
         OGRGeometryCollection::operator=( other );
     }
     return *this;
+}
+
+/************************************************************************/
+/*                               clone()                                */
+/************************************************************************/
+
+OGRMultiPoint *OGRMultiPoint::clone() const
+
+{
+    return new (std::nothrow) OGRMultiPoint(*this);
 }
 
 /************************************************************************/
@@ -151,25 +162,26 @@ OGRMultiPoint::isCompatibleSubType( OGRwkbGeometryType eGeomType ) const
 
 std::string OGRMultiPoint::exportToWkt(const OGRWktOptions& opts, OGRErr *err) const
 {
-    std::string wkt = getGeometryName() + wktTypeString(opts.variant);
-    if( IsEmpty() )
-        wkt += "EMPTY";
-    else
+    try
     {
+        std::string wkt = getGeometryName();
+        wkt += wktTypeString(opts.variant);
+
         bool first(true);
-        wkt += "(";
         // OGRMultiPoint has a begin()/end().
         for(const OGRPoint *poPoint: this)
         {
             if( poPoint->IsEmpty() )
                 continue;
 
-            if( !first )
-                wkt += ",";
+            if( first )
+                wkt += '(';
+            else
+                wkt += ',';
             first = false;
 
             if( opts.variant == wkbVariantIso )
-                wkt += "(";
+                wkt += '(';
 
             wkt += OGRMakeWktCoordinateM(poPoint->getX(), poPoint->getY(),
                     poPoint->getZ(), poPoint->getM(), poPoint->Is3D(),
@@ -177,14 +189,24 @@ std::string OGRMultiPoint::exportToWkt(const OGRWktOptions& opts, OGRErr *err) c
                     opts);
 
             if( opts.variant == wkbVariantIso )
-                wkt += ")";
+                wkt += ')';
         }
-        wkt += ")";
-    }
 
-    if (err)
-        *err = OGRERR_NONE;
-    return wkt;
+        if (err)
+            *err = OGRERR_NONE;
+        if (first)
+            wkt += "EMPTY";
+        else
+            wkt += ')';
+        return wkt;
+    }
+    catch( const std::bad_alloc& e )
+    {
+        CPLError(CE_Failure, CPLE_OutOfMemory, "%s", e.what());
+        if (err)
+            *err = OGRERR_FAILURE;
+        return std::string();
+    }
 }
 
 /************************************************************************/

@@ -47,7 +47,7 @@
 #include "nitflib.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: rpftocdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: rpftocdataset.cpp 502ef117f5528fbfa9d9768eb4fdd351e9196fca 2021-03-16 21:15:08 +0100 Even Rouault $")
 
 constexpr int GEOTRSFRM_TOPLEFT_X = 0;
 constexpr int GEOTRSFRM_WE_RES = 1;
@@ -729,12 +729,20 @@ char **RPFTOCDataset::GetMetadata( const char *pszDomain )
 /*                  NITFCreateVRTDataSetFromTocEntry()                  */
 /************************************************************************/
 
-#define ASSERT_CREATE_VRT(x) do { if (!(x)) { \
-    CPLError(CE_Failure, CPLE_AppDefined, \
-             "For %s, assert '" #x "' failed", \
-             entry->frameEntries[i].fullFilePath); \
-    if (poSrcDS) GDALClose(poSrcDS); CPLFree(projectionRef); \
-    return nullptr;} } while( false )
+#define ASSERT_CREATE_VRT(x) \
+    do \
+    { \
+        if (!(x)) \
+        { \
+            CPLError(CE_Failure, CPLE_AppDefined, \
+                     "For %s, assert '" #x "' failed", \
+                     entry->frameEntries[i].fullFilePath); \
+            if (poSrcDS) \
+                GDALClose(poSrcDS); \
+            CPLFree(projectionRef); \
+            return nullptr; \
+        } \
+    } while( false )
 
 /* Builds a RPFTOCSubDataset from the set of files of the toc entry */
 GDALDataset *

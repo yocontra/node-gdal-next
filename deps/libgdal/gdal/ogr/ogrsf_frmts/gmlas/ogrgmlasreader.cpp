@@ -35,7 +35,7 @@
 
 #include "cpl_json_header.h"
 
-CPL_CVSID("$Id: ogrgmlasreader.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasreader.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        GMLASBinInputStream                           */
@@ -426,8 +426,8 @@ GMLASReader::~GMLASReader()
     for( size_t i = 0; i < m_aoStackContext.size(); i++ )
     {
         if( i == 0 ||
-            (i > 0 && m_aoStackContext[i].m_poFeature !=
-                                        m_aoStackContext[i-1].m_poFeature) )
+            m_aoStackContext[i].m_poFeature !=
+                                        m_aoStackContext[i-1].m_poFeature )
         {
             CPLDebug("GMLAS",
                      "Delete feature m_aoStackContext[%d].m_poFeature=%p",

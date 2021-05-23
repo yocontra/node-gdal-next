@@ -29,7 +29,7 @@
 
 #include "ogrwalk.h"
 
-CPL_CVSID("$Id: ogrwalkdriver.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrwalkdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          ~OGRWalkDriver()                            */
@@ -97,8 +97,14 @@ OGRDataSource *OGRWalkDriver::Open( const char * pszFilename, int bUpdate )
         delete poDS;
         return nullptr;
     }
-    else
-        return poDS;
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("WALK") )
+    {
+        delete poDS;
+        return nullptr;
+    }
+
+    return poDS;
 }
 
 /************************************************************************/

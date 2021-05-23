@@ -35,7 +35,7 @@
 #include "gdal_frmts.h"
 #include "jpipkakdataset.h"
 
-CPL_CVSID("$Id: jpipkakdataset.cpp 49fb5567e2bc851b5b3c64476d80e7e23cffd0e7 2021-03-08 22:49:55 +0100 Even Rouault $")
+CPL_CVSID("$Id: jpipkakdataset.cpp cee3d5d3864c1d7f493306700a19ef22f0fecbee 2021-03-08 22:53:56 +0100 Even Rouault $")
 
 /*
 ** The following are for testing premature stream termination support.
@@ -383,42 +383,12 @@ JPIPKAKRasterBand::IRasterIO( GDALRWFlag eRWFlag,
 /*****************************************/
 JPIPKAKDataset::JPIPKAKDataset()
 {
-    pszPath = nullptr;
-    pszCid = nullptr;
-    pszProjection = nullptr;
-
-    poCache = nullptr;
-    poCodestream = nullptr;
-    poDecompressor = nullptr;
-
-    nPos = 0;
-    nVBASLen = 0;
-    nVBASFirstByte = 0;
-
-    nClassId = 0;
-    nCodestream = 0;
-    nDatabins = 0;
-    bWindowDone = FALSE;
-    bGeoTransformValid = FALSE;
-
-    bNeedReinitialize = FALSE;
-
     adfGeoTransform[0] = 0.0;
     adfGeoTransform[1] = 1.0;
     adfGeoTransform[2] = 0.0;
     adfGeoTransform[3] = 0.0;
     adfGeoTransform[4] = 0.0;
     adfGeoTransform[5] = 1.0;
-
-    nGCPCount = 0;
-    pasGCPList = nullptr;
-
-    bHighThreadRunning = 0;
-    bLowThreadRunning = 0;
-    bHighThreadFinished = 0;
-    bLowThreadFinished = 0;
-    nHighThreadByteCount = 0;
-    nLowThreadByteCount = 0;
 
     pGlobalMutex = CPLCreateMutex();
     CPLReleaseMutex(pGlobalMutex);
@@ -432,7 +402,7 @@ JPIPKAKDataset::~JPIPKAKDataset()
     char** papszOptions = nullptr;
     papszOptions = CSLSetNameValue(papszOptions,
                         "CLOSE_PERSISTENT", CPLSPrintf("JPIPKAK:%p", this));
-    CPLHTTPFetch("", papszOptions);
+    CPLHTTPDestroyResult(CPLHTTPFetch("", papszOptions));
     CSLDestroy(papszOptions);
 
     Deinitialize();
@@ -2107,6 +2077,7 @@ static void JPIPWorkerFunc(void *req)
             // status is not being set, always zero in cpl_http
             CPLDebug("JPIPWorkerFunc", "zero data returned from server");
             CPLReleaseMutex(poJDS->pGlobalMutex);
+            CPLHTTPDestroyResult(psResult);
             break;
         }
 

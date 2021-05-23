@@ -31,7 +31,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwglayer.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdwglayer.cpp 901a2011cf840e038937efafb2f9cf133a835894 2021-03-17 16:38:43 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRDWGLayer()                             */
@@ -1082,6 +1082,8 @@ public:
     OGRSpatialReference *GetTargetCS() override { return nullptr; }
 
     OGRCoordinateTransformation* Clone() const override { return new GeometryInsertTransformer(*this); }
+
+    virtual OGRCoordinateTransformation* GetInverse() const override { return nullptr; }
 
     int Transform( int nCount,
                      double *x, double *y, double *z = nullptr,

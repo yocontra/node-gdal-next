@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "cpl_cpu_features.h"
 
-CPL_CVSID("$Id: cpl_cpu_features.cpp 253aabd2115e206aba2236ea8af24c66059ab8c1 2019-12-30 11:34:46 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_cpu_features.cpp 044a11ee4d018f526644c342c3f483ddd1e6d688 2020-12-15 20:56:11 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 
@@ -156,6 +156,7 @@ static bool CPLDetectRuntimeAVX()
     {
         return false;
     }
+    CPL_IGNORE_RET_VAL(nXCRHigh); // unused
 
     return true;
 }

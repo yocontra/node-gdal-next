@@ -43,7 +43,7 @@
 #include <utility>
 #include <vector>
 
-CPL_CVSID("$Id: pdfcreatecopy.cpp 9c1c4c56303c06d9e18dbfd9412dab3ce58f3f03 2020-05-28 14:16:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: pdfcreatecopy.cpp e43184de37dc81a1092e10a1d79265e6b6a2f82c 2021-03-15 14:48:22 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        GDALPDFBaseWriter()                           */
@@ -3148,7 +3148,7 @@ GDALPDFObjectNum GDALPDFBaseWriter::WriteLabel(OGRGeometryH hGeom,
     VSIFPrintfL(m_fp, "Q");
 
     EndObjWithStream();
-    
+
     return nObjectId;
 }
 
@@ -4224,7 +4224,7 @@ GDALPDFObjectNum GDALPDFBaseWriter::WriteBlock(GDALDataset* poSrcDS,
                 break;
             }
 
-            if( eErr == CE_None && pfnProgress != nullptr
+            if( pfnProgress != nullptr
                 && !pfnProgress( (iLine+1) / (double)nReqYSize,
                                 nullptr, pProgressData ) )
             {
@@ -4781,7 +4781,7 @@ GDALDataset *GDALPDFCreateCopy( const char * pszFilename,
             {
                 CPLError(CE_Warning, CPLE_AppDefined,
                          "Invalid value for CLIPPING_EXTENT. Should be xmin,ymin,xmax,ymax");
-                bUseClippingExtent = TRUE;
+                bUseClippingExtent = FALSE;
             }
 
             if( bUseClippingExtent )
@@ -4793,14 +4793,14 @@ GDALDataset *GDALPDFCreateCopy( const char * pszFilename,
                     {
                         CPLError(CE_Warning, CPLE_AppDefined,
                                 "Cannot use CLIPPING_EXTENT because main raster has a rotated geotransform");
-                        bUseClippingExtent = TRUE;
+                        bUseClippingExtent = FALSE;
                     }
                 }
                 else
                 {
                     CPLError(CE_Warning, CPLE_AppDefined,
                                 "Cannot use CLIPPING_EXTENT because main raster has no geotransform");
-                    bUseClippingExtent = TRUE;
+                    bUseClippingExtent = FALSE;
                 }
             }
         }

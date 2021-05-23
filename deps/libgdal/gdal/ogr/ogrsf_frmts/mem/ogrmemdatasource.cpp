@@ -35,7 +35,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrmemdatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmemdatasource.cpp 92caa0d0f67bdff72b5f272d1558b1909bdbeaea 2021-03-31 14:38:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRMemDataSource()                          */
@@ -139,6 +139,8 @@ int OGRMemDataSource::TestCapability( const char *pszCap )
         return TRUE;
     else if( EQUAL(pszCap, ODsCRandomLayerWrite) )
         return TRUE;
+    else if( EQUAL(pszCap, ODsCAddFieldDomain) )
+        return TRUE;
 
     return FALSE;
 }
@@ -154,4 +156,21 @@ OGRLayer *OGRMemDataSource::GetLayer( int iLayer )
         return nullptr;
 
     return papoLayers[iLayer];
+}
+
+/************************************************************************/
+/*                           AddFieldDomain()                           */
+/************************************************************************/
+
+bool OGRMemDataSource::AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                      std::string& failureReason)
+{
+    if( GetFieldDomain(domain->GetName()) != nullptr )
+    {
+        failureReason = "A domain of identical name already exists";
+        return false;
+    }
+    const auto domainName = domain->GetName();
+    m_oMapFieldDomains[domainName] = std::move(domain);
+    return true;
 }

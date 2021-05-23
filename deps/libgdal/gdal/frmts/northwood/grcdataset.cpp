@@ -37,7 +37,7 @@
 #include "../../ogr/ogrsf_frmts/mitab/mitab.h"
 #endif
 
-CPL_CVSID("$Id: grcdataset.cpp 6e3d6eff53731ab5a9b5ec7c8136366ed8e3d35b 2021-03-27 10:49:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: grcdataset.cpp edff0f6ff69efb760c7e123f7ca2e2b2038d3a7e 2021-03-27 10:49:34 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -133,13 +133,13 @@ NWT_GRCRasterBand::NWT_GRCRasterBand( NWT_GRCDataset * poDSIn, int nBandIn )
          i < static_cast<int>( poGDS->pGrd->stClassDict->nNumClassifiedItems );
          i++ )
     {
-        oEntry.c1 = poGDS->pGrd->stClassDict->stClassifedItem[i]->r;
-        oEntry.c2 = poGDS->pGrd->stClassDict->stClassifedItem[i]->g;
-        oEntry.c3 = poGDS->pGrd->stClassDict->stClassifedItem[i]->b;
+        oEntry.c1 = poGDS->pGrd->stClassDict->stClassifiedItem[i]->r;
+        oEntry.c2 = poGDS->pGrd->stClassDict->stClassifiedItem[i]->g;
+        oEntry.c3 = poGDS->pGrd->stClassDict->stClassifiedItem[i]->b;
         oEntry.c4 = 255;            // alpha 255 = solid
 
         poGDS->poColorTable->SetColorEntry( poGDS->pGrd->
-                                          stClassDict->stClassifedItem[i]->
+                                          stClassDict->stClassifiedItem[i]->
                                           usPixVal, &oEntry );
     }
 
@@ -147,8 +147,8 @@ NWT_GRCRasterBand::NWT_GRCRasterBand( NWT_GRCDataset * poDSIn, int nBandIn )
     int maxValue = 0;
     for( int i=0; i < static_cast<int>( poGDS->pGrd->stClassDict->nNumClassifiedItems ); i++ )
     {
-        if( poGDS->pGrd->stClassDict->stClassifedItem[i]->usPixVal > maxValue )
-            maxValue = poGDS->pGrd->stClassDict->stClassifedItem[i]->usPixVal;
+        if( poGDS->pGrd->stClassDict->stClassifiedItem[i]->usPixVal > maxValue )
+            maxValue = poGDS->pGrd->stClassDict->stClassifiedItem[i]->usPixVal;
     }
 
     // load a value for the null value
@@ -164,13 +164,13 @@ NWT_GRCRasterBand::NWT_GRCRasterBand( NWT_GRCDataset * poDSIn, int nBandIn )
              i < static_cast<int>( poGDS->pGrd->stClassDict->nNumClassifiedItems );
              i++ )
         {
-            if( static_cast<int>( poGDS->pGrd->stClassDict->stClassifedItem[i]->usPixVal ) ==
+            if( static_cast<int>( poGDS->pGrd->stClassDict->stClassifiedItem[i]->usPixVal ) ==
                 val )
             {
                 poGDS->papszCategories =
                     CSLAddString( poGDS->papszCategories,
                                     poGDS->pGrd->stClassDict->
-                                    stClassifedItem[i]->szClassName );
+                                    stClassifiedItem[i]->szClassName );
                 break;
             }
         }

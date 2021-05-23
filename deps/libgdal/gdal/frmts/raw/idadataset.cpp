@@ -33,7 +33,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: idadataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: idadataset.cpp 452b07d9aa72be1d260abacca8a95367d32abc48 2021-03-08 17:45:34 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                                tp2c()                                */
@@ -163,7 +163,7 @@ class IDADataset final: public RawDataset
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
                                 GDALDataType eType,
-                                char ** /* papszParmList */ );
+                                char ** /* papszParamList */ );
 };
 
 /************************************************************************/
@@ -796,6 +796,9 @@ GDALDataset *IDADataset::Open( GDALOpenInfo * poOpenInfo )
     if( nActualFileSize != nExpectedFileSize )
         return nullptr;
 
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("IDA") )
+        return nullptr;
+
 /* -------------------------------------------------------------------- */
 /*      Create the dataset.                                             */
 /* -------------------------------------------------------------------- */
@@ -989,9 +992,12 @@ GDALDataset *IDADataset::Open( GDALOpenInfo * poOpenInfo )
 GDALDataset *IDADataset::Create( const char * pszFilename,
                                  int nXSize, int nYSize, int nBands,
                                  GDALDataType eType,
-                                 char ** /* papszParmList */ )
+                                 char ** /* papszParamList */ )
 
 {
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("IDA") )
+        return nullptr;
+
 /* -------------------------------------------------------------------- */
 /*      Verify input options.                                           */
 /* -------------------------------------------------------------------- */

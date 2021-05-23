@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: avc_e00write.cpp 46793afe3323585d3f85026a8a9cf00d4989e412 2018-07-08 16:43:27 +0900 Hiroshi Miura $
+ * $Id: avc_e00write.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $
  *
  * Name:     avc_e00write.c
  * Project:  Arc/Info vector coverage (AVC)  E00->BIN conversion library
@@ -471,6 +471,12 @@ static void _AVCE00WriteRenameTable(AVCTableDef *psTableDef,
     char szOldName[40], szOldExt[40], szNewName[40], *pszTmp;
     char szSysId[40], szUserId[40];
     int  i;
+
+    if( psTableDef == nullptr )
+    {
+        CPLAssert( false );
+        return;
+    }
 
     snprintf(szNewName, sizeof(szNewName), "%s", pszNewCoverName);
     for(i=0; szNewName[i] != '\0'; i++)

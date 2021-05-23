@@ -49,7 +49,7 @@
 #include "gdal_priv.h"
 #include "gdal_rat.h"
 
-CPL_CVSID("$Id: gdalpamrasterband.cpp 69f25f253d141faf836c400676f9f94dd3f43707 2019-07-12 18:42:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalpamrasterband.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALPamRasterBand()                          */
@@ -278,7 +278,9 @@ void GDALPamRasterBand::PamInitialize()
         dynamic_cast<GDALPamDataset *>( poNonPamParentDS );
     if( poParentDS == nullptr ) {
         // Should never happen.
-        CPLAssert(false);
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Programming error: found GDALPamRasterBand that is not "
+                 "attached to a GDALPamDataset.");
         return;
     }
 
@@ -408,7 +410,7 @@ CPLErr GDALPamRasterBand::XMLInit( CPLXMLNode *psTree,
              psEntry != nullptr;
              psEntry = psEntry->psNext )
         {
-            /* Don't skeep <Category> tag with empty content */
+            /* Don't skip <Category> tag with empty content */
             if( psEntry->eType != CXT_Element
                 || !EQUAL(psEntry->pszValue,"Category")
                 || (psEntry->psChild != nullptr &&

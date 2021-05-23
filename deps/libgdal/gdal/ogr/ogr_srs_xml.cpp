@@ -43,7 +43,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogr_srs_xml.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_srs_xml.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                              parseURN()                              */
@@ -326,10 +326,10 @@ static void addProjArg( const OGRSpatialReference *poSRS, CPLXMLNode *psBase,
 /* -------------------------------------------------------------------- */
 /*      Add the parameter value itself.                                 */
 /* -------------------------------------------------------------------- */
-    double dfParmValue = poSRS->GetNormProjParm( pszWKTName, dfDefault, nullptr );
+    double dfParamValue = poSRS->GetNormProjParm( pszWKTName, dfDefault, nullptr );
 
     CPLCreateXMLNode( psValue, CXT_Text,
-                      CPLString().Printf( "%.16g", dfParmValue ) );
+                      CPLString().Printf( "%.16g", dfParamValue ) );
 
 /* -------------------------------------------------------------------- */
 /*      Add the valueOfParameter.                                       */
@@ -543,25 +543,25 @@ static CPLXMLNode *exportGeogCSToXML( const OGRSpatialReference *poSRS )
         exportAuthorityToXML( poEllipsoid, "gml:ellipsoidID", psEllipseXML,
                               "ellipsoid");
 
-        CPLXMLNode *psParmXML =
+        CPLXMLNode *psParamXML =
             CPLCreateXMLNode( psEllipseXML, CXT_Element, "gml:semiMajorAxis" );
 
-        CPLCreateXMLNode( CPLCreateXMLNode(psParmXML, CXT_Attribute, "uom"),
+        CPLCreateXMLNode( CPLCreateXMLNode(psParamXML, CXT_Attribute, "uom"),
                           CXT_Text, "urn:ogc:def:uom:EPSG::9001" );
 
-        CPLCreateXMLNode( psParmXML, CXT_Text,
+        CPLCreateXMLNode( psParamXML, CXT_Text,
                           poEllipsoid->GetChild(1)->GetValue() );
 
-        psParmXML =
+        psParamXML =
             CPLCreateXMLNode(
                 CPLCreateXMLNode( psEllipseXML, CXT_Element,
                                   "gml:secondDefiningParameter" ),
                 CXT_Element, "gml:inverseFlattening" );
 
-        CPLCreateXMLNode( CPLCreateXMLNode(psParmXML, CXT_Attribute, "uom"),
+        CPLCreateXMLNode( CPLCreateXMLNode(psParamXML, CXT_Attribute, "uom"),
                           CXT_Text, "urn:ogc:def:uom:EPSG::9201" );
 
-        CPLCreateXMLNode( psParmXML, CXT_Text,
+        CPLCreateXMLNode( psParamXML, CXT_Text,
                           poEllipsoid->GetChild(2)->GetValue() );
     }
 
@@ -964,10 +964,10 @@ static int getEPSGObjectCodeValue( CPLXMLNode *psNode,
 }
 
 /************************************************************************/
-/*                         getProjectionParm()                          */
+/*                         getProjectionParam()                          */
 /************************************************************************/
 
-static double getProjectionParm( CPLXMLNode *psRootNode,
+static double getProjectionParam( CPLXMLNode *psRootNode,
                                  int nParameterCode,
                                  const char * /*pszMeasureType */,
                                  double dfDefault )
@@ -1219,11 +1219,11 @@ static OGRErr importProjCSFromXML( OGRSpatialReference *poSRS,
     if( nMethod == 9807 )
     {
         poSRS->SetTM(
-            getProjectionParm( psConv, 8801, "Angular", 0.0 ),
-            getProjectionParm( psConv, 8802, "Angular", 0.0 ),
-            getProjectionParm( psConv, 8805, "Unitless", 1.0 ),
-            getProjectionParm( psConv, 8806, "Linear", 0.0 ),
-            getProjectionParm( psConv, 8807, "Linear", 0.0 ) );
+            getProjectionParam( psConv, 8801, "Angular", 0.0 ),
+            getProjectionParam( psConv, 8802, "Angular", 0.0 ),
+            getProjectionParam( psConv, 8805, "Unitless", 1.0 ),
+            getProjectionParam( psConv, 8806, "Linear", 0.0 ),
+            getProjectionParam( psConv, 8807, "Linear", 0.0 ) );
     }
 
 /* -------------------------------------------------------------------- */

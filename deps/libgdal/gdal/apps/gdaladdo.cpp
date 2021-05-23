@@ -32,7 +32,7 @@
 #include "gdal_priv.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdaladdo.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaladdo.cpp e984e8fba5b45396cfe0e8872911a2d894ca7429 2020-12-04 20:15:54 +0100 GOACOLOU Manuel $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -41,7 +41,7 @@ CPL_CVSID("$Id: gdaladdo.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19
 static void Usage( const char* pszErrorMsg = nullptr )
 
 {
-    printf("Usage: gdaladdo [-r {nearest,average,gauss,cubic,cubicspline,lanczos,average_mp,average_magphase,mode}]\n"
+    printf("Usage: gdaladdo [-r {nearest,average,rms,gauss,cubic,cubicspline,lanczos,average_mp,average_magphase,mode}]\n"
            "                [-ro] [-clean] [-q] [-oo NAME=VALUE]* [-minsize val]\n"
            "                [--help-general] filename [levels]\n"
            "\n"

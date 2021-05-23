@@ -40,7 +40,7 @@
 
 void CPL_DLL CPL_STDCALL GDALRegister_RASDAMAN();
 
-CPL_CVSID("$Id: rasdamandataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: rasdamandataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 // cppcheck-suppress copyCtorAndEqOperator
 class Subset
@@ -240,7 +240,7 @@ r_Ref<r_GMarray>& RasdamanDataset::request_array(const Subset& subset, int& offs
       offsetX = subset.x_lo() - existing.x_lo();
       offsetY = subset.y_lo() - existing.y_lo();
 
-      CPLDebug("rasdaman", "Found matching tile (%d, %d, %d, %d) for requested tile (%d, %d, %d, %d). Offests are (%d, %d).",
+      CPLDebug("rasdaman", "Found matching tile (%d, %d, %d, %d) for requested tile (%d, %d, %d, %d). Offsets are (%d, %d).",
             existing.x_lo(), existing.x_hi(), existing.y_lo(), existing.y_hi(),
             subset.x_lo(), subset.x_hi(), subset.y_lo(), subset.y_hi(),
             offsetX, offsetY);

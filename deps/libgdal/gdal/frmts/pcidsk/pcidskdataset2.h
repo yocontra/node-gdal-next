@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcidskdataset2.h 3b89063b95a18cfefb8dcf527a472987c52e6e3c 2020-05-27 19:53:42 +0200 Even Rouault $
+ * $Id: pcidskdataset2.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  PCIDSK Database File
  * Purpose:  Read/write PCIDSK Database File used by the PCI software, using
@@ -57,7 +57,8 @@ class PCIDSK2Dataset final: public GDALPamDataset
     friend class PCIDSK2Band;
 
     mutable OGRSpatialReference* m_poSRS = nullptr;
-    CPLString   osLastMDValue;
+
+    std::unordered_map<std::string, std::string> m_oCacheMetadataItem{};
     char      **papszLastMDListValue;
 
     PCIDSK::PCIDSKFile  *poFile;
@@ -79,7 +80,7 @@ class PCIDSK2Dataset final: public GDALPamDataset
     static GDALDataset  *Create( const char * pszFilename,
                                  int nXSize, int nYSize, int nBands,
                                  GDALDataType eType,
-                                 char **papszParmList );
+                                 char **papszParamList );
 
     char              **GetFileList() override;
     CPLErr              GetGeoTransform( double * padfTransform ) override;
@@ -122,7 +123,7 @@ class PCIDSK2Band final: public GDALPamRasterBand
     void        RefreshOverviewList();
     std::vector<PCIDSK2Band*> apoOverviews;
 
-    CPLString   osLastMDValue;
+    std::unordered_map<std::string, std::string> m_oCacheMetadataItem{};
     char      **papszLastMDListValue;
 
     bool        CheckForColorTable();

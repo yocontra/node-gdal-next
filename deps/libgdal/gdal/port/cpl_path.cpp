@@ -49,7 +49,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_path.cpp c6d968cff9ac8a35496596945b63b5ca6fc74be5 2020-09-09 15:52:31 +0200 Thomas Bonfort $")
+CPL_CVSID("$Id: cpl_path.cpp 9481870d652348aa5ecfce924c13dda64501bae6 2020-12-09 21:21:53 +0100 Even Rouault $")
 
 // Should be size of larged possible filename.
 constexpr int CPL_PATH_BUF_SIZE = 2048;
@@ -494,6 +494,7 @@ static bool RequiresUnixPathSeparator(const char* pszPath)
             STARTS_WITH(pszPath, "/vsigs_streaming/") ||
             STARTS_WITH(pszPath, "/vsiaz/") ||
             STARTS_WITH(pszPath, "/vsiaz_streaming/") ||
+            STARTS_WITH(pszPath, "/vsiadls/") ||
             STARTS_WITH(pszPath, "/vsioss/") ||
             STARTS_WITH(pszPath, "/vsioss_streaming/") ||
             STARTS_WITH(pszPath, "/vsiswift/") ||

@@ -34,7 +34,7 @@
 #include "cpl_string.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_odbc.cpp 78db15d6c0eda569a90a155b84cdd14ac280928f 2021-02-15 11:39:14 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: cpl_odbc.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 #ifndef SQLColumns_TABLE_CAT
 #define SQLColumns_TABLE_CAT 1
@@ -363,7 +363,7 @@ int CPLODBCSession::RollbackTransaction()
  * ODBC error messages are reported in the following format:
  * [SQLState]ErrorMessage(NativeErrorCode)
  *
- * Multiple error messages are delimeted by ",".
+ * Multiple error messages are delimited by ",".
  */
 int CPLODBCSession::Failed( int nRetCode, HSTMT hStmt )
 
@@ -397,7 +397,7 @@ int CPLODBCSession::Failed( int nRetCode, HSTMT hStmt )
                     achSQLState, &nNativeError,
                     reinterpret_cast<SQLCHAR *>(pachCurErrMsg),
                     nTextLength, &nTextLength2);
-            }               
+            }
             pachCurErrMsg[nTextLength] = '\0';
             m_osLastError += CPLString().Printf("%s[%5s]%s(" CPL_FRMT_GIB ")",
                     (m_osLastError.empty() ? "" : ", "), achSQLState,
@@ -1134,16 +1134,6 @@ int CPLODBCStatement::Fetch( int nOrientation, int nOffset )
             memcpy( m_papszColValues[iCol], szWrkData, cbDataLen );
             m_papszColValues[iCol][cbDataLen] = '\0';
             m_papszColValues[iCol][cbDataLen+1] = '\0';
-        }
-
-        // Trim white space off end, if there is any.
-        if( nFetchType == SQL_C_CHAR && m_papszColValues[iCol] != nullptr )
-        {
-            char *pszTarget = m_papszColValues[iCol];
-            size_t iEnd = strlen(pszTarget);
-
-            while( iEnd > 0 && pszTarget[iEnd - 1] == ' ' )
-                pszTarget[--iEnd] = '\0';
         }
 
         // Convert WCHAR to UTF-8, assuming the WCHAR is UCS-2.
@@ -1986,7 +1976,7 @@ SQLSMALLINT CPLODBCStatement::GetTypeMapping( SQLSMALLINT nTypeCode )
         case SQL_INTERVAL_HOUR_TO_SECOND:
         case SQL_INTERVAL_MINUTE_TO_SECOND:
         case SQL_GUID:
-            return SQL_C_CHAR;
+            return SQL_C_GUID;
 
         case SQL_DATE:
         case SQL_TYPE_DATE:

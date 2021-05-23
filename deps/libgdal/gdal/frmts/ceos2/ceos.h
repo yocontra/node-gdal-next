@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceos.h 5f60b1791853de7f54efebeb3faeb8c1bbf0c7db 2016-12-30 15:31:43Z Even Rouault $
+ * $Id: ceos.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  ASI CEOS Translator
  * Purpose:  CEOS library prototypes
@@ -234,7 +234,7 @@ typedef struct
     int32     AcquisitionMsec;
     int32     TransmittedPolarization;
     int32     ReceivedPolarization;
-    int32     PulsRepetitionFrequency;
+    int32     PulseRepetitionFrequency;
     int32     SlantRangeFirstPixel;
     int32     SlantRangeMidPixel;
     int32     SlantRangeLastPixel;

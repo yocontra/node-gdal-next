@@ -35,7 +35,7 @@
 #include "cpl_vsi.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: georaster_rasterband.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: georaster_rasterband.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 //  ---------------------------------------------------------------------------
 //                                                        GeoRasterRasterBand()
@@ -239,7 +239,7 @@ CPLErr GeoRasterRasterBand::IReadBlock( int nBlockXOff,
     {
         if( bHasNoDataArray )
         {
-            ApplyNoDataArry( pImage );
+            ApplyNoDataArray( pImage );
         }
 
         return CE_None;
@@ -982,10 +982,10 @@ int GeoRasterRasterBand::GetMaskFlags()
 }
 
 //  ---------------------------------------------------------------------------
-//                                                            ApplyNoDataArry()
+//                                                            ApplyNoDataArray()
 //  ---------------------------------------------------------------------------
 
-void GeoRasterRasterBand::ApplyNoDataArry(void* pBuffer) const
+void GeoRasterRasterBand::ApplyNoDataArray(void* pBuffer) const
 {
     int i = 0;
     int j = 0;

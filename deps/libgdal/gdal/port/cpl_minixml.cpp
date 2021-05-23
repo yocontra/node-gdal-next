@@ -53,7 +53,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_minixml.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_minixml.cpp 068cfa4fb6233cbd14ef1d20cedef8aaadb3885b 2021-04-01 17:47:33 +0200 Even Rouault $")
 
 typedef enum {
     TNone,
@@ -1562,14 +1562,21 @@ CPLXMLNode *CPLGetXMLNode( CPLXMLNode *psRoot, const char *pszPath )
         pszPath++;
     }
 
-    char *apszTokens[2] = { const_cast<char*>(pszPath), nullptr };
+    const char * const apszTokens[2] = { pszPath, nullptr };
 
     // Slight optimization: avoid using CSLTokenizeStringComplex that
     // does memory allocations when it is not really necessary.
-    char **papszTokens =
-        strchr(pszPath, '.')
-        ? CSLTokenizeStringComplex( pszPath, ".", FALSE, FALSE )
-        : apszTokens;
+    char **papszTokensToFree = nullptr;
+    const char* const* papszTokens;
+    if( strchr(pszPath, '.') )
+    {
+        papszTokensToFree = CSLTokenizeStringComplex( pszPath, ".", FALSE, FALSE );
+        papszTokens = papszTokensToFree;
+    }
+    else
+    {
+        papszTokens = apszTokens;
+    }
 
     int iToken = 0;
     while( papszTokens[iToken] != nullptr && psRoot != nullptr )
@@ -1601,8 +1608,8 @@ CPLXMLNode *CPLGetXMLNode( CPLXMLNode *psRoot, const char *pszPath )
         iToken++;
     }
 
-    if( papszTokens != apszTokens )
-        CSLDestroy( papszTokens );
+    if( papszTokensToFree )
+        CSLDestroy( papszTokensToFree );
     return psRoot;
 }
 

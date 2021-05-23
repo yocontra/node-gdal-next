@@ -112,7 +112,7 @@
 #include "ogr_core.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: swq_parser.cpp fa01e48290b6aaaf0574b9e363bd0e0d131d7377 2020-10-01 15:32:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: swq_parser.cpp c5c2e7a31a1021667987a72ca0d08520b980066e 2020-11-20 14:10:54 +0100 Even Rouault $")
 
 #define YYSTYPE swq_expr_node *
 
@@ -1079,7 +1079,7 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
   YYSIZE_T yysize = yysize0;
   enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
   /* Internationalized format string. */
-  const char *yyformat = YY_NULLPTR;
+  const char *yyformat = "";
   /* Arguments of yyformat. */
   char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
   /* Number of reported tokens (one for the "unexpected", one per

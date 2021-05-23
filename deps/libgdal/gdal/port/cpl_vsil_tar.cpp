@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_tar.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_tar.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
 
 #if (defined(DEBUG) || defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)) && !defined(HAVE_FUZZER_FRIENDLY_ARCHIVE)
 /* This is a completely custom archive format that is rather inefficient */
@@ -495,7 +495,8 @@ public:
 
     VSIVirtualHandle *Open( const char *pszFilename,
                             const char *pszAccess,
-                            bool bSetError ) override;
+                            bool bSetError,
+                            CSLConstList /* papszOptions */ ) override;
 };
 
 /************************************************************************/
@@ -550,7 +551,8 @@ VSIArchiveReader* VSITarFilesystemHandler::CreateReader(const char* pszTarFileNa
 
 VSIVirtualHandle* VSITarFilesystemHandler::Open( const char *pszFilename,
                                                  const char *pszAccess,
-                                                 bool /* bSetError */ )
+                                                 bool /* bSetError */,
+                                                 CSLConstList /* papszOptions */ )
 {
 
     if (strchr(pszAccess, 'w') != nullptr ||

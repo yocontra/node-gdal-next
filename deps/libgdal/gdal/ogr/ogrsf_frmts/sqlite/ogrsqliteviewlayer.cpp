@@ -43,7 +43,7 @@
 #include "ogr_geometry.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqliteviewlayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqliteviewlayer.cpp be7fac6445d8606b05cb151ded7460fe18d60830 2021-04-04 21:42:47 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRSQLiteViewLayer()                         */
@@ -243,7 +243,7 @@ CPLErr OGRSQLiteViewLayer::EstablishFeatureDefn()
     std::set<CPLString> aosGeomCols;
     std::set<CPLString> aosIgnoredCols;
     aosGeomCols.insert(osGeomColumn);
-    BuildFeatureDefn( pszViewName, hColStmt, &aosGeomCols, aosIgnoredCols );
+    BuildFeatureDefn( pszViewName, false, hColStmt, &aosGeomCols, aosIgnoredCols );
     sqlite3_finalize( hColStmt );
 
 /* -------------------------------------------------------------------- */

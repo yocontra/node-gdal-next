@@ -49,7 +49,7 @@
 #include <limits>
 #include <utility>
 
-CPL_CVSID("$Id: wmsdriver.cpp 0ec35245f2cde4d7af175f58e586ecc07522b1b7 2020-11-17 20:04:37 +0100 Even Rouault $")
+CPL_CVSID("$Id: wmsdriver.cpp 9848e3975ae5de16d14d395c847731f5493edd82 2021-03-01 09:58:23 -0800 Lucian Plesea $")
 
 //
 // A static map holding seen server GetTileService responses, per process
@@ -757,6 +757,9 @@ GDALDataset *GDALWMSDataset::Open(GDALOpenInfo *poOpenInfo)
     const char* pszFilename = poOpenInfo->pszFilename;
     const char* pabyHeader = (const char *) poOpenInfo->pabyHeader;
 
+    if (!Identify(poOpenInfo))
+        return nullptr;
+
     if (poOpenInfo->nHeaderBytes == 0 &&
         STARTS_WITH_CI(pszFilename, "<GDAL_WMS>"))
     {
@@ -824,7 +827,7 @@ GDALDataset *GDALWMSDataset::Open(GDALOpenInfo *poOpenInfo)
         CPLXMLNode* psXML = CPLParseXMLFile(pszFilename);
         if (psXML == nullptr)
             return nullptr;
-        GDALDataset* poRet = GDALWMSMetaDataset::AnalyzeGetTileService(psXML);
+        GDALDataset* poRet = GDALWMSMetaDataset::AnalyzeGetTileService(psXML, poOpenInfo);
         CPLDestroyXMLNode( psXML );
         return poRet;
     }
@@ -949,9 +952,16 @@ GDALDataset *GDALWMSDataset::Open(GDALOpenInfo *poOpenInfo)
 /* -------------------------------------------------------------------- */
     if (ds != nullptr)
     {
-        ds->SetMetadataItem( "INTERLEAVE", "PIXEL", "IMAGE_STRUCTURE" );
-        ds->SetDescription( poOpenInfo->pszFilename );
-        ds->TryLoadXML();
+        if (poOpenInfo->pszFilename && poOpenInfo->pszFilename[0] == '<')
+        {
+            ds->nPamFlags = GPF_DISABLED;
+        }
+        else
+        {
+            ds->SetMetadataItem("INTERLEAVE", "PIXEL", "IMAGE_STRUCTURE");
+            ds->SetDescription(poOpenInfo->pszFilename);
+            ds->TryLoadXML();
+        }
     }
 
     return ds;
@@ -1054,6 +1064,12 @@ void WMSDeregister(CPL_UNUSED GDALDriver *d) {
 /************************************************************************/
 /*                          GDALRegister_WMS()                          */
 /************************************************************************/
+
+//
+// Do not define any open options here!
+// Doing so will enable checking the open options, which will generate warnings for
+// undeclared options which may be handled by individual minidrivers
+//
 
 void GDALRegister_WMS()
 

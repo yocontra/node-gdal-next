@@ -58,7 +58,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_geos.h"
 
-CPL_CVSID("$Id: gdal_misc.cpp 8dfefb05e148aae1ecc8417522e0197a2133ec0a 2020-10-20 23:05:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_misc.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 static int GetMinBitsForPair(
     const bool pabSigned[], const bool pabFloating[], const int panBits[])
@@ -511,7 +511,7 @@ int CPL_STDCALL GDALDataTypeIsConversionLossy( GDALDataType eTypeFrom,
 
     if( GDALDataTypeIsInteger(eTypeTo) )
     {
-        // E.g. float32 -> int32 
+        // E.g. float32 -> int32
         if( GDALDataTypeIsFloating(eTypeFrom) )
             return TRUE;
 
@@ -725,7 +725,7 @@ double GDALAdjustValueToDataType(
             }
             else
             {
-                // Intentionaly loose precision.
+                // Intentionally loose precision.
                 // TODO(schwehr): Is the double cast really necessary?
                 // If so, why?  What will fail?
                 dfValue = static_cast<double>(static_cast<float>(dfValue));
@@ -3411,13 +3411,31 @@ static bool _FetchDblFromMD( CSLConstList papszMD, const char *pszKey,
 
 /** Extract RPC info from metadata, and apply to an RPCInfo structure.
  *
- * The inverse of this function is RPCInfoToMD() in alg/gdal_rpc.cpp
+ * The inverse of this function is RPCInfoV1ToMD() in alg/gdal_rpc.cpp
  *
  * @param papszMD Dictionary of metadata representing RPC
  * @param psRPC (output) Pointer to structure to hold the RPC values.
  * @return TRUE in case of success. FALSE in case of failure.
  */
-int CPL_STDCALL GDALExtractRPCInfo( CSLConstList papszMD, GDALRPCInfo *psRPC )
+int CPL_STDCALL GDALExtractRPCInfoV1( CSLConstList papszMD, GDALRPCInfoV1 *psRPC )
+
+{
+    GDALRPCInfoV2 sRPC;
+    if( !GDALExtractRPCInfoV2(papszMD, &sRPC) )
+        return FALSE;
+    memcpy(psRPC, &sRPC, sizeof(GDALRPCInfoV1) );
+    return TRUE;
+}
+
+/** Extract RPC info from metadata, and apply to an RPCInfo structure.
+ *
+ * The inverse of this function is RPCInfoV2ToMD() in alg/gdal_rpc.cpp
+ *
+ * @param papszMD Dictionary of metadata representing RPC
+ * @param psRPC (output) Pointer to structure to hold the RPC values.
+ * @return TRUE in case of success. FALSE in case of failure.
+ */
+int CPL_STDCALL GDALExtractRPCInfoV2( CSLConstList papszMD, GDALRPCInfoV2 *psRPC )
 
 {
     if( CSLFetchNameValue( papszMD, RPC_LINE_NUM_COEFF ) == nullptr )
@@ -3433,6 +3451,8 @@ int CPL_STDCALL GDALExtractRPCInfo( CSLConstList papszMD, GDALRPCInfo *psRPC )
         return FALSE;
     }
 
+    _FetchDblFromMD( papszMD, RPC_ERR_BIAS, &(psRPC->dfERR_BIAS), 1, -1.0 );
+    _FetchDblFromMD( papszMD, RPC_ERR_RAND, &(psRPC->dfERR_RAND), 1, -1.0 );
     _FetchDblFromMD( papszMD, RPC_LINE_OFF, &(psRPC->dfLINE_OFF), 1, 0.0 );
     _FetchDblFromMD( papszMD, RPC_LINE_SCALE, &(psRPC->dfLINE_SCALE), 1, 1.0 );
     _FetchDblFromMD( papszMD, RPC_SAMP_OFF, &(psRPC->dfSAMP_OFF), 1, 0.0 );
@@ -3997,6 +4017,8 @@ GDALRIOResampleAlg GDALRasterIOGetResampleAlg(const char* pszResampling)
         eResampleAlg = GRIORA_Lanczos;
     else if( EQUAL(pszResampling, "AVERAGE") )
         eResampleAlg = GRIORA_Average;
+    else if( EQUAL(pszResampling, "RMS") )
+        eResampleAlg = GRIORA_RMS;
     else if( EQUAL(pszResampling, "MODE") )
         eResampleAlg = GRIORA_Mode;
     else if( EQUAL(pszResampling, "GAUSS") )
@@ -4027,6 +4049,8 @@ const char* GDALRasterIOGetResampleAlg(GDALRIOResampleAlg eResampleAlg)
             return "Lanczos";
         case GRIORA_Average:
             return "Average";
+        case GRIORA_RMS:
+            return "RMS";
         case GRIORA_Mode:
             return "Mode";
         case GRIORA_Gauss:

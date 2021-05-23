@@ -57,7 +57,7 @@
 #include "shapefil.h"
 #include "shp_vsi.h"
 
-CPL_CVSID("$Id: ogrshapelayer.cpp 7465a420517ca7053fd87ea6f16e76df2b9a4ce8 2020-08-07 17:22:47 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrshapelayer.cpp e620b541e9c5d62487fa9dbcf42c8ce2f10b4905 2020-12-04 13:56:44 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRShapeLayer()                            */
@@ -1465,7 +1465,7 @@ int OGRShapeLayer::GetFeatureCountWithSpatialFilterOnly()
                     else if( m_pPreparedFilterGeom != nullptr )
                     {
                         if( OGRPreparedGeometryIntersects(m_pPreparedFilterGeom,
-                                                          poGeometry) )
+                                                          OGRGeometry::ToHandle(poGeometry)) )
                         {
                             nFeatureCount++;
                         }

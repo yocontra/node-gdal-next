@@ -36,7 +36,7 @@
 
 using std::fill;
 
-CPL_CVSID("$Id: elasdataset.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: elasdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 typedef struct ELASHeader {
     ELASHeader();
@@ -140,7 +140,7 @@ class ELASDataset final: public GDALPamDataset
     static int          Identify( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
-                                GDALDataType eType, char ** papszParmList );
+                                GDALDataType eType, char ** papszParamList );
 
     void FlushCache() override;
 };
@@ -506,7 +506,7 @@ GDALDataset *ELASDataset::Open( GDALOpenInfo * poOpenInfo )
 GDALDataset *ELASDataset::Create( const char * pszFilename,
                                   int nXSize, int nYSize, int nBands,
                                   GDALDataType eType,
-                                  char ** /* notdef: papszParmList */ )
+                                  char ** /* notdef: papszParamList */ )
 
 {
 /* -------------------------------------------------------------------- */

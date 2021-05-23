@@ -55,7 +55,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsi_mem.cpp 440139adbd1cbb61e3395c7b2beee94cb77ffd99 2020-12-08 19:13:46 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsi_mem.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
 
 /*
 ** Notes on Multithreading:
@@ -167,7 +167,8 @@ class VSIMemFilesystemHandler final : public VSIFilesystemHandler
 
     VSIVirtualHandle *Open( const char *pszFilename,
                             const char *pszAccess,
-                            bool bSetError ) override;
+                            bool bSetError,
+                            CSLConstList /* papszOptions */ ) override;
     int Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
               int nFlags ) override;
     int Unlink( const char *pszFilename ) override;
@@ -291,7 +292,7 @@ bool VSIMemFile::SetLength( vsi_l_offset nNewLength )
 
 VSIMemHandle::~VSIMemHandle()
 {
-    Close();
+    VSIMemHandle::Close();
 }
 
 /************************************************************************/
@@ -508,7 +509,8 @@ VSIMemFilesystemHandler::~VSIMemFilesystemHandler()
 VSIVirtualHandle *
 VSIMemFilesystemHandler::Open( const char *pszFilename,
                                const char *pszAccess,
-                               bool bSetError )
+                               bool bSetError,
+                               CSLConstList /* papszOptions */ )
 
 {
     CPLMutexHolder oHolder( &hMutex );

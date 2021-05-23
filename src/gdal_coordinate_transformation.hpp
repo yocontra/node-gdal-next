@@ -80,6 +80,15 @@ class GeoTransformTransformer : public OGRCoordinateTransformation {
     return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
 
+#if GDAL_VERSION_MAJOR >= 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 3)
+  // FIXME
+  // This happens because we are not supposed to be using OGRCoordinateTransformation
+  // This is a temporary hack that works because node-gdal-async doesn't use GetInverse()
+  virtual OGRCoordinateTransformation *GetInverse() const override {
+    return nullptr;
+  }
+#endif
+
   virtual OGRCoordinateTransformation *Clone() const {
     return new GeoTransformTransformer(*this);
   }

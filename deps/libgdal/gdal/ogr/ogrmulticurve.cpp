@@ -36,7 +36,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrmulticurve.cpp c7d51c5ead794772b42f3c58c394bfff6045f8d6 2019-08-22 09:59:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmulticurve.cpp 464e5bd63b59963407c8adc30fcbd5899731eddc 2021-03-16 15:06:30 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRMultiCurve()                           */
@@ -89,6 +89,16 @@ OGRMultiCurve& OGRMultiCurve::operator=( const OGRMultiCurve& other )
         OGRGeometryCollection::operator=( other );
     }
     return *this;
+}
+
+/************************************************************************/
+/*                               clone()                                */
+/************************************************************************/
+
+OGRMultiCurve *OGRMultiCurve::clone() const
+
+{
+    return new (std::nothrow) OGRMultiCurve(*this);
 }
 
 /************************************************************************/

@@ -32,7 +32,7 @@
 
 /* g++ -fPIC -g -Wall frmts/ozi/ozidataset.cpp -shared -o gdal_OZI.so -Iport -Igcore -Iogr -L. -lgdal  */
 
-CPL_CVSID("$Id: ozidataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: ozidataset.cpp 1ceb40fc17830ef802f4b56e34c6780e7b386351 2021-03-08 23:01:41 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -266,6 +266,7 @@ CPLErr OZIRasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
     }
 
     z_stream      stream;
+    memset(&stream, 0, sizeof(stream));
     stream.zalloc = (alloc_func)nullptr;
     stream.zfree = (free_func)nullptr;
     stream.opaque = (voidpf)nullptr;
@@ -537,7 +538,7 @@ GDALDataset *OZIDataset::Open( GDALOpenInfo * poOpenInfo )
     if (!bOzi3 && nSeparator != 0x77777777)
     {
         /* Some files have 8 extra bytes before the marker. I'm not sure */
-        /* what they are used for. So just skeep them and hope that */
+        /* what they are used for. So just skip them and hope that */
         /* we'll find the marker */
         CPL_IGNORE_RET_VAL(ReadInt(fp));
         nSeparator = ReadInt(fp);

@@ -38,7 +38,7 @@
 #include "ogrlibkmlgeometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrlibkmlfeature.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmlfeature.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 using kmldom::AliasPtr;
 using kmldom::CameraPtr;
@@ -231,7 +231,7 @@ static void OGRLIBKMLGetMaxDimensions( const char* pszURL,
 
 FeaturePtr feat2kml(
     OGRLIBKMLDataSource * poOgrDS,
-    OGRLayer * poOgrLayer,
+    OGRLIBKMLLayer * poOgrLayer,
     OGRFeature * poOgrFeat,
     KmlFactory * poKmlFactory,
     int bUseSimpleField )
@@ -352,7 +352,7 @@ FeaturePtr feat2kml(
                         poOgrFeat->GetFieldAsInteger(iImagePyramidMaxHeight);
                 }
 
-                if( nTileSize <= 0 || nMaxWidth <= 0 || nMaxHeight <= 0)
+                if( nMaxWidth <= 0 || nMaxHeight <= 0)
                 {
                     CPLError(
                         CE_Failure, CPLE_AppDefined,
@@ -837,14 +837,7 @@ FeaturePtr feat2kml(
                       poKmlFeature );
 
     /***** fields *****/
-    OGRLIBKMLLayer * const poKmlLayer =
-        dynamic_cast<OGRLIBKMLLayer *>(poOgrLayer);
-    if( poKmlLayer == nullptr )
-    {
-        CPLError(CE_Failure, CPLE_AppDefined, "dynamic_cast failed.");
-        return nullptr;
-    }
-    field2kml( poOgrFeat, poKmlLayer, poKmlFactory,
+    field2kml( poOgrFeat, poOgrLayer, poKmlFactory,
                poKmlFeature, bUseSimpleField );
 
     return poKmlFeature;

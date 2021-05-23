@@ -48,7 +48,7 @@
 #include "cpl_error.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: cpl_virtualmem.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_virtualmem.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 #ifdef NDEBUG
 // Non NDEBUG: Ignore the result.
@@ -2050,8 +2050,8 @@ CPLVirtualMemFileMapNew( VSILFILE* fp,
 
     const off_t nAlignedOffset =
         static_cast<off_t>((nOffset / CPLGetPageSize()) * CPLGetPageSize());
-    size_t nAligment = static_cast<size_t>(nOffset - nAlignedOffset);
-    size_t nMappingSize = static_cast<size_t>(nLength + nAligment);
+    size_t nAlignment = static_cast<size_t>(nOffset - nAlignedOffset);
+    size_t nMappingSize = static_cast<size_t>(nLength + nAlignment);
 
     // Need to ensure that the requested extent fits into the file size
     // otherwise SIGBUS errors will occur when using the mapping.
@@ -2107,7 +2107,7 @@ CPLVirtualMemFileMapNew( VSILFILE* fp,
     ctxt->eType = VIRTUAL_MEM_TYPE_FILE_MEMORY_MAPPED;
     ctxt->nRefCount = 1;
     ctxt->eAccessMode = eAccessMode;
-    ctxt->pData = static_cast<GByte *>(addr) + nAligment;
+    ctxt->pData = static_cast<GByte *>(addr) + nAlignment;
     ctxt->pDataToFree = addr;
     ctxt->nSize = static_cast<size_t>(nLength);
     ctxt->nPageSize = CPLGetPageSize();

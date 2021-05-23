@@ -272,7 +272,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
 
     oHeader.addValue( CADHeader::CECOLOR, buffer.ReadBITSHORT() );
 
-    oHeader.addValue( CADHeader::HANDSEED, buffer.ReadHANDLE() ); 
+    oHeader.addValue( CADHeader::HANDSEED, buffer.ReadHANDLE() );
 
     oHeader.addValue( CADHeader::CLAYER, buffer.ReadHANDLE() );
     oHeader.addValue( CADHeader::TEXTSTYLE, buffer.ReadHANDLE() );
@@ -829,7 +829,7 @@ int DWGFileR2000::CreateFileMap()
             {
                 if( (tmpOffset.first >= 0 &&
                      std::numeric_limits<long>::max() - tmpOffset.first > previousObjHandleOffset.first) ||
-                    (tmpOffset.first < 0 && 
+                    (tmpOffset.first < 0 &&
                      std::numeric_limits<long>::min() - tmpOffset.first <= previousObjHandleOffset.first) )
                 {
                     previousObjHandleOffset.first += tmpOffset.first;
@@ -1350,7 +1350,7 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             spline->setDegree( cadSpline->dDegree );
             if( spline->getScenario() == 2 )
             {
-                spline->setFitTollerance( cadSpline->dfFitTol );
+                spline->setFitTolerance( cadSpline->dfFitTol );
             }
             else if( spline->getScenario() == 1 )
             {
@@ -2376,7 +2376,7 @@ CADLWPolylineObject * DWGFileR2000::getLWPolyLine(unsigned int dObjectSize,
     polyline->setSize( dObjectSize );
     polyline->stCed = stCommonEntityData;
 
-    int    vertixesCount = 0, nBulges = 0, nNumWidths = 0;
+    int    verticesCount = 0, nBulges = 0, nNumWidths = 0;
     short  dataFlag      = buffer.ReadBITSHORT();
     if( dataFlag & 4 )
         polyline->dfConstWidth = buffer.ReadBITDOUBLE();
@@ -2390,17 +2390,17 @@ CADLWPolylineObject * DWGFileR2000::getLWPolyLine(unsigned int dObjectSize,
         polyline->vectExtrusion = vectExtrusion;
     }
 
-    vertixesCount = buffer.ReadBITLONG();
-    if(vertixesCount < 1)
+    verticesCount = buffer.ReadBITLONG();
+    if(verticesCount < 1)
     {
         delete polyline;
         return nullptr;
     }
-    if( vertixesCount < 100000 )
+    if( verticesCount < 100000 )
     {
         // For some reason reserving huge amounts cause later segfaults
         // whereas an exception would have been expected
-        polyline->avertVertices.reserve( static_cast<size_t>(vertixesCount) );
+        polyline->avertVertices.reserve( static_cast<size_t>(verticesCount) );
     }
 
     if( dataFlag & 16 )
@@ -2448,7 +2448,7 @@ CADLWPolylineObject * DWGFileR2000::getLWPolyLine(unsigned int dObjectSize,
     // All the others are not raw doubles; bitdoubles with default instead,
     // where default is previous point coords.
     size_t prev;
-    for( int i = 1; i < vertixesCount; ++i )
+    for( int i = 1; i < verticesCount; ++i )
     {
         prev = size_t( i - 1 );
         double x = buffer.ReadBITDOUBLEWD( polyline->avertVertices[prev].getX() );
@@ -3106,16 +3106,16 @@ CADMLineObject * DWGFileR2000::getMLine(unsigned int dObjectSize,
         for( unsigned char j = 0; j < mline->nLinesInStyle; ++j )
         {
             CADLineStyle   stLStyle;
-            stLStyle.nNumSegParms = buffer.ReadBITSHORT();
-            if( stLStyle.nNumSegParms > 0 ) // Or return null here?
+            stLStyle.nNumSegParams = buffer.ReadBITSHORT();
+            if( stLStyle.nNumSegParams > 0 ) // Or return null here?
             {
-                for( short k = 0; k < stLStyle.nNumSegParms; ++k )
+                for( short k = 0; k < stLStyle.nNumSegParams; ++k )
                     stLStyle.adfSegparms.push_back( buffer.ReadBITDOUBLE() );
             }
-            stLStyle.nAreaFillParms = buffer.ReadBITSHORT();
-            if( stLStyle.nAreaFillParms > 0 )
+            stLStyle.nAreaFillParams = buffer.ReadBITSHORT();
+            if( stLStyle.nAreaFillParams > 0 )
             {
-                for( short k = 0; k < stLStyle.nAreaFillParms; ++k )
+                for( short k = 0; k < stLStyle.nAreaFillParams; ++k )
                     stLStyle.adfAreaFillParameters.push_back( buffer.ReadBITDOUBLE() );
             }
 

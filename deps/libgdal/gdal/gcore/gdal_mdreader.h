@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_mdreader.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
+ * $Id: gdal_mdreader.h d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata (mainly the remote sensing imagery) from files of
@@ -51,6 +51,8 @@
  * RPC/RPB specific defines
  */
 
+#define RPC_ERR_BIAS        "ERR_BIAS"
+#define RPC_ERR_RAND        "ERR_RAND"
 #define RPC_LINE_OFF        "LINE_OFF"
 #define RPC_SAMP_OFF        "SAMP_OFF"
 #define RPC_LAT_OFF         "LAT_OFF"

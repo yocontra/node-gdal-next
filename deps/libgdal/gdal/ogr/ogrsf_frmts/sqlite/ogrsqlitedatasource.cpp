@@ -99,7 +99,7 @@ void GDALOpenInfoDeclareFileNotToOpen(const char* pszFilename,
 void GDALOpenInfoUnDeclareFileNotToOpen(const char* pszFilename);
 
 
-CPL_CVSID("$Id: ogrsqlitedatasource.cpp c91c85854631084021f9a75fe6797fea2ac071c4 2020-09-21 15:20:58 +0200 Alessandro Pasotti $")
+CPL_CVSID("$Id: ogrsqlitedatasource.cpp f6081537662b44d4f23c4f8fa9b468e56da0ace2 2021-03-15 14:38:47 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRSQLiteInitOldSpatialite()                    */
@@ -428,7 +428,6 @@ OGRSQLiteDataSource::OGRSQLiteDataSource() :
     nKnownSRID(0),
     panSRID(nullptr),
     papoSRS(nullptr),
-    papszOpenOptions(nullptr),
     bHaveGeometryColumns(FALSE),
     bIsSpatiaLiteDB(FALSE),
     bSpatialite4Layout(FALSE),
@@ -511,7 +510,6 @@ OGRSQLiteDataSource::~OGRSQLiteDataSource()
     }
     CPLFree( panSRID );
     CPLFree( papoSRS );
-    CSLDestroy( papszOpenOptions );
 }
 
 /************************************************************************/
@@ -631,7 +629,7 @@ bool OGRSQLiteBaseDataSource::SetCacheSize()
     const char* pszSqliteCacheMB = CPLGetConfigOption("OGR_SQLITE_CACHE", nullptr);
     if (pszSqliteCacheMB != nullptr)
     {
-        const GIntBig iSqliteCacheBytes = 
+        const GIntBig iSqliteCacheBytes =
             static_cast<GIntBig>(atoi( pszSqliteCacheMB )) * 1024 * 1024;
 
         /* querying the current PageSize */

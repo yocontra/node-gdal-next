@@ -32,7 +32,7 @@
 #include "ogrpgeogeometry.h"
 #include "ogrgeomediageometry.h"
 
-CPL_CVSID("$Id: ogrmdblayer.cpp bcbf5d514c5224cd13de7c697f66e7f6cc52df27 2020-06-23 23:09:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmdblayer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRMDBLayer()                            */
@@ -424,7 +424,7 @@ void OGRMDBLayer::LookupSRID( int nSRID )
 
     if( pszSRText[0] == '{' )
     {
-        CPLDebug( "MDB", "Ignoreing GUID SRTEXT: %s", pszSRText );
+        CPLDebug( "MDB", "Ignoring GUID SRTEXT: %s", pszSRText );
         delete poSRSTable;
         CPLFree(pszSRText);
         return;

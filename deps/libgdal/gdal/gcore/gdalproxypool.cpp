@@ -44,7 +44,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: gdalproxypool.cpp 5d92959f1afafc273140671136adcc1f12d16160 2020-06-02 16:12:25 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalproxypool.cpp de1b652965f6849f07a11073f59f9d142b6a8317 2020-12-01 19:17:38 +0100 Even Rouault $")
 
 /* We *must* share the same mutex as the gdaldataset.cpp file, as we are */
 /* doing GDALOpen() calls that can indirectly call GDALOpenShared() on */
@@ -111,7 +111,8 @@ class GDALDatasetPool
                                              int bShared,
                                              bool bForceOpen,
                                              const char* pszOwner);
-        void _CloseDataset(const char* pszFileName, GDALAccess eAccess,
+        void _CloseDatasetIfZeroRefCount(
+                           const char* pszFileName, GDALAccess eAccess,
                            const char* pszOwner);
 
 #ifdef DEBUG_PROXY_POOL
@@ -132,7 +133,8 @@ class GDALDatasetPool
                                                    bool bForceOpen,
                                                    const char* pszOwner);
         static void UnrefDataset(GDALProxyPoolCacheEntry* cacheEntry);
-        static void CloseDataset(const char* pszFileName, GDALAccess eAccess,
+        static void CloseDatasetIfZeroRefCount(
+                                 const char* pszFileName, GDALAccess eAccess,
                                  const char* pszOwner);
 
         static void PreventDestroy();
@@ -358,10 +360,10 @@ GDALProxyPoolCacheEntry* GDALDatasetPool::_RefDataset(const char* pszFileName,
 }
 
 /************************************************************************/
-/*                       _CloseDataset()                                */
+/*                   _CloseDatasetIfZeroRefCount()                      */
 /************************************************************************/
 
-void GDALDatasetPool::_CloseDataset( const char* pszFileName,
+void GDALDatasetPool::_CloseDatasetIfZeroRefCount( const char* pszFileName,
                                      GDALAccess /* eAccess */,
                                      const char* pszOwner )
 {
@@ -373,7 +375,8 @@ void GDALDatasetPool::_CloseDataset( const char* pszFileName,
         GDALProxyPoolCacheEntry* next = cur->next;
 
         CPLAssert(cur->pszFileName);
-        if (strcmp(cur->pszFileName, pszFileName) == 0 && cur->refCount == 0 &&
+        if (cur->refCount == 0 &&
+            strcmp(cur->pszFileName, pszFileName) == 0 &&
             ((pszOwner == nullptr && cur->pszOwner == nullptr) ||
              (pszOwner != nullptr && cur->pszOwner != nullptr &&
               strcmp(cur->pszOwner, pszOwner) == 0)) &&
@@ -506,14 +509,15 @@ void GDALDatasetPool::UnrefDataset(GDALProxyPoolCacheEntry* cacheEntry)
 }
 
 /************************************************************************/
-/*                       CloseDataset()                                 */
+/*                   CloseDatasetIfZeroRefCount()                       */
 /************************************************************************/
 
-void GDALDatasetPool::CloseDataset(const char* pszFileName, GDALAccess eAccess,
+void GDALDatasetPool::CloseDatasetIfZeroRefCount(
+                                   const char* pszFileName, GDALAccess eAccess,
                                    const char* pszOwner)
 {
     CPLMutexHolderD( GDALGetphDLMutex() );
-    singleton->_CloseDataset(pszFileName, eAccess, pszOwner);
+    singleton->_CloseDatasetIfZeroRefCount(pszFileName, eAccess, pszOwner);
 }
 
 struct GetMetadataElt
@@ -662,10 +666,8 @@ GDALProxyPoolDataset::GDALProxyPoolDataset(const char* pszSourceDatasetDescripti
 
 GDALProxyPoolDataset::~GDALProxyPoolDataset()
 {
-    if( !bShared )
-    {
-        GDALDatasetPool::CloseDataset(GetDescription(), eAccess, m_pszOwner);
-    }
+    GDALDatasetPool::CloseDatasetIfZeroRefCount(GetDescription(), eAccess, m_pszOwner);
+
     /* See comment in constructor */
     /* It is not really a genuine shared dataset, so we don't */
     /* want ~GDALDataset() to try to release it from its */

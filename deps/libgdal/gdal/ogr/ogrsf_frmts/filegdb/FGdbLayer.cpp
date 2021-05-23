@@ -29,14 +29,16 @@
 * DEALINGS IN THE SOFTWARE.
 ****************************************************************************/
 
+#include <cassert>
 #include "ogr_fgdb.h"
 #include "ogrpgeogeometry.h"
 #include "cpl_conv.h"
 #include "cpl_string.h"
 #include "FGdbUtils.h"
 #include "cpl_minixml.h" // the only way right now to extract schema information
+#include "filegdb_gdbtoogrfieldtype.h"
 
-CPL_CVSID("$Id: FGdbLayer.cpp 9953406c1be0d385a920244c3e2fe4f805bd67c3 2020-07-13 17:13:24 +0200 Even Rouault $")
+CPL_CVSID("$Id: FGdbLayer.cpp 7819e495986c82c51d7023358b14ecb2b0fd4d98 2021-04-01 20:02:10 +0200 Even Rouault $")
 
 using std::string;
 using std::wstring;
@@ -819,6 +821,7 @@ int  FGdbLayer::EditGDBTablX( const CPLString& osGDBTablX,
     //printf("nLastWrittenOffset = %d\n", nLastWrittenOffset);
     if( nLastWrittenOffset > 0 || bDisableSparsePages )
     {
+        assert( nOutMaxFID >= 1 );
         SET_BIT(pabyBlockMapOut, (nOutMaxFID - 1) / 1024);
         nNonEmptyPages ++;
         if( nLastWrittenOffset < 1024 * nRecordSize )
@@ -2880,6 +2883,7 @@ bool FGdbLayer::GDBToOGRFields(CPLXMLNode* psRoot)
             //int nPrecision = 0;
             int bNullable = TRUE;
             std::string osDefault;
+            std::string osDomainName;
 
             // loop through all items in Field element
             //
@@ -2931,6 +2935,13 @@ bool FGdbLayer::GDBToOGRFields(CPLXMLNode* psRoot)
                     else if (EQUAL(psFieldItemNode->pszValue,"DefaultValue"))
                     {
                         osDefault = CPLGetXMLValue(psFieldItemNode, nullptr, "");
+                    }
+                    // NOTE: when using the GetDefinition() API, the domain name
+                    // is set in <Domain><DomainName>, whereas the raw XML is
+                    // just <DomainName>
+                    else if (EQUAL(psFieldItemNode->pszValue,"Domain"))
+                    {
+                        osDomainName = CPLGetXMLValue(psFieldItemNode, "DomainName", "");
                     }
                 }
             }
@@ -3021,6 +3032,10 @@ bool FGdbLayer::GDBToOGRFields(CPLXMLNode* psRoot)
                                nYear, nMonth, nDay, nHour, nMinute, (int)(fSecond + 0.5)));
                     }
                 }
+            }
+            if( !osDomainName.empty() )
+            {
+                fieldTemplate.SetDomainName(osDomainName);
             }
 
             m_pFeatureDefn->AddFieldDefn( &fieldTemplate );

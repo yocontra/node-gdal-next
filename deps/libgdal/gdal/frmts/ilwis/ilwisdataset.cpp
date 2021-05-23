@@ -38,7 +38,7 @@
 
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: ilwisdataset.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ilwisdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 namespace GDAL
 {
@@ -865,7 +865,7 @@ void ILWISDataset::FlushCache()
 GDALDataset *ILWISDataset::Create(const char* pszFilename,
                                   int nXSize, int nYSize,
                                   int nBands, GDALDataType eType,
-                                  CPL_UNUSED char** papszParmList)
+                                  CPL_UNUSED char** papszParamList)
 {
 /* -------------------------------------------------------------------- */
 /*      Verify input options.                                           */
@@ -917,11 +917,12 @@ GDALDataset *ILWISDataset::Create(const char* pszFilename,
     else
     {
         pszFileName = CPLFormFilename(pszPath.c_str(),pszBaseName.c_str(),"mpl");
-        globalFile.reset(new IniFile(std::string(pszFileName)));
-        globalFile->SetKeyValue("Ilwis", "Type", "MapList");
-        globalFile->SetKeyValue("MapList", "GeoRef", "none.grf");
-        globalFile->SetKeyValue("MapList", "Size", std::string(strsize));
-        globalFile->SetKeyValue("MapList", "Maps", CPLSPrintf("%d", nBands));
+        auto iniFile = new IniFile(std::string(pszFileName));
+        iniFile->SetKeyValue("Ilwis", "Type", "MapList");
+        iniFile->SetKeyValue("MapList", "GeoRef", "none.grf");
+        iniFile->SetKeyValue("MapList", "Size", std::string(strsize));
+        iniFile->SetKeyValue("MapList", "Maps", CPLSPrintf("%d", nBands));
+        globalFile.reset(iniFile);
     }
 
     for( int iBand = 0; iBand < nBands; iBand++ )

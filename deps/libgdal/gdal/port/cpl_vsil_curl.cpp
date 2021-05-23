@@ -48,7 +48,19 @@
 #include "cpl_http.h"
 #include "cpl_mem_cache.h"
 
-CPL_CVSID("$Id: cpl_vsil_curl.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
+#ifndef S_IRUSR
+#define S_IRUSR     00400
+#define S_IWUSR     00200
+#define S_IXUSR     00100
+#define S_IRGRP     00040
+#define S_IWGRP     00020
+#define S_IXGRP     00010
+#define S_IROTH     00004
+#define S_IWOTH     00002
+#define S_IXOTH     00001
+#endif
+
+CPL_CVSID("$Id: cpl_vsil_curl.cpp cbed494f61f11f2fba7fffe92d4a9f911ef9dc6a 2021-04-22 11:41:33 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -562,9 +574,9 @@ void VSICURLInitWriteFuncStruct( WriteFuncStruct   *psStruct,
     psStruct->pReadCbkUserData = pReadCbkUserData;
     psStruct->bInterrupted = false;
 
-#if LIBCURL_VERSION_NUM < 0x073600
+#if !CURL_AT_LEAST_VERSION(7,54,0)
     psStruct->bIsProxyConnectHeader = false;
-#endif
+#endif //!CURL_AT_LEAST_VERSION(7,54,0)
 }
 
 /************************************************************************/
@@ -594,7 +606,7 @@ size_t VSICurlHandleWriteFunc( void *buffer, size_t count,
                 {
                     psStruct->nHTTPCode = atoi(pszSpace + 1);
 
-#if LIBCURL_VERSION_NUM < 0x073600
+#if !CURL_AT_LEAST_VERSION(7,54,0)
                     // Workaround to ignore extra HTTP response headers from
                     // proxies in older versions of curl.
                     // CURLOPT_SUPPRESS_CONNECT_HEADERS fixes this
@@ -612,7 +624,7 @@ size_t VSICurlHandleWriteFunc( void *buffer, size_t count,
                             psStruct->bIsProxyConnectHeader = true;
                         }
                     }
-#endif
+#endif //!CURL_AT_LEAST_VERSION(7,54,0)
                 }
             }
             else if( STARTS_WITH_CI(pszLine, "Content-Length: ") )
@@ -664,12 +676,12 @@ size_t VSICurlHandleWriteFunc( void *buffer, size_t count,
                           psStruct->nHTTPCode == 302) )
                         return 0;
                 }
-#if LIBCURL_VERSION_NUM < 0x073600
+#if !CURL_AT_LEAST_VERSION(7,54,0)
                 else if( psStruct->bIsProxyConnectHeader )
                 {
                     psStruct->bIsProxyConnectHeader = false;
                 }
-#endif
+#endif //!CURL_AT_LEAST_VERSION(7,54,0)
                 else
                 {
                     psStruct->bIsInHeader = false;
@@ -720,14 +732,14 @@ size_t VSICurlHandleWriteFunc( void *buffer, size_t count,
 static bool VSICurlIsS3LikeSignedURL( const char* pszURL )
 {
     return
-        (strstr(pszURL, ".s3.amazonaws.com/") != nullptr ||
-         strstr(pszURL, ".s3.amazonaws.com:") != nullptr ||
-         strstr(pszURL, ".storage.googleapis.com/") != nullptr ||
-         strstr(pszURL, ".storage.googleapis.com:") != nullptr) &&
-        (strstr(pszURL, "&Signature=") != nullptr ||
-         strstr(pszURL, "?Signature=") != nullptr ||
-         strstr(pszURL, "&X-Amz-Signature=") != nullptr ||
-         strstr(pszURL, "?X-Amz-Signature=") != nullptr);
+        ((strstr(pszURL, ".s3.amazonaws.com/") != nullptr ||
+          strstr(pszURL, ".s3.amazonaws.com:") != nullptr ||
+          strstr(pszURL, ".storage.googleapis.com/") != nullptr ||
+          strstr(pszURL, ".storage.googleapis.com:") != nullptr) &&
+         (strstr(pszURL, "&Signature=") != nullptr ||
+          strstr(pszURL, "?Signature=") != nullptr)) ||
+        strstr(pszURL, "&X-Amz-Signature=") != nullptr ||
+        strstr(pszURL, "?X-Amz-Signature=") != nullptr;
 }
 
 /************************************************************************/
@@ -736,19 +748,49 @@ static bool VSICurlIsS3LikeSignedURL( const char* pszURL )
 
 static GIntBig VSICurlGetExpiresFromS3LikeSignedURL( const char* pszURL )
 {
-    const char* pszExpires = strstr(pszURL, "&Expires=");
-    if( pszExpires == nullptr )
-        pszExpires = strstr(pszURL, "?Expires=");
-    if( pszExpires != nullptr )
-        return CPLAtoGIntBig(pszExpires + strlen("&Expires="));
+    const auto GetParamValue = [pszURL](const char* pszKey) -> const char*
+    {
+        for( const char* pszPrefix: { "&", "?" } )
+        {
+            std::string osNeedle(pszPrefix);
+            osNeedle += pszKey;
+            osNeedle += '=';
+            const char* pszStr = strstr(pszURL, osNeedle.c_str());
+            if( pszStr )
+                return pszStr + osNeedle.size();
+        }
+        return nullptr;
+    };
 
-    pszExpires = strstr(pszURL, "?X-Amz-Expires=");
-    if( pszExpires == nullptr )
-        pszExpires = strstr(pszURL, "?X-Amz-Expires=");
-    if( pszExpires != nullptr )
-        return CPLAtoGIntBig(pszExpires + strlen("&X-Amz-Expires="));
+    {
+        // Expires= is a Unix timestamp
+        const char* pszExpires = GetParamValue("Expires");
+        if( pszExpires != nullptr )
+            return CPLAtoGIntBig(pszExpires);
+    }
 
-    return 0;
+    // X-Amz-Expires= is a delay, to be combined with X-Amz-Date=
+    const char* pszAmzExpires = GetParamValue("X-Amz-Expires");
+    if( pszAmzExpires == nullptr )
+        return 0;
+    const int nDelay = atoi(pszAmzExpires);
+
+    const char* pszAmzDate = GetParamValue("X-Amz-Date");
+    if( pszAmzDate == nullptr )
+        return 0;
+    // pszAmzDate should be YYYYMMDDTHHMMSSZ
+    if( strlen(pszAmzDate) < strlen("YYYYMMDDTHHMMSSZ") )
+        return 0;
+    if( pszAmzDate[strlen("YYYYMMDDTHHMMSSZ")-1] != 'Z' )
+        return 0;
+    struct tm brokendowntime;
+    brokendowntime.tm_year = atoi(std::string(pszAmzDate).substr(0, 4).c_str()) - 1900;
+    brokendowntime.tm_mon = atoi(std::string(pszAmzDate).substr(4, 2).c_str()) - 1;
+    brokendowntime.tm_mday = atoi(std::string(pszAmzDate).substr(6, 2).c_str());
+    brokendowntime.tm_hour = atoi(std::string(pszAmzDate).substr(9, 2).c_str());
+    brokendowntime.tm_min = atoi(std::string(pszAmzDate).substr(11, 2).c_str());
+    brokendowntime.tm_sec = atoi(std::string(pszAmzDate).substr(13, 2).c_str());
+    return CPLYMDHMSToUnixTime(&brokendowntime) + nDelay;
 }
 
 /************************************************************************/
@@ -834,7 +876,7 @@ vsi_l_offset VSICurlHandle::GetFileSizeOrHeaders( bool bSetError, bool bGetHeade
 
     CURLM* hCurlMultiHandle = poFS->GetCurlMultiHandleFor(m_pszURL);
 
-    CPLString osURL(m_pszURL);
+    CPLString osURL(m_pszURL + m_osQueryString);
     bool bRetryWithGet = false;
     bool bS3LikeRedirect = false;
     int nRetryCount = 0;
@@ -942,7 +984,8 @@ retry:
                     pszContentLength,
                     static_cast<int>(strlen(pszContentLength)));
                 if( ENABLE_DEBUG )
-                    CPLDebug("VSICURL", "GetFileSize(%s)=" CPL_FRMT_GUIB,
+                    CPLDebug(poFS->GetDebugKey(),
+                             "GetFileSize(%s)=" CPL_FRMT_GUIB,
                             osURL.c_str(), oFileProp.fileSize);
             }
         }
@@ -964,7 +1007,8 @@ retry:
 
         if( ENABLE_DEBUG && szCurlErrBuf[0] != '\0' )
         {
-            CPLDebug("VSICURL", "GetFileSize(%s): response_code=%d, msg=%s",
+            CPLDebug(poFS->GetDebugKey(),
+                     "GetFileSize(%s): response_code=%d, msg=%s",
                      osURL.c_str(),
                      static_cast<int>(response_code),
                      szCurlErrBuf);
@@ -981,7 +1025,8 @@ retry:
 
         if( !osEffectiveURL.empty() && strstr(osEffectiveURL, osURL) == nullptr )
         {
-            CPLDebug("VSICURL", "Effective URL: %s", osEffectiveURL.c_str());
+            CPLDebug(poFS->GetDebugKey(),
+                     "Effective URL: %s", osEffectiveURL.c_str());
 
             // Is this is a redirect to a S3 URL?
             if( VSICurlIsS3LikeSignedURL(osEffectiveURL) &&
@@ -993,7 +1038,7 @@ retry:
 
                 if( !bRetryWithGet && osVerb == "HEAD" && response_code == 403 )
                 {
-                    CPLDebug("VSICURL",
+                    CPLDebug(poFS->GetDebugKey(),
                              "Redirected to a AWS S3 signed URL. Retrying "
                              "with GET request instead of HEAD since the URL "
                              "might be valid only for GET");
@@ -1020,7 +1065,7 @@ retry:
                 const int nValidity =
                     static_cast<int>(nExpireTimestamp -
                                      sWriteFuncHeaderData.nTimestampDate);
-                CPLDebug("VSICURL",
+                CPLDebug(poFS->GetDebugKey(),
                          "Will use redirect URL for the next %d seconds",
                          nValidity);
                 // As our local clock might not be in sync with server clock,
@@ -1040,9 +1085,10 @@ retry:
             oFileProp.eExists = EXIST_YES;
             if( dfSize < 0 )
             {
-                if( osVerb == "HEAD" && !bRetryWithGet )
+                if( osVerb == "HEAD" && !bRetryWithGet && response_code == 200 )
                 {
-                    CPLDebug("VSICURL", "HEAD did not provide file size. Retrying with GET");
+                    CPLDebug(poFS->GetDebugKey(),
+                             "HEAD did not provide file size. Retrying with GET");
                     bRetryWithGet = true;
                     CPLFree(sWriteFuncData.pBuffer);
                     CPLFree(sWriteFuncHeaderData.pBuffer);
@@ -1067,6 +1113,31 @@ retry:
                 if( pszEndOfETag )
                 {
                     oFileProp.ETag.assign(pzETag, pszEndOfETag - pzETag);
+                }
+            }
+
+            // Azure Data Lake Storage
+            const char* pszPermissions = strstr(sWriteFuncHeaderData.pBuffer, "x-ms-permissions: ");
+            if( pszPermissions )
+            {
+                pszPermissions += strlen("x-ms-permissions: ");
+                const char* pszEOL = strstr(pszPermissions, "\r\n");
+                if( pszEOL )
+                {
+                    bool bIsDir = strstr(sWriteFuncHeaderData.pBuffer, "x-ms-resource-type: directory\r\n") != nullptr;
+                    bool bIsFile = strstr(sWriteFuncHeaderData.pBuffer, "x-ms-resource-type: file\r\n") != nullptr;
+                    if( bIsDir || bIsFile )
+                    {
+                        oFileProp.bIsDirectory = bIsDir;
+                        CPLString osPermissions;
+                        osPermissions.assign(pszPermissions,
+                                            pszEOL - pszPermissions);
+                        if( bIsDir )
+                            oFileProp.nMode = S_IFDIR;
+                        else
+                            oFileProp.nMode = S_IFREG;
+                        oFileProp.nMode |= VSICurlParseUnixPermissions(osPermissions);
+                    }
                 }
             }
 
@@ -1133,7 +1204,7 @@ retry:
         // 405 = Method not allowed
         else if (response_code == 405 && !bRetryWithGet && osVerb == "HEAD" )
         {
-            CPLDebug("VSICURL", "HEAD not allowed. Retrying with GET");
+            CPLDebug(poFS->GetDebugKey(), "HEAD not allowed. Retrying with GET");
             bRetryWithGet = true;
             CPLFree(sWriteFuncData.pBuffer);
             CPLFree(sWriteFuncHeaderData.pBuffer);
@@ -1241,7 +1312,8 @@ retry:
 
         if( ENABLE_DEBUG && szCurlErrBuf[0] == '\0' )
         {
-            CPLDebug("VSICURL", "GetFileSize(%s)=" CPL_FRMT_GUIB
+            CPLDebug(poFS->GetDebugKey(),
+                     "GetFileSize(%s)=" CPL_FRMT_GUIB
                      "  response_code=%d",
                      osURL.c_str(), oFileProp.fileSize,
                      static_cast<int>(response_code));
@@ -1291,12 +1363,12 @@ CPLString VSICurlHandle::GetRedirectURLIfValid(bool& bHasExpired)
     bHasExpired = false;
     poFS->GetCachedFileProp(m_pszURL, oFileProp);
 
-    CPLString osURL(m_pszURL);
+    CPLString osURL(m_pszURL + m_osQueryString);
     if( oFileProp.bS3LikeRedirect )
     {
         if( time(nullptr) + 1 < oFileProp.nExpireTimestampLocal )
         {
-            CPLDebug("VSICURL",
+            CPLDebug(poFS->GetDebugKey(),
                      "Using redirect URL as it looks to be still valid "
                      "(%d seconds left)",
                      static_cast<int>(oFileProp.nExpireTimestampLocal - time(nullptr)));
@@ -1304,7 +1376,8 @@ CPLString VSICurlHandle::GetRedirectURLIfValid(bool& bHasExpired)
         }
         else
         {
-            CPLDebug("VSICURL", "Redirect URL has expired. Using original URL");
+            CPLDebug(poFS->GetDebugKey(),
+                     "Redirect URL has expired. Using original URL");
             oFileProp.bS3LikeRedirect = false;
             poFS->SetCachedFileProp(m_pszURL, oFileProp);
             bHasExpired = true;
@@ -1373,7 +1446,7 @@ retry:
             sWriteFuncHeaderData.nEndOffset);
 
     if( ENABLE_DEBUG )
-        CPLDebug("VSICURL", "Downloading %s (%s)...", rangeStr, osURL.c_str());
+        CPLDebug(poFS->GetDebugKey(), "Downloading %s (%s)...", rangeStr, osURL.c_str());
 
     CPLString osHeaderRange; // leave in this scope
     if( sWriteFuncHeaderData.bIsHTTP )
@@ -1419,7 +1492,8 @@ retry:
 
     if( ENABLE_DEBUG && szCurlErrBuf[0] != '\0' )
     {
-        CPLDebug("VSICURL", "DownloadRegion(%s): response_code=%d, msg=%s",
+        CPLDebug(poFS->GetDebugKey(),
+                 "DownloadRegion(%s): response_code=%d, msg=%s",
                  osURL.c_str(),
                  static_cast<int>(response_code),
                  szCurlErrBuf);
@@ -1434,11 +1508,12 @@ retry:
     }
 
     if( ENABLE_DEBUG )
-        CPLDebug("VSICURL", "Got response_code=%ld", response_code);
+        CPLDebug(poFS->GetDebugKey(),
+                 "Got response_code=%ld", response_code);
 
     if( response_code == 403 && bUsedRedirect )
     {
-        CPLDebug("VSICURL",
+        CPLDebug(poFS->GetDebugKey(),
                  "Got an error with redirect URL. Retrying with original one");
         oFileProp.bS3LikeRedirect = false;
         poFS->SetCachedFileProp(m_pszURL, oFileProp);
@@ -1452,7 +1527,8 @@ retry:
 
     if( response_code == 401 && nRetryCount < m_nMaxRetry )
     {
-        CPLDebug("VSICURL", "Unauthorized, trying to authenticate");
+        CPLDebug(poFS->GetDebugKey(),
+                 "Unauthorized, trying to authenticate");
         CPLFree(sWriteFuncData.pBuffer);
         CPLFree(sWriteFuncHeaderData.pBuffer);
         curl_easy_cleanup(hCurlHandle);
@@ -1473,7 +1549,8 @@ retry:
     if( !oFileProp.bS3LikeRedirect && !osEffectiveURL.empty() &&
         strstr(osEffectiveURL, m_pszURL) == nullptr )
     {
-        CPLDebug("VSICURL", "Effective URL: %s", osEffectiveURL.c_str());
+        CPLDebug(poFS->GetDebugKey(),
+                 "Effective URL: %s", osEffectiveURL.c_str());
         if( response_code >= 200 && response_code < 300 &&
             sWriteFuncHeaderData.nTimestampDate > 0 &&
             VSICurlIsS3LikeSignedURL(osEffectiveURL) &&
@@ -1488,7 +1565,7 @@ retry:
                 const int nValidity =
                     static_cast<int>(nExpireTimestamp -
                                      sWriteFuncHeaderData.nTimestampDate);
-                CPLDebug("VSICURL",
+                CPLDebug(poFS->GetDebugKey(),
                          "Will use redirect URL for the next %d seconds",
                          nValidity);
                 // As our local clock might not be in sync with server clock,
@@ -1616,7 +1693,8 @@ retry:
             oFileProp.eExists = EXIST_YES;
 
             if( ENABLE_DEBUG )
-                CPLDebug("VSICURL", "GetFileSize(%s)=" CPL_FRMT_GUIB
+                CPLDebug(poFS->GetDebugKey(),
+                         "GetFileSize(%s)=" CPL_FRMT_GUIB
                          "  response_code=%d",
                          m_pszURL, oFileProp.fileSize, static_cast<int>(response_code));
 
@@ -1655,7 +1733,7 @@ void VSICurlHandle::DownloadRegionPostProcess( const vsi_l_offset startOffset,
     {
         if( ENABLE_DEBUG )
             CPLDebug(
-                "VSICURL", "Got more data than expected : %u instead of %u",
+                poFS->GetDebugKey(), "Got more data than expected : %u instead of %u",
                 static_cast<unsigned int>(nSize),
                 static_cast<unsigned int>(nBlocks * knDOWNLOAD_CHUNK_SIZE));
     }
@@ -1666,7 +1744,7 @@ void VSICurlHandle::DownloadRegionPostProcess( const vsi_l_offset startOffset,
 #if DEBUG_VERBOSE
         if( ENABLE_DEBUG )
             CPLDebug(
-                "VSICURL",
+                poFS->GetDebugKey(),
                 "Add region %u - %u",
                 static_cast<unsigned int>(startOffset),
                 static_cast<unsigned int>(
@@ -1700,7 +1778,7 @@ size_t VSICurlHandle::Read( void * const pBufferIn, size_t const nSize,
     void* pBuffer = pBufferIn;
 
 #if DEBUG_VERBOSE
-    CPLDebug("VSICURL", "offset=%d, size=%d",
+    CPLDebug(poFS->GetDebugKey(), "offset=%d, size=%d",
              static_cast<int>(curOffset), static_cast<int>(nBufferRequestSize));
 #endif
 
@@ -1716,7 +1794,7 @@ size_t VSICurlHandle::Read( void * const pBufferIn, size_t const nSize,
         {
             if( iterOffset == curOffset )
             {
-                CPLDebug("VSICURL", "Request at offset " CPL_FRMT_GUIB
+                CPLDebug(poFS->GetDebugKey(), "Request at offset " CPL_FRMT_GUIB
                          ", after end of file", iterOffset);
             }
             break;
@@ -1784,12 +1862,23 @@ size_t VSICurlHandle::Read( void * const pBufferIn, size_t const nSize,
                 return 0;
             }
         }
+
+        const vsi_l_offset nRegionOffset = iterOffset - nOffsetToDownload;
+        if (osRegion.size() < nRegionOffset)
+        {
+            if( iterOffset == curOffset )
+            {
+                CPLDebug(poFS->GetDebugKey(), "Request at offset " CPL_FRMT_GUIB
+                         ", after end of file", iterOffset);
+            }
+            break;
+        }
+
         const int nToCopy = static_cast<int>(
             std::min(static_cast<vsi_l_offset>(nBufferRequestSize),
-                     osRegion.size() -
-                     (iterOffset - nOffsetToDownload)));
+                     osRegion.size() - nRegionOffset));
         memcpy(pBuffer,
-               osRegion.data() + iterOffset - nOffsetToDownload,
+               osRegion.data() + nRegionOffset,
                nToCopy);
         pBuffer = static_cast<char *>(pBuffer) + nToCopy;
         iterOffset += nToCopy;
@@ -1933,7 +2022,8 @@ int VSICurlHandle::ReadMultiRange( int const nRanges, void ** const ppData,
                 asWriteFuncHeaderData[iRequest].nEndOffset);
 
         if( ENABLE_DEBUG )
-            CPLDebug("VSICURL", "Downloading %s (%s)...", rangeStr, osURL.c_str());
+            CPLDebug(poFS->GetDebugKey(),
+                     "Downloading %s (%s)...", rangeStr, osURL.c_str());
 
         if( asWriteFuncHeaderData[iRequest].bIsHTTP )
         {
@@ -1994,7 +2084,8 @@ int VSICurlHandle::ReadMultiRange( int const nRanges, void ** const ppData,
                     asWriteFuncHeaderData[iReq].nEndOffset);
 
             const char* pszErrorMsg = &asCurlErrors[iRange].szCurlErrBuf[0];
-            CPLDebug("VSICURL", "ReadMultiRange(%s), %s: response_code=%d, msg=%s",
+            CPLDebug(poFS->GetDebugKey(),
+                     "ReadMultiRange(%s), %s: response_code=%d, msg=%s",
                      osURL.c_str(),
                      rangeStr,
                      static_cast<int>(response_code),
@@ -2065,7 +2156,7 @@ int VSICurlHandle::ReadMultiRange( int const nRanges, void ** const ppData,
     NetworkStatisticsLogger::LogGET(nTotalDownloaded);
 
     if( ENABLE_DEBUG )
-        CPLDebug("VSICURL", "Download completed");
+        CPLDebug(poFS->GetDebugKey(), "Download completed");
 
     return nRet;
 }
@@ -2156,10 +2247,10 @@ int VSICurlHandle::ReadMultiRangeSingleGet(
     if( ENABLE_DEBUG )
     {
         if( nMergedRanges == 1 )
-            CPLDebug("VSICURL", "Downloading %s (%s)...",
+            CPLDebug(poFS->GetDebugKey(), "Downloading %s (%s)...",
                      osRanges.c_str(), m_pszURL);
         else
-            CPLDebug("VSICURL", "Downloading %s, ..., %s (" CPL_FRMT_GUIB
+            CPLDebug(poFS->GetDebugKey(), "Downloading %s, ..., %s (" CPL_FRMT_GUIB
                      " bytes, %s)...",
                      osFirstRange.c_str(), osLastRange.c_str(),
                      static_cast<GUIntBig>(nTotalReqSize), m_pszURL);
@@ -3037,7 +3128,8 @@ bool VSICurlFilesystemHandler::IsAllowedFilename( const char* pszFilename )
 
 VSIVirtualHandle* VSICurlFilesystemHandler::Open( const char *pszFilename,
                                                   const char *pszAccess,
-                                                  bool bSetError )
+                                                  bool bSetError,
+                                                  CSLConstList /* papszOptions */ )
 {
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) &&
         !STARTS_WITH_CI(pszFilename, "/vsicurl?") )
@@ -3486,7 +3578,7 @@ char** VSICurlFilesystemHandler::ParseHTMLFileList( const char* pszFilename,
                     oFileList.AddString( beginFilename );
                     if( ENABLE_DEBUG_VERBOSE )
                     {
-                        CPLDebug("VSICURL",
+                        CPLDebug(GetDebugKey(),
                                  "File[%d] = %s, is_dir = %d, size = "
                                  CPL_FRMT_GUIB
                                  ", time = %04d/%02d/%02d %02d:%02d:%02d",
@@ -3689,7 +3781,7 @@ char** VSICurlFilesystemHandler::GetFileList(const char *pszDirname,
                                              bool* pbGotFileList)
 {
     if( ENABLE_DEBUG )
-        CPLDebug("VSICURL", "GetFileList(%s)" , pszDirname);
+        CPLDebug(GetDebugKey(), "GetFileList(%s)" , pszDirname);
 
     *pbGotFileList = false;
 
@@ -3733,12 +3825,7 @@ char** VSICurlFilesystemHandler::GetFileList(const char *pszDirname,
             // work, then try again with CURLOPT_DIRLISTONLY set.
             if( iTry == 1 )
             {
-// 7.16.4
-#if LIBCURL_VERSION_NUM <= 0x071004
-                curl_easy_setopt(hCurlHandle, CURLOPT_FTPLISTONLY, 1);
-#elif LIBCURL_VERSION_NUM > 0x071004
                 curl_easy_setopt(hCurlHandle, CURLOPT_DIRLISTONLY, 1);
-#endif
             }
 
             VSICURLInitWriteFuncStruct(&sWriteFuncData, nullptr, nullptr, nullptr);
@@ -3817,7 +3904,7 @@ char** VSICurlFilesystemHandler::GetFileList(const char *pszDirname,
                         {
                             struct tm brokendowntime;
                             CPLUnixTimeToYMDHMS(mUnixTime, &brokendowntime);
-                            CPLDebug("VSICURL",
+                            CPLDebug(GetDebugKey(),
                                      "File[%d] = %s, is_dir = %d, size = "
                                      CPL_FRMT_GUIB
                                      ", time = %04d/%02d/%02d %02d:%02d:%02d",
@@ -3863,7 +3950,7 @@ char** VSICurlFilesystemHandler::GetFileList(const char *pszDirname,
                         oFileList.AddString(pszLine);
                         if( ENABLE_DEBUG_VERBOSE )
                         {
-                            CPLDebug("VSICURL",
+                            CPLDebug(GetDebugKey(),
                                      "File[%d] = %s", nCount, pszLine);
                         }
                         nCount++;
@@ -4054,7 +4141,9 @@ int VSICurlFilesystemHandler::Stat( const char *pszFilename,
     const int nRet =
         poHandle->Exists((nFlags & VSI_STAT_SET_ERROR_FLAG) > 0) ? 0 : -1;
     pStatBuf->st_mtime = poHandle->GetMTime();
-    pStatBuf->st_mode = poHandle->IsDirectory() ? S_IFDIR : S_IFREG;
+    pStatBuf->st_mode = static_cast<unsigned short>(poHandle->GetMode());
+    if( pStatBuf->st_mode == 0 )
+        pStatBuf->st_mode = poHandle->IsDirectory() ? S_IFDIR : S_IFREG;
     delete poHandle;
     return nRet;
 }
@@ -4229,7 +4318,7 @@ char** VSICurlFilesystemHandler::SiblingFiles( const char *pszFilename )
         return static_cast<char**> (CPLCalloc(1,sizeof(char*)));
     }
     return nullptr;
-    
+
 }
 
 /************************************************************************/
@@ -4706,6 +4795,36 @@ CPLString NetworkStatisticsLogger::GetReportAsSerializedJSON()
     return oJSON.Format(CPLJSONObject::PrettyFormat::Pretty);
 }
 
+/************************************************************************/
+/*                     VSICurlParseUnixPermissions()                    */
+/************************************************************************/
+
+int VSICurlParseUnixPermissions(const char* pszPermissions)
+{
+    if( strlen(pszPermissions) != 9 )
+        return 0;
+    int nMode = 0;
+    if( pszPermissions[0] == 'r' )
+        nMode |= S_IRUSR;
+    if( pszPermissions[1] == 'w' )
+        nMode |= S_IWUSR;
+    if( pszPermissions[2] == 'x' )
+        nMode |= S_IXUSR;
+    if( pszPermissions[3] == 'r' )
+        nMode |= S_IRGRP;
+    if( pszPermissions[4] == 'w' )
+        nMode |= S_IWGRP;
+    if( pszPermissions[5] == 'x' )
+        nMode |= S_IXGRP;
+    if( pszPermissions[6] == 'r' )
+        nMode |= S_IROTH;
+    if( pszPermissions[7] == 'w' )
+        nMode |= S_IWOTH;
+    if( pszPermissions[8] == 'x' )
+        nMode |= S_IXOTH;
+    return nMode;
+}
+
 
 } /* end of namespace cpl */
 
@@ -4742,18 +4861,12 @@ struct curl_slist* VSICurlSetOptions(
     struct curl_slist* headers = static_cast<struct curl_slist*>(
         CPLHTTPSetOptions(hCurlHandle, pszURL, papszOptions));
 
-// 7.16
-#if LIBCURL_VERSION_NUM >= 0x071000
     long option = CURLFTPMETHOD_SINGLECWD;
     curl_easy_setopt(hCurlHandle, CURLOPT_FTP_FILEMETHOD, option);
-#endif
 
-// 7.12.3
-#if LIBCURL_VERSION_NUM > 0x070C03
     // ftp://ftp2.cits.rncan.gc.ca/pub/cantopo/250k_tif/
     // doesn't like EPSV command,
     curl_easy_setopt(hCurlHandle, CURLOPT_FTP_USE_EPSV, 0);
-#endif
 
     return headers;
 }
@@ -4776,6 +4889,95 @@ struct curl_slist* VSICurlMergeHeaders( struct curl_slist* poDest,
     return poDest;
 }
 
+/************************************************************************/
+/*                    VSICurlSetContentTypeFromExt()                    */
+/************************************************************************/
+
+struct curl_slist* VSICurlSetContentTypeFromExt(struct curl_slist* poList,
+                                                const char *pszPath)
+{
+    struct curl_slist* iter = poList;
+    while( iter != nullptr )
+    {
+        if( STARTS_WITH_CI(iter->data, "Content-Type") )
+        {
+            return poList;
+        }
+        iter = iter->next;
+    }
+
+    static const struct
+    {
+        const char* ext;
+        const char* mime;
+    }
+    aosExtMimePairs[] =
+    {
+        {"txt", "text/plain"},
+        {"json", "application/json"},
+        {"tif", "image/tiff"}, {"tiff", "image/tiff"},
+        {"jpg", "image/jpeg"}, {"jpeg", "image/jpeg"},
+        {"jp2", "image/jp2"}, {"jpx", "image/jp2"}, {"j2k", "image/jp2"}, {"jpc", "image/jp2"},
+        {"png", "image/png"},
+    };
+
+    const char *pszExt = CPLGetExtension(pszPath);
+    if( pszExt )
+    {
+        for( const auto& pair: aosExtMimePairs )
+        {
+            if( EQUAL(pszExt, pair.ext) )
+            {
+
+                CPLString osContentType;
+                osContentType.Printf("Content-Type: %s", pair.mime);
+                poList = curl_slist_append(poList, osContentType.c_str());
+#ifdef DEBUG_VERBOSE
+                CPLDebug("HTTP", "Setting %s, based on lookup table.", osContentType.c_str());
+#endif
+                break;
+            }
+        }
+    }
+
+    return poList;
+}
+
+/************************************************************************/
+/*                VSICurlSetCreationHeadersFromOptions()                */
+/************************************************************************/
+
+struct curl_slist* VSICurlSetCreationHeadersFromOptions(struct curl_slist* headers,
+                                                        CSLConstList papszOptions,
+                                                        const char *pszPath)
+{
+    bool bContentTypeFound = false;
+    for( CSLConstList papszIter = papszOptions; papszIter && *papszIter; ++papszIter )
+    {
+        char* pszKey = nullptr;
+        const char* pszValue = CPLParseNameValue(*papszIter, &pszKey);
+        if( pszKey && pszValue )
+        {
+            if( EQUAL(pszKey, "Content-Type") )
+            {
+                bContentTypeFound = true;
+            }
+            CPLString osVal;
+            osVal.Printf("%s: %s", pszKey, pszValue);
+            headers = curl_slist_append(headers, osVal.c_str());
+        }
+        CPLFree(pszKey);
+    }
+
+    // If Content-type not found in papszOptions, try to set it from the
+    // filename exstension.
+    if( !bContentTypeFound )
+    {
+        headers = VSICurlSetContentTypeFromExt(headers, pszPath);
+    }
+
+    return headers;
+}
 
 #endif // DOXYGEN_SKIP
 //! @endcond
@@ -4819,14 +5021,12 @@ void VSICurlClearCache( void )
     // FIXME ? Currently we have different filesystem instances for
     // vsicurl/, /vsis3/, /vsigs/ . So each one has its own cache of regions,
     // file size, etc.
-    const char* const apszFS[] = { "/vsicurl/", "/vsis3/", "/vsigs/",
-                                   "/vsiaz/", "/vsioss/", "/vsiswift/",
-                                   "/vsiwebhdfs/" };
-    for( size_t i = 0; i < CPL_ARRAYSIZE(apszFS); ++i )
+    CSLConstList papszPrefix = VSIFileManager::GetPrefixes();
+    for( size_t i = 0; papszPrefix && papszPrefix[i]; ++i )
     {
         auto poFSHandler =
             dynamic_cast<cpl::VSICurlFilesystemHandler*>(
-                VSIFileManager::GetHandler( apszFS[i] ));
+                VSIFileManager::GetHandler( papszPrefix[i] ));
 
         if( poFSHandler )
             poFSHandler->ClearCache();
@@ -4965,7 +5165,7 @@ void VSINetworkStatsReset( void )
  *     },
  *     "vsis3":{
  *          [...]
- *     } 
+ *     }
  *   }
  * }
 

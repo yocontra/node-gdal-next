@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrxlsxdatasource.cpp bddee02cadaed842e6760d814b5d7156da4394a0 2021-04-23 21:22:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrxlsxdatasource.cpp 01a361c7662f881f73db6edcc8c739d79174049c 2021-04-23 21:22:42 +0200 Even Rouault $")
 
 namespace OGRXLSX {
 

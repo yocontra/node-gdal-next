@@ -35,7 +35,7 @@
    #include "gnm_frmts.h"
 #endif
 
-CPL_CVSID("$Id: gdalallregister.cpp ea7e27cb335aea69decb920a492723aebf3eaf43 2020-09-24 14:51:54 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalallregister.cpp 55ded3e021103ffa5634561565ba0ea37aab66ad 2021-02-28 00:00:37 +0100 Even Rouault $")
 
 #ifdef notdef
 // we may have a use for this some day
@@ -435,7 +435,6 @@ void CPL_STDCALL GDALAllRegister()
     GDALRegister_LCP();
     GDALRegister_GTX();
     GDALRegister_LOSLAS();
-    GDALRegister_NTv1();
     GDALRegister_NTv2();
     GDALRegister_CTable2();
     GDALRegister_ACE2();
@@ -504,22 +503,12 @@ void CPL_STDCALL GDALAllRegister()
     GDALRegister_GEOR();
 #endif
 
-#ifdef FRMT_epsilon
-    GDALRegister_EPSILON();
-#endif
-
 #ifdef FRMT_postgisraster
     GDALRegister_PostGISRaster();
 #endif
 
 #ifdef FRMT_saga
     GDALRegister_SAGA();
-#endif
-
-#ifdef FRMT_ignfheightasciigrid
-    // IGNFHeightASCIIGrid must come before XYZ, otherwise XYZ might
-    // try and fail opening such files
-    GDALRegister_IGNFHeightASCIIGrid();
 #endif
 
 #ifdef FRMT_xyz
@@ -540,10 +529,6 @@ void CPL_STDCALL GDALAllRegister()
 
 #ifdef FRMT_ctg
     GDALRegister_CTG();
-#endif
-
-#ifdef FRMT_e00grid
-    GDALRegister_E00GRID();
 #endif
 
 #ifdef FRMT_zmap
@@ -597,6 +582,10 @@ void CPL_STDCALL GDALAllRegister()
 
 #ifdef FRMT_ogcapi
     GDALRegister_OGCAPI();
+#endif
+
+#ifdef FRMT_stacta
+    GDALRegister_STACTA();
 #endif
 
     // NOTE: you need to generally your own driver before that line.

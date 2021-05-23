@@ -38,7 +38,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: byndataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: byndataset.cpp 026ccc0bd255d04c0ece5f86190db8f992010531 2020-11-05 22:52:15 +0100 Even Rouault $")
 
 // Specification at
 // https://www.nrcan.gc.ca/sites/www.nrcan.gc.ca/files/earthsciences/pdf/gpshgrid_e.pdf
@@ -202,10 +202,20 @@ int BYNDataset::Identify( GDALOpenInfo *poOpenInfo )
         hHeader.nDatum     < 0 || hHeader.nDatum     > 1 ||
         hHeader.nEllipsoid < 0 || hHeader.nEllipsoid > 7 ||
         hHeader.nByteOrder < 0 || hHeader.nByteOrder > 1 ||
-        hHeader.nScale     < 0 || hHeader.nScale     > 1 ||
-        hHeader.nTideSys   < 0 || hHeader.nTideSys   > 2 ||
-        hHeader.nPtType    < 0 || hHeader.nPtType    > 1 )
+        hHeader.nScale     < 0 || hHeader.nScale     > 1 )
         return FALSE;
+
+    if((hHeader.nTideSys   < 0 || hHeader.nTideSys   > 2 ||
+        hHeader.nPtType    < 0 || hHeader.nPtType    > 1 ))
+    {
+        // Some datasets use 0xCC as a marker for invalidity for
+        // records starting from Geopotential Wo
+        for( int i = 52; i < 78; i++ )
+        {
+            if( poOpenInfo->pabyHeader[i] != 0xCC )
+                return FALSE;
+        }
+    }
 
     if( hHeader.nScale == 0 )
     {

@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <sstream>
 
-CPL_CVSID("$Id: irisdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: irisdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 static double DEG2RAD = M_PI / 180.0;
 static double RAD2DEG = 180.0 / M_PI;
@@ -1021,7 +1021,7 @@ GDALDataset *IRISDataset::Open( GDALOpenInfo * poOpenInfo )
 
         const float fMinZAcum =
             (CPL_LSBUINT32PTR(poDS->abyHeader+164+12) - 32768.0f) / 10000.0f;
-        poDS->SetMetadataItem("MINIMUM_Z_TO_ACUMULATE",
+        poDS->SetMetadataItem("MINIMUM_Z_TO_ACCUMULATE",
                               CPLString().Printf("%f", fMinZAcum));
 
         const unsigned short nSecondsOfAccumulation =

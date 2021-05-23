@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h 5ba03d148d85d7b4ffa367e0df2c8ef1ae884c51 2021-04-08 19:30:45 +0200 Even Rouault $
+ * $Id: ogr_geopackage.h eef59c953468d4ebdce3d88b5194e46054d89366 2021-04-08 19:51:47 +0200 Even Rouault $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -52,7 +52,6 @@
 typedef enum
 {
     GPKG_ATTRIBUTES,
-    OGR_ASPATIAL,
     NOT_REGISTERED,
 } GPKGASpatialVariant;
 
@@ -129,8 +128,6 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
 
     bool                m_bInFlushCache;
 
-    bool                m_bTableCreated;
-
     bool                m_bDateTimeWithTZ = true;
 
     CPLString           m_osTilingScheme;
@@ -187,7 +184,7 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
         bool                    RegisterZoomOtherExtension();
         void                    ParseCompressionOptions(char** papszOptions);
 
-        bool                    HasMetadataTables();
+        bool                    HasMetadataTables() const;
         bool                    CreateMetadataTables();
         const char*             CheckMetadataDomain( const char* pszDomain );
         void                    WriteMetadata(CPLXMLNode* psXMLNode, /* will be destroyed by the method */
@@ -199,7 +196,6 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
         bool                    HasGriddedCoverageAncillaryTable();
         bool                    CreateTileGriddedTable(char** papszOptions);
 
-        void                    CreateOGREmptyTableIfNeeded();
         void                    RemoveOGREmptyTable();
 
         std::map<CPLString, CPLString> m_oMapNameToType;
@@ -275,6 +271,10 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
                                          char **papszOptions ) override;
         int                 TestCapability( const char * ) override;
 
+        const OGRFieldDomain* GetFieldDomain(const std::string& name) const override;
+        bool                AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                           std::string& failureReason) override;
+
         virtual std::pair<OGRLayer*, IOGRSQLiteGetSpatialWhere*> GetLayerWithGetSpatialWhereByName( const char* pszName ) override;
 
         virtual OGRLayer *  ExecuteSQL( const char *pszSQLCommand,
@@ -292,11 +292,11 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
         OGRSpatialReference* GetSpatialRef( int iSrsId, bool bFallbackToEPSG = false );
         OGRErr              CreateExtensionsTableIfNecessary();
         bool                HasExtensionsTable();
-        OGRErr              CreateGDALAspatialExtension();
         void                SetMetadataDirty() { m_bMetadataDirty = true; }
 
-        bool                    HasDataColumnsTable();
-        bool                    HasDataColumnConstraintsTable();
+        bool                    HasDataColumnsTable() const;
+        bool                    HasDataColumnConstraintsTable() const;
+        bool                CreateColumnsTableAndColumnConstraintsTablesIfNecessary();
 
         const char*         GetGeometryTypeString(OGRwkbGeometryType eType);
 
@@ -452,7 +452,7 @@ class OGRGeoPackageTableLayer final : public OGRGeoPackageLayer
     CPLString                   m_osDescriptionLCO;
     bool                        m_bHasReadMetadataFromStorage;
     bool                        m_bHasTriedDetectingFID64;
-    GPKGASpatialVariant         m_eASPatialVariant;
+    GPKGASpatialVariant         m_eASpatialVariant;
     std::set<OGRwkbGeometryType> m_eSetBadGeomTypeWarned;
 
     int                         m_nCountInsertInTransactionThreshold = -1;
@@ -550,8 +550,8 @@ class OGRGeoPackageTableLayer final : public OGRGeoPackageLayer
                                                const char* pszDescription );
     void                SetDeferredSpatialIndexCreation( bool bFlag )
                                 { m_bDeferredSpatialIndexCreation = bFlag; }
-    void                SetASpatialVariant( GPKGASpatialVariant eASPatialVariant )
-                                { m_eASPatialVariant = eASPatialVariant; }
+    void                SetASpatialVariant( GPKGASpatialVariant eASpatialVariant )
+                                { m_eASpatialVariant = eASpatialVariant; }
 
     void                CreateSpatialIndexIfNecessary();
     bool                CreateSpatialIndex(const char* pszTableName = nullptr);

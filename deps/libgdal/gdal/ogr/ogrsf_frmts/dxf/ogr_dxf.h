@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dxf.h 23ce60aecb9a6eb91f9dda2e4075215e70e971ca 2020-07-25 21:34:53 +1000 Alan Thomas $
+ * $Id: ogr_dxf.h 901a2011cf840e038937efafb2f9cf133a835894 2021-03-17 16:38:43 +0100 Even Rouault $
  *
  * Project:  DXF Translator
  * Purpose:  Definition of classes for OGR .dxf driver.
@@ -183,6 +183,8 @@ public:
         }
         return TRUE;
     }
+
+    OGRCoordinateTransformation* GetInverse() const override { return nullptr; }
 };
 
 /************************************************************************/
@@ -273,6 +275,8 @@ public:
     OGRCoordinateTransformation* Clone() const override {
         return new OGRDXFOCSTransformer(*this);
     }
+
+    OGRCoordinateTransformation* GetInverse() const override { return nullptr; }
 };
 
 /************************************************************************/

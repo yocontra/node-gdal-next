@@ -50,7 +50,7 @@
 #include "gdal_priv.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vrtsourcedrasterband.cpp 0141707f36f13d35ae404b99609069464eb51928 2020-09-21 14:37:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtsourcedrasterband.cpp 9c76f54836aeca57bc60bfd7ef7f75664317bb15 2020-11-13 17:04:02 +0100 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -102,6 +102,18 @@ VRTSourcedRasterBand::VRTSourcedRasterBand( GDALDataType eType,
 VRTSourcedRasterBand::VRTSourcedRasterBand( GDALDataset *poDSIn, int nBandIn,
                                             GDALDataType eType,
                                             int nXSize, int nYSize ) :
+    VRTSourcedRasterBand(poDSIn, nBandIn, eType, nXSize, nYSize, 0, 0)
+{
+}
+
+/************************************************************************/
+/*                        VRTSourcedRasterBand()                        */
+/************************************************************************/
+
+VRTSourcedRasterBand::VRTSourcedRasterBand( GDALDataset *poDSIn, int nBandIn,
+                                            GDALDataType eType,
+                                            int nXSize, int nYSize,
+                                            int nBlockXSizeIn, int nBlockYSizeIn ) :
     m_nRecursionCounter(0),
     m_papszSourceList(nullptr),
     nSources(0),
@@ -114,6 +126,10 @@ VRTSourcedRasterBand::VRTSourcedRasterBand( GDALDataset *poDSIn, int nBandIn,
     nBand = nBandIn;
 
     eDataType = eType;
+    if( nBlockXSizeIn > 0 )
+        nBlockXSize = nBlockXSizeIn;
+    if( nBlockYSizeIn > 0 )
+        nBlockYSize = nBlockYSizeIn;
 }
 
 /************************************************************************/

@@ -27,8 +27,10 @@ class LinearRing : public CurveBase<LinearRing, OGRLinearRing, LineStringPoints>
 
   static void Initialize(Local<Object> target);
   using CurveBase<LinearRing, OGRLinearRing, LineStringPoints>::New;
+  static Local<Value> New(OGRLinearRing *geom, bool owned);
   static NAN_METHOD(toString);
   static NAN_METHOD(getArea);
+  static NAN_METHOD(addSubLineString);
 };
 
 } // namespace node_gdal

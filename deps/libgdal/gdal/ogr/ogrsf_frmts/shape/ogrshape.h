@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrshape.h e0c4124700394d1459aa2e6b9124a5ff282660b9 2020-06-01 15:35:17 +0200 Yorick de Wid $
+ * $Id: ogrshape.h 74eca1110adf6e47b87fee110ad9bf5f322fef64 2021-03-15 14:38:32 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the Shapefile driver to implement
@@ -277,7 +277,6 @@ class OGRShapeDataSource final: public OGRDataSource
     std::vector<CPLString> oVectorLayerName{};
 
     bool                b2GBLimit;
-    char              **papszOpenOptions;
     bool                m_bIsZip = false;
     bool                m_bSingleLayerZip = false;
     CPLString           m_osTemporaryUnzipDir{};

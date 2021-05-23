@@ -36,7 +36,7 @@
 #include "cpl_error.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: ogr_api.cpp 2d686cadda65aebe1463aa2b7aaf7bfbcf992cdc 2020-10-03 17:16:57 -0400 Dylan Sutton $")
+CPL_CVSID("$Id: ogr_api.cpp 97b0aef771ee5f9742b799ef3101180808c23f0b 2021-03-29 17:56:08 +0100 Joaquim $")
 
 static bool bNonLinearGeometriesEnabled = true;
 
@@ -62,7 +62,7 @@ inline OGRGeometryH ToHandle(OGRGeometry* poGeom)
 /*                        OGR_G_GetPointCount()                         */
 /************************************************************************/
 /**
- * \brief Fetch number of points from a geometry.
+ * \brief Fetch number of points from a Point or a LineString/LinearRing geometry.
  *
  * Only wkbPoint[25D] or wkbLineString[25D] may return a valid value.
  * Other geometry types will silently return 0.
@@ -177,7 +177,7 @@ static double OGR_G_Get_Component( OGRGeometryH hGeom, int i )
 /*                             OGR_G_GetX()                             */
 /************************************************************************/
 /**
- * \brief Fetch the x coordinate of a point from a geometry.
+ * \brief Fetch the x coordinate of a point from a Point or a LineString/LinearRing geometry.
  *
  * @param hGeom handle to the geometry from which to get the x coordinate.
  * @param i point to get the x coordinate.
@@ -200,7 +200,7 @@ double OGR_G_GetX( OGRGeometryH hGeom, int i )
 /*                             OGR_G_GetY()                             */
 /************************************************************************/
 /**
- * \brief Fetch the x coordinate of a point from a geometry.
+ * \brief Fetch the x coordinate of a point from a Point or a LineString/LinearRing geometry.
  *
  * @param hGeom handle to the geometry from which to get the y coordinate.
  * @param i point to get the Y coordinate.
@@ -223,7 +223,7 @@ double OGR_G_GetY( OGRGeometryH hGeom, int i )
 /*                             OGR_G_GetZ()                             */
 /************************************************************************/
 /**
- * \brief Fetch the z coordinate of a point from a geometry.
+ * \brief Fetch the z coordinate of a point from a Point or a LineString/LinearRing geometry.
  *
  * @param hGeom handle to the geometry from which to get the Z coordinate.
  * @param i point to get the Z coordinate.

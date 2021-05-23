@@ -29,7 +29,7 @@
 
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrregisterall.cpp bca0a3e9973959f19849febb0281fa9ecf0ad51f 2020-09-02 20:47:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrregisterall.cpp decf0d0bdf8ba9b4efa471cd15c968080e656298 2021-02-27 22:56:48 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRRegisterAll()                           */
@@ -74,9 +74,6 @@ void OGRRegisterAllInternal()
 #endif
 #ifdef MEM_ENABLED
     RegisterOGRMEM();
-#endif
-#ifdef BNA_ENABLED
-    RegisterOGRBNA();
 #endif
 #ifdef CSV_ENABLED
     RegisterOGRCSV();
@@ -159,9 +156,6 @@ void OGRRegisterAllInternal()
 #ifdef FGDB_ENABLED
     RegisterOGRFileGDB();
 #endif
-#ifdef XPLANE_ENABLED
-    RegisterOGRXPlane();
-#endif
 #ifdef DWG_ENABLED
     RegisterOGRDWG();
 #endif
@@ -208,12 +202,6 @@ void OGRRegisterAllInternal()
 #ifdef GPSBABEL_ENABLED
     RegisterOGRGPSBabel();
 #endif
-#ifdef SUA_ENABLED
-    RegisterOGRSUA();
-#endif
-#ifdef OPENAIR_ENABLED
-    RegisterOGROpenAir();
-#endif
 #ifdef PDS_ENABLED
     RegisterOGRPDS();
 #endif
@@ -223,12 +211,6 @@ void OGRRegisterAllInternal()
 #endif
 #ifdef SOSI_ENABLED
     RegisterOGRSOSI();
-#endif
-#ifdef HTF_ENABLED
-    RegisterOGRHTF();
-#endif
-#ifdef AERONAVFAA_ENABLED
-    RegisterOGRAeronavFAA();
 #endif
 #ifdef GEOMEDIA_ENABLED
     RegisterOGRGeomedia();
@@ -250,12 +232,6 @@ void OGRRegisterAllInternal()
 #endif
 #ifdef ARCGEN_ENABLED
     RegisterOGRARCGEN();
-#endif
-#ifdef SEGUKOOA_ENABLED
-    RegisterOGRSEGUKOOA();
-#endif
-#ifdef SEGY_ENABLED
-    RegisterOGRSEGY();
 #endif
 #ifdef XLS_ENABLED
     RegisterOGRXLS();

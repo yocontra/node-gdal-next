@@ -51,7 +51,9 @@
 #include "ogrsf_frmts.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogropenfilegdbdatasource.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
+#include "filegdb_fielddomain.h"
+
+CPL_CVSID("$Id: ogropenfilegdbdatasource.cpp 7819e495986c82c51d7023358b14ecb2b0fd4d98 2021-04-01 20:02:10 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGROpenFileGDBDataSource()                      */
@@ -404,6 +406,17 @@ int OGROpenFileGDBDataSource::OpenFileGDBv10(int iGDBItems,
                 AddLayer( psField->String, nInterestTable, nCandidateLayers, nLayersSDCOrCDF,
                           osDefinition, osDocumentation,
                           nullptr, wkbUnknown );
+            }
+        }
+        else if( psField != nullptr &&
+            (strstr(psField->String, "GPCodedValueDomain2") != nullptr ||
+                strstr(psField->String, "GPRangeDomain2") != nullptr) )
+        {
+            auto poDomain = ParseXMLFieldDomainDef(psField->String);
+            if( poDomain )
+            {
+                const auto domainName = poDomain->GetName();
+                m_oMapFieldDomains[domainName] = std::move(poDomain);
             }
         }
     }

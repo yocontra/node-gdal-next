@@ -8,9 +8,9 @@
 			"type": "static_library",
 			"sources": [
 				"../gdal/frmts/ingr/IngrTypes.cpp",
+				"../gdal/frmts/ingr/JpegHelper.cpp",
 				"../gdal/frmts/ingr/IntergraphBand.cpp",
-				"../gdal/frmts/ingr/IntergraphDataset.cpp",
-				"../gdal/frmts/ingr/JpegHelper.cpp"
+				"../gdal/frmts/ingr/IntergraphDataset.cpp"
 			],
 			"include_dirs": [
 				"../gdal/frmts/ingr",

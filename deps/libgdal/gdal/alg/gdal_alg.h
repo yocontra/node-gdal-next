@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg.h 60d13e19f89619ca16040b9a270d3837b8f0df63 2020-03-05 10:02:43 +0200 Ilmari Ayres $
+ * $Id: gdal_alg.h d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes, and definitions for various GDAL based algorithms.
@@ -212,15 +212,35 @@ int CPL_DLL GDALTPSTransform(
     double *x, double *y, double *z, int *panSuccess );
 
 /*! @cond Doxygen_Suppress */
-char CPL_DLL ** RPCInfoToMD( GDALRPCInfo *psRPCInfo );
+#ifdef GDAL_COMPILATION
+#define RPCInfoV1ToMD RPCInfoToMD
+#else
+#define RPCInfoToMD RPCInfoV2ToMD
+#endif
+char CPL_DLL ** RPCInfoV1ToMD( GDALRPCInfoV1 *psRPCInfo );
+char CPL_DLL ** RPCInfoV2ToMD( GDALRPCInfoV2 *psRPCInfo );
 /*! @endcond */
 
 /* RPC based transformer ... src is pixel/line/elev, dst is long/lat/elev */
 
+/*! @cond Doxygen_Suppress */
+#ifdef GDAL_COMPILATION
+#define GDALCreateRPCTransformerV1 GDALCreateRPCTransformer
+#else
+#define GDALCreateRPCTransformer GDALCreateRPCTransformerV2
+#endif
+
 void CPL_DLL *
-GDALCreateRPCTransformer( GDALRPCInfo *psRPC, int bReversed,
+GDALCreateRPCTransformerV1( GDALRPCInfoV1 *psRPC, int bReversed,
                           double dfPixErrThreshold,
                           char **papszOptions );
+/*! @endcond */
+
+void CPL_DLL *
+GDALCreateRPCTransformerV2( const GDALRPCInfoV2 *psRPC, int bReversed,
+                          double dfPixErrThreshold,
+                          char **papszOptions );
+
 void CPL_DLL GDALDestroyRPCTransformer( void *pTransformArg );
 int CPL_DLL GDALRPCTransform(
     void *pTransformArg, int bDstToSrc, int nPointCount,

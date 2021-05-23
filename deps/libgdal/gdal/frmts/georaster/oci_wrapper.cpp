@@ -29,7 +29,7 @@
 
 #include "oci_wrapper.h"
 
-CPL_CVSID("$Id: oci_wrapper.cpp 0022fc591f3de6528cc6de3bbbec4bdd8122cbaa 2019-03-23 17:01:14 +0100 Even Rouault $")
+CPL_CVSID("$Id: oci_wrapper.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},
@@ -517,7 +517,7 @@ bool OWConnection::GetNextField( OCIParam* phTable,
                                  int* pnPrecision,
                                  signed short* pnScale )
 {
-    OCIParam* hParmDesc = nullptr;
+    OCIParam* hParamDesc = nullptr;
 
     sword nStatus = 0;
 
@@ -525,7 +525,7 @@ bool OWConnection::GetNextField( OCIParam* phTable,
         phTable,
         (ub4) OCI_DTYPE_PARAM,
         hError,
-        (dvoid**) &hParmDesc,   //Warning
+        (dvoid**) &hParamDesc,   //Warning
         (ub4) nIndex + 1 );
 
     if( nStatus != OCI_SUCCESS )
@@ -537,7 +537,7 @@ bool OWConnection::GetNextField( OCIParam* phTable,
     ub4 nNameLength = 0;
 
     CheckError( OCIAttrGet(
-        hParmDesc,
+        hParamDesc,
         (ub4) OCI_DTYPE_PARAM,
         (dvoid*) &pszFieldName,
         (ub4*) &nNameLength,
@@ -547,7 +547,7 @@ bool OWConnection::GetNextField( OCIParam* phTable,
     ub2 nOCIType = 0;
 
     CheckError( OCIAttrGet(
-        hParmDesc,
+        hParamDesc,
         (ub4) OCI_DTYPE_PARAM,
         (dvoid*) &nOCIType,
         (ub4*) nullptr,
@@ -557,7 +557,7 @@ bool OWConnection::GetNextField( OCIParam* phTable,
     ub2 nOCILen = 0;
 
     CheckError( OCIAttrGet(
-        hParmDesc,
+        hParamDesc,
         (ub4) OCI_DTYPE_PARAM,
         (dvoid*) &nOCILen,
         (ub4*) nullptr,
@@ -570,7 +570,7 @@ bool OWConnection::GetNextField( OCIParam* phTable,
     if( nOCIType == SQLT_NUM )
     {
         CheckError( OCIAttrGet(
-            hParmDesc,
+            hParamDesc,
             (ub4) OCI_DTYPE_PARAM,
             (dvoid*) &nOCIPrecision,
             (ub4*) nullptr,
@@ -578,7 +578,7 @@ bool OWConnection::GetNextField( OCIParam* phTable,
             hError ), hError );
 
         CheckError( OCIAttrGet(
-            hParmDesc,
+            hParamDesc,
             (ub4) OCI_DTYPE_PARAM,
             (dvoid*) &nOCIScale,
             (ub4*) nullptr,

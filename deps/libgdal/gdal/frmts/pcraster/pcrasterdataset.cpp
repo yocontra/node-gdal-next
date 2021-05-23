@@ -33,7 +33,7 @@
 #include "pcrasterdataset.h"
 #include "pcrasterutil.h"
 
-CPL_CVSID("$Id: pcrasterdataset.cpp fa839b55f793867fe0bfe7239f18216793be4f7f 2020-09-18 16:59:11 +0200 Even Rouault $")
+CPL_CVSID("$Id: pcrasterdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /*!
   \file
@@ -407,7 +407,7 @@ GDALDataset* PCRasterDataset::create(
      int nr_rows,
      int nrBands,
      GDALDataType gdalType,
-     char** papszParmList)
+     char** papszParamList)
 {
   // Checks
   if(nrBands != 1){
@@ -449,7 +449,7 @@ GDALDataset* PCRasterDataset::create(
   // value scale must be specified by the user,
   // determines cell representation
   const char *valueScale = CSLFetchNameValue(
-    papszParmList,"PCRASTER_VALUESCALE");
+    papszParamList,"PCRASTER_VALUESCALE");
 
   if(valueScale == nullptr){
     CPLError(CE_Failure, CPLE_AppDefined,

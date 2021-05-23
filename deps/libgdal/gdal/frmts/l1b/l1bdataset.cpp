@@ -40,7 +40,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: l1bdataset.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: l1bdataset.cpp 70c086916d3b0b14f6b5ed9c793dd62daca8d14d 2021-03-08 22:56:55 +0100 Even Rouault $")
 
 typedef enum {                  // File formats
     L1B_NONE,           // Not a L1B format
@@ -3248,7 +3248,7 @@ GDALDataset *L1BDataset::Open( GDALOpenInfo * poOpenInfo )
 
     if( poDS->eL1BFormat == L1B_NOAA15_NOHDR &&
         poDS->nRecordSizeFromHeader == 22016 &&
-        (sStat.st_size % poDS->nRecordSizeFromHeader) == 0 )
+        (sStat.st_size % 22016 /* poDS->nRecordSizeFromHeader*/) == 0 )
     {
         poDS->iDataFormat = UNPACKED16BIT;
         poDS->ComputeFileOffsets();

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm.h 2854064296f013181ac011aa4f8473566a46fd4a 2019-08-15 15:36:49 +0200 Even Rouault $
+ * $Id: gnm.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM general public declarations.
@@ -250,7 +250,7 @@ public:
      * @param nConFID - connection feature identificator (-1 for virtual connection)
      * @param dfCost - cost moving from source to target (default 1)
      * @param dfInvCost - cost moving from target to source (default 1)
-     * @param eDir - direction, may be source to target, traget to source or both.
+     * @param eDir - direction, may be source to target, target to source or both.
      *               (default - both)
      * @return CE_None on success
      */

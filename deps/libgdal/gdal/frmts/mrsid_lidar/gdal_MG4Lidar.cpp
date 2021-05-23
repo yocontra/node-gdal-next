@@ -48,7 +48,7 @@ LT_USE_LIDAR_NAMESPACE
 #include "gdal_pam.h"
 // #include "gdal_alg.h" // 1.6 and later have gridding algorithms
 
-CPL_CVSID("$Id: gdal_MG4Lidar.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: gdal_MG4Lidar.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -726,6 +726,9 @@ GDALDataset *MG4LidarDataset::Open( GDALOpenInfo * poOpenInfo )
       if (pxmlPCView == nullptr)
           return nullptr;
    }
+
+  if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("MG4LIDAR") )
+      return nullptr;
 
    CPLXMLNode *psInputFile = CPLGetXMLNode( pxmlPCView, "InputFile" );
    if( psInputFile == nullptr )

@@ -30,7 +30,7 @@
 
 #include "tilematrixset.hpp"
 
-CPL_CVSID("$Id: ogrgeopackagedriver.cpp 5df592a8d2ffb66455270555b586a067a7e400ff 2021-04-04 13:36:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeopackagedriver.cpp 652f826f3549f0359e3ccd637631725ee7708fc4 2021-04-08 15:37:24 +0200 Even Rouault $")
 
 // g++ -g -Wall -fPIC -shared -o ogr_geopackage.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/gpkg ogr/ogrsf_frmts/gpkg/*.c* -L. -lgdal
 
@@ -383,6 +383,7 @@ COMPRESSION_OPTIONS
 "     <Value>1.0</Value>"
 "     <Value>1.1</Value>"
 "     <Value>1.2</Value>"
+"     <Value>1.3</Value>"
 "  </Option>"
 "  <Option name='DATETIME_FORMAT' type='string-select' description='How to encode DateTime not in UTC' default='WITH_TZ'>"
 "     <Value>WITH_TZ</Value>"
@@ -464,7 +465,6 @@ COMPRESSION_OPTIONS
 "  <Option name='DESCRIPTION' type='string' description='Description of the layer, as put in the contents table'/>"
 "  <Option name='ASPATIAL_VARIANT' type='string-select' description='How to register non spatial tables' default='GPKG_ATTRIBUTES'>"
 "     <Value>GPKG_ATTRIBUTES</Value>"
-"     <Value>OGR_ASPATIAL</Value>"
 "     <Value>NOT_REGISTERED</Value>"
 "  </Option>"
 "</LayerCreationOptionList>");

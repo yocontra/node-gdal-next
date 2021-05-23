@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsf_frmts.h bca0a3e9973959f19849febb0281fa9ecf0ad51f 2020-09-02 20:47:32 +0200 Even Rouault $
+ * $Id: ogrsf_frmts.h decf0d0bdf8ba9b4efa471cd15c968080e656298 2021-02-27 22:56:48 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes related to format registration, and file opening.
@@ -518,11 +518,9 @@ void CPL_DLL RegisterOGRDWG();
 void CPL_DLL RegisterOGRDGNV8();
 void CPL_DLL RegisterOGRIDB();
 void CPL_DLL RegisterOGRGMT();
-void CPL_DLL RegisterOGRBNA();
 void CPL_DLL RegisterOGRGPX();
 void CPL_DLL RegisterOGRGeoconcept();
 void CPL_DLL RegisterOGRIngres();
-void CPL_DLL RegisterOGRXPlane();
 void CPL_DLL RegisterOGRNAS();
 void CPL_DLL RegisterOGRGeoRSS();
 void CPL_DLL RegisterOGRGTM();
@@ -530,14 +528,10 @@ void CPL_DLL RegisterOGRVFK();
 void CPL_DLL RegisterOGRPGDump();
 void CPL_DLL RegisterOGROSM();
 void CPL_DLL RegisterOGRGPSBabel();
-void CPL_DLL RegisterOGRSUA();
-void CPL_DLL RegisterOGROpenAir();
 void CPL_DLL RegisterOGRPDS();
 void CPL_DLL RegisterOGRWFS();
 void CPL_DLL RegisterOGROAPIF();
 void CPL_DLL RegisterOGRSOSI();
-void CPL_DLL RegisterOGRHTF();
-void CPL_DLL RegisterOGRAeronavFAA();
 void CPL_DLL RegisterOGRGeomedia();
 void CPL_DLL RegisterOGRMDB();
 void CPL_DLL RegisterOGREDIGEO();
@@ -546,8 +540,6 @@ void CPL_DLL RegisterOGRCouchDB();
 void CPL_DLL RegisterOGRCloudant();
 void CPL_DLL RegisterOGRIdrisi();
 void CPL_DLL RegisterOGRARCGEN();
-void CPL_DLL RegisterOGRSEGUKOOA();
-void CPL_DLL RegisterOGRSEGY();
 void CPL_DLL RegisterOGRXLS();
 void CPL_DLL RegisterOGRODS();
 void CPL_DLL RegisterOGRXLSX();

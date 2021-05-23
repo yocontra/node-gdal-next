@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_fgdb.h 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $
+* $Id: ogr_fgdb.h c9bb0a71c27de43dab42821569ee6d9baf2fdf8f 2021-04-01 19:20:15 +0200 Even Rouault $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Standard includes and class definitions ArcObjects OGR driver.
@@ -310,6 +310,8 @@ public:
   virtual void        ReleaseResultSet( OGRLayer * poResultsSet ) override;
 
   int TestCapability( const char * ) override;
+
+  const OGRFieldDomain* GetFieldDomain(const std::string& name) const override;
 
   Geodatabase* GetGDB() { return m_pGeodatabase; }
   bool         GetUpdate() { return m_bUpdate; }

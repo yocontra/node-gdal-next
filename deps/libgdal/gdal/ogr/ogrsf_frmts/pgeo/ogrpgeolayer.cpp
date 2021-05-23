@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpgeolayer.cpp 085d851ca29ce323a5556449611935a5852cc9dc 2020-08-20 14:13:35 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrpgeolayer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRPGeoLayer()                            */
@@ -365,7 +365,7 @@ void OGRPGeoLayer::LookupSRID( int nSRID )
 
     if( pszSRText[0] == '{' )
     {
-        CPLDebug( "PGEO", "Ignoreing GUID SRTEXT: %s", pszSRText );
+        CPLDebug( "PGEO", "Ignoring GUID SRTEXT: %s", pszSRText );
         return;
     }
 

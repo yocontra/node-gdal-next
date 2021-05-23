@@ -50,7 +50,7 @@
 #include "ogr_core.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: gdal_rasterize_lib.cpp 4c22301b7382166177783477cefcecf4fe693ade 2020-11-07 16:13:30 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_rasterize_lib.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */
@@ -160,7 +160,7 @@ static void InvertGeometries( GDALDatasetH hDstDS,
             auto poMulti = OGRGeometry::FromHandle(ahGeometries[iGeom])->toMultiPolygon();
             for( int i = 0; i < poMulti->getNumGeometries(); i++ )
             {
-                ProcessPoly( poMulti->getGeometryRef(i)->toPolygon() );
+                ProcessPoly( poMulti->getGeometryRef(i) );
             }
             delete poMulti;
         }

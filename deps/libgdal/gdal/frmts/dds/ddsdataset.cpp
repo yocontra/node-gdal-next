@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ddsdataset.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ddsdataset.cpp ac2c77cd845c1d7a43c86106717ec6d08b407cc7 2021-03-15 14:55:45 +0100 Even Rouault $")
 
 using namespace crnlib;
 
@@ -665,7 +665,7 @@ DDSDataset::CreateCopy(const char * pszFilename, GDALDataset *poSrcDS,
             for (int i=0; i<nPixels;++i)
             {
                 int y = (i*3);
-                src_image[i] = (255<<24) | (pabyScanlines[y+2]<<16) | (pabyScanlines[y+1]<<8) |
+                src_image[i] = (255U <<24) | (pabyScanlines[y+2]<<16) | (pabyScanlines[y+1]<<8) |
                   pabyScanlines[y];
             }
 

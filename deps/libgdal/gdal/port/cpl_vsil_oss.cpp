@@ -41,7 +41,7 @@
 
 #include "cpl_alibaba_oss.h"
 
-CPL_CVSID("$Id: cpl_vsil_oss.cpp 84033e049eee28696b553cb16258b3a196410e56 2020-06-29 20:48:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_oss.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -78,7 +78,7 @@ protected:
         IVSIS3LikeHandleHelper* CreateHandleHelper(
             const char* pszURI, bool bAllowNoObject) override;
 
-        CPLString GetFSPrefix() override { return "/vsioss/"; }
+        CPLString GetFSPrefix() const override { return "/vsioss/"; }
 
         void ClearCache() override;
 
@@ -88,7 +88,8 @@ public:
 
         VSIVirtualHandle *Open( const char *pszFilename,
                                 const char *pszAccess,
-                                bool bSetError ) override;
+                                bool bSetError,
+                                CSLConstList papszOptions ) override;
 
         const char* GetOptions() override;
 
@@ -129,7 +130,8 @@ class VSIOSSHandle final : public IVSIS3LikeHandle
 
 VSIVirtualHandle* VSIOSSFSHandler::Open( const char *pszFilename,
                                         const char *pszAccess,
-                                        bool bSetError)
+                                        bool bSetError,
+                                        CSLConstList papszOptions )
 {
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
         return nullptr;
@@ -153,7 +155,7 @@ VSIVirtualHandle* VSIOSSFSHandler::Open( const char *pszFilename,
             return nullptr;
         UpdateHandleFromMap(poHandleHelper);
         VSIS3WriteHandle* poHandle =
-            new VSIS3WriteHandle(this, pszFilename, poHandleHelper, false);
+            new VSIS3WriteHandle(this, pszFilename, poHandleHelper, false, papszOptions);
         if( !poHandle->IsOK() )
         {
             delete poHandle;
@@ -167,7 +169,7 @@ VSIVirtualHandle* VSIOSSFSHandler::Open( const char *pszFilename,
     }
 
     return
-        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError);
+        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError, papszOptions);
 }
 
 /************************************************************************/
@@ -298,10 +300,7 @@ void VSIOSSFSHandler::UpdateMapFromHandle( IVSIS3LikeHandleHelper * poHandleHelp
     CPLMutexHolder oHolder( &hMutex );
 
     VSIOSSHandleHelper * poOSSHandleHelper =
-        dynamic_cast<VSIOSSHandleHelper *>(poHandleHelper);
-    CPLAssert( poOSSHandleHelper );
-    if( !poOSSHandleHelper )
-        return;
+        cpl::down_cast<VSIOSSHandleHelper *>(poHandleHelper);
     oMapBucketsToOSSParams[ poOSSHandleHelper->GetBucket() ] =
         VSIOSSUpdateParams ( poOSSHandleHelper );
 }
@@ -315,10 +314,7 @@ void VSIOSSFSHandler::UpdateHandleFromMap( IVSIS3LikeHandleHelper * poHandleHelp
     CPLMutexHolder oHolder( &hMutex );
 
     VSIOSSHandleHelper * poOSSHandleHelper =
-        dynamic_cast<VSIOSSHandleHelper *>(poHandleHelper);
-    CPLAssert( poOSSHandleHelper );
-    if( !poOSSHandleHelper )
-        return;
+        cpl::down_cast<VSIOSSHandleHelper *>(poHandleHelper);
     std::map< CPLString, VSIOSSUpdateParams>::iterator oIter =
         oMapBucketsToOSSParams.find(poOSSHandleHelper->GetBucket());
     if( oIter != oMapBucketsToOSSParams.end() )

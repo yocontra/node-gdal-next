@@ -34,7 +34,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: genbindataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: genbindataset.cpp 18c08feb1540d58a5076265e837d49ace106f302 2021-03-08 23:30:56 +0100 Even Rouault $")
 
 /* ==================================================================== */
 /*      Table relating USGS and ESRI state plane zones.                 */
@@ -447,14 +447,14 @@ void GenBinDataset::ParseCoordinateSystem( char **papszHdr )
 
 #if 0
     // TODO(schwehr): Why was this being done but not used?
-    double adfProjParms[15] = { 0.0 };
+    double adfProjParams[15] = { 0.0 };
     if( CSLFetchNameValue( papszHdr, "PROJECTION_PARAMETERS" ) )
     {
         char **papszTokens = CSLTokenizeString(
             CSLFetchNameValue( papszHdr, "PROJECTION_PARAMETERS" ) );
 
         for( int i = 0; i < 15 && papszTokens[i] != NULL; i++ )
-            adfProjParms[i] = CPLAtofM( papszTokens[i] );
+            adfProjParams[i] = CPLAtofM( papszTokens[i] );
 
         CSLDestroy( papszTokens );
     }
@@ -780,7 +780,7 @@ GDALDataset *GenBinDataset::Open( GDALOpenInfo * poOpenInfo )
     else if( EQUAL(pszInterleaving,"BIP") )
     {
         nPixelOffset = nItemSize * nBands;
-        if( poDS->nRasterXSize > INT_MAX / nPixelOffset )
+        if( nPixelOffset == 0 || poDS->nRasterXSize > INT_MAX / nPixelOffset )
             bIntOverflow = true;
         else
         {
@@ -796,7 +796,8 @@ GDALDataset *GenBinDataset::Open( GDALOpenInfo * poOpenInfo )
                       pszInterleaving );
 
         nPixelOffset = nItemSize;
-        if( poDS->nRasterXSize > INT_MAX / (nPixelOffset * nBands) )
+        if( nPixelOffset == 0 || nBands == 0 ||
+            poDS->nRasterXSize > INT_MAX / (nPixelOffset * nBands) )
             bIntOverflow = true;
         else
         {

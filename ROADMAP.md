@@ -3,7 +3,6 @@
 - GDAL 3.3
 - Add EventEmitters
 - Support aborting of GDAL operations (that allow it) through the AbortController (Node.js >= 15)
-- *Dropping support for Node.js 10.x, GDAL 1.x, Python 2 and Ubuntu 16.04*
 
 # One day, maybe
 

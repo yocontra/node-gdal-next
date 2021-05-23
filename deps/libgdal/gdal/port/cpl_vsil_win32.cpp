@@ -29,7 +29,7 @@
 
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_win32.cpp 08c9fb51f640a13b2e3a7d662ab676f08c57001e 2020-10-06 13:05:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_win32.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
 
 #if defined(WIN32)
 
@@ -67,7 +67,8 @@ public:
 
     virtual VSIVirtualHandle *Open( const char *pszFilename,
                                     const char *pszAccess,
-                                    bool bSetError ) override;
+                                    bool bSetError,
+                                    CSLConstList /* papszOptions */ ) override;
     virtual int      Stat( const char *pszFilename, VSIStatBufL *pStatBuf, int nFlags ) override;
     virtual int      Unlink( const char *pszFilename ) override;
     virtual int      Rename( const char *oldpath, const char *newpath ) override;
@@ -555,7 +556,8 @@ static bool VSIWin32IsLongFilename( const wchar_t* pwszFilename )
 
 VSIVirtualHandle *VSIWin32FilesystemHandler::Open( const char *pszFilename,
                                                    const char *pszAccess,
-                                                   bool bSetError )
+                                                   bool bSetError,
+                                                   CSLConstList /* papszOptions */ )
 
 {
     DWORD dwDesiredAccess;

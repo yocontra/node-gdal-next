@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_srs_api.h ef356bb0205870e819cb422bace9b5f8c39ae2cb 2020-10-07 19:56:50 +0200 Even Rouault $
+ * $Id: ogr_srs_api.h 9722d88648b7695fefda75ef93388bca2e7556f1 2021-03-24 00:21:44 +0300 drons $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API and constant declarations for OGR Spatial References.
@@ -465,6 +465,8 @@ typedef void *OGRCoordinateTransformationH;
 
 void CPL_DLL OSRSetPROJSearchPaths( const char* const * papszPaths );
 char CPL_DLL **OSRGetPROJSearchPaths( void );
+void CPL_DLL OSRSetPROJAuxDbPaths( const char* const * papszPaths );
+char CPL_DLL **OSRGetPROJAuxDbPaths( void );
 void CPL_DLL OSRGetPROJVersion( int* pnMajor, int* pnMinor, int* pnPatch );
 
 OGRSpatialReferenceH CPL_DLL CPL_STDCALL
@@ -617,12 +619,12 @@ int CPL_DLL OSRGetAreaOfUse(  OGRSpatialReferenceH hSRS,
 OGRErr CPL_DLL OSRSetProjection( OGRSpatialReferenceH, const char * );
 OGRErr CPL_DLL OSRSetProjParm( OGRSpatialReferenceH, const char *, double );
 double CPL_DLL OSRGetProjParm( OGRSpatialReferenceH hSRS,
-                        const char * pszParmName,
+                        const char * pszParamName,
                         double dfDefault /* = 0.0 */,
                         OGRErr * /* = NULL */ );
 OGRErr CPL_DLL OSRSetNormProjParm( OGRSpatialReferenceH, const char *, double);
 double CPL_DLL OSRGetNormProjParm( OGRSpatialReferenceH hSRS,
-                                   const char * pszParmName,
+                                   const char * pszParamName,
                                    double dfDefault /* = 0.0 */,
                                    OGRErr * /* = NULL */ );
 
@@ -1054,6 +1056,12 @@ int CPL_DLL OCTCoordinateTransformationOptionsSetAreaOfInterest(
     double dfEastLongitudeDeg,
     double dfNorthLatitudeDeg);
 
+int CPL_DLL OCTCoordinateTransformationOptionsSetDesiredAccuracy(
+    OGRCoordinateTransformationOptionsH hOptions, double dfAccuracy);
+
+int CPL_DLL OCTCoordinateTransformationOptionsSetBallparkAllowed(
+    OGRCoordinateTransformationOptionsH hOptions, int bAllowBallpark);
+
 void CPL_DLL OCTDestroyCoordinateTransformationOptions(OGRCoordinateTransformationOptionsH);
 
 OGRCoordinateTransformationH CPL_DLL
@@ -1077,6 +1085,12 @@ int CPL_DLL
 OCTTransform4D( OGRCoordinateTransformationH hCT,
                 int nCount, double *x, double *y, double *z, double *t,
                 int *pabSuccess );
+
+int CPL_DLL
+OCTTransform4DWithErrorCodes( OGRCoordinateTransformationH hCT,
+                  int nCount, double *x, double *y, double *z, double *t,
+                  int *panErrorCodes );
+
 
 CPL_C_END
 

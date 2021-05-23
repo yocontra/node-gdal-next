@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_conv.h bb8555c956c75e4f6ae50db6d28e40b660d9a777 2020-06-14 00:21:08 +0200 Even Rouault $
+ * $Id: cpl_conv.h daf8a2abc014b937ac276c213cf26e843121f6cb 2021-02-24 11:01:06 +0100 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Convenience functions declarations.
@@ -66,6 +66,8 @@ char CPL_DLL** CPLGetConfigOptions(void);
 void CPL_DLL   CPLSetConfigOptions(const char* const * papszConfigOptions);
 char CPL_DLL** CPLGetThreadLocalConfigOptions(void);
 void CPL_DLL   CPLSetThreadLocalConfigOptions(const char* const * papszConfigOptions);
+void CPL_DLL   CPLLoadConfigOptionsFromFile(const char* pszFilename, int bOverrideEnvVars);
+void CPL_DLL   CPLLoadConfigOptionsFromPredefinedFiles(void);
 
 /* -------------------------------------------------------------------- */
 /*      Safe malloc() API.  Thin cover over VSI functions with fatal    */

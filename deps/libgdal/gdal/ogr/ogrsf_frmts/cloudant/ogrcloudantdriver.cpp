@@ -28,7 +28,7 @@
 
 #include "ogr_cloudant.h"
 
-CPL_CVSID("$Id: ogrcloudantdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcloudantdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 extern "C" void RegisterOGRCloudant();
 
@@ -56,6 +56,9 @@ static GDALDataset* OGRCloudantDriverOpen( GDALOpenInfo* poOpenInfo )
     if( OGRCloudantDriverIdentify(poOpenInfo) == 0 )
         return nullptr;
 
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("CLOUDANT") )
+        return nullptr;
+
     OGRCloudantDataSource   *poDS = new OGRCloudantDataSource();
 
     if( !poDS->Open( poOpenInfo->pszFilename, poOpenInfo->eAccess == GA_Update ) )
@@ -78,6 +81,9 @@ static GDALDataset* OGRCloudantDriverCreate( const char * pszName,
                                             GDALDataType /* eDT */,
                                             char ** /* papszOptions */ )
 {
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("CLOUDANT") )
+        return nullptr;
+
     OGRCloudantDataSource   *poDS = new OGRCloudantDataSource();
 
     if( !poDS->Open( pszName, TRUE ) )

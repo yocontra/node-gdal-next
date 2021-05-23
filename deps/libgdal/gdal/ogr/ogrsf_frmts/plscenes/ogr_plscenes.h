@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_plscenes.h 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $
+ * $Id: ogr_plscenes.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  PlanetLabs scene driver
  * Purpose:  PLScenes driver interface
@@ -113,7 +113,7 @@ class OGRPLScenesDataV1Layer final: public OGRLayer
             OGRSpatialReference*  m_poSRS;
             GIntBig               m_nTotalFeatures;
             std::map<CPLString, int> m_oMapPrefixedJSonFieldNameToFieldIdx;
-            std::map<int,CPLString>  m_oMapFieldIdxToQueriableJSonFieldName;
+            std::map<int,CPLString>  m_oMapFieldIdxToQueryableJSonFieldName;
 
             GIntBig               m_nNextFID;
             bool                  m_bEOF;
@@ -141,7 +141,7 @@ class OGRPLScenesDataV1Layer final: public OGRLayer
                                         json_object* poVal );
             void                  EstablishLayerDefn();
             void                  RegisterField(OGRFieldDefn* poFieldDefn,
-                                                const char* pszQueriableJSonName,
+                                                const char* pszQueryableJSonName,
                                                 const char* pszPrefixedJSonName);
             bool                  GetNextPage();
             json_object*          BuildFilter(swq_expr_node* poNode);

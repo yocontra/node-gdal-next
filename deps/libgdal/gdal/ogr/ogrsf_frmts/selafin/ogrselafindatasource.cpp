@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <ctime>
 
-CPL_CVSID("$Id: ogrselafindatasource.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrselafindatasource.cpp 7021dc4f10c17b71347f2ed349c6d1768425e847 2021-03-07 19:12:46 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          Range                                       */
@@ -567,9 +567,8 @@ OGRErr OGRSelafinDataSource::DeleteLayer( int iLayer ) {
         }
         for (int j=0;j<poHeader->nVar;++j)
         {
-            int nTemp = 0;
             if (VSIFSeekL(poHeader->fp,poHeader->getPosition(i+1)+12,SEEK_SET)!=0 ||
-                (nTemp=Selafin::read_floatarray(poHeader->fp,&dfValues,poHeader->nFileSize)) !=poHeader->nPoints ||
+                Selafin::read_floatarray(poHeader->fp,&dfValues,poHeader->nFileSize) !=poHeader->nPoints ||
                 VSIFSeekL(poHeader->fp,poHeader->getPosition(i)+12,SEEK_SET)!=0 ||
                 Selafin::write_floatarray(poHeader->fp,dfValues,poHeader->nPoints)==0) {
                 CPLError( CE_Failure, CPLE_FileIO, "Could not update Selafin file %s.\n",pszName);

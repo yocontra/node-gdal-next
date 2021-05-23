@@ -49,7 +49,7 @@
 #include <utility>
 #include <set>
 
-CPL_CVSID("$Id: bagdataset.cpp 49658c34da30633b35741e368e0b9961f1fe22f0 2021-03-23 23:21:02 +0100 Even Rouault $")
+CPL_CVSID("$Id: bagdataset.cpp 72ff37e10b2a9fb44ba254659a87a6b31445db2e 2021-03-23 22:13:38 +0100 Even Rouault $")
 
 struct BAGRefinementGrid
 {

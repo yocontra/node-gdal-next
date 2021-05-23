@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "aoutils.h"
 
-CPL_CVSID("$Id: aodriver.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: aodriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                            AODriver()                            */
@@ -102,6 +102,9 @@ OGRDataSource *AODriver::Open( const char* pszFilename,
 
   if( !STARTS_WITH_CI(pszFilename, "AO:") )
     return NULL;
+
+  if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("AO") )
+        return nullptr;
 
   //OK, it is our turn, let's pay the price
 

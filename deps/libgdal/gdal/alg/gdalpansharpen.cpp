@@ -51,7 +51,7 @@
 // Limit types to practical use cases.
 #define LIMIT_TYPES 1
 
-CPL_CVSID("$Id: gdalpansharpen.cpp 6fea8863f7c33ef02b5098ee82ee80ecf250fac9 2020-11-17 21:14:43 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalpansharpen.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALCreatePansharpenOptions()                    */
@@ -404,6 +404,7 @@ GDALPansharpenOperation::Initialize( const GDALPansharpenOptions* psOptionsIn )
             (eResampleAlg == GRIORA_CubicSpline) ? "CUBICSPLINE" :
             (eResampleAlg == GRIORA_Lanczos) ? "LANCZOS" :
             (eResampleAlg == GRIORA_Average) ? "AVERAGE" :
+            (eResampleAlg == GRIORA_RMS) ? "RMS" :
             (eResampleAlg == GRIORA_Mode) ? "MODE" :
             (eResampleAlg == GRIORA_Gauss) ? "GAUSS" : "UNKNOWN";
 
@@ -1267,12 +1268,9 @@ CPLErr GDALPansharpenOperation::ProcessRegion( int nXOff, int nYOff,
 
             // To avoid races in threads, we query now the mask flags,
             // so that implicit mask bands are created now.
-            if( eResampleAlg != GRIORA_NearestNeighbour )
+            for( int i = 0; i < poMEMDS->GetRasterCount(); i++ )
             {
-                for( int i = 0; i < poMEMDS->GetRasterCount(); i++ )
-                {
-                    poMEMDS->GetRasterBand(i+1)->GetMaskFlags();
-                }
+                poMEMDS->GetRasterBand(i+1)->GetMaskFlags();
             }
 
             std::vector<GDALPansharpenResampleJob> asJobs;

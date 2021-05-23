@@ -31,7 +31,7 @@
 #include "gdal_pam.h"
 #include "gxfopen.h"
 
-CPL_CVSID("$Id: gxfdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: gxfdataset.cpp 3565f178b0cf927c6e755d7da1af362499edca5f 2021-03-08 21:56:06 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -273,7 +273,7 @@ GDALDataset *GXFDataset::Open( GDALOpenInfo * poOpenInfo )
 /*      we also now verify that there is a #GRID keyword before         */
 /*      passing it off to GXFOpen().  We check in the first 50K.        */
 /* -------------------------------------------------------------------- */
-    poOpenInfo->TryToIngest(50000);
+    CPL_IGNORE_RET_VAL(poOpenInfo->TryToIngest(50000));
     bool bGotGrid = false;
 
     const char* pszBigBuf = (const char*)poOpenInfo->pabyHeader;

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: geoconcept.c b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
+ * $Id: geoconcept.c 32e5b9f8df67107313a1a803f4bb422369b8de90 2021-03-07 19:12:09 +0100 Even Rouault $
  *
  * Name:     geoconcept.c
  * Project:  OpenGIS Simple Features Reference Implementation
@@ -36,7 +36,7 @@
 #include "cpl_string.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: geoconcept.c b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: geoconcept.c 32e5b9f8df67107313a1a803f4bb422369b8de90 2021-03-07 19:12:09 +0100 Even Rouault $")
 
 #define kItemSize_GCIO      256
 #define kExtraSize_GCIO    4096
@@ -3313,7 +3313,6 @@ static OGRErr GCIOAPI_CALL _readConfigFieldType_GCIO (
   char e[kExtraSize_GCIO] = {0};
   long id;
   GCTypeKind knd;
-  GCField* theField;
 
   bEOF= 0;
   n[0]= '\0';
@@ -3321,7 +3320,6 @@ static OGRErr GCIOAPI_CALL _readConfigFieldType_GCIO (
   e[0]= '\0';
   id= UNDEFINEDID_GCIO;
   knd= vUnknownItemType_GCIO;
-  theField= NULL;
   while( _get_GCIO(hGCT)!= (vsi_l_offset)EOF ) {
     /* TODO: Switch to C++ casts below. */
     if( (enum _tIO_MetadataType_GCIO)GetGCWhatIs_GCIO(hGCT) == vComType_GCIO )
@@ -3341,7 +3339,7 @@ static OGRErr GCIOAPI_CALL _readConfigFieldType_GCIO (
                     n[0]=='\0'? "Name": id==UNDEFINEDID_GCIO? "ID": "Kind");
           goto onError;
         }
-        if( (theField= AddTypeField_GCIO(hGCT,GetTypeName_GCIO(theClass),-1,n,id,knd,x,e))==NULL )
+        if( AddTypeField_GCIO(hGCT,GetTypeName_GCIO(theClass),-1,n,id,knd,x,e)==NULL )
         {
           goto onError;
         }
@@ -3492,7 +3490,6 @@ static OGRErr GCIOAPI_CALL _readConfigFieldSubType_GCIO (
   char e[kExtraSize_GCIO] = {0};
   long id;
   GCTypeKind knd;
-  GCField* theField;
 
   bEOF= 0;
   n[0]= '\0';
@@ -3500,7 +3497,6 @@ static OGRErr GCIOAPI_CALL _readConfigFieldSubType_GCIO (
   e[0]= '\0';
   id= UNDEFINEDID_GCIO;
   knd= vUnknownItemType_GCIO;
-  theField= NULL;
   while( _get_GCIO(hGCT)!= (vsi_l_offset)EOF ) {
     if( (enum _tIO_MetadataType_GCIO)GetGCWhatIs_GCIO(hGCT) == vComType_GCIO )
     {
@@ -3519,7 +3515,7 @@ static OGRErr GCIOAPI_CALL _readConfigFieldSubType_GCIO (
                     n[0]=='\0'? "Name": id==UNDEFINEDID_GCIO? "ID": "Kind");
           goto onError;
         }
-        if( (theField= AddSubTypeField_GCIO(hGCT,GetTypeName_GCIO(theClass),GetSubTypeName_GCIO(theSubType),-1,n,id,knd,x,e))==NULL )
+        if( AddSubTypeField_GCIO(hGCT,GetTypeName_GCIO(theClass),GetSubTypeName_GCIO(theSubType),-1,n,id,knd,x,e)==NULL )
         {
           goto onError;
         }
@@ -5383,12 +5379,11 @@ OGRFeatureH GCIOAPI_CALL ReadNextFeature_GCIO (
 {
   OGRFeatureH f;
   GCExportFileH* H;
-  GCExportFileMetadata* Meta;
   GCDim d;
 
   f= NULL;
   H= GetSubTypeGCHandle_GCIO(theSubType);
-  if( !(Meta= GetGCMeta_GCIO(H)) )
+  if( !(GetGCMeta_GCIO(H)) )
   {
     return NULL;
   }

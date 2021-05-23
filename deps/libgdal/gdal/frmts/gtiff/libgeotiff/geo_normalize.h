@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geo_normalize.h 48793b5613cf1bf789125516ba845947dc63098f 2019-07-17 17:40:29 +0200 Even Rouault $
+ * $Id: geo_normalize.h 6240bef04d4ee087587e50fb0ff83a04e4f09c1e 2021-03-06 17:04:20 +0100 Even Rouault $
  *
  * Project:  libgeotiff
  * Purpose:  Include file related to geo_normalize.c containing Code to
@@ -155,11 +155,11 @@ int GTIF_DLL GTIFGetProjTRFInfoEx( void* ctx, /* The void* should be a PJ_CONTEX
                           int nProjTRFCode,
                           char **ppszProjTRFName,
                           short * pnProjMethod,
-                          double * padfProjParms );
+                          double * padfProjParams );
 int GTIF_DLL GTIFGetProjTRFInfo( int nProjTRFCode,
                                 char ** ppszProjTRFName,
                                 short * pnProjMethod,
-                                double * padfProjParms );
+                                double * padfProjParams );
 
 int GTIF_DLL GTIFGetGCSInfoEx( void* ctx, /* The void* should be a PJ_CONTEXT* */
                       int nGCSCode, char ** ppszName,

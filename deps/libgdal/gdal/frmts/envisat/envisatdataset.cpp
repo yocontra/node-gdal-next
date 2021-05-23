@@ -34,7 +34,7 @@
 #include "ogr_srs_api.h"
 #include "timedelta.hpp"
 
-CPL_CVSID("$Id: envisatdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: envisatdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 CPL_C_START
 #include "EnvisatFile.h"
@@ -506,7 +506,7 @@ void EnvisatDataset::ScanForGCPs_MERIS()
     }
     else
     {
-        CPLDebug( "EnvisatDataset", "Unexpectd size of 'Tie points ADS' !"
+        CPLDebug( "EnvisatDataset", "Unexpected size of 'Tie points ADS' !"
                 " received=%d expected=%d or %d" , nDSRSize ,
                 50*nTPPerLine+13, 8*nTPPerLine+13 ) ;
         return;

@@ -38,7 +38,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gs7bgdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: gs7bgdataset.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -79,7 +79,7 @@ class GS7BGDataset final: public GDALPamDataset
     static GDALDataset *Create( const char * pszFilename,
                     int nXSize, int nYSize, int nBands,
                     GDALDataType eType,
-                    char **papszParmList );
+                    char **papszParamList );
     static GDALDataset *CreateCopy( const char *pszFilename,
                     GDALDataset *poSrcDS,
                     int bStrict, char **papszOptions,
@@ -861,9 +861,9 @@ CPLErr GS7BGDataset::SetGeoTransform( double *padfGeoTransform )
         return CE_Failure;
     }
 
-    GS7BGRasterBand *poGRB = dynamic_cast<GS7BGRasterBand *>(GetRasterBand( 1 ));
+    GS7BGRasterBand *poGRB = cpl::down_cast<GS7BGRasterBand *>(GetRasterBand( 1 ));
 
-    if( poGRB == nullptr || padfGeoTransform == nullptr)
+    if( padfGeoTransform == nullptr)
         return CE_Failure;
 
     /* non-zero transform 2 or 4 or negative 1 or 5 not supported natively */
@@ -1071,7 +1071,7 @@ GDALDataset *GS7BGDataset::Create( const char * pszFilename,
                                    int nYSize,
                                    int nBands,
                                    GDALDataType eType,
-                                   CPL_UNUSED char **papszParmList )
+                                   CPL_UNUSED char **papszParamList )
 
 {
     if( nXSize <= 0 || nYSize <= 0 )

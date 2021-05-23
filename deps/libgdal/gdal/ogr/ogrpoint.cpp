@@ -42,7 +42,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrpoint.cpp f03e9dcb4ba7c78c663e1e21485f83ed99016d87 2021-03-08 19:16:56 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrpoint.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GetEmptyNonEmptyFlag()                       */
@@ -202,17 +202,10 @@ OGRPoint& OGRPoint::operator=( const OGRPoint& other )
 /*      Make a new object that is a copy of this object.                */
 /************************************************************************/
 
-OGRGeometry *OGRPoint::clone() const
+OGRPoint *OGRPoint::clone() const
 
 {
-    OGRPoint *poNewPoint = new (std::nothrow) OGRPoint( x, y, z, m );
-    if( poNewPoint == nullptr )
-        return nullptr;
-
-    poNewPoint->assignSpatialReference( getSpatialReference() );
-    poNewPoint->flags = flags;
-
-    return poNewPoint;
+    return new (std::nothrow) OGRPoint(*this);
 }
 
 /************************************************************************/
@@ -300,7 +293,7 @@ void OGRPoint::setCoordinateDimension( int nNewDimension )
 /*      representation including the byte order, and type information.  */
 /************************************************************************/
 
-int OGRPoint::WkbSize() const
+size_t OGRPoint::WkbSize() const
 
 {
     if( (flags & OGR_G_3D) && (flags & OGR_G_MEASURED) )
@@ -319,12 +312,12 @@ int OGRPoint::WkbSize() const
 /************************************************************************/
 
 OGRErr OGRPoint::importFromWkb( const unsigned char *pabyData,
-                                int nSize,
+                                size_t nSize,
                                 OGRwkbVariant eWkbVariant,
-                                int& nBytesConsumedOut )
+                                size_t& nBytesConsumedOut )
 
 {
-    nBytesConsumedOut = -1;
+    nBytesConsumedOut = 0;
     OGRwkbByteOrder eByteOrder = wkbNDR;
 
     flags = 0;
@@ -334,7 +327,7 @@ OGRErr OGRPoint::importFromWkb( const unsigned char *pabyData,
     if( eErr != OGRERR_NONE )
         return eErr;
 
-    if( nSize != -1 )
+    if( nSize != static_cast<size_t>(-1) )
     {
         if( (nSize < 37) && ((flags & OGR_G_3D) && (flags & OGR_G_MEASURED)) )
             return OGRERR_NOT_ENOUGH_DATA;

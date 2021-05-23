@@ -64,7 +64,6 @@ class OGRLVBAGLayer final: public OGRAbstractProxiedLayer, public OGRGetNextFeat
     OGRFeatureDefn     *poFeatureDefn;
     OGRFeature         *m_poFeature = nullptr;
     VSILFILE           *fp;
-    int                 nNextFID;
     CPLString           osFilename;
     
     typedef enum
@@ -80,15 +79,26 @@ class OGRLVBAGLayer final: public OGRAbstractProxiedLayer, public OGRGetNextFeat
     
     bool                bSchemaOnly;
     bool                bHasReadSchema;
-    bool                bFitInvalidData;
+    bool                bFixInvalidData;
+    bool                bLegacyId;
     
+    typedef enum
+    {
+        ADDRESS_PRIMARY,
+        ADDRESS_SECONDARY,
+    } AddressRefState;
+
+    int                 nNextFID;
     int                 nCurrentDepth;
     int                 nGeometryElementDepth;
     int                 nFeatureCollectionDepth;
     int                 nFeatureElementDepth;
     int                 nAttributeElementDepth;
+
+    AddressRefState     eAddressRefState;
     
     CPLString           osElementString;
+    CPLString           osAttributeString;
     bool                bCollectData;
 
     char                aBuf[BUFSIZ];

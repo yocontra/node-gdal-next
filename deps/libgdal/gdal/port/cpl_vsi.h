@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi.h 63047152a3b5ceb7293ae884fb96be39cd428383 2020-09-30 13:00:56 +0200 Thomas Bonfort $
+ * $Id: cpl_vsi.h a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -158,6 +158,7 @@ typedef FILE VSILFILE;
 
 VSILFILE CPL_DLL *  VSIFOpenL( const char *, const char * ) CPL_WARN_UNUSED_RESULT;
 VSILFILE CPL_DLL *  VSIFOpenExL( const char *, const char *, int ) CPL_WARN_UNUSED_RESULT;
+VSILFILE CPL_DLL *  VSIFOpenEx2L( const char *, const char *, int, CSLConstList ) CPL_WARN_UNUSED_RESULT;
 int CPL_DLL     VSIFCloseL( VSILFILE * ) EXPERIMENTAL_CPL_WARN_UNUSED_RESULT;
 int CPL_DLL     VSIFSeekL( VSILFILE *, vsi_l_offset, int ) EXPERIMENTAL_CPL_WARN_UNUSED_RESULT;
 vsi_l_offset CPL_DLL VSIFTellL( VSILFILE * ) CPL_WARN_UNUSED_RESULT;
@@ -395,6 +396,7 @@ void VSIInstallGSFileHandler(void);
 void VSIInstallGSStreamingFileHandler(void);
 void VSIInstallAzureFileHandler(void);
 void VSIInstallAzureStreamingFileHandler(void);
+void VSIInstallADLSFileHandler(void);
 void VSIInstallOSSFileHandler(void);
 void VSIInstallOSSStreamingFileHandler(void);
 void VSIInstallSwiftFileHandler(void);

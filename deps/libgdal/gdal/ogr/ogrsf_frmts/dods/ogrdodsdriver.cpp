@@ -29,7 +29,7 @@
 #include "ogr_dods.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdodsdriver.cpp 103562a4b99e01eef1f5cb350b2dccaa6fe01e81 2017-12-14 19:39:15Z Even Rouault $")
+CPL_CVSID("$Id: ogrdodsdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                            ~OGRDODSDriver()                            */
@@ -59,6 +59,9 @@ OGRDataSource *OGRDODSDriver::Open( const char * pszFilename,
 
 {
     if( !STARTS_WITH_CI(pszFilename, "DODS:http:") )
+        return nullptr;
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("OGR_DODS") )
         return nullptr;
 
     OGRDODSDataSource *poDS = new OGRDODSDataSource();

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_oci.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_oci.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  Oracle Spatial Driver
  * Purpose:  Oracle Spatial OGR Driver Declarations.
@@ -120,7 +120,7 @@ class CPL_DLL OGROCISession {
 
     int      Failed( sword nStatus, const char *pszFunction = nullptr );
 
-    CPLErr   GetParmInfo( OCIParam *hParmDesc, OGRFieldDefn *poOGRDefn,
+    CPLErr   GetParamInfo( OCIParam *hParamDesc, OGRFieldDefn *poOGRDefn,
                           ub2 *pnOCIType, ub4 *pnOCILen );
 
     void     CleanName( char * );

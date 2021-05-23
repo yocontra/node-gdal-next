@@ -52,7 +52,7 @@
 #include <fcntl.h>
 #endif
 
-CPL_CVSID("$Id: cpl_vsil_stdin.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_stdin.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
 
 // We buffer the first 1MB of standard input to enable drivers
 // to autodetect data. In the first MB, backward and forward seeking
@@ -95,7 +95,8 @@ class VSIStdinFilesystemHandler final : public VSIFilesystemHandler
 
     VSIVirtualHandle *Open( const char *pszFilename,
                             const char *pszAccess,
-                            bool bSetError ) override;
+                            bool bSetError,
+                            CSLConstList /* papszOptions */ ) override;
     int Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
               int nFlags ) override;
 };
@@ -340,7 +341,8 @@ VSIStdinFilesystemHandler::~VSIStdinFilesystemHandler()
 VSIVirtualHandle *
 VSIStdinFilesystemHandler::Open( const char *pszFilename,
                                  const char *pszAccess,
-                                 bool /* bSetError */ )
+                                 bool /* bSetError */,
+                                 CSLConstList /* papszOptions */ )
 
 {
     if( strcmp(pszFilename, "/vsistdin/") != 0 )

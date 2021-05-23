@@ -32,7 +32,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: fastdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: fastdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 // constexpr int ADM_STD_HEADER_SIZE = 4608;  // Format specification says it
 constexpr int ADM_HEADER_SIZE = 5000;  // Should be 4608, but some vendors
@@ -969,7 +969,7 @@ GDALDataset *FASTDataset::Open( GDALOpenInfo * poOpenInfo )
     CPLFree( pszTemp );
 
     // Read 15 USGS projection parameters
-    double adfProjParms[15] = { 0.0 };
+    double adfProjParams[15] = { 0.0 };
     pszTemp = strstr( pszHeader, USGS_PARAMETERS );
     if ( pszTemp && !EQUAL( pszTemp, "" ) )
     {
@@ -979,7 +979,7 @@ GDALDataset *FASTDataset::Open( GDALOpenInfo * poOpenInfo )
             pszTemp = strpbrk( pszTemp, "-.0123456789" );
             if ( pszTemp )
             {
-                adfProjParms[i] = CPLScanDouble( pszTemp, VALUE_SIZE );
+                adfProjParams[i] = CPLScanDouble( pszTemp, VALUE_SIZE );
                 pszTemp = strpbrk( pszTemp, " \t" );
             }
             if (pszTemp == nullptr )
@@ -1065,7 +1065,7 @@ GDALDataset *FASTDataset::Open( GDALOpenInfo * poOpenInfo )
         // Create projection definition
         OGRSpatialReference oSRS;
         OGRErr eErr =
-            oSRS.importFromUSGS( iProjSys, iZone, adfProjParms, iDatum, bAnglesInPackedDMSFormat );
+            oSRS.importFromUSGS( iProjSys, iZone, adfProjParams, iDatum, bAnglesInPackedDMSFormat );
         if ( eErr != OGRERR_NONE )
             CPLDebug( "FAST", "Import projection from USGS failed: %d", eErr );
         oSRS.SetLinearUnits( SRS_UL_METER, 1.0 );

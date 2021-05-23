@@ -29,7 +29,7 @@
 #include "ogr_arcgen.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ograrcgendriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ograrcgendriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 extern "C" void RegisterOGRARCGEN();
 
@@ -91,6 +91,9 @@ static GDALDataset *OGRARCGENDriverOpen( GDALOpenInfo* poOpenInfo )
     }
     CSLDestroy(papszTokens);
     CPLFree(szFirstLine);
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("ARCGEN") )
+        return nullptr;
 
     OGRARCGENDataSource *poDS = new OGRARCGENDataSource();
 

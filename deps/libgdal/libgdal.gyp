@@ -133,6 +133,7 @@
 				"./gdal/port/cpl_vsil_cache.cpp",
 				"./gdal/port/cpl_vsil_buffered_reader.cpp",
 				"./gdal/port/cpl_vsil_az.cpp",
+				"./gdal/port/cpl_vsil_adls.cpp",
 				"./gdal/port/cpl_vsil_abstract_archive.cpp",
 				"./gdal/port/cpl_vsil.cpp",
 				"./gdal/port/cpl_vsi_mem.cpp",

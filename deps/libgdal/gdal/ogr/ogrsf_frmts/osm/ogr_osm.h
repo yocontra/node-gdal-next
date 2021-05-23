@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_osm.h f2db151194e327903a0b8f7bbfa01633cefa542f 2020-05-24 07:49:09 +0200 Kai Pastor $
+ * $Id: ogr_osm.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/OpenStreeMap driver.
@@ -129,8 +129,8 @@ class OGROSMLayer final: public OGRLayer
     char                  szLaunderedFieldName[256];
     const char*           GetLaunderedFieldName(const char* pszName);
 
-    std::vector<char*>    apszUnsignificantKeys;
-    std::map<const char*, int, ConstCharComp> aoSetUnsignificantKeys;
+    std::vector<char*>    apszInsignificantKeys;
+    std::map<const char*, int, ConstCharComp> aoSetInsignificantKeys;
 
     std::vector<char*>    apszIgnoreKeys;
     std::map<const char*, int, ConstCharComp> aoSetIgnoreKeys;
@@ -209,9 +209,9 @@ class OGROSMLayer final: public OGRLayer
     int                 HasAttributeFilter() const { return m_poAttrQuery != nullptr; }
     int                 EvaluateAttributeFilter(OGRFeature* poFeature);
 
-    void                AddUnsignificantKey(const char* pszK);
+    void                AddInsignificantKey(const char* pszK);
     int                 IsSignificantKey(const char* pszK) const
-        { return aoSetUnsignificantKeys.find(pszK) == aoSetUnsignificantKeys.end(); }
+        { return aoSetInsignificantKeys.find(pszK) == aoSetInsignificantKeys.end(); }
 
     void                AddIgnoreKey(const char* pszK);
     void                AddWarnKey(const char* pszK);
@@ -373,7 +373,7 @@ class OGROSMDataSource final: public OGRDataSource
     bool                bEnableHashedIndex;
     /* values >= 0 are indexes of panReqIds. */
     /*        == -1 for unoccupied */
-    /*        < -1 are expressed as -nIndexToCollisonBuckets-2 where nIndexToCollisonBuckets point to psCollisionBuckets */
+    /*        < -1 are expressed as -nIndexToCollisionBuckets-2 where nIndexToCollisionBuckets point to psCollisionBuckets */
     int                *panHashedIndexes;
     CollisionBucket    *psCollisionBuckets;
     bool                bHashedIndexValid;

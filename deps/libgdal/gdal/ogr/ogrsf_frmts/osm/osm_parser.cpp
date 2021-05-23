@@ -52,7 +52,7 @@
 #include "ogr_expat.h"
 #endif
 
-CPL_CVSID("$Id: osm_parser.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: osm_parser.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 // The buffer that are passed to GPB decoding are extended with 0's
 // to be sure that we will be able to read a single 64bit value without
@@ -1986,7 +1986,7 @@ static OSMRetCode PBF_ProcessBlock(OSMContext* psCtxt)
             }
             psCtxt->pabyBlob = pabyBlobNew;
         }
-        // Given how Protocol buffer work, we can merge sevaral buffers
+        // Given how Protocol buffer work, we can merge several buffers
         // by just appending them to the previous ones.
         if( VSIFReadL(psCtxt->pabyBlob + nBlobSizeAcc, 1,
                       nBlobSize, psCtxt->fp) != nBlobSize )

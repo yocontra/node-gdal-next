@@ -37,7 +37,7 @@
 #include "gdal_pam.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: sagadataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: sagadataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 #ifndef INT_MAX
 # define INT_MAX 2147483647
@@ -81,7 +81,7 @@ class SAGADataset final: public GDALPamDataset
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
                                 GDALDataType eType,
-                                char **papszParmList );
+                                char **papszParamList );
     static GDALDataset *CreateCopy( const char *pszFilename,
                                     GDALDataset *poSrcDS,
                                     int bStrict, char **papszOptions,
@@ -864,7 +864,7 @@ CPLErr SAGADataset::WriteHeader( CPLString osHDRFilename, GDALDataType eType,
 GDALDataset *SAGADataset::Create( const char * pszFilename,
                                   int nXSize, int nYSize, int nBands,
                                   GDALDataType eType,
-                                  char **papszParmList )
+                                  char **papszParamList )
 
 {
     if( nXSize <= 0 || nYSize <= 0 )
@@ -907,7 +907,7 @@ GDALDataset *SAGADataset::Create( const char * pszFilename,
 
     double dfNoDataVal = 0.0;
 
-    const char* pszNoDataValue = CSLFetchNameValue(papszParmList, "NODATA_VALUE");
+    const char* pszNoDataValue = CSLFetchNameValue(papszParamList, "NODATA_VALUE");
     if (pszNoDataValue)
     {
         dfNoDataVal = CPLAtofM(pszNoDataValue);
@@ -972,7 +972,7 @@ GDALDataset *SAGADataset::Create( const char * pszFilename,
         return nullptr;
     }
 
-    if( CPLFetchBool( papszParmList , "FILL_NODATA", true ) )
+    if( CPLFetchBool( papszParamList , "FILL_NODATA", true ) )
     {
         const int nDataTypeSize = GDALGetDataTypeSize(eType) / 8;
         GByte* pabyNoDataBuf = reinterpret_cast<GByte *>(

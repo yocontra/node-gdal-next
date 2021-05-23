@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarper.h 58843108fdd2c6fcd8c8391f370989c937c877dc 2020-05-19 22:26:59 +0200 Martin Dobias $
+ * $Id: gdalwarper.h 98488570e6fb1676653ada4ed498c46a6115eaf1 2020-12-28 23:45:10 +0100 Even Rouault $
  *
  * Project:  GDAL High Performance Warper
  * Purpose:  Prototypes, and definitions for warping related work.
@@ -61,7 +61,11 @@ typedef enum {
   /*! Med (selects median of all non-NODATA contributing pixels) */ GRA_Med=10,
   /*! Q1 (selects first quartile of all non-NODATA contributing pixels) */ GRA_Q1=11,
   /*! Q3 (selects third quartile of all non-NODATA contributing pixels) */ GRA_Q3=12,
-  /*! Sum (computes the weighed sum of all non-NODATA contributing pixels). Added in GDAL 3.1 */ GRA_Sum=13
+  /*! Sum (weighed sum of all non-NODATA contributing pixels). Added in GDAL 3.1 */ GRA_Sum=13,
+  /*! RMS (weighted root mean square (quadratic mean) of all non-NODATA contributing pixels) */ GRA_RMS=14,
+/*! @cond Doxygen_Suppress */
+  GRA_LAST_VALUE=GRA_RMS
+/*! @endcond */
 } GDALResampleAlg;
 
 /*! GWKAverageOrMode Algorithm */
@@ -72,7 +76,8 @@ typedef enum {
     /*! Maximum */ GWKAOM_Max=4,
     /*! Minimum */ GWKAOM_Min=5,
     /*! Quantile */ GWKAOM_Quant=6,
-    /*! Sum */ GWKAOM_Sum=7
+    /*! Sum */ GWKAOM_Sum=7,
+    /*! RMS */ GWKAOM_RMS=8
 } GWKAverageOrModeAlg;
 
 /*! @cond Doxygen_Suppress */

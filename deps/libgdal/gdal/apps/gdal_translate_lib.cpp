@@ -55,7 +55,7 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: gdal_translate_lib.cpp ea54dac8b8ea1f5a7b3b818d590de7356a16038b 2020-11-02 19:51:01 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_translate_lib.cpp e464272048d535fecb3378c0d33efd3e0f8286c8 2021-04-19 22:46:09 +0200 Even Rouault $")
 
 static int ArgIsNumeric( const char * );
 static void AttachMetadata( GDALDatasetH, char ** );
@@ -704,7 +704,7 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
 
     if(pbUsageError)
         *pbUsageError = FALSE;
- 
+
     if(psOptions->adfULLR[0] != 0.0 || psOptions->adfULLR[1] != 0.0 || psOptions->adfULLR[2] != 0.0 || psOptions->adfULLR[3] != 0.0)
         bGotBounds = true;
 
@@ -1519,6 +1519,21 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
         }
     }
 
+    {
+        char** papszIter = papszMetadata;
+        while(papszIter && *papszIter)
+        {
+            // Do not preserve the CACHE_PATH from the WMS driver
+            if (STARTS_WITH_CI(*papszIter, "CACHE_PATH="))
+            {
+                CPLFree(*papszIter);
+                memmove(papszIter, papszIter+1, sizeof(char*) * (CSLCount(papszIter+1)+1));
+            }
+            else
+                papszIter++;
+        }
+    }
+
     poVDS->SetMetadata( papszMetadata );
     CSLDestroy( papszMetadata );
     AttachMetadata( static_cast<GDALDatasetH>(poVDS), psOptions->papszMetadataOptions );
@@ -1526,6 +1541,14 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
     const char* pszInterleave = GDALGetMetadataItem(hSrcDataset, "INTERLEAVE", "IMAGE_STRUCTURE");
     if (pszInterleave)
         poVDS->SetMetadataItem("INTERLEAVE", pszInterleave, "IMAGE_STRUCTURE");
+
+    {
+        const char* pszCompression = poSrcDS->GetMetadataItem("COMPRESSION", "IMAGE_STRUCTURE");
+        if( pszCompression )
+        {
+            poVDS->SetMetadataItem("COMPRESSION", pszCompression, "IMAGE_STRUCTURE");
+        }
+    }
 
     /* ISIS3 metadata preservation */
     char** papszMD_ISIS3 = poSrcDS->GetMetadata("json:ISIS3");
@@ -1793,7 +1816,15 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
 /* -------------------------------------------------------------------- */
 /*      Create this band.                                               */
 /* -------------------------------------------------------------------- */
-        poVDS->AddBand( eBandType, nullptr );
+        CPLStringList aosAddBandOptions;
+        if( bSpatialArrangementPreserved )
+        {
+            int nSrcBlockXSize, nSrcBlockYSize;
+            poSrcBand->GetBlockSize(&nSrcBlockXSize, &nSrcBlockYSize);
+            aosAddBandOptions.SetNameValue("BLOCKXSIZE", CPLSPrintf("%d", nSrcBlockXSize));
+            aosAddBandOptions.SetNameValue("BLOCKYSIZE", CPLSPrintf("%d", nSrcBlockYSize));
+        }
+        poVDS->AddBand( eBandType, aosAddBandOptions.List() );
         VRTSourcedRasterBand *poVRTBand =
             static_cast<VRTSourcedRasterBand *>(poVDS->GetRasterBand( i+1 ));
         if (nSrcBand < 0)
@@ -1820,6 +1851,12 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
             !psOptions->bUnscale && psOptions->eOutputType == GDT_Unknown && psOptions->pszResampling == nullptr )
         {
             poVRTBand->SetMetadataItem("PIXELTYPE", pszPixelType, "IMAGE_STRUCTURE");
+        }
+
+        const char* pszCompression = poSrcBand->GetMetadataItem("COMPRESSION", "IMAGE_STRUCTURE");
+        if( pszCompression )
+        {
+            poVRTBand->SetMetadataItem("COMPRESSION", pszCompression, "IMAGE_STRUCTURE");
         }
 
 /* -------------------------------------------------------------------- */
@@ -2008,7 +2045,7 @@ GDALDatasetH GDALTranslate( const char *pszDest, GDALDatasetH hSrcDataset,
         // Color interpretation override
         if( psOptions->panColorInterp )
         {
-            if( i < psOptions->nColorInterpSize && 
+            if( i < psOptions->nColorInterpSize &&
                 psOptions->panColorInterp[i] >= 0 )
             {
                 poVRTBand->SetColorInterpretation(
@@ -2188,7 +2225,7 @@ static void CopyBandInfo( GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand
         {
             GDALRasterAttributeTable *poNewRAT = poSrcBand->GetDefaultRAT()->Clone();
 
-            // strip histogram data (as definied by the source RAT)
+            // strip histogram data (as defined by the source RAT)
             poNewRAT->RemoveStatistics();
             if( poNewRAT->GetColumnCount() )
             {

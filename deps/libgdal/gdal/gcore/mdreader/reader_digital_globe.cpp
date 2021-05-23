@@ -38,7 +38,7 @@
 #include "cpl_string.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: reader_digital_globe.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: reader_digital_globe.cpp d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $")
 
 /**
  * GDALMDReaderDigitalGlobe()
@@ -246,6 +246,8 @@ char** GDALMDReaderDigitalGlobe::LoadIMDXmlNode(CPLXMLNode* psNode)
  * GDALLoadRPBXmlNode()
  */
 static const char * const apszRPBMap[] = {
+    RPC_ERR_BIAS,   "image.errBias",
+    RPC_ERR_RAND,   "image.errRand",
     RPC_LINE_OFF,   "image.lineOffset",
     RPC_SAMP_OFF,   "image.sampOffset",
     RPC_LAT_OFF,    "image.latOffset",

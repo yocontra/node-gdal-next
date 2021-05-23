@@ -29,7 +29,7 @@
 #include "ogr_db2.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdb2driver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdb2driver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRDB2DriverIdentify()                  */
@@ -50,6 +50,9 @@ static int OGRDB2DriverIdentify( GDALOpenInfo* poOpenInfo )
 static GDALDataset *OGRDB2DriverOpen( GDALOpenInfo* poOpenInfo )
 {
     if( !OGRDB2DriverIdentify(poOpenInfo) )
+        return nullptr;
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("DB2") )
         return nullptr;
 
     CPLDebug( "OGRDB2DriverOpen", "pszFilename: '%s'",
@@ -78,6 +81,9 @@ static GDALDataset* OGRDB2DriverCreate( const char * pszFilename,
                                         GDALDataType eDT,
                                         char **papszOptions )
 {
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("DB2") )
+        return nullptr;
+
     OGRDB2DataSource   *poDS = new OGRDB2DataSource();
     CPLDebug( "OGRDB2DriverCreate", "pszFilename: '%s'", pszFilename);
     CPLDebug( "OGRDB2DriverCreate", "eDT: %d", eDT);

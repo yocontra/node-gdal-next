@@ -31,7 +31,7 @@
 #include "ogrmutexeddatasource.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrmutexeddatasource.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmutexeddatasource.cpp c9bb0a71c27de43dab42821569ee6d9baf2fdf8f 2021-04-01 19:20:15 +0200 Even Rouault $")
 
 OGRMutexedDataSource::OGRMutexedDataSource( OGRDataSource* poBaseDataSource,
                                             int bTakeOwnership,
@@ -231,6 +231,19 @@ CPLErr      OGRMutexedDataSource::SetMetadataItem( const char * pszName,
 {
     CPLMutexHolderOptionalLockD(m_hGlobalMutex);
     return m_poBaseDataSource->SetMetadataItem(pszName, pszValue, pszDomain);
+}
+
+const OGRFieldDomain* OGRMutexedDataSource::GetFieldDomain(const std::string& name) const
+{
+    CPLMutexHolderOptionalLockD(m_hGlobalMutex);
+    return m_poBaseDataSource->GetFieldDomain(name);
+}
+
+bool OGRMutexedDataSource::AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                          std::string& failureReason)
+{
+    CPLMutexHolderOptionalLockD(m_hGlobalMutex);
+    return m_poBaseDataSource->AddFieldDomain(std::move(domain), failureReason);
 }
 
 #if defined(WIN32) && defined(_MSC_VER)

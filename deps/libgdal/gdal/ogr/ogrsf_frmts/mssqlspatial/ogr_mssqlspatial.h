@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mssqlspatial.h 44f00f2525498bc2059c9cc0e6d86fe7accd9168 2020-05-27 22:13:37 +0200 Even Rouault $
+ * $Id: ogr_mssqlspatial.h d4f8ce3534e7f16fb3eb0eed97b7cb301828ccd3 2021-03-28 15:45:02 +0200 Even Rouault $
  *
  * Project:  MSSQL Spatial driver
  * Purpose:  Definition of classes for OGR MSSQL Spatial driver.
@@ -125,28 +125,23 @@ public:
 
     bool            IsValidLatLon(double longitude, double latitude);
     bool            IsValidCircularZ(double z1, double z2);
-    bool            IsValidPolygonRingCount(OGRCurve* poGeom);
-    bool            IsValidPolygonRingClosed(OGRCurve* poGeom);
-    bool            IsValid(OGRPoint* poGeom);
-    bool            IsValid(OGRMultiPoint* poGeom);
-    bool            IsValid(OGRLineString* poGeom);
-    bool            IsValid(OGRCircularString* poGeom);
-    bool            IsValid(OGRSimpleCurve* poGeom);
-    bool            IsValid(OGRCompoundCurve* poGeom);
-    bool            IsValid(OGRLinearRing* poGeom);
-    bool            IsValid(OGRMultiLineString* poGeom);
-    bool            IsValid(OGRPolygon* poGeom);
-    bool            IsValid(OGRCurvePolygon* poGeom);
-    bool            IsValid(OGRMultiPolygon* poGeom);
-    bool            IsValid(OGRGeometryCollection* poGeom);
-    bool            IsValid(OGRGeometry* poGeom);
+    bool            IsValidPolygonRingCount(const OGRCurve* poGeom);
+    bool            IsValidPolygonRingClosed(const OGRCurve* poGeom);
+    bool            IsValid(const OGRPoint* poGeom);
+    bool            IsValid(const OGRMultiPoint* poGeom);
+    bool            IsValid(const OGRCircularString* poGeom);
+    bool            IsValid(const OGRSimpleCurve* poGeom);
+    bool            IsValid(const OGRCompoundCurve* poGeom);
+    bool            IsValid(const OGRMultiLineString* poGeom);
+    bool            IsValid(const OGRCurvePolygon* poGeom);
+    bool            IsValid(const OGRMultiPolygon* poGeom);
+    bool            IsValid(const OGRGeometryCollection* poGeom);
+    bool            IsValid(const OGRGeometry* poGeom);
     void            MakeValid(OGRPoint* poGeom);
     void            MakeValid(OGRMultiPoint* poGeom);
-    void            MakeValid(OGRLineString* poGeom);
     void            MakeValid(OGRCircularString* poGeom);
     void            MakeValid(OGRSimpleCurve* poGeom);
     void            MakeValid(OGRCompoundCurve* poGeom);
-    void            MakeValid(OGRLinearRing* poGeom);
     void            MakeValid(OGRMultiLineString* poGeom);
     void            MakeValid(OGRPolygon* poGeom);
     void            MakeValid(OGRCurvePolygon* poGeom);

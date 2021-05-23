@@ -48,7 +48,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrgpxlayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgpxlayer.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
 
 constexpr int FLD_TRACK_FID = 0;
 constexpr int FLD_TRACK_SEG_ID = 1;
@@ -1535,7 +1535,7 @@ OGRErr OGRGPXLayer::ICreateFeature( OGRFeature *poFeatureIn )
                 }
                 else if (nGeometries == 1)
                 {
-                    line = poGeom->toMultiLineString()->getGeometryRef(0)->toLineString();
+                    line = poGeom->toMultiLineString()->getGeometryRef(0);
                 }
                 else
                 {

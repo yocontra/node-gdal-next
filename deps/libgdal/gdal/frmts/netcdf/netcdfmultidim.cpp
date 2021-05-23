@@ -206,6 +206,25 @@ public:
 };
 
 /************************************************************************/
+/*                   netCDFVirtualGroupBySameDimension                  */
+/************************************************************************/
+
+class netCDFVirtualGroupBySameDimension final: public GDALGroup
+{
+    // the real group to which we derived this virtual group from
+    std::shared_ptr<netCDFGroup> m_poGroup;
+    std::string m_osDimName{};
+
+public:
+    netCDFVirtualGroupBySameDimension(const std::shared_ptr<netCDFGroup>& poGroup,
+                                      const std::string& osDimName);
+
+    std::vector<std::string> GetMDArrayNames(CSLConstList papszOptions) const override;
+    std::shared_ptr<GDALMDArray> OpenMDArray(const std::string& osName,
+                                             CSLConstList papszOptions) const override;
+};
+
+/************************************************************************/
 /*                         netCDFDimension                              */
 /************************************************************************/
 
@@ -436,13 +455,13 @@ public:
 
     bool SetSpatialRef(const OGRSpatialReference* poSRS) override;
 
-    double GetOffset(bool* pbHasOffset) const override;
+    double GetOffset(bool* pbHasOffset, GDALDataType* peStorageType) const override;
 
-    double GetScale(bool* pbHasScale) const override;
+    double GetScale(bool* pbHasScale, GDALDataType* peStorageType) const override;
 
-    bool SetOffset(double dfOffset) override;
+    bool SetOffset(double dfOffset, GDALDataType eStorageType) override;
 
-    bool SetScale(double dfScale) override;
+    bool SetScale(double dfScale, GDALDataType eStorageType) override;
 
     int GetGroupId() const { return m_gid; }
     int GetVarId() const { return m_varid; }
@@ -896,13 +915,36 @@ std::shared_ptr<GDALAttribute> netCDFGroup::CreateAttribute(
 /*                            GetGroupNames()                           */
 /************************************************************************/
 
-std::vector<std::string> netCDFGroup::GetGroupNames(CSLConstList) const
+std::vector<std::string> netCDFGroup::GetGroupNames(CSLConstList papszOptions) const
 {
     CPLMutexHolderD(&hNCMutex);
     int nSubGroups = 0;
     NCDF_ERR(nc_inq_grps(m_gid, &nSubGroups, nullptr));
     if( nSubGroups == 0 )
+    {
+        if( EQUAL(CSLFetchNameValueDef(papszOptions, "GROUP_BY", ""),
+                  "SAME_DIMENSION") )
+        {
+            std::vector<std::string> names;
+            std::set<std::string> oSetDimNames;
+            for( const auto& osArrayName: GetMDArrayNames(nullptr) )
+            {
+                const auto poArray = OpenMDArray(osArrayName, nullptr);
+                const auto apoDims = poArray->GetDimensions();
+                if( apoDims.size() == 1 )
+                {
+                    const auto osDimName = apoDims[0]->GetName();
+                    if( oSetDimNames.find(osDimName) == oSetDimNames.end() )
+                    {
+                        oSetDimNames.insert(osDimName);
+                        names.emplace_back(osDimName);
+                    }
+                }
+            }
+            return names;
+        }
         return {};
+    }
     std::vector<int> anSubGroupdsIds(nSubGroups);
     NCDF_ERR(nc_inq_grps(m_gid, nullptr, &anSubGroupdsIds[0]));
     std::vector<std::string> names;
@@ -920,14 +962,31 @@ std::vector<std::string> netCDFGroup::GetGroupNames(CSLConstList) const
 /*                             OpenGroup()                              */
 /************************************************************************/
 
-std::shared_ptr<GDALGroup> netCDFGroup::OpenGroup(const std::string& osName, CSLConstList) const
+std::shared_ptr<GDALGroup> netCDFGroup::OpenGroup(const std::string& osName,
+                                                  CSLConstList papszOptions) const
 {
     CPLMutexHolderD(&hNCMutex);
     int nSubGroups = 0;
     // This is weird but nc_inq_grp_ncid() succeeds on a single group file.
     NCDF_ERR(nc_inq_grps(m_gid, &nSubGroups, nullptr));
     if( nSubGroups == 0 )
+    {
+        if( EQUAL(CSLFetchNameValueDef(papszOptions, "GROUP_BY", ""),
+            "SAME_DIMENSION") )
+        {
+            const auto oCandidateGroupNames = GetGroupNames(papszOptions);
+            for( const auto& osCandidateGroupName: oCandidateGroupNames )
+            {
+                if( osCandidateGroupName == osName )
+                {
+                    auto poThisGroup = std::make_shared<netCDFGroup>(m_poShared, m_gid);
+                    return std::make_shared<netCDFVirtualGroupBySameDimension>(
+                        poThisGroup, osName);
+                }
+            }
+        }
         return nullptr;
+    }
     int nSubGroupId = 0;
     if( nc_inq_grp_ncid(m_gid, osName.c_str(), &nSubGroupId) != NC_NOERR ||
         nSubGroupId <= 0 )
@@ -982,11 +1041,19 @@ std::vector<std::string> netCDFGroup::GetMDArrayNames(CSLConstList papszOptions)
             CSLDestroy(papszTokens);
         }
     }
+
+    const bool bGroupBySameDimension =
+        EQUAL(CSLFetchNameValueDef(papszOptions, "GROUP_BY", ""),
+              "SAME_DIMENSION");
     for( const auto& varid: anVarIds )
     {
         int nVarDims = 0;
         NCDF_ERR(nc_inq_varndims(m_gid, varid, &nVarDims));
         if( nVarDims == 0 &&! bZeroDim )
+        {
+            continue;
+        }
+        if( nVarDims == 1 && bGroupBySameDimension )
         {
             continue;
         }
@@ -1111,6 +1178,54 @@ std::vector<std::shared_ptr<GDALAttribute>> netCDFGroup::GetAttributes(CSLConstL
 CSLConstList netCDFGroup::GetStructuralInfo() const
 {
     return m_aosStructuralInfo.List();
+}
+
+/************************************************************************/
+/*                   netCDFVirtualGroupBySameDimension()                */
+/************************************************************************/
+
+netCDFVirtualGroupBySameDimension::netCDFVirtualGroupBySameDimension(
+                                    const std::shared_ptr<netCDFGroup>& poGroup,
+                                    const std::string& osDimName):
+    GDALGroup(poGroup->GetName(), osDimName),
+    m_poGroup(poGroup),
+    m_osDimName(osDimName)
+{
+}
+
+/************************************************************************/
+/*                         GetMDArrayNames()                            */
+/************************************************************************/
+
+std::vector<std::string> netCDFVirtualGroupBySameDimension::GetMDArrayNames(CSLConstList) const
+{
+    const auto srcNames = m_poGroup->GetMDArrayNames(nullptr);
+    std::vector<std::string> names;
+    for( const auto& srcName: srcNames )
+    {
+        auto poArray = m_poGroup->OpenMDArray(srcName, nullptr);
+        if( poArray )
+        {
+            const auto apoArrayDims = poArray->GetDimensions();
+            if( apoArrayDims.size() == 1 &&
+                apoArrayDims[0]->GetName() == m_osDimName )
+            {
+                names.emplace_back(srcName);
+            }
+        }
+    }
+    return names;
+}
+
+/************************************************************************/
+/*                           OpenMDArray()                              */
+/************************************************************************/
+
+std::shared_ptr<GDALMDArray> netCDFVirtualGroupBySameDimension::OpenMDArray(
+                                            const std::string& osName,
+                                            CSLConstList papszOptions) const
+{
+    return m_poGroup->OpenMDArray(osName, papszOptions);
 }
 
 /************************************************************************/
@@ -2881,13 +2996,14 @@ bool netCDFVariable::SetRawNoDataValue(const void* pNoData)
 /*                               SetScale()                             */
 /************************************************************************/
 
-bool netCDFVariable::SetScale(double dfScale)
+bool netCDFVariable::SetScale(double dfScale, GDALDataType eStorageType)
 {
     auto poAttr = GetAttribute(CF_SCALE_FACTOR);
     if( !poAttr )
     {
         poAttr = CreateAttribute(CF_SCALE_FACTOR, {},
-                                 GDALExtendedDataType::Create(GDT_Float64),
+                                 GDALExtendedDataType::Create(
+                                     eStorageType == GDT_Unknown ? GDT_Float64 : eStorageType),
                                  nullptr);
     }
     if( !poAttr )
@@ -2896,16 +3012,17 @@ bool netCDFVariable::SetScale(double dfScale)
 }
 
 /************************************************************************/
-/*                               SetOffset)                             */
+/*                              SetOffset()                             */
 /************************************************************************/
 
-bool netCDFVariable::SetOffset(double dfOffset)
+bool netCDFVariable::SetOffset(double dfOffset, GDALDataType eStorageType)
 {
     auto poAttr = GetAttribute(CF_ADD_OFFSET);
     if( !poAttr )
     {
         poAttr = CreateAttribute(CF_ADD_OFFSET, {},
-                                 GDALExtendedDataType::Create(GDT_Float64),
+                                 GDALExtendedDataType::Create(
+                                     eStorageType == GDT_Unknown ? GDT_Float64 : eStorageType),
                                  nullptr);
     }
     if( !poAttr )
@@ -2917,10 +3034,10 @@ bool netCDFVariable::SetOffset(double dfOffset)
 /*                               GetScale()                             */
 /************************************************************************/
 
-double netCDFVariable::GetScale(bool* pbHasScale) const
+double netCDFVariable::GetScale(bool* pbHasScale, GDALDataType* peStorageType) const
 {
     auto poAttr = GetAttribute(CF_SCALE_FACTOR);
-    if( !poAttr )
+    if( !poAttr || poAttr->GetDataType().GetClass() != GEDTC_NUMERIC )
     {
         if( pbHasScale )
             *pbHasScale = false;
@@ -2928,6 +3045,8 @@ double netCDFVariable::GetScale(bool* pbHasScale) const
     }
     if( pbHasScale )
         *pbHasScale = true;
+    if( peStorageType )
+        *peStorageType = poAttr->GetDataType().GetNumericDataType();
     return poAttr->ReadAsDouble();
 }
 
@@ -2935,10 +3054,10 @@ double netCDFVariable::GetScale(bool* pbHasScale) const
 /*                               GetOffset()                            */
 /************************************************************************/
 
-double netCDFVariable::GetOffset(bool* pbHasOffset) const
+double netCDFVariable::GetOffset(bool* pbHasOffset, GDALDataType* peStorageType) const
 {
     auto poAttr = GetAttribute(CF_ADD_OFFSET);
-    if( !poAttr )
+    if( !poAttr || poAttr->GetDataType().GetClass() != GEDTC_NUMERIC )
     {
         if( pbHasOffset )
             *pbHasOffset = false;
@@ -2946,6 +3065,8 @@ double netCDFVariable::GetOffset(bool* pbHasOffset) const
     }
     if( pbHasOffset )
         *pbHasOffset = true;
+    if( peStorageType )
+        *peStorageType = poAttr->GetDataType().GetNumericDataType();
     return poAttr->ReadAsDouble();
 }
 

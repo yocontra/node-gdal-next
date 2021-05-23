@@ -35,21 +35,14 @@
 #include <cstring>
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgpsbabeldatasource.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgpsbabeldatasource.cpp 86083eda37a69a700825c6128034b4d5a789d05f 2021-03-11 11:39:44 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRGPSBabelDataSource()                         */
 /************************************************************************/
 
-OGRGPSBabelDataSource::OGRGPSBabelDataSource() :
-    nLayers(0),
-    pszName(nullptr),
-    pszGPSBabelDriverName(nullptr),
-    pszFilename(nullptr),
-    poGPXDS(nullptr)
+OGRGPSBabelDataSource::OGRGPSBabelDataSource()
 {
-  std::fill_n(apoLayers, CPL_ARRAYSIZE(apoLayers),
-              static_cast<OGRLayer*>(nullptr));
 }
 
 /************************************************************************/

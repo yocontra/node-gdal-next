@@ -33,7 +33,7 @@
 #include <sstream>
 #include <iomanip>
 
-CPL_CVSID("$Id: ogramigocloudtablelayer.cpp ee873e5214b45bf61b57b0710113b6e495b5ce6c 2021-03-11 10:09:10 -0800 Victor Chernetsky $")
+CPL_CVSID("$Id: ogramigocloudtablelayer.cpp 13f84b05a4e4c31c976debc455c86e966e9974ae 2021-03-11 10:09:10 -0800 Victor Chernetsky $")
 
 /************************************************************************/
 /*                    OGRAMIGOCLOUDEscapeIdentifier( )                     */

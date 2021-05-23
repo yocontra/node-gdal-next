@@ -40,7 +40,7 @@
 // Note: JPEG_DIRECT_COPY is not defined by default, because it is mainly
 // useful for debugging purposes.
 
-CPL_CVSID("$Id: gt_jpeg_copy.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_jpeg_copy.cpp d80d9db4c465d5a3a22407e3a07d85ea4b583ced 2021-03-07 13:00:13 +0100 Even Rouault $")
 
 #if defined(JPEG_DIRECT_COPY) || defined(HAVE_LIBJPEG)
 
@@ -382,7 +382,7 @@ void GTIFF_Set_TIFFTAG_JPEGTABLES( TIFF* hTIFF,
              "/vsimem/tables_%p", &sDInfo);
     VSILFILE* fpTABLES = VSIFOpenL(szTmpFilename, "wb+");
 
-    uint16 nPhotometric = 0;
+    uint16_t nPhotometric = 0;
     TIFFGetField( hTIFF, TIFFTAG_PHOTOMETRIC, &nPhotometric );
 
     jpeg_vsiio_dest( &sCInfo, fpTABLES );
@@ -467,11 +467,11 @@ CPLErr GTIFF_CopyFromJPEG_WriteAdditionalTags( TIFF* hTIFF,
 /*      Write TIFFTAG_REFERENCEBLACKWHITE if needed.                    */
 /* -------------------------------------------------------------------- */
 
-    uint16 nPhotometric = 0;
+    uint16_t nPhotometric = 0;
     if( !TIFFGetField( hTIFF, TIFFTAG_PHOTOMETRIC, &(nPhotometric) ) )
         nPhotometric = PHOTOMETRIC_MINISBLACK;
 
-    uint16 nBitsPerSample = 0;
+    uint16_t nBitsPerSample = 0;
     if( !TIFFGetField(hTIFF, TIFFTAG_BITSPERSAMPLE, &(nBitsPerSample)) )
         nBitsPerSample = 1;
 
@@ -872,7 +872,7 @@ CPLErr GTIFF_CopyFromJPEG(GDALDataset* poDS, GDALDataset* poSrcDS,
     }
     else
     {
-        uint32 nRowsPerStrip = 0;
+        uint32_t nRowsPerStrip = 0;
         if( !TIFFGetField( hTIFF, TIFFTAG_ROWSPERSTRIP,
                         &(nRowsPerStrip) ) )
         {
@@ -884,7 +884,7 @@ CPLErr GTIFF_CopyFromJPEG(GDALDataset* poDS, GDALDataset* poSrcDS,
         // If the rows per strip is larger than the file we will get
         // confused.  libtiff internally will treat the rowsperstrip as
         // the image height and it is best if we do too. (#4468)
-        if( nRowsPerStrip > static_cast<uint32>(nYSize) )
+        if( nRowsPerStrip > static_cast<uint32_t>(nYSize) )
             nRowsPerStrip = nYSize;
 
         nBlockXSize = nXSize;

@@ -52,7 +52,7 @@
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrutils.cpp 3b83dfb59dba8a1b3ba3d18b396d6a6582fae8c0 2021-02-03 11:25:41 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrutils.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 // Returns whether a double fits within an int.
 // Unable to put this in cpl_port.h as include limit breaks grib.
@@ -124,7 +124,7 @@ std::string roundup(std::string s)
 }
 
 
-// This attempts to elimiate what is likely binary -> decimal representation
+// This attempts to eliminate what is likely binary -> decimal representation
 // error or the result of low-order rounding with calculations.  The result
 // may be more visually pleasing and takes up fewer places.
 std::string intelliround(std::string& s)

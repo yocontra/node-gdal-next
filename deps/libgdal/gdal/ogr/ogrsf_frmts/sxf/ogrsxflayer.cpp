@@ -37,7 +37,7 @@
 #include "ogr_srs_api.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrsxflayer.cpp ee8820bddb700cb626bbbed83c97f821f4390862 2021-03-27 13:30:50 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrsxflayer.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRSXFLayer()                                 */
@@ -1004,8 +1004,9 @@ OGRFeature *OGRSXFLayer::GetNextRawFeature(long nFID)
                 }
                 case SXF_RAT_UNICODE:
                 {
-                    unsigned nLen = (unsigned(stAttInfo.nScale) + 1) * 2;
-                    if(nLen < 2 || nLen > nSemanticsSize || nSemanticsSize - nLen < offset )
+                    uint64_t nLen64 = (static_cast<uint64_t>(stAttInfo.nScale) + 1) * 2;
+                    unsigned nLen = static_cast<unsigned>(nLen64);
+                    if(/* nLen < 2 || */ nLen64 > nSemanticsSize || nSemanticsSize - nLen < offset )
                     {
                         nSemanticsSize = 0;
                         break;

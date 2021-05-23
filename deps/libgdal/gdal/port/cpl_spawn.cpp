@@ -40,6 +40,7 @@
 #if defined(WIN32)
 #include <windows.h>
 #else
+#include <cassert>
 #include <cerrno>
 #include <csignal>
 #include <cstdio>
@@ -66,7 +67,7 @@ constexpr int PIPE_BUFFER_SIZE = 4096;
 constexpr int IN_FOR_PARENT = 0;
 constexpr int OUT_FOR_PARENT = 1;
 
-CPL_CVSID("$Id: cpl_spawn.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_spawn.cpp 3fb011b4d4b0d51546069dd416bfddd56950577d 2021-03-07 19:13:41 +0100 Even Rouault $")
 
 static void FillFileFromPipe(CPL_FILE_HANDLE pipe_fd, VSILFILE* fout);
 
@@ -592,7 +593,7 @@ struct _CPLSpawnedProcess
  * output stream.
  * @param bCreateErrorPipe set to TRUE to create a pipe for the child
  * error stream.
-
+ * @param papszOptions unused. should be set to NULL.
  *
  * @return a handle, that must be freed with CPLSpawnAsyncFinish()
  *
@@ -604,7 +605,7 @@ CPLSpawnedProcess* CPLSpawnAsync( int (*pfnMain)(CPL_FILE_HANDLE,
                                   int bCreateInputPipe,
                                   int bCreateOutputPipe,
                                   int bCreateErrorPipe,
-                                  char** /* papszOptions */ )
+                                  CPL_UNUSED char** papszOptions )
 {
     int pipe_in[2] = { -1, -1 };
     int pipe_out[2] = { -1, -1 };
@@ -695,6 +696,7 @@ CPLSpawnedProcess* CPLSpawnAsync( int (*pfnMain)(CPL_FILE_HANDLE,
         }
 
         pid_t pid = 0;
+        assert( papszArgvDup[0] != nullptr );
         if( posix_spawnp(&pid, papszArgvDup[0],
                          bHasActions ? &actions : nullptr,
                          nullptr,

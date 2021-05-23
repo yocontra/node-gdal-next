@@ -28,7 +28,7 @@
 
 #include "aoutils.h"
 
-CPL_CVSID("$Id: aoutils.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: aoutils.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
 
 bool AOErr(HRESULT hr, std::string desc)
 {
@@ -333,7 +333,7 @@ bool OGRGeometryToAOGeometry(OGRGeometry* pOGRGeom, esriGeometry::IGeometry** pp
 
   *ppGeometry = NULL;
 
-  long wkbSize = pOGRGeom->WkbSize();
+  long wkbSize = static_cast<long>(pOGRGeom->WkbSize());
   GByte* pWKB = (GByte *) CPLMalloc(wkbSize);
 
   if( pOGRGeom->exportToWkb( wkbNDR, pWKB ) != OGRERR_NONE )

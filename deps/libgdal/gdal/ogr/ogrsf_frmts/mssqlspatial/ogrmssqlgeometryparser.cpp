@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlgeometryparser.cpp edcc6709ca4195da164b4345888ee2f74560e24d 2020-02-05 02:47:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlgeometryparser.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 /*   SqlGeometry/SqlGeography serialization format
 
@@ -110,7 +110,7 @@ SegmentType (1 byte)
 /*                         Geometry parser macros                       */
 /************************************************************************/
 
-#define ReadInt32(nPos) (*((unsigned int*)(pszData + (nPos))))
+#define ReadInt32(nPos) (*((int*)(pszData + (nPos))))
 
 #define ReadByte(nPos) (pszData[nPos])
 
@@ -224,7 +224,7 @@ OGRMultiPoint* OGRMSSQLGeometryParser::ReadMultiPoint(int iShape)
     for (int i = iShape + 1; i < nNumShapes; i++)
     {
         poGeom = nullptr;
-        if (ParentOffset(i) == (unsigned int)iShape)
+        if (ParentOffset(i) == iShape)
         {
             if  ( ShapeType(i) == ST_POINT )
                 poGeom = ReadPoint(FigureOffset(i));
@@ -344,7 +344,7 @@ OGRMultiLineString* OGRMSSQLGeometryParser::ReadMultiLineString(int iShape)
     for (int i = iShape + 1; i < nNumShapes; i++)
     {
         poGeom = nullptr;
-        if (ParentOffset(i) == (unsigned int)iShape)
+        if (ParentOffset(i) == iShape)
         {
             if  ( ShapeType(i) == ST_LINESTRING )
                 poGeom = ReadLineString(FigureOffset(i));
@@ -363,7 +363,7 @@ OGRMultiLineString* OGRMSSQLGeometryParser::ReadMultiLineString(int iShape)
 OGRPolygon* OGRMSSQLGeometryParser::ReadPolygon(int iShape)
 {
     int iFigure, iNextFigure;
-    
+
     OGRPolygon* poPoly = new OGRPolygon();
 
     if ((iFigure = FigureOffset(iShape)) == -1)
@@ -401,7 +401,7 @@ OGRMultiPolygon* OGRMSSQLGeometryParser::ReadMultiPolygon(int iShape)
     for (int i = iShape + 1; i < nNumShapes; i++)
     {
         poGeom = nullptr;
-        if (ParentOffset(i) == (unsigned int)iShape)
+        if (ParentOffset(i) == iShape)
         {
             if ( ShapeType(i) == ST_POLYGON )
                 poGeom = ReadPolygon(i);
@@ -478,7 +478,7 @@ OGRCompoundCurve* OGRMSSQLGeometryParser::ReadCompoundCurve(int iFigure)
             nPointsPrepared = 2;
             iPoint += 2;
             break;
-        case SMT_ARC:           
+        case SMT_ARC:
             nPointsPrepared += 2;
             iPoint += 2;
             break;
@@ -550,7 +550,7 @@ OGRGeometryCollection* OGRMSSQLGeometryParser::ReadGeometryCollection(int iShape
     for (int i = iShape + 1; i < nNumShapes; i++)
     {
         poGeom = nullptr;
-        if (ParentOffset(i) == (unsigned int)iShape)
+        if (ParentOffset(i) == iShape)
         {
             switch (ShapeType(i))
             {
@@ -793,7 +793,7 @@ OGRErr OGRMSSQLGeometryParser::ParseSqlGeometry(unsigned char* pszInput,
         }
 
         // pick up the root shape
-        if ( ParentOffset(0) != 0xFFFFFFFF)
+        if ( ParentOffset(0) != -1 )
         {
             return OGRERR_CORRUPT_DATA;
         }

@@ -62,7 +62,7 @@
 // FIXME: Disabled following code as it crashed on OSX CI test.
 // #include <mutex>
 
-CPL_CVSID("$Id: gdaldrivermanager.cpp 9771b16ddd8d2e577e1875984b0737b220964b99 2020-05-21 11:31:01 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldrivermanager.cpp 230012f811b25deeac8a0fd1180f6baae8ed67a4 2021-03-16 22:36:04 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -118,6 +118,8 @@ GDALDriverManager * GetGDALDriverManager()
 GDALDriverManager::GDALDriverManager()
 {
     CPLAssert( poDM == nullptr );
+
+    CPLLoadConfigOptionsFromPredefinedFiles();
 
 /* -------------------------------------------------------------------- */
 /*      We want to push a location to search for data files             */
@@ -236,6 +238,12 @@ GDALDriverManager::~GDALDriverManager()
     PamCleanProxyDB();
 
 /* -------------------------------------------------------------------- */
+/*      Cleanup any memory allocated by the OGRSpatialReference         */
+/*      related subsystem.                                              */
+/* -------------------------------------------------------------------- */
+    OSRCleanup();
+
+/* -------------------------------------------------------------------- */
 /*      Blow away all the finder hints paths.  We really should not     */
 /*      be doing all of them, but it is currently hard to keep track    */
 /*      of those that actually belong to us.                            */
@@ -243,12 +251,6 @@ GDALDriverManager::~GDALDriverManager()
     CPLFinderClean();
     CPLFreeConfig();
     CPLCleanupSharedFileMutex();
-
-/* -------------------------------------------------------------------- */
-/*      Cleanup any memory allocated by the OGRSpatialReference         */
-/*      related subsystem.                                              */
-/* -------------------------------------------------------------------- */
-    OSRCleanup();
 
 #ifdef HAVE_XERCES
     OGRCleanupXercesMutex();
@@ -911,4 +913,32 @@ void CPL_STDCALL GDALDestroyDriverManager( void )
         delete poDM;
         poDM = nullptr;
     }
+}
+
+/************************************************************************/
+/*        GDALIsDriverDeprecatedForGDAL35StillEnabled()                 */
+/************************************************************************/
+
+/**
+ * \brief Returns whether a deprecated driver is explicitly enabled by the user
+ */
+
+bool GDALIsDriverDeprecatedForGDAL35StillEnabled(const char* pszDriverName, const char* pszExtraMsg)
+{
+    CPLString osConfigOption;
+    osConfigOption.Printf("GDAL_ENABLE_DEPRECATED_DRIVER_%s", pszDriverName);
+    if( CPLTestBool(CPLGetConfigOption(osConfigOption.c_str(), "NO")) )
+    {
+        return true;
+    }
+    CPLError(CE_Failure, CPLE_AppDefined,
+        "Driver %s is considered for removal in GDAL 3.5.%s You are invited "
+        "to convert any dataset in that format to another more common one ."
+        "If you need this driver in future GDAL versions, create a ticket at "
+        "https://github.com/OSGeo/gdal (look first for an existing one first) to "
+        "explain how critical it is for you (but the GDAL project may still "
+        "remove it), and to enable it now, set the %s "
+        "configuration option / environment variable to YES",
+        pszDriverName, pszExtraMsg, osConfigOption.c_str());
+    return false;
 }

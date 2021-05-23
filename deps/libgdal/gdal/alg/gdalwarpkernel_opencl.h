@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarpkernel_opencl.h 678d89afcc4ec43e300b2f337b51349139543d01 2016-06-30 22:42:39Z Kurt Schwehr $
+ * $Id: gdalwarpkernel_opencl.h 81cf50eb5388867c88b73e923d9e9264653b5fec 2021-04-24 00:34:42 +0200 Even Rouault $
  *
  * Project:  OpenCL Image Reprojector
  * Purpose:  Implementation of the GDALWarpKernel reprojector in OpenCL.
@@ -36,6 +36,8 @@
 #if defined(DEBUG_OPENCL) && DEBUG_OPENCL == 1
 #define CL_USE_DEPRECATED_OPENCL_1_0_APIS
 #endif
+
+#define CL_TARGET_OPENCL_VERSION 100
 
 #ifdef __APPLE__
 #include <OpenCL/OpenCL.h>

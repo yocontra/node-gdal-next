@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rmfdataset.h f34ff8b29818d5b90b868a0bbc9c95b520f2b02f 2020-10-20 23:07:32 +0300 drons $
+ * $Id: rmfdataset.h 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $
  *
  * Project:  Raster Matrix Format
  * Purpose:  Private class declarations for the RMF classes used to read/write
@@ -273,7 +273,7 @@ private:
 
     static int          Identify( GDALOpenInfo * poOpenInfo );
     static GDALDataset  *Open( GDALOpenInfo * );
-    static GDALDataset  *Open(GDALOpenInfo *, RMFDataset* poParentDS, vsi_l_offset nNextHeaderOffset );
+    static RMFDataset   *Open(GDALOpenInfo *, RMFDataset* poParentDS, vsi_l_offset nNextHeaderOffset );
     static GDALDataset  *Create( const char *, int, int, int,
                                  GDALDataType, char ** );
     static GDALDataset  *Create( const char *, int, int, int,
@@ -314,7 +314,7 @@ private:
     int                 SetupCompression(GDALDataType eType,
                                          const char* pszFilename);
     static void         WriteTileJobFunc(void* pData);
-    CPLErr              InitCompressorData(char **papszParmList);
+    CPLErr              InitCompressorData(char **papszParamList);
     CPLErr              WriteTile(int nBlockXOff, int nBlockYOff,
                                   GByte* pabyData, size_t nBytes,
                                   GUInt32 nRawXSize, GUInt32 nRawYSize);

@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libgdal"
 
-GDAL_VERSION=3.2.3
+GDAL_VERSION=3.3.0
 dir_gdal=./gdal
 dir_formats_gyp=./gyp-formats
 dir_gyp_templates=./gyp-templates
@@ -33,7 +33,6 @@ patch $dir_gdal/ogr/ogrsf_frmts/shape/shpopen.c < patches/ogrsf_frmts_shape_shpo
 patch $dir_gdal/ogr/ogrsf_frmts/shape/dbfopen.c < patches/ogrsf_frmts_shape_dbfopen.diff
 patch $dir_gdal/ogr/ogrsf_frmts/shape/sbnsearch.c < patches/ogrsf_frmts_shape_sbnsearch.diff
 patch $dir_gdal/frmts/blx/blx.c < patches/frmts_blx_blxc.diff # missing cpl_port.h
-patch $dir_gdal/frmts/sdts/sdts2shp.cpp < patches/frmts_sdts_switches.diff # bad syntax
 
 #
 # create format gyps
@@ -44,14 +43,14 @@ GDAL_FORMATS="gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm
 	nitf bmp pcidsk airsar rs2 ilwis rmf leveller sgi srtmhgt
 	idrisi gsg ingr ers jaxapalsar dimap gff cosar pds adrg
 	coasp tsx terragen blx til r northwood saga xyz hf2
-	kmlsuperoverlay ctg e00grid zmap ngsgeoid iris map
-	jpeg png mbtiles
+	kmlsuperoverlay ctg zmap ngsgeoid iris map
+	jpeg png mbtiles wms wmts
 	${OPT_GDAL_FORMATS:-}"
 
-OGR_FORMATS="shape vrt avc geojson mem mitab kml gpx aeronavfaa
-	bna dxf csv edigeo geoconcept georss gml gmt gpsbabel gtm htf
-	idrisi dgn openair openfilegdb pds pgdump rec s57 sdts segukooa
-	segy sua svg sxf ntf xplane wasp sqlite gpkg mvt osm"
+OGR_FORMATS="shape vrt avc geojson mem mitab kml gpx
+	dxf csv edigeo geoconcept georss gml gmt gpsbabel gtm
+	idrisi dgn openfilegdb pds pgdump rec s57 sdts
+	svg sxf ntf wasp sqlite gpkg mvt osm flatgeobuf carto"
 
 mkdir -p $dir_formats_gyp
 
@@ -101,12 +100,25 @@ function generate_formats() {
 		format_target_name=$(wrap_string "$target_name")
 
 		dir_format="${directory}/${fmt}"
-		relative_dir_format=`echo ${dir_format} | awk '{print "." $0}'`
-		files_src=`find ${dir_format} | egrep '\.(c|cpp)$' | awk '{print "." $0}'`
+		relative_dir_format=`find ${dir_format} -type d | awk '{print "." $0}'`
+		files_src_all=`find ${dir_format} | egrep '\.(c|cpp)$' | awk '{print "." $0}'`
+		files_src=''
+		# check to see which .c/.cpp files are mentioned in the makefile
+		makefiles=`find ${dir_format} -name GNUmakefile`
+		for file in $files_src_all; do
+			base=`basename $file | cut -f 1 -d '.'`
+			if grep -q ${base}.o ${makefiles}; then
+				files_src="${files_src}"$'\n'"${file}"
+			fi
+		done
+		# check for additional include directories
+		add_includes=`cat ${dir_format}/GNUmakefile | grep -oE -- '-I\S+' | sed 's#-I#../gdal/frmts/#g'`
+		relative_dir_format="${relative_dir_format}"$'\n'"${add_includes}"
+
 		gyp_template="${format_gyp_template}"
 
 		format_sources=$(wrap_array "$files_src" 4)
-		format_include_dirs=$(wrap_string "$relative_dir_format")
+		format_include_dirs=$(wrap_array "$relative_dir_format" 4)
 
 		if [[ ! -f "$file_gyp" ]]; then
 			echo "Defining target: $format_target_name (\"$file_gyp\")"

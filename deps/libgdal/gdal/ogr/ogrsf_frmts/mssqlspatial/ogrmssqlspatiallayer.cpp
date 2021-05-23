@@ -28,7 +28,7 @@
 
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlspatiallayer.cpp 44f00f2525498bc2059c9cc0e6d86fe7accd9168 2020-05-27 22:13:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatiallayer.cpp 7293747789d700a4e83363a52661dc36b83829fe 2020-11-08 16:47:53Z Björn Harrtell $")
 /************************************************************************/
 /*                        OGRMSSQLSpatialLayer()                        */
 /************************************************************************/
@@ -240,6 +240,12 @@ CPLErr OGRMSSQLSpatialLayer::BuildFeatureDefn( const char *pszLayerName,
             case SQL_C_TIMESTAMP:
                 oField.SetType( OFTDateTime );
                 break;
+
+            case SQL_C_GUID:
+                oField.SetType( OFTString );
+                oField.SetSubType( OFSTUUID );
+                break;
+
 
             default:
                 /* leave it as OFTString */;

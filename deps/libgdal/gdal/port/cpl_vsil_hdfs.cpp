@@ -49,7 +49,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_hdfs.cpp 5551b0b7ab234a3c412620ed91c8b941d56efc87 2020-03-16 16:01:21 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_hdfs.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
 
 #ifdef HDFS_ENABLED
 
@@ -246,7 +246,8 @@ class VSIHdfsFilesystemHandler final : public VSIFilesystemHandler
     void EnsureFilesystem();
     VSIVirtualHandle *Open(const char *pszFilename,
                            const char *pszAccess,
-                           bool bSetError ) override;
+                           bool bSetError,
+                           CSLConstList /* papszOptions */) override;
     int Stat(const char *pszFilename,
              VSIStatBufL *pStatBuf,
              int nFlags) override;
@@ -283,7 +284,8 @@ VSIHdfsFilesystemHandler::EnsureFilesystem() {
 VSIVirtualHandle *
 VSIHdfsFilesystemHandler::Open( const char *pszFilename,
                                 const char *pszAccess,
-                                bool)
+                                bool,
+                                CSLConstList /* papszOptions */ )
 {
   EnsureFilesystem();
 

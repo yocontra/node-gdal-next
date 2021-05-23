@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: FGdbUtils.h 6bbf51d28ca41dc1f06ee142d5b6407dac7f2c17 2016-11-21 22:40:20Z Even Rouault $
+ * $Id: FGdbUtils.h 7819e495986c82c51d7023358b14ecb2b0fd4d98 2021-04-01 20:02:10 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Various FileGDB OGR Datasource utility functions
@@ -58,7 +58,6 @@ bool GhettoGDBGeometryToOGRGeometry(bool forceMulti, FileGDBAPI::ShapeBuffer* pG
 //
 // GDB API to OGR Field Mapping
 //
-bool GDBToOGRFieldType(const std::string& gdbType, OGRFieldType* ogrType, OGRFieldSubType* pSubType);
 bool OGRToGDBFieldType(OGRFieldType ogrType, OGRFieldSubType eSubType, std::string* gdbType);
 
 //

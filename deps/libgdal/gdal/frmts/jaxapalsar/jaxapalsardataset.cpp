@@ -32,7 +32,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: jaxapalsardataset.cpp 74c26e1c9176bd5d83cd024cfa427249ffab6304 2021-03-04 17:59:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: jaxapalsardataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 #if defined(WIN32)
 #define SEP_STRING "\\"
@@ -360,7 +360,7 @@ const GDAL_GCP *PALSARJaxaDataset::GetGCPs() {
 /************************************************************************/
 
 void PALSARJaxaDataset::ReadMetadata( PALSARJaxaDataset *poDS, VSILFILE *fp ) {
-    /* seek to the end fo the leader file descriptor */
+    /* seek to the end of the leader file descriptor */
     VSIFSeekL( fp, LEADER_FILE_DESCRIPTOR_LENGTH, SEEK_SET );
     if (poDS->nFileType == level_10) {
         poDS->SetMetadataItem( "PRODUCT_LEVEL", "1.0" );

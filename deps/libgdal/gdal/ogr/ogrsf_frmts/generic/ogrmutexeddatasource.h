@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrmutexeddatasource.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogrmutexeddatasource.h c9bb0a71c27de43dab42821569ee6d9baf2fdf8f 2021-04-01 19:20:15 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLMutexedDataSource class
@@ -112,6 +112,12 @@ class CPL_DLL OGRMutexedDataSource : public OGRDataSource
     virtual CPLErr      SetMetadataItem( const char * pszName,
                                          const char * pszValue,
                                          const char * pszDomain = "" ) override;
+
+    virtual const OGRFieldDomain* GetFieldDomain(const std::string& name) const override;
+
+    virtual bool        AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                       std::string& failureReason) override;
+
 };
 
 #endif /* #ifndef DOXYGEN_SKIP */

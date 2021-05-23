@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mem.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_mem.h 92caa0d0f67bdff72b5f272d1558b1909bdbeaea 2021-03-31 14:38:01 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the OGR Memory driver.
@@ -143,6 +143,9 @@ class OGRMemDataSource CPL_NON_FINAL: public OGRDataSource
     OGRErr              DeleteLayer( int iLayer ) override;
 
     int                 TestCapability( const char * ) override;
+
+    bool                AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                       std::string& failureReason) override;
 };
 
 /************************************************************************/

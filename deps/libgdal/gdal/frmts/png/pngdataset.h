@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pngdataset.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: pngdataset.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  PNG Driver
  * Purpose:  Implement GDAL PNG Support
@@ -170,7 +170,7 @@ class PNGDataset final: public GDALPamDataset
     virtual CPLErr SetGeoTransform( double * );
     static GDALDataset  *Create( const char* pszFilename,
                                 int nXSize, int nYSize, int nBands,
-                                GDALDataType, char** papszParmList );
+                                GDALDataType, char** papszParamList );
   protected:
         CPLErr write_png_header();
 

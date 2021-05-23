@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gxf_ogcwkt.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: gxf_ogcwkt.c fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
  *
  * Project:  GXF Reader
  * Purpose:  Handle GXF to OGC WKT projection transformation.
@@ -31,7 +31,7 @@
 #include "gxfopen.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: gxf_ogcwkt.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gxf_ogcwkt.c fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /* -------------------------------------------------------------------- */
 /* the following #defines come from ogr_spatialref.h in the GDAL/OGR	*/
@@ -206,29 +206,29 @@ static void OGCWKTSetProj( char * pszProjection,
                            const char * pszParm7 )
 
 {
-    int		iParm, nCount = CSLCount(papszMethods);
-    const char	*apszParmNames[8] = { NULL };
+    int		iParam, nCount = CSLCount(papszMethods);
+    const char	*apszParamNames[8] = { NULL };
 
-    apszParmNames[0] = pszParm1;
-    apszParmNames[1] = pszParm2;
-    apszParmNames[2] = pszParm3;
-    apszParmNames[3] = pszParm4;
-    apszParmNames[4] = pszParm5;
-    apszParmNames[5] = pszParm6;
-    apszParmNames[6] = pszParm7;
-    apszParmNames[7] = NULL;
+    apszParamNames[0] = pszParm1;
+    apszParamNames[1] = pszParm2;
+    apszParamNames[2] = pszParm3;
+    apszParamNames[3] = pszParm4;
+    apszParamNames[4] = pszParm5;
+    apszParamNames[5] = pszParm6;
+    apszParamNames[6] = pszParm7;
+    apszParamNames[7] = NULL;
 
     snprintf( pszProjection, nProjectionSize,
              "PROJECTION[\"%s\"]",
              pszTransformName );
 
-    for( iParm = 0; iParm < nCount-1 && apszParmNames[iParm] != NULL; iParm++ )
+    for( iParam = 0; iParam < nCount-1 && apszParamNames[iParam] != NULL; iParam++ )
     {
         snprintf( pszProjection + strlen(pszProjection),
                  nProjectionSize - strlen(pszProjection),
                  ",PARAMETER[\"%s\",%s]",
-                 apszParmNames[iParm],
-                 papszMethods[iParm+1] );
+                 apszParamNames[iParam],
+                 papszMethods[iParam+1] );
     }
 }
 

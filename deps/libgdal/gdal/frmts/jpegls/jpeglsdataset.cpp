@@ -34,7 +34,7 @@
 
 /* g++ -Wall -g fmrts/jpegls/jpeglsdataset.cpp -shared -fPIC -o gdal_JPEGLS.so -Iport -Igcore -L. -lgdal -I/home/even/charls-1.0 -L/home/even/charls-1.0/build -lCharLS */
 
-CPL_CVSID("$Id: jpeglsdataset.cpp 51724c47693d768ad59b10ed6a3061afcacdace4 2020-04-28 17:46:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpeglsdataset.cpp 452b07d9aa72be1d260abacca8a95367d32abc48 2021-03-08 17:45:34 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -423,6 +423,9 @@ GDALDataset *JPEGLSDataset::Open( GDALOpenInfo * poOpenInfo )
     if (!Identify(poOpenInfo, bIsDCOM))
         return nullptr;
 
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("JPEGLS") )
+        return nullptr;
+
     JlsParameters sParams;
 
 #ifdef CHARLS_2
@@ -505,7 +508,7 @@ GDALDataset *JPEGLSDataset::Open( GDALOpenInfo * poOpenInfo )
     if (nBitsPerSample > 16)
     {
         CPLError(CE_Failure, CPLE_NotSupported,
-                 "Unsupport bitspersample : %d",
+                 "Unsupported bitspersample : %d",
                  nBitsPerSample);
         return nullptr;
     }
@@ -562,6 +565,10 @@ JPEGLSDataset::CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
                 GDALProgressFunc /*pfnProgress*/, void * /*pProgressData*/ )
 
 {
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("JPEGLS") )
+        return nullptr;
+
     const int  nBands = poSrcDS->GetRasterCount();
     const int  nXSize = poSrcDS->GetRasterXSize();
     const int  nYSize = poSrcDS->GetRasterYSize();

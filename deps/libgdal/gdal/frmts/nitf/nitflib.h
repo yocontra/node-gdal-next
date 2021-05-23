@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitflib.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: nitflib.h b33096582db6db97e24011418d0304d736c102fa 2020-11-06 16:52:08 -0500 matthew-baran $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Main GDAL independent include file for NITF support.
@@ -262,6 +262,8 @@ int       CPL_DLL  NITFDESGetTRE(   NITFDES* psDES,
 void      CPL_DLL  NITFDESFreeTREData( char* pabyTREData );
 
 int       CPL_DLL  NITFDESExtractShapefile(NITFDES* psDES, const char* pszRadixFileName);
+
+CPLXMLNode CPL_DLL *NITFDESGetXml(NITFFile*, int iSegment);
 
 /* -------------------------------------------------------------------- */
 /*      These are really intended to be private helper stuff for the    */

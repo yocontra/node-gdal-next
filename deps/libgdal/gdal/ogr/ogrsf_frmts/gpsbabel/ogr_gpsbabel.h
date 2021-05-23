@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gpsbabel.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogr_gpsbabel.h 86083eda37a69a700825c6128034b4d5a789d05f 2021-03-11 11:39:44 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/GPSBabel driver.
@@ -32,6 +32,7 @@
 
 #include "ogrsf_frmts.h"
 #include "cpl_string.h"
+#include <array>
 
 /************************************************************************/
 /*                        OGRGPSBabelDataSource                         */
@@ -39,13 +40,13 @@
 
 class OGRGPSBabelDataSource final: public OGRDataSource
 {
-    int                 nLayers;
-    OGRLayer*           apoLayers[5];
-    char               *pszName;
-    char               *pszGPSBabelDriverName;
-    char               *pszFilename;
-    CPLString           osTmpFileName;
-    GDALDataset        *poGPXDS;
+    int                 nLayers = 0;
+    std::array<OGRLayer*, 5>  apoLayers{{nullptr,nullptr,nullptr,nullptr,nullptr}};
+    char               *pszName = nullptr;
+    char               *pszGPSBabelDriverName = nullptr;
+    char               *pszFilename = nullptr;
+    CPLString           osTmpFileName{};
+    GDALDataset        *poGPXDS = nullptr;
 
   public:
                         OGRGPSBabelDataSource();

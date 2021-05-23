@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: ogrgeojsonutils.cpp 66b26b0bb2b01dcbe7dcfeb2c3199621456af56f 2020-12-17 19:13:24 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonutils.cpp 3f847c810ebdafb96bd0c2823b838ed25d35799f 2020-12-17 19:13:24 +0100 Even Rouault $")
 
 const char szESRIJSonPotentialStart1[] =
     "{\"features\":[{\"geometry\":{\"rings\":[";

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfdataset.h b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
+ * $Id: nitfdataset.h b33096582db6db97e24011418d0304d736c102fa 2020-11-06 16:52:08 -0500 matthew-baran $
  *
  * Project:  NITF Read/Write Translator
  * Purpose:  GDALDataset/GDALRasterBand declarations.
@@ -88,9 +88,9 @@ class NITFDataset final: public GDALPamDataset
 
 #ifdef ESRI_BUILD
     void         InitializeNITFDESMetadata();
-    void         InitializeNITFDESs();
     void         InitializeNITFTREs();
 #endif
+    void         InitializeNITFDESs();
     void         InitializeNITFMetadata();
     void         InitializeCGMMetadata();
     void         InitializeTextMetadata();

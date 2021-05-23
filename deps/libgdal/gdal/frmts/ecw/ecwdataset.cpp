@@ -38,7 +38,7 @@
 
 #include "../mem/memdataset.h"
 
-CPL_CVSID("$Id: ecwdataset.cpp 2a09de991820b991ea290b426f011fe6cff7256c 2020-10-03 15:20:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: ecwdataset.cpp 0bf67fbc9324262e10309c79f08530b0c9437ba4 2021-04-20 06:50:41 +0200 Bas Couwenberg $")
 
 #undef NOISY_DEBUG
 
@@ -3117,7 +3117,7 @@ void ECWDataset::ECW2WKTProjection()
         /* have "Upward" orientation (Y coordinates increase "Upward"). */
         /* Setting ECW_ALWAYS_UPWARD=FALSE option relexes that policy   */
         /* and makes the driver rely on the actual Y-resolution         */
-        /* value (sign) of an image. This allows to correctly process   */
+        /* value (sign) of an image. This allows correctly processing   */
         /* rare images with "Downward" orientation, where Y coordinates */
         /* increase "Downward" and Y-resolution is positive.            */
         if( CPLTestBool( CPLGetConfigOption("ECW_ALWAYS_UPWARD","TRUE") ) )

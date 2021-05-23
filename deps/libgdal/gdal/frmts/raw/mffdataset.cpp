@@ -37,7 +37,7 @@
 #include <cmath>
 #include <algorithm>
 
-CPL_CVSID("$Id: mffdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: mffdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 enum {
   MFFPRJ_NONE,
@@ -95,7 +95,7 @@ class MFFDataset final : public RawDataset
     static GDALDataset *Open( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
-                                GDALDataType eType, char ** papszParmList );
+                                GDALDataType eType, char ** papszParamList );
     static GDALDataset *CreateCopy( const char * pszFilename,
                                     GDALDataset *poSrcDS,
                                     int bStrict, char ** papszOptions,
@@ -1107,7 +1107,7 @@ int GetMFFProjectionType(const char *pszNewProjection)
 GDALDataset *MFFDataset::Create( const char * pszFilenameIn,
                                  int nXSize, int nYSize, int nBands,
                                  GDALDataType eType,
-                                 char ** papszParmList )
+                                 char ** papszParamList )
 
 {
 /* -------------------------------------------------------------------- */
@@ -1174,7 +1174,7 @@ GDALDataset *MFFDataset::Create( const char * pszFilenameIn,
     bOK &= VSIFPrintfL( fp, "BYTE_ORDER = LSB\n" ) >= 0;
 #endif
 
-    if (CSLFetchNameValue(papszParmList,"NO_END") == nullptr)
+    if (CSLFetchNameValue(papszParamList,"NO_END") == nullptr)
         bOK &= VSIFPrintfL( fp, "END\n" ) >= 0;
 
     if( VSIFCloseL( fp ) != 0 )

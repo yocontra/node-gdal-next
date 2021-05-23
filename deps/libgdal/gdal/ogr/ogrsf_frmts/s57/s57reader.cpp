@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <string>
 
-CPL_CVSID("$Id: s57reader.cpp 768c9ed157d3f09d675f3993a63e4cb756b31486 2020-06-27 17:05:44 +0200 Even Rouault $")
+CPL_CVSID("$Id: s57reader.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
 
 /**
 * Recode the given string from a source encoding to UTF-8 encoding.  The source
@@ -322,7 +322,7 @@ OGRFeature *S57Reader::NextPendingMultiPoint()
         poPoint->SetField( i, poMultiPoint->GetRawFieldRef(i) );
     }
 
-    OGRPoint *poSrcPoint = poMPGeom->getGeometryRef( iPointOffset )->toPoint();
+    OGRPoint *poSrcPoint = poMPGeom->getGeometryRef( iPointOffset );
     iPointOffset++;
     poPoint->SetGeometry( poSrcPoint );
 
@@ -3119,8 +3119,8 @@ bool S57Reader::ApplyRecordUpdate( DDFRecord *poTarget, DDFRecord *poUpdate )
 
         if( poDstATTF == nullptr )
         {
-            // Create empty ATTF Field (see GDAL/OGR Bug #1648)" ); 
-            poDstATTF = poTarget->AddField(poModule->FindFieldDefn( "ATTF" ));         
+            // Create empty ATTF Field (see GDAL/OGR Bug #1648)" );
+            poDstATTF = poTarget->AddField(poModule->FindFieldDefn( "ATTF" ));
         }
 
         DDFField *poSrcATTF = poUpdate->FindField( "ATTF" );

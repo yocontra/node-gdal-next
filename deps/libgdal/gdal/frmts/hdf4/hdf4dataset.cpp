@@ -42,7 +42,7 @@
 #include "hdf4compat.h"
 #include "hdf4dataset.h"
 
-CPL_CVSID("$Id: hdf4dataset.cpp 7efbb574f409465c908e5d83877fa36a501d434d 2020-10-14 11:56:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: hdf4dataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 extern const char * const pszGDALSignature;
 
@@ -1154,7 +1154,7 @@ GDALDataset *HDF4Dataset::Open( GDALOpenInfo * poOpenInfo )
                             &nAttrs) != 0 )
                 return nullptr;
 
-            if ( iRank == 1 )  // Skip 1D datsets
+            if ( iRank == 1 )  // Skip 1D datasets
                     continue;
 
             // Do sort of known datasets. We will display only image bands

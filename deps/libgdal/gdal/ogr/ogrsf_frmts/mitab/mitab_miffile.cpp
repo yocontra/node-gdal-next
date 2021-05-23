@@ -51,7 +51,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: mitab_miffile.cpp d65d044c3b43c1ddd2a03672e8d105fa33717c2f 2019-08-15 21:28:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_miffile.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
 
 /*=====================================================================
  *                      class MIFFile
@@ -558,7 +558,7 @@ int MIFFile::ParseMIFHeader(int* pbIsEmpty)
         return -1;
     }
 
-    if ((pszLine = m_poMIFFile->GetLastLine()) == nullptr ||
+    if (m_poMIFFile->GetLastLine() == nullptr ||
         STARTS_WITH_CI(m_poMIFFile->GetLastLine(), "DATA") == FALSE)
     {
         CPLError(CE_Failure, CPLE_NotSupported,
@@ -646,7 +646,7 @@ int  MIFFile::AddFields(const char *pszLine)
              *------------------------------------------------*/
             nStatus = AddFieldNative(osFieldName, TABFInteger);
         }
-        else if (numTok > 2)
+        else /* if (numTok > 2) */
         {
             /*-------------------------------------------------
              * INTEGER type with a specified width
@@ -663,7 +663,7 @@ int  MIFFile::AddFields(const char *pszLine)
              *------------------------------------------------*/
             nStatus = AddFieldNative(osFieldName, TABFSmallInt);
         }
-        else if (numTok > 2)
+        else /* if (numTok > 2) */
         {
             /*-------------------------------------------------
              * SMALLINT type with a specified width

@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: dgnread.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: dgnread.cpp 7b0ca41c54ccdcaaf512a7b11cad4dc93ca71e66 2020-11-06 22:14:23 +0100 Even Rouault $")
 
 static DGNElemCore *DGNParseTCB( DGNInfo * );
 static DGNElemCore *DGNParseColorTable( DGNInfo * );
@@ -498,8 +498,10 @@ static DGNElemCore *DGNProcessElement( DGNInfo *psDGN, int nType, int nLevel )
               return nullptr;
           }
           DGNElemMultiPoint *psLine = static_cast<DGNElemMultiPoint *>(
-              CPLCalloc(sizeof(DGNElemMultiPoint)+(count-1)*sizeof(DGNPoint),
+              VSI_CALLOC_VERBOSE(sizeof(DGNElemMultiPoint)+(count-1)*sizeof(DGNPoint),
                         1));
+          if( psLine == nullptr )
+              return nullptr;
           psElement = (DGNElemCore *) psLine;
           psElement->stype = DGNST_MULTIPOINT;
           DGNParseCore( psDGN, psElement );

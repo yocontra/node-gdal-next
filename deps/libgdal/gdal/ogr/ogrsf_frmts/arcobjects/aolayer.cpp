@@ -32,7 +32,7 @@
 #include "aoutils.h"
 #include <strstream>
 
-CPL_CVSID("$Id: aolayer.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: aolayer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                              AOLayer()                               */
@@ -191,7 +191,7 @@ void AOLayer::SetSpatialFilter( OGRGeometry* pOGRGeom )
     // Crap! we failed and there is no return error mechanism.
     // Report Error and dismiss ogr geometry to go back to at least a working
     // state
-    CPLError( CE_Failure, CPLE_AppDefined, "Could not convert OGR spatial filter geometry to ArcObjecs one. Dismissing spatial filter!");
+    CPLError( CE_Failure, CPLE_AppDefined, "Could not convert OGR spatial filter geometry to ArcObjects one. Dismissing spatial filter!");
 
     SwitchToAttributeOnlyFilter();
     return;

@@ -29,7 +29,7 @@
 
 #include "ogr_db2.h"
 
-CPL_CVSID("$Id: ogrdb2datasource.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdb2datasource.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
 
 static GPKGTileFormat GetTileFormat(const char* pszTF );
 
@@ -657,20 +657,22 @@ int OGRDB2DataSource::GetLayerCount()
 /*                       ParseValue()                                   */
 /************************************************************************/
 
-int OGRDB2DataSource::ParseValue(char** pszValue, char* pszSource,
+int OGRDB2DataSource::ParseValue(char** ppszValue, char* pszSource,
                                  const char* pszKey, int nStart, int nNext,
                                  int nTerm, int bRemove)
 {
     int nLen = static_cast<int>(strlen(pszKey));
-    if ((*pszValue) == nullptr && nStart + nLen < nNext &&
+    if ((*ppszValue) == nullptr && nStart + nLen < nNext &&
             EQUALN(pszSource + nStart, pszKey, nLen))
     {
         const int nSize = nNext - nStart - nLen;
-        *pszValue = (char*)CPLMalloc( nSize + 1 );
-        if (*pszValue)
-            strncpy(*pszValue, pszSource + nStart + nLen,
+        *ppszValue = (char*)CPLMalloc( nSize + 1 );
+        if (*ppszValue)
+        {
+            strncpy(*ppszValue, pszSource + nStart + nLen,
                     nSize);
-        (*pszValue)[nSize] = 0;
+            (*ppszValue)[nSize] = 0;
+        }
 
         if (bRemove)
         {
@@ -2517,6 +2519,7 @@ static const WarpResamplingAlg asResamplingAlg[] =
     { "LANCZOS", GRA_Lanczos },
     { "MODE", GRA_Mode },
     { "AVERAGE", GRA_Average },
+    { "RMS", GRA_RMS },
 };
 
 static void DumpStringList(char **papszStrList)

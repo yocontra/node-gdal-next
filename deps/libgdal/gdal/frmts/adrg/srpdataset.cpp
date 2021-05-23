@@ -39,7 +39,7 @@
 // Uncomment to recognize also .gen files in addition to .img files
 // #define OPEN_GEN
 
-CPL_CVSID("$Id: srpdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: srpdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 class SRPDataset final: public GDALPamDataset
 {
@@ -729,7 +729,7 @@ bool SRPDataset::GetFromRecord( const char* pszFileName, DDFRecord * record )
                 // TODO: Translate to English or state why this should not be in
                 // English.
                 // Date de production du produit : QAL.QUV.DAT1
-                // Num�ro d'�dition  du produit : QAL.QUV.EDN
+                // Numero d'edition  du produit : QAL.QUV.EDN
 
                 const int EDN =
                     record->GetIntSubfield( "QUV", 0, "EDN", 0, &bSuccess );
@@ -1372,7 +1372,7 @@ char** SRPDataset::GetIMGListFromGEN(const char* pszFileName,
             if ( strcmp(RTY, "GIN") != 0 )
                 continue;
 
-            /* make sure that the GEN file is part of a SRP dataset, not an ADRG dataset, by checking that the GEN field does not contain a NWO subfield */
+            /* make sure that the GEN file is part of a SRP dataset, not an ADRG dataset, by checking that the GEN field does not contain a NOW subfield */
             const char* NWO = record->GetStringSubfield("GEN", 0, "NWO", 0);
             if( NWO )
             {

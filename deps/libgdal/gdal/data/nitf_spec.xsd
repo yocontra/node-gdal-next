@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /******************************************************************************
- * $Id: nitf_spec.xsd 220fb188536106a9992284cd5629363c064f624e 2020-10-13 17:23:11 -0400 matthew-baran $
+ * $Id: nitf_spec.xsd b9cb04116b824a177dfb9d57aa3e0d6a12cb7c58 2020-12-08 17:07:27 -0500 Matthew Baran $
  *
  * Project:  NITF Library
  * Purpose:  Schema of description of NITF TREs
@@ -132,6 +132,7 @@
                     <xs:enumeration value="real"/>
                     <xs:enumeration value="IEEE754_Float32_BigEndian"/>
                     <xs:enumeration value="UnsignedInt_BigEndian"/>
+                    <xs:enumeration value="ISO8859-1"/>
                     <xs:enumeration value="bitmask"/>
                 </xs:restriction>
             </xs:simpleType>

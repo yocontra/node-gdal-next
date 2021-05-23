@@ -56,7 +56,7 @@
 
 #include "cpl_json_header.h"
 
-CPL_CVSID("$Id: ogrfeature.cpp abbdb7ff7a84bdb2177a70981b817f6347daa9c0 2020-10-27 21:35:24 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrfeature.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                             OGRFeature()                             */
@@ -4289,7 +4289,7 @@ void OGR_F_SetFieldIntegerList( OGRFeatureH hFeat, int iField,
  * This method currently on has an effect of OFTIntegerList, OFTInteger64List
  * and OFTRealList fields.
  *
- * This method is the same as the C function OGR_F_SetFieldIntege64rList().
+ * This method is the same as the C function OGR_F_SetFieldInteger64List().
  *
  * @note This method has only an effect on the in-memory feature object. If
  * this object comes from a layer and the modifications must be serialized back
@@ -5716,7 +5716,8 @@ OGRErr OGRFeature::SetFrom( const OGRFeature * poSrcFeature, int bForgiving )
     {
         if( poSrcFeature->GetFieldCount() )
             return OGRERR_FAILURE;
-        return SetFrom( poSrcFeature, nullptr, bForgiving );
+        int dummy = 0;
+        return SetFrom( poSrcFeature, &dummy, bForgiving );
     }
     return SetFrom( poSrcFeature, oMap.data(), bForgiving );
 }

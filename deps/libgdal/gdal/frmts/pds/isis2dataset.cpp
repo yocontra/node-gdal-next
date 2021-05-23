@@ -46,7 +46,7 @@ constexpr int RECORD_SIZE = 512;
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: isis2dataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: isis2dataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -95,7 +95,7 @@ public:
     static GDALDataset *Open( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
                                 int nXSize, int nYSize, int nBands,
-                                GDALDataType eType, char ** papszParmList );
+                                GDALDataType eType, char ** papszParamList );
 
     // Write related.
     static int WriteRaster(CPLString osFilename, bool includeLabel, GUIntBig iRecord, GUIntBig iLabelRecords, GDALDataType eType, const char * pszInterleaving);
@@ -836,7 +836,7 @@ void ISIS2Dataset::CleanString( CPLString &osInput )
 
 GDALDataset *ISIS2Dataset::Create(const char* pszFilename,
                                   int nXSize, int nYSize, int nBands,
-                                  GDALDataType eType, char** papszParmList) {
+                                  GDALDataType eType, char** papszParamList) {
 
     /* Verify settings. In Isis 2 core pixel values can be represented in
      * three different ways : 1, 2 4, or 8 Bytes */
@@ -852,7 +852,7 @@ GDALDataset *ISIS2Dataset::Create(const char* pszFilename,
         (SAMPLE, BAND, LINE) - Band Interleaved by Line (BIL)
         (BAND, SAMPLE, LINE) - Band Interleaved by Pixel (BIP) */
     const char *pszInterleaving = "(SAMPLE,LINE,BAND)";
-    const char *pszInterleavingParam = CSLFetchNameValue( papszParmList, "INTERLEAVE" );
+    const char *pszInterleavingParam = CSLFetchNameValue( papszParamList, "INTERLEAVE" );
     if ( pszInterleavingParam ) {
         if ( STARTS_WITH_CI(pszInterleavingParam, "bip") )
             pszInterleaving = "(BAND,SAMPLE,LINE)";
@@ -865,7 +865,7 @@ GDALDataset *ISIS2Dataset::Create(const char* pszFilename,
     /* default labeling method is attached */
     bool bAttachedLabelingMethod = true;
     /* check if labeling method is set : check the all three first chars */
-    const char *pszLabelingMethod = CSLFetchNameValue( papszParmList, "LABELING_METHOD" );
+    const char *pszLabelingMethod = CSLFetchNameValue( papszParamList, "LABELING_METHOD" );
     if ( pszLabelingMethod ){
         if ( STARTS_WITH_CI( pszLabelingMethod, "det" /* "detached" */ ) ){
             bAttachedLabelingMethod = false;
@@ -885,7 +885,7 @@ GDALDataset *ISIS2Dataset::Create(const char* pszFilename,
     else
     {
         CPLString sExtension = "cub";
-        const char* pszExtension = CSLFetchNameValue( papszParmList, "IMAGE_EXTENSION" );
+        const char* pszExtension = CSLFetchNameValue( papszParamList, "IMAGE_EXTENSION" );
         if( pszExtension ){
             sExtension = pszExtension;
         }
@@ -903,7 +903,7 @@ GDALDataset *ISIS2Dataset::Create(const char* pszFilename,
         osOutFile = osLabelFile;
     }
 
-    const char *pszObject = CSLFetchNameValue( papszParmList, "OBJECT" );
+    const char *pszObject = CSLFetchNameValue( papszParamList, "OBJECT" );
     CPLString sObject = "QUBE"; // default choice
     if (pszObject) {
         if ( EQUAL( pszObject, "IMAGE") ){

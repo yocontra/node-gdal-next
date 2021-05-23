@@ -35,7 +35,7 @@
 #include <vector>
 #include <algorithm>
 
-CPL_CVSID("$Id: imdreader.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: imdreader.cpp f0237483886cb50fd93f6295263546017ab95d41 2021-03-11 11:42:22 +0100 Even Rouault $")
 
 typedef std::map<CPLString,CPLXMLNode*> StrNodeMap;
 typedef std::vector<CPLXMLNode*> NodeVector;
@@ -222,6 +222,8 @@ public:
         {
             if (*it == nullptr) continue;
             const char* psName = CPLGetXMLValue( *it, "Name", nullptr );
+            if( psName == nullptr )
+                continue;
             const char* psTypeRef = CPLGetXMLValue( *it, "Type.REF", nullptr );
             if (psTypeRef == nullptr) //Assoc Role
                 AddField(psName, OFTString); //FIXME: numeric?

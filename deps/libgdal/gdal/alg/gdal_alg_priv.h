@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg_priv.h b982ae87d349217de9d832df29ea4c5bd672bcad 2020-10-28 00:34:26 +0100 Even Rouault $
+ * $Id: gdal_alg_priv.h 47fcc5b4d15f1ac172b3b7b60f26f95905fa001a 2020-10-28 00:34:26 +0100 Even Rouault $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes and definitions for various GDAL based algorithms:
