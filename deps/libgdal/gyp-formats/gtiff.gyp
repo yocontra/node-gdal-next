@@ -77,12 +77,11 @@
 				"../gdal/frmts/gtiff/libgeotiff",
 				"../gdal/frmts/libtiff",
 				"../gdal/frmts/libgeotiff",
-				"../gdal/frmts/../jpeg",
-				"../gdal/frmts/../jpeg/libjpeg",
-				"../gdal/frmts/..",
-				"../gdal/frmts/../../port",
-				"../gdal/frmts/../../gcore",
-				"../gdal/frmts/../../ogr"
+				"../gdal/frmts/jpeg",
+				"../gdal/frmts/jpeg/libjpeg",
+				"../gdal/port",
+				"../gdal/gcore",
+				"../gdal/ogr"
 			]
 		}
 	]
