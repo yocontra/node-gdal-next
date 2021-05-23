@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library
  - Drop support for Ubuntu 16.04
+ - Drop support for Node.js 10.x and 15.x
 
 ## [3.2.0] 2021-05-21
 

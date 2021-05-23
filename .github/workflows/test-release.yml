@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         linux-version: [ 'ubuntu:18.04', 'ubuntu:20.04', 'centos:8', 'debian:buster', 'fedora:33', 'archlinux:latest' ]
-        node-version: [ 10, 12, 14, 15, 16 ]
+        node-version: [ 12, 14, 16 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         platforms: [ windows-2019, macos-10.15 ]
-        node-version: [ 10.x, 12.x, 14.x, 15.x, 16.x ]
+        node-version: [ 12.x, 14.x, 16.x ]
 
     steps:
     - uses: actions/checkout@v2
