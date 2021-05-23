@@ -19,6 +19,8 @@ using namespace node;
 
 namespace node_gdal {
 
+class GeoTransformTransformer;
+
 class CoordinateTransformation : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -30,6 +32,7 @@ class CoordinateTransformation : public Nan::ObjectWrap {
 
   CoordinateTransformation();
   CoordinateTransformation(OGRCoordinateTransformation *srs);
+  CoordinateTransformation(GeoTransformTransformer *srs, bool geoTransform);
   inline OGRCoordinateTransformation *get() {
     return this_;
   }
@@ -40,6 +43,7 @@ class CoordinateTransformation : public Nan::ObjectWrap {
     private:
   ~CoordinateTransformation();
   OGRCoordinateTransformation *this_;
+  bool geoTransform;
 };
 
 // adapted from gdalwarp source
