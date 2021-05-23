@@ -87,6 +87,9 @@ NAN_METHOD(CoordinateTransformation::New) {
       }
       f = new CoordinateTransformation(transform);
     } else if (Nan::New(Dataset::constructor)->HasInstance(info[1])) {
+      // FIXME
+      Nan::ThrowError("This road is temporarily closed pending a rewrite of this feature");
+      return;
       // srs -> px/line
       // todo: allow additional options using StringList
 
