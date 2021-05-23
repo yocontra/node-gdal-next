@@ -97,12 +97,6 @@ NAN_METHOD(CoordinateTransformation::New) {
       ds = Nan::ObjectWrap::Unwrap<Dataset>(info[1].As<Object>());
 
       if (!ds->getDataset()) {
-#if GDAL_VERSION_MAJOR < 2
-        if (ds->getDatasource()) {
-          Nan::ThrowError("Only raster datasets can be used to create geotransform coordinate transformations");
-          return;
-        }
-#endif
         Nan::ThrowError("Dataset already closed");
         return;
       }

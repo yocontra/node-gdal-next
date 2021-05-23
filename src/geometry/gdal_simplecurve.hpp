@@ -19,9 +19,6 @@ using namespace node;
 
 namespace node_gdal {
 
-#if GDAL_VERSION_MAJOR < 2
-#define OGRSimpleCurve OGRLineString
-#endif
 class SimpleCurve : public CurveBase<SimpleCurve, OGRSimpleCurve, LineStringPoints> {
 
     public:
@@ -39,4 +36,5 @@ class SimpleCurve : public CurveBase<SimpleCurve, OGRSimpleCurve, LineStringPoin
 };
 
 } // namespace node_gdal
+
 #endif

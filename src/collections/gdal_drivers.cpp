@@ -19,9 +19,6 @@ void GDALDrivers::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "getNames", getNames);
 
   GDALAllRegister();
-#if GDAL_VERSION_MAJOR < 2
-  OGRRegisterAll();
-#endif
 
   Nan::Set(target, Nan::New("GDALDrivers").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
@@ -91,10 +88,6 @@ NAN_METHOD(GDALDrivers::toString) {
 NAN_METHOD(GDALDrivers::get) {
   Nan::HandleScope scope;
 
-#if GDAL_VERSION_MAJOR < 2
-  OGRSFDriver *ogr_driver;
-#endif
-
   GDALDriver *gdal_driver;
 
   if (info.Length() == 0) {
@@ -108,29 +101,7 @@ NAN_METHOD(GDALDrivers::get) {
     // with <2.0 require user to specify which driver to pick
     std::string name = *Nan::Utf8String(info[0]);
 
-#if GDAL_VERSION_MAJOR < 2
-    if (name == "VRT") {
-      Nan::ThrowError("Name \"VRT\" is ambiguous before GDAL 2.0. Use VRT:raster or VRT:vector instead");
-      return;
-    }
-    ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(name.c_str());
-    if (ogr_driver) {
-      info.GetReturnValue().Set(Driver::New(ogr_driver));
-      return;
-    }
-#endif
-
-    if (name == "VRT:vector") {
-#if GDAL_VERSION_MAJOR < 2
-      ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("VRT");
-      if (ogr_driver) {
-        info.GetReturnValue().Set(Driver::New(ogr_driver));
-        return;
-      }
-#else
-      name = "VRT";
-#endif
-    }
+    if (name == "VRT:vector") { name = "VRT"; }
 
     if (name == "VRT:raster") { name = "VRT"; }
     gdal_driver = GetGDALDriverManager()->GetDriverByName(name.c_str());
@@ -148,14 +119,6 @@ NAN_METHOD(GDALDrivers::get) {
       return;
     }
 
-#if GDAL_VERSION_MAJOR < 2
-    i -= GetGDALDriverManager()->GetDriverCount();
-    ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriver(i);
-    if (ogr_driver) {
-      info.GetReturnValue().Set(Driver::New(ogr_driver));
-      return;
-    }
-#endif
   } else {
     Nan::ThrowError("Argument must be string or integer");
     return;
@@ -176,10 +139,6 @@ NAN_METHOD(GDALDrivers::getNames) {
   int i, ogr_count = 0;
   std::string name;
 
-#if GDAL_VERSION_MAJOR < 2
-  ogr_count = OGRSFDriverRegistrar::GetRegistrar()->GetDriverCount();
-#endif
-
   int n = gdal_count + ogr_count;
 
   Local<Array> driver_names = Nan::New<Array>(n);
@@ -187,20 +146,8 @@ NAN_METHOD(GDALDrivers::getNames) {
   for (i = 0; i < gdal_count; ++i) {
     GDALDriver *driver = GetGDALDriverManager()->GetDriver(i);
     name = driver->GetDescription();
-#if GDAL_VERSION_MAJOR < 2
-    if (name == "VRT") name = "VRT:raster";
-#endif
     Nan::Set(driver_names, i, SafeString::New(name.c_str()));
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  for (; i < n; ++i) {
-    OGRSFDriver *driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriver(i - gdal_count);
-    name = driver->GetName();
-    if (name == "VRT") name = "VRT:vector";
-    Nan::Set(driver_names, i, SafeString::New(name.c_str()));
-  }
-#endif
 
   info.GetReturnValue().Set(driver_names);
 }
@@ -215,10 +162,6 @@ NAN_METHOD(GDALDrivers::count) {
   Nan::HandleScope scope;
 
   int count = GetGDALDriverManager()->GetDriverCount();
-
-#if GDAL_VERSION_MAJOR < 2
-  count += OGRSFDriverRegistrar::GetRegistrar()->GetDriverCount();
-#endif
 
   info.GetReturnValue().Set(Nan::New<Integer>(count));
 }

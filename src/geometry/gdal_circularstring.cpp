@@ -11,8 +11,6 @@
 
 namespace node_gdal {
 
-#if GDAL_VERSION_MAJOR >= 2
-
 Nan::Persistent<FunctionTemplate> CircularString::constructor;
 
 void CircularString::Initialize(Local<Object> target) {
@@ -48,7 +46,5 @@ NAN_METHOD(CircularString::toString) {
   Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("CircularString").ToLocalChecked());
 }
-
-#endif
 
 } // namespace node_gdal

@@ -273,13 +273,8 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   std::vector<long> uids = options->datasetUids();
 
   if (progress_cb) {
-#if GDAL_VERSION_MAJOR < 2
-    Nan::ThrowError("Progress callback not supported on GDAL 1.x");
-    return;
-#else
     job.persist(progress_cb->GetFunction());
     job.progress = progress_cb;
-#endif
   }
 
   // opts is a pointer inside options memory space
@@ -388,12 +383,6 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
       ds = Nan::ObjectWrap::Unwrap<Dataset>(prop.As<Object>());
       if (!ds->getDataset()) {
-#if GDAL_VERSION_MAJOR < 2
-        if (ds->getDatasource()) {
-          Nan::ThrowError("src dataset must be a raster dataset");
-          return;
-        }
-#endif
         Nan::ThrowError("src dataset already closed");
         return;
       }
@@ -429,7 +418,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
     int w, h;
   };
 
-#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3)
+#if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
   GDALDatasetH gdal_ds = static_cast<GDALDatasetH>(ds->getDataset());
 #else
   GDALDatasetH gdal_ds = GDALDataset::ToHandle(ds->getDataset());

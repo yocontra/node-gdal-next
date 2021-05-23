@@ -143,11 +143,9 @@ Local<Value> Geometry::New(OGRGeometry *geom, bool owned) {
     case wkbMultiPoint: return scope.Escape(MultiPoint::New(static_cast<OGRMultiPoint *>(geom), owned));
     case wkbMultiLineString: return scope.Escape(MultiLineString::New(static_cast<OGRMultiLineString *>(geom), owned));
     case wkbMultiPolygon: return scope.Escape(MultiPolygon::New(static_cast<OGRMultiPolygon *>(geom), owned));
-#if GDAL_VERSION_MAJOR >= 2
     case wkbCompoundCurve: return scope.Escape(CompoundCurve::New(static_cast<OGRCompoundCurve *>(geom), owned));
     case wkbCircularString: return scope.Escape(CircularString::New(static_cast<OGRCircularString *>(geom), owned));
     case wkbMultiCurve: return scope.Escape(MultiCurve::New(static_cast<OGRMultiCurve *>(geom), owned));
-#endif
     default: Nan::ThrowError("Tried to create unsupported geometry type"); return scope.Escape(Nan::Undefined());
   }
 }
@@ -962,17 +960,12 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR > 1 || (GDAL_VERSION_MINOR > 10)
   // wkb variant
   OGRwkbVariant wkb_variant;
   std::string variant = "OGC";
   NODE_ARG_OPT_STR(1, "wkb variant", variant);
   if (variant == "OGC") {
-#if GDAL_VERSION_MAJOR > 1
     wkb_variant = wkbVariantOldOgc;
-#else
-    wkb_variant = wkbVariantOgc;
-#endif
   } else if (variant == "ISO") {
     wkb_variant = wkbVariantIso;
   } else {
@@ -999,18 +992,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     return result;
   };
   job.run(info, async, 2);
-#else
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  OGRErr err = geom->this_->exportToWkb(byte_order, data);
-  if (err) {
-    free(data);
-    NODE_THROW_OGRERR(err);
-    return;
-  }
-  //^^ export to wkb and fill buffer ^^
-  Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
-  info.GetReturnValue().Set(result);
-#endif
 }
 
 /**
@@ -1441,7 +1422,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
  */
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
   Nan::HandleScope scope;
-#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR <= 2 && GDAL_VERSION_MINOR < 3)
+#if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
   Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
   return;
 #else
@@ -1496,7 +1477,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
 
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJsonBuffer) {
   Nan::HandleScope scope;
-#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR <= 2 && GDAL_VERSION_MINOR < 3)
+#if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
   Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
   return;
 #else
@@ -1663,12 +1644,10 @@ Local<Value> Geometry::getConstructor(OGRwkbGeometryType type) {
     case wkbMultiLineString:
       return scope.Escape(Nan::GetFunction(Nan::New(MultiLineString::constructor)).ToLocalChecked());
     case wkbMultiPolygon: return scope.Escape(Nan::GetFunction(Nan::New(MultiPolygon::constructor)).ToLocalChecked());
-#if GDAL_VERSION_MAJOR >= 2
     case wkbCircularString:
       return scope.Escape(Nan::GetFunction(Nan::New(CircularString::constructor)).ToLocalChecked());
     case wkbCompoundCurve: return scope.Escape(Nan::GetFunction(Nan::New(CompoundCurve::constructor)).ToLocalChecked());
     case wkbMultiCurve: return scope.Escape(Nan::GetFunction(Nan::New(MultiCurve::constructor)).ToLocalChecked());
-#endif
     default: return scope.Escape(Nan::Null());
   }
 }

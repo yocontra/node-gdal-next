@@ -115,16 +115,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
-#else
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  OGRDataSource *raw = ds->getDatasource();
-  if (!ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
-#endif
 
   if (info.Length() < 1) {
     Nan::ThrowError("method must be given integer or string");
@@ -214,16 +205,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
-#else
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  OGRDataSource *raw = ds->getDatasource();
-  if (!ds->uses_ogr) {
-    Nan::ThrowError("Dataset does not support creating layers");
-    return;
-  }
-#endif
 
   std::string *layer_name = new std::string;
   SpatialReference *spatial_ref = NULL;
@@ -286,16 +268,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
-#else
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  OGRDataSource *raw = ds->getDatasource();
-  if (!ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::New<Integer>(0));
-    return;
-  }
-#endif
 
   long ds_uid = ds->uid;
   GDALAsyncableJob<int> job;
@@ -345,16 +318,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
-#else
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  OGRDataSource *raw = ds->getDatasource();
-  if (!ds->uses_ogr) {
-    Nan::ThrowError("Dataset does not support copying layers");
-    return;
-  }
-#endif
 
   Layer *layer_to_copy;
   std::string *new_name = new std::string("");
@@ -414,16 +378,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
-#else
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  OGRDataSource *raw = ds->getDatasource();
-  if (!ds->uses_ogr) {
-    Nan::ThrowError("Dataset does not support removing layers");
-    return;
-  }
-#endif
 
   int i;
   NODE_ARG_INT(0, "layer index", i);

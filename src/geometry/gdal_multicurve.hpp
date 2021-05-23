@@ -18,8 +18,6 @@ using namespace node;
 
 namespace node_gdal {
 
-#if GDAL_VERSION_MAJOR >= 2
-
 class MultiCurve : public GeometryCollectionBase<MultiCurve, OGRMultiCurve> {
 
     public:
@@ -31,8 +29,6 @@ class MultiCurve : public GeometryCollectionBase<MultiCurve, OGRMultiCurve> {
   static NAN_METHOD(toString);
   static NAN_METHOD(polygonize);
 };
-
-#endif
 
 } // namespace node_gdal
 #endif

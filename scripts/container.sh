@@ -5,7 +5,7 @@ DIST=$2
 NODEJS=$3
 GDAL=$4
 if [ -z "${OP}" ]; then
-  echo "container.sh <release|dev|shell> [<ubuntu:{16.04|18.04|20.04}|centos:8|fedora:{34|35}>] [shared]"
+  echo "container.sh <release|dev|shell> [<ubuntu:{18.04|20.04}|centos:8|fedora:{34|35}>] [shared]"
   exit 1
 fi
 if [ ! -d "test/platforms" ]; then

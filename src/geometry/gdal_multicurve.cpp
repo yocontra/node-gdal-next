@@ -9,8 +9,6 @@
 
 namespace node_gdal {
 
-#if GDAL_VERSION_MAJOR >= 2
-
 Nan::Persistent<FunctionTemplate> MultiCurve::constructor;
 
 void MultiCurve::Initialize(Local<Object> target) {
@@ -53,7 +51,5 @@ NAN_METHOD(MultiCurve::polygonize) {
 
   info.GetReturnValue().Set(Geometry::New(geom->this_->Polygonize()));
 }
-
-#endif
 
 } // namespace node_gdal

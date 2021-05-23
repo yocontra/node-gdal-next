@@ -39,9 +39,6 @@ struct PtrManagerDatasetItem {
   std::list<PtrManagerRasterBandItem *> bands;
   GDALDataset *ptr;
   uv_sem_t *async_lock;
-#if GDAL_VERSION_MAJOR < 2
-  OGRDataSource *ptr_datasource;
-#endif
 };
 
 namespace node_gdal {
@@ -68,9 +65,6 @@ namespace node_gdal {
 class PtrManager {
     public:
   long add(GDALDataset *ptr, uv_sem_t *async_lock);
-#if GDAL_VERSION_MAJOR < 2
-  long add(OGRDataSource *ptr, uv_sem_t *async_lock);
-#endif
   long add(GDALRasterBand *ptr, long parent_uid);
   long add(OGRLayer *ptr, long parent_uid, bool is_result_set);
   void dispose(long uid);

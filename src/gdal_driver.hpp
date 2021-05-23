@@ -52,32 +52,13 @@ class Driver : public Nan::ObjectWrap {
   }
   void dispose();
 
-#if GDAL_VERSION_MAJOR < 2
-  static Local<Value> New(OGRSFDriver *driver);
-
-  static ObjectCache<OGRSFDriver, Driver> cache_ogr;
-
-  Driver(OGRSFDriver *driver);
-
-  inline OGRSFDriver *getOGRSFDriver() {
-    return this_ogrdriver;
-  }
-  inline bool isAlive() {
-    return this_ogrdriver || this_gdaldriver;
-  }
-  bool uses_ogr;
-#else
   inline bool isAlive() {
     return this_gdaldriver;
   }
-#endif
 
     private:
   ~Driver();
   GDALDriver *this_gdaldriver;
-#if GDAL_VERSION_MAJOR < 2
-  OGRSFDriver *this_ogrdriver;
-#endif
 };
 
 } // namespace node_gdal

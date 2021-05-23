@@ -9,8 +9,6 @@
 
 namespace node_gdal {
 
-#if GDAL_VERSION_MAJOR >= 2
-
 Nan::Persistent<FunctionTemplate> CompoundCurve::constructor;
 
 void CompoundCurve::Initialize(Local<Object> target) {
@@ -63,7 +61,5 @@ NAN_GETTER(CompoundCurve::curvesGetter) {
   Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("curves_").ToLocalChecked()).ToLocalChecked());
 }
-
-#endif
 
 } // namespace node_gdal

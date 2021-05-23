@@ -102,19 +102,6 @@ long PtrManager::add(GDALDataset *ptr, uv_sem_t *async_lock) {
   return item->uid;
 }
 
-#if GDAL_VERSION_MAJOR < 2
-long PtrManager::add(OGRDataSource *ptr, uv_sem_t *async_lock) {
-  lock();
-  PtrManagerDatasetItem *item = new PtrManagerDatasetItem();
-  item->uid = uid++;
-  item->ptr_datasource = ptr;
-  item->async_lock = async_lock;
-  datasets[item->uid] = item;
-  unlock();
-  return item->uid;
-}
-#endif
-
 void PtrManager::dispose(long uid) {
   lock();
   if (datasets.count(uid))
@@ -135,12 +122,6 @@ void PtrManager::dispose(PtrManagerDatasetItem *item) {
   while (!item->layers.empty()) { dispose(item->layers.back()); }
   while (!item->bands.empty()) { dispose(item->bands.back()); }
 
-#if GDAL_VERSION_MAJOR < 2
-  if (item->ptr_datasource) {
-    Dataset::datasource_cache.erase(item->ptr_datasource);
-    OGRDataSource::DestroyDataSource(item->ptr_datasource);
-  }
-#endif
   if (item->async_lock) {
     uv_sem_destroy(item->async_lock);
     delete item->async_lock;
@@ -178,11 +159,7 @@ void PtrManager::dispose(PtrManagerLayerItem *item) {
   layers.erase(item->uid);
   item->parent->layers.remove(item);
 
-#if GDAL_VERSION_MAJOR < 2
-  OGRDataSource *parent_ds = item->parent->ptr_datasource;
-#else
   GDALDataset *parent_ds = item->parent->ptr;
-#endif
 
   if (item->is_result_set) { parent_ds->ReleaseResultSet(item->ptr); }
   if (async_lock != nullptr) uv_sem_post(async_lock);

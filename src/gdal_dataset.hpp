@@ -66,31 +66,15 @@ class Dataset : public Nan::ObjectWrap {
   void dispose();
   long uid;
 
-#if GDAL_VERSION_MAJOR < 2
-  static Local<Value> New(OGRDataSource *ds);
-  static ObjectCache<OGRDataSource, Dataset> datasource_cache;
-  Dataset(OGRDataSource *ds);
-  inline OGRDataSource *getDatasource() {
-    return this_datasource;
-  }
-  inline bool isAlive() {
-    return (uses_ogr ? (this_datasource != NULL) : (this_dataset != NULL)) && ptr_manager.isAlive(uid);
-  }
-  bool uses_ogr;
-#else
   inline bool isAlive() {
     return this_dataset && ptr_manager.isAlive(uid);
   }
-#endif
 
   uv_sem_t *async_lock;
 
     private:
   ~Dataset();
   GDALDataset *this_dataset;
-#if GDAL_VERSION_MAJOR < 2
-  OGRDataSource *this_datasource;
-#endif
 };
 
 } // namespace node_gdal

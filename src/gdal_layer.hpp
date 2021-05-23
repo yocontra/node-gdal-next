@@ -24,13 +24,8 @@ class Layer : public Nan::ObjectWrap {
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
-#if GDAL_VERSION_MAJOR >= 2
   static Local<Value> New(OGRLayer *raw, GDALDataset *raw_parent);
   static Local<Value> New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set);
-#else
-  static Local<Value> New(OGRLayer *raw, OGRDataSource *raw_parent);
-  static Local<Value> New(OGRLayer *raw, OGRDataSource *raw_parent, bool result_set);
-#endif
   static NAN_METHOD(toString);
   static NAN_METHOD(getExtent);
   static NAN_METHOD(setAttributeFilter);
@@ -60,15 +55,9 @@ class Layer : public Nan::ObjectWrap {
   inline bool isAlive() {
     return this_ && ptr_manager.isAlive(uid);
   }
-#if GDAL_VERSION_MAJOR >= 2
   inline GDALDataset *getParent() {
     return parent_ds;
   }
-#else
-  inline OGRDataSource *getParent() {
-    return parent_ds;
-  }
-#endif
   void dispose();
   long uid;
   long parent_uid;
@@ -76,11 +65,7 @@ class Layer : public Nan::ObjectWrap {
     private:
   ~Layer();
   OGRLayer *this_;
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *parent_ds;
-#else
-  OGRDataSource *parent_ds;
-#endif
 };
 
 } // namespace node_gdal

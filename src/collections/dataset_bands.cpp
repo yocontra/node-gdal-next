@@ -111,31 +111,21 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR < 2
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  } else {
-#else
-  {
-#endif
-    GDALDataset *raw = ds->getDataset();
-    long ds_uid = ds->uid;
-    int band_id;
-    NODE_ARG_INT(0, "band id", band_id);
+  GDALDataset *raw = ds->getDataset();
+  long ds_uid = ds->uid;
+  int band_id;
+  NODE_ARG_INT(0, "band id", band_id);
 
-    GDALAsyncableJob<GDALRasterBand *> job;
-    job.persist(parent);
-    job.main = [ds_uid, raw, band_id](const GDALExecutionProgress &) {
-      GDAL_ASYNCABLE_LOCK(ds_uid);
-      GDALRasterBand *band = raw->GetRasterBand(band_id);
-      GDAL_UNLOCK_PARENT;
-      return band;
-    };
-    job.rval = [raw](GDALRasterBand *band, GetFromPersistentFunc) { return RasterBand::New(band, raw); };
-    job.run(info, async, 1);
-  }
+  GDALAsyncableJob<GDALRasterBand *> job;
+  job.persist(parent);
+  job.main = [ds_uid, raw, band_id](const GDALExecutionProgress &) {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    GDALRasterBand *band = raw->GetRasterBand(band_id);
+    GDAL_UNLOCK_PARENT;
+    return band;
+  };
+  job.rval = [raw](GDALRasterBand *band, GetFromPersistentFunc) { return RasterBand::New(band, raw); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -171,14 +161,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  if (ds->uses_ogr) {
-    Nan::ThrowError("Dataset does not support getting creating bands");
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   GDALDataType type;
@@ -249,14 +231,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::New<Integer>(0));
-    return;
-  }
-#endif
 
   long ds_uid = ds->uid;
   GDALDataset *raw = ds->getDataset();

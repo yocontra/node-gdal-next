@@ -11,6 +11,10 @@
 
 #include "utils/ptr_manager.hpp"
 
+#if GDAL_VERSION_MAJOR < 2
+#error GDAL 1.x not supported since gdal-async@3.3.0
+#endif
+
 namespace node_gdal {
 extern FILE *log_file;
 extern PtrManager ptr_manager;
@@ -454,7 +458,7 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 // ----- special case: progress callback in [options] argument -------
 
-#define __NODE_PROGRESS_CB_OPT(num, progress_cb, job)                                                                  \
+#define NODE_PROGRESS_CB_OPT(num, progress_cb, job)                                                                    \
   {                                                                                                                    \
     Local<Object> progress_obj;                                                                                        \
     progress_cb = nullptr;                                                                                             \
@@ -468,17 +472,6 @@ NAN_SETTER(READ_ONLY_SETTER);
       job.progress = progress_cb;                                                                                      \
     }                                                                                                                  \
   }
-
-#if GDAL_VERSION_MAJOR < 2
-#define NODE_PROGRESS_CB_OPT(num, progress_cb, job)                                                                    \
-  __NODE_PROGRESS_CB_OPT(num, progress_cb, job)                                                                        \
-  if (progress_cb) {                                                                                                   \
-    Nan::ThrowError("Progress callback not supported on GDAL 1.x");                                                    \
-    return;                                                                                                            \
-  }
-#else
-#define NODE_PROGRESS_CB_OPT(num, progress_cb, job) __NODE_PROGRESS_CB_OPT(num, progress_cb, job)
-#endif
 
 // ----- wrapped methods w/ results-------
 

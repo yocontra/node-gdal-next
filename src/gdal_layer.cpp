@@ -106,22 +106,12 @@ NAN_METHOD(Layer::New) {
   info.GetReturnValue().Set(info.This());
 }
 
-#if GDAL_VERSION_MAJOR >= 2
-Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent)
-#else
-Local<Value> Layer::New(OGRLayer *raw, OGRDataSource *raw_parent)
-#endif
-{
+Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent) {
   Nan::EscapableHandleScope scope;
   return scope.Escape(Layer::New(raw, raw_parent, false));
 }
 
-#if GDAL_VERSION_MAJOR >= 2
-Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set)
-#else
-Local<Value> Layer::New(OGRLayer *raw, OGRDataSource *raw_parent, bool result_set)
-#endif
-{
+Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set) {
   Nan::EscapableHandleScope scope;
 
   if (!raw) { return scope.Escape(Nan::Null()); }
@@ -138,16 +128,9 @@ Local<Value> Layer::New(OGRLayer *raw, OGRDataSource *raw_parent, bool result_se
   // add reference to datasource so datasource doesnt get GC'ed while layer is
   // alive
   Local<Object> ds;
-#if GDAL_VERSION_MAJOR >= 2
   if (Dataset::dataset_cache.has(raw_parent)) {
     ds = Dataset::dataset_cache.get(raw_parent);
-  }
-#else
-  if (Dataset::datasource_cache.has(raw_parent)) {
-    ds = Dataset::datasource_cache.get(raw_parent);
-  }
-#endif
-  else {
+  } else {
     LOG("Layer's parent dataset disappeared from cache (layer = %p, dataset = %p)", raw, raw_parent);
     Nan::ThrowError("Layer's parent dataset disappeared from cache");
     return scope.Escape(Nan::Undefined());

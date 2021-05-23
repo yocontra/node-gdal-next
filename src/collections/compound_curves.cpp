@@ -7,8 +7,6 @@
 
 namespace node_gdal {
 
-#if GDAL_VERSION_MAJOR >= 2
-
 Nan::Persistent<FunctionTemplate> CompoundCurveCurves::constructor;
 
 void CompoundCurveCurves::Initialize(Local<Object> target) {
@@ -187,7 +185,5 @@ NAN_METHOD(CompoundCurveCurves::add) {
 
   return;
 }
-
-#endif
 
 } // namespace node_gdal

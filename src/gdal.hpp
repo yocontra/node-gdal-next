@@ -36,31 +36,6 @@ GDAL_ASYNCABLE_DEFINE(open) {
   NODE_ARG_STR(0, "path", path);
   NODE_ARG_OPT_STR(1, "mode", mode);
 
-#if GDAL_VERSION_MAJOR < 2
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  GDALAccess access = GA_ReadOnly;
-  if (mode == "r+") {
-    access = GA_Update;
-  } else if (mode != "r") {
-    Nan::ThrowError("Invalid open mode. Must be \"r\" or \"r+\"");
-    return;
-  }
-
-  OGRDataSource *ogr_ds = OGRSFDriverRegistrar::Open(path.c_str(), static_cast<int>(access));
-  if (ogr_ds) {
-    info.GetReturnValue().Set(Dataset::New(ogr_ds));
-    return;
-  }
-
-  GDALDataset *gdal_ds = (GDALDataset *)GDALOpen(path.c_str(), access);
-  if (gdal_ds) {
-    info.GetReturnValue().Set(Dataset::New(gdal_ds));
-    return;
-  }
-  Nan::ThrowError("Error opening dataset");
-  return;
-
-#else
   unsigned int flags = 0;
   if (mode == "r+") {
     flags |= GDAL_OF_UPDATE;
@@ -80,7 +55,6 @@ GDAL_ASYNCABLE_DEFINE(open) {
     return ds;
   };
   job.run(info, async, 2);
-#endif
 }
 
 static NAN_METHOD(setConfigOption) {

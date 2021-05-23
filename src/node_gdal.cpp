@@ -296,13 +296,10 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   MultiPoint::Initialize(target);
   MultiLineString::Initialize(target);
   MultiPolygon::Initialize(target);
-#if GDAL_VERSION_MAJOR >= 2
   CircularString::Initialize(target);
   CompoundCurve::Initialize(target);
   MultiCurve::Initialize(target);
 
-  CompoundCurveCurves::Initialize(target);
-#endif
   SpatialReference::Initialize(target);
   CoordinateTransformation::Initialize(target);
 
@@ -315,6 +312,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   GeometryCollectionChildren::Initialize(target);
   PolygonRings::Initialize(target);
   LineStringPoints::Initialize(target);
+  CompoundCurveCurves::Initialize(target);
   RasterBandOverviews::Initialize(target);
   RasterBandPixels::Initialize(target);
 
@@ -1033,7 +1031,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbLineString").ToLocalChecked(), Nan::New<Integer>(wkbLineString));
-#if GDAL_VERSION_MAJOR >= 2
   /**
    * @final
    * @property gdal.wkbCircularString
@@ -1052,7 +1049,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiCurve").ToLocalChecked(), Nan::New<Integer>(wkbMultiCurve));
-#endif
   /**
    * @final
    * @property gdal.wkbPolygon
@@ -1162,7 +1158,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Nan::Set(
     target, Nan::New("OFTIntegerList").ToLocalChecked(), Nan::New(getFieldTypeName(OFTIntegerList)).ToLocalChecked());
 
-#if defined(GDAL_VERSION_MAJOR) && (GDAL_VERSION_MAJOR >= 2)
   /**
    * @final
    * @property gdal.OFTInteger64
@@ -1179,7 +1174,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
     target,
     Nan::New("OFTInteger64List").ToLocalChecked(),
     Nan::New(getFieldTypeName(OFTInteger64List)).ToLocalChecked());
-#endif
   /**
    * @final
    * @property gdal.OFTReal

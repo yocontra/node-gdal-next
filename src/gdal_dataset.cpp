@@ -13,9 +13,6 @@ namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> Dataset::constructor;
 ObjectCache<GDALDataset, Dataset> Dataset::dataset_cache;
-#if GDAL_VERSION_MAJOR < 2
-ObjectCache<OGRDataSource, Dataset> Dataset::datasource_cache;
-#endif
 
 void Dataset::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -50,18 +47,9 @@ void Dataset::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-#if GDAL_VERSION_MAJOR < 2
-Dataset::Dataset(GDALDataset *ds) : Nan::ObjectWrap(), uid(0), uses_ogr(false), this_dataset(ds), this_datasource(0) {
-  LOG("Created Dataset [%p]", ds);
-}
-Dataset::Dataset(OGRDataSource *ds) : Nan::ObjectWrap(), uid(0), uses_ogr(true), this_dataset(0), this_datasource(ds) {
-  LOG("Created Datasource [%p]", ds);
-}
-#else
 Dataset::Dataset(GDALDataset *ds) : Nan::ObjectWrap(), uid(0), this_dataset(ds) {
   LOG("Created Dataset [%p]", ds);
 }
-#endif
 
 Dataset::~Dataset() {
   // Destroy at garbage collection time if not already explicitly destroyed
@@ -69,20 +57,6 @@ Dataset::~Dataset() {
 }
 
 void Dataset::dispose() {
-
-#if GDAL_VERSION_MAJOR < 2
-
-  if (this_datasource) {
-    LOG("Disposing Datasource [%p]", this_datasource);
-
-    ptr_manager.dispose(uid);
-
-    LOG("Disposed Datasource [%p]", this_datasource);
-
-    this_datasource = NULL;
-  }
-#endif
-
   if (this_dataset) {
     LOG("Disposing Dataset [%p]", this_dataset);
 
@@ -160,28 +134,6 @@ Local<Value> Dataset::New(GDALDataset *raw) {
   return scope.Escape(obj);
 }
 
-#if GDAL_VERSION_MAJOR < 2
-Local<Value> Dataset::New(OGRDataSource *raw) {
-  Nan::EscapableHandleScope scope;
-
-  if (!raw) { return scope.Escape(Nan::Null()); }
-  if (datasource_cache.has(raw)) { return scope.Escape(datasource_cache.get(raw)); }
-
-  Dataset *wrapped = new Dataset(raw);
-
-  Local<Value> ext = Nan::New<External>(wrapped);
-  v8::Local<v8::Object> obj =
-    Nan::NewInstance(Nan::GetFunction(Nan::New(Dataset::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
-
-  datasource_cache.add(raw, obj);
-  wrapped->async_lock = new uv_sem_t;
-  uv_sem_init(wrapped->async_lock, 1);
-  wrapped->uid = ptr_manager.add(raw, wrapped->async_lock);
-
-  return scope.Escape(obj);
-}
-#endif
-
 NAN_METHOD(Dataset::toString) {
   Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Dataset").ToLocalChecked());
@@ -202,13 +154,6 @@ NAN_METHOD(Dataset::getMetadata) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::New<Object>());
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   std::string domain("");
@@ -235,15 +180,7 @@ NAN_METHOD(Dataset::testCapability) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
-#else
-  OGRDataSource *raw = ds->getDatasource();
-  if (!ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::False());
-    return;
-  }
-#endif
 
   std::string capability("");
   NODE_ARG_STR(0, "capability", capability);
@@ -267,13 +204,6 @@ NAN_METHOD(Dataset::getGCPProjection) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   uv_sem_wait(ds->async_lock);
@@ -329,21 +259,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  if (ds->uses_ogr) {
-    OGRDataSource *raw = ds->getDatasource();
-    uv_sem_wait(ds->async_lock);
-    OGRErr err = raw->SyncToDisk();
-    uv_sem_post(ds->async_lock);
-    if (err) {
-      NODE_THROW_OGRERR(err);
-      return;
-    }
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   if (!raw) {
@@ -407,16 +322,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR >= 2
   GDALDataset *raw = ds->getDataset();
-#else
-  GDAL_ASYNCABLE_1x_UNSUPPORTED;
-  OGRDataSource *raw = ds->getDatasource();
-  if (!ds->uses_ogr) {
-    Nan::ThrowError("Dataset does not support executing a SQL query");
-    return;
-  }
-#endif
 
   std::string sql;
   std::string sql_dialect;
@@ -465,13 +371,6 @@ NAN_METHOD(Dataset::getFileList) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(results);
-    return;
-  }
-#endif
-
   GDALDataset *raw = ds->getDataset();
   if (!raw) {
     Nan::ThrowError("Dataset object has already been destroyed");
@@ -514,13 +413,6 @@ NAN_METHOD(Dataset::getGCPs) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(results);
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   if (!raw) {
@@ -571,13 +463,6 @@ NAN_METHOD(Dataset::setGCPs) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    Nan::ThrowError("Dataset does not support setting GCPs");
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   if (!raw) {
@@ -664,13 +549,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    Nan::ThrowError("Dataset does not support building overviews");
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   std::string resampling = "";
@@ -761,14 +639,6 @@ NAN_GETTER(Dataset::descriptionGetter) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    OGRDataSource *raw = ds->getDatasource();
-    info.GetReturnValue().Set(SafeString::New(raw->GetName()));
-    return;
-  }
-#endif
-
   GDALDataset *raw = ds->getDataset();
   if (!raw) {
     Nan::ThrowError("Dataset object has already been destroyed");
@@ -795,26 +665,17 @@ NAN_GETTER(Dataset::rasterSizeGetter) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
-#endif
-
   GDALDataset *raw = ds->getDataset();
 
   // GDAL 2.x will return 512x512 for vector datasets... which doesn't really make
   // sense in JS where we can return null instead of a number
   // https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
   uv_sem_wait(ds->async_lock);
-#if GDAL_VERSION_MAJOR >= 2
   if (raw->GetDriver() == nullptr || !raw->GetDriver()->GetMetadataItem(GDAL_DCAP_RASTER)) {
     info.GetReturnValue().Set(Nan::Null());
     uv_sem_post(ds->async_lock);
     return;
   }
-#endif
 
   Local<Object> result = Nan::New<Object>();
   Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(raw->GetRasterXSize()));
@@ -838,13 +699,6 @@ NAN_GETTER(Dataset::srsGetter) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   uv_sem_wait(ds->async_lock);
@@ -891,13 +745,6 @@ NAN_GETTER(Dataset::geoTransformGetter) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
-#endif
-
   GDALDataset *raw = ds->getDataset();
   double transform[6];
   uv_sem_wait(ds->async_lock);
@@ -935,14 +782,6 @@ NAN_GETTER(Dataset::driverGetter) {
     return;
   }
 
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    OGRDataSource *raw = ds->getDatasource();
-    if (raw->GetDriver() != nullptr) { info.GetReturnValue().Set(Driver::New(raw->GetDriver())); }
-    return;
-  }
-#endif
-
   GDALDataset *raw = ds->getDataset();
   if (raw->GetDriver() != nullptr) { info.GetReturnValue().Set(Driver::New(raw->GetDriver())); }
 }
@@ -955,13 +794,6 @@ NAN_SETTER(Dataset::srsSetter) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    Nan::ThrowError("Dataset doesnt support setting a spatial reference");
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
   std::string wkt("");
@@ -998,13 +830,6 @@ NAN_SETTER(Dataset::geoTransformSetter) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-
-#if GDAL_VERSION_MAJOR < 2
-  if (ds->uses_ogr) {
-    Nan::ThrowError("Dataset doesnt support setting a geotransform");
-    return;
-  }
-#endif
 
   GDALDataset *raw = ds->getDataset();
 

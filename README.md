@@ -27,15 +27,6 @@ The default install is currently `gdal-async@3.1.1`, `gdal-async@3.2.0` is avail
 
 Support for `worker_threads` is planned but it is not a priority project
 
-### Breaking Changes relative to node-gdal
-
-- With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
-longitude second. If you don't want to make large code changes, you can replace code like `gdal.SpatialReference.fromEPSG(4326)` with `gdal.SpatialReference.fromProj4('+init=epsg:4326')`
-
-### Breaking Changes relative to node-gdal-next
-
-- Starting from 3.2, `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry
-
 ## Installation
 
 Pre-built binaries are provided for most recent Linux distributions, Windows 64 bit and OS X 10.15:
@@ -142,6 +133,20 @@ const ds2: Promise<gdal.Dataset> = gdal.openAsync('sample.tif')
 Built-in networking uses an embedded version of `libcurl`. It supports `zlib` compression through Node.js' own `zlib` support. It does not support `brotli` or `zstd`. Node.js includes `brotli`, but as of Node.js 16 it still does not export these symbols for use by add-ons (yes, go bug them - ask them for c-ares too).
 SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted root CA store by default and another store can be provided through the `CURL_CA_BUNDLE` enviornment variable or GDAL config option. SSL on Windows and OSX uses the OS-provided mechanisms - Schannel and SecureTransport respectively - and thus the trusted root CA store will be the one provided by the OS.
 
+### Breaking changes relative to node-gdal / node-gdal-next
+
+ * If you are coming from `node-gdal-next`
+    - Starting with 3.2
+        * `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry
+    - Starting with 3.3
+        * Drop support for linking against a shared GDAL 1.x library
+        * Drop support for Ubuntu 16.04 and equivalent, Ubuntu 18.04 is the new baseline target
+
+ * If you are coming from `node-gdal`, in addition to all of the above
+    - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
+    longitude second. If you don't want to make large code changes, you can replace code like `gdal.SpatialReference.fromEPSG(4326)` with `gdal.SpatialReference.fromProj4('+init=epsg:4326')`
+
+
 ## Bundled Drivers
 
 When using the bundled GDAL version, the following drivers will be available:
@@ -182,7 +187,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 Release binaries with pre-built bundled GDAL are tested against the full matrix of:
 
 * Node.js versions: 10.x, 12.x, 14.x, 15.x, 16.x
-* OS: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, CentOS 8, Fedora 33, Debian 10 buster, Arch Linux current, Windows Server 2019, macOS Catalina 10.15
+* OS: Ubuntu 18.04, Ubuntu 20.04, CentOS 8, Fedora 33, Debian 10 buster, Arch Linux current, Windows Server 2019, macOS Catalina 10.15
 
 
 Development versions are unit tested for the following targets:
@@ -190,18 +195,16 @@ Development versions are unit tested for the following targets:
 ---
 | Node | OS | GDAL |
 | --- | --- | --- |
-| Node.js 14.x | Ubuntu 16.04 | system installed GDAL 1.11.3
-| Node.js 14.x | Ubuntu 16.04 | bundled GDAL 3.2.3 (*glibc target platform*)
-| Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
-| Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.3
 | Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
 | Node.js 14.x | CentOS 8 | bundled GDAL 3.2.3
-| Node.js 14.x | Debian 10 buster | system installed GDAL 2.1.2
+| Node.js 14.x | Debian 10 buster | system installed GDAL 2.1.2 (*earliest unit-tested GDAL*)
 | Node.js 14.x | Debian 10 buster | bundled GDAL 3.2.3
 | Node.js 14.x | Fedora 33 | system installed GDAL 3.1.4
 | Node.js 14.x | Fedora 33 | bundled GDAL 3.2.3
 | Node.js 16.x | Arch Linux current | system installed GDAL 3.2.3
 | Node.js 16.x | Arch Linux current | bundled GDAL 3.2.3
+| Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
+| Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.3 (*glibc target platform*)
 | Node.js 10.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 12.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 14.x | Ubuntu 20.04 | system installed GDAL 3.0.4

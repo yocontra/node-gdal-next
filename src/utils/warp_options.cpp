@@ -128,18 +128,12 @@ int WarpOptions::parse(Local<Value> value) {
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
       this->src_obj = prop.As<Object>();
       this->src = Nan::ObjectWrap::Unwrap<Dataset>(this->src_obj);
-#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3)
+#if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
       options->hSrcDS = static_cast<GDALDatasetH>(this->src->getDataset());
 #else
       options->hSrcDS = GDALDataset::ToHandle(this->src->getDataset());
 #endif
       if (!options->hSrcDS) {
-#if GDAL_VERSION_MAJOR < 2
-        if (this->src->getDatasource()) {
-          Nan::ThrowError("src dataset must be a raster dataset");
-          return 1;
-        }
-#endif
         Nan::ThrowError("src dataset already closed");
         return 1;
       }
@@ -156,18 +150,12 @@ int WarpOptions::parse(Local<Value> value) {
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
       this->dst_obj = prop.As<Object>();
       this->dst = Nan::ObjectWrap::Unwrap<Dataset>(this->dst_obj);
-#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3)
+#if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
       options->hDstDS = static_cast<GDALDatasetH>(this->dst->getDataset());
 #else
       options->hDstDS = GDALDataset::ToHandle(this->dst->getDataset());
 #endif
       if (!options->hDstDS) {
-#if GDAL_VERSION_MAJOR < 2
-        if (this->dst->getDatasource()) {
-          Nan::ThrowError("dst dataset must be a raster dataset");
-          return 1;
-        }
-#endif
         Nan::ThrowError("dst dataset already closed");
         return 1;
       }

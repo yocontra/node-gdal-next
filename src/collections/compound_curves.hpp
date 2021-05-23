@@ -18,8 +18,6 @@ using namespace node;
 
 namespace node_gdal {
 
-#if GDAL_VERSION_MAJOR >= 2
-
 class CompoundCurveCurves : public Nan::ObjectWrap {
     public:
   static Nan::Persistent<FunctionTemplate> constructor;
@@ -38,8 +36,6 @@ class CompoundCurveCurves : public Nan::ObjectWrap {
     private:
   ~CompoundCurveCurves();
 };
-
-#endif
 
 } // namespace node_gdal
 #endif
