@@ -5,6 +5,7 @@
 	"target_defaults": {
 		"default_configuration": "Release",
 		"cflags_cc!": ["-fno-rtti", "-fno-exceptions"],
+		"cflags!": ["-fno-rtti", "-fno-exceptions"],
 		"variables": {
 			"debug_extra_ccflags_cc%": "",
 			"debug_extra_ldflags%" : "",
