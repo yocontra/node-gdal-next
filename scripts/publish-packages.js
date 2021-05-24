@@ -1,10 +1,13 @@
+const exec = require('util').promisify(require('child_process').exec)
 const { Octokit } = require('@octokit/core')
 const octokit = new Octokit({ auth: process.env.NODE_PRE_GYP_GITHUB_TOKEN })
 const pkg = { repo: 'node-gdal-async', owner: 'mmomtchev' }
 const workflowPublish = { ...pkg, workflow_id: 7048427, ref: 'master' };
 
 (async () => {
-  process.stdout.write('launching Github actions build')
+  const branch = (await exec('git branch --show-current')).stdout.trim()
+  process.stdout.write(`launching Github actions build on branch ${branch}`)
+  workflowPublish.ref = branch
   await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', workflowPublish)
 
   let status
