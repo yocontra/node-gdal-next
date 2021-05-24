@@ -516,6 +516,7 @@ NAN_METHOD(SpatialReference::fromWKT) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromWkt(&str);
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -541,6 +542,7 @@ NAN_METHOD(SpatialReference::fromProj4) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromProj4(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -574,6 +576,7 @@ NAN_METHOD(SpatialReference::fromWMSAUTO) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromWMSAUTO(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -599,6 +602,7 @@ NAN_METHOD(SpatialReference::fromXML) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromXML(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -628,6 +632,7 @@ NAN_METHOD(SpatialReference::fromURN) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromURN(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -657,6 +662,7 @@ NAN_METHOD(SpatialReference::fromCRSURL) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromCRSURL(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -684,6 +690,7 @@ NAN_METHOD(SpatialReference::fromURL) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromUrl(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -709,6 +716,7 @@ NAN_METHOD(SpatialReference::fromMICoordSys) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromMICoordSys(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -737,6 +745,7 @@ NAN_METHOD(SpatialReference::fromUserInput) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->SetFromUserInput(input.c_str());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -766,6 +775,7 @@ NAN_METHOD(SpatialReference::fromEPSG) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromEPSG(epsg);
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -801,6 +811,7 @@ NAN_METHOD(SpatialReference::fromEPSGA) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromEPSGA(epsg);
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }
@@ -846,6 +857,7 @@ NAN_METHOD(SpatialReference::fromESRI) {
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromESRI(list.get());
   if (err) {
+    delete srs;
     NODE_THROW_OGRERR(err);
     return;
   }

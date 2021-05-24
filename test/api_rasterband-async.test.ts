@@ -307,6 +307,7 @@ describe('gdal.RasterBandAsync', () => {
               } })
               return assert.isFulfilled(q.then(() => {
                 assert.isAtLeast(calls, 1)
+                ds.close()
               }))
             })
           })

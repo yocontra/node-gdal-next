@@ -10,6 +10,8 @@ describe('Open', () => {
   describe('vsicurl', () => {
     let ds
 
+    after(() => ds.close)
+
     it('should not throw', () => {
       ds = gdal.open('/vsicurl/https://s3.amazonaws.com/elevation-tiles-prod/geotiff/12/1/1.tif')
     })
@@ -27,6 +29,8 @@ describe('Open', () => {
 
   describe('vsicurl/Async', () => {
     let ds
+
+    after(() => ds.close)
 
     it('should not throw', () => {
       ds = gdal.openAsync('/vsicurl/https://s3.amazonaws.com/elevation-tiles-prod/geotiff/12/1/1.tif')
@@ -48,6 +52,8 @@ describe('Open', () => {
 
   describe('vsigzip/vsicurl chaining', () => {
     let ds
+
+    after(() => ds.close)
 
     it('should not throw', () => {
       ds = gdal.open('/vsigzip//vsicurl/https://s3.amazonaws.com/elevation-tiles-prod/skadi/N40/N40E001.hgt.gz')

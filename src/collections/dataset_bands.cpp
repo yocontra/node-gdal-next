@@ -164,7 +164,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
 
   GDALDataset *raw = ds->getDataset();
   GDALDataType type;
-  StringList *options = new StringList;
+  std::shared_ptr<StringList> options(new StringList);
 
   // NODE_ARG_ENUM(0, "data type", GDALDataType, type);
   if (info.Length() < 1) {
@@ -190,7 +190,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
   GDALAsyncableJob<GDALRasterBand *> job;
   job.persist(parent);
   job.main = [ds_uid, raw, type, options](const GDALExecutionProgress &) {
-    std::unique_ptr<StringList> options_ptr(options);
     GDAL_ASYNCABLE_LOCK(ds_uid);
     CPLErr err = raw->AddBand(type, options->get());
     GDAL_UNLOCK_PARENT;
