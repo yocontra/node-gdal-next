@@ -24,13 +24,8 @@ void CoordinateTransformation::Initialize(Local<Object> target) {
 }
 
 CoordinateTransformation::CoordinateTransformation(OGRCoordinateTransformation *transform)
-  : Nan::ObjectWrap(), this_(transform), geoTransform(false) {
+  : Nan::ObjectWrap(), this_(transform) {
   LOG("Created CoordinateTransformation [%p]", transform);
-}
-
-CoordinateTransformation::CoordinateTransformation(GeoTransformTransformer *transform, bool geoTranform)
-  : Nan::ObjectWrap(), this_(transform), geoTransform(true) {
-  LOG("Created CoordinateTransformation (geo) [%p]", transform);
 }
 
 CoordinateTransformation::CoordinateTransformation() : Nan::ObjectWrap(), this_(0) {
@@ -39,10 +34,7 @@ CoordinateTransformation::CoordinateTransformation() : Nan::ObjectWrap(), this_(
 CoordinateTransformation::~CoordinateTransformation() {
   if (this_) {
     LOG("Disposing CoordinateTransformation [%p]", this_);
-    if (geoTransform)
-      delete this_;
-    else
-      OGRCoordinateTransformation::DestroyCT(this_);
+    OGRCoordinateTransformation::DestroyCT(this_);
     LOG("Disposed CoordinateTransformation [%p]", this_);
     this_ = NULL;
   }
@@ -125,7 +117,7 @@ NAN_METHOD(CoordinateTransformation::New) {
         return;
       }
 
-      f = new CoordinateTransformation(transform, true);
+      f = new CoordinateTransformation(transform);
 
       CPLFree(src_wkt);
       CSLDestroy(papszTO);

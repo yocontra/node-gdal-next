@@ -254,13 +254,10 @@ describe('gdal', () => {
         options.dst.geoTransform = info.geoTransform
         options.maxError = 4
 
-        gdal.reprojectImageAsync(options, (err) => {
-          assert.isNull(err)
-
+        return assert.isFulfilled(gdal.reprojectImageAsync(options).then(() => {
           const approx_checksum = gdal.checksumImage(options.dst.bands.get(1))
-
           assert.notEqual(approx_checksum, exact_checksum)
-        })
+        }))
       })
     })
     it('should produce same result using multi option', () => {
@@ -288,9 +285,7 @@ describe('gdal', () => {
       )
       options.dst.geoTransform = info.geoTransform
 
-      gdal.reprojectImageAsync(options, (err) => {
-        assert.isNull(err)
-
+      return assert.isFulfilled(gdal.reprojectImageAsync(options).then(() => {
         const expected_checksum = gdal.checksumImage(options.dst.bands.get(1))
 
         options.dst = gdal.open(
@@ -305,12 +300,13 @@ describe('gdal', () => {
         options.dst.geoTransform = info.geoTransform
         options.multi = true
 
-        gdal.reprojectImage(options)
+        return gdal.reprojectImageAsync(options).then(() => {
 
-        const result_checksum = gdal.checksumImage(options.dst.bands.get(1))
+          const result_checksum = gdal.checksumImage(options.dst.bands.get(1))
 
-        assert.equal(result_checksum, expected_checksum)
-      })
+          assert.equal(result_checksum, expected_checksum)
+        })
+      }))
     })
 
     describe('argument errors', () => {
@@ -342,66 +338,66 @@ describe('gdal', () => {
       it('should throw if cutline is wrong geometry type', () => {
         reprojectOptions.cutline = new gdal.LineString()
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions))
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions))
       })
       it('should throw if src dataset has been closed', () => {
         reprojectOptions.src.close()
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions), 'src dataset already closed')
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions), 'src dataset already closed')
       })
       it('should throw if dst dataset has been closed', () => {
         reprojectOptions.dst.close()
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions), 'dst dataset already closed')
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions), 'dst dataset already closed')
       })
       it('should throw if dst dataset isnt a raster', () => {
         reprojectOptions.dst = gdal.open('temp', 'w', 'Memory')
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           /must be a raster dataset|There is no affine transformation and no GCPs/)
       })
       it('should throw if src dataset isnt a raster', () => {
         reprojectOptions.src = gdal.open('temp_src', 'w', 'Memory')
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           /must be a raster dataset|There is no affine transformation and no GCPs/)
       })
       it('should throw if srcBands option is provided but dstBands isnt', () => {
         reprojectOptions.srcBands = [ 1 ]
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'dstBands must be provided if srcBands option is used')
       })
       it('should throw if dstBands option is provided but srcBands isnt', () => {
         reprojectOptions.dstBands = [ 1 ]
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'srcBands must be provided if dstBands option is used')
       })
       it('should throw if srcBands option is invalid', () => {
         reprojectOptions.srcBands = [ 3 ]
         reprojectOptions.dstBands = [ 1 ]
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'out of range for dataset')
       })
       it('should throw if dstBands option is invalid', () => {
         reprojectOptions.srcBands = [ 1 ]
         reprojectOptions.dstBands = [ 3 ]
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'out of range for dataset')
       })
       it('should throw if dstAlphaBand is invalid', () => {
         reprojectOptions.dstAlphaBand = 5
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'out of range for dataset')
       })
       it('should throw if memoryLimit is invalid', () => {
         reprojectOptions.memoryLimit = 1
 
-        assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
+        return assert.isRejected(gdal.reprojectImageAsync(reprojectOptions),
           'dfWarpMemoryLimit=1 is unreasonably small')
       })
 
@@ -410,7 +406,7 @@ describe('gdal', () => {
 
         const p = gdal.reprojectImageAsync(reprojectOptions)
 
-        assert.isFulfilled(p.then(() => {
+        return assert.isFulfilled(p.then(() => {
           const value = reprojectOptions.dst.bands.get(1).pixels.get(0, 0)
 
           assert.equal(value, 123)
@@ -425,7 +421,7 @@ describe('gdal', () => {
 
         const p = gdal.reprojectImageAsync(reprojectOptions)
 
-        assert.isFulfilled(p.then(() => assert.isAbove(calls, 0)))
+        return assert.isFulfilled(p.then(() => assert.isAbove(calls, 0)))
       })
 
       if (semver.gte(gdal.version, '2.0.0')) {

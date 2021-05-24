@@ -32,7 +32,6 @@ class CoordinateTransformation : public Nan::ObjectWrap {
 
   CoordinateTransformation();
   CoordinateTransformation(OGRCoordinateTransformation *srs);
-  CoordinateTransformation(GeoTransformTransformer *srs, bool geoTransform);
   inline OGRCoordinateTransformation *get() {
     return this_;
   }
@@ -43,7 +42,6 @@ class CoordinateTransformation : public Nan::ObjectWrap {
     private:
   ~CoordinateTransformation();
   OGRCoordinateTransformation *this_;
-  bool geoTransform;
 };
 
 // adapted from gdalwarp source
@@ -59,10 +57,11 @@ class GeoTransformTransformer : public OGRCoordinateTransformation {
     return nullptr;
   }
 
-  // only used on GDAL 2.X
+#if GDAL_VERSION_MAJOR < 3
   virtual int TransformEx(int nCount, double *x, double *y, double *z = NULL, int *pabSuccess = NULL) {
     return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
+#endif
 
   virtual int Transform(int nCount, double *x, double *y, double *z = NULL) {
     int nResult;
@@ -74,26 +73,27 @@ class GeoTransformTransformer : public OGRCoordinateTransformation {
     return nResult;
   }
 
-  // GDAL 3.x+
-  virtual int Transform(int nCount, double *x, double *y, double *z, int *pabSuccess) {
+  int Transform(int nCount, double *x, double *y, double *z, int *pabSuccess) {
     return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
 
-  // Latest GDAL
-  virtual int Transform(int nCount, double *x, double *y, double *z, double * /* t */, int *pabSuccess) {
+#if GDAL_VERSION_MAJOR >= 3
+  virtual int Transform(int nCount, double *x, double *y, double *z, double * /* t */, int *pabSuccess) override {
     return GDALGenImgProjTransform(hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess);
   }
+#endif
 
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 3)
-  // FIXME
-  // This happens because we are not supposed to be using OGRCoordinateTransformation
-  // This is a temporary hack that works because node-gdal-async doesn't use GetInverse()
   virtual OGRCoordinateTransformation *GetInverse() const override {
     return nullptr;
   }
 #endif
 
-  virtual OGRCoordinateTransformation *Clone() const {
+  virtual OGRCoordinateTransformation *Clone() const
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+    override
+#endif
+  {
     return new GeoTransformTransformer(*this);
   }
 
