@@ -1,4 +1,7 @@
 {
+	"includes": [
+		"../../common.gypi"
+	],
 	"variables": {
 		# This is what happens when you still keep the support for VAX VMS, Xenix, Windows CE and OS/2 in 2021
 		# Cmon, seriously, the last version of Xenix was in 1989
