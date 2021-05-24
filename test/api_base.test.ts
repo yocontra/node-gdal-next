@@ -1,7 +1,6 @@
 import * as gdal from '..'
 import { assert } from 'chai'
 import * as path from 'path'
-import * as semver from 'semver'
 
 if (process.env.GDAL_DATA !== undefined) {
   throw new Error(
@@ -125,16 +124,4 @@ describe('gdal', () => {
       })
     })
   })
-  if (semver.lt(gdal.version, '2.0.0')) {
-    describe('progress_cb on GDAL 1.x', () => {
-      it('should throw on GDAL 1.x', () => {
-        assert.throws(() => {
-          const ds = gdal.open(`${__dirname}/data/sample.tif`)
-          const band = ds.bands.get(1)
-          band.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y, undefined, {
-            progress_cb: (): void => undefined })
-        }, /not supported on GDAL 1.x/)
-      })
-    })
-  }
 })

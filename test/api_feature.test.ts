@@ -1,7 +1,6 @@
 import * as gdal from '..'
 import { assert } from 'chai'
 import * as path from 'path'
-import * as semver from 'semver'
 
 describe('gdal.Feature', () => {
   afterEach(global.gc)
@@ -567,12 +566,10 @@ describe('gdal.Feature', () => {
         const ds = gdal.open(path.join(__dirname, 'data', 'complexfields.geo.json'))
         const layer = ds.layers.get(0)
 
-        if (semver.gte(gdal.version, '2.0.0')) {
-          assert.deepEqual(layer.features.get(0).fields.get('OFTInteger64List'), [
-            281474976710656,
-            281474976710657
-          ])
-        }
+        assert.deepEqual(layer.features.get(0).fields.get('OFTInteger64List'), [
+          281474976710656,
+          281474976710657
+        ])
         assert.deepEqual(layer.features.get(0).fields.get('OFTIntegerList'), [ 1, 2, 3 ])
         assert.deepEqual(layer.features.get(0).fields.get('OFTRealList'), [ 1.2, 1.3, 1.4 ])
         assert.deepEqual(layer.features.get(0).fields.get('OFTStringList'), [ 'a', 'b', 'c' ])

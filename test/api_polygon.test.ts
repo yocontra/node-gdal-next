@@ -1,6 +1,5 @@
 import { assert } from 'chai'
 import * as gdal from '..'
-import * as semver from 'semver'
 
 describe('gdal.Polygon', () => {
   afterEach(global.gc)
@@ -72,17 +71,15 @@ describe('gdal.Polygon', () => {
           polygon.rings.add([ ring1, ring2 ])
           assert.equal(polygon.rings.count(), 2)
         })
-        if (semver.gte(gdal.version, '2.0.0')) {
-          it('should reject invalid geometries', () => {
-            const polygon = new gdal.Polygon()
-            polygon.rings.add(ring1)
-            const ring2 = new gdal.LineString()
-            assert.throws(() => {
-              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-              polygon.rings.add(ring2 as any)
-            }, /must be a LinearRing/)
-          })
-        }
+        it('should reject invalid geometries', () => {
+          const polygon = new gdal.Polygon()
+          polygon.rings.add(ring1)
+          const ring2 = new gdal.LineString()
+          assert.throws(() => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+            polygon.rings.add(ring2 as any)
+          }, /must be a LinearRing/)
+        })
       })
       let polygon
       const createRings = () => {

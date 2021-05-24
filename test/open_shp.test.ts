@@ -1,7 +1,6 @@
 import * as gdal from '..'
 import * as path from 'path'
 import { assert } from 'chai'
-import * as semver from 'semver'
 
 describe('Open', () => {
   afterEach(global.gc)
@@ -46,10 +45,7 @@ describe('Open', () => {
         })
         it('should evaluate datatypes', () => {
           assert.equal(integerLayer.fields.get(0).type, 'string')
-          assert.equal(
-            integerLayer.fields.get(3).type,
-            semver.gte(gdal.version, '2.0.0') ? 'integer64' : 'integer'
-          )
+          assert.equal(integerLayer.fields.get(3).type, 'integer64')
           assert.equal(integerLayer.fields.get(5).type, 'real')
           assert.equal(integerLayer.fields.get(10).type, 'date')
         })

@@ -3,15 +3,10 @@ import * as chai from 'chai'
 const assert = chai.assert
 import * as gdal from '..'
 import * as fileUtils from './utils/file.js'
-import * as semver from 'semver'
 
 chai.use(chaiAsPromised)
 
 describe('gdal.LayerAsync', () => {
-  // Not supported on GDAL 1.x
-  if (semver.lt(gdal.version, '2.0.0')) {
-    return
-  }
   afterEach(global.gc)
 
   describe('instance', () => {

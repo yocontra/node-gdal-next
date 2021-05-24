@@ -45,12 +45,6 @@ namespace node_gdal {
 #define GDAL_UNLOCK_MANY                                                                                               \
   for (uv_sem_t * async_lock : async_locks) { uv_sem_post(async_lock); }
 
-#define GDAL_ASYNCABLE_1x_UNSUPPORTED                                                                                  \
-  if (GDAL_ISASYNC) {                                                                                                  \
-    Nan::ThrowError("This asynchronous operation is not supported on GDAL 1.x");                                       \
-    return;                                                                                                            \
-  }
-
 // Node.js NAN null initializes and trivially copies objects of this class without asking permission
 struct GDALProgressInfo {
   double complete;

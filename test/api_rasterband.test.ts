@@ -913,12 +913,6 @@ describe('gdal.RasterBand', () => {
               for (i = 0; i < data.length; i++) assert.equal(data[i], 100)
             })
             it('should support non-standard resampling', () => {
-              if (semver.lt(gdal.version, '2.0.0')) {
-                assert.throws(() => {
-                  data = band_stripes.pixels.read(0, 0, w, h, undefined, { buffer_width: w / 4, buffer_height: h / 4, resampling: gdal.GRA_Bilinear })
-                }, /not supported on GDAL 1/)
-                return
-              }
               let i
 
               let data

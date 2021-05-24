@@ -436,24 +436,20 @@ describe('gdal', () => {
         assert.isAbove(calls, 0)
       })
 
-      if (semver.gte(gdal.version, '2.0.0')) {
-        it("should throw error if GDAL can't create transformer", () => {
-          src = gdal.open(`${__dirname}/data/unsupported-srs.tif`)
+      it("should throw error if GDAL can't create transformer", () => {
+        src = gdal.open(`${__dirname}/data/unsupported-srs.tif`)
 
-          const options = {
-            src: src,
-            s_srs: src.srs,
-            t_srs: gdal.SpatialReference.fromEPSG(3857)
-          }
+        const options = {
+          src: src,
+          s_srs: src.srs,
+          t_srs: gdal.SpatialReference.fromEPSG(3857)
+        }
 
-          assert.throws(() => {
-            gdal.suggestedWarpOutput(options)
-            // gdal has a different error message between versions
-          }, /(Cannot find coordinate operations from)|(Mercator_1SP)/)
-        })
-      } else {
-        it.skip("should throw error if GDAL can't create transformer (skipped)", () => undefined)
-      }
+        assert.throws(() => {
+          gdal.suggestedWarpOutput(options)
+          // gdal has a different error message between versions
+        }, /(Cannot find coordinate operations from)|(Mercator_1SP)/)
+      })
     })
   })
 })
