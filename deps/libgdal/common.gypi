@@ -1,4 +1,7 @@
 {
+	"includes": [
+		"../../common.gypi"
+	],
 	"variables": {
 		"shared_geos%": "false",
 		"endianness": "<!(python -c \"import sys;print(sys.byteorder.upper())\")",

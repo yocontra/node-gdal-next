@@ -5,6 +5,7 @@
 	"target_defaults": {
 		"default_configuration": "Release",
 		"cflags_cc!": ["-fno-rtti", "-fno-exceptions"],
+		"cflags!": ["-fno-rtti", "-fno-exceptions"],
 		"variables": {
 			"debug_extra_ccflags_cc%": "",
 			"debug_extra_ldflags%" : "",
@@ -82,6 +83,7 @@
 						#"InlineFunctionExpansion": 0, #0:/Ob0: disable, 1:/Ob1 inline only marked funtions, 2:/Ob2 inline anything eligible
 						"AdditionalOptions": [
 							"/MP", # compile across multiple CPUs
+							"/GR"
 						],
 						"ExceptionHandling": 1,
 						"RuntimeTypeInfo": "true",
