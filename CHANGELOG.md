@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - GDAL 3.3.0
   - Carto, FlatGeobuf, WMS and WMTS drivers
 
+### Changed
+ - Linux release builds have lazy binding enabled
+
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library
  - Drop support for Ubuntu 16.04

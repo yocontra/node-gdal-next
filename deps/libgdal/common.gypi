@@ -1,7 +1,4 @@
 {
-	"includes": [
-		"../../common.gypi"
-	],
 	"variables": {
 		"shared_geos%": "false",
 		"endianness": "<!(python -c \"import sys;print(sys.byteorder.upper())\")",
@@ -66,12 +63,6 @@
 			}],
 			["OS != 'freebsd' and OS != 'win'", {
 				"include_dirs": ["./arch/unix"]
-			}],
-			["OS == 'mac'", {
-				"xcode_settings": {
-					"GCC_ENABLE_CPP_RTTI": "YES",
-					"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
-				}
 			}],
 			["shared_geos == 'false'", {
 				"dependencies": [

@@ -1,5 +1,4 @@
 {
-	"includes": ["common.gypi"],
 	"variables": {
 		"shared_gdal%": "false",
 		"runtime_link%": "shared",

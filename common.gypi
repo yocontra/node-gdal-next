@@ -5,7 +5,6 @@
 	"target_defaults": {
 		"default_configuration": "Release",
 		"cflags_cc!": ["-fno-rtti", "-fno-exceptions"],
-		"cflags!": ["-fno-rtti", "-fno-exceptions"],
 		"variables": {
 			"debug_extra_ccflags_cc%": "",
 			"debug_extra_ldflags%" : "",
@@ -15,6 +14,7 @@
 			"HAVE_LIBZ"
 		],
 		"xcode_settings": {
+			"GCC_ENABLE_CPP_RTTI": "YES",
 			"GCC_ENABLE_CPP_EXCEPTIONS": "YES",
       "CLANG_CXX_LIBRARY": "libc++",
       "MACOSX_DEPLOYMENT_TARGET": "10.7",
@@ -24,7 +24,9 @@
 			],
 			"OTHER_CPLUSPLUSFLAGS": [
 				"-Wno-deprecated-register",
-				"-Wno-unused-const-variable"
+				"-Wno-unused-const-variable",
+				"-frtti",
+				"-fexceptions"
 			]
 		},
 		"conditions": [
@@ -44,22 +46,16 @@
 				"libraries": [ "-framework Security" ]
 			}]
 		],
-		"link_settings": {
-			"ldflags": [
-				"-Wl,-z,now"
-			]
-		},
 		"configurations": {
 			"Debug": {
 				"cflags_cc!": [ "-O3", "-Os" ],
 				"cflags_cc": [ "<@(debug_extra_ccflags_cc)" ],
-				"ldflags": [ "<@(debug_extra_ldflags)" ],
+				"ldflags": [ "-Wl,-z,now", "<@(debug_extra_ldflags)" ],
 				"defines": [ "DEBUG" ],
 				"defines!": [ "NDEBUG" ],
 				"xcode_settings": {
 					"GCC_OPTIMIZATION_LEVEL": "0",
 					"GCC_GENERATE_DEBUGGING_SYMBOLS": "YES",
-					"GCC_ENABLE_CPP_RTTI": "YES"
 				},
 				"msvs_settings": {
 					"VCCLCompilerTool": {

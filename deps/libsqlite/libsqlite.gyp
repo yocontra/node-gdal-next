@@ -1,5 +1,4 @@
 {
-  'includes': [ "../../common.gypi" ],
   'target_defaults': {
     'default_configuration': 'Release',
     'cflags':[

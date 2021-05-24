@@ -1,7 +1,4 @@
 {
-	"includes": [
-		"../../common.gypi"
-	],
 	"variables": {
 		"endianness": "<!(python -c \"import sys;print(sys.byteorder.upper())\")",
 	},
@@ -28,10 +25,6 @@
 				"HAVE_EXPAT_CONFIG_H=1",
 				"CPU_<(endianness)_ENDIAN=1"
 			],
-			"xcode_settings": {
-				"GCC_ENABLE_CPP_RTTI": "YES",
-				"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
-			},
 			"direct_dependent_settings": {
 				"include_dirs": [
 					"./expat/lib",

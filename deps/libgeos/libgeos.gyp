@@ -1,7 +1,4 @@
 {
-	"includes": [
-		"../../common.gypi"
-	],
 	"targets": [
 		{
 			"target_name": "libgeos",
@@ -31,10 +28,6 @@
 					"include_dirs": ["./arch/unix"]
 				}]
 			],
-			"xcode_settings": {
-				"GCC_ENABLE_CPP_RTTI": "YES",
-				"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
-			},
 			"direct_dependent_settings": {
 				"include_dirs": [
 					"./arch/common",
