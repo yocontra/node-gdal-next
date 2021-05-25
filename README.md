@@ -83,6 +83,8 @@ Simultaneous operations on the same dataset object should be safe too but they w
 
 **Does not support `worker_threads` yet**
 
+**HDF5 on Windows is not thread safe**
+
 #### With callbacks
 
 If the last argument of an `xxxAsync` function is a callback,

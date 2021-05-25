@@ -8,6 +8,7 @@
 #define H5_PACKAGE_TARNAME "hdf5"
 #define H5_PACKAGE_URL ""
 #define H5_PACKAGE_VERSION "1.12.0"
+#define H5_VERSION "1.12.0"
 
 #ifdef LINUX
 #define H5_DEFAULT_PLUGINDIR "node_modules/gdal-async/hdf5/lib/plugin"
@@ -41,6 +42,7 @@
 #define H5_HAVE_IOCTL 1
 #define H5_HAVE_LIBDL 1
 #define H5_HAVE_LIBM 1
+#define H5_HAVE_LIBPTHREAD 1
 #define H5_HAVE_LIBZ 1
 #define H5_HAVE_LLROUND 1
 #define H5_HAVE_LLROUNDF 1
@@ -50,6 +52,7 @@
 #define H5_HAVE_LSTAT 1
 #define H5_HAVE_MEMORY_H 1
 #define H5_HAVE_PREADWRITE 1
+#define H5_HAVE_PTHREAD_H 1
 #define H5_HAVE_QUADMATH_H 1
 #define H5_HAVE_RANDOM 1
 #define H5_HAVE_RAND_R 1
@@ -81,6 +84,7 @@
 #define H5_HAVE_SYS_TIMEB_H 1
 #define H5_HAVE_SYS_TIME_H 1
 #define H5_HAVE_SYS_TYPES_H 1
+#define H5_HAVE_THREADSAFE 1
 #define H5_HAVE_TIMEZONE 1
 #define H5_HAVE_TIOCGETD 1
 #define H5_HAVE_TIOCGWINSZ 1
@@ -93,7 +97,6 @@
 #define H5_HAVE_ZLIB_H 1
 #define H5_HAVE___INLINE 1
 #define H5_HAVE___INLINE__ 1
-#define H5_INCLUDE_HL 1
 #define H5_LDOUBLE_TO_LLONG_ACCURATE 1
 #define H5_LLONG_TO_LDOUBLE_CORRECT 1
 #define H5_LT_OBJDIR ".libs/"
@@ -143,9 +146,9 @@
 #define H5_SIZEOF___FLOAT128 16
 #define H5_SIZEOF___INT64 0
 #define H5_STDC_HEADERS 1
+#define H5_SYSTEM_SCOPE_THREADS 1
 #define H5_TIME_WITH_SYS_TIME 1
 #define H5_USE_112_API_DEFAULT 1
-#define H5_VERSION "1.12.0"
 #define H5_WANT_DATA_ACCURACY 1
 #define H5_WANT_DCONV_EXCEPTION 1
 #endif // LINUX
