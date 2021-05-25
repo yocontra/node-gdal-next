@@ -517,7 +517,7 @@ describe('gdal.LayerAsync', () => {
       describe('firstAsync()', () => {
         it('should return a Feature and reset the iterator', () =>
           prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
-            const f = layer.features.nextAsync().then(layer.features.firstAsync())
+            const f = layer.features.nextAsync().then(() => layer.features.firstAsync())
             return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(f, gdal.Feature),
               assert.eventually.propertyVal(f, 'fid', 0)
             ]))

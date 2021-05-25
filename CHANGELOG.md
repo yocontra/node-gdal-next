@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - Fix a failing unit test on GDAL 1.x (no effect on the bindings)
+ - Fix another randomly failing unit test (no effect on the bindings)
 
 ## [3.2.1] 2021-05-24
 
