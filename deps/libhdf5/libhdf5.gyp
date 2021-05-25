@@ -17,6 +17,14 @@
 			"conditions": [
 				["OS == 'win'", {
 					"defines": [
+						"_WINDOWS"
+					],
+					"defines!": [
+						"NOGDI=1"
+					],
+					"sources": [
+						"settings-win.c",
+						"numeric-types-win.c"
 					]
 				}],
 				["OS == 'linux'", {
@@ -33,6 +41,14 @@
 					]
 				}]
 			],
+			"msvs_settings": {
+				"VCCLCompilerTool": {
+					"AdditionalOptions": [
+						"/W3",
+						"/EHsc"
+					],
+				},
+			},
 			"direct_dependent_settings": {
 				"include_dirs": [
 					"./hdf5/src"

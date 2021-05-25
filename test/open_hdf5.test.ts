@@ -9,6 +9,25 @@ describe('Open', () => {
     let filename, ds
 
     it('should not throw', () => {
+      filename = path.join(__dirname, 'data/h5ex_t_array.h5')
+      ds = gdal.open(filename)
+    })
+
+    it('should be able to read raster size', () => {
+      assert.equal(ds.rasterSize.x, 512)
+      assert.equal(ds.rasterSize.y, 512)
+      assert.equal(ds.bands.count(), 0)
+    })
+
+    it('should not have projection', () => {
+      assert.isNull(ds.srs)
+    })
+  })
+
+  describe('HDF5/gzip', () => {
+    let filename, ds
+
+    it('should not throw', () => {
       filename = path.join(__dirname, 'data/h5ex_d_gzip.h5')
       ds = gdal.open(filename)
     })
