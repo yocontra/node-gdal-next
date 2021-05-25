@@ -98,7 +98,7 @@ char H5libhdf5_settings[]=
 	"                   Parallel HDF5: OFF\n"
 	"Parallel Filtered Dataset Writes: \n"
 	"              Large Parallel I/O: \n"
-	"              High-level library: ON\n"
+	"              High-level library: OFF\n"
 	"                Build HDF5 Tests: OFF\n"
 	"                Build HDF5 Tools: ON\n"
 	"                    Threadsafety: OFF\n"

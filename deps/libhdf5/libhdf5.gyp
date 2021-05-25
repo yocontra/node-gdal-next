@@ -38,6 +38,11 @@
 				}],
 				["OS == 'mac'", {
 					"defines": [
+						"DARWIN"
+					],
+					"sources": [
+						"settings-darwin.c",
+						"numeric-types-darwin.c"
 					]
 				}]
 			],
