@@ -39,6 +39,7 @@
 			"HAVE_SQLITE=1",
 			"HAVE_MITAB=1",
 			"HAVE_CURL=1",
+			"HAVE_HDF5=1",
 			"PROJ_STATIC=1",
 			"CPU_<(endianness)_ENDIAN=1",
 			"BIGTIFF_SUPPORT=1",
@@ -49,7 +50,8 @@
 			"<(deps_dir)/libexpat/libexpat.gyp:libexpat",
 			"<(deps_dir)/libproj/libproj.gyp:libproj",
 			"<(deps_dir)/libsqlite/libsqlite.gyp:libsqlite",
-			"<(deps_dir)/libcurl/libcurl.gyp:libcurl"
+			"<(deps_dir)/libcurl/libcurl.gyp:libcurl",
+			"<(deps_dir)/libhdf5/libhdf5.gyp:libhdf5"
 		],
 		"conditions": [
 			["OS == 'win'", {

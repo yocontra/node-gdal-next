@@ -1,0 +1,18 @@
+# .gitignore file for HDF5
+
+# Java .classes files
+**/java/.classes
+
+# Backup files
+# Editor-specific extensions should go in your ~/.gitconfig, but we
+# include the standard Unix backup '~' extension since autoheader
+# backs up H5config.h.in when it creates a new one and the
+# extension is always '~'.
+**/*~
+
+# Other files, most of which are created by the Autotools though
+# some are created by scripts in bin/
+/autom4te.cache
+/build*
+
+/.classpath

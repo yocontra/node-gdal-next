@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
   - GDAL 3.3.0
-  - Carto, FlatGeobuf, WMS and WMTS drivers
+  - HDF5, Carto, FlatGeobuf, WMS and WMTS drivers
 
 ### Changed
  - Linux release builds have lazy binding enabled
