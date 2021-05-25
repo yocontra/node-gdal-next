@@ -44,7 +44,11 @@
 				],
 			}],
 			["OS == 'mac'", {
-				"libraries": [ "-framework Security" ]
+				"libraries": [ "-framework Security" ],
+				"defines": [ "DARWIN" ]
+			}],
+			["OS == 'linux'", {
+				"defines": [ "LINUX" ]
 			}]
 		],
 		"configurations": {
