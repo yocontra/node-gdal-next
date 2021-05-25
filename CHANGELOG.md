@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Drop support for Node.js 10.x and 15.x
  - Drop support for Python 2
  - Drop support for the drivers removed in GDAL 3.3: AeronavFAA, BNA, E00Grid, HTF, OpenAir, SEGUKOOA, SEGY, SUA and XPlane
+## [3.2.2] 2021-05-25
+
+### Changed
+ - Fix a failing unit test on GDAL 1.x (no effect on the bindings)
 
 ## [3.2.1] 2021-05-24
 
