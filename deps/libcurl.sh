@@ -21,3 +21,4 @@ mv curl-${CURL_VERSION} $dir_curl
 
 # update the CA bundle
 curl -L https://curl.se/ca/cacert.pem -o cacert.pem
+[ -d ${dir_curl} ] && rm -rf ${dir_curl}/{tests,projects}

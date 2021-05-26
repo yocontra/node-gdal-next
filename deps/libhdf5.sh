@@ -19,3 +19,4 @@ fi
 tar -xzf hdf5-${HDF5_VERSION}.tar.gz
 mv hdf5-hdf5-`echo ${HDF5_VERSION} | tr "." "_"` $dir_hdf5
 cp H5pubconf.h $dir_hdf5/src/H5pubconf.h
+[ -d ${dir_hdf5} ] && rm -rf ${dir_hdf5}/{tools,test,testpar}

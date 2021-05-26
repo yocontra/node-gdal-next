@@ -20,3 +20,4 @@ tar -xzf netcdf-${NETCDF_VERSION}.tar.gz
 mv netcdf-c-${NETCDF_VERSION} $dir_netcdf
 cp config.h $dir_netcdf
 cat netcdf/include/netcdf_dispatch.h.in | sed 's/@NC_DISPATCH_VERSION@/3/' > netcdf/include/netcdf_dispatch.h
+[ -d ${dir_netcdf} ] && rm -rf ${dir_netcdf}/{ncdap_test,ncdump,nc_test,nc_perf,nc_test4}
