@@ -27,7 +27,7 @@ deps/libexpat/expat*.tar.gz
 deps/libsqlite/sqlite*.tar.gz
 deps/libcurl/cur*tar.gz
 deps/libhdf5/hdf5*.tar.gz
-deps/libnetcfg/netcdf*.tar.gz
+deps/libnetcdf/netcdf*.tar.gz
 lib/binding
 lib/index.d.ts
 yuidocs

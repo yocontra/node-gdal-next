@@ -175,7 +175,6 @@
 					"defines": [
 						"LINUX"
 					],
-					"cflags": [ "-Wno-sign-compare",  "-Wno-stringop-overflow", "-Wstringop-truncation" ],
 					"cflags!": [ "-Wall", "-Wextra" ]
 				}],
 				["OS == 'mac'", {
