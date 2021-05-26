@@ -8,7 +8,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('vsicurl', () => {
-    let ds
+    let ds: gdal.Dataset
 
     after(() => (ds && ds.close()))
 
@@ -28,9 +28,9 @@ describe('Open', () => {
   })
 
   describe('vsicurl/Async', () => {
-    let ds
+    let ds: Promise<gdal.Dataset>
 
-    after(() => ds && ds.then(ds.close))
+    after(() => ds && ds.then((r) => r.close()))
 
     it('should not throw', () => {
       ds = gdal.openAsync('/vsicurl/https://s3.amazonaws.com/elevation-tiles-prod/geotiff/12/1/1.tif')
@@ -45,13 +45,13 @@ describe('Open', () => {
       ]))
     )
 
-    it('should have projection', () => {
+    it('should have projection', () =>
       assert.eventually.isTrue(ds.then((r) => r.srs.isSame(gdal.SpatialReference.fromEPSG(3857))))
-    })
+    )
   })
 
   describe('vsigzip/vsicurl chaining', () => {
-    let ds
+    let ds: gdal.Dataset
 
     after(() => ds && ds.close())
 
