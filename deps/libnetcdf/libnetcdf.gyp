@@ -169,8 +169,6 @@
 				["OS == 'win'", {
 					"defines": [
 						"_WIN64"
-					],
-					"sources": [
 					]
 				}],
 				["OS == 'linux'", {
@@ -178,14 +176,11 @@
 						"LINUX"
 					],
 					"cflags": [ "-Wno-sign-compare",  "-Wno-stringop-overflow", "-Wstringop-truncation" ],
-					"cflags!": [ "-Wall", "-Wextra" ],
-					"sources": [
-					]
+					"cflags!": [ "-Wall", "-Wextra" ]
 				}],
 				["OS == 'mac'", {
 					"defines": [
-					],
-					"sources": [
+						"DARWIN"
 					]
 				}]
 			],
