@@ -13,7 +13,8 @@
 #define H5_EXAMPLESDIR ""
 
 #ifdef LINUX
-#define H5_DEFAULT_PLUGINDIR "node_modules/gdal-async/hdf5/lib/plugin"
+#define H5_CXX_HAVE_OFFSETOF 1
+#define H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin"
 #define H5_DEV_T_IS_SCALAR 1
 #define H5_HAVE_ALARM 1
 #define H5_HAVE_ASPRINTF 1
@@ -98,6 +99,7 @@
 #define H5_HAVE_ZLIB_H 1
 #define H5_HAVE___INLINE 1
 #define H5_HAVE___INLINE__ 1
+#define H5_INCLUDE_HL 1
 #define H5_LDOUBLE_TO_LLONG_ACCURATE 1
 #define H5_LLONG_TO_LDOUBLE_CORRECT 1
 #define H5_LT_OBJDIR ".libs/"
@@ -209,6 +211,7 @@
 #define H5_HAVE_WINSOCK2_H 1
 #define H5_HAVE_ZLIB_H 1
 #define H5_HAVE___INLINE 1
+#define H5_INCLUDE_HL 1
 #define H5_LDOUBLE_TO_LLONG_ACCURATE 1
 #define H5_LLONG_TO_LDOUBLE_CORRECT 1
 #define H5_NO_ALIGNMENT_RESTRICTIONS 1
@@ -260,7 +263,8 @@
 #endif // WIN32
 
 #ifdef DARWIN
-#define H5_DEFAULT_PLUGINDIR "node_modules/gdal-async/hdf5/lib/plugin"
+#define H5_CXX_HAVE_OFFSETOF 1
+#define H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin"
 #define H5_DEV_T_IS_SCALAR 1
 #define H5_HAVE_ALARM 1
 #define H5_HAVE_ASPRINTF 1
@@ -345,6 +349,7 @@
 #define H5_HAVE_ZLIB_H 1
 #define H5_HAVE___INLINE 1
 #define H5_HAVE___INLINE__ 1
+#define H5_INCLUDE_HL 1
 #define H5_LDOUBLE_TO_LLONG_ACCURATE 1
 #define H5_LLONG_TO_LDOUBLE_CORRECT 1
 #define H5_LT_OBJDIR ".libs/"

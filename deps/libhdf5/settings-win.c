@@ -14,7 +14,7 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Created:		May 25, 2021
+ * Created:		May 26, 2021
  *			
  *
  * Purpose:		This machine-generated source code contains
@@ -35,7 +35,7 @@ char H5libhdf5_settings[]=
 	"General Information:\n"
 	"-------------------\n"
 	"                   HDF5 Version: 1.12.0\n"
-	"                  Configured on: 2021-05-25\n"
+	"                  Configured on: 2021-05-26\n"
 	"                  Configured by: Visual Studio 16 2019\n"
 	"                    Host system: Windows-10.0.19041\n"
 	"              Uname information: Windows\n"
@@ -98,7 +98,7 @@ char H5libhdf5_settings[]=
 	"                   Parallel HDF5: OFF\n"
 	"Parallel Filtered Dataset Writes: \n"
 	"              Large Parallel I/O: \n"
-	"              High-level library: OFF\n"
+	"              High-level library: ON\n"
 	"                Build HDF5 Tests: OFF\n"
 	"                Build HDF5 Tools: ON\n"
 	"                    Threadsafety: OFF\n"

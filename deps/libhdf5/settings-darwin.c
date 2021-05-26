@@ -14,7 +14,7 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Created:		May 25, 2021
+ * Created:		May 26, 2021
  *			Momtchil Momtchev <mmom@mmom-macbook>
  *
  * Purpose:		This machine-generated source code contains
@@ -35,7 +35,7 @@ char H5libhdf5_settings[]=
 	"General Information:\n"
 	"-------------------\n"
 	"                   HDF5 Version: 1.12.0\n"
-	"                  Configured on: Tue May 25 16:40:12 CEST 2021\n"
+	"                  Configured on: Wed May 26 10:39:40 CEST 2021\n"
 	"                  Configured by: mmom@mmom-macbook\n"
 	"                    Host system: x86_64-apple-darwin19.6.0\n"
 	"              Uname information: Darwin mmom-macbook 19.6.0 Darwin Kernel Version 19.6.0: Tue Jan 12 22:13:05 PST 2021; root:xnu-6153.141.16~1/RELEASE_X86_64 x86_64\n"
@@ -78,7 +78,13 @@ char H5libhdf5_settings[]=
 	"\n"
 	"                        Fortran: no\n"
 	"\n"
-	"                            C++: no\n"
+	"                            C++: yes\n"
+	"                   C++ Compiler: /usr/bin/clang++ ( Apple clang version 11.0.0 )\n"
+	"                      C++ Flags: \n"
+	"                   H5 C++ Flags:  -O3  \n"
+	"                   AM C++ Flags: \n"
+	"             Shared C++ Library: no\n"
+	"             Static C++ Library: yes\n"
 	"\n"
 	"                           Java: no\n"
 	"\n"
@@ -88,7 +94,7 @@ char H5libhdf5_settings[]=
 	"                   Parallel HDF5: no\n"
 	"Parallel Filtered Dataset Writes: no\n"
 	"              Large Parallel I/O: no\n"
-	"              High-level library: no\n"
+	"              High-level library: yes\n"
 	"                Build HDF5 Tests: no\n"
 	"                Build HDF5 Tools: no\n"
 	"                    Threadsafety: yes\n"
