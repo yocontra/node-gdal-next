@@ -14,7 +14,7 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Created:		May 25, 2021
+ * Created:		May 26, 2021
  *			Momtchil Momtchev <mmom@mmom-workstation>
  *
  * Purpose:		This machine-generated source code contains
@@ -35,7 +35,7 @@ char H5libhdf5_settings[]=
 	"General Information:\n"
 	"-------------------\n"
 	"                   HDF5 Version: 1.12.0\n"
-	"                  Configured on: Tue May 25 16:03:47 CEST 2021\n"
+	"                  Configured on: Wed May 26 10:32:35 CEST 2021\n"
 	"                  Configured by: mmom@mmom-workstation\n"
 	"                    Host system: x86_64-unknown-linux-gnu\n"
 	"              Uname information: Linux mmom-workstation 5.8.0-53-generic #60~20.04.1-Ubuntu SMP Thu May 6 09:52:46 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux\n"
@@ -78,7 +78,13 @@ char H5libhdf5_settings[]=
 	"\n"
 	"                        Fortran: no\n"
 	"\n"
-	"                            C++: no\n"
+	"                            C++: yes\n"
+	"                   C++ Compiler: /usr/bin/g++\n"
+	"                      C++ Flags: \n"
+	"                   H5 C++ Flags:   -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wredundant-decls -Winline -Wsign-promo -Woverloaded-virtual -Wold-style-cast -Weffc++ -Wreorder -Wnon-virtual-dtor -Wctor-dtor-privacy -Wabi -finline-functions -s -O\n"
+	"                   AM C++ Flags: \n"
+	"             Shared C++ Library: no\n"
+	"             Static C++ Library: yes\n"
 	"\n"
 	"                           Java: no\n"
 	"\n"
@@ -88,7 +94,7 @@ char H5libhdf5_settings[]=
 	"                   Parallel HDF5: no\n"
 	"Parallel Filtered Dataset Writes: no\n"
 	"              Large Parallel I/O: no\n"
-	"              High-level library: no\n"
+	"              High-level library: yes\n"
 	"                Build HDF5 Tests: no\n"
 	"                Build HDF5 Tools: no\n"
 	"                    Threadsafety: yes\n"
