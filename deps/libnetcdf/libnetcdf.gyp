@@ -162,9 +162,13 @@
 			"defines!": [
 				"DEBUG"
 			],
+			"defines": [
+				"HAVE_CONFIG_H"
+			],
 			"conditions": [
 				["OS == 'win'", {
 					"defines": [
+						"_WIN64"
 					],
 					"sources": [
 					]
@@ -194,6 +198,7 @@
 				},
 			},
 			"dependencies": [
+				"<(deps_dir)/libcurl/libcurl.gyp:libcurl",
 				"<(deps_dir)/libhdf5/libhdf5.gyp:libhdf5"
 			],
 			"direct_dependent_settings": {
