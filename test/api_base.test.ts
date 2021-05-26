@@ -68,9 +68,11 @@ describe('gdal', () => {
     })
     describe('GDAL_DATA behavior', () => {
       const data_path = path.resolve(__dirname, '../deps/libgdal/gdal/data')
-      it('should set GDAL_DATA config option to locally bundled path', () => {
-        assert.equal(gdal.config.get('GDAL_DATA'), data_path)
-      })
+      if (gdal.bundled) {
+        it('should set GDAL_DATA config option to locally bundled path', () => {
+          assert.equal(gdal.config.get('GDAL_DATA'), data_path)
+        })
+      }
       it('should respect GDAL_DATA environment over locally bundled path', (done) => {
         const env = Object.assign({}, process.env)
         env.GDAL_DATA = 'bogus'
