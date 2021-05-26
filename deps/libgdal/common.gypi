@@ -51,7 +51,8 @@
 			"<(deps_dir)/libproj/libproj.gyp:libproj",
 			"<(deps_dir)/libsqlite/libsqlite.gyp:libsqlite",
 			"<(deps_dir)/libcurl/libcurl.gyp:libcurl",
-			"<(deps_dir)/libhdf5/libhdf5.gyp:libhdf5"
+			"<(deps_dir)/libhdf5/libhdf5.gyp:libhdf5",
+			"<(deps_dir)/libnetcdf/libnetcdf.gyp:libnetcdf"
 		],
 		"conditions": [
 			["OS == 'win'", {

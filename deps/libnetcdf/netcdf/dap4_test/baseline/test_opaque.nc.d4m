@@ -1,0 +1,7 @@
+netcdf test_opaque {
+types:
+  opaque(8) opaque8_t ;
+variables:
+	opaque8_t vo1 ;
+
+}

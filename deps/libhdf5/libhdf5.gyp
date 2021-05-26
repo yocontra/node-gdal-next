@@ -330,12 +330,19 @@
 				"hdf5/src/H5Smpio.c",
 				"hdf5/src/H5FDdirect.c",
 				"hdf5/src/H5FDros3.c",
-				"hdf5/src/H5FDs3comms.c"
+				"hdf5/src/H5FDs3comms.c",
+				"hdf5/hl/src/H5DO.c",
+				"hdf5/hl/src/H5DS.c",
+				"hdf5/hl/src/H5IM.c",
+				"hdf5/hl/src/H5LT.c",
+				"hdf5/hl/src/H5LTanalyze.c",
+				"hdf5/hl/src/H5LTparse.c",
+				"hdf5/hl/src/H5PT.c",
+				"hdf5/hl/src/H5TB.c",
+				"hdf5/hl/src/H5LD.c"
 			],
 			"include_dirs": [
 				"./hdf5/src"
-			],
-			"defines": [
 			],
 			"conditions": [
 				["OS == 'win'", {
@@ -379,7 +386,8 @@
 			},
 			"direct_dependent_settings": {
 				"include_dirs": [
-					"./hdf5/src"
+					"./hdf5/src",
+					"./hdf5/hl/src"
 				]
 			}
 		}

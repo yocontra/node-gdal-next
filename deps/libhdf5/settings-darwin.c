@@ -98,7 +98,7 @@ char H5libhdf5_settings[]=
 	"                Build HDF5 Tests: no\n"
 	"                Build HDF5 Tools: no\n"
 	"                    Threadsafety: yes\n"
-	"             Default API mapping: v112\n"
+	"             Default API mapping: v18\n"
 	"  With deprecated public symbols: yes\n"
 	"          I/O filters (external): deflate(zlib)\n"
 	"                             MPE: no\n"

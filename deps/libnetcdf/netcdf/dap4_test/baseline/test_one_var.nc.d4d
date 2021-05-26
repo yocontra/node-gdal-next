@@ -1,0 +1,8 @@
+netcdf test_one_var.nc {
+variables:
+	int t ;
+
+data:
+
+ t = 17 ;
+}

@@ -1,0 +1,5 @@
+netcdf test_one_var {
+variables:
+	int t ;
+
+}

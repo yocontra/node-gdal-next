@@ -1,0 +1,26 @@
+netcdf point {
+dimensions:
+	time = 3 ;
+variables:
+	float lon(time) ;
+		lon:long_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	float lat(time) ;
+		lat:long_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	float z(time) ;
+		z:long_name = "height above mean sea level" ;
+		z:units = "km" ;
+		z:positive = "up" ;
+	double time(time) ;
+		time:long_name = "time" ;
+		time:units = "days since 1970-01-01 00:00:00" ;
+	float data(time) ;
+		data :long_name = "skin temperature" ;
+		data :units = "Celsius" ;
+		data :coordinates = "time lon lat z" ;
+
+// global attributes:
+		:featureType = "point" ;
+		:Conventions = "CF-1.6" ;
+}
