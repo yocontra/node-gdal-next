@@ -219,6 +219,8 @@ NAN_METHOD(Dataset::getGCPProjection) {
  * If this could potentially be the case and blocking the event loop is not possible (server code),
  * then the best option is to simply unreference it (ds = null) and leave
  * the garbage collector to expire it.
+ * 
+ * flush[Async]() ensures that, when writing, all data has been written
  *
  * @method close
  */
