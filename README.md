@@ -39,7 +39,8 @@ npm install gdal-async
 By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed gdal you will have to rebuild it when installing using the following flags:
 
 ```sh
-# --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev (debian: sudo apt-get install libgdal-dev)
+# --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev
+# (debian: sudo apt-get install libgdal-dev)
 $ npm install gdal-next --build-from-source --shared_gdal  
 ```
 
@@ -160,12 +161,14 @@ const src = gdal.open('sample.tif');
 const band_src = src.bands.get(1);
 
 // Read as ndarray
-const data = ndarray(band_src.pixels.read(0, 0, src.rasterSize.x, src.rasterSize.y), [src.rasterSize.x, src.rasterSize.y]);
+const data = ndarray(band_src.pixels.read(0, 0, src.rasterSize.x, src.rasterSize.y),
+                    [src.rasterSize.x, src.rasterSize.y]);
 
-const dst = gdal.open('dst.tif', 'w', 'GTiff', src.rasterSize.x, src.rasterSize.y, 1, band_src.dataType);
+const dst = gdal.open('dst.tif', 'w', 'GTiff', src.rasterSize.x, src.rasterSize.y,
+                    1, band_src.dataType);
 const band_dst = dst.bands.get(1);
 
-// Write from ndarray
+// Write from ndarray, must be in row-major stride (the default one)
 band_dst.pixels.write(0, 0, src.rasterSize.x, src.rasterSize.y, data.data);
 dst.flush();
 ```
@@ -190,7 +193,8 @@ Before submitting pull requests, please update the [tests](test) and make sure t
 ```sh
 $ npm test # test against bundled gdal
 $ npm run test:shared # test against most major versions
-$ npm run container dev {ubuntu|centos|fedora|debian|archlinux}:{version} 12|14|16|lts shared  # test against shared gdal on given Linux version and Node.js version
+# test against shared gdal on given Linux version and Node.js version
+$ npm run container dev {ubuntu|centos|fedora|debian|archlinux}:{version} 12|14|16|lts shared
 ```
 
 ## License
