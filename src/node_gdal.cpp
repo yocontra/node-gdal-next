@@ -79,7 +79,6 @@
 #include "gdal_spatial_reference.hpp"
 #include "gdal_memfile.hpp"
 
-#include "gdal.hpp"
 #include "utils/field_types.hpp"
 
 // collections
@@ -217,6 +216,104 @@ static NAN_METHOD(Log) {
   return;
 }
 
+/*
+ * Common code for sync and async opening
+ */
+GDAL_ASYNCABLE_GLOBAL(gdal_open);
+GDAL_ASYNCABLE_DEFINE(gdal_open) {
+  Nan::HandleScope scope;
+
+  std::string path;
+  std::string mode = "r";
+
+  NODE_ARG_STR(0, "path", path);
+  NODE_ARG_OPT_STR(1, "mode", mode);
+
+  unsigned int flags = 0;
+  if (mode == "r+") {
+    flags |= GDAL_OF_UPDATE;
+  } else if (mode == "r") {
+    flags |= GDAL_OF_READONLY;
+  } else {
+    Nan::ThrowError("Invalid open mode. Must be \"r\" or \"r+\"");
+    return;
+  }
+  flags |= GDAL_OF_VERBOSE_ERROR;
+
+  GDALAsyncableJob<GDALDataset *> job;
+  job.rval = [](GDALDataset *ds, GetFromPersistentFunc) { return Dataset::New(ds); };
+  job.main = [path, flags](const GDALExecutionProgress &) {
+    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), flags, NULL, NULL, NULL);
+    if (!ds) throw CPLGetLastErrorMsg();
+    return ds;
+  };
+  job.run(info, async, 2);
+}
+
+static NAN_METHOD(setConfigOption) {
+  Nan::HandleScope scope;
+
+  std::string name;
+
+  NODE_ARG_STR(0, "name", name);
+
+  if (info.Length() < 2) {
+    Nan::ThrowError("string or null value must be provided");
+    return;
+  }
+  if (info[1]->IsString()) {
+    std::string val = *Nan::Utf8String(info[1]);
+    CPLSetConfigOption(name.c_str(), val.c_str());
+  } else if (info[1]->IsNull() || info[1]->IsUndefined()) {
+    CPLSetConfigOption(name.c_str(), NULL);
+  } else {
+    Nan::ThrowError("value must be a string or null");
+    return;
+  }
+
+  return;
+}
+
+static NAN_METHOD(getConfigOption) {
+  Nan::HandleScope scope;
+
+  std::string name;
+  NODE_ARG_STR(0, "name", name);
+
+  info.GetReturnValue().Set(SafeString::New(CPLGetConfigOption(name.c_str(), NULL)));
+}
+
+/**
+ * Convert decimal degrees to degrees, minutes, and seconds string
+ *
+ * @for gdal
+ * @static
+ * @method decToDMS
+ * @param {number} angle
+ * @param {string} axis `"lat"` or `"long"`
+ * @param {number} [precision=2]
+ * @return {string} A string nndnn'nn.nn'"L where n is a number and L is either
+ * N or E
+ */
+static NAN_METHOD(decToDMS) {
+  Nan::HandleScope scope;
+
+  double angle;
+  std::string axis;
+  int precision = 2;
+  NODE_ARG_DOUBLE(0, "angle", angle);
+  NODE_ARG_STR(1, "axis", axis);
+  NODE_ARG_INT_OPT(2, "precision", precision);
+
+  if (axis.length() > 0) { axis[0] = toupper(axis[0]); }
+  if (axis != "Lat" && axis != "Long") {
+    Nan::ThrowError("Axis must be 'lat' or 'long'");
+    return;
+  }
+
+  info.GetReturnValue().Set(SafeString::New(GDALDecToDMS(angle, axis.c_str(), precision)));
+}
+
 /**
  * Set paths where proj will search it data.
  *
@@ -266,7 +363,7 @@ static NAN_METHOD(getMemfileName) {
 
 static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
-  Nan__SetAsyncableMethod(target, "open", open);
+  Nan__SetAsyncableMethod(target, "open", gdal_open);
   Nan::SetMethod(target, "setConfigOption", setConfigOption);
   Nan::SetMethod(target, "getConfigOption", getConfigOption);
   Nan::SetMethod(target, "decToDMS", decToDMS);
