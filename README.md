@@ -6,7 +6,7 @@
 ![Node.js CI](https://github.com/mmomtchev/node-gdal-async/workflows/Node.js%20CI/badge.svg)
 [![codecov](https://codecov.io/gh/mmomtchev/node-gdal-async/branch/master/graph/badge.svg?token=FE9IJUZ07D)](https://codecov.io/gh/mmomtchev/node-gdal-async)
 
-Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchrounous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://mmomtchev.github.io/node-gdal-async/classes/gdal.html) or [examples](examples/).
+Read and write raster and vector geospatial datasets straight from [Node.js](http://nodejs.org) with this native asynchronous [GDAL](http://www.gdal.org/) binding. To get started, browse the [**API Documentation**](https://mmomtchev.github.io/node-gdal-async/classes/gdal.html) or [examples](examples/).
 
 When in doubt on how to use a method, check also the [unit tests](https://github.com/mmomtchev/node-gdal-async/tree/master/test).
 
@@ -36,7 +36,7 @@ Pre-built binaries are provided for most recent Linux distributions, Windows 64 
 npm install gdal-async
 ```
 
-By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed gdal you will have to rebuild it when installing using the following flags:
+By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed GDAL you will have to rebuild it when installing using the following flags:
 
 ```sh
 # --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev
@@ -135,7 +135,7 @@ const ds2: Promise<gdal.Dataset> = gdal.openAsync('sample.tif')
 ### Built-in networking (starting from 3.2)
 
 Built-in networking uses an embedded version of `libcurl`. It supports `zlib` compression through Node.js' own `zlib` support. It does not support `brotli` or `zstd`. Node.js includes `brotli`, but as of Node.js 16 it still does not export these symbols for use by add-ons (yes, go bug them - ask them for c-ares too).
-SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted root CA store by default and another store can be provided through the `CURL_CA_BUNDLE` enviornment variable or GDAL config option. SSL on Windows and OSX uses the OS-provided mechanisms - Schannel and SecureTransport respectively - and thus the trusted root CA store will be the one provided by the OS.
+SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted root CA store by default and another store can be provided through the `CURL_CA_BUNDLE` environment variable or GDAL config option. SSL on Windows and OSX uses the OS-provided mechanisms - Schannel and SecureTransport respectively - and thus the trusted root CA store will be the one provided by the OS.
 
 ### Breaking changes relative to node-gdal / node-gdal-next
 
@@ -153,7 +153,7 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
 
 ### With `ndarray` from `scijs`
 
-`gdal-async` is fully compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray)
+The current version `gdal-async` is fully compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray)
 
 ```js
 const gdal = require('gdal-async');
@@ -175,6 +175,8 @@ const band_dst = dst.bands.get(1);
 band_dst.pixels.write(0, 0, src.rasterSize.x, src.rasterSize.y, data.data);
 dst.flush();
 ```
+
+I plan to release a separate plugin, with automatic support for different strides, at the same time as `gdal-async@3.3`: [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal). The plugin requires `gdal-async@3.3` and it is not compatible with the `gdal-async@3.2` branch.
 
 ## Bundled Drivers
 
