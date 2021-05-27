@@ -145,6 +145,7 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
     - Starting with 3.3
         * Drop support for linking against a shared GDAL 1.x library
         * Drop support for Ubuntu 16.04 and equivalent, Ubuntu 18.04 is the new baseline target
+        * Drop support for Node.js 10.x and 15.x
 
  * If you are coming from `node-gdal`, in addition to all of the above
     - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
