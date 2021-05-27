@@ -149,6 +149,26 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
     - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
     longitude second. If you don't want to make large code changes, you can replace code like `gdal.SpatialReference.fromEPSG(4326)` with `gdal.SpatialReference.fromProj4('+init=epsg:4326')`
 
+### With `ndarray` from `scijs`
+
+`gdal-async` is fully compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray)
+
+```js
+const gdal = require('gdal-async');
+const ndarray = require('ndarray');
+const src = gdal.open('sample.tif');
+const band_src = src.bands.get(1);
+
+// Read as ndarray
+const data = ndarray(band_src.pixels.read(0, 0, src.rasterSize.x, src.rasterSize.y), [src.rasterSize.x, src.rasterSize.y]);
+
+const dst = gdal.open('dst.tif', 'w', 'GTiff', src.rasterSize.x, src.rasterSize.y, 1, band_src.dataType);
+const band_dst = dst.bands.get(1);
+
+// Write from ndarray
+band_dst.pixels.write(0, 0, src.rasterSize.x, src.rasterSize.y, data.data);
+dst.flush();
+```
 
 ## Bundled Drivers
 
