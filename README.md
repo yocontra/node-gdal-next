@@ -163,7 +163,9 @@ const band_src = src.bands.get(1);
 
 // Read as ndarray
 const data = ndarray(band_src.pixels.read(0, 0, src.rasterSize.x, src.rasterSize.y),
-                    [src.rasterSize.x, src.rasterSize.y]);
+                    [src.rasterSize.y, src.rasterSize.x]);
+
+// Access with data.get(y, x);
 
 const dst = gdal.open('dst.tif', 'w', 'GTiff', src.rasterSize.x, src.rasterSize.y,
                     1, band_src.dataType);
