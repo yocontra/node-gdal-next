@@ -244,7 +244,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   int buffer_w, buffer_h;
   int bytes_per_pixel;
   int pixel_space, line_space;
-  int size, length, min_size, min_length;
+  int size, length;
   void *data;
   Local<Value> array;
   Local<Object> obj;
@@ -293,16 +293,11 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
     Nan::ThrowError("pixel_space must be greater than or equal to size of data_type");
     return;
   }
-  if (line_space < pixel_space * buffer_w) {
-    Nan::ThrowError("line_space must be greater than or equal to pixel_space * buffer_w");
-    return;
-  }
 
-  size = line_space * buffer_h;                      // bytes
-  min_size = size - (pixel_space - bytes_per_pixel); // subtract away padding on last
-                                                     // pixel that wont be written
-  length = (size + bytes_per_pixel - 1) / bytes_per_pixel;
-  min_length = (min_size + bytes_per_pixel - 1) / bytes_per_pixel;
+  // size (bytes) = offset of last element + its size
+  size = (line_space * (buffer_h - 1)) + (pixel_space * (buffer_w - 1)) + bytes_per_pixel;
+  // length (elements) = size / bytes_per_pixel + 1 more if it is not a perfect fit
+  length = size / bytes_per_pixel + ((size % bytes_per_pixel) ? 1 : 0);
 
   // create array if no array was passed
   if (obj.IsEmpty()) {
@@ -313,7 +308,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
     obj = array.As<Object>();
   }
 
-  data = TypedArray::Validate(obj, type, min_length);
+  data = TypedArray::Validate(obj, type, length);
   if (!data) {
     return; // TypedArray::Validate threw an error
   }
@@ -403,7 +398,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   int buffer_w, buffer_h;
   int bytes_per_pixel;
   int pixel_space, line_space;
-  int size, min_size, min_length;
+  int size, length;
   void *data;
   Local<Object> passed_array;
   GDALDataType type;
@@ -433,20 +428,17 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   NODE_ARG_INT_OPT(8, "line_space", line_space);
   NODE_ARG_CB_OPT(9, "progress_cb", cb);
 
-  size = line_space * buffer_h;                      // bytes
-  min_size = size - (pixel_space - bytes_per_pixel); // subtract away padding on last pixel that wont be read
-  min_length = (min_size + bytes_per_pixel - 1) / bytes_per_pixel;
+  // size (bytes) = offset of last element + its size
+  size = (line_space * (buffer_h - 1)) + (pixel_space * (buffer_w - 1)) + bytes_per_pixel;
+  // length (elements) = size / bytes_per_pixel + 1 more if it is not a perfect fit
+  length = size / bytes_per_pixel + ((size % bytes_per_pixel) ? 1 : 0);
 
   if (pixel_space < bytes_per_pixel) {
     Nan::ThrowError("pixel_space must be greater than or equal to size of data_type");
     return;
   }
-  if (line_space < pixel_space * buffer_w) {
-    Nan::ThrowError("line_space must be greater than or equal to pixel_space * buffer_w");
-    return;
-  }
 
-  data = TypedArray::Validate(passed_array, type, min_length);
+  data = TypedArray::Validate(passed_array, type, length);
   if (!data) {
     return; // TypedArray::Validate threw an error
   }

@@ -91,6 +91,25 @@
                 "test/*.ts"
             ],
             "program": "${workspaceFolder}/node_modules/.bin/mocha"
+        },
+        {
+            "name": "Load a core dump (gdb)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/usr/bin/node",
+            "coreDumpPath": "${workspaceFolder}/core",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }

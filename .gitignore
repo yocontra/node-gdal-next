@@ -32,6 +32,8 @@ lib/binding
 lib/index.d.ts
 yuidocs
 coverage
+core
+**/core
 package-lock.json
 yarn.lock
 

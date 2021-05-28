@@ -1,6 +1,5 @@
 import { assert } from 'chai'
 import * as gdal from '..'
-import * as semver from 'semver'
 import * as fileUtils from './utils/file.js'
 
 describe('gdal.RasterBand', () => {
@@ -555,6 +554,38 @@ describe('gdal.RasterBand', () => {
               band.pixels.read(0, 0, 20, 31, data)
             })
           })
+          it('should throw error if array is too small w/pixel_space', () => {
+            const ds = gdal.open(
+              'temp',
+              'w',
+              'MEM',
+              984,
+              804,
+              1,
+              gdal.GDT_Byte
+            )
+            const band = ds.bands.get(1)
+            const data = new Uint8Array(new ArrayBuffer(984 * 804))
+            assert.throws(() => {
+              band.pixels.read(0, 0, 984, 804, data, { pixel_space: 984 })
+            })
+          })
+          it('should throw error if array is too small w/line_space', () => {
+            const ds = gdal.open(
+              'temp',
+              'w',
+              'MEM',
+              984,
+              804,
+              1,
+              gdal.GDT_Byte
+            )
+            const band = ds.bands.get(1)
+            const data = new Uint8Array(new ArrayBuffer(984 * 804))
+            assert.throws(() => {
+              band.pixels.read(0, 0, 984, 804, data, { line_space: 985 })
+            })
+          })
           it('should automatically translate data to array data type', () => {
             const ds = gdal.open(
               'temp',
@@ -774,6 +805,28 @@ describe('gdal.RasterBand', () => {
 
           assert.throws(() => {
             band.pixels.write(100, 120, w, h, data)
+          })
+        })
+        it('should throw error if array is too small w/pixel_space', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          const w = 16,
+            h = 16
+          const data = new Uint8Array(new ArrayBuffer(w * h))
+
+          assert.throws(() => {
+            band.pixels.write(0, 0, w, h, data, { pixel_space: 2 })
+          })
+        })
+        it('should throw error if array is too small w/line_space', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          const w = 16,
+            h = 16
+          const data = new Uint8Array(new ArrayBuffer(w * h))
+
+          assert.throws(() => {
+            band.pixels.write(0, 0, w, h, data, { line_space: h + 1 })
           })
         })
         it('should automatically translate data to array data type', () => {
@@ -1314,7 +1367,7 @@ describe('gdal.RasterBand', () => {
         assert.equal(mask.pixels.get(10, 10), 255)
       })
     })
-    describe('"categoryNames" propetry', () => {
+    describe('"categoryNames" property', () => {
       it('should allow setting and retrieving the category names', () => {
         const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
         const cats = [ 'dry', 'humid', 'wet', 'soaking' ]
