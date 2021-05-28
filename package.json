@@ -48,6 +48,7 @@
     "lint:fix": "eslint lib test examples --fix",
     "lint": "npm run lint:js && npm run lint:cpp",
     "install": "node-pre-gyp install --fallback-to-build -j max",
+    "yatag": "npx yatag",
     "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
     "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js",
     "preversion": "npm run lint && npx yatag && npm run test",
