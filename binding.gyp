@@ -4,18 +4,10 @@
 		"runtime_link%": "shared",
 		"enable_logging%": "false",
 		"debug_extra_ccflags_cc": ["-fprofile-arcs", "-ftest-coverage" ],
-		"debug_extra_ldflags" : ["-lgcov", "--coverage" ]
+		"debug_extra_ldflags" : ["-lgcov", "--coverage" ],
 		#"debug_extra_ccflags_cc": ["-fprofile-arcs", "-ftest-coverage", "-fsanitize=address" ],
-		#"debug_extra_ldflags" : ["-lgcov", "--coverage", "-fsanitize=address" ]
-	},
-	"targets": [
-		{
-			"target_name": "gdal",
-			"type": "loadable_module",
-			"win_delay_load_hook": "false",
-			"product_prefix": "",
-			"product_extension": "node",
-			"sources": [
+		#"debug_extra_ldflags" : ["-lgcov", "--coverage", "-fsanitize=address" ],
+		"sources_node_gdal": [
 				"src/utils/typed_array.cpp",
 				"src/utils/string_list.cpp",
 				"src/utils/number_list.cpp",
@@ -63,9 +55,26 @@
 				"src/collections/rasterband_overviews.cpp",
 				"src/collections/rasterband_pixels.cpp",
 				"src/collections/gdal_drivers.cpp"
-			],
+			]
+	},
+	"targets": [
+		{
+			"target_name": "gdal",
+			"type": "loadable_module",
+			"win_delay_load_hook": "false",
+			"product_prefix": "",
+			"product_extension": "node",
+			"sources": [ "<@(sources_node_gdal)" ],
 			"include_dirs": [
 				"<!(node -e \"require('nan')\")"
+			],
+			"actions": [
+				{
+					"action_name": "yatag",
+					"inputs":  [ "<@(sources_node_gdal)", "lib/gdal.js" ],
+					"outputs": [ "../lib/index.d.ts" ],
+					"action": [ "npx", "yatag" ]
+				}
 			],
 			"defines": [
 				"PLATFORM='<(OS)'",
