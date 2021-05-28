@@ -24,7 +24,9 @@ await Promise.all([Promise.all(data1), Promise.all(data2)])
 
 It launches 8 parallel operations: 4 reads for one band on 2 datasets of 4 bands each. One could expect that with 4 threads in the pool, this one will be at least partially parallelized. Alas, this is not really the case.
 
-The first loop will schedule 4 jobs on the Node.js event loop. libuv will place them in 4 different threads - allocating all slots. As GDAL does not support multiple concurrent operations on a single Dataset handle, these 4 threads will compete for a single mutex. One of them will acquire it, leaving the other 3 threads sleeping while occupying a slot on the thread pool. This is a classical example of *thread starvation*. None of the 4 jobs, scheduled by the second loop, will be able to run as there won't be any free slots left.
+The first loop will schedule 4 jobs on the Node.js event loop. libuv will place them in 4 different threads - allocating all slots. As GDAL does not support multiple concurrent operations on a single Dataset handle - as reading with multiple threads from the same file handle will hardly achieve anything in most cases - these 4 threads will compete for a single mutex. One of them will acquire it, leaving the other 3 threads sleeping while occupying a slot on the thread pool. This is a classical example of *thread starvation*. None of the 4 jobs, scheduled by the second loop, will be able to run as there won't be any free slots left.
+
+As a note, I/O is, most of the time, limited by the I/O bandwidth of the host and performing more than one read or write in parallel won't always result in higher performance. There are two notable exceptions to this rule: network I/O and I/O of very complex (highly compressed) data formats and/or very high speed devices (SSD).
 
 # Increase the thread pool size
 
