@@ -586,6 +586,80 @@ describe('gdal.RasterBand', () => {
               band.pixels.read(0, 0, 984, 804, data, { line_space: 985 })
             })
           })
+          it('should support negative line_space', () => {
+            const w = 36,
+              h = 48
+            const ds = gdal.open(
+              'temp',
+              'w',
+              'MEM',
+              w,
+              h,
+              1,
+              gdal.GDT_Byte
+            )
+            const band = ds.bands.get(1)
+            band.pixels.set(1, 1, 255)
+            const data = new Uint8Array(new ArrayBuffer(w * h))
+            band.pixels.read(0, 0, w, h, data, { line_space: -w, offset: (h-1)*w })
+            assert.equal(data[w*h - 2*w + 1], 255)
+          })
+          it('should support negative pixel_space', () => {
+            const w = 36,
+              h = 48
+            const ds = gdal.open(
+              'temp',
+              'w',
+              'MEM',
+              w,
+              h,
+              1,
+              gdal.GDT_Byte
+            )
+            const band = ds.bands.get(1)
+            band.pixels.set(1, 1, 255)
+            const data = new Uint8Array(new ArrayBuffer(w * h))
+            band.pixels.read(0, 0, w, h, data, { pixel_space: -1, line_space: w, offset: w-1 })
+            assert.equal(data[2*w - 2], 255)
+          })
+          it('should detect write before start w/negative line_space', () => {
+            const w = 36,
+              h = 48
+            const ds = gdal.open(
+              'temp',
+              'w',
+              'MEM',
+              w,
+              h,
+              1,
+              gdal.GDT_Byte
+            )
+            const band = ds.bands.get(1)
+            band.pixels.set(1, 1, 255)
+            const data = new Uint8Array(new ArrayBuffer(w * h))
+            assert.throws(() => {
+              band.pixels.read(0, 0, w, h, data, { line_space: -w, offset: (h-1)*w - 1 })
+            })
+          })
+          it('should detect write before start w/negative pixel_space', () => {
+            const w = 36,
+              h = 48
+            const ds = gdal.open(
+              'temp',
+              'w',
+              'MEM',
+              w,
+              h,
+              1,
+              gdal.GDT_Byte
+            )
+            const band = ds.bands.get(1)
+            band.pixels.set(1, 1, 255)
+            const data = new Uint8Array(new ArrayBuffer(w * h))
+            assert.throws(() => {
+              band.pixels.read(0, 0, w, h, data, { pixel_space: -1, line_space: w, offset: w-1 - 1 })
+            })
+          })
           it('should automatically translate data to array data type', () => {
             const ds = gdal.open(
               'temp',

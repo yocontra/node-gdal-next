@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - GDAL 3.3.0
   - NetCDF, GRIB, HDF5, Carto, FlatGeobuf, WMS, WMTS and WCS drivers
+  - Support generalized strides in `gdal.RasterBandPixels.{write|read}()`
 
 ### Changed
  - Linux release builds have lazy binding enabled

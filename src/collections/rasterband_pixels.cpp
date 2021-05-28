@@ -186,8 +186,42 @@ inline GDALRIOResampleAlg parseResamplingAlg(Local<Value> value) {
   throw "Invalid resampling algorithm";
 }
 
+/* Find the lowest possible element index for the given width, height, pixel_space, line_space and offset */
+inline int findLowest(int w, int h, int px, int ln, int offset) {
+  int x, y;
+
+  if (px < 0)
+    x = w - 1;
+  else
+    x = 0;
+
+  if (ln < 0)
+    y = h - 1;
+  else
+    y = 0;
+
+  return offset + (x * px + y * ln);
+}
+
+/* Find the highest possible element index for the given width, height, pixel_space, line_space and offset */
+inline int findHighest(int w, int h, int px, int ln, int offset) {
+  int x, y;
+
+  if (px < 0)
+    x = 0;
+  else
+    x = w - 1;
+
+  if (ln < 0)
+    y = 0;
+  else
+    y = h - 1;
+
+  return offset + (x * px + y * ln);
+}
+
 /**
- * @typedef ReadOptions { buffer_width?: number, buffer_height?: number, type?: string, pixel_space?: number, line_space?: number, resampling?: string, progress_cb?: ProgressCb }
+ * @typedef ReadOptions { buffer_width?: number, buffer_height?: number, type?: string, pixel_space?: number, line_space?: number, resampling?: string, progress_cb?: ProgressCb, offset?: number }
  */
 
 /**
@@ -244,7 +278,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   int buffer_w, buffer_h;
   int bytes_per_pixel;
   int pixel_space, line_space;
-  int size, length;
+  int size, length, offset;
   void *data;
   Local<Value> array;
   Local<Object> obj;
@@ -288,14 +322,14 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
     Nan::ThrowError(e);
     return;
   }
+  offset = 0;
+  NODE_ARG_INT_OPT(12, "offset", offset);
 
-  if (pixel_space < bytes_per_pixel) {
-    Nan::ThrowError("pixel_space must be greater than or equal to size of data_type");
+  if (findLowest(buffer_w, buffer_h, pixel_space, line_space, offset) < 0) {
+    Nan::ThrowError("has to write before the start of the TypedArray");
     return;
   }
-
-  // size (bytes) = offset of last element + its size
-  size = (line_space * (buffer_h - 1)) + (pixel_space * (buffer_w - 1)) + bytes_per_pixel;
+  size = findHighest(buffer_w, buffer_h, pixel_space, line_space, offset) + 1;
   // length (elements) = size / bytes_per_pixel + 1 more if it is not a perfect fit
   length = size / bytes_per_pixel + ((size % bytes_per_pixel) ? 1 : 0);
 
@@ -323,6 +357,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
     job.progress = cb;
   }
 
+  data = (uint8_t *)data + offset * bytes_per_pixel;
   job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, resampling, cb](
                const GDALExecutionProgress &progress) {
     std::shared_ptr<GDALRasterIOExtraArg> extra(new GDALRasterIOExtraArg);
@@ -344,11 +379,11 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   };
 
   job.rval = [](CPLErr err, GetFromPersistentFunc getter) { return getter("array"); };
-  job.run(info, async, 12);
+  job.run(info, async, 13);
 }
 
 /**
- * @typedef WriteOptions { buffer_width?: number, buffer_height?: number, pixel_space?: number, line_space?: number, progress_cb?: ProgressCb }
+ * @typedef WriteOptions { buffer_width?: number, buffer_height?: number, pixel_space?: number, line_space?: number, progress_cb?: ProgressCb, offset?: number }
  */
 
 /**
@@ -398,7 +433,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   int buffer_w, buffer_h;
   int bytes_per_pixel;
   int pixel_space, line_space;
-  int size, length;
+  int size, length, offset;
   void *data;
   Local<Object> passed_array;
   GDALDataType type;
@@ -427,16 +462,16 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   line_space = pixel_space * buffer_w;
   NODE_ARG_INT_OPT(8, "line_space", line_space);
   NODE_ARG_CB_OPT(9, "progress_cb", cb);
+  offset = 0;
+  NODE_ARG_INT_OPT(10, "offset", offset);
 
-  // size (bytes) = offset of last element + its size
-  size = (line_space * (buffer_h - 1)) + (pixel_space * (buffer_w - 1)) + bytes_per_pixel;
-  // length (elements) = size / bytes_per_pixel + 1 more if it is not a perfect fit
-  length = size / bytes_per_pixel + ((size % bytes_per_pixel) ? 1 : 0);
-
-  if (pixel_space < bytes_per_pixel) {
-    Nan::ThrowError("pixel_space must be greater than or equal to size of data_type");
+  if (findLowest(buffer_w, buffer_h, pixel_space, line_space, offset) < 0) {
+    Nan::ThrowError("has to read before the start of the TypedArray");
     return;
   }
+  size = findHighest(buffer_w, buffer_h, pixel_space, line_space, offset) + 1;
+  // length (elements) = size / bytes_per_pixel + 1 more if it is not a perfect fit
+  length = size / bytes_per_pixel + ((size % bytes_per_pixel) ? 1 : 0);
 
   data = TypedArray::Validate(passed_array, type, length);
   if (!data) {
@@ -453,6 +488,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
     job.progress = cb;
   }
 
+  data = (uint8_t *)data + offset * bytes_per_pixel;
   job.main = [gdal_band, ds_uid, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, cb](
                const GDALExecutionProgress &progress) {
     std::shared_ptr<GDALRasterIOExtraArg> extra(new GDALRasterIOExtraArg);
@@ -471,7 +507,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
   };
   job.rval = [](CPLErr, GetFromPersistentFunc getter) { return getter("array"); };
 
-  job.run(info, async, 10);
+  job.run(info, async, 11);
 }
 
 /**
