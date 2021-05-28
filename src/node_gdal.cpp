@@ -24,9 +24,8 @@
  * }
  * ```
  *
- * see <https://gist.github.com/mmomtchev/14c3428255fd9c88ed20517572d8efdc>
- * for some performance considerations when designing code that will run
- * multiple parallel operations on the same dataset
+ * see ASYNCIO.md for some performance considerations when designing code
+ * that will run multiple parallel operations on the same dataset
  *
  * <iframe
  * src="http://ghbtns.com/github-btn.html?user=mmomtchev&repo=node-gdal-async&type=watch&count=true"
