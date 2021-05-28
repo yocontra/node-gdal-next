@@ -982,6 +982,48 @@ describe('gdal.RasterBand', () => {
               data = blue.pixels.read(0, 0, w, h)
               for (i = 0; i < data.length; i++) assert.equal(data[i], 2)
             })
+            it('should support negative pixel_space', () => {
+              const w = 36,
+                h = 48
+              const ds = gdal.open('temp', 'w', 'MEM', w, h, 1, gdal.GDT_Byte)
+              const data = new Uint8Array(new ArrayBuffer(w * h))
+              data[0] = 255
+              const band = ds.bands.get(1)
+              band.pixels.write(0, 0, w, h, data, { line_space: w, pixel_space: -1, offset: w - 1 })
+              assert.equal(band.pixels.get(w - 1, 0), 255)
+            })
+            it('should support negative line_space', () => {
+              const w = 36,
+                h = 48
+              const ds = gdal.open('temp', 'w', 'MEM', w, h, 1, gdal.GDT_Byte)
+              const data = new Uint8Array(new ArrayBuffer(w * h))
+              data[0] = 255
+              const band = ds.bands.get(1)
+              band.pixels.write(0, 0, w, h, data, { line_space: -w, pixel_space: 1, offset: (h-1)*w })
+              assert.equal(band.pixels.get(0, h - 1), 255)
+            })
+            it('should throw instead of reading before the start w/line-negative', () => {
+              const w = 36,
+                h = 48
+              const ds = gdal.open('temp', 'w', 'MEM', w, h, 1, gdal.GDT_Byte)
+              const data = new Uint8Array(new ArrayBuffer(w * h))
+              data[0] = 255
+              const band = ds.bands.get(1)
+              assert.throws(() => {
+                band.pixels.write(0, 0, w, h, data, { line_space: w, pixel_space: -1, offset: w - 1 - 1 })
+              })
+            })
+            it('should throw instead of reading before the start w/row-negative', () => {
+              const w = 36,
+                h = 48
+              const ds = gdal.open('temp', 'w', 'MEM', w, h, 1, gdal.GDT_Byte)
+              const data = new Uint8Array(new ArrayBuffer(w * h))
+              data[0] = 255
+              const band = ds.bands.get(1)
+              assert.throws(() => {
+                band.pixels.write(0, 0, w, h, data, { line_space: -w, pixel_space: 1, offset: (h-1)*w - 1 })
+              })
+            })
             it('should throw error if array is not long enough', () => {
               const w = 16,
                 h = 16
