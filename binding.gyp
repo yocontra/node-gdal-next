@@ -131,13 +131,27 @@
 			"target_name": "action_after_build",
 			"type": "none",
 			"dependencies": [ "<(module_name)" ],
-			"actions": [
-				{
-					"action_name": "yatag",
-					"inputs":  [ "<@(sources_node_gdal)", "lib/gdal.js" ],
-					"outputs": [ "lib/index.d.ts" ],
-					"action": [ "npm run yatag" ]
-				}
+			"conditions": [
+				['OS != "win"', {
+					"actions": [
+						{
+							"action_name": "yatag",
+							"inputs":  [ "<@(sources_node_gdal)", "lib/gdal.js" ],
+							"outputs": [ "../lib/index.d.ts" ],
+							"action": [ "npm", "run", "yatag" ]
+						}
+					]
+				}],
+				['OS == "win"', {
+					"actions": [
+						{
+							"action_name": "yatag",
+							"inputs":  [ "<@(sources_node_gdal)", "lib/gdal.js" ],
+							"outputs": [ "lib/index.d.ts" ],
+							"action": [ "npm run yatag" ]
+						}
+					]
+				}],
 			],
 			"copies": [
 				{
