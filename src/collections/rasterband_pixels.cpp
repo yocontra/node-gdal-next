@@ -29,6 +29,8 @@ void RasterBandPixels::Initialize(Local<Object> target) {
   Nan__SetPrototypeAsyncableMethod(lcons, "readBlock", readBlock);
   Nan__SetPrototypeAsyncableMethod(lcons, "writeBlock", writeBlock);
 
+  ATTR_DONT_ENUM(lcons, "band", bandGetter, READ_ONLY_SETTER);
+
   Nan::Set(target, Nan::New("RasterBandPixels").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
   constructor.Reset(lcons);
@@ -642,6 +644,18 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
   };
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
   job.run(info, async, 3);
+}
+
+/**
+ * Parent dataset
+ *
+ * @readOnly
+ * @attribute band
+ * @type {gdal.RasterBand}
+ */
+NAN_GETTER(RasterBandPixels::bandGetter) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 
 } // namespace node_gdal

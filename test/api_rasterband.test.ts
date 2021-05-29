@@ -435,6 +435,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
           assert.instanceOf(band.pixels, gdal.RasterBandPixels)
+          assert.strictEqual(band.pixels.band, band)
         })
       })
       describe('setter', () => {
