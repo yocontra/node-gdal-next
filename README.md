@@ -24,7 +24,7 @@ It adds a number of features:
 - Numerous bugfixes including a number of memory leaks
 
 The default install is currently the 3.2 branch which is bundled with GDAL 3.2.3.
-The 3.3 branch, which introduces a number of significant changes, and is bundled with GDAL 3.3.0, is available only as a git checkout.
+The 3.3 branch, which introduces a number of significant changes, and is bundled with GDAL 3.3.0, is available by installing `gdal-async@alpha`.
 
 Support for `worker_threads` is planned but it is not a priority project
 
@@ -153,7 +153,7 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
 
 ### With `ndarray` from `scijs`
 
-The current version `gdal-async` is fully compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray)
+The 3.2 branch of `gdal-async` is compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray), but the array must be in a positive/positive row-major stride.
 
 ```js
 const gdal = require('gdal-async');
@@ -176,7 +176,7 @@ band_dst.pixels.write(0, 0, src.rasterSize.x, src.rasterSize.y, data.data);
 dst.flush();
 ```
 
-I plan to release a separate plugin, with automatic support for different strides, at the same time as `gdal-async@3.3`: [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal). The plugin requires `gdal-async@3.3` and it is not compatible with the `gdal-async@3.2` branch.
+A separate plugin [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal) allows zero-copy I/O, with GDAL-backed interleaving in C++ using SIMD instructions, for all possible 2D strides. The plugin requires `gdal-async@3.3` and it is not compatible with the `gdal-async@3.2` branch.
 
 ## Bundled Drivers
 
