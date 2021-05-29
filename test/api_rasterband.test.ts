@@ -547,7 +547,7 @@ describe('gdal.RasterBand', () => {
               256,
               256,
               1,
-              gdal.GDT_Byte
+              gdal.GDT_UInt16
             )
             const band = ds.bands.get(1)
             const data = new Uint8Array(new ArrayBuffer(20 * 30))
@@ -563,7 +563,7 @@ describe('gdal.RasterBand', () => {
               984,
               804,
               1,
-              gdal.GDT_Byte
+              gdal.GDT_UInt16
             )
             const band = ds.bands.get(1)
             const data = new Uint8Array(new ArrayBuffer(984 * 804))
@@ -579,7 +579,7 @@ describe('gdal.RasterBand', () => {
               984,
               804,
               1,
-              gdal.GDT_Byte
+              gdal.GDT_UInt16
             )
             const band = ds.bands.get(1)
             const data = new Uint8Array(new ArrayBuffer(984 * 804))
@@ -597,7 +597,7 @@ describe('gdal.RasterBand', () => {
               w,
               h,
               1,
-              gdal.GDT_Byte
+              gdal.GDT_UInt16
             )
             const band = ds.bands.get(1)
             band.pixels.set(1, 1, 255)
@@ -615,7 +615,7 @@ describe('gdal.RasterBand', () => {
               w,
               h,
               1,
-              gdal.GDT_Byte
+              gdal.GDT_UInt16
             )
             const band = ds.bands.get(1)
             band.pixels.set(1, 1, 255)
@@ -633,7 +633,7 @@ describe('gdal.RasterBand', () => {
               w,
               h,
               1,
-              gdal.GDT_Byte
+              gdal.GDT_UInt16
             )
             const band = ds.bands.get(1)
             band.pixels.set(1, 1, 255)
@@ -652,7 +652,7 @@ describe('gdal.RasterBand', () => {
               w,
               h,
               1,
-              gdal.GDT_Byte
+              gdal.GDT_UInt16
             )
             const band = ds.bands.get(1)
             band.pixels.set(1, 1, 255)
