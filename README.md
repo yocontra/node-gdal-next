@@ -19,8 +19,10 @@ It adds a number of features:
 - **Support for asynchronous IO** (since 3.0)
 - **Full native TypeScript support** with autocompletion in IDEs that support it (since 3.1)
 - **Built-in networking support** with native support for cloud services (since 3.2)
+- **scijs/ndarray integration** with zero-copy I/O (will appear in 3.3)
 - Support for curve geometries (since 3.1)
 - Progress callbacks (since 3.2)
+- Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (will appear in 3.3)
 - Numerous bugfixes including a number of memory leaks
 
 The default install is currently the 3.2 branch which is bundled with GDAL 3.2.3.
