@@ -24,6 +24,8 @@ jobs:
       with:
         node-version: 14.x
     - run: npm run container release ${{ matrix.linux-version }} ${{ matrix.node-version }}
+      env:
+        MOCHA_TEST_NETWORK: 1
 
 
   test_winmac:
@@ -44,3 +46,5 @@ jobs:
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp install
     - run: npm test
+      env:
+        MOCHA_TEST_NETWORK: 1
