@@ -126,13 +126,21 @@ gdal.openAsync('sample.tif').then((dataset) => {
 ### TypeScript (starting from 3.1)
 
 TypeScript support is available beginning with `gdal-async@3.1.0`
-
 ```ts
 import * as gdal from 'gdal-async'
 
 const ds1: gdal.Dataset = gdal.open('sample.tif')
 const ds2: Promise<gdal.Dataset> = gdal.openAsync('sample.tif')
 ```
+In TypeScript `gdal` is a collection of named exports - as this is the preferred way of importing a native module in TypeScript and it does not impose the use of the `esModuleInterop` flag.
+
+### MJS (Node.js ES6 modules)
+
+When importing from a so-called Michael Jackson Script environment (Node.js native ES6 modules), the correct import syntax is:
+```js
+import gdal from 'gdal-async'
+```
+In MJS `gdal` is a default export - as this allows for maximum compatibility with existing CJS applications.
 
 ### Built-in networking (starting from 3.2)
 
