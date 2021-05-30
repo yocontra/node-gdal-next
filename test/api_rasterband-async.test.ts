@@ -52,6 +52,46 @@ describe('gdal.RasterBandAsync', () => {
       })
     })
     describe('"pixels" property', () => {
+      describe('getAsync()', () => {
+        it('should return a number', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.pixels.getAsync(200, 300), 10)
+        })
+        it('should throw an error if x,y is out of bounds', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.isRejected(band.pixels.getAsync(-1, -1))
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.pixels.getAsync(200, 300))
+        })
+      })
+      describe('set()', () => {
+        it('should set the pixel to the value', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.isFulfilled(band.pixels.setAsync(10, 20, 30).then(() => {
+            assert.equal(band.pixels.get(10, 20), 30)
+            band.pixels.set(10, 20, 33.6)
+            assert.equal(band.pixels.get(10, 20), 34)
+          }))
+        })
+        it('should throw an error if x,y is out of bounds', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.isRejected(band.pixels.setAsync(-1, -1, 20))
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.pixels.setAsync(10, 20, 30))
+        })
+      })
       describe('readAsync() w/cb', () => {
         it('should not crash if the dataset is immediately closed', () => {
           gdal.openAsync(`${__dirname}/data/sample.tif`, (e, ds) => {
@@ -289,7 +329,7 @@ describe('gdal.RasterBandAsync', () => {
               }))
             })
           })
-          describe('"progress_cb"', () => {
+          describe('"progress_cb" w/Net', () => {
             // When running the full test suite, all test files will be cached
             // In order to not create a flaky test and to make sure that the progress callback
             // has always a chance to run at least once, we must use a very slow datasource

@@ -28,8 +28,8 @@ class RasterBandPixels : public Nan::ObjectWrap {
   static Local<Value> New(Local<Value> band_obj);
   static NAN_METHOD(toString);
 
-  static NAN_METHOD(get);
-  static NAN_METHOD(set);
+  GDAL_ASYNCABLE_DECLARE(get);
+  GDAL_ASYNCABLE_DECLARE(set);
   GDAL_ASYNCABLE_DECLARE(read);
   GDAL_ASYNCABLE_DECLARE(write);
   GDAL_ASYNCABLE_DECLARE(readBlock);

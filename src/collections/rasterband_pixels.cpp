@@ -22,8 +22,8 @@ void RasterBandPixels::Initialize(Local<Object> target) {
   lcons->SetClassName(Nan::New("RasterBandPixels").ToLocalChecked());
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
-  Nan::SetPrototypeMethod(lcons, "get", get);
-  Nan::SetPrototypeMethod(lcons, "set", set);
+  Nan__SetPrototypeAsyncableMethod(lcons, "get", get);
+  Nan__SetPrototypeAsyncableMethod(lcons, "set", set);
   Nan__SetPrototypeAsyncableMethod(lcons, "read", read);
   Nan__SetPrototypeAsyncableMethod(lcons, "write", write);
   Nan__SetPrototypeAsyncableMethod(lcons, "readBlock", readBlock);
@@ -115,27 +115,44 @@ NAN_METHOD(RasterBandPixels::toString) {
  * @param {number} y
  * @return {number}
  */
-NAN_METHOD(RasterBandPixels::get) {
+
+/**
+ * Returns the value at the x, y coordinate.
+ * {{{async}}}
+ *
+ * @method getAsync
+ * @param {number} x
+ * @param {number} y
+ * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @return {Promise<number>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
   Nan::HandleScope scope;
 
   RasterBand *band;
   if ((band = parent(info)) == nullptr) return;
 
   int x, y;
-  double val;
 
   NODE_ARG_INT(0, "x", x);
   NODE_ARG_INT(1, "y", y);
+  long ds_uid = band->parent_uid;
+  GDALRasterBand *raw = band->get();
 
-  GDAL_TRYLOCK_PARENT(band);
-  CPLErr err = band->get()->RasterIO(GF_Read, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
-  GDAL_UNLOCK_PARENT;
-  if (err) {
-    NODE_THROW_LAST_CPLERR;
-    return;
-  }
+  GDALAsyncableJob<double> job;
+  job.persist(band->handle());
 
-  info.GetReturnValue().Set(Nan::New<Number>(val));
+  job.main = [ds_uid, raw, x, y](const GDALExecutionProgress &) {
+    double val;
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    CPLErr err = raw->RasterIO(GF_Read, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
+    GDAL_UNLOCK_PARENT;
+    if (err) { throw CPLGetLastErrorMsg(); }
+    return val;
+  };
+
+  job.rval = [](double val, GetFromPersistentFunc) { return Nan::New<Number>(val); };
+  job.run(info, async, 2);
 }
 
 /**
@@ -146,7 +163,19 @@ NAN_METHOD(RasterBandPixels::get) {
  * @param {number} y
  * @param {number} value
  */
-NAN_METHOD(RasterBandPixels::set) {
+
+/**
+ * Sets the value at the x, y coordinate.
+ * {{{async}}}
+ *
+ * @method setAsync
+ * @param {number} x
+ * @param {number} y
+ * @param {number} value
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBandPixels::set) {
   Nan::HandleScope scope;
 
   RasterBand *band;
@@ -158,16 +187,22 @@ NAN_METHOD(RasterBandPixels::set) {
   NODE_ARG_INT(0, "x", x);
   NODE_ARG_INT(1, "y", y);
   NODE_ARG_DOUBLE(2, "val", val);
+  long ds_uid = band->parent_uid;
+  GDALRasterBand *raw = band->get();
 
-  GDAL_TRYLOCK_PARENT(band);
-  CPLErr err = band->get()->RasterIO(GF_Write, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
-  GDAL_UNLOCK_PARENT;
-  if (err) {
-    NODE_THROW_LAST_CPLERR;
-    return;
-  }
+  GDALAsyncableJob<CPLErr> job;
+  job.persist(band->handle());
 
-  return;
+  job.main = [ds_uid, raw, x, y, val](const GDALExecutionProgress &) {
+    GDAL_ASYNCABLE_LOCK(ds_uid);
+    CPLErr err = raw->RasterIO(GF_Write, x, y, 1, 1, (void *)&val, 1, 1, GDT_Float64, 0, 0);
+    GDAL_UNLOCK_PARENT;
+    if (err) { throw CPLGetLastErrorMsg(); }
+    return err;
+  };
+
+  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
+  job.run(info, async, 3);
 }
 
 inline GDALRIOResampleAlg parseResamplingAlg(Local<Value> value) {
