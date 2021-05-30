@@ -9,6 +9,11 @@ on:
   pull_request:
     branches: [ master ]
   workflow_dispatch:
+    inputs:
+      testNetwork:
+        description: 'Run tests that require network connectivity'
+        required: false
+        default: 0
 
 jobs:
   bundled_gdal_coverage:
@@ -32,6 +37,8 @@ jobs:
       run: npx @mapbox/node-pre-gyp build -j max --debug
     - name: Run unit tests
       run: npm test
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
     - run: npm run gcov
     - run: npm run codecov
       env:
@@ -54,6 +61,8 @@ jobs:
       with:
         node-version: 14.x
     - run: npm run container dev ${{ matrix.linux-version }} 14 ${{ matrix.gdal-version }}
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
 
 
   test_node:
@@ -72,7 +81,9 @@ jobs:
       with:
         node-version: 14.x
     - run: npm run container dev ubuntu:20.04 ${{ matrix.node-version }} ${{ matrix.gdal-version }}
-  
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
+
 
   test_winmac:
 
@@ -95,3 +106,5 @@ jobs:
       run: npx @mapbox/node-pre-gyp build -j max
     - name: Run unit tests
       run: npm test
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}

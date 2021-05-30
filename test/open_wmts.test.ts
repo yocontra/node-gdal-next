@@ -9,7 +9,7 @@ const shomTides = 'WMTS:https://services.data.shom.fr/INSPIRE/wmts?request=GetCa
 describe('Open', () => {
   afterEach(global.gc)
 
-  describe('WMTS', () => {
+  describe('WMTS w/Net', () => {
     let ds: gdal.Dataset
 
     after(() => (ds && ds.close()))
@@ -28,7 +28,7 @@ describe('Open', () => {
     })
   })
 
-  describe('WMTS/Async', () => {
+  describe('WMTS/Async w/Net', () => {
     let ds: Promise<gdal.Dataset>
 
     after(() => ds && ds.then((r) => r.close()))

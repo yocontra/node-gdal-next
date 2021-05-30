@@ -131,7 +131,7 @@ describe('gdal.SpatialReference', () => {
       })
     })
   })
-  describe('fromCRSURL', () => {
+  describe('fromCRSURL w/Net', () => {
     it('should return SpatialReference', () => {
       const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
       const ref = gdal.SpatialReference.fromCRSURL(wms)
@@ -180,7 +180,7 @@ describe('gdal.SpatialReference', () => {
       })
     }
   })
-  describe('exportToPrettyWKT', () => {
+  describe('exportToPrettyWKT w/Net', () => {
     it('should pretty-print WKT', () => {
       const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
       const ref = gdal.SpatialReference.fromCRSURL(wms)
@@ -328,7 +328,7 @@ describe('gdal.SpatialReference', () => {
       assert.equal(gdal.SpatialReference.fromEPSG(2154).isCompound(), false)
     })
   })
-  describe('isSame', () => {
+  describe('isSame w/Net', () => {
     it('should return true if compound coordinate system', () => {
       assert.equal(gdal.SpatialReference.fromEPSG(3857)
         .isSame(gdal.SpatialReference.fromCRSURL('http://www.opengis.net/def/crs/EPSG/0/3857')), true)

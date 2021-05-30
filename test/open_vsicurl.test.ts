@@ -7,7 +7,7 @@ chai.use(chaiAsPromised)
 describe('Open', () => {
   afterEach(global.gc)
 
-  describe('vsicurl', () => {
+  describe('vsicurl w/Net', () => {
     let ds: gdal.Dataset
 
     after(() => (ds && ds.close()))
@@ -27,7 +27,7 @@ describe('Open', () => {
     })
   })
 
-  describe('vsicurl/Async', () => {
+  describe('vsicurl/Async w/Net', () => {
     let ds: Promise<gdal.Dataset>
 
     after(() => ds && ds.then((r) => r.close()))

@@ -11,7 +11,7 @@ const magosm = 'https://magosm.magellium.com/geoserver/ows?SERVICE=WMS&VERSION=1
 describe('Open', () => {
   afterEach(global.gc)
 
-  describe('WMS', () => {
+  describe('WMS w/Net', () => {
     let ds: gdal.Dataset
 
     after(() => (ds && ds.close()))
@@ -30,7 +30,7 @@ describe('Open', () => {
     })
   })
 
-  describe('WMS/Async', () => {
+  describe('WMS/Async w/Net', () => {
     let ds: Promise<gdal.Dataset>
 
     after(() => ds && ds.then((r) => r.close()))

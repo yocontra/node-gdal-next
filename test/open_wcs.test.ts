@@ -18,7 +18,7 @@ describe('Open', () => {
     return
   }
 
-  describe('WCS', () => {
+  describe('WCS w/Net', () => {
     let ds: gdal.Dataset
 
     after(() => (ds && ds.close()))
@@ -37,7 +37,7 @@ describe('Open', () => {
     })
   })
 
-  describe('WCS/Async', () => {
+  describe('WCS/Async w/Net', () => {
     let ds: Promise<gdal.Dataset>
 
     after(() => ds && ds.then((r) => r.close()))

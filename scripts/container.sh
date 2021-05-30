@@ -30,22 +30,26 @@ fi
 CONTAINER="${DIST}-node-gdal:${VERSION}_${NODEJS}_${GDAL}"
 SEP="\n=======================================================\n"
 echo -e "${SEP}Building container ${CONTAINER}${SEP}"
-docker build --build-arg VERSION=${VERSION} --build-arg NODEJS=${NODEJS} --build-arg GDAL=${GDAL} -t ${CONTAINER} -f test/platforms/Dockerfile.${DIST} test/platforms
+
+docker build \
+        --build-arg VERSION=${VERSION} --build-arg NODEJS=${NODEJS} --build-arg GDAL=${GDAL} \
+        -t ${CONTAINER} -f test/platforms/Dockerfile.${DIST} test/platforms
+
 case ${OP} in
   release)
     echo -e "${SEP}Testing in ${CONTAINER}${SEP}"
-    docker run -v `pwd`:/src ${CONTAINER} RELEASE || exit 1
+    docker run --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} RELEASE || exit 1
     ;;
   dev)
     echo -e "${SEP}Testing in ${CONTAINER}${SEP}"
-    docker run -v `pwd`:/src ${CONTAINER} DEV || exit 1
+    docker run --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} DEV || exit 1
     ;;
   publish)
     echo -e "${SEP}Publishing in ${CONTAINER}${SEP}"
-    docker run --env NODE_PRE_GYP_GITHUB_TOKEN -v `pwd`:/src ${CONTAINER} PUBLISH || exit 1
+    docker run --env MOCHA_TEST_NETWORK --env NODE_PRE_GYP_GITHUB_TOKEN -v `pwd`:/src ${CONTAINER} PUBLISH || exit 1
     ;;
   shell)
     echo -e "${SEP}Testing in ${CONTAINER} and running a shell${SEP}"
-    docker run -it -v `pwd`:/src ${CONTAINER} DEV /bin/bash
+    docker run -it --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} DEV /bin/bash
     ;;
 esac

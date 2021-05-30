@@ -15,7 +15,7 @@ describe('Open', () => {
     gdal.config.set('AWS_NO_SIGN_REQUEST', 'YES')
   })
 
-  describe('vsis3', () => {
+  describe('vsis3 w/Net', () => {
     let ds
 
     it('should not throw', () => {
@@ -33,7 +33,7 @@ describe('Open', () => {
     })
   })
 
-  describe('vsis3/Async', () => {
+  describe('vsis3/Async w/Net', () => {
     let ds
 
     it('should not throw', () => {
