@@ -86,6 +86,7 @@ NAN_METHOD(DatasetBands::toString) {
  *
  * @method get
  * @param {number} id
+ * @throws Error
  * @return {gdal.RasterBand}
  */
 
@@ -122,6 +123,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     GDALRasterBand *band = raw->GetRasterBand(band_id);
     GDAL_UNLOCK_PARENT;
+    if (band == nullptr) { throw CPLGetLastErrorMsg(); }
     return band;
   };
   job.rval = [raw](GDALRasterBand *band, GetFromPersistentFunc) { return RasterBand::New(band, raw); };
@@ -193,8 +195,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
     GDAL_ASYNCABLE_LOCK(ds_uid);
     CPLErr err = raw->AddBand(type, options->get());
     GDAL_UNLOCK_PARENT;
-    // This is not thread-safe, but mis-reporting the error message
-    // 0.01% of the time is probably acceptable
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return raw->GetRasterBand(raw->GetRasterCount());
   };

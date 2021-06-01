@@ -86,7 +86,9 @@ describe('gdal.Dataset', () => {
         })
         it('should return null if band id is out of range', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
-          assert.isNull(ds.bands.get(0))
+          assert.throws(() => {
+            ds.bands.get(0)
+          })
         })
         it('should throw if dataset is closed', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
@@ -102,9 +104,9 @@ describe('gdal.Dataset', () => {
           const p = ds.bands.getAsync(1)
           return assert.eventually.instanceOf(p, gdal.RasterBand)
         })
-        it('should return null if band id is out of range', () => {
+        it('should reject if band id is out of range', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
-          return assert.eventually.isNull(ds.bands.getAsync(0))
+          return assert.isRejected(ds.bands.getAsync(0))
         })
         it('should throw if dataset is closed', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
