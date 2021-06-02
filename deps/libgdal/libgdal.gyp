@@ -190,7 +190,6 @@
 				"./gdal/gcore",
 				"./gdal/port",
 				"./gdal/frmts",
-				"./gdal/frmts/zlib",
 				"./gdal/frmts/vrt",
 				"./gdal/frmts/mem",
 				"./gdal/frmts/derived",
