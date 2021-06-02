@@ -682,7 +682,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
 }
 
 /**
- * Parent dataset
+ * Parent raster band
  *
  * @readOnly
  * @attribute band
