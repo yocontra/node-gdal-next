@@ -43,7 +43,7 @@ By default all dependencies are the latest versions and bundled out of the box, 
 ```sh
 # --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev
 # (debian: sudo apt-get install libgdal-dev)
-$ npm install gdal-next --build-from-source --shared_gdal  
+$ npm install gdal-async --build-from-source --shared_gdal  
 ```
 
 ## Sample Usage
