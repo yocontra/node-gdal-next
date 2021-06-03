@@ -23,8 +23,8 @@ void RasterBand::Initialize(Local<Object> target) {
   lcons->SetClassName(Nan::New("RasterBand").ToLocalChecked());
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
-  Nan::SetPrototypeMethod(lcons, "flush", flush);
-  Nan::SetPrototypeMethod(lcons, "fill", fill);
+  Nan__SetPrototypeAsyncableMethod(lcons, "flush", flush);
+  Nan__SetPrototypeAsyncableMethod(lcons, "fill", fill);
   Nan::SetPrototypeMethod(lcons, "getStatistics", getStatistics);
   Nan::SetPrototypeMethod(lcons, "setStatistics", setStatistics);
   Nan::SetPrototypeMethod(lcons, "computeStatistics", computeStatistics);
@@ -167,10 +167,19 @@ NAN_METHOD(RasterBand::toString) {
 
 /**
  * Saves changes to disk.
- *
  * @method flush
  */
-NODE_WRAPPED_METHOD(RasterBand, flush, FlushCache);
+
+/**
+ * Saves changes to disk.
+ * {{{async}}}
+ *
+ * @method flushAsync
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
+ * 
+ */
+NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(RasterBand, flush, FlushCache);
 
 /**
  * Return the status flags of the mask band associated with the band.
@@ -237,10 +246,23 @@ NAN_METHOD(RasterBand::getMaskBand) {
  *
  * @throws Error
  * @method fill
+ * @throws Error
  * @param {number} real_value
  * @param {number} [imaginary_value]
  */
-NAN_METHOD(RasterBand::fill) {
+
+/**
+ * Fill this band with a constant value.
+ *
+ * @throws Error
+ * @method fillAsync
+ * @throws Error
+ * @param {number} real_value
+ * @param {number} [imaginary_value]
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
   Nan::HandleScope scope;
   double real, imaginary = 0;
   NODE_ARG_DOUBLE(0, "real value", real);
@@ -252,15 +274,16 @@ NAN_METHOD(RasterBand::fill) {
     return;
   }
 
-  GDAL_TRYLOCK_PARENT(band);
-  int err = band->this_->Fill(real, imaginary);
-  GDAL_UNLOCK_PARENT;
+  GDALAsyncableJob<CPLErr> job;
+  GDALRasterBand *gdal_obj = band->this_;
+  job.main = [gdal_obj, real, imaginary](const GDALExecutionProgress &) {
+    CPLErr err = gdal_obj->Fill(real, imaginary);
+    if (err) { throw CPLGetLastErrorMsg(); }
+    return err;
+  };
+  job.rval = [](CPLErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
 
-  if (err) {
-    NODE_THROW_LAST_CPLERR;
-    return;
-  }
-  return;
+  job.run(info, async, 2);
 }
 
 // --- Custom error handling to handle VRT errors ---

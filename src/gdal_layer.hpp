@@ -32,7 +32,7 @@ class Layer : public Nan::ObjectWrap {
   static NAN_METHOD(setSpatialFilter);
   static NAN_METHOD(getSpatialFilter);
   static NAN_METHOD(testCapability);
-  static NAN_METHOD(syncToDisk);
+  GDAL_ASYNCABLE_DECLARE(syncToDisk);
 
   static NAN_SETTER(dsSetter);
   static NAN_GETTER(dsGetter);

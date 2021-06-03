@@ -26,8 +26,8 @@ class RasterBand : public Nan::ObjectWrap {
   static NAN_METHOD(New);
   static Local<Value> New(GDALRasterBand *band, GDALDataset *parent);
   static NAN_METHOD(toString);
-  static NAN_METHOD(flush);
-  static NAN_METHOD(fill);
+  GDAL_ASYNCABLE_DECLARE(flush);
+  GDAL_ASYNCABLE_DECLARE(fill);
   static NAN_METHOD(getStatistics);
   static NAN_METHOD(computeStatistics);
   static NAN_METHOD(setStatistics);

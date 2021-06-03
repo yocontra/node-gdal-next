@@ -31,7 +31,7 @@ void Layer::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "setSpatialFilter", setSpatialFilter);
   Nan::SetPrototypeMethod(lcons, "getSpatialFilter", getSpatialFilter);
   Nan::SetPrototypeMethod(lcons, "testCapability", testCapability);
-  Nan::SetPrototypeMethod(lcons, "flush", syncToDisk);
+  Nan__SetPrototypeAsyncableMethod(lcons, "flush", syncToDisk);
 
   ATTR_DONT_ENUM(lcons, "ds", dsGetter, READ_ONLY_SETTER);
   ATTR_DONT_ENUM(lcons, "_uid", uidGetter, READ_ONLY_SETTER);
@@ -158,7 +158,9 @@ NAN_METHOD(Layer::toString) {
   }
 
   std::ostringstream ss;
+  GDAL_TRYLOCK_PARENT(layer);
   ss << "Layer (" << layer->this_->GetName() << ")";
+  GDAL_UNLOCK_PARENT;
 
   info.GetReturnValue().Set(SafeString::New(ss.str().c_str()));
 }
@@ -169,7 +171,18 @@ NAN_METHOD(Layer::toString) {
  * @throws Error
  * @method flush
  */
-NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(Layer, syncToDisk, SyncToDisk);
+
+/**
+ * Flush pending changes to disk.
+ * {{{async}}}
+ *
+ * @throws Error
+ * @method flushAsync
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<void>}
+ * 
+ */
+NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(Layer, syncToDisk, SyncToDisk);
 
 /**
  * Determines if the dataset supports the indicated operation.
@@ -179,7 +192,7 @@ NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(Layer, syncToDisk, SyncToDisk);
  * list{{/crossLink}})
  * @return {boolean}
  */
-NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM(Layer, testCapability, Boolean, TestCapability, "capability");
+NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM_LOCKED(Layer, testCapability, Boolean, TestCapability, "capability");
 
 /**
  * Fetch the extent of this layer.
@@ -202,7 +215,9 @@ NAN_METHOD(Layer::getExtent) {
   NODE_ARG_BOOL_OPT(0, "force", force);
 
   std::unique_ptr<OGREnvelope> envelope(new OGREnvelope());
+  GDAL_TRYLOCK_PARENT(layer);
   OGRErr err = layer->this_->GetExtent(envelope.get(), force);
+  GDAL_UNLOCK_PARENT;
   if (err) {
     Nan::ThrowError("Can't get layer extent without computing it");
     return;
@@ -233,7 +248,10 @@ NAN_METHOD(Layer::getSpatialFilter) {
     return;
   }
 
-  info.GetReturnValue().Set(Geometry::New(layer->this_->GetSpatialFilter(), false));
+  GDAL_TRYLOCK_PARENT(layer);
+  auto r = layer->this_->GetSpatialFilter();
+  GDAL_UNLOCK_PARENT;
+  info.GetReturnValue().Set(Geometry::New(r, false));
 }
 
 /**
@@ -265,11 +283,13 @@ NAN_METHOD(Layer::setSpatialFilter) {
     Geometry *filter = NULL;
     NODE_ARG_WRAPPED_OPT(0, "filter", Geometry, filter);
 
+    GDAL_TRYLOCK_PARENT(layer);
     if (filter) {
       layer->this_->SetSpatialFilter(filter->get());
     } else {
       layer->this_->SetSpatialFilter(NULL);
     }
+    GDAL_UNLOCK_PARENT;
   } else if (info.Length() == 4) {
     double minX, minY, maxX, maxY;
     NODE_ARG_DOUBLE(0, "minX", minX);
@@ -277,7 +297,9 @@ NAN_METHOD(Layer::setSpatialFilter) {
     NODE_ARG_DOUBLE(2, "maxX", maxX);
     NODE_ARG_DOUBLE(3, "maxY", maxY);
 
+    GDAL_TRYLOCK_PARENT(layer);
     layer->this_->SetSpatialFilterRect(minX, minY, maxX, maxY);
+    GDAL_UNLOCK_PARENT;
   } else {
     Nan::ThrowError("Invalid number of arguments");
     return;
@@ -321,11 +343,13 @@ NAN_METHOD(Layer::setAttributeFilter) {
   NODE_ARG_OPT_STR(0, "filter", filter);
 
   OGRErr err;
+  GDAL_TRYLOCK_PARENT(layer);
   if (filter.empty()) {
     err = layer->this_->SetAttributeFilter(NULL);
   } else {
     err = layer->this_->SetAttributeFilter(filter.c_str());
   }
+  GDAL_UNLOCK_PARENT;
 
   if (err) {
     NODE_THROW_OGRERR(err);
@@ -373,7 +397,10 @@ NAN_GETTER(Layer::srsGetter) {
     Nan::ThrowError("Layer object has already been destroyed");
     return;
   }
-  info.GetReturnValue().Set(SpatialReference::New(layer->this_->GetSpatialRef(), false));
+  GDAL_TRYLOCK_PARENT(layer);
+  auto r = layer->this_->GetSpatialRef();
+  GDAL_UNLOCK_PARENT;
+  info.GetReturnValue().Set(SpatialReference::New(r, false));
 }
 
 /**
@@ -388,7 +415,10 @@ NAN_GETTER(Layer::nameGetter) {
     Nan::ThrowError("Layer object has already been destroyed");
     return;
   }
-  info.GetReturnValue().Set(SafeString::New(layer->this_->GetName()));
+  GDAL_TRYLOCK_PARENT(layer);
+  auto r = layer->this_->GetName();
+  GDAL_UNLOCK_PARENT;
+  info.GetReturnValue().Set(SafeString::New(r));
 }
 
 /**
@@ -403,7 +433,10 @@ NAN_GETTER(Layer::geomColumnGetter) {
     Nan::ThrowError("Layer object has already been destroyed");
     return;
   }
-  info.GetReturnValue().Set(SafeString::New(layer->this_->GetGeometryColumn()));
+  GDAL_TRYLOCK_PARENT(layer);
+  auto r = layer->this_->GetGeometryColumn();
+  GDAL_UNLOCK_PARENT;
+  info.GetReturnValue().Set(SafeString::New(r));
 }
 
 /**
@@ -418,7 +451,10 @@ NAN_GETTER(Layer::fidColumnGetter) {
     Nan::ThrowError("Layer object has already been destroyed");
     return;
   }
-  info.GetReturnValue().Set(SafeString::New(layer->this_->GetFIDColumn()));
+  GDAL_TRYLOCK_PARENT(layer);
+  auto r = layer->this_->GetFIDColumn();
+  GDAL_UNLOCK_PARENT;
+  info.GetReturnValue().Set(SafeString::New(r));
 }
 
 /**
@@ -434,7 +470,10 @@ NAN_GETTER(Layer::geomTypeGetter) {
     Nan::ThrowError("Layer object has already been destroyed");
     return;
   }
-  info.GetReturnValue().Set(Nan::New<Integer>(layer->this_->GetGeomType()));
+  GDAL_TRYLOCK_PARENT(layer);
+  auto r = layer->this_->GetGeomType();
+  GDAL_UNLOCK_PARENT;
+  info.GetReturnValue().Set(Nan::New<Integer>(r));
 }
 
 /**

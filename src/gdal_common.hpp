@@ -625,6 +625,29 @@ NAN_SETTER(READ_ONLY_SETTER);
     job.run(info, async, 1);                                                                                           \
   }
 
+#define NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(klass, method, wrapped_method)                             \
+  GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
+    Nan::HandleScope scope;                                                                                            \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    auto gdal_obj = obj->this_;                                                                                        \
+    long parent_uid = obj->parent_uid;                                                                                 \
+    GDALAsyncableJob<OGRErr> job;                                                                                      \
+    job.persist(info.This());                                                                                          \
+    job.main = [gdal_obj, parent_uid](const GDALExecutionProgress &) {                                                 \
+      GDAL_ASYNCABLE_LOCK(parent_uid);                                                                                 \
+      int err = gdal_obj->wrapped_method();                                                                            \
+      GDAL_UNLOCK_PARENT;                                                                                              \
+      if (err) throw getOGRErrMsg(err);                                                                                \
+      return err;                                                                                                      \
+    };                                                                                                                 \
+    job.rval = [](OGRErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };                             \
+    job.run(info, async, 1);                                                                                           \
+  }
+
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(                                                  \
   klass, async_type, method, wrapped_method, param_type, param_name)                                                   \
   GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
@@ -825,6 +848,41 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     return;                                                                                                            \
+  }
+
+// ----- wrapped methods w/ OGRErr result (throws) -------
+
+#define NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_LOCKED(klass, method, wrapped_method)                                   \
+  NAN_METHOD(klass::method) {                                                                                          \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    int err = obj->this_->wrapped_method();                                                                            \
+    GDAL_UNLOCK_PARENT;                                                                                                \
+    if (err) {                                                                                                         \
+      NODE_THROW_OGRERR(err);                                                                                          \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    return;                                                                                                            \
+  }
+
+#define NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM_LOCKED(klass, method, result_type, wrapped_method, param_name)  \
+  NAN_METHOD(klass::method) {                                                                                          \
+    Nan::HandleScope scope;                                                                                            \
+    std::string param;                                                                                                 \
+    NODE_ARG_STR(0, #param_name, param);                                                                               \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    auto r = obj->this_->wrapped_method(param.c_str());                                                                \
+    GDAL_UNLOCK_PARENT;                                                                                                \
+    info.GetReturnValue().Set(Nan::New<result_type>(r));                                                               \
   }
 
 // ----- wrapped methods -------
