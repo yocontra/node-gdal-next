@@ -1,0 +1,34 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Debug",
+      "type": "shell",
+      "command": "node-pre-gyp configure --debug && node-pre-gyp build -j max --debug",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build ASAN",
+      "type": "shell",
+      "command": "node-pre-gyp configure --debug --enable_asan && node-pre-gyp build -j max --debug",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Unit Test",
+      "type": "shell",
+      "command": "npm test",
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    }
+  ]
+}
