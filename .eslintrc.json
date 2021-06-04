@@ -173,7 +173,8 @@
     },
     {
       "files": [
-        "scripts/publish-packages.js"
+        "scripts/publish-packages.js",
+        "test/stress.js"
       ],
       "parserOptions": {
         "ecmaVersion": 2018
