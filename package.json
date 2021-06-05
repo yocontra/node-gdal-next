@@ -42,7 +42,7 @@
     "email": "brandon@naturalatlas.com"
   },
   "scripts": {
-    "test": "mocha test --require ts-node/register -R tap --timeout 0 --expose-gc --require ./test/_common.js --require ./test/_hooks.js test/*.test.ts",
+    "test": "mocha",
     "lint:cpp": "clang-format -i src/*.cpp src/*.hpp && clang-format -i src/*/*.cpp src/*/*.hpp",
     "lint:js": "eslint lib test examples",
     "lint:fix": "eslint lib test examples --fix",

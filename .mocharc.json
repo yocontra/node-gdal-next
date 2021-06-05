@@ -1,0 +1,11 @@
+{
+  "spec": "test/*.test.ts",
+  "require": [
+    "ts-node/register",
+    "test/_common.js",
+    "test/_hooks.js"
+  ],
+  "reporter": "tap",
+  "timeout": 0,
+  "expose-gc": true
+}
