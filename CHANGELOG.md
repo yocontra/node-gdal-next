@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add `gdal.RasterBandPixels.{set|get}Async()`
 
 ### Changed
+ - Vastly improved locking mechanism allowing better parallelization
  - Linux release builds have lazy binding enabled
  - `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
 

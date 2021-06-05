@@ -14,11 +14,11 @@ PtrManager::PtrManager() : uid(1), layers(), bands(), datasets() {
 PtrManager::~PtrManager() {
 }
 
-void PtrManager::lock() {
+inline void PtrManager::lock() {
   uv_mutex_lock(&master_lock);
 }
 
-void PtrManager::unlock() {
+inline void PtrManager::unlock() {
   uv_mutex_unlock(&master_lock);
 }
 
@@ -28,38 +28,56 @@ bool PtrManager::isAlive(long uid) {
 }
 
 uv_sem_t *PtrManager::tryLockDataset(long uid) {
-  lock();
-
-  auto parent = datasets.find(uid);
-  if (parent != datasets.end()) {
-    uv_sem_wait(parent->second->async_lock);
-    unlock();
-    return parent->second->async_lock;
+  while (true) {
+    lock();
+    auto parent = datasets.find(uid);
+    if (parent != datasets.end()) {
+      int r = uv_sem_trywait(parent->second->async_lock);
+      unlock();
+      if (r == 0) return parent->second->async_lock;
+    } else {
+      unlock();
+      throw "Parent Dataset object has already been destroyed";
+    }
   }
-  unlock();
-  throw "Parent Dataset object has already been destroyed";
 }
 
 std::vector<uv_sem_t *> PtrManager::tryLockDatasets(std::vector<long> uids) {
   // There is lots of copying around here but these vectors are never longer than 3 elements
-  std::vector<uv_sem_t *> locks;
   // Avoid deadlocks
   std::sort(uids.begin(), uids.end());
   // Eliminate dupes
   uids.erase(std::unique(uids.begin(), uids.end()), uids.end());
-  lock();
-  for (long uid : uids) {
-    if (!uid) continue;
-    auto parent = datasets.find(uid);
-    if (parent == datasets.end()) {
-      unlock();
-      throw "Parent Dataset object has already been destroyed";
+  while (true) {
+    std::vector<uv_sem_t *> locks;
+    lock();
+    for (long uid : uids) {
+      if (!uid) continue;
+      auto parent = datasets.find(uid);
+      if (parent == datasets.end()) {
+        unlock();
+        throw "Parent Dataset object has already been destroyed";
+      }
+      locks.push_back(parent->second->async_lock);
     }
-    locks.push_back(parent->second->async_lock);
+    std::vector<uv_sem_t *> locked;
+    for (uv_sem_t *async_lock : locks) {
+      int r = uv_sem_trywait(async_lock);
+      if (r == 0) {
+        locked.push_back(async_lock);
+      } else {
+        // We failed acquiring one of the locks =>
+        // free all acquired locks and start a new cycle
+        for (uv_sem_t *lock : locked) { uv_sem_post(lock); }
+        unlock();
+        goto next;
+      }
+    }
+    unlock();
+    return locks;
+  next:;
+    //printf("next cycle\n");
   }
-  for (uv_sem_t *async_lock : locks) { uv_sem_wait(async_lock); }
-  unlock();
-  return locks;
 }
 
 long PtrManager::add(OGRLayer *ptr, long parent_uid, bool is_result_set) {

@@ -46,21 +46,24 @@ namespace node_gdal {
 // A class for cleaning up GDAL objects that depend on open datasets
 
 // Async lock semantics:
+//
 // * There is one global master lock
+//
 // * There is one async lock per dataset
+//
 // * All operations on the PtrManager should acquire the master_lock
 // - This implicit in all cases except isAlive()
 // - The caller should explicitly lock isAlive()
-// * All objects carry the dataset uid
-// * All I/O operations on the dataset require locking the dataset async_lock
-// - This is best accomplished though tryLockDataSet
-// * Deadlock avoidance strategy:
-// - One should never lock the master lock while holding an async_lock
 //
-// Weaknesses:
-// - A long-running operation has locked a dataset
-// - Another operation on that dataset tries to get its async_lock
-// - While the second operation is waiting, creating new datasets is blocked
+// * All objects carry the dataset uid
+//
+// * All GDAL operations on an object require locking the parent dataset
+// - This is best accomplished though tryLockDataSet
+//
+// * Deadlock avoidance strategy
+// - One should never lock the master lock while holding an async_lock
+// - Multiple datasets are to be locked with tryLockDatasets which sorts locks
+//
 
 class PtrManager {
     public:
@@ -71,8 +74,8 @@ class PtrManager {
   bool isAlive(long uid);
   uv_sem_t *tryLockDataset(long uid);
   std::vector<uv_sem_t *> tryLockDatasets(std::vector<long> uids);
-  void lock();
-  void unlock();
+  inline void lock();
+  inline void unlock();
 
   PtrManager();
   ~PtrManager();

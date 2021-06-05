@@ -13,6 +13,7 @@ void Algorithms::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "sieveFilter", sieveFilter);
   Nan__SetAsyncableMethod(target, "checksumImage", checksumImage);
   Nan__SetAsyncableMethod(target, "polygonize", polygonize);
+  Nan__SetAsyncableMethod(target, "_acquireLocks", _acquireLocks);
 }
 
 /**
@@ -526,4 +527,32 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
+
+// This is used for stress-testing the locking mechanism
+// it doesn't do anything but sollicit locks
+GDAL_ASYNCABLE_DEFINE(Algorithms::_acquireLocks) {
+  Nan::HandleScope scope;
+  Dataset *ds1, *ds2, *ds3;
+
+  NODE_ARG_WRAPPED(0, "ds1", Dataset, ds1);
+  NODE_ARG_WRAPPED(1, "ds2", Dataset, ds2);
+  NODE_ARG_WRAPPED(2, "ds3", Dataset, ds3);
+
+  long ds1_uid = ds1->uid;
+  long ds2_uid = ds2->uid;
+  long ds3_uid = ds3->uid;
+  GDALAsyncableJob<int> job;
+  job.persist({ds1->handle(), ds2->handle(), ds3->handle()});
+  job.main = [ds1_uid, ds2_uid, ds3_uid](const GDALExecutionProgress &) {
+    GDAL_ASYNCABLE_LOCK_MANY(ds1_uid, ds2_uid, ds3_uid);
+    int i, sum = 0;
+    // make sure the optimizer won't surprise us
+    for (i = 0; i < 1e4; i++) sum += i;
+    GDAL_UNLOCK_MANY;
+    return sum;
+  };
+  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
+  job.run(info, async, 3);
+}
+
 } // namespace node_gdal
