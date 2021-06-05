@@ -4,6 +4,7 @@
 #include "../gdal_rasterband.hpp"
 
 #include <sstream>
+#include <thread>
 
 namespace node_gdal {
 
@@ -39,6 +40,7 @@ uv_sem_t *PtrManager::tryLockDataset(long uid) {
       unlock();
       throw "Parent Dataset object has already been destroyed";
     }
+    std::this_thread::yield();
   }
 }
 
@@ -61,22 +63,21 @@ std::vector<uv_sem_t *> PtrManager::tryLockDatasets(std::vector<long> uids) {
       locks.push_back(parent->second->async_lock);
     }
     std::vector<uv_sem_t *> locked;
+    int r;
     for (uv_sem_t *async_lock : locks) {
-      int r = uv_sem_trywait(async_lock);
+      r = uv_sem_trywait(async_lock);
       if (r == 0) {
         locked.push_back(async_lock);
       } else {
         // We failed acquiring one of the locks =>
         // free all acquired locks and start a new cycle
         for (uv_sem_t *lock : locked) { uv_sem_post(lock); }
-        unlock();
-        goto next;
+        break;
       }
     }
     unlock();
-    return locks;
-  next:;
-    //printf("next cycle\n");
+    if (r == 0) return locks;
+    std::this_thread::yield();
   }
 }
 
