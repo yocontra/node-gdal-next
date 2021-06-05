@@ -152,11 +152,11 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
  * If you are coming from `node-gdal-next`
     - Starting with 3.2
         * `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry
-        * `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
     - Starting with 3.3
         * Drop support for linking against a shared GDAL 1.x library
         * Drop support for Ubuntu 16.04 and equivalent, Ubuntu 18.04 is the new baseline target
         * Drop support for Node.js 10.x and 15.x
+        * `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
 
  * If you are coming from `node-gdal`, in addition to all of the above
     - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
