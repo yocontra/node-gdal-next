@@ -1,24 +1,31 @@
-const openDatasets = 20
+const openDatasets = 10 // 10 raster + 10 vector
 const parallelOps = 50
 const probabilityToKeepDataset = 0.85
 const magicOffset = 98500
 const magicData = 75
+const magicString = 'L\'Adour, de son embouchure au confluent avec le gave de Pau'
 
 // Add tests here
 const tests = [
   (slot) => {
-    const dsq = datasets[Math.floor(Math.random() * openDatasets)]
+    const dsq = datasetsRaster[Math.floor(Math.random() * openDatasets)]
     return dsq.then((ds) => ds.bands.getAsync(1))
       .then((band) => band.pixels.readAsync(0, 0, size.x, size.y, staticBuffers[slot]))
       .then((data) => assert(data[magicOffset] === magicData))
   },
   () => {
-    const ds1q = datasets[Math.floor(Math.random() * openDatasets)]
-    const ds2q = datasets[Math.floor(Math.random() * openDatasets)]
-    const ds3q = datasets[Math.floor(Math.random() * openDatasets)]
+    const ds1q = datasetsRaster[Math.floor(Math.random() * openDatasets)]
+    const ds2q = datasetsRaster[Math.floor(Math.random() * openDatasets)]
+    const ds3q = datasetsVector[Math.floor(Math.random() * openDatasets)]
     return Promise.all([ ds1q, ds2q, ds3q ])
       // This is a method that artificially stresses the locking
       .then(([ ds1, ds2, ds3 ]) => gdal._acquireLocksAsync(ds1, ds2, ds3))
+  },
+  () => {
+    const dsq = datasetsVector[Math.floor(Math.random() * openDatasets)]
+    return dsq.then((ds) => ds.layers.getAsync(1))
+      .then((l) => l.features.getAsync(0))
+      .then((f) => assert(f.fields.toObject().texte_arre === magicString))
   }
 ]
 
@@ -27,12 +34,15 @@ const path = require('path')
 const os = require('os')
 const assert = require('assert')
 
-const testFile = path.resolve(__dirname, 'data', 'sample.tif')
 
-const datasets = new Array(openDatasets)
+const testFileRaster = path.resolve(__dirname, 'data', 'sample.tif')
+const testFileVector = path.resolve(__dirname, 'data', 'shp')
+
+const datasetsRaster = new Array(openDatasets)
+const datasetsVector = new Array(openDatasets)
 const operations = new Array(parallelOps)
 
-const size = { x: gdal.open(testFile).rasterSize.x, y: gdal.open(testFile).rasterSize.y }
+const size = { x: gdal.open(testFileRaster).rasterSize.x, y: gdal.open(testFileRaster).rasterSize.y }
 
 // We want to stress node-gdal, not the GC
 const staticBuffers = new Array(parallelOps).fill(new Uint8Array(size.x * size.y))
@@ -53,9 +63,10 @@ process.on('SIGINT', async () => {
 
 function operation(slot) {
   if (Math.random() > probabilityToKeepDataset) {
-    opens++
+    opens += 2
     const ds = Math.floor(Math.random() * openDatasets)
-    datasets[ds] = gdal.openAsync(testFile)
+    datasetsRaster[ds] = gdal.openAsync(testFileRaster)
+    datasetsVector[ds] = gdal.openAsync(testFileVector)
   }
 
   ops++
@@ -69,8 +80,9 @@ function operation(slot) {
 console.log('Hit Ctrl-C to stop')
 
 for (let i = 0; i < openDatasets; i++) {
-  opens++
-  datasets[i] = gdal.openAsync(testFile)
+  opens += 2
+  datasetsRaster[i] = gdal.openAsync(testFileRaster)
+  datasetsVector[i] = gdal.openAsync(testFileVector)
 }
 const cpuUserStart = os.cpus().map((cpu) => cpu.times.user).reduce((a, x) => a + x, 0)
 const cpuIdleStart = os.cpus().map((cpu) => cpu.times.idle).reduce((a, x) => a + x, 0)
