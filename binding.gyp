@@ -3,10 +3,8 @@
 		"shared_gdal%": "false",
 		"runtime_link%": "shared",
 		"enable_logging%": "false",
-		"debug_extra_ccflags_cc": ["-fprofile-arcs", "-ftest-coverage" ],
-		"debug_extra_ldflags" : ["-lgcov", "--coverage" ],
-		#"debug_extra_ccflags_cc": ["-fprofile-arcs", "-ftest-coverage", "-fsanitize=address" ],
-		#"debug_extra_ldflags" : ["-lgcov", "--coverage", "-fsanitize=address" ],
+		"enable_asan%": "false",
+		"enable_coverage%": "false",
 		"sources_node_gdal": [
 				"src/utils/typed_array.cpp",
 				"src/utils/string_list.cpp",
@@ -19,6 +17,10 @@
 				"src/gdal_dataset.cpp",
 				"src/gdal_driver.cpp",
 				"src/gdal_rasterband.cpp",
+				"src/gdal_group.cpp",
+				"src/gdal_mdarray.cpp",
+				"src/gdal_dimension.cpp",
+				"src/gdal_attribute.cpp",
 				"src/gdal_majorobject.cpp",
 				"src/gdal_feature.cpp",
 				"src/gdal_feature_defn.cpp",
@@ -46,6 +48,12 @@
 				"src/collections/dataset_layers.cpp",
 				"src/collections/layer_features.cpp",
 				"src/collections/layer_fields.cpp",
+				"src/collections/group_groups.cpp",
+				"src/collections/group_arrays.cpp",
+				"src/collections/group_attributes.cpp",
+				"src/collections/group_dimensions.cpp",
+				"src/collections/array_dimensions.cpp",
+				"src/collections/array_attributes.cpp",
 				"src/collections/feature_fields.cpp",
 				"src/collections/feature_defn_fields.cpp",
 				"src/collections/geometry_collection_children.cpp",
@@ -57,6 +65,20 @@
 				"src/collections/gdal_drivers.cpp"
 			]
 	},
+	"conditions": [
+		["enable_asan == 'true'", {
+			"variables": {
+				"debug_extra_ccflags_cc": [ "-fsanitize=address" ],
+				"debug_extra_ldflags" : [ "-fsanitize=address" ]
+			},
+		}],
+		["enable_coverage == 'true'", {
+			"variables": {
+				"debug_extra_ccflags_cc": [ "-fprofile-arcs", "-ftest-coverage" ],
+				"debug_extra_ldflags" : [ "-lgcov", "--coverage" ],
+			},
+		}],
+	],
 	"targets": [
 		{
 			"target_name": "gdal",

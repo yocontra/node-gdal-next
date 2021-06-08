@@ -61,6 +61,8 @@
     "test:u20": "npm run container dev ubuntu:20.04 14 shared",
     "test:u20n16": "npm run container dev ubuntu:20.04 16 shared",
     "test:c8": "npm run container dev centos:8 14 shared",
+    "test:arch": "npm run container dev archlinux:latest 16 shared",
+    "test:f33": "npm run container dev fedora:33 14 shared",
     "test:shared": "npm run test:u18 && npm run test:u20 && npm run test:c8",
     "test:clean": "rimraf test/data/*.tmp* test/data/temp/*",
     "test:stress": "node test/stress"

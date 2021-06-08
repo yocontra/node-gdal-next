@@ -16,7 +16,7 @@
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> Layer::constructor;
-ObjectCache<OGRLayer, Layer> Layer::cache;
+ObjectCache<OGRLayer *, Layer> Layer::cache;
 
 void Layer::Initialize(Local<Object> target) {
   Nan::HandleScope scope;

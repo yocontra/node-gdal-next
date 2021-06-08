@@ -9,7 +9,7 @@
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> Driver::constructor;
-ObjectCache<GDALDriver, Driver> Driver::cache;
+ObjectCache<GDALDriver *, Driver> Driver::cache;
 
 void Driver::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -285,7 +285,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return; // error parsing string list
   }
 
-  uv_sem_t *async_lock = nullptr;
+  std::shared_ptr<uv_sem_t> async_lock = nullptr;
   try {
     async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
   } catch (const char *err) {
@@ -300,7 +300,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   job.main = [raw, filename, raw_ds, strict, options, async_lock](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
-    uv_sem_post(async_lock);
+    uv_sem_post(async_lock.get());
     if (!ds) CPLGetLastErrorMsg();
     return ds;
   };

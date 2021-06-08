@@ -73,7 +73,7 @@ class SpatialReference : public Nan::ObjectWrap {
   static NAN_METHOD(fromURL);
   static NAN_METHOD(fromMICoordSys);
 
-  static ObjectCache<OGRSpatialReference, SpatialReference> cache;
+  static ObjectCache<OGRSpatialReference *, SpatialReference> cache;
 
   SpatialReference();
   SpatialReference(OGRSpatialReference *srs);

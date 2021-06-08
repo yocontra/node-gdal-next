@@ -1,4 +1,3 @@
-
 #ifndef __GDAL_COMMON_H__
 #define __GDAL_COMMON_H__
 
@@ -69,6 +68,20 @@ template <typename T> struct array_deleter {
   }
 };
 
+template <typename INPUT, typename RETURN>
+std::shared_ptr<RETURN> NumberArrayToSharedPtr(Local<Array> array, size_t count = 0) {
+  if (array.IsEmpty()) return nullptr;
+  if (count != 0 && array->Length() != count) throw "Array size must match the number of dimensions";
+  std::shared_ptr<RETURN> ptr(new RETURN[array->Length()], array_deleter<RETURN>());
+  for (unsigned i = 0; i < array->Length(); i++) {
+    Local<Value> val = Nan::Get(array, i).ToLocalChecked();
+    if (!val->IsNumber()) throw "Array must contain only numbers";
+    ptr.get()[i] = static_cast<RETURN>(Nan::To<INPUT>(val).ToChecked());
+  }
+
+  return ptr;
+}
+
 #define NODE_THROW_LAST_CPLERR Nan::ThrowError(CPLGetLastErrorMsg())
 
 #define NODE_THROW_OGRERR(err) Nan::ThrowError(getOGRErrMsg(err))
@@ -90,6 +103,20 @@ NAN_SETTER(READ_ONLY_SETTER);
 #define Nan__SetPrototypeAsyncableMethod(lcons, name, method)                                                          \
   Nan::SetPrototypeMethod(lcons, name, method);                                                                        \
   Nan::SetPrototypeMethod(lcons, name "Async", method##Async)
+
+#define NODE_UNWRAP_CHECK(type, obj, var)                                                                              \
+  type *var = Nan::ObjectWrap::Unwrap<type>(obj);                                                                      \
+  if (!var->isAlive()) {                                                                                               \
+    Nan::ThrowError(#type " object has already been destroyed");                                                       \
+    return;                                                                                                            \
+  }
+
+#define GDAL_RAW_CHECK(type, obj, var)                                                                                 \
+  type var = obj->get();                                                                                               \
+  if (!obj) {                                                                                                          \
+    Nan::ThrowError("Attribute object has already been destroyed");                                                    \
+    return;                                                                                                            \
+  }
 
 // ----- object property conversion -------
 
@@ -136,6 +163,34 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     var = *Nan::Utf8String(val);                                                                                       \
+  }
+
+#define NODE_ARRAY_FROM_OBJ(obj, key, var)                                                                             \
+  {                                                                                                                    \
+    Local<String> sym = Nan::New(key).ToLocalChecked();                                                                \
+    if (!Nan::HasOwnProperty(obj, sym).FromMaybe(false)) {                                                             \
+      Nan::ThrowError("Object must contain property \"" key "\"");                                                     \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    Local<Value> val = Nan::Get(obj, sym).ToLocalChecked();                                                            \
+    if (!val->IsArray()) {                                                                                             \
+      Nan::ThrowTypeError("Property \"" key "\" must be an array");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    var = val.As<Array>();                                                                                             \
+  }
+
+#define NODE_ARRAY_FROM_OBJ_OPT(obj, key, var)                                                                         \
+  {                                                                                                                    \
+    Local<String> sym = Nan::New(key).ToLocalChecked();                                                                \
+    if (Nan::HasOwnProperty(obj, sym).FromMaybe(false)) {                                                              \
+      Local<Value> val = Nan::Get(obj, sym).ToLocalChecked();                                                          \
+      if (!val->IsArray()) {                                                                                           \
+        Nan::ThrowTypeError("Property \"" key "\" must be an array");                                                  \
+        return;                                                                                                        \
+      }                                                                                                                \
+      var = val.As<Array>();                                                                                           \
+    }                                                                                                                  \
   }
 
 #define NODE_WRAPPED_FROM_OBJ(obj, key, type, var)                                                                     \
@@ -198,6 +253,19 @@ NAN_SETTER(READ_ONLY_SETTER);
         return;                                                                                                        \
       }                                                                                                                \
       var = Nan::To<int32_t>(val).ToChecked();                                                                         \
+    }                                                                                                                  \
+  }
+
+#define NODE_INT64_FROM_OBJ_OPT(obj, key, var)                                                                         \
+  {                                                                                                                    \
+    Local<String> sym = Nan::New(key).ToLocalChecked();                                                                \
+    if (Nan::HasOwnProperty(obj, sym).FromMaybe(false)) {                                                              \
+      Local<Value> val = Nan::Get(obj, sym).ToLocalChecked();                                                          \
+      if (!val->IsNumber()) {                                                                                          \
+        Nan::ThrowTypeError("Property \"" key "\" must be a number");                                                  \
+        return;                                                                                                        \
+      }                                                                                                                \
+      var = Nan::To<int64_t>(val).ToChecked();                                                                         \
     }                                                                                                                  \
   }
 
@@ -340,6 +408,23 @@ NAN_SETTER(READ_ONLY_SETTER);
     return;                                                                                                            \
   }                                                                                                                    \
   var = (*Nan::Utf8String(info[num]))
+
+#define NODE_ARG_STR_INT(num, name, varString, varInt, isString)                                                       \
+  bool isString = false;                                                                                               \
+  if (info.Length() < num + 1) {                                                                                       \
+    Nan::ThrowError(name " must be given");                                                                            \
+    return;                                                                                                            \
+  }                                                                                                                    \
+  if (info[num]->IsString()) {                                                                                         \
+    varString = (*Nan::Utf8String(info[num]));                                                                         \
+    isString = true;                                                                                                   \
+  } else if (info[num]->IsNumber()) {                                                                                  \
+    varInt = static_cast<int>(Nan::To<int64_t>(info[num]).ToChecked());                                                \
+    isString = false;                                                                                                  \
+  } else {                                                                                                             \
+    Nan::ThrowTypeError(name " must be a string or a number");                                                         \
+    return;                                                                                                            \
+  }
 
 #define NODE_ARG_BUFFER(num, name, var)                                                                                \
   if (info.Length() < num + 1) {                                                                                       \
@@ -548,6 +633,36 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     info.GetReturnValue().Set(Nan::New<result_type>(obj->this_->wrapped_method(param)));                               \
+  }
+
+// ----- wrapped getter w/ lock -------
+
+#define NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(klass, method, wrapped_method)                                          \
+  NAN_GETTER(klass::method) {                                                                                          \
+    Nan::HandleScope scope;                                                                                            \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    auto r = obj->this_->wrapped_method();                                                                             \
+    GDAL_UNLOCK_PARENT;                                                                                                \
+    info.GetReturnValue().Set(SafeString::New(r.c_str()));                                                             \
+  }
+
+#define NODE_WRAPPED_GETTER_WITH_RESULT_LOCKED(klass, method, result_type, wrapped_method)                             \
+  NAN_GETTER(klass::method) {                                                                                          \
+    Nan::HandleScope scope;                                                                                            \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    auto r = obj->this_->wrapped_method();                                                                             \
+    GDAL_UNLOCK_PARENT;                                                                                                \
+    info.GetReturnValue().Set(Nan::New<result_type>(r));                                                               \
   }
 
 // ----- wrapped asyncable methods-------

@@ -6,7 +6,7 @@
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> SpatialReference::constructor;
-ObjectCache<OGRSpatialReference, SpatialReference> SpatialReference::cache;
+ObjectCache<OGRSpatialReference *, SpatialReference> SpatialReference::cache;
 
 void SpatialReference::Initialize(Local<Object> target) {
   Nan::HandleScope scope;

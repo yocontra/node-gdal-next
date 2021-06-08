@@ -10,7 +10,7 @@ Read and write raster and vector geospatial datasets straight from [Node.js](htt
 
 When in doubt on how to use a method, check also the [unit tests](https://github.com/mmomtchev/node-gdal-async/tree/master/test).
 
-# Fork Notes
+# Fork notes
 
 This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal>.
 
@@ -20,6 +20,7 @@ It adds a number of features:
 - **Full native TypeScript support** with autocompletion in IDEs that support it (since 3.1)
 - **Built-in networking support** with native support for cloud services (since 3.2)
 - **scijs/ndarray integration** with zero-copy I/O (will appear in 3.3)
+- **Read-only support for the new Multidimensional Raster Data Model of GDAL 3.1** (will appear in 3.3)
 - Support for curve geometries (since 3.1)
 - Progress callbacks (since 3.2)
 - Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (will appear in 3.3)
@@ -46,7 +47,7 @@ By default all dependencies are the latest versions and bundled out of the box, 
 $ npm install gdal-async --build-from-source --shared_gdal  
 ```
 
-## Sample Usage
+## Sample usage
 
 ### Synchronous
 
@@ -202,7 +203,7 @@ This binding was originally the product of a collaboration between [Natural Atla
 
 node-gdal-next is maintained by [@contra](https://github.com/contra).
 
-The async bindings, the curve geometries, the TypeScript support and the built-in networking are by [@mmomtchev](https://github.com/mmomtchev) who is the current maintainer.
+The async bindings, the curve geometries, the TypeScript support, the built-in networking and the multidimensional raster model are by [@mmomtchev](https://github.com/mmomtchev) who is the current maintainer.
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
 

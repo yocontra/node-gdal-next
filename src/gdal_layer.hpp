@@ -45,7 +45,7 @@ class Layer : public Nan::ObjectWrap {
   static NAN_GETTER(geomTypeGetter);
   static NAN_GETTER(uidGetter);
 
-  static ObjectCache<OGRLayer, Layer> cache;
+  static ObjectCache<OGRLayer *, Layer> cache;
 
   Layer();
   Layer(OGRLayer *ds);

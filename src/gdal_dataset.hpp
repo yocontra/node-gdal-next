@@ -31,7 +31,7 @@ class Dataset : public Nan::ObjectWrap {
   static Nan::Persistent<FunctionTemplate> constructor;
   static void Initialize(Local<Object> target);
   static NAN_METHOD(New);
-  static Local<Value> New(GDALDataset *ds);
+  static Local<Value> New(GDALDataset *ds, GDALDataset *parent = nullptr);
   static NAN_METHOD(toString);
   GDAL_ASYNCABLE_DECLARE(flush);
   static NAN_METHOD(getMetadata);
@@ -51,12 +51,13 @@ class Dataset : public Nan::ObjectWrap {
   static NAN_GETTER(geoTransformGetter);
   static NAN_GETTER(descriptionGetter);
   static NAN_GETTER(layersGetter);
+  static NAN_GETTER(rootGetter);
   static NAN_GETTER(uidGetter);
 
   static NAN_SETTER(srsSetter);
   static NAN_SETTER(geoTransformSetter);
 
-  static ObjectCache<GDALDataset, Dataset> dataset_cache;
+  static ObjectCache<GDALDataset *, Dataset> dataset_cache;
 
   Dataset(GDALDataset *ds);
   inline GDALDataset *getDataset() {
@@ -65,16 +66,18 @@ class Dataset : public Nan::ObjectWrap {
 
   void dispose();
   long uid;
+  long parent_uid;
 
   inline bool isAlive() {
     return this_dataset && ptr_manager.isAlive(uid);
   }
 
-  uv_sem_t *async_lock;
+  std::shared_ptr<uv_sem_t> async_lock;
 
     private:
   ~Dataset();
   GDALDataset *this_dataset;
+  GDALDataset *parent_ds;
 };
 
 } // namespace node_gdal

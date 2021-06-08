@@ -28,6 +28,9 @@ class RasterBand : public Nan::ObjectWrap {
   static NAN_METHOD(toString);
   GDAL_ASYNCABLE_DECLARE(flush);
   GDAL_ASYNCABLE_DECLARE(fill);
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+  static NAN_METHOD(asMDArray);
+#endif
   static NAN_METHOD(getStatistics);
   static NAN_METHOD(computeStatistics);
   static NAN_METHOD(setStatistics);
@@ -72,7 +75,7 @@ class RasterBand : public Nan::ObjectWrap {
   static NAN_SETTER(categoryNamesSetter);
   static NAN_SETTER(colorInterpretationSetter);
 
-  static ObjectCache<GDALRasterBand, RasterBand> cache;
+  static ObjectCache<GDALRasterBand *, RasterBand> cache;
 
   RasterBand();
   RasterBand(GDALRasterBand *band);

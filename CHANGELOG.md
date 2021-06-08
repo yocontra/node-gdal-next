@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
   - GDAL 3.3.0
+  - Read-only support of the new Multidimensional Raster Data Model introduced in GDAL 3.1, requires GDAL >= 3.1
   - NetCDF, GRIB, HDF5, Carto, FlatGeobuf, WMS, WMTS and WCS drivers
   - Support generalized strides in `gdal.RasterBandPixels.{write|read}()`
   - Add `gdal.RasterBandPixels.{set|get}Async()`

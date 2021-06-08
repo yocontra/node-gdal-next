@@ -7,7 +7,13 @@
       "label": "Build Debug",
       "type": "shell",
       "command": "node-pre-gyp configure --debug && node-pre-gyp build -j max --debug",
-      "problemMatcher": [],
+      "problemMatcher": {
+        "base": "$gcc",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/build"
+        ]
+      },
       "group": {
         "kind": "build",
         "isDefault": true

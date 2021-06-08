@@ -8,7 +8,7 @@ ENV USER=root
 
 RUN \
   pacman --noconfirm -Sy && \
-  pacman --noconfirm -Sy base-devel git && \
+  pacman --noconfirm -Sy base-devel git rsync && \
   pacman --noconfirm -Sy nodejs npm
 
 RUN if [ "${GDAL}" = "shared" ]; then pacman --noconfirm -Sy gdal; fi

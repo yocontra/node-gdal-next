@@ -32,9 +32,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install --ignore-scripts
-    - run: npx @mapbox/node-pre-gyp configure --debug
+    - run: npx @mapbox/node-pre-gyp configure --debug --enable_coverage
     - name: Build from sources
-      run: npx @mapbox/node-pre-gyp build -j max --debug
+      run: npx @mapbox/node-pre-gyp build -j max --debug --enable_coverage
     - name: Run unit tests
       run: npm test
       env:

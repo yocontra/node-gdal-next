@@ -55,6 +55,10 @@
 #include "gdal_dataset.hpp"
 #include "gdal_driver.hpp"
 #include "gdal_rasterband.hpp"
+#include "gdal_group.hpp"
+#include "gdal_mdarray.hpp"
+#include "gdal_dimension.hpp"
+#include "gdal_attribute.hpp"
 #include "gdal_warper.hpp"
 
 #include "gdal_coordinate_transformation.hpp"
@@ -83,6 +87,12 @@
 // collections
 #include "collections/dataset_bands.hpp"
 #include "collections/dataset_layers.hpp"
+#include "collections/group_groups.hpp"
+#include "collections/group_arrays.hpp"
+#include "collections/group_dimensions.hpp"
+#include "collections/group_attributes.hpp"
+#include "collections/array_dimensions.hpp"
+#include "collections/array_attributes.hpp"
 #include "collections/feature_defn_fields.hpp"
 #include "collections/feature_fields.hpp"
 #include "collections/gdal_drivers.hpp"
@@ -229,13 +239,22 @@ GDAL_ASYNCABLE_DEFINE(gdal_open) {
   NODE_ARG_OPT_STR(1, "mode", mode);
 
   unsigned int flags = 0;
-  if (mode == "r+") {
-    flags |= GDAL_OF_UPDATE;
-  } else if (mode == "r") {
-    flags |= GDAL_OF_READONLY;
-  } else {
-    Nan::ThrowError("Invalid open mode. Must be \"r\" or \"r+\"");
-    return;
+  for (unsigned i = 0; i < mode.length(); i++) {
+    if (mode[i] == 'r') {
+      if (i < mode.length() - 1 && mode[i + 1] == '+') {
+        flags |= GDAL_OF_UPDATE;
+        i++;
+      } else {
+        flags |= GDAL_OF_READONLY;
+      }
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+    } else if (mode[i] == 'm') {
+      flags |= GDAL_OF_MULTIDIM_RASTER;
+#endif
+    } else {
+      Nan::ThrowError("Invalid open mode. Must contain only \"r\" or \"r+\" and \"m\" ");
+      return;
+    }
   }
   flags |= GDAL_OF_VERBOSE_ERROR;
 
@@ -377,6 +396,12 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Driver::Initialize(target);
   Dataset::Initialize(target);
   RasterBand::Initialize(target);
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+  Group::Initialize(target);
+  MDArray::Initialize(target);
+  Dimension::Initialize(target);
+  Attribute::Initialize(target);
+#endif
 
   Layer::Initialize(target);
   Feature::Initialize(target);
@@ -401,6 +426,14 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
   DatasetBands::Initialize(target);
   DatasetLayers::Initialize(target);
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+  GroupGroups::Initialize(target);
+  GroupArrays::Initialize(target);
+  GroupDimensions::Initialize(target);
+  GroupAttributes::Initialize(target);
+  ArrayDimensions::Initialize(target);
+  ArrayAttributes::Initialize(target);
+#endif
   LayerFeatures::Initialize(target);
   FeatureFields::Initialize(target);
   LayerFields::Initialize(target);
@@ -855,6 +888,24 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    */
   Nan::Set(
     target, Nan::New("GDT_CFloat64").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_CFloat64)).ToLocalChecked());
+
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+  /**
+   * String extended type for MDArrays (GDAL >= 3.1)
+   * @final
+   * @property gdal.GEDTC_String 
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("GEDTC_String").ToLocalChecked(), Nan::New("String").ToLocalChecked());
+
+  /**
+   * String extended type for MDArrays (GDAL >= 3.1)
+   * @final
+   * @property gdal.GEDTC_Compound
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("GEDTC_Compound").ToLocalChecked(), Nan::New("Compound").ToLocalChecked());
+#endif
 
   /**
    * @class Constants (OJ)
@@ -1384,6 +1435,113 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_Mode").ToLocalChecked(), Nan::New("Mode").ToLocalChecked());
+
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+  /**
+   * Dimension types for gdal.Dimension (GDAL >= 3.3)
+   *
+   * @class Constants (DIM)
+   */
+
+  /**
+   * @final
+   * @property gdal.DIM_HORIZONTAL_X
+   * @type {string}
+   */
+  Nan::Set(
+    target, Nan::New("DIM_HORIZONTAL_X").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_HORIZONTAL_X).ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIM_HORIZONTAL_Y
+   * @type {string}
+   */
+  Nan::Set(
+    target, Nan::New("DIM_HORIZONTAL_Y").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_HORIZONTAL_Y).ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIM_VERTICAL
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIM_VERTICAL").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_VERTICAL).ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIM_TEMPORAL
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIM_TEMPORAL").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_TEMPORAL).ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIM_PARAMETRIC
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIM_PARAMETRIC").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_PARAMETRIC).ToLocalChecked());
+#endif
+
+  /**
+   * Direction types for gdal.Dimension (GDAL >= 3.3)
+   *
+   * @class Constants (DIR)
+   */
+
+  /**
+   * @final
+   * @property gdal.DIR_EAST
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_EAST").ToLocalChecked(), Nan::New("EAST").ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIR_WEST
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_WEST").ToLocalChecked(), Nan::New("WEST").ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIR_SOUTH
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_SOUTH").ToLocalChecked(), Nan::New("SOUTH").ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIR_NORTH
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_NORTH").ToLocalChecked(), Nan::New("NORTH").ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIR_UP
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_UP").ToLocalChecked(), Nan::New("UP").ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIR_DOWN
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_DOWN").ToLocalChecked(), Nan::New("DOWN").ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIR_FUTURE
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_FUTURE").ToLocalChecked(), Nan::New("FUTURE").ToLocalChecked());
+
+  /**
+   * @final
+   * @property gdal.DIR_PAST
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("DIR_PAST").ToLocalChecked(), Nan::New("PAST").ToLocalChecked());
 
   /**
    * GDAL version (not the binding version)

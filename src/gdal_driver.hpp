@@ -41,7 +41,7 @@ class Driver : public Nan::ObjectWrap {
   GDAL_ASYNCABLE_DECLARE(copyFiles);
   static NAN_METHOD(getMetadata);
 
-  static ObjectCache<GDALDriver, Driver> cache;
+  static ObjectCache<GDALDriver *, Driver> cache;
 
   static NAN_GETTER(descriptionGetter);
 

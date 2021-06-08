@@ -224,7 +224,7 @@ inline GDALRIOResampleAlg parseResamplingAlg(Local<Value> value) {
 }
 
 /* Find the lowest possible element index for the given width, height, pixel_space, line_space and offset */
-inline int findLowest(int w, int h, int px, int ln, int offset) {
+static inline int findLowest(int w, int h, int px, int ln, int offset) {
   int x, y;
 
   if (px < 0)
@@ -241,7 +241,7 @@ inline int findLowest(int w, int h, int px, int ln, int offset) {
 }
 
 /* Find the highest possible element index for the given width, height, pixel_space, line_space and offset */
-inline int findHighest(int w, int h, int px, int ln, int offset) {
+static inline int findHighest(int w, int h, int px, int ln, int offset) {
   int x, y;
 
   if (px < 0)
@@ -274,8 +274,7 @@ inline int findHighest(int w, int h, int px, int ln, int offset) {
  * @param {ReadOptions} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
- * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
- * constants{{/crossLink}}.
+ * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT constants{{/crossLink}}.
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
  * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
@@ -296,8 +295,7 @@ inline int findHighest(int w, int h, int px, int ln, int offset) {
  * @param {ReadOptions} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
- * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT
- * constants{{/crossLink}}.
+ * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT constants{{/crossLink}}.
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
  * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})

@@ -18,30 +18,32 @@
 #include <map>
 
 using namespace v8;
+using namespace std;
 
-struct PtrManagerDatasetItem;
-struct PtrManagerLayerItem {
+template <typename GDALPTR> struct PtrManagerItem {
   long uid;
-  PtrManagerDatasetItem *parent;
+  shared_ptr<PtrManagerItem<GDALDataset *>> parent;
+  GDALPTR ptr;
+};
+
+template <> struct PtrManagerItem<OGRLayer *> {
+  long uid;
+  shared_ptr<PtrManagerItem<GDALDataset *>> parent;
   OGRLayer *ptr;
   bool is_result_set;
 };
-
-struct PtrManagerRasterBandItem {
+template <> struct PtrManagerItem<GDALDataset *> {
   long uid;
-  PtrManagerDatasetItem *parent;
-  GDALRasterBand *ptr;
-};
-
-struct PtrManagerDatasetItem {
-  long uid;
-  std::list<PtrManagerLayerItem *> layers;
-  std::list<PtrManagerRasterBandItem *> bands;
+  list<long> children;
   GDALDataset *ptr;
-  uv_sem_t *async_lock;
+  shared_ptr<uv_sem_t> async_lock;
 };
 
 namespace node_gdal {
+
+struct uv_sem_deleter {
+  void operator()(uv_sem_t *p);
+};
 
 // A class for cleaning up GDAL objects that depend on open datasets
 
@@ -65,15 +67,17 @@ namespace node_gdal {
 // - Multiple datasets are to be locked with tryLockDatasets which sorts locks
 //
 
+template <typename GDALPTR> using uidmap = map<long, shared_ptr<PtrManagerItem<GDALPTR>>>;
 class PtrManager {
     public:
-  long add(GDALDataset *ptr, uv_sem_t *async_lock);
-  long add(GDALRasterBand *ptr, long parent_uid);
+  template <typename GDALPTR> long add(GDALPTR ptr, long parent_uid);
   long add(OGRLayer *ptr, long parent_uid, bool is_result_set);
+  long add(GDALDataset *ptr, shared_ptr<uv_sem_t> async_lock);
+
   void dispose(long uid);
   bool isAlive(long uid);
-  uv_sem_t *tryLockDataset(long uid);
-  std::vector<uv_sem_t *> tryLockDatasets(std::vector<long> uids);
+  shared_ptr<uv_sem_t> tryLockDataset(long uid);
+  vector<shared_ptr<uv_sem_t>> tryLockDatasets(vector<long> uids);
   inline void lock();
   inline void unlock();
 
@@ -83,12 +87,22 @@ class PtrManager {
     private:
   long uid;
   uv_mutex_t master_lock;
-  void dispose(PtrManagerLayerItem *item);
-  void dispose(PtrManagerRasterBandItem *item);
-  void dispose(PtrManagerDatasetItem *item);
-  std::map<long, PtrManagerLayerItem *> layers;
-  std::map<long, PtrManagerRasterBandItem *> bands;
-  std::map<long, PtrManagerDatasetItem *> datasets;
+  template <typename GDALPTR> void dispose(shared_ptr<PtrManagerItem<GDALPTR>> item);
+
+  // this is a manual implementation of member overloading which does not exist in C++
+  template <typename GDALPTR> inline constexpr uidmap<GDALPTR> &getUidMap();
+
+  template <typename GDALPTR> inline void erase(GDALPTR item);
+
+  uidmap<OGRLayer *> layers;
+  uidmap<GDALRasterBand *> bands;
+  uidmap<GDALDataset *> datasets;
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+  uidmap<shared_ptr<GDALGroup>> groups;
+  uidmap<shared_ptr<GDALMDArray>> arrays;
+  uidmap<shared_ptr<GDALDimension>> dimensions;
+  uidmap<shared_ptr<GDALAttribute>> attributes;
+#endif
 };
 
 } // namespace node_gdal
