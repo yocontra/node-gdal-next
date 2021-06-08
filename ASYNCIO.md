@@ -1,4 +1,6 @@
-# A note on async I/O parallelism and the event loop
+# Notes on async I/O parallelism and the event loop
+
+Common pitfalls to avoid when writing server code
 
 ## Mixing of synchronous and asynchronous operations
 
@@ -7,8 +9,9 @@ Consider the following `async` code:
 const ds = await gdal.openAsync('4bands.tif')
 const band1 = await ds.bands.getAsync(1)
 const band2 = await ds.bands.getAsync(2)
-const data1 = await band1.pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y)
-const data2 = await band2.pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+const data1 = band1.pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+const data2 = band2.pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+await Promise.all([ data1, data2 ])
 ```
 
 As this code uses only async operations, one could expect that it will never block the event loop. In fact, it is a very dangerous code to put in a multi-user server as depending on the exact order of execution, the first asynchronous read could lock the dataset before that second one has had the chance to start. In this case, accessing `ds.rasterSize` will be a blocking operation that will have to wait for the first read to complete. As this is a synchronous operation, this will have the effect of completely blocking the event loop until the first read is finished.
