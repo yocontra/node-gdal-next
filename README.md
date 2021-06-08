@@ -81,10 +81,13 @@ console.log("srs: " + (layer.srs ? layer.srs.toWKT() : 'null'))
 
 Mixing of synchronous and asynchronous operations is supported.
 
-#### Safe mixing of asynchronous operations
+#### Mixing of synchronous and asynchronous operations
 
 Simultaneous operations on distinct dataset objects are always safe and can run it parallel.
-Simultaneous operations on the same dataset object should be safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node.js/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time.
+
+Simultaneous operations on the same dataset object are safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node.js/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time. Take a look at `ASYNCIO.md` which explains this in detail.
+
+Also be particularly careful when mixing synchronous and asynchronous operations in server code. If a GDAL operation is running in the background for any given Dataset, all synchronous operations on that same Dataset on the main thread will block the event loop until the background operation is finished. **This includes synchronous getters and setters that might otherwise be instantaneous.**. It is recommended to retrieve all values such as raster size or no data value or spatial reference **before** starting any I/O operations.
 
 **Does not support `worker_threads` yet**
 
