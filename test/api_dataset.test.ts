@@ -47,9 +47,7 @@ describe('gdal.Dataset', () => {
         it('should be 0 for vector datasets', () => {
           const arr = []
           for (let i = 0; i < 10000; i++) arr.push(i)
-          console.log('before')
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-          console.log('after')
           assert.equal(ds.bands.count(), 0)
         })
         it('should throw if dataset is closed', () => {
@@ -68,9 +66,7 @@ describe('gdal.Dataset', () => {
         it('should be 0 for vector datasets', () => {
           const arr = []
           for (let i = 0; i < 10000; i++) arr.push(i)
-          console.log('before')
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-          console.log('after')
           assert.becomes(ds.bands.countAsync(), 0)
         })
         it('should throw if dataset is closed', () => {
