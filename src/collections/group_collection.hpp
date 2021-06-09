@@ -128,7 +128,7 @@ class GroupCollection : public Nan::ObjectWrap {
       if (r == nullptr) throw "Invalid element";
       return r;
     };
-    job.rval = [&raw, &gdal_ds](std::shared_ptr<GDALOBJ> r, GetFromPersistentFunc) { return NODEOBJ::New(r, gdal_ds); };
+    job.rval = [gdal_ds](std::shared_ptr<GDALOBJ> r, GetFromPersistentFunc) { return NODEOBJ::New(r, gdal_ds); };
     job.run(info, async, 1);
   }
 
