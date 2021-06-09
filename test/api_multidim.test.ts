@@ -70,11 +70,20 @@ describe('gdal', () => {
 
       // These two must wait before executing the after hook which destroys the ds
       // (otherwise they become an excellent dangling pointer handling test)
-      it('should have "countAsync()" method', (done) => {
-        assert.eventually.equal(ds.root.arrays.countAsync(), 4).then(done)
+      // Mocha has some weird behavior in this case
+      it('should have "countAsync()" method', () => {
+        const ds = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr')
+        return assert.eventually.equal(ds.root.arrays.countAsync().then((r) => {
+          ds.close()
+          return r
+        }), 4)
       })
-      it('should have "getAsync()" method', (done) => {
-        assert.eventually.instanceOf(ds.root.arrays.getAsync('time'), gdal.MDArray).then(done)
+      it('should have "getAsync()" method', () => {
+        const ds = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr')
+        return assert.eventually.instanceOf(ds.root.arrays.getAsync('time').then((r) => {
+          ds.close()
+          return r
+        }), gdal.MDArray)
       })
 
       it('should be Iterable', () => {
