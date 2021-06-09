@@ -50,7 +50,7 @@ describe('Open', () => {
     )
   })
 
-  describe('vsigzip/vsicurl chaining', () => {
+  describe('vsigzip/vsicurl chaining w/Net', () => {
     let ds: gdal.Dataset
 
     after(() => ds && ds.close())
