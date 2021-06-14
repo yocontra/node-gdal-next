@@ -511,11 +511,13 @@ describe('gdal.RasterBandAsync', () => {
       it('should set all pixels to given value', () => {
         const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
         const band = ds.bands.get(1)
-        band.fillAsync(5)
-        const data = band.pixels.read(0, 0, 16, 16)
-        for (let i = 0; i < data.length; i++) {
-          assert.equal(data[i], 5)
-        }
+        const q = band.fillAsync(5)
+        return assert.isFulfilled(q.then(() => {
+          const data = band.pixels.read(0, 0, 16, 16)
+          for (let i = 0; i < data.length; i++) {
+            assert.equal(data[i], 5)
+          }
+        }))
       })
       it('should reject if dataset already closed', () => {
         const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
