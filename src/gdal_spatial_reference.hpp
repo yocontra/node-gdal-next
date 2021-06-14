@@ -9,7 +9,6 @@
 #include "nan-wrapper.h"
 
 // ogr
-#include "utils/obj_cache.hpp"
 #include <ogrsf_frmts.h>
 
 using namespace v8;
@@ -73,8 +72,6 @@ class SpatialReference : public Nan::ObjectWrap {
   static NAN_METHOD(fromURL);
   static NAN_METHOD(fromMICoordSys);
 
-  static ObjectCache<OGRSpatialReference *, SpatialReference> cache;
-
   SpatialReference();
   SpatialReference(OGRSpatialReference *srs);
   inline OGRSpatialReference *get() {
@@ -84,6 +81,7 @@ class SpatialReference : public Nan::ObjectWrap {
     return this_;
   }
   void dispose();
+  long uid;
 
     private:
   ~SpatialReference();

@@ -15,7 +15,6 @@ namespace node_gdal {
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
 
 Nan::Persistent<FunctionTemplate> MDArray::constructor;
-ObjectCache<std::shared_ptr<GDALMDArray>, MDArray> MDArray::array_cache;
 
 void MDArray::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -47,8 +46,8 @@ void MDArray::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-MDArray::MDArray(std::shared_ptr<GDALMDArray> ds) : Nan::ObjectWrap(), uid(0), this_(ds) {
-  LOG("Created MDArray [%p]", ds);
+MDArray::MDArray(std::shared_ptr<GDALMDArray> md) : Nan::ObjectWrap(), uid(0), this_(md) {
+  LOG("Created MDArray [%p]", md.get());
 }
 
 MDArray::~MDArray() {
@@ -58,11 +57,11 @@ MDArray::~MDArray() {
 void MDArray::dispose() {
   if (this_) {
 
-    LOG("Disposing array [%p]", this_);
+    LOG("Disposing array [%p]", this_.get());
 
-    ptr_manager.dispose(uid);
+    object_store.dispose(uid);
 
-    LOG("Disposed array [%p]", this_);
+    LOG("Disposed array [%p]", this_.get());
   }
 };
 
@@ -104,17 +103,17 @@ Local<Value> MDArray::New(std::shared_ptr<GDALMDArray> raw, GDALDataset *parent_
   Nan::EscapableHandleScope scope;
 
   if (!raw) { return scope.Escape(Nan::Null()); }
-  if (array_cache.has(raw)) { return scope.Escape(array_cache.get(raw)); }
+  if (object_store.has(raw)) { return scope.Escape(object_store.get(raw)); }
 
   MDArray *wrapped = new MDArray(raw);
 
   // add reference to datasource so datasource doesnt get GC'ed while group is
   // alive
   Local<Object> ds, group;
-  if (Dataset::dataset_cache.has(parent_ds)) {
-    ds = Dataset::dataset_cache.get(parent_ds);
+  if (object_store.has(parent_ds)) {
+    ds = object_store.get(parent_ds);
   } else {
-    LOG("MDArray's parent dataset disappeared from cache (array = %p, dataset = %p)", raw, parent_ds);
+    LOG("MDArray's parent dataset disappeared from cache (array = %p, dataset = %p)", raw.get(), parent_ds);
     Nan::ThrowError("MDArray's parent dataset disappeared from cache");
     return scope.Escape(Nan::Undefined());
   }
@@ -125,12 +124,11 @@ Local<Value> MDArray::New(std::shared_ptr<GDALMDArray> raw, GDALDataset *parent_
     Nan::NewInstance(Nan::GetFunction(Nan::New(MDArray::constructor)).ToLocalChecked(), 2, argv).ToLocalChecked();
 
   size_t dim = raw->GetDimensionCount();
-  array_cache.add(raw, obj);
 
   Dataset *unwrapped_ds = Nan::ObjectWrap::Unwrap<Dataset>(ds);
   long parent_uid = unwrapped_ds->uid;
 
-  wrapped->uid = ptr_manager.add(raw, parent_uid);
+  wrapped->uid = object_store.add(raw, obj, parent_uid);
   wrapped->parent_ds = parent_ds;
   wrapped->parent_uid = parent_uid;
   wrapped->dimensions = dim;

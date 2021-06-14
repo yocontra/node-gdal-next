@@ -13,7 +13,6 @@
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> Dataset::constructor;
-ObjectCache<GDALDataset *, Dataset> Dataset::dataset_cache;
 
 void Dataset::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -49,8 +48,7 @@ void Dataset::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-Dataset::Dataset(GDALDataset *ds)
-  : Nan::ObjectWrap(), uid(0), parent_uid(0), async_lock(nullptr), this_dataset(ds), parent_ds(nullptr) {
+Dataset::Dataset(GDALDataset *ds) : Nan::ObjectWrap(), uid(0), parent_uid(0), this_dataset(ds), parent_ds(nullptr) {
   LOG("Created Dataset [%p]", ds);
 }
 
@@ -63,7 +61,7 @@ void Dataset::dispose() {
   if (this_dataset) {
     LOG("Disposing Dataset [%p]", this_dataset);
 
-    ptr_manager.dispose(uid);
+    object_store.dispose(uid);
 
     LOG("Disposed Dataset [%p]", this_dataset);
 
@@ -103,23 +101,20 @@ NAN_METHOD(Dataset::New) {
 
     Local<Value> rootObj, bandsObj;
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
-    GDALDataset *gdal_ds = f->getDataset();
+    GDALDataset *gdal_ds = f->get();
     std::shared_ptr<GDALGroup> root = gdal_ds->GetRootGroup();
     if (root == nullptr) {
 #endif
-      rootObj = Nan::Null();
       bandsObj = DatasetBands::New(info.This());
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
     } else {
       bandsObj = Nan::Null();
-      rootObj = Group::New(root, info.This());
     }
 #endif
     Nan::SetPrivate(info.This(), Nan::New("bands_").ToLocalChecked(), bandsObj);
-    Nan::SetPrivate(info.This(), Nan::New("root_").ToLocalChecked(), rootObj);
     if (f->parent_ds)
       // For dependent Datasets, keep a reference on the parent to protect it from the GC
-      Nan::SetPrivate(info.This(), Nan::New("parent_").ToLocalChecked(), dataset_cache.get(f->parent_ds));
+      Nan::SetPrivate(info.This(), Nan::New("parent_").ToLocalChecked(), object_store.get(f->parent_ds));
 
     info.GetReturnValue().Set(info.This());
     return;
@@ -133,31 +128,23 @@ Local<Value> Dataset::New(GDALDataset *raw, GDALDataset *parent) {
   Nan::EscapableHandleScope scope;
 
   if (!raw) { return scope.Escape(Nan::Null()); }
-  if (dataset_cache.has(raw)) { return scope.Escape(dataset_cache.get(raw)); }
+  if (object_store.has(raw)) { return scope.Escape(object_store.get(raw)); }
 
   Dataset *wrapped = new Dataset(raw);
 
-  if (parent == nullptr) {
-    /* The async locks must live outside the V8 memory management,
-     * otherwise they won't be accessible from the async threads
-     */
-    wrapped->async_lock = std::shared_ptr<uv_sem_t>(new uv_sem_t, uv_sem_deleter());
-    uv_sem_init(wrapped->async_lock.get(), 1);
-  } else {
+  long parent_uid = 0;
+  if (parent != nullptr) {
     /* A dependent Dataset shares the lock of its parent
      */
-    Dataset *parent_ds = dataset_cache.getWrapped(parent);
-    wrapped->async_lock = parent_ds->async_lock;
-    wrapped->parent_uid = parent_ds->uid;
+    Dataset *parent_ds = Nan::ObjectWrap::Unwrap<Dataset>(object_store.get(parent));
+    parent_uid = parent_ds->uid;
   }
-
-  wrapped->uid = ptr_manager.add(raw, wrapped->async_lock);
 
   Local<Value> ext = Nan::New<External>(wrapped);
   Local<Object> obj =
     Nan::NewInstance(Nan::GetFunction(Nan::New(Dataset::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
-  dataset_cache.add(raw, obj);
+  wrapped->uid = object_store.add(raw, obj, parent_uid);
 
   return scope.Escape(obj);
 }
@@ -183,12 +170,12 @@ NAN_METHOD(Dataset::getMetadata) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   std::string domain("");
   NODE_ARG_OPT_STR(0, "domain", domain);
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   info.GetReturnValue().Set(MajorObject::getMetadata(raw, domain.empty() ? NULL : domain.c_str()));
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 }
 
 /**
@@ -208,14 +195,14 @@ NAN_METHOD(Dataset::testCapability) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   std::string capability("");
   NODE_ARG_STR(0, "capability", capability);
 
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   info.GetReturnValue().Set(Nan::New<Boolean>(raw->TestCapability(capability.c_str())));
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 }
 
 /**
@@ -233,10 +220,10 @@ NAN_METHOD(Dataset::getGCPProjection) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
-  uv_sem_wait(ds->async_lock.get());
+  GDALDataset *raw = ds->get();
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   info.GetReturnValue().Set(SafeString::New(raw->GetGCPProjection()));
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 }
 
 /**
@@ -295,7 +282,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   if (!raw) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
@@ -357,7 +344,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   std::string sql;
   std::string sql_dialect;
@@ -406,17 +393,17 @@ NAN_METHOD(Dataset::getFileList) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   if (!raw) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
 
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   char **list = raw->GetFileList();
   if (!list) {
     info.GetReturnValue().Set(results);
-    uv_sem_post(ds->async_lock.get());
+    uv_sem_post(lock.get());
     return;
   }
 
@@ -425,7 +412,7 @@ NAN_METHOD(Dataset::getFileList) {
     Nan::Set(results, i, SafeString::New(list[i]));
     i++;
   }
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 
   CSLDestroy(list);
 
@@ -449,19 +436,19 @@ NAN_METHOD(Dataset::getGCPs) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   if (!raw) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
 
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   int n = raw->GetGCPCount();
   const GDAL_GCP *gcps = raw->GetGCPs();
 
   if (!gcps) {
     info.GetReturnValue().Set(results);
-    uv_sem_post(ds->async_lock.get());
+    uv_sem_post(lock.get());
     return;
   }
 
@@ -479,7 +466,7 @@ NAN_METHOD(Dataset::getGCPs) {
   }
 
   info.GetReturnValue().Set(results);
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 }
 
 /**
@@ -499,7 +486,7 @@ NAN_METHOD(Dataset::setGCPs) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   if (!raw) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
@@ -536,9 +523,9 @@ NAN_METHOD(Dataset::setGCPs) {
     gcp++;
   }
 
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   CPLErr err = raw->SetGCPs(gcps->Length(), list.get(), projection.c_str());
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 
   if (err) {
     NODE_THROW_LAST_CPLERR;
@@ -585,7 +572,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   std::string resampling = "";
   Local<Array> overviews;
   Local<Array> bands;
@@ -609,27 +596,27 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     o.get()[i] = Nan::To<int32_t>(val).ToChecked();
   }
 
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   if (!bands.IsEmpty()) {
     n_bands = bands->Length();
     b = std::shared_ptr<int>(new int[n_bands], array_deleter<int>());
     for (i = 0; i < n_bands; i++) {
       Local<Value> val = Nan::Get(bands, i).ToLocalChecked();
       if (!val->IsNumber()) {
-        uv_sem_post(ds->async_lock.get());
+        uv_sem_post(lock.get());
         Nan::ThrowError("band array must only contain numbers");
         return;
       }
       b.get()[i] = Nan::To<int32_t>(val).ToChecked();
       if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) {
         // BuildOverviews prints an error but segfaults before returning
-        uv_sem_post(ds->async_lock.get());
+        uv_sem_post(lock.get());
         Nan::ThrowError("invalid band id");
         return;
       }
     }
   }
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 
   GDALAsyncableJob<CPLErr> job;
   long ds_uid = ds->uid;
@@ -674,14 +661,14 @@ NAN_GETTER(Dataset::descriptionGetter) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   if (!raw) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   info.GetReturnValue().Set(SafeString::New(raw->GetDescription()));
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 }
 
 /**
@@ -700,22 +687,22 @@ NAN_GETTER(Dataset::rasterSizeGetter) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   // GDAL 2.x will return 512x512 for vector datasets... which doesn't really make
   // sense in JS where we can return null instead of a number
   // https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   if (raw->GetDriver() == nullptr || !raw->GetDriver()->GetMetadataItem(GDAL_DCAP_RASTER)) {
     info.GetReturnValue().Set(Nan::Null());
-    uv_sem_post(ds->async_lock.get());
+    uv_sem_post(lock.get());
     return;
   }
 
   Local<Object> result = Nan::New<Object>();
   Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(raw->GetRasterXSize()));
   Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(raw->GetRasterYSize()));
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
   info.GetReturnValue().Set(result);
 }
 
@@ -735,12 +722,12 @@ NAN_GETTER(Dataset::srsGetter) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
-  uv_sem_wait(ds->async_lock.get());
+  GDALDataset *raw = ds->get();
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   // get projection wkt and return null if not set
   OGRChar *wkt = (OGRChar *)raw->GetProjectionRef();
   if (*wkt == '\0') {
-    uv_sem_post(ds->async_lock.get());
+    uv_sem_post(lock.get());
     // getProjectionRef returns string of length 0 if no srs set
     info.GetReturnValue().Set(Nan::Null());
     return;
@@ -748,7 +735,7 @@ NAN_GETTER(Dataset::srsGetter) {
   // otherwise construct and return SpatialReference from wkt
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromWkt(&wkt);
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 
   if (err) {
     NODE_THROW_OGRERR(err);
@@ -780,11 +767,11 @@ NAN_GETTER(Dataset::geoTransformGetter) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   double transform[6];
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   CPLErr err = raw->GetGeoTransform(transform);
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
   if (err) {
     // This is mostly (always?) a sign that it has not been set
     info.GetReturnValue().Set(Nan::Null());
@@ -817,7 +804,7 @@ NAN_GETTER(Dataset::driverGetter) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   if (raw->GetDriver() != nullptr) { info.GetReturnValue().Set(Driver::New(raw->GetDriver())); }
 }
 
@@ -830,7 +817,7 @@ NAN_SETTER(Dataset::srsSetter) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   std::string wkt("");
   if (IS_WRAPPED(value, SpatialReference)) {
 
@@ -850,9 +837,9 @@ NAN_SETTER(Dataset::srsSetter) {
     return;
   }
 
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   CPLErr err = raw->SetProjection(wkt.c_str());
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 
   if (err) { NODE_THROW_LAST_CPLERR; }
 }
@@ -866,7 +853,7 @@ NAN_SETTER(Dataset::geoTransformSetter) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   if (!value->IsArray()) {
     Nan::ThrowError("Transform must be an array");
@@ -889,9 +876,9 @@ NAN_SETTER(Dataset::geoTransformSetter) {
     buffer[i] = Nan::To<double>(val).ToChecked();
   }
 
-  uv_sem_wait(ds->async_lock.get());
+  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
   CPLErr err = raw->SetGeoTransform(buffer);
-  uv_sem_post(ds->async_lock.get());
+  uv_sem_post(lock.get());
 
   if (err) { NODE_THROW_LAST_CPLERR; }
 }
@@ -923,7 +910,28 @@ NAN_GETTER(Dataset::layersGetter) {
  */
 NAN_GETTER(Dataset::rootGetter) {
   Nan::HandleScope scope;
-  info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("root_").ToLocalChecked()).ToLocalChecked());
+  MaybeLocal<Value> maybeRootObj = Nan::GetPrivate(info.This(), Nan::New("root_").ToLocalChecked());
+  Local<Value> rootObj;
+  if (rootObj.IsEmpty()) {
+    NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
+    GDAL_RAW_CHECK(GDALDataset *, ds, gdal_ds);
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+    shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+    std::shared_ptr<GDALGroup> root = gdal_ds->GetRootGroup();
+    uv_sem_post(lock.get());
+    if (root == nullptr) {
+#endif
+      rootObj = Nan::Null();
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
+    } else {
+      rootObj = Group::New(root, info.This());
+    }
+#endif
+    Nan::SetPrivate(info.This(), Nan::New("root_").ToLocalChecked(), rootObj);
+  } else {
+    rootObj = maybeRootObj.ToLocalChecked();
+  }
+  info.GetReturnValue().Set(rootObj);
 }
 
 NAN_GETTER(Dataset::uidGetter) {

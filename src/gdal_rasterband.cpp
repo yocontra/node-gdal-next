@@ -14,7 +14,6 @@
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> RasterBand::constructor;
-ObjectCache<GDALRasterBand *, RasterBand> RasterBand::cache;
 
 void RasterBand::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -86,7 +85,7 @@ void RasterBand::dispose() {
   if (this_) {
     LOG("Disposing band [%p]", this_);
 
-    ptr_manager.dispose(uid);
+    object_store.dispose(uid);
 
     LOG("Disposed band [%p]", this_);
 
@@ -129,7 +128,7 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
   Nan::EscapableHandleScope scope;
 
   if (!raw) { return scope.Escape(Nan::Null()); }
-  if (cache.has(raw)) { return scope.Escape(cache.get(raw)); }
+  if (object_store.has(raw)) { return scope.Escape(object_store.get(raw)); }
 
   RasterBand *wrapped = new RasterBand(raw);
 
@@ -138,7 +137,6 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(RasterBand::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   LOG("Adding band to cache[%p] (parent=%p)", raw, raw_parent);
-  cache.add(raw, obj);
 
   // add reference to dataset so dataset doesnt get GC'ed while band is alive
   // DONT USE GDALRasterBand.GetDataset() ... it will return a "fake" dataset
@@ -146,17 +144,17 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
   // https://github.com/naturalatlas/node-gdal/blob/master/deps/libgdal/gdal/frmts/gtiff/geotiff.cpp#L84
 
   Local<Object> ds;
-  if (!Dataset::dataset_cache.has(raw_parent)) {
+  if (!object_store.has(raw_parent)) {
     LOG("Band's parent dataset disappeared from cache (band = %p, dataset = %p)", raw, raw_parent);
     Nan::ThrowError("Band's parent dataset disappeared from cache");
     return scope.Escape(Nan::Undefined());
     // ds = Dataset::New(raw_parent); //this should never happen
   }
 
-  ds = Dataset::dataset_cache.get(raw_parent);
+  ds = object_store.get(raw_parent);
   Dataset *parent = Nan::ObjectWrap::Unwrap<Dataset>(ds);
   long parent_uid = parent->uid;
-  wrapped->uid = ptr_manager.add(raw, parent_uid);
+  wrapped->uid = object_store.add(raw, obj, parent_uid);
   wrapped->parent_ds = raw_parent;
   wrapped->parent_uid = parent_uid;
   Nan::SetPrivate(obj, Nan::New("ds_").ToLocalChecked(), ds);

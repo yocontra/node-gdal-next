@@ -12,7 +12,6 @@
 #include <gdal_priv.h>
 
 #include "gdal_dataset.hpp"
-#include "utils/obj_cache.hpp"
 
 using namespace v8;
 using namespace node;
@@ -75,12 +74,10 @@ class RasterBand : public Nan::ObjectWrap {
   static NAN_SETTER(categoryNamesSetter);
   static NAN_SETTER(colorInterpretationSetter);
 
-  static ObjectCache<GDALRasterBand *, RasterBand> cache;
-
   RasterBand();
   RasterBand(GDALRasterBand *band);
   inline bool isAlive() {
-    return this_ && ptr_manager.isAlive(uid);
+    return this_ && object_store.isAlive(uid);
   }
   inline GDALRasterBand *get() {
     return this_;

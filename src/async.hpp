@@ -43,15 +43,15 @@ namespace node_gdal {
 #define GDAL_TRYLOCK_PARENT(p)                                                                                         \
   std::shared_ptr<uv_sem_t> async_lock = nullptr;                                                                      \
   try {                                                                                                                \
-    async_lock = ptr_manager.tryLockDataset((p)->parent_uid);                                                          \
+    async_lock = object_store.tryLockDataset((p)->parent_uid);                                                         \
   } catch (const char *err) {                                                                                          \
     Nan::ThrowError(err);                                                                                              \
     return;                                                                                                            \
   }
-#define GDAL_ASYNCABLE_LOCK(uid) std::shared_ptr<uv_sem_t> async_lock = ptr_manager.tryLockDataset(uid);
+#define GDAL_ASYNCABLE_LOCK(uid) std::shared_ptr<uv_sem_t> async_lock = object_store.tryLockDataset(uid);
 #define GDAL_UNLOCK_PARENT uv_sem_post(async_lock.get())
 #define GDAL_ASYNCABLE_LOCK_MANY(...)                                                                                  \
-  std::vector<std::shared_ptr<uv_sem_t>> async_locks = ptr_manager.tryLockDatasets({__VA_ARGS__});
+  std::vector<std::shared_ptr<uv_sem_t>> async_locks = object_store.tryLockDatasets({__VA_ARGS__});
 #define GDAL_UNLOCK_MANY                                                                                               \
   for (std::shared_ptr<uv_sem_t> & async_lock : async_locks) { uv_sem_post(async_lock.get()); }
 

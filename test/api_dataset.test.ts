@@ -1010,7 +1010,6 @@ describe('gdal.Dataset', () => {
         }
       ]
 
-      console.log()
       ds.setGCPs(expectedGCPs, srs.toWKT())
       const actualGCPs = ds.getGCPs()
 

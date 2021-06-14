@@ -14,7 +14,6 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "utils/obj_cache.hpp"
 #include "async.hpp"
 
 using namespace v8;
@@ -41,8 +40,6 @@ class Driver : public Nan::ObjectWrap {
   GDAL_ASYNCABLE_DECLARE(copyFiles);
   static NAN_METHOD(getMetadata);
 
-  static ObjectCache<GDALDriver *, Driver> cache;
-
   static NAN_GETTER(descriptionGetter);
 
   Driver();
@@ -51,6 +48,7 @@ class Driver : public Nan::ObjectWrap {
     return this_gdaldriver;
   }
   void dispose();
+  long uid;
 
   inline bool isAlive() {
     return this_gdaldriver;

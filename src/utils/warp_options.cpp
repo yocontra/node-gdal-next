@@ -129,9 +129,9 @@ int WarpOptions::parse(Local<Value> value) {
       this->src_obj = prop.As<Object>();
       this->src = Nan::ObjectWrap::Unwrap<Dataset>(this->src_obj);
 #if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
-      options->hSrcDS = static_cast<GDALDatasetH>(this->src->getDataset());
+      options->hSrcDS = static_cast<GDALDatasetH>(this->src->get());
 #else
-      options->hSrcDS = GDALDataset::ToHandle(this->src->getDataset());
+      options->hSrcDS = GDALDataset::ToHandle(this->src->get());
 #endif
       if (!options->hSrcDS) {
         Nan::ThrowError("src dataset already closed");
@@ -151,9 +151,9 @@ int WarpOptions::parse(Local<Value> value) {
       this->dst_obj = prop.As<Object>();
       this->dst = Nan::ObjectWrap::Unwrap<Dataset>(this->dst_obj);
 #if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
-      options->hDstDS = static_cast<GDALDatasetH>(this->dst->getDataset());
+      options->hDstDS = static_cast<GDALDatasetH>(this->dst->get());
 #else
-      options->hDstDS = GDALDataset::ToHandle(this->dst->getDataset());
+      options->hDstDS = GDALDataset::ToHandle(this->dst->get());
 #endif
       if (!options->hDstDS) {
         Nan::ThrowError("dst dataset already closed");

@@ -12,8 +12,6 @@
 // gdal
 #include <gdal_priv.h>
 
-#include "utils/obj_cache.hpp"
-
 using namespace v8;
 using namespace node;
 

@@ -14,7 +14,6 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "utils/obj_cache.hpp"
 #include "async.hpp"
 
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
@@ -35,8 +34,6 @@ class Attribute : public Nan::ObjectWrap {
   static NAN_GETTER(valueGetter);
   static NAN_GETTER(uidGetter);
 
-  static ObjectCache<std::shared_ptr<GDALAttribute>, Attribute> attribute_cache;
-
   Attribute();
   Attribute(std::shared_ptr<GDALAttribute> group);
   inline std::shared_ptr<GDALAttribute> get() {
@@ -48,7 +45,7 @@ class Attribute : public Nan::ObjectWrap {
   long parent_uid;
 
   inline bool isAlive() {
-    return this_ && ptr_manager.isAlive(uid);
+    return this_ && object_store.isAlive(uid);
   }
 
     private:

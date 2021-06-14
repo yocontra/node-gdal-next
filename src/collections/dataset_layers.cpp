@@ -115,7 +115,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   if (info.Length() < 1) {
     Nan::ThrowError("method must be given integer or string");
@@ -205,7 +205,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   std::string *layer_name = new std::string;
   SpatialReference *spatial_ref = NULL;
@@ -268,7 +268,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   long ds_uid = ds->uid;
   GDALAsyncableJob<int> job;
@@ -318,7 +318,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   Layer *layer_to_copy;
   std::string *new_name = new std::string("");
@@ -378,7 +378,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
 
   int i;
   NODE_ARG_INT(0, "layer index", i);

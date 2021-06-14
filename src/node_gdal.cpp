@@ -116,7 +116,7 @@ using namespace node;
 using namespace v8;
 
 FILE *log_file = NULL;
-PtrManager ptr_manager;
+ObjectStore object_store;
 
 /**
  * @attribute lastError
@@ -363,7 +363,7 @@ static NAN_METHOD(isAlive) {
   long uid;
   NODE_ARG_INT(0, "uid", uid);
 
-  info.GetReturnValue().Set(Nan::New(ptr_manager.isAlive(uid)));
+  info.GetReturnValue().Set(Nan::New(object_store.isAlive(uid)));
 }
 
 static NAN_METHOD(getMemfileName) {

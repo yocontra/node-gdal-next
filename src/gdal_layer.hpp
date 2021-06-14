@@ -12,7 +12,6 @@
 #include <ogrsf_frmts.h>
 
 #include "gdal_dataset.hpp"
-#include "utils/obj_cache.hpp"
 
 using namespace v8;
 using namespace node;
@@ -45,15 +44,13 @@ class Layer : public Nan::ObjectWrap {
   static NAN_GETTER(geomTypeGetter);
   static NAN_GETTER(uidGetter);
 
-  static ObjectCache<OGRLayer *, Layer> cache;
-
   Layer();
   Layer(OGRLayer *ds);
   inline OGRLayer *get() {
     return this_;
   }
   inline bool isAlive() {
-    return this_ && ptr_manager.isAlive(uid);
+    return this_ && object_store.isAlive(uid);
   }
   inline GDALDataset *getParent() {
     return parent_ds;

@@ -14,7 +14,6 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "utils/obj_cache.hpp"
 #include "async.hpp"
 
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
@@ -47,8 +46,6 @@ class MDArray : public Nan::ObjectWrap {
   static NAN_GETTER(attributesGetter);
   static NAN_GETTER(uidGetter);
 
-  static ObjectCache<std::shared_ptr<GDALMDArray>, MDArray> array_cache;
-
   MDArray(std::shared_ptr<GDALMDArray> ds);
   inline std::shared_ptr<GDALMDArray> get() {
     return this_;
@@ -60,7 +57,7 @@ class MDArray : public Nan::ObjectWrap {
   size_t dimensions;
 
   inline bool isAlive() {
-    return this_ && ptr_manager.isAlive(uid);
+    return this_ && object_store.isAlive(uid);
   }
 
     private:

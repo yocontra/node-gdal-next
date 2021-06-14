@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Vastly improved locking mechanism allowing better parallelization
  - Linux release builds have lazy binding enabled
  - `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
+ - Completely reworked persistent object storage
 
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library

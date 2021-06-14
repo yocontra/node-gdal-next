@@ -9,7 +9,6 @@
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> Driver::constructor;
-ObjectCache<GDALDriver *, Driver> Driver::cache;
 
 void Driver::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -47,7 +46,7 @@ Driver::~Driver() {
 void Driver::dispose() {
   if (this_gdaldriver) {
     LOG("Disposing GDAL Driver [%p]", this_gdaldriver);
-    cache.erase(this_gdaldriver);
+    object_store.dispose(uid);
     LOG("Disposed GDAL Driver [%p]", this_gdaldriver);
     this_gdaldriver = NULL;
   }
@@ -90,7 +89,7 @@ Local<Value> Driver::New(GDALDriver *driver) {
   Nan::EscapableHandleScope scope;
 
   if (!driver) { return scope.Escape(Nan::Null()); }
-  if (cache.has(driver)) { return scope.Escape(cache.get(driver)); }
+  if (object_store.has(driver)) { return scope.Escape(object_store.get(driver)); }
 
   Driver *wrapped = new Driver(driver);
   Local<Value> ext = Nan::New<External>(wrapped);
@@ -98,7 +97,7 @@ Local<Value> Driver::New(GDALDriver *driver) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(Driver::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   // LOG("ADDING DRIVER TO CACHE [%p]", driver);
-  cache.add(driver, obj);
+  wrapped->uid = object_store.add(driver, obj, 0);
   // LOG("DONE ADDING DRIVER TO CACHE [%p]", driver);
 
   return scope.Escape(obj);
@@ -287,14 +286,14 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
 
   std::shared_ptr<uv_sem_t> async_lock = nullptr;
   try {
-    async_lock = ptr_manager.tryLockDataset(src_dataset->uid);
+    async_lock = object_store.tryLockDataset(src_dataset->uid);
   } catch (const char *err) {
     Nan::ThrowError(err);
     return;
   }
 
   GDALDriver *raw = driver->getGDALDriver();
-  GDALDataset *raw_ds = src_dataset->getDataset();
+  GDALDataset *raw_ds = src_dataset->get();
   GDALAsyncableJob<GDALDataset *> job;
   job.rval = DatasetRval;
   job.main = [raw, filename, raw_ds, strict, options, async_lock](const GDALExecutionProgress &) {

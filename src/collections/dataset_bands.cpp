@@ -112,7 +112,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   long ds_uid = ds->uid;
   int band_id;
   NODE_ARG_INT(0, "band id", band_id);
@@ -164,7 +164,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
     return;
   }
 
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   GDALDataType type;
   std::shared_ptr<StringList> options(new StringList);
 
@@ -232,7 +232,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
   }
 
   long ds_uid = ds->uid;
-  GDALDataset *raw = ds->getDataset();
+  GDALDataset *raw = ds->get();
   GDALAsyncableJob<int> job;
   job.persist(parent);
   job.main = [ds_uid, raw](const GDALExecutionProgress &) {

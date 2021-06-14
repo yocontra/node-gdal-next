@@ -15,7 +15,6 @@ namespace node_gdal {
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
 
 Nan::Persistent<FunctionTemplate> Attribute::constructor;
-ObjectCache<std::shared_ptr<GDALAttribute>, Attribute> Attribute::attribute_cache;
 
 void Attribute::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -35,8 +34,9 @@ void Attribute::Initialize(Local<Object> target) {
   constructor.Reset(lcons);
 }
 
-Attribute::Attribute(std::shared_ptr<GDALAttribute> group) : Nan::ObjectWrap(), uid(0), this_(group), parent_ds(0) {
-  LOG("Created attribute [%p]", group);
+Attribute::Attribute(std::shared_ptr<GDALAttribute> attribute)
+  : Nan::ObjectWrap(), uid(0), this_(attribute), parent_ds(0) {
+  LOG("Created attribute [%p]", attribute.get());
 }
 
 Attribute::Attribute() : Nan::ObjectWrap(), uid(0), this_(0), parent_ds(0) {
@@ -49,11 +49,11 @@ Attribute::~Attribute() {
 void Attribute::dispose() {
   if (this_) {
 
-    LOG("Disposing attribute [%p]", this_);
+    LOG("Disposing attribute [%p]", this_.get());
 
-    ptr_manager.dispose(uid);
+    object_store.dispose(uid);
 
-    LOG("Disposed attribute [%p]", this_);
+    LOG("Disposed attribute [%p]", this_.get());
   }
 };
 
@@ -90,15 +90,15 @@ Local<Value> Attribute::New(std::shared_ptr<GDALAttribute> raw, GDALDataset *par
   Nan::EscapableHandleScope scope;
 
   if (!raw) { return scope.Escape(Nan::Null()); }
-  if (attribute_cache.has(raw)) { return scope.Escape(attribute_cache.get(raw)); }
+  if (object_store.has(raw)) { return scope.Escape(object_store.get(raw)); }
 
   Attribute *wrapped = new Attribute(raw);
 
   Local<Object> ds;
-  if (Dataset::dataset_cache.has(parent_ds)) {
-    ds = Dataset::dataset_cache.get(parent_ds);
+  if (object_store.has(parent_ds)) {
+    ds = object_store.get(parent_ds);
   } else {
-    LOG("Attribute's parent dataset disappeared from cache (array = %p, dataset = %p)", raw, parent_ds);
+    LOG("Attribute's parent dataset disappeared from cache (array = %p, dataset = %p)", raw.get(), parent_ds);
     Nan::ThrowError("Attribute's parent dataset disappeared from cache");
     return scope.Escape(Nan::Undefined());
   }
@@ -107,12 +107,10 @@ Local<Value> Attribute::New(std::shared_ptr<GDALAttribute> raw, GDALDataset *par
   Local<Object> obj =
     Nan::NewInstance(Nan::GetFunction(Nan::New(Attribute::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
-  attribute_cache.add(raw, obj);
-
   Dataset *unwrapped_ds = Nan::ObjectWrap::Unwrap<Dataset>(ds);
   long parent_uid = unwrapped_ds->uid;
 
-  wrapped->uid = ptr_manager.add(raw, parent_uid);
+  wrapped->uid = object_store.add(raw, obj, parent_uid);
   wrapped->parent_ds = parent_ds;
   wrapped->parent_uid = parent_uid;
 

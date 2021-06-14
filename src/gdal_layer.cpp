@@ -16,7 +16,6 @@
 namespace node_gdal {
 
 Nan::Persistent<FunctionTemplate> Layer::constructor;
-ObjectCache<OGRLayer *, Layer> Layer::cache;
 
 void Layer::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -64,7 +63,7 @@ void Layer::dispose() {
 
     LOG("Disposing layer [%p]", this_);
 
-    ptr_manager.dispose(uid);
+    object_store.dispose(uid);
 
     LOG("Disposed layer [%p]", this_);
     this_ = NULL;
@@ -115,7 +114,7 @@ Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set)
   Nan::EscapableHandleScope scope;
 
   if (!raw) { return scope.Escape(Nan::Null()); }
-  if (cache.has(raw)) { return scope.Escape(cache.get(raw)); }
+  if (object_store.has(raw)) { return scope.Escape(object_store.get(raw)); }
 
   Layer *wrapped = new Layer(raw);
 
@@ -123,13 +122,11 @@ Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set)
   Local<Object> obj =
     Nan::NewInstance(Nan::GetFunction(Nan::New(Layer::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
-  cache.add(raw, obj);
-
   // add reference to datasource so datasource doesnt get GC'ed while layer is
   // alive
   Local<Object> ds;
-  if (Dataset::dataset_cache.has(raw_parent)) {
-    ds = Dataset::dataset_cache.get(raw_parent);
+  if (object_store.has(raw_parent)) {
+    ds = object_store.get(raw_parent);
   } else {
     LOG("Layer's parent dataset disappeared from cache (layer = %p, dataset = %p)", raw, raw_parent);
     Nan::ThrowError("Layer's parent dataset disappeared from cache");
@@ -140,7 +137,7 @@ Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set)
   Dataset *unwrapped = Nan::ObjectWrap::Unwrap<Dataset>(ds);
   long parent_uid = unwrapped->uid;
 
-  wrapped->uid = ptr_manager.add(raw, parent_uid, result_set);
+  wrapped->uid = object_store.add(raw, obj, parent_uid, result_set);
   wrapped->parent_ds = raw_parent;
   wrapped->parent_uid = parent_uid;
   Nan::SetPrivate(obj, Nan::New("ds_").ToLocalChecked(), ds);

@@ -96,7 +96,7 @@ NAN_METHOD(CoordinateTransformation::New) {
 
       ds = Nan::ObjectWrap::Unwrap<Dataset>(info[1].As<Object>());
 
-      if (!ds->getDataset()) {
+      if (!ds->get()) {
         Nan::ThrowError("Dataset already closed");
         return;
       }
@@ -111,7 +111,7 @@ NAN_METHOD(CoordinateTransformation::New) {
       papszTO = CSLSetNameValue(papszTO, "INSERT_CENTER_LONG", "FALSE");
 
       GeoTransformTransformer *transform = new GeoTransformTransformer();
-      transform->hSrcImageTransformer = GDALCreateGenImgProjTransformer2(ds->getDataset(), NULL, papszTO);
+      transform->hSrcImageTransformer = GDALCreateGenImgProjTransformer2(ds->get(), NULL, papszTO);
       if (!transform->hSrcImageTransformer) {
         NODE_THROW_LAST_CPLERR;
         return;

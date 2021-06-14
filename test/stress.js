@@ -50,6 +50,12 @@ const staticBuffers = new Array(parallelOps).fill(new Uint8Array(size.x * size.y
 let opens = 0, ops = 0
 let stop = false
 
+try {
+  gdal.startLogging(`${__dirname}/stress.log`)
+} catch (e) {
+  /* ignore */
+}
+
 process.on('SIGINT', async () => {
   console.log('Ctrl-C... exiting')
   stop = true

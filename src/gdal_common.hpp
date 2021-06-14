@@ -16,7 +16,7 @@
 
 namespace node_gdal {
 extern FILE *log_file;
-extern PtrManager ptr_manager;
+extern ObjectStore object_store;
 } // namespace node_gdal
 
 #ifdef ENABLE_LOGGING
@@ -645,7 +645,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
     auto r = obj->this_->wrapped_method();                                                                             \
     GDAL_UNLOCK_PARENT;                                                                                                \
     info.GetReturnValue().Set(SafeString::New(r.c_str()));                                                             \
@@ -659,7 +659,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
     auto r = obj->this_->wrapped_method();                                                                             \
     GDAL_UNLOCK_PARENT;                                                                                                \
     info.GetReturnValue().Set(Nan::New<result_type>(r));                                                               \
@@ -974,7 +974,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
     int err = obj->this_->wrapped_method();                                                                            \
     GDAL_UNLOCK_PARENT;                                                                                                \
     if (err) {                                                                                                         \
@@ -994,7 +994,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                          \
+    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
     auto r = obj->this_->wrapped_method(param.c_str());                                                                \
     GDAL_UNLOCK_PARENT;                                                                                                \
     info.GetReturnValue().Set(Nan::New<result_type>(r));                                                               \

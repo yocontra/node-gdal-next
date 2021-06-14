@@ -14,7 +14,6 @@
 // ogr
 #include <ogrsf_frmts.h>
 
-#include "utils/obj_cache.hpp"
 #include "async.hpp"
 
 using namespace v8;
@@ -57,10 +56,8 @@ class Dataset : public Nan::ObjectWrap {
   static NAN_SETTER(srsSetter);
   static NAN_SETTER(geoTransformSetter);
 
-  static ObjectCache<GDALDataset *, Dataset> dataset_cache;
-
   Dataset(GDALDataset *ds);
-  inline GDALDataset *getDataset() {
+  inline GDALDataset *get() {
     return this_dataset;
   }
 
@@ -69,10 +66,8 @@ class Dataset : public Nan::ObjectWrap {
   long parent_uid;
 
   inline bool isAlive() {
-    return this_dataset && ptr_manager.isAlive(uid);
+    return this_dataset && object_store.isAlive(uid);
   }
-
-  std::shared_ptr<uv_sem_t> async_lock;
 
     private:
   ~Dataset();

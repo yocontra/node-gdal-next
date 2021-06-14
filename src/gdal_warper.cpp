@@ -382,7 +382,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
     prop = Nan::Get(obj, Nan::New("src").ToLocalChecked()).ToLocalChecked();
     if (prop->IsObject() && !prop->IsNull() && Nan::New(Dataset::constructor)->HasInstance(prop)) {
       ds = Nan::ObjectWrap::Unwrap<Dataset>(prop.As<Object>());
-      if (!ds->getDataset()) {
+      if (!ds->get()) {
         Nan::ThrowError("src dataset already closed");
         return;
       }
@@ -419,9 +419,9 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
   };
 
 #if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
-  GDALDatasetH gdal_ds = static_cast<GDALDatasetH>(ds->getDataset());
+  GDALDatasetH gdal_ds = static_cast<GDALDatasetH>(ds->get());
 #else
-  GDALDatasetH gdal_ds = GDALDataset::ToHandle(ds->getDataset());
+  GDALDatasetH gdal_ds = GDALDataset::ToHandle(ds->get());
 #endif
   long uid = ds->uid;
   GDALAsyncableJob<warpOutputResult> job;

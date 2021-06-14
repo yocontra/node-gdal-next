@@ -109,7 +109,7 @@ class GroupCollection : public Nan::ObjectWrap {
     NODE_UNWRAP_CHECK(NODEPARENT, parent_obj, parent);
 
     std::shared_ptr<GDALPARENT> raw = parent->get();
-    GDALDataset *gdal_ds = ds->getDataset();
+    GDALDataset *gdal_ds = ds->get();
     long ds_uid = ds->uid;
     std::string name = "";
     size_t idx = 0;
