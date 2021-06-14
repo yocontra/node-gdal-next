@@ -40,20 +40,39 @@ namespace node_gdal {
 #define GDAL_ISASYNC async
 
 // Handle locking
-#define GDAL_TRYLOCK_PARENT(p)                                                                                         \
-  std::shared_ptr<uv_sem_t> async_lock = nullptr;                                                                      \
+#define GDAL_LOCK_PARENT(p)                                                                                            \
+  AsyncGuard lock;                                                                                                     \
   try {                                                                                                                \
-    async_lock = object_store.tryLockDataset((p)->parent_uid);                                                         \
+    lock.acquire((p)->parent_uid);                                                                                     \
   } catch (const char *err) {                                                                                          \
     Nan::ThrowError(err);                                                                                              \
     return;                                                                                                            \
   }
-#define GDAL_ASYNCABLE_LOCK(uid) std::shared_ptr<uv_sem_t> async_lock = object_store.tryLockDataset(uid);
-#define GDAL_UNLOCK_PARENT uv_sem_post(async_lock.get())
-#define GDAL_ASYNCABLE_LOCK_MANY(...)                                                                                  \
-  std::vector<std::shared_ptr<uv_sem_t>> async_locks = object_store.tryLockDatasets({__VA_ARGS__});
-#define GDAL_UNLOCK_MANY                                                                                               \
-  for (std::shared_ptr<uv_sem_t> & async_lock : async_locks) { uv_sem_post(async_lock.get()); }
+
+// These constructor throw
+class AsyncGuard {
+    public:
+  inline AsyncGuard() : lock(nullptr), locks(nullptr) {
+  }
+  inline AsyncGuard(long uid) : locks(nullptr) {
+    lock = object_store.lockDataset(uid);
+  }
+  inline AsyncGuard(vector<long> uids) : lock(nullptr) {
+    locks = make_shared<vector<AsyncLock>>(object_store.lockDatasets(uids));
+  }
+  inline void acquire(long uid) {
+    if (lock != nullptr) throw "Trying to acquire multiple locks";
+    lock = object_store.lockDataset(uid);
+  }
+  inline ~AsyncGuard() {
+    if (lock != nullptr) object_store.unlockDataset(lock);
+    if (locks != nullptr) object_store.unlockDatasets(*locks);
+  }
+
+    private:
+  AsyncLock lock;
+  shared_ptr<vector<AsyncLock>> locks;
+};
 
 // Node.js NAN null initializes and trivially copies objects of this class without asking permission
 struct GDALProgressInfo {

@@ -82,7 +82,3 @@ await Promise.all(data1[4], data2[4])
 ```
 
 Here we are chaining all the Promises one on another. Now the read of the second band of the first dataset won't launch until the first one has completed - ensuring that there will be enough free slots on the thread pool for the jobs of the second loop to run.
-
-### Solution 3: node-gdal-async I/O scheduling
-
-3.3 (will) implement(s) a new I/O scheduler that will render this automatic and transparent for the user.

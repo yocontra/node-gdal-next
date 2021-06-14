@@ -284,9 +284,9 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return; // error parsing string list
   }
 
-  std::shared_ptr<uv_sem_t> async_lock = nullptr;
+  AsyncLock async_lock = nullptr;
   try {
-    async_lock = object_store.tryLockDataset(src_dataset->uid);
+    async_lock = object_store.lockDataset(src_dataset->uid);
   } catch (const char *err) {
     Nan::ThrowError(err);
     return;
@@ -299,7 +299,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   job.main = [raw, filename, raw_ds, strict, options, async_lock](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
-    uv_sem_post(async_lock.get());
+    object_store.unlockDataset(async_lock);
     if (!ds) CPLGetLastErrorMsg();
     return ds;
   };

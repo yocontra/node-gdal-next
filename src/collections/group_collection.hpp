@@ -118,13 +118,12 @@ class GroupCollection : public Nan::ObjectWrap {
     GDALAsyncableJob<std::shared_ptr<GDALOBJ>> job;
     job.persist(parent_ds, parent_obj);
     job.main = [ds_uid, raw, name, idx, isString](const GDALExecutionProgress &) {
-      GDAL_ASYNCABLE_LOCK(ds_uid);
+      AsyncGuard lock(ds_uid);
       std::shared_ptr<GDALOBJ> r = nullptr;
       if (!isString)
         r = SELF::__get(raw, idx);
       else
         r = SELF::__get(raw, name);
-      GDAL_UNLOCK_PARENT;
       if (r == nullptr) throw "Invalid element";
       return r;
     };
@@ -148,9 +147,8 @@ class GroupCollection : public Nan::ObjectWrap {
     GDALAsyncableJob<int> job;
     job.persist(parent_ds, parent_obj);
     job.main = [ds_uid, raw](const GDALExecutionProgress &) {
-      GDAL_ASYNCABLE_LOCK(ds_uid);
+      AsyncGuard lock(ds_uid);
       int r = SELF::__count(raw);
-      GDAL_UNLOCK_PARENT;
       return r;
     };
     job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Number>(r); };

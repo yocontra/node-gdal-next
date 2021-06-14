@@ -173,9 +173,9 @@ NAN_METHOD(Dataset::getMetadata) {
   GDALDataset *raw = ds->get();
   std::string domain("");
   NODE_ARG_OPT_STR(0, "domain", domain);
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   info.GetReturnValue().Set(MajorObject::getMetadata(raw, domain.empty() ? NULL : domain.c_str()));
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 }
 
 /**
@@ -200,9 +200,9 @@ NAN_METHOD(Dataset::testCapability) {
   std::string capability("");
   NODE_ARG_STR(0, "capability", capability);
 
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   info.GetReturnValue().Set(Nan::New<Boolean>(raw->TestCapability(capability.c_str())));
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 }
 
 /**
@@ -221,9 +221,9 @@ NAN_METHOD(Dataset::getGCPProjection) {
   }
 
   GDALDataset *raw = ds->get();
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   info.GetReturnValue().Set(SafeString::New(raw->GetGCPProjection()));
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 }
 
 /**
@@ -291,9 +291,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
   long ds_uid = ds->uid;
   job.persist(info.This());
   job.main = [raw, ds_uid](const GDALExecutionProgress &) {
-    GDAL_ASYNCABLE_LOCK(ds_uid);
+    AsyncGuard lock(ds_uid);
     raw->FlushCache();
-    GDAL_UNLOCK_PARENT;
     return 0;
   };
   job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
@@ -359,9 +358,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
   long ds_uid = ds->uid;
   job.persist(info.This());
   job.main = [raw, ds_uid, sql, sql_dialect, geom_filter](const GDALExecutionProgress &) {
-    GDAL_ASYNCABLE_LOCK(ds_uid);
+    AsyncGuard lock(ds_uid);
     OGRLayer *layer = raw->ExecuteSQL(sql.c_str(), geom_filter, sql_dialect.empty() ? NULL : sql_dialect.c_str());
-    GDAL_UNLOCK_PARENT;
     if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
   };
@@ -399,11 +397,11 @@ NAN_METHOD(Dataset::getFileList) {
     return;
   }
 
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   char **list = raw->GetFileList();
   if (!list) {
     info.GetReturnValue().Set(results);
-    uv_sem_post(lock.get());
+    object_store.unlockDataset(lock);
     return;
   }
 
@@ -412,7 +410,7 @@ NAN_METHOD(Dataset::getFileList) {
     Nan::Set(results, i, SafeString::New(list[i]));
     i++;
   }
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 
   CSLDestroy(list);
 
@@ -442,13 +440,13 @@ NAN_METHOD(Dataset::getGCPs) {
     return;
   }
 
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   int n = raw->GetGCPCount();
   const GDAL_GCP *gcps = raw->GetGCPs();
 
   if (!gcps) {
     info.GetReturnValue().Set(results);
-    uv_sem_post(lock.get());
+    object_store.unlockDataset(lock);
     return;
   }
 
@@ -466,7 +464,7 @@ NAN_METHOD(Dataset::getGCPs) {
   }
 
   info.GetReturnValue().Set(results);
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 }
 
 /**
@@ -523,9 +521,9 @@ NAN_METHOD(Dataset::setGCPs) {
     gcp++;
   }
 
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   CPLErr err = raw->SetGCPs(gcps->Length(), list.get(), projection.c_str());
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 
   if (err) {
     NODE_THROW_LAST_CPLERR;
@@ -596,27 +594,27 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     o.get()[i] = Nan::To<int32_t>(val).ToChecked();
   }
 
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   if (!bands.IsEmpty()) {
     n_bands = bands->Length();
     b = std::shared_ptr<int>(new int[n_bands], array_deleter<int>());
     for (i = 0; i < n_bands; i++) {
       Local<Value> val = Nan::Get(bands, i).ToLocalChecked();
       if (!val->IsNumber()) {
-        uv_sem_post(lock.get());
+        object_store.unlockDataset(lock);
         Nan::ThrowError("band array must only contain numbers");
         return;
       }
       b.get()[i] = Nan::To<int32_t>(val).ToChecked();
       if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) {
         // BuildOverviews prints an error but segfaults before returning
-        uv_sem_post(lock.get());
+        object_store.unlockDataset(lock);
         Nan::ThrowError("invalid band id");
         return;
       }
     }
   }
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 
   GDALAsyncableJob<CPLErr> job;
   long ds_uid = ds->uid;
@@ -629,7 +627,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   // But we can use a shared_ptr because the lifetime of the lambda is limited by the lifetime
   // of the async worker
   job.main = [raw, ds_uid, resampling, n_overviews, o, n_bands, b, progress_cb](const GDALExecutionProgress &progress) {
-    GDAL_ASYNCABLE_LOCK(ds_uid);
+    AsyncGuard lock(ds_uid);
     CPLErr err = raw->BuildOverviews(
       resampling.c_str(),
       n_overviews,
@@ -638,7 +636,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
       b.get(),
       progress_cb ? ProgressTrampoline : nullptr,
       progress_cb ? (void *)&progress : nullptr);
-    GDAL_UNLOCK_PARENT;
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return err;
   };
@@ -666,9 +663,9 @@ NAN_GETTER(Dataset::descriptionGetter) {
     Nan::ThrowError("Dataset object has already been destroyed");
     return;
   }
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   info.GetReturnValue().Set(SafeString::New(raw->GetDescription()));
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 }
 
 /**
@@ -692,17 +689,17 @@ NAN_GETTER(Dataset::rasterSizeGetter) {
   // GDAL 2.x will return 512x512 for vector datasets... which doesn't really make
   // sense in JS where we can return null instead of a number
   // https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   if (raw->GetDriver() == nullptr || !raw->GetDriver()->GetMetadataItem(GDAL_DCAP_RASTER)) {
     info.GetReturnValue().Set(Nan::Null());
-    uv_sem_post(lock.get());
+    object_store.unlockDataset(lock);
     return;
   }
 
   Local<Object> result = Nan::New<Object>();
   Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(raw->GetRasterXSize()));
   Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(raw->GetRasterYSize()));
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
   info.GetReturnValue().Set(result);
 }
 
@@ -723,11 +720,11 @@ NAN_GETTER(Dataset::srsGetter) {
   }
 
   GDALDataset *raw = ds->get();
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   // get projection wkt and return null if not set
   OGRChar *wkt = (OGRChar *)raw->GetProjectionRef();
   if (*wkt == '\0') {
-    uv_sem_post(lock.get());
+    object_store.unlockDataset(lock);
     // getProjectionRef returns string of length 0 if no srs set
     info.GetReturnValue().Set(Nan::Null());
     return;
@@ -735,7 +732,7 @@ NAN_GETTER(Dataset::srsGetter) {
   // otherwise construct and return SpatialReference from wkt
   OGRSpatialReference *srs = new OGRSpatialReference();
   int err = srs->importFromWkt(&wkt);
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 
   if (err) {
     NODE_THROW_OGRERR(err);
@@ -769,9 +766,9 @@ NAN_GETTER(Dataset::geoTransformGetter) {
 
   GDALDataset *raw = ds->get();
   double transform[6];
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   CPLErr err = raw->GetGeoTransform(transform);
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
   if (err) {
     // This is mostly (always?) a sign that it has not been set
     info.GetReturnValue().Set(Nan::Null());
@@ -837,9 +834,9 @@ NAN_SETTER(Dataset::srsSetter) {
     return;
   }
 
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   CPLErr err = raw->SetProjection(wkt.c_str());
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 
   if (err) { NODE_THROW_LAST_CPLERR; }
 }
@@ -876,9 +873,9 @@ NAN_SETTER(Dataset::geoTransformSetter) {
     buffer[i] = Nan::To<double>(val).ToChecked();
   }
 
-  shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+  AsyncLock lock = object_store.lockDataset(ds->uid);
   CPLErr err = raw->SetGeoTransform(buffer);
-  uv_sem_post(lock.get());
+  object_store.unlockDataset(lock);
 
   if (err) { NODE_THROW_LAST_CPLERR; }
 }
@@ -916,9 +913,9 @@ NAN_GETTER(Dataset::rootGetter) {
     NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
     GDAL_RAW_CHECK(GDALDataset *, ds, gdal_ds);
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
-    shared_ptr<uv_sem_t> lock = object_store.tryLockDataset(ds->uid);
+    AsyncLock lock = object_store.lockDataset(ds->uid);
     std::shared_ptr<GDALGroup> root = gdal_ds->GetRootGroup();
-    uv_sem_post(lock.get());
+    object_store.unlockDataset(lock);
     if (root == nullptr) {
 #endif
       rootObj = Nan::Null();

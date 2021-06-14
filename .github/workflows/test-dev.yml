@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ cond_lock ]
   pull_request:
-    branches: [ master ]
+    branches: [ cond_lock ]
   workflow_dispatch:
     inputs:
       testNetwork:

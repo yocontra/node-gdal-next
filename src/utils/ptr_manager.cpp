@@ -25,7 +25,7 @@
 //
 // Second, it is allocated entirely outside of the V8 memory management and the GC
 // Thus, it is accessible from the worker threads
-// The async locks and the I/O queues live here
+// The async locks live here
 // For this use, the V8 objects are indexed with numeric uids
 // ptrs won't be safe for this use
 
@@ -34,7 +34,7 @@ namespace node_gdal {
 // Because of severe bugs linked to C++14 template variables in MSVC
 // these two must be here and must have file scope
 // MSVC throws an Internal Compiler Error when specializing templated variables
-// and the linker produces an off-by-one error when processing exported symbols
+// and the linker doesn't use the right address when processing exported symbols
 template <typename GDALPTR> using UidMap = map<long, shared_ptr<ObjectStoreItem<GDALPTR>>>;
 template <typename GDALPTR> using PtrMap = map<GDALPTR, shared_ptr<ObjectStoreItem<GDALPTR>>>;
 template <typename GDALPTR> static UidMap<GDALPTR> uidMap;
@@ -45,11 +45,34 @@ void uv_sem_deleter::operator()(uv_sem_t *p) {
   delete p;
 }
 
+class uv_scoped_mutex {
+    public:
+  inline uv_scoped_mutex(uv_mutex_t *lock) : lock(lock) {
+    uv_mutex_lock(lock);
+  }
+  inline ~uv_scoped_mutex() {
+    uv_mutex_unlock(lock);
+  }
+
+    private:
+  uv_mutex_t *lock;
+};
+
 ObjectStore::ObjectStore() : uid(1) {
-  uv_mutex_init_recursive(&master_lock);
+#ifdef PTHREAD_MUTEX_DEBUG
+  pthread_mutexattr_t attr;
+  pthread_mutexattr_init(&attr);
+  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
+  pthread_mutex_init(&master_lock, &attr);
+#else
+  uv_mutex_init(&master_lock);
+#endif
+  uv_cond_init(&master_sleep);
 }
 
 ObjectStore::~ObjectStore() {
+  uv_mutex_destroy(&master_lock);
+  uv_cond_destroy(&master_sleep);
 }
 
 bool ObjectStore::isAlive(long uid) {
@@ -63,57 +86,93 @@ bool ObjectStore::isAlive(long uid) {
     ;
 }
 
-shared_ptr<uv_sem_t> ObjectStore::tryLockDataset(long uid) {
+/*
+ * Lock a Dataset by uid, throws when the Dataset has been destroyed
+ * There is a single global condition which allows to avoid active spinning
+ * Every time a Dataset releases a lock it must broadcast the condition
+ */
+AsyncLock ObjectStore::lockDataset(long uid) {
+  uv_scoped_mutex lock(&master_lock);
   while (true) {
-    lock();
     auto parent = uidMap<GDALDataset *>.find(uid);
-    if (parent != uidMap<GDALDataset *>.end()) {
-      int r = uv_sem_trywait(parent->second->async_lock.get());
-      unlock();
-      if (r == 0) return parent->second->async_lock;
-    } else {
-      unlock();
-      throw "Parent Dataset object has already been destroyed";
-    }
-    std::this_thread::yield();
+    if (parent == uidMap<GDALDataset *>.end()) { throw "Parent Dataset object has already been destroyed"; }
+    int r = uv_sem_trywait(parent->second->async_lock.get());
+    if (r == 0) { return parent->second->async_lock; }
+    uv_cond_wait(&master_sleep, &master_lock);
   }
 }
 
-vector<shared_ptr<uv_sem_t>> ObjectStore::tryLockDatasets(vector<long> uids) {
+/*
+ * Lock several Datasets by uid avoiding deadlocks, same semantics as the previous one
+ */
+vector<AsyncLock> ObjectStore::lockDatasets(vector<long> uids) {
   // There is lots of copying around here but these vectors are never longer than 3 elements
   // Avoid deadlocks
-  std::sort(uids.begin(), uids.end());
-  // Eliminate dupes
-  uids.erase(std::unique(uids.begin(), uids.end()), uids.end());
+  sort(uids.begin(), uids.end());
+  // Eliminate dupes and 0s
+  uids.erase(unique(uids.begin(), uids.end()), uids.end());
+  if (uids.front() == 0) uids.erase(uids.begin());
+  if (uids.size() == 0) return {};
+  uv_scoped_mutex lock(&master_lock);
   while (true) {
-    vector<shared_ptr<uv_sem_t>> locks;
-    lock();
-    for (long uid : uids) {
-      if (!uid) continue;
-      auto parent = uidMap<GDALDataset *>.find(uid);
-      if (parent == uidMap<GDALDataset *>.end()) {
-        unlock();
-        throw "Parent Dataset object has already been destroyed";
-      }
-      locks.push_back(parent->second->async_lock);
-    }
-    vector<shared_ptr<uv_sem_t>> locked;
-    int r = 0;
-    for (shared_ptr<uv_sem_t> &async_lock : locks) {
-      r = uv_sem_trywait(async_lock.get());
-      if (r == 0) {
-        locked.push_back(async_lock);
-      } else {
-        // We failed acquiring one of the locks =>
-        // free all acquired locks and start a new cycle
-        for (shared_ptr<uv_sem_t> &lock : locked) { uv_sem_post(lock.get()); }
-        break;
-      }
-    }
-    unlock();
-    if (r == 0) return locks;
-    std::this_thread::yield();
+    try {
+      vector<AsyncLock> locks = _tryLockDatasets(uids);
+      if (locks.size() > 0) { return locks; }
+    } catch (const char *msg) { throw msg; }
+    uv_cond_wait(&master_sleep, &master_lock);
   }
+}
+
+/*
+ * Acquire the lock only if it is free, do not block
+ */
+AsyncLock ObjectStore::tryLockDataset(long uid) {
+  uv_scoped_mutex lock(&master_lock);
+  auto parent = uidMap<GDALDataset *>.find(uid);
+  if (parent == uidMap<GDALDataset *>.end()) { throw "Parent Dataset object has already been destroyed"; }
+  int r = uv_sem_trywait(parent->second->async_lock.get());
+  if (r == 0) return parent->second->async_lock;
+  return nullptr;
+}
+
+vector<AsyncLock> ObjectStore::_tryLockDatasets(vector<long> uids) {
+  vector<AsyncLock> locks;
+  for (long uid : uids) {
+    auto parent = uidMap<GDALDataset *>.find(uid);
+    if (parent == uidMap<GDALDataset *>.end()) { throw "Parent Dataset object has already been destroyed"; }
+    locks.push_back(parent->second->async_lock);
+  }
+  vector<AsyncLock> locked;
+  int r = 0;
+  for (AsyncLock &async_lock : locks) {
+    r = uv_sem_trywait(async_lock.get());
+    if (r == 0) {
+      locked.push_back(async_lock);
+    } else {
+      // We failed acquiring one of the locks =>
+      // free all acquired locks and start a new cycle
+      for (AsyncLock &lock : locked) { uv_sem_post(lock.get()); }
+      uv_cond_broadcast(&master_sleep);
+      break;
+    }
+  }
+  if (r == 0) return locks;
+  return {};
+}
+
+/*
+ * Try to acquire several locks avoiding deadlocks without blocking
+ */
+vector<AsyncLock> ObjectStore::tryLockDatasets(vector<long> uids) {
+  // There is lots of copying around here but these vectors are never longer than 3 elements
+  // Avoid deadlocks
+  sort(uids.begin(), uids.end());
+  // Eliminate dupes and 0s
+  uids.erase(unique(uids.begin(), uids.end()), uids.end());
+  if (uids.front() == 0) uids.erase(uids.begin());
+  if (uids.size() == 0) return {};
+  uv_scoped_mutex lock(&master_lock);
+  return _tryLockDatasets(uids);
 }
 
 // The basic unit of the ObjectStore is the ObjectStoreItem<GDALPTR>
@@ -131,7 +190,7 @@ vector<shared_ptr<uv_sem_t>> ObjectStore::tryLockDatasets(vector<long> uids) {
 // Only after both have happened, the ObjectStoreItem<GDALPTR> is destroyed
 template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, const Local<Object> &obj, long parent_uid) {
   LOG("ObjectStore: Add %s [<%ld]", typeid(ptr).name(), parent_uid);
-  lock();
+  uv_scoped_mutex lock(&master_lock);
   shared_ptr<ObjectStoreItem<GDALPTR>> item(new ObjectStoreItem<GDALPTR>);
   item->uid = uid++;
   if (parent_uid) {
@@ -149,7 +208,6 @@ template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, const Local<Objec
 
   uidMap<GDALPTR>[item->uid] = item;
   ptrMap<GDALPTR>[ptr] = item;
-  unlock();
   LOG("ObjectStore: Added %s [%ld]", typeid(ptr).name(), item->uid);
   return item->uid;
 }
@@ -162,7 +220,7 @@ long ObjectStore::add(OGRLayer *ptr, const Local<Object> &obj, long parent_uid, 
 }
 
 // Creating a Dataset object is a special case
-// It contains a lock and an I/O queue (unless it is a dependant Dataset)
+// It contains a lock (unless it is a dependant Dataset)
 long ObjectStore::add(GDALDataset *ptr, const Local<Object> &obj, long parent_uid) {
   long uid = ObjectStore::add<GDALDataset *>(ptr, obj, parent_uid);
   if (parent_uid == 0) {
@@ -219,29 +277,29 @@ template Local<Object> ObjectStore::get(shared_ptr<GDALMDArray>);
 //
 // Is there a simpler solution with a single code path? It remains to be seen
 
-// Disposing a Dataset is a special case - it has children
+// Disposing a Dataset is a special case - it has children (called with the master lock held)
 template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>> item) {
   uv_sem_wait(item->async_lock.get());
   uidMap<GDALDataset *>.erase(item->uid);
   ptrMap<GDALDataset *>.erase(item->ptr);
   if (item->parent != nullptr) item->parent->children.remove(item->uid);
   uv_sem_post(item->async_lock.get());
+  uv_cond_broadcast(&master_sleep);
 
-  while (!item->children.empty()) { dispose(item->children.back()); }
+  while (!item->children.empty()) { do_dispose(item->children.back()); }
 }
 
-// Generic disposal
+// Generic disposal (called with the master lock held)
 template <typename GDALPTR> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item) {
-  shared_ptr<uv_sem_t> async_lock = nullptr;
-  if (item->parent) {
-    try {
-      async_lock = tryLockDataset(item->parent->uid);
-    } catch (const char *) {};
-  }
+  AsyncLock async_lock = nullptr;
+  if (item->parent != nullptr) uv_sem_wait(item->parent->async_lock.get());
   ptrMap<GDALPTR>.erase(item->ptr);
   uidMap<GDALPTR>.erase(item->uid);
-  if (item->parent != nullptr) item->parent->children.remove(item->uid);
-  if (async_lock != nullptr) uv_sem_post(async_lock.get());
+  if (item->parent != nullptr) {
+    item->parent->children.remove(item->uid);
+    uv_sem_post(item->parent->async_lock.get());
+    uv_cond_broadcast(&master_sleep);
+  }
 }
 
 // Death by GC
@@ -249,17 +307,20 @@ template <typename GDALPTR>
 void ObjectStore::weakCallback(const Nan::WeakCallbackInfo<shared_ptr<ObjectStoreItem<GDALPTR>>> &data) {
   shared_ptr<ObjectStoreItem<GDALPTR>> *item = (shared_ptr<ObjectStoreItem<GDALPTR>> *)data.GetParameter();
   LOG("ObjectStore: Death by GC %s [%ld]", typeid((*item)->ptr).name(), (*item)->uid);
-  object_store.lock();
+  uv_scoped_mutex lock(&object_store.master_lock);
   object_store.dispose(*item);
-  object_store.unlock();
   delete item; // this is the dynamically allocated shared_ptr
 }
 
 // Death by calling dispose from C++ code
 void ObjectStore::dispose(long uid) {
   LOG("ObjectStore: Death by calling dispose from C++ [%ld]", uid);
-  lock();
+  uv_scoped_mutex lock(&master_lock);
+  do_dispose(uid);
+}
 
+// The locked section of the above function
+void ObjectStore::do_dispose(long uid) {
   if (uidMap<GDALDataset *>.count(uid))
     dispose(uidMap<GDALDataset *>[uid]);
   else if (uidMap<OGRLayer *>.count(uid))
@@ -276,13 +337,12 @@ void ObjectStore::dispose(long uid) {
   else if (uidMap<shared_ptr<GDALAttribute>>.count(uid))
     dispose(uidMap<shared_ptr<GDALAttribute>>[uid]);
 #endif
-  unlock();
 }
 
 // Destruction = called after both disposals
 // Frees the memory and the resources
 
-// This is the final phase of the removal
+// This is the final phase of the tear down
 // This is triggered when all 3 shared_ptrs have been destroyed
 // The last one will call the class destructor
 template <typename GDALPTR> ObjectStoreItem<GDALPTR>::~ObjectStoreItem() {

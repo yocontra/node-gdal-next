@@ -135,7 +135,7 @@ NAN_GETTER(Attribute::valueGetter) {
   Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(Attribute, info.This(), attribute);
   GDAL_RAW_CHECK(std::shared_ptr<GDALAttribute>, attribute, raw);
-  GDAL_TRYLOCK_PARENT(attribute);
+  GDAL_LOCK_PARENT(attribute);
   GDALExtendedDataType type = raw->GetDataType();
   Local<Value> r;
   switch (type.GetClass()) {
@@ -143,7 +143,7 @@ NAN_GETTER(Attribute::valueGetter) {
     case GEDTC_STRING: r = SafeString::New(raw->ReadAsString()); break;
     default: Nan::ThrowError("Compound attributes are not supported yet"); return;
   }
-  GDAL_UNLOCK_PARENT;
+
   info.GetReturnValue().Set(r);
 }
 
@@ -156,7 +156,7 @@ NAN_GETTER(Attribute::typeGetter) {
   Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(Attribute, info.This(), attribute);
   GDAL_RAW_CHECK(std::shared_ptr<GDALAttribute>, attribute, raw);
-  GDAL_TRYLOCK_PARENT(attribute);
+  GDAL_LOCK_PARENT(attribute);
   GDALExtendedDataType type = raw->GetDataType();
   const char *r;
   switch (type.GetClass()) {
@@ -165,7 +165,7 @@ NAN_GETTER(Attribute::typeGetter) {
     case GEDTC_COMPOUND: r = "Compound"; break;
     default: Nan::ThrowError("Invalid attribute type"); return;
   }
-  GDAL_UNLOCK_PARENT;
+
   info.GetReturnValue().Set(SafeString::New(r));
 }
 

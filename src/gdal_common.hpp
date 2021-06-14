@@ -645,9 +645,8 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
+    GDAL_LOCK_PARENT(obj);                                                                                             \
     auto r = obj->this_->wrapped_method();                                                                             \
-    GDAL_UNLOCK_PARENT;                                                                                                \
     info.GetReturnValue().Set(SafeString::New(r.c_str()));                                                             \
   }
 
@@ -659,9 +658,8 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
+    GDAL_LOCK_PARENT(obj);                                                                                             \
     auto r = obj->this_->wrapped_method();                                                                             \
-    GDAL_UNLOCK_PARENT;                                                                                                \
     info.GetReturnValue().Set(Nan::New<result_type>(r));                                                               \
   }
 
@@ -753,9 +751,8 @@ NAN_SETTER(READ_ONLY_SETTER);
     GDALAsyncableJob<OGRErr> job;                                                                                      \
     job.persist(info.This());                                                                                          \
     job.main = [gdal_obj, parent_uid](const GDALExecutionProgress &) {                                                 \
-      GDAL_ASYNCABLE_LOCK(parent_uid);                                                                                 \
+      AsyncGuard lock(parent_uid);                                                                                     \
       int err = gdal_obj->wrapped_method();                                                                            \
-      GDAL_UNLOCK_PARENT;                                                                                              \
       if (err) throw getOGRErrMsg(err);                                                                                \
       return err;                                                                                                      \
     };                                                                                                                 \
@@ -974,7 +971,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
+    GDAL_LOCK_PARENT(obj);                                                                                             \
     int err = obj->this_->wrapped_method();                                                                            \
     GDAL_UNLOCK_PARENT;                                                                                                \
     if (err) {                                                                                                         \
@@ -994,9 +991,8 @@ NAN_SETTER(READ_ONLY_SETTER);
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
       return;                                                                                                          \
     }                                                                                                                  \
-    GDAL_TRYLOCK_PARENT(obj);                                                                                             \
+    GDAL_LOCK_PARENT(obj);                                                                                             \
     auto r = obj->this_->wrapped_method(param.c_str());                                                                \
-    GDAL_UNLOCK_PARENT;                                                                                                \
     info.GetReturnValue().Set(Nan::New<result_type>(r));                                                               \
   }
 

@@ -56,7 +56,7 @@ try {
   /* ignore */
 }
 
-process.on('SIGINT', async () => {
+async function cleanup() {
   console.log('Ctrl-C... exiting')
   stop = true
   await Promise.all(operations.filter((op) => op))
@@ -65,7 +65,9 @@ process.on('SIGINT', async () => {
   const cpuIdleEnd = os.cpus().map((cpu) => cpu.times.idle).reduce((a, x) => a + x, 0)
   console.log('parallelization waste: ', ((cpuIdleEnd - cpuIdleStart) / (cpuUserEnd - cpuUserStart)).toPrecision(3))
   process.exit(0)
-})
+}
+process.once('SIGHUP', cleanup)
+process.once('SIGINT', cleanup)
 
 function operation(slot) {
   if (Math.random() > probabilityToKeepDataset) {

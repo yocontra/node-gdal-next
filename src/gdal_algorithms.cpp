@@ -75,9 +75,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
   long mask_uid = mask ? mask->parent_uid : 0;
 
   job.main = [src_uid, mask_uid, gdal_src, gdal_mask, search_dist, smooth_iterations](const GDALExecutionProgress &) {
-    GDAL_ASYNCABLE_LOCK_MANY(src_uid, mask_uid);
+    AsyncGuard lock({src_uid, mask_uid});
     CPLErr err = GDALFillNodata(gdal_src, gdal_mask, search_dist, 0, smooth_iterations, NULL, NULL, NULL);
-    GDAL_UNLOCK_MANY;
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
@@ -206,7 +205,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
               id_field,
               elev_field,
               progress_cb](const GDALExecutionProgress &progress) {
-    GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid);
+    AsyncGuard lock({src_uid, dst_uid});
     CPLErr err = GDALContourGenerate(
       gdal_src,
       interval,
@@ -220,7 +219,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
       elev_field,
       progress_cb ? ProgressTrampoline : nullptr,
       progress_cb ? (void *)&progress : nullptr);
-    GDAL_UNLOCK_MANY;
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
@@ -306,7 +304,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   }
   job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_dst, gdal_mask, threshold, connectedness, progress_cb](
                const GDALExecutionProgress &progress) {
-    GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid, mask_uid);
+    AsyncGuard lock({src_uid, dst_uid, mask_uid});
     CPLErr err = GDALSieveFilter(
       gdal_src,
       gdal_mask,
@@ -316,7 +314,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
       NULL,
       progress_cb ? ProgressTrampoline : nullptr,
       progress_cb ? (void *)&progress : nullptr);
-    GDAL_UNLOCK_MANY;
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
@@ -391,9 +388,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
   GDALAsyncableJob<int> job;
 
   job.main = [src_uid, gdal_src, x, y, w, h](const GDALExecutionProgress &) {
-    GDAL_ASYNCABLE_LOCK(src_uid);
+    AsyncGuard lock(src_uid);
     int r = GDALChecksumImage(gdal_src, x, y, w, h);
-    GDAL_UNLOCK_PARENT;
     return r;
   };
   job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Integer>(r); };
@@ -492,7 +488,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
     Nan::To<bool>(Nan::Get(obj, Nan::New("useFloats").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
     job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](
                  const GDALExecutionProgress &progress) {
-      GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid, mask_uid);
+      AsyncGuard lock({src_uid, dst_uid, mask_uid});
       CPLErr err = GDALFPolygonize(
         gdal_src,
         gdal_mask,
@@ -501,7 +497,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
         papszOptions,
         progress_cb ? ProgressTrampoline : nullptr,
         progress_cb ? (void *)&progress : nullptr);
-      GDAL_UNLOCK_MANY;
       if (papszOptions) CSLDestroy(papszOptions);
       if (err) throw CPLGetLastErrorMsg();
       return err;
@@ -509,7 +504,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   } else {
     job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](
                  const GDALExecutionProgress &progress) {
-      GDAL_ASYNCABLE_LOCK_MANY(src_uid, dst_uid, mask_uid);
+      AsyncGuard lock({src_uid, dst_uid, mask_uid});
       CPLErr err = GDALPolygonize(
         gdal_src,
         gdal_mask,
@@ -518,7 +513,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
         papszOptions,
         progress_cb ? ProgressTrampoline : nullptr,
         progress_cb ? (void *)&progress : nullptr);
-      GDAL_UNLOCK_MANY;
       if (papszOptions) CSLDestroy(papszOptions);
       if (err) throw CPLGetLastErrorMsg();
       return err;
@@ -544,11 +538,10 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::_acquireLocks) {
   GDALAsyncableJob<int> job;
   job.persist({ds1->handle(), ds2->handle(), ds3->handle()});
   job.main = [ds1_uid, ds2_uid, ds3_uid](const GDALExecutionProgress &) {
-    GDAL_ASYNCABLE_LOCK_MANY(ds1_uid, ds2_uid, ds3_uid);
+    AsyncGuard lock({ds1_uid, ds2_uid, ds3_uid});
     int i, sum = 0;
     // make sure the optimizer won't surprise us
     for (i = 0; i < 1e4; i++) sum += i;
-    GDAL_UNLOCK_MANY;
     return sum;
   };
   job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };

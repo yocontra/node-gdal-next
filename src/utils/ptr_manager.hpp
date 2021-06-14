@@ -22,6 +22,8 @@ using namespace std;
 
 namespace node_gdal {
 
+typedef shared_ptr<uv_sem_t> AsyncLock;
+
 template <typename GDALPTR> struct ObjectStoreItem {
   long uid;
   shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
@@ -44,7 +46,7 @@ template <> struct ObjectStoreItem<GDALDataset *> {
   shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
   list<long> children;
   GDALDataset *ptr;
-  shared_ptr<uv_sem_t> async_lock;
+  AsyncLock async_lock;
   Nan::Persistent<v8::Object> obj;
   ~ObjectStoreItem();
 };
@@ -68,11 +70,11 @@ struct uv_sem_deleter {
 // * All objects carry the dataset uid
 //
 // * All GDAL operations on an object require locking the parent dataset
-// - This is best accomplished though tr.tryLockDataset
+// - This is best accomplished though .lockDataset
 //
 // * Deadlock avoidance strategy
 // - One should never lock the master lock while holding an async_lock
-// - Multiple datasets are to be locked with .tryLockDataset which sorts locks
+// - Multiple datasets are to be locked with .lockDataset which sorts locks
 //
 
 class ObjectStore {
@@ -83,20 +85,27 @@ class ObjectStore {
 
   void dispose(long uid);
   bool isAlive(long uid);
-  shared_ptr<uv_sem_t> tryLockDataset(long uid);
-  vector<shared_ptr<uv_sem_t>> tryLockDatasets(vector<long> uids);
-  inline void lock() {
-    uv_mutex_lock(&master_lock);
+  inline void lockDataset(AsyncLock lock) {
+    uv_sem_wait(lock.get());
   }
-  inline void unlock() {
-    uv_mutex_unlock(&master_lock);
+  inline void unlockDataset(AsyncLock lock) {
+    uv_sem_post(lock.get());
+    uv_cond_broadcast(&master_sleep);
   }
+  inline void unlockDatasets(vector<AsyncLock> locks) {
+    for (const AsyncLock &l : locks) uv_sem_post(l.get());
+    uv_cond_broadcast(&master_sleep);
+  }
+  AsyncLock lockDataset(long uid);
+  vector<AsyncLock> lockDatasets(vector<long> uids);
+  AsyncLock tryLockDataset(long uid);
+  vector<AsyncLock> tryLockDatasets(vector<long> uids);
 
   template <typename GDALPTR>
   static void weakCallback(const Nan::WeakCallbackInfo<shared_ptr<ObjectStoreItem<GDALPTR>>> &data);
 
-  template <typename GDALPTR> inline bool has(GDALPTR ptr);
-  template <typename GDALPTR> inline Local<Object> get(GDALPTR ptr);
+  template <typename GDALPTR> bool has(GDALPTR ptr);
+  template <typename GDALPTR> Local<Object> get(GDALPTR ptr);
 
   ObjectStore();
   ~ObjectStore();
@@ -104,7 +113,10 @@ class ObjectStore {
     private:
   long uid;
   uv_mutex_t master_lock;
+  uv_cond_t master_sleep;
+  vector<AsyncLock> _tryLockDatasets(vector<long> uids);
   template <typename GDALPTR> void dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item);
+  void do_dispose(long uid);
 };
 
 } // namespace node_gdal

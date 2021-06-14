@@ -282,7 +282,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   if (options->useMultithreading()) {
     job.main =
       [uids, options, opts, s_srs_str, t_srs_str, maxError, progress_cb](const GDALExecutionProgress &progress) {
-        GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
+        AsyncGuard lock(uids);
         CPLErr err = GDALReprojectImageMulti(
           opts->hSrcDS,
           s_srs_str.c_str(),
@@ -294,14 +294,13 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
           progress_cb ? ProgressTrampoline : nullptr,
           progress_cb ? (void *)&progress : nullptr,
           opts);
-        GDAL_UNLOCK_MANY;
         if (err) { throw CPLGetLastErrorMsg(); }
         return err;
       };
   } else {
     job.main =
       [uids, options, opts, s_srs_str, t_srs_str, maxError, progress_cb](const GDALExecutionProgress &progress) {
-        GDAL_ASYNCABLE_LOCK_MANY(uids[0], uids[1]);
+        AsyncGuard lock(uids);
         CPLErr err = GDALReprojectImage(
           opts->hSrcDS,
           s_srs_str.c_str(),
@@ -313,7 +312,6 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
           progress_cb ? ProgressTrampoline : nullptr,
           progress_cb ? (void *)&progress : nullptr,
           opts);
-        GDAL_UNLOCK_MANY;
         if (err) { throw CPLGetLastErrorMsg(); }
         return err;
       };
@@ -430,16 +428,13 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
   job.main = [gdal_ds, uid, s_srs_str, t_srs_str, maxError](const GDALExecutionProgress &) {
     struct warpOutputResult r;
 
-    GDAL_ASYNCABLE_LOCK(uid);
+    AsyncGuard lock(uid);
 
     void *hTransformArg;
     void *hGenTransformArg =
       GDALCreateGenImgProjTransformer(gdal_ds, s_srs_str.c_str(), NULL, t_srs_str.c_str(), TRUE, 1000.0, 0);
 
-    if (!hGenTransformArg) {
-      GDAL_UNLOCK_PARENT;
-      throw CPLGetLastErrorMsg();
-    }
+    if (!hGenTransformArg) { throw CPLGetLastErrorMsg(); }
 
     GDALTransformerFunc pfnTransformer;
 
@@ -449,7 +444,6 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
 
       if (!hTransformArg) {
         GDALDestroyGenImgProjTransformer(hGenTransformArg);
-        GDAL_UNLOCK_PARENT;
         throw CPLGetLastErrorMsg();
       }
     } else {
@@ -461,7 +455,6 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
 
     GDALDestroyGenImgProjTransformer(hGenTransformArg);
     if (maxError > 0.0) { GDALDestroyApproxTransformer(hTransformArg); }
-    GDAL_UNLOCK_PARENT;
 
     if (err) { throw CPLGetLastErrorMsg(); }
     return r;
