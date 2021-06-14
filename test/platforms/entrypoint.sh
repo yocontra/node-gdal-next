@@ -2,10 +2,10 @@
 
 SEP="\n=======================================================\n"
 echo -e "${SEP}Preparing source tree${SEP}"
-rsync -r /src/ /target --exclude=build --exclude=test --exclude node_modules
+rsync -r /src/ /target --exclude=build --exclude=test/data --exclude node_modules
 cd /target
 rm -rf lib/binding package-lock.json
-git checkout test
+git checkout test/data
 npm install --ignore-scripts
 
 if [ "${GDAL}" == "shared" ]; then

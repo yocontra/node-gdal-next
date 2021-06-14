@@ -1,4 +1,6 @@
 import { assert } from 'chai'
+import * as semver from 'semver'
+import * as path from 'path'
 import * as gdal from '..'
 
 // create = function -> class cannot be directly instantiated
@@ -9,21 +11,21 @@ const create = {
   CompoundCurveCurves: () => new gdal.CompoundCurve().curves,
   CoordinateTransformation: [ gdal.SpatialReference.fromEPSG(4326), gdal.SpatialReference.fromEPSG(3857) ],
   Dataset: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte),
-  DatasetBands: () => gdal.open(`${__dirname}/data/sample.tif`).bands,
-  DatasetLayers: () => gdal.open(`${__dirname}/data/park.geo.json`).layers,
+  DatasetBands: () => gdal.open(path.resolve(__dirname, 'data', 'sample.tif')).bands,
+  DatasetLayers: () => gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')).layers,
   Driver: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte).driver,
   Feature: [ new gdal.FeatureDefn() ],
   FeatureDefn: [],
   FeatureDefnFields: () => new gdal.FeatureDefn().fields,
-  FeatureFields: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0).features.get(0).fields,
+  FeatureFields: () => gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')).layers.get(0).features.get(0).fields,
   FieldDefn: [ 'id', gdal.OFTInteger ],
   GDALDrivers: () => gdal.drivers,
   Geometry: () => new gdal.LineString(),
   GeometryCollection: [],
   GeometryCollectionChildren: () => new gdal.GeometryCollection().children,
-  Layer: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0),
-  LayerFields: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0).fields,
-  LayerFeatures: () => gdal.open(`${__dirname}/data/park.geo.json`).layers.get(0).features,
+  Layer: () => gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')).layers.get(0),
+  LayerFields: () => gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')).layers.get(0).fields,
+  LayerFeatures: () => gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')).layers.get(0).features,
   LinearRing: [],
   LineString: [],
   LineStringPoints: () => new gdal.LineString().points,
@@ -41,10 +43,28 @@ const create = {
   SpatialReference: []
 }
 
+const create31 = {
+  Attribute: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.attributes.get(1),
+  ArrayAttributes: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.arrays.get(1).attributes,
+  ArrayDimensions: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.arrays.get(1).dimensions,
+  Dimension: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.dimensions.get(1),
+  Group: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root,
+  GroupAttributes: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.attributes,
+  GroupArrays: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.arrays,
+  GroupDimensions: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.dimensions,
+  GroupGroups: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.groups,
+  MDArray: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.arrays.get(1)
+}
+
 describe('Class semantics', () => {
   afterEach(global.gc)
 
-  for (const name in create) {
+  const klasses = create
+  if (semver.gte(gdal.version, '3.1.0')) {
+    Object.assign(klasses, create31)
+  }
+
+  for (const name in klasses) {
     it(`gdal.${name}`, () => {
       let o
       if (typeof create[name] === 'function') {
