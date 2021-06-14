@@ -13,12 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - NetCDF, GRIB, HDF5, Carto, FlatGeobuf, WMS, WMTS and WCS drivers
   - Support generalized strides in `gdal.RasterBandPixels.{write|read}()`
   - Add `gdal.RasterBandPixels.{set|get}Async()`
+  - Add `gdal.RasterBand.computeStatisticsAsync`
 
 ### Changed
  - Vastly improved locking mechanism allowing better parallelization
  - Linux release builds have lazy binding enabled
  - `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
  - Completely reworked persistent object storage
+ - Thread-safe `gdal.RasterBand.fillAsync`
 
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library

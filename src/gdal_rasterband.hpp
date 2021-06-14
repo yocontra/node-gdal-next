@@ -31,7 +31,7 @@ class RasterBand : public Nan::ObjectWrap {
   static NAN_METHOD(asMDArray);
 #endif
   static NAN_METHOD(getStatistics);
-  static NAN_METHOD(computeStatistics);
+  GDAL_ASYNCABLE_DECLARE(computeStatistics);
   static NAN_METHOD(setStatistics);
   static NAN_METHOD(getMaskBand);
   static NAN_METHOD(getMaskFlags);

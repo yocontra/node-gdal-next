@@ -507,5 +507,50 @@ describe('gdal.RasterBandAsync', () => {
         })
       })
     })
+    describe('fillAsync()', () => {
+      it('should set all pixels to given value', () => {
+        const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+        const band = ds.bands.get(1)
+        band.fillAsync(5)
+        const data = band.pixels.read(0, 0, 16, 16)
+        for (let i = 0; i < data.length; i++) {
+          assert.equal(data[i], 5)
+        }
+      })
+      it('should reject if dataset already closed', () => {
+        const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+        const band = ds.bands.get(1)
+        ds.close()
+        return assert.isRejected(band.fillAsync(5))
+      })
+    })
+    describe('statistics', () => {
+      const statsBand = () => {
+        const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+        const band = ds.bands.get(1)
+        band.fill(5)
+        band.pixels.set(10, 10, 20)
+        band.pixels.set(0, 0, 0)
+        return band
+      }
+      describe('computeStatisticsAsync()', () => {
+        it('should compute statistics', () => {
+          const band = statsBand()
+          const statsq = band.computeStatisticsAsync(false)
+          return assert.isFulfilled(statsq.then((stats) => {
+            assert.equal(stats.min, 0)
+            assert.equal(stats.max, 20)
+            assert.closeTo(stats.mean, 5, 0.1)
+            assert.closeTo(stats.std_dev, 1, 0.1)
+          }))
+        })
+        it('should reject if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.computeStatisticsAsync(false))
+        })
+      })
+    })
   })
 })

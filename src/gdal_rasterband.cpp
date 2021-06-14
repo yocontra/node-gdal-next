@@ -10,6 +10,7 @@
 
 #include <cpl_port.h>
 #include <limits>
+#include <mutex>
 
 namespace node_gdal {
 
@@ -30,7 +31,7 @@ void RasterBand::Initialize(Local<Object> target) {
 #endif
   Nan::SetPrototypeMethod(lcons, "getStatistics", getStatistics);
   Nan::SetPrototypeMethod(lcons, "setStatistics", setStatistics);
-  Nan::SetPrototypeMethod(lcons, "computeStatistics", computeStatistics);
+  Nan__SetPrototypeAsyncableMethod(lcons, "computeStatistics", computeStatistics);
   Nan::SetPrototypeMethod(lcons, "getMaskBand", getMaskBand);
   Nan::SetPrototypeMethod(lcons, "getMaskFlags", getMaskFlags);
   Nan::SetPrototypeMethod(lcons, "createMaskBand", createMaskBand);
@@ -267,7 +268,10 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
 
   GDALAsyncableJob<CPLErr> job;
   GDALRasterBand *gdal_obj = band->this_;
-  job.main = [gdal_obj, real, imaginary](const GDALExecutionProgress &) {
+
+  long ds_uid = band->parent_uid;
+  job.main = [ds_uid, gdal_obj, real, imaginary](const GDALExecutionProgress &) {
+    AsyncGuard lock(ds_uid);
     CPLErr err = gdal_obj->Fill(real, imaginary);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -280,6 +284,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
 // --- Custom error handling to handle VRT errors ---
 // see: https://github.com/mapbox/mapnik-omnivore/issues/10
 
+std::mutex stats_lock;
 std::string stats_file_err = "";
 CPLErrorHandler last_err_handler;
 void CPL_STDCALL statisticsErrorHandler(CPLErr eErrClass, int err_no, const char *msg) {
@@ -372,6 +377,10 @@ NAN_METHOD(RasterBand::getStatistics) {
 }
 
 /**
+ * @typedef stats { min: number, max: number, mean: number, std_dev: number }
+ */
+
+/**
  * Computes image statistics.
  *
  * Returns the minimum, maximum, mean and standard deviation of all pixel values
@@ -383,33 +392,69 @@ NAN_METHOD(RasterBand::getStatistics) {
  * @method computeStatistics
  * @param {boolean} allow_approximation If `true` statistics may be computed
  * based on overviews or a subset of all tiles.
- * @return {any} Statistics containing `"min"`, `"max"`, `"mean"`,
+ * @return {stats} Statistics containing `"min"`, `"max"`, `"mean"`,
  * `"std_dev"` properties.
  */
-NAN_METHOD(RasterBand::computeStatistics) {
+
+/**
+ * Computes image statistics.
+ * {{async}}
+ *
+ * Returns the minimum, maximum, mean and standard deviation of all pixel values
+ * in this band. If approximate statistics are sufficient, the
+ * `allow_approximation` argument can be set to `true` in which case overviews,
+ * or a subset of image tiles may be used in computing the statistics.
+ *
+ * @throws Error
+ * @method computeStatisticsAsync
+ * @param {boolean} allow_approximation If `true` statistics may be computed
+ * based on overviews or a subset of all tiles.
+ * @param {callback<stats>} [callback=undefined] {{{cb}}}
+ * @return {Promise<stats>} Statistics containing `"min"`, `"max"`, `"mean"`,
+ * `"std_dev"` properties.
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBand::computeStatistics) {
   Nan::HandleScope scope;
-  double min, max, mean, std_dev;
+  struct stats_t {
+    double min, max, mean, std_dev;
+  };
   int approx;
+
   NODE_ARG_BOOL(0, "allow approximation", approx);
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  pushStatsErrorHandler();
-  CPLErr err = band->this_->ComputeStatistics(approx, &min, &max, &mean, &std_dev, NULL, NULL);
-  popStatsErrorHandler();
-  if (!stats_file_err.empty()) {
-    Nan::ThrowError(stats_file_err.c_str());
-  } else if (err) {
-    NODE_THROW_LAST_CPLERR;
-    return;
-  }
 
-  Local<Object> result = Nan::New<Object>();
-  Nan::Set(result, Nan::New("min").ToLocalChecked(), Nan::New<Number>(min));
-  Nan::Set(result, Nan::New("max").ToLocalChecked(), Nan::New<Number>(max));
-  Nan::Set(result, Nan::New("mean").ToLocalChecked(), Nan::New<Number>(mean));
-  Nan::Set(result, Nan::New("std_dev").ToLocalChecked(), Nan::New<Number>(std_dev));
+  GDALAsyncableJob<stats_t> job;
+  GDALRasterBand *gdal_obj = band->this_;
+  long ds_uid = band->parent_uid;
 
-  info.GetReturnValue().Set(result);
+  job.main = [ds_uid, gdal_obj, approx](const GDALExecutionProgress &) {
+    struct stats_t stats;
+    AsyncGuard lock(ds_uid);
+    std::lock_guard<std::mutex> guard(stats_lock);
+
+    pushStatsErrorHandler();
+    CPLErr err = gdal_obj->ComputeStatistics(approx, &stats.min, &stats.max, &stats.mean, &stats.std_dev, NULL, NULL);
+    popStatsErrorHandler();
+    if (!stats_file_err.empty()) {
+      throw stats_file_err.c_str();
+    } else if (err != CPLE_None) {
+      throw CPLGetLastErrorMsg();
+    }
+
+    return stats;
+  };
+
+  job.rval = [](stats_t r, GetFromPersistentFunc) {
+    Nan::EscapableHandleScope scope;
+    Local<Object> result = Nan::New<Object>();
+    Nan::Set(result, Nan::New("min").ToLocalChecked(), Nan::New<Number>(r.min));
+    Nan::Set(result, Nan::New("max").ToLocalChecked(), Nan::New<Number>(r.max));
+    Nan::Set(result, Nan::New("mean").ToLocalChecked(), Nan::New<Number>(r.mean));
+    Nan::Set(result, Nan::New("std_dev").ToLocalChecked(), Nan::New<Number>(r.std_dev));
+    return scope.Escape(result);
+  };
+
+  job.run(info, async, 1);
 }
 
 /**
