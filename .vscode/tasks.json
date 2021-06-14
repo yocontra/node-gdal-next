@@ -4,9 +4,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build Debug",
+      "label": "Build",
       "type": "shell",
-      "command": "node-pre-gyp configure --debug && node-pre-gyp build -j max --debug",
+      "command": "npx node-pre-gyp build -j max",
       "problemMatcher": {
         "base": "$gcc",
         "fileLocation": [
@@ -20,9 +20,30 @@
       }
     },
     {
-      "label": "Build ASAN",
+      "label": "Configure Release",
       "type": "shell",
-      "command": "node-pre-gyp configure --debug --enable_asan && node-pre-gyp build -j max --debug",
+      "command": "npx node-pre-gyp configure",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Configure Debug",
+      "type": "shell",
+      "command": "npx node-pre-gyp configure --debug",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Configure ASAN",
+      "type": "shell",
+      "command": "npx node-pre-gyp configure --debug --enable_asan",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Configure coverage",
+      "type": "shell",
+      "command": "npx node-pre-gyp configure --debug --enable_coverage",
       "problemMatcher": [],
       "group": "build"
     },
