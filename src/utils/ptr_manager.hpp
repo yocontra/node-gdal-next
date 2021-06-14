@@ -55,28 +55,6 @@ struct uv_sem_deleter {
   void operator()(uv_sem_t *p);
 };
 
-// A class for cleaning up GDAL objects that depend on open datasets
-
-// Async lock semantics:
-//
-// * There is one global master lock
-//
-// * There is one async lock per dataset
-//
-// * All operations on the ObjectStore should acquire the master_lock
-// - This implicit in all cases except isAlive()
-// - The caller should explicitly lock isAlive()
-//
-// * All objects carry the dataset uid
-//
-// * All GDAL operations on an object require locking the parent dataset
-// - This is best accomplished though .lockDataset
-//
-// * Deadlock avoidance strategy
-// - One should never lock the master lock while holding an async_lock
-// - Multiple datasets are to be locked with .lockDataset which sorts locks
-//
-
 class ObjectStore {
     public:
   template <typename GDALPTR> long add(GDALPTR ptr, const Local<Object> &obj, long parent_uid);

@@ -29,6 +29,30 @@
 // For this use, the V8 objects are indexed with numeric uids
 // ptrs won't be safe for this use
 
+// Async lock semantics:
+//
+// * There is one global master lock, all operations on the ObjectStore structures
+//   must acquire it
+// * There is one async lock per dataset and it is a semaphore because it needs
+//   to support being acquired by the main thread and being unlocked in a worker
+// * Sync operation can sleep on the semaphore as only the main thread can
+//   delete a semaphore
+// * Async operations should sleep on the master_sleep condition as semaphores
+//   can be deleted by the main thread (but this would also mean that someone forgot
+//   to protect his object from the GC)
+// * Acquiring a semaphore requires acquiring the master look otherwise the
+//   semaphore may disappear
+// * When waking from master_sleep, the presence of the semaphore (isAlive) must be
+//   checked again
+// * When unlocking a semaphore, the master_sleep condition is to be broadcasted
+// * Never acquire the master lock while holding a semaphore (deadlock avoidance)
+// * Multiple datasets are to be locked with .lockDataset which sorts locks (deadlock avoidance)
+// * Never sleep with the master lock held (performance)
+// * All objects carry the dataset uid
+// * All GDAL operations on a dependant object require locking the parent dataset
+// - This is best accomplished though .lockDataset
+// * Dependant Datasets share a semaphore with their parent through a shared_ptr
+
 namespace node_gdal {
 
 // Because of severe bugs linked to C++14 template variables in MSVC
