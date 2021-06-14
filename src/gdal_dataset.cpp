@@ -910,9 +910,9 @@ NAN_GETTER(Dataset::rootGetter) {
   MaybeLocal<Value> maybeRootObj = Nan::GetPrivate(info.This(), Nan::New("root_").ToLocalChecked());
   Local<Value> rootObj;
   if (rootObj.IsEmpty()) {
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
     NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
     GDAL_RAW_CHECK(GDALDataset *, ds, gdal_ds);
-#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
     AsyncLock lock = object_store.lockDataset(ds->uid);
     std::shared_ptr<GDALGroup> root = gdal_ds->GetRootGroup();
     object_store.unlockDataset(lock);
