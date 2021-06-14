@@ -51,7 +51,7 @@ jobs:
 
     strategy:
       matrix:
-        linux-version: [ 'ubuntu:18.04', 'debian:buster', 'fedora:33', 'archlinux:latest' ]
+        linux-version: [ 'ubuntu:18.04', 'debian:buster', 'centos:8', 'fedora:33', 'archlinux:latest' ]
         gdal-version: [ 'shared', 'bundled' ]
 
     steps:
