@@ -1,6 +1,4 @@
-*.md
 Makefile
-AUTHORS
 yuidoc.json
 .editorconfig
 .eslintrc.json
