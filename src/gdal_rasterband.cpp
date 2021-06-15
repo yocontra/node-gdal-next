@@ -155,7 +155,7 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
   ds = object_store.get(raw_parent);
   Dataset *parent = Nan::ObjectWrap::Unwrap<Dataset>(ds);
   long parent_uid = parent->uid;
-  wrapped->uid = object_store.add(raw, obj, parent_uid);
+  wrapped->uid = object_store.add(raw, wrapped->persistent(), parent_uid);
   wrapped->parent_ds = raw_parent;
   wrapped->parent_uid = parent_uid;
   Nan::SetPrivate(obj, Nan::New("ds_").ToLocalChecked(), ds);

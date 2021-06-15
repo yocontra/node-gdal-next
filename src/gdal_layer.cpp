@@ -137,7 +137,7 @@ Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set)
   Dataset *unwrapped = Nan::ObjectWrap::Unwrap<Dataset>(ds);
   long parent_uid = unwrapped->uid;
 
-  wrapped->uid = object_store.add(raw, obj, parent_uid, result_set);
+  wrapped->uid = object_store.add(raw, wrapped->persistent(), parent_uid, result_set);
   wrapped->parent_ds = raw_parent;
   wrapped->parent_uid = parent_uid;
   Nan::SetPrivate(obj, Nan::New("ds_").ToLocalChecked(), ds);

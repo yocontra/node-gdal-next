@@ -112,7 +112,7 @@ Local<Value> Dimension::New(std::shared_ptr<GDALDimension> raw, GDALDataset *par
   Dataset *unwrapped_ds = Nan::ObjectWrap::Unwrap<Dataset>(ds);
   long parent_uid = unwrapped_ds->uid;
 
-  wrapped->uid = object_store.add(raw, obj, parent_uid);
+  wrapped->uid = object_store.add(raw, wrapped->persistent(), parent_uid);
   wrapped->parent_ds = parent_ds;
   wrapped->parent_uid = parent_uid;
 

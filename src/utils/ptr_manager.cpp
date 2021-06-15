@@ -206,21 +206,24 @@ vector<AsyncLock> ObjectStore::tryLockDatasets(vector<long> uids) {
 
 // The basic unit of the ObjectStore is the ObjectStoreItem<GDALPTR>
 // There is only one such item per GDALPTR
-// There are three shared_ptr to it:
+// There are two shared_ptr to it:
 // * one in the uidMap
 // * one in the ptrMap
-// * and one dynamically allocated on the heap passed to the weakCallback
+// There is alo a reference to the Persistent in Nan::ObjectWrap
+// This is a Weak Persistent and Nan::ObjectWrap will call the C++ destructor
+// when the GC calls the Weak Callback which will trigger the dispose functions below
 
-// Do not forget that the destruction path is two-fold
-// * through dispose called from the C++ destructor (when the GC calls Nan::ObjectWrap)
-// * through the weakCallback called from the GC (when the GC acts on the ObjectStore Persistent)
-// Both will happen and there is no order
-// Both will disable further use of the object (removing it from the store)
-// Only after both have happened, the ObjectStoreItem<GDALPTR> is destroyed
-template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, const Local<Object> &obj, long parent_uid) {
+template <typename GDALPTR> ObjectStoreItem<GDALPTR>::ObjectStoreItem(Nan::Persistent<Object> &obj) : obj(obj) {
+}
+ObjectStoreItem<GDALDataset *>::ObjectStoreItem(Nan::Persistent<Object> &obj) : obj(obj) {
+}
+ObjectStoreItem<OGRLayer *>::ObjectStoreItem(Nan::Persistent<Object> &obj) : obj(obj) {
+}
+
+template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, Nan::Persistent<Object> &obj, long parent_uid) {
   LOG("ObjectStore: Add %s [<%ld]", typeid(ptr).name(), parent_uid);
   uv_scoped_mutex lock(&master_lock);
-  shared_ptr<ObjectStoreItem<GDALPTR>> item(new ObjectStoreItem<GDALPTR>);
+  shared_ptr<ObjectStoreItem<GDALPTR>> item(new ObjectStoreItem<GDALPTR>(obj));
   item->uid = uid++;
   if (parent_uid) {
     shared_ptr<ObjectStoreItem<GDALDataset *>> parent = uidMap<GDALDataset *>[parent_uid];
@@ -230,10 +233,6 @@ template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, const Local<Objec
     item->parent = nullptr;
   }
   item->ptr = ptr;
-  item->obj.Reset(obj);
-  // The pointer to a shared_ptr is a necessary evil, SetWeak/WeakCallback take only raw pointers
-  shared_ptr<ObjectStoreItem<GDALPTR>> *raw = new shared_ptr<ObjectStoreItem<GDALPTR>>(item);
-  item->obj.SetWeak(raw, weakCallback<GDALPTR>, Nan::WeakCallbackType::kParameter);
 
   uidMap<GDALPTR>[item->uid] = item;
   ptrMap<GDALPTR>[ptr] = item;
@@ -242,7 +241,7 @@ template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, const Local<Objec
 }
 
 // Creating a Layer object is a special case - it can contain SQL results
-long ObjectStore::add(OGRLayer *ptr, const Local<Object> &obj, long parent_uid, bool is_result_set) {
+long ObjectStore::add(OGRLayer *ptr, Nan::Persistent<Object> &obj, long parent_uid, bool is_result_set) {
   long uid = ObjectStore::add<OGRLayer *>(ptr, obj, parent_uid);
   uidMap<OGRLayer *>[uid] -> is_result_set = is_result_set;
   return uid;
@@ -250,7 +249,7 @@ long ObjectStore::add(OGRLayer *ptr, const Local<Object> &obj, long parent_uid, 
 
 // Creating a Dataset object is a special case
 // It contains a lock (unless it is a dependant Dataset)
-long ObjectStore::add(GDALDataset *ptr, const Local<Object> &obj, long parent_uid) {
+long ObjectStore::add(GDALDataset *ptr, Nan::Persistent<Object> &obj, long parent_uid) {
   long uid = ObjectStore::add<GDALDataset *>(ptr, obj, parent_uid);
   if (parent_uid == 0) {
     uidMap<GDALDataset *>[uid] -> async_lock = shared_ptr<uv_sem_t>(new uv_sem_t(), uv_sem_deleter());
@@ -276,9 +275,9 @@ template <typename GDALPTR> Local<Object> ObjectStore::get(long uid) {
 // Explicit instantiation:
 // * allows calling object_store.add without <>
 // * makes sure that this class template won't be accidentally instantiated with an unsupported type
-template long ObjectStore::add(GDALDriver *, const Local<Object> &, long);
-template long ObjectStore::add(GDALRasterBand *, const Local<Object> &, long);
-template long ObjectStore::add(OGRSpatialReference *, const Local<Object> &, long);
+template long ObjectStore::add(GDALDriver *, Nan::Persistent<Object> &, long);
+template long ObjectStore::add(GDALRasterBand *, Nan::Persistent<Object> &, long);
+template long ObjectStore::add(OGRSpatialReference *, Nan::Persistent<Object> &, long);
 template bool ObjectStore::has(GDALDriver *);
 template bool ObjectStore::has(GDALDataset *);
 template bool ObjectStore::has(OGRLayer *);
@@ -291,10 +290,10 @@ template Local<Object> ObjectStore::get(GDALRasterBand *);
 template Local<Object> ObjectStore::get(OGRSpatialReference *);
 template Local<Object> ObjectStore::get<GDALDataset *>(long uid);
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
-template long ObjectStore::add(shared_ptr<GDALAttribute>, const Local<Object> &, long);
-template long ObjectStore::add(shared_ptr<GDALDimension>, const Local<Object> &, long);
-template long ObjectStore::add(shared_ptr<GDALGroup>, const Local<Object> &, long);
-template long ObjectStore::add(shared_ptr<GDALMDArray>, const Local<Object> &, long);
+template long ObjectStore::add(shared_ptr<GDALAttribute>, Nan::Persistent<Object> &, long);
+template long ObjectStore::add(shared_ptr<GDALDimension>, Nan::Persistent<Object> &, long);
+template long ObjectStore::add(shared_ptr<GDALGroup>, Nan::Persistent<Object> &, long);
+template long ObjectStore::add(shared_ptr<GDALMDArray>, Nan::Persistent<Object> &, long);
 template bool ObjectStore::has(shared_ptr<GDALAttribute>);
 template bool ObjectStore::has(shared_ptr<GDALDimension>);
 template bool ObjectStore::has(shared_ptr<GDALGroup>);
@@ -305,15 +304,24 @@ template Local<Object> ObjectStore::get(shared_ptr<GDALGroup>);
 template Local<Object> ObjectStore::get(shared_ptr<GDALMDArray>);
 #endif
 
-// Disposing = called by either the destructor or the GC (WeakCallback)
+static inline void uv_sem_waitWithWarning(uv_sem_t *sem) {
+  if (uv_sem_trywait(sem) != 0) {
+    auto startTime = clock();
+    fprintf(stderr, "Sleeping on semaphore in garbage collector, this is a bug in gdal-async, event loop blocked for ");
+    uv_sem_wait(sem);
+    fprintf(stderr, "%ld µs\n", clock() - startTime);
+  }
+}
+
+// Disposing = called by the C++ destructor which is called by Nan::ObjectWrap
+// which is called by the WeakCallback of the GC on its Persistent
+// This is the same Persistent that has a reference in the ObjectStoreItem
 // Removes the object and all its children for the ObjectStore
-// Called twice
-//
-// Is there a simpler solution with a single code path? It remains to be seen
 
 // Disposing a Dataset is a special case - it has children (called with the master lock held)
 template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>> item) {
-  uv_sem_wait(item->async_lock.get());
+  uv_sem_waitWithWarning(item->async_lock.get());
+
   uidMap<GDALDataset *>.erase(item->uid);
   ptrMap<GDALDataset *>.erase(item->ptr);
   if (item->parent != nullptr) item->parent->children.remove(item->uid);
@@ -325,8 +333,7 @@ template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>>
 
 // Generic disposal (called with the master lock held)
 template <typename GDALPTR> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item) {
-  AsyncLock async_lock = nullptr;
-  if (item->parent != nullptr) uv_sem_wait(item->parent->async_lock.get());
+  if (item->parent != nullptr) uv_sem_waitWithWarning(item->parent->async_lock.get());
   ptrMap<GDALPTR>.erase(item->ptr);
   uidMap<GDALPTR>.erase(item->uid);
   if (item->parent != nullptr) {
@@ -336,17 +343,7 @@ template <typename GDALPTR> void ObjectStore::dispose(shared_ptr<ObjectStoreItem
   }
 }
 
-// Death by GC
-template <typename GDALPTR>
-void ObjectStore::weakCallback(const Nan::WeakCallbackInfo<shared_ptr<ObjectStoreItem<GDALPTR>>> &data) {
-  shared_ptr<ObjectStoreItem<GDALPTR>> *item = (shared_ptr<ObjectStoreItem<GDALPTR>> *)data.GetParameter();
-  LOG("ObjectStore: Death by GC %s [%ld]", typeid((*item)->ptr).name(), (*item)->uid);
-  uv_scoped_mutex lock(&object_store.master_lock);
-  object_store.dispose(*item);
-  delete item; // this is the dynamically allocated shared_ptr
-}
-
-// Death by calling dispose from C++ code
+// Called from the C++ destructor
 void ObjectStore::dispose(long uid) {
   LOG("ObjectStore: Death by calling dispose from C++ [%ld]", uid);
   uv_scoped_mutex lock(&master_lock);
@@ -361,6 +358,10 @@ void ObjectStore::do_dispose(long uid) {
     dispose(uidMap<OGRLayer *>[uid]);
   else if (uidMap<GDALRasterBand *>.count(uid))
     dispose(uidMap<GDALRasterBand *>[uid]);
+  else if (uidMap<GDALDriver *>.count(uid))
+    dispose(uidMap<GDALDriver *>[uid]);
+  else if (uidMap<OGRSpatialReference *>.count(uid))
+    dispose(uidMap<OGRSpatialReference *>[uid]);
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
   else if (uidMap<shared_ptr<GDALGroup>>.count(uid))
     dispose(uidMap<shared_ptr<GDALGroup>>[uid]);
@@ -373,11 +374,11 @@ void ObjectStore::do_dispose(long uid) {
 #endif
 }
 
-// Destruction = called after both disposals
+// Destruction
 // Frees the memory and the resources
 
 // This is the final phase of the tear down
-// This is triggered when all 3 shared_ptrs have been destroyed
+// This is triggered when all shared_ptrs have been destroyed
 // The last one will call the class destructor
 template <typename GDALPTR> ObjectStoreItem<GDALPTR>::~ObjectStoreItem() {
 }

@@ -144,7 +144,7 @@ Local<Value> Dataset::New(GDALDataset *raw, GDALDataset *parent) {
   Local<Object> obj =
     Nan::NewInstance(Nan::GetFunction(Nan::New(Dataset::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
-  wrapped->uid = object_store.add(raw, obj, parent_uid);
+  wrapped->uid = object_store.add(raw, wrapped->persistent(), parent_uid);
 
   return scope.Escape(obj);
 }

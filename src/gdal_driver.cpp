@@ -97,7 +97,7 @@ Local<Value> Driver::New(GDALDriver *driver) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(Driver::constructor)).ToLocalChecked(), 1, &ext).ToLocalChecked();
 
   // LOG("ADDING DRIVER TO CACHE [%p]", driver);
-  wrapped->uid = object_store.add(driver, obj, 0);
+  wrapped->uid = object_store.add(driver, wrapped->persistent(), 0);
   // LOG("DONE ADDING DRIVER TO CACHE [%p]", driver);
 
   return scope.Escape(obj);

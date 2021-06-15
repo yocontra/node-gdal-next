@@ -128,7 +128,7 @@ NAN_METHOD(SpatialReference::New) {
     f->owned_ = true;
     f->Wrap(info.This());
 
-    f->uid = object_store.add(srs, info.This(), 0);
+    f->uid = object_store.add(srs, f->persistent(), 0);
   }
 
   info.GetReturnValue().Set(info.This());
@@ -163,7 +163,7 @@ Local<Value> SpatialReference::New(OGRSpatialReference *raw, bool owned) {
     Nan::NewInstance(Nan::GetFunction(Nan::New(SpatialReference::constructor)).ToLocalChecked(), 1, &ext)
       .ToLocalChecked();
 
-  wrapped->uid = object_store.add(raw, obj, 0);
+  wrapped->uid = object_store.add(raw, wrapped->persistent(), 0);
 
   return scope.Escape(obj);
 }

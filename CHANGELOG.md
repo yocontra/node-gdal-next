@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Completely reworked persistent object storage
  - Thread-safe `gdal.RasterBand.fillAsync`
  - Fix a number of cases where an unreferenced `gdal.Dataset` was not protected from the GC during an asynchronous operation
+ - Add an explicit warning when the GC has to active sleep on an async operation and solve all (known) cases where this was happening
 
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library

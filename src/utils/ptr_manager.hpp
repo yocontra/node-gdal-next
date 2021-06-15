@@ -26,28 +26,31 @@ typedef shared_ptr<uv_sem_t> AsyncLock;
 
 template <typename GDALPTR> struct ObjectStoreItem {
   long uid;
-  shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
+  Nan::Persistent<v8::Object> &obj;
   GDALPTR ptr;
-  Nan::Persistent<v8::Object> obj;
+  shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
+  ObjectStoreItem(Nan::Persistent<Object> &obj);
   ~ObjectStoreItem();
 };
 
 template <> struct ObjectStoreItem<OGRLayer *> {
   long uid;
-  shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
+  Nan::Persistent<v8::Object> &obj;
   OGRLayer *ptr;
+  shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
   bool is_result_set;
-  Nan::Persistent<v8::Object> obj;
+  ObjectStoreItem(Nan::Persistent<Object> &obj);
   ~ObjectStoreItem();
 };
 
 template <> struct ObjectStoreItem<GDALDataset *> {
   long uid;
+  Nan::Persistent<v8::Object> &obj;
+  GDALDataset *ptr;
   shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
   list<long> children;
-  GDALDataset *ptr;
   AsyncLock async_lock;
-  Nan::Persistent<v8::Object> obj;
+  ObjectStoreItem(Nan::Persistent<Object> &obj);
   ~ObjectStoreItem();
 };
 
@@ -57,9 +60,9 @@ struct uv_sem_deleter {
 
 class ObjectStore {
     public:
-  template <typename GDALPTR> long add(GDALPTR ptr, const Local<Object> &obj, long parent_uid);
-  long add(OGRLayer *ptr, const Local<Object> &obj, long parent_uid, bool is_result_set);
-  long add(GDALDataset *ptr, const Local<Object> &obj, long parent_uid);
+  template <typename GDALPTR> long add(GDALPTR ptr, Nan::Persistent<Object> &obj, long parent_uid);
+  long add(OGRLayer *ptr, Nan::Persistent<Object> &obj, long parent_uid, bool is_result_set);
+  long add(GDALDataset *ptr, Nan::Persistent<Object> &obj, long parent_uid);
 
   void dispose(long uid);
   bool isAlive(long uid);
@@ -78,9 +81,6 @@ class ObjectStore {
   vector<AsyncLock> lockDatasets(vector<long> uids);
   AsyncLock tryLockDataset(long uid);
   vector<AsyncLock> tryLockDatasets(vector<long> uids);
-
-  template <typename GDALPTR>
-  static void weakCallback(const Nan::WeakCallbackInfo<shared_ptr<ObjectStoreItem<GDALPTR>>> &data);
 
   template <typename GDALPTR> bool has(GDALPTR ptr);
   template <typename GDALPTR> Local<Object> get(GDALPTR ptr);
