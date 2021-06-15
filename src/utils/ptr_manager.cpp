@@ -35,7 +35,7 @@
 //   must acquire it
 // * There is one async lock per dataset and it is a semaphore because it needs
 //   to support being acquired by the main thread and being unlocked in a worker
-// * Sync operation can sleep on the semaphore as only the main thread can
+// * Sync operations can sleep on the semaphore as only the main thread can
 //   delete a semaphore
 // * Async operations should sleep on the master_sleep condition as semaphores
 //   can be deleted by the main thread (but this would also mean that someone forgot

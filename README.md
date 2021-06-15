@@ -19,15 +19,15 @@ It adds a number of features:
 - **Support for asynchronous IO** (since 3.0)
 - **Full native TypeScript support** with autocompletion in IDEs that support it (since 3.1)
 - **Built-in networking support** with native support for cloud services (since 3.2)
-- **scijs/ndarray integration** with zero-copy I/O (will appear in 3.3)
-- **Read-only support for the new Multidimensional Raster Data Model of GDAL 3.1** (will appear in 3.3)
+- **scijs/ndarray integration** with zero-copy I/O (since 3.3)
+- **Read-only support for the new Multidimensional Raster Data Model of GDAL 3.1** (since 3.3)
 - Support for curve geometries (since 3.1)
 - Progress callbacks (since 3.2)
-- Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (will appear in 3.3)
+- Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (since 3.3)
 - Numerous bugfixes including a number of memory leaks
 
 The default install is currently the 3.2 branch which is bundled with GDAL 3.2.3.
-The 3.3 branch, which introduces a number of significant changes, and is bundled with GDAL 3.3.0, is available by installing `gdal-async@alpha`.
+The 3.3 branch, which introduces a number of significant changes, and is bundled with GDAL 3.3.0, is available by installing `gdal-async@beta`.
 
 Support for `worker_threads` is planned but it is not a priority project
 
