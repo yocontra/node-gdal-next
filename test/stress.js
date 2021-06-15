@@ -56,7 +56,7 @@ let opens = 0, ops = 0
 let stop = false
 
 try {
-  gdal.startLogging(`${__dirname}/stress.log`)
+  gdal.startLogging(`${__dirname}/artifacts/stress.log`)
 } catch (e) {
   /* ignore */
 }
