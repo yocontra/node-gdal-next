@@ -120,7 +120,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
   NODE_ARG_INT(0, "feature id", feature_id);
   OGRLayer *gdal_layer = layer->get();
   GDALAsyncableJob<OGRFeature *> job(layer->parent_uid);
-  job.persist(parent);
+  job.persist(layer->handle());
   job.main = [gdal_layer, feature_id](const GDALExecutionProgress &) {
     OGRFeature *feature = gdal_layer->GetFeature(feature_id);
     return feature;
@@ -159,7 +159,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
 
   OGRLayer *gdal_layer = layer->get();
   GDALAsyncableJob<OGRFeature *> job(layer->parent_uid);
-  job.persist(parent);
+  job.persist(layer->handle());
   job.main = [gdal_layer](const GDALExecutionProgress &) {
     gdal_layer->ResetReading();
     OGRFeature *feature = gdal_layer->GetNextFeature();
@@ -205,7 +205,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
 
   OGRLayer *gdal_layer = layer->get();
   GDALAsyncableJob<OGRFeature *> job(layer->parent_uid);
-  job.persist(parent);
+  job.persist(layer->handle());
   job.main = [gdal_layer](const GDALExecutionProgress &) {
     OGRFeature *feature = gdal_layer->GetNextFeature();
     return feature;
@@ -266,7 +266,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
   OGRLayer *gdal_layer = layer->get();
   OGRFeature *gdal_f = f->get();
   GDALAsyncableJob<int> job(layer->parent_uid);
-  job.persist(parent);
+  job.persist(layer->handle());
   job.main = [gdal_layer, gdal_f](const GDALExecutionProgress &) {
     int err = gdal_layer->CreateFeature(gdal_f);
     if (err != CE_None) throw getOGRErrMsg(err);
@@ -318,7 +318,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
 
   OGRLayer *gdal_layer = layer->get();
   GDALAsyncableJob<GIntBig> job(layer->parent_uid);
-  job.persist(parent);
+  job.persist(layer->handle());
   job.main = [gdal_layer, force](const GDALExecutionProgress &) {
     GIntBig count = gdal_layer->GetFeatureCount(force);
     return count;
@@ -403,7 +403,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
   OGRLayer *gdal_layer = layer->get();
   OGRFeature *gdal_feature = f->get();
   GDALAsyncableJob<OGRErr> job(layer->parent_uid);
-  job.persist({parent, feature});
+  job.persist(layer->handle(), f->handle());
   job.main = [gdal_layer, gdal_feature](const GDALExecutionProgress &) {
     OGRErr err = gdal_layer->SetFeature(gdal_feature);
     if (err != CE_None) throw getOGRErrMsg(err);
@@ -448,7 +448,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
 
   OGRLayer *gdal_layer = layer->get();
   GDALAsyncableJob<int> job(layer->parent_uid);
-  job.persist(parent);
+  job.persist(layer->handle());
   job.main = [gdal_layer, i](const GDALExecutionProgress &) {
     int err = gdal_layer->DeleteFeature(i);
     if (err) { throw getOGRErrMsg(err); }
