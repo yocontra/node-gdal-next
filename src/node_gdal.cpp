@@ -117,6 +117,7 @@ using namespace v8;
 
 FILE *log_file = NULL;
 ObjectStore object_store;
+bool eventLoopWarn = true;
 
 /**
  * @attribute lastError
@@ -147,6 +148,20 @@ static NAN_SETTER(LastErrorSetter) {
     Nan::ThrowError("'lastError' only supports being set to null");
     return;
   }
+}
+
+static NAN_GETTER(EventLoopWarningGetter) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New<Boolean>(eventLoopWarn));
+}
+
+static NAN_SETTER(EventLoopWarningSetter) {
+  Nan::HandleScope scope;
+  if (!value->IsBoolean()) {
+    Nan::ThrowError("'eventLoopWarning' must be a boolean value");
+    return;
+  }
+  eventLoopWarn = Nan::To<bool>(value).ToChecked();
 }
 
 extern "C" {
@@ -1578,6 +1593,19 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @type {object}
    */
   Nan::SetAccessor(target, Nan::New<v8::String>("lastError").ToLocalChecked(), LastErrorGetter, LastErrorSetter);
+
+  /**
+   * Should a warning be emitted to stderr when a synchronous operation
+   * is blocking the event loop, can be safely disabled unless
+   * the user application needs to remain responsive at all times
+   * Use `(gdal as any).eventLoopWarning = false` to set the value from TypeScript
+   *
+   * @for gdal
+   * @property gdal.eventLoopWarning
+   * @type {boolean}
+   */
+  Nan::SetAccessor(
+    target, Nan::New<v8::String>("eventLoopWarning").ToLocalChecked(), EventLoopWarningGetter, EventLoopWarningSetter);
 
   // Local<Object> versions = Nan::New<Object>();
   // Nan::Set(versions, Nan::New("node").ToLocalChecked(),

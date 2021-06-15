@@ -34,6 +34,13 @@
       "group": "build"
     },
     {
+      "label": "Configure Logging",
+      "type": "shell",
+      "command": "npx node-pre-gyp configure --debug --enable_logging",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
       "label": "Configure ASAN",
       "type": "shell",
       "command": "npx node-pre-gyp configure --debug --enable_asan",

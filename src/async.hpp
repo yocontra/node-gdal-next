@@ -49,7 +49,11 @@ namespace node_gdal {
     return;                                                                                                            \
   }
 
-// These constructor throw
+static const char eventLoopWarning[] =
+  "Synchronous method called while an asynchronous operation is running in the background, check node_modules/gdal-async/ASYNCIO.md, event loop blocked for ";
+// These constructors throw
+// Only one use case never throws: on the main thread
+// and after checking that the Dataset is alive
 class AsyncGuard {
     public:
   inline AsyncGuard() : lock(nullptr), locks(nullptr) {
@@ -62,6 +66,27 @@ class AsyncGuard {
       lock = object_store.lockDataset(uids[0]);
     else
       locks = make_shared<vector<AsyncLock>>(object_store.lockDatasets(uids));
+  }
+  inline AsyncGuard(vector<long> uids, bool warning) : lock(nullptr), locks(nullptr) {
+    if (uids.size() == 1) {
+      if (uids[0] == 0) return;
+      lock = warning ? object_store.tryLockDataset(uids[0]) : object_store.lockDataset(uids[0]);
+      if (lock == nullptr) {
+        auto startTime = clock();
+        fprintf(stderr, eventLoopWarning);
+        lock = object_store.lockDataset(uids[0]);
+        fprintf(stderr, "%ld µs\n", clock() - startTime);
+      }
+    } else {
+      locks = warning ? make_shared<vector<AsyncLock>>(object_store.tryLockDatasets(uids))
+                      : make_shared<vector<AsyncLock>>(object_store.lockDatasets(uids));
+      if (locks->size() == 0) {
+        auto startTime = clock();
+        fprintf(stderr, eventLoopWarning);
+        locks = make_shared<vector<AsyncLock>>(object_store.lockDatasets(uids));
+        fprintf(stderr, "%ld µs\n", clock() - startTime);
+      }
+    }
   }
   inline void acquire(long uid) {
     if (lock != nullptr) throw "Trying to acquire multiple locks";
@@ -305,7 +330,7 @@ template <class GDALType> class GDALAsyncableJob {
     }
     try {
       GDALExecutionProgress executionProgress(new GDALSyncExecutionProgress(progress));
-      AsyncGuard lock(ds_uids);
+      AsyncGuard lock(ds_uids, eventLoopWarn);
       GDALType obj = main(executionProgress);
       // rval is the user function that will create the returned value
       // we give it a lambda that can access the persistent storage created for this operation

@@ -2,7 +2,9 @@
 
 Common pitfalls to avoid when writing server code
 
-## Mixing of synchronous and asynchronous operations
+## Mixing of synchronous and asynchronous operations (or why does gdal-async complain)
+
+*If you are not writing server code that must remain responsive at all times and should never block the event loop for more than a few hundred microseconds, you can safely ignore this warning. In this case you can simply set `gdal.eventLoopWarning = false`.*
 
 Consider the following `async` code:
 ```js
@@ -14,13 +16,11 @@ const data2 = band2.pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y)
 await Promise.all([ data1, data2 ])
 ```
 
-As this code uses only async operations, one could expect that it will never block the event loop. In fact, it is a very dangerous code to put in a multi-user server as depending on the exact order of execution, the first asynchronous read could lock the dataset before that second one has had the chance to start. In this case, accessing `ds.rasterSize` will be a blocking operation that will have to wait for the first read to complete. As this is a synchronous operation, this will have the effect of completely blocking the event loop until the first read is finished.
+As this code uses only async operations, one could expect that it will never block the event loop. In fact, it is a very dangerous code to put in a multi-user server as depending on the exact order of execution, the first asynchronous read could lock the dataset before that second one has had the chance to start. In this case, accessing `ds.rasterSize` will be a blocking operation that will have to wait for the first read to complete. As this is a synchronous getter, this will have the effect of completely blocking the event loop until the first read is finished.
 
 In all other cases, accessing a synchronous getter or setter is an instantaneous operation that can be safely used in server code.
 
 **As a general rule, never access synchronous getters or setters on a Dataset after starting any I/O operation on that same Dataset. Retrieve all the needed values beforehand.**
-
-As an eventual solution, I am considering for a future version is a configurable optional behavior, via a setting, `neverBlock` that will raise an exception if an operation tries to access a locked Dataset on the main thread.
 
 ## Worker thread starvation
 

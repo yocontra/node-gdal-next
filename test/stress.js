@@ -27,6 +27,11 @@ const tests = [
       .then((l) => l.features.getAsync(0))
       .then((f) => assert(f.fields.toObject().texte_arre === magicString))
   }
+  /*() => {
+    // This should trigger the event loop warning
+    const dsq = datasetsRaster[Math.floor(Math.random() * openDatasets)]
+    return dsq.then((ds) => assert(ds.rasterSize.x == size.x))
+  }*/
 ]
 
 const gdal = require('..')

@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Support generalized strides in `gdal.RasterBandPixels.{write|read}()`
   - Add `gdal.RasterBandPixels.{set|get}Async()`
   - Add `gdal.RasterBand.computeStatisticsAsync`
+  - Add an explicit stderr warning when the GC has to active sleep on an async operation and solve all (known) occurrences
+  - Add an explicit stderr warning when user code is calling a synchronous method while an asynchronous operation is running in the background
 
 ### Changed
  - Vastly improved locking mechanism allowing better parallelization
@@ -22,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Completely reworked persistent object storage
  - Thread-safe `gdal.RasterBand.fillAsync`
  - Fix a number of cases where an unreferenced `gdal.Dataset` was not protected from the GC during an asynchronous operation
- - Add an explicit warning when the GC has to active sleep on an async operation and solve all (known) cases where this was happening
 
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library

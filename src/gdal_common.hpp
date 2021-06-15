@@ -17,6 +17,7 @@
 namespace node_gdal {
 extern FILE *log_file;
 extern ObjectStore object_store;
+extern bool eventLoopWarn;
 } // namespace node_gdal
 
 #ifdef ENABLE_LOGGING

@@ -55,7 +55,7 @@ int GroupAttributes::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method getAsync
  *
- * @param {string|attribute} attribute
+ * @param {string|number} attribute
  * @param {callback<gdal.Attribute>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Attribute>}
  */

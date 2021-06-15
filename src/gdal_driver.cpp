@@ -214,6 +214,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   // Very careful here
   // we can't reference automatic variables, thus the *options object
   GDALAsyncableJob<GDALDataset *> job(0);
+  job.persist(driver->handle());
   job.main = [raw, filename, x_size, y_size, n_bands, type, options](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
@@ -284,22 +285,14 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return; // error parsing string list
   }
 
-  AsyncLock async_lock = nullptr;
-  try {
-    async_lock = object_store.lockDataset(src_dataset->uid);
-  } catch (const char *err) {
-    Nan::ThrowError(err);
-    return;
-  }
-
   GDALDriver *raw = driver->getGDALDriver();
   GDALDataset *raw_ds = src_dataset->get();
-  GDALAsyncableJob<GDALDataset *> job(0);
+  GDALAsyncableJob<GDALDataset *> job(src_dataset->uid);
   job.rval = DatasetRval;
-  job.main = [raw, filename, raw_ds, strict, options, async_lock](const GDALExecutionProgress &) {
+  job.persist(driver->handle());
+  job.main = [raw, filename, raw_ds, strict, options](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
-    object_store.unlockDataset(async_lock);
     if (!ds) CPLGetLastErrorMsg();
     return ds;
   };
@@ -423,6 +416,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   GDALDriver *raw = driver->getGDALDriver();
 
   GDALAsyncableJob<GDALDataset *> job(0);
+  job.persist(driver->handle());
   job.main = [raw, path, access](const GDALExecutionProgress &) {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);

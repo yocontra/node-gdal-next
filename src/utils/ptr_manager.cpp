@@ -345,7 +345,7 @@ template <typename GDALPTR> void ObjectStore::dispose(shared_ptr<ObjectStoreItem
 
 // Called from the C++ destructor
 void ObjectStore::dispose(long uid) {
-  LOG("ObjectStore: Death by calling dispose from C++ [%ld]", uid);
+  LOG("ObjectStore: Dispose [%ld]", uid);
   uv_scoped_mutex lock(&master_lock);
   do_dispose(uid);
 }
