@@ -570,21 +570,25 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     o.get()[i] = Nan::To<int32_t>(val).ToChecked();
   }
 
-  AsyncGuard lock({ds->uid}, eventLoopWarn);
-  if (!bands.IsEmpty()) {
-    n_bands = bands->Length();
-    b = std::shared_ptr<int>(new int[n_bands], array_deleter<int>());
-    for (i = 0; i < n_bands; i++) {
-      Local<Value> val = Nan::Get(bands, i).ToLocalChecked();
-      if (!val->IsNumber()) {
-        Nan::ThrowError("band array must only contain numbers");
-        return;
-      }
-      b.get()[i] = Nan::To<int32_t>(val).ToChecked();
-      if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) {
-        // BuildOverviews prints an error but segfaults before returning
-        Nan::ThrowError("invalid band id");
-        return;
+  // FIXME: even buildOverviewsAsync would block the event loop if called
+  // while another operation is running on the same Dataset
+  {
+    AsyncGuard lock({ds->uid}, eventLoopWarn);
+    if (!bands.IsEmpty()) {
+      n_bands = bands->Length();
+      b = std::shared_ptr<int>(new int[n_bands], array_deleter<int>());
+      for (i = 0; i < n_bands; i++) {
+        Local<Value> val = Nan::Get(bands, i).ToLocalChecked();
+        if (!val->IsNumber()) {
+          Nan::ThrowError("band array must only contain numbers");
+          return;
+        }
+        b.get()[i] = Nan::To<int32_t>(val).ToChecked();
+        if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) {
+          // BuildOverviews prints an error but segfaults before returning
+          Nan::ThrowError("invalid band id");
+          return;
+        }
       }
     }
   }
