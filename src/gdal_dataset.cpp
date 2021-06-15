@@ -539,14 +539,10 @@ NAN_METHOD(Dataset::setGCPs) {
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   Nan::HandleScope scope;
-  Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
-  if (!ds->isAlive()) {
-    Nan::ThrowError("Dataset object has already been destroyed");
-    return;
-  }
+  NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
+  GDAL_RAW_CHECK(GDALDataset *, ds, raw);
 
-  GDALDataset *raw = ds->get();
   std::string resampling = "";
   Local<Array> overviews;
   Local<Array> bands;
@@ -570,26 +566,16 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     o.get()[i] = Nan::To<int32_t>(val).ToChecked();
   }
 
-  // FIXME: even buildOverviewsAsync would block the event loop if called
-  // while another operation is running on the same Dataset
-  {
-    AsyncGuard lock({ds->uid}, eventLoopWarn);
-    if (!bands.IsEmpty()) {
-      n_bands = bands->Length();
-      b = std::shared_ptr<int>(new int[n_bands], array_deleter<int>());
-      for (i = 0; i < n_bands; i++) {
-        Local<Value> val = Nan::Get(bands, i).ToLocalChecked();
-        if (!val->IsNumber()) {
-          Nan::ThrowError("band array must only contain numbers");
-          return;
-        }
-        b.get()[i] = Nan::To<int32_t>(val).ToChecked();
-        if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) {
-          // BuildOverviews prints an error but segfaults before returning
-          Nan::ThrowError("invalid band id");
-          return;
-        }
+  if (!bands.IsEmpty()) {
+    n_bands = bands->Length();
+    b = std::shared_ptr<int>(new int[n_bands], array_deleter<int>());
+    for (i = 0; i < n_bands; i++) {
+      Local<Value> val = Nan::Get(bands, i).ToLocalChecked();
+      if (!val->IsNumber()) {
+        Nan::ThrowError("band array must only contain numbers");
+        return;
       }
+      b.get()[i] = Nan::To<int32_t>(val).ToChecked();
     }
   }
 
@@ -603,6 +589,11 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   // But we can use a shared_ptr because the lifetime of the lambda is limited by the lifetime
   // of the async worker
   job.main = [raw, resampling, n_overviews, o, n_bands, b, progress_cb](const GDALExecutionProgress &progress) {
+    if (b != nullptr) {
+      for (int i = 0; i < n_bands; i++) {
+        if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) { throw "invalid band id"; }
+      }
+    }
     CPLErr err = raw->BuildOverviews(
       resampling.c_str(),
       n_overviews,
