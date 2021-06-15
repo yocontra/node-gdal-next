@@ -186,11 +186,13 @@ NAN_SETTER(READ_ONLY_SETTER);
     Local<String> sym = Nan::New(key).ToLocalChecked();                                                                \
     if (Nan::HasOwnProperty(obj, sym).FromMaybe(false)) {                                                              \
       Local<Value> val = Nan::Get(obj, sym).ToLocalChecked();                                                          \
-      if (!val->IsArray()) {                                                                                           \
-        Nan::ThrowTypeError("Property \"" key "\" must be an array");                                                  \
-        return;                                                                                                        \
+      if (!val->IsUndefined() && !val->IsNull()) {                                                                     \
+        if (!val->IsArray()) {                                                                                         \
+          Nan::ThrowTypeError("Property \"" key "\" must be an array");                                                \
+          return;                                                                                                      \
+        }                                                                                                              \
+        var = val.As<Array>();                                                                                         \
       }                                                                                                                \
-      var = val.As<Array>();                                                                                           \
     }                                                                                                                  \
   }
 
