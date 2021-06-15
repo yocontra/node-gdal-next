@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
  - Completely reworked persistent object storage
  - Thread-safe `gdal.RasterBand.fillAsync`
+ - Fix a number of cases where an unreferenced `gdal.Dataset` was not protected from the GC during an asynchronous operation
 
 ### Removed
  - Drop support for linking against a system-installed GDAL 1.x library

@@ -266,12 +266,10 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
 
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
-  GDALAsyncableJob<CPLErr> job;
+  GDALAsyncableJob<CPLErr> job(band->parent_uid);
   GDALRasterBand *gdal_obj = band->this_;
 
-  long ds_uid = band->parent_uid;
-  job.main = [ds_uid, gdal_obj, real, imaginary](const GDALExecutionProgress &) {
-    AsyncGuard lock(ds_uid);
+  job.main = [gdal_obj, real, imaginary](const GDALExecutionProgress &) {
     CPLErr err = gdal_obj->Fill(real, imaginary);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -423,13 +421,11 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::computeStatistics) {
   NODE_ARG_BOOL(0, "allow approximation", approx);
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
-  GDALAsyncableJob<stats_t> job;
+  GDALAsyncableJob<stats_t> job(band->parent_uid);
   GDALRasterBand *gdal_obj = band->this_;
-  long ds_uid = band->parent_uid;
 
-  job.main = [ds_uid, gdal_obj, approx](const GDALExecutionProgress &) {
+  job.main = [gdal_obj, approx](const GDALExecutionProgress &) {
     struct stats_t stats;
-    AsyncGuard lock(ds_uid);
     std::lock_guard<std::mutex> guard(stats_lock);
 
     pushStatsErrorHandler();

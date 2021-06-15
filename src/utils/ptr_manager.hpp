@@ -84,6 +84,7 @@ class ObjectStore {
 
   template <typename GDALPTR> bool has(GDALPTR ptr);
   template <typename GDALPTR> Local<Object> get(GDALPTR ptr);
+  template <typename GDALPTR> Local<Object> get(long uid);
 
   ObjectStore();
   ~ObjectStore();

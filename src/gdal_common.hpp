@@ -552,10 +552,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       progress_obj = info[num].As<Object>();                                                                           \
       NODE_CB_FROM_OBJ_OPT(progress_obj, "progress_cb", progress_cb);                                                  \
     }                                                                                                                  \
-    if (progress_cb) {                                                                                                 \
-      job.persist(progress_cb->GetFunction());                                                                         \
-      job.progress = progress_cb;                                                                                      \
-    }                                                                                                                  \
+    if (progress_cb) { job.progress = progress_cb; }                                                                   \
   }
 
 // ----- wrapped methods w/ results-------
@@ -673,8 +670,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     auto *gdal_obj = obj->this_;                                                                                       \
-    GDALAsyncableJob<int> job;                                                                                         \
-    job.persist(info.This());                                                                                          \
+    GDALAsyncableJob<int> job(0);                                                                                      \
     job.main = [gdal_obj](const GDALExecutionProgress &) {                                                             \
       gdal_obj->wrapped_method();                                                                                      \
       return 0;                                                                                                        \
@@ -694,8 +690,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     auto *gdal_obj = obj->this_;                                                                                       \
-    GDALAsyncableJob<async_type> job;                                                                                  \
-    job.persist(info.This());                                                                                          \
+    GDALAsyncableJob<async_type> job(0);                                                                               \
     job.main = [gdal_obj](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(); };                       \
     job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 0);                                                                                           \
@@ -712,8 +707,8 @@ NAN_SETTER(READ_ONLY_SETTER);
     if (!obj->isAlive()) return Nan::ThrowError(#klass " object has already been destroyed");                          \
     auto *gdal_obj = obj->this_;                                                                                       \
     auto *gdal_param = param->get();                                                                                   \
-    GDALAsyncableJob<async_type> job;                                                                                  \
-    job.persist(info.This(), info[0].As<Object>());                                                                    \
+    GDALAsyncableJob<async_type> job(0);                                                                               \
+    job.persist(info[0].As<Object>());                                                                                 \
     job.main = [gdal_obj, gdal_param](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(gdal_param); }; \
     job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 1);                                                                                           \
@@ -731,8 +726,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     auto *gdal_obj = obj->this_;                                                                                       \
-    GDALAsyncableJob<async_type> job;                                                                                  \
-    job.persist(info.This());                                                                                          \
+    GDALAsyncableJob<async_type> job(0);                                                                               \
     job.main = [gdal_obj, param](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(param); };           \
     job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
     job.run(info, async, 1);                                                                                           \
@@ -747,11 +741,8 @@ NAN_SETTER(READ_ONLY_SETTER);
       return;                                                                                                          \
     }                                                                                                                  \
     auto gdal_obj = obj->this_;                                                                                        \
-    long parent_uid = obj->parent_uid;                                                                                 \
-    GDALAsyncableJob<OGRErr> job;                                                                                      \
-    job.persist(info.This());                                                                                          \
-    job.main = [gdal_obj, parent_uid](const GDALExecutionProgress &) {                                                 \
-      AsyncGuard lock(parent_uid);                                                                                     \
+    GDALAsyncableJob<OGRErr> job(obj->parent_uid);                                                                     \
+    job.main = [gdal_obj](const GDALExecutionProgress &) {                                                             \
       int err = gdal_obj->wrapped_method();                                                                            \
       if (err) throw getOGRErrMsg(err);                                                                                \
       return err;                                                                                                      \
@@ -773,8 +764,8 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     auto gdal_obj = obj->this_;                                                                                        \
     auto gdal_param = param->get();                                                                                    \
-    GDALAsyncableJob<async_type> job;                                                                                  \
-    job.persist(info.This(), info[0].As<Object>());                                                                    \
+    GDALAsyncableJob<async_type> job(0);                                                                               \
+    job.persist(info[0].As<Object>());                                                                                 \
     job.main = [gdal_obj, gdal_param](const GDALExecutionProgress &) {                                                 \
       int err = gdal_obj->wrapped_method(gdal_param);                                                                  \
       if (err) throw getOGRErrMsg(err);                                                                                \

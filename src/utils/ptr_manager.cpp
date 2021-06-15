@@ -40,6 +40,9 @@
 // * Async operations should sleep on the master_sleep condition as semaphores
 //   can be deleted by the main thread (but this would also mean that someone forgot
 //   to protect his object from the GC)
+//   - Failing to protect an object from the GC means that GC could potentially sleep
+//   on a semaphore when disposing
+//   - GC that sleeps -> event loop that does run
 // * Acquiring a semaphore requires acquiring the master look otherwise the
 //   semaphore may disappear
 // * When waking from master_sleep, the presence of the semaphore (isAlive) must be
@@ -110,12 +113,21 @@ bool ObjectStore::isAlive(long uid) {
     ;
 }
 
+static inline void sortUnique(vector<long> &uids) {
+  // Avoid deadlocks
+  sort(uids.begin(), uids.end());
+  // Eliminate dupes and 0s
+  uids.erase(unique(uids.begin(), uids.end()), uids.end());
+  if (uids.front() == 0) uids.erase(uids.begin());
+}
+
 /*
  * Lock a Dataset by uid, throws when the Dataset has been destroyed
  * There is a single global condition which allows to avoid active spinning
  * Every time a Dataset releases a lock it must broadcast the condition
  */
 AsyncLock ObjectStore::lockDataset(long uid) {
+  if (uid == 0) return nullptr;
   uv_scoped_mutex lock(&master_lock);
   while (true) {
     auto parent = uidMap<GDALDataset *>.find(uid);
@@ -131,11 +143,7 @@ AsyncLock ObjectStore::lockDataset(long uid) {
  */
 vector<AsyncLock> ObjectStore::lockDatasets(vector<long> uids) {
   // There is lots of copying around here but these vectors are never longer than 3 elements
-  // Avoid deadlocks
-  sort(uids.begin(), uids.end());
-  // Eliminate dupes and 0s
-  uids.erase(unique(uids.begin(), uids.end()), uids.end());
-  if (uids.front() == 0) uids.erase(uids.begin());
+  sortUnique(uids);
   if (uids.size() == 0) return {};
   uv_scoped_mutex lock(&master_lock);
   while (true) {
@@ -151,6 +159,7 @@ vector<AsyncLock> ObjectStore::lockDatasets(vector<long> uids) {
  * Acquire the lock only if it is free, do not block
  */
 AsyncLock ObjectStore::tryLockDataset(long uid) {
+  if (uid == 0) return nullptr;
   uv_scoped_mutex lock(&master_lock);
   auto parent = uidMap<GDALDataset *>.find(uid);
   if (parent == uidMap<GDALDataset *>.end()) { throw "Parent Dataset object has already been destroyed"; }
@@ -189,11 +198,7 @@ vector<AsyncLock> ObjectStore::_tryLockDatasets(vector<long> uids) {
  */
 vector<AsyncLock> ObjectStore::tryLockDatasets(vector<long> uids) {
   // There is lots of copying around here but these vectors are never longer than 3 elements
-  // Avoid deadlocks
-  sort(uids.begin(), uids.end());
-  // Eliminate dupes and 0s
-  uids.erase(unique(uids.begin(), uids.end()), uids.end());
-  if (uids.front() == 0) uids.erase(uids.begin());
+  sortUnique(uids);
   if (uids.size() == 0) return {};
   uv_scoped_mutex lock(&master_lock);
   return _tryLockDatasets(uids);
@@ -263,6 +268,10 @@ template <typename GDALPTR> Local<Object> ObjectStore::get(GDALPTR ptr) {
   Nan::EscapableHandleScope scope;
   return scope.Escape(Nan::New(ptrMap<GDALPTR>[ptr] -> obj));
 }
+template <typename GDALPTR> Local<Object> ObjectStore::get(long uid) {
+  Nan::EscapableHandleScope scope;
+  return scope.Escape(Nan::New(uidMap<GDALPTR>[uid] -> obj));
+}
 
 // Explicit instantiation:
 // * allows calling object_store.add without <>
@@ -280,6 +289,7 @@ template Local<Object> ObjectStore::get(GDALDataset *);
 template Local<Object> ObjectStore::get(OGRLayer *);
 template Local<Object> ObjectStore::get(GDALRasterBand *);
 template Local<Object> ObjectStore::get(OGRSpatialReference *);
+template Local<Object> ObjectStore::get<GDALDataset *>(long uid);
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
 template long ObjectStore::add(shared_ptr<GDALAttribute>, const Local<Object> &, long);
 template long ObjectStore::add(shared_ptr<GDALDimension>, const Local<Object> &, long);

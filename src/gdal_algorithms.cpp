@@ -59,7 +59,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
   RasterBand *mask = NULL;
   double search_dist;
   int smooth_iterations = 0;
-  GDALAsyncableJob<CPLErr> job;
 
   NODE_ARG_OBJECT(0, "options", obj);
 
@@ -71,11 +70,13 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
   GDALRasterBand *gdal_src = src->get();
   GDALRasterBand *gdal_mask = mask ? mask->get() : nullptr;
 
-  long src_uid = src->parent_uid;
-  long mask_uid = mask ? mask->parent_uid : 0;
+  std::vector<long> ds_uids = {src->parent_uid};
+  if (mask) ds_uids.push_back(mask->parent_uid);
 
-  job.main = [src_uid, mask_uid, gdal_src, gdal_mask, search_dist, smooth_iterations](const GDALExecutionProgress &) {
-    AsyncGuard lock({src_uid, mask_uid});
+  GDALAsyncableJob<CPLErr> job(ds_uids);
+  job.persist(src->handle());
+  if (mask) job.persist(mask->handle());
+  job.main = [gdal_src, gdal_mask, search_dist, smooth_iterations](const GDALExecutionProgress &) {
     CPLErr err = GDALFillNodata(gdal_src, gdal_mask, search_dist, 0, smooth_iterations, NULL, NULL, NULL);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -187,14 +188,9 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   long src_uid = src->parent_uid;
   long dst_uid = dst->parent_uid;
 
-  GDALAsyncableJob<CPLErr> job;
-  if (progress_cb) {
-    job.persist(progress_cb->GetFunction());
-    job.progress = progress_cb;
-  }
-  job.main = [src_uid,
-              dst_uid,
-              gdal_src,
+  GDALAsyncableJob<CPLErr> job({src_uid, dst_uid});
+  job.progress = progress_cb;
+  job.main = [gdal_src,
               interval,
               base,
               n_fixed_levels,
@@ -205,7 +201,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
               id_field,
               elev_field,
               progress_cb](const GDALExecutionProgress &progress) {
-    AsyncGuard lock({src_uid, dst_uid});
     CPLErr err = GDALContourGenerate(
       gdal_src,
       interval,
@@ -293,30 +288,25 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   GDALRasterBand *gdal_dst = dst->get();
   GDALRasterBand *gdal_mask = mask ? mask->get() : nullptr;
 
-  long src_uid = src->parent_uid;
-  long dst_uid = dst->parent_uid;
-  long mask_uid = mask ? mask->parent_uid : 0;
+  std::vector<long> ds_uids = {src->parent_uid, dst->parent_uid};
+  if (mask) ds_uids.push_back(mask->parent_uid);
 
-  GDALAsyncableJob<CPLErr> job;
-  if (progress_cb) {
-    job.persist(progress_cb->GetFunction());
-    job.progress = progress_cb;
-  }
-  job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_dst, gdal_mask, threshold, connectedness, progress_cb](
-               const GDALExecutionProgress &progress) {
-    AsyncGuard lock({src_uid, dst_uid, mask_uid});
-    CPLErr err = GDALSieveFilter(
-      gdal_src,
-      gdal_mask,
-      gdal_dst,
-      threshold,
-      connectedness,
-      NULL,
-      progress_cb ? ProgressTrampoline : nullptr,
-      progress_cb ? (void *)&progress : nullptr);
-    if (err) { throw CPLGetLastErrorMsg(); }
-    return err;
-  };
+  GDALAsyncableJob<CPLErr> job(ds_uids);
+  job.progress = progress_cb;
+  job.main =
+    [gdal_src, gdal_dst, gdal_mask, threshold, connectedness, progress_cb](const GDALExecutionProgress &progress) {
+      CPLErr err = GDALSieveFilter(
+        gdal_src,
+        gdal_mask,
+        gdal_dst,
+        threshold,
+        connectedness,
+        NULL,
+        progress_cb ? ProgressTrampoline : nullptr,
+        progress_cb ? (void *)&progress : nullptr);
+      if (err) { throw CPLGetLastErrorMsg(); }
+      return err;
+    };
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
@@ -385,10 +375,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
   GDALRasterBand *gdal_src = src->get();
   long src_uid = src->parent_uid;
 
-  GDALAsyncableJob<int> job;
-
-  job.main = [src_uid, gdal_src, x, y, w, h](const GDALExecutionProgress &) {
-    AsyncGuard lock(src_uid);
+  GDALAsyncableJob<int> job(src_uid);
+  job.main = [gdal_src, x, y, w, h](const GDALExecutionProgress &) {
     int r = GDALChecksumImage(gdal_src, x, y, w, h);
     return r;
   };
@@ -473,50 +461,44 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   OGRLayer *gdal_dst = dst->get();
   GDALRasterBand *gdal_mask = mask ? mask->get() : nullptr;
 
-  long src_uid = src->parent_uid;
-  long dst_uid = dst->parent_uid;
-  long mask_uid = mask ? mask->parent_uid : 0;
+  std::vector<long> ds_uids = {src->parent_uid, dst->parent_uid};
+  if (mask) ds_uids.push_back(mask->parent_uid);
 
-  GDALAsyncableJob<CPLErr> job;
-  if (progress_cb) {
-    job.persist(progress_cb->GetFunction());
-    job.progress = progress_cb;
-  }
+  GDALAsyncableJob<CPLErr> job(ds_uids);
+  job.progress = progress_cb;
 
   if (
     Nan::HasOwnProperty(obj, Nan::New("useFloats").ToLocalChecked()).FromMaybe(false) &&
     Nan::To<bool>(Nan::Get(obj, Nan::New("useFloats").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
-    job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](
-                 const GDALExecutionProgress &progress) {
-      AsyncGuard lock({src_uid, dst_uid, mask_uid});
-      CPLErr err = GDALFPolygonize(
-        gdal_src,
-        gdal_mask,
-        reinterpret_cast<OGRLayerH>(gdal_dst),
-        pix_val_field,
-        papszOptions,
-        progress_cb ? ProgressTrampoline : nullptr,
-        progress_cb ? (void *)&progress : nullptr);
-      if (papszOptions) CSLDestroy(papszOptions);
-      if (err) throw CPLGetLastErrorMsg();
-      return err;
-    };
+    job.main =
+      [gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](const GDALExecutionProgress &progress) {
+        CPLErr err = GDALFPolygonize(
+          gdal_src,
+          gdal_mask,
+          reinterpret_cast<OGRLayerH>(gdal_dst),
+          pix_val_field,
+          papszOptions,
+          progress_cb ? ProgressTrampoline : nullptr,
+          progress_cb ? (void *)&progress : nullptr);
+        if (papszOptions) CSLDestroy(papszOptions);
+        if (err) throw CPLGetLastErrorMsg();
+        return err;
+      };
   } else {
-    job.main = [src_uid, dst_uid, mask_uid, gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](
-                 const GDALExecutionProgress &progress) {
-      AsyncGuard lock({src_uid, dst_uid, mask_uid});
-      CPLErr err = GDALPolygonize(
-        gdal_src,
-        gdal_mask,
-        reinterpret_cast<OGRLayerH>(gdal_dst),
-        pix_val_field,
-        papszOptions,
-        progress_cb ? ProgressTrampoline : nullptr,
-        progress_cb ? (void *)&progress : nullptr);
-      if (papszOptions) CSLDestroy(papszOptions);
-      if (err) throw CPLGetLastErrorMsg();
-      return err;
-    };
+    job.main =
+      [gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](const GDALExecutionProgress &progress) {
+        CPLErr err = GDALPolygonize(
+          gdal_src,
+          gdal_mask,
+          reinterpret_cast<OGRLayerH>(gdal_dst),
+          pix_val_field,
+          papszOptions,
+          progress_cb ? ProgressTrampoline : nullptr,
+          progress_cb ? (void *)&progress : nullptr);
+        if (papszOptions) CSLDestroy(papszOptions);
+        if (err) throw CPLGetLastErrorMsg();
+        return err;
+      };
   }
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
@@ -532,13 +514,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::_acquireLocks) {
   NODE_ARG_WRAPPED(1, "ds2", Dataset, ds2);
   NODE_ARG_WRAPPED(2, "ds3", Dataset, ds3);
 
-  long ds1_uid = ds1->uid;
-  long ds2_uid = ds2->uid;
-  long ds3_uid = ds3->uid;
-  GDALAsyncableJob<int> job;
-  job.persist({ds1->handle(), ds2->handle(), ds3->handle()});
-  job.main = [ds1_uid, ds2_uid, ds3_uid](const GDALExecutionProgress &) {
-    AsyncGuard lock({ds1_uid, ds2_uid, ds3_uid});
+  GDALAsyncableJob<int> job({ds1->uid, ds2->uid, ds3->uid});
+  job.main = [](const GDALExecutionProgress &) {
     int i, sum = 0;
     // make sure the optimizer won't surprise us
     for (i = 0; i < 1e4; i++) sum += i;

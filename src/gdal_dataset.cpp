@@ -275,23 +275,10 @@ NAN_METHOD(Dataset::close) {
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
   Nan::HandleScope scope;
-  Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
-
-  if (!ds->isAlive()) {
-    Nan::ThrowError("Dataset object has already been destroyed");
-    return;
-  }
-
-  GDALDataset *raw = ds->get();
-  if (!raw) {
-    Nan::ThrowError("Dataset object has already been destroyed");
-    return;
-  }
-  GDALAsyncableJob<int> job;
-  long ds_uid = ds->uid;
-  job.persist(info.This());
-  job.main = [raw, ds_uid](const GDALExecutionProgress &) {
-    AsyncGuard lock(ds_uid);
+  NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
+  GDAL_RAW_CHECK(GDALDataset *, ds, raw);
+  GDALAsyncableJob<int> job(ds->uid);
+  job.main = [raw](const GDALExecutionProgress &) {
     raw->FlushCache();
     return 0;
   };
@@ -353,12 +340,9 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
   NODE_ARG_WRAPPED_OPT(1, "spatial filter geometry", Geometry, spatial_filter);
   NODE_ARG_OPT_STR(2, "sql dialect", sql_dialect);
 
-  GDALAsyncableJob<OGRLayer *> job;
+  GDALAsyncableJob<OGRLayer *> job(ds->uid);
   OGRGeometry *geom_filter = spatial_filter ? spatial_filter->get() : NULL;
-  long ds_uid = ds->uid;
-  job.persist(info.This());
-  job.main = [raw, ds_uid, sql, sql_dialect, geom_filter](const GDALExecutionProgress &) {
-    AsyncGuard lock(ds_uid);
+  job.main = [raw, sql, sql_dialect, geom_filter](const GDALExecutionProgress &) {
     OGRLayer *layer = raw->ExecuteSQL(sql.c_str(), geom_filter, sql_dialect.empty() ? NULL : sql_dialect.c_str());
     if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
@@ -616,18 +600,16 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
   }
   object_store.unlockDataset(lock);
 
-  GDALAsyncableJob<CPLErr> job;
-  long ds_uid = ds->uid;
-  job.persist(info.This());
+  GDALAsyncableJob<CPLErr> job(ds->uid);
 
   Nan::Callback *progress_cb;
   NODE_PROGRESS_CB_OPT(3, progress_cb, job);
+  job.progress = progress_cb;
   // Alas one cannot capture-move a unique_ptr and assign the lambda to a variable
   // because the lambda becomes non-copyable
   // But we can use a shared_ptr because the lifetime of the lambda is limited by the lifetime
   // of the async worker
-  job.main = [raw, ds_uid, resampling, n_overviews, o, n_bands, b, progress_cb](const GDALExecutionProgress &progress) {
-    AsyncGuard lock(ds_uid);
+  job.main = [raw, resampling, n_overviews, o, n_bands, b, progress_cb](const GDALExecutionProgress &progress) {
     CPLErr err = raw->BuildOverviews(
       resampling.c_str(),
       n_overviews,

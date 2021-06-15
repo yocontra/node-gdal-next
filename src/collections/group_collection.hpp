@@ -110,15 +110,13 @@ class GroupCollection : public Nan::ObjectWrap {
 
     std::shared_ptr<GDALPARENT> raw = parent->get();
     GDALDataset *gdal_ds = ds->get();
-    long ds_uid = ds->uid;
     std::string name = "";
     size_t idx = 0;
     NODE_ARG_STR_INT(0, "id", name, idx, isString);
 
-    GDALAsyncableJob<std::shared_ptr<GDALOBJ>> job;
-    job.persist(parent_ds, parent_obj);
-    job.main = [ds_uid, raw, name, idx, isString](const GDALExecutionProgress &) {
-      AsyncGuard lock(ds_uid);
+    GDALAsyncableJob<std::shared_ptr<GDALOBJ>> job(ds->uid);
+    job.persist(parent_obj);
+    job.main = [raw, name, idx, isString](const GDALExecutionProgress &) {
       std::shared_ptr<GDALOBJ> r = nullptr;
       if (!isString)
         r = SELF::__get(raw, idx);
@@ -142,12 +140,10 @@ class GroupCollection : public Nan::ObjectWrap {
     NODE_UNWRAP_CHECK(NODEPARENT, parent_obj, parent);
 
     std::shared_ptr<GDALPARENT> raw = parent->get();
-    long ds_uid = ds->uid;
 
-    GDALAsyncableJob<int> job;
-    job.persist(parent_ds, parent_obj);
-    job.main = [ds_uid, raw](const GDALExecutionProgress &) {
-      AsyncGuard lock(ds_uid);
+    GDALAsyncableJob<int> job(ds->uid);
+    job.persist(parent_obj);
+    job.main = [raw](const GDALExecutionProgress &) {
       int r = SELF::__count(raw);
       return r;
     };
