@@ -71,11 +71,15 @@ class ObjectStore {
   }
   inline void unlockDataset(AsyncLock lock) {
     uv_sem_post(lock.get());
+    uv_mutex_lock(&master_lock);
     uv_cond_broadcast(&master_sleep);
+    uv_mutex_unlock(&master_lock);
   }
   inline void unlockDatasets(vector<AsyncLock> locks) {
     for (const AsyncLock &l : locks) uv_sem_post(l.get());
+    uv_mutex_lock(&master_lock);
     uv_cond_broadcast(&master_sleep);
+    uv_mutex_unlock(&master_lock);
   }
   AsyncLock lockDataset(long uid);
   vector<AsyncLock> lockDatasets(vector<long> uids);
