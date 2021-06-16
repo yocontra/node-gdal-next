@@ -64,15 +64,13 @@ try {
 async function cleanup() {
   console.log('Ctrl-C... exiting')
   stop = true
-  await Promise.all(operations.filter((op) => op))
-  console.log(`total opens: ${opens}, total ops: ${ops}, ops/s: ${(ops * 1000 / (Date.now() - timeStart)).toPrecision(3)}`)
-  const cpuUserEnd = os.cpus().map((cpu) => cpu.times.user).reduce((a, x) => a + x, 0)
-  const cpuIdleEnd = os.cpus().map((cpu) => cpu.times.idle).reduce((a, x) => a + x, 0)
-  console.log('parallelization waste: ', ((cpuIdleEnd - cpuIdleStart) / (cpuUserEnd - cpuUserStart)).toPrecision(3))
-  process.exit(0)
 }
 process.once('SIGHUP', cleanup)
 process.once('SIGINT', cleanup)
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Promise rejection', reason, promise)
+  process.exit(1)
+})
 
 function operation(slot) {
   if (Math.random() > probabilityToKeepDataset) {
@@ -90,8 +88,6 @@ function operation(slot) {
   })
 }
 
-console.log('Hit Ctrl-C to stop')
-
 for (let i = 0; i < openDatasets; i++) {
   opens += 2
   datasetsRaster[i] = gdal.openAsync(testFileRaster)
@@ -99,19 +95,37 @@ for (let i = 0; i < openDatasets; i++) {
 }
 const cpuUserStart = os.cpus().map((cpu) => cpu.times.user).reduce((a, x) => a + x, 0)
 const cpuIdleStart = os.cpus().map((cpu) => cpu.times.idle).reduce((a, x) => a + x, 0)
-const timeStart = Date.now();
-(async () => {
-// eslint-disable-next-line no-constant-condition
-  while (!stop) {
-    let freeSlot
-    do {
-      freeSlot = operations.findIndex((op) => !op)
-      if (freeSlot == -1) {
-        // eslint-disable-next-line no-await-in-loop
-        await Promise.race(operations.filter((op) => op))
-      }
-    } while (freeSlot == -1)
 
-    operation(freeSlot)
+const timeStart = Date.now()
+let timeEnd
+if (!process.argv[2] || isNaN(parseInt(process.argv[2]))) {
+  console.log('Hit Ctrl-C to stop')
+} else {
+  timeEnd = parseInt(process.argv[2]) * 1000 + timeStart
+}
+
+(async () => {
+  try {
+    while (!stop && (!timeEnd || Date.now() < timeEnd)) {
+      let freeSlot
+      do {
+        freeSlot = operations.findIndex((op) => !op)
+        if (freeSlot == -1) {
+        // eslint-disable-next-line no-await-in-loop
+          await Promise.race(operations.filter((op) => op))
+        }
+      } while (freeSlot == -1)
+
+      operation(freeSlot)
+    }
+
+    await Promise.all(operations.filter((op) => op))
+    console.log(`total opens: ${opens}, total ops: ${ops}, ops/s: ${(ops * 1000 / (Date.now() - timeStart)).toPrecision(3)}`)
+    const cpuUserEnd = os.cpus().map((cpu) => cpu.times.user).reduce((a, x) => a + x, 0)
+    const cpuIdleEnd = os.cpus().map((cpu) => cpu.times.idle).reduce((a, x) => a + x, 0)
+    console.log('parallelization waste: ', ((cpuIdleEnd - cpuIdleStart) / (cpuUserEnd - cpuUserStart)).toPrecision(3))
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
   }
 })()
