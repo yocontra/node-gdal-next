@@ -23,7 +23,7 @@ const tests = [
   },
   () => {
     const dsq = datasetsVector[Math.floor(Math.random() * openDatasets)]
-    return dsq.then((ds) => ds.layers.getAsync(1))
+    return dsq.then((ds) => ds.layers.getAsync('sample_int64'))
       .then((l) => l.features.getAsync(0))
       .then((f) => assert(f.fields.toObject().texte_arre === magicString))
   }
