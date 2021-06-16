@@ -261,13 +261,16 @@ long ObjectStore::add(GDALDataset *ptr, Nan::Persistent<Object> &obj, long paren
 }
 
 template <typename GDALPTR> bool ObjectStore::has(GDALPTR ptr) {
+  uv_scoped_mutex lock(&master_lock);
   return ptrMap<GDALPTR>.count(ptr) > 0;
 }
 template <typename GDALPTR> Local<Object> ObjectStore::get(GDALPTR ptr) {
+  uv_scoped_mutex lock(&master_lock);
   Nan::EscapableHandleScope scope;
   return scope.Escape(Nan::New(ptrMap<GDALPTR>[ptr] -> obj));
 }
 template <typename GDALPTR> Local<Object> ObjectStore::get(long uid) {
+  uv_scoped_mutex lock(&master_lock);
   Nan::EscapableHandleScope scope;
   return scope.Escape(Nan::New(uidMap<GDALPTR>[uid] -> obj));
 }
