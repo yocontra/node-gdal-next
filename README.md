@@ -39,12 +39,19 @@ Pre-built binaries are provided for most recent Linux distributions, Windows 64 
 npm install gdal-async
 ```
 
-By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a pre-installed GDAL you will have to rebuild it when installing using the following flags:
+### Linking with your own version of GDAL
+
+By default all dependencies are the latest versions and bundled out of the box, but if you would like to link against a custom GDAL library you will have to rebuild it when installing using the following flags:
 
 ```sh
 # --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev
 # (debian: sudo apt-get install libgdal-dev)
 $ npm install gdal-async --build-from-source --shared_gdal  
+```
+
+If you have multiple versions of GDAL or your library is not in its standard location, you can use the usual `CXXFLAGS` and `LDFLAGS` variables:
+```sh 
+$ CXXFLAGS="-I/some/path/include" LDFLAGS="-L/some/path/lib" npm install gdal-async --build-from-source --shared_gdal
 ```
 
 ## Sample usage
