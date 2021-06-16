@@ -168,6 +168,15 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
         * Drop support for Ubuntu 16.04 and equivalent, Ubuntu 18.04 is the new baseline target
         * Drop support for Node.js 10.x and 15.x
         * `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
+        * `gdal.DatasetLayers.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
+        * `gdal.FeatureDefnFields.get{Async}()` now throws an `Error` if an invalid field definition is requested instead of returning a null object
+        * `gdal.FeatureFields.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
+        * `gdal.GDALDrivers.get()` now throws an `Error` if an invalid driver is requested instead of returning a null object
+        * `gdal.GeometryCollectionChildren.get()` now throws an `Error` if an invalid sub-geometry is requested instead of returning a null object
+        * `gdal.LayerFeatures.get{Async}()` now throws an `Error` if an invalid feature is requested instead of returning a null object
+        * `gdal.LayerFields.get{Async}()` now throws an `Error` if an invalid field is requested instead of returning a null object
+        * `gdal.LineStringPoints.get()` now throws an `Error` if an invalid point is requested instead of returning a null object
+        * `gdal.PolygonRings.get()` now throws an `Error` if an invalid ring is requested instead of returning a null object
 
  * If you are coming from `node-gdal`, in addition to all of the above
     - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,

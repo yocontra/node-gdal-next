@@ -113,6 +113,7 @@ NAN_METHOD(RasterBandPixels::toString) {
  * @method get
  * @param {number} x
  * @param {number} y
+ * @throws Error
  * @return {number}
  */
 

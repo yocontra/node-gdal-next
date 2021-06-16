@@ -179,9 +179,11 @@ describe('gdal.LineString', () => {
         })
       })
       describe('get()', () => {
-        it("should return null if point doesn't exist", () => {
+        it("should throw if point doesn't exist", () => {
           const line = new gdal.LineString()
-          assert.isNull(line.points.get(2))
+          assert.throws(() => {
+            line.points.get(2)
+          })
         })
         it('should Point instance', () => {
           const line = new gdal.LineString()

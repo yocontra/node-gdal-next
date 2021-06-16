@@ -472,10 +472,10 @@ describe('gdal.LayerAsync', () => {
             return assert.eventually.instanceOf(feature, gdal.Feature)
           })
         )
-        it("should return null if index doesn't exist", () =>
+        it("should reject if index doesn't exist", () =>
           prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) => {
             const feature = layer.features.getAsync(99)
-            return assert.eventually.isNull(feature)
+            return assert.isRejected(feature)
           })
         )
         it('should throw error if dataset is destroyed', () =>
@@ -650,7 +650,7 @@ describe('gdal.LayerAsync', () => {
             layer.features.add(new gdal.Feature(layer))
 
             assert.instanceOf(layer.features.get(1), gdal.Feature)
-            return assert.eventually.isNull(layer.features.removeAsync(1).then(() => layer.features.get(1)))
+            return assert.isRejected(layer.features.removeAsync(1).then(() => layer.features.get(1)))
           })
         )
         it('should throw error if driver doesnt support deleting features', () =>

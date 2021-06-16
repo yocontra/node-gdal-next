@@ -89,6 +89,7 @@ NAN_METHOD(LayerFeatures::toString) {
  *
  * @method get
  * @param {number} id The feature ID of the feature to read.
+ * @throws Error
  * @return {gdal.Feature}
  */
 
@@ -103,6 +104,7 @@ NAN_METHOD(LayerFeatures::toString) {
  * @method getAsync
  * @param {number} id The feature ID of the feature to read.
  * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
@@ -123,6 +125,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
   job.persist(layer->handle());
   job.main = [gdal_layer, feature_id](const GDALExecutionProgress &) {
     OGRFeature *feature = gdal_layer->GetFeature(feature_id);
+    if (feature == nullptr) throw CPLGetLastErrorMsg();
     return feature;
   };
   job.rval = [](OGRFeature *feature, GetFromPersistentFunc) { return Feature::New(feature); };

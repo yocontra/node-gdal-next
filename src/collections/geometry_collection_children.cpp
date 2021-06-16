@@ -97,6 +97,7 @@ NAN_METHOD(GeometryCollectionChildren::count) {
  *
  * @method get
  * @param {number} index 0-based index
+ * @throws Error
  * @return {gdal.Geometry}
  */
 NAN_METHOD(GeometryCollectionChildren::get) {
@@ -109,7 +110,12 @@ NAN_METHOD(GeometryCollectionChildren::get) {
   int i;
   NODE_ARG_INT(0, "index", i);
 
-  info.GetReturnValue().Set(Geometry::New(geom->get()->getGeometryRef(i), false));
+  auto r = geom->get()->getGeometryRef(i);
+  if (r == nullptr) {
+    NODE_THROW_LAST_CPLERR;
+    return;
+  }
+  info.GetReturnValue().Set(Geometry::New(r, false));
 }
 
 /**

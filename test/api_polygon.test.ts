@@ -14,9 +14,11 @@ describe('gdal.Polygon', () => {
   describe('instance', () => {
     describe('"rings" property', () => {
       describe('get()', () => {
-        it("should return null if ring doesn't exist", () => {
+        it("should throw if ring doesn't exist", () => {
           const polygon = new gdal.Polygon()
-          assert.isNull(polygon.rings.get(2))
+          assert.throws(() => {
+            polygon.rings.get(2)
+          })
         })
         it('should return LinearRing instance', () => {
           const polygon = new gdal.Polygon()

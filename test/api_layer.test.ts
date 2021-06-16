@@ -432,10 +432,11 @@ describe('gdal.Layer', () => {
             assert.instanceOf(feature, gdal.Feature)
           })
         })
-        it("should return null if index doesn't exist", () => {
+        it("should throw if index doesn't exist", () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
-            const feature = layer.features.get(99)
-            assert.isNull(feature)
+            assert.throws(() => {
+              layer.features.get(99)
+            })
           })
         })
         it('should throw error if dataset is destroyed', () => {
@@ -650,7 +651,9 @@ describe('gdal.Layer', () => {
 
             assert.instanceOf(layer.features.get(1), gdal.Feature)
             layer.features.remove(1)
-            assert.isNull(layer.features.get(1))
+            assert.throws(() => {
+              layer.features.get(1)
+            })
           })
         })
         it('should throw error if driver doesnt support deleting features', () => {

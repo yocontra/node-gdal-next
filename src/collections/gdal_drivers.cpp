@@ -83,6 +83,7 @@ NAN_METHOD(GDALDrivers::toString) {
  *
  * @method get
  * @param {number|string} index 0-based index or driver name
+ * @throws Error
  * @return {gdal.Driver}
  */
 NAN_METHOD(GDALDrivers::get) {
@@ -124,7 +125,7 @@ NAN_METHOD(GDALDrivers::get) {
     return;
   }
 
-  info.GetReturnValue().Set(Nan::Null());
+  NODE_THROW_LAST_CPLERR;
 }
 
 /**

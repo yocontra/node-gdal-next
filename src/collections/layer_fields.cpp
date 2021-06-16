@@ -167,7 +167,12 @@ NAN_METHOD(LayerFields::get) {
   int field_index;
   ARG_FIELD_ID(0, def, field_index);
 
-  info.GetReturnValue().Set(FieldDefn::New(def->GetFieldDefn(field_index)));
+  auto r = def->GetFieldDefn(field_index);
+  if (r == nullptr) {
+    NODE_THROW_LAST_CPLERR;
+    return;
+  }
+  info.GetReturnValue().Set(FieldDefn::New(r));
 }
 
 /**

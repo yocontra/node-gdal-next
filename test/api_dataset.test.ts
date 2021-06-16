@@ -254,9 +254,11 @@ describe('gdal.Dataset', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
             assert.instanceOf(ds.layers.get(0), gdal.Layer)
           })
-          it('should return null if layer id is out of range', () => {
+          it('should throw if layer id is out of range', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-            assert.isNull(ds.layers.get(5))
+            assert.throws(() => {
+              ds.layers.get(5)
+            })
           })
           it('should throw if dataset is closed', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
@@ -271,9 +273,11 @@ describe('gdal.Dataset', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
             assert.instanceOf(ds.layers.get('sample'), gdal.Layer)
           })
-          it('should return null if layer name doesnt exist', () => {
+          it('should throw if layer name doesnt exist', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
-            assert.isNull(ds.layers.get('bogus'))
+            assert.throws(() => {
+              ds.layers.get('bogus')
+            })
           })
           it('should throw if dataset is closed', () => {
             const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)

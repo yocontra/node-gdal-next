@@ -431,6 +431,7 @@ Local<Value> FeatureFields::get(OGRFeature *f, int field_index) {
  *
  * @method get
  * @param {string|number} key Feature name or index.
+ * @throws Error
  * @return {any}
  */
 NAN_METHOD(FeatureFields::get) {
@@ -455,6 +456,7 @@ NAN_METHOD(FeatureFields::get) {
   Local<Value> result = FeatureFields::get(f->get(), field_index);
 
   if (result.IsEmpty()) {
+    NODE_THROW_LAST_CPLERR;
     return;
   } else {
     info.GetReturnValue().Set(result);

@@ -98,6 +98,7 @@ NAN_METHOD(DatasetBands::toString) {
  *
  * @param {number} id
  * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {

@@ -131,6 +131,7 @@ NAN_METHOD(FeatureDefnFields::indexOf) {
  *
  * @method get
  * @param {string|number} key Field name or index
+ * @throws Error
  * @return {gdal.FieldDefn}
  */
 NAN_METHOD(FeatureDefnFields::get) {
@@ -152,7 +153,9 @@ NAN_METHOD(FeatureDefnFields::get) {
   int field_index;
   ARG_FIELD_ID(0, feature_def->get(), field_index);
 
-  info.GetReturnValue().Set(FieldDefn::New(feature_def->get()->GetFieldDefn(field_index)));
+  auto r = feature_def->get()->GetFieldDefn(field_index);
+  if (r == nullptr) { throw CPLGetLastErrorMsg(); }
+  info.GetReturnValue().Set(FieldDefn::New(r));
 }
 
 /**

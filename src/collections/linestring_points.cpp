@@ -137,6 +137,7 @@ NAN_METHOD(LineStringPoints::resize) {
  *
  * @method get
  * @param {number} index 0-based index
+ * @throws Error
  * @return {gdal.Point}
  */
 NAN_METHOD(LineStringPoints::get) {
@@ -151,7 +152,7 @@ NAN_METHOD(LineStringPoints::get) {
 
   NODE_ARG_INT(0, "index", i);
   if (i < 0 || i >= geom->get()->getNumPoints()) {
-    info.GetReturnValue().Set(Nan::Null());
+    Nan::ThrowError("Invalid point requested");
     return;
   }
 

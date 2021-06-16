@@ -105,6 +105,7 @@ NAN_METHOD(PolygonRings::count) {
  *
  * @method get
  * @param {number} index
+ * @throws Error
  * @return {gdal.LinearRing}
  */
 NAN_METHOD(PolygonRings::get) {
@@ -117,13 +118,17 @@ NAN_METHOD(PolygonRings::get) {
   int i;
   NODE_ARG_INT(0, "index", i);
 
+  OGRLinearRing *r;
   if (i == 0) {
-    info.GetReturnValue().Set(LinearRing::New(geom->get()->getExteriorRing(), false));
-    return;
+    r = geom->get()->getExteriorRing();
   } else {
-    info.GetReturnValue().Set(LinearRing::New(geom->get()->getInteriorRing(i - 1), false));
+    r = geom->get()->getInteriorRing(i - 1);
+  }
+  if (r == nullptr) {
+    NODE_THROW_LAST_CPLERR;
     return;
   }
+  info.GetReturnValue().Set(LinearRing::New(r, false));
 }
 
 /**

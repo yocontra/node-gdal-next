@@ -35,8 +35,10 @@ describe('gdal.drivers', () => {
     it('should support string argument', () => {
       assert.instanceOf(gdal.drivers.get('GTiff'), gdal.Driver)
     })
-    it('should return null when not found', () => {
-      assert.equal(gdal.drivers.get('awfag'), null)
+    it('should throw when not found', () => {
+      assert.throws(() => {
+        gdal.drivers.get('awfag')
+      })
     })
 
     // raster drivers

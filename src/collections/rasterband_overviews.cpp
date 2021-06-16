@@ -98,8 +98,7 @@ NAN_METHOD(RasterBandOverviews::get) {
 
   GDALRasterBand *result = band->get()->GetOverview(id);
 
-  // TODO: return null instead?
-  if (result == NULL) {
+  if (result == nullptr) {
     Nan::ThrowError("Specified overview not found");
     return;
   }

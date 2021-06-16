@@ -90,6 +90,7 @@ NAN_METHOD(DatasetLayers::toString) {
  *
  * @method get
  * @param {string|number} key Layer name or ID.
+ * @throws Error
  * @return {gdal.Layer}
  */
 
@@ -100,6 +101,7 @@ NAN_METHOD(DatasetLayers::toString) {
  * @method getAsync
  * @param {string|number} key Layer name or ID.
  * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Layer>}
  */
 
@@ -129,12 +131,14 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
     job.main = [raw, layer_name](const GDALExecutionProgress &) {
       std::unique_ptr<std::string> layer_name_ptr(layer_name);
       OGRLayer *lyr = raw->GetLayerByName(layer_name->c_str());
+      if (lyr == nullptr) { throw CPLGetLastErrorMsg(); }
       return lyr;
     };
   } else if (info[0]->IsNumber()) {
     int64_t id = Nan::To<int64_t>(info[0]).ToChecked();
     job.main = [raw, id](const GDALExecutionProgress &) {
       OGRLayer *lyr = raw->GetLayer(id);
+      if (lyr == nullptr) { throw CPLGetLastErrorMsg(); }
       return lyr;
     };
   } else {
