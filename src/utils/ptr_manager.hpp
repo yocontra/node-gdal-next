@@ -30,7 +30,6 @@ template <typename GDALPTR> struct ObjectStoreItem {
   GDALPTR ptr;
   shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
   ObjectStoreItem(Nan::Persistent<Object> &obj);
-  ~ObjectStoreItem();
 };
 
 template <> struct ObjectStoreItem<OGRLayer *> {
@@ -40,7 +39,6 @@ template <> struct ObjectStoreItem<OGRLayer *> {
   shared_ptr<ObjectStoreItem<GDALDataset *>> parent;
   bool is_result_set;
   ObjectStoreItem(Nan::Persistent<Object> &obj);
-  ~ObjectStoreItem();
 };
 
 template <> struct ObjectStoreItem<GDALDataset *> {
@@ -51,7 +49,6 @@ template <> struct ObjectStoreItem<GDALDataset *> {
   list<long> children;
   AsyncLock async_lock;
   ObjectStoreItem(Nan::Persistent<Object> &obj);
-  ~ObjectStoreItem();
 };
 
 struct uv_sem_deleter {

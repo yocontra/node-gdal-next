@@ -304,16 +304,18 @@ template Local<Object> ObjectStore::get(shared_ptr<GDALGroup>);
 template Local<Object> ObjectStore::get(shared_ptr<GDALMDArray>);
 #endif
 
-static inline void uv_sem_waitWithWarning(uv_sem_t *sem) {
+const char warningDefault[] =
+  "Sleeping on semaphore in garbage collector, this is a bug in gdal-async, event loop blocked for ";
+static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning = warningDefault) {
   if (uv_sem_trywait(sem) != 0) {
     auto startTime = clock();
-    fprintf(stderr, "Sleeping on semaphore in garbage collector, this is a bug in gdal-async, event loop blocked for ");
+    fprintf(stderr, "%s", warning);
     uv_sem_wait(sem);
     fprintf(stderr, "%ld µs\n", clock() - startTime);
   }
 }
 
-// Disposing = called by the C++ destructor which is called by Nan::ObjectWrap
+// dispose is called by the C++ destructor which is called by Nan::ObjectWrap
 // which is called by the WeakCallback of the GC on its Persistent
 // This is the same Persistent that has a reference in the ObjectStoreItem
 // Removes the object and all its children for the ObjectStore
@@ -321,26 +323,53 @@ static inline void uv_sem_waitWithWarning(uv_sem_t *sem) {
 // Disposing a Dataset is a special case - it has children (called with the master lock held)
 template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>> item) {
   uv_sem_waitWithWarning(item->async_lock.get());
-
   uidMap<GDALDataset *>.erase(item->uid);
   ptrMap<GDALDataset *>.erase(item->ptr);
   if (item->parent != nullptr) item->parent->children.remove(item->uid);
+
   uv_sem_post(item->async_lock.get());
   uv_cond_broadcast(&master_sleep);
+  // Beyond this point the Dataset is not alive anymore ->
+  // anyone who was waiting for this semaphore should fail
 
+  // Its children can still lock its item to remove themselves
   while (!item->children.empty()) { do_dispose(item->children.back()); }
+
+  if (item->ptr) {
+    LOG("Closing GDALDataset %ld [%p]", uid, ptr);
+    GDALClose(item->ptr);
+    item->ptr = nullptr;
+  }
+}
+
+const char warningSQL[] =
+  "Sleeping on semaphore in garbage collector while destroying an SQL results layers, this is a known issue in gdal-async, event loop blocked for ";
+// Closing a Layer is a special case - it can contain SQL results
+// This is the only case where we could sleep in the GC:
+//   A Dataset has multiple layers, one of them is an SQL results layer
+//   An asynchronous operation is running on one of the other layers
+//   The GC decides it is time to reclaim the SQL results
+template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<OGRLayer *>> item) {
+  ptrMap<OGRLayer *>.erase(item->ptr);
+  uidMap<OGRLayer *>.erase(item->uid);
+  if (item->parent != nullptr) { item->parent->children.remove(item->uid); }
+  if (item->is_result_set) {
+    LOG("Closing OGRLayer with SQL results [%ld] [%p]", uid, ptr);
+    if (item->parent) {
+      uv_sem_waitWithWarning(item->parent->async_lock.get(), warningSQL);
+      GDALDataset *parent_ds = item->parent->ptr;
+      parent_ds->ReleaseResultSet(item->ptr);
+      uv_sem_post(item->parent->async_lock.get());
+      uv_cond_broadcast(&object_store.master_sleep);
+    }
+  }
 }
 
 // Generic disposal (called with the master lock held)
 template <typename GDALPTR> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item) {
-  if (item->parent != nullptr) uv_sem_waitWithWarning(item->parent->async_lock.get());
   ptrMap<GDALPTR>.erase(item->ptr);
   uidMap<GDALPTR>.erase(item->uid);
-  if (item->parent != nullptr) {
-    item->parent->children.remove(item->uid);
-    uv_sem_post(item->parent->async_lock.get());
-    uv_cond_broadcast(&master_sleep);
-  }
+  if (item->parent != nullptr) { item->parent->children.remove(item->uid); }
 }
 
 // Called from the C++ destructor
@@ -372,33 +401,6 @@ void ObjectStore::do_dispose(long uid) {
   else if (uidMap<shared_ptr<GDALAttribute>>.count(uid))
     dispose(uidMap<shared_ptr<GDALAttribute>>[uid]);
 #endif
-}
-
-// Destruction
-// Frees the memory and the resources
-
-// This is the final phase of the tear down
-// This is triggered when all shared_ptrs have been destroyed
-// The last one will call the class destructor
-template <typename GDALPTR> ObjectStoreItem<GDALPTR>::~ObjectStoreItem() {
-}
-
-// Closing a Dataset is a special case - it requires a GDAL operation
-ObjectStoreItem<GDALDataset *>::~ObjectStoreItem() {
-  if (ptr) {
-    LOG("Closing GDALDataset %ld [%p]", uid, ptr);
-    GDALClose(ptr);
-    ptr = nullptr;
-  }
-}
-
-// Closing a Layer is a special case - it can contain SQL results
-ObjectStoreItem<OGRLayer *>::~ObjectStoreItem() {
-  GDALDataset *parent_ds = parent->ptr;
-  if (is_result_set) {
-    LOG("Closing OGRLayer with SQL results %ld [%p]", uid, ptr);
-    parent_ds->ReleaseResultSet(ptr);
-  }
 }
 
 } // namespace node_gdal

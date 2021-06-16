@@ -82,3 +82,10 @@ await Promise.all(data1[4], data2[4])
 ```
 
 Here we are chaining all the Promises one on another. Now the read of the second band of the first dataset won't launch until the first one has completed - ensuring that there will be enough free slots on the thread pool for the jobs of the second loop to run.
+
+## SQL layers
+
+SQL layers present a unique challenge when implementing asynchronous bindings - they require holding a lock over the parent Dataset in order to destroy them. This means that if a Dataset with multiple layers has an asynchronous operation running on one of them and the GC decides it is time to reclaim the SQL results layer - there will be only one solution - to completely block the Node.js process until that background operation finishes.
+
+Alas, there are no simple solutions for this issue. `gdal-async`prints a warning to stderr when this happens.
+ 
