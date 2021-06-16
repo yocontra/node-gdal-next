@@ -1,6 +1,6 @@
 const openDatasets = 10 // 10 raster + 10 vector
 const parallelOps = 50
-const probabilityToKeepDataset = 0.85
+const probabilityToKeepDataset = 0.95
 const magicOffset = 98500
 const magicData = 75
 const magicString = 'L\'Adour, de son embouchure au confluent avec le gave de Pau'
