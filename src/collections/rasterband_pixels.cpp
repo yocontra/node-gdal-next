@@ -144,6 +144,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
 
   job.main = [raw, x, y](const GDALExecutionProgress &) {
     double val;
+    CPLErrorReset();
     CPLErr err = raw->RasterIO(GF_Read, x, y, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
     if (err) { throw CPLGetLastErrorMsg(); }
     return val;
@@ -191,6 +192,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::set) {
   job.persist(band->handle());
 
   job.main = [raw, x, y, val](const GDALExecutionProgress &) {
+    CPLErrorReset();
     CPLErr err = raw->RasterIO(GF_Write, x, y, 1, 1, (void *)&val, 1, 1, GDT_Float64, 0, 0);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -394,6 +396,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
       extra->pProgressData = (void *)&progress;
     }
 
+    CPLErrorReset();
     CPLErr err =
       gdal_band->RasterIO(GF_Read, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, extra.get());
 
@@ -520,6 +523,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
       extra->pProgressData = (void *)&progress;
     }
 
+    CPLErrorReset();
     CPLErr err =
       gdal_band->RasterIO(GF_Write, x, y, w, h, data, buffer_w, buffer_h, type, pixel_space, line_space, extra.get());
     if (err != CE_None) throw CPLGetLastErrorMsg();
@@ -593,6 +597,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
   job.persist("array", obj);
   job.persist(band->handle());
   job.main = [gdal_band, x, y, data](const GDALExecutionProgress &) {
+    CPLErrorReset();
     CPLErr err = gdal_band->ReadBlock(x, y, data);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -650,6 +655,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
   GDALAsyncableJob<CPLErr> job(band->parent_uid);
   job.persist(obj, band->handle());
   job.main = [gdal_band, x, y, data](const GDALExecutionProgress &) {
+    CPLErrorReset();
     CPLErr err = gdal_band->WriteBlock(x, y, data);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;

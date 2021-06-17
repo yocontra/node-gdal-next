@@ -77,6 +77,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
   job.persist(src->handle());
   if (mask) job.persist(mask->handle());
   job.main = [gdal_src, gdal_mask, search_dist, smooth_iterations](const GDALExecutionProgress &) {
+    CPLErrorReset();
     CPLErr err = GDALFillNodata(gdal_src, gdal_mask, search_dist, 0, smooth_iterations, NULL, NULL, NULL);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -201,6 +202,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
               id_field,
               elev_field,
               progress_cb](const GDALExecutionProgress &progress) {
+    CPLErrorReset();
     CPLErr err = GDALContourGenerate(
       gdal_src,
       interval,
@@ -295,6 +297,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
   job.progress = progress_cb;
   job.main =
     [gdal_src, gdal_dst, gdal_mask, threshold, connectedness, progress_cb](const GDALExecutionProgress &progress) {
+      CPLErrorReset();
       CPLErr err = GDALSieveFilter(
         gdal_src,
         gdal_mask,
@@ -472,6 +475,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
     Nan::To<bool>(Nan::Get(obj, Nan::New("useFloats").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
     job.main =
       [gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](const GDALExecutionProgress &progress) {
+        CPLErrorReset();
         CPLErr err = GDALFPolygonize(
           gdal_src,
           gdal_mask,
@@ -487,6 +491,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
   } else {
     job.main =
       [gdal_src, gdal_mask, gdal_dst, pix_val_field, papszOptions, progress_cb](const GDALExecutionProgress &progress) {
+        CPLErrorReset();
         CPLErr err = GDALPolygonize(
           gdal_src,
           gdal_mask,

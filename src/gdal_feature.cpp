@@ -206,7 +206,7 @@ NAN_METHOD(Feature::getFieldDefn) {
   }
 
   if (field_index < 0 || field_index >= feature->this_->GetFieldCount()) {
-    Nan::ThrowError("Invalid field index");
+    Nan::ThrowRangeError("Invalid field index");
     return;
   }
 

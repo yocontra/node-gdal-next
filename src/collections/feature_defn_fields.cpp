@@ -153,6 +153,7 @@ NAN_METHOD(FeatureDefnFields::get) {
   int field_index;
   ARG_FIELD_ID(0, feature_def->get(), field_index);
 
+  CPLErrorReset();
   auto r = feature_def->get()->GetFieldDefn(field_index);
   if (r == nullptr) { throw CPLGetLastErrorMsg(); }
   info.GetReturnValue().Set(FieldDefn::New(r));

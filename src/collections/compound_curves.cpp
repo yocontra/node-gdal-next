@@ -103,6 +103,7 @@ NAN_METHOD(CompoundCurveCurves::count) {
  *
  * @method get
  * @param {number} index
+ * @throws Error
  * @return {gdal.CompoundCurve|gdal.SimpleCurve}
  */
 NAN_METHOD(CompoundCurveCurves::get) {
@@ -117,6 +118,8 @@ NAN_METHOD(CompoundCurveCurves::get) {
 
   if (i >= 0 && i < geom->get()->getNumCurves())
     info.GetReturnValue().Set(Geometry::New(geom->get()->getCurve(i), false));
+  else
+    Nan::ThrowRangeError("Invalid curve requested");
 }
 
 /**

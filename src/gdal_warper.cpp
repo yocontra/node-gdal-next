@@ -277,6 +277,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   // the lifetime of the options shared_ptr is limited by the lifetime of the lambda
   if (options->useMultithreading()) {
     job.main = [options, opts, s_srs_str, t_srs_str, maxError, progress_cb](const GDALExecutionProgress &progress) {
+      CPLErrorReset();
       CPLErr err = GDALReprojectImageMulti(
         opts->hSrcDS,
         s_srs_str.c_str(),
@@ -293,6 +294,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
     };
   } else {
     job.main = [options, opts, s_srs_str, t_srs_str, maxError, progress_cb](const GDALExecutionProgress &progress) {
+      CPLErrorReset();
       CPLErr err = GDALReprojectImage(
         opts->hSrcDS,
         s_srs_str.c_str(),
@@ -417,6 +419,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
 
   job.main = [gdal_ds, s_srs_str, t_srs_str, maxError](const GDALExecutionProgress &) {
     struct warpOutputResult r;
+    CPLErrorReset();
 
     void *hTransformArg;
     void *hGenTransformArg =

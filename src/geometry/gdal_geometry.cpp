@@ -587,6 +587,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
   OGRGeometry *gdal_geom = geom->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->ConvexHull();
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -619,6 +620,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
   OGRGeometry *gdal_geom = geom->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->Boundary();
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -659,6 +661,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->Intersection(gdal_x);
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -699,6 +702,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->Union(gdal_x);
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -739,6 +743,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->Difference(gdal_x);
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -779,6 +784,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->SymDifference(gdal_x);
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -818,6 +824,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
 
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, tolerance](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->Simplify(tolerance);
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -857,6 +864,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
 
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, tolerance](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->SimplifyPreserveTopology(tolerance);
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -902,6 +910,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
 
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, distance, number_of_segments](const GDALExecutionProgress &) {
+    CPLErrorReset();
     auto r = gdal_geom->Buffer(distance, number_of_segments);
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
@@ -1064,6 +1073,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
   uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<char *> job(0);
   job.main = [async_lock, gdal_geom](const GDALExecutionProgress &) {
+    CPLErrorReset();
     uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToKML();
     uv_sem_post(async_lock);
@@ -1108,6 +1118,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
   uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<char *> job(0);
   job.main = [async_lock, gdal_geom](const GDALExecutionProgress &) {
+    CPLErrorReset();
     uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToGML();
     uv_sem_post(async_lock);
@@ -1152,6 +1163,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
   uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<char *> job(0);
   job.main = [async_lock, gdal_geom](const GDALExecutionProgress &) {
+    CPLErrorReset();
     uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToJson();
     uv_sem_post(async_lock);
@@ -1491,6 +1503,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
 
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [val](const GDALExecutionProgress &) {
+    CPLErrorReset();
     std::unique_ptr<std::string> val_ptr(val);
     OGRGeometry *geom = OGRGeometryFactory::createFromGeoJson(val->c_str());
     if (geom == nullptr) throw CPLGetLastErrorMsg();
@@ -1546,6 +1559,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJsonBuffer) {
 
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [data, length](const GDALExecutionProgress &) {
+    CPLErrorReset();
     CPLJSONDocument oDocument;
     if (!oDocument.LoadMemory(reinterpret_cast<const GByte *>(data), length)) {
       throw "Parsing the GeoJSON fragment failed";

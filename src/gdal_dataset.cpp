@@ -340,6 +340,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
   GDALAsyncableJob<OGRLayer *> job(ds->uid);
   OGRGeometry *geom_filter = spatial_filter ? spatial_filter->get() : NULL;
   job.main = [raw, sql, sql_dialect, geom_filter](const GDALExecutionProgress &) {
+    CPLErrorReset();
     OGRLayer *layer = raw->ExecuteSQL(sql.c_str(), geom_filter, sql_dialect.empty() ? NULL : sql_dialect.c_str());
     if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
@@ -594,6 +595,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
         if (b.get()[i] > raw->GetRasterCount() || b.get()[i] < 1) { throw "invalid band id"; }
       }
     }
+    CPLErrorReset();
     CPLErr err = raw->BuildOverviews(
       resampling.c_str(),
       n_overviews,

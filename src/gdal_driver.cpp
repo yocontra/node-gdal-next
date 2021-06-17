@@ -217,6 +217,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
   job.persist(driver->handle());
   job.main = [raw, filename, x_size, y_size, n_bands, type, options](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
+    CPLErrorReset();
     GDALDataset *ds = raw->Create(filename.c_str(), x_size, y_size, n_bands, type, options->get());
     if (!ds) throw CPLGetLastErrorMsg();
     return ds;
@@ -292,6 +293,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   job.persist(driver->handle());
   job.main = [raw, filename, raw_ds, strict, options](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
+    CPLErrorReset();
     GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
     if (!ds) CPLGetLastErrorMsg();
     return ds;
@@ -419,6 +421,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
   job.persist(driver->handle());
   job.main = [raw, path, access](const GDALExecutionProgress &) {
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
+    CPLErrorReset();
     GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
     if (!ds) throw CPLGetLastErrorMsg();
     return ds;

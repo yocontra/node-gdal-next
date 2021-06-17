@@ -124,6 +124,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
   GDALAsyncableJob<OGRFeature *> job(layer->parent_uid);
   job.persist(layer->handle());
   job.main = [gdal_layer, feature_id](const GDALExecutionProgress &) {
+    CPLErrorReset();
     OGRFeature *feature = gdal_layer->GetFeature(feature_id);
     if (feature == nullptr) throw CPLGetLastErrorMsg();
     return feature;

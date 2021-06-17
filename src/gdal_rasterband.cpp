@@ -270,6 +270,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
   GDALRasterBand *gdal_obj = band->this_;
 
   job.main = [gdal_obj, real, imaginary](const GDALExecutionProgress &) {
+    CPLErrorReset();
     CPLErr err = gdal_obj->Fill(real, imaginary);
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
@@ -316,6 +317,7 @@ NAN_METHOD(RasterBand::asMDArray) {
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_RAW_CHECK(GDALRasterBand *, band, raw);
   GDAL_LOCK_PARENT(band);
+  CPLErrorReset();
   std::shared_ptr<GDALMDArray> mdarray = raw->AsMDArray();
   if (mdarray == nullptr) {
     Nan::ThrowError(CPLGetLastErrorMsg());
@@ -428,6 +430,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::computeStatistics) {
     struct stats_t stats;
     std::lock_guard<std::mutex> guard(stats_lock);
 
+    CPLErrorReset();
     pushStatsErrorHandler();
     CPLErr err = gdal_obj->ComputeStatistics(approx, &stats.min, &stats.max, &stats.mean, &stats.std_dev, NULL, NULL);
     popStatsErrorHandler();

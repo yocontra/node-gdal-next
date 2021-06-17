@@ -120,6 +120,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
   GDALAsyncableJob<GDALRasterBand *> job(ds->uid);
   job.persist(parent);
   job.main = [raw, band_id](const GDALExecutionProgress &) {
+    CPLErrorReset();
     GDALRasterBand *band = raw->GetRasterBand(band_id);
     if (band == nullptr) { throw CPLGetLastErrorMsg(); }
     return band;
@@ -188,6 +189,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
   GDALAsyncableJob<GDALRasterBand *> job(ds->uid);
   job.persist(parent);
   job.main = [raw, type, options](const GDALExecutionProgress &) {
+    CPLErrorReset();
     CPLErr err = raw->AddBand(type, options->get());
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return raw->GetRasterBand(raw->GetRasterCount());

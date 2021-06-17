@@ -329,6 +329,7 @@ GDAL_ASYNCABLE_DEFINE(MDArray::read) {
   job.main =
     [buffer, gdal_mdarray, gdal_origin, gdal_span, gdal_stride, type, length, offset](const GDALExecutionProgress &) {
       int bytes_per_pixel = GDALGetDataTypeSize(type) / 8;
+      CPLErrorReset();
       GDALExtendedDataType gdal_type = GDALExtendedDataType::Create(type);
       bool success = gdal_mdarray->Read(
         gdal_origin.get(),
@@ -364,6 +365,7 @@ NAN_METHOD(MDArray::getView) {
   std::string viewExpr;
   NODE_ARG_STR(0, "view", viewExpr);
   GDAL_LOCK_PARENT(array);
+  CPLErrorReset();
   std::shared_ptr<GDALMDArray> view = raw->GetView(viewExpr);
   if (view == nullptr) {
     Nan::ThrowError(CPLGetLastErrorMsg());
@@ -390,6 +392,7 @@ NAN_METHOD(MDArray::getMask) {
   GDAL_RAW_CHECK(std::shared_ptr<GDALMDArray>, array, raw);
 
   GDAL_LOCK_PARENT(array);
+  CPLErrorReset();
   std::shared_ptr<GDALMDArray> mask = raw->GetMask(NULL);
   if (mask == nullptr) {
     Nan::ThrowError(CPLGetLastErrorMsg());
@@ -423,6 +426,7 @@ NAN_METHOD(MDArray::asDataset) {
   if (isYString) y = ArrayDimensions::__getIdx(raw, dim);
 
   GDAL_LOCK_PARENT(array);
+  CPLErrorReset();
   GDALDataset *ds = raw->AsClassicDataset(x, y);
   if (ds == nullptr) {
     Nan::ThrowError(CPLGetLastErrorMsg());

@@ -130,6 +130,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
     std::string *layer_name = new std::string(*Nan::Utf8String(info[0]));
     job.main = [raw, layer_name](const GDALExecutionProgress &) {
       std::unique_ptr<std::string> layer_name_ptr(layer_name);
+      CPLErrorReset();
       OGRLayer *lyr = raw->GetLayerByName(layer_name->c_str());
       if (lyr == nullptr) { throw CPLGetLastErrorMsg(); }
       return lyr;
@@ -137,6 +138,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
   } else if (info[0]->IsNumber()) {
     int64_t id = Nan::To<int64_t>(info[0]).ToChecked();
     job.main = [raw, id](const GDALExecutionProgress &) {
+      CPLErrorReset();
       OGRLayer *lyr = raw->GetLayer(id);
       if (lyr == nullptr) { throw CPLGetLastErrorMsg(); }
       return lyr;
@@ -225,6 +227,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
   job.main = [raw, layer_name, srs, geom_type, options](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
     std::unique_ptr<std::string> layer_name_ptr(layer_name);
+    CPLErrorReset();
     OGRLayer *layer = raw->CreateLayer(layer_name->c_str(), srs, geom_type, options->get());
     if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
@@ -326,6 +329,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
   job.main = [raw, src, new_name, options](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
     std::unique_ptr<std::string> new_name_ptr(new_name);
+    CPLErrorReset();
     OGRLayer *layer = raw->CopyLayer(src, new_name->c_str(), options->get());
     if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
