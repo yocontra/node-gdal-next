@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fix #6, a case of sleeping in the GC while destroying the sibling of an object with an active asynchronous operation
  - Fix a potential race condition in the object store
  - Fix several potential race conditions in `gdal.RasterBand`
+ - Correctly return an empty error if a GDAL method fails without setting the error message instead of the last previously encountered error
 
 ## [3.3.0] 2021-06-15
 
