@@ -74,7 +74,8 @@ describe('gdal.CompoundCurve', () => {
         newcompound.curves.add(arc)
         newcompound.curves.add(line)
         assert.equal(newcompound.curves.count(), 2)
-        assert.equal(newcompound.curves.get(0).toJSON(), arc.toJSON())
+        // GeoJSON does not support curves
+        assert.instanceOf(newcompound.curves.get(0), gdal.CircularString)
         assert.equal(newcompound.curves.get(1).toJSON(), line.toJSON())
       })
       it('should support adding multiple curves', () => {
@@ -83,7 +84,8 @@ describe('gdal.CompoundCurve', () => {
 
         newcompound.curves.add([ arc, line ])
         assert.equal(newcompound.curves.count(), 2)
-        assert.equal(newcompound.curves.get(0).toJSON(), arc.toJSON())
+        // GeoJSON does not support curves
+        assert.instanceOf(newcompound.curves.get(0), gdal.CircularString)
         assert.equal(newcompound.curves.get(1).toJSON(), line.toJSON())
       })
     })
