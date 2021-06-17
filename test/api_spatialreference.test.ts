@@ -141,6 +141,18 @@ describe('gdal.SpatialReference', () => {
       })
     })
   })
+  describe('fromURL w/Net', () => {
+    it('should return SpatialReference', () => {
+      const ref = gdal.SpatialReference.fromURL('http://spatialreference.org/ref/epsg/4326/')
+      assert.instanceOf(ref, gdal.SpatialReference)
+      assert.isTrue(ref.isSame(gdal.SpatialReference.fromEPSG(4326)))
+    })
+    it('should throw on invalid URL', () => {
+      assert.throws(() => {
+        gdal.SpatialReference.fromURL('http://nosuchdomain/ref/epsg/4326/')
+      })
+    })
+  })
   describe('fromCRSURL w/Net', () => {
     it('should return SpatialReference', () => {
       const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
@@ -165,6 +177,31 @@ describe('gdal.SpatialReference', () => {
       assert.throws(() => {
         gdal.SpatialReference.fromMICoordSys(micoordsys)
       })
+    })
+  })
+  describe('clone', () => {
+    it('should clone a SpatialReference', () => {
+      const srs1 = gdal.SpatialReference.fromEPSG(4326)
+      const srs2 = srs1.clone()
+      assert.isTrue(srs1.isSame(srs2))
+      assert.notStrictEqual(srs1, srs2)
+    })
+  })
+  describe('cloneGeogCS', () => {
+    it('should clone a SpatialReference', () => {
+      const wkt =
+        'PROJCS["NAD_1983_UTM_Zone_10N",' +
+        'GEOGCS["GCS_North_American_1983",' +
+        'DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137,298.257222101]],' +
+        'PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],' +
+        'PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],' +
+        'PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-123.0],' +
+        'PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_of_Origin",0.0],' +
+        'UNIT["Meter",1.0]]'
+      const srs1 = gdal.SpatialReference.fromWKT(wkt)
+      const srs2 = srs1.cloneGeogCS()
+      assert.isFalse(srs1.isSame(srs2))
+      assert.isTrue(srs1.isSameGeogCS(srs2))
     })
   })
   describe('setWellKnownGeogCS', () => {

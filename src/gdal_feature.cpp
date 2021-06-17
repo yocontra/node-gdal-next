@@ -29,11 +29,10 @@ void Feature::Initialize(Local<Object> target) {
   // defn.fields.get() instead)
   Nan::SetPrototypeMethod(lcons, "setFrom", setFrom);
 
-  // Note: We should let node GC handle destroying features when they arent
-  // being used
+  // Note: This is used mainly for testing
   // TODO: Give node more info on the amount of memory a feature is using
   //      Nan::AdjustExternalMemory()
-  // Nan::SetPrototypeMethod(lcons, "destroy", destroy);
+  Nan::SetPrototypeMethod(lcons, "destroy", destroy);
 
   ATTR(lcons, "fields", fieldsGetter, READ_ONLY_SETTER);
   ATTR(lcons, "defn", defnGetter, READ_ONLY_SETTER);
@@ -187,12 +186,13 @@ NAN_METHOD(Feature::getGeometry) {
   info.GetReturnValue().Set(Geometry::New(geom, false));
 }
 
+#if 0
 /**
  * Returns the definition of a particular field at an index.
  *
- * @method getFieldDefn
- * @param {number} index Field index (0-based)
- * @return {gdal.FieldDefn}
+ * _method getFieldDefn
+ * _param {number} index Field index (0-based)
+ * _return {gdal.FieldDefn}
  */
 NAN_METHOD(Feature::getFieldDefn) {
   Nan::HandleScope scope;
@@ -212,6 +212,7 @@ NAN_METHOD(Feature::getFieldDefn) {
 
   info.GetReturnValue().Set(FieldDefn::New(feature->this_->GetFieldDefnRef(field_index), false));
 }
+#endif
 
 // NODE_WRAPPED_METHOD_WITH_RESULT(Feature, stealGeometry, Geometry,
 // StealGeometry);

@@ -145,11 +145,27 @@ describe('gdal.Feature', () => {
   })
 
   describe('instance', () => {
+    describe('destroy', () => {
+      it('should destroy the feature', () => {
+        const feature = new gdal.Feature(defn)
+        feature.destroy()
+        assert.throws(() => {
+          feature.getGeometry()
+        })
+      })
+    })
     describe('"fid" property', () => {
       describe('getter', () => {
         it('should return integer', () => {
           const feature = new gdal.Feature(defn)
           assert.equal(feature.fid, -1)
+        })
+        it('should throw on destroyed feature', () => {
+          const feature = new gdal.Feature(defn)
+          feature.destroy()
+          assert.throws(() => {
+            console.log(feature.fid)
+          })
         })
       })
       describe('setter', () => {
@@ -526,6 +542,13 @@ describe('gdal.Feature', () => {
         const feature = new gdal.Feature(defn)
         const geom = feature.getGeometry()
         assert.isNull(geom)
+      })
+      it('should throw on destroyed feature', () => {
+        const feature = new gdal.Feature(defn)
+        feature.destroy()
+        assert.throws(() => {
+          feature.getGeometry()
+        }, /destroyed/)
       })
     })
     describe('setFrom()', () => {
