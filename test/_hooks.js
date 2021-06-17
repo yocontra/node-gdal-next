@@ -1,6 +1,15 @@
 const gdal = require('../lib/gdal.js')
 
-let noFailNet = (done) => done()
+let noFailNet = function (done) {
+  let test = this.currentTest
+  while (test) {
+    if (test.title.match(/w\/Net/)) {
+      this.retries(3)
+    }
+    test = test.parent
+  }
+  done()
+}
 
 if (!process.env.MOCHA_TEST_NETWORK || process.env.MOCHA_TEST_NETWORK == 0) {
   noFailNet = function (done) {
