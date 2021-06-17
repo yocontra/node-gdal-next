@@ -567,6 +567,7 @@ NAN_METHOD(Geometry::clone) {
  * Compute convex hull.
  *
  * @method convexHull
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -575,6 +576,7 @@ NAN_METHOD(Geometry::clone) {
  * {{{async}}}
  *
  * @method convexHullAsync
+ * @throws Error
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Geometry>}
  */
@@ -584,7 +586,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
-  job.main = [gdal_geom](const GDALExecutionProgress &) { return gdal_geom->ConvexHull(); };
+  job.main = [gdal_geom](const GDALExecutionProgress &) {
+    auto r = gdal_geom->ConvexHull();
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
@@ -593,6 +599,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
  * Compute boundary.
  *
  * @method boundary
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -601,6 +608,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
  * {{{async}}}
  *
  * @method boundaryAsync
+ * @throws Error
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Geometry>}
  */
@@ -610,7 +618,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
-  job.main = [gdal_geom](const GDALExecutionProgress &) { return gdal_geom->Boundary(); };
+  job.main = [gdal_geom](const GDALExecutionProgress &) {
+    auto r = gdal_geom->Boundary();
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
@@ -620,6 +632,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
  *
  * @method intersection
  * @param {gdal.Geometry} geometry
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -630,6 +643,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
  * @method intersectionAsync
  * @param {gdal.Geometry} geometry
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 
@@ -644,7 +658,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
-  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) { return gdal_geom->Intersection(gdal_x); };
+  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    auto r = gdal_geom->Intersection(gdal_x);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
@@ -654,6 +672,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
  *
  * @method union
  * @param {gdal.Geometry} geometry
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -664,6 +683,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
  * @method unionAsync
  * @param {gdal.Geometry} geometry
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 
@@ -678,7 +698,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
-  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) { return gdal_geom->Union(gdal_x); };
+  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    auto r = gdal_geom->Union(gdal_x);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
@@ -688,6 +712,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
  *
  * @method difference
  * @param {gdal.Geometry} geometry
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -698,6 +723,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
  * @method differenceAsync
  * @param {gdal.Geometry} geometry
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 
@@ -712,7 +738,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
-  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) { return gdal_geom->Difference(gdal_x); };
+  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    auto r = gdal_geom->Difference(gdal_x);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
@@ -722,6 +752,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
  *
  * @method symDifference
  * @param {gdal.Geometry} geometry
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -732,6 +763,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
  * @method symDifferenceAsync
  * @param {gdal.Geometry} geometry
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 
@@ -746,7 +778,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
   OGRGeometry *gdal_geom = geom->this_;
   OGRGeometry *gdal_x = x->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
-  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) { return gdal_geom->SymDifference(gdal_x); };
+  job.main = [gdal_geom, gdal_x](const GDALExecutionProgress &) {
+    auto r = gdal_geom->SymDifference(gdal_x);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
@@ -756,6 +792,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
  *
  * @method simplify
  * @param {number} tolerance
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -766,6 +803,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
  * @method simplifyAsync
  * @param {number} tolerance
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 
@@ -779,7 +817,11 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
   OGRGeometry *gdal_geom = geom->this_;
 
   GDALAsyncableJob<OGRGeometry *> job(0);
-  job.main = [gdal_geom, tolerance](const GDALExecutionProgress &) { return gdal_geom->Simplify(tolerance); };
+  job.main = [gdal_geom, tolerance](const GDALExecutionProgress &) {
+    auto r = gdal_geom->Simplify(tolerance);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
@@ -789,6 +831,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
  *
  * @method simplifyPreserveTopology
  * @param {number} tolerance
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -799,6 +842,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
  * @method simplifyPreserveTopologyAsync
  * @param {number} tolerance
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 
@@ -813,7 +857,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
 
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, tolerance](const GDALExecutionProgress &) {
-    return gdal_geom->SimplifyPreserveTopology(tolerance);
+    auto r = gdal_geom->SimplifyPreserveTopology(tolerance);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
   };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 1);
@@ -825,6 +871,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
  * @method buffer
  * @param {number} distance
  * @param {number} segments
+ * @throws Error
  * @return {gdal.Geometry}
  */
 
@@ -836,6 +883,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
  * @param {number} distance
  * @param {number} segments
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 
@@ -854,7 +902,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
 
   GDALAsyncableJob<OGRGeometry *> job(0);
   job.main = [gdal_geom, distance, number_of_segments](const GDALExecutionProgress &) {
-    return gdal_geom->Buffer(distance, number_of_segments);
+    auto r = gdal_geom->Buffer(distance, number_of_segments);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
   };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 2);
@@ -864,6 +914,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
  * Convert a geometry into well known text format.
  *
  * @method toWKT
+ * @throws Error
  * @return {string}
  */
 
@@ -873,6 +924,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
  *
  * @method toWKTAsync
  * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<string>}
  */
 
@@ -913,6 +965,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
  * (wkbByteOrder)"}}see options{{/crossLink}})
  * @param {string} [variant="OGC"] ({{#crossLink "Constants (wkbVariant)"}}see
  * options{{/crossLink}})
+ * @throws Error
  * @return {Buffer}
  */
 
@@ -926,6 +979,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
  * @param {string} [variant="OGC"] ({{#crossLink "Constants (wkbVariant)"}}see
  * options{{/crossLink}})
  * @param {callback<Buffer>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<Buffer>}
  */
 
@@ -987,6 +1041,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
  * Convert a geometry into KML format.
  *
  * @method toKML
+ * @throws Error
  * @return {string}
  */
 
@@ -996,6 +1051,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
  *
  * @method toKMLAsync
  * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<string>}
  */
 
@@ -1011,6 +1067,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
     uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToKML();
     uv_sem_post(async_lock);
+    if (text == nullptr) throw CPLGetLastErrorMsg();
     return text;
   };
   job.rval = [](char *text, GetFromPersistentFunc) {
@@ -1028,6 +1085,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
  * Convert a geometry into GML format.
  *
  * @method toGML
+ * @throws Error
  * @return {string}
  */
 
@@ -1037,6 +1095,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
  *
  * @method toGMLAsync
  * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<string>}
  */
 
@@ -1052,6 +1111,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
     uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToGML();
     uv_sem_post(async_lock);
+    if (text == nullptr) throw CPLGetLastErrorMsg();
     return text;
   };
   job.rval = [](char *text, GetFromPersistentFunc) {
@@ -1069,6 +1129,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
  * Convert a geometry into JSON format.
  *
  * @method toJSON
+ * @throws Error
  * @return {string}
  */
 
@@ -1078,6 +1139,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
  *
  * @method toJSONAsync
  * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<string>}
  */
 
@@ -1093,6 +1155,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
     uv_sem_wait(async_lock);
     char *text = gdal_geom->exportToJson();
     uv_sem_post(async_lock);
+    if (text == nullptr) throw CPLGetLastErrorMsg();
     return text;
   };
   job.rval = [](char *text, GetFromPersistentFunc) {
@@ -1110,6 +1173,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
  * Compute the centroid of the geometry.
  *
  * @method centroid
+ * @throws Error
  * @return {gdal.Point}
  */
 
@@ -1119,6 +1183,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
  *
  * @method centroidAsync
  * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @throws Error
  * @return {Promise<gdal.Geometry>}
  */
 

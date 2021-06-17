@@ -178,6 +178,7 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
         * `gdal.LayerFields.get{Async}()` now throws an `Error` if an invalid field is requested instead of returning a null object
         * `gdal.LineStringPoints.get()` now throws an `Error` if an invalid point is requested instead of returning a null object
         * `gdal.PolygonRings.get()` now throws an `Error` if an invalid ring is requested instead of returning a null object
+        * All `gdal.Geometry` methods that return a `gdal.Geometry` throw an `Error` on error instead of returning a null object
 
  * If you are coming from `node-gdal`, in addition to all of the above
     - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,
