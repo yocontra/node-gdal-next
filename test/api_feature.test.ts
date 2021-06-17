@@ -74,6 +74,11 @@ describe('gdal.Feature', () => {
     it('get() should accept an id', () => {
       assert.propertyVal(defn.fields.get('id'), 'name', 'id')
     })
+    it('get() should throw on invalid id', () => {
+      assert.throws(() => {
+        defn.fields.get('bogus')
+      })
+    })
     it('indexOf() should find a field by id', () => {
       assert.equal(defn.fields.indexOf('value'), 2)
     })

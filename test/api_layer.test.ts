@@ -733,6 +733,13 @@ describe('gdal.Layer', () => {
             }, /already destroyed/)
           })
         })
+        it('should throw error if the field does not exist', () => {
+          prepare_dataset_layer_test('r', (dataset, layer) => {
+            assert.throws(() => {
+              layer.fields.get(112)
+            }, /Invalid field index/)
+          })
+        })
       })
       describe('forEach()', () => {
         it('should return pass each FieldDefn to callback', () => {
