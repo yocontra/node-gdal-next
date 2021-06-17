@@ -170,7 +170,8 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
         * `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
         * `gdal.DatasetLayers.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
         * `gdal.FeatureDefnFields.get{Async}()` now throws an `Error` if an invalid field definition is requested instead of returning a null object
-        * `gdal.FeatureFields.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
+        * `gdal.FeatureFields.get{Async}()` now throws an `Error` if an invalid feature is requested instead of returning a null object
+          - it can still return `null` if the field exists in the definition but it is not set in the feature
         * `gdal.GDALDrivers.get()` now throws an `Error` if an invalid driver is requested instead of returning a null object
         * `gdal.GeometryCollectionChildren.get()` now throws an `Error` if an invalid sub-geometry is requested instead of returning a null object
         * `gdal.LayerFeatures.get{Async}()` now throws an `Error` if an invalid feature is requested instead of returning a null object

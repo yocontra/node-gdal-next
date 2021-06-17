@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - `gdal.DatasetLayers.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
  - `gdal.FeatureDefnFields.get{Async}()` now throws an `Error` if an invalid field definition is requested instead of returning a null object
- - `gdal.FeatureFields.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
+ - `gdal.FeatureFields.get{Async}()` now throws an `Error` if an invalid field is requested instead of returning a null object
+    - it can still return `null` if the field exists in the definition but it is not set in the feature
  - `gdal.GDALDrivers.get()` now throws an `Error` if an invalid driver is requested instead of returning a null object
  - `gdal.GeometryCollectionChildren.get()` now throws an `Error` if an invalid sub-geometry is requested instead of returning a null object
  - `gdal.LayerFeatures.get{Async}()` now throws an `Error` if an invalid feature is requested instead of returning a null object
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.LineStringPoints.get()` now throws an `Error` if an invalid point is requested instead of returning a null object
  - `gdal.PolygonRings.get()` now throws an `Error` if an invalid ring is requested instead of returning a null object
  - Fix #6, a case of sleeping in the GC while destroying the sibling of an object with an active asynchronous operation
+ - Fix a potential race condition in the object store
 
 ## [3.3.0] 2021-06-15
 

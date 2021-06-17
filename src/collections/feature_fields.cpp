@@ -354,12 +354,13 @@ NAN_METHOD(FeatureFields::toObject) {
     }
 
     // get field value
-    Local<Value> val = FeatureFields::get(f->get(), i);
-    if (val.IsEmpty()) {
-      return; // get method threw an exception
+    try {
+      Local<Value> val = FeatureFields::get(f->get(), i);
+      Nan::Set(obj, Nan::New(key).ToLocalChecked(), val);
+    } catch (const char *err) {
+      Nan::ThrowError(err);
+      return;
     }
-
-    Nan::Set(obj, Nan::New(key).ToLocalChecked(), val);
   }
   info.GetReturnValue().Set(obj);
 }
@@ -387,20 +388,22 @@ NAN_METHOD(FeatureFields::toArray) {
 
   for (int i = 0; i < n; i++) {
     // get field value
-    Local<Value> val = FeatureFields::get(f->get(), i);
-    if (val.IsEmpty()) {
-      return; // get method threw an exception
+    try {
+      Local<Value> val = FeatureFields::get(f->get(), i);
+      Nan::Set(array, i, val);
+    } catch (const char *err) {
+      Nan::ThrowError(err);
+      return;
     }
-
-    Nan::Set(array, i, val);
   }
   info.GetReturnValue().Set(array);
 }
 
 Local<Value> FeatureFields::get(OGRFeature *f, int field_index) {
-  //#throws : caller must check if return_val.IsEmpty() and bail out if true
+  //throws
   Nan::EscapableHandleScope scope;
 
+  if (field_index < 0 || field_index >= f->GetFieldCount()) throw "Invalid field";
   if (!f->IsFieldSet(field_index)) return scope.Escape(Nan::Null());
 
   OGRFieldDefn *field_def = f->GetFieldDefnRef(field_index);
@@ -417,7 +420,7 @@ Local<Value> FeatureFields::get(OGRFeature *f, int field_index) {
     case OFTDate:
     case OFTTime:
     case OFTDateTime: return scope.Escape(getFieldAsDateTime(f, field_index));
-    default: Nan::ThrowError("Unsupported field type"); return scope.Escape(Nan::Undefined());
+    default: throw "Unsupported field type";
   }
 }
 
@@ -453,15 +456,10 @@ NAN_METHOD(FeatureFields::get) {
   int field_index;
   ARG_FIELD_ID(0, f->get(), field_index);
 
-  Local<Value> result = FeatureFields::get(f->get(), field_index);
-
-  if (result.IsEmpty()) {
-    NODE_THROW_LAST_CPLERR;
-    return;
-  } else {
+  try {
+    Local<Value> result = FeatureFields::get(f->get(), field_index);
     info.GetReturnValue().Set(result);
-    return;
-  }
+  } catch (const char *err) { Nan::ThrowError(err); }
 }
 
 /**
