@@ -15,6 +15,16 @@ describe('gdal.SpatialReference', () => {
   it('should be instantiable', () => {
     assert.instanceOf(new gdal.SpatialReference(), gdal.SpatialReference)
   })
+  it('should be instantiable w/WKT', () => {
+    assert.instanceOf(new gdal.SpatialReference(
+      'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]'),
+    gdal.SpatialReference)
+  })
+  it('constructor can throw', () => {
+    assert.throws(() => {
+      new gdal.SpatialReference('c\'est en faisant n\'importe quoi')
+    })
+  })
   describe('fromWKT()', () => {
     it('should return SpatialReference', () => {
       const wkt =
@@ -157,6 +167,19 @@ describe('gdal.SpatialReference', () => {
       })
     })
   })
+  describe('setWellKnownGeogCS', () => {
+    it('should accept a string parameter', () => {
+      const srs = new gdal.SpatialReference()
+      srs.setWellKnownGeogCS('EPSG:4326')
+      assert.isTrue(srs.isSame(gdal.SpatialReference.fromEPSG(4326)))
+    })
+    it('should throw on invalid input', () => {
+      const srs = new gdal.SpatialReference()
+      assert.throws(() => {
+        srs.setWellKnownGeogCS('invalid')
+      })
+    })
+  })
   describe('validate', () => {
     it('should validate a valid SpatialReference', () => {
       const epsg = 4326
@@ -180,18 +203,17 @@ describe('gdal.SpatialReference', () => {
       })
     }
   })
-  describe('exportToPrettyWKT w/Net', () => {
+  describe('exportToPrettyWKT', () => {
     it('should pretty-print WKT', () => {
-      const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
-      const ref = gdal.SpatialReference.fromCRSURL(wms)
-      assert.include(ref.toPrettyWKT(), 'WGS 84 / Pseudo-Mercato')
+      const ref = gdal.SpatialReference.fromEPSG(3857)
+      assert.include(ref.toPrettyWKT(), 'WGS 84 / Pseudo-Mercator')
     })
   })
   describe('exportToXML', () => {
     it('should export to XML', () => {
       const epsg = 3857
       const ref = gdal.SpatialReference.fromEPSG(epsg)
-      assert.include(ref.toXML(), 'WGS 84 / Pseudo-Mercato')
+      assert.include(ref.toXML(), 'WGS 84 / Pseudo-Mercator')
     })
   })
   describe('getAngularUnits', () => {
