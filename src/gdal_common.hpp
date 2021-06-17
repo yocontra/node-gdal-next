@@ -635,7 +635,19 @@ NAN_SETTER(READ_ONLY_SETTER);
     info.GetReturnValue().Set(Nan::New<result_type>(obj->this_->wrapped_method(param)));                               \
   }
 
-// ----- wrapped getter w/ lock -------
+// ----- wrapped methods w/ lock -------
+
+#define NODE_WRAPPED_METHOD_WITH_RESULT_LOCKED(klass, method, result_type, wrapped_method)                             \
+  NAN_METHOD(klass::method) {                                                                                          \
+    Nan::HandleScope scope;                                                                                            \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    GDAL_LOCK_PARENT(obj);                                                                                             \
+    info.GetReturnValue().Set(Nan::New<result_type>(obj->this_->wrapped_method()));                                    \
+  }
 
 #define NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(klass, method, wrapped_method)                                          \
   NAN_GETTER(klass::method) {                                                                                          \
@@ -849,11 +861,11 @@ NAN_SETTER(READ_ONLY_SETTER);
     return;                                                                                                            \
   }
 
-#define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_DOUBLE_PARAM(klass, method, wrapped_method, param_name)               \
+#define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM_LOCKED(klass, method, wrapped_method, param_name)       \
   NAN_METHOD(klass::method) {                                                                                          \
     Nan::HandleScope scope;                                                                                            \
-    double param;                                                                                                      \
-    NODE_ARG_DOUBLE(0, #param_name, param);                                                                            \
+    int param;                                                                                                         \
+    NODE_ARG_INT(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -864,6 +876,22 @@ NAN_SETTER(READ_ONLY_SETTER);
       NODE_THROW_LAST_CPLERR;                                                                                          \
       return;                                                                                                          \
     }                                                                                                                  \
+    return;                                                                                                            \
+  }
+
+#define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_DOUBLE_PARAM(klass, method, wrapped_method, param_name)               \
+  NAN_METHOD(klass::method) {                                                                                          \
+    Nan::HandleScope scope;                                                                                            \
+    double param;                                                                                                      \
+    NODE_ARG_DOUBLE(0, #param_name, param);                                                                            \
+    klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
+    if (!obj->isAlive()) {                                                                                             \
+      Nan::ThrowError(#klass " object has already been destroyed");                                                    \
+      return;                                                                                                          \
+    }                                                                                                                  \
+    GDAL_LOCK_PARENT(obj);                                                                                             \
+    int err = obj->this_->wrapped_method(param);                                                                       \
+    if (err) { NODE_THROW_LAST_CPLERR; }                                                                               \
     return;                                                                                                            \
   }
 
@@ -967,7 +995,6 @@ NAN_SETTER(READ_ONLY_SETTER);
     }                                                                                                                  \
     GDAL_LOCK_PARENT(obj);                                                                                             \
     int err = obj->this_->wrapped_method();                                                                            \
-    GDAL_UNLOCK_PARENT;                                                                                                \
     if (err) {                                                                                                         \
       NODE_THROW_OGRERR(err);                                                                                          \
       return;                                                                                                          \

@@ -202,7 +202,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(RasterBand, flush, FlushCach
  * @method getMaskFlags
  * @return {number} Mask flags
  */
-NODE_WRAPPED_METHOD_WITH_RESULT(RasterBand, getMaskFlags, Integer, GetMaskFlags);
+NODE_WRAPPED_METHOD_WITH_RESULT_LOCKED(RasterBand, getMaskFlags, Integer, GetMaskFlags);
 // TODO: expose GMF constants in API
 // ({{#crossLink "Constants (GMF)"}}see flags{{/crossLink}})
 
@@ -213,7 +213,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(RasterBand, getMaskFlags, Integer, GetMaskFlags)
  * @method createMaskBand
  * @param {number} flags Mask flags
  */
-NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM(RasterBand, createMaskBand, CreateMaskBand, "mask flags");
+NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM_LOCKED(RasterBand, createMaskBand, CreateMaskBand, "mask flags");
 // TODO: expose GMF constants in API
 // ({{#crossLink "Constants (GMF)"}}see flags{{/crossLink}})
 
