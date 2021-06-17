@@ -1,4 +1,5 @@
 import { assert } from 'chai'
+import * as path from 'path'
 import * as gdal from '..'
 
 describe('gdal.Polygon', () => {
@@ -212,6 +213,57 @@ describe('gdal.Polygon', () => {
         ring.points.add(0, 0, 0)
         polygon.rings.add(ring)
         assert.closeTo(ring.getArea(), 100, 0.001)
+      })
+    })
+  })
+})
+
+describe('gdal.MultiPolygon', () => {
+  afterEach(global.gc)
+  let multiPolygon: gdal.MultiPolygon
+
+  beforeEach(() => {
+    multiPolygon = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      .layers.get(0).features.get(0).getGeometry() as gdal.MultiPolygon
+  })
+
+  it('unionCascaded() should return a Geometry', () => {
+    const geom = gdal.Geometry.fromWKT(
+      'MULTIPOLYGON(((0 0,0 1,1 1,1 0,0 0)),((0.5 0.5,0.5 1.5,1.5 1.5,1.5 0.5,0.5 0.5)))') as gdal.MultiPolygon
+    const union = geom.unionCascaded()
+    assert.instanceOf(union, gdal.Geometry)
+  })
+
+  it('unionCascaded() should throw on Error', () => {
+    assert.throws(() => {
+      multiPolygon.unionCascaded()
+    })
+  })
+
+
+  it('getArea() should return a number', () => {
+    const area = multiPolygon.getArea()
+    assert.isNumber(area)
+    assert.closeTo(area, 2.04665, 1e-3)
+  })
+
+  describe('"children" property', () => {
+    it('should be an instance of GeometryCollectionChildren', () => {
+      assert.instanceOf(multiPolygon.children, gdal.GeometryCollectionChildren)
+    })
+    it('get() should return a Geometry', () => {
+      const geom = multiPolygon.children.get(0)
+      assert.instanceOf(geom, gdal.Geometry)
+      assert.instanceOf(geom, gdal.Polygon)
+    })
+    it('count() should return a number', () => {
+      const n = multiPolygon.children.count()
+      assert.isNumber(n)
+      assert.equal(n, 1)
+    })
+    it('get() should throw if the geometry does not exist', () => {
+      assert.throws(() => {
+        multiPolygon.children.get(112)
       })
     })
   })

@@ -49,8 +49,13 @@ NAN_METHOD(MultiPolygon::unionCascaded) {
   Nan::HandleScope scope;
 
   MultiPolygon *geom = Nan::ObjectWrap::Unwrap<MultiPolygon>(info.This());
+  auto r = geom->this_->UnionCascaded();
+  if (r == nullptr) {
+    NODE_THROW_LAST_CPLERR;
+    return;
+  }
 
-  info.GetReturnValue().Set(Geometry::New(geom->this_->UnionCascaded()));
+  info.GetReturnValue().Set(Geometry::New(r));
 }
 
 /**
