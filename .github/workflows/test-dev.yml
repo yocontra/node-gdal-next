@@ -38,7 +38,7 @@ jobs:
     - name: Run unit tests
       run: npm test
       env:
-        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
+        MOCHA_TEST_NETWORK: 1
     - run: npm run gcov
     - run: npm run codecov
       env:
