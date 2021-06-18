@@ -311,10 +311,11 @@ const char warningDefault[] =
   "Sleeping on semaphore in garbage collector, this is a bug in gdal-async, event loop blocked for ";
 static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning = warningDefault) {
   if (uv_sem_trywait(sem) != 0) {
-    auto startTime = clock();
+    auto start = std::chrono::high_resolution_clock::now();
     fprintf(stderr, "%s", warning);
     uv_sem_wait(sem);
-    fprintf(stderr, "%ld µs\n", clock() - startTime);
+    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    fprintf(stderr, "%ld µs\n", std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
   }
 }
 

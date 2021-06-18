@@ -2,6 +2,7 @@
 #define __NODE_GDAL_ASYNC_WORKER_H__
 
 #include <functional>
+#include <chrono>
 #include "nan-wrapper.h"
 #include "gdal_common.hpp"
 
@@ -72,19 +73,20 @@ class AsyncGuard {
       if (uids[0] == 0) return;
       lock = warning ? object_store.tryLockDataset(uids[0]) : object_store.lockDataset(uids[0]);
       if (lock == nullptr) {
-        auto startTime = clock();
+        auto start = std::chrono::high_resolution_clock::now();
         fprintf(stderr, eventLoopWarning);
         lock = object_store.lockDataset(uids[0]);
-        fprintf(stderr, "%ld µs\n", clock() - startTime);
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        fprintf(stderr, "%ld µs\n", std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
       }
     } else {
       locks = warning ? make_shared<vector<AsyncLock>>(object_store.tryLockDatasets(uids))
                       : make_shared<vector<AsyncLock>>(object_store.lockDatasets(uids));
       if (locks->size() == 0) {
-        auto startTime = clock();
+        auto start = std::chrono::high_resolution_clock::now();
         fprintf(stderr, eventLoopWarning);
-        locks = make_shared<vector<AsyncLock>>(object_store.lockDatasets(uids));
-        fprintf(stderr, "%ld µs\n", clock() - startTime);
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        fprintf(stderr, "%ld µs\n", std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
       }
     }
   }
