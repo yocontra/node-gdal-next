@@ -211,6 +211,17 @@ describe('gdal.Dataset', () => {
           return assert.isRejected(band, /Dataset object has already been destroyed/)
         })
       })
+      describe('getEnvelope()', () => {
+        it('should return the envelope', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const extent = ds.bands.getEnvelope()
+          assert.instanceOf(extent, gdal.Envelope)
+          assert.closeTo(extent.minX, -1134675.2952829634, 1e-6)
+          assert.closeTo(extent.minY, 2479678.7999914493, 1e-6)
+          assert.closeTo(extent.maxX, -1127293.2565036996, 1e-6)
+          assert.closeTo(extent.maxY, 2485710.4658232867, 1e-6)
+        })
+      })
     })
     describe('"layers" property', () => {
       it('should exist', () => {
