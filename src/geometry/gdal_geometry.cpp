@@ -79,7 +79,9 @@ void Geometry::Initialize(Local<Object> target) {
   Nan__SetPrototypeAsyncableMethod(lcons, "flattenTo2D", flattenTo2D);
   Nan__SetPrototypeAsyncableMethod(lcons, "transform", transform);
   Nan__SetPrototypeAsyncableMethod(lcons, "transformTo", transformTo);
+#if GDAL_VERSION_MAJOR >= 3
   Nan__SetPrototypeAsyncableMethod(lcons, "makeValid", makeValid);
+#endif
 
   ATTR(lcons, "srs", srsGetter, srsSetter);
   ATTR(lcons, "wkbSize", wkbSizeGetter, READ_ONLY_SETTER);
@@ -920,8 +922,10 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
   job.run(info, async, 2);
 }
 
+#if GDAL_VERSION_MAJOR >= 3
 /**
  * Attempts to make an invalid geometry valid without losing vertices.
+ * Requires GDAL 3.0
  *
  * @method makeValid
  * @throws Error
@@ -930,6 +934,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
 
 /**
  * Attempts to make an invalid geometry valid without losing vertices.
+ * Requires GDAL 3.0
  * {{{async}}}
  *
  * @method makeValidAsync
@@ -952,6 +957,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::makeValid) {
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
+#endif
 
 /**
  * Convert a geometry into well known text format.

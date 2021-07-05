@@ -69,7 +69,9 @@ class Geometry : public GeometryBase<Geometry, OGRGeometry> {
   GDAL_ASYNCABLE_DECLARE(flattenTo2D);
   GDAL_ASYNCABLE_DECLARE(transform);
   GDAL_ASYNCABLE_DECLARE(transformTo);
+#if GDAL_VERSION_MAJOR >= 3
   GDAL_ASYNCABLE_DECLARE(makeValid);
+#endif
 
   // static constructor methods
   GDAL_ASYNCABLE_DECLARE(create);
