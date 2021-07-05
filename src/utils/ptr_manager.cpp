@@ -315,7 +315,8 @@ static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning = w
     fprintf(stderr, "%s", warning);
     uv_sem_wait(sem);
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
-    fprintf(stderr, "%ld µs\n", std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
+    fprintf(
+      stderr, "%ld µs\n", static_cast<long>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
   }
 }
 

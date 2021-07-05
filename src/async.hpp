@@ -77,7 +77,10 @@ class AsyncGuard {
         fprintf(stderr, eventLoopWarning);
         lock = object_store.lockDataset(uids[0]);
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
-        fprintf(stderr, "%ld µs\n", std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
+        fprintf(
+          stderr,
+          "%ld µs\n",
+          static_cast<long>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
       }
     } else {
       locks = warning ? make_shared<vector<AsyncLock>>(object_store.tryLockDatasets(uids))
@@ -86,7 +89,10 @@ class AsyncGuard {
         auto start = std::chrono::high_resolution_clock::now();
         fprintf(stderr, eventLoopWarning);
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
-        fprintf(stderr, "%ld µs\n", std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
+        fprintf(
+          stderr,
+          "%ld µs\n",
+          static_cast<long>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
       }
     }
   }
