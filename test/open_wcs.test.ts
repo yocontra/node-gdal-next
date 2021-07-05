@@ -5,7 +5,7 @@ import * as chaiAsPromised from 'chai-as-promised'
 import * as semver from 'semver'
 chai.use(chaiAsPromised)
 
-const columbiaPop = 'WCS:https://sedac.ciesin.columbia.edu/geoserver/wcs?VERSION=1.0.0&COVERAGE=anthromes:anthromes-anthropogenic-biomes-world-v2-2000'
+const wcsURL = 'WCS:https://webmap.ornl.gov/ogcbroker/wcs?VERSION=1.0.0&COVERAGE=1001_1'
 
 describe('Open', () => {
   afterEach(global.gc)
@@ -24,12 +24,11 @@ describe('Open', () => {
     after(() => (ds && ds.close()))
 
     it('should not throw', () => {
-      ds = gdal.open(columbiaPop)
+      ds = gdal.open(wcsURL)
     })
 
     it('should be able to the bands', () => {
       assert.equal(ds.bands.count(), 1)
-      assert.equal(ds.bands.get(1).overviews.get(2).size.x, 540)
     })
 
     it('should have projection', () => {
@@ -43,14 +42,13 @@ describe('Open', () => {
     after(() => ds && ds.then((r) => r.close()))
 
     it('should not throw', () => {
-      ds = gdal.openAsync(columbiaPop)
+      ds = gdal.openAsync(wcsURL)
       return assert.isFulfilled(ds)
     })
 
     it('should be able to read raster size', () =>
       assert.isFulfilled(Promise.all([
-        assert.eventually.equal(ds.then((r) => r.bands.count()), 1),
-        assert.eventually.equal(ds.then((r) => r.bands.get(1).overviews.get(2).size.x), 540)
+        assert.eventually.equal(ds.then((r) => r.bands.count()), 1)
       ]))
     )
 
