@@ -79,6 +79,7 @@ void Geometry::Initialize(Local<Object> target) {
   Nan__SetPrototypeAsyncableMethod(lcons, "flattenTo2D", flattenTo2D);
   Nan__SetPrototypeAsyncableMethod(lcons, "transform", transform);
   Nan__SetPrototypeAsyncableMethod(lcons, "transformTo", transformTo);
+  Nan__SetPrototypeAsyncableMethod(lcons, "makeValid", makeValid);
 
   ATTR(lcons, "srs", srsGetter, srsSetter);
   ATTR(lcons, "wkbSize", wkbSizeGetter, READ_ONLY_SETTER);
@@ -917,6 +918,39 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
   };
   job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
   job.run(info, async, 2);
+}
+
+/**
+ * Attempts to make an invalid geometry valid without losing vertices.
+ *
+ * @method makeValid
+ * @throws Error
+ * @return {gdal.Geometry}
+ */
+
+/**
+ * Attempts to make an invalid geometry valid without losing vertices.
+ * {{{async}}}
+ *
+ * @method makeValidAsync
+ * @param {callback<gdal.Geometry>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.Geometry>}
+ */
+
+GDAL_ASYNCABLE_DEFINE(Geometry::makeValid) {
+  Nan::HandleScope scope;
+
+  Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
+  OGRGeometry *gdal_geom = geom->this_;
+  GDALAsyncableJob<OGRGeometry *> job(0);
+  job.main = [gdal_geom](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    auto r = gdal_geom->MakeValid();
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.run(info, async, 0);
 }
 
 /**

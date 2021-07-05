@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Add `gdal.DatasetBands.getEnvelope()`
+ - Add `gdal.Geometry.makeValid{Async}()`
  
 ### Changed
  - Correctly measure the wall time for the event loop warnings

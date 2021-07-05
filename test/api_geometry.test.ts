@@ -934,5 +934,18 @@ describe('gdal.Geometry', () => {
         ]))
       })
     })
+    it('makeValid', () => {
+      const json = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'makeValid.json'), 'utf-8'))
+      const invalid = gdal.Geometry.fromGeoJson(json)
+      const valid = invalid.makeValid()
+      assert.instanceOf(valid, gdal.GeometryCollection)
+      assert.closeTo((valid as gdal.GeometryCollection).getArea(), 0.012428372488501122, 1e-6)
+    })
+    it('makeValidAsync', () => {
+      const json = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'makeValid.json'), 'utf-8'))
+      const invalid = gdal.Geometry.fromGeoJson(json)
+      const valid = invalid.makeValidAsync()
+      return assert.eventually.instanceOf(valid, gdal.GeometryCollection)
+    })
   })
 })
