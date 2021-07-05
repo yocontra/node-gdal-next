@@ -934,7 +934,7 @@ describe('gdal.Geometry', () => {
         ]))
       })
     })
-    if (semver.gte(gdal.version, '3.0.0')) {
+    if (gdal.bundled) {
       it('makeValid', () => {
         const json = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'makeValid.json'), 'utf-8'))
         const invalid = gdal.Geometry.fromGeoJson(json)
