@@ -46,7 +46,7 @@
 
 #include "cpl_aws.h"
 
-CPL_CVSID("$Id: cpl_vsil_s3.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_s3.cpp f758a71297938073503550f3dd24b43fc3ec7a90 2021-06-15 23:10:14 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -1834,7 +1834,7 @@ const char* VSIS3FSHandler::GetOptions()
     "  <Option name='AWS_DEFAULT_REGION' type='string' "
         "description='AWS S3 default region' default='us-east-1'/>"
     "  <Option name='CPL_AWS_AUTODETECT_EC2' type='boolean' "
-        "description='Whether to check Hypervisor & DMI identifiers to "
+        "description='Whether to check Hypervisor and DMI identifiers to "
         "determine if current host is an AWS EC2 instance' default='YES'/>"
     "  <Option name='AWS_DEFAULT_PROFILE' type='string' "
         "description='Name of the profile to use for IAM credentials "
@@ -4183,6 +4183,7 @@ bool IVSIS3LikeFSHandler::Sync( const char* pszSource, const char* pszTarget,
                             queue->dfRetryDelay);
                         if( !osEtag.empty() )
                         {
+                            std::lock_guard<std::mutex> lock(queue->sMutex);
                             iter->second.nCountValidETags ++;
                             iter->second.aosEtags.resize(
                                 std::max(nPartNumber,

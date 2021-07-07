@@ -29,7 +29,7 @@
 
 #include "oci_wrapper.h"
 
-CPL_CVSID("$Id: oci_wrapper.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: oci_wrapper.cpp bf3a27bbd1f495a7e83d7373545798549a9f813e 2021-05-04 14:06:34 -0400 fechen123 $")
 
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},
@@ -122,8 +122,7 @@ OWConnection::OWConnection( const char* pszUserIn,
 
     ub4 eCred = OCI_CRED_RDBMS;
 
-    if( EQUAL(pszServer, "") &&
-        EQUAL(pszPassword, "") &&
+    if( EQUAL(pszPassword, "") &&
         EQUAL(pszUser, "") )
     {
         eCred = OCI_CRED_EXT;
@@ -237,6 +236,22 @@ OWConnection::OWConnection( const char* pszUserIn,
     QueryVersion();
 
     bSuceeeded = true;
+
+    // ------------------------------------------------------
+    //  If no user specified, get it from the session 
+    // ------------------------------------------------------
+    if (EQUAL(pszUser, "") )
+    {
+      OWStatement* poStmt = CreateStatement(
+            "select sys_context('userenv','session_user')\n"
+            "from dual\n" );
+
+      pszUser = static_cast<char*>(CPLRealloc(pszUser, OWNAME)); 
+      poStmt->Define(pszUser);
+      CPL_IGNORE_RET_VAL(poStmt->Execute());
+      delete poStmt;
+      CPLDebug("OCI: ", "Implicit User: %s\n", pszUser);
+    }
 
     // ------------------------------------------------------
     //  Initialize/Describe types

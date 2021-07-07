@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h eef59c953468d4ebdce3d88b5194e46054d89366 2021-04-08 19:51:47 +0200 Even Rouault $
+ * $Id: ogr_geopackage.h d0b90f70f6208002da877ff223a4de103898113a 2021-05-20 22:55:15 +0200 Even Rouault $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -224,6 +224,7 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
         std::map<int, bool> m_oSetGPKGLayerWarnings{};
 
         void                FixupWrongRTreeTrigger();
+        void                FixupWrongMedataReferenceColumnNameUpdate();
 
     public:
                             GDALGeoPackageDataset();

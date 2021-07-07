@@ -104,7 +104,7 @@
 #include "xtiffio.h"
 #include "quant_table_md5sum.h"
 
-CPL_CVSID("$Id: geotiff.cpp db9c615f39e4da0623e12f467ff74d7946f17e24 2021-04-21 13:16:57 +0200 Even Rouault $")
+CPL_CVSID("$Id: geotiff.cpp 640b56a91e19444d79f1378b9325ec274b7d7d1d 2021-06-17 14:07:03 +0200 Even Rouault $")
 
 static bool bGlobalInExternalOvr = false;
 
@@ -1271,6 +1271,7 @@ public:
                                                char **papszOptions )  override final;
 
     GDALRasterAttributeTable* GetDefaultRAT() override final;
+    virtual CPLErr SetDefaultRAT(const GDALRasterAttributeTable *) override final;
     virtual CPLErr  GetHistogram(
         double dfMin, double dfMax,
         int nBuckets, GUIntBig * panHistogram,
@@ -1842,6 +1843,12 @@ GDALRasterAttributeTable *GTiffRasterBand::GetDefaultRAT()
 {
     m_poGDS->LoadGeoreferencingAndPamIfNeeded();
     return GDALPamRasterBand::GetDefaultRAT();
+}
+
+CPLErr GTiffRasterBand::SetDefaultRAT(const GDALRasterAttributeTable *poRAT )
+{
+    m_poGDS->LoadGeoreferencingAndPamIfNeeded();
+    return GDALPamRasterBand::SetDefaultRAT( poRAT );
 }
 
 /************************************************************************/
@@ -5853,7 +5860,9 @@ CPLErr GTiffRasterBand::SetNoDataValue( double dfNoData )
 {
     m_poGDS->LoadGeoreferencingAndPamIfNeeded();
 
-    if( m_poGDS->m_bNoDataSet && m_poGDS->m_dfNoDataValue == dfNoData )
+    if( m_poGDS->m_bNoDataSet &&
+        (m_poGDS->m_dfNoDataValue == dfNoData ||
+         (std::isnan(m_poGDS->m_dfNoDataValue) && std::isnan(dfNoData))) )
     {
         m_bNoDataSet = true;
         m_dfNoDataValue = dfNoData;
@@ -5939,7 +5948,7 @@ void GTiffRasterBand::NullBlock( void *pData )
     const int nChunkSize = std::max(1, GDALGetDataTypeSizeBytes(eDataType));
 
     int bNoDataSetIn = FALSE;
-    const double dfNoData = GetNoDataValue( &bNoDataSetIn );
+    double dfNoData = GetNoDataValue( &bNoDataSetIn );
     if( !bNoDataSetIn )
     {
 #ifdef ESRI_BUILD
@@ -5953,6 +5962,17 @@ void GTiffRasterBand::NullBlock( void *pData )
     }
     else
     {
+        // Hack for Signed Int8 case. As the data type is GDT_Byte (unsigned),
+        // we have to convert a negative nodata value in the range [-128,-1] in
+        // [128, 255]
+        if( m_poGDS->m_nBitsPerSample == 8 &&
+            m_poGDS->m_nSampleFormat == SAMPLEFORMAT_INT &&
+            dfNoData < 0 && dfNoData >= -128 &&
+            static_cast<int>(dfNoData) == dfNoData )
+        {
+            dfNoData = 256 + dfNoData;
+        }
+
         // Will convert nodata value to the right type and copy efficiently.
         GDALCopyWords64( &dfNoData, GDT_Float64, 0,
                        pData, eDataType, nChunkSize, nWords);
@@ -8119,7 +8139,20 @@ void GTiffDataset::FillEmptyTiles()
         if( nDataTypeSize &&
             nDataTypeSize * 8 == static_cast<int>(m_nBitsPerSample) )
         {
-            GDALCopyWords64( &m_dfNoDataValue, GDT_Float64, 0,
+            double dfNoData = m_dfNoDataValue;
+
+            // Hack for Signed Int8 case. As the data type is GDT_Byte (unsigned),
+            // we have to convert a negative nodata value in the range [-128,-1] in
+            // [128, 255]
+            if( m_nBitsPerSample == 8 &&
+                m_nSampleFormat == SAMPLEFORMAT_INT &&
+                dfNoData < 0 && dfNoData >= -128 &&
+                static_cast<int>(dfNoData) == dfNoData )
+            {
+                dfNoData = 256 + dfNoData;
+            }
+
+            GDALCopyWords64( &dfNoData, GDT_Float64, 0,
                            pabyData, eDataType,
                            nDataTypeSize,
                            nBlockBytes / nDataTypeSize );
@@ -14104,6 +14137,7 @@ CPLErr GTiffDataset::OpenOffset( TIFF *hTIFFIn,
         if( m_nBitsPerSample == 32 && m_nSampleFormat == SAMPLEFORMAT_IEEEFP )
         {
             m_dfNoDataValue = GDALAdjustNoDataCloseToFloatMax(m_dfNoDataValue);
+            m_dfNoDataValue = static_cast<float>(m_dfNoDataValue);
         }
     }
 

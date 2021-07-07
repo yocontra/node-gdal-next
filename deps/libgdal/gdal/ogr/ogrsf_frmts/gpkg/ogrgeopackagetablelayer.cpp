@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <cmath>
 
-CPL_CVSID("$Id: ogrgeopackagetablelayer.cpp 03e8ba2750e2a42a3f6063b3e7602f9509516324 2021-04-25 21:46:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeopackagetablelayer.cpp e1ee07f819b10f5cb7867c27ee0a0b3e3de76013 2021-06-20 19:45:55 +0200 Even Rouault $")
 
 static const char UNSUPPORTED_OP_READ_ONLY[] =
   "%s : unsupported operation on a read-only datasource.";
@@ -140,29 +140,41 @@ OGRErr OGRGeoPackageTableLayer::BuildColumns()
 {
     CPLFree(panFieldOrdinals);
     panFieldOrdinals = (int *) CPLMalloc( sizeof(int) * m_poFeatureDefn->GetFieldCount() );
+    int iCurCol = 0;
 
     /* Always start with a primary key */
-    CPLString soColumns = "m.";
-    soColumns += m_pszFidColumn ?
-        "\"" + SQLEscapeName(m_pszFidColumn) + "\"" : "_rowid_";
-    iFIDCol = 0;
+    CPLString soColumns;
+    if( m_bIsTable || m_pszFidColumn != nullptr )
+    {
+        soColumns += "m.";
+        soColumns += m_pszFidColumn ?
+            "\"" + SQLEscapeName(m_pszFidColumn) + "\"" : "_rowid_";
+        iFIDCol = iCurCol;
+        iCurCol ++;
+    }
 
     /* Add a geometry column if there is one (just one) */
     if ( m_poFeatureDefn->GetGeomFieldCount() )
     {
-        soColumns += ", m.\"";
+        if( !soColumns.empty() )
+            soColumns += ", ";
+        soColumns += "m.\"";
         soColumns += SQLEscapeName(m_poFeatureDefn->GetGeomFieldDefn(0)->GetNameRef());
         soColumns += "\"";
-        iGeomCol = 1;
+        iGeomCol = iCurCol;
+        iCurCol ++;
     }
 
     /* Add all the attribute columns */
     for( int i = 0; i < m_poFeatureDefn->GetFieldCount(); i++ )
     {
-        soColumns += ", m.\"";
+        if( !soColumns.empty() )
+            soColumns += ", ";
+        soColumns += "m.\"";
         soColumns += SQLEscapeName(m_poFeatureDefn->GetFieldDefn(i)->GetNameRef());
         soColumns += "\"";
-        panFieldOrdinals[i] = 1 + (iGeomCol >= 0) + i;
+        panFieldOrdinals[i] = iCurCol;
+        iCurCol ++;
     }
 
     m_soColumns = soColumns;
@@ -1220,6 +1232,17 @@ void OGRGeoPackageTableLayer::InitView()
                         // We cannot just take the FID of a source table as
                         // a FID because of potential joins that would result
                         // in multiple records with same source FID.
+                        CPLFree(m_pszFidColumn);
+                        m_pszFidColumn = CPLStrdup(osColName);
+                        m_poFeatureDefn->DeleteFieldDefn(
+                            m_poFeatureDefn->GetFieldIndex(osColName));
+                    }
+                    else if( iCol == 0 &&
+                             sqlite3_column_type( hStmt, iCol ) == SQLITE_INTEGER )
+                    {
+                        // Assume the first column of integer type is the FID column
+                        // per the latest requirements of the GPKG spec
+                        CPLFree(m_pszFidColumn);
                         m_pszFidColumn = CPLStrdup(osColName);
                         m_poFeatureDefn->DeleteFieldDefn(
                             m_poFeatureDefn->GetFieldIndex(osColName));
@@ -1323,12 +1346,16 @@ OGRErr OGRGeoPackageTableLayer::CreateField( OGRFieldDefn *poField,
     oFieldDefn.SetPrecision(0);
 
     if( m_pszFidColumn != nullptr &&
-        EQUAL( oFieldDefn.GetNameRef(), m_pszFidColumn ) &&
-        oFieldDefn.GetType() != OFTInteger &&
-        oFieldDefn.GetType() != OFTInteger64 )
+        EQUAL( poField->GetNameRef(), m_pszFidColumn ) &&
+        poField->GetType() != OFTInteger &&
+        poField->GetType() != OFTInteger64 &&
+        // typically a GeoPackage exported with QGIS as a shapefile and re-imported
+        // See https://github.com/qgis/QGIS/pull/43118
+        !(poField->GetType() == OFTReal && poField->GetWidth() == 20 &&
+          poField->GetPrecision() == 0) )
     {
         CPLError(CE_Failure, CPLE_AppDefined, "Wrong field type for %s",
-                 oFieldDefn.GetNameRef());
+                 poField->GetNameRef());
         return OGRERR_FAILURE;
     }
 
@@ -1695,6 +1722,43 @@ void OGRGeoPackageTableLayer::CheckGeometryType( OGRFeature *poFeature )
 }
 
 /************************************************************************/
+/*                   CheckFIDAndFIDColumnConsistency()                  */
+/************************************************************************/
+
+static bool CheckFIDAndFIDColumnConsistency( const OGRFeature* poFeature,
+                                             int iFIDAsRegularColumnIndex)
+{
+    bool ok = false;
+    if( !poFeature->IsFieldSetAndNotNull( iFIDAsRegularColumnIndex ) )
+    {
+        // nothing to do
+    }
+    else if( poFeature->GetDefnRef()->GetFieldDefn(iFIDAsRegularColumnIndex)->GetType() == OFTReal )
+    {
+        const double dfFID = poFeature->GetFieldAsDouble(iFIDAsRegularColumnIndex);
+        if( dfFID >= static_cast<double>(std::numeric_limits<int64_t>::min()) &&
+            dfFID <= static_cast<double>(std::numeric_limits<int64_t>::max()) )
+        {
+            const auto nFID = static_cast<GIntBig>(dfFID);
+            if( nFID == poFeature->GetFID() )
+            {
+                ok = true;
+            }
+        }
+    }
+    else if( poFeature->GetFieldAsInteger64(iFIDAsRegularColumnIndex) == poFeature->GetFID() )
+    {
+        ok = true;
+    }
+    if( !ok )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                    "Inconsistent values of FID and field of same name");
+    }
+    return ok;
+}
+
+/************************************************************************/
 /*                      ICreateFeature()                                 */
 /************************************************************************/
 
@@ -1775,19 +1839,38 @@ OGRErr OGRGeoPackageTableLayer::ICreateFeature( OGRFeature *poFeature )
         {
             if( poFeature->IsFieldSetAndNotNull( m_iFIDAsRegularColumnIndex ) )
             {
-                poFeature->SetFID(
-                    poFeature->GetFieldAsInteger64(m_iFIDAsRegularColumnIndex));
+                if( m_poFeatureDefn->GetFieldDefn(m_iFIDAsRegularColumnIndex)->GetType() == OFTReal )
+                {
+                    bool ok = false;
+                    const double dfFID = poFeature->GetFieldAsDouble(m_iFIDAsRegularColumnIndex);
+                    if( dfFID >= static_cast<double>(std::numeric_limits<int64_t>::min()) &&
+                        dfFID <= static_cast<double>(std::numeric_limits<int64_t>::max()) )
+                    {
+                        const auto nFID = static_cast<GIntBig>(dfFID);
+                        if( static_cast<double>(nFID) == dfFID )
+                        {
+                            poFeature->SetFID(nFID);
+                            ok = true;
+                        }
+                    }
+                    if( !ok )
+                    {
+                        CPLError(CE_Failure, CPLE_AppDefined,
+                            "Value of FID %g cannot be parsed to an Integer64",
+                            dfFID);
+                        return OGRERR_FAILURE;
+                    }
+                }
+                else
+                {
+                    poFeature->SetFID(
+                        poFeature->GetFieldAsInteger64(m_iFIDAsRegularColumnIndex));
+                }
             }
         }
-        else
+        else if( !CheckFIDAndFIDColumnConsistency(poFeature, m_iFIDAsRegularColumnIndex) )
         {
-            if( !poFeature->IsFieldSetAndNotNull( m_iFIDAsRegularColumnIndex ) ||
-                poFeature->GetFieldAsInteger64(m_iFIDAsRegularColumnIndex) != poFeature->GetFID() )
-            {
-                CPLError(CE_Failure, CPLE_AppDefined,
-                            "Inconsistent values of FID and field of same name");
-                return OGRERR_FAILURE;
-            }
+            return OGRERR_FAILURE;
         }
     }
 
@@ -1945,15 +2028,10 @@ OGRErr OGRGeoPackageTableLayer::ISetFeature( OGRFeature *poFeature )
     }
 
     /* In case the FID column has also been created as a regular field */
-    if( m_iFIDAsRegularColumnIndex >= 0 )
+    if( m_iFIDAsRegularColumnIndex >= 0 &&
+        !CheckFIDAndFIDColumnConsistency(poFeature, m_iFIDAsRegularColumnIndex) )
     {
-        if( !poFeature->IsFieldSetAndNotNull( m_iFIDAsRegularColumnIndex ) ||
-            poFeature->GetFieldAsInteger64(m_iFIDAsRegularColumnIndex) != poFeature->GetFID() )
-        {
-            CPLError(CE_Failure, CPLE_AppDefined,
-                        "Inconsistent values of FID and field of same name");
-            return OGRERR_FAILURE;
-        }
+        return OGRERR_FAILURE;
     }
 
     if( m_bDeferredCreation && RunDeferredCreationIfNecessary() != OGRERR_NONE )

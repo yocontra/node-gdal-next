@@ -4,7 +4,7 @@
  * Purpose:  Implements PostGIS Raster driver class methods
  * Author:   Jorge Arevalo, jorge.arevalo@deimos-space.com
  *
- * Last changes: $Id: postgisrasterdriver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * Last changes: $Id: postgisrasterdriver.cpp dc859cb33d0ccc49884be06f682f7f9908b5ad8c 2021-05-09 19:14:32 +0100 Jorge Gustavo Rocha $
  *
  ******************************************************************************
  * Copyright (c) 2010, Jorge Arevalo, jorge.arevalo@deimos-space.com
@@ -31,7 +31,7 @@
 #include "postgisraster.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: postgisrasterdriver.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: postgisrasterdriver.cpp dc859cb33d0ccc49884be06f682f7f9908b5ad8c 2021-05-09 19:14:32 +0100 Jorge Gustavo Rocha $")
 
 /************************
  * \brief Constructor
@@ -68,15 +68,19 @@ PostGISRasterDriver::~PostGISRasterDriver() {
  * All connection will be destroyed when the PostGISRasterDriver is destroyed.
  *
  ***************************************************************************/
-PGconn* PostGISRasterDriver::GetConnection(const char* pszConnectionString,
-        const char * pszDbnameIn, const char * pszHostIn, const char * pszPortIn, const char * pszUserIn)
+PGconn *PostGISRasterDriver::GetConnection(const char *pszConnectionString,
+                                           const char *pszServiceIn,
+                                           const char *pszDbnameIn,
+                                           const char *pszHostIn,
+                                           const char *pszPortIn,
+                                           const char *pszUserIn)
 {
     PGconn * poConn = nullptr;
 
     if( pszHostIn == nullptr ) pszHostIn = "(null)";
     if( pszPortIn == nullptr ) pszPortIn = "(null)";
     if( pszUserIn == nullptr ) pszUserIn = "(null)";
-    CPLString osKey = pszDbnameIn;
+    CPLString osKey = ( pszServiceIn == nullptr ) ? pszDbnameIn : pszServiceIn;
     osKey += "-";
     osKey += pszHostIn;
     osKey += "-";

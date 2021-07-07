@@ -42,7 +42,7 @@
 
 #include "cpl_azure.h"
 
-CPL_CVSID("$Id: cpl_vsil_az.cpp 273c8030f0046347884ad8f36c3c7774ad5ce352 2021-03-14 13:17:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_az.cpp c8e7edf3e9e74bb6960d5d0f71ab74ecaa334a5a 2021-06-14 23:53:18 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -1116,6 +1116,10 @@ bool VSIAzureWriteHandle::SendInternal(bool bInitOnly, bool bIsLastBlock)
             osContentLength.Printf("Content-Length: %d", m_nBufferOff);
             headers = curl_slist_append(headers, osContentLength.c_str());
             headers = curl_slist_append(headers, "x-ms-blob-type: AppendBlob");
+            CPLString osAppendPos;
+            vsi_l_offset nStartOffset = m_nCurOffset - m_nBufferOff;
+            osAppendPos.Printf("x-ms-blob-condition-appendpos: " CPL_FRMT_GUIB, nStartOffset);
+            headers = curl_slist_append(headers, osAppendPos.c_str());
         }
 
         headers = VSICurlMergeHeaders(headers,
@@ -1813,6 +1817,8 @@ const char* VSIAzureFSHandler::GetOptions()
         "description='Storage account. To use with AZURE_STORAGE_ACCESS_KEY'/>"
     "  <Option name='AZURE_STORAGE_ACCESS_KEY' type='string' "
         "description='Secret key'/>"
+    "  <Option name='AZURE_NO_SIGN_REQUEST' type='boolean' "
+        "description='Whether to disable signing of requests' default='NO'/>"
     "  <Option name='VSIAZ_CHUNK_SIZE' type='int' "
         "description='Size in MB for chunks of files that are uploaded' "
         "default='4' min='1' max='4'/>" +

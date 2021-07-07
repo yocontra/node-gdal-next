@@ -56,7 +56,7 @@
 
 #include "cpl_json_header.h"
 
-CPL_CVSID("$Id: ogrfeature.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrfeature.cpp 1193692ec37e9c345231765a720b601e45776a8c 2021-06-21 15:56:22 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             OGRFeature()                             */
@@ -3289,15 +3289,22 @@ char* OGRFeature::GetFieldAsSerializedJSon( int iField ) const
     OGRFieldType eType = poFDefn->GetType();
     if( eType == OFTStringList )
     {
-        json_object* poObj = json_object_new_array();
         char** papszValues = GetFieldAsStringList(iField);
-        for( int i=0; papszValues[i] != nullptr; i++)
+        if( papszValues == nullptr )
         {
-            json_object_array_add( poObj,
-                                   json_object_new_string(papszValues[i]) );
+            pszRet = CPLStrdup("[]");
         }
-        pszRet = CPLStrdup( json_object_to_json_string(poObj) );
-        json_object_put(poObj);
+        else
+        {
+            json_object* poObj = json_object_new_array();
+            for( int i=0; papszValues[i] != nullptr; i++)
+            {
+                json_object_array_add( poObj,
+                                       json_object_new_string(papszValues[i]) );
+            }
+            pszRet = CPLStrdup( json_object_to_json_string(poObj) );
+            json_object_put(poObj);
+        }
     }
     else if( eType == OFTIntegerList )
     {

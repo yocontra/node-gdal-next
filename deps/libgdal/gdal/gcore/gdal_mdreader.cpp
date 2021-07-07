@@ -61,7 +61,7 @@
 #include "mdreader/reader_rdk1.h"
 #include "mdreader/reader_spot.h"
 
-CPL_CVSID("$Id: gdal_mdreader.cpp ae80d5d0c6072e848fa5fc19d8d1ff00698a7856 2021-03-11 11:08:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_mdreader.cpp 65cedb212e0afc801f5064b63a16963e80789ae0 2021-05-21 10:31:43 +0200 deng0 $")
 
 /**
  * The RPC parameters names
@@ -535,6 +535,11 @@ char **GDALLoadRPBFile( const CPLString& soFilePath )
 
         if( pszRPBVal == nullptr )
         {
+            if (strcmp(apszRPBMap[i], RPC_ERR_RAND) == 0 ||
+                strcmp(apszRPBMap[i], RPC_ERR_BIAS) == 0)
+            {
+                continue;
+            }
             CPLError( CE_Failure, CPLE_AppDefined,
                       "%s file found, but missing %s field (and possibly others).",
                       soFilePath.c_str(), apszRPBMap[i+1] );

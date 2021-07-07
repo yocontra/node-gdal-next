@@ -34,7 +34,7 @@
 #include "cpl_string.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_odbc.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_odbc.cpp 2fa7c4178ab4d9154511fb84aeac2edefaced51c 2021-06-01 13:54:17 +0200 Even Rouault $")
 
 #ifndef SQLColumns_TABLE_CAT
 #define SQLColumns_TABLE_CAT 1
@@ -1975,6 +1975,8 @@ SQLSMALLINT CPLODBCStatement::GetTypeMapping( SQLSMALLINT nTypeCode )
         case SQL_INTERVAL_HOUR_TO_MINUTE:
         case SQL_INTERVAL_HOUR_TO_SECOND:
         case SQL_INTERVAL_MINUTE_TO_SECOND:
+            return SQL_C_CHAR;
+
         case SQL_GUID:
             return SQL_C_GUID;
 

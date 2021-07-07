@@ -37,7 +37,7 @@
 #include "ogr_srs_api.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdal_contour.cpp b04ca419afe96b637a7b77773997361cf605e88f 2019-11-28 16:14:29 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_contour.cpp a095bd8fcc94b5d0c06bb08dd638e8da25ea7123 2021-04-29 18:14:50 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */
@@ -306,12 +306,7 @@ MAIN_START(argc, argv)
 /* -------------------------------------------------------------------- */
 /*      Try to get a coordinate system from the raster.                 */
 /* -------------------------------------------------------------------- */
-    OGRSpatialReferenceH hSRS = nullptr;
-
-    const char *pszWKT = GDALGetProjectionRef( hSrcDS );
-
-    if( pszWKT != nullptr && strlen(pszWKT) != 0 )
-        hSRS = OSRNewSpatialReference( pszWKT );
+    OGRSpatialReferenceH hSRS = GDALGetSpatialRef( hSrcDS );
 
 /* -------------------------------------------------------------------- */
 /*      Create the output file.                                         */
@@ -471,13 +466,10 @@ MAIN_START(argc, argv)
     }
 
     CPLErr eErr = GDALContourGenerateEx( hBand, hLayer, options, pfnProgress, nullptr );
-    
+
     CSLDestroy( options );
     OGR_DS_Destroy( hDS );
     GDALClose( hSrcDS );
-
-    if (hSRS)
-        OSRDestroySpatialReference( hSRS );
 
     CSLDestroy( argv );
     CSLDestroy( papszDSCO );

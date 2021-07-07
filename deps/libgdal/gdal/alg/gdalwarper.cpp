@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp f9fa3b2765778367d2210d5c053009d5ef53ba54 2021-03-08 21:35:37 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalwarper.cpp bdd14b01e32211af5bea348926073fa20ba5847e 2021-05-31 13:37:00 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */
@@ -1858,7 +1858,7 @@ GDALWarpOptions * CPL_STDCALL GDALDeserializeWarpOptions( CPLXMLNode *psTree )
     else
     {
         CPLError( CE_Failure, CPLE_AppDefined,
-                  "Unrecognise ResampleAlg value '%s'.",
+                  "Unrecognised ResampleAlg value '%s'.",
                   pszValue );
     }
 

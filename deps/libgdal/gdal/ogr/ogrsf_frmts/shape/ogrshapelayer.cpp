@@ -57,7 +57,7 @@
 #include "shapefil.h"
 #include "shp_vsi.h"
 
-CPL_CVSID("$Id: ogrshapelayer.cpp e620b541e9c5d62487fa9dbcf42c8ce2f10b4905 2020-12-04 13:56:44 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrshapelayer.cpp 55b80efaada5eaf092ec04eca79b10a99af9442b 2021-06-10 22:01:50 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRShapeLayer()                            */
@@ -2180,33 +2180,6 @@ OGRSpatialReference *OGRShapeGeomFieldDefn::GetSpatialRef() const
         }
         CSLDestroy( papszLines );
 
-        // Some new? shapefiles have  EPSG authority nodes (#6485) Use
-        // them  to  'import'  TOWGS84  from EPSG  definition,  if  no
-        // TOWGS84 is present in the  .prj (which should be the case).
-        // We  could  potentially import  more,  or  just replace  the
-        // entire definition
-        const char* pszAuthorityName = nullptr;
-        const char* pszAuthorityCode = nullptr;
-        double adfTOWGS84[7] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        if( poSRS != nullptr &&
-            poSRS->GetTOWGS84(adfTOWGS84, 7) == OGRERR_FAILURE &&
-            (pszAuthorityName = poSRS->GetAuthorityName(nullptr)) != nullptr &&
-            EQUAL(pszAuthorityName, "EPSG") &&
-            (pszAuthorityCode = poSRS->GetAuthorityCode(nullptr)) != nullptr )
-        {
-            const int nEPSGCode = atoi(pszAuthorityCode);
-            OGRSpatialReference oSRS;
-            if( oSRS.importFromEPSG(nEPSGCode) == OGRERR_NONE &&
-                oSRS.GetTOWGS84(adfTOWGS84, 7) == OGRERR_NONE )
-            {
-                CPLDebug(
-                    "Shape", "Importing TOWGS84 node from EPSG definition");
-                poSRS->SetTOWGS84(adfTOWGS84[0], adfTOWGS84[1], adfTOWGS84[2],
-                                  adfTOWGS84[3], adfTOWGS84[4], adfTOWGS84[5],
-                                  adfTOWGS84[6]);
-            }
-        }
-
         if( poSRS )
         {
             if( CPLTestBool(CPLGetConfigOption("USE_OSR_FIND_MATCHES", "YES")) )
@@ -2217,10 +2190,29 @@ OGRSpatialReference *OGRShapeGeomFieldDefn::GetSpatialRef() const
                     poSRS->FindMatches(nullptr, &nEntries, &panConfidence);
                 if( nEntries == 1 && panConfidence[0] >= 90 )
                 {
+                    std::vector<double> adfTOWGS84(7);
+                    if( poSRS->GetTOWGS84(&adfTOWGS84[0], 7) != OGRERR_NONE )
+                    {
+                        adfTOWGS84.clear();
+                    }
+
                     poSRS->Release();
                     poSRS = reinterpret_cast<OGRSpatialReference*>(pahSRS[0]);
                     poSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
                     CPLFree(pahSRS);
+
+                    // If the SRS is EPSG:4326 with TOWGS84[0,0,0,0,0,0], then
+                    // just use plain EPSG:4326
+                    const char* pszAuthorityName = nullptr;
+                    const char* pszAuthorityCode = nullptr;
+                    if( adfTOWGS84 == std::vector<double>(7) &&
+                        (pszAuthorityName = poSRS->GetAuthorityName(nullptr)) != nullptr &&
+                        EQUAL(pszAuthorityName, "EPSG") &&
+                        (pszAuthorityCode = poSRS->GetAuthorityCode(nullptr)) != nullptr &&
+                        EQUAL(pszAuthorityCode, "4326") )
+                    {
+                        poSRS->importFromEPSG(4326);
+                    }
                 }
                 else
                 {

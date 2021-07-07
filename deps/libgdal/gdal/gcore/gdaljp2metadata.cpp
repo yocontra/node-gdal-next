@@ -61,7 +61,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: gdaljp2metadata.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaljp2metadata.cpp 43089a69cc6e35392c8be6316aa931a7d3c59def 2021-06-08 23:43:42 +0200 Even Rouault $")
 
 static const unsigned char msi_uuid2[16] = {
     0xb1,0x4b,0xf8,0xbd,0x08,0x3d,0x4b,0x43,
@@ -2368,10 +2368,26 @@ GDALJP2Box *GDALJP2Metadata::CreateGMLJP2V2( int nXSize, int nYSize,
             snprintf( szSRSName, sizeof(szSRSName), "%s",
                     "gmljp2://xml/CRSDictionary.gml#ogrcrs1" );
 
-        const double dfLLX = adfGeoTransform[0];
-        const double dfLLY = adfGeoTransform[3] + adfGeoTransform[5] * nYSize;
-        const double dfURX = adfGeoTransform[0] + adfGeoTransform[1] * nXSize;
-        const double dfURY = adfGeoTransform[3];
+
+        // Compute bounding box
+        double dfX1 = adfGeoTransform[0];
+        double dfX2 = adfGeoTransform[0] + nXSize * adfGeoTransform[1];
+        double dfX3 = adfGeoTransform[0] +                               nYSize * adfGeoTransform[2];
+        double dfX4 = adfGeoTransform[0] + nXSize * adfGeoTransform[1] + nYSize * adfGeoTransform[2];
+        double dfY1 = adfGeoTransform[3];
+        double dfY2 = adfGeoTransform[3] + nXSize * adfGeoTransform[4];
+        double dfY3 = adfGeoTransform[3] +                               nYSize * adfGeoTransform[5];
+        double dfY4 = adfGeoTransform[3] + nXSize * adfGeoTransform[4] + nYSize * adfGeoTransform[5];
+        double dfLCX = std::min(std::min(dfX1, dfX2), std::min(dfX3, dfX4));
+        double dfLCY = std::min(std::min(dfY1, dfY2), std::min(dfY3, dfY4));
+        double dfUCX = std::max(std::max(dfX1, dfX2), std::max(dfX3, dfX4));
+        double dfUCY = std::max(std::max(dfY1, dfY2), std::max(dfY3, dfY4));
+        if( bNeedAxisFlip )
+        {
+            std::swap(dfLCX, dfLCY);
+            std::swap(dfUCX, dfUCY);
+        }
+
         osGridCoverage.Printf(
 "   <gmljp2:GMLJP2RectifiedGridCoverage gml:id=\"RGC_1_%s\">\n"
 "     <gml:boundedBy>\n"
@@ -2411,8 +2427,8 @@ GDALJP2Box *GDALJP2Metadata::CreateGMLJP2V2( int nXSize, int nYSize,
 "   </gmljp2:GMLJP2RectifiedGridCoverage>\n",
             osRootGMLId.c_str(),
             szSRSName,
-            dfLLX, dfLLY,
-            dfURX, dfURY,
+            dfLCX, dfLCY,
+            dfUCX, dfUCY,
             osRootGMLId.c_str(),
             szSRSName,
             nXSize-1, nYSize-1, szSRSName, adfOrigin[0], adfOrigin[1],

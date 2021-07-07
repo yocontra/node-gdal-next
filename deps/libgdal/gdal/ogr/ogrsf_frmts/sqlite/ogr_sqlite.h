@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sqlite.h be7fac6445d8606b05cb151ded7460fe18d60830 2021-04-04 21:42:47 +0200 Even Rouault $
+ * $Id: ogr_sqlite.h e1ee07f819b10f5cb7867c27ee0a0b3e3de76013 2021-06-20 19:45:55 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/SQLite driver.
@@ -343,6 +343,8 @@ class OGRSQLiteLayer CPL_NON_FINAL: public OGRLayer, public IOGRSQLiteGetSpatial
 
 class OGRSQLiteTableLayer final: public OGRSQLiteLayer
 {
+    bool                m_bIsTable = true;
+
     int                 bLaunderColumnNames;
     int                 bSpatialite2D;
 
@@ -407,8 +409,9 @@ class OGRSQLiteTableLayer final: public OGRSQLiteLayer
                         virtual ~OGRSQLiteTableLayer();
 
     CPLErr              Initialize( const char *pszTableName,
-                                    int bIsVirtualShapeIn,
-                                    int bDeferredCreation);
+                                    bool bIsTable,
+                                    bool bIsVirtualShapeIn,
+                                    bool bDeferredCreation);
     void                SetCreationParameters( const char *pszFIDColumnName,
                                                OGRwkbGeometryType eGeomType,
                                                const char *pszGeomFormat,
@@ -826,7 +829,8 @@ class OGRSQLiteDataSource final : public OGRSQLiteBaseDataSource
     int                 Create( const char *, char **papszOptions );
 
     int                 OpenTable( const char *pszTableName,
-                                   int bIsVirtualShapeIn = FALSE );
+                                   bool IsTable,
+                                   bool bIsVirtualShape );
     int                  OpenView( const char *pszViewName,
                                    const char *pszViewGeometry,
                                    const char *pszViewRowid,

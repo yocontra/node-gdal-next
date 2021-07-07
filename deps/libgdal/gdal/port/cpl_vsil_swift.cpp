@@ -42,7 +42,7 @@
 
 #include "cpl_swift.h"
 
-CPL_CVSID("$Id: cpl_vsil_swift.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_swift.cpp 978dfdb07e7a2ee3e7fc742b8cad366a264c0e65 2021-06-14 23:53:42 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -367,8 +367,24 @@ const char* VSISwiftFSHandler::GetOptions()
     "  <Option name='SWIFT_USER' type='string' "
         "description='User name to use with authentication V1'/>"
     "  <Option name='SWIFT_KEY' type='string' "
-        "description='Key/password to use with authentication V1'/>" +
-        VSICurlFilesystemHandler::GetOptionsStatic() +
+        "description='Key/password to use with authentication V1'/>"
+    "  <Option name='OS_IDENTITY_API_VERSION' type='string' "
+        "description='OpenStack identity API version'/>"
+    "  <Option name='OS_AUTH_TYPE' type='string' "
+        "description='Authentication URL'/>"
+    "  <Option name='OS_USERNAME' type='string' "
+        "description='User name'/>"
+    "  <Option name='OS_PASSWORD' type='string' "
+        "description='Password'/>"
+    "  <Option name='OS_USER_DOMAIN_NAME' type='string' "
+        "description='User domain name'/>"
+    "  <Option name='OS_PROJECT_NAME' type='string' "
+        "description='Project name'/>"
+    "  <Option name='OS_PROJECT_DOMAIN_NAME' type='string' "
+        "description='Project domain name'/>"
+    "  <Option name='OS_REGION_NAME' type='string' "
+        "description='Region name'/>"
+    +  VSICurlFilesystemHandler::GetOptionsStatic() +
         "</Options>");
     return osOptions.c_str();
 }

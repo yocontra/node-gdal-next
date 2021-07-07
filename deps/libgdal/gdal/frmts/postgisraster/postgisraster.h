@@ -7,7 +7,7 @@
  *
  * Author:   David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisraster.h 4320c64a7648709cc69efbd39af2c63ff89252e5 2021-03-04 17:59:40 +0100 Even Rouault $
+ * Last changes: $Id: postgisraster.h dc859cb33d0ccc49884be06f682f7f9908b5ad8c 2021-05-09 19:14:32 +0100 Jorge Gustavo Rocha $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -182,8 +182,10 @@ private:
 public:
     PostGISRasterDriver();
     virtual ~PostGISRasterDriver();
-    PGconn* GetConnection(const char* pszConnectionString,
-        const char * pszDbnameIn, const char * pszHostIn, const char * pszPortIn, const char * pszUserIn);
+  PGconn *GetConnection(const char *pszConnectionString,
+                        const char *pszServiceIn, const char *pszDbnameIn,
+                        const char *pszHostIn, const char *pszPortIn,
+                        const char *pszUserIn);
 };
 
 /***********************************************************************

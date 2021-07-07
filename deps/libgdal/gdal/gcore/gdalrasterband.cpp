@@ -53,7 +53,7 @@
 #include "gdal_rat.h"
 #include "gdal_priv_templates.hpp"
 
-CPL_CVSID("$Id: gdalrasterband.cpp 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterband.cpp 9898d9dd8cda79685580c326551335b017321ff8 2021-04-29 11:57:18 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALRasterBand()                           */
@@ -7256,10 +7256,25 @@ public:
 
     std::shared_ptr<OGRSpatialReference> GetSpatialRef() const override
     {
-        auto poSRS = m_poDS->GetSpatialRef();
-        if( !poSRS )
+        auto poSrcSRS = m_poDS->GetSpatialRef();
+        if( !poSrcSRS )
             return nullptr;
-        return std::shared_ptr<OGRSpatialReference>(poSRS->Clone());
+        auto poSRS = std::shared_ptr<OGRSpatialReference>(poSrcSRS->Clone());
+
+        auto axisMapping = poSRS->GetDataAxisToSRSAxisMapping();
+        constexpr int iYDim = 0;
+        constexpr int iXDim = 1;
+        for( auto& m: axisMapping )
+        {
+            if( m == 1 )
+                m = iXDim + 1;
+            else if( m == 2 )
+                m = iYDim + 1;
+            else
+                m = 0;
+        }
+        poSRS->SetDataAxisToSRSAxisMapping(axisMapping);
+        return poSRS;
     }
 
     std::vector<GUInt64> GetBlockSize() const override

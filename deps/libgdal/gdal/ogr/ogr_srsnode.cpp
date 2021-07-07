@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogr_srsnode.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_srsnode.cpp e239dabbcb1d644ad68dc50a00575ab5b1828e89 2021-06-03 00:57:38 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGR_SRSNode()                             */
@@ -441,6 +441,10 @@ int OGR_SRSNode::NeedsQuoting() const
     // values for the AXIS keywords should *not* be quoted.
     if( poParent != nullptr && EQUAL(poParent->GetValue(), "AXIS")
         && this != poParent->GetChild(0) )
+        return FALSE;
+
+    if( poParent != nullptr && EQUAL(poParent->GetValue(), "CS")
+        && this == poParent->GetChild(0) )
         return FALSE;
 
     // Strings starting with e or E are not valid numeric values, so they

@@ -54,7 +54,7 @@
 #include "ogrsf_frmts/ogrsf_frmts.h"
 #include "ogrsf_frmts/vrt/ogr_vrt.h"
 
-CPL_CVSID("$Id: ogrvrtlayer.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtlayer.cpp 98351eaab48f9ffadcbd6dbb29fb7f4ba4c9044f 2021-05-06 13:53:27 +0200 Even Rouault $")
 
 #define UNSUPPORTED_OP_READ_ONLY \
     "%s : unsupported operation on a read-only datasource."
@@ -1217,7 +1217,7 @@ bool OGRVRTLayer::ResetSourceReading()
 
                 if( !CPLIsInf(sEnvelope.MinX) )
                     osFilter +=
-                        CPLSPrintf("%s > %.15g", pszXField, sEnvelope.MinX);
+                        CPLSPrintf("\"%s\" > %.15g", pszXField, sEnvelope.MinX);
                 else if( sEnvelope.MinX > 0 )
                     osFilter += "0 = 1";
 
@@ -1226,7 +1226,7 @@ bool OGRVRTLayer::ResetSourceReading()
                     if( !osFilter.empty() )
                         osFilter += " AND ";
                     osFilter +=
-                        CPLSPrintf("%s < %.15g", pszXField, sEnvelope.MaxX);
+                        CPLSPrintf("\"%s\" < %.15g", pszXField, sEnvelope.MaxX);
                 }
                 else if( sEnvelope.MaxX < 0 )
                 {
@@ -1240,7 +1240,7 @@ bool OGRVRTLayer::ResetSourceReading()
                     if( !osFilter.empty() )
                         osFilter += " AND ";
                     osFilter +=
-                        CPLSPrintf("%s > %.15g", pszYField, sEnvelope.MinY);
+                        CPLSPrintf("\"%s\" > %.15g", pszYField, sEnvelope.MinY);
                 }
                 else if( sEnvelope.MinY > 0 )
                 {
@@ -1254,7 +1254,7 @@ bool OGRVRTLayer::ResetSourceReading()
                     if( !osFilter.empty() )
                         osFilter += " AND ";
                     osFilter +=
-                        CPLSPrintf("%s < %.15g", pszYField, sEnvelope.MaxY);
+                        CPLSPrintf("\"%s\" < %.15g", pszYField, sEnvelope.MaxY);
                 }
                 else if( sEnvelope.MaxY < 0 )
                 {

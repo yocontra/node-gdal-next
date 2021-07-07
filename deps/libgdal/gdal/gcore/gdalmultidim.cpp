@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalmultidim.cpp 108750e31f6be47b91cab301c236b08f52cab7f6 2021-03-24 18:10:11 +0100 Even Rouault $
+ * $Id: gdalmultidim.cpp 5f249867c4bbe5a64ddcbc483c76b612119d85d4 2021-04-29 11:57:20 +0200 Even Rouault $
  *
  * Name:     gdalmultidim.cpp
  * Project:  GDAL Core
@@ -5867,27 +5867,28 @@ CPLErr GDALRasterBandFromArray::IRasterIO( GDALRWFlag eRWFlag,
 {
     auto l_poDS(cpl::down_cast<GDALDatasetFromArray*>(poDS));
     const auto& poArray(l_poDS->m_poArray);
-    const int nDTSize(GDALGetDataTypeSizeBytes(eDataType));
-    if( nXSize == nBufXSize && nYSize == nBufYSize && nDTSize > 0 &&
-        (nPixelSpaceBuf % nDTSize) == 0 && (nLineSpaceBuf % nDTSize) == 0 )
+    const int nBufferDTSize(GDALGetDataTypeSizeBytes(eBufType));
+    if( nXSize == nBufXSize && nYSize == nBufYSize && nBufferDTSize > 0 &&
+        (nPixelSpaceBuf % nBufferDTSize) == 0 &&
+        (nLineSpaceBuf % nBufferDTSize) == 0 )
     {
         m_anOffset[l_poDS->m_iXDim] = static_cast<GUInt64>(nXOff);
         m_anCount[l_poDS->m_iXDim] = static_cast<size_t>(nXSize);
         m_anStride[l_poDS->m_iXDim] =
-            static_cast<GPtrDiff_t>(nPixelSpaceBuf / nDTSize);
+            static_cast<GPtrDiff_t>(nPixelSpaceBuf / nBufferDTSize);
         if( poArray->GetDimensionCount() >= 2 )
         {
             m_anOffset[l_poDS->m_iYDim] = static_cast<GUInt64>(nYOff);
             m_anCount[l_poDS->m_iYDim] = static_cast<size_t>(nYSize);
             m_anStride[l_poDS->m_iYDim] =
-                static_cast<GPtrDiff_t>(nLineSpaceBuf / nDTSize);
+                static_cast<GPtrDiff_t>(nLineSpaceBuf / nBufferDTSize);
         }
         if( eRWFlag == GF_Read )
         {
             return poArray->Read(m_anOffset.data(),
                                  m_anCount.data(),
                                  nullptr, m_anStride.data(),
-                                 poArray->GetDataType(), pData) ?
+                                 GDALExtendedDataType::Create(eBufType), pData) ?
                                  CE_None : CE_Failure;
         }
         else
@@ -5895,7 +5896,7 @@ CPLErr GDALRasterBandFromArray::IRasterIO( GDALRWFlag eRWFlag,
             return poArray->Write(m_anOffset.data(),
                                   m_anCount.data(),
                                   nullptr, m_anStride.data(),
-                                  poArray->GetDataType(), pData) ?
+                                  GDALExtendedDataType::Create(eBufType), pData) ?
                                   CE_None : CE_Failure;
         }
     }

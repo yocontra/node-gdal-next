@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <cstdint>
 
-CPL_CVSID("$Id: ogrgeojsonwriter.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonwriter.cpp e15d9c61f434751cb4d978f2ebdbfbbef4173c79 2021-06-17 17:59:49 +0200 Momtchil Momtchev $")
 
 static json_object *
 json_object_new_float_with_significant_figures( float fVal,
@@ -1079,9 +1079,9 @@ json_object* OGRGeoJSONWriteGeometry( const OGRGeometry* poGeometry,
                                             oOptions );
         else
         {
-            CPLDebug( "GeoJSON",
-                      "Unsupported geometry type detected. "
-                      "Feature gets NULL geometry assigned." );
+            CPLError(CE_Failure, CPLE_NotSupported,
+                     "OGR geometry type unsupported as a GeoJSON geometry detected. "
+                     "Feature gets NULL geometry assigned.");
         }
 
         if( poObjGeom != nullptr )

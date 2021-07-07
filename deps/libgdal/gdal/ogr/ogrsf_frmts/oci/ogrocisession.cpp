@@ -30,7 +30,7 @@
 #include "ogr_oci.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrocisession.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrocisession.cpp bf3a27bbd1f495a7e83d7373545798549a9f813e 2021-05-04 14:06:34 -0400 fechen123 $")
 
 /************************************************************************/
 /*                          OGRGetOCISession()                          */
@@ -128,13 +128,20 @@ int OGROCISession::EstablishSession( const char *pszUseridIn,
 /*      Operational Systems's authentication option                     */
 /* -------------------------------------------------------------------- */
 
+    //Setting to "/" for backward compatibility
+    const char* pszUser = "/";
+
     ub4 eCred = OCI_CRED_RDBMS;
 
-    if( EQUAL(pszDatabaseIn, "") &&
-        EQUAL(pszPasswordIn, "") &&
-        EQUAL(pszUseridIn, "/") )
+    if( EQUAL(pszPasswordIn, "") &&
+        EQUAL(pszUseridIn, "") )
     {
+        //user and password are ignored in this credential type. 
         eCred = OCI_CRED_EXT;
+    }
+    else
+    {
+        pszUser = pszUseridIn;
     }
 
 /* -------------------------------------------------------------------- */
@@ -197,7 +204,7 @@ int OGROCISession::EstablishSession( const char *pszUseridIn,
     }
 
     if( Failed( OCIAttrSet((dvoid *) hSession, (ub4) OCI_HTYPE_SESSION,
-                (dvoid *) pszUseridIn, (ub4) strlen((char *) pszUseridIn),
+                (dvoid *) pszUser, (ub4) strlen((char *) pszUser),
                 (ub4) OCI_ATTR_USERNAME, hError) ) )
     {
         return FALSE;

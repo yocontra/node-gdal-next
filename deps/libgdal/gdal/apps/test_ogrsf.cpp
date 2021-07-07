@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: test_ogrsf.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: test_ogrsf.cpp 297036cf14c6ed4bf8e6b320b27edbabd717e095 2021-05-20 21:56:24 +0200 Even Rouault $")
 
 bool bReadOnly = false;
 bool bVerbose = true;
@@ -383,6 +383,10 @@ static int TestDataset( GDALDriver** ppoDriver )
                "      different from user name `%s'.\n",
                poDS->GetDescription(), pszDataSource);
     }
+
+    // Check that pszDomain == nullptr doesn't crash
+    poDS->GetMetadata( nullptr );
+    poDS->GetMetadataItem( "", nullptr );
 
 /* -------------------------------------------------------------------- */
 /*      Process optional SQL request.                                   */
@@ -3453,6 +3457,10 @@ static int TestOGRLayer( GDALDataset* poDS, OGRLayer * poLayer,
 
 {
     int bRet = TRUE;
+
+    // Check that pszDomain == nullptr doesn't crash
+    poLayer->GetMetadata( nullptr );
+    poLayer->GetMetadataItem( "", nullptr );
 
 /* -------------------------------------------------------------------- */
 /*      Verify that there is no spatial filter in place by default.     */

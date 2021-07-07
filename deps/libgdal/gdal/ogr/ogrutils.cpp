@@ -52,7 +52,7 @@
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrutils.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrutils.cpp ec2f3126303c95ed1190097992f84739f33c8603 2021-05-06 12:51:16 +0200 Even Rouault $")
 
 // Returns whether a double fits within an int.
 // Unable to put this in cpl_port.h as include limit breaks grib.
@@ -409,7 +409,7 @@ const char *OGRWktReadToken( const char * pszInput, char * pszToken )
 /* -------------------------------------------------------------------- */
 /*      Swallow pre-white space.                                        */
 /* -------------------------------------------------------------------- */
-    while( *pszInput == ' ' || *pszInput == '\t' )
+    while( *pszInput == ' ' || *pszInput == '\t' || *pszInput == '\n' || *pszInput == '\r' )
         ++pszInput;
 
 /* -------------------------------------------------------------------- */
@@ -448,7 +448,7 @@ const char *OGRWktReadToken( const char * pszInput, char * pszToken )
 /* -------------------------------------------------------------------- */
 /*      Eat any trailing white space.                                   */
 /* -------------------------------------------------------------------- */
-    while( *pszInput == ' ' || *pszInput == '\t' )
+    while( *pszInput == ' ' || *pszInput == '\t' || *pszInput == '\n' || *pszInput == '\r' )
         ++pszInput;
 
     return pszInput;

@@ -66,7 +66,7 @@
     (PROJ_VERSION_NUMBER >= PROJ_COMPUTE_VERSION(maj,min,patch))
 #endif
 
-CPL_CVSID("$Id: ogrspatialreference.cpp 56ffce3410a916e1f0c3e583141c7bef9d7b4bbe 2021-04-10 20:16:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrspatialreference.cpp 5c89d02c9c0f5d0fcbb67192587a9a4c3a8bf4b3 2021-06-25 06:05:00 -0400 Ian Lilley $")
 
 #define STRINGIFY(s) #s
 #define XSTRINGIFY(s) STRINGIFY(s)
@@ -2413,7 +2413,8 @@ OGRErr OSRSetLinearUnitsAndUpdateParameters( OGRSpatialReferenceH hSRS,
  * \brief Set the linear units for the projection.
  *
  * This method creates a UNIT subnode with the specified values as a
- * child of the PROJCS, GEOCCS or LOCAL_CS node.
+ * child of the PROJCS, GEOCCS, GEOGCS or LOCAL_CS node. When called on a
+ * Geographic 3D CRS the vertical axis units will be set.
  *
  * This method does the same as the C function OSRSetLinearUnits().
  *
@@ -2588,8 +2589,9 @@ OGRErr OSRSetTargetLinearUnits( OGRSpatialReferenceH hSRS,
  * \brief Fetch linear projection units.
  *
  * If no units are available, a value of "Meters" and 1.0 will be assumed.
- * This method only checks directly under the PROJCS, GEOCCS or LOCAL_CS node
- * for units.
+ * This method only checks directly under the PROJCS, GEOCCS, GEOGCS or
+ * LOCAL_CS node for units. When called on a Geographic 3D CRS the vertical
+ * axis units will be returned.
  *
  * This method does the same thing as the C function OSRGetLinearUnits()
  *
@@ -2664,7 +2666,7 @@ double OSRGetLinearUnits( OGRSpatialReferenceH hSRS, char ** ppszName )
  *
  * @param pszTargetKey the key to look on. i.e. "PROJCS" or "VERT_CS". Might be
  * NULL, in which case PROJCS will be implied (and if not found, LOCAL_CS,
- * GEOCCS and VERT_CS are looked up)
+ * GEOCCS, GEOGCS and VERT_CS are looked up)
  * @param ppszName a pointer to be updated with the pointer to the units name.
  * The returned value remains internal to the OGRSpatialReference and should not
  * be freed, or modified.  It may be invalidated on the next
@@ -2739,16 +2741,39 @@ double OGRSpatialReference::GetTargetLinearUnits( const char *pszTargetKey,
                 break;
             }
             auto csType = proj_cs_get_type(d->getPROJContext(), coordSys);
-            if(csType != PJ_CS_TYPE_CARTESIAN && csType != PJ_CS_TYPE_VERTICAL )
+
+            if( csType != PJ_CS_TYPE_CARTESIAN
+                && csType != PJ_CS_TYPE_VERTICAL
+                && csType != PJ_CS_TYPE_ELLIPSOIDAL
+                && csType != PJ_CS_TYPE_SPHERICAL )
             {
                 proj_destroy(coordSys);
                 break;
             }
 
+            int axis = 0;
+
+            if ( csType == PJ_CS_TYPE_ELLIPSOIDAL
+                 || csType == PJ_CS_TYPE_SPHERICAL )
+            {
+                const int axisCount = proj_cs_get_axis_count(
+                    d->getPROJContext(), coordSys);
+
+                if( axisCount == 3 )
+                {
+                    axis = 2;
+                }
+                else
+                {
+                    proj_destroy(coordSys);
+                    break;
+                }
+            }
+
             double dfConvFactor = 0.0;
             const char* pszUnitName = nullptr;
             if( !proj_cs_get_axis_info(
-                d->getPROJContext(), coordSys, 0, nullptr, nullptr, nullptr,
+                d->getPROJContext(), coordSys, axis, nullptr, nullptr, nullptr,
                 &dfConvFactor, &pszUnitName, nullptr, nullptr) )
             {
                 proj_destroy(coordSys);
@@ -3417,7 +3442,7 @@ OGRErr OGRSpatialReference::SetFromUserInput( const char * pszDefinition )
         // WKT2"
         "GEODCRS", "GEOGCRS", "GEODETICCRS", "GEOGRAPHICCRS", "PROJCRS",
         "PROJECTEDCRS", "VERTCRS", "VERTICALCRS", "COMPOUNDCRS",
-        "ENGCRS", "ENGINEERINGCRS", "BOUNDCRS"
+        "ENGCRS", "ENGINEERINGCRS", "BOUNDCRS", "DERIVEDPROJCRS"
     };
     for( const char* keyword: wktKeywords )
     {
@@ -11764,13 +11789,13 @@ int OGRSpatialReference::GetEPSGGeogCS() const
 /*      If we know the datum, associate the most likely GCS with        */
 /*      it.                                                             */
 /* -------------------------------------------------------------------- */
-    pszAuthName = oSRSTmp.IsEmpty() ? GetAuthorityName( "GEOGCS|DATUM" ) :
-                                      oSRSTmp.GetAuthorityName( "GEOGCS|DATUM" );
+    const OGRSpatialReference& oActiveObj = oSRSTmp.IsEmpty() ? *this : oSRSTmp;
+    pszAuthName = oActiveObj.GetAuthorityName( "GEOGCS|DATUM" );
     if( pszAuthName != nullptr
         && EQUAL(pszAuthName, "epsg")
         && GetPrimeMeridian() == 0.0 )
     {
-        const int nDatum = atoi(GetAuthorityCode("GEOGCS|DATUM"));
+        const int nDatum = atoi(oActiveObj.GetAuthorityCode("GEOGCS|DATUM"));
 
         if( nDatum >= 6000 && nDatum <= 6999 )
             return nDatum - 2000;

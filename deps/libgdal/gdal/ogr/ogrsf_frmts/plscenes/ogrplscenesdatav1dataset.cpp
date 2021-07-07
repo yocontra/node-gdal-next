@@ -30,7 +30,7 @@
 #include "ogrgeojsonreader.h"
 #include <time.h>
 
-CPL_CVSID("$Id: ogrplscenesdatav1dataset.cpp 045de1ee7f1d26332043919b051a693843efc9fc 2021-03-07 19:12:33 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrplscenesdatav1dataset.cpp 805c0f42527c4129db9ff7299677426005fa12fc 2021-06-21 18:02:56 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRPLScenesDataV1Dataset()                     */
@@ -571,7 +571,7 @@ retry:
     if( bUseVSICURL && !(STARTS_WITH(m_osBaseURL, "/vsimem/")) )
     {
         char* pszEscapedURL = CPLEscapeString(osRasterURL, -1, CPLES_URL);
-        CPLString osTmpURL("/vsicurl?use_head=no&max_retry=3&empty_dir=yes&url=");
+        CPLString osTmpURL("/vsicurl?use_head=no&max_retry=3&empty_dir=yes&use_redirect_url_if_no_query_string_params=yes&url=");
         osTmpURL += pszEscapedURL;
         CPLFree(pszEscapedURL);
         CPLDebug("PLSCENES", "URL = %s", osTmpURL.c_str());
@@ -594,6 +594,10 @@ retry:
     papszAllowedDrivers = CSLAddString(papszAllowedDrivers, "PNG");
     papszAllowedDrivers = CSLAddString(papszAllowedDrivers, "JPEG");
     papszAllowedDrivers = CSLAddString(papszAllowedDrivers, "NITF");
+    papszAllowedDrivers = CSLAddString(papszAllowedDrivers, "JP2KAK");
+    papszAllowedDrivers = CSLAddString(papszAllowedDrivers, "JP2ECW");
+    papszAllowedDrivers = CSLAddString(papszAllowedDrivers, "JP2MrSID");
+    papszAllowedDrivers = CSLAddString(papszAllowedDrivers, "JP2OpenJPEG");
     GDALDataset* poOutDS = (GDALDataset*) GDALOpenEx(osRasterURL, GDAL_OF_RASTER,
                                                      papszAllowedDrivers, nullptr, nullptr);
     CSLDestroy(papszAllowedDrivers);

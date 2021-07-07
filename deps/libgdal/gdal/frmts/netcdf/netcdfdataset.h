@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdfdataset.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: netcdfdataset.h 8079173adf4c43b5da628e6b82fa19fa0a8a1949 2021-04-29 11:57:19 +0200 Even Rouault $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.
@@ -287,18 +287,18 @@ static const int NCDF_DEFLATE_LEVEL    = 1;  /* best time/size ratio */
 /*         CF-1 Coordinate Type Naming (Chapter 4.  Coordinate Types )  */
 /* -------------------------------------------------------------------- */
 static const char* const papszCFLongitudeVarNames[] = { CF_LONGITUDE_VAR_NAME, "longitude", nullptr };
-static const char* const papszCFLongitudeAttribNames[] = { CF_UNITS, CF_STD_NAME, CF_AXIS, nullptr };
-static const char* const papszCFLongitudeAttribValues[] = { CF_DEGREES_EAST, CF_LONGITUDE_STD_NAME, "X", nullptr };
+static const char* const papszCFLongitudeAttribNames[] = { CF_UNITS, CF_STD_NAME, CF_AXIS, CF_LNG_NAME, nullptr };
+static const char* const papszCFLongitudeAttribValues[] = { CF_DEGREES_EAST, CF_LONGITUDE_STD_NAME, "X", CF_LONGITUDE_LNG_NAME, nullptr };
 static const char* const papszCFLatitudeVarNames[] = { CF_LATITUDE_VAR_NAME, "latitude", nullptr };
-static const char* const papszCFLatitudeAttribNames[] = { CF_UNITS, CF_STD_NAME, CF_AXIS, nullptr };
-static const char* const papszCFLatitudeAttribValues[] = { CF_DEGREES_NORTH, CF_LATITUDE_STD_NAME, "Y", nullptr };
+static const char* const papszCFLatitudeAttribNames[] = { CF_UNITS, CF_STD_NAME, CF_AXIS, CF_LNG_NAME, nullptr };
+static const char* const papszCFLatitudeAttribValues[] = { CF_DEGREES_NORTH, CF_LATITUDE_STD_NAME, "Y", CF_LATITUDE_LNG_NAME, nullptr };
 
 static const char* const papszCFProjectionXVarNames[] = { CF_PROJ_X_VAR_NAME, "xc", nullptr };
-static const char* const papszCFProjectionXAttribNames[] = { CF_STD_NAME, nullptr };
-static const char* const papszCFProjectionXAttribValues[] = { CF_PROJ_X_COORD, nullptr };
+static const char* const papszCFProjectionXAttribNames[] = { CF_STD_NAME, CF_AXIS, nullptr };
+static const char* const papszCFProjectionXAttribValues[] = { CF_PROJ_X_COORD, "X", nullptr };
 static const char* const papszCFProjectionYVarNames[] = { CF_PROJ_Y_VAR_NAME, "yc", nullptr };
-static const char* const papszCFProjectionYAttribNames[] = { CF_STD_NAME, nullptr };
-static const char* const papszCFProjectionYAttribValues[] = { CF_PROJ_Y_COORD, nullptr };
+static const char* const papszCFProjectionYAttribNames[] = { CF_STD_NAME, CF_AXIS, nullptr };
+static const char* const papszCFProjectionYAttribValues[] = { CF_PROJ_Y_COORD, "Y", nullptr };
 
 static const char* const papszCFVerticalAttribNames[] = { CF_AXIS, "positive", "positive", nullptr };
 static const char* const papszCFVerticalAttribValues[] = { "Z", "up", "down", nullptr };

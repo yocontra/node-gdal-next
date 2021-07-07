@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrocidatasource.cpp c4fdd27e8361cb9ef1072ccb9d96a5dc6c8d1125 2019-03-23 14:01:08 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrocidatasource.cpp 6c533b4f07cce657ec4a8b4d6163bf161ceafaa7 2021-06-24 15:38:31 +0200 Even Rouault $")
 
 constexpr int anEPSGOracleMapping[] =
 {
@@ -182,18 +182,7 @@ int OGROCIDataSource::Open( const char * pszNewName,
 /*      Try to establish connection.                                    */
 /* -------------------------------------------------------------------- */
 
-    if( EQUAL(pszDatabase, "") &&
-        EQUAL(pszPassword, "") &&
-        EQUAL(pszUserid, "") )
-    {
-        /* Use username/password OS Authentication and ORACLE_SID database */
-
-        poSession = OGRGetOCISession( "/", "", "" );
-    }
-    else
-    {
-        poSession = OGRGetOCISession( pszUserid, pszPassword, pszDatabase );
-    }
+    poSession = OGRGetOCISession( pszUserid, pszPassword, pszDatabase );
 
     if( poSession == nullptr )
     {
@@ -518,11 +507,13 @@ OGROCIDataSource::ICreateLayer( const char * pszLayerName,
 /*      away?                                                           */
 /* -------------------------------------------------------------------- */
     int iLayer;
+    bool bIsNewLayer = TRUE;
 
     if( CPLFetchBool( papszOptions, "TRUNCATE", false ) )
     {
         CPLDebug( "OCI", "Calling TruncateLayer for %s", pszLayerName );
         TruncateLayer( pszSafeLayerName );
+        bIsNewLayer = false;  // Oracle table already exists
     }
     else
     {
@@ -632,7 +623,7 @@ OGROCIDataSource::ICreateLayer( const char * pszLayerName,
     if( pszLoaderFile == nullptr )
         poLayer = new OGROCITableLayer( this, pszSafeLayerName, eType,
                                         EQUAL(szSRSId,"NULL") ? -1 : atoi(szSRSId),
-                                        TRUE, TRUE );
+                                        TRUE, bIsNewLayer);
     else
         poLayer =
             new OGROCILoaderLayer( this, pszSafeLayerName,
