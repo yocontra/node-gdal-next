@@ -116,6 +116,7 @@ describe('Open', () => {
       const tmp = gdal.open(tmpName)
       assert.instanceOf(tmp, gdal.Dataset)
       assert.deepEqual(tmp.rasterSize, { x: 16, y: 16 })
+      tmp.close()
       fs.unlinkSync(tmpName)
     })
     it('should throw if the file is not a vsimem file', () => {
