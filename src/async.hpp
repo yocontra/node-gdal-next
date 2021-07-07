@@ -317,8 +317,8 @@ template <class GDALType> void GDALCallbackWorker<GDALType>::HandleErrorCallback
 // This async worker returns a Promise
 template <class GDALType> class GDALPromiseWorker : public GDALAsyncWorker<GDALType> {
     public:
-  typedef class GDALAsyncWorker<GDALType>::GDALMainFunc GDALMainFunc;
-  typedef class GDALAsyncWorker<GDALType>::GDALRValFunc GDALRValFunc;
+  typedef typename GDALAsyncWorker<GDALType>::GDALMainFunc GDALMainFunc;
+  typedef typename GDALAsyncWorker<GDALType>::GDALRValFunc GDALRValFunc;
 
     private:
   Nan::Persistent<v8::Promise::Resolver> *resolver_handle;
