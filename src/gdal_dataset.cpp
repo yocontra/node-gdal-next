@@ -37,11 +37,11 @@ void Dataset::Initialize(Local<Object> target) {
   ATTR(lcons, "description", descriptionGetter, READ_ONLY_SETTER);
   ATTR(lcons, "bands", bandsGetter, READ_ONLY_SETTER);
   ATTR(lcons, "layers", layersGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "rasterSize", rasterSizeGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "rasterSize", rasterSizeGetter, READ_ONLY_SETTER);
   ATTR(lcons, "driver", driverGetter, READ_ONLY_SETTER);
   ATTR(lcons, "root", rootGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "srs", srsGetter, srsSetter);
-  ATTR(lcons, "geoTransform", geoTransformGetter, geoTransformSetter);
+  ATTR_ASYNCABLE(lcons, "srs", srsGetter, srsSetter);
+  ATTR_ASYNCABLE(lcons, "geoTransform", geoTransformGetter, geoTransformSetter);
 
   Nan::Set(target, Nan::New("Dataset").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
@@ -642,30 +642,56 @@ NAN_GETTER(Dataset::descriptionGetter) {
  * @attribute rasterSize
  * @type {xyz}
  */
-NAN_GETTER(Dataset::rasterSizeGetter) {
+
+/**
+ * Raster dimensions. An object containing `x` and `y` properties.
+ * {{async_getter}}
+ *
+ * @readOnly
+ * @attribute rasterSizeAsync
+ * @type {Promise<xyz>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
   Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
+  struct xy {
+    int x, y;
+    bool null;
+  };
 
   if (!ds->isAlive()) {
-    Nan::ThrowError("Dataset object has already been destroyed");
+    THROW_OR_REJECT("Dataset object has already been destroyed")
     return;
   }
 
   GDALDataset *raw = ds->get();
 
-  // GDAL 2.x will return 512x512 for vector datasets... which doesn't really make
-  // sense in JS where we can return null instead of a number
-  // https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
-  AsyncGuard lock({ds->uid}, eventLoopWarn);
-  if (raw->GetDriver() == nullptr || !raw->GetDriver()->GetMetadataItem(GDAL_DCAP_RASTER)) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
+  GDALAsyncableJob<xy> job(ds->uid);
 
-  Local<Object> result = Nan::New<Object>();
-  Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(raw->GetRasterXSize()));
-  Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(raw->GetRasterYSize()));
-  info.GetReturnValue().Set(result);
+  job.main = [raw](const GDALExecutionProgress &) {
+    xy result;
+    // GDAL 2.x will return 512x512 for vector datasets... which doesn't really make
+    // sense in JS where we can return null instead of a number
+    // https://github.com/OSGeo/gdal/blob/beef45c130cc2778dcc56d85aed1104a9b31f7e6/gdal/gcore/gdaldataset.cpp#L173-L174
+    if (raw->GetDriver() == nullptr || !raw->GetDriver()->GetMetadataItem(GDAL_DCAP_RASTER)) {
+      result.null = true;
+      return result;
+    }
+    result.x = raw->GetRasterXSize();
+    result.y = raw->GetRasterYSize();
+    result.null = false;
+    return result;
+  };
+
+  job.rval = [](xy xy, GetFromPersistentFunc) {
+    if (xy.null) return Nan::Null().As<Value>();
+    Local<Object> result = Nan::New<Object>();
+    Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(xy.x));
+    Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(xy.y));
+    return result.As<Value>();
+  };
+
+  job.run(info, async);
 }
 
 /**
@@ -675,34 +701,49 @@ NAN_GETTER(Dataset::rasterSizeGetter) {
  * @attribute srs
  * @type {gdal.SpatialReference}
  */
-NAN_GETTER(Dataset::srsGetter) {
+
+/**
+ * Spatial reference associated with raster dataset
+ * {{async_getter}}
+ *
+ * @throws Error
+ * @attribute srsAsync
+ * @type {Promise<gdal.SpatialReference>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
   Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
-    Nan::ThrowError("Dataset object has already been destroyed");
+    THROW_OR_REJECT("Dataset object has already been destroyed");
     return;
   }
 
   GDALDataset *raw = ds->get();
-  AsyncGuard lock({ds->uid}, eventLoopWarn);
-  // get projection wkt and return null if not set
-  OGRChar *wkt = (OGRChar *)raw->GetProjectionRef();
-  if (*wkt == '\0') {
-    // getProjectionRef returns string of length 0 if no srs set
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
-  // otherwise construct and return SpatialReference from wkt
-  OGRSpatialReference *srs = new OGRSpatialReference();
-  int err = srs->importFromWkt(&wkt);
 
-  if (err) {
-    NODE_THROW_OGRERR(err);
-    return;
-  }
+  GDALAsyncableJob<OGRSpatialReference *> job(ds->uid);
 
-  info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  job.main = [raw](const GDALExecutionProgress &) {
+    // get projection wkt and return null if not set
+    OGRChar *wkt = (OGRChar *)raw->GetProjectionRef();
+    if (*wkt == '\0') {
+      // getProjectionRef returns string of length 0 if no srs set
+      return (OGRSpatialReference *)nullptr;
+    }
+    // otherwise construct and return SpatialReference from wkt
+    OGRSpatialReference *srs = new OGRSpatialReference();
+    int err = srs->importFromWkt(&wkt);
+    if (err) throw getOGRErrMsg(err);
+    return srs;
+  };
+
+  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) {
+    if (srs != nullptr)
+      return SpatialReference::New(srs, true);
+    else
+      return Nan::Null().As<Value>();
+  };
+  job.run(info, async);
 }
 
 /**
@@ -718,35 +759,56 @@ NAN_GETTER(Dataset::srsGetter) {
  * @attribute geoTransform
  * @type {number[]}
  */
-NAN_GETTER(Dataset::geoTransformGetter) {
+
+/**
+ * An affine transform which maps pixel/line coordinates into georeferenced
+ * space using the following relationship:
+ *
+ * @example
+ * ```
+ * var GT = dataset.geoTransform;
+ * var Xgeo = GT[0] + Xpixel*GT[1] + Yline*GT[2];
+ * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];```
+ *
+ * {{async_getter}}
+ * @attribute geoTransformAsync
+ * @type {Promise<number[]>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
   Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
-    Nan::ThrowError("Dataset object has already been destroyed");
+    THROW_OR_REJECT("Dataset object has already been destroyed");
     return;
   }
 
   GDALDataset *raw = ds->get();
-  double transform[6];
-  AsyncGuard lock({ds->uid}, eventLoopWarn);
-  CPLErr err = raw->GetGeoTransform(transform);
-  if (err) {
+
+  GDALAsyncableJob<std::shared_ptr<double>> job(ds->uid);
+
+  job.main = [raw](const GDALExecutionProgress &) {
+    auto transform = std::shared_ptr<double>(new double[6], array_deleter<double>());
+    CPLErr err = raw->GetGeoTransform(transform.get());
     // This is mostly (always?) a sign that it has not been set
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-    // NODE_THROW_LAST_CPLERR;
-  }
+    if (err) { return std::shared_ptr<double>(nullptr); }
+    return transform;
+  };
 
-  Local<Array> result = Nan::New<Array>(6);
-  Nan::Set(result, 0, Nan::New<Number>(transform[0]));
-  Nan::Set(result, 1, Nan::New<Number>(transform[1]));
-  Nan::Set(result, 2, Nan::New<Number>(transform[2]));
-  Nan::Set(result, 3, Nan::New<Number>(transform[3]));
-  Nan::Set(result, 4, Nan::New<Number>(transform[4]));
-  Nan::Set(result, 5, Nan::New<Number>(transform[5]));
+  job.rval = [](std::shared_ptr<double> transform, GetFromPersistentFunc) {
+    if (transform == nullptr) return Nan::Null().As<v8::Value>();
+    Local<Array> result = Nan::New<Array>(6);
+    Nan::Set(result, 0, Nan::New<Number>(transform.get()[0]));
+    Nan::Set(result, 1, Nan::New<Number>(transform.get()[1]));
+    Nan::Set(result, 2, Nan::New<Number>(transform.get()[2]));
+    Nan::Set(result, 3, Nan::New<Number>(transform.get()[3]));
+    Nan::Set(result, 4, Nan::New<Number>(transform.get()[4]));
+    Nan::Set(result, 5, Nan::New<Number>(transform.get()[5]));
 
-  info.GetReturnValue().Set(result);
+    return result.As<v8::Value>();
+  };
+
+  job.run(info, async);
 }
 
 /**

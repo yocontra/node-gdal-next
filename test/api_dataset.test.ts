@@ -488,6 +488,21 @@ describe('gdal.Dataset', () => {
           })
         })
       })
+      describe('getter/Async', () => {
+        it('should return SpatialReference', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          return assert.eventually.isTrue(ds.srsAsync.then((srs) => srs.toWKT().indexOf('PROJCS["WGS_1984_Albers"') > -1))
+        })
+        it("should return null when dataset doesn't have projection", () => {
+          const ds = gdal.open(`${__dirname}/data/blank.jpg`)
+          return assert.eventually.isNull(ds.srsAsync)
+        })
+        it('should reject if dataset is already closed', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          ds.close()
+          return assert.isRejected(ds.srsAsync)
+        })
+      })
       describe('setter', () => {
         it('should throw when not an SpatialReference object', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
@@ -544,7 +559,7 @@ describe('gdal.Dataset', () => {
           ds.close()
           assert.throws(() => {
             console.log(ds.rasterSize)
-          })
+          }, /already been destroyed/)
         })
       })
       describe('setter', () => {
@@ -554,6 +569,20 @@ describe('gdal.Dataset', () => {
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             (ds as any).rasterSize = { x: 0, y: 0 }
           }, /rasterSize is a read-only property/)
+        })
+      })
+      describe('getter/Async', () => {
+        it('should return dataset dimensions', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          return assert.eventually.deepEqual(ds.rasterSizeAsync, {
+            x: 495,
+            y: 286
+          })
+        })
+        it('should reject if dataset is already closed', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          ds.close()
+          return assert.isRejected(ds.rasterSizeAsync, /already been destroyed/)
         })
       })
     })
@@ -657,6 +686,63 @@ describe('gdal.Dataset', () => {
           assert.throws(() => {
             console.log(ds.geoTransform)
           })
+        })
+      })
+      describe('getter/Async', () => {
+        it('should return array', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const expected_geotransform = [
+            -1134675.2952829634,
+            7.502071930146189,
+            0,
+            2485710.4658232867,
+            0,
+            -7.502071930145942
+          ]
+
+          const p = ds.geoTransformAsync
+          return assert.isFulfilled(p.then((actual_geotransform) => {
+            const delta = 0.00001
+            assert.closeTo(
+              actual_geotransform[0],
+              expected_geotransform[0],
+              delta
+            )
+            assert.closeTo(
+              actual_geotransform[1],
+              expected_geotransform[1],
+              delta
+            )
+            assert.closeTo(
+              actual_geotransform[2],
+              expected_geotransform[2],
+              delta
+            )
+            assert.closeTo(
+              actual_geotransform[3],
+              expected_geotransform[3],
+              delta
+            )
+            assert.closeTo(
+              actual_geotransform[4],
+              expected_geotransform[4],
+              delta
+            )
+            assert.closeTo(
+              actual_geotransform[5],
+              expected_geotransform[5],
+              delta
+            )
+          }))
+        })
+        it('should return null if dataset doesnt have geotransform', () => {
+          const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
+          return assert.eventually.isNull(ds.geoTransformAsync)
+        })
+        it('should reject if dataset is already closed', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          ds.close()
+          return assert.isRejected(ds.geoTransformAsync)
         })
       })
       describe('setter', () => {

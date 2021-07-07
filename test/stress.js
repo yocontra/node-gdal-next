@@ -7,11 +7,12 @@ const magicString = 'L\'Adour, de son embouchure au confluent avec le gave de Pa
 
 // Add tests here
 const tests = [
-  (slot) => {
-    const dsq = datasetsRaster[Math.floor(Math.random() * openDatasets)]
-    return dsq.then((ds) => ds.bands.getAsync(1))
-      .then((band) => band.pixels.readAsync(0, 0, size.x, size.y, staticBuffers[slot]))
-      .then((data) => assert(data[magicOffset] === magicData))
+  async (slot) => {
+    const ds = await datasetsRaster[Math.floor(Math.random() * openDatasets)]
+    const band = await ds.bands.getAsync(1)
+    const rasterSize = await ds.rasterSizeAsync
+    const data = await band.pixels.readAsync(0, 0, rasterSize.x, rasterSize.y, staticBuffers[slot])
+    assert(data[magicOffset] === magicData)
   },
   () => {
     const ds1q = datasetsRaster[Math.floor(Math.random() * openDatasets)]

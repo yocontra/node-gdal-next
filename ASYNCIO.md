@@ -2,7 +2,7 @@
 
 Common pitfalls to avoid when writing server code
 
-## Mixing of synchronous and asynchronous operations (or why does gdal-async complain)
+## Mixing of synchronous and asynchronous operations (or why does gdal-async complain about blocking the event loop)
 
 *If you are not writing server code that must remain responsive at all times and should never block the event loop for more than a few hundred microseconds, you can safely ignore this warning. In this case you can simply set `gdal.eventLoopWarning = false`.*
 
@@ -20,7 +20,18 @@ As this code uses only async operations, one could expect that it will never blo
 
 In all other cases, accessing a synchronous getter or setter is an instantaneous operation that can be safely used in server code.
 
-**As a general rule, never access synchronous getters or setters on a Dataset after starting any I/O operation on that same Dataset. Retrieve all the needed values beforehand.**
+Version 3.3.2 introduces async getters that solve this problem in an elegant way:
+
+```js
+const ds = await gdal.openAsync('4bands.tif')
+const band1 = await ds.bands.getAsync(1)
+const band2 = await ds.bands.getAsync(2)
+const data1 = band2.pixels.readAsync(0, 0, (await ds.rasterSizeAsync).x, (await ds.rasterSizeAsync).y)
+const data2 = band2.pixels.readAsync(0, 0, (await ds.rasterSizeAsync).x, (await ds.rasterSizeAsync).y)
+await Promise.all([ data1, data2 ])
+```
+
+**As a general rule, never access synchronous getters or setters on a Dataset after starting any I/O operation on that same Dataset. Retrieve all the needed values beforehand or use an async getter whenever one is available.**
 
 ## Worker thread starvation
 

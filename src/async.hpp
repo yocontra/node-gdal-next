@@ -18,11 +18,29 @@ namespace node_gdal {
   }                                                                                                                    \
   void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async)
 
+// This generates getter definitions for 2 getters: sync and async version and a hidden common block
+#define GDAL_ASYNCABLE_GETTER_DEFINE(method)                                                                           \
+  NAN_GETTER(method) {                                                                                                 \
+    method##_do(property, info, false);                                                                                \
+  }                                                                                                                    \
+  NAN_GETTER(method##Async) {                                                                                          \
+    method##_do(property, info, true);                                                                                 \
+  }                                                                                                                    \
+  Nan::NAN_GETTER_RETURN_TYPE method##_do(                                                                             \
+    v8::Local<v8::String> property, const Nan::NAN_GETTER_ARGS_TYPE &info, bool async)
+
 // This generates method declarations for 2 methods: sync and async version and a hidden common block
 #define GDAL_ASYNCABLE_DECLARE(method)                                                                                 \
   static NAN_METHOD(method);                                                                                           \
   static NAN_METHOD(method##Async);                                                                                    \
   static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async)
+
+// This generates getter declarations for 2 getters: sync and async version and a hidden common block
+#define GDAL_ASYNCABLE_GETTER_DECLARE(method)                                                                          \
+  static NAN_GETTER(method);                                                                                           \
+  static NAN_GETTER(method##Async);                                                                                    \
+  static Nan::NAN_GETTER_RETURN_TYPE method##_do(                                                                      \
+    v8::Local<v8::String> property, const Nan::NAN_GETTER_ARGS_TYPE &info, bool async)
 
 #define GDAL_ASYNCABLE_GLOBAL(method)                                                                                  \
   NAN_METHOD(method);                                                                                                  \
@@ -39,6 +57,15 @@ namespace node_gdal {
   static void method##_do(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async)
 
 #define GDAL_ISASYNC async
+
+#define THROW_OR_REJECT(msg)                                                                                           \
+  if (async) {                                                                                                         \
+    auto context = info.GetIsolate()->GetCurrentContext();                                                             \
+    auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();                                              \
+    resolver->Reject(context, Nan::Error(msg)).FromJust();                                                             \
+    info.GetReturnValue().Set(resolver->GetPromise());                                                                 \
+  } else                                                                                                               \
+    Nan::ThrowError(msg);
 
 // Handle locking (used only for sync methods)
 #define GDAL_LOCK_PARENT(p)                                                                                            \
@@ -165,8 +192,9 @@ class GDALExecutionProgress {
 int ProgressTrampoline(double dfComplete, const char *pszMessage, void *pProgressArg);
 
 //
-// This class handles async operations
-// It is meant to be used by GDALAsyncableJob defined below
+// This is the common class for handling async operations
+// It has two subclasses: GDALCallbackWorker and GDALPromiseWorker
+// They are meant to be used by GDALAsyncableJob defined below
 //
 // It takes the lambdas as input
 // GDALType is the type of the object that will be carried from
@@ -199,8 +227,7 @@ template <class GDALType> class GDALAsyncWorker : public GDALAsyncProgressWorker
   ~GDALAsyncWorker();
 
   void Execute(const ExecutionProgress &progress);
-  void HandleOKCallback();
-  void HandleErrorCallback();
+  Local<Value> ProduceRVal();
   void HandleProgressCallback(const GDALProgressInfo *data, size_t count);
 };
 
@@ -212,7 +239,7 @@ GDALAsyncWorker<GDALType>::GDALAsyncWorker(
   const GDALRValFunc &rval,
   const std::map<std::string, v8::Local<v8::Object>> &objects,
   const std::vector<long> &ds_uids)
-  : Nan::AsyncProgressWorkerBase<GDALProgressInfo>(resultCallback, "node-gdal:GDALAsyncWorker"),
+  : GDALAsyncProgressWorker(resultCallback, "node-gdal:GDALAsyncWorker"),
     progressCallback(progressCallback),
     // These members are not references! These functions must be copied
     // as they will be executed in async context!
@@ -226,8 +253,8 @@ GDALAsyncWorker<GDALType>::GDALAsyncWorker(
     if (*i != 0) SaveToPersistent(("ds" + std::to_string(*i)).c_str(), object_store.get<GDALDataset *>(*i));
 }
 
-template <class GDALType> GDALAsyncWorker<GDALType>::~GDALAsyncWorker() {
-  if (progressCallback) delete progressCallback;
+template <class GDALType> Local<Value> GDALAsyncWorker<GDALType>::ProduceRVal() {
+  return rval(raw, [this](const char *key) { return this->GetFromPersistent(key); });
 }
 
 template <class GDALType> void GDALAsyncWorker<GDALType>::Execute(const ExecutionProgress &progress) {
@@ -240,26 +267,13 @@ template <class GDALType> void GDALAsyncWorker<GDALType>::Execute(const Executio
   } catch (const char *err) { this->SetErrorMessage(err); }
 }
 
-template <class GDALType> void GDALAsyncWorker<GDALType>::HandleOKCallback() {
-  // Back to the main thread with the JS world not running
-  Nan::HandleScope scope;
-
-  // rval is the user function that will create the returned value
-  // we give it a lambda that can access the persistent storage created for this operation
-  v8::Local<v8::Value> argv[] = {
-    Nan::Null(), rval(raw, [this](const char *key) { return this->GetFromPersistent(key); })};
-  callback->Call(2, argv, async_resource);
-}
-
-template <class GDALType> void GDALAsyncWorker<GDALType>::HandleErrorCallback() {
-  // Back to the main thread with the JS world not running
-  Nan::HandleScope scope;
-  v8::Local<v8::Value> argv[] = {Nan::Error(this->ErrorMessage())};
-  callback->Call(1, argv, async_resource);
+template <class GDALType> GDALAsyncWorker<GDALType>::~GDALAsyncWorker() {
+  if (progressCallback != nullptr) delete progressCallback;
 }
 
 template <class GDALType>
 void GDALAsyncWorker<GDALType>::HandleProgressCallback(const GDALProgressInfo *data, size_t count) {
+  if (progressCallback == nullptr) return;
   // Back to the main thread with the JS world not running
   Nan::HandleScope scope;
   // A mutex-protected pop in the calling function (in Node.js NAN) can sometimes produce a spurious call
@@ -270,8 +284,94 @@ void GDALAsyncWorker<GDALType>::HandleProgressCallback(const GDALProgressInfo *d
   const GDALProgressInfo *to_send = data + (count - 1);
   if (data != nullptr && count > 0) {
     v8::Local<v8::Value> argv[] = {Nan::New<Number>(to_send->complete), SafeString::New(to_send->message)};
-    progressCallback->Call(2, argv, async_resource);
+    progressCallback->Call(2, argv, this->async_resource);
   }
+}
+
+// This async worker calls a callback
+template <class GDALType> class GDALCallbackWorker : public GDALAsyncWorker<GDALType> {
+    public:
+  using GDALAsyncWorker<GDALType>::GDALAsyncWorker;
+  void HandleOKCallback();
+  void HandleErrorCallback();
+};
+
+template <class GDALType> void GDALCallbackWorker<GDALType>::HandleOKCallback() {
+  // Back to the main thread with the JS world not running
+  Nan::HandleScope scope;
+
+  // rval is the user function that will create the returned value
+  // we give it a lambda that can access the persistent storage created for this operation
+  // It uses our HandleScope so it can return a Local without escaping
+  v8::Local<v8::Value> argv[] = {Nan::Null(), this->ProduceRVal()};
+  this->callback->Call(2, argv, this->async_resource);
+}
+
+template <class GDALType> void GDALCallbackWorker<GDALType>::HandleErrorCallback() {
+  // Back to the main thread with the JS world not running
+  Nan::HandleScope scope;
+  v8::Local<v8::Value> argv[] = {Nan::Error(this->ErrorMessage())};
+  this->callback->Call(1, argv, this->async_resource);
+}
+
+// This async worker returns a Promise
+template <class GDALType> class GDALPromiseWorker : public GDALAsyncWorker<GDALType> {
+    public:
+  typedef class GDALAsyncWorker<GDALType>::GDALMainFunc GDALMainFunc;
+  typedef class GDALAsyncWorker<GDALType>::GDALRValFunc GDALRValFunc;
+
+    private:
+  Nan::Persistent<v8::Promise::Resolver> *resolver_handle;
+  Nan::Persistent<v8::Context> *context_handle;
+
+    public:
+  explicit GDALPromiseWorker(
+    const Nan::NAN_GETTER_ARGS_TYPE &info,
+    const GDALMainFunc &doit,
+    const GDALRValFunc &rval,
+    const std::map<std::string, v8::Local<v8::Object>> &objects,
+    const std::vector<long> &ds_uids);
+
+  ~GDALPromiseWorker();
+
+  void HandleOKCallback();
+  void HandleErrorCallback();
+  inline Local<Value> Promise() {
+    return Nan::New(*resolver_handle)->GetPromise();
+  };
+};
+
+template <class GDALType>
+GDALPromiseWorker<GDALType>::GDALPromiseWorker(
+  const Nan::NAN_GETTER_ARGS_TYPE &info,
+  const GDALMainFunc &doit,
+  const GDALRValFunc &rval,
+  const std::map<std::string, v8::Local<v8::Object>> &objects,
+  const std::vector<long> &ds_uids)
+  : GDALAsyncWorker<GDALType>(nullptr, nullptr, doit, rval, objects, ds_uids) {
+  auto context = info.GetIsolate()->GetCurrentContext();
+  context_handle = new Nan::Persistent<v8::Context>(context);
+  auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();
+  resolver_handle = new Nan::Persistent<v8::Promise::Resolver>(resolver);
+}
+
+template <class GDALType> void GDALPromiseWorker<GDALType>::HandleOKCallback() {
+  Nan::HandleScope scope;
+  v8::Local<v8::Context> context = Nan::New(*context_handle);
+  v8::Local<v8::Promise::Resolver> resolver = Nan::New(*resolver_handle);
+  resolver->Resolve(context, this->ProduceRVal()).FromJust();
+}
+
+template <class GDALType> void GDALPromiseWorker<GDALType>::HandleErrorCallback() {
+  Nan::HandleScope scope;
+  v8::Local<v8::Context> context = Nan::New(*context_handle);
+  v8::Local<v8::Promise::Resolver> resolver = Nan::New(*resolver_handle);
+  resolver->Reject(context, Nan::Error(this->ErrorMessage())).FromJust();
+}
+
+template <class GDALType> GDALPromiseWorker<GDALType>::~GDALPromiseWorker() {
+  delete context_handle;
+  delete resolver_handle;
 }
 
 // This the basic unit of the GDALAsyncable framework
@@ -333,7 +433,25 @@ template <class GDALType> class GDALAsyncableJob {
       if (!info.This().IsEmpty() && info.This()->IsObject()) persist("this", info.This());
       Nan::Callback *callback;
       NODE_ARG_CB(cb_arg, "callback", callback);
-      Nan::AsyncQueueWorker(new GDALAsyncWorker<GDALType>(callback, progress, main, rval, persistent, ds_uids));
+      Nan::AsyncQueueWorker(new GDALCallbackWorker<GDALType>(callback, progress, main, rval, persistent, ds_uids));
+      return;
+    }
+    try {
+      GDALExecutionProgress executionProgress(new GDALSyncExecutionProgress(progress));
+      AsyncGuard lock(ds_uids, eventLoopWarn);
+      GDALType obj = main(executionProgress);
+      // rval is the user function that will create the returned value
+      // we give it a lambda that can access the persistent storage created for this operation
+      info.GetReturnValue().Set(rval(obj, [this](const char *key) { return this->persistent[key]; }));
+    } catch (const char *err) { Nan::ThrowError(err); }
+  }
+
+  void run(const Nan::NAN_GETTER_ARGS_TYPE &info, bool async) {
+    if (async) {
+      if (!info.This().IsEmpty() && info.This()->IsObject()) persist("this", info.This());
+      auto worker = new GDALPromiseWorker<GDALType>(info, main, rval, persistent, ds_uids);
+      info.GetReturnValue().Set(worker->Promise());
+      Nan::AsyncQueueWorker(worker);
       return;
     }
     try {

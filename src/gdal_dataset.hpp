@@ -44,10 +44,10 @@ class Dataset : public Nan::ObjectWrap {
   static NAN_METHOD(close);
 
   static NAN_GETTER(bandsGetter);
-  static NAN_GETTER(rasterSizeGetter);
-  static NAN_GETTER(srsGetter);
+  GDAL_ASYNCABLE_GETTER_DECLARE(rasterSizeGetter);
+  GDAL_ASYNCABLE_GETTER_DECLARE(srsGetter);
   static NAN_GETTER(driverGetter);
-  static NAN_GETTER(geoTransformGetter);
+  GDAL_ASYNCABLE_GETTER_DECLARE(geoTransformGetter);
   static NAN_GETTER(descriptionGetter);
   static NAN_GETTER(layersGetter);
   static NAN_GETTER(rootGetter);
