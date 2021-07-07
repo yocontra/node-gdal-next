@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - GDAL 3.3.1
  - Add `gdal.DatasetBands.getEnvelope()`
+ - Add `gdal.vsimem.set` and `gdal.vsimem.release` allowing to load and unload files between a `Buffer` and GDAL's in-memory `vsimem` file system
  - Add `gdal.Geometry.makeValid{Async}()`
  
 ### Changed

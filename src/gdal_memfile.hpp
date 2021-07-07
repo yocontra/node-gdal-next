@@ -12,6 +12,8 @@
 // gdal
 #include <gdal_priv.h>
 
+#include "gdal_common.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -21,16 +23,22 @@ namespace node_gdal {
 
 class Memfile {
   void *data;
-  size_t len;
-  Nan::Persistent<Object> *weakHandle;
+  Nan::Persistent<Object> *persistent;
   static void weakCallback(const Nan::WeakCallbackInfo<Memfile> &);
 
     public:
   std::string filename;
-  Memfile(void *, size_t);
+  Memfile(void *);
+  Memfile(void *, const std::string &filename);
+  ~Memfile();
   static Memfile *get(Local<Object>);
-  void release();
+  static Memfile *get(Local<Object>, const std::string &filename);
   static std::map<void *, Memfile *> memfile_collection;
+
+  static void Initialize(Local<Object> target);
+  static NAN_METHOD(vsimemSet);
+  static NAN_METHOD(vsimemAnonymous);
+  static NAN_METHOD(vsimemRelease);
 };
 } // namespace node_gdal
 #endif

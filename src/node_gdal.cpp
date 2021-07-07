@@ -381,19 +381,6 @@ static NAN_METHOD(isAlive) {
   info.GetReturnValue().Set(Nan::New(object_store.isAlive(uid)));
 }
 
-static NAN_METHOD(getMemfileName) {
-  Nan::HandleScope scope;
-  Local<Object> buffer;
-
-  NODE_ARG_OBJECT(0, "buffer", buffer);
-
-  Memfile *memfile = Memfile::get(buffer);
-  if (memfile == nullptr)
-    Nan::ThrowError("Failed creating in-memory file");
-  else
-    info.GetReturnValue().Set(Nan::New<String>(memfile->filename).ToLocalChecked());
-}
-
 static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
   Nan__SetAsyncableMethod(target, "open", gdal_open);
@@ -403,7 +390,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   Nan::SetMethod(target, "setPROJSearchPath", setPROJSearchPath);
   Nan::SetMethod(target, "_triggerCPLError", ThrowDummyCPLError); // for tests
   Nan::SetMethod(target, "_isAlive", isAlive);                    // for tests
-  Nan::SetMethod(target, "_getMemFileName", getMemfileName);      // not a public API
 
   Warper::Initialize(target);
   Algorithms::Initialize(target);
@@ -459,6 +445,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   CompoundCurveCurves::Initialize(target);
   RasterBandOverviews::Initialize(target);
   RasterBandPixels::Initialize(target);
+  Memfile::Initialize(target);
 
   /**
    * The collection of all drivers registered with GDAL

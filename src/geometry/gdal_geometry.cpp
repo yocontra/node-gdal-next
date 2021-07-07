@@ -1080,8 +1080,9 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
   };
   //^^ export to wkb and fill buffer ^^
   job.rval = [size](unsigned char *data, GetFromPersistentFunc) {
+    Nan::EscapableHandleScope scope;
     Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
-    return result;
+    return scope.Escape(result);
   };
   job.run(info, async, 2);
 }

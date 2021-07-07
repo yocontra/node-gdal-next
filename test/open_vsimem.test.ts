@@ -9,99 +9,119 @@ chai.use(chaiAsPromised)
 describe('Open', () => {
   afterEach(global.gc)
 
-  // The bufferHolder/delete acrobatics are needed for the ASAN builds
-  // This simulates the buffer going out of scope
-  describe('vsimem', () => {
-    let filename, ds
+  describe('vsimem/open', () => {
+    let filename, ds, buffer
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    const bufferHolder = {} as any
 
     after(() => {
-      delete ds.buffer
       ds.close()
-      delete bufferHolder.buffer
       global.gc()
     })
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/park.geo.json')
-      bufferHolder.buffer = fs.readFileSync(filename)
-      ds = gdal.open(bufferHolder.buffer)
+      buffer = fs.readFileSync(filename)
+      ds = gdal.open(buffer)
     })
     it('should be able to read band count', () => {
       assert.equal(ds.layers.count(), 1)
     })
     it('should keep the buffer in the dataset', () => {
       assert.instanceOf(ds.buffer, Buffer)
-      assert.equal(ds.buffer, bufferHolder.buffer)
+      assert.equal(ds.buffer, buffer)
     })
     it('should throw on an empty buffer', () => {
-      bufferHolder.buffer2 = Buffer.alloc(0)
-      assert.throws(() => gdal.open(bufferHolder.buffer2))
-      delete bufferHolder.buffer2
+      const buffer2 = Buffer.alloc(0)
+      assert.throws(() => gdal.open(buffer2))
     })
     it('should throw on an invalid buffer', () => {
-      bufferHolder.buffer2 = Buffer.alloc(1024)
-      assert.throws(() => gdal.open(bufferHolder.buffer2))
-      delete bufferHolder.buffer2
+      const buffer2 = Buffer.alloc(1024)
+      assert.throws(() => gdal.open(buffer2))
     })
     it('should be shareable across datasets', () => {
-      const ds2 = gdal.open(bufferHolder.buffer)
+      const ds2 = gdal.open(buffer)
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       assert.equal((ds2 as any).buffer, ds.buffer)
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      delete (ds2 as any).buffer
       ds2.close()
     })
-    describe('layer', () => {
-      let layer
-      before(() => {
-        layer = ds.layers.get(0)
-      })
-      it('should have all fields defined', () => {
-        assert.equal(layer.fields.count(), 3)
-        assert.deepEqual(layer.fields.getNames(), [
-          'kind',
-          'name',
-          'state'
-        ])
-      })
+    it('layer should have all fields defined', () => {
+      const layer = ds.layers.get(0)
+      assert.equal(layer.fields.count(), 3)
+      assert.deepEqual(layer.fields.getNames(), [
+        'kind',
+        'name',
+        'state'
+      ])
     })
   })
-  describe('vsimem/Async', () => {
-    let filename, ds
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    const bufferHolder = {} as any
-    after(() => {
-      ds.then((r) => {
-        delete r.buffer
-        r.close()
-        delete bufferHolder.buffer
-        delete bufferHolder.buffer2
-        global.gc()
-      })
-    })
+  describe('vsimem/openAsync', () => {
+    let filename, ds, buffer
+    after(() => ds.then((r) => {
+      r.close()
+      global.gc()
+    }))
     afterEach(global.gc)
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/park.geo.json')
-      bufferHolder.buffer = fs.readFileSync(filename)
-      ds = gdal.openAsync(bufferHolder.buffer)
+      buffer = fs.readFileSync(filename)
+      ds = gdal.openAsync(buffer)
     })
     it('should be able to read band count', () =>
       assert.eventually.equal(ds.then((ds) => ds.layers.count()), 1)
     )
     it('should keep the buffer in the dataset', () =>
       Promise.all([ assert.eventually.instanceOf(ds.then((ds) => ds.buffer), Buffer),
-        assert.eventually.equal(ds.then((ds) => ds.buffer), bufferHolder.buffer)
+        assert.eventually.equal(ds.then((ds) => ds.buffer), buffer)
       ])
     )
     it('should throw on an empty buffer', () => {
-      bufferHolder.buffer2 = Buffer.alloc(0)
-      return assert.isRejected(gdal.openAsync(bufferHolder.buffer2))
+      const buffer2 = Buffer.alloc(0)
+      return assert.isRejected(gdal.openAsync(buffer2))
     })
     it('should throw on an invalid buffer', () => {
-      bufferHolder.buffer2 = Buffer.alloc(1024)
-      return assert.isRejected(gdal.openAsync(bufferHolder.buffer2))
+      const buffer2 = Buffer.alloc(1024)
+      return assert.isRejected(gdal.openAsync(buffer2))
+    })
+  })
+
+  describe('vsimem/set', () => {
+    after(() => {
+      global.gc()
+    })
+    it('should create a vsimem file from a Buffer', () => {
+      const buffer_in = fs.readFileSync(path.join(__dirname, 'data/park.geo.json'))
+      gdal.vsimem.set(buffer_in, '/vsimem/park.geo.json')
+      const ds = gdal.open('/vsimem/park.geo.json')
+      ds.close()
+      const buffer_out = gdal.vsimem.release('/vsimem/park.geo.json')
+      assert.strictEqual(buffer_in, buffer_out)
+    })
+    it('should throw if the buffer is not a Buffer', () => {
+      assert.throws(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        gdal.vsimem.set(({}) as any, '/vsimem/park.geo.json')
+      })
+    })
+  })
+
+  describe('vsimem/release', () => {
+    it('should allow to retrieve the contents from a vsimem', () => {
+      const ds = gdal.open('/vsimem/temp1.tiff', 'w', 'GTiff', 16, 16, 1, gdal.GDT_Byte)
+      ds.close()
+      const buffer = gdal.vsimem.release('/vsimem/temp1.tiff')
+      assert.instanceOf(buffer, Buffer)
+      const tmpName = path.join(__dirname, 'data', 'temp', `temp_vsimem_${Date.now()}.tiff`)
+      fs.writeFileSync(tmpName, buffer)
+      const tmp = gdal.open(tmpName)
+      assert.instanceOf(tmp, gdal.Dataset)
+      assert.deepEqual(tmp.rasterSize, { x: 16, y: 16 })
+      fs.unlinkSync(tmpName)
+    })
+    it('should throw if the file is not a vsimem file', () => {
+      assert.throws(() => {
+        gdal.vsimem.release('park.geo.json')
+      })
     })
   })
 })
