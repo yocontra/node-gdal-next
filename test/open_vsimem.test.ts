@@ -107,7 +107,11 @@ describe('Open', () => {
 
   describe('vsimem/release', () => {
     it('should allow to retrieve the contents from a vsimem', () => {
-      const ds = gdal.open('/vsimem/temp1.tiff', 'w', 'GTiff', 16, 16, 1, gdal.GDT_Byte)
+      const size = 64
+      const ds = gdal.open('/vsimem/temp1.tiff', 'w', 'GTiff', size, size, 1, gdal.GDT_Byte)
+      const data = new Uint8Array(size * size)
+      for (let i = 0; i < data.length; i ++) data[i] = Math.round(Math.random() * 256)
+      ds.bands.get(1).pixels.write(0, 0, ds.rasterSize.x, ds.rasterSize.y, data)
       ds.close()
       const buffer = gdal.vsimem.release('/vsimem/temp1.tiff')
       assert.instanceOf(buffer, Buffer)
@@ -115,7 +119,8 @@ describe('Open', () => {
       fs.writeFileSync(tmpName, buffer)
       const tmp = gdal.open(tmpName)
       assert.instanceOf(tmp, gdal.Dataset)
-      assert.deepEqual(tmp.rasterSize, { x: 16, y: 16 })
+      assert.deepEqual(tmp.rasterSize, { x: size, y: size })
+      assert.deepEqual(tmp.bands.get(1).pixels.read(0, 0, size, size), data)
       tmp.close()
       fs.unlinkSync(tmpName)
     })
