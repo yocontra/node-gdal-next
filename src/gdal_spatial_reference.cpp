@@ -120,6 +120,7 @@ NAN_METHOD(SpatialReference::New) {
       OGRChar *wkt_c = (OGRChar *)wkt.c_str();
       int err = srs->importFromWkt(&wkt_c);
       if (err) {
+        delete srs;
         NODE_THROW_OGRERR(err);
         return;
       }
@@ -318,7 +319,7 @@ NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(SpatialReference, autoIdentifyEPSG, AutoI
 NAN_METHOD(SpatialReference::clone) {
   Nan::HandleScope scope;
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
-  info.GetReturnValue().Set(SpatialReference::New(srs->this_->Clone()));
+  info.GetReturnValue().Set(SpatialReference::New(srs->this_->Clone(), true));
 }
 
 /**
@@ -330,7 +331,7 @@ NAN_METHOD(SpatialReference::clone) {
 NAN_METHOD(SpatialReference::cloneGeogCS) {
   Nan::HandleScope scope;
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
-  info.GetReturnValue().Set(SpatialReference::New(srs->this_->CloneGeogCS()));
+  info.GetReturnValue().Set(SpatialReference::New(srs->this_->CloneGeogCS(), true));
 }
 
 /**
