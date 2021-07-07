@@ -130,7 +130,7 @@ NAN_METHOD(Memfile::vsimemAnonymous) {
  * Delete and retrieve the contents of an in-memory /vsimem/ file.
  * This is a very fast zero-copy operation.
  * It does not block the event loop.
- * The file must not be open.
+ * The file must not be open and there is no safety mechanism to enforce this.
  * If the file was created by vsimem.set, it will return a reference
  * to the same Buffer that was used to create it.
  * Otherwise it will construct a new Buffer object with the GDAL
