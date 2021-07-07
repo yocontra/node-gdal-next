@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Correctly measure the wall time for the event loop warnings
  - Fix a number of memory leaks in `gdal.SpatialReference.clone()`, `gdal.SpatialReference.cloneGeogCS()` and when constructing a `gdal.SpatialReference` with a `wkt` argument
+ - Remove a wasteful reallocation in `gdal.Dataset.root`
 
 ## [3.3.1] 2021-06-17
 

@@ -867,9 +867,8 @@ NAN_GETTER(Dataset::layersGetter) {
  */
 NAN_GETTER(Dataset::rootGetter) {
   Nan::HandleScope scope;
-  MaybeLocal<Value> maybeRootObj = Nan::GetPrivate(info.This(), Nan::New("root_").ToLocalChecked());
-  Local<Value> rootObj;
-  if (rootObj.IsEmpty()) {
+  Local<Value> rootObj = Nan::GetPrivate(info.This(), Nan::New("root_").ToLocalChecked()).ToLocalChecked();
+  if (rootObj->IsUndefined()) {
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
     NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
     GDAL_RAW_CHECK(GDALDataset *, ds, gdal_ds);
@@ -884,8 +883,6 @@ NAN_GETTER(Dataset::rootGetter) {
     }
 #endif
     Nan::SetPrivate(info.This(), Nan::New("root_").ToLocalChecked(), rootObj);
-  } else {
-    rootObj = maybeRootObj.ToLocalChecked();
   }
   info.GetReturnValue().Set(rootObj);
 }
