@@ -36,6 +36,7 @@ core
 **/core
 package-lock.json
 yarn.lock
+Attic
 
 
 deps/libgdal/gdal/wince
