@@ -36,11 +36,21 @@
     "type": "git",
     "url": "https://github.com/mmomtchev/node-gdal-async.git"
   },
-  "author": {
-    "name": "Brandon Reavis",
-    "url": "https://github.com/brandonreavis",
-    "email": "brandon@naturalatlas.com"
+  "funding": {
+    "url": "https://github.com/sponsors/mmomtchev"
   },
+  "contributors": [ 
+    {
+      "name": "Brandon Reavis",
+      "url": "https://github.com/brandonreavis",
+      "email": "brandon@naturalatlas.com"
+    },
+    {
+      "name": "Momtchil Momtchev",
+      "url": "https://github.com/mmomtchev",
+      "email": "momtchil@momtchev.com"
+    }
+  ],
   "scripts": {
     "test": "mocha && npm run test:stress 20",
     "lint:cpp": "clang-format -i src/*.cpp src/*.hpp && clang-format -i src/*/*.cpp src/*/*.hpp",
