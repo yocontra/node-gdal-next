@@ -11,6 +11,7 @@ node_modules
 yuidocs
 coverage
 .vscode
+Attic
 
 deps/**/*.sh
 deps/**/*.py
