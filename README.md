@@ -26,8 +26,7 @@ It adds a number of features:
 - Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (since 3.3)
 - Numerous bugfixes including a number of memory leaks
 
-The default install is currently the 3.2 branch which is bundled with GDAL 3.2.3.
-The 3.3 branch, which introduces a number of significant changes, and is bundled with GDAL 3.3.0, is available by installing `gdal-async@beta`.
+The default install is currently the 3.3 branch which is bundled with GDAL 3.3.1.
 
 Support for `worker_threads` is planned but it is not a priority project
 
@@ -94,11 +93,11 @@ Simultaneous operations on distinct dataset objects are always safe and can run 
 
 Simultaneous operations on the same dataset object are safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node.js/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time. Take a look at `ASYNCIO.md` which explains this in detail.
 
-Also be particularly careful when mixing synchronous and asynchronous operations in server code. If a GDAL operation is running in the background for any given Dataset, all synchronous operations on that same Dataset on the main thread will block the event loop until the background operation is finished. **This includes synchronous getters and setters that might otherwise be instantaneous.**. It is recommended to retrieve all values such as raster size or no data value or spatial reference **before** starting any I/O operations.
+Also be particularly careful when mixing synchronous and asynchronous operations in server code. If a GDAL operation is running in the background for any given Dataset, all synchronous operations on that same Dataset on the main thread will block the event loop until the background operation is finished. **This includes synchronous getters and setters that might otherwise be instantaneous.**. It is recommended to retrieve all values such as raster size or no data value or spatial reference **before** starting any I/O operations or use the new asynchronous getters introduced in 3.3.2.
 
 **Does not support `worker_threads` yet**
 
-**HDF5 on Windows is not thread safe**
+**The HDF5 driver is not thread safe on Windows**
 
 #### With callbacks
 
@@ -107,16 +106,20 @@ it will be called on completion with standard *(e,r)* semantics
 
 In this case the function will return a resolved *Promise*
 ```js
-const gdal = require('gdal-async')
+const gdal = require('gdal-async');
 gdal.openAsync('sample.tif', (e, dataset) => {
-    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x,
-        dataset.rasterSize.y, (e, data) => {
         if (e) {
             console.error(e);
             return;
         }
-        console.log(data);
-    });
+        dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x,
+        dataset.rasterSize.y, (e, data) => {
+            if (e) {
+                console.error(e);
+                return;
+            }
+            console.log(data);
+        });
 });
 ```
 
@@ -126,12 +129,23 @@ If there is no callback, the function will return a *Promise*
 
 ```js
 const gdal = require('gdal-async')
-gdal.openAsync('sample.tif').then((dataset) => {
-    dataset.bands.get(1).pixels.readAsync(0, 0, dataset.rasterSize.x, dataset.rasterSize.y)
-        .then((data) => {
-            console.log(data);
-        }).catch(e => console.error(e));
-}).catch(e => console.error(e));
+gdal.openAsync('sample.tif')
+    .then((dataset) => dataset.bands.getAsync(1))
+    .then((band) => band.pixels.readAsync(0, 0, band.ds.rasterSize.x, band.ds.rasterSize.y))
+    .then((data) => console.log(data))
+    .catch((e) => console.error(e))
+```
+
+### With async/await
+
+```js
+const gdal = require('gdal-async');
+try {
+    const ds = await gdal.openAsync('sample.tif');
+    const band = await ds.bands.getAsync(1);
+    const rasterSize = await ds.rasterSizeAsync;    // starting with 3.3.2
+    const data = await band.pixels.readAsync(0, 0, rasterSize.x, rasterSize.y);
+} catch (e => console.error(e));
 ```
 
 ### TypeScript (starting from 3.1)
@@ -187,29 +201,7 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
 ### With `ndarray` from `scijs`
 
 The 3.2 branch of `gdal-async` is compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray), but the array must be in a positive/positive row-major stride.
-
-```js
-const gdal = require('gdal-async');
-const ndarray = require('ndarray');
-const src = gdal.open('sample.tif');
-const band_src = src.bands.get(1);
-
-// Read as ndarray
-const data = ndarray(band_src.pixels.read(0, 0, src.rasterSize.x, src.rasterSize.y),
-                    [src.rasterSize.y, src.rasterSize.x]);
-
-// Access with data.get(y, x);
-
-const dst = gdal.open('dst.tif', 'w', 'GTiff', src.rasterSize.x, src.rasterSize.y,
-                    1, band_src.dataType);
-const band_dst = dst.bands.get(1);
-
-// Write from ndarray, must be in row-major stride (the default one)
-band_dst.pixels.write(0, 0, src.rasterSize.x, src.rasterSize.y, data.data);
-dst.flush();
-```
-
-A separate plugin [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal) allows zero-copy I/O, with GDAL-backed interleaving in C++ using SIMD instructions, for all possible 2D strides. The plugin requires `gdal-async@3.3` and it is not compatible with the `gdal-async@3.2` branch.
+A separate plugin [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal) allows zero-copy I/O, with GDAL-backed interleaving in C++ using SIMD instructions, for all possible strides both for 2D raster data and N-dimensional `MDArray` data. The plugin requires `gdal-async@3.3` and it is not compatible with the `gdal-async@3.2` branch.
 
 ## Bundled Drivers
 
