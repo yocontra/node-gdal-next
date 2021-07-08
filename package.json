@@ -1,6 +1,6 @@
 {
   "name": "gdal-async",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "Bindings to GDAL (Geospatial Data Abstraction Library) with full async support",
   "license": "Apache-2.0",
   "url": "https://github.com/mmomtchev/node-gdal-async",
@@ -39,7 +39,7 @@
   "funding": {
     "url": "https://github.com/sponsors/mmomtchev"
   },
-  "contributors": [ 
+  "contributors": [
     {
       "name": "Brandon Reavis",
       "url": "https://github.com/brandonreavis",
