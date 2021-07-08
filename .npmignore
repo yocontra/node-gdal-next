@@ -12,6 +12,7 @@ yuidocs
 coverage
 .vscode
 Attic
+core
 
 deps/**/*.sh
 deps/**/*.py
