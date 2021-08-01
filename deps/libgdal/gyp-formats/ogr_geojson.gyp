@@ -32,9 +32,7 @@
 			"include_dirs": [
 				"../gdal/ogr/ogrsf_frmts/geojson",
 				"../gdal/ogr/ogrsf_frmts/geojson/libjson",
-				"../gdal/frmts/.",
-				"../gdal/frmts/..",
-				"../gdal/frmts/../.."
+				"../gdal/frmts/."
 			]
 		}
 	]

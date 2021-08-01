@@ -26,8 +26,7 @@ namespace node_gdal {
   NAN_GETTER(method##Async) {                                                                                          \
     method##_do(property, info, true);                                                                                 \
   }                                                                                                                    \
-  Nan::NAN_GETTER_RETURN_TYPE method##_do(                                                                             \
-    v8::Local<v8::String> property, const Nan::NAN_GETTER_ARGS_TYPE &info, bool async)
+  Nan::NAN_GETTER_RETURN_TYPE method##_do(v8::Local<v8::String> property, Nan::NAN_GETTER_ARGS_TYPE info, bool async)
 
 // This generates method declarations for 2 methods: sync and async version and a hidden common block
 #define GDAL_ASYNCABLE_DECLARE(method)                                                                                 \
@@ -40,7 +39,7 @@ namespace node_gdal {
   static NAN_GETTER(method);                                                                                           \
   static NAN_GETTER(method##Async);                                                                                    \
   static Nan::NAN_GETTER_RETURN_TYPE method##_do(                                                                      \
-    v8::Local<v8::String> property, const Nan::NAN_GETTER_ARGS_TYPE &info, bool async)
+    v8::Local<v8::String> property, Nan::NAN_GETTER_ARGS_TYPE info, bool async)
 
 #define GDAL_ASYNCABLE_GLOBAL(method)                                                                                  \
   NAN_METHOD(method);                                                                                                  \
@@ -326,7 +325,7 @@ template <class GDALType> class GDALPromiseWorker : public GDALAsyncWorker<GDALT
 
     public:
   explicit GDALPromiseWorker(
-    const Nan::NAN_GETTER_ARGS_TYPE &info,
+    Nan::NAN_GETTER_ARGS_TYPE info,
     const GDALMainFunc &doit,
     const GDALRValFunc &rval,
     const std::map<std::string, v8::Local<v8::Object>> &objects,
@@ -343,7 +342,7 @@ template <class GDALType> class GDALPromiseWorker : public GDALAsyncWorker<GDALT
 
 template <class GDALType>
 GDALPromiseWorker<GDALType>::GDALPromiseWorker(
-  const Nan::NAN_GETTER_ARGS_TYPE &info,
+  Nan::NAN_GETTER_ARGS_TYPE info,
   const GDALMainFunc &doit,
   const GDALRValFunc &rval,
   const std::map<std::string, v8::Local<v8::Object>> &objects,
@@ -446,7 +445,7 @@ template <class GDALType> class GDALAsyncableJob {
     } catch (const char *err) { Nan::ThrowError(err); }
   }
 
-  void run(const Nan::NAN_GETTER_ARGS_TYPE &info, bool async) {
+  void run(Nan::NAN_GETTER_ARGS_TYPE info, bool async) {
     if (async) {
       if (!info.This().IsEmpty() && info.This()->IsObject()) persist("this", info.This());
       auto worker = new GDALPromiseWorker<GDALType>(info, main, rval, persistent, ds_uids);
