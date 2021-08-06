@@ -91,7 +91,14 @@ std::shared_ptr<RETURN> NumberArrayToSharedPtr(Local<Array> array, size_t count 
 
 #define ATTR_ASYNCABLE(t, name, get, set)                                                                              \
   Nan::SetAccessor(t->InstanceTemplate(), Nan::New(name).ToLocalChecked(), get, set);                                  \
-  Nan::SetAccessor(t->InstanceTemplate(), Nan::New(name "Async").ToLocalChecked(), get##Async, READ_ONLY_SETTER);
+  Nan::SetAccessor(                                                                                                    \
+    t->InstanceTemplate(),                                                                                             \
+    Nan::New(name "Async").ToLocalChecked(),                                                                           \
+    get##Async,                                                                                                        \
+    READ_ONLY_SETTER,                                                                                                  \
+    Local<Value>(),                                                                                                    \
+    DEFAULT,                                                                                                           \
+    DontEnum);
 
 #define ATTR_DONT_ENUM(t, name, get, set)                                                                              \
   Nan::SetAccessor(t->InstanceTemplate(), Nan::New(name).ToLocalChecked(), get, set, Local<Value>(), DEFAULT, DontEnum);
