@@ -70,7 +70,7 @@
 			"variables": {
 				"debug_extra_ccflags_cc": [ "-fsanitize=address" ],
 				"debug_extra_ldflags" : [ "-fsanitize=address" ]
-			},
+			}
 		}],
 		["enable_coverage == 'true'", {
 			"variables": {

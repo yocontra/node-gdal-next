@@ -61,6 +61,8 @@
 				"xcode_settings": {
 					"GCC_OPTIMIZATION_LEVEL": "0",
 					"GCC_GENERATE_DEBUGGING_SYMBOLS": "YES",
+					"OTHER_CPLUSPLUSFLAGS": [ "<@(debug_extra_ccflags_cc)" ],
+					"OTHER_LDFLAGS": [ "<@(debug_extra_ldflags)" ]
 				},
 				"msvs_settings": {
 					"VCCLCompilerTool": {

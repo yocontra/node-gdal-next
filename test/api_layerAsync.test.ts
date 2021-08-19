@@ -80,7 +80,7 @@ describe('gdal.LayerAsync', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             dataset.close()
             assert.throws(() => {
-              console.log(layer.ds)
+              console.log(layer.ds.srs)
             }, /already been destroyed/)
           })
         })
