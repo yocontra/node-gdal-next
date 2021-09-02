@@ -277,14 +277,14 @@ describe('gdal.SpatialReference', () => {
     it('should support null argument', () => {
       // https://github.com/naturalatlas/node-gdal/issues/218
       const wkt =
-        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]'
+        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],UNIT["Degree",0.0174532925199433]]'
       const srs = gdal.SpatialReference.fromWKT(wkt)
       srs.autoIdentifyEPSG()
       assert.strictEqual(srs.getAuthorityCode(null), '4269')
     })
     it('should support no arguments', () => {
       const wkt =
-        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]'
+        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],UNIT["Degree",0.0174532925199433]]'
       const srs = gdal.SpatialReference.fromWKT(wkt)
       srs.autoIdentifyEPSG()
       assert.strictEqual(srs.getAuthorityCode(), '4269')
@@ -297,14 +297,14 @@ describe('gdal.SpatialReference', () => {
     })
     it('should support null argument', () => {
       const wkt =
-        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]'
+        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],UNIT["Degree",0.0174532925199433]]'
       const srs = gdal.SpatialReference.fromWKT(wkt)
       srs.autoIdentifyEPSG()
       assert.strictEqual(srs.getAuthorityName(null), 'EPSG')
     })
     it('should support no arguments', () => {
       const wkt =
-        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]'
+        'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],UNIT["Degree",0.0174532925199433]]'
       const srs = gdal.SpatialReference.fromWKT(wkt)
       srs.autoIdentifyEPSG()
       assert.strictEqual(srs.getAuthorityName(), 'EPSG')
