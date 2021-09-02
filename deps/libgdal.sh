@@ -6,6 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libgdal"
 
 GDAL_VERSION=3.3.1
+GDAL_VERSION_SUFFIX=
 dir_gdal=./gdal
 dir_formats_gyp=./gyp-formats
 dir_gyp_templates=./gyp-templates
@@ -15,10 +16,10 @@ dir_gyp_templates=./gyp-templates
 #
 
 rm -rf $dir_gdal
-if [[ ! -f gdal-${GDAL_VERSION}.tar.gz ]]; then
-	curl -L http://download.osgeo.org/gdal/${GDAL_VERSION}/gdal-${GDAL_VERSION}.tar.gz -o gdal-${GDAL_VERSION}.tar.gz
+if [[ ! -f gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz ]]; then
+	curl -L http://download.osgeo.org/gdal/${GDAL_VERSION}${GDAL_VERSION_SUFFIX}/gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz -o gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz
 fi
-tar -xzf gdal-${GDAL_VERSION}.tar.gz
+tar -xzf gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz
 mv gdal-${GDAL_VERSION} $dir_gdal
 mv $dir_gdal/gcore/gdal_version.h.in $dir_gdal/gcore/gdal_version.h
 #
