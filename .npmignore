@@ -25,6 +25,7 @@ deps/libproj/proj*.tar.gz
 deps/libexpat/expat*.tar.gz
 deps/libsqlite/sqlite*.tar.gz
 deps/libnetcdf/netcdf*.tar.gz
+deps/libcurl/cur*tar.gz
 deps/libhdf5/hdf5*.tar.gz
 lib/binding
 
