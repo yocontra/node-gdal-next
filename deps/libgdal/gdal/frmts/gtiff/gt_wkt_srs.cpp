@@ -62,7 +62,7 @@
 
 #include "proj.h"
 
-CPL_CVSID("$Id: gt_wkt_srs.cpp adcd057fdd5dae443f23c4250abc10d3b0b91b09 2021-03-09 23:16:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: gt_wkt_srs.cpp b63caf261137ef2cb015cad525a6050f924347f0 2021-08-12 21:28:41 +0800 C41eb $")
 
 static const geokey_t ProjLinearUnitsInterpCorrectGeoKey =
     static_cast<geokey_t>(3059);
@@ -1243,6 +1243,21 @@ OGRSpatialReferenceH GTIFGetOGISDefnAsOSR( GTIF *hGTIF, GTIFDefn * psDefn )
 /* ==================================================================== */
     bool bNeedManualVertCS = false;
     char citation[2048] = { '\0' };
+
+    // See https://github.com/OSGeo/gdal/pull/4197
+    if( verticalCSType > KvUserDefined ||
+        verticalDatum > KvUserDefined ||
+        verticalUnits > KvUserDefined )
+    {
+        CPLError(CE_Warning, CPLE_AppDefined,
+                 "At least one of VerticalCSTypeGeoKey, VerticalDatumGeoKey or "
+                 "VerticalUnitsGeoKey has a value in the private user range. "
+                 "Ignoring vertical information.");
+        verticalCSType = 0;
+        verticalDatum = 0;
+        verticalUnits = 0;
+    }
+
     if( (verticalCSType != 0 || verticalDatum != 0 || verticalUnits != 0)
         && (oSRS.IsGeographic() || oSRS.IsProjected() || oSRS.IsLocal()) )
     {

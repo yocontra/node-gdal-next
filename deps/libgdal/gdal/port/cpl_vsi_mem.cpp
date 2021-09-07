@@ -55,7 +55,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsi_mem.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsi_mem.cpp abffe1af06efa258264c005f246286a65478b0b0 2021-08-08 17:30:54 +0200 Momtchil Momtchev $")
 
 /*
 ** Notes on Multithreading:
@@ -1034,8 +1034,11 @@ GByte *VSIGetMemFileBuffer( const char *pszFilename,
         CPLDebug("VSIMEM", "VSIGetMemFileBuffer() %s: ref_count=%d (before)",
                  poFile->osFilename.c_str(), poFile->nRefCount);
 #endif
-        CPLAtomicDec(&(poFile->nRefCount));
-        delete poFile;
+        poFile->pabyData = nullptr;
+        poFile->nLength = 0;
+        poFile->nAllocLength = 0;
+        if (CPLAtomicDec(&(poFile->nRefCount)) == 0)
+            delete poFile;
     }
 
     return pabyData;

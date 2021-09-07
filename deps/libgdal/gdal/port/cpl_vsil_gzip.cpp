@@ -115,7 +115,7 @@
 #include "cpl_vsi_virtual.h"
 #include "cpl_worker_thread_pool.h"
 
-CPL_CVSID("$Id: cpl_vsil_gzip.cpp 2399e9412412ef3664b20dc33c237ca41830b273 2021-03-11 12:22:18 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gzip.cpp 8dad2ed6c749f4f46e59b31f163ea52e9b3466fc 2021-08-12 10:02:05 +0200 Even Rouault $")
 
 constexpr int Z_BUFSIZE = 65536;  // Original size is 16384
 constexpr int gz_magic[2] = {0x1f, 0x8b};  // gzip magic header
@@ -1919,24 +1919,30 @@ int VSIGZipWriteHandle::Close()
         const size_t nOutBytes =
             static_cast<uInt>(Z_BUFSIZE) - sStream.avail_out;
 
-        if( m_poBaseHandle->Write( pabyOutBuf, 1, nOutBytes ) < nOutBytes )
-            return EOF;
-
         deflateEnd( &sStream );
 
-        if( nDeflateType == CPL_DEFLATE_TYPE_GZIP )
+        if( m_poBaseHandle->Write( pabyOutBuf, 1, nOutBytes ) < nOutBytes )
+        {
+            nRet = -1;
+        }
+
+        if( nRet == 0 && nDeflateType == CPL_DEFLATE_TYPE_GZIP )
         {
             const GUInt32 anTrailer[2] = {
                 CPL_LSBWORD32(static_cast<GUInt32>(nCRC)),
                 CPL_LSBWORD32(static_cast<GUInt32>(nCurOffset))
             };
 
-            m_poBaseHandle->Write( anTrailer, 1, 8 );
+            if( m_poBaseHandle->Write( anTrailer, 1, 8 ) < 8 )
+            {
+                nRet = -1;
+            }
         }
 
         if( bAutoCloseBaseHandle )
         {
-            nRet = m_poBaseHandle->Close();
+            if( nRet == 0 )
+                nRet = m_poBaseHandle->Close();
 
             delete m_poBaseHandle;
         }
@@ -3068,8 +3074,8 @@ VSIZipFilesystemHandler::OpenForWrite_unlocked( const char *pszFilename,
         if( hZIP == nullptr )
             return nullptr;
 
-        oMapZipWriteHandles[osZipFilename] =
-            new VSIZipWriteHandle(this, hZIP, nullptr);
+        auto poHandle = new VSIZipWriteHandle(this, hZIP, nullptr);
+        oMapZipWriteHandles[osZipFilename] = poHandle;
 
         if( !osZipInFileName.empty() )
         {
@@ -3077,7 +3083,8 @@ VSIZipFilesystemHandler::OpenForWrite_unlocked( const char *pszFilename,
                 OpenForWrite_unlocked(pszFilename, pszAccess));
             if( poRes == nullptr )
             {
-                delete oMapZipWriteHandles[osZipFilename];
+                delete poHandle;
+                oMapZipWriteHandles.erase(osZipFilename);
                 return nullptr;
             }
 
@@ -3086,7 +3093,7 @@ VSIZipFilesystemHandler::OpenForWrite_unlocked( const char *pszFilename,
             return poRes;
         }
 
-        return oMapZipWriteHandles[osZipFilename];
+        return poHandle;
     }
 }
 
@@ -3229,28 +3236,35 @@ int VSIZipWriteHandle::Flush()
 
 int VSIZipWriteHandle::Close()
 {
+    int nRet = 0;
     if( m_poParent )
     {
         CPLCloseFileInZip(m_poParent->m_hZIP);
         m_poParent->poChildInWriting = nullptr;
         if( bAutoDeleteParent )
+        {
+            if( m_poParent->Close() != 0 )
+                nRet = -1;
             delete m_poParent;
+        }
         m_poParent = nullptr;
     }
     if( poChildInWriting )
     {
-        poChildInWriting->Close();
+        if( poChildInWriting->Close() != 0 )
+            nRet = -1;
         poChildInWriting = nullptr;
     }
     if( m_hZIP )
     {
-        CPLCloseZip(m_hZIP);
+        if( CPLCloseZip(m_hZIP) != CE_None )
+            nRet = -1;
         m_hZIP = nullptr;
 
         m_poFS->RemoveFromMap(this);
     }
 
-    return 0;
+    return nRet;
 }
 
 /************************************************************************/

@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrxlslayer.cpp bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrxlslayer.cpp 08fa620992e06a57dd580ce9ff53b3a9fcd05682 2021-07-16 12:31:42 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRXLSLayer()                             */
@@ -340,6 +340,8 @@ int OGRXLSLayer::TestCapability( const char * pszCap )
 {
     if( EQUAL(pszCap, OLCFastFeatureCount) )
         return m_poAttrQuery == nullptr /* && m_poFilterGeom == NULL */;
+    else if( EQUAL(pszCap, OLCStringsAsUTF8) )
+        return TRUE;
 
     return FALSE;
 }

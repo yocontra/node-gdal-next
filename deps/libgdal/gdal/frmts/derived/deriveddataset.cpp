@@ -30,7 +30,7 @@
 #include "gdal_proxy.h"
 #include "derivedlist.h"
 
-CPL_CVSID("$Id: deriveddataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: deriveddataset.cpp c8b632b9f2ee8c7208719e57ef34079b3f95c1b3 2021-07-01 02:08:45 -0700 Yann-Sebastien Tremblay-Johnston $")
 
 class DerivedDataset final: public VRTDataset
 {
@@ -138,6 +138,12 @@ GDALDataset * DerivedDataset::Open( GDALOpenInfo * poOpenInfo )
 
     // Transfer metadata
     poDS->SetMetadata(poTmpDS->GetMetadata());
+
+    char** papszRPC = poTmpDS->GetMetadata("RPC");
+    if( papszRPC )
+    {
+        poDS->SetMetadata(papszRPC, "RPC");
+    }
 
     // Transfer projection
     poDS->SetProjection(poTmpDS->GetProjectionRef());

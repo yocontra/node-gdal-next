@@ -30,7 +30,7 @@
 #include "ogr_pgeo.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgeodriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeodriver.cpp 02d450524dbd32158b8cbe30261d4ea618404c79 2021-07-03 18:42:13 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ~OGRODBCDriver()                            */
@@ -206,6 +206,7 @@ bool OGRODBCMDBDriver::FindDriverLib()
     };
     const int nLibNames = sizeof(aszDefaultLibName) / sizeof(aszDefaultLibName[0]);
     const char* libPath[] = {
+        "/usr/lib/x86_64-linux-gnu/odbc", /* ubuntu 20.04 */
         "/usr/lib64",
         "/usr/local/lib64",
         "/usr/lib",

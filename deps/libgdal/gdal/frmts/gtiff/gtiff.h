@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gtiff.h db9c615f39e4da0623e12f467ff74d7946f17e24 2021-04-21 13:16:57 +0200 Even Rouault $
+ * $Id: gtiff.h 3e61c10dec395d035fcfc97b423f3151d1e9e8cf 2021-07-07 11:39:48 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  GDAL GeoTIFF support.
@@ -67,6 +67,10 @@ const int knGTIFFJpegTablesModeDefault = 1; /* JPEGTABLESMODE_QUANT */
 constexpr uint16_t DEFAULT_ALPHA_TYPE = EXTRASAMPLE_UNASSALPHA;
 
 uint16_t GTiffGetAlphaValue(const char* pszValue, uint16_t nDefault);
+
+bool GTIFFIsStandardColorInterpretation(GDALDatasetH hSrcDS,
+                                        uint16_t nPhotometric,
+                                        CSLConstList papszCreationOptions);
 
 CPLString CPL_DLL GTiffGetCompressValues(bool& bHasLZW,
                                  bool& bHasDEFLATE,

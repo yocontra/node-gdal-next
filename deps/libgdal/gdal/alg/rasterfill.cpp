@@ -45,7 +45,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: rasterfill.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: rasterfill.cpp 6b9ef92ef33b9a98bd6012c52888586c449f7770 2021-08-12 12:35:44 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALFilterLine()                           */
@@ -804,11 +804,10 @@ GDALFillNodata( GDALRasterBandH hTargetBand,
             {
                 if( adfQuadDist[iQuad] <= dfMaxSearchDist )
                 {
-                    const double dfWeight = 1.0 / adfQuadDist[iQuad];
-
-                    bHasSrcValues = dfWeight != 0;
+                    bHasSrcValues = true;
                     if( !bHasNoData || fQuadValue[iQuad] != fNoData )
                     {
+                        const double dfWeight = 1.0 / adfQuadDist[iQuad];
                         dfWeightSum += dfWeight;
                         dfValueSum += fQuadValue[iQuad] * dfWeight;
                     }
@@ -817,7 +816,6 @@ GDALFillNodata( GDALRasterBandH hTargetBand,
 
             if( bHasSrcValues )
             {
-                pabyMask[iX] = 255;
                 pabyFiltMask[iX] = 255;
                 if( dfWeightSum > 0.0 )
                     pafScanline[iX] = static_cast<float>(dfValueSum / dfWeightSum);

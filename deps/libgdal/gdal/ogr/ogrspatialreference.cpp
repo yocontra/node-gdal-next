@@ -44,6 +44,7 @@
 #include "cpl_conv.h"
 #include "cpl_csv.h"
 #include "cpl_error.h"
+#include "cpl_error_internal.h"
 #include "cpl_http.h"
 #include "cpl_multiproc.h"
 #include "cpl_string.h"
@@ -66,7 +67,7 @@
     (PROJ_VERSION_NUMBER >= PROJ_COMPUTE_VERSION(maj,min,patch))
 #endif
 
-CPL_CVSID("$Id: ogrspatialreference.cpp 5c89d02c9c0f5d0fcbb67192587a9a4c3a8bf4b3 2021-06-25 06:05:00 -0400 Ian Lilley $")
+CPL_CVSID("$Id: ogrspatialreference.cpp 009de4e7f144e2099bc00898db8b174466aa51ad 2021-08-16 17:34:26 +0200 Even Rouault $")
 
 #define STRINGIFY(s) #s
 #define XSTRINGIFY(s) STRINGIFY(s)
@@ -643,7 +644,7 @@ OGRErr OGRSpatialReference::Private::replaceConversionAndUnref(PJ* conv)
 /*                           ToPointer()                                */
 /************************************************************************/
 
-inline OGRSpatialReference* ToPointer(OGRSpatialReferenceH hSRS)
+static inline OGRSpatialReference* ToPointer(OGRSpatialReferenceH hSRS)
 {
     return OGRSpatialReference::FromHandle(hSRS);
 }
@@ -652,7 +653,7 @@ inline OGRSpatialReference* ToPointer(OGRSpatialReferenceH hSRS)
 /*                           ToHandle()                                 */
 /************************************************************************/
 
-inline OGRSpatialReferenceH ToHandle(OGRSpatialReference* poSRS)
+static inline OGRSpatialReferenceH ToHandle(OGRSpatialReference* poSRS)
 {
     return OGRSpatialReference::ToHandle(poSRS);
 }
@@ -1485,7 +1486,10 @@ OGRErr OGRSpatialReference::exportToWkt( char ** ppszResult,
     auto ctxt = d->getPROJContext();
     auto wktFormat = PJ_WKT1_GDAL;
     const char* pszFormat = CSLFetchNameValueDef(papszOptions, "FORMAT",
-                                    CPLGetConfigOption("OSR_WKT_FORMAT", ""));
+                                    CPLGetConfigOption("OSR_WKT_FORMAT", "DEFAULT"));
+    if( EQUAL(pszFormat, "DEFAULT") )
+        pszFormat = "";
+
     if( EQUAL(pszFormat, "WKT1_ESRI" ) || d->m_bMorphToESRI )
     {
         wktFormat = PJ_WKT1_ESRI;
@@ -1552,9 +1556,26 @@ OGRErr OGRSpatialReference::exportToWkt( char ** ppszResult,
             d->getPROJContext(), d->m_pj_crs, true, true);
     }
 
+    std::vector<CPLErrorHandlerAccumulatorStruct> aoErrors;
+    CPLInstallErrorHandlerAccumulator(aoErrors);
     const char* pszWKT = proj_as_wkt(
         ctxt, boundCRS ? boundCRS : d->m_pj_crs,
         wktFormat, aosOptions.List());
+    CPLUninstallErrorHandlerAccumulator();
+    for( const auto& oError: aoErrors )
+    {
+        if( pszFormat[0] == '\0' &&
+            oError.msg.find("Unsupported conversion method") != std::string::npos )
+        {
+            CPLErrorReset();
+            // If we cannot export in the default mode (WKT1), retry with WKT2
+            pszWKT = proj_as_wkt(
+                ctxt, boundCRS ? boundCRS : d->m_pj_crs,
+                PJ_WKT2_2018, aosOptions.List());
+            break;
+        }
+        CPLError( oError.type, oError.no, "%s", oError.msg.c_str() );
+    }
 
     if( !pszWKT )
     {
@@ -6996,6 +7017,15 @@ OGRErr OSRSetPolyconic( OGRSpatialReferenceH hSRS,
 /*                               SetPS()                                */
 /************************************************************************/
 
+/** Sets a Polar Stereographic projection.
+ *
+ * Two variants are possible:
+ * - Polar Stereographic Variant A: dfCenterLat must be +/- 90° and is
+ *   interpretated as the latitude of origin, combined with the scale factor
+ * - Polar Stereographic Variant B: dfCenterLat is different from +/- 90° and
+ *   is interpretated as the latitude of true scale. In that situation, dfScale
+ *   must be set to 1 (it is ignored in the projection parameters)
+ */
 OGRErr OGRSpatialReference::SetPS(
                                 double dfCenterLat, double dfCenterLong,
                                 double dfScale,
@@ -11692,11 +11722,40 @@ OGRErr OSRDemoteTo2D( OGRSpatialReferenceH hSRS, const char* pszName  )
 int OGRSpatialReference::GetEPSGGeogCS() const
 
 {
-    const char *pszAuthName = GetAuthorityName( "GEOGCS" );
+/* -------------------------------------------------------------------- */
+/*      Check axis order.                                               */
+/* -------------------------------------------------------------------- */
+    auto poGeogCRS = std::unique_ptr<OGRSpatialReference>(CloneGeogCS());
+    if( !poGeogCRS )
+        return -1;
+
+    bool ret = false;
+    poGeogCRS->d->demoteFromBoundCRS();
+    auto cs = proj_crs_get_coordinate_system(d->getPROJContext(),
+                                             poGeogCRS->d->m_pj_crs);
+    poGeogCRS->d->undoDemoteFromBoundCRS();
+    if( cs )
+    {
+        const char* pszDirection = nullptr;
+        if( proj_cs_get_axis_info(
+            d->getPROJContext(), cs, 0, nullptr, nullptr, &pszDirection,
+            nullptr, nullptr, nullptr, nullptr) )
+        {
+            if( EQUAL(pszDirection, "north") )
+            {
+                ret = true;
+            }
+        }
+
+        proj_destroy(cs);
+    }
+    if( !ret )
+        return -1;
 
 /* -------------------------------------------------------------------- */
 /*      Do we already have it?                                          */
 /* -------------------------------------------------------------------- */
+    const char *pszAuthName = GetAuthorityName( "GEOGCS" );
     if( pszAuthName != nullptr && EQUAL(pszAuthName, "epsg") )
         return atoi(GetAuthorityCode( "GEOGCS" ));
 

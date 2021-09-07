@@ -38,9 +38,9 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 #include "cpl_vsi.h"
-#include "sqlite3.h"
+#include "ogrsqlitevfs.h"
 
-CPL_CVSID("$Id: ogrsqlitevfs.cpp e665ed544d2c5572c03c44a7327d8b284c03d86b 2019-08-15 22:13:38 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitevfs.cpp 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $")
 
 #ifdef DEBUG_IO
 # define DEBUG_ONLY

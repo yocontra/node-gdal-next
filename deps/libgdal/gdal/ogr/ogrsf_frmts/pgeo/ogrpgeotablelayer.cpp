@@ -31,7 +31,7 @@
 #include "ogr_pgeo.h"
 #include "ogrpgeogeometry.h"
 
-CPL_CVSID("$Id: ogrpgeotablelayer.cpp 94b866cf397d5b988c35f9cc76d126be054cd4b4 2020-08-26 10:25:17 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrpgeotablelayer.cpp e56499f901604d5d288ee927cde0ad3f6e7379c1 2021-08-23 12:30:12 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRPGeoTableLayer()                         */
@@ -187,13 +187,18 @@ CPLErr OGRPGeoTableLayer::Initialize( const char *pszTableName,
 /*      NOTE: per reports from Craig Miller, it seems we cannot really  */
 /*      trust the ShapeType value.  At the very least "line" tables     */
 /*      sometimes have multilinestrings.  So for now we just always     */
-/*      return wkbUnknown.                                              */
+/*      return wkbUnknown (unless it's a non-spatial table!)            */
 /*                                                                      */
 /*      TODO - mloskot: Similar issue has been reported in Ticket #1484 */
 /* -------------------------------------------------------------------- */
+    if( eOGRType == wkbNone )
+        poFeatureDefn->SetGeomType( eOGRType );
+    else
+    {
 #ifdef notdef
-    poFeatureDefn->SetGeomType( eOGRType );
+        poFeatureDefn->SetGeomType( eOGRType );
 #endif
+    }
 
     return CE_None;
 }
@@ -374,6 +379,11 @@ GIntBig OGRPGeoTableLayer::GetFeatureCount( int bForce )
 
 OGRErr OGRPGeoTableLayer::GetExtent( OGREnvelope *psExtent, CPL_UNUSED int bForce )
 {
+    if( pszGeomColumn == nullptr )
+    {
+        return OGRERR_FAILURE;
+    }
+
     *psExtent = sExtent;
     return OGRERR_NONE;
 }

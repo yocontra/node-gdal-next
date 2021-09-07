@@ -46,19 +46,19 @@
 #include "ogr_core.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: viewshed.cpp be87276cb86253ca49d2ca9759db96d18aa6ba43 2020-05-24 18:07:44 +0200 Even Rouault $")
+CPL_CVSID("$Id: viewshed.cpp 17ccead9e815bbb1a0d5d1696de06dc62afd496f 2021-08-30 20:49:53 +0200 Tamas Szekeres $")
 
 
 inline static void SetVisibility(int iPixel, double dfZ, double dfZTarget, double* padfZVal,
     std::vector<GByte>& vResult, GByte byVisibleVal, GByte byInvisibleVal)
 {
     if (padfZVal[iPixel] + dfZTarget < dfZ)
-    {
-        padfZVal[iPixel] = dfZ;
         vResult[iPixel] = byInvisibleVal;
-    }
     else
         vResult[iPixel] = byVisibleVal;
+
+    if (padfZVal[iPixel] < dfZ)
+        padfZVal[iPixel] = dfZ;
 }
 
 inline static bool AdjustHeightInRange(const double* adfGeoTransform, int iPixel, int iLine, double& dfHeight, double dfDistance2, double dfCurvCoeff, double dfSphereDiameter)
@@ -273,6 +273,14 @@ GDALDatasetH GDALViewshedGenerate(GDALRasterBandH hBand,
     /* normalize horizontal index (0 - nXSize) */
     nXSize = nXStop - nXStart;
     nX -= nXStart;
+
+    nYSize = nYStop - nYStart;
+
+    if (nXSize == 0 || nYSize == 0)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Invalid target raster size");
+        return nullptr;
+    }
 
     std::vector<double> vFirstLineVal;
     std::vector<double> vLastLineVal;
@@ -670,7 +678,7 @@ GDALDatasetH GDALViewshedGenerate(GDALRasterBandH hBand,
 
         std::swap(padfLastLineVal, padfThisLineVal);
 
-        if (!pfnProgress((nYStart - iLine + 1) / static_cast<double>(nYStop),
+        if (!pfnProgress((nY - iLine) / static_cast<double>(nYSize),
                 "", pProgressArg))
         {
             CPLError(CE_Failure, CPLE_UserInterrupt, "User terminated");
@@ -845,12 +853,18 @@ GDALDatasetH GDALViewshedGenerate(GDALRasterBandH hBand,
 
         std::swap(padfLastLineVal, padfThisLineVal);
 
-        if(!pfnProgress((iLine + 1) / static_cast<double>(nYStop),
-                         "", pProgressArg) )
+        if (!pfnProgress((iLine - nYStart) / static_cast<double>(nYSize),
+            "", pProgressArg))
         {
             CPLError( CE_Failure, CPLE_UserInterrupt, "User terminated" );
             return nullptr;
         }
+    }
+
+    if (!pfnProgress(1.0, "", pProgressArg))
+    {
+        CPLError(CE_Failure, CPLE_UserInterrupt, "User terminated");
+        return nullptr;
     }
 
     return GDALDataset::FromHandle(poDstDS.release());

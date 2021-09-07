@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarpkernel_opencl.cpp 78114d9ca3cc8bbd5b73b58c5c9ecf939bbd2e9e 2021-04-24 11:42:04 +0200 Even Rouault $
+ * $Id: gdalwarpkernel_opencl.cpp 32b416eddf6e3fa3ea837f60ba5cf5e9f6982cc0 2021-09-01 11:25:43 +0200 Even Rouault $
  *
  * Project:  OpenCL Image Reprojector
  * Purpose:  Implementation of the GDALWarpKernel reprojector in OpenCL.
@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "gdalwarpkernel_opencl.h"
 
-CPL_CVSID("$Id: gdalwarpkernel_opencl.cpp 78114d9ca3cc8bbd5b73b58c5c9ecf939bbd2e9e 2021-04-24 11:42:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarpkernel_opencl.cpp 32b416eddf6e3fa3ea837f60ba5cf5e9f6982cc0 2021-09-01 11:25:43 +0200 Even Rouault $")
 
 #define handleErr(err) if((err) != CL_SUCCESS) { \
     CPLError(CE_Failure, CPLE_AppDefined, "Error at file %s line %d: %s", __FILE__, __LINE__, getCLErrorString(err)); \
@@ -708,7 +708,7 @@ void setPixel(__global outType *dstReal,
         fImag = 0.0f;
 
     } else if (fDensity.x < 0.9999f || fDensity.y < 0.9999f ||
-               "fDensity.z < 0.9999f || fDensity.w < 0.9999f ) {
+               fDensity.z < 0.9999f || fDensity.w < 0.9999f ) {
         vecf fDstReal, fDstImag;
         float fDstDensity;
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: filegdbtable.h 3662d8ee920725c704a5c5be562b5fc3a93c4f4a 2020-07-16 16:07:33 +0200 Even Rouault $
+ * $Id: filegdbtable.h 6b84484fd22d27a4611ab64da86ba221156293f8 2021-08-25 10:30:20 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements reading of FileGDB tables
@@ -189,12 +189,14 @@ class FileGDBRasterField: public FileGDBGeomField
         friend class FileGDBTable;
 
         std::string       osRasterColumnName;
+        bool              m_bIsManaged = false;
 
     public:
         explicit          FileGDBRasterField(FileGDBTable* poParentIn) : FileGDBGeomField(poParentIn) {}
         virtual          ~FileGDBRasterField() {}
 
         const std::string& GetRasterColumnName() const { return osRasterColumnName; }
+        bool IsManaged() const { return m_bIsManaged; }
 };
 
 /************************************************************************/
@@ -271,6 +273,8 @@ class FileGDBTable
 
         GUInt32                     nBufferMaxSize;
         GByte*                      pabyBuffer;
+
+        std::string                 m_osCacheRasterFieldPath{};
 
         void                        Init();
 

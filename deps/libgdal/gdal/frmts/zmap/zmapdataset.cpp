@@ -33,7 +33,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: zmapdataset.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: zmapdataset.cpp fd05fbd0482d8fc5ba286491fbb955f275e2d176 2021-07-14 15:37:18 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -279,9 +279,6 @@ GDALDataset *ZMapDataset::Open( GDALOpenInfo * poOpenInfo )
 
 {
     if (!Identify(poOpenInfo) || poOpenInfo->fpL == nullptr )
-        return nullptr;
-
-    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("ZMAP") )
         return nullptr;
 
 /* -------------------------------------------------------------------- */
@@ -538,9 +535,6 @@ GDALDataset* ZMapDataset::CreateCopy( const char * pszFilename,
                                       GDALProgressFunc pfnProgress,
                                       void * pProgressData )
 {
-    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("ZMAP") )
-        return nullptr;
-
 /* -------------------------------------------------------------------- */
 /*      Some some rudimentary checks                                    */
 /* -------------------------------------------------------------------- */

@@ -32,7 +32,7 @@
 #include "ogrsqliteutility.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrgeopackagelayer.cpp 61d987943110d648f8c231783559e48a08303ff3 2020-10-17 20:56:24 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeopackagelayer.cpp 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRGeoPackageLayer()                            */
@@ -201,7 +201,7 @@ OGRFeature *OGRGeoPackageLayer::TranslateFeature( sqlite3_stmt* hStmt )
             if ( poGeom == nullptr )
             {
                 // Try also spatialite geometry blobs
-                if( OGRSQLiteLayer::ImportSpatiaLiteGeometry( pabyGpkg, iGpkgSize,
+                if( OGRSQLiteImportSpatiaLiteGeometry( pabyGpkg, iGpkgSize,
                                                               &poGeom ) != OGRERR_NONE )
                 {
                     CPLError( CE_Failure, CPLE_AppDefined, "Unable to read geometry");
@@ -562,7 +562,7 @@ void OGRGeoPackageLayer::BuildFeatureDefn( const char *pszLayerName,
                 else
                 {
                     // Try also spatialite geometry blobs
-                    if( OGRSQLiteLayer::ImportSpatiaLiteGeometry(
+                    if( OGRSQLiteImportSpatiaLiteGeometry(
                           pabyGpkg, nBytes, &poGeom, &nSRID ) != OGRERR_NONE )
                     {
                         delete poGeom;

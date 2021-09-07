@@ -49,7 +49,7 @@
 #include "proj.h"
 #include "proj_experimental.h"
 
-CPL_CVSID("$Id: ogrct.cpp cd90cd43af3093df8864269859585311580289d3 2021-04-24 17:33:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrct.cpp b05756601113727335bdde9901bcf2c209aedf6f 2021-08-14 09:53:08 +0200 Even Rouault $")
 
 #ifdef DEBUG_PERF
 static double g_dfTotalTimeCRStoCRS = 0;
@@ -1250,7 +1250,8 @@ int OGRProjCT::Initialize( const OGRSpatialReference * poSourceIn,
                 OGRSpatialReference oTmpSRS;
                 oTmpSRS.SetFromUserInput(osAuthCode);
                 oTmpSRS.SetDataAxisToSRSAxisMapping(poSRS->GetDataAxisToSRSAxisMapping());
-                if( oTmpSRS.IsSame(poSRS) )
+                const char* const apszOptionsIsSame[] = { "CRITERION=EQUIVALENT", nullptr };
+                if( oTmpSRS.IsSame(poSRS, apszOptionsIsSame) )
                 {
                     if( CanUseAuthorityDef(poSRS, &oTmpSRS, pszAuth) )
                     {
@@ -1353,8 +1354,9 @@ int OGRProjCT::Initialize( const OGRSpatialReference * poSourceIn,
     if( options.d->osCoordOperation.empty() && poSRSSource && poSRSTarget )
     {
         // Determine if we can skip the transformation completely.
+        const char* const apszOptionsIsSame[] = { "CRITERION=EQUIVALENT", nullptr };
         bNoTransform = !bSourceWrap && !bTargetWrap &&
-                       CPL_TO_BOOL(poSRSSource->IsSame(poSRSTarget));
+                       CPL_TO_BOOL(poSRSSource->IsSame(poSRSTarget, apszOptionsIsSame));
     }
 
     return TRUE;
@@ -1589,7 +1591,7 @@ bool OGRProjCT::ListCoordinateOperations(const char* pszSrcSRS,
         return false;
     }
 
-    const auto addTransformation = [=](PJ* op,
+    const auto addTransformation = [this, &pjGeogToSrc, &ctx](PJ* op,
                                        double west_lon, double south_lat,
                                        double east_lon, double north_lat) {
         double minx = -std::numeric_limits<double>::max();
@@ -2238,7 +2240,28 @@ int OGRProjCT::TransformWithErrorCodes(
             if( t )
                 t[i] = coord.xyzt.t;
             int err = 0;
-            if( coord.xyzt.x == HUGE_VAL )
+            if( std::isnan(coord.xyzt.x) )
+            {
+                // This shouldn't normally happen if PROJ projections behave
+                // correctly, but e.g inverse laea before PROJ 8.1.1 could
+                // do that for points out of domain.
+                // See https://github.com/OSGeo/PROJ/pull/2800
+                x[i] = HUGE_VAL;
+                y[i] = HUGE_VAL;
+                err = PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN;
+                static bool bHasWarned = false;
+                if( !bHasWarned )
+                {
+#ifdef DEBUG
+                    CPLError(CE_Warning, CPLE_AppDefined,
+                             "PROJ returned a NaN value. It should be fixed");
+#else
+                    CPLDebug("OGR_CT", "PROJ returned a NaN value. It should be fixed");
+#endif
+                    bHasWarned = true;
+                }
+            }
+            else if( coord.xyzt.x == HUGE_VAL )
             {
                 err = proj_errno(pj);
                 // PROJ should normally emit an error, but in case it does not

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h d0b90f70f6208002da877ff223a4de103898113a 2021-05-20 22:55:15 +0200 Even Rouault $
+ * $Id: ogr_geopackage.h 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -31,7 +31,7 @@
 #define OGR_GEOPACKAGE_H_INCLUDED
 
 #include "ogrsf_frmts.h"
-#include "ogr_sqlite.h"
+#include "ogrsqlitebase.h"
 #include "gpkgmbtilescommon.h"
 #include "ogrsqliteutility.h"
 

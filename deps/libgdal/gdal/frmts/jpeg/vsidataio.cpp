@@ -32,7 +32,7 @@
 
 #include <cstddef>
 
-CPL_CVSID("$Id: vsidataio.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: vsidataio.cpp 4a459797606d482992df3e0d63cddf17cd13b24b 2021-08-14 17:10:36 +0200 Even Rouault $")
 
 CPL_C_START
 #include "jerror.h"
@@ -112,6 +112,7 @@ fill_input_buffer(j_decompress_ptr cinfo)
             // Treat empty input file as fatal error.
             cinfo->err->msg_code = JERR_INPUT_EMPTY;
             cinfo->err->error_exit((j_common_ptr)(cinfo));
+            return FALSE; // will never reach that point
         }
         WARNMS(cinfo, JWRN_JPEG_EOF);
         // Insert a fake EOI marker.
@@ -350,6 +351,7 @@ empty_output_buffer(j_compress_ptr cinfo)
     {
         cinfo->err->msg_code = JERR_FILE_WRITE;
         cinfo->err->error_exit((j_common_ptr)(cinfo));
+        return FALSE; // will never reach that point
     }
 
     dest->pub.next_output_byte = dest->buffer;
@@ -377,12 +379,14 @@ term_destination(j_compress_ptr cinfo)
         {
             cinfo->err->msg_code = JERR_FILE_WRITE;
             cinfo->err->error_exit((j_common_ptr)(cinfo));
+            return; // will never reach that point
         }
     }
     if( VSIFFlushL(dest->outfile) != 0 )
     {
         cinfo->err->msg_code = JERR_FILE_WRITE;
         cinfo->err->error_exit((j_common_ptr)(cinfo));
+        return; // will never reach that point
     }
 }
 

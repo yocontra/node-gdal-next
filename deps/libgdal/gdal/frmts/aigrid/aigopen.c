@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: aigopen.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: aigopen.c 0106a8d53db28578a06f271b1cfa94112d6c2782 2021-08-25 17:30:34 +0200 Even Rouault $
  *
  * Project:  Arc/Info Binary Grid Translator
  * Purpose:  Grid file access cover API for non-GDAL use.
@@ -30,7 +30,7 @@
 
 #include "aigrid.h"
 
-CPL_CVSID("$Id: aigopen.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: aigopen.c 0106a8d53db28578a06f271b1cfa94112d6c2782 2021-08-25 17:30:34 +0200 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 
@@ -211,7 +211,10 @@ CPLErr AIGAccessTile( AIGInfo_t *psInfo, int iTileX, int iTileY )
 
     psTInfo = psInfo->pasTileInfo + iTileX + iTileY * psInfo->nTilesPerRow;
 
-    if( psTInfo->fpGrid != NULL || psTInfo->bTriedToLoad )
+    if( psTInfo->fpGrid != NULL )
+        return psTInfo->panBlockOffset != NULL ? CE_None : CE_Failure;
+
+    if( psTInfo->bTriedToLoad )
         return CE_None;
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION

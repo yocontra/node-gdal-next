@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: envidataset.h a128daac892a6830951c5cbb43e8abf7f615aeeb 2020-07-13 11:54:59 +0200 Even Rouault $
+ * $Id: envidataset.h 2783cb874e95c7d69dc42f3680a2829d4a276dea 2021-08-26 09:26:51 +0200 Even Rouault $
  *
  * Project:  ENVI .hdr Driver
  * Purpose:  Implementation of ENVI .hdr labelled raw raster support.
@@ -139,7 +139,7 @@ class ENVIDataset final: public RawDataset
     bool GetRawBinaryLayout(GDALDataset::RawBinaryLayout&) override;
 
     static GDALDataset *Open( GDALOpenInfo * );
-    static GDALDataset *Open( GDALOpenInfo *, bool bFileSizeCheck );
+    static ENVIDataset *Open( GDALOpenInfo *, bool bFileSizeCheck );
     static GDALDataset *Create( const char *pszFilename,
                                 int nXSize, int nYSize, int nBands,
                                 GDALDataType eType, char ** papszOptions );

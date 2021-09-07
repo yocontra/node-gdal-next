@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdfdataset.h 8079173adf4c43b5da628e6b82fa19fa0a8a1949 2021-04-29 11:57:19 +0200 Even Rouault $
+ * $Id: netcdfdataset.h ce8bc209fdb6ae4a53fec39ec4f6081727877153 2021-08-16 17:27:36 +0200 Even Rouault $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.
@@ -586,25 +586,8 @@ static const oNetcdfSRS_PP poOrthoMappings[] = {
 //    * false_easting
 //    * false_northing
 
-/*
-   (http://www.remotesensing.org/geotiff/proj_list/polar_stereographic.html)
-
-   Note: Projection parameters for this projection are quite different in CF-1 from
-     OGC WKT/GeoTiff (for the latter, see above).
-   From our best understanding, this projection requires more than a straight mapping:
-     - As defined below, 'latitude_of_origin' (WKT) -> 'standard_parallel' (CF-1)
-       and 'central_meridian' (WKT) -> 'straight_vertical_longitude_from_pole' (CF-1)
-     - Then the 'latitude_of_projection_origin' in CF-1 must be set to either +90 or -90,
-       depending on the sign of 'latitude_of_origin' in WKT.
-   CF allows the use of standard_parallel (lat_ts in proj4) OR scale_factor (k0 in proj4).
-   This is analogous to the B and A variants (resp.) in EPSG guidelines.
-   When importing a CF file with scale_factor, we compute standard_parallel using
-     Snyder eq. 22-7 with k=1 and lat=standard_parallel.
-   Currently OGR does NOT relate the scale factor with the standard parallel, so we
-   use the default. It seems that proj4 uses lat_ts (standard_parallel) and not k0.
-*/
 static const oNetcdfSRS_PP poPSmappings[] = {
-    {CF_PP_STD_PARALLEL_1, SRS_PP_LATITUDE_OF_ORIGIN},
+    /* {CF_PP_STD_PARALLEL_1, SRS_PP_LATITUDE_OF_ORIGIN}, */
     /* {CF_PP_SCALE_FACTOR_ORIGIN, SRS_PP_SCALE_FACTOR},   */
     {CF_PP_VERT_LONG_FROM_POLE, SRS_PP_CENTRAL_MERIDIAN},
     {CF_PP_FALSE_EASTING, SRS_PP_FALSE_EASTING },
@@ -931,7 +914,7 @@ class netCDFDataset final: public GDALPamDataset
                                 const char *pszParam, double dfDefault,
                                 bool *pbFound=nullptr );
 
-    char **      FetchStandardParallels( const char *pszGridMappingValue );
+    std::vector<std::string> FetchStandardParallels( const char *pszGridMappingValue );
 
     const char *FetchAttr( const char *pszVarFullName, const char *pszAttr );
     const char *FetchAttr( int nGroupId, int nVarId, const char *pszAttr );

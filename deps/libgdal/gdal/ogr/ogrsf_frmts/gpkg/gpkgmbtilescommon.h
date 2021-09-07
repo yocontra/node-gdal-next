@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gpkgmbtilescommon.h b7e1b1ddcb26a8716a1beea7a2e5f4e711481080 2018-03-22 10:28:21Z Even Rouault $
+ * $Id: gpkgmbtilescommon.h 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $
  *
  * Project:  GeoPackage/MBTiles Translator
  * Purpose:  Definition of common classes for GeoPackage and MBTiles drivers.
@@ -32,7 +32,7 @@
 
 #include "cpl_string.h"
 #include "gdal_pam.h"
-#include "ogr_sqlite.h" // for sqlite3*
+#include <sqlite3.h>
 
 typedef struct
 {

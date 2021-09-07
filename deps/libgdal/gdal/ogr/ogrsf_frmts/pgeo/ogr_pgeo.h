@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pgeo.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ogr_pgeo.h 466c86dedf244d64ff367a1ae264ab9e73e21a1b 2021-08-23 11:12:16 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Personal Geodatabase driver.
@@ -60,6 +60,8 @@ class OGRPGeoLayer CPL_NON_FINAL: public OGRLayer
     char                *pszFIDColumn;
 
     int                *panFieldOrdinals;
+
+    bool                m_bEOF = false;
 
     CPLErr              BuildFeatureDefn( const char *pszLayerName,
                                           CPLODBCStatement *poStmt );

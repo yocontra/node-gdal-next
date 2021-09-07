@@ -33,7 +33,7 @@
 #include <vector>
 #include <unordered_set>
 
-CPL_CVSID("$Id: ogrpgeodatasource.cpp 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrpgeodatasource.cpp b813ff1ee9d538514d85e8bfd50b1cbe7afbcc09 2021-08-23 11:13:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRPGeoDataSource()                          */
@@ -217,31 +217,14 @@ int OGRPGeoDataSource::Open( const char * pszNewName, int bUpdate,
         {
             while( oTableList.Fetch() )
             {
-                CPLString osTableName = CPLString( oTableList.GetColData(2) );
+                const CPLString osTableName = CPLString( oTableList.GetColData(2) );
+                const CPLString osLCTableName(CPLString(osTableName).tolower());
                 // a bunch of internal tables we don't want to expose...
                 if( !osTableName.empty()
-                        && osTableName != "MSysObjects"
-                        && osTableName != "MSysACEs"
-                        && osTableName != "MSysQueries"
-                        && osTableName != "MSysRelationships"
-                        && osTableName != "GDB_ColumnInfo"
-                        && osTableName != "GDB_DatabaseLocks"
-                        && osTableName != "GDB_GeomColumns"
-                        && osTableName != "GDB_ItemRelationships"
-                        && osTableName != "GDB_ItemRelationshipTypes"
-                        && osTableName != "GDB_Items"
-                        && osTableName != "GDB_Items_Shape_Index"
-                        && osTableName != "GDB_ItemTypes"
-                        && osTableName != "GDB_RasterColumns"
-                        && osTableName != "GDB_ReplicaLog"
-                        && osTableName != "GDB_SpatialRefs"
-                        && osTableName != "MSysAccessStorage"
-                        && osTableName != "MSysNavPaneGroupCategories"
-                        && osTableName != "MSysNavPaneGroups"
-                        && osTableName != "MSysNavPaneGroupToObjects"
-                        && osTableName != "MSysNavPaneObjectIDs"
-                        && oSetSpatialTableNames.find( osTableName ) == oSetSpatialTableNames.end()
-                        && !osTableName.endsWith( "_Shape_Index")
+                        && !(osLCTableName.size() >= 4 && osLCTableName.substr(0, 4) == "msys") // MS Access internal tables
+                        && oSetSpatialTableNames.find( osTableName ) == oSetSpatialTableNames.end() // spatial tables, already handled above
+                        && !osLCTableName.endsWith( "_shape_index") // gdb spatial index tables, internal details only
+                        && !(osLCTableName.size() >= 4 && osLCTableName.substr(0, 4) == "gdb_") // gdb private tables
                         )
                 {
                     OGRPGeoTableLayer  *poLayer = new OGRPGeoTableLayer( this );

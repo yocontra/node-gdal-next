@@ -104,7 +104,7 @@
 #include "xtiffio.h"
 #include "quant_table_md5sum.h"
 
-CPL_CVSID("$Id: geotiff.cpp 640b56a91e19444d79f1378b9325ec274b7d7d1d 2021-06-17 14:07:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: geotiff.cpp 3e61c10dec395d035fcfc97b423f3151d1e9e8cf 2021-07-07 11:39:48 +0200 Even Rouault $")
 
 static bool bGlobalInExternalOvr = false;
 
@@ -10158,6 +10158,15 @@ CPLErr GTiffDataset::RegisterNewOverviewDataset(toff_t nOverviewOffset,
         return CE_Failure;
     }
 
+    // Assign color interpretation from main dataset
+    const int l_nBands = GetRasterCount();
+    for(int i = 1; i <= l_nBands; i++ )
+    {
+        auto poBand = dynamic_cast<GTiffRasterBand*>(poODS->GetRasterBand(i));
+        if( poBand )
+            poBand->m_eBandInterp = GetRasterBand(i)->GetColorInterpretation();
+    }
+
     // Do that now that m_nCompression is set
     poODS->RestoreVolatileParameters( poODS->m_hTIFF );
 
@@ -11569,13 +11578,14 @@ void GTiffDataset::WriteRPC( GDALDataset *poSrcDS, TIFF *l_hTIFF,
 }
 
 /************************************************************************/
-/*                  IsStandardColorInterpretation()                     */
+/*                 GTIFFIsStandardColorInterpretation()                 */
 /************************************************************************/
 
-static bool IsStandardColorInterpretation(GDALDataset* poSrcDS,
+bool GTIFFIsStandardColorInterpretation(GDALDatasetH hSrcDS,
                                           uint16_t nPhotometric,
-                                          char** papszCreationOptions)
+                                          CSLConstList papszCreationOptions)
 {
+    GDALDataset* poSrcDS = GDALDataset::FromHandle(hSrcDS);
     bool bStandardColorInterp = true;
     if( nPhotometric == PHOTOMETRIC_MINISBLACK )
     {
@@ -11699,8 +11709,8 @@ bool GTiffDataset::WriteMetadata( GDALDataset *poSrcDS, TIFF *l_hTIFF,
         nPhotometric = PHOTOMETRIC_MINISBLACK;
 
     const bool bStandardColorInterp =
-        IsStandardColorInterpretation(poSrcDS, nPhotometric,
-                                      l_papszCreationOptions);
+        GTIFFIsStandardColorInterpretation(
+            GDALDataset::ToHandle(poSrcDS), nPhotometric, l_papszCreationOptions);
 
 /* -------------------------------------------------------------------- */
 /*      We also need to address band specific metadata, and special     */
@@ -11915,7 +11925,8 @@ void GTiffDataset::PushMetadataToPam()
         return;
 
     const bool bStandardColorInterp =
-        IsStandardColorInterpretation(this, m_nPhotometric, m_papszCreationOptions);
+        GTIFFIsStandardColorInterpretation(GDALDataset::ToHandle(this),
+                                           m_nPhotometric, m_papszCreationOptions);
 
     for( int nBand = 0; nBand <= GetRasterCount(); ++nBand )
     {
@@ -15440,6 +15451,19 @@ void GTiffDataset::ScanDirectories()
                     cpl::down_cast<GTiffDataset*>(GDALDataset::FromHandle(
                         m_papoOverviewDS[i]))->m_poMaskDS;
             }
+        }
+    }
+
+    // Assign color interpretation from main dataset
+    const int l_nBands = GetRasterCount();
+    for( int iOvr = 0; iOvr < m_nOverviewCount; ++iOvr )
+    {
+        for(int i = 1; i <= l_nBands; i++ )
+        {
+            auto poBand = dynamic_cast<GTiffRasterBand*>(
+                                    m_papoOverviewDS[iOvr]->GetRasterBand(i));
+            if( poBand )
+                poBand->m_eBandInterp = GetRasterBand(i)->GetColorInterpretation();
         }
     }
 

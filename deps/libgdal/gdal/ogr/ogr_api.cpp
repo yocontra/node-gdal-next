@@ -36,7 +36,7 @@
 #include "cpl_error.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: ogr_api.cpp 97b0aef771ee5f9742b799ef3101180808c23f0b 2021-03-29 17:56:08 +0100 Joaquim $")
+CPL_CVSID("$Id: ogr_api.cpp 26f27d5cae0c2645582ce39f7c07476622add8f9 2021-08-14 17:09:35 +0200 Even Rouault $")
 
 static bool bNonLinearGeometriesEnabled = true;
 
@@ -44,7 +44,7 @@ static bool bNonLinearGeometriesEnabled = true;
 /*                           ToPointer()                                */
 /************************************************************************/
 
-inline OGRGeometry* ToPointer(OGRGeometryH hGeom)
+static inline OGRGeometry* ToPointer(OGRGeometryH hGeom)
 {
     return reinterpret_cast<OGRGeometry *>(hGeom);
 }
@@ -53,7 +53,7 @@ inline OGRGeometry* ToPointer(OGRGeometryH hGeom)
 /*                           ToHandle()                                 */
 /************************************************************************/
 
-inline OGRGeometryH ToHandle(OGRGeometry* poGeom)
+static inline OGRGeometryH ToHandle(OGRGeometry* poGeom)
 {
     return reinterpret_cast<OGRGeometryH>(poGeom);
 }

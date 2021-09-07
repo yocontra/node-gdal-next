@@ -44,7 +44,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: gdalproxypool.cpp de1b652965f6849f07a11073f59f9d142b6a8317 2020-12-01 19:17:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalproxypool.cpp 5aa7ae3d46661c107e1138aae376bb0b181d83ab 2021-08-28 19:35:01 +0200 Even Rouault $")
 
 /* We *must* share the same mutex as the gdaldataset.cpp file, as we are */
 /* doing GDALOpen() calls that can indirectly call GDALOpenShared() on */
@@ -367,6 +367,10 @@ void GDALDatasetPool::_CloseDatasetIfZeroRefCount( const char* pszFileName,
                                      GDALAccess /* eAccess */,
                                      const char* pszOwner )
 {
+    // May fix https://github.com/OSGeo/gdal/issues/4318
+    if( bInDestruction )
+        return;
+
     GDALProxyPoolCacheEntry* cur = firstEntry;
     GIntBig responsiblePID = GDALGetResponsiblePIDForCurrentThread();
 
@@ -386,16 +390,18 @@ void GDALDatasetPool::_CloseDatasetIfZeroRefCount( const char* pszFileName,
             /* dataset */
             GDALSetResponsiblePIDForCurrentThread(cur->responsiblePID);
 
-            refCountOfDisableRefCount ++;
-            GDALClose(cur->poDS);
-            refCountOfDisableRefCount --;
-
-            GDALSetResponsiblePIDForCurrentThread(responsiblePID);
+            GDALDataset* poDS = cur->poDS;
 
             cur->poDS = nullptr;
             cur->pszFileName[0] = '\0';
             CPLFree(cur->pszOwner);
             cur->pszOwner = nullptr;
+
+            refCountOfDisableRefCount ++;
+            GDALClose(poDS);
+            refCountOfDisableRefCount --;
+
+            GDALSetResponsiblePIDForCurrentThread(responsiblePID);
             break;
         }
 

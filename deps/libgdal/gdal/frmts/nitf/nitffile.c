@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitffile.c fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: nitffile.c 2c3a0f53a1550c31b62e4ca88bf594b97757ed41 2021-06-09 21:37:57 +0200 Even Rouault $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Module responsible for opening NITF file, populating NITFFile
@@ -34,7 +34,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: nitffile.c fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: nitffile.c 2c3a0f53a1550c31b62e4ca88bf594b97757ed41 2021-06-09 21:37:57 +0200 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 
@@ -539,6 +539,16 @@ int NITFCreate( const char *pszFilename,
                       char **papszOptions )
 
 {
+    return NITFCreateEx(pszFilename, nPixels, nLines, nBands, nBitsPerSample,
+                        pszPVType, papszOptions, NULL);
+}
+
+int NITFCreateEx( const char *pszFilename,
+                      int nPixels, int nLines, int nBands,
+                      int nBitsPerSample, const char *pszPVType,
+                      char **papszOptions,  int* pnICOffset )
+
+{
     VSILFILE	*fp;
     GUIntBig    nCur = 0;
     int         nOffset = 0, iBand, nIHSize, nNPPBH, nNPPBV;
@@ -1010,6 +1020,8 @@ int NITFCreate( const char *pszFilename,
         }
     }
 
+    if( pnICOffset && iIM == 0 )
+        *pnICOffset = (int)(nCur+nOffset+1);
     OVR( 2,nCur+nOffset+1, IC     , "NC"                           );
 
     if( pszIC[0] != 'N' )

@@ -29,12 +29,13 @@
 #include "ogr_geopackage.h"
 #include "memdataset.h"
 #include "gdal_alg_priv.h"
+#include "ogrsqlitevfs.h"
 
 #include <algorithm>
 #include <cassert>
 #include <limits>
 
-CPL_CVSID("$Id: gdalgeopackagerasterband.cpp 814736ec26adc43f1674af83d0100ccd2fc48b09 2020-10-09 15:32:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalgeopackagerasterband.cpp 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $")
 
 #if !defined(DEBUG_VERBOSE) && defined(DEBUG_VERBOSE_GPKG)
 #define DEBUG_VERBOSE

@@ -40,6 +40,7 @@
 #include "gdal_utils.h"
 #include "gdalwarper.h"
 #include "mvtutils.h"
+#include "ogrsqlitevfs.h"
 
 #include "zlib.h"
 #include "ogrgeojsonreader.h"
@@ -49,7 +50,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: mbtilesdataset.cpp 0dd501fa3344b020e317356a7d770ee731fa5fe1 2021-03-08 22:59:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: mbtilesdataset.cpp 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $")
 
 static const char * const apszAllowedDrivers[] = {"JPEG", "PNG", nullptr};
 

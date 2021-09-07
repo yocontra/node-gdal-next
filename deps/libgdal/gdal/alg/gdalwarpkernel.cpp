@@ -72,7 +72,7 @@
 
 #endif
 
-CPL_CVSID("$Id: gdalwarpkernel.cpp 16c2d8a29d4ef148a7ad466ee1dd6ed13f4c7f63 2021-06-14 23:21:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarpkernel.cpp 5cf9a59b0286589b642bb9c229bbb0b4966a88c8 2021-08-13 18:39:08 +0200 Even Rouault $")
 
 constexpr double BAND_DENSITY_THRESHOLD = 0.0000000001;
 constexpr float SRC_DENSITY_THRESHOLD =  0.000000001f;
@@ -4753,7 +4753,10 @@ static CPL_INLINE bool GWKCheckAndComputeSrcOffsets(
         static bool bNanCoordFound = false;
         if( !bNanCoordFound )
         {
-            CPLDebug("WARP", "NaN coordinate found.");
+            CPLDebug("WARP",
+                     "GWKCheckAndComputeSrcOffsets(): "
+                     "NaN coordinate found on point %d.",
+                     _iDstX);
             bNanCoordFound = true;
         }
         return false;

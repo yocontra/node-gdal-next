@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpgeolayer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeolayer.cpp 86712ccad3229729b777b63858c96d87e1c67b5e 2021-08-23 18:39:33 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRPGeoLayer()                            */
@@ -176,12 +176,14 @@ CPLErr OGRPGeoLayer::BuildFeatureDefn( const char *pszLayerName,
             /* leave it as OFTString */;
         }
 
-        if( pszGeomColumn != nullptr )
-            poFeatureDefn->GetGeomFieldDefn(0)->SetName(pszGeomColumn);
-
         poFeatureDefn->AddFieldDefn( &oField );
         panFieldOrdinals[poFeatureDefn->GetFieldCount() - 1] = iCol+1;
     }
+
+    if( pszGeomColumn != nullptr )
+        poFeatureDefn->GetGeomFieldDefn(0)->SetName(pszGeomColumn);
+    else
+        poFeatureDefn->SetGeomType( wkbNone );
 
     return CE_None;
 }
@@ -194,6 +196,7 @@ void OGRPGeoLayer::ResetReading()
 
 {
     iNextShapeId = 0;
+    m_bEOF = false;
 }
 
 /************************************************************************/
@@ -228,7 +231,7 @@ OGRFeature *OGRPGeoLayer::GetNextRawFeature()
 {
     OGRErr err = OGRERR_NONE;
 
-    if( GetStatement() == nullptr )
+    if( m_bEOF || GetStatement() == nullptr )
         return nullptr;
 
 /* -------------------------------------------------------------------- */
@@ -238,6 +241,7 @@ OGRFeature *OGRPGeoLayer::GetNextRawFeature()
     {
         delete poStmt;
         poStmt = nullptr;
+        m_bEOF = true;
         return nullptr;
     }
 

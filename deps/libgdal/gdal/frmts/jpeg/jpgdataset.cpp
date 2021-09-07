@@ -30,8 +30,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#undef ENABLE_LIBJPEG_NO_RETURN
-
 #include "cpl_port.h"
 #include "jpgdataset.h"
 
@@ -72,7 +70,7 @@ CPL_C_END
 #include "rawdataset.h"
 #include "vsidataio.h"
 
-CPL_CVSID("$Id: jpgdataset.cpp 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpgdataset.cpp 2490a3d17f8bda6ac5e0c061df67b4c9a58e35a9 2021-08-27 23:10:01 +0200 Even Rouault $")
 
 constexpr int TIFF_VERSION = 42;
 
@@ -608,7 +606,7 @@ void JPGDatasetCommon::ReadFLIRMetadata()
         SetMetadataItem("PaletteColors",
                         CPLSPrintf("%d", nPaletteColors), "FLIR");
 
-        const auto SetColorItem = [=](const char* pszItem, std::uint32_t nOffset)
+        const auto SetColorItem = [this, &abyFLIR](const char* pszItem, std::uint32_t nOffset)
         {
             SetMetadataItem(pszItem,
                             CPLSPrintf("%d %d %d",
@@ -3225,7 +3223,7 @@ void JPGDatasetCommon::DecompressMask()
                 break;
         }
 
-        if( iX == nRasterXSize )
+        if( iX == nRasterXSize && nChangedValBit == 1 )
         {
             CPLDebug("JPEG",
                      "Bit ordering in mask is guessed to be msb (unusual)");

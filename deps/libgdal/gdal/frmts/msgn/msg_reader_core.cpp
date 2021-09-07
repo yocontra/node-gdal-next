@@ -44,7 +44,7 @@
 #ifdef GDAL_SUPPORT
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: msg_reader_core.cpp b5174429691e01d1cff7ebc69f956b5cd9ffd6cc 2019-08-26 19:14:19 +0200 Even Rouault $")
+CPL_CVSID("$Id: msg_reader_core.cpp a6bcda3760ce7fc7ecf5e16e78394ba12475d698 2021-07-05 22:23:51 +0200 Even Rouault $")
 
 #else
 #define VSIFSeek(fp, pos, ref)    CPL_IGNORE_RET_VAL(fseek(fp, pos, ref))
@@ -236,13 +236,15 @@ void Msg_reader_core::read_metadata_block(VSILFILE* fin) {
 
 #ifdef DEBUG
     printf("lines = %u, cols = %u\n", _lines, _columns);/*ok*/
+    int records_per_line = 0;
 #endif // DEBUG
 
-    int records_per_line = 0;
     for (i=0; i < MSG_NUM_CHANNELS; i++) {
         if (_sec_header.selectedBandIds.value[i] == 'X') {
             _bands[i] = 1;
+#ifdef DEBUG
             records_per_line += (i == (MSG_NUM_CHANNELS-1)) ? 3 : 1;
+#endif // DEBUG
         } else {
             _bands[i] = 0;
         }

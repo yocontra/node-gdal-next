@@ -60,7 +60,6 @@
 #include "ogr_feature.h"
 #include "ogr_geometry.h"
 #include "ogr_p.h"
-#include "ogr_sqlite.h"
 #include "ogrlayerdecorator.h"
 #include "ogrsf_frmts.h"
 #include "ogrsqliteexecutesql.h"
@@ -166,7 +165,7 @@ size_t GetMaxTotalAllocs();
 
 static void WriteVarSInt64(GIntBig nSVal, GByte** ppabyData);
 
-CPL_CVSID("$Id: ogrosmdatasource.cpp a0433eee3d17031e4af654fe3c994a0561ddd9cf 2021-03-11 11:45:02 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrosmdatasource.cpp 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $")
 
 class DSToBeOpened
 {

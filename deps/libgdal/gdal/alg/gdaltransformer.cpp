@@ -57,7 +57,7 @@
 #include "ogr_srs_api.h"
 
 
-CPL_CVSID("$Id: gdaltransformer.cpp cc131afd44991aff25452a81efa772c00c34ef12 2021-03-25 23:20:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdaltransformer.cpp 495cc64146662655cda26fa902293830ab07d179 2021-08-06 11:18:21 +0200 Even Rouault $")
 
 CPL_C_START
 void *GDALDeserializeGCPTransformer( CPLXMLNode *psTree );
@@ -1598,7 +1598,7 @@ GDALCreateGenImgProjTransformer2( GDALDatasetH hSrcDS, GDALDatasetH hDstDS,
                  || psInfo->adfSrcGeoTransform[2] != 0.0
                  || psInfo->adfSrcGeoTransform[3] != 0.0
                  || psInfo->adfSrcGeoTransform[4] != 0.0
-                 || std::abs(psInfo->adfSrcGeoTransform[5]) != 1.0) )
+                 || psInfo->adfSrcGeoTransform[5] != 1.0) )
     {
         if( !GDALInvGeoTransform( psInfo->adfSrcGeoTransform,
                                   psInfo->adfSrcInvGeoTransform ) )

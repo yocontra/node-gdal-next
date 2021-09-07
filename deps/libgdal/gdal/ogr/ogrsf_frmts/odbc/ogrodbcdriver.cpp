@@ -29,7 +29,7 @@
 #include "ogr_odbc.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrodbcdriver.cpp 2b7dd67cad092ba95547b0aa44cd7a3bebe4f015 2020-08-25 21:13:47 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrodbcdriver.cpp 33732ab4f529ccb1892dbbc1596c0b3dacb2260c 2021-08-06 11:20:05 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ~OGRODBCDriver()                            */
@@ -119,6 +119,9 @@ void RegisterOGRODBC()
 
 {
     OGRSFDriver* poDriver = new OGRODBCDriver;
-    poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "ODBC:");
+    poDriver->SetMetadataItem(GDAL_DCAP_VECTOR, "YES");
+    poDriver->SetMetadataItem(GDAL_DMD_CONNECTION_PREFIX, "ODBC:");
+    poDriver->SetMetadataItem(GDAL_DMD_EXTENSIONS, "mdb accdb" );
+    poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/vector/odbc.html");
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver( poDriver );
 }

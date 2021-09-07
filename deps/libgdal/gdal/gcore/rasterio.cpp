@@ -55,7 +55,7 @@
 #include "memdataset.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: rasterio.cpp 567bd8f254630e61f9f3e0fb5aa1f307c459f037 2021-03-11 11:22:54 +0100 Even Rouault $")
+CPL_CVSID("$Id: rasterio.cpp 2fe4638aae5eacb83a6253b30fd049f4bbccf824 2021-07-06 12:16:43 +0200 Even Rouault $")
 
 static void GDALFastCopyByte( const GByte * CPL_RESTRICT pSrcData,
                               int nSrcPixelStride,
@@ -4136,7 +4136,7 @@ GDALDataset::BlockBasedRasterIO( GDALRWFlag eRWFlag,
 
             if( psExtraArg->pfnProgress != nullptr &&
                 !psExtraArg->pfnProgress(
-                    1.0 * std::max(nBufYSize,
+                    1.0 * std::min(nBufYSize,
                                    iBufYOff + nChunkYSize) /
                     nBufYSize, "", psExtraArg->pProgressData) )
             {

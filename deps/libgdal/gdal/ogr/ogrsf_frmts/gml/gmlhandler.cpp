@@ -54,7 +54,7 @@
 #  include "ogr_xerces.h"
 #endif
 
-CPL_CVSID("$Id: gmlhandler.cpp 286a02e0797a5b5469b608c4b3868f976620e6cc 2020-10-22 11:54:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlhandler.cpp 64ec322361c40b9a76ddec22fa3ae2655c835496 2021-08-10 14:09:45 +0200 Even Rouault $")
 
 #ifdef HAVE_XERCES
 
@@ -808,7 +808,7 @@ void GMLHandler::DealWithAttributes(const char *pszName, int nLenName, void* att
             }
             else if( (!poClass->IsSchemaLocked() && (m_bReportHref || m_poReader->ReportAllAttributes())) ||
                         (poClass->IsSchemaLocked() && (nAttrIndex =
-                        m_poReader->GetAttributeElementIndex( CPLSPrintf("%s_href", pszName ),
+                        m_poReader->GetAttributeElementIndex( (std::string(pszName) + "_href").c_str(),
                                                     nLenName + 5 )) != -1) )
             {
                 poState->PushPath( pszName, nLenName );

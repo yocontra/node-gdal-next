@@ -1,11 +1,12 @@
 /******************************************************************************
+ * $Id: ogrsqlitevfs.h 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $
  *
- * Project:  GDAL
- * Purpose:  Includes MongoDB C++ v3 SDK headers
- * Author:   Even Rouault <even dot rouault at spatialys dot com>
+ * Project:  OpenGIS Simple Features Reference Implementation
+ * Purpose:  Creation of a SQLite3 VFS
+ * Author:   Even Rouault <even dot rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2019, Even Rouault <even dot rouault at spatialys dot com>
+ * Copyright (c) 2021, Even Rouault <even dot rouault at spatialys.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -24,28 +25,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- *****************************************************************************/
+ ****************************************************************************/
 
-#ifndef MONGOCXXV3_HEADERS_H
-#define MONGOCXXV3_HEADERS_H
+#ifndef OGR_SQLITE_VFS_H_INCLUDED
+#define OGR_SQLITE_VFS_H_INCLUDED
 
-#if defined(__GNUC__) && !defined(_MSC_VER)
-#pragma GCC system_header
-#endif
+#include "cpl_vsi.h"
 
-#include <bsoncxx/config/version.hpp>
-#include <bsoncxx/builder/basic/document.hpp>
-#include <bsoncxx/builder/basic/kvp.hpp>
-#include <bsoncxx/json.hpp>
-#include <bsoncxx/stdx/make_unique.hpp>
-#include <bsoncxx/string/to_string.hpp>
-#include <bsoncxx/types/value.hpp>
+#include <sqlite3.h>
 
-#include <mongocxx/client.hpp>
-#include <mongocxx/instance.hpp>
-#include <mongocxx/uri.hpp>
-#include <mongocxx/logger.hpp>
-#include <mongocxx/options/client.hpp>
-#include <mongocxx/options/ssl.hpp>
+typedef void (*pfnNotifyFileOpenedType)(void* pfnUserData, const char* pszFilename, VSILFILE* fp);
 
-#endif
+sqlite3_vfs* OGRSQLiteCreateVFS(pfnNotifyFileOpenedType pfn, void* pfnUserData);
+
+#endif // OGR_SQLITE_VFS_H_INCLUDED

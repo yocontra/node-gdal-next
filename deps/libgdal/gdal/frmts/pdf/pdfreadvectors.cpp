@@ -33,7 +33,7 @@
 #define SQUARE(x) ((x)*(x))
 #define EPSILON 1e-5
 
-CPL_CVSID("$Id: pdfreadvectors.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: pdfreadvectors.cpp 6c0684aa03b8700ef7ff6329ba2bce592d453c9f 2021-08-11 14:42:51 +0200 Even Rouault $")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 
@@ -57,7 +57,7 @@ int PDFDataset::OpenVectorLayers(GDALPDFDictionary* poPageDict)
     }
 
     GetCatalog();
-    if( poCatalogObject == nullptr )
+    if( poCatalogObject == nullptr || poCatalogObject->GetType() != PDFObjectType_Dictionary )
         return FALSE;
 
     GDALPDFObject* poContents = poPageDict->Get("Contents");

@@ -56,7 +56,7 @@
 
 /* g++ -fPIC -g -Wall frmts/pdf/pdfdataset.cpp -shared -o gdal_PDF.so -Iport -Igcore -Iogr -L. -lgdal -lpoppler -I/usr/include/poppler */
 
-CPL_CVSID("$Id: pdfdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: pdfdataset.cpp d8b966b80dfe7ae9edd66c4dbb0b18aab04df048 2021-08-20 19:55:24 +0200 Even Rouault $")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 
@@ -2714,7 +2714,16 @@ static void PDFDatasetErrorFunction(
                                    )
 {
     if( g_nPopplerErrors >= MAX_POPPLER_ERRORS )
+    {
+        // If there are too many errors, then unregister ourselves and turn
+        // quiet error mode, as the error() function in poppler can spend
+        // significant time formatting an error message we won't emit...
+#if POPPLER_MAJOR_VERSION >= 1 || POPPLER_MINOR_VERSION >= 85
+        setErrorCallback(nullptr);
+        globalParams->setErrQuiet(true);
+#endif
         return;
+    }
 
     g_nPopplerErrors ++;
     CPLString osError;
@@ -4232,18 +4241,13 @@ PDFDataset *PDFDataset::Open( GDALOpenInfo * poOpenInfo )
   {
     GooString* poUserPwd = nullptr;
 
-    /* Set custom error handler for poppler errors */
-#if POPPLER_MAJOR_VERSION >= 1 || POPPLER_MINOR_VERSION >= 85
-    setErrorCallback(PDFDatasetErrorFunction);
-#else
-    setErrorCallback(PDFDatasetErrorFunction, nullptr);
-#endif
-
+    static bool globalParamsCreatedByGDAL = false;
     {
         CPLMutexHolderD(&hGlobalParamsMutex);
         /* poppler global variable */
         if (globalParams == nullptr)
         {
+            globalParamsCreatedByGDAL = true;
 #if POPPLER_MAJOR_VERSION >= 1 || POPPLER_MINOR_VERSION >= 83
             globalParams.reset(new GlobalParams());
 #else
@@ -4254,6 +4258,17 @@ PDFDataset *PDFDataset::Open( GDALOpenInfo * poOpenInfo )
         globalParams->setPrintCommands(CPLTestBool(
             CPLGetConfigOption("GDAL_PDF_PRINT_COMMANDS", "FALSE")));
     }
+
+    const auto registerErrorCallback = []()
+    {
+        /* Set custom error handler for poppler errors */
+#if POPPLER_MAJOR_VERSION >= 1 || POPPLER_MINOR_VERSION >= 85
+        setErrorCallback(PDFDatasetErrorFunction);
+#else
+        setErrorCallback(PDFDatasetErrorFunction, nullptr);
+#endif
+        globalParams->setErrQuiet(false);
+    };
 
     VSILFILE* fp = VSIFOpenL(pszFilename, "rb");
     if (fp == nullptr)
@@ -4269,6 +4284,8 @@ PDFDataset *PDFDataset::Open( GDALOpenInfo * poOpenInfo )
             poUserPwd = new GooString(pszUserPwd);
 
         g_nPopplerErrors = 0;
+        if( globalParamsCreatedByGDAL )
+            registerErrorCallback();
 #if POPPLER_MAJOR_VERSION >= 1 || POPPLER_MINOR_VERSION >= 58
         auto poStream = new VSIPDFFileStream(fp, pszFilename, std::move(oObj));
 #else
@@ -4276,6 +4293,8 @@ PDFDataset *PDFDataset::Open( GDALOpenInfo * poOpenInfo )
         auto poStream = new VSIPDFFileStream(fp, pszFilename, oObj.getObj());
 #endif
         poDocPoppler = new PDFDoc(poStream, nullptr, poUserPwd);
+        if( globalParamsCreatedByGDAL )
+            registerErrorCallback();
         delete poUserPwd;
         if( g_nPopplerErrors >= MAX_POPPLER_ERRORS )
         {

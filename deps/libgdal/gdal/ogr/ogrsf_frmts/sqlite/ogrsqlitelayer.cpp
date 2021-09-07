@@ -59,7 +59,7 @@
 #include "ogrsf_frmts.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqlitelayer.cpp be7fac6445d8606b05cb151ded7460fe18d60830 2021-04-04 21:42:47 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitelayer.cpp 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRSQLiteLayer()                           */
@@ -3500,4 +3500,65 @@ CPLString OGRSQLiteLayer::FormatSpatialFilterFromMBR(OGRGeometry* poFilterGeom,
                     sEnvelope.MaxY + 1e-11);
 
     return osSpatialWHERE;
+}
+
+/************************************************************************/
+/*                 OGRSQLiteGetSpatialiteGeometryHeader()               */
+/************************************************************************/
+
+OGRErr       OGRSQLiteGetSpatialiteGeometryHeader( const GByte *pabyData,
+                                                    int nBytes,
+                                                    int* pnSRID,
+                                                    OGRwkbGeometryType* peType,
+                                                    bool* pbIsEmpty,
+                                                    double* pdfMinX,
+                                                    double* pdfMinY,
+                                                    double* pdfMaxX,
+                                                    double* pdfMaxY )
+{
+    return OGRSQLiteLayer::GetSpatialiteGeometryHeader( pabyData,
+                                                        nBytes,
+                                                        pnSRID,
+                                                        peType,
+                                                        pbIsEmpty,
+                                                        pdfMinX,
+                                                        pdfMinY,
+                                                        pdfMaxX,
+                                                        pdfMaxY );
+}
+
+/************************************************************************/
+/*                   OGRSQLiteImportSpatiaLiteGeometry()                */
+/************************************************************************/
+
+OGRErr       OGRSQLiteImportSpatiaLiteGeometry( const GByte *pabyData,
+                                                int nBytes,
+                                                OGRGeometry **ppoGeometry,
+                                                int* pnSRID )
+{
+    return OGRSQLiteLayer::ImportSpatiaLiteGeometry( pabyData,
+                                                     nBytes,
+                                                     ppoGeometry,
+                                                     pnSRID );
+}
+
+/************************************************************************/
+/*                   OGRSQLiteExportSpatiaLiteGeometry()                */
+/************************************************************************/
+
+OGRErr       OGRSQLiteExportSpatiaLiteGeometry( const OGRGeometry *poGeometry,
+                                                 GInt32 nSRID,
+                                                 OGRwkbByteOrder eByteOrder,
+                                                 int bSpatialite2D,
+                                                 int bUseComprGeom,
+                                                 GByte **ppabyData,
+                                                 int *pnDataLength )
+{
+    return OGRSQLiteLayer::ExportSpatiaLiteGeometry( poGeometry,
+                                                     nSRID,
+                                                     eByteOrder,
+                                                     bSpatialite2D,
+                                                     bUseComprGeom,
+                                                     ppabyData,
+                                                     pnDataLength );
 }

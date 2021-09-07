@@ -34,7 +34,7 @@
 #include "cpl_string.h"
 #include "cpl_minixml.h"
 
-CPL_CVSID("$Id: georaster_wrapper.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: georaster_wrapper.cpp 453a032f70e60f749c4d05678374363748a59d2c 2021-07-14 06:36:36 -0400 fechen123 $")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterWrapper()
@@ -3521,6 +3521,11 @@ bool GeoRasterWrapper::FlushMetadata()
                     nExtentSRID = 0;
                 }
             }
+        }
+        else
+        {
+            if (nExtentSRID == 0)
+                nExtentSRID = nSRID;
         }
 
         delete poStmt;

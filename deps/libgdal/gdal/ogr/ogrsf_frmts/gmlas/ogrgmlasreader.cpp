@@ -35,7 +35,7 @@
 
 #include "cpl_json_header.h"
 
-CPL_CVSID("$Id: ogrgmlasreader.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasreader.cpp 13fb5edfd2b4d28203c98db3b755d014a36ede02 2021-08-22 17:23:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        GMLASBinInputStream                           */
@@ -114,10 +114,18 @@ GMLASInputSource::GMLASInputSource(const char* pszFilename,
 {
     m_fp = fp;
     m_bOwnFP = bOwnFP;
-    XMLCh* pFilename = XMLString::transcode(pszFilename);
-    setPublicId(pFilename);
-    setSystemId(pFilename);
-    XMLString::release( &pFilename );
+    try
+    {
+        XMLCh* pFilename = XMLString::transcode(pszFilename);
+        setPublicId(pFilename);
+        setSystemId(pFilename);
+        XMLString::release( &pFilename );
+    }
+    catch( const TranscodingException& e )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "TranscodingException: %s",
+                 transcode(e.getMessage()).c_str());
+    }
     m_nCounter = 0;
     m_pnCounter = &m_nCounter;
     m_cbk = nullptr;
@@ -527,9 +535,28 @@ bool GMLASReader::LoadXSDInParser( SAX2XMLReader* poParser,
 
     GMLASInputSource oSource(osResolvedFilename, fpXSD, false);
     const bool bCacheGrammar = true;
-    Grammar* poGrammar = poParser->loadGrammar(oSource,
+    Grammar* poGrammar = nullptr;
+    std::string osLoadGrammarErrorMsg("loadGrammar failed");
+    try
+    {
+        poGrammar = poParser->loadGrammar(oSource,
                                             Grammar::SchemaGrammarType,
                                             bCacheGrammar);
+    }
+    catch( const SAXException& e )
+    {
+        osLoadGrammarErrorMsg += ": "+ transcode(e.getMessage());
+    }
+    catch( const XMLException& e )
+    {
+        osLoadGrammarErrorMsg += ": "+ transcode(e.getMessage());
+    }
+    catch( const DOMException& e )
+    {
+        // Can happen with a .xsd that has a bad <?xml version="
+        // declaration.
+        osLoadGrammarErrorMsg += ": "+ transcode(e.getMessage());
+    }
 
     // Restore previous handlers
     poParser->setEntityResolver( poOldEntityResolver );
@@ -538,7 +565,8 @@ bool GMLASReader::LoadXSDInParser( SAX2XMLReader* poParser,
 
     if( poGrammar == nullptr )
     {
-        CPLError(CE_Failure, CPLE_AppDefined, "loadGrammar failed");
+        CPLError(CE_Failure, CPLE_AppDefined, "%s",
+                 osLoadGrammarErrorMsg.c_str());
         return false;
     }
     if( oErrorHandler.hasFailed() )
@@ -2626,6 +2654,9 @@ static size_t SkipSpace( const char* pszValues, size_t i )
 
 void GMLASReader::ProcessSWEDataArray(CPLXMLNode* psRoot)
 {
+    if( m_oCurCtxt.m_poLayer == nullptr )
+        return;
+
     CPLStripXMLNamespace( psRoot, "swe", true );
     CPLXMLNode* psElementType = CPLGetXMLNode(psRoot, "elementType");
     if( psElementType == nullptr )

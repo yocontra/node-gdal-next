@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_osm.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: ogr_osm.h 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/OpenStreeMap driver.
@@ -44,8 +44,7 @@
 
 #include "osm_parser.h"
 
-#define DO_NOT_INCLUDE_SQLITE_CLASSES
-#include "ogr_sqlite.h"
+#include "ogrsqlitevfs.h"
 
 class ConstCharComp
 {

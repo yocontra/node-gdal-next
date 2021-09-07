@@ -31,7 +31,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwglayer.cpp 901a2011cf840e038937efafb2f9cf133a835894 2021-03-17 16:38:43 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdwglayer.cpp 95708c896583cc143c2ab314321aeb37483faed0 2021-08-19 20:35:04 +0800 GISerliang $")
 
 /************************************************************************/
 /*                            OGRDWGLayer()                             */
@@ -725,6 +725,11 @@ OGRFeature *OGRDWGLayer::Translate2DPOLYLINE( OdDbEntityPtr poEntity )
         poIter->step();
     }
 
+    if (poPL->isClosed() && !poLS->IsEmpty())
+    {
+        poLS->addPoint(poLS->getX(0), poLS->getY(0), poLS->getZ(0));
+    }
+
     poFeature->SetGeometryDirectly( poLS );
 
     PrepareLineStyle( poFeature );
@@ -756,6 +761,11 @@ OGRFeature *OGRDWGLayer::Translate3DPOLYLINE( OdDbEntityPtr poEntity )
         OdGePoint3d oPoint = poVertex->position();
         poLS->addPoint( oPoint.x, oPoint.y, oPoint.z );
         poIter->step();
+    }
+
+    if (poPL->isClosed() && !poLS->IsEmpty())
+    {
+        poLS->addPoint(poLS->getX(0), poLS->getY(0), poLS->getZ(0));
     }
 
     poFeature->SetGeometryDirectly( poLS );

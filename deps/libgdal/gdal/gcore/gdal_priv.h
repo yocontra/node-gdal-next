@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_priv.h 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $
+ * $Id: gdal_priv.h 4837705836841b794f4d30bf30430f11a1496956 2021-07-12 14:16:37 +0200 Even Rouault $
  *
  * Name:     gdal_priv.h
  * Project:  GDAL Core
@@ -2436,7 +2436,10 @@ public:
     * ar->at(0,3,2)
     * \endcode
     */
+    // sphinx 4.1.0 / breathe 4.30.0 don't like typename...
+//! @cond Doxygen_Suppress
     template<typename... GUInt64VarArg>
+//! @endcond
     // cppcheck-suppress functionStatic
     std::shared_ptr<GDALMDArray> at(GUInt64 idx, GUInt64VarArg... tail) const
     {

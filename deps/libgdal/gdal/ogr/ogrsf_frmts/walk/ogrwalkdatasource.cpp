@@ -29,7 +29,7 @@
 #include "ogrwalk.h"
 #include <vector>
 
-CPL_CVSID("$Id: ogrwalkdatasource.cpp 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrwalkdatasource.cpp 316de08882c4b40ed999aa6e37198a5168b8e93c 2021-08-23 11:12:04 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRWalkDataSource()                          */
@@ -89,6 +89,27 @@ int OGRWalkDataSource::Open( const char * pszNewName, int /* bUpdate */ )
         {
            return FALSE;
         }
+    }
+
+    // check for WalkLayers table
+    {
+        bool bFoundWalkLayersTable = false;
+        CPLODBCStatement oTableList( &oSession );
+        if( oTableList.GetTables() )
+        {
+            while( oTableList.Fetch() )
+            {
+                const CPLString osTableName = CPLString( oTableList.GetColData(2, "") );
+                const CPLString osLCTableName(CPLString(osTableName).tolower());
+                if( osLCTableName == "walklayers" )
+                {
+                    bFoundWalkLayersTable = true;
+                    break;
+                }
+            }
+        }
+        if (!bFoundWalkLayersTable )
+            return FALSE;
     }
 
     pszName = CPLStrdup( pszNewName );

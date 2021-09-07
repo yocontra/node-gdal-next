@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfdataset.h b33096582db6db97e24011418d0304d736c102fa 2020-11-06 16:52:08 -0500 matthew-baran $
+ * $Id: nitfdataset.h 2c3a0f53a1550c31b62e4ca88bf594b97757ed41 2021-06-09 21:37:57 +0200 Even Rouault $
  *
  * Project:  NITF Read/Write Translator
  * Purpose:  GDALDataset/GDALRasterBand declarations.
@@ -72,6 +72,7 @@ class NITFDataset final: public GDALPamDataset
 
     GDALDataset *poJ2KDataset;
     int         bJP2Writing;
+    int         m_nICOffset = 0;
 
     GDALDataset *poJPEGDataset;
 

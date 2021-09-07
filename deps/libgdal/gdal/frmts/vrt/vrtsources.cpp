@@ -66,7 +66,7 @@
 #define isnan std::isnan
 #endif
 
-CPL_CVSID("$Id: vrtsources.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtsources.cpp 940f5c72ba23624a30d8e003fc9f3fdc1d4f2d8f 2021-08-25 10:30:28 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -499,9 +499,9 @@ CPLErr VRTSimpleSource::XMLInit( CPLXMLNode *psSrc, const char *pszVRTPath,
     CPLXMLNode* psSourceFileNameNode = CPLGetXMLNode(psSrc,"SourceFilename");
     const char *pszFilename =
         psSourceFileNameNode ?
-        CPLGetXMLValue(psSourceFileNameNode, nullptr, nullptr) : nullptr;
+        CPLGetXMLValue(psSourceFileNameNode, nullptr, "") : "";
 
-    if( pszFilename == nullptr )
+    if( pszFilename[0] == '\0' )
     {
         CPLError( CE_Warning, CPLE_AppDefined,
                   "Missing <SourceFilename> element in VRTRasterBand." );

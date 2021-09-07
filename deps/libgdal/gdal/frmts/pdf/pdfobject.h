@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pdfobject.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: pdfobject.h 8cd41d830a6a679b01e7c90ceb2f10fa8e42a99b 2021-08-21 20:37:24 +0200 Even Rouault $
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.
@@ -76,6 +76,7 @@ class GDALPDFObjectNum
     public:
         explicit GDALPDFObjectNum(int nId = 0): m_nId(nId) {}
         GDALPDFObjectNum(const GDALPDFObjectNum& other) = default;
+        GDALPDFObjectNum& operator=(const GDALPDFObjectNum&) = default;
         GDALPDFObjectNum& operator=(int nId) { m_nId = nId; return *this; }
 
         int toInt() const { return m_nId; }

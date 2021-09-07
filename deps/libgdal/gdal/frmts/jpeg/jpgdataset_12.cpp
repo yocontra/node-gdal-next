@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: jpgdataset_12.cpp c8dccc4748607bd0df3214640ddd71698e172558 2020-04-25 13:38:36 +0200 Even Rouault $
+ * $Id: jpgdataset_12.cpp 4a459797606d482992df3e0d63cddf17cd13b24b 2021-08-14 17:10:36 +0200 Even Rouault $
  *
  * Project:  JPEG JFIF Driver
  * Purpose:  Implement GDAL JPEG Support based on IJG libjpeg.
@@ -29,13 +29,12 @@
 
 #if defined(JPEG_DUAL_MODE_8_12)
 
-#undef ENABLE_LIBJPEG_NO_RETURN
-
 #define LIBJPEG_12_PATH   "libjpeg12/jpeglib.h"
 #define JPGDataset        JPGDataset12
 #define GDALJPEGErrorStruct     GDALJPEGErrorStruct12
 #define jpeg_vsiio_src    jpeg_vsiio_src_12
 #define jpeg_vsiio_dest   jpeg_vsiio_dest_12
+#define GDALJPEGUserData  GDALJPEGUserData12
 
 #include "jpgdataset.cpp"
 

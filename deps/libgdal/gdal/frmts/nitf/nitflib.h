@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitflib.h b33096582db6db97e24011418d0304d736c102fa 2020-11-06 16:52:08 -0500 matthew-baran $
+ * $Id: nitflib.h 2c3a0f53a1550c31b62e4ca88bf594b97757ed41 2021-06-09 21:37:57 +0200 Even Rouault $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Main GDAL independent include file for NITF support.
@@ -87,6 +87,11 @@ int      CPL_DLL  NITFCreate( const char *pszFilename,
                               int nPixels, int nLines, int nBands,
                               int nBitsPerSample, const char *pszPVType,
                               char **papszOptions );
+
+int        NITFCreateEx( const char *pszFilename,
+                              int nPixels, int nLines, int nBands,
+                              int nBitsPerSample, const char *pszPVType,
+                              char **papszOptions, int* pnICOffset );
 
 const char CPL_DLL *NITFFindTRE( const char *pszTREData, int nTREBytes,
                                  const char *pszTag, int *pnFoundTRESize );

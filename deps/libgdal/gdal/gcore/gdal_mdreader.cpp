@@ -61,7 +61,7 @@
 #include "mdreader/reader_rdk1.h"
 #include "mdreader/reader_spot.h"
 
-CPL_CVSID("$Id: gdal_mdreader.cpp 65cedb212e0afc801f5064b63a16963e80789ae0 2021-05-21 10:31:43 +0200 deng0 $")
+CPL_CVSID("$Id: gdal_mdreader.cpp 5b42715435d8f16fc6d45103cf40879a8c319f9d 2021-07-01 17:21:54 +0200 Even Rouault $")
 
 /**
  * The RPC parameters names
@@ -1122,7 +1122,34 @@ CPLErr GDALWriteIMDFile( const char *pszFilename, char **papszMD )
             bOK &= VSIFPrintfL( fp, "%s = ", osKeyItem.c_str() ) > 0;
 
         if( pszValue[0] != '(' )
-            bOK &= VSIFPrintfL( fp, "%s;\n", pszValue ) > 0;
+        {
+            const bool bHasSingleQuote = strchr(pszValue, '\'') != nullptr;
+            const bool bHasDoubleQuote = strchr(pszValue, '"') != nullptr;
+            if( strchr(pszValue, ' ') != nullptr ||
+                strchr(pszValue, ';') != nullptr ||
+                strchr(pszValue, '\t') != nullptr ||
+                bHasSingleQuote ||
+                (bHasDoubleQuote && !(pszValue[0] == '"' && pszValue[strlen(pszValue)-1] == '"')) )
+            {
+                if( !bHasDoubleQuote )
+                    bOK &= VSIFPrintfL( fp, "\"%s\";\n", pszValue ) > 0;
+                else if( !bHasSingleQuote )
+                    bOK &= VSIFPrintfL( fp, "'%s';\n", pszValue ) > 0;
+                else
+                {
+                    // There does not seem to have a way to escape double-quotes
+                    // in a double-quoted string (or single-quote in a single-quoted
+                    // string), so we are going to convert double-quotes as
+                    // two single-quotes...
+                    const std::string osVal = CPLString(pszValue).replaceAll('"', "''");
+                    bOK &= VSIFPrintfL( fp, "\"%s\";\n", osVal.c_str() ) > 0;
+                }
+            }
+            else
+            {
+                bOK &= VSIFPrintfL( fp, "%s;\n", pszValue ) > 0;
+            }
+        }
         else
             GDALWriteIMDMultiLine( fp, pszValue );
     }

@@ -59,7 +59,7 @@
 #include "gdalsse_priv.h"
 #endif
 
-CPL_CVSID("$Id: overview.cpp ba8b1ed45ee772278f1c18a9b1e6cfaf2b0315a1 2021-06-13 23:55:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: overview.cpp e2f3698499b06dd03205c26333cd316db9e6e65a 2021-08-26 21:37:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALResampleChunk32R_Near()                      */
@@ -4549,9 +4549,11 @@ GDALRegenerateOverviews( GDALRasterBandH hSrcBand,
     VSIFree( pabyChunkNodataMask );
 
     // Wait for all pending jobs to complete
-    while( eErr == CE_None && !jobList.empty() )
+    while( !jobList.empty() )
     {
-        eErr = WaitAndFinalizeOldestJob(jobList);
+        const auto l_eErr = WaitAndFinalizeOldestJob(jobList);
+        if( l_eErr != CE_None && eErr == CE_None )
+            eErr = l_eErr;
     }
 
 /* -------------------------------------------------------------------- */
@@ -5202,9 +5204,11 @@ GDALRegenerateOverviewsMultiBand( int nBands, GDALRasterBand** papoSrcBands,
         }
 
         // Wait for all pending jobs to complete
-        while( eErr == CE_None && !jobList.empty() )
+        while( !jobList.empty() )
         {
-            eErr = WaitAndFinalizeOldestJob(jobList);
+            const auto l_eErr = WaitAndFinalizeOldestJob(jobList);
+            if( l_eErr != CE_None && eErr == CE_None )
+                eErr = l_eErr;
         }
 
         // Flush the data to overviews.

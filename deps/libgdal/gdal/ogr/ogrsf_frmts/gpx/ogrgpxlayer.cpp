@@ -48,7 +48,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrgpxlayer.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgpxlayer.cpp 6e493a46d255d5d5c39929bb2442fa6d742cf6ae 2021-08-11 23:35:44 +0200 Even Rouault $")
 
 constexpr int FLD_TRACK_FID = 0;
 constexpr int FLD_TRACK_SEG_ID = 1;
@@ -1417,11 +1417,7 @@ OGRErr OGRGPXLayer::CheckAndFixCoordinatesValidity( double* pdfLatitude, double*
                       *pdfLongitude);
         }
 
-        if (*pdfLongitude > 180)
-            *pdfLongitude -= (static_cast<int> ((*pdfLongitude+180)/360)*360);
-        else if (*pdfLongitude < -180)
-            *pdfLongitude += (static_cast<int> (180 - *pdfLongitude)/360)*360;
-
+        *pdfLongitude = fmod(*pdfLongitude + 180.0, 360.0) - 180.0;
         return OGRERR_NONE;
     }
 

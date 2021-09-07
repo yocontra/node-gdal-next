@@ -34,7 +34,7 @@
 #include "rawdataset.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: sar_ceosdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: sar_ceosdataset.cpp a553eb92ad83a52727951c797044d9e6bdaf49d9 2021-08-11 12:00:20 +0200 Even Rouault $")
 
 static GInt16 CastToGInt16(float val)
 {
@@ -685,8 +685,8 @@ SAR_CEOSDataset::~SAR_CEOSDataset()
     if( nGCPCount > 0 )
     {
         GDALDeinitGCPs( nGCPCount, pasGCPList );
-        CPLFree( pasGCPList );
     }
+    CPLFree( pasGCPList );
 
     if( sVolume.RecordList )
     {

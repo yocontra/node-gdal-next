@@ -53,7 +53,7 @@
 #include "gdal_rat.h"
 #include "gdal_priv_templates.hpp"
 
-CPL_CVSID("$Id: gdalrasterband.cpp 9898d9dd8cda79685580c326551335b017321ff8 2021-04-29 11:57:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterband.cpp 0daa4251466091d6d8acbd64a17dec0fe27d6b34 2021-08-04 12:01:30 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALRasterBand()                           */
@@ -6388,15 +6388,26 @@ unsigned char* GDALRasterBand::GetIndexColorTranslationTo(
         {
             const int nEntries = srcColorTable->GetColorEntryCount();
             const int nRefEntries = destColorTable->GetColorEntryCount();
+
             int bHasNoDataValueSrc = FALSE;
             double dfNoDataValueSrc = GetNoDataValue(&bHasNoDataValueSrc);
+            if( !(bHasNoDataValueSrc &&
+                  dfNoDataValueSrc >= 0 && dfNoDataValueSrc <= 255 &&
+                  dfNoDataValueSrc == static_cast<int>(dfNoDataValueSrc)) )
+                bHasNoDataValueSrc = FALSE;
             const int noDataValueSrc =
                 bHasNoDataValueSrc ? static_cast<int>(dfNoDataValueSrc) : 0;
+
             int bHasNoDataValueRef = FALSE;
             const double dfNoDataValueRef =
                 poReferenceBand->GetNoDataValue(&bHasNoDataValueRef);
+            if( !(bHasNoDataValueRef &&
+                  dfNoDataValueRef >= 0 && dfNoDataValueRef <= 255 &&
+                  dfNoDataValueRef == static_cast<int>(dfNoDataValueRef)) )
+                bHasNoDataValueRef = FALSE;
             const int noDataValueRef =
                 bHasNoDataValueRef ? static_cast<int>(dfNoDataValueRef) : 0;
+
             bool samePalette = false;
 
             if (pApproximateMatching)
@@ -6423,10 +6434,13 @@ unsigned char* GDALRasterBand::GetIndexColorTranslationTo(
 
             if( !samePalette )
             {
-                // TODO(schwehr): Make 256 a constant and explain it.
                 if (pTranslationTable == nullptr)
-                    pTranslationTable =
-                        static_cast<unsigned char *>( CPLMalloc(256) );
+                {
+                    pTranslationTable = static_cast<unsigned char *>(
+                        VSI_CALLOC_VERBOSE(1, std::max(256, nEntries)) );
+                    if( pTranslationTable == nullptr )
+                        return nullptr;
+                }
 
                 // Trying to remap the product palette on the subdataset
                 // palette.
@@ -6437,8 +6451,8 @@ unsigned char* GDALRasterBand::GetIndexColorTranslationTo(
                         continue;
                     const GDALColorEntry* entry =
                         srcColorTable->GetColorEntry(i);
-                    int j = 0;  // j used after for.
-                    for( j = 0; j < nRefEntries; ++j )
+                    bool bMatchFound = false;
+                    for( int j = 0; j < nRefEntries; ++j )
                     {
                         if (bHasNoDataValueRef && noDataValueRef == j)
                             continue;
@@ -6450,17 +6464,18 @@ unsigned char* GDALRasterBand::GetIndexColorTranslationTo(
                         {
                             pTranslationTable[i] =
                                 static_cast<unsigned char>(j);
+                            bMatchFound = true;
                             break;
                         }
                     }
-                    if( j == nEntries )
+                    if( !bMatchFound )
                     {
                         // No exact match. Looking for closest color now.
                         int best_j = 0;
                         int best_distance = 0;
                         if( pApproximateMatching )
                             *pApproximateMatching = TRUE;
-                        for( j = 0; j < nRefEntries; ++j )
+                        for( int j = 0; j < nRefEntries; ++j )
                         {
                             const GDALColorEntry* entryRef =
                                 destColorTable->GetColorEntry(j);
