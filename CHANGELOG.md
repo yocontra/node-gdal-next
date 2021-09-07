@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fix #9, do not enumerate async getters
  - Fix #12, build-from-source is broken when building through npm
  - Compatibility with `rollup-plugin-natives`
+ - Fix #6, `gdal.vsimem.release` is now always safe to use
 
 ## [3.3.2] 2021-07-08
 
