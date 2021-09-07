@@ -26,7 +26,7 @@ It adds a number of features:
 - Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (since 3.3)
 - Numerous bugfixes including a number of memory leaks
 
-The default install is currently the 3.3 branch which is bundled with GDAL 3.3.1.
+The default install is currently the 3.3 branch which is bundled with GDAL 3.3.2.
 
 Support for `worker_threads` is planned but it is not a priority project
 
