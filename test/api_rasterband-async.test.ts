@@ -506,6 +506,31 @@ describe('gdal.RasterBandAsync', () => {
         })
       })
     })
+    describe('flushAsync()', () => {
+      it('should flush the written data', () => {
+        const file = `${__dirname}/data/temp/write_flushAsync_test.${String(
+          Math.random()
+        ).substring(2)}.tmp.tif`
+        const size = 64
+        const ds = gdal.open(file, 'w', 'GTiff', size, size, 1, gdal.GDT_Byte)
+        const band = ds.bands.get(1)
+        let i
+
+        const data = new Uint8Array(new ArrayBuffer(size * size))
+        for (i = 0; i < size*size; i++) data[i] = i % 256
+
+        band.pixels.write(0, 0, size, size, data)
+
+        assert.throws(() => gdal.open(file))
+        return assert.isFulfilled(band.flushAsync().then(() => {
+          const newDs = gdal.open(file)
+          const result = newDs.bands.get(1).pixels.read(0, 0, size, size, data)
+          for (i = 0; i < size * size; i++) {
+            assert.equal(result[i], data[i])
+          }
+        }))
+      })
+    })
     describe('fillAsync()', () => {
       it('should set all pixels to given value', () => {
         const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)

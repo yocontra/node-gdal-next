@@ -774,7 +774,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       return err;                                                                                                      \
     };                                                                                                                 \
     job.rval = [](OGRErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };                             \
-    job.run(info, async, 1);                                                                                           \
+    job.run(info, async, 0);                                                                                           \
   }
 
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(                                                  \

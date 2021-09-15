@@ -1264,6 +1264,30 @@ describe('gdal.RasterBand', () => {
         })
       })
     })
+    describe('flush()', () => {
+      it('should flush the written data', () => {
+        const file = `${__dirname}/data/temp/write_flush_test.${String(
+          Math.random()
+        ).substring(2)}.tmp.tif`
+        const size = 64
+        const ds = gdal.open(file, 'w', 'GTiff', size, size, 1, gdal.GDT_Byte)
+        const band = ds.bands.get(1)
+        let i
+
+        const data = new Uint8Array(new ArrayBuffer(size * size))
+        for (i = 0; i < size*size; i++) data[i] = i % 256
+
+        band.pixels.write(0, 0, size, size, data)
+
+        assert.throws(() => gdal.open(file))
+        band.flush()
+        const newDs = gdal.open(file)
+        const result = newDs.bands.get(1).pixels.read(0, 0, size, size, data)
+        for (i = 0; i < size * size; i++) {
+          assert.equal(result[i], data[i])
+        }
+      })
+    })
     describe('"overviews" property', () => {
       describe('getter', () => {
         it('should return overview collection', () => {
