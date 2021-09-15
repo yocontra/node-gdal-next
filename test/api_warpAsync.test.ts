@@ -424,6 +424,16 @@ describe('gdal', () => {
         return assert.isFulfilled(p.then(() => assert.isAbove(calls, 0)))
       })
 
+      it('should ignore exceptions in an async "progress_cb"', () => {
+        reprojectOptions.progress_cb = () => {
+          throw new Error('progress callback error')
+        }
+
+        const p = gdal.reprojectImageAsync(reprojectOptions)
+
+        return assert.isRejected(p, /async progress callback exception/)
+      })
+
       it("should throw error if GDAL can't create transformer", () => {
         src = gdal.open(`${__dirname}/data/unsupported-srs.tif`)
 

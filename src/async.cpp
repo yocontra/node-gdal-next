@@ -62,7 +62,9 @@ GDALSyncExecutionProgress::~GDALSyncExecutionProgress() {
 void GDALSyncExecutionProgress::Send(GDALProgressInfo *info) const {
   Nan::HandleScope scope;
   v8::Local<v8::Value> argv[] = {Nan::New<Number>(info->complete), SafeString::New(info->message)};
+  Nan::TryCatch try_catch;
   Nan::Call(progress_callback->GetFunction(), Nan::GetCurrentContext()->Global(), 2, argv);
+  if (try_catch.HasCaught()) throw "sync progress callback exception";
 }
 
 } // namespace node_gdal

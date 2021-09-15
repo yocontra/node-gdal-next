@@ -113,17 +113,34 @@ describe('gdal', () => {
     })
   })
   describe('Node.js Async callback error convention', () => {
-    it('should return null for error on success', () => {
+    it('should return null for error on success', (done) => {
       gdal.openAsync(`${__dirname}/data/sample.tif`, (error, result) => {
         assert.isNull(error)
         assert.instanceOf(result, gdal.Dataset)
+        done()
       })
     })
-    it('should return an Error object and an undefined result on error', () => {
+    it('should return an Error object and an undefined result on error', (done) => {
       gdal.openAsync('notfound', (error, result) => {
         assert.instanceOf(error, Error)
         assert.isUndefined(result)
+        done()
       })
     })
+  })
+
+  it('should handle exceptions in progress callbacks', () => {
+    const driver = gdal.drivers.get('MEM')
+    const outputFilename = ''
+    assert.throws(() => {
+      driver.createCopy(
+        outputFilename,
+        gdal.open(`${__dirname}/data/12_791_1476.jpg`),
+        {},
+        false,
+        (): void => {
+          throw new Error('progress callback error')
+        })
+    }, /sync progress callback exception/)
   })
 })

@@ -276,14 +276,16 @@ void GDALAsyncWorker<GDALType>::HandleProgressCallback(const GDALProgressInfo *d
   // Back to the main thread with the JS world not running
   Nan::HandleScope scope;
   // A mutex-protected pop in the calling function (in Node.js NAN) can sometimes produce a spurious call
-  // with no data, handle gracefully this case -> no need to call JS if there is not data to deliver
+  // with no data, handle gracefully this case -> no need to call JS if there is no data to deliver
   if (data == nullptr || count == 0) return;
   // Receiving more than one callback invocation at the same time is also possible
   // Send only the last one to JS
   const GDALProgressInfo *to_send = data + (count - 1);
   if (data != nullptr && count > 0) {
     v8::Local<v8::Value> argv[] = {Nan::New<Number>(to_send->complete), SafeString::New(to_send->message)};
+    Nan::TryCatch try_catch;
     progressCallback->Call(2, argv, this->async_resource);
+    if (try_catch.HasCaught()) this->SetErrorMessage("async progress callback exception");
   }
 }
 
