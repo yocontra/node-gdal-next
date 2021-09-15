@@ -65,6 +65,28 @@ describe('gdal.Feature', () => {
   })
 
   describe('gdal.FeatureDefn', () => {
+    it('name should return a string', () => {
+      assert.typeOf(defn.name, 'string')
+    })
+
+    it('geomType should return a Geometry type', () => {
+      assert.strictEqual(defn.geomType, gdal.wkbUnknown)
+    })
+
+    it('geomIgnored should accept and return a Boolean', () => {
+      assert.strictEqual(defn.geomIgnored, false)
+      defn.geomIgnored = true
+      assert.strictEqual(defn.geomIgnored, true)
+    })
+
+    it('styleIgnored should accept and return a Boolean', () => {
+      assert.strictEqual(defn.styleIgnored, false)
+      defn.styleIgnored = true
+      assert.strictEqual(defn.styleIgnored, true)
+    })
+  })
+
+  describe('gdal.FeatureDefnFields', () => {
     it('count() should return the field count', () => {
       assert.equal(defn.fields.count(), 3)
     })
