@@ -1503,9 +1503,21 @@ describe('gdal.RasterBand', () => {
     describe('getMaskBand()', () => {
       it('should retrieve the band nodata mask', () => {
         const band = gdal.open(`${__dirname}/data/test_with_mask_1bit.tif`).bands.get(1)
+        assert.equal(band.getMaskFlags(), 2)
         const mask = band.getMaskBand()
         assert.equal(mask.pixels.get(0, 0), 0)
         assert.equal(mask.pixels.get(10, 10), 255)
+      })
+    })
+    describe('createMaskBand()', () => {
+      it('should create the band nodata mask', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
+        assert.equal(band.getMaskFlags(), 1)
+        band.createMaskBand(2)
+        assert.equal(band.getMaskFlags(), 2)
+        const mask = band.getMaskBand()
+        assert.isNotNull(mask)
+        assert.instanceOf(mask, gdal.RasterBand)
       })
     })
     describe('"categoryNames" property', () => {
