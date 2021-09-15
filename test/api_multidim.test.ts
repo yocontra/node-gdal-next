@@ -243,6 +243,10 @@ describe('gdal', () => {
       })
     })
 
+    it('should have "description" property', () => {
+      assert.typeOf(mdarray.description, 'string')
+    })
+
     it('should have "srs" property', () => {
       assert.isNull(mdarray.srs)
     })
