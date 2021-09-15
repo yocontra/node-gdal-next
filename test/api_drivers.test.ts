@@ -159,6 +159,29 @@ describe('gdal.drivers', () => {
     })
   })
 
+  describe('createCopy', () => {
+    it('should operate normally', () => {
+      const driver = gdal.drivers.get('MEM')
+      const outputFilename = '' // __dirname + '/data/12_791_1476.tif';
+      const ds = driver.createCopy(
+        outputFilename,
+        gdal.open(`${__dirname}/data/12_791_1476.jpg`)
+      )
+      assert.equal(ds.driver.description, 'MEM')
+    })
+
+    it('should throw on error', () => {
+      const driver = gdal.drivers.get('GTiff')
+      const outputFilename = '' // __dirname + '/data/12_791_1476.tif';
+      assert.throws(() => {
+        driver.createCopy(
+          outputFilename,
+          gdal.open(`${__dirname}/data/12_791_1476.jpg`)
+        )
+      }, /No such file/)
+    })
+  })
+
   describe('createCopyAsync', () => {
     it('should operate normally', () => {
       const driver = gdal.drivers.get('MEM')

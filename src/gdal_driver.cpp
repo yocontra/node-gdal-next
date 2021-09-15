@@ -234,7 +234,6 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @method createCopy
  * @param {string} filename
  * @param {gdal.Dataset} src
- * @param {boolean} [strict=false]
  * @param {string[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
  * @return {gdal.Dataset}
@@ -247,7 +246,6 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @method createCopyAsync
  * @param {string} filename
  * @param {gdal.Dataset} src
- * @param {boolean} [strict=false]
  * @param {string[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
  * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
@@ -264,7 +262,6 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
 
   std::string filename;
   Dataset *src_dataset;
-  unsigned int strict = 0;
   StringList *options;
 
   NODE_ARG_STR(0, "filename", filename);
@@ -291,11 +288,11 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   GDALAsyncableJob<GDALDataset *> job(src_dataset->uid);
   job.rval = DatasetRval;
   job.persist(driver->handle());
-  job.main = [raw, filename, raw_ds, strict, options](const GDALExecutionProgress &) {
+  job.main = [raw, filename, raw_ds, options](const GDALExecutionProgress &) {
     std::unique_ptr<StringList> options_ptr(options);
     CPLErrorReset();
-    GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, strict, options->get(), NULL, NULL);
-    if (!ds) CPLGetLastErrorMsg();
+    GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, 0, options->get(), NULL, NULL);
+    if (!ds) throw CPLGetLastErrorMsg();
     return ds;
   };
   job.run(info, async, 3);
