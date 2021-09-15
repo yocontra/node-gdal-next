@@ -236,6 +236,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @param {gdal.Dataset} src
  * @param {string[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
+ * @param {boolean} [strict=false] strict mode
+ * @param {ProgressCb} [progress_cb=undefined] {{{progress_cb}}}
  * @return {gdal.Dataset}
  */
 
@@ -248,6 +250,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @param {gdal.Dataset} src
  * @param {string[]|object} [options=null] An array or object containing
  * driver-specific dataset creation options
+ * @param {boolean} [strict=false] strict mode
+ * @param {ProgressCb} [progress_cb=undefined] {{{progress_cb}}}
  * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Dataset>}
  */
@@ -283,19 +287,28 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
     return; // error parsing string list
   }
 
+  bool strict = false;
+  NODE_ARG_BOOL_OPT(3, "strict", strict);
+
+  Nan::Callback *progress_cb = nullptr;
+  NODE_ARG_CB_OPT(4, "progress_cb", progress_cb);
+
   GDALDriver *raw = driver->getGDALDriver();
   GDALDataset *raw_ds = src_dataset->get();
   GDALAsyncableJob<GDALDataset *> job(src_dataset->uid);
   job.rval = DatasetRval;
   job.persist(driver->handle());
-  job.main = [raw, filename, raw_ds, options](const GDALExecutionProgress &) {
+  job.progress = progress_cb;
+
+  job.main = [raw, filename, raw_ds, strict, options, progress_cb](const GDALExecutionProgress &progress) {
     std::unique_ptr<StringList> options_ptr(options);
     CPLErrorReset();
-    GDALDataset *ds = raw->CreateCopy(filename.c_str(), raw_ds, 0, options->get(), NULL, NULL);
+    GDALDataset *ds = raw->CreateCopy(
+      filename.c_str(), raw_ds, strict, options->get(), progress_cb ? ProgressTrampoline : nullptr, (void *)&progress);
     if (!ds) throw CPLGetLastErrorMsg();
     return ds;
   };
-  job.run(info, async, 3);
+  job.run(info, async, 5);
 }
 
 /**

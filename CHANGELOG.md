@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - Fix `gdal.RasterBand.flushAsync()`
- - Remove unimplemented boolean argument `strict` of `gdal.Driver.createCopy{Async}()` documentation
+ - Implement the previously non-existing `strict` argument of `gdal.Driver.createCopy{Async}()` and move it after `options`
+ - Implement progress callbacks in `gdal.Driver.createCopy{Async}()`
  - `gdal.Driver.createCopy{Async}()` now always throws an `Error` / rejects the Promise if the operation failed instead of returning a null object in some cases
 
 ## [3.3.3] 2021-09-07
