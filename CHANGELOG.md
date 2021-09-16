@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.Driver.createCopy{Async}()` now always throws an `Error` / rejects the Promise if the operation failed instead of returning a null object in some cases
  - Fix #14, correctly handle exceptions in progress callbacks and return them to the calling user code
  - Add a previously missing TypeScript signature for `gdal.CoordinateTransformation.transformPoint(point: xyz)`
+ - Fix the documentation / TypeScript signature for `gdal.Geometry.segmentize` - it returns `undefined`
 
 ## [3.3.3] 2021-09-07
 

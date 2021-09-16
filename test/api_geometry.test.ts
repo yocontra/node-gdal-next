@@ -324,6 +324,20 @@ describe('gdal.Geometry', () => {
           point.srs = 'invalid' as any
         })
       })
+    })
+
+    describe('empty()', () => {
+      it('should empty the geometry', () => {
+        const ring = new gdal.LinearRing()
+        ring.points.add({ x: 0, y: 0 })
+        ring.points.add({ x: 10, y: 0 })
+        ring.points.add({ x: 10, y: 10 })
+        ring.points.add({ x: 0, y: 10 })
+        ring.closeRings()
+        assert.isFalse(ring.isEmpty())
+        ring.empty()
+        assert.isTrue(ring.isEmpty())
+      })
     });
 
     // comparison functions
@@ -468,6 +482,18 @@ describe('gdal.Geometry', () => {
           const point_edge = new gdal.Point(10, 0)
           assert.equal(point_edge.touches(square), true)
           assert.equal(point_outer.touches(square), false)
+        })
+      })
+
+      describe('isRing()', () => {
+        it('should return correct result', () => {
+          assert.isFalse(square.isRing())
+          const ring1 = new gdal.LineString()
+          ring1.points.add({ x: 1, y: 0 })
+          ring1.points.add({ x: 11, y: 0 })
+          ring1.points.add({ x: 11, y: 10 })
+          ring1.points.add({ x: 1, y: 0 })
+          assert.isTrue(ring1.isRing())
         })
       })
     })()
@@ -720,6 +746,18 @@ describe('gdal.Geometry', () => {
         ]))
       })
     })
+    describe('segmentize()', () => {
+      it('should segmentize the geometry', () => {
+        const line = new gdal.LineString()
+        line.points.add(0, 0)
+        line.points.add(1, 1)
+        line.points.add(10, 10)
+
+        line.segmentize(2)
+        assert.instanceOf(line, gdal.LineString)
+        assert.equal(line.points.count(), 9)
+      })
+    })
     describe('flattenTo2D()', () => {
       it('should flatten a LineString', () => {
         const points = [
@@ -902,7 +940,7 @@ describe('gdal.Geometry', () => {
         square2.rings.add(ring2)
 
         const result = square1.difference(square2) as gdal.Polygon
-        assert.instanceOf(result, gdal.Polygon),
+        assert.instanceOf(result, gdal.Polygon)
         assert.equal(result.getArea(), 50)
       })
     })
@@ -932,6 +970,33 @@ describe('gdal.Geometry', () => {
         return assert.isFulfilled(Promise.all([ assert.eventually.instanceOf(result, gdal.Polygon),
           assert.eventually.equal(result.then((r) => r.getArea()), 50)
         ]))
+      })
+    })
+    describe('symDifference()', () => {
+      it('should return the symetric difference of two geometries', () => {
+        const ring1 = new gdal.LinearRing()
+        ring1.points.add({ x: 0, y: 0 })
+        ring1.points.add({ x: 10, y: 0 })
+        ring1.points.add({ x: 10, y: 10 })
+        ring1.points.add({ x: 0, y: 10 })
+        ring1.closeRings()
+
+        const square1 = new gdal.Polygon()
+        square1.rings.add(ring1)
+
+        const ring2 = new gdal.LinearRing()
+        ring2.points.add({ x: 5, y: 0 })
+        ring2.points.add({ x: 20, y: 0 })
+        ring2.points.add({ x: 20, y: 10 })
+        ring2.points.add({ x: 5, y: 10 })
+        ring2.closeRings()
+
+        const square2 = new gdal.Polygon()
+        square2.rings.add(ring2)
+
+        const result = square1.symDifference(square2) as gdal.MultiPolygon
+        assert.instanceOf(result, gdal.MultiPolygon)
+        assert.equal(result.getArea(), 150)
       })
     })
     if (gdal.bundled) {

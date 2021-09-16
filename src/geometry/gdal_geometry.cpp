@@ -493,7 +493,7 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(
  *
  * @method segmentize
  * @param {number} segment_length
- * @return {number}
+ * @return {void}
  */
 NODE_WRAPPED_METHOD_WITH_1_DOUBLE_PARAM(Geometry, segmentize, segmentize, "segment length");
 
