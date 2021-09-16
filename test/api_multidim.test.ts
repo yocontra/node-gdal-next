@@ -175,32 +175,41 @@ describe('gdal', () => {
   })
 
   describe('gdal.MDArray', () => {
-    let mdarray: gdal.MDArray
+    let ds2: gdal.Dataset
+    let mdarray: gdal.MDArray, mdarray2: gdal.MDArray
     beforeEach(() => {
       ds = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr')
       mdarray = ds.root.arrays.get('alnsf')
+      ds2 = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.pgrb2b.4p.f000.grb2'), 'mr')
+      mdarray2 = ds2.root.arrays.get('HGT_100-ISBL')
     })
 
     it('should be an instance of gdal.MDArray', () => {
       assert.instanceOf(mdarray, gdal.MDArray)
+      assert.instanceOf(mdarray2, gdal.MDArray)
     })
 
     describe('"dimensions" property', () => {
       it('should be an instance of gdal.ArrayDimensions', () => {
         assert.instanceOf(mdarray.dimensions, gdal.ArrayDimensions)
+        assert.instanceOf(mdarray2.dimensions, gdal.ArrayDimensions)
       })
 
       it('should have "names" property', () => {
         assert.deepEqual(mdarray.dimensions.names, [ 'time', 'lat', 'lon' ])
+        assert.deepEqual(mdarray2.dimensions.names, [ 'Y', 'X' ])
       })
 
       it('should return dimensions', () => {
         assert.instanceOf(mdarray.dimensions.get('time'), gdal.Dimension)
         assert.equal(mdarray.dimensions.get('time').type, gdal.DIM_TEMPORAL)
+        assert.instanceOf(mdarray2.dimensions.get('Y'), gdal.Dimension)
+        assert.equal(mdarray2.dimensions.get('Y').type, gdal.DIM_HORIZONTAL_Y)
       })
 
       it('should have "count()" method', () => {
         assert.equal(mdarray.dimensions.count(), 3)
+        assert.equal(mdarray2.dimensions.count(), 2)
       })
 
       it('should be Iterable', () => {
@@ -216,15 +225,19 @@ describe('gdal', () => {
     describe('"attributes" property', () => {
       it('should be an instance of gdal.ArrayAttributes', () => {
         assert.instanceOf(mdarray.attributes, gdal.ArrayAttributes)
+        assert.instanceOf(mdarray2.attributes, gdal.ArrayAttributes)
       })
 
       it('should return attributes', () => {
         assert.instanceOf(mdarray.attributes.get('long_name'), gdal.Attribute)
         assert.equal(mdarray.attributes.get('long_name').value, 'mean nir albedo with strong cosz dependency')
+        assert.instanceOf(mdarray2.attributes.get('long_name'), gdal.Attribute)
+        assert.equal(mdarray2.attributes.get('long_name').value, 'Geopotential height [gpm]')
       })
 
       it('should have "count()" method', () => {
         assert.equal(mdarray.attributes.count(), 4)
+        assert.equal(mdarray2.attributes.count(), 20)
       })
 
       it('should be Iterable', () => {
@@ -240,19 +253,24 @@ describe('gdal', () => {
     describe('"length" property', () => {
       it('should return the total flattened length of the MDArray', () => {
         assert.equal(mdarray.length, 4050)
+        assert.equal(mdarray2.length, 4050)
       })
     })
 
     it('should have "description" property', () => {
       assert.typeOf(mdarray.description, 'string')
+      assert.equal(mdarray2.description, '/HGT_100-ISBL')
     })
 
     it('should have "srs" property', () => {
       assert.isNull(mdarray.srs)
+      assert.instanceOf(mdarray2.srs, gdal.SpatialReference)
+      assert.equal(mdarray2.srs.getAttrValue('SPHEROID', 1), '6371229')
     })
 
     it('should have "dataType" property', () => {
       assert.equal(mdarray.dataType, gdal.GDT_Float32)
+      assert.equal(mdarray2.dataType, gdal.GDT_Float64)
     })
 
     it('should have "scale" property', () => {
@@ -265,10 +283,12 @@ describe('gdal', () => {
 
     it('should have "noDataValue" property', () => {
       assert.equal(mdarray.noDataValue, 9.969209968386869e+36)
+      assert.isNull(mdarray2.noDataValue)
     })
 
     it('should have "unitType" property', () => {
       assert.equal(mdarray.unitType, '%')
+      assert.equal(mdarray2.unitType, 'gpm')
     })
 
     describe('getView', () => {
