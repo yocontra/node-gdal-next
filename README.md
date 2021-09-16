@@ -179,7 +179,6 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
         * `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry
     - Starting with 3.3
         * Drop support for linking against a shared GDAL 1.x library
-        * Drop support for Ubuntu 16.04 and equivalent, Ubuntu 18.04 is the new baseline target
         * Drop support for Node.js 10.x and 15.x
         * `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
         * `gdal.DatasetLayers.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
@@ -203,6 +202,14 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
 The 3.2 branch of `gdal-async` is compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray), but the array must be in a positive/positive row-major stride.
 A separate plugin [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal) allows zero-copy I/O, with GDAL-backed interleaving in C++ using SIMD instructions, for all possible strides both for 2D raster data and N-dimensional `MDArray` data. The plugin requires `gdal-async@3.3` and it is not compatible with the `gdal-async@3.2` branch.
 
+### Pruning the source tree
+
+A special NPM script target, `npm run prune` allows to delete most of the bundled source packages - these are not needed unless rebuilding from source. It significantly reduces the overall size of this module.
+
+### Using in Amazon Linux Lambdas
+
+Amazon Linux will be supported starting from `gdal-async@3.3.4`. There is no shared GDAL support, only the bundled GDAL version is supported. It is highly recommended that you prune the module before deploying to an Amazon Lambda - when pruned the module is only 16MB zipped.
+
 ## Bundled Drivers
 
 When using the bundled GDAL version, the following drivers will be available:
@@ -224,7 +231,7 @@ Before submitting pull requests, please update the [tests](test) and make sure t
 $ npm test # test against bundled gdal
 $ npm run test:shared # test against most major versions
 # test against shared gdal on given Linux version and Node.js version
-$ npm run container dev {ubuntu|centos|fedora|debian|archlinux}:{version} 12|14|16|lts shared
+$ npm run container dev {ubuntu|centos|fedora|debian|archlinux|amazon}:{version} 12|14|16|lts shared
 ```
 
 ## License
@@ -242,7 +249,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 Release binaries with pre-built bundled GDAL are tested against the full matrix of:
 
 * Node.js versions: 12.x, 14.x, 16.x
-* OS: Ubuntu 18.04, Ubuntu 20.04, CentOS 8, Fedora 33, Debian 10 buster, Arch Linux current, Windows Server 2019, macOS Catalina 10.15
+* OS: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, CentOS 8, Fedora 33, Debian 10 buster, Arch Linux current, Amazon Linux, Windows Server 2019, macOS Catalina 10.15
 
 
 Development versions are unit tested for the following targets:
@@ -251,26 +258,28 @@ Development versions are unit tested for the following targets:
 | Node | OS | GDAL |
 | --- | --- | --- |
 | Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
-| Node.js 14.x | CentOS 8 | bundled GDAL 3.2.3
+| Node.js 14.x | CentOS 8 | bundled GDAL
 | Node.js 14.x | Debian 10 buster | system installed GDAL 2.1.2 (*earliest unit-tested GDAL*)
-| Node.js 14.x | Debian 10 buster | bundled GDAL 3.2.3
+| Node.js 14.x | Debian 10 buster | bundled GDAL
 | Node.js 14.x | Fedora 33 | system installed GDAL 3.1.4
-| Node.js 14.x | Fedora 33 | bundled GDAL 3.2.3
+| Node.js 14.x | Fedora 33 | bundled GDAL
 | Node.js 16.x | Arch Linux current | system installed GDAL 3.2.3
-| Node.js 16.x | Arch Linux current | bundled GDAL 3.2.3
+| Node.js 16.x | Arch Linux current | bundled GDAL
+| Node.js 14.x | Ubuntu 16.04 | bundled GDAL (*glibc target platform*)
 | Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
-| Node.js 14.x | Ubuntu 18.04 | bundled GDAL 3.2.3 (*glibc target platform*)
+| Node.js 14.x | Ubuntu 18.04 | bundled GDAL
 | Node.js 12.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 14.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 16.x | Ubuntu 20.04 | system installed GDAL 3.0.4
-| Node.js 12.x | Ubuntu 20.04 | bundled GDAL 3.2.3
-| Node.js 14.x | Ubuntu 20.04 | bundled GDAL 3.2.3 (*code coverage platform*)
-| Node.js 16.x | Ubuntu 20.04 | bundled GDAL 3.2.3
-| Node.js 12.x | Windows Server 2019 | bundled GDAL 3.2.3
-| Node.js 14.x | Windows Server 2019 | bundled GDAL 3.2.3
-| Node.js 16.x | Windows Server 2019 | bundled GDAL 3.2.3
-| Node.js 12.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
-| Node.js 14.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
-| Node.js 16.x | macOS Catalina 10.15 | bundled GDAL 3.2.3
+| Node.js 12.x | Ubuntu 20.04 | bundled GDAL
+| Node.js 14.x | Ubuntu 20.04 | bundled GDAL (*code coverage platform*)
+| Node.js 16.x | Ubuntu 20.04 | bundled GDAL
+| Node.js 14.x | Amazon Linux | bundled GDAL
+| Node.js 12.x | Windows Server 2019 | bundled GDAL
+| Node.js 14.x | Windows Server 2019 | bundled GDAL
+| Node.js 16.x | Windows Server 2019 | bundled GDAL
+| Node.js 12.x | macOS Catalina 10.15 | bundled GDAL
+| Node.js 14.x | macOS Catalina 10.15 | bundled GDAL
+| Node.js 16.x | macOS Catalina 10.15 | bundled GDAL
 ---
 

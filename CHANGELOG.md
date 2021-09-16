@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.4] WIP
 
+### Added
+ - Add support for Amazon Linux and restore Ubuntu 16.04 support (glibc 2.23)
 ### Changed
  - Fix `gdal.RasterBand.flushAsync()`
  - Implement the previously non-existing `strict` argument of `gdal.Driver.createCopy{Async}()` and move it after `options`
