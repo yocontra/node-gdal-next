@@ -157,12 +157,23 @@ NAN_METHOD(CoordinateTransformation::toString) {
  * @example
  * ```
  * pt = transform.transformPoint(0, 0, 0);
- * pt = transform.transformPoint({x: 0, y: 0, z: 0});```
  *
  * @method transformPoint
  * @param {number} x
  * @param {number} y
  * @param {number} [z]
+ * @return {xyz} A regular object containing `x`, `y`, `z` properties.
+ */
+
+/**
+ * Transform point from source to destination space.
+ *
+ * @example
+ * ```
+ * pt = transform.transformPoint({x: 0, y: 0, z: 0});```
+ *
+ * @method transformPoint
+ * @param {xyz} point
  * @return {xyz} A regular object containing `x`, `y`, `z` properties.
  */
 NAN_METHOD(CoordinateTransformation::transformPoint) {

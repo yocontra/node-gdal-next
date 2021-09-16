@@ -31,4 +31,30 @@ describe('gdal.CoordinateTransformation', () => {
     assert.closeTo(pt.x, 1564201.4044502454, 0.1)
     assert.closeTo(pt.y, 3370263.469590679, 0.1)
   })
+  describe('transformPoint()', () => {
+    let ct: gdal.CoordinateTransformation
+    beforeEach(() => {
+      const srs0 = gdal.SpatialReference.fromProj4('+init=epsg:4326')
+      const srs1 = gdal.SpatialReference.fromProj4('+init=epsg:32632')
+      ct = new gdal.CoordinateTransformation(srs0, srs1)
+    })
+    it('should accept xyz objects', () => {
+      const pt = ct.transformPoint({ x: 20, y: 30 })
+
+      assert.closeTo(pt.x, 1564201.4044502454, 0.1)
+      assert.closeTo(pt.y, 3370263.469590679, 0.1)
+    })
+    it('should accept x, y, z arguments', () => {
+      const pt = ct.transformPoint(20, 30)
+
+      assert.closeTo(pt.x, 1564201.4044502454, 0.1)
+      assert.closeTo(pt.y, 3370263.469590679, 0.1)
+    })
+    it('should throw on invalid arguments', () => {
+      assert.throws(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ct.transformPoint({ x: 'a', y: 30 } as any)
+      })
+    })
+  })
 })
