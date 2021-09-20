@@ -1,6 +1,7 @@
 const gdal = require('../lib/gdal.js')
+const os = require('os')
 
-let noFailNet = function (done) {
+let noFailNet = function () {
   let test = this.currentTest
   while (test) {
     if (test.title.match(/w\/Net/)) {
@@ -8,20 +9,29 @@ let noFailNet = function (done) {
     }
     test = test.parent
   }
-  done()
 }
 
 if (!process.env.MOCHA_TEST_NETWORK || process.env.MOCHA_TEST_NETWORK == 0) {
-  noFailNet = function (done) {
+  noFailNet = function () {
     let test = this.currentTest
     while (test) {
       if (test.title.match(/w\/Net/)) {
-        console.log('test requires networking, run with MOCHA_TEST_NETWORK=1 npm test to enable', test.title)
+        console.log('test requires networking, run with MOCHA_TEST_NETWORK=1 npm test to enable:', test.title)
         this.skip()
       }
       test = test.parent
     }
-    done()
+  }
+}
+
+const platformSkip = function () {
+  let test = this.currentTest
+  while (test) {
+    if (test.title.match(/^on Linux/) && os.platform() != 'linux') {
+      console.log('test requires Linux: ', test.title)
+      this.skip()
+    }
+    test = test.parent
   }
 }
 
@@ -31,6 +41,10 @@ const cleanup = () => {
 }
 
 exports.mochaHooks = {
-  beforeEach: noFailNet,
+  beforeEach: function (done) {
+    platformSkip.call(this)
+    noFailNet.call(this)
+    done()
+  },
   afterAll: cleanup
 }

@@ -31,5 +31,11 @@ describe('Open', () => {
       assert.closeTo(actual_geotransform[4], expected_geotransform[4], delta)
       assert.closeTo(actual_geotransform[5], expected_geotransform[5], delta)
     })
+
+    if (gdal.bundled) {
+      it('on Linux, it should support should virtual IO', () => {
+        assert.equal(gdal.drivers.get('netcdf').getMetadata().DCAP_VIRTUALIO, 'YES')
+      })
+    }
   })
 })

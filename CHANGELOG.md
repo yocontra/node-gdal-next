@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Add support for Amazon Linux and restore Ubuntu 16.04 support (glibc 2.23)
+ - On Linux, build GDAL with `ENABLE_UFFD` for virtual I/O support on drivers that allow it (currently only NetCDF) - this allows accessing NetCDF subdatasets with remote virtual filesystems
  
 ### Changed
  - Fix `gdal.RasterBand.flushAsync()`

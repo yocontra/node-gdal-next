@@ -65,6 +65,9 @@
 					"GenerateDebugInformation": "false",
 				},
 			}],
+			["OS == 'linux'", {
+				"defines": ["ENABLE_UFFD=1"]
+			}],
 			["OS == 'freebsd'", {
 				"include_dirs": ["./arch/bsd"]
 			}],
