@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.3.4] WIP
+## [3.3.4] 2021-09-28
 
 ### Added
  - Add support for Amazon Linux and restore Ubuntu 16.04 support (glibc 2.23)
- - On Linux, build GDAL with `ENABLE_UFFD` for virtual I/O support on drivers that allow it (currently only NetCDF) - this allows accessing NetCDF subdatasets with remote virtual filesystems
- 
+ - On Linux, build GDAL with `ENABLE_UFFD` for virtual I/O support on drivers that allow it (currently only NetCDF) to allow accessing NetCDF subdatasets with remote virtual filesystems
+ - Add a new npm script - `npm run prune` - not to be confused with `npm prune` - which allows to keep only the module runtime, significantly reducing the size of the installed package
+
 ### Changed
  - Fix `gdal.RasterBand.flushAsync()`
  - Implement the previously non-existing `strict` argument of `gdal.Driver.createCopy{Async}()` and move it after `options`
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fix #14, correctly handle exceptions in progress callbacks and return them to the calling user code
  - Add a previously missing TypeScript signature for `gdal.CoordinateTransformation.transformPoint(point: xyz)`
  - Fix the documentation / TypeScript signature for `gdal.Geometry.segmentize` - it returns `undefined`
+ - Removed all source tarballs of the bundled dependencies from the published package to reduce its size
 
 ## [3.3.3] 2021-09-07
 
@@ -42,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add `gdal.DatasetBands.getEnvelope()`
  - Add `gdal.vsimem.set` and `gdal.vsimem.release` allowing to load and unload files between a `Buffer` and GDAL's in-memory `vsimem` file system
  - Add `gdal.Geometry.makeValid{Async}()`
- 
+
 ### Changed
  - Correctly measure the wall time for the event loop warnings
  - Fix a number of memory leaks in `gdal.SpatialReference.clone()`, `gdal.SpatialReference.cloneGeogCS()` and when constructing a `gdal.SpatialReference` with a `wkt` argument
@@ -125,8 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add `gdal.LayerFeatures.setAsync()`
 
 ### Changed
- - `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry 
-   
+ - `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry
+
    Previously all `gdal.Geometry.from*` functions except `fromGeoJson` threw undocumented errors, now all of them, including `fromGeoJson` throw documented errors
 
 ## [3.1.1] 2021-05-14
@@ -140,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
   - Add full TypeScript support
-  
+
   - Complete reworking of the Geometry code adding support for CircularString, CompoundCurve and MultiCurve
   - Add JS iterators to all collections
   - Enable MapInfo TAB and MIF/MID
