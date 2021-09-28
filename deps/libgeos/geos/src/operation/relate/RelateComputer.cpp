@@ -37,6 +37,7 @@
 #include <geos/geomgraph/EdgeIntersection.h>
 
 #include <geos/util/Interrupt.h>
+#include <geos/util.h>
 
 #include <vector>
 #include <cassert>
@@ -205,7 +206,7 @@ RelateComputer::computeIM()
 
     labelNodeEdges();
 
-    /**
+    /*
      * Compute the labeling for isolated components.
      * Isolated components are components that do not touch any
      * other components in the graph.
@@ -233,8 +234,7 @@ RelateComputer::computeIM()
 void
 RelateComputer::insertEdgeEnds(std::vector<EdgeEnd*>* ee)
 {
-    for(std::vector<EdgeEnd*>::iterator i = ee->begin(); i < ee->end(); i++) {
-        EdgeEnd* e = *i;
+    for(EdgeEnd* e: *ee) {
         nodes.add(e);
     }
 }
@@ -249,22 +249,22 @@ RelateComputer::computeProperIntersectionIM(SegmentIntersector* intersector, Int
     bool hasProper = intersector->hasProperIntersection();
     bool hasProperInterior = intersector->hasProperInteriorIntersection();
     // For Geometry's of dim 0 there can never be proper intersections.
-    /**
-    * If edge segments of Areas properly intersect, the areas must properly overlap.
-    */
+    /*
+     * If edge segments of Areas properly intersect, the areas must properly overlap.
+     */
     if(dimA == 2 && dimB == 2) {
         if(hasProper) {
             imX->setAtLeast("212101212");
         }
     }
-    /**
-    * If an Line segment properly intersects an edge segment of an Area,
-    * it follows that the Interior of the Line intersects the Boundary of the Area.
-    * If the intersection is a proper <i>interior</i> intersection, then
-    * there is an Interior-Interior intersection too.
-    * Note that it does not follow that the Interior of the Line intersects the Exterior
-    * of the Area, since there may be another Area component which contains the rest of the Line.
-    */
+    /*
+     * If an Line segment properly intersects an edge segment of an Area,
+     * it follows that the Interior of the Line intersects the Boundary of the Area.
+     * If the intersection is a proper *interior* intersection, then
+     * there is an Interior-Interior intersection too.
+     * Note that it does not follow that the Interior of the Line intersects the Exterior
+     * of the Area, since there may be another Area component which contains the rest of the Line.
+     */
     else if(dimA == 2 && dimB == 1) {
         if(hasProper) {
             imX->setAtLeast("FFF0FFFF2");
@@ -310,10 +310,8 @@ void
 RelateComputer::copyNodesAndLabels(int argIndex)
 {
     const NodeMap* nm = (*arg)[argIndex]->getNodeMap();
-    NodeMap::const_iterator nodeIt = nm->begin(), nodeEnd = nm->end();
-
-    for(; nodeIt != nodeEnd; nodeIt++) {
-        Node* graphNode = nodeIt->second;
+    for(const auto& it: *nm) {
+        const Node* graphNode = it.second;
         Node* newNode = nodes.addNode(graphNode->getCoordinate());
         newNode->setLabel(argIndex,
                           graphNode->getLabel().getLocation(argIndex));
@@ -334,13 +332,11 @@ void
 RelateComputer::computeIntersectionNodes(int argIndex)
 {
     std::vector<Edge*>* edges = (*arg)[argIndex]->getEdges();
-    for(std::vector<Edge*>::iterator i = edges->begin(); i < edges->end(); i++) {
-        Edge* e = *i;
+    for(Edge* e: *edges) {
         Location eLoc = e->getLabel().getLocation(argIndex);
         EdgeIntersectionList& eiL = e->getEdgeIntersectionList();
         for(const EdgeIntersection & ei : eiL) {
-            assert(dynamic_cast<RelateNode*>(nodes.addNode(ei.coord)));
-            RelateNode* n = static_cast<RelateNode*>(nodes.addNode(ei.coord));
+            RelateNode* n = detail::down_cast<RelateNode*>(nodes.addNode(ei.coord));
             if(eLoc == Location::BOUNDARY) {
                 n->setLabelBoundary(argIndex);
             }
@@ -364,8 +360,7 @@ void
 RelateComputer::labelIntersectionNodes(int argIndex)
 {
     std::vector<Edge*>* edges = (*arg)[argIndex]->getEdges();
-    for(std::vector<Edge*>::iterator i = edges->begin(); i < edges->end(); i++) {
-        Edge* e = *i;
+    for(Edge* e: *edges) {
         Location eLoc = e->getLabel().getLocation(argIndex);
         EdgeIntersectionList& eiL = e->getEdgeIntersectionList();
 
@@ -405,8 +400,7 @@ RelateComputer::labelNodeEdges()
 {
     auto& nMap = nodes.nodeMap;
     for(auto& entry : nMap) {
-        assert(dynamic_cast<RelateNode*>(entry.second));
-        RelateNode* node = static_cast<RelateNode*>(entry.second);
+        RelateNode* node = detail::down_cast<RelateNode*>(entry.second);
 #if GEOS_DEBUG
         std::cerr << "RelateComputer::labelNodeEdges: "
                   << "node edges: " << *(node->getEdges())
@@ -440,8 +434,7 @@ void
 RelateComputer::labelIsolatedEdges(int thisIndex, int targetIndex)
 {
     std::vector<Edge*>* edges = (*arg)[thisIndex]->getEdges();
-    for(std::vector<Edge*>::iterator i = edges->begin(); i < edges->end(); i++) {
-        Edge* e = *i;
+    for(Edge* e: *edges) {
         if(e->isIsolated()) {
             labelIsolatedEdge(e, targetIndex, (*arg)[targetIndex]->getGeometry());
             isolatedEdges.push_back(e);
@@ -471,9 +464,8 @@ RelateComputer::labelIsolatedEdge(Edge* e, int targetIndex, const Geometry* targ
 void
 RelateComputer::labelIsolatedNodes()
 {
-    NodeMap::iterator nodeIt = nodes.begin(), nodeEnd = nodes.end();
-    for(; nodeIt != nodeEnd; nodeIt++) {
-        Node* n = nodeIt->second;
+    for(const auto& it: nodes) {
+        Node* n = it.second;
         const Label& label = n->getLabel();
         // isolated nodes should always have at least one geometry in their label
         assert(label.getGeometryCount() > 0); // node with empty label found

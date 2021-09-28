@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pg.h 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $
+ * $Id: ogr_pg.h 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL driver.
@@ -154,8 +154,9 @@ class OGRPGFeatureDefn CPL_NON_FINAL: public OGRFeatureDefn
 
         virtual void UnsetLayer()
         {
+            const int nGeomFieldCount = GetGeomFieldCount();
             for(int i=0;i<nGeomFieldCount;i++)
-                cpl::down_cast<OGRPGGeomFieldDefn*>(papoGeomFieldDefn[i])->UnsetLayer();
+                cpl::down_cast<OGRPGGeomFieldDefn*>(apoGeomFieldDefn[i].get())->UnsetLayer();
         }
 
         OGRPGGeomFieldDefn *GetGeomFieldDefn( int i ) override
@@ -331,8 +332,8 @@ class OGRPGTableLayer final: public OGRPGLayer
 
     virtual CPLString   GetFromClauseForGetExtent() override { return pszSqlTableName; }
 
-    OGRErr              RunAddGeometryColumn( OGRPGGeomFieldDefn *poGeomField );
-    OGRErr              RunCreateSpatialIndex( OGRPGGeomFieldDefn *poGeomField );
+    OGRErr              RunAddGeometryColumn( const OGRPGGeomFieldDefn *poGeomField );
+    OGRErr              RunCreateSpatialIndex( const OGRPGGeomFieldDefn *poGeomField );
 
     void                UpdateSequenceIfNeeded();
 

@@ -104,9 +104,11 @@
 #include "xtiffio.h"
 #include "quant_table_md5sum.h"
 
-CPL_CVSID("$Id: geotiff.cpp 3e61c10dec395d035fcfc97b423f3151d1e9e8cf 2021-07-07 11:39:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: geotiff.cpp 543dd29d28b2121417eb699e28843c534a3c4c69 2021-09-12 00:37:29 +0200 Even Rouault $")
 
 static bool bGlobalInExternalOvr = false;
+
+static thread_local int gnThreadLocalLibtiffError = 0;
 
 // Only libtiff 4.0.4 can handle between 32768 and 65535 directories.
 #if TIFFLIB_VERSION >= 20120922
@@ -479,9 +481,7 @@ private:
                                    int bPreserveDataBuffer );
     bool         WriteEncodedStrip( uint32_t strip, GByte* pabyData,
                                     int bPreserveDataBuffer );
-    template<class T>
-    bool         HasOnlyNoDataT( const T* pBuffer, int nWidth, int nHeight,
-                                int nLineStride, int nComponents ) const;
+
     bool         HasOnlyNoData( const void* pBuffer, int nWidth, int nHeight,
                                 int nLineStride, int nComponents );
     inline bool  IsFirstPixelEqualToNoData( const void* pBuffer );
@@ -4769,6 +4769,8 @@ bool GTiffDataset::ReadStrile(int nBlockId,
     else
         m_bHasUsedReadEncodedAPI = true;
 
+    // Set to 1 to allow GTiffErrorHandler to implement limitation on error messages
+    gnThreadLocalLibtiffError = 1;
     if( TIFFIsTiled( m_hTIFF ) )
     {
         if( TIFFReadEncodedTile( m_hTIFF, nBlockId, pOutputBuffer,
@@ -4777,7 +4779,7 @@ bool GTiffDataset::ReadStrile(int nBlockId,
         {
             CPLError( CE_Failure, CPLE_AppDefined,
                         "TIFFReadEncodedTile() failed." );
-
+            gnThreadLocalLibtiffError = 0;
             return false;
         }
     }
@@ -4789,10 +4791,11 @@ bool GTiffDataset::ReadStrile(int nBlockId,
         {
             CPLError( CE_Failure, CPLE_AppDefined,
                     "TIFFReadEncodedStrip() failed." );
-
+            gnThreadLocalLibtiffError = 0;
             return false;
         }
     }
+    gnThreadLocalLibtiffError = 0;
     return true;
 }
 
@@ -6526,7 +6529,7 @@ GTiffOddBitsBand::GTiffOddBitsBand( GTiffDataset *m_poGDSIn, int nBandIn )
 /*                            FloatToHalf()                             */
 /************************************************************************/
 
-static GUInt16 FloatToHalf( GUInt32 iFloat32, bool& bHasWarned )
+GUInt16 FloatToHalf( GUInt32 iFloat32, bool& bHasWarned )
 {
     GUInt32 iSign =     (iFloat32 >> 31) & 0x00000001;
     GUInt32 iExponent = (iFloat32 >> 23) & 0x000000ff;
@@ -7616,6 +7619,8 @@ CPLErr GTiffSplitBitmapBand::IReadBlock( int /* nBlockXOff */, int nBlockYOff,
     if( m_poGDS->m_nLoadedBlock >= nBlockYOff )
         m_poGDS->m_nLoadedBlock = -1;
 
+    // Set to 1 to allow GTiffErrorHandler to implement limitation on error messages
+    gnThreadLocalLibtiffError = 1;
     while( m_poGDS->m_nLoadedBlock < nBlockYOff )
     {
         ++m_poGDS->m_nLoadedBlock;
@@ -7650,9 +7655,11 @@ CPLErr GTiffSplitBitmapBand::IReadBlock( int /* nBlockXOff */, int nBlockYOff,
             ReportError( CE_Failure, CPLE_AppDefined,
                       "TIFFReadScanline() failed." );
             m_poGDS->m_nLoadedBlock = -1;
+            gnThreadLocalLibtiffError = 0;
             return CE_Failure;
         }
     }
+    gnThreadLocalLibtiffError = 0;
 
 /* -------------------------------------------------------------------- */
 /*      Translate 1bit data to eight bit.                               */
@@ -8349,155 +8356,23 @@ void GTiffDataset::FillEmptyTiles()
 /*                         HasOnlyNoData()                              */
 /************************************************************************/
 
-template<class T>
-static inline bool IsEqualToNoData( T value, T noDataValue )
-{
-    return value == noDataValue;
-}
-
-template<> bool IsEqualToNoData<float>( float value, float noDataValue )
-{
-    return
-        CPLIsNan(noDataValue) ?
-        CPL_TO_BOOL(CPLIsNan(value)) : value == noDataValue;
-}
-
-template<> bool IsEqualToNoData<double>( double value, double noDataValue )
-{
-    return
-        CPLIsNan(noDataValue) ?
-        CPL_TO_BOOL(CPLIsNan(value)) : value == noDataValue;
-}
-
-template<class T>
-bool GTiffDataset::HasOnlyNoDataT( const T* pBuffer, int nWidth, int nHeight,
-                                   int nLineStride, int nComponents ) const
-{
-    const T noDataValue = static_cast<T>((m_bNoDataSet) ? m_dfNoDataValue : 0.0);
-
-    CPLAssert(m_nBitsPerSample != 1 || noDataValue == 0);
-
-    // Fast test: check the 4 corners and the middle pixel.
-    for( int iBand = 0; iBand < nComponents; iBand++ )
-    {
-        if( !(IsEqualToNoData(pBuffer[iBand], noDataValue) &&
-              IsEqualToNoData(
-                  pBuffer[static_cast<size_t>(nWidth - 1) * nComponents +
-                          iBand],
-                  noDataValue) &&
-              IsEqualToNoData(
-                  pBuffer[(static_cast<size_t>(nHeight-1)/2 * nLineStride +
-                           (nWidth - 1)/2) * nComponents + iBand],
-                  noDataValue) &&
-              IsEqualToNoData(
-                  pBuffer[static_cast<size_t>(nHeight - 1) * nLineStride *
-                          nComponents + iBand], noDataValue) &&
-              IsEqualToNoData(
-                  pBuffer[(static_cast<size_t>(nHeight - 1) * nLineStride +
-                           nWidth - 1) * nComponents + iBand], noDataValue) ) )
-        {
-            return false;
-        }
-    }
-
-    // Test all pixels.
-    for( int iY = 0; iY < nHeight; iY++ )
-    {
-        for( int iX = 0; iX < nWidth * nComponents; iX++ )
-        {
-            if( !IsEqualToNoData(
-                   pBuffer[iY * static_cast<size_t>(nLineStride) * nComponents +
-                           iX], noDataValue) )
-            {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 bool GTiffDataset::HasOnlyNoData( const void* pBuffer, int nWidth, int nHeight,
                                   int nLineStride, int nComponents )
 {
-    const GDALDataType eDT = GetRasterBand(1)->GetRasterDataType();
-
-    // In the case where the nodata is 0, we can compare several bytes at
-    // once. Select the largest natural integer type for the architecture.
-#if SIZEOF_VOIDP == 8 || defined(__x86_64__)
-    // We test __x86_64__ for x32 arch where SIZEOF_VOIDP == 4
-    typedef GUInt64 WordType;
-#else
-    typedef unsigned int WordType;
-#endif
-    if( (!m_bNoDataSet || m_dfNoDataValue == 0.0) && nWidth == nLineStride )
-    {
-        const GByte* pabyBuffer = static_cast<const GByte*>(pBuffer);
-        const size_t nSize = (static_cast<size_t>(nWidth) * nHeight *
-                                nComponents * m_nBitsPerSample + 7) / 8;
-        size_t i = 0;
-        const size_t nInitialIters = std::min(
-            sizeof(WordType) -
-                (reinterpret_cast<std::uintptr_t>(pabyBuffer) % sizeof(WordType)),
-            nSize);
-        for( ; i < nInitialIters; i++ )
-        {
-            if( pabyBuffer[i] )
-                return false;
-        }
-        for( ; i + sizeof(WordType) - 1 < nSize; i += sizeof(WordType) )
-        {
-            if( *(reinterpret_cast<const WordType*>(pabyBuffer + i)) )
-                return false;
-        }
-        for( ; i < nSize; i++ )
-        {
-            if( pabyBuffer[i] )
-                return false;
-        }
-        return true;
-    }
-
-    if( m_nBitsPerSample == 8 )
-    {
-        if( m_nSampleFormat == SAMPLEFORMAT_INT )
-        {
-            return HasOnlyNoDataT(static_cast<const signed char*>(pBuffer),
-                                  nWidth, nHeight, nLineStride, nComponents);
-        }
-        return HasOnlyNoDataT(static_cast<const GByte*>(pBuffer),
-                              nWidth, nHeight, nLineStride, nComponents);
-    }
-    if( m_nBitsPerSample == 16 && eDT == GDT_UInt16 )
-    {
-        return HasOnlyNoDataT(static_cast<const GUInt16*>(pBuffer),
-                              nWidth, nHeight, nLineStride, nComponents);
-    }
-    if( m_nBitsPerSample == 16 && eDT== GDT_Int16 )
-    {
-        return HasOnlyNoDataT(static_cast<const GInt16*>(pBuffer),
-                              nWidth, nHeight, nLineStride, nComponents);
-    }
-    if( m_nBitsPerSample == 32 && eDT == GDT_UInt32 )
-    {
-        return HasOnlyNoDataT(static_cast<const GUInt32*>(pBuffer),
-                              nWidth, nHeight, nLineStride, nComponents);
-    }
-    if( m_nBitsPerSample == 32 && eDT == GDT_Int32 )
-    {
-        return HasOnlyNoDataT(static_cast<const GInt32*>(pBuffer),
-                              nWidth, nHeight, nLineStride, nComponents);
-    }
-    if( m_nBitsPerSample == 32 && eDT == GDT_Float32 )
-    {
-        return HasOnlyNoDataT(static_cast<const float*>(pBuffer),
-                              nWidth, nHeight, nLineStride, nComponents);
-    }
-    if( m_nBitsPerSample == 64 && eDT == GDT_Float64 )
-    {
-        return HasOnlyNoDataT(static_cast<const double*>(pBuffer),
-                              nWidth, nHeight, nLineStride, nComponents);
-    }
-    return false;
+    if( m_nSampleFormat == SAMPLEFORMAT_COMPLEXINT ||
+        m_nSampleFormat == SAMPLEFORMAT_COMPLEXIEEEFP )
+        return false;
+    return GDALBufferHasOnlyNoData( pBuffer,
+                                    m_bNoDataSet ? m_dfNoDataValue : 0.0,
+                                    nWidth, nHeight,
+                                    nLineStride,
+                                    nComponents,
+                                    m_nBitsPerSample,
+                                    m_nSampleFormat == SAMPLEFORMAT_UINT ?
+                                        GSF_UNSIGNED_INT :
+                                    m_nSampleFormat == SAMPLEFORMAT_INT ?
+                                        GSF_SIGNED_INT :
+                                        GSF_FLOATING_POINT );
 }
 
 /************************************************************************/
@@ -11267,7 +11142,8 @@ void GTiffDataset::WriteGeoTIFFInfo()
             if( pszProjection && pszProjection[0] &&
                 strstr(pszProjection, "custom_proj4") == nullptr )
             {
-                GTIFSetFromOGISDefnEx( psGTIF, pszProjection,
+                GTIFSetFromOGISDefnEx( psGTIF,
+                                       OGRSpatialReference::ToHandle(&m_oSRS),
                                        m_eGeoTIFFKeysFlavor,
                                        m_eGeoTIFFVersion );
             }
@@ -15065,7 +14941,7 @@ void GTiffDataset::LoadGeoreferencingAndPamIfNeeded()
 /* -------------------------------------------------------------------- */
         if( pszTabWKT != nullptr && m_oSRS.IsEmpty() )
         {
-            m_oSRS.SetFromUserInput(pszTabWKT);
+            m_oSRS.importFromWkt(pszTabWKT);
             m_bLookedForProjection = true;
         }
 
@@ -17970,7 +17846,9 @@ GTiffDataset::CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
             }
             if( eErr == OGRERR_NONE && strstr(pszWKT, "custom_proj4") == nullptr )
             {
-                GTIFSetFromOGISDefnEx( psGTIF, pszWKT,
+                GTIFSetFromOGISDefnEx( psGTIF,
+                                       OGRSpatialReference::ToHandle(
+                                           const_cast<OGRSpatialReference*>(l_poSRS)),
                                     GetGTIFFKeysFlavor(papszOptions),
                                     GetGeoTIFFVersion(papszOptions) );
             }
@@ -19855,6 +19733,13 @@ static char *PrepareTIFFErrorFormat( const char *module, const char *fmt )
 static void
 GTiffWarningHandler(const char* module, const char* fmt, va_list ap )
 {
+    if( gnThreadLocalLibtiffError > 0 )
+    {
+        gnThreadLocalLibtiffError ++;
+        if( gnThreadLocalLibtiffError > 10 )
+            return;
+    }
+
     if( strstr(fmt,"nknown field") != nullptr )
         return;
 
@@ -19878,6 +19763,13 @@ GTiffWarningHandler(const char* module, const char* fmt, va_list ap )
 static void
 GTiffErrorHandler( const char* module, const char* fmt, va_list ap )
 {
+    if( gnThreadLocalLibtiffError > 0 )
+    {
+        gnThreadLocalLibtiffError ++;
+        if( gnThreadLocalLibtiffError > 10 )
+            return;
+    }
+
     if( strcmp(fmt, "Maximum TIFF file size exceeded") == 0 )
     {
         // Ideally there would be a thread-safe way of setting this flag,
@@ -20132,7 +20024,7 @@ CPLString GTiffGetCompressValues(bool& bHasLZW,
             osCompressValues +=
                     "       <Value>CCITTFAX4</Value>";
         }
-        else if( c->scheme == COMPRESSION_LZMA && !bForCOG )
+        else if( c->scheme == COMPRESSION_LZMA )
         {
             bHasLZMA = true;
             osCompressValues +=
@@ -20359,6 +20251,8 @@ void GDALRegister_GTiff()
 #define STRINGIFY(x) #x
 #define XSTRINGIFY(x) STRINGIFY(x)
     poDriver->SetMetadataItem( "LIBGEOTIFF", XSTRINGIFY(LIBGEOTIFF_VERSION) );
+
+    poDriver->SetMetadataItem( GDAL_DCAP_COORDINATE_EPOCH, "YES" );
 
     poDriver->pfnOpen = GTiffDataset::Open;
     poDriver->pfnCreate = GTiffDataset::Create;

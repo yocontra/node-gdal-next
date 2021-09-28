@@ -45,7 +45,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: rasterfill.cpp 6b9ef92ef33b9a98bd6012c52888586c449f7770 2021-08-12 12:35:44 +0200 Even Rouault $")
+CPL_CVSID("$Id: rasterfill.cpp 9aecbf344bcaf55e1ef26aa89f0732f60a644ff4 2021-08-11 11:10:23 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALFilterLine()                           */
@@ -56,10 +56,10 @@ CPL_CVSID("$Id: rasterfill.cpp 6b9ef92ef33b9a98bd6012c52888586c449f7770 2021-08-
 /************************************************************************/
 
 static void
-GDALFilterLine( float *pafLastLine, float *pafThisLine, float *pafNextLine,
+GDALFilterLine( const float *pafLastLine, const float *pafThisLine, const float *pafNextLine,
                 float *pafOutLine,
-                GByte *pabyLastTMask, GByte *pabyThisTMask, GByte*pabyNextTMask,
-                GByte *pabyThisFMask, int nXSize )
+                const GByte *pabyLastTMask, const GByte *pabyThisTMask, const GByte *pabyNextTMask,
+                const GByte *pabyThisFMask, int nXSize )
 
 {
     for( int iX = 0; iX < nXSize; iX++ )

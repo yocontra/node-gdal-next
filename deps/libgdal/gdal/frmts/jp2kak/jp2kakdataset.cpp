@@ -53,7 +53,7 @@
 #include <cmath>
 #include <vector>
 
-CPL_CVSID("$Id: jp2kakdataset.cpp 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: jp2kakdataset.cpp 0336b4cd6f7fd5012867509f24b6cb88e8a3ef02 2021-09-26 12:58:16 +0200 Even Rouault $")
 
 // Before v7.5 Kakadu does not advertise its version well
 // After v7.5 Kakadu has KDU_{MAJOR,MINOR,PATCH}_VERSION defines so it is easier
@@ -788,7 +788,8 @@ int JP2KAKDataset::Identify( GDALOpenInfo * poOpenInfo )
             || EQUAL(pszExtension, "j2k")
             || EQUAL(pszExtension, "jp2")
             || EQUAL(pszExtension, "jpx")
-            || EQUAL(pszExtension, "j2c") )
+            || EQUAL(pszExtension, "j2c")
+            || EQUAL(pszExtension, "jhc") )
            return TRUE;
 
         // We also want to handle jpc datastreams vis /vsisubfile.
@@ -2491,6 +2492,7 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
     // Set the GeoTIFF and GML boxes if georeferencing is available,
     // and this is a JP2 file.
     double adfGeoTransform[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    // cppcheck-suppress knownConditionTrueFalse
     if( bIsJP2
         && ((poSrcDS->GetGeoTransform(adfGeoTransform) == CE_None
              && (adfGeoTransform[0] != 0.0
@@ -2506,12 +2508,12 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
 
         if( poSrcDS->GetGCPCount() > 0 )
         {
-            oJP2MD.SetProjection(poSrcDS->GetGCPProjection());
+            oJP2MD.SetSpatialRef(poSrcDS->GetGCPSpatialRef());
             oJP2MD.SetGCPs(poSrcDS->GetGCPCount(), poSrcDS->GetGCPs());
         }
         else
         {
-            oJP2MD.SetProjection(poSrcDS->GetProjectionRef());
+            oJP2MD.SetSpatialRef(poSrcDS->GetSpatialRef());
             oJP2MD.SetGeoTransform(adfGeoTransform);
         }
 
@@ -2581,6 +2583,7 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
     }
 
     // Open codestream box.
+    // cppcheck-suppress knownConditionTrueFalse
     if( bIsJP2 )
         jp2_out.open_codestream();
 

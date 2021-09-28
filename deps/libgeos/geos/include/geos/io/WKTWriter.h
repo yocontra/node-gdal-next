@@ -24,6 +24,7 @@
 #include <geos/export.h>
 
 #include <string>
+#include <cctype>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -56,7 +57,7 @@ namespace geos {
 namespace io {
 
 /**
- * \class WKTWriter io.h geos.h
+ * \class WKTWriter
  *
  * \brief Outputs the textual representation of a Geometry.
  * See also WKTReader.
@@ -173,7 +174,7 @@ public:
      *        Note that 3 indicates up to 3 dimensions will be
      *        written but 2D WKB is still produced for 2D geometries.
      */
-    void setOutputDimension(int newOutputDimension);
+    void setOutputDimension(uint8_t newOutputDimension);
 
 protected:
 
@@ -261,8 +262,8 @@ private:
 
     int level;
 
-    int defaultOutputDimension;
-    int outputDimension;
+    uint8_t defaultOutputDimension;
+    uint8_t outputDimension;
     bool old3D;
 
     void writeFormatted(

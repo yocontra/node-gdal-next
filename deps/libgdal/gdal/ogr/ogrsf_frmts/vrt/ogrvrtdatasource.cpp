@@ -44,12 +44,12 @@
 #include "ogr_core.h"
 #include "ogr_feature.h"
 #include "ogr_spatialref.h"
-#include "ogrlayerpool.h" 
+#include "ogrlayerpool.h"
 #include "ogrunionlayer.h"
 #include "ogrwarpedlayer.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrvrtdatasource.cpp 8e2b7eaf348d5421dcca71045daed4c3888f85a6 2020-05-22 19:27:31 +0200 Yorick de Wid $")
+CPL_CVSID("$Id: ogrvrtdatasource.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRVRTGetGeometryType()                        */
@@ -278,7 +278,7 @@ OGRLayer *OGRVRTDataSource::InstantiateWarpedLayer(
     {
         poSrcSRS = new OGRSpatialReference();
         poSrcSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-        if( poSrcSRS->SetFromUserInput(pszSourceSRS) != OGRERR_NONE )
+        if( poSrcSRS->SetFromUserInput(pszSourceSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE )
         {
             delete poSrcSRS;
             poSrcSRS = nullptr;
@@ -294,7 +294,7 @@ OGRLayer *OGRVRTDataSource::InstantiateWarpedLayer(
 
     OGRSpatialReference *poTargetSRS = new OGRSpatialReference();
     poTargetSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-    if( poTargetSRS->SetFromUserInput(pszTargetSRS) != OGRERR_NONE )
+    if( poTargetSRS->SetFromUserInput(pszTargetSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE )
     {
         delete poTargetSRS;
         poTargetSRS = nullptr;
@@ -404,7 +404,7 @@ OGRLayer *OGRVRTDataSource::InstantiateUnionLayer(
             OGRSpatialReference oSRS;
             oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 
-            if( oSRS.SetFromUserInput(pszLayerSRS) != OGRERR_NONE )
+            if( oSRS.SetFromUserInput(pszLayerSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE )
             {
                 CPLError(CE_Failure, CPLE_AppDefined,
                          "Failed to import LayerSRS `%s'.", pszLayerSRS);
@@ -531,7 +531,7 @@ OGRLayer *OGRVRTDataSource::InstantiateUnionLayer(
                     OGRSpatialReference oSRS;
                     oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 
-                    if( oSRS.SetFromUserInput(pszSRS) != OGRERR_NONE )
+                    if( oSRS.SetFromUserInput(pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE )
                     {
                         CPLError(CE_Failure, CPLE_AppDefined,
                                  "Failed to import SRS `%s'.", pszSRS);

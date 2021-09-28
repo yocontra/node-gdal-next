@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: filegdbtable.h 6b84484fd22d27a4611ab64da86ba221156293f8 2021-08-25 10:30:20 +0200 Even Rouault $
+ * $Id: filegdbtable.h 658c2d9b0784249ceeefd02044d19b6e5dfe50cd 2021-08-24 20:25:31 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements reading of FileGDB tables

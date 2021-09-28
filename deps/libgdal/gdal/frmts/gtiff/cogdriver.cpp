@@ -164,7 +164,7 @@ bool COGGetWarpingCharacteristics(GDALDataset* poSrcDS,
 
         // "Normalize" SRS as AUTH:CODE
         OGRSpatialReference oTargetSRS;
-        oTargetSRS.SetFromUserInput(osTargetSRS);
+        oTargetSRS.SetFromUserInput(osTargetSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
         const char* pszAuthCode = oTargetSRS.GetAuthorityCode(nullptr);
         const char* pszAuthName = oTargetSRS.GetAuthorityName(nullptr);
         if( pszAuthName && pszAuthCode )
@@ -180,7 +180,7 @@ bool COGGetWarpingCharacteristics(GDALDataset* poSrcDS,
     void* hTransformArg = nullptr;
 
     OGRSpatialReference oTargetSRS;
-    oTargetSRS.SetFromUserInput(osTargetSRS);
+    oTargetSRS.SetFromUserInput(osTargetSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
     const char* pszAuthCode = oTargetSRS.GetAuthorityCode(nullptr);
     const int nEPSGCode = pszAuthCode ? atoi(pszAuthCode) : 0;
 
@@ -991,6 +991,11 @@ GDALDataset* GDALCOGCreator::Create(const char * pszFilename,
         aosOptions.SetNameValue("ZSTD_LEVEL",
                                 CSLFetchNameValue(papszOptions, "LEVEL"));
     }
+    else if( EQUAL(osCompress, "LZMA") )
+    {
+        aosOptions.SetNameValue("LZMA_PRESET",
+                                CSLFetchNameValue(papszOptions, "LEVEL"));
+    }
 
     if( STARTS_WITH_CI(osCompress, "LERC") )
     {
@@ -1155,7 +1160,7 @@ void GDALCOGDriver::InitializeCreationOptionList()
     osOptions += osCompressValues;
     osOptions += "   </Option>";
 
-    if( bHasLZW || bHasDEFLATE || bHasZSTD )
+    if( bHasLZW || bHasDEFLATE || bHasZSTD || bHasLZMA)
     {
         const char* osPredictorOptions =  "     <Value>YES</Value>"
                      "     <Value>NO</Value>"
@@ -1163,7 +1168,7 @@ void GDALCOGDriver::InitializeCreationOptionList()
                      "     <Value alias='3'>FLOATING_POINT</Value>";
 
         osOptions += "   <Option name='LEVEL' type='int' "
-            "description='DEFLATE/ZSTD compression level: 1 (fastest)'/>";
+            "description='DEFLATE/ZSTD/LZMA compression level: 1 (fastest)'/>";
 
         osOptions += "   <Option name='PREDICTOR' type='string-select' default='FALSE'>";
         osOptions += osPredictorOptions;
@@ -1280,6 +1285,8 @@ void GDALRegister_COG()
                                "Float64 CInt16 CInt32 CFloat32 CFloat64" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
+
+    poDriver->SetMetadataItem( GDAL_DCAP_COORDINATE_EPOCH, "YES" );
 
     poDriver->pfnCreateCopy = COGCreateCopy;
 

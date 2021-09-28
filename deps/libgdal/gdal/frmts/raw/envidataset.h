@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: envidataset.h 2783cb874e95c7d69dc42f3680a2829d4a276dea 2021-08-26 09:26:51 +0200 Even Rouault $
+ * $Id: envidataset.h 6a95fed35a4c6eee4cdbeaa4253cbec2917f7645 2021-09-09 19:10:16 +0200 Even Rouault $
  *
  * Project:  ENVI .hdr Driver
  * Purpose:  Implementation of ENVI .hdr labelled raw raster support.
@@ -74,7 +74,7 @@ class ENVIDataset final: public RawDataset
 
     double      adfGeoTransform[6];
 
-    char       *pszProjection;
+    OGRSpatialReference m_oSRS{};
 
     CPLStringList m_aosHeader{};
 
@@ -114,14 +114,10 @@ class ENVIDataset final: public RawDataset
     void    FlushCache() override;
     CPLErr  GetGeoTransform( double *padfTransform ) override;
     CPLErr  SetGeoTransform( double * ) override;
-    const char *_GetProjectionRef() override;
-    CPLErr  _SetProjection( const char * ) override;
-    const OGRSpatialReference* GetSpatialRef() const override {
-        return GetSpatialRefFromOldGetProjectionRef();
-    }
-    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override {
-        return OldSetProjectionFromSetSpatialRef(poSRS);
-    }
+
+    const OGRSpatialReference* GetSpatialRef() const override ;
+    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override;
+
     char  **GetFileList() override;
 
     void SetDescription( const char * ) override;

@@ -35,7 +35,7 @@
 #include "ogr_p.h"
 #include "cpl_vsi_error.h"
 
-CPL_CVSID("$Id: ogrlibkmldatasource.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmldatasource.cpp bf254e6d344c4d2ed43058246b80742613b1c251 2021-08-12 15:31:27 +0200 Even Rouault $")
 
 using kmlbase::Attributes;
 using kmldom::ContainerPtr;
@@ -173,6 +173,45 @@ static void OGRLIBKMLPreProcessInput( std::string& oKml )
                          "</coordinates>");
             nPos = nPosAfterCoordinates + strlen("</coordinates>");
         }
+    }
+
+    // Some non conformant file may contain MultiPolygon/MultiLineString/MultiPoint
+    // See https://github.com/OSGeo/gdal/issues/4031
+    // Replace them by MultiGeometry.
+    nPos = 0;
+    while( true )
+    {
+        const char* pszStartTag = "<MultiPolygon>";
+        const char* pszEndTag = "";
+        auto nNewPos = oKml.find(pszStartTag, nPos);
+        if( nNewPos != std::string::npos )
+        {
+            pszEndTag = "</MultiPolygon>";
+        }
+        else
+        {
+            pszStartTag = "<MultiLineString>";
+            nNewPos = oKml.find(pszStartTag, nPos);
+            if( nNewPos != std::string::npos )
+            {
+                pszEndTag = "</MultiLineString>";
+            }
+            else
+            {
+                pszStartTag = "<MultiPoint>";
+                nNewPos = oKml.find(pszStartTag, nPos);
+                if( nNewPos != std::string::npos )
+                    pszEndTag = "</MultiPoint>";
+                else
+                    break;
+            }
+        }
+        nPos = nNewPos;
+        oKml.replace(nPos, strlen(pszStartTag), "<MultiGeometry>");
+        nPos = oKml.find(pszEndTag, nPos);
+        if( nPos == std::string::npos )
+            break;
+        oKml.replace(nPos, strlen(pszEndTag), "</MultiGeometry>");
     }
 }
 
@@ -446,7 +485,9 @@ void OGRLIBKMLDataSource::WriteKmz()
         OGRLIBKMLPostProcessOutput(oKmlOut);
 
         if( iLayer == 0 && CPLTestBool( pszUseDocKml ) )
-            CPLCreateFileInZip( hZIP, "layers/", nullptr );
+        {
+            CPL_IGNORE_RET_VAL(CPLCreateFileInZip( hZIP, "layers/", nullptr ));
+        }
 
         const char* pszLayerFileName = nullptr;
         if( CPLTestBool( pszUseDocKml ) )

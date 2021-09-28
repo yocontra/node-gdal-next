@@ -35,7 +35,7 @@
 
 #include "tiledb_headers.h"
 
-CPL_CVSID("$Id: tiledbdataset.cpp 0f46ad0966385e2c0d5604c2428fe65a1d1b4cdf 2021-04-23 16:13:36 +0200 Vincent Schut $")
+CPL_CVSID("$Id: tiledbdataset.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $")
 
 
 const CPLString TILEDB_VALUES( "TDB_VALUES" );
@@ -1202,7 +1202,7 @@ GDALDataset *TileDBDataset::Open( GDALOpenInfo * poOpenInfo )
         if( !Identify( poOpenInfo ) )
             return nullptr;
 
-        std::unique_ptr<TileDBDataset> poDS(new TileDBDataset());
+        auto poDS = cpl::make_unique<TileDBDataset>();
 
         const char* pszConfig = CSLFetchNameValue(
                                     poOpenInfo->papszOpenOptions,
@@ -1773,7 +1773,7 @@ TileDBDataset* TileDBDataset::CreateLL( const char *pszFilename,
             return nullptr;
         }
 
-        std::unique_ptr<TileDBDataset> poDS(new TileDBDataset());
+        auto poDS = cpl::make_unique<TileDBDataset>();
         poDS->nRasterXSize = nXSize;
         poDS->nRasterYSize = nYSize;
         poDS->eDataType = eType;

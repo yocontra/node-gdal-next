@@ -48,7 +48,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsil_abstract_archive.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_abstract_archive.cpp 87733df0a658f5c24312c5a98954117f53b0ca94 2021-09-22 22:17:18 +0200 Even Rouault $")
 
 static bool IsEitherSlash( char c )
 {
@@ -207,8 +207,11 @@ const VSIArchiveContent* VSIArchiveFilesystemHandler::GetContentOfArchive(
         bool bIsDir = false;
         const CPLString osStrippedFilename =
                                 GetStrippedFilename(osFileName, bIsDir);
-        if( osStrippedFilename.empty() )
+        if( osStrippedFilename.empty() || osStrippedFilename[0] == '/' ||
+            osStrippedFilename.find("//") != std::string::npos )
+        {
             continue;
+        }
 
         if( oSet.find(osStrippedFilename) == oSet.end() )
         {

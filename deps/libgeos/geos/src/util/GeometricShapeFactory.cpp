@@ -58,7 +58,7 @@ GeometricShapeFactory::setCentre(const Coordinate& centre)
 }
 
 void
-GeometricShapeFactory::setNumPoints(int nNPts)
+GeometricShapeFactory::setNumPoints(uint32_t nNPts)
 {
     nPts = nNPts;
 }
@@ -86,7 +86,7 @@ GeometricShapeFactory::createRectangle()
 {
     int i;
     int ipt = 0;
-    int nSide = nPts / 4;
+    uint32_t nSide = nPts / 4;
     if(nSide < 1) {
         nSide = 1;
     }
@@ -161,8 +161,8 @@ GeometricShapeFactory::createArc(double startAng, double angExtent)
     env.reset();
 
     double angSize = angExtent;
-    if(angSize <= 0.0 || angSize > 2 * M_PI) {
-        angSize = 2 * M_PI;
+    if(angSize <= 0.0 || angSize > 2 * MATH_PI) {
+        angSize = 2 * MATH_PI;
     }
     double angInc = angSize / (nPts - 1);
 
@@ -191,8 +191,8 @@ GeometricShapeFactory::createArcPolygon(double startAng, double angExtent)
     env.reset();
 
     double angSize = angExtent;
-    if(angSize <= 0.0 || angSize > 2 * M_PI) {
-        angSize = 2 * M_PI;
+    if(angSize <= 0.0 || angSize > 2 * MATH_PI) {
+        angSize = 2 * MATH_PI;
     }
     double angInc = angSize / (nPts - 1);
 

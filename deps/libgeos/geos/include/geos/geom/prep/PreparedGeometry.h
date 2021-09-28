@@ -19,13 +19,17 @@
 #ifndef GEOS_GEOM_PREP_PREPAREDGEOMETRY_H
 #define GEOS_GEOM_PREP_PREPAREDGEOMETRY_H
 
+#include <vector>
+#include <memory>
 #include <geos/export.h>
 
 // Forward declarations
 namespace geos {
-namespace geom {
-class Geometry;
-}
+    namespace geom {
+        class Geometry;
+        class Coordinate;
+        class CoordinateSequence;
+    }
 }
 
 
@@ -55,14 +59,14 @@ public:
     virtual
     ~PreparedGeometry() {}
 
-    /**
+    /** \brief
      * Gets the original {@link Geometry} which has been prepared.
      *
      * @return the base geometry
      */
     virtual const geom::Geometry& getGeometry() const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} contains a given geometry.
      *
      * @param geom the Geometry to test
@@ -84,26 +88,26 @@ public:
      * - The DE-9IM Intersection Matrix for the two geometries matches
      *   <code>[T**FF*FF*]</code>
      *
-         * In other words, if the test geometry has any interaction with
+     * In other words, if the test geometry has any interaction with
      * the boundary of the target
-         * geometry the result of <tt>containsProperly</tt> is <tt>false</tt>.
-         * This is different semantics to the {@link Geometry::contains}
-     * predicate, * in which test geometries can intersect the target's
+     * geometry the result of <tt>containsProperly</tt> is <tt>false</tt>.
+     * This is different semantics to the {@link Geometry::contains}
+     * predicate, in which test geometries can intersect the target's
      * boundary and still be contained.
      *
-         * The advantage of using this predicate is that it can be computed
-         * efficiently, since it avoids the need to compute the full
+     * The advantage of using this predicate is that it can be computed
+     * efficiently, since it avoids the need to compute the full
      * topological relationship of the input boundaries in cases where
      * they intersect.
      *
-         * An example use case is computing the intersections
-         * of a set of geometries with a large polygonal geometry.
-         * Since <tt>intersection</tt> is a fairly slow operation, it can
+     * An example use case is computing the intersections
+     * of a set of geometries with a large polygonal geometry.
+     * Since <tt>intersection</tt> is a fairly slow operation, it can
      * be more efficient
-         * to use <tt>containsProperly</tt> to filter out test geometries
+     * to use <tt>containsProperly</tt> to filter out test geometries
      * which lie
-         * wholly inside the area.  In these cases the intersection is
-         * known <i>a priori</i> to be exactly the original test geometry.
+     * wholly inside the area.  In these cases the intersection is
+     * known <i>a priori</i> to be exactly the original test geometry.
      *
      * @param geom the Geometry to test
      * @return true if this Geometry properly contains the given Geometry
@@ -113,7 +117,7 @@ public:
      */
     virtual bool containsProperly(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} is covered by a given geometry.
      *
      * @param geom the Geometry to test
@@ -123,7 +127,7 @@ public:
      */
     virtual bool coveredBy(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} covers a given geometry.
      *
      * @param geom the Geometry to test
@@ -133,7 +137,7 @@ public:
      */
     virtual bool covers(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} crosses a given geometry.
      *
      * @param geom the Geometry to test
@@ -143,7 +147,7 @@ public:
      */
     virtual bool crosses(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} is disjoint from a given geometry.
      *
      * @param geom the Geometry to test
@@ -153,7 +157,7 @@ public:
      */
     virtual bool disjoint(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} intersects a given geometry.
      *
      * @param geom the Geometry to test
@@ -163,7 +167,7 @@ public:
      */
     virtual bool intersects(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} overlaps a given geometry.
      *
      * @param geom the Geometry to test
@@ -173,7 +177,7 @@ public:
      */
     virtual bool overlaps(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} touches a given geometry.
      *
      * @param geom the Geometry to test
@@ -183,7 +187,7 @@ public:
      */
     virtual bool touches(const geom::Geometry* geom) const = 0;
 
-    /**
+    /** \brief
      * Tests whether the base {@link Geometry} is within a given geometry.
      *
      * @param geom the Geometry to test
@@ -192,6 +196,26 @@ public:
      * @see Geometry#within(Geometry)
      */
     virtual bool within(const geom::Geometry* geom) const = 0;
+
+    /** \brief
+     * Compute the nearest locations on the base {@link Geometry} and
+     * the given geometry.
+     *
+     * @param geom the Geometry to compute the nearest point to
+     * @return true the nearest points
+     *
+     */
+    virtual std::unique_ptr<geom::CoordinateSequence> nearestPoints(const geom::Geometry* geom) const = 0;
+
+    /** \brief
+     * Compute the minimum distance between the base {@link Geometry} and
+     * the given geometry.
+     *
+     * @param geom the Geometry to compute the distance to
+     * @return the minimum distance between the two geometries
+     *
+     */
+    virtual double distance(const geom::Geometry* geom) const = 0;
 };
 
 

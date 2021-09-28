@@ -43,7 +43,7 @@
 #include <geos/noding/SegmentString.h>
 #include <geos/noding/MCIndexNoder.h>
 #include <geos/noding/NodedSegmentString.h>
-#include <geos/geomgraph/Position.h>
+#include <geos/geom/Position.h>
 #include <geos/geomgraph/PlanarGraph.h>
 #include <geos/geomgraph/Label.h>
 #include <geos/geomgraph/Node.h>
@@ -252,17 +252,16 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
     // Merge result lines together.
     LineMerger lineMerge;
     lineMerge.add(intersectedLines.get());
-    std::unique_ptr< std::vector< LineString* > > mergedLines(
-        lineMerge.getMergedLineStrings());
+    auto mergedLines = lineMerge.getMergedLineStrings();
 
     // Convert the result into a std::vector< Geometry* >.
     std::vector< Geometry* >* mergedLinesGeom = new std::vector< Geometry* >();
     const Coordinate& startPoint = l->getCoordinatesRO()->front();
     const Coordinate& endPoint = l->getCoordinatesRO()->back();
-    while(!mergedLines->empty()) {
+    while(!mergedLines.empty()) {
         // Remove end points if they are a part of the original line to be
         // buffered.
-        CoordinateSequence::Ptr coords(mergedLines->back()->getCoordinates());
+        CoordinateSequence::Ptr coords(mergedLines.back()->getCoordinates());
         if(nullptr != coords.get()) {
             // Use 98% of the buffer width as the point-distance requirement - this
             // is to ensure that the point that is "distance" +/- epsilon is not
@@ -349,8 +348,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
             }
         }
 
-        geomFact->destroyGeometry(mergedLines->back());
-        mergedLines->pop_back();
+        mergedLines.pop_back();
     }
 
     // Clean up.
@@ -523,11 +521,9 @@ BufferBuilder::getNoder(const PrecisionModel* pm)
      * virtual const geos::Coordinate& geos::CoordinateArraySequence::getAt(size_t) const:
      * Assertion `pos<vect->size()' failed.
      */
-    //Noder* noder = new snapround::SimpleSnapRounder(*pm);
 
     Noder* noder = new IteratedNoder(pm);
 
-    Noder noder = new SimpleSnapRounder(pm);
     Noder noder = new MCIndexSnapRounder(pm);
     Noder noder = new ScaledNoder(
         new MCIndexSnapRounder(new PrecisionModel(1.0)),

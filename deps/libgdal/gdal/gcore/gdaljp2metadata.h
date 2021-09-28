@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdaljp2metadata.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: gdaljp2metadata.h 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  JP2 Box Reader (and GMLJP2 Interpreter)
@@ -151,7 +151,7 @@ public:
     double  adfGeoTransform[6];
     bool    bPixelIsPoint;
 
-    char   *pszProjection;
+    OGRSpatialReference m_oSRS{};
 
     int         nGCPCount;
     GDAL_GCP    *pasGCPList;
@@ -181,7 +181,7 @@ public:
                           int nWorldFileIndex = 3, int *pnIndexUsed = nullptr );
 
     // Write oriented.
-    void    SetProjection( const char *pszWKT );
+    void    SetSpatialRef( const OGRSpatialReference *poSRS );
     void    SetGeoTransform( double * );
     void    SetGCPs( int, const GDAL_GCP * );
     void    SetRPCMD( char** papszRPCMDIn );

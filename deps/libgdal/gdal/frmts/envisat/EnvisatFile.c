@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: EnvisatFile.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: EnvisatFile.c 930aad0b9faed99e277da3cd649d4bef0b13f3c8 2021-08-12 14:52:44 +0200 Even Rouault $
  *
  * Project:  APP ENVISAT Support
  * Purpose:  Low Level Envisat file access (read/write) API.
@@ -35,7 +35,7 @@
 #  include "cpl_conv.h"
 #  include "EnvisatFile.h"
 
-CPL_CVSID("$Id: EnvisatFile.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: EnvisatFile.c 930aad0b9faed99e277da3cd649d4bef0b13f3c8 2021-08-12 14:52:44 +0200 Even Rouault $")
 
 #else
 #  include "APP/app.h"
@@ -1301,9 +1301,9 @@ Returns:
 
 int EnvisatFile_GetDatasetInfo( EnvisatFile *self,
                                 int ds_index,
-                                char **ds_name,
-                                char **ds_type,
-                                char **filename,
+                                const char **ds_name,
+                                const char **ds_type,
+                                const char **filename,
                                 int  *ds_offset,
                                 int  *ds_size,
                                 int  *num_dsr,

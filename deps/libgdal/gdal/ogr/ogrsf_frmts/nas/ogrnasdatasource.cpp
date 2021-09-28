@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_nas.h"
 
-CPL_CVSID("$Id: ogrnasdatasource.cpp 538cefca18e29a3b75cffe97823475177ca71cd0 2021-03-11 11:43:45 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrnasdatasource.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
 
 static const char * const apszURNNames[] =
 {
@@ -262,7 +262,7 @@ OGRNASLayer *OGRNASDataSource::TranslateNASSchema( GMLFeatureClass *poClass )
                 }
             }
 
-            if (poSRS->SetFromUserInput(pszSRSName) != OGRERR_NONE)
+            if (poSRS->SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE)
             {
                 CPLDebug( "NAS", "Failed to translate srsName='%s'",
                         pszSRSName );

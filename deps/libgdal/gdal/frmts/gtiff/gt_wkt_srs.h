@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_wkt_srs.h cc02dc4397c7ec43ec4c4b842e5faabe16c54904 2019-12-17 14:27:30 +0100 Even Rouault $
+ * $Id: gt_wkt_srs.h 02501e858470529cbe79c7fe1f0154e0cdaae288 2021-05-08 15:51:06 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implements translation between GeoTIFF normalized projection
@@ -56,7 +56,7 @@ typedef enum
 
 OGRSpatialReferenceH GTIFGetOGISDefnAsOSR( GTIF *, GTIFDefn * );
 
-int GTIFSetFromOGISDefnEx( GTIF *, const char *, GTIFFKeysFlavorEnum,
+int GTIFSetFromOGISDefnEx( GTIF *, OGRSpatialReferenceH, GTIFFKeysFlavorEnum,
                            GeoTIFFVersionEnum );
 
 CPL_C_END

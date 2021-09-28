@@ -49,7 +49,7 @@
 #include <utility>
 #include <set>
 
-CPL_CVSID("$Id: bagdataset.cpp 38addbd67dc34139d885e12f82a52f55cc9669dc 2021-07-03 16:32:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: bagdataset.cpp 2986c5478b030cbf210890376e28d4ccdec15991 2021-08-06 16:59:15 +0200 Even Rouault $")
 
 struct BAGRefinementGrid
 {
@@ -2076,7 +2076,7 @@ GDALDataset *BAGDataset::Open( GDALOpenInfo *poOpenInfo )
     }
     H5Aclose(hVersion);
 
-    auto poSharedResources = std::make_shared<GDAL::HDF5SharedResources>();
+    auto poSharedResources = std::make_shared<GDAL::HDF5SharedResources>(osFilename);
     poSharedResources->m_hHDF5 = hHDF5;
 
     auto poRootGroup = HDF5Dataset::OpenGroup(poSharedResources);
@@ -2956,7 +2956,7 @@ GDALDataset *BAGDataset::OpenForCreate( GDALOpenInfo *poOpenInfo,
     if( hHDF5 < 0 )
         return nullptr;
 
-    auto poSharedResources = std::make_shared<GDAL::HDF5SharedResources>();
+    auto poSharedResources = std::make_shared<GDAL::HDF5SharedResources>(osFilename);
     poSharedResources->m_hHDF5 = hHDF5;
 
     auto poRootGroup = HDF5Dataset::OpenGroup(poSharedResources);

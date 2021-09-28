@@ -31,7 +31,9 @@
 #include "ogr_dods.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrdodssequencelayer.cpp 0f97d3a5c271e8972ea5dddc07421c7d083050b0 2019-03-24 13:50:30 +0100 Even Rouault $")
+#include <cmath>
+
+CPL_CVSID("$Id: ogrdodssequencelayer.cpp 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRDODSSequenceLayer()                        */
@@ -1027,19 +1029,5 @@ bool OGRDODSIsFloatInvalid( const float * pfValToCheck )
 bool OGRDODSIsDoubleInvalid( const double * pdfValToCheck )
 
 {
-    const unsigned char *pabyValToCheck = (unsigned char *) pdfValToCheck;
-
-#if CPL_IS_LSB == 0
-    if( (pabyValToCheck[0] & 0x7f) == 0x7f
-        && (pabyValToCheck[1] & 0xf0) == 0xf0 )
-        return true;
-    else
-        return false;
-#else
-    if( (pabyValToCheck[7] & 0x7f) == 0x7f
-        && (pabyValToCheck[6] & 0xf0) == 0xf0 )
-        return true;
-    else
-        return false;
-#endif
+    return !std::isfinite(*pdfValToCheck);
 }

@@ -57,7 +57,7 @@
 #include "shapefil.h"
 #include "shp_vsi.h"
 
-CPL_CVSID("$Id: ogrshapelayer.cpp 55b80efaada5eaf092ec04eca79b10a99af9442b 2021-06-10 22:01:50 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrshapelayer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRShapeLayer()                            */
@@ -243,12 +243,12 @@ OGRShapeLayer::OGRShapeLayer( OGRShapeDataSource* poDSIn,
         {
             poSRSClone->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
         }
-        OGRShapeGeomFieldDefn* poGeomFieldDefn =
-            new OGRShapeGeomFieldDefn(pszFullName, eType, bSRSSetIn, poSRSClone);
+        auto poGeomFieldDefn =
+            cpl::make_unique<OGRShapeGeomFieldDefn>(pszFullName, eType, bSRSSetIn, poSRSClone);
         if( poSRSClone )
             poSRSClone->Release();
         poFeatureDefn->SetGeomType(wkbNone);
-        poFeatureDefn->AddGeomFieldDefn(poGeomFieldDefn, FALSE);
+        poFeatureDefn->AddGeomFieldDefn(std::move(poGeomFieldDefn));
     }
 
     SetDescription( poFeatureDefn->GetName() );
@@ -2484,7 +2484,7 @@ OGRErr OGRShapeLayer::CreateSpatialIndex( int nMaxDepth )
 /* -------------------------------------------------------------------- */
     SHPDestroyTree( psTree );
 
-    CheckForQIX();
+    CPL_IGNORE_RET_VAL(CheckForQIX());
 
     return OGRERR_NONE;
 }

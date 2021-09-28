@@ -54,7 +54,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrpgeogeometry.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeogeometry.cpp 498a80077f2504ce756950b02fccc7144c28e163 2021-08-13 10:52:53 +0200 Even Rouault $")
 
 constexpr int SHPP_TRISTRIP  = 0;
 constexpr int SHPP_TRIFAN    = 1;
@@ -1755,7 +1755,7 @@ static OGRCurve* OGRShapeCreateCompoundCurve( int nPartStartIdx,
                                               /* const */ double* padfM,
                                               int* pnLastCurveIdx )
 {
-    auto poCC = std::unique_ptr<OGRCompoundCurve>(new OGRCompoundCurve());
+    auto poCC = cpl::make_unique<OGRCompoundCurve>();
     int nLastPointIdx = nPartStartIdx;
     bool bHasCircularArcs = false;
     int i = nFirstCurveIdx;  // Used after for.

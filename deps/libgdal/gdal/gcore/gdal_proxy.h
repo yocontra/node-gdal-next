@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_proxy.h b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $
+ * $Id: gdal_proxy.h 0b332f1a2700726be41485d9802f777397d9fb29 2021-07-21 18:13:49 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  GDAL Core C++/Private declarations
@@ -235,6 +235,11 @@ class CPL_DLL GDALProxyPoolDataset : public GDALProxyDataset
 
         GDALDataset *RefUnderlyingDataset(bool bForceOpen) const;
 
+        GDALProxyPoolDataset( const char* pszSourceDatasetDescription,
+                              GDALAccess eAccess,
+                              int bShared,
+                              const char* pszOwner );
+
   protected:
     GDALDataset *RefUnderlyingDataset() const override;
     void UnrefUnderlyingDataset(GDALDataset* poUnderlyingDataset) const override;
@@ -249,9 +254,17 @@ class CPL_DLL GDALProxyPoolDataset : public GDALProxyDataset
                           const char * pszProjectionRef = nullptr,
                           double * padfGeoTransform = nullptr,
                           const char* pszOwner = nullptr );
+
+
+    static GDALProxyPoolDataset* Create( const char* pszSourceDatasetDescription,
+                                         CSLConstList papszOpenOptions = nullptr,
+                                         GDALAccess eAccess = GA_ReadOnly,
+                                         int bShared = FALSE,
+                                         const char* pszOwner = nullptr );
+
     ~GDALProxyPoolDataset() override;
 
-    void SetOpenOptions( char** papszOpenOptions );
+    void SetOpenOptions( CSLConstList papszOpenOptions );
 
     // If size (nBlockXSize&nBlockYSize) parameters is zero
     // they will be loaded when RefUnderlyingRasterBand function is called.
@@ -333,6 +346,8 @@ class CPL_DLL GDALProxyPoolRasterBand : public GDALProxyRasterBand
 
     void AddSrcMaskBandDescription( GDALDataType eDataType, int nBlockXSize,
                                     int nBlockYSize );
+
+    void AddSrcMaskBandDescriptionFromUnderlying();
 
     // Special behavior for the following methods : they return a pointer
     // data type, that must be cached by the proxy, so it doesn't become invalid

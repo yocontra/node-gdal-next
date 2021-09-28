@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: pcidskdataset2.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: pcidskdataset2.cpp f90ebb2a2eb4bcecff7da733e777e0cb98594aa1 2021-09-17 15:12:30 +0200 Even Rouault $")
 
 const PCIDSK::PCIDSKInterfaces *PCIDSK2GetInterfaces(void);
 
@@ -1761,11 +1761,13 @@ GDALDataset *PCIDSK2Dataset::Open( GDALOpenInfo * poOpenInfo )
 /*      Try opening the file.                                           */
 /* -------------------------------------------------------------------- */
     PCIDSKFile *poFile = nullptr;
+    const int nMaxBandCount = atoi(CPLGetConfigOption("GDAL_MAX_BAND_COUNT", "65536"));
     try {
         poFile =
             PCIDSK::Open( poOpenInfo->pszFilename,
                           poOpenInfo->eAccess == GA_ReadOnly ? "r" : "r+",
-                          PCIDSK2GetInterfaces() );
+                          PCIDSK2GetInterfaces(),
+                          nMaxBandCount );
         if( poFile == nullptr )
         {
             CPLError( CE_Failure, CPLE_OpenFailed,

@@ -63,7 +63,7 @@ namespace operation { // geos::operation
 namespace overlay { // geos::operation::overlay
 
 /// \brief Computes the geometric overlay of two Geometry.
-//
+///
 /// The overlay can be used to determine any
 /// boolean combination of the geometries.
 ///
@@ -72,7 +72,7 @@ class GEOS_DLL OverlayOp: public GeometryGraphOperation {
 public:
 
     ///  \brief The spatial functions supported by this class.
-    //
+    ///
     /// These operations implement various boolean combinations of
     /// the resultants of the overlay.
     ///
@@ -107,7 +107,7 @@ public:
      * the result of overlaying the geometries using
      * a given overlay operation.
      *
-     * The method handles arguments of [Location::UNDEF](@ref geom::Location::UNDEF) correctly
+     * The method handles arguments of [Location::NONE](@ref geom::Location::NONE) correctly
      *
      * @param label the topological label of the point
      * @param opCode the code for the overlay operation to test
@@ -116,13 +116,13 @@ public:
     static bool isResultOfOp(const geomgraph::Label& label, OpCode opCode);
 
     /// \brief This method will handle arguments of Location.NULL correctly
-    //
+    ///
     /// @return true if the locations correspond to the opCode
     ///
     static bool isResultOfOp(geom::Location loc0, geom::Location loc1, OpCode opCode);
 
     /// \brief Construct an OverlayOp with the given Geometry args.
-    //
+    ///
     /// Ownership of passed args will remain to caller, and
     /// the OverlayOp won't change them in any way.
     ///
@@ -174,6 +174,23 @@ public:
      * @return true if the coord is located in the interior or boundary of
      * a geometry in the list.
      */
+
+    /**
+    * Creates an empty result geometry of the appropriate dimension,
+    * based on the given overlay operation and the dimensions of the inputs.
+    * The created geometry is always an atomic geometry,
+    * not a collection.
+    *
+    * The empty result is constructed using the following rules:
+    *
+    * * #opINTERSECTION  result has the dimension of the lowest input dimension
+    * * #opUNION - result has the dimension of the highest input dimension
+    * * #opDIFFERENCE - result has the dimension of the left-hand input
+    * * #opSYMDIFFERENCE - result has the dimension of the highest input dimension
+    */
+    static std::unique_ptr<geom::Geometry> createEmptyResult(
+        OverlayOp::OpCode overlayOpCode, const geom::Geometry* a,
+        const geom::Geometry* b, const geom::GeometryFactory* geomFact);
 
 protected:
 
@@ -341,23 +358,6 @@ private:
             const geom::Geometry* g0, const geom::Geometry* g1);
 
     /**
-    * Creates an empty result geometry of the appropriate dimension,
-    * based on the given overlay operation and the dimensions of the inputs.
-    * The created geometry is always an atomic geometry,
-    * not a collection.
-    *
-    * The empty result is constructed using the following rules:
-    *
-    * * #opINTERSECTION  result has the dimension of the lowest input dimension
-    * * #opUNION - result has the dimension of the highest input dimension
-    * * #opDIFFERENCE - result has the dimension of the left-hand input
-    * * #opSYMDIFFERENCE - result has the dimension of the highest input dimension
-    */
-    static std::unique_ptr<geom::Geometry> createEmptyResult(
-        OverlayOp::OpCode overlayOpCode, const geom::Geometry* a,
-        const geom::Geometry* b, const geom::GeometryFactory* geomFact);
-
-    /**
      * Build a Geometry containing all Geometries in the given vectors.
      * Takes element's ownership, vector control is left to caller.
      */
@@ -397,27 +397,6 @@ private:
     /// Throw TopologyException if an obviously wrong result has
     /// been computed.
     void checkObviouslyWrongResult(OpCode opCode);
-
-};
-
-/** \brief
- * OverlayOp::overlayOp Adapter for use with geom::BinaryOp
- */
-struct overlayOp {
-
-    OverlayOp::OpCode opCode;
-
-    overlayOp(OverlayOp::OpCode code)
-        :
-        opCode(code)
-    {}
-
-    geom::Geometry*
-    operator()(const geom::Geometry* g0,
-               const geom::Geometry* g1)
-    {
-        return OverlayOp::overlayOp(g0, g1, opCode);
-    }
 
 };
 

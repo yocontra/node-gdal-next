@@ -37,7 +37,7 @@
 #include <cmath>
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_hatch.cpp c1d42d41a98f8c766a50dba7758dcaf6cc72b4ba 2021-03-15 14:44:14 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdxf_hatch.cpp 96ac99f1f87bf75edc2fcbf39ea1196e58f00a0f 2021-08-13 10:26:38 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           TranslateHATCH()                           */
@@ -521,7 +521,7 @@ OGRErr OGRDXFLayer::CollectBoundaryPath( OGRGeometryCollection *poGC,
             if( nCode > 0 )
                 poDS->UnreadValue();
 
-            OGRLineString *poLS = InsertSplineWithChecks( nDegree,
+            auto poLS = InsertSplineWithChecks( nDegree,
                 adfControlPoints, nControlPoints, adfKnots, nKnots,
                 adfWeights );
 
@@ -531,7 +531,7 @@ OGRErr OGRDXFLayer::CollectBoundaryPath( OGRGeometryCollection *poGC,
                 return OGRERR_FAILURE;
             }
 
-            poGC->addGeometryDirectly( poLS );
+            poGC->addGeometryDirectly( poLS.release() );
         }
 
         else

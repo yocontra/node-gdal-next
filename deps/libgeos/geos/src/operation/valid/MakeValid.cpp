@@ -21,7 +21,11 @@
 
 #include <geos/operation/valid/MakeValid.h>
 #include <geos/operation/valid/IsValidOp.h>
+
+#include <geos/operation/overlay/OverlayOp.h>
 #include <geos/operation/polygonize/BuildArea.h>
+#include <geos/operation/union/UnaryUnionOp.h>
+#include <geos/geom/HeuristicOverlay.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryCollection.h>
 #include <geos/geom/GeometryFactory.h>
@@ -30,8 +34,10 @@
 #include <geos/geom/Polygon.h>
 #include <geos/geom/MultiLineString.h>
 #include <geos/geom/MultiPolygon.h>
+#include <geos/util/Interrupt.h>
 #include <geos/util/UniqueCoordinateArrayFilter.h>
 #include <geos/util/UnsupportedOperationException.h>
+
 
 // std
 #include <cassert>
@@ -44,10 +50,30 @@
 #endif
 
 using namespace geos::geom;
+using namespace geos::operation::overlay;
 
 namespace geos {
 namespace operation { // geos.operation
 namespace valid { // geos.operation.valid
+
+
+static std::unique_ptr<geom::Geometry>
+makeValidSymDifference(const geom::Geometry* g0, const geom::Geometry* g1)
+{
+    return HeuristicOverlay(g0, g1, OverlayOp::opSYMDIFFERENCE);
+}
+
+static std::unique_ptr<geom::Geometry>
+makeValidDifference(const geom::Geometry* g0, const geom::Geometry* g1)
+{
+    return HeuristicOverlay(g0, g1, OverlayOp::opDIFFERENCE);
+}
+
+static std::unique_ptr<geom::Geometry>
+makeValidUnion(const geom::Geometry* g0, const geom::Geometry* g1)
+{
+    return HeuristicOverlay(g0, g1, OverlayOp::opUNION);
+}
 
 /*
  * Fully node given linework
@@ -76,12 +102,12 @@ nodeLineWithFirstCoordinate(const geom::Geometry* geom)
   } else {
       auto mls = dynamic_cast<const geom::MultiLineString*>(geom);
       assert(mls);
-      auto line = dynamic_cast<const geom::LineString*>(mls->getGeometryN(0));
+      auto line = mls->getGeometryN(0);
       assert(line);
       point = line->getPointN(0);
   }
 
-  return geom->Union(point.get());
+  return makeValidUnion(geom, point.get());
 }
 
 
@@ -190,7 +216,7 @@ static std::unique_ptr<geom::Geometry> MakeValidPoly(const geom::Geometry* geom)
     *       We want to retrieve any of those */
     auto pi = extractUniquePoints(bound.get());
     auto po = extractUniquePoints(cut_edges.get());
-    std::unique_ptr<geom::Geometry> collapse_points(pi->difference(po.get()));
+    std::unique_ptr<geom::Geometry> collapse_points = makeValidDifference(pi.get(), po.get());
     assert(collapse_points);
     pi.reset();
     po.reset();
@@ -208,6 +234,8 @@ static std::unique_ptr<geom::Geometry> MakeValidPoly(const geom::Geometry* geom)
     */
     while( cut_edges->getNumGeometries() ) {
 
+        GEOS_CHECK_FOR_INTERRUPTS();
+
         // ASSUMPTION: cut_edges should already be fully noded
         auto new_area = geos::operation::polygonize::BuildArea().build(cut_edges.get());
         assert(new_area); // never return nullptr, but exception
@@ -222,8 +250,10 @@ static std::unique_ptr<geom::Geometry> MakeValidPoly(const geom::Geometry* geom)
         assert(new_area_bound);
 
         // Now symdif new and old area
-        std::unique_ptr<geom::Geometry> symdif(area->symDifference(new_area.get()));
+        std::unique_ptr<geom::Geometry> symdif = makeValidSymDifference(area.get(), new_area.get());
         assert(symdif);
+
+        GEOS_CHECK_FOR_INTERRUPTS();
 
         area = std::move(symdif);
 
@@ -237,7 +267,7 @@ static std::unique_ptr<geom::Geometry> MakeValidPoly(const geom::Geometry* geom)
         * NOTE: this is an expensive operation.
         *
         */
-        std::unique_ptr<geom::Geometry> new_cut_edges(cut_edges->difference(new_area_bound.get()));
+        std::unique_ptr<geom::Geometry> new_cut_edges = makeValidDifference(cut_edges.get(), new_area_bound.get());
         assert(new_cut_edges);
 
         cut_edges = std::move(new_cut_edges);

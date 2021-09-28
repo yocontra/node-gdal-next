@@ -30,7 +30,7 @@
 #include "cpl_error.h"
 #include "msg_basic_types.h"
 
-CPL_CVSID("$Id: msg_basic_types.cpp 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
+CPL_CVSID("$Id: msg_basic_types.cpp 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $")
 
 #include <stdio.h>
 
@@ -57,11 +57,7 @@ void to_native(SUB_VISIRLINE& v) {
 }
 
 static void swap_64_bits(unsigned char* b) {
-    for (int i=0; i < 4; i++) {
-        unsigned char t = b[i];
-        b[i] = b[7-i];
-        b[7-i] = t;
-    }
+    CPL_SWAP64PTR(b);
 }
 
 void to_native(RADIOMETRIC_PROCESSING_RECORD& r) {

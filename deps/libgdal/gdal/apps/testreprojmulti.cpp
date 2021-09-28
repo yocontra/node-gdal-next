@@ -33,7 +33,7 @@
 #include "cpl_multiproc.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: testreprojmulti.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: testreprojmulti.cpp 0987ab9e6491cb84fb800144ee271ab7e68f9db4 2021-06-15 13:43:00 +0800 C41eb $")
 
 double* padfRefX = nullptr;
 double* padfRefY = nullptr;
@@ -63,7 +63,7 @@ static void ReprojFunc(void* /* unused */)
         CPLAtomicInc(&nIter);
         memcpy(padfResultX, padfRefX, 1024 * sizeof(double));
         memcpy(padfResultY, padfRefY, 1024 * sizeof(double));
-        poCT->TransformEx( 1024, padfResultX, padfResultY, nullptr, nullptr );
+        poCT->Transform( 1024, padfResultX, padfResultY, nullptr, nullptr );
 
         /* Check that the results are consistent with the reference results */
         assert(memcmp(padfResultX, padfRefResultX, 1024 * sizeof(double)) == 0);
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
     memcpy(padfRefResultX, padfRefX, 1024 * sizeof(double));
     memcpy(padfRefResultY, padfRefY, 1024 * sizeof(double));
 
-    poCT->TransformEx( 1024, padfRefResultX, padfRefResultY, nullptr, nullptr );
+    poCT->Transform( 1024, padfRefResultX, padfRefResultY, nullptr, nullptr );
 
     for(int i=0;i<nThreads;i++)
         CPLCreateThread(ReprojFunc, nullptr);

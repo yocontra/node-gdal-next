@@ -30,6 +30,7 @@
 #include <geos/geom/MultiLineString.h>
 #include <geos/geom/MultiPolygon.h>
 #include <geos/geom/CoordinateSequence.h>
+#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/PrecisionModel.h>
 
 #include <ostream>
@@ -44,7 +45,7 @@ using namespace geos::geom;
 namespace geos {
 namespace io { // geos.io
 
-WKBWriter::WKBWriter(int dims, int bo, bool srid):
+WKBWriter::WKBWriter(uint8_t dims, int bo, bool srid):
     defaultOutputDimension(dims), byteOrder(bo), includeSRID(srid), outStream(nullptr)
 {
     if(dims < 2 || dims > 3) {
@@ -56,7 +57,7 @@ WKBWriter::WKBWriter(int dims, int bo, bool srid):
 
 /* public */
 void
-WKBWriter::setOutputDimension(int dims)
+WKBWriter::setOutputDimension(uint8_t dims)
 {
     if(dims < 2 || dims > 3) {
         throw util::IllegalArgumentException("WKB output dimension must be 2 or 3");
@@ -121,10 +122,25 @@ WKBWriter::write(const Geometry& g, ostream& os)
 }
 
 void
+WKBWriter::writePointEmpty(const Point& g)
+{
+    writeByteOrder();
+    writeGeometryType(WKBConstants::wkbPoint, g.getSRID());
+    writeSRID(g.getSRID());
+
+    Coordinate c(DoubleNotANumber, DoubleNotANumber, DoubleNotANumber);
+    CoordinateArraySequence cas(std::size_t(1), std::size_t(g.getCoordinateDimension()));
+    cas.setAt(c, 0);
+
+    writeCoordinateSequence(cas, false);
+}
+
+void
 WKBWriter::writePoint(const Point& g)
 {
-    if(g.isEmpty()) throw
-        util::IllegalArgumentException("Empty Points cannot be represented in WKB");
+    if(g.isEmpty()) {
+        return writePointEmpty(g);
+    }
 
     writeByteOrder();
 
@@ -240,7 +256,7 @@ WKBWriter::setByteOrder(int bo)
 void
 WKBWriter::writeGeometryType(int typeId, int SRID)
 {
-    int flag3D = (outputDimension == 3) ? 0x80000000 : 0;
+    int flag3D = (outputDimension == 3) ? int(0x80000000) : 0;
     int typeInt = typeId | flag3D;
 
     if(includeSRID && SRID != 0) {

@@ -23,7 +23,7 @@
 #include <geos/algorithm/locate/SimplePointInAreaLocator.h>
 #include <geos/geom/Location.h>
 #include <geos/geomgraph/Label.h>
-#include <geos/geomgraph/Position.h>
+#include <geos/geom/Position.h>
 #include <geos/geomgraph/GeometryGraph.h>
 
 #include <cassert>
@@ -47,8 +47,8 @@ EdgeEndStar::EdgeEndStar()
     :
     edgeMap()
 {
-    ptInAreaLocation[0] = Location::UNDEF;
-    ptInAreaLocation[1] = Location::UNDEF;
+    ptInAreaLocation[0] = Location::NONE;
+    ptInAreaLocation[1] = Location::NONE;
 }
 
 /*public*/
@@ -105,7 +105,7 @@ EdgeEndStar::computeLabelling(std::vector<GeometryGraph*>* geomGraph)
     propagateSideLabels(0);
     propagateSideLabels(1);
 
-    /**
+    /*
      * If there are edges that still have null labels for a geometry
      * this must be because there are no area edges for that geometry
      * incident on this node.
@@ -161,9 +161,9 @@ EdgeEndStar::computeLabelling(std::vector<GeometryGraph*>* geomGraph)
         EdgeEnd* e = *it;
         assert(e);
         Label& label = e->getLabel();
-        for(int geomi = 0; geomi < 2; ++geomi) {
+        for(uint32_t geomi = 0; geomi < 2; ++geomi) {
             if(label.isAnyNull(geomi)) {
-                Location loc = Location::UNDEF;
+                Location loc = Location::NONE;
                 if(hasDimensionalCollapseEdge[geomi]) {
                     loc = Location::EXTERIOR;
                 }
@@ -192,11 +192,11 @@ EdgeEndStar::computeEdgeEndLabels(
 
 /*public*/
 Location
-EdgeEndStar::getLocation(int geomIndex,
+EdgeEndStar::getLocation(uint32_t geomIndex,
                          const Coordinate& p, std::vector<GeometryGraph*>* geom)
 {
     // compute location only on demand
-    if(ptInAreaLocation[geomIndex] == Location::UNDEF) {
+    if(ptInAreaLocation[geomIndex] == Location::NONE) {
         ptInAreaLocation[geomIndex] = algorithm::locate::SimplePointInAreaLocator::locate(p,
                                       (*geom)[geomIndex]->getGeometry());
     }
@@ -213,7 +213,7 @@ EdgeEndStar::isAreaLabelsConsistent(const GeometryGraph& geomGraph)
 
 /*private*/
 bool
-EdgeEndStar::checkAreaLabelsConsistent(int geomIndex)
+EdgeEndStar::checkAreaLabelsConsistent(uint32_t geomIndex)
 {
     // Since edges are stored in CCW order around the node,
     // As we move around the ring we move from the right to
@@ -230,7 +230,7 @@ EdgeEndStar::checkAreaLabelsConsistent(int geomIndex)
     Location startLoc = startLabel.getLocation(geomIndex, Position::LEFT);
 
     // Found unlabelled area edge
-    assert(startLoc != Location::UNDEF);
+    assert(startLoc != Location::NONE);
 
     Location currLoc = startLoc;
 
@@ -262,13 +262,13 @@ EdgeEndStar::checkAreaLabelsConsistent(int geomIndex)
 
 /*public*/
 void
-EdgeEndStar::propagateSideLabels(int geomIndex)
+EdgeEndStar::propagateSideLabels(uint32_t geomIndex)
 //throw(TopologyException *)
 {
     // Since edges are stored in CCW order around the node,
     // As we move around the ring we move from the right to the
     // left side of the edge
-    Location startLoc = Location::UNDEF;
+    Location startLoc = Location::NONE;
 
     EdgeEndStar::iterator beginIt = begin();
     EdgeEndStar::iterator endIt = end();
@@ -280,13 +280,13 @@ EdgeEndStar::propagateSideLabels(int geomIndex)
         assert(e);
         const Label& label = e->getLabel();
         if(label.isArea(geomIndex) &&
-                label.getLocation(geomIndex, Position::LEFT) != Location::UNDEF) {
+                label.getLocation(geomIndex, Position::LEFT) != Location::NONE) {
             startLoc = label.getLocation(geomIndex, Position::LEFT);
         }
     }
 
     // no labelled sides found, so no labels to propagate
-    if(startLoc == Location::UNDEF) {
+    if(startLoc == Location::NONE) {
         return;
     }
 
@@ -296,7 +296,7 @@ EdgeEndStar::propagateSideLabels(int geomIndex)
         assert(e);
         Label& label = e->getLabel();
         // set null ON values to be in current location
-        if(label.getLocation(geomIndex, Position::ON) == Location::UNDEF) {
+        if(label.getLocation(geomIndex, Position::ON) == Location::NONE) {
             label.setLocation(geomIndex, Position::ON, currLoc);
         }
 
@@ -311,18 +311,18 @@ EdgeEndStar::propagateSideLabels(int geomIndex)
 
             // if there is a right location, that is the next
             // location to propagate
-            if(rightLoc != Location::UNDEF) {
+            if(rightLoc != Location::NONE) {
                 if(rightLoc != currLoc)
                     throw util::TopologyException("side location conflict",
                                                   e->getCoordinate());
-                if(leftLoc == Location::UNDEF) {
+                if(leftLoc == Location::NONE) {
                     // found single null side at e->getCoordinate()
                     assert(0);
                 }
                 currLoc = leftLoc;
             }
             else {
-                /**
+                /*
                  * RHS is null - LHS must be null too.
                  * This must be an edge from the other
                  * geometry, which has no location
@@ -335,7 +335,7 @@ EdgeEndStar::propagateSideLabels(int geomIndex)
                  */
                 // found single null side
                 assert(label.getLocation(geomIndex,
-                                         Position::LEFT) == Location::UNDEF);
+                                         Position::LEFT) == Location::NONE);
 
                 label.setLocation(geomIndex, Position::RIGHT,
                                   currLoc);

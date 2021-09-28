@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pdfobject.h 8cd41d830a6a679b01e7c90ceb2f10fa8e42a99b 2021-08-21 20:37:24 +0200 Even Rouault $
+ * $Id: pdfobject.h c0da1d4fc8605bc434cedbad4224e36689a0c7f6 2021-08-21 20:37:24 +0200 Even Rouault $
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.

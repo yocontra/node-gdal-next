@@ -46,7 +46,7 @@
 #include <set>
 #include <vector>
 
-CPL_CVSID("$Id: fitsdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: fitsdataset.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -88,8 +88,6 @@ class FITSDataset final : public GDALPamDataset {
 
   std::vector<std::unique_ptr<FITSLayer>> m_apoLayers{};
 
-  FITSDataset();     // Others should not call this constructor explicitly
-
   CPLErr Init(fitsfile* hFITS, bool isExistingFile, int hduNum);
 
   void        LoadGeoreferencing();
@@ -98,6 +96,8 @@ class FITSDataset final : public GDALPamDataset {
   void        LoadMetadata(GDALMajorObject* poTarget);
 
 public:
+
+  FITSDataset();     // Others should not call this constructor explicitly
   ~FITSDataset();
 
   static GDALDataset* Open( GDALOpenInfo* );
@@ -2388,7 +2388,7 @@ GDALDataset* FITSDataset::Open(GDALOpenInfo* poOpenInfo) {
         return nullptr;
     }
     // Create a FITSDataset object
-    auto dataset = std::unique_ptr<FITSDataset>(new FITSDataset());
+    auto dataset = cpl::make_unique<FITSDataset>();
     dataset->m_isExistingFile = true;
     dataset->m_hFITS = hFITS;
     dataset->eAccess = poOpenInfo->eAccess;

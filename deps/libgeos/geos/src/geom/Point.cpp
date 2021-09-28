@@ -44,6 +44,7 @@ namespace geom { // geos::geom
 const static FixedSizeCoordinateSequence<0> emptyCoords2d(2);
 const static FixedSizeCoordinateSequence<0> emptyCoords3d(3);
 
+
 /*protected*/
 Point::Point(CoordinateSequence* newCoords, const GeometryFactory* factory)
     :
@@ -54,7 +55,7 @@ Point::Point(CoordinateSequence* newCoords, const GeometryFactory* factory)
     std::unique_ptr<CoordinateSequence> coords(newCoords);
 
     if(coords == nullptr) {
-        empty3d = true;
+        empty2d = true;
         return;
     }
 
@@ -82,7 +83,7 @@ Point::Point(const Point& p)
     :
     Geometry(p),
     coordinates(p.coordinates),
-    empty2d(p.empty3d),
+    empty2d(p.empty2d),
     empty3d(p.empty3d)
 {
 }
@@ -117,10 +118,10 @@ Point::getDimension() const
     return Dimension::P; // point
 }
 
-int
+uint8_t
 Point::getCoordinateDimension() const
 {
-    return (int) getCoordinatesRO()->getDimension();
+    return (uint8_t) getCoordinatesRO()->getDimension();
 }
 
 int

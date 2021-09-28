@@ -29,15 +29,15 @@
 
 #include "ogrgeojsonutils.h"
 #include <assert.h>
-#include <cpl_port.h>
-#include <cpl_conv.h>
-#include <ogr_geometry.h>
+#include "cpl_port.h"
+#include "cpl_conv.h"
+#include "ogr_geometry.h"
 #include <json.h> // JSON-C
 
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: ogrgeojsonutils.cpp 3f847c810ebdafb96bd0c2823b838ed25d35799f 2020-12-17 19:13:24 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonutils.cpp 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $")
 
 const char szESRIJSonPotentialStart1[] =
     "{\"features\":[{\"geometry\":{\"rings\":[";

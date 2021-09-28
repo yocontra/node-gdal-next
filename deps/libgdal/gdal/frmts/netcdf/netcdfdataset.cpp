@@ -9,6 +9,7 @@
  * Copyright (c) 2004, Frank Warmerdam
  * Copyright (c) 2007-2016, Even Rouault <even.rouault at spatialys.com>
  * Copyright (c) 2010, Kyle Shannon <kyle at pobox dot com>
+ * Copyright (c) 2021, CLS
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -60,6 +61,7 @@
 
 #include "cpl_conv.h"
 #include "cpl_error.h"
+#include "cpl_json.h"
 #include "cpl_minixml.h"
 #include "cpl_multiproc.h"
 #include "cpl_progress.h"
@@ -70,7 +72,7 @@
 #include "ogr_srs_api.h"
 
 
-CPL_CVSID("$Id: netcdfdataset.cpp ce8bc209fdb6ae4a53fec39ec4f6081727877153 2021-08-16 17:27:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: netcdfdataset.cpp a81745303f2221da5297b2eb495bae929e6f50ea 2021-09-23 01:20:02 +0200 Even Rouault $")
 
 // Internal function declarations.
 
@@ -439,35 +441,41 @@ netCDFRasterBand::netCDFRasterBand( netCDFDataset *poNCDFDS,
     // Look for valid_range or valid_min/valid_max.
 
     // First look for valid_range.
-    status = nc_inq_att(cdfid, nZId, "valid_range", &atttype, &attlen);
-    if( (status == NC_NOERR) && (attlen == 2) &&
-        CPLFetchBool(poNCDFDS->GetOpenOptions(), "HONOUR_VALID_RANGE", true) )
+    if( CPLFetchBool(poNCDFDS->GetOpenOptions(), "HONOUR_VALID_RANGE", true) )
     {
-        int vrange[2] = { 0, 0 };
-        status = nc_get_att_int(cdfid, nZId, "valid_range", vrange);
-        if( status == NC_NOERR )
+        char *pszValidRange = nullptr;
+        if( NCDFGetAttr(cdfid, nZId, "valid_range", &pszValidRange) == CE_None &&
+            pszValidRange[0] == '{' && pszValidRange[strlen(pszValidRange)-1] == '}' )
         {
-            bValidRangeValid = true;
-            adfValidRange[0] = vrange[0];
-            adfValidRange[1] = vrange[1];
-        }
-        // If not found look for valid_min and valid_max.
-        else
-        {
-            int vmin = 0;
-            status = nc_get_att_int(cdfid, nZId, "valid_min", &vmin);
-            if( status == NC_NOERR )
+            const std::string osValidRange = std::string(
+                pszValidRange).substr(1, strlen(pszValidRange)-2);
+            const CPLStringList aosValidRange(
+                CSLTokenizeString2(osValidRange.c_str(), ",", 0));
+            if( aosValidRange.size() == 2 &&
+                CPLGetValueType(aosValidRange[0]) != CPL_VALUE_STRING &&
+                CPLGetValueType(aosValidRange[1]) != CPL_VALUE_STRING )
             {
-                adfValidRange[0] = vmin;
-                int vmax = 0;
-                status = nc_get_att_int(cdfid, nZId, "valid_max", &vmax);
-                if( status == NC_NOERR )
-                {
-                    adfValidRange[1] = vmax;
-                    bValidRangeValid = true;
-                }
+                bValidRangeValid = true;
+                adfValidRange[0] = CPLAtof(aosValidRange[0]);
+                adfValidRange[1] = CPLAtof(aosValidRange[1]);
             }
         }
+        CPLFree(pszValidRange);
+
+        // If not found look for valid_min and valid_max.
+        if( !bValidRangeValid )
+        {
+            double dfMin = 0;
+            double dfMax = 0;
+            if( NCDFGetAttr(cdfid, nZId, "valid_min", &dfMin) == CE_None &&
+                NCDFGetAttr(cdfid, nZId, "valid_max", &dfMax) == CE_None )
+            {
+                adfValidRange[0] = dfMin;
+                adfValidRange[1] = dfMax;
+                bValidRangeValid = true;
+            }
+        }
+
         if (bValidRangeValid && adfValidRange[0] > adfValidRange[1])
         {
             CPLError(
@@ -2358,8 +2366,11 @@ bool netCDFDataset::SetDefineMode( bool bNewDefineMode )
 
 char **netCDFDataset::GetMetadataDomainList()
 {
-    return BuildMetadataDomainList(GDALDataset::GetMetadataDomainList(), TRUE,
+    char** papszDomains = BuildMetadataDomainList(GDALDataset::GetMetadataDomainList(), TRUE,
                                    "SUBDATASETS", nullptr);
+    for( const auto& kv: m_oMapDomainToJSon )
+        papszDomains = CSLAddString(papszDomains, ("json:" + kv.first).c_str());
+    return papszDomains;
 }
 
 /************************************************************************/
@@ -2369,6 +2380,13 @@ char **netCDFDataset::GetMetadata( const char *pszDomain )
 {
     if( pszDomain != nullptr && STARTS_WITH_CI(pszDomain, "SUBDATASETS") )
         return papszSubDatasets;
+
+    if( pszDomain != nullptr && STARTS_WITH(pszDomain, "json:") )
+    {
+        auto iter = m_oMapDomainToJSon.find(pszDomain + strlen("json:"));
+        if( iter != m_oMapDomainToJSon.end() )
+            return iter->second.List();
+    }
 
     return GDALDataset::GetMetadata(pszDomain);
 }
@@ -2415,8 +2433,6 @@ CPLXMLNode *netCDFDataset::SerializeToXML( const char *pszUnused )
         if( psBandTree != nullptr )
             CPLAddXMLChild(psDSTree, psBandTree);
     }
-
-    SerializeMDArrayStatistics(psDSTree);
 
     // We don't want to return anything if we had no metadata to attach.
     if( psDSTree->psChild == nullptr )
@@ -3298,18 +3314,11 @@ void netCDFDataset::SetProjectionFromVar( int nGroupId, int nVarId,
                     poDS->FetchCopyParam(pszGridMappingValue,
                                         CF_PP_NORTH_POLE_GRID_LONGITUDE,0.0);
 
-                // Hack
-                oSRS.SetProjection( "Rotated_pole" );
-                oSRS.SetExtension(oSRS.GetRoot()->GetValue(),
-                    "PROJ4",
-                    CPLSPrintf("+proj=ob_tran +o_proj=longlat +lon_0=%.18g "
-                               "+o_lon_p=%.18g +o_lat_p=%.18g +a=%.18g "
-                               "+b=%.18g +to_meter=0.0174532925199 +wktext",
-                               180.0 + dfGridNorthPoleLong,
-                               dfNorthPoleGridLong,
-                               dfGridNorthPoleLat,
-                               dfEarthRadius,
-                               dfEarthRadius));
+                oSRS.SetDerivedGeogCRSWithPoleRotationNetCDFCFConvention(
+                                                           "Rotated_pole",
+                                                           dfGridNorthPoleLat,
+                                                           dfGridNorthPoleLong,
+                                                           dfNorthPoleGridLong);
                 bRotatedPole = true;
             }
 
@@ -3331,8 +3340,12 @@ void netCDFDataset::SetProjectionFromVar( int nGroupId, int nVarId,
         // Dataset from https://github.com/OSGeo/gdal/issues/4075 has a "crs"
         // attribute hold on the variable of interest that contains a PROJ.4 string
         pszValue = FetchAttr(nGroupId, nVarId, "crs");
-        if( pszValue && strstr(pszValue, "+proj=") &&
-            oSRS.importFromProj4(pszValue) == OGRERR_NONE )
+        if( pszValue &&
+            (strstr(pszValue, "+proj=") != nullptr ||
+             strstr(pszValue, "GEOGCS") != nullptr ||
+             strstr(pszValue, "PROJCS") != nullptr ||
+             strstr(pszValue, "EPSG:") != nullptr ) &&
+            oSRS.SetFromUserInput(pszValue) == OGRERR_NONE )
         {
             bGotCfSRS = true;
         }
@@ -4299,6 +4312,7 @@ CPLErr netCDFDataset::_SetProjection( const char * pszNewProjection )
 
     if( !STARTS_WITH_CI(pszNewProjection, "GEOGCS")
         && !STARTS_WITH_CI(pszNewProjection, "PROJCS")
+        && !STARTS_WITH_CI(pszNewProjection, "GEOGCRS")
         && !EQUAL(pszNewProjection, "") )
     {
         CPLError(CE_Failure, CPLE_AppDefined,
@@ -4496,6 +4510,84 @@ int NCDFWriteSRSVariable(int cdfid, const OGRSpatialReference* poSRS,
             const char *pszSweepAxisAngle =
                 (pszPredefProj4 != nullptr && strstr(pszPredefProj4, "+sweep=x")) ? "x" : "y";
             addParamString(CF_PP_SWEEP_ANGLE_AXIS, pszSweepAxisAngle);
+        }
+    }
+    else if( poSRS->IsDerivedGeographic() )
+    {
+        const OGR_SRSNode *poConversion = poSRS->GetAttrNode("DERIVINGCONVERSION");
+        if( poConversion == nullptr )
+            return -1;
+        const char *pszMethod = poSRS->GetAttrValue("METHOD");
+        if( pszMethod == nullptr )
+            return -1;
+
+        std::map<std::string, double> oValMap;
+        for( int iChild = 0; iChild < poConversion->GetChildCount(); iChild++ )
+        {
+            const OGR_SRSNode *poNode = poConversion->GetChild(iChild);
+            if( !EQUAL(poNode->GetValue(), "PARAMETER") ||
+                poNode->GetChildCount() <= 2 )
+                continue;
+            const char *pszParamStr = poNode->GetChild(0)->GetValue();
+            const char *pszParamVal = poNode->GetChild(1)->GetValue();
+            oValMap[pszParamStr] = CPLAtof(pszParamVal);
+        }
+
+        if( EQUAL(pszMethod, "PROJ ob_tran o_proj=longlat") )
+        {
+            // Not enough interoperable to be written as WKT
+            bWriteGDALTags = false;
+
+            const double dfLon0 = oValMap["lon_0"];
+            const double dfLonp = oValMap["o_lon_p"];
+            const double dfLatp = oValMap["o_lat_p"];
+
+            pszCFProjection = CPLStrdup("rotated_pole");
+            addParamString(CF_GRD_MAPPING_NAME, "rotated_latitude_longitude");
+            addParamDouble(CF_PP_GRID_NORTH_POLE_LONGITUDE, dfLon0 - 180);
+            addParamDouble(CF_PP_GRID_NORTH_POLE_LATITUDE, dfLatp);
+            addParamDouble(CF_PP_NORTH_POLE_GRID_LONGITUDE, dfLonp);
+        }
+        else if( EQUAL(pszMethod, "Pole rotation (netCDF CF convention)") )
+        {
+            // Not enough interoperable to be written as WKT
+            bWriteGDALTags = false;
+
+            const double dfGridNorthPoleLat = oValMap["Grid north pole latitude (netCDF CF convention)"];
+            const double dfGridNorthPoleLong = oValMap["Grid north pole longitude (netCDF CF convention)"];
+            const double dfNorthPoleGridLong = oValMap["North pole grid longitude (netCDF CF convention)"];
+
+            pszCFProjection = CPLStrdup("rotated_pole");
+            addParamString(CF_GRD_MAPPING_NAME, "rotated_latitude_longitude");
+            addParamDouble(CF_PP_GRID_NORTH_POLE_LONGITUDE, dfGridNorthPoleLong);
+            addParamDouble(CF_PP_GRID_NORTH_POLE_LATITUDE, dfGridNorthPoleLat);
+            addParamDouble(CF_PP_NORTH_POLE_GRID_LONGITUDE, dfNorthPoleGridLong);
+        }
+        else if( EQUAL(pszMethod, "Pole rotation (GRIB convention)") )
+        {
+            // Not enough interoperable to be written as WKT
+            bWriteGDALTags = false;
+
+            const double dfLatSouthernPole = oValMap["Latitude of the southern pole (GRIB convention)"];
+            const double dfLonSouthernPole = oValMap["Longitude of the southern pole (GRIB convention)"];
+            const double dfAxisRotation = oValMap["Axis rotation (GRIB convention)"];
+
+            const double dfLon0 = dfLonSouthernPole;
+            const double dfLonp = dfAxisRotation == 0 ? 0 : -dfAxisRotation;
+            const double dfLatp = dfLatSouthernPole == 0 ? 0 : -dfLatSouthernPole;
+
+            pszCFProjection = CPLStrdup("rotated_pole");
+            addParamString(CF_GRD_MAPPING_NAME, "rotated_latitude_longitude");
+            addParamDouble(CF_PP_GRID_NORTH_POLE_LONGITUDE, dfLon0 - 180);
+            addParamDouble(CF_PP_GRID_NORTH_POLE_LATITUDE, dfLatp);
+            addParamDouble(CF_PP_NORTH_POLE_GRID_LONGITUDE, dfLonp);
+        }
+        else
+        {
+            CPLError(CE_Failure, CPLE_NotSupported,
+                     "Unsupported method for DerivedGeographicCRS: %s",
+                     pszMethod);
+            return -1;
         }
     }
     else
@@ -5493,6 +5585,110 @@ double netCDFDataset::rint( double dfX )
 }
 
 /************************************************************************/
+/*                          NCDFReadIsoMetadata()                       */
+/************************************************************************/
+
+#ifdef NETCDF_HAS_NC4
+
+static void NCDFReadMetadataAsJson(int cdfid, CPLJSONObject& obj)
+{
+    int nbAttr = 0;
+    NCDF_ERR(nc_inq_varnatts(cdfid, NC_GLOBAL, &nbAttr));
+
+    std::map<std::string, CPLJSONArray> oMapNameToArray;
+    for( int l = 0; l < nbAttr; l++ )
+    {
+        char szAttrName[NC_MAX_NAME + 1];
+        szAttrName[0] = 0;
+        NCDF_ERR(nc_inq_attname(cdfid, NC_GLOBAL, l, szAttrName));
+
+        char *pszMetaValue = nullptr;
+        if( NCDFGetAttr(cdfid, NC_GLOBAL, szAttrName, &pszMetaValue) == CE_None )
+        {
+            nc_type nAttrType = NC_NAT;
+            size_t nAttrLen = 0;
+
+            NCDF_ERR(nc_inq_att(cdfid, NC_GLOBAL, szAttrName, &nAttrType, &nAttrLen));
+
+            std::string osAttrName(szAttrName);
+            const auto sharpPos = osAttrName.find('#');
+            if( sharpPos == std::string:: npos )
+            {
+                if( nAttrType == NC_DOUBLE || nAttrType == NC_FLOAT )
+                    obj.Add(osAttrName, CPLAtof(pszMetaValue));
+                else
+                    obj.Add(osAttrName, pszMetaValue);
+            }
+            else
+            {
+                osAttrName.resize(sharpPos);
+                auto iter = oMapNameToArray.find(osAttrName);
+                if( iter == oMapNameToArray.end() )
+                {
+                    CPLJSONArray array;
+                    obj.Add(osAttrName, array);
+                    oMapNameToArray[osAttrName] = array;
+                    array.Add(pszMetaValue);
+                }
+                else
+                {
+                    iter->second.Add(pszMetaValue);
+                }
+            }
+            CPLFree(pszMetaValue);
+            pszMetaValue = nullptr;
+        }
+    }
+
+    int nSubGroups = 0;
+    int *panSubGroupIds = nullptr;
+    NCDFGetSubGroups(cdfid, &nSubGroups, &panSubGroupIds);
+    oMapNameToArray.clear();
+    for( int i = 0; i < nSubGroups; i++ )
+    {
+        CPLJSONObject subObj;
+        NCDFReadMetadataAsJson(panSubGroupIds[i], subObj);
+
+        std::string osGroupName;
+        osGroupName.resize(NC_MAX_NAME);
+        NCDF_ERR(nc_inq_grpname(panSubGroupIds[i], &osGroupName[0]));
+        osGroupName.resize(strlen(osGroupName.data()));
+        const auto sharpPos = osGroupName.find('#');
+        if( sharpPos == std::string:: npos )
+        {
+            obj.Add(osGroupName, subObj);
+        }
+        else
+        {
+            osGroupName.resize(sharpPos);
+            auto iter = oMapNameToArray.find(osGroupName);
+            if( iter == oMapNameToArray.end() )
+            {
+                CPLJSONArray array;
+                obj.Add(osGroupName, array);
+                oMapNameToArray[osGroupName] = array;
+                array.Add(subObj);
+            }
+            else
+            {
+                iter->second.Add(subObj);
+            }
+        }
+    }
+    CPLFree(panSubGroupIds);
+}
+
+std::string NCDFReadMetadataAsJson(int cdfid)
+{
+    CPLJSONDocument oDoc;
+    CPLJSONObject oRoot = oDoc.GetRoot();
+    NCDFReadMetadataAsJson(cdfid, oRoot);
+    return oDoc.SaveAsString();
+}
+
+#endif
+
+/************************************************************************/
 /*                        ReadAttributes()                              */
 /************************************************************************/
 CPLErr netCDFDataset::ReadAttributes( int cdfidIn, int var)
@@ -5500,6 +5696,34 @@ CPLErr netCDFDataset::ReadAttributes( int cdfidIn, int var)
 {
     char *pszVarFullName = nullptr;
     ERR_RET(NCDFGetVarFullName(cdfidIn, var, &pszVarFullName));
+#ifdef NETCDF_HAS_NC4
+    // For metadata in Sentinel 5
+    if( STARTS_WITH(pszVarFullName, "/METADATA/") )
+    {
+        for( const char* key : { "ISO_METADATA", "ESA_METADATA", "EOP_METADATA",
+                                 "QA_STATISTICS", "GRANULE_DESCRIPTION", "ALGORITHM_SETTINGS" } )
+        {
+            if( var == NC_GLOBAL &&
+                strcmp(pszVarFullName, CPLSPrintf("/METADATA/%s/NC_GLOBAL", key)) == 0 )
+            {
+                CPLFree(pszVarFullName);
+                CPLStringList aosList;
+                aosList.AddString(CPLString(NCDFReadMetadataAsJson(cdfidIn)).replaceAll("\\/", '/'));
+                m_oMapDomainToJSon[key] = std::move(aosList);
+                return CE_None;
+            }
+        }
+    }
+    if( STARTS_WITH(pszVarFullName, "/PRODUCT/SUPPORT_DATA/") )
+    {
+        CPLFree(pszVarFullName);
+        CPLStringList aosList;
+        aosList.AddString(CPLString(NCDFReadMetadataAsJson(cdfidIn)).replaceAll("\\/", '/'));
+        m_oMapDomainToJSon["SUPPORT_DATA"] = std::move(aosList);
+        return CE_None;
+    }
+#endif
+
     size_t nMetaNameSize = sizeof(char) * (strlen(pszVarFullName) + 1
                                            + NC_MAX_NAME + 1);
     char *pszMetaName = static_cast<char *>(CPLMalloc(nMetaNameSize));
@@ -5772,8 +5996,14 @@ CPL_UNUSED
             const char *pszExtension = CPLGetExtension(poOpenInfo->pszFilename);
             if( !(EQUAL(pszExtension, "nc") || EQUAL(pszExtension, "cdf") ||
                   EQUAL(pszExtension, "nc2") || EQUAL(pszExtension, "nc4") ||
-                  EQUAL(pszExtension, "nc3") || EQUAL(pszExtension, "grd")) )
-                return NCDF_FORMAT_HDF5;
+                  EQUAL(pszExtension, "nc3") || EQUAL(pszExtension, "grd") ||
+                  EQUAL(pszExtension, "gmac") ) )
+            {
+                if( GDALGetDriverByName("HDF5") != nullptr )
+                {
+                    return NCDF_FORMAT_HDF5;
+                }
+            }
         }
 #endif
 
@@ -5793,7 +6023,7 @@ CPL_UNUSED
 
         // Check for HDF4 support in GDAL.
 #ifdef HAVE_HDF4
-        if( bCheckExt )
+        if( bCheckExt && GDALGetDriverByName("HDF4") != nullptr )
         {
             // Check by default.
             // Always treat as HDF4 file.
@@ -6839,15 +7069,17 @@ bool netCDFDatasetCreateTempFile( NetCDFFormatEnum eFormat,
                         aoDimIds.push_back(nDimId);
 
                         const size_t nDimSize = oMapDimIdToDimLen[nDimId];
-                        if( nDimSize != 0 &&
-                            nSize > std::numeric_limits<size_t>::max() / nDimSize )
+                        if( nDimSize != 0 )
                         {
-                            bFailed = true;
-                            break;
-                        }
-                        else
-                        {
-                            nSize *= nDimSize;
+                            if (nSize > std::numeric_limits<size_t>::max() / nDimSize )
+                            {
+                                bFailed = true;
+                                break;
+                            }
+                            else
+                            {
+                                nSize *= nDimSize;
+                            }
                         }
                     }
                     if( bFailed )

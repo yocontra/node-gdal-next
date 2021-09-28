@@ -1157,7 +1157,7 @@ static void OGRMongoDBV3ReaderSetField(OGRFeature* poFeature,
 std::unique_ptr<OGRFeature> OGRMongoDBv3Layer::Translate(
                                             const bsoncxx::document::view& doc)
 {
-    std::unique_ptr<OGRFeature> poFeature(new OGRFeature(m_poFeatureDefn));
+    auto poFeature = cpl::make_unique<OGRFeature>(m_poFeatureDefn);
     for (auto&& field : doc)
     {
         std::string fieldName(field.key());
@@ -2683,6 +2683,7 @@ void RegisterOGRMongoDBv3()
 
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES, "Integer Integer64 Real String Date DateTime Time IntegerList Integer64List RealList StringList Binary" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATASUBTYPES, "Boolean" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
     poDriver->pfnOpen = OGRMongoDBv3DriverOpen;
     poDriver->pfnIdentify = OGRMongoDBv3DriverIdentify;

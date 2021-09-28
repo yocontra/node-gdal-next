@@ -34,7 +34,7 @@
 #include "ogr_srs_api.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdal_viewshed.cpp f09e810a3fa9b6cd76a050679bdb0349a11a7914 2020-08-29 10:33:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_viewshed.cpp 4632aa0a7a1ff73c322369c0948ae220e683807b 2021-09-02 11:57:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -90,7 +90,8 @@ MAIN_START(argc, argv)
     double dfInvisibleVal = 0.0;
     double dfOutOfRangeVal = 0.0;
     double dfNoDataVal = -1.0;
-    double dfCurvCoeff = 0.0;
+    // Value for standard atmospheric refraction. See doc/source/programs/gdal_viewshed.rst
+    double dfCurvCoeff = 0.85714;
     const char *pszDriverName = nullptr;
     const char *pszSrcFilename = nullptr;
     const char *pszDstFilename = nullptr;

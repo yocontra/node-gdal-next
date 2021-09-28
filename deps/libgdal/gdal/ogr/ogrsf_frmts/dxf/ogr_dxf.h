@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dxf.h 901a2011cf840e038937efafb2f9cf133a835894 2021-03-17 16:38:43 +0100 Even Rouault $
+ * $Id: ogr_dxf.h 96ac99f1f87bf75edc2fcbf39ea1196e58f00a0f 2021-08-13 10:26:38 +0200 Even Rouault $
  *
  * Project:  DXF Translator
  * Purpose:  Definition of classes for OGR .dxf driver.
@@ -440,7 +440,7 @@ class OGRDXFLayer final: public OGRLayer
     OGRDXFFeature *     TranslateASMEntity();
 
     bool                GenerateINSERTFeatures();
-    OGRLineString *     InsertSplineWithChecks( const int nDegree,
+    std::unique_ptr<OGRLineString> InsertSplineWithChecks( const int nDegree,
                                                 std::vector<double>& adfControlPoints,
                                                 int nControlPoints,
                                                 std::vector<double>& adfKnots,

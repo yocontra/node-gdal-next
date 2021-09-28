@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: vrtrawrasterband.cpp ef49c00611235df0c1ce4f51344f00567a668661 2020-02-13 11:08:39 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtrawrasterband.cpp 0b332f1a2700726be41485d9802f777397d9fb29 2021-07-21 18:13:49 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -349,11 +349,10 @@ CPLVirtualMem * VRTRawRasterBand::GetVirtualMemAuto( GDALRWFlag eRWFlag,
 
 CPLErr VRTRawRasterBand::XMLInit( CPLXMLNode * psTree,
                                   const char *pszVRTPath,
-                                  void* pUniqueHandle,
                                   std::map<CPLString, GDALDataset*>& oMapSharedSources )
 
 {
-    const CPLErr eErr = VRTRasterBand::XMLInit( psTree, pszVRTPath, pUniqueHandle,
+    const CPLErr eErr = VRTRasterBand::XMLInit( psTree, pszVRTPath,
                                                 oMapSharedSources );
     if( eErr != CE_None )
         return eErr;

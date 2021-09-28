@@ -56,7 +56,7 @@
 
 /* g++ -fPIC -g -Wall frmts/pdf/pdfdataset.cpp -shared -o gdal_PDF.so -Iport -Igcore -Iogr -L. -lgdal -lpoppler -I/usr/include/poppler */
 
-CPL_CVSID("$Id: pdfdataset.cpp d8b966b80dfe7ae9edd66c4dbb0b18aab04df048 2021-08-20 19:55:24 +0200 Even Rouault $")
+CPL_CVSID("$Id: pdfdataset.cpp 9c09870e374ca21d558101af3f4c09a6164fdfc3 2021-09-26 22:49:52 +0200 Even Rouault $")
 
 #ifdef HAVE_PDF_READ_SUPPORT
 
@@ -1410,26 +1410,26 @@ public:
 
     virtual void SetBaseClip(const FX_RECT& rect) override { m_poParent->SetBaseClip(rect); }
 
-    virtual bool SetClip_PathFill(const CFX_PathData* pPathData,
+    virtual bool SetClip_PathFill(const CFX_Path* pPath,
                                 const CFX_Matrix* pObject2Device,
                                 const CFX_FillRenderOptions& fill_options) override
     {
         if( !bEnableVector && !bTemporaryEnableVectorForTextStroking )
             return true;
-        return m_poParent->SetClip_PathFill(pPathData, pObject2Device, fill_options);
+        return m_poParent->SetClip_PathFill(pPath, pObject2Device, fill_options);
     }
 
-    virtual bool     SetClip_PathStroke(const CFX_PathData* pPathData,
-                                       const CFX_Matrix* pObject2Device,
-                                       const CFX_GraphStateData* pGraphState
+    virtual bool     SetClip_PathStroke(const CFX_Path* pPath,
+                                  const CFX_Matrix* pObject2Device,
+                                  const CFX_GraphStateData* pGraphState
                                       ) override
     {
         if( !bEnableVector && !bTemporaryEnableVectorForTextStroking )
             return true;
-        return m_poParent->SetClip_PathStroke(pPathData, pObject2Device, pGraphState);
+        return m_poParent->SetClip_PathStroke(pPath, pObject2Device, pGraphState);
     }
 
-    virtual bool DrawPath(const CFX_PathData* pPathData,
+    virtual bool DrawPath(const CFX_Path* pPath,
                         const CFX_Matrix* pObject2Device,
                         const CFX_GraphStateData* pGraphState,
                         uint32_t fill_color,
@@ -1439,7 +1439,7 @@ public:
     {
         if( !bEnableVector && !bTemporaryEnableVectorForTextStroking )
             return true;
-        return m_poParent->DrawPath(pPathData, pObject2Device, pGraphState ,
+        return m_poParent->DrawPath(pPath, pObject2Device, pGraphState ,
                                     fill_color, stroke_color, fill_options,
                                     blend_type);
     }
@@ -1657,7 +1657,7 @@ void myRenderPageImpl(PDFDataset* poDS,
   }
 
   const CPDF_OCContext::UsageType usage =
-      (flags & FPDF_PRINTING) ? CPDF_OCContext::Print : CPDF_OCContext::View;
+      (flags & FPDF_PRINTING) ? CPDF_OCContext::kPrint : CPDF_OCContext::kView;
   pContext->m_pOptions->SetOCContext(
       pdfium::MakeRetain<GDALPDFiumOCContext>(poDS, pPage->GetDocument(), usage));
 
@@ -1665,10 +1665,10 @@ void myRenderPageImpl(PDFDataset* poDS,
   pContext->m_pDevice->SetBaseClip(clipping_rect);
   pContext->m_pDevice->SetClip_Rect(clipping_rect);
   pContext->m_pContext = std::make_unique<CPDF_RenderContext>(
-      pPage->GetDocument(), pPage->m_pPageResources.Get(),
+      pPage->GetDocument(), pPage->GetPageResources(),
       static_cast<CPDF_PageRenderCache*>(pPage->GetRenderCache()));
 
-  pContext->m_pContext->AppendLayer(pPage, &matrix);
+  pContext->m_pContext->AppendLayer(pPage, matrix);
 
   if (flags & FPDF_ANNOT) {
     auto pOwnedList = std::make_unique<CPDF_AnnotList>(pPage);
@@ -1676,7 +1676,8 @@ void myRenderPageImpl(PDFDataset* poDS,
     pContext->m_pAnnots = std::move(pOwnedList);
     bool bPrinting =
         pContext->m_pDevice->GetDeviceType() != DeviceType::kDisplay;
-    pList->DisplayAnnots(pPage, pContext->m_pContext.get(), bPrinting, &matrix,
+    pList->DisplayAnnots(pPage, pContext->m_pDevice.get(),
+                         pContext->m_pContext.get(), bPrinting, matrix,
                          false, nullptr);
   }
 
@@ -1731,7 +1732,7 @@ bool MyRenderDevice::Attach(const RetainPtr<CFX_DIBitmap>& pBitmap,
 {
   SetBitmap(pBitmap);
 
-  std::unique_ptr<RenderDeviceDriverIface> driver = std::make_unique<CFX_AggDeviceDriver>(
+  std::unique_ptr<RenderDeviceDriverIface> driver = std::make_unique<pdfium::CFX_AggDeviceDriver>(
       pBitmap, bRgbByteOrder, pBackdropBitmap, bGroupKnockout);
   if (pszRenderingOptions != nullptr)
   {
@@ -3815,6 +3816,7 @@ void PDFDataset::ExploreLayersPdfium(GDALPDFArray* poArray,
             if (poName != nullptr && poName->GetType() == PDFObjectType_String)
             {
                 CPLString osName = PDFSanitizeLayerName(poName->GetString().c_str());
+                // coverity[copy_paste_error]
                 if (!osTopLayer.empty() )
                     osCurLayer = osTopLayer + "." + osName;
                 else
@@ -4273,6 +4275,34 @@ PDFDataset *PDFDataset::Open( GDALOpenInfo * poOpenInfo )
     VSILFILE* fp = VSIFOpenL(pszFilename, "rb");
     if (fp == nullptr)
         return nullptr;
+
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    {
+        // Workaround for ossfuzz only due to
+        // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=37584
+        // https://gitlab.freedesktop.org/poppler/poppler/-/issues/1137
+        GByte* pabyRet = nullptr;
+        vsi_l_offset nSize = 0;
+        if( VSIIngestFile(fp, pszFilename, &pabyRet, &nSize, 10 * 1024 * 1024) )
+        {
+            // Replace nul byte by something else so that strstr() works
+            for( size_t i = 0; i < nSize; i++ )
+            {
+                if( pabyRet[i] == 0 ) pabyRet[i] = ' ';
+            }
+            if( strstr(reinterpret_cast<const char*>(pabyRet), "/JBIG2Decode") )
+            {
+                CPLError(CE_Failure, CPLE_AppDefined,
+                         "/JBIG2Decode found. Giving up due to potential "
+                         "very long processing time.");
+                CPLFree(pabyRet);
+                VSIFCloseL(fp);
+                return nullptr;
+            }
+        }
+        CPLFree(pabyRet);
+    }
+#endif
 
     fp = (VSILFILE*)VSICreateBufferedReaderHandle((VSIVirtualHandle*)fp);
     fpKeeper.reset(fp);
@@ -4982,7 +5012,7 @@ PDFDataset *PDFDataset::Open( GDALOpenInfo * poOpenInfo )
 #ifdef HAVE_POPPLER
   if (bUseLib.test(PDFLIB_POPPLER))
   {
-    GooString* poMetadata = poCatalogPoppler->readMetadata();
+    auto poMetadata = poCatalogPoppler->readMetadata();
     if (poMetadata)
     {
 #if (POPPLER_MAJOR_VERSION >= 1 || POPPLER_MINOR_VERSION >= 72)
@@ -4996,7 +5026,9 @@ PDFDataset *PDFDataset::Open( GDALOpenInfo * poOpenInfo )
             const char * const apszMDList[2] = { pszContent, nullptr };
             poDS->SetMetadata(const_cast<char**>(apszMDList), "xml:XMP");
         }
+#if (POPPLER_MAJOR_VERSION < 21 || (POPPLER_MAJOR_VERSION == 21 && POPPLER_MINOR_VERSION <= 9))
         delete poMetadata;
+#endif
     }
 
     /* Read Info object */
@@ -7169,6 +7201,7 @@ void GDALRegister_PDF()
 #endif
 
     poDriver->SetMetadataItem( GDAL_DCAP_FEATURE_STYLES, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
 #ifdef HAVE_POPPLER
     poDriver->SetMetadataItem( "HAVE_POPPLER", "YES" );
@@ -7248,6 +7281,7 @@ void GDALRegister_PDF()
     poDriver->pfnOpen = PDFDataset::OpenWrapper;
     poDriver->pfnIdentify = PDFDataset::Identify;
     poDriver->SetMetadataItem( GDAL_DMD_SUBDATASETS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 #endif // HAVE_PDF_READ_SUPPORT
 
     poDriver->pfnCreateCopy = GDALPDFCreateCopy;

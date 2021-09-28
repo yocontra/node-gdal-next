@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeojsonwriter.h 56e004faba62c1e87c5595aaa1baec0d78b9a521 2020-04-16 20:02:53 +0200 Momtchil Momtchev $
+ * $Id: ogrgeojsonwriter.h 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines GeoJSON reader within OGR OGRGeoJSON Driver.
@@ -31,7 +31,7 @@
 #ifndef OGR_GEOJSONWRITER_H_INCLUDED
 #define OGR_GEOJSONWRITER_H_INCLUDED
 
-#include <ogr_core.h>
+#include "ogr_core.h"
 
 #include "cpl_json_header.h"
 #include "cpl_string.h"

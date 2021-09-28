@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gridlib.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: gridlib.c 142d549e6b41452de3feb598524192b4b66a9c40 2021-08-10 18:46:26 +0200 Even Rouault $
  *
  * Project:  Arc/Info Binary Grid Translator
  * Purpose:  Grid file reading code.
@@ -30,7 +30,7 @@
 
 #include "aigrid.h"
 
-CPL_CVSID("$Id: gridlib.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gridlib.c 142d549e6b41452de3feb598524192b4b66a9c40 2021-08-10 18:46:26 +0200 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 
@@ -116,7 +116,10 @@ static GInt32 AIGRolloverSignedAdd(GInt32 a, GInt32 b)
     // Not really portable as assumes complement to 2 representation
     // but AIG assumes typical unsigned rollover on signed
     // integer operations.
-    return (GInt32)((GUInt32)(a) + (GUInt32)(b));
+    GInt32 res;
+    GUInt32 resUnsigned = (GUInt32)(a) + (GUInt32)(b);
+    memcpy(&res, &resUnsigned, sizeof(res));
+    return res;
 }
 
 /************************************************************************/
@@ -415,7 +418,7 @@ CPLErr AIGProcessBlock( GByte *pabyCur, int nDataSize, int nMin, int nMagic,
                 return CE_Failure;
             }
 
-            nValue = (pabyCur[0] * 256 + pabyCur[1]) + nMin;
+            nValue = AIGRolloverSignedAdd(pabyCur[0] * 256 + pabyCur[1], nMin);
             pabyCur += 2;
             nDataSize -= 2;
 
@@ -444,7 +447,7 @@ CPLErr AIGProcessBlock( GByte *pabyCur, int nDataSize, int nMin, int nMagic,
                 return CE_Failure;
             }
 
-            nValue = *(pabyCur++) + nMin;
+            nValue = AIGRolloverSignedAdd(*(pabyCur++), nMin);
             nDataSize--;
 
             for( i = 0; i < nMarker; i++ )

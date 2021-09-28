@@ -32,7 +32,7 @@
 #include "gdal_utils_priv.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: gdalmdimtranslate_bin.cpp 9598f66a2ef90ef40fc3274e54d5d723ad597b0f 2019-07-13 00:03:57 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalmdimtranslate_bin.cpp f8d287e54f1e12adba6f163309d69b75fc539236 2021-08-25 12:19:06 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -47,6 +47,7 @@ static void Usage(const char* pszErrorMsg = nullptr)
         "                             [-group <group_spec>]* \n"
         "                             [-subset <subset_spec>]* \n"
         "                             [-scaleaxes <scaleaxes_spec>] \n"
+        "                             [-oo NAME=VALUE]*\n"
         "                             <src_filename> <dst_filename>\n" );
 
     if( pszErrorMsg != nullptr )
@@ -77,6 +78,7 @@ static void GDALMultiDimTranslateOptionsForBinaryFree(
     CPLFree(psOptionsForBinary->pszSource);
     CPLFree(psOptionsForBinary->pszDest);
     CPLFree(psOptionsForBinary->pszFormat);
+    CSLDestroy(psOptionsForBinary->papszOpenOptions);
     CPLFree(psOptionsForBinary);
 }
 
@@ -160,7 +162,9 @@ MAIN_START(argc, argv)
         hDstDS = GDALOpenEx(
             psOptionsForBinary->pszDest,
             GDAL_OF_RASTER | GDAL_OF_MULTIDIM_RASTER | GDAL_OF_VERBOSE_ERROR | GDAL_OF_UPDATE,
-            nullptr, nullptr, nullptr );
+            nullptr,
+            psOptionsForBinary->papszOpenOptions,
+            nullptr );
         CPLPopErrorHandler();
     }
 

@@ -33,7 +33,7 @@
 #include "cpl_error.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrlibkmldriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmldriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
 
 using kmldom::KmlFactory;
 
@@ -345,6 +345,7 @@ void RegisterOGRLIBKML()
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATATYPES,
                                "Integer Real String" );
     poDriver->SetMetadataItem( GDAL_DCAP_FEATURE_STYLES, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
     poDriver->pfnOpen = OGRLIBKMLDriverOpen;
     poDriver->pfnIdentify = OGRLIBKMLDriverIdentify;

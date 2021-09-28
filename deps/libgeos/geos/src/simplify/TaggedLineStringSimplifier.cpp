@@ -40,7 +40,9 @@
 #endif
 
 using namespace geos::geom;
-using namespace std;
+using std::pair;
+using std::unique_ptr;
+using std::vector;
 
 namespace geos {
 namespace simplify { // geos::simplify
@@ -113,7 +115,7 @@ TaggedLineStringSimplifier::simplifySection(std::size_t i,
 
     bool isValidToSimplify = true;
 
-    /**
+    /*
      * Following logic ensures that there is enough points in the
      * output line.
      * If there is already more points than the minimum, there's

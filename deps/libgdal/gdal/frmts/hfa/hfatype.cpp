@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: hfatype.cpp 085ace6b956265eaf2405b298048c59e7a9027cd 2019-10-19 23:19:13 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfatype.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -93,7 +93,7 @@ const char *HFAType::Initialize( const char *pszInput )
     // Read the field definitions.
     while( pszInput != nullptr && *pszInput != '}' )
     {
-        std::unique_ptr<HFAField> poNewField(new HFAField());
+        auto poNewField = cpl::make_unique<HFAField>();
 
         pszInput = poNewField->Initialize(pszInput);
         if( pszInput != nullptr )

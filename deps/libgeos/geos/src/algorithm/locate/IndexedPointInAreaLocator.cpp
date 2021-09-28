@@ -52,9 +52,18 @@ IndexedPointInAreaLocator::IntervalIndexedGeometry::init(const geom::Geometry& g
     geom::LineString::ConstVect lines;
     geom::util::LinearComponentExtracter::getLines(g, lines);
 
+    // pre-compute size of segment vector
+    size_t nsegs = 0;
+    for(const geom::LineString* line : lines) {
+        nsegs += line->getCoordinatesRO()->size() - 1;
+    }
+    segments.reserve(nsegs);
+
     for(const geom::LineString* line : lines) {
         addLine(line->getCoordinatesRO());
     }
+
+    index = index::intervalrtree::SortedPackedIntervalRTree(segments.size());
 
     for(geom::LineSegment& seg : segments) {
         index.insert(

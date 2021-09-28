@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: tif_float.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: tif_float.h c9569ee6d1e2555307eeb6378f2408a79055f245 2021-06-18 14:29:12 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Floating point conversion functions. Convert 16- and 24-bit
@@ -54,5 +54,9 @@ CPL_C_START
 GUInt32 HalfToFloat( GUInt16 iHalf );
 GUInt32 TripleToFloat( GUInt32 iTriple );
 CPL_C_END
+
+#ifdef __cplusplus
+GUInt16 FloatToHalf( GUInt32 iFloat32, bool& bHasWarned );
+#endif
 
 #endif // TIF_FLOAT_H_INCLUDED

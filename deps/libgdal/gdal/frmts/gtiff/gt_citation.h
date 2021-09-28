@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_citation.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: gt_citation.h 02501e858470529cbe79c7fe1f0154e0cdaae288 2021-05-08 15:51:06 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implements special parsing of Imagine citation strings, and
@@ -65,7 +65,7 @@ void SetLinearUnitCitation( std::map<geokey_t, std::string>& oMapAsciiKeys,
                             const char* pszLinearUOMName );
 void SetGeogCSCitation( GTIF * psGTIF,
                         std::map<geokey_t, std::string>& oMapAsciiKeys,
-                        OGRSpatialReference *poSRS,
+                        const OGRSpatialReference *poSRS,
                         const char* angUnitName, int nDatum, short nSpheroid );
 OGRBoolean SetCitationToSRS(GTIF* hGTIF, char* szCTString, int nCTStringLen,
                             geokey_t geoKey, OGRSpatialReference* poSRS,

@@ -24,7 +24,7 @@
 #include <geos/index/chain/MonotoneChain.h>
 #include <geos/index/chain/MonotoneChainBuilder.h>
 #include <geos/index/chain/MonotoneChainOverlapAction.h>
-#include <geos/index/strtree/STRtree.h>
+#include <geos/index/strtree/SimpleSTRtree.h>
 // std
 #include <cstddef>
 
@@ -57,8 +57,10 @@ MCIndexSegmentSetMutualIntersector::intersectChains()
 {
     MCIndexSegmentSetMutualIntersector::SegmentOverlapAction overlapAction(*segInt);
 
+    std::vector<void*> overlapChains;
     for(const auto& queryChain : monoChains) {
-        std::vector<void*> overlapChains;
+        overlapChains.clear();
+
         index->query(&(queryChain->getEnvelope()), overlapChains);
 
         for(std::size_t j = 0, nj = overlapChains.size(); j < nj; j++) {
@@ -92,7 +94,7 @@ MCIndexSegmentSetMutualIntersector::addToMonoChains(SegmentString* segStr)
 /* public */
 MCIndexSegmentSetMutualIntersector::MCIndexSegmentSetMutualIntersector()
     :	monoChains(),
-      index(new geos::index::strtree::STRtree()),
+      index(new geos::index::strtree::SimpleSTRtree()),
       indexCounter(0),
       processCounter(0),
       nOverlaps(0)
@@ -103,8 +105,6 @@ MCIndexSegmentSetMutualIntersector::MCIndexSegmentSetMutualIntersector()
 MCIndexSegmentSetMutualIntersector::~MCIndexSegmentSetMutualIntersector()
 {
     delete index;
-
-    MonoChains::iterator i, e;
 }
 
 /* public */

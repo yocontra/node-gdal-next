@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_virtual.h a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $
+ * $Id: cpl_vsi_virtual.h 7930624ea8fb161357da54ca71479b51ffdc8ede 2021-08-25 12:19:08 +0200 Even Rouault $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Declarations for classes related to the virtual filesystem.
@@ -134,6 +134,10 @@ public:
                                     CSLConstList papszMetadata,
                                     const char* pszDomain,
                                     CSLConstList papszOptions );
+
+    virtual bool    AbortPendingUploads(const char* /*pszFilename*/) { return true;}
+
+    virtual std::string GetStreamingFilename(const std::string& osFilename) const { return osFilename; }
 };
 #endif /* #ifndef DOXYGEN_SKIP */
 

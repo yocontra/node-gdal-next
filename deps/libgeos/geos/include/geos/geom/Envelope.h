@@ -317,6 +317,7 @@ public:
      * @param other the Envelope to merge with
      */
     void expandToInclude(const Envelope* other);
+    void expandToInclude(const Envelope& other);
 
     /** \brief
      * Tests if the Envelope `other` lies wholly inside this Envelope
@@ -398,6 +399,17 @@ public:
 
     bool intersects(const Envelope& other) const;
 
+    /**
+    * Tests if the region defined by other
+    * is disjoint from the region of this Envelope
+    *
+    * @param other  the Envelope being checked for disjointness
+    * @return  true if the Envelopes are disjoint
+    */
+    bool disjoint(const Envelope* other) const;
+
+    bool disjoint(const Envelope& other) const;
+
     /** \brief
      * Tests if the given point lies in or on the envelope.
      *
@@ -451,7 +463,37 @@ public:
      * The distance between overlapping Envelopes is 0. Otherwise, the
      * distance is the Euclidean distance between the closest points.
      */
-    double distance(const Envelope* env) const;
+    double distance(const Envelope& env) const;
+
+    /** \brief
+     * Computes the square of the distance between this and another Envelope.
+     *
+     * The distance between overlapping Envelopes is 0. Otherwise, the
+     * distance is the Euclidean distance between the closest points.
+     */
+    double distanceSquared(const Envelope& env) const;
+
+    /** \brief
+     * Computes the distance between one Coordinate and an Envelope
+     * defined by two other Coordinates. The order of the Coordinates
+     * used to define the envelope is not significant.
+     *
+     * @param c the coordinate to from which distance should be found
+     * @param p1 first coordinate defining an envelope
+     * @param p2 second coordinate defining an envelope.
+     */
+    static double distanceToCoordinate(const Coordinate & c, const Coordinate & p1, const Coordinate & p2);
+
+    /** \brief
+     * Computes the squared distance between one Coordinate and an Envelope
+     * defined by two other Coordinates. The order of the Coordinates
+     * used to define the envelope is not significant.
+     *
+     * @param c the coordinate to from which distance should be found
+     * @param p1 first coordinate defining an envelope
+     * @param p2 second coordinate defining an envelope.
+     */
+    static double distanceSquaredToCoordinate(const Coordinate & c, const Coordinate & p1, const Coordinate & p2);
 
     size_t hashCode() const;
 

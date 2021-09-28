@@ -786,75 +786,6 @@ std::unique_ptr<File> FileStdio::open(PJ_CONTEXT *ctx, const char *filename,
 
 // ---------------------------------------------------------------------------
 
-#ifndef REMOVE_LEGACY_SUPPORT
-
-class FileLegacyAdapter : public File {
-    PJ_CONTEXT *m_ctx;
-    PAFile m_fp;
-
-    FileLegacyAdapter(const FileLegacyAdapter &) = delete;
-    FileLegacyAdapter &operator=(const FileLegacyAdapter &) = delete;
-
-  protected:
-    FileLegacyAdapter(const std::string &filename, PJ_CONTEXT *ctx, PAFile fp)
-        : File(filename), m_ctx(ctx), m_fp(fp) {}
-
-  public:
-    ~FileLegacyAdapter() override;
-
-    size_t read(void *buffer, size_t sizeBytes) override;
-    size_t write(const void *, size_t) override { return 0; }
-    bool seek(unsigned long long offset, int whence = SEEK_SET) override;
-    unsigned long long tell() override;
-    void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
-
-    // We may lie, but the real use case is only for network files
-    bool hasChanged() const override { return false; }
-
-    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename,
-                                      FileAccess access);
-};
-
-// ---------------------------------------------------------------------------
-
-FileLegacyAdapter::~FileLegacyAdapter() { pj_ctx_fclose(m_ctx, m_fp); }
-
-// ---------------------------------------------------------------------------
-
-size_t FileLegacyAdapter::read(void *buffer, size_t sizeBytes) {
-    return pj_ctx_fread(m_ctx, buffer, 1, sizeBytes, m_fp);
-}
-
-// ---------------------------------------------------------------------------
-
-bool FileLegacyAdapter::seek(unsigned long long offset, int whence) {
-    if (offset != static_cast<unsigned long long>(static_cast<long>(offset))) {
-        pj_log(m_ctx, PJ_LOG_ERROR,
-               "Attempt at seeking to a 64 bit offset. Not supported yet");
-        return false;
-    }
-    return pj_ctx_fseek(m_ctx, m_fp, static_cast<long>(offset), whence) == 0;
-}
-
-// ---------------------------------------------------------------------------
-
-unsigned long long FileLegacyAdapter::tell() {
-    return pj_ctx_ftell(m_ctx, m_fp);
-}
-
-// ---------------------------------------------------------------------------
-
-std::unique_ptr<File>
-FileLegacyAdapter::open(PJ_CONTEXT *ctx, const char *filename, FileAccess) {
-    auto fid = pj_ctx_fopen(ctx, filename, "rb");
-    return std::unique_ptr<File>(fid ? new FileLegacyAdapter(filename, ctx, fid)
-                                     : nullptr);
-}
-
-#endif // REMOVE_LEGACY_SUPPORT
-
-// ---------------------------------------------------------------------------
-
 class FileApiAdapter : public File {
     PJ_CONTEXT *m_ctx;
     PROJ_FILE_HANDLE *m_fp;
@@ -954,12 +885,6 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
         }
         return pj_network_file_open(ctx, filename);
     }
-#ifndef REMOVE_LEGACY_SUPPORT
-    // If the user has specified a legacy fileapi, use it
-    if (ctx->fileapi_legacy != pj_get_default_fileapi()) {
-        return FileLegacyAdapter::open(ctx, filename, access);
-    }
-#endif
     if (ctx->fileApi.open_cbk != nullptr) {
         return FileApiAdapter::open(ctx, filename, access);
     }
@@ -1185,7 +1110,7 @@ void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
  * already.
  * @return The path to the PROJ user writable directory.
  * @since 7.1
-*/
+ */
 
 const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
                                                      int create) {
@@ -1256,12 +1181,12 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
 }
 
 /** Get the URL endpoint to query for remote grids.
-*
-* @param ctx PROJ context, or NULL
-* @return Endpoint URL. The returned pointer would be invalidated
-* by a later call to proj_context_set_url_endpoint()
-* @since 7.1
-*/
+ *
+ * @param ctx PROJ context, or NULL
+ * @return Endpoint URL. The returned pointer would be invalidated
+ * by a later call to proj_context_set_url_endpoint()
+ * @since 7.1
+ */
 const char *proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
@@ -1342,7 +1267,7 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
     constexpr char dir_sep = '\\';
 #else
     Dl_info info;
-    if (!dladdr((const void *)pj_get_relative_share_proj, &info)) {
+    if (!dladdr((void *)pj_get_relative_share_proj, &info)) {
         return std::string();
     }
     std::string out(info.dli_fname);
@@ -1437,6 +1362,12 @@ static const char *proj_lib_name =
     nullptr;
 #endif
 
+#ifdef PROJ_LIB_ENV_VAR_TRIED_LAST
+static bool gbPROJ_LIB_ENV_VAR_TRIED_LAST = true;
+#else
+static bool gbPROJ_LIB_ENV_VAR_TRIED_LAST = false;
+#endif
+
 static bool dontReadUserWritableDirectory() {
     // Env var mostly for testing purposes and being independent from
     // an existing installation
@@ -1444,10 +1375,10 @@ static bool dontReadUserWritableDirectory() {
     return envVar != nullptr && envVar[0] != '\0';
 }
 
-static void *
-pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
-                     void *(*open_file)(projCtx, const char *, const char *),
-                     char *out_full_filename, size_t out_full_filename_size) {
+static void *pj_open_lib_internal(
+    PJ_CONTEXT *ctx, const char *name, const char *mode,
+    void *(*open_file)(PJ_CONTEXT *, const char *, const char *),
+    char *out_full_filename, size_t out_full_filename_size) {
     try {
         std::string fname;
         const char *sysname = nullptr;
@@ -1493,10 +1424,6 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
                       ctx, name, ctx->file_finder_user_data)) != nullptr)
             ;
 
-        else if (ctx->file_finder_legacy != nullptr &&
-                 (sysname = ctx->file_finder_legacy(name)) != nullptr)
-            ;
-
         /* The user has search paths set */
         else if (!ctx->search_paths.empty()) {
             for (const auto &path : ctx->search_paths) {
@@ -1527,8 +1454,10 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
             sysname = fname.c_str();
         }
 
-        /* if is environment PROJ_LIB defined */
-        else if (!(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
+        /* if the environment PROJ_LIB defined, and *not* tried as last
+           possibility */
+        else if (!gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
+                 !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
                       .empty()) {
             auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
             for (const auto &path : paths) {
@@ -1540,17 +1469,42 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
                 if (fid)
                     break;
             }
+        }
+
+        else if ((sysname = get_path_from_relative_share_proj(
+                      ctx, name, fname)) != nullptr) {
             /* check if it lives in a ../share/proj dir of the proj dll */
-        } else if ((sysname = get_path_from_relative_share_proj(
-                        ctx, name, fname)) != nullptr) {
+        } else if (proj_lib_name != nullptr &&
+                   (fid = open_file(
+                        ctx,
+                        (std::string(proj_lib_name) + DIR_CHAR + name).c_str(),
+                        mode)) != nullptr) {
+
             /* or hardcoded path */
-        } else if ((sysname = proj_lib_name) != nullptr) {
-            fname = sysname;
+            fname = proj_lib_name;
             fname += DIR_CHAR;
             fname += name;
             sysname = fname.c_str();
+        }
+
+        /* if the environment PROJ_LIB defined, and tried as last possibility */
+        else if (gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
+                 !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
+                      .empty()) {
+            auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
+            for (const auto &path : paths) {
+                fname = path;
+                fname += DIR_CHAR;
+                fname += name;
+                sysname = fname.c_str();
+                fid = open_file(ctx, sysname, mode);
+                if (fid)
+                    break;
+            }
+        }
+
+        else {
             /* just try it bare bones */
-        } else {
             sysname = name;
         }
 
@@ -1566,15 +1520,15 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
         }
 
         if (ctx->last_errno == 0 && errno != 0)
-            pj_ctx_set_errno(ctx, errno);
+            proj_context_errno_set(ctx, errno);
 
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "pj_open_lib(%s): call fopen(%s) - %s",
-               name, sysname, fid == nullptr ? "failed" : "succeeded");
+        pj_log(ctx, PJ_LOG_DEBUG, "pj_open_lib(%s): call fopen(%s) - %s", name,
+               sysname, fid == nullptr ? "failed" : "succeeded");
 
         return (fid);
     } catch (const std::exception &) {
 
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "pj_open_lib(%s): out of memory", name);
+        pj_log(ctx, PJ_LOG_DEBUG, "pj_open_lib(%s): out of memory", name);
 
         return nullptr;
     }
@@ -1595,21 +1549,35 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         ignoreUserWritableDirectory[0] == '\0') {
         ret.push_back(proj_context_get_user_writable_directory(ctx, false));
     }
+
     const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
-    if (!envPROJ_LIB.empty()) {
-        ret.push_back(envPROJ_LIB);
-    }
-    if (envPROJ_LIB.empty()) {
-        const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
+    const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
+
+    if (gbPROJ_LIB_ENV_VAR_TRIED_LAST) {
+/* Situation where PROJ_LIB environment variable is tried in last */
+#ifdef PROJ_LIB
+        ret.push_back(PROJ_LIB);
+#endif
         if (!relativeSharedProj.empty()) {
             ret.push_back(relativeSharedProj);
         }
-    }
+        if (!envPROJ_LIB.empty()) {
+            ret.push_back(envPROJ_LIB);
+        }
+    } else {
+        /* Situation where PROJ_LIB environment variable is used if defined */
+        if (!envPROJ_LIB.empty()) {
+            ret.push_back(envPROJ_LIB);
+        } else {
+            if (!relativeSharedProj.empty()) {
+                ret.push_back(relativeSharedProj);
+            }
 #ifdef PROJ_LIB
-    if (envPROJ_LIB.empty()) {
-        ret.push_back(PROJ_LIB);
-    }
+            ret.push_back(PROJ_LIB);
 #endif
+        }
+    }
+
     return ret;
 }
 
@@ -1617,7 +1585,7 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
 /*                  pj_open_file_with_manager()                         */
 /************************************************************************/
 
-static void *pj_open_file_with_manager(projCtx ctx, const char *name,
+static void *pj_open_file_with_manager(PJ_CONTEXT *ctx, const char *name,
                                        const char * /* mode */) {
     return NS_PROJ::FileManager::open(ctx, name, NS_PROJ::FileAccess::READ_ONLY)
         .release();
@@ -1639,7 +1607,7 @@ static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
 /************************************************************************/
 
 std::unique_ptr<NS_PROJ::File>
-NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
+NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
 
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
@@ -1666,7 +1634,7 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
                                              pj_open_file_with_manager, nullptr,
                                              0)));
                     if (file) {
-                        pj_ctx_set_errno(ctx, 0);
+                        proj_context_errno_set(ctx, 0);
                     } else {
                         // For final network access attempt, use the new
                         // name.
@@ -1696,7 +1664,7 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
                                              pj_open_file_with_manager, nullptr,
                                              0)));
                     if (file) {
-                        pj_ctx_set_errno(ctx, 0);
+                        proj_context_errno_set(ctx, 0);
                     }
                 }
             } catch (const std::exception &e) {
@@ -1719,34 +1687,13 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
             file =
                 open(ctx, remote_file.c_str(), NS_PROJ::FileAccess::READ_ONLY);
             if (file) {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Using %s",
-                       remote_file.c_str());
-                pj_ctx_set_errno(ctx, 0);
+                pj_log(ctx, PJ_LOG_DEBUG, "Using %s", remote_file.c_str());
+                proj_context_errno_set(ctx, 0);
             }
         }
     }
     return file;
 }
-
-/************************************************************************/
-/*                            pj_open_lib()                             */
-/************************************************************************/
-
-#ifndef REMOVE_LEGACY_SUPPORT
-
-// Used by following legacy function
-static void *pj_ctx_fopen_adapter(projCtx ctx, const char *name,
-                                  const char *mode) {
-    return pj_ctx_fopen(ctx, name, mode);
-}
-
-// Legacy function
-PAFile pj_open_lib(projCtx ctx, const char *name, const char *mode) {
-    return (PAFile)pj_open_lib_internal(ctx, name, mode, pj_ctx_fopen_adapter,
-                                        nullptr, 0);
-}
-
-#endif // REMOVE_LEGACY_SUPPORT
 
 /************************************************************************/
 /*                           pj_find_file()                             */
@@ -1764,7 +1711,7 @@ PAFile pj_open_lib(projCtx ctx, const char *name, const char *mode) {
  * @param out_full_filename_size size of out_full_filename.
  * @return 1 if the file was found, 0 otherwise.
  */
-int pj_find_file(projCtx ctx, const char *short_filename,
+int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
                  char *out_full_filename, size_t out_full_filename_size) {
     auto file = std::unique_ptr<NS_PROJ::File>(
         reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
@@ -1812,7 +1759,7 @@ static std::string trim(const std::string &s) {
 /*                            pj_load_ini()                             */
 /************************************************************************/
 
-void pj_load_ini(projCtx ctx) {
+void pj_load_ini(PJ_CONTEXT *ctx) {
     if (ctx->iniFileLoaded)
         return;
 
@@ -1891,19 +1838,6 @@ void pj_load_ini(projCtx ctx) {
 //! @endcond
 
 /************************************************************************/
-/*                           pj_set_finder()                            */
-/************************************************************************/
-
-void pj_set_finder(const char *(*new_finder)(const char *))
-
-{
-    auto ctx = pj_get_default_ctx();
-    if (ctx) {
-        ctx->file_finder_legacy = new_finder;
-    }
-}
-
-/************************************************************************/
 /*                   proj_context_set_file_finder()                     */
 /************************************************************************/
 
@@ -1971,19 +1905,6 @@ void proj_context_set_search_paths(PJ_CONTEXT *ctx, int count_paths,
         ctx->set_search_paths(vector_of_paths);
     } catch (const std::exception &) {
     }
-}
-
-/************************************************************************/
-/*                         pj_set_searchpath()                          */
-/*                                                                      */
-/*      Path control for callers that can't practically provide         */
-/*      pj_set_finder() style callbacks.  Call with (0,NULL) as args    */
-/*      to clear the searchpath set.                                    */
-/************************************************************************/
-
-void pj_set_searchpath(int count, const char **path) {
-    proj_context_set_search_paths(nullptr, count,
-                                  const_cast<const char *const *>(path));
 }
 
 /************************************************************************/

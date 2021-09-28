@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: link.c 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $
+ * $Id: link.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $
  *
  * Project:  ASI CEOS Translator
  * Purpose:  Link list function replacements.
@@ -29,7 +29,7 @@
 
 #include "ceos.h"
 
-CPL_CVSID("$Id: link.c 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57:02Z Even Rouault $")
+CPL_CVSID("$Id: link.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $")
 
 
 /************************************************************************/
@@ -39,7 +39,7 @@ CPL_CVSID("$Id: link.c 3b0bbf7a8a012d69a783ee1f9cfeb5c52b370021 2017-06-27 20:57
 Link_t *ceos2CreateLink( void *pObject )
 
 {
-    Link_t	*psLink = (Link_t *) CPLCalloc(sizeof(Link_t),1);
+    Link_t    *psLink = (Link_t *) CPLCalloc(sizeof(Link_t),1);
 
     psLink->object = pObject;
 
@@ -55,7 +55,7 @@ void DestroyList( Link_t * psList )
 {
     while( psList != NULL )
     {
-        Link_t	*psNext = psList->next;
+        Link_t    *psNext = psList->next;
 
         CPLFree( psList );
         psList = psNext;
@@ -81,7 +81,7 @@ Link_t *InsertLink( Link_t *psList, Link_t *psLink )
 Link_t *AddLink( Link_t *psList, Link_t *psLink )
 
 {
-    Link_t	*psNode;
+    Link_t    *psNode;
 
     if( psList == NULL )
         return psLink;

@@ -33,7 +33,7 @@
 #include "gdal_priv.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gdalasyncread.cpp 3933b3a21990c6b7072b1a4e50e8520c7bfaf1f8 2021-06-09 17:21:21 +0800 C41eb $")
+CPL_CVSID("$Id: gdalasyncread.cpp d7930230888ada4a2c756c84115208e8ef56dcdf 2021-06-09 17:21:21 +0800 C41eb $")
 
 /* ******************************************************************** */
 /*                               Usage()                                */

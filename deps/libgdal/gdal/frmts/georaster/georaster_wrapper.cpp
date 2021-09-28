@@ -34,7 +34,7 @@
 #include "cpl_string.h"
 #include "cpl_minixml.h"
 
-CPL_CVSID("$Id: georaster_wrapper.cpp 453a032f70e60f749c4d05678374363748a59d2c 2021-07-14 06:36:36 -0400 fechen123 $")
+CPL_CVSID("$Id: georaster_wrapper.cpp 59a31bdb51484a42c79267eecf20a0089a7ba1cf 2021-09-10 04:49:36 -0400 fechen123 $")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterWrapper()
@@ -323,7 +323,7 @@ GeoRasterWrapper* GeoRasterWrapper::Open( const char* pszStringId, bool bUpdate 
         else
         {
             poGRW->sSchema = "";
-            poGRW->sOwner  = poGRW->poConnection->GetUser();
+            poGRW->sOwner  = poGRW->poConnection->GetSessionUser();
         }
 
         CSLDestroy( papszSchema );

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_wkt_srs_for_gdal.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: gt_wkt_srs_for_gdal.h 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Read/Write in-memory GeoTIFF file
@@ -32,6 +32,7 @@
 
 #include "cpl_port.h"
 #include "gdal.h"
+#include "ogr_srs_api.h"
 
 CPL_C_START
 
@@ -40,7 +41,7 @@ CPLErr CPL_DLL GTIFMemBufFromWkt( const char *pszWKT,
                                   int nGCPCount, const GDAL_GCP *pasGCPList,
                                   int *pnSize, unsigned char **ppabyBuffer );
 
-CPLErr GTIFMemBufFromWktEx( const char *pszWKT,
+CPLErr GTIFMemBufFromSRS( OGRSpatialReferenceH hSRS,
                             const double *padfGeoTransform,
                             int nGCPCount, const GDAL_GCP *pasGCPList,
                             int *pnSize, unsigned char **ppabyBuffer,
@@ -51,7 +52,7 @@ CPLErr CPL_DLL GTIFWktFromMemBuf( int nSize, unsigned char *pabyBuffer,
                           int *pnGCPCount, GDAL_GCP **ppasGCPList );
 
 CPLErr GTIFWktFromMemBufEx( int nSize, unsigned char *pabyBuffer,
-                            char **ppszWKT, double *padfGeoTransform,
+                            OGRSpatialReferenceH* phSRS, double *padfGeoTransform,
                             int *pnGCPCount, GDAL_GCP **ppasGCPList,
                             int *pbPixelIsPoint, char*** ppapszRPCMD );
 

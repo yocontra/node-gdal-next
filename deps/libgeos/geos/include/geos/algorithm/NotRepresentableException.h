@@ -24,7 +24,7 @@ namespace geos {
 namespace algorithm { // geos::algorithm
 
 /**
- * \class NotRepresentableException geosAlgorithm.h geos/geosAlgorithm.h
+ * \class NotRepresentableException
  * \brief
  * Indicates that a HCoordinate has been computed which is
  * not representable on the Cartesian plane.
@@ -36,7 +36,7 @@ class GEOS_DLL NotRepresentableException: public util::GEOSException {
 public:
     NotRepresentableException();
     NotRepresentableException(std::string msg);
-    ~NotRepresentableException() throw() override {}
+    ~NotRepresentableException() noexcept override {}
 };
 
 } // namespace geos::algorithm

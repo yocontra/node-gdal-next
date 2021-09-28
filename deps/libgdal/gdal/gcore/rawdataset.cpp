@@ -54,7 +54,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: rawdataset.cpp 11d5fd1088af3c1c129433e30914108ebbc82750 2021-04-06 21:39:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: rawdataset.cpp f0c548a8672e140a8dc7fe8cceec71231772e17d 2021-05-31 13:13:20 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           RawRasterBand()                            */
@@ -523,7 +523,9 @@ CPLErr RawRasterBand::AccessLine( int iLine )
         if( nBand > 1 && pLineStart != nullptr )
         {
             // BIP interleaved
-            return cpl::down_cast<RawRasterBand*>(poDS->GetRasterBand(1))->AccessLine(iLine);
+            auto poFirstBand = cpl::down_cast<RawRasterBand*>(poDS->GetRasterBand(1));
+            CPLAssert(poFirstBand);
+            return poFirstBand->AccessLine(iLine);
         }
         return CE_Failure;
     }

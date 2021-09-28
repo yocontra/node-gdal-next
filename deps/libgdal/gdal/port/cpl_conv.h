@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_conv.h daf8a2abc014b937ac276c213cf26e843121f6cb 2021-02-24 11:01:06 +0100 Even Rouault $
+ * $Id: cpl_conv.h 3f38a16ca468d5cd752ad8884468f69acedcf0ff 2021-08-13 10:37:00 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Convenience functions declarations.
@@ -373,9 +373,9 @@ namespace cpl
     /** Use cpl::down_cast<Derived*>(pointer_to_base) as equivalent of
      * static_cast<Derived*>(pointer_to_base) with safe checking in debug
      * mode.
-     * 
+     *
      * Only works if no virtual inheritance is involved.
-     * 
+     *
      * @param f pointer to a base class
      * @return pointer to a derived class
      */
@@ -387,6 +387,24 @@ namespace cpl
             "target type not derived from source type");
         CPLAssert(f == nullptr || dynamic_cast<To>(f) != nullptr);
         return static_cast<To>(f);
+    }
+}
+} // extern "C++"
+
+#endif /* def __cplusplus */
+
+
+#if defined(__cplusplus) && defined(GDAL_COMPILATION)
+
+extern "C++"
+{
+#include <memory> // for std::unique_ptr
+namespace cpl
+{
+    /** std::make_unique<> implementation borrowed from C++14 */
+    template <typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args &&... args) {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
     }
 }
 } // extern "C++"

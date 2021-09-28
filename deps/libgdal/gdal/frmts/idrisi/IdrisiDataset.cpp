@@ -47,7 +47,7 @@
 
 #include <cmath>
 
-CPL_CVSID( "$Id: IdrisiDataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $" )
+CPL_CVSID( "$Id: IdrisiDataset.cpp 12469d3f0dcb60bb54ca1d4cee2fe9f5a7cacd90 2021-04-28 13:31:05 -0400 Hongmei-Coco $" )
 
 #ifdef WIN32
 #  define PATHDELIM       '\\'
@@ -2756,7 +2756,7 @@ CPLErr IdrisiGeoReference2Wkt( const char* pszFilename,
     //      Oblique Stereographic
     //      Albers Equal Area Conic
     //      Sinusoidal
-    //
+    //      Cylindrical Equal Area
 
     if( EQUAL( pszProjName, "Mercator" ) )
     {
@@ -2814,6 +2814,10 @@ CPLErr IdrisiGeoReference2Wkt( const char* pszFilename,
     else if( EQUAL( pszProjName, "Sinusoidal" ) )
     {
         oSRS.SetSinusoidal( dfCenterLong, dfFalseEasting, dfFalseNorthing );
+    }
+    else if( EQUAL( pszProjName, "CylindricalEA") || EQUAL( pszProjName, "Cylindrical Equal Area" ))
+    {
+        oSRS.SetCEA( dfStdP1, dfCenterLong, dfFalseEasting, dfFalseNorthing );
     }
     else
     {
@@ -3113,9 +3117,13 @@ CPLErr IdrisiDataset::Wkt2GeoReference( const char *pszProjString,
                      {
                          pszProjectionOut =  "Alber's Equal Area Conic" ;
                      }
+        else if( EQUAL( pszProjName, SRS_PT_CYLINDRICAL_EQUAL_AREA ) )
+                     {
+                         pszProjectionOut =  "Cylindrical Equal Area" ;
+                     }
 
         // ---------------------------------------------------------
-        //  Failure, Projection system not suppotted
+        //  Failure, Projection system not supported
         // ---------------------------------------------------------
 
         if( pszProjectionOut == nullptr )
@@ -3167,7 +3175,15 @@ CPLErr IdrisiDataset::Wkt2GeoReference( const char *pszProjString,
         dfFalseEasting  = oSRS.GetProjParm( SRS_PP_FALSE_EASTING, 0.0, nullptr );
         dfScale         = oSRS.GetProjParm( SRS_PP_SCALE_FACTOR, 0.0, nullptr );
         dfStdP1         = oSRS.GetProjParm( SRS_PP_STANDARD_PARALLEL_1, -0.1, nullptr );
-        dfStdP2         = oSRS.GetProjParm( SRS_PP_STANDARD_PARALLEL_2, -0.1, nullptr );
+        if ( EQUAL(pszProjectionOut, "Cylindrical Equal Area") )
+        {
+            dfStdP2 = -dfStdP1;
+            dfScale = 1.0;
+        } 
+        else
+        {
+            dfStdP2 = oSRS.GetProjParm( SRS_PP_STANDARD_PARALLEL_2, -0.1, nullptr );
+        }
         if( dfStdP1 != -0.1 )
         {
             nParameters = 1;

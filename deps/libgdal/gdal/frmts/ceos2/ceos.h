@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceos.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: ceos.h c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $
  *
  * Project:  ASI CEOS Translator
  * Purpose:  CEOS library prototypes
@@ -140,6 +140,11 @@ Link_t *AddLink( Link_t *psList, Link_t *psLink );
 #define CEOS_RADAR_MAX_LUT 512
 #define CEOS_RADAR_FLIP_DATE 19980101
 #define CEOS_RADAR_FACILITY "CDPF-RSAT"
+
+/* Defines for GCP Ordering mode */
+#define CEOS_STD_MAPREC_GCP_ORDER 0
+#define CEOS_ASF_MAPREC_GCP_ORDER 1
+#define CEOS_ASF_FACREC_GCP_ORDER 2
 
 typedef union
 {

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geomedia.h bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $
+ * $Id: ogr_geomedia.h 5214e0d8bbeab9cc5eb9834575ec8eb1b5eb9a02 2021-08-27 14:44:27 +1000 Nyall Dawson $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Geomedia MDB driver.
@@ -157,7 +157,6 @@ class OGRGeomediaDataSource final: public OGRDataSource
 
     char               *pszName;
 
-    int                 bDSUpdate;
     CPLODBCSession      oSession;
 
     CPLString          GetTableNameFromType(const char* pszTableType);
@@ -168,7 +167,7 @@ class OGRGeomediaDataSource final: public OGRDataSource
                         OGRGeomediaDataSource();
                         virtual ~OGRGeomediaDataSource();
 
-    int                 Open( const char *, int bUpdate, int bTestOpen );
+    int                 Open( const char * );
     int                 OpenTable( const char *pszTableName,
                                    const char *pszGeomCol,
                                    int bUpdate );
@@ -187,21 +186,6 @@ class OGRGeomediaDataSource final: public OGRDataSource
 
     // Internal use
     CPLODBCSession     *GetSession() { return &oSession; }
-};
-
-/************************************************************************/
-/*                          OGRGeomediaDriver                           */
-/************************************************************************/
-
-class OGRGeomediaDriver final: public OGRODBCMDBDriver
-{
-  public:
-                ~OGRGeomediaDriver();
-
-    const char  *GetName() override;
-    OGRDataSource *Open( const char *, int ) override;
-
-    int          TestCapability( const char * ) override;
 };
 
 #endif /* ndef _OGR_Geomedia_H_INCLUDED */

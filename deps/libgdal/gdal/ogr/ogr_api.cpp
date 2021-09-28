@@ -35,10 +35,47 @@
 
 #include "cpl_error.h"
 #include "ogr_geometry.h"
+#include "ogr_geos.h"
 
-CPL_CVSID("$Id: ogr_api.cpp 26f27d5cae0c2645582ce39f7c07476622add8f9 2021-08-14 17:09:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_api.cpp 80bab8978346437a3eae93bd4ff541752c4df3e2 2021-08-14 17:09:35 +0200 Even Rouault $")
 
 static bool bNonLinearGeometriesEnabled = true;
+
+/************************************************************************/
+/*                         OGRGetGEOSVersion()                          */
+/************************************************************************/
+
+/** \brief Get the GEOS version
+ *
+ * @param pnMajor Pointer to major version number, or NULL
+ * @param pnMinor Pointer to minor version number, or NULL
+ * @param pnPatch Pointer to patch version number, or NULL
+ * @return TRUE if GDAL is built against GEOS
+ * @since GDAL 3.4.0
+ */
+#ifdef HAVE_GEOS
+bool OGRGetGEOSVersion(int *pnMajor, int *pnMinor, int *pnPatch) {
+    CPLStringList aosTokens(CSLTokenizeString2(GEOSversion(), ".", 0));
+
+    if (pnMajor && aosTokens.size() > 0)
+        *pnMajor = std::stoi(aosTokens[0]);
+    if (pnMinor && aosTokens.size() > 1)
+        *pnMinor = std::stoi(aosTokens[1]);
+    if (pnPatch && aosTokens.size() > 2)
+        *pnPatch = std::stoi(aosTokens[2]);
+    return TRUE;
+}
+#else
+bool OGRGetGEOSVersion(int *pnMajor, int *pnMinor, int *pnPatch) {
+    if (pnMajor)
+        *pnMajor = 0;
+    if (pnMinor)
+        *pnMinor = 0;
+    if (pnPatch)
+        *pnPatch = 0;
+    return FALSE;
+}
+#endif
 
 /************************************************************************/
 /*                           ToPointer()                                */

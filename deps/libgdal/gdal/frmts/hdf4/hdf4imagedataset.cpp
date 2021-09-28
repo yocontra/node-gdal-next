@@ -55,7 +55,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hdf4imagedataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: hdf4imagedataset.cpp 6ec9fe9f7ecfdf8b0f333833577d72a0daa1c253 2021-08-12 22:02:31 +0200 Even Rouault $")
 
 constexpr int HDF4_SDS_MAXNAMELEN = 65;
 
@@ -2558,18 +2558,16 @@ int HDF4ImageDataset::ProcessSwathGeolocation( int32 hSW, char **papszDimList )
 #endif
             char **papszParams = pszParams ?
                 CSLTokenizeString2( pszParams, ",", CSLT_HONOURSTRINGS ) : nullptr;
-            int nParams = CSLCount(papszParams);
-            if( nParams >= 15 )
-                nParams = 15;
-            double adfProjParams[15] = {};
-            for( int i = 0; i < nParams; i++)
-                adfProjParams[i] = CPLAtof( papszParams[i] );
-            for ( int i = nParams; i < 15; i++)
-                adfProjParams[i] = 0.0;
+            std::vector<double> adfProjParams(15);
+            if( papszParams )
+            {
+                for( int i = 0; i < 15 && papszParams[i] != nullptr ; i++)
+                    adfProjParams[i] = CPLAtof( papszParams[i] );
+            }
 
             // Create projection definition
             oSRS.importFromUSGS( iProjSys, iZone,
-                                 adfProjParams, iEllipsoid );
+                                 adfProjParams.data(), iEllipsoid );
             oSRS.SetLinearUnits( SRS_UL_METER, 1.0 );
             oSRS.exportToWkt( &pszGCPProjection );
 

@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmtlayer.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmtlayer.cpp 797b0787ff2079ae825f8519419432168c8027ea 2021-09-05 20:57:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRGmtLayer()                             */
@@ -315,6 +315,7 @@ bool OGRGmtLayer::ReadLine()
     if( osLine[0] != '#' || osLine.find_first_of('@') == std::string::npos )
         return true;
 
+    CPLStringList aosKeyedValues;
     for( size_t i = 0; i < osLine.length(); i++ )
     {
         if( osLine[i] == '@' && i + 2 <= osLine.size() )
@@ -346,11 +347,12 @@ bool OGRGmtLayer::ReadLine()
             CPLString osKeyValue = osLine.substr(i+1,1);
             osKeyValue += pszUEValue;
             CPLFree( pszUEValue );
-            papszKeyedValues = CSLAddString( papszKeyedValues, osKeyValue );
+            aosKeyedValues.AddString( osKeyValue );
 
             i = iValEnd;
         }
     }
+    papszKeyedValues = aosKeyedValues.StealList();
 
     return true;
 }

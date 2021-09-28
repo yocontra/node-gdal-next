@@ -66,7 +66,7 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpglayer.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpglayer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 // These originally are defined in libpq-fs.h.
 
@@ -2032,8 +2032,8 @@ int OGRPGLayer::ReadResultDefinition(PGresult *hInitialResultIn)
                  nTypeOID == poDS->GetGeometryOID()  ||
                  nTypeOID == poDS->GetGeographyOID()  )
         {
-            OGRPGGeomFieldDefn* poGeomFieldDefn =
-                new OGRPGGeomFieldDefn(this, oField.GetNameRef());
+            auto poGeomFieldDefn =
+                cpl::make_unique<OGRPGGeomFieldDefn>(this, oField.GetNameRef());
             if( iGeomFuncPrefix >= 0 &&
                 oField.GetNameRef()[strlen(
                     apszKnownGeomFuncPrefixes[iGeomFuncPrefix])] == '_' )
@@ -2048,17 +2048,17 @@ int OGRPGLayer::ReadResultDefinition(PGresult *hInitialResultIn)
             }
             else
                 poGeomFieldDefn->ePostgisType = GEOM_TYPE_GEOMETRY;
-            poFeatureDefn->AddGeomFieldDefn(poGeomFieldDefn, FALSE);
+            poFeatureDefn->AddGeomFieldDefn(std::move(poGeomFieldDefn));
             continue;
         }
         else if( EQUAL(oField.GetNameRef(),"WKB_GEOMETRY") )
         {
             if( nTypeOID == OIDOID )
                 bWkbAsOid = TRUE;
-            OGRPGGeomFieldDefn* poGeomFieldDefn =
-                new OGRPGGeomFieldDefn(this, oField.GetNameRef());
+            auto poGeomFieldDefn =
+                cpl::make_unique<OGRPGGeomFieldDefn>(this, oField.GetNameRef());
             poGeomFieldDefn->ePostgisType = GEOM_TYPE_WKB;
-            poFeatureDefn->AddGeomFieldDefn(poGeomFieldDefn, FALSE);
+            poFeatureDefn->AddGeomFieldDefn(std::move(poGeomFieldDefn));
             continue;
         }
 

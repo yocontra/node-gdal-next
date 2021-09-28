@@ -153,7 +153,7 @@ public:
                                         const Geometry* exemplar) const;
 
     /// Converts an Envelope to a Geometry.
-    //
+    ///
     /// Returned Geometry can be a Point, a Polygon or an EMPTY geom.
     ///
     std::unique_ptr<Geometry> toGeometry(const Envelope* envelope) const;
@@ -164,7 +164,7 @@ public:
     const PrecisionModel* getPrecisionModel() const;
 
     /// Creates an EMPTY Point
-    std::unique_ptr<Point> createPoint() const;
+    std::unique_ptr<Point> createPoint(std::size_t coordinateDimension = 2) const;
 
     /// Creates a Point using the given Coordinate
     Point* createPoint(const Coordinate& coordinate) const;
@@ -185,8 +185,12 @@ public:
     GeometryCollection* createGeometryCollection(
         std::vector<Geometry*>* newGeoms) const;
 
+    template<typename T>
     std::unique_ptr<GeometryCollection> createGeometryCollection(
-            std::vector<std::unique_ptr<Geometry>> && newGeoms) const;
+            std::vector<std::unique_ptr<T>> && newGeoms) const {
+        // Can't use make_unique because constructor is protected
+        return std::unique_ptr<GeometryCollection>(new GeometryCollection(Geometry::toGeometryArray(std::move(newGeoms)), *this));
+    }
 
     /// Constructs a GeometryCollection with a deep-copy of args
     GeometryCollection* createGeometryCollection(
@@ -265,7 +269,7 @@ public:
         const std::vector<Coordinate>& fromCoords) const;
 
     /// Construct an EMPTY Polygon
-    std::unique_ptr<Polygon> createPolygon() const;
+    std::unique_ptr<Polygon> createPolygon(std::size_t coordinateDimension = 2) const;
 
     /// Construct a Polygon taking ownership of given arguments
     Polygon* createPolygon(LinearRing* shell,
@@ -281,7 +285,7 @@ public:
                            const std::vector<LinearRing*>& holes) const;
 
     /// Construct an EMPTY LineString
-    std::unique_ptr<LineString> createLineString() const;
+    std::unique_ptr<LineString> createLineString(std::size_t coordinateDimension = 2) const;
 
     /// Copy a LineString
     std::unique_ptr<LineString> createLineString(const LineString& ls) const;
@@ -295,6 +299,15 @@ public:
     /// Construct a LineString with a deep-copy of given argument
     LineString* createLineString(
         const CoordinateSequence& coordinates) const;
+
+    /**
+    * Creates an empty atomic geometry of the given dimension.
+    * If passed a dimension of -1 will create an empty {@link GeometryCollection}.
+    *
+    * @param dimension the required dimension (-1, 0, 1 or 2)
+    * @return an empty atomic geometry of given dimension
+    */
+    std::unique_ptr<Geometry> createEmpty(int dimension) const;
 
     /**
      *  Build an appropriate <code>Geometry</code>, <code>MultiGeometry</code>, or
@@ -329,6 +342,12 @@ public:
     Geometry* buildGeometry(std::vector<Geometry*>* geoms) const;
 
     std::unique_ptr<Geometry> buildGeometry(std::vector<std::unique_ptr<Geometry>> && geoms) const;
+
+    std::unique_ptr<Geometry> buildGeometry(std::vector<std::unique_ptr<Point>> && geoms) const;
+
+    std::unique_ptr<Geometry> buildGeometry(std::vector<std::unique_ptr<LineString>> && geoms) const;
+
+    std::unique_ptr<Geometry> buildGeometry(std::vector<std::unique_ptr<Polygon>> && geoms) const;
 
     /// See buildGeometry(std::vector<Geometry *>&) for semantics
     //
@@ -415,7 +434,7 @@ public:
     void destroyGeometry(Geometry* g) const;
 
     /// Request that the instance is deleted.
-    //
+    ///
     /// It will really be deleted only after last child Geometry is
     /// deleted. Do not use the instance anymore after calling this function
     /// (unless you're a live child!).

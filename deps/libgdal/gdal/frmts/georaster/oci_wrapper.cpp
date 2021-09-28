@@ -29,7 +29,7 @@
 
 #include "oci_wrapper.h"
 
-CPL_CVSID("$Id: oci_wrapper.cpp bf3a27bbd1f495a7e83d7373545798549a9f813e 2021-05-04 14:06:34 -0400 fechen123 $")
+CPL_CVSID("$Id: oci_wrapper.cpp 59a31bdb51484a42c79267eecf20a0089a7ba1cf 2021-09-10 04:49:36 -0400 fechen123 $")
 
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},
@@ -246,11 +246,11 @@ OWConnection::OWConnection( const char* pszUserIn,
             "select sys_context('userenv','session_user')\n"
             "from dual\n" );
 
-      pszUser = static_cast<char*>(CPLRealloc(pszUser, OWNAME)); 
-      poStmt->Define(pszUser);
+      pszSessionUser = static_cast<char*>(CPLMalloc(OWNAME)); 
+      poStmt->Define(pszSessionUser);
       CPL_IGNORE_RET_VAL(poStmt->Execute());
       delete poStmt;
-      CPLDebug("OCI: ", "Implicit User: %s\n", pszUser);
+      CPLDebug("OCI: ", "Implicit User: %s\n", pszSessionUser);
     }
 
     // ------------------------------------------------------
@@ -304,6 +304,7 @@ void OWConnection::QueryVersion()
 OWConnection::~OWConnection()
 {
     CPLFree( pszUser );
+    CPLFree( pszSessionUser );
     CPLFree( pszPassword );
     CPLFree( pszServer );
 

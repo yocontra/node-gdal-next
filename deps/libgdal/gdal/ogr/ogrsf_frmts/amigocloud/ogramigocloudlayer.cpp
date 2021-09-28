@@ -30,7 +30,7 @@
 #include "ogr_p.h"
 #include "ogrgeojsonreader.h"
 
-CPL_CVSID("$Id: ogramigocloudlayer.cpp 22f7e8df5b2966e7025652cfbe5ee9b143d0e008 2021-02-22 12:01:13 -0500 Victor $")
+CPL_CVSID("$Id: ogramigocloudlayer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRAmigoCloudLayer()                            */
@@ -388,19 +388,15 @@ void OGRAmigoCloudLayer::EstablishLayerDefn(const char* pszLayerName,
                 }
                 else if(EQUAL(fieldType.c_str(), "geometry"))
                 {
-                    OGRAmigoCloudGeomFieldDefn *poFieldDefn =
-                            new OGRAmigoCloudGeomFieldDefn(fieldName.c_str(), wkbUnknown);
-                    poFeatureDefn->AddGeomFieldDefn(poFieldDefn, FALSE);
+                    auto poFieldDefn =
+                        cpl::make_unique<OGRAmigoCloudGeomFieldDefn>(fieldName.c_str(), wkbUnknown);
                     OGRSpatialReference* poSRS = GetSRS(fieldName.c_str(), &poFieldDefn->nSRID);
                     if( poSRS != nullptr )
                     {
-                        poFeatureDefn->GetGeomFieldDefn(
-                                poFeatureDefn->GetGeomFieldCount() - 1)->SetSpatialRef(poSRS);
+                        poFieldDefn->SetSpatialRef(poSRS);
                         poSRS->Release();
-                    } else {
-                        poFeatureDefn->GetGeomFieldDefn(
-                                poFeatureDefn->GetGeomFieldCount() - 1)->SetSpatialRef(poSRS);
                     }
+                    poFeatureDefn->AddGeomFieldDefn(std::move(poFieldDefn));
                 }
                 else if(EQUAL(fieldType.c_str(), "boolean"))
                 {

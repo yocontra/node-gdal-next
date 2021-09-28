@@ -34,7 +34,7 @@
 #include <string.h>
 
 
-CPL_CVSID("$Id: ogrsosilayer.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrsosilayer.cpp 498a80077f2504ce756950b02fccc7144c28e163 2021-08-13 10:52:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRSOSILayer()                             */
@@ -217,7 +217,7 @@ OGRFeature *OGRSOSILayer::GetNextFeature() {
         }
         case L_FLATE: {  /* Area */
             oGType = wkbPolygon;
-            std::unique_ptr<OGRLinearRing> poOuter(new OGRLinearRing());  /* Initialize a new closed polygon */
+            auto poOuter = cpl::make_unique<OGRLinearRing>();  /* Initialize a new closed polygon */
             long nRefNr;
             unsigned char nRefStatus;
             long nRefCount;
@@ -253,7 +253,7 @@ OGRFeature *OGRSOSILayer::GetNextFeature() {
             }
 
             if (correct) {
-              std::unique_ptr<OGRPolygon> poLy(new OGRPolygon());
+              auto poLy = cpl::make_unique<OGRPolygon>();
               poOuter->closeRings();
               poLy->addRingDirectly(poOuter.release());
 

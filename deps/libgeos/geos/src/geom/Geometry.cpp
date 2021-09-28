@@ -18,7 +18,7 @@
  *
  **********************************************************************/
 
-#include <geos/geom/BinaryOp.h>
+#include <geos/geom/HeuristicOverlay.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/PrecisionModel.h>
@@ -51,6 +51,7 @@
 #include <geos/operation/buffer/BufferOp.h>
 #include <geos/operation/distance/DistanceOp.h>
 #include <geos/operation/IsSimpleOp.h>
+#include <geos/operation/overlayng/OverlayNGRobust.h>
 #include <geos/io/WKBWriter.h>
 #include <geos/io/WKTWriter.h>
 #include <geos/version.h>
@@ -153,7 +154,7 @@ Geometry::isWithinDistance(const Geometry* geom, double cDistance) const
 {
     const Envelope* env0 = getEnvelopeInternal();
     const Envelope* env1 = geom->getEnvelopeInternal();
-    double envDist = env0->distance(env1);
+    double envDist = env0->distance(*env1);
 
     if(envDist > cDistance) {
         return false;
@@ -303,7 +304,7 @@ Geometry::intersects(const Geometry* g) const
     }
 #endif
 
-    /**
+    /*
      * TODO: (MD) Add optimizations:
      *
      * - for P-A case:
@@ -523,13 +524,13 @@ Geometry::convexHull() const
 std::unique_ptr<Geometry>
 Geometry::intersection(const Geometry* other) const
 {
-    /**
-    * TODO: MD - add optimization for P-A case using Point-In-Polygon
-    */
+    /*
+     * TODO: MD - add optimization for P-A case using Point-In-Polygon
+     */
 
     // special case: if one input is empty ==> empty
     if(isEmpty() || other->isEmpty()) {
-        return std::unique_ptr<Geometry>(getFactory()->createGeometryCollection());
+        return OverlayOp::createEmptyResult(OverlayOp::opINTERSECTION, this, other, getFactory());
     }
 
 #ifdef USE_RECTANGLE_INTERSECTION
@@ -550,18 +551,20 @@ Geometry::intersection(const Geometry* other) const
     }
 #endif
 
-    return BinaryOp(this, other, overlayOp(OverlayOp::opINTERSECTION));
+    return HeuristicOverlay(this, other, OverlayOp::opINTERSECTION);
 }
 
 std::unique_ptr<Geometry>
 Geometry::Union(const Geometry* other) const
 {
-    // special case: if one input is empty ==> other input
-    if(isEmpty()) {
-        return other->clone();
-    }
-    if(other->isEmpty()) {
-        return clone();
+    // handle empty geometry cases
+    if(isEmpty() || other->isEmpty() ) {
+      if(isEmpty() && other->isEmpty() ) {
+        return OverlayOp::createEmptyResult(OverlayOp::opUNION, this, other, getFactory());
+      }
+      // special case: if one input is empty ==> other input
+      if(isEmpty()) return other->clone();
+      if(other->isEmpty()) return clone();
     }
 
 #ifdef SHORTCIRCUIT_PREDICATES
@@ -602,7 +605,7 @@ Geometry::Union(const Geometry* other) const
     }
 #endif
 
-    return BinaryOp(this, other, overlayOp(OverlayOp::opUNION));
+    return HeuristicOverlay(this, other, OverlayOp::opUNION);
 }
 
 /* public */
@@ -610,7 +613,11 @@ Geometry::Ptr
 Geometry::Union() const
 {
     using geos::operation::geounion::UnaryUnionOp;
+#ifdef DISABLE_OVERLAYNG
     return UnaryUnionOp::Union(*this);
+#else
+    return operation::overlayng::OverlayNGRobust::Union(this);
+#endif
 }
 
 std::unique_ptr<Geometry>
@@ -619,24 +626,26 @@ Geometry::difference(const Geometry* other) const
 {
     // special case: if A.isEmpty ==> empty; if B.isEmpty ==> A
     if(isEmpty()) {
-        return std::unique_ptr<Geometry>(getFactory()->createGeometryCollection());
+        return OverlayOp::createEmptyResult(OverlayOp::opDIFFERENCE, this, other, getFactory());
     }
     if(other->isEmpty()) {
         return clone();
     }
 
-    return BinaryOp(this, other, overlayOp(OverlayOp::opDIFFERENCE));
+    return HeuristicOverlay(this, other, OverlayOp::opDIFFERENCE);
 }
 
 std::unique_ptr<Geometry>
 Geometry::symDifference(const Geometry* other) const
 {
-    // special case: if either input is empty ==> other input
-    if(isEmpty()) {
-        return other->clone();
-    }
-    if(other->isEmpty()) {
-        return clone();
+    // handle empty geometry cases
+    if(isEmpty() || other->isEmpty() ) {
+      if(isEmpty() && other->isEmpty() ) {
+        return OverlayOp::createEmptyResult(OverlayOp::opSYMDIFFERENCE, this, other, getFactory());
+      }
+      // special case: if either input is empty ==> other input
+      if(isEmpty()) return other->clone();
+      if(other->isEmpty()) return clone();
     }
 
     // if envelopes are disjoint return a MULTI geom or
@@ -673,7 +682,8 @@ Geometry::symDifference(const Geometry* other) const
         return std::unique_ptr<Geometry>(_factory->buildGeometry(v));
     }
 
-    return BinaryOp(this, other, overlayOp(OverlayOp::opSYMDIFFERENCE));
+    return HeuristicOverlay(this, other, OverlayOp::opSYMDIFFERENCE);
+
 }
 
 int

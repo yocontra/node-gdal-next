@@ -323,6 +323,8 @@ public:
 
     bool IsWritable() const override { return !m_poShared->IsReadOnly(); }
 
+    const std::string& GetFilename() const override { return m_poShared->GetFilename(); }
+
     const std::vector<std::shared_ptr<GDALDimension>>& GetDimensions() const override { return m_dims; }
 
     const GDALExtendedDataType &GetDataType() const override { return m_dt; }
@@ -449,6 +451,16 @@ public:
 
     const GDALExtendedDataType &GetDataType() const override { return m_dt; }
 };
+
+/************************************************************************/
+/*                        HDF5SharedResources()                         */
+/************************************************************************/
+
+HDF5SharedResources::HDF5SharedResources(const std::string& osFilename):
+    m_osFilename(osFilename),
+    m_poPAM(std::make_shared<GDALPamMultiDim>(osFilename))
+{
+}
 
 /************************************************************************/
 /*                        ~HDF5SharedResources()                        */
@@ -2117,7 +2129,7 @@ GDALDataset *HDF5Dataset::OpenMultiDim( GDALOpenInfo *poOpenInfo )
         return nullptr;
     }
 
-    auto poSharedResources = std::make_shared<GDAL::HDF5SharedResources>();
+    auto poSharedResources = std::make_shared<GDAL::HDF5SharedResources>(pszFilename);
     poSharedResources->m_hHDF5 = hHDF5;
 
     auto poGroup(OpenGroup(poSharedResources));

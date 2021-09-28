@@ -32,7 +32,7 @@
 #include "ogrwarpedlayer.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrunionlayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrunionlayer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRUnionLayerGeomFieldDefn()                    */
@@ -49,7 +49,7 @@ OGRUnionLayerGeomFieldDefn::OGRUnionLayerGeomFieldDefn(
 /************************************************************************/
 
 OGRUnionLayerGeomFieldDefn::OGRUnionLayerGeomFieldDefn(
-    OGRGeomFieldDefn* poSrc) :
+    const OGRGeomFieldDefn* poSrc) :
     OGRGeomFieldDefn(poSrc->GetNameRef(), poSrc->GetType())
 {
     SetSpatialRef(poSrc->GetSpatialRef());
@@ -60,7 +60,7 @@ OGRUnionLayerGeomFieldDefn::OGRUnionLayerGeomFieldDefn(
 /************************************************************************/
 
 OGRUnionLayerGeomFieldDefn::OGRUnionLayerGeomFieldDefn(
-    OGRUnionLayerGeomFieldDefn* poSrc) :
+    const OGRUnionLayerGeomFieldDefn* poSrc) :
     OGRGeomFieldDefn(poSrc->GetNameRef(), poSrc->GetType()),
     bGeomTypeSet(poSrc->bGeomTypeSet),
     bSRSSet(poSrc->bSRSSet)
@@ -271,7 +271,7 @@ OGRFeatureDefn *OGRUnionLayer::GetLayerDefn()
         for( int i = 0; i < nGeomFields; i++ )
         {
             poFeatureDefn->AddGeomFieldDefn(
-                new OGRUnionLayerGeomFieldDefn(papoGeomFields[i]), FALSE);
+                cpl::make_unique<OGRUnionLayerGeomFieldDefn>(papoGeomFields[i]) );
             OGRUnionLayerGeomFieldDefn* poGeomFieldDefn =
                 cpl::down_cast<OGRUnionLayerGeomFieldDefn*>(poFeatureDefn->GetGeomFieldDefn(i));
 
@@ -321,7 +321,7 @@ OGRFeatureDefn *OGRUnionLayer::GetLayerDefn()
         {
             OGRGeomFieldDefn* poFldDefn = poSrcFeatureDefn->GetGeomFieldDefn(i);
             poFeatureDefn->AddGeomFieldDefn(
-                new OGRUnionLayerGeomFieldDefn(poFldDefn), FALSE);
+                cpl::make_unique<OGRUnionLayerGeomFieldDefn>(poFldDefn));
         }
     }
     else if (eFieldStrategy == FIELD_UNION_ALL_LAYERS )
@@ -329,7 +329,7 @@ OGRFeatureDefn *OGRUnionLayer::GetLayerDefn()
         if( nGeomFields == 1 )
         {
             poFeatureDefn->AddGeomFieldDefn(
-                        new OGRUnionLayerGeomFieldDefn(papoGeomFields[0]), FALSE);
+                cpl::make_unique<OGRUnionLayerGeomFieldDefn>(papoGeomFields[0]));
         }
 
         for(int iLayer = 0; iLayer < nSrcLayers; iLayer++)
@@ -364,7 +364,7 @@ OGRFeatureDefn *OGRUnionLayer::GetLayerDefn()
                 if( nIndex < 0 )
                 {
                     poFeatureDefn->AddGeomFieldDefn(
-                        new OGRUnionLayerGeomFieldDefn(poSrcFieldDefn), FALSE);
+                        cpl::make_unique<OGRUnionLayerGeomFieldDefn>(poSrcFieldDefn));
                     if( poFeatureDefn->GetGeomFieldCount() == 1 && nGeomFields == 0 &&
                         GetSpatialRef() != nullptr )
                     {
@@ -405,7 +405,7 @@ OGRFeatureDefn *OGRUnionLayer::GetLayerDefn()
         {
             OGRGeomFieldDefn* poFldDefn = poSrcFeatureDefn->GetGeomFieldDefn(i);
             poFeatureDefn->AddGeomFieldDefn(
-                new OGRUnionLayerGeomFieldDefn(poFldDefn), FALSE);
+                cpl::make_unique<OGRUnionLayerGeomFieldDefn>(poFldDefn));
         }
 
         /* Remove any field that is not found in the source layers */

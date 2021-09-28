@@ -44,7 +44,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: jpeg2000dataset.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: jpeg2000dataset.cpp 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $")
 
 // XXX: Part of code below extracted from the JasPer internal headers and
 // must be in sync with JasPer version (this one works with JasPer 1.900.1)
@@ -1157,12 +1157,12 @@ JPEG2000CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
 
             if( poSrcDS->GetGCPCount() > 0 )
             {
-                oJP2Geo.SetProjection( poSrcDS->GetGCPProjection() );
+                oJP2Geo.SetSpatialRef( poSrcDS->GetGCPSpatialRef() );
                 oJP2Geo.SetGCPs( poSrcDS->GetGCPCount(), poSrcDS->GetGCPs() );
             }
             else
             {
-                oJP2Geo.SetProjection( poSrcDS->GetProjectionRef() );
+                oJP2Geo.SetSpatialRef( poSrcDS->GetSpatialRef() );
                 oJP2Geo.SetGeoTransform( adfGeoTransform );
             }
 
@@ -1250,8 +1250,7 @@ JPEG2000CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
         double  adfGeoTransform[6];
         if( CPLFetchBool( papszOptions, "GMLJP2", true ) &&
             poSrcDS->GetGeoTransform(adfGeoTransform) == CE_None &&
-            poSrcDS->GetProjectionRef() != nullptr &&
-            poSrcDS->GetProjectionRef()[0] != '\0' )
+            poSrcDS->GetSpatialRef() != nullptr )
         {
             VSILFILE* fp = VSIFOpenL(pszFilename, "rb+");
             if( fp )
@@ -1300,7 +1299,7 @@ JPEG2000CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
                 if( bOK )
                 {
                     GDALJP2Metadata oJP2MD;
-                    oJP2MD.SetProjection( poSrcDS->GetProjectionRef() );
+                    oJP2MD.SetSpatialRef( poSrcDS->GetSpatialRef() );
                     oJP2MD.SetGeoTransform( adfGeoTransform );
                     GDALJP2Box *poBox;
                     const char* pszGMLJP2V2Def = CSLFetchNameValue( papszOptions, "GMLJP2V2_DEF" );

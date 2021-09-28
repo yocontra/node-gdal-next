@@ -64,6 +64,8 @@ namespace distance { // geos::operation::distance
  * the coordinate computed is a close
  * approximation to the exact point.
  *
+ * Empty geometry collection components are ignored.
+ *
  * The algorithms used are straightforward O(n^2)
  * comparisons.  This worst-case performance could be improved on
  * by using Voronoi techniques or spatial indexes.
@@ -185,9 +187,6 @@ private:
                        const std::vector<const geom::Polygon*>& polys,
                        std::array<std::unique_ptr<GeometryLocation>, 2> & locPtPoly);
 
-    void computeInside(std::unique_ptr<GeometryLocation> & ptLoc,
-                       const geom::Polygon* poly,
-                       std::array<std::unique_ptr<GeometryLocation>, 2> & locPtPoly);
 
     /**
      * Computes distance between facets (lines and points)

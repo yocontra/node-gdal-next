@@ -12,7 +12,7 @@
  *
  **********************************************************************
  *
- *  Last port: noding/SegmentNode.java rev. 1.6 (JTS-1.9)
+ * Last port: noding/SegmentNode.java 4667170ea (JTS-1.17)
  *
  **********************************************************************/
 
@@ -66,7 +66,7 @@ public:
     size_t segmentIndex;
 
     /// Construct a node on the given NodedSegmentString
-    //
+    ///
     /// @param ss the parent NodedSegmentString
     ///
     /// @param nCoord the coordinate of the intersection, will be copied

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeojsonreader.h 3a7914cee018d5b65dc1639368edbd8faac2543d 2020-01-07 22:30:27 +0100 Even Rouault $
+ * $Id: ogrgeojsonreader.h f28f5e8137ffeb479da480dc99e4dedbeec895ab 2021-09-26 20:02:01 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines GeoJSON reader within OGR OGRGeoJSON Driver.
@@ -32,13 +32,16 @@
 
 #include "cpl_json_header.h"
 #include "cpl_string.h"
-#include <ogr_core.h>
+#include "ogr_core.h"
 #include "ogrsf_frmts.h"
 
 #include "ogrgeojsonutils.h"
+#include "directedacyclicgraph.hpp"
 
 #include <utility>
+#include <map>
 #include <set>
+#include <vector>
 
 /************************************************************************/
 /*                         FORWARD DECLARATIONS                         */
@@ -101,7 +104,10 @@ class OGRGeoJSONBaseReader
     void SetArrayAsString( bool bArrayAsString );
     void SetDateAsString( bool bDateAsString );
 
-    bool GenerateFeatureDefn( OGRLayer* poLayer, json_object* poObj );
+    bool GenerateFeatureDefn( std::map<std::string, int>& oMapFieldNameToIdx,
+                              std::vector<std::unique_ptr<OGRFieldDefn>>& apoFieldDefn,
+                              gdal::DirectedAcyclicGraph<int, std::string>& dag,
+                              OGRLayer* poLayer, json_object* poObj );
     void FinalizeLayerDefn( OGRLayer* poLayer, CPLString& osFIDColumn );
 
     OGRGeometry* ReadGeometry( json_object* poObj, OGRSpatialReference* poLayerSRS );
@@ -213,7 +219,9 @@ void OGRGeoJSONReaderSetField( OGRLayer* poLayer,
                                bool bFlattenNestedAttributes,
                                char chNestedAttributeSeparator );
 void OGRGeoJSONReaderAddOrUpdateField(
-    OGRFeatureDefn* poDefn,
+    std::vector<int>& retIndices,
+    std::map<std::string, int>& oMapFieldNameToIdx,
+    std::vector<std::unique_ptr<OGRFieldDefn>>& apoFieldDefn,
     const char* pszKey,
     json_object* poVal,
     bool bFlattenNestedAttributes,

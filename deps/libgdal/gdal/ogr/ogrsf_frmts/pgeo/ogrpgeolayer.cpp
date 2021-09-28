@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpgeolayer.cpp 86712ccad3229729b777b63858c96d87e1c67b5e 2021-08-23 18:39:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeolayer.cpp f5183a2f1aa42d5b91cd9da8ba237259944594d9 2021-08-23 12:30:12 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRPGeoLayer()                            */
@@ -300,6 +300,13 @@ OGRFeature *OGRPGeoLayer::GetNextRawFeature()
 
         if( poGeom != nullptr && OGRERR_NONE == err )
         {
+            // always promote polygon/linestring geometries to multipolygon/multilinestring,
+            // so that the geometry types returned for the layer are predictable and match
+            // the advertised layer geometry type. See more details in OGRPGeoTableLayer::Initialize
+            const OGRwkbGeometryType eFlattenType = wkbFlatten(poGeom->getGeometryType());
+            if( eFlattenType == wkbPolygon || eFlattenType == wkbLineString )
+                poGeom = OGRGeometryFactory::forceTo(poGeom, OGR_GT_GetCollection(poGeom->getGeometryType()));
+
             poGeom->assignSpatialReference( poSRS );
             poFeature->SetGeometryDirectly( poGeom );
         }

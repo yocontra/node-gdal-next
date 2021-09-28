@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_ecw.h 0d8c4003fd3291dd14fad164eef25599b684a0ae 2021-03-22 15:02:53 +0100 Even Rouault $
+ * $Id: gdal_ecw.h 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  ECW (ERDAS Wavelet Compression Format) Driver Definitions
@@ -591,10 +591,7 @@ class CPL_DLL ECWDataset final: public GDALJP2AbstractDataset
     virtual char      **GetMetadata( const char * pszDomain = "" ) override;
 
     virtual CPLErr SetGeoTransform( double * padfGeoTransform ) override;
-    virtual CPLErr _SetProjection( const char* pszProjection ) override;
-    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override {
-        return OldSetProjectionFromSetSpatialRef(poSRS);
-    }
+    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override;
 
     virtual CPLErr SetMetadataItem( const char * pszName,
                                  const char * pszValue,
@@ -704,7 +701,7 @@ class ECWRasterBand final: public GDALPamRasterBand
 
 };
 
-int ECWTranslateFromWKT( const char *pszWKT,
+int ECWTranslateFromWKT( const OGRSpatialReference *poSRS,
                          char *pszProjection,
                          int nProjectionLen,
                          char *pszDatum,

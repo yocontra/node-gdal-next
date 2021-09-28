@@ -63,8 +63,6 @@
 #include <xercesc/util/XMLException.hpp>
 #include <xercesc/dom/DOMException.hpp>
 
-#ifdef XERCES_CPP_NAMESPACE_USE
-XERCES_CPP_NAMESPACE_USE
-#endif
+using namespace XERCES_CPP_NAMESPACE;
 
 #endif /* XERCESC_HEADERS_H */

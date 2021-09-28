@@ -33,7 +33,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxf_leader.cpp 5f6d7d1878fd9ad64fb72525d1db843ae99856e1 2020-06-27 14:09:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxf_leader.cpp 8d5b1df5a0e407130147947c7b88456c0659aa56 2021-06-03 19:13:55 +1000 Alan Thomas $")
 
 static void InterpolateSpline( OGRLineString* const poLine,
     const DXFTriple& oEndTangentDirection );
@@ -318,7 +318,9 @@ struct DXFMLEADERLeader {
 OGRDXFFeature *OGRDXFLayer::TranslateMLEADER()
 
 {
-    char szLineBuf[257];
+    // The MLEADER line buffer has to be very large, as the text contents
+    // (group code 304) do not wrap and may be arbitrarily long
+    char szLineBuf[4096];
     int nCode = 0;
 
     // This is a dummy feature object used to store style properties

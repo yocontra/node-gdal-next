@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrpgdumpdatasource.cpp 379fc8667418dc54e864d828ea35be513e69abc9 2021-04-03 21:58:21 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdumpdatasource.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRPGDumpDataSource()                           */
@@ -600,11 +600,10 @@ OGRPGDumpDataSource::ICreateLayer( const char * pszLayerName,
     if( bHavePostGIS )
     {
         OGRGeomFieldDefn oTmp( pszGFldName, eType );
-        OGRPGDumpGeomFieldDefn *poGeomField =
-            new OGRPGDumpGeomFieldDefn(&oTmp);
+        auto poGeomField = cpl::make_unique<OGRPGDumpGeomFieldDefn>(&oTmp);
         poGeomField->nSRSId = nSRSId;
         poGeomField->GeometryTypeFlags = GeometryTypeFlags;
-        poLayer->GetLayerDefn()->AddGeomFieldDefn(poGeomField, FALSE);
+        poLayer->GetLayerDefn()->AddGeomFieldDefn(std::move(poGeomField));
     }
     else if( pszGFldName )
         poLayer->SetGeometryFieldName(pszGFldName);

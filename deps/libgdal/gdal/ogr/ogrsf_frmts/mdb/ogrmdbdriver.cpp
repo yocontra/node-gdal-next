@@ -29,7 +29,7 @@
 #include "ogr_mdb.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrmdbdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmdbdriver.cpp 81398395d36dcf81cfee182d25b4dbccc63edc84 2021-08-28 07:57:54 +1000 Nyall Dawson $")
 
 // g++ -fPIC -g -Wall ogr/ogrsf_frmts/mdb/*.cpp -shared -o ogr_MDB.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/mdb -L. -lgdal -I/usr/lib/jvm/java-6-openjdk/include -I/usr/lib/jvm/java-6-openjdk/include/linux  -L/usr/lib/jvm/java-6-openjdk/jre/lib/amd64/server -ljvm
 
@@ -92,8 +92,14 @@ OGRDataSource *OGRMDBDriver::Open( const char * pszFilename,
         delete poDS;
         return nullptr;
     }
-    else
-        return poDS;
+
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled("MDB", "You should consider using the generic ODBC driver with an updated MDBTools Access driver instead.") )
+    {
+        delete poDS;
+        return nullptr;
+    }
+
+    return poDS;
 }
 
 /************************************************************************/
@@ -118,5 +124,7 @@ void RegisterOGRMDB()
                                "Access MDB (PGeo and Geomedia capable)" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "mdb" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/mdb.html" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
+
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver( poDriver );
 }

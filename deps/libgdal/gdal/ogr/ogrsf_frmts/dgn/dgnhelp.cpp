@@ -28,7 +28,7 @@
 
 #include "dgnlibp.h"
 
-CPL_CVSID("$Id: dgnhelp.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: dgnhelp.cpp 248de76b8e0054cb7512e40676533fa9a009565c 2021-08-28 12:54:10 +0200 Even Rouault $")
 
 static const unsigned char abyDefaultPCT[256][3] =
 {
@@ -1342,10 +1342,10 @@ void DGNRotationToQuaternion( double dfRotation, int *panQuaternion )
 void DGNQuaternionToMatrix( int *quat, float *mat )
 {
     const double q[4] = {
-        1.0 * quat[1] / (1<<31),
-        1.0 * quat[2] / (1<<31),
-        1.0 * quat[3] / (1<<31),
-        1.0 * quat[0] / (1<<31)
+        1.0 * quat[1] / (1U<<31),
+        1.0 * quat[2] / (1U<<31),
+        1.0 * quat[3] / (1U<<31),
+        1.0 * quat[0] / (1U<<31)
     };
 
     mat[0*3+0] = (float) (q[0]*q[0] - q[1]*q[1] - q[2]*q[2] + q[3]*q[3]);

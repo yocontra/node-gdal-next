@@ -38,7 +38,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: ogr_gensql.cpp 9cb485b2fb43258aa1fd374c1983564064f32c5f 2020-11-30 20:41:37 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogr_gensql.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 class OGRGenSQLGeomFieldDefn final: public OGRGeomFieldDefn
 {
@@ -429,10 +429,9 @@ OGRGenSQLResultsLayer::OGRGenSQLResultsLayer( GDALDataset *poSrcDSIn,
                 poSRS->Release();
             }
 
-            OGRGenSQLGeomFieldDefn* poMyGeomFieldDefn =
-                new OGRGenSQLGeomFieldDefn(&oGFDefn);
+            auto poMyGeomFieldDefn = cpl::make_unique<OGRGenSQLGeomFieldDefn>(&oGFDefn);
             poMyGeomFieldDefn->bForceGeomType = bForceGeomType;
-            poDefn->AddGeomFieldDefn( poMyGeomFieldDefn, FALSE );
+            poDefn->AddGeomFieldDefn( std::move(poMyGeomFieldDefn) );
         }
         else
             poDefn->AddFieldDefn( &oFDefn );
@@ -466,9 +465,8 @@ OGRGenSQLResultsLayer::OGRGenSQLResultsLayer( GDALDataset *poSrcDSIn,
 
         panGeomFieldToSrcGeomField[poDefn->GetGeomFieldCount()] = 0;
 
-        OGRGenSQLGeomFieldDefn* poMyGeomFieldDefn =
-            new OGRGenSQLGeomFieldDefn(poSrcDefn->GetGeomFieldDefn(0));
-        poDefn->AddGeomFieldDefn( poMyGeomFieldDefn, FALSE );
+        poDefn->AddGeomFieldDefn(
+            cpl::make_unique<OGRGenSQLGeomFieldDefn>(poSrcDefn->GetGeomFieldDefn(0)) );
 
         /* Hack while drivers haven't been updated so that */
         /* poSrcDefn->GetGeomFieldDefn(0)->GetSpatialRef() == poSrcLayer->GetSpatialRef() */

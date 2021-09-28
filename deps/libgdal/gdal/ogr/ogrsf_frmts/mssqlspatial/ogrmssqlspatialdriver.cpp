@@ -29,7 +29,7 @@
 #include "ogr_mssqlspatial.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrmssqlspatialdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatialdriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                           ~OGRMSSQLSpatialDriver()                   */
@@ -163,6 +163,7 @@ void RegisterOGRMSSQLSpatial()
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver(poDriver);
 }

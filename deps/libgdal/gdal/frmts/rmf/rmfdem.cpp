@@ -31,7 +31,7 @@
 
 #include "rmfdataset.h"
 
-CPL_CVSID("$Id: rmfdem.cpp a4c5f347548234b2307046a4a97aff83db0a4493 2021-03-26 21:46:09 +0100 Even Rouault $")
+CPL_CVSID("$Id: rmfdem.cpp ecd9506c41677b36e9b3a7095cd8415a44014ce5 2021-09-01 22:15:42 +0300 drons $")
 
 /*
  * The encoded data stream is a series of records.
@@ -603,9 +603,12 @@ size_t RMFDataset::DEMCompress(const GByte* pabyIn, GUInt32 nSizeIn,
     const GUInt32 anDeltaTypeSize[8] = {0,0,4,8,12,16,24,32};
     const GUInt32 nMaxRecordSize = 255 + 32;
 
-    DEMWorkT iMin((poDS == nullptr) ? std::numeric_limits<DEMWorkT>::min() :
-                  static_cast<DEMWorkT>(poDS->sHeader.adfElevMinMax[0]));
-
+    DEMWorkT iMin(std::numeric_limits<DEMWorkT>::min() + 1);
+    if(poDS != nullptr &&
+       poDS->sHeader.adfElevMinMax[0] < poDS->sHeader.adfElevMinMax[1])
+    {
+        iMin = static_cast<DEMWorkT>(poDS->sHeader.adfElevMinMax[0]);
+    }
     GUInt32     nLessCount = 0;
     GUInt32     nRecordSize = 0;
     RmfTypes    eRecordType = TYPE_OUT;

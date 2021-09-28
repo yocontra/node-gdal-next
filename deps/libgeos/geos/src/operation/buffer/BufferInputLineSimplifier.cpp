@@ -79,7 +79,7 @@ BufferInputLineSimplifier::simplify(double nDistanceTol)
 bool
 BufferInputLineSimplifier::deleteShallowConcavities()
 {
-    /**
+    /*
      * Do not simplify end line segments of the line string.
      * This ensures that end caps are generated consistently.
      */
@@ -128,7 +128,7 @@ BufferInputLineSimplifier::findNextNonDeletedIndex(size_t index) const
 std::unique_ptr<geom::CoordinateSequence>
 BufferInputLineSimplifier::collapseLine() const
 {
-    auto coordList = detail::make_unique<CoordinateArraySequence>();
+    auto coordList = new CoordinateArraySequence();
 
     for(size_t i = 0, n = inputLine.size(); i < n; ++i) {
         if(isDeleted[i] != DELETE) {
@@ -136,7 +136,7 @@ BufferInputLineSimplifier::collapseLine() const
         }
     }
 
-    return std::move(coordList);
+    return std::unique_ptr<CoordinateSequence>(coordList);
 }
 
 /* private */

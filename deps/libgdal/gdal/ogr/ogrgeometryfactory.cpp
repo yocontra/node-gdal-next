@@ -65,7 +65,7 @@
 #define UNUSED_IF_NO_GEOS
 #endif
 
-CPL_CVSID("$Id: ogrgeometryfactory.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeometryfactory.cpp 9f57a8d3c5f327cb02bb78ef23479c4b74143220 2021-05-22 00:41:26 +0200 Momtchil Momtchev $")
 
 /************************************************************************/
 /*                           createFromWkb()                            */
@@ -6087,13 +6087,16 @@ OGRCurve* OGRGeometryFactory::curveFromLineString(
 /**
  * @brief Create geometry from GeoJson fragment.
  * @param pszJsonString The GeoJSON fragment for the geometry.
+ * @param nSize (new in GDAL 3.4) Optional length of the string
+ *              if it is not null-terminated
  * @return a geometry on success, or NULL on error.
  * @since GDAL 2.3
  */
-OGRGeometry* OGRGeometryFactory::createFromGeoJson( const char *pszJsonString )
+OGRGeometry* OGRGeometryFactory::createFromGeoJson(
+    const char *pszJsonString, int nSize )
 {
     CPLJSONDocument oDocument;
-    if( !oDocument.LoadMemory( reinterpret_cast<const GByte*>(pszJsonString)) )
+    if( !oDocument.LoadMemory( reinterpret_cast<const GByte*>(pszJsonString), nSize) )
     {
         return nullptr;
     }

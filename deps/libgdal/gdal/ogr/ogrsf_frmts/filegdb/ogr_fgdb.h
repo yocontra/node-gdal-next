@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_fgdb.h c9bb0a71c27de43dab42821569ee6d9baf2fdf8f 2021-04-01 19:20:15 +0200 Even Rouault $
+* $Id: ogr_fgdb.h 2bd4328a9cb58844cb91956f8bd9869218a45b1a 2021-04-29 18:40:02 +0200 Even Rouault $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Standard includes and class definitions ArcObjects OGR driver.
@@ -276,12 +276,14 @@ protected:
 /************************************************************************/
 
 class FGdbDatabaseConnection;
+class OGRFileGDBGroup;
 
 class FGdbDataSource final: public OGRDataSource
 {
   CPLString             m_osFSName;
   CPLString             m_osPublicName;
   std::set<OGRLayer*>   m_oSetSelectLayers;
+  std::shared_ptr<GDALGroup>     m_poRootGroup{};
 
   int        FixIndexes();
   int        bPerLayerCopyingForTransaction;
@@ -313,6 +315,8 @@ public:
 
   const OGRFieldDomain* GetFieldDomain(const std::string& name) const override;
 
+  std::shared_ptr<GDALGroup> GetRootGroup() const override { return m_poRootGroup; }
+
   Geodatabase* GetGDB() { return m_pGeodatabase; }
   bool         GetUpdate() { return m_bUpdate; }
   FGdbDatabaseConnection* GetConnection() { return m_pConnection; }
@@ -335,7 +339,8 @@ public:
   */
 protected:
   bool LoadLayers(const std::wstring & parent);
-  bool OpenFGDBTables(const std::wstring &type,
+  bool OpenFGDBTables(OGRFileGDBGroup* group,
+                      const std::wstring &type,
                       const std::vector<std::wstring> &layers);
 
   FGdbDriver* m_poDriver;

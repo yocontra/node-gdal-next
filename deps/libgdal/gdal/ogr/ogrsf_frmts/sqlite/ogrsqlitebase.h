@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqlitebase.h 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $
+ * $Id: ogrsqlitebase.h 8dc0a101c5e4667fc8dfddf2a96ff54209bf0bfe 2021-09-05 18:19:07 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definition of classes and functions used by SQLite and GPKG drivers
@@ -62,22 +62,20 @@ class OGRSQLiteGeomFieldDefn final : public OGRGeomFieldDefn
 {
     public:
         OGRSQLiteGeomFieldDefn( const char* pszNameIn, int iGeomColIn ) :
-            OGRGeomFieldDefn(pszNameIn, wkbUnknown), nSRSId(-1),
-            iCol(iGeomColIn), bTriedAsSpatiaLite(FALSE), eGeomFormat(OSGF_None),
-            bCachedExtentIsValid(FALSE), bHasSpatialIndex(FALSE),
-            bHasCheckedSpatialIndexTable(FALSE)
+            OGRGeomFieldDefn(pszNameIn, wkbUnknown),
+            m_iCol(iGeomColIn)
             {
             }
 
-        int nSRSId;
-        int iCol; /* ordinal of geometry field in SQL statement */
-        int bTriedAsSpatiaLite;
-        OGRSQLiteGeomFormat eGeomFormat;
-        OGREnvelope         oCachedExtent;
-        int                 bCachedExtentIsValid;
-        int                 bHasSpatialIndex;
-        int                 bHasCheckedSpatialIndexTable;
-        std::vector< std::pair<CPLString,CPLString> > aosDisabledTriggers;
+        int m_nSRSId = -1;
+        int m_iCol; /* ordinal of geometry field in SQL statement */
+        bool m_bTriedAsSpatiaLite = false;
+        OGRSQLiteGeomFormat m_eGeomFormat = OSGF_None;
+        OGREnvelope         m_oCachedExtent{};
+        bool                m_bCachedExtentIsValid = false;
+        bool                m_bHasSpatialIndex = false;
+        bool                m_bHasCheckedSpatialIndexTable = false;
+        std::vector< std::pair<CPLString,CPLString> > m_aosDisabledTriggers{};
 };
 
 /************************************************************************/
@@ -108,7 +106,7 @@ class IOGRSQLiteGetSpatialWhere
   public:
     virtual              ~IOGRSQLiteGetSpatialWhere() {}
 
-    virtual int           HasFastSpatialFilter(int iGeomCol) = 0;
+    virtual bool          HasFastSpatialFilter(int iGeomCol) = 0;
     virtual CPLString     GetSpatialWhere(int iGeomCol,
                                           OGRGeometry* poFilterGeom) = 0;
 };
@@ -131,7 +129,7 @@ class OGRSQLiteBaseDataSource CPL_NON_FINAL: public GDALPamDataset
     VSILFILE*           fpMainFile = nullptr; /* Set by the VFS layer when it opens the DB */
                                     /* Must *NOT* be closed by the datasource explicitly. */
 
-    int                 OpenOrCreateDB(int flags, int bRegisterOGR2SQLiteExtensions);
+    int                 OpenOrCreateDB(int flags, bool bRegisterOGR2SQLiteExtensions);
     bool                SetSynchronous();
     bool                SetCacheSize();
 
@@ -210,26 +208,26 @@ class IOGRSQLiteSelectLayer
 
 class OGRSQLiteSelectLayerCommonBehaviour
 {
-    OGRSQLiteBaseDataSource *poDS;
-    IOGRSQLiteSelectLayer   *poLayer;
+    OGRSQLiteBaseDataSource *m_poDS = nullptr;
+    IOGRSQLiteSelectLayer   *m_poLayer = nullptr;
 
-    CPLString           osSQLBase;
+    CPLString           m_osSQLBase{};
 
-    int                 bEmptyLayer;
-    int                 bAllowResetReadingEvenIfIndexAtZero;
-    int                 bSpatialFilterInSQL;
+    bool                m_bEmptyLayer = false;
+    bool                m_bAllowResetReadingEvenIfIndexAtZero = false;
+    bool                m_bSpatialFilterInSQL = true;
 
     std::pair<OGRLayer*, IOGRSQLiteGetSpatialWhere*> GetBaseLayer(size_t& i);
     int                 BuildSQL();
 
   public:
 
-    CPLString           osSQLCurrent;
+    CPLString           m_osSQLCurrent{};
 
         OGRSQLiteSelectLayerCommonBehaviour(OGRSQLiteBaseDataSource* poDS,
                                             IOGRSQLiteSelectLayer* poBaseLayer,
-                                            CPLString osSQL,
-                                            int bEmptyLayer);
+                                            const CPLString& osSQL,
+                                            bool bEmptyLayer);
 
     void        ResetReading();
     OGRFeature *GetNextFeature();
@@ -278,10 +276,13 @@ OGRErr       OGRSQLiteGetSpatialiteGeometryHeader( const GByte *pabyData,
                                                     double* pdfMinY,
                                                     double* pdfMaxX,
                                                     double* pdfMaxY );
-OGRErr       OGRSQLiteImportSpatiaLiteGeometry( const GByte *, int,
+// CPL_DLL just for spatialite_geom_import_fuzzer
+OGRErr CPL_DLL OGRSQLiteImportSpatiaLiteGeometry( const GByte *, int,
                                                 OGRGeometry **,
                                                 int *pnSRID = nullptr);
 OGRErr       OGRSQLiteExportSpatiaLiteGeometry( const OGRGeometry *,
-                                                  GInt32, OGRwkbByteOrder,
-                                                  int, int bUseComprGeom, GByte **, int * );
+                                                GInt32, OGRwkbByteOrder,
+                                                bool bSpatialite2D,
+                                                bool bUseComprGeom,
+                                                GByte **, int * );
 #endif // OGR_SQLITE_BASE_H_INCLUDED

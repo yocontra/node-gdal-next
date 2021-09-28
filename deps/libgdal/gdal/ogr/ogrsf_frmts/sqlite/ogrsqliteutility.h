@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqliteutility.h 455bf3c255ee78dc70116ca2e2b1a37aaecd0799 2020-05-30 17:43:05 +0200 Even Rouault $
+ * $Id: ogrsqliteutility.h 8d61c2d7f95f833cf04075914ed0eba06bd65ed5 2021-05-31 17:39:36 +0200 Julien Rebetez $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Utility header for OGR GeoPackage driver.
@@ -36,26 +36,32 @@
 
 #include <set>
 #include <string>
+#include <memory>
 
-typedef struct
+class SQLResult
 {
-    char** papszResult;
-    int nRowCount;
-    int nColCount;
-    char *pszErrMsg;
-    int rc;
-} SQLResult;
+    public:
+        SQLResult(char** result, int nRow, int nCol);
+        ~SQLResult ();
+
+        int         RowCount() const { return nRowCount; }
+        int         ColCount() const { return nColCount; }
+        void        LimitRowCount(int nLimit);
+
+        const char* GetValue(int iColumnNum, int iRowNum) const;
+        int         GetValueAsInteger(int iColNum, int iRowNum) const;
+    private:
+        char** papszResult = nullptr;
+        int nRowCount = 0;
+        int nColCount = 0;
+};
 
 
 OGRErr              SQLCommand(sqlite3 *poDb, const char * pszSQL);
 int                 SQLGetInteger(sqlite3 * poDb, const char * pszSQL, OGRErr *err);
 GIntBig             SQLGetInteger64(sqlite3 * poDb, const char * pszSQL, OGRErr *err);
 
-OGRErr              SQLResultInit(SQLResult * poResult);
-OGRErr              SQLQuery(sqlite3 *poDb, const char * pszSQL, SQLResult * poResult);
-const char*         SQLResultGetValue(const SQLResult * poResult, int iColumnNum, int iRowNum);
-int                 SQLResultGetValueAsInteger(const SQLResult * poResult, int iColNum, int iRowNum);
-OGRErr              SQLResultFree(SQLResult * poResult);
+std::unique_ptr<SQLResult> SQLQuery(sqlite3 *poDb, const char * pszSQL);
 
 int                 SQLiteFieldFromOGR(OGRFieldType eType);
 

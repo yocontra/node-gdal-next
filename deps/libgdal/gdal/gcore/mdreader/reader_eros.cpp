@@ -38,7 +38,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: reader_eros.cpp ec7b85e6bb8f9737693a31f0bf7166e31e10992e 2018-04-16 00:08:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: reader_eros.cpp 24c41364357171099e668f8edea9a122eac260bf 2021-08-28 12:31:15 +0200 Even Rouault $")
 
 /**
  * GDALMDReaderEROS()
@@ -230,26 +230,19 @@ char** GDALMDReaderEROS::LoadImdTxtFile()
         return nullptr;
 
     char** papszIMD = nullptr;
-    char szName[22];
-    int i, j;
 
-    for(i = 0; papszLines[i] != nullptr; i++)
+    for(int i = 0; papszLines[i] != nullptr; i++)
     {
         const char *pszLine = papszLines[i];
         if( CPLStrnlen(pszLine, 21) >= 21 )
         {
-            for(j = 0; j < 21; j++)
+            char szName[22];
+            memcpy(szName, pszLine, 21);
+            szName[21] = 0;
+            char* pszSpace = strchr(szName, ' ');
+            if(pszSpace)
             {
-                if(pszLine[j] == ' ' )
-                {
-                    break;
-                }
-                szName[j] = pszLine[j];
-            }
-
-            if(j > 0)
-            {
-                szName[j] = 0;
+                *pszSpace = 0;
                 papszIMD = CSLAddNameValue(papszIMD, szName, pszLine + 20);
             }
         }

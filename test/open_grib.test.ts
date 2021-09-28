@@ -73,7 +73,9 @@ describe('Open', () => {
     })
 
     it('should be able to read geotransform', () => {
-      const expected_geotransform = [ -0.125, 4, 0, 90.125, 0, -4 ]
+      // GDAL 3.4+ translates the GRIB2 coordinates
+      const expected_geotransform = semver.gte(gdal.version, '3.4.0-git0') ?
+        [ -182, 4, 0, 90.125, 0, -4 ] : [ -0.125, 4, 0, 90.125, 0, -4 ]
 
       const actual_geotransform = ds.geoTransform
       const delta = 0.00001

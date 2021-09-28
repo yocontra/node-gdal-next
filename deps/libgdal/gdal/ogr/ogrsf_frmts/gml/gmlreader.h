@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gmlreader.h 2b939583852d95f8724a939c927361cf40e81500 2020-10-22 11:42:59 +0200 Even Rouault $
+ * $Id: gmlreader.h ee7d33b2b9929bdfd7f3a285c3777761b2a59ef2 2021-05-09 13:45:35 +0200 Even Rouault $
  *
  * Project:  GML Reader
  * Purpose:  Public Declarations for OGR free GML Reader code.
@@ -132,6 +132,7 @@ class CPL_DLL GMLGeometryPropertyDefn
     int         m_nGeometryType;
     int         m_nAttributeIndex;
     bool        m_bNullable;
+    std::string m_osSRSName{};
 
 public:
         GMLGeometryPropertyDefn( const char *pszName, const char *pszSrcElement,
@@ -148,6 +149,9 @@ public:
         int GetAttributeIndex() const { return m_nAttributeIndex; }
 
         bool IsNullable() const { return m_bNullable; }
+
+        void SetSRSName(const std::string& srsName) { m_osSRSName = srsName; }
+        const std::string& GetSRSName() const { return m_osSRSName; }
 };
 
 /************************************************************************/

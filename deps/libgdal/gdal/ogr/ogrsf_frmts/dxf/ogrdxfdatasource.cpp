@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxfdatasource.cpp f722e742a6963701692ad111819225355a14a3c6 2020-03-29 21:41:09 +1100 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxfdatasource.cpp 8d5b1df5a0e407130147947c7b88456c0659aa56 2021-06-03 19:13:55 +1000 Alan Thomas $")
 
 /************************************************************************/
 /*                          OGRDXFDataSource()                          */
@@ -1005,7 +1005,7 @@ size_t OGRDXFDataSource::GetEntryFromAcDsDataSection(
     int iPrevOffset = oReader.iSrcBufferFileOffset + oReader.iSrcBufferOffset;
     int nPrevLineNumber = oReader.nLineNumber;
 
-    char szLineBuf[270]; // TODO figure out what to do with this re character escapes
+    char szLineBuf[4096];
     int nCode = 0;
     bool bFound = false;
 

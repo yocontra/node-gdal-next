@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_spatialref.h 56ffce3410a916e1f0c3e583141c7bef9d7b4bbe 2021-04-10 20:16:53 +0200 Even Rouault $
+ * $Id: ogr_spatialref.h 70d0856e6baecec8b082273d1a1105910da742ff 2021-09-03 11:56:55 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes for manipulating spatial reference systems in a
@@ -346,6 +346,7 @@ class CPL_DLL OGRSpatialReference
     int         IsDerivedGeographic() const;
     int         IsProjected() const;
     int         IsGeocentric() const;
+    bool        IsDynamic() const;
     int         IsLocal() const;
     int         IsVertical() const;
     int         IsCompound() const;
@@ -379,12 +380,20 @@ class CPL_DLL OGRSpatialReference
                                const OGRSpatialReference *poHorizSRS,
                                const OGRSpatialReference *poVertSRS );
 
+    void        SetCoordinateEpoch( double dfCoordinateEpoch );
+    double      GetCoordinateEpoch() const;
+
     // cppcheck-suppress functionStatic
     OGRErr      PromoteTo3D( const char* pszName );
     // cppcheck-suppress functionStatic
     OGRErr      DemoteTo2D( const char* pszName );
 
     OGRErr      SetFromUserInput( const char * );
+
+    static const char* const SET_FROM_USER_INPUT_LIMITATIONS[];
+    static CSLConstList SET_FROM_USER_INPUT_LIMITATIONS_get();
+
+    OGRErr      SetFromUserInput( const char *, CSLConstList papszOptions );
 
     OGRErr      SetTOWGS84( double, double, double,
                             double = 0.0, double = 0.0, double = 0.0,
@@ -678,6 +687,13 @@ class CPL_DLL OGRSpatialReference
                                                double dfSouthPoleLat,
                                                double dfSouthPoleLon,
                                                double dfAxisRotation );
+
+    /** Pole rotation (netCDF CF convention) */
+    OGRErr      SetDerivedGeogCRSWithPoleRotationNetCDFCFConvention(
+                                               const char* pszCRSName,
+                                               double dfGridNorthPoleLat,
+                                               double dfGridNorthPoleLon,
+                                               double dfNorthPoleGridLon );
 
     /** State Plane */
     OGRErr      SetStatePlane( int nZone, int bNAD83 = TRUE,

@@ -53,7 +53,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id: ogrinfo.cpp fb6aaddcfeb93b956a1a988cb142f25878ed1a35 2021-04-01 19:19:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrinfo.cpp a74c04943cc2d7463a7d9bd46ec05bdfacd54d7b 2021-08-27 12:28:04 +1000 Nyall Dawson $")
 
 bool bVerbose = true;
 bool bSuperQuiet = false;
@@ -298,7 +298,20 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
                       oExt.MinX, oExt.MinY, oExt.MaxX, oExt.MaxY);
         }
 
-        const auto displayDataAxisMapping = [](const OGRSpatialReference* poSRS) {
+        const auto displayExtraInfoSRS = [](const OGRSpatialReference* poSRS) {
+
+            const double dfCoordinateEpoch = poSRS->GetCoordinateEpoch();
+            if( dfCoordinateEpoch > 0 )
+            {
+                std::string osCoordinateEpoch = CPLSPrintf("%f", dfCoordinateEpoch);
+                if( osCoordinateEpoch.find('.') != std::string::npos )
+                {
+                    while( osCoordinateEpoch.back() == '0' )
+                        osCoordinateEpoch.resize(osCoordinateEpoch.size()-1);
+                }
+                printf("Coordinate epoch: %s\n", osCoordinateEpoch.c_str());
+            }
+
             const auto mapping = poSRS->GetDataAxisToSRSAxisMapping();
             printf("Data axis to CRS axis mapping: ");
             for( size_t i = 0; i < mapping.size(); i++ )
@@ -338,7 +351,7 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
                 CPLFree(pszWKT);
                 if( poSRS )
                 {
-                    displayDataAxisMapping(poSRS);
+                    displayExtraInfoSRS(poSRS);
                 }
             }
         }
@@ -363,7 +376,7 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
             CPLFree(pszWKT);
             if( poSRS )
             {
-                displayDataAxisMapping(poSRS);
+                displayExtraInfoSRS(poSRS);
             }
         }
 
@@ -632,6 +645,85 @@ static void RemoveSQLComments(char*& pszSQL)
     CSLDestroy(papszLines);
     CPLFree(pszSQL);
     pszSQL = CPLStrdup(osSQL);
+}
+
+/************************************************************************/
+/*                           PrintLayerSummary()                        */
+/************************************************************************/
+
+static void PrintLayerSummary(OGRLayer* poLayer, bool bGeomType, bool bIsPrivate=false)
+{
+    printf("%s", poLayer->GetName());
+
+    const char* pszTitle = poLayer->GetMetadataItem("TITLE");
+    if( pszTitle )
+    {
+        printf(" (title: %s)", pszTitle);
+    }
+
+    const int nGeomFieldCount =
+        bGeomType ? poLayer->GetLayerDefn()->GetGeomFieldCount() : 0;
+    if( nGeomFieldCount > 1 )
+    {
+        printf(" (");
+        for( int iGeom = 0; iGeom < nGeomFieldCount; iGeom++ )
+        {
+            if( iGeom > 0 )
+                printf(", ");
+            OGRGeomFieldDefn* poGFldDefn =
+                poLayer->GetLayerDefn()->
+                    GetGeomFieldDefn(iGeom);
+            printf(
+                "%s",
+                OGRGeometryTypeToName(
+                    poGFldDefn->GetType()));
+        }
+        printf(")");
+    }
+    else if( bGeomType && poLayer->GetGeomType() != wkbUnknown )
+        printf(" (%s)",
+               OGRGeometryTypeToName(
+                   poLayer->GetGeomType()));
+
+    if( bIsPrivate )
+    {
+        printf(" [private]");
+    }
+
+    printf("\n");
+}
+
+/************************************************************************/
+/*                       ReportHiearchicalLayers()                      */
+/************************************************************************/
+
+static void ReportHiearchicalLayers(const GDALGroup* group,
+                                    const std::string& indent,
+                                    bool bGeomType)
+{
+    const auto aosVectorLayerNames = group->GetVectorLayerNames();
+    for( const auto& osVectorLayerName: aosVectorLayerNames )
+    {
+        OGRLayer* poLayer = group->OpenVectorLayer(osVectorLayerName);
+        if( poLayer )
+        {
+            printf("%sLayer: ", indent.c_str());
+            PrintLayerSummary(poLayer, bGeomType);
+        }
+    }
+
+    const std::string subIndent(indent + "  ");
+    auto aosSubGroupNames = group->GetGroupNames();
+    for( const auto& osSubGroupName: aosSubGroupNames )
+    {
+        auto poSubGroup = group->OpenGroup(osSubGroupName);
+        if( poSubGroup )
+        {
+            printf("Group %s", indent.c_str());
+            printf("%s:\n", osSubGroupName.c_str());
+            ReportHiearchicalLayers(poSubGroup.get(), subIndent, bGeomType);
+        }
+    }
 }
 
 /************************************************************************/
@@ -942,6 +1034,7 @@ MAIN_START(nArgc, papszArgv)
     GDALDriver *poDriver = nullptr;
     if( poDS != nullptr )
         poDriver = poDS->GetDriver();
+    const int nLayerCount = poDS ? poDS->GetLayerCount() : 0;
 
 /* -------------------------------------------------------------------- */
 /*      Report failure                                                  */
@@ -1133,12 +1226,23 @@ MAIN_START(nArgc, papszArgv)
         {
             if( iRepeat == 0 )
                 CPLDebug("OGR", "GetLayerCount() = %d\n",
-                         poDS->GetLayerCount());
+                         nLayerCount);
+
+            bool bDone = false;
+            auto poRootGroup = poDS->GetRootGroup();
+            if( !bAllLayers && poRootGroup &&
+                (!poRootGroup->GetGroupNames().empty() ||
+                 !poRootGroup->GetVectorLayerNames().empty()) )
+            {
+                ReportHiearchicalLayers(poRootGroup.get(),
+                                        std::string(), bGeomType);
+                bDone = true;
+            }
 
 /* -------------------------------------------------------------------- */
 /*      Process each data source layer.                                 */
 /* -------------------------------------------------------------------- */
-            for( int iLayer = 0; iLayer < poDS->GetLayerCount(); iLayer++ )
+            for( int iLayer = 0; !bDone && iLayer < nLayerCount; iLayer++ )
             {
                 OGRLayer *poLayer = poDS->GetLayer(iLayer);
 
@@ -1151,39 +1255,8 @@ MAIN_START(nArgc, papszArgv)
 
                 if( !bAllLayers )
                 {
-                    printf("%d: %s", iLayer + 1, poLayer->GetName());
-
-                    const char* pszTitle = poLayer->GetMetadataItem("TITLE");
-                    if( pszTitle )
-                    {
-                        printf(" (title: %s)", pszTitle);
-                    }
-
-                    const int nGeomFieldCount =
-                        bGeomType ? poLayer->GetLayerDefn()->GetGeomFieldCount() : 0;
-                    if( nGeomFieldCount > 1 )
-                    {
-                        printf(" (");
-                        for( int iGeom = 0; iGeom < nGeomFieldCount; iGeom++ )
-                        {
-                            if( iGeom > 0 )
-                                printf(", ");
-                            OGRGeomFieldDefn* poGFldDefn =
-                                poLayer->GetLayerDefn()->
-                                    GetGeomFieldDefn(iGeom);
-                            printf(
-                                "%s",
-                                OGRGeometryTypeToName(
-                                    poGFldDefn->GetType()));
-                        }
-                        printf(")");
-                    }
-                    else if( bGeomType && poLayer->GetGeomType() != wkbUnknown )
-                        printf(" (%s)",
-                               OGRGeometryTypeToName(
-                                   poLayer->GetGeomType()));
-
-                    printf("\n");
+                    printf("%d: ", iLayer + 1);
+                    PrintLayerSummary(poLayer, bGeomType, poDS->IsLayerPrivate(iLayer));
                 }
                 else
                 {

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_odbc.h 657d65d2f09c031221875536844191be01b4ea66 2020-08-31 18:09:29 +1000 Nyall Dawson $
+ * $Id: cpl_odbc.h 658d4f6254f467214d228ee9513838e9b1f878f9 2021-08-27 15:00:59 +1000 Nyall Dawson $
  *
  * Project:  OGR ODBC Driver
  * Purpose:  Declarations for ODBC Access Cover API.
@@ -65,6 +65,9 @@ class CPL_DLL CPLODBCDriverInstaller
     DWORD m_nErrorCode;
     DWORD m_nUsageCount;
 
+    static bool        FindMdbToolsDriverLib( CPLString& osDriverFile );
+    static bool        LibraryExists( const char* pszLibPath );
+
   public:
 
     // Default constructor.
@@ -89,6 +92,15 @@ class CPL_DLL CPLODBCDriverInstaller
      */
     int InstallDriver( const char* pszDriver, const char* pszPathIn,
             WORD fRequest = ODBC_INSTALL_COMPLETE );
+
+    /**
+     * Attempts to install the MDB Tools driver for Microsoft Access databases.
+     *
+     * This is only supported on non-Windows platforms.
+     *
+     * @since GDAL 3.4
+     */
+    static void InstallMdbToolsDriver();
 
     /**
      * Removes or changes information about the driver from

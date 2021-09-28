@@ -47,7 +47,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdaldefaultoverviews.cpp a0022b0e5184151635fcb8513190005ec7e9ea88 2020-06-26 17:57:17 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldefaultoverviews.cpp cd9e30f12c3c75eef8c341492c6d6bdfd89ab8e5 2021-08-12 21:45:00 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/
@@ -1176,25 +1176,27 @@ int GDALDefaultOverviews::HaveMaskFile( char ** papszSiblingFiles,
     if( poBaseDS != nullptr && poBaseDS->oOvManager.HaveMaskFile() )
     {
         GDALRasterBand * const poBaseBand = poBaseDS->GetRasterBand(1);
-        GDALRasterBand * poBaseMask = poBaseBand != nullptr ?
-            poBaseBand->GetMaskBand() : nullptr;
-
-        const int nOverviewCount = poBaseMask != nullptr ?
-            poBaseMask->GetOverviewCount() : 0;
-
         GDALDataset* poMaskDSTemp = nullptr;
-        for( int iOver = 0; iOver < nOverviewCount; iOver++ )
+        if( poBaseBand != nullptr )
         {
-            GDALRasterBand * const poOverBand =
-                poBaseMask->GetOverview( iOver );
-            if( poOverBand == nullptr )
-                continue;
-
-            if( poOverBand->GetXSize() == poDS->GetRasterXSize()
-                && poOverBand->GetYSize() == poDS->GetRasterYSize() )
+            GDALRasterBand * poBaseMask = poBaseBand->GetMaskBand();
+            if( poBaseMask != nullptr )
             {
-                poMaskDSTemp = poOverBand->GetDataset();
-                break;
+                const int nOverviewCount = poBaseMask->GetOverviewCount();
+                for( int iOver = 0; iOver < nOverviewCount; iOver++ )
+                {
+                    GDALRasterBand * const poOverBand =
+                        poBaseMask->GetOverview( iOver );
+                    if( poOverBand == nullptr )
+                        continue;
+
+                    if( poOverBand->GetXSize() == poDS->GetRasterXSize()
+                        && poOverBand->GetYSize() == poDS->GetRasterYSize() )
+                    {
+                        poMaskDSTemp = poOverBand->GetDataset();
+                        break;
+                    }
+                }
             }
         }
 

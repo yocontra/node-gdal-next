@@ -65,7 +65,7 @@
 #include "ogr_proj_p.h"
 #include "proj.h"
 
-CPL_CVSID("$Id: hfadataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: hfadataset.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
 
 constexpr double R2D = 180.0 / M_PI;
 constexpr double D2R = M_PI / 180.0;
@@ -5186,7 +5186,7 @@ CPLErr HFADataset::ReadProjection()
         pszPE_COORDSYS = HFAGetPEString(hHFA);
     if( pszPE_COORDSYS != nullptr
         && strlen(pszPE_COORDSYS) > 0
-        && oSRS.SetFromUserInput(pszPE_COORDSYS) == OGRERR_NONE )
+        && oSRS.SetFromUserInput(pszPE_COORDSYS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) == OGRERR_NONE )
     {
         CPLFree(pszPE_COORDSYS);
 

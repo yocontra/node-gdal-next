@@ -47,7 +47,7 @@
 #include <vector>
 #include <set>
 
-CPL_CVSID("$Id: ogrmvtdataset.cpp 1f9c95d231ddf23fc672c8e5bdf676c5f1499075 2021-08-25 18:57:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmvtdataset.cpp 0441642c7a5bd491d37183b6a563080ff322c6b1 2021-08-25 11:43:53 +0200 Even Rouault $")
 
 const char* SRS_EPSG_3857 = "PROJCS[\"WGS 84 / Pseudo-Mercator\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Mercator_1SP\"],PARAMETER[\"central_meridian\",0],PARAMETER[\"scale_factor\",1],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"X\",EAST],AXIS[\"Y\",NORTH],EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs\"],AUTHORITY[\"EPSG\",\"3857\"]]";
 
@@ -3716,7 +3716,7 @@ bool OGRMVTWriterDataset::EncodeRepairedOuterRing(
     const int nLastYOri = nLastY;
     GUInt32 nLineToCount = 0;
     const int nPoints = poRing->getNumPoints() - 1;
-    std::unique_ptr<OGRLinearRing> poOutLinearRing(new OGRLinearRing());
+    auto poOutLinearRing = cpl::make_unique<OGRLinearRing>();
     poOutLinearRing->setNumPoints(nPoints);
     for( int i = 0; i < nPoints; i++ )
     {
@@ -3800,7 +3800,7 @@ bool OGRMVTWriterDataset::EncodePolygon(MVTTileLayerFeature *poGPBFeature,
                                            double& dfArea) const
 {
     dfArea = 0;
-    std::unique_ptr<OGRLinearRing> poOutOuterRing(new OGRLinearRing());
+    auto poOutOuterRing = cpl::make_unique<OGRLinearRing>();
     OGRPolygon oOutPolyAllRings;
 
     for( int i = 0; i < 1 + poPoly->getNumInteriorRings(); i++ )
@@ -3821,7 +3821,7 @@ bool OGRMVTWriterDataset::EncodePolygon(MVTTileLayerFeature *poGPBFeature,
         const GUInt32 nMinLineTo = 2;
         std::unique_ptr<OGRLinearRing> poOutInnerRing;
         if( i > 0 )
-            poOutInnerRing = std::unique_ptr<OGRLinearRing>(new OGRLinearRing());
+            poOutInnerRing = cpl::make_unique<OGRLinearRing>();
         OGRLinearRing* poOutRing =
             poOutInnerRing.get() ? poOutInnerRing.get() : poOutOuterRing.get();
 

@@ -31,7 +31,7 @@
 #include "ogrmutexeddatasource.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrmutexeddatasource.cpp c9bb0a71c27de43dab42821569ee6d9baf2fdf8f 2021-04-01 19:20:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmutexeddatasource.cpp 2bd4328a9cb58844cb91956f8bd9869218a45b1a 2021-04-29 18:40:02 +0200 Even Rouault $")
 
 OGRMutexedDataSource::OGRMutexedDataSource( OGRDataSource* poBaseDataSource,
                                             int bTakeOwnership,
@@ -245,6 +245,13 @@ bool OGRMutexedDataSource::AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& doma
     CPLMutexHolderOptionalLockD(m_hGlobalMutex);
     return m_poBaseDataSource->AddFieldDomain(std::move(domain), failureReason);
 }
+
+std::shared_ptr<GDALGroup> OGRMutexedDataSource::GetRootGroup() const
+{
+    CPLMutexHolderOptionalLockD(m_hGlobalMutex);
+    return m_poBaseDataSource->GetRootGroup();
+}
+
 
 #if defined(WIN32) && defined(_MSC_VER)
 // Horrible hack: for some reason MSVC doesn't export the class

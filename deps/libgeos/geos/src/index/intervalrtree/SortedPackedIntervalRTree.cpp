@@ -17,7 +17,6 @@
 #include <geos/index/intervalrtree/IntervalRTreeLeafNode.h>
 #include <geos/index/intervalrtree/IntervalRTreeBranchNode.h>
 #include <geos/index/ItemVisitor.h>
-#include <geos/util/UnsupportedOperationException.h>
 
 #include <algorithm>
 
@@ -38,10 +37,10 @@ SortedPackedIntervalRTree::init()
     if(root != nullptr)
         return;
 
-    /**
-    * if leaves is empty then nothing has been inserted.
-    * In this case it is safe to leave the tree in an open state
-    */
+    /*
+     * if leaves is empty then nothing has been inserted.
+     * In this case it is safe to leave the tree in an open state
+     */
     if (leaves.empty()) return;
 
     root = buildTree();
@@ -52,15 +51,21 @@ SortedPackedIntervalRTree::buildTree()
 {
     branches.reserve(leaves.size() - 1);
 
+    // sort the leaf nodes
+    std::sort(leaves.begin(), leaves.end(),
+            [](const IntervalRTreeLeafNode & n1, const IntervalRTreeLeafNode & n2) {
+                double mid1 = n1.getMin() + n1.getMax();
+                double mid2 = n2.getMin() + n2.getMax();
+
+                return mid1 > mid2;
+            });
+
     // now group nodes into blocks of two and build tree up recursively
     std::vector<const IntervalRTreeNode*> src{leaves.size()};
     std::vector<const IntervalRTreeNode*> dest;
     std::transform(leaves.begin(), leaves.end(), src.begin(), [](const IntervalRTreeLeafNode & n) {
         return &n;
     });
-
-    // sort the leaf nodes
-    std::sort(src.begin(), src.end(), IntervalRTreeNode::compare);
 
     while(true) {
         buildLevel(src, dest);
@@ -103,15 +108,6 @@ SortedPackedIntervalRTree::buildLevel(IntervalRTreeNode::ConstVect& src, Interva
 // public:
 //
 
-void
-SortedPackedIntervalRTree::insert(double min, double max, void* item)
-{
-    if(root != nullptr) {
-        throw util::UnsupportedOperationException("Index cannot be added to once it has been queried");
-    }
-
-    leaves.emplace_back(min, max, item);
-}
 
 void
 SortedPackedIntervalRTree::query(double min, double max, index::ItemVisitor* visitor)

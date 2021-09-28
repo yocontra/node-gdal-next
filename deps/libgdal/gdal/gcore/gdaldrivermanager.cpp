@@ -40,6 +40,7 @@
 #include "cpl_port.h"
 #include "cpl_string.h"
 #include "cpl_vsi.h"
+#include "cpl_compressor.h"
 #include "gdal_alg.h"
 #include "gdal_alg_priv.h"
 #include "gdal.h"
@@ -62,7 +63,7 @@
 // FIXME: Disabled following code as it crashed on OSX CI test.
 // #include <mutex>
 
-CPL_CVSID("$Id: gdaldrivermanager.cpp 230012f811b25deeac8a0fd1180f6baae8ed67a4 2021-03-16 22:36:04 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdaldrivermanager.cpp 9fd53989b94f9d2cdab20515361b1be5045acaf5 2021-08-20 14:14:20 +0800 Tim Lander $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -264,6 +265,7 @@ GDALDriverManager::~GDALDriverManager()
 /*      Cleanup VSIFileManager.                                         */
 /* -------------------------------------------------------------------- */
     VSICleanupFileManager();
+    CPLDestroyCompressorRegistry();
 
 /* -------------------------------------------------------------------- */
 /*      Cleanup thread local storage ... I hope the program is all      */
@@ -933,12 +935,12 @@ bool GDALIsDriverDeprecatedForGDAL35StillEnabled(const char* pszDriverName, cons
     }
     CPLError(CE_Failure, CPLE_AppDefined,
         "Driver %s is considered for removal in GDAL 3.5.%s You are invited "
-        "to convert any dataset in that format to another more common one ."
+        "to convert any dataset in that format to another more common one. "
         "If you need this driver in future GDAL versions, create a ticket at "
         "https://github.com/OSGeo/gdal (look first for an existing one first) to "
         "explain how critical it is for you (but the GDAL project may still "
         "remove it), and to enable it now, set the %s "
-        "configuration option / environment variable to YES",
+        "configuration option / environment variable to YES.",
         pszDriverName, pszExtraMsg, osConfigOption.c_str());
     return false;
 }

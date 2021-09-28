@@ -26,8 +26,8 @@ dmstor(const char *is, char **rs) {
 }
 
 	double
-dmstor_ctx(projCtx ctx, const char *is, char **rs) {
-	int sign, n, nl;
+dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
+	int n, nl;
 	char *s, work[MAX_WORK];
         const char* p;
 	double v, tv;
@@ -35,7 +35,7 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 	if (rs)
 		*rs = (char *)is;
 	/* copy sting into work space */
-	while (isspace(sign = *is)) ++is;
+	while (isspace(*is)) ++is;
 	n = MAX_WORK;
 	s = work;
 	p = (char *)is;
@@ -44,7 +44,7 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 	*s = '\0';
 	/* it is possible that a really odd input (like lots of leading
 		zeros) could be truncated in copying into work.  But ... */
-	sign = *(s = work);
+	int sign = *(s = work);
 	if (sign == '+' || sign == '-') s++;
 	else sign = '+';
 	v = 0.;
@@ -61,7 +61,7 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 			n = 2; break;
 		case 'r': case 'R':
 			if (nl) {
-				pj_ctx_set_errno( ctx, PJD_ERR_WRONG_FORMAT_DMS_VALUE );
+				proj_context_errno_set( ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE );
 				return HUGE_VAL;
 			}
 			++s;
@@ -73,7 +73,7 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 			continue;
 		}
 		if (n < nl) {
-			pj_ctx_set_errno( ctx, PJD_ERR_WRONG_FORMAT_DMS_VALUE );
+			proj_context_errno_set( ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE );
 			return HUGE_VAL;
 		}
 		v += tv * vm[n];

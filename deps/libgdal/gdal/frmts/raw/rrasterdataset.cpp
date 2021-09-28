@@ -39,7 +39,7 @@
 #include <limits>
 #include <memory>
 
-CPL_CVSID("$Id: rrasterdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: rrasterdataset.cpp ab70db66553f198773c52a33ddbffea53f4f4881 2021-08-28 12:36:46 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -323,7 +323,7 @@ CPLErr RRASTERRasterBand::SetNoDataValue(double dfNoData)
 /*                             GetMinMax()                              */
 /************************************************************************/
 
-template<class T> 
+template<class T>
 static void GetMinMax(const T* buffer, int nBufXSize, int nBufYSize,
                       GSpacing nPixelSpace, GSpacing nLineSpace,
                       double dfNoDataValue,
@@ -561,7 +561,7 @@ void RRASTERDataset::RewriteHeader()
     if( !m_osProjection.empty() )
     {
         OGRSpatialReference oSRS;
-        oSRS.SetFromUserInput(m_osProjection);
+        oSRS.SetFromUserInput(m_osProjection, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
         char* pszProj4 = nullptr;
         oSRS.exportToProj4(&pszProj4);
         if( pszProj4 )
@@ -1322,13 +1322,14 @@ GDALDataset *RRASTERDataset::Open( GDALOpenInfo * poOpenInfo )
                 }
             }
 
+            // cppcheck-suppress knownConditionTrueFalse
             if( !bIsCompatibleOfCT )
             {
                 poDS->m_poRAT.reset(new GDALDefaultRasterAttributeTable());
                 for( int i = 0; i < aosRatNames.size(); i++ )
                 {
                     poDS->m_poRAT->CreateColumn(
-                        aosRatNames[i], 
+                        aosRatNames[i],
                         EQUAL(aosRatTypes[i], "integer") ?  GFT_Integer :
                         EQUAL(aosRatTypes[i], "numeric") ?  GFT_Real :
                                                             GFT_String,

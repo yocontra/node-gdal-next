@@ -13,6 +13,7 @@
  *
  **********************************************************************/
 
+#include <geos/geom/Envelope.h>
 #include <geos/index/strtree/AbstractSTRtree.h>
 #include <geos/index/strtree/AbstractNode.h>
 #include <geos/index/strtree/ItemBoundable.h>
@@ -70,15 +71,10 @@ AbstractSTRtree::createParentBoundables(BoundableList* childBoundables,
     std::unique_ptr< BoundableList > parentBoundables(new BoundableList());
     parentBoundables->push_back(createNode(newLevel));
 
-    std::unique_ptr< BoundableList > sortedChildBoundables(sortBoundables(childBoundables));
+    std::unique_ptr< BoundableList > sortedChildBoundables(sortBoundablesY(childBoundables));
 
-    for(BoundableList::iterator i = sortedChildBoundables->begin(),
-            e = sortedChildBoundables->end();
-            i != e; i++)
-        //for(std::size_t i=0, scbsize=sortedChildBoundables->size(); i<scbsize; ++i)
+    for(Boundable* childBoundable: *sortedChildBoundables)
     {
-        Boundable* childBoundable = *i; // (*sortedChildBoundables)[i];
-
         AbstractNode* last = lastNode(parentBoundables.get());
         if(last->getChildBoundables()->size() == nodeCapacity) {
             last = createNode(newLevel);
@@ -160,9 +156,7 @@ AbstractSTRtree::query(const void* searchBounds, const AbstractNode& node,
 
     const BoundableList& boundables = *(node.getChildBoundables());
 
-    for(BoundableList::const_iterator i = boundables.begin(), e = boundables.end();
-            i != e; i++) {
-        const Boundable* childBoundable = *i;
+    for(const Boundable* childBoundable: boundables) {
         if(!getIntersectsOp()->intersects(childBoundable->getBounds(), searchBounds)) {
             continue;
         }
@@ -363,6 +357,29 @@ AbstractSTRtree::itemsTree()
     }
 
     return valuesTree;
+}
+
+/*private*/
+std::unique_ptr<BoundableList>
+AbstractSTRtree::sortBoundablesY(const BoundableList* input)
+{
+    assert(input);
+    std::unique_ptr<BoundableList> output(new BoundableList(*input));
+    assert(output->size() == input->size());
+
+    struct {
+        bool operator()(Boundable* a, Boundable* b) const
+        {
+            const geom::Envelope* ea = static_cast<const geom::Envelope*>(a->getBounds());
+            const geom::Envelope* eb = static_cast<const geom::Envelope*>(b->getBounds());
+            double ya = (ea->getMinY() + ea->getMaxY()) / 2.0;
+            double yb = (eb->getMinY() + eb->getMaxY()) / 2.0;
+            return ya < yb ? true : false;
+        }
+    } nodeSortByY;
+
+    sort(output->begin(), output->end(), nodeSortByY);
+    return output;
 }
 
 } // namespace geos.index.strtree

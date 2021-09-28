@@ -28,7 +28,7 @@
 
 #include "wmsdriver.h"
 
-CPL_CVSID("$Id: wmsutils.cpp 4acd10754e950208aeca32134bd83b6df4aa6805 2017-12-20 11:30:20Z Dmitry Baryshnikov $")
+CPL_CVSID("$Id: wmsutils.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
 
 CPLString ProjToWKT(const CPLString &proj) {
     char* wkt = nullptr;
@@ -47,7 +47,7 @@ CPLString ProjToWKT(const CPLString &proj) {
     }
     else
     {
-        if (sr.SetFromUserInput(proj.c_str()) != OGRERR_NONE) return srs;
+        if (sr.SetFromUserInput(proj.c_str(), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE) return srs;
     }
     sr.exportToWkt(&wkt);
     srs = wkt;

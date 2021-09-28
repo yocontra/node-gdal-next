@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_curl_streaming.cpp b0c2cc25f0802273e1c16958f04d0f59e1986a90 2021-08-30 14:36:08 +0200 Even Rouault $")
 
 #if !defined(HAVE_CURL) || defined(CPL_MULTIPROC_STUB)
 
@@ -1637,6 +1637,15 @@ int VSICurlStreamingFSHandler::Stat( const char *pszFilename,
 {
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
         return -1;
+
+    if( (nFlags & VSI_STAT_CACHE_ONLY) != 0 )
+    {
+        const std::string osVSICURLFilename =
+            std::string("/vsicurl/") + (pszFilename + GetFSPrefix().size());
+        return VSIStatExL( osVSICURLFilename.c_str(),
+                           pStatBuf,
+                           nFlags );
+    }
 
     memset(pStatBuf, 0, sizeof(VSIStatBufL));
 

@@ -7,7 +7,7 @@
  *
  * Author:       David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisrasterdataset.cpp dc859cb33d0ccc49884be06f682f7f9908b5ad8c 2021-05-09 19:14:32 +0100 Jorge Gustavo Rocha $
+ * Last changes: $Id: postgisrasterdataset.cpp bd5a022eadf5eb934283f26e430767ddc8d14f59 2021-05-09 23:31:15 +0200 Even Rouault $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -41,7 +41,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: postgisrasterdataset.cpp dc859cb33d0ccc49884be06f682f7f9908b5ad8c 2021-05-09 19:14:32 +0100 Jorge Gustavo Rocha $")
+CPL_CVSID("$Id: postgisrasterdataset.cpp bd5a022eadf5eb934283f26e430767ddc8d14f59 2021-05-09 23:31:15 +0200 Even Rouault $")
 
 #ifdef _WIN32
 #define rint(x) floor((x) + 0.5)
@@ -2840,6 +2840,8 @@ GetConnectionInfo(const char *pszFilename, char **ppszConnectionString,
             papszParams = CSLRemoveStrings(papszParams, nPos, 1, nullptr);
         }
     } else {
+        *bBrowseDatabase = false;
+
         *ppszTable =
             CPLStrdup(CPLParseNameValue(papszParams[nPos], nullptr));
         /* Delete this pair from params array */
@@ -2908,7 +2910,9 @@ GetConnectionInfo(const char *pszFilename, char **ppszConnectionString,
      * Set application name if not found in connection string
      **********************************************************/
 
-    if (CSLFindName(papszParams, "application_name") == -1 &&
+    if (*bBrowseDatabase == FALSE &&
+        *nMode == ONE_RASTER_PER_TABLE &&
+        CSLFindName(papszParams, "application_name") == -1 &&
         getenv("PGAPPNAME") == nullptr) {
         osConnectionString += "application_name=";
         osConnectionString += "'";

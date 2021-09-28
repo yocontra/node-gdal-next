@@ -46,7 +46,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: gdalwmsdataset.cpp 5e703afd56b19ad73c76ab865cb4f1988211b9ad 2021-01-20 14:45:04 -0800 Lucian Plesea $")
+CPL_CVSID("$Id: gdalwmsdataset.cpp 8f9afedfd2f5f9e916323e96d896056b7749b3d6 2021-07-10 20:38:03 +0200 Momtchil Momtchev $")
 
 /************************************************************************/
 /*                           GDALWMSDataset()                           */
@@ -245,8 +245,9 @@ CPLErr GDALWMSDataset::Initialize(CPLXMLNode *config, char **l_papszOpenOptions)
     }
 
     if (ret == CE_None) {
+        const char *pszEnableCache = CPLGetConfigOption("GDAL_ENABLE_WMS_CACHE", "YES");
         CPLXMLNode *cache_node = CPLGetXMLNode(config, "Cache");
-        if (cache_node != nullptr) {
+        if (cache_node != nullptr && CPLTestBool(pszEnableCache)) {
             m_cache = new GDALWMSCache();
             if (m_cache->Initialize(CPLGetXMLValue(service_node, "ServerUrl", nullptr),
                                     cache_node) != CE_None) {

@@ -40,13 +40,13 @@
 #endif
 
 #include <printbuf.h>
-#include <ogr_api.h>
-#include <ogr_p.h>
+#include "ogr_api.h"
+#include "ogr_p.h"
 
 #include <algorithm>
 #include <cstdint>
 
-CPL_CVSID("$Id: ogrgeojsonwriter.cpp e15d9c61f434751cb4d978f2ebdbfbbef4173c79 2021-06-17 17:59:49 +0200 Momtchil Momtchev $")
+CPL_CVSID("$Id: ogrgeojsonwriter.cpp 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $")
 
 static json_object *
 json_object_new_float_with_significant_figures( float fVal,

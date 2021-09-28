@@ -516,7 +516,7 @@ std::vector<unsigned> CPCIDSKFile::GetSegmentIDs(int type,
 /*                        InitializeFromHeader()                        */
 /************************************************************************/
 
-void CPCIDSKFile::InitializeFromHeader()
+void CPCIDSKFile::InitializeFromHeader(int max_channel_count_allowed)
 
 {
 /* -------------------------------------------------------------------- */
@@ -533,6 +533,13 @@ void CPCIDSKFile::InitializeFromHeader()
     {
         return ThrowPCIDSKException(
             "Invalid width, height and/or channel_count" );
+    }
+    if( max_channel_count_allowed >= 0 && channel_count > max_channel_count_allowed )
+    {
+        return ThrowPCIDSKException(
+            "channel_count = %d exceeds max_channel_count_allowed = %d",
+            channel_count,
+            max_channel_count_allowed );
     }
     file_size = fh.GetUInt64(16,16);
 
@@ -570,16 +577,37 @@ void CPCIDSKFile::InitializeFromHeader()
         return ThrowPCIDSKException( "Invalid segment_block_count: %d",
                                      segment_block_count );
 
-    segment_count = (segment_block_count * 512) / 32;
-    segment_pointers.SetSize( segment_block_count * 512 );
     segment_pointers_offset = atouint64(fh.Get(440,16));
     if( segment_pointers_offset == 0 ||
-        segment_pointers_offset-1 > std::numeric_limits<uint64>::max() / 512 )
+        segment_pointers_offset-1 > file_size )
     {
         return ThrowPCIDSKException(
             "Invalid segment_pointers_offset: " PCIDSK_FRMT_UINT64, segment_pointers_offset );
     }
     segment_pointers_offset = segment_pointers_offset * 512 - 512;
+
+    // Sanity check to avoid allocating too much memory
+    if( segment_block_count * 512 > 100 * 1024 * 1024 )
+    {
+        MutexHolder oHolder( io_mutex );
+
+        interfaces.io->Seek( io_handle, 0, SEEK_END );
+        const auto nRealFileSize = interfaces.io->Tell( io_handle );
+        if( segment_pointers_offset > nRealFileSize )
+        {
+            return ThrowPCIDSKException(
+                "Invalid segment_pointers_offset: " PCIDSK_FRMT_UINT64, segment_pointers_offset );
+        }
+        if( static_cast<unsigned>(segment_block_count * 512) > nRealFileSize - segment_pointers_offset )
+        {
+            // I guess we could also decide to error out
+            segment_block_count = static_cast<int>((nRealFileSize - segment_pointers_offset) / 512);
+        }
+    }
+
+    segment_count = (segment_block_count * 512) / 32;
+    segment_pointers.SetSize( segment_block_count * 512 );
+
     ReadFromFile( segment_pointers.buffer, segment_pointers_offset,
                   segment_block_count * 512 );
 
@@ -741,6 +769,7 @@ void CPCIDSKFile::InitializeFromHeader()
         // fetch the filename, if there is one.
         std::string filename;
         ih.Get(64,64,filename);
+        filename.resize(strlen(filename.c_str()));
 
         // Check for an extended link file
         bool bLinked = false;

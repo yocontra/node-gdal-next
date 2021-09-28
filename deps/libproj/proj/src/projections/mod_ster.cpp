@@ -7,9 +7,9 @@
 
 PROJ_HEAD(mil_os, "Miller Oblated Stereographic") "\n\tAzi(mod)";
 PROJ_HEAD(lee_os, "Lee Oblated Stereographic") "\n\tAzi(mod)";
-PROJ_HEAD(gs48, "Mod. Stereographic of 48 U.S.") "\n\tAzi(mod)";
-PROJ_HEAD(alsk, "Mod. Stereographic of Alaska") "\n\tAzi(mod)";
-PROJ_HEAD(gs50, "Mod. Stereographic of 50 U.S.") "\n\tAzi(mod)";
+PROJ_HEAD(gs48, "Modified Stereographic of 48 U.S.") "\n\tAzi(mod)";
+PROJ_HEAD(alsk, "Modified Stereographic of Alaska") "\n\tAzi(mod)";
+PROJ_HEAD(gs50, "Modified Stereographic of 50 U.S.") "\n\tAzi(mod)";
 
 #define EPSLN 1e-12
 
@@ -37,7 +37,7 @@ static PJ_XY mod_ster_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, for
     cchi = cos(chi);
     const double denom = 1. + Q->schio * schi + Q->cchio * cchi * coslon;
     if( denom == 0 ) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     s = 2. / denom;
@@ -134,9 +134,9 @@ PJ *PROJECTION(mil_os) {
         {0.019430, 0.}
     };
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 2;
@@ -157,9 +157,9 @@ PJ *PROJECTION(lee_os) {
         {-0.0088162, -0.00617325}
     };
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 2;
@@ -182,9 +182,9 @@ PJ *PROJECTION(gs48) {
         {0.075528,  0.}
     };
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 4;
@@ -217,9 +217,9 @@ PJ *PROJECTION(alsk) {
         { .3660976, -.2937382}
     };
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 5;
@@ -265,9 +265,9 @@ PJ *PROJECTION(gs50) {
         {-.0225161,  .0853673}
     };
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 9;

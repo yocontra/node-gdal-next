@@ -53,7 +53,7 @@
 #include "gdal_pam.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gdalpamproxydb.cpp e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalpamproxydb.cpp b7b5310eaa836bde0c23cb65da0ca1464755f9ed 2021-08-25 12:19:11 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -418,10 +418,13 @@ const char *PamAllocateProxy( const char *pszOriginal )
     for( i = static_cast<int>(osRevProxyFile.size())-1; i >= 0; i-- )
         osProxy += osRevProxyFile[i];
 
-    if( osOriginal.find(":::OVR") != CPLString::npos )
-        osProxy += ".ovr";
-    else
-        osProxy += ".aux.xml";
+    if( !osOriginal.endsWith(".gmac") )
+    {
+        if( osOriginal.find(":::OVR") != CPLString::npos )
+            osProxy += ".ovr";
+        else
+            osProxy += ".aux.xml";
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Add the proxy and the original to the proxy list and resave     */

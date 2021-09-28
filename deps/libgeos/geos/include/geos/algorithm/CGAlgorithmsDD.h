@@ -19,17 +19,7 @@
 #ifndef GEOS_ALGORITHM_CGALGORITHMDD_H
 #define GEOS_ALGORITHM_CGALGORITHMDD_H
 #include <geos/export.h>
-#include <geos/algorithm/ttmath/ttmath.h>
-
-/// \file CGAlgorithmsDD.h
-
-/// \brief Close to DoubleDouble equivalent used by JTS
-///
-/// Usage: `ttmath::Big<exponent, mantissa>`
-typedef ttmath::Big<TTMATH_BITS(32), TTMATH_BITS(128)> DD;
-//typedef ttmath::Big<TTMATH_BITS(64), TTMATH_BITS(128)> DD;
-//typedef ttmath::Big<TTMATH_BITS(32), TTMATH_BITS(256)> DD;
-//typedef ttmath::Big<TTMATH_BITS(64), TTMATH_BITS(256)> DD;
+#include <geos/math/DD.h>
 
 // Forward declarations
 namespace geos {
@@ -38,6 +28,8 @@ class Coordinate;
 class CoordinateSequence;
 }
 }
+
+using namespace geos::math;
 
 namespace geos {
 namespace algorithm { // geos::algorithm
@@ -75,7 +67,13 @@ public:
     static int orientationIndex(const geom::Coordinate& p1,
                                 const geom::Coordinate& p2,
                                 const geom::Coordinate& q);
-    /** \brief
+
+
+    static int orientationIndex(double p1x, double p1y,
+                                double p2x, double p2y,
+                                double qx,  double qy);
+
+    /**
      * A filter for computing the orientation index of three coordinates.
      *
      * If the orientation can be computed safely using standard DP arithmetic,
@@ -88,16 +86,11 @@ public:
      * average performance.
      *
      * Uses an approach due to Jonathan Shewchuk, which is in the public domain.
-     *
-     * @param pa a coordinate
-     * @param pb a coordinate
-     * @param pc a coordinate
-     * @return the orientation index if it can be computed safely
-     * @return `i > 1` if the orientation index cannot be computed safely
-    */
-    static int orientationIndexFilter(const geom::Coordinate& pa,
-                                      const geom::Coordinate& pb,
-                                      const geom::Coordinate& pc);
+     */
+    static int orientationIndexFilter(double pax, double pay,
+                                      double pbx, double pby,
+                                      double pcx, double pcy);
+
 
     static int
     orientation(double x)
@@ -139,7 +132,7 @@ public:
      * The circumcentre does not necessarily lie within the triangle. For example,
      * the circumcentre of an obtuse isosceles triangle lies outside the triangle.
      *
-     * This method uses @ref DD extended-precision arithmetic to provide more accurate
+     * This method uses @ref geos::math::DD extended-precision arithmetic to provide more accurate
      * results than [circumcentre(Coordinate, Coordinate, Coordinate)]
      * (@ref geos::geom::Triangle::circumcentre(const Coordinate& p0, const Coordinate& p1, const Coordinate& p2)).
      *

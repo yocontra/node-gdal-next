@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: EnvisatFile.h bde879dd6c2dd67ecf317ad588846089f0905cb9 2016-03-15 00:39:53Z Kurt Schwehr $
+ * $Id: EnvisatFile.h 930aad0b9faed99e277da3cd649d4bef0b13f3c8 2021-08-12 14:52:44 +0200 Even Rouault $
  *
  * Project:  APP ENVISAT Support
  * Purpose:  Low Level Envisat file access (read/write) API.
@@ -87,9 +87,9 @@ int EnvisatFile_GetDatasetIndex( EnvisatFile *self, const char *ds_name );
 
 int EnvisatFile_GetDatasetInfo( EnvisatFile *self,
                                 int ds_index,
-                                char **ds_name,
-                                char **ds_type,
-                                char **filename,
+                                const char **ds_name,
+                                const char **ds_type,
+                                const char **filename,
                                 int  *ds_offset,
                                 int  *ds_size,
                                 int  *num_dsr,

@@ -30,7 +30,7 @@
 
 #include "tilematrixset.hpp"
 
-CPL_CVSID("$Id: ogrgeopackagedriver.cpp 652f826f3549f0359e3ccd637631725ee7708fc4 2021-04-08 15:37:24 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeopackagedriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
 
 // g++ -g -Wall -fPIC -shared -o ogr_geopackage.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/gpkg ogr/ogrsf_frmts/gpkg/*.c* -L. -lgdal
 
@@ -477,6 +477,7 @@ COMPRESSION_OPTIONS
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_UNIQUE_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
 #ifdef ENABLE_SQL_GPKG_FORMAT
     poDriver->SetMetadataItem("ENABLE_SQL_GPKG_FORMAT", "YES");

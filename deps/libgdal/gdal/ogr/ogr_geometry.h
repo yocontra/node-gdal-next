@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geometry.h 840a7ef3e792f283aefb26a79a9d3507c27664a5 2021-04-21 12:06:27 +0200 Even Rouault $
+ * $Id: ogr_geometry.h 9f57a8d3c5f327cb02bb78ef23479c4b74143220 2021-05-22 00:41:26 +0200 Momtchil Momtchev $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes for manipulating simple features that is not specific
@@ -398,7 +398,7 @@ class CPL_DLL OGRGeometry
     int CoordinateDimension() const;
     virtual OGRBoolean  IsEmpty() const = 0;
     virtual OGRBoolean  IsValid() const;
-    virtual OGRGeometry* MakeValid() const;
+    virtual OGRGeometry* MakeValid(CSLConstList papszOptions = nullptr) const;
     virtual OGRGeometry* Normalize() const;
     virtual OGRBoolean  IsSimple() const;
     /*! Returns whether the geometry has a Z component. */
@@ -3253,7 +3253,7 @@ class CPL_DLL OGRGeometryFactory
     static OGRGeometry *createFromGML( const char * );
     static OGRGeometry *createFromGEOS( GEOSContextHandle_t hGEOSCtxt,
                                         GEOSGeom );
-    static OGRGeometry *createFromGeoJson( const char *);
+    static OGRGeometry *createFromGeoJson( const char *, int = -1 );
     static OGRGeometry *createFromGeoJson( const CPLJSONObject &oJSONObject );
 
     static void   destroyGeometry( OGRGeometry * );

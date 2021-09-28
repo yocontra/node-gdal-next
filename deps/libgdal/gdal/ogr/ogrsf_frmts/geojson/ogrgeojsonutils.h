@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeojsonutils.h 287413caabcca722a41a2f74f819e5b03e44ed21 2018-09-16 15:01:08 +0200 Even Rouault $
+ * $Id: ogrgeojsonutils.h 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private utilities within OGR OGRGeoJSON Driver.
@@ -29,7 +29,7 @@
 #ifndef OGR_GEOJSONUTILS_H_INCLUDED
 #define OGR_GEOJSONUTILS_H_INCLUDED
 
-#include <ogr_core.h>
+#include "ogr_core.h"
 
 #include "cpl_json_header.h"
 #include "cpl_vsi.h"

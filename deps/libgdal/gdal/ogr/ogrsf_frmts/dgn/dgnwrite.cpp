@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: dgnwrite.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: dgnwrite.cpp 248de76b8e0054cb7512e40676533fa9a009565c 2021-08-28 12:54:10 +0200 Even Rouault $")
 
 static void DGNPointToInt( DGNInfo *psDGN, DGNPoint *psPoint,
                            unsigned char *pabyTarget );
@@ -1264,7 +1264,7 @@ DGNCreateConeElem( DGNHandle hDGN,
     }
     else
     {
-      psCone->quat[0] = 1 << 31;
+      psCone->quat[0] = static_cast<int>(1U << 31);
       psCone->quat[1] = 0;
       psCone->quat[2] = 0;
       psCone->quat[3] = 0;

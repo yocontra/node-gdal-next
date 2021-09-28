@@ -54,7 +54,7 @@
 #include "ogr_api.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gdalwarpoperation.cpp d829adae90157e0e13657b2b5e6a69fbcbc12d99 2021-08-18 13:16:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarpoperation.cpp 3302b5c9cb62191df3409676aa97fced07c92c3b 2021-08-23 00:29:18 +0200 Even Rouault $")
 
 struct _GDALWarpChunk {
     int dx, dy, dsx, dsy;
@@ -542,7 +542,7 @@ CPLErr GDALWarpOperation::Initialize( const GDALWarpOptions *psNewOptions )
         && GDALGetRasterCount( psOptions->hSrcDS )
         == GDALGetRasterCount( psOptions->hDstDS ) )
     {
-        GDALWarpInitDefaultBandMapping( 
+        GDALWarpInitDefaultBandMapping(
             psOptions, GDALGetRasterCount( psOptions->hSrcDS ) );
     }
 
@@ -635,6 +635,26 @@ CPLErr GDALWarpOperation::Initialize( const GDALWarpOptions *psNewOptions )
                                         psOptions->pTransformerArg);
         if( psThreadData == nullptr )
             eErr = CE_Failure;
+
+/* -------------------------------------------------------------------- */
+/*      Compute dstcoordinates of a few special points.                 */
+/* -------------------------------------------------------------------- */
+
+        // South and north poles. Do not exactly take +/-90 as the round-tripping of
+        // the longitude value fails with some projections.
+        for( double dfY : { -89.9999, 89.9999 } )
+        {
+            double dfX = 0;
+            if( (psOptions->pfnTransformer == GDALApproxTransform &&
+                 GDALTransformLonLatToDestApproxTransformer(
+                     psOptions->pTransformerArg, &dfX, &dfY)) ||
+                (psOptions->pfnTransformer == GDALGenImgProjTransform &&
+                 GDALTransformLonLatToDestGenImgProjTransformer(
+                     psOptions->pTransformerArg, &dfX, &dfY)) )
+            {
+                aDstXYSpecialPoints.emplace_back(std::pair<double, double>(dfX, dfY));
+            }
+        }
     }
 
     return eErr;
@@ -676,14 +696,14 @@ void* GDALWarpOperation::CreateDestinationBuffer(
     const char *pszInitDest = CSLFetchNameValue( psOptions->papszWarpOptions,
                                                  "INIT_DEST" );
 
-    if( pszInitDest == nullptr || EQUAL(pszInitDest, "") ) 
+    if( pszInitDest == nullptr || EQUAL(pszInitDest, "") )
     {
         if( pbInitialized != nullptr )
         {
             *pbInitialized = FALSE;
-        } 
-        
-        return pDstBuffer; 
+        }
+
+        return pDstBuffer;
     }
 
 
@@ -1547,7 +1567,7 @@ CPLErr GDALWarpOperation::WarpRegion( int nDstXOff, int nDstYOff,
 /*      Allocate the output buffer.                                     */
 /* -------------------------------------------------------------------- */
     int bDstBufferInitialized = FALSE;
-    void *pDstBuffer = CreateDestinationBuffer(nDstXSize, nDstYSize, &bDstBufferInitialized); 
+    void *pDstBuffer = CreateDestinationBuffer(nDstXSize, nDstYSize, &bDstBufferInitialized);
     if( pDstBuffer == nullptr )
     {
         return CE_Failure;
@@ -1917,7 +1937,7 @@ CPLErr GDALWarpOperation::WarpRegionToBuffer(
     {
         CPLAssert( oWK.pafUnifiedSrcDensity == nullptr );
 
-        eErr = CreateKernelMask( &oWK, -1, "UnifiedSrcDensity" );
+        eErr = CreateKernelMask( &oWK, 0 /* not used */, "UnifiedSrcDensity" );
 
         if( eErr == CE_None )
         {
@@ -1952,7 +1972,7 @@ CPLErr GDALWarpOperation::WarpRegionToBuffer(
     {
         if( oWK.pafUnifiedSrcDensity == nullptr )
         {
-            eErr = CreateKernelMask( &oWK, -1, "UnifiedSrcDensity" );
+            eErr = CreateKernelMask( &oWK, 0 /* not used */, "UnifiedSrcDensity" );
 
             if( eErr == CE_None )
             {
@@ -1980,7 +2000,7 @@ CPLErr GDALWarpOperation::WarpRegionToBuffer(
     {
         CPLAssert( oWK.pafDstDensity == nullptr );
 
-        eErr = CreateKernelMask( &oWK, -1, "DstDensity" );
+        eErr = CreateKernelMask( &oWK, 0 /* not used */, "DstDensity" );
 
         if( eErr == CE_None )
             eErr =
@@ -2080,7 +2100,7 @@ CPLErr GDALWarpOperation::WarpRegionToBuffer(
                     static_cast<GPtrDiff_t>(oWK.nSrcXSize) * oWK.nSrcYSize + 31) / 8;
                 const GPtrDiff_t nIters = nBytesInMask / 4;
 
-                eErr = CreateKernelMask( &oWK, -1, "UnifiedSrcValid" );
+                eErr = CreateKernelMask( &oWK, 0 /* not used */, "UnifiedSrcValid" );
 
                 if( eErr == CE_None )
                 {
@@ -2136,7 +2156,7 @@ CPLErr GDALWarpOperation::WarpRegionToBuffer(
         && nSrcXSize > 0 && nSrcYSize > 0 )
 
     {
-        eErr = CreateKernelMask( &oWK, -1, "UnifiedSrcValid" );
+        eErr = CreateKernelMask( &oWK, 0 /* not used */, "UnifiedSrcValid" );
 
         if( eErr == CE_None )
             eErr =
@@ -2164,7 +2184,7 @@ CPLErr GDALWarpOperation::WarpRegionToBuffer(
 
         const GPtrDiff_t nMaskWords = (static_cast<GPtrDiff_t>(oWK.nDstXSize) * oWK.nDstYSize + 31)/32;
 
-        eErr = CreateKernelMask( &oWK, -1, "DstValid" );
+        eErr = CreateKernelMask( &oWK, 0 /* not used */, "DstValid" );
         GUInt32 *panBandMask =
             eErr == CE_None
             ? static_cast<GUInt32 *>(CPLMalloc(nMaskWords * 4))
@@ -2605,6 +2625,22 @@ CPLErr GDALWarpOperation::ComputeSourceWindow(
 
     bool bUseGrid =
         CPLFetchBool(psOptions->papszWarpOptions, "SAMPLE_GRID", false);
+
+    // Use grid sampling as soon as a special point falls into the extent of
+    // the target raster.
+    if( !bUseGrid && psOptions->hDstDS )
+    {
+        for( const auto &xy: aDstXYSpecialPoints )
+        {
+            if( 0 <= xy.first && GDALGetRasterXSize(psOptions->hDstDS) >= xy.first &&
+                0 <= xy.second && GDALGetRasterYSize(psOptions->hDstDS) >= xy.second )
+            {
+                bUseGrid = true;
+                break;
+            }
+        }
+    }
+
     bool bTryWithCheckWithInvertProj = false;
 
   TryAgain:

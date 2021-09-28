@@ -70,7 +70,7 @@ CPL_C_END
 #include "rawdataset.h"
 #include "vsidataio.h"
 
-CPL_CVSID("$Id: jpgdataset.cpp 2490a3d17f8bda6ac5e0c061df67b4c9a58e35a9 2021-08-27 23:10:01 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpgdataset.cpp 46d6c378a52872bbc5bdbd8ef1550dc9720f1888 2021-09-25 23:40:30 +0200 Even Rouault $")
 
 constexpr int TIFF_VERSION = 42;
 
@@ -574,7 +574,7 @@ void JPGDatasetCommon::ReadFLIRMetadata()
         const auto nSS = ReadUInt32(nRecOffset + 904) & 0xffff;
         const auto nTZ = ReadInt16(nRecOffset + 908);
         struct tm brokenDown;
-        CPLUnixTimeToYMDHMS(nUnixTime - nTZ * 60, &brokenDown);
+        CPLUnixTimeToYMDHMS(static_cast<GIntBig>(nUnixTime) - nTZ * 60, &brokenDown);
         std::string osDateTime(CPLSPrintf("%04d-%02d-%02dT%02d:%02d:%02d.%03d",
                                brokenDown.tm_year + 1900,
                                brokenDown.tm_mon + 1,
@@ -3494,7 +3494,7 @@ CPLErr JPGAppendMask( const char *pszJPGFilename, GDALRasterBand *poMask,
     size_t nTotalOut = 0;
     if ( eErr == CE_None )
     {
-        if( CPLZLibDeflate(pabyBitBuf, nBitBufSize, 9,
+        if( CPLZLibDeflate(pabyBitBuf, nBitBufSize, -1,
                            pabyCMask, nBitBufSize + 30,
                            &nTotalOut) == nullptr )
         {

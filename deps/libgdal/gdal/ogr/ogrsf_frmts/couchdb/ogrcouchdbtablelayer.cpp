@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrcouchdbtablelayer.cpp 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $")
+CPL_CVSID("$Id: ogrcouchdbtablelayer.cpp c590b0d14bea43032fcac1bd2cff79519a0fb16d 2021-08-12 15:26:20 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       OGRCouchDBTableLayer()                         */
@@ -216,6 +216,7 @@ bool OGRCouchDBTableLayer::RunSpatialFilterQueryIfNecessary()
         pszSpatialFilter = "_design/ogr_spatial/_spatial/spatial";
     else if( bHasGeocouchUtilsMinimalSpatialView )
         pszSpatialFilter = "_design/geo/_spatial/minimal";
+    CPLAssert(pszSpatialFilter);
 
     CPLString osURI("/");
     osURI += osEscapedName;

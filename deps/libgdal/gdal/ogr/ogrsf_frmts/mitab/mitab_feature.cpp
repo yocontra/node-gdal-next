@@ -55,7 +55,7 @@
 #include "ogr_featurestyle.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: mitab_feature.cpp f56bbc756bdf358abd3530078f8c3617beae60e7 2021-05-17 17:50:19 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_feature.cpp 458cc8f13df9e7c91f2c24ae1f73db6b971108e2 2021-05-11 09:30:03 +1000 Nyall Dawson $")
 
 /*=====================================================================
  *                      class TABFeature

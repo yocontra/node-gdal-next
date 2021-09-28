@@ -46,7 +46,7 @@
 #include "cpl_string.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: nearblack_lib.cpp adf0cd29fb7e479c33474ed88072945ad8c8cc69 2020-09-12 20:10:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: nearblack_lib.cpp c5adf201d7675caaacbe836d1aea293ecf20ce6a 2021-08-12 14:43:23 +0200 Even Rouault $")
 
 typedef std::vector<int> Color;
 typedef std::vector< Color > Colors;
@@ -100,7 +100,7 @@ static void ProcessLine( GByte *pabyLine, GByte *pabyMask, int iStart,
  * @param hSrcDataset the source dataset handle.
  * @param psOptionsIn the options struct returned by GDALNearblackOptionsNew() or NULL.
  * @param pbUsageError pointer to a integer output variable to store if any usage error has occurred or NULL.
- * @return the output dataset (new dataset that must be closed using GDALClose(), or hDstDS is not NULL) or NULL in case of error.
+ * @return the output dataset (new dataset that must be closed using GDALClose(), or hDstDS when it is not NULL) or NULL in case of error.
  *
  * @since GDAL 2.1
  */

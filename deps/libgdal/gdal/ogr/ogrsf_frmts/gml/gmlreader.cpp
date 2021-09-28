@@ -45,7 +45,7 @@
 #include "gmlutils.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: gmlreader.cpp 2b939583852d95f8724a939c927361cf40e81500 2020-10-22 11:42:59 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlreader.cpp 71389e922e77a1eca18d14f46b2aa9fc84d70e57 2021-09-18 20:24:28 +0900 mugwort_rc $")
 
 /************************************************************************/
 /*                            ~IGMLReader()                             */
@@ -577,15 +577,20 @@ GMLFeature *GMLReader::NextFeature()
 #ifdef HAVE_EXPAT
     if (bUseExpatReader)
         return NextFeatureExpat();
-#endif
-
-#ifdef HAVE_XERCES
-    if (!bUseExpatReader)
-        return NextFeatureXerces();
-#endif
-
+#  ifdef HAVE_XERCES
+    return NextFeatureXerces();
+#  else
     CPLError(CE_Failure, CPLE_AppDefined, "NextFeature(): Should not happen");
     return nullptr;
+#  endif
+#else
+#  ifdef HAVE_XERCES
+    if (!bUseExpatReader)
+        return NextFeatureXerces();
+#  endif
+    CPLError(CE_Failure, CPLE_AppDefined, "NextFeature(): Should not happen");
+    return nullptr;
+#endif
 }
 
 /************************************************************************/
@@ -1370,8 +1375,16 @@ bool GMLReader::PrescanForSchema( bool bGetExtents,
         if( !bOnlyDetectSRS && papsGeometry != nullptr && papsGeometry[0] != nullptr )
         {
             if( poClass->GetGeometryPropertyCount() == 0 )
+            {
+                std::string osGeomName(m_osSingleGeomElemPath);
+                const auto nPos = osGeomName.rfind('|');
+                if( nPos != std::string::npos )
+                    osGeomName = osGeomName.substr(nPos + 1);
                 poClass->AddGeometryProperty(
-                    new GMLGeometryPropertyDefn("", "", wkbUnknown, -1, true));
+                    new GMLGeometryPropertyDefn(osGeomName.c_str(),
+                                                m_osSingleGeomElemPath.c_str(),
+                                                wkbUnknown, -1, true));
+            }
         }
 
         if( bGetExtents && papsGeometry != nullptr )
@@ -1517,6 +1530,7 @@ void GMLReader::SetGlobalSRSName( const char* pszGlobalSRSName )
         {
             m_pszGlobalSRSName = CPLStrdup(pszGlobalSRSName);
         }
+        m_bCanUseGlobalSRSName = m_pszGlobalSRSName != nullptr;
     }
 }
 

@@ -20,8 +20,10 @@
 
 #include <geos/util/IllegalArgumentException.h>
 #include <geos/algorithm/Length.h>
+#include <geos/algorithm/Orientation.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequenceFactory.h>
+#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/CoordinateSequenceFilter.h>
 #include <geos/geom/CoordinateFilter.h>
@@ -45,7 +47,7 @@ using namespace geos::algorithm;
 namespace geos {
 namespace geom { // geos::geom
 
-LineString::~LineString(){};
+LineString::~LineString(){}
 
 /*protected*/
 LineString::LineString(const LineString& ls)
@@ -134,10 +136,10 @@ LineString::getDimension() const
     return Dimension::L; // line
 }
 
-int
+uint8_t
 LineString::getCoordinateDimension() const
 {
-    return (int) points->getDimension();
+    return (uint8_t) points->getDimension();
 }
 
 int
@@ -307,11 +309,38 @@ LineString::apply_ro(GeometryFilter* filter) const
     filter->filter_ro(this);
 }
 
+/*private*/
+void
+LineString::normalizeClosed()
+{
+    auto coords = detail::make_unique<std::vector<Coordinate>>();
+    getCoordinatesRO()->toVector(*coords);
+
+    coords->erase(coords->end() - 1); // remove last point (repeated)
+
+    auto uniqueCoordinates = detail::make_unique<CoordinateArraySequence>(coords.release());
+
+    const Coordinate* minCoordinate = uniqueCoordinates->minCoordinate();
+
+    CoordinateSequence::scroll(uniqueCoordinates.get(), minCoordinate);
+    uniqueCoordinates->add(uniqueCoordinates->getAt(0));
+
+    if(uniqueCoordinates->size() >= 4 && algorithm::Orientation::isCCW(uniqueCoordinates.get())) {
+        CoordinateSequence::reverse(uniqueCoordinates.get());
+    }
+    points = uniqueCoordinates.get()->clone();
+}
+
 /*public*/
 void
 LineString::normalize()
 {
+    if (isEmpty()) return;
     assert(points.get());
+    if (isClosed()) {
+        normalizeClosed();
+        return;
+    }
     std::size_t npts = points->getSize();
     std::size_t n = npts / 2;
     for(std::size_t i = 0; i < n; i++) {

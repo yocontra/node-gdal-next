@@ -91,7 +91,7 @@
 #include "gdal_pam.h"
 #include "gta_headers.h"
 
-CPL_CVSID("$Id: gtadataset.cpp 8c3e4ef55212f20eec95aa7e12ba5d48dacfdc47 2020-10-01 21:20:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: gtadataset.cpp 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /* Helper functions                                                     */
@@ -121,6 +121,12 @@ static CPLString PrintDoubles( const double *padfDoubles, int nCount )
         }
     }
     return oString;
+}
+
+static CPLString PrintDouble( double dfVal )
+
+{
+    return CPLString ().FormatC( dfVal, "%.16g" );
 }
 
 /************************************************************************/
@@ -1520,33 +1526,33 @@ GTACreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
             dfNoDataValue = poSrcBand->GetNoDataValue( &bHaveNoDataValue );
             if( bHaveNoDataValue )
                 oHeader.component_taglist( iBand ).set( "NO_DATA_VALUE",
-                        PrintDoubles( &dfNoDataValue, 1 ).c_str() );
+                        PrintDouble( dfNoDataValue ).c_str() );
             // Min/max values
             int bHaveMinValue;
             double dfMinValue;
             dfMinValue = poSrcBand->GetMinimum( &bHaveMinValue );
             if( bHaveMinValue )
                 oHeader.component_taglist( iBand ).set( "MIN_VALUE",
-                        PrintDoubles( &dfMinValue, 1 ).c_str() );
+                        PrintDouble( dfMinValue ).c_str() );
             int bHaveMaxValue;
             double dfMaxValue;
             dfMaxValue = poSrcBand->GetMaximum( &bHaveMaxValue );
             if( bHaveMaxValue )
                 oHeader.component_taglist( iBand ).set( "MAX_VALUE",
-                        PrintDoubles( &dfMaxValue, 1 ).c_str() );
+                        PrintDouble( dfMaxValue ).c_str() );
             // Offset/scale values
             int bHaveOffsetValue;
             double dfOffsetValue;
             dfOffsetValue = poSrcBand->GetOffset( &bHaveOffsetValue );
             if( bHaveOffsetValue )
                 oHeader.component_taglist( iBand ).set( "GDAL/OFFSET",
-                        PrintDoubles( &dfOffsetValue, 1 ).c_str() );
+                        PrintDouble( dfOffsetValue ).c_str() );
             int bHaveScaleValue;
             double dfScaleValue;
             dfScaleValue = poSrcBand->GetScale( &bHaveScaleValue );
             if( bHaveScaleValue )
                 oHeader.component_taglist( iBand ).set( "GDAL/SCALE",
-                        PrintDoubles( &dfScaleValue, 1 ).c_str() );
+                        PrintDouble( dfScaleValue ).c_str() );
             // Unit
             const char *pszUnit = poSrcBand->GetUnitType( );
             if( pszUnit != nullptr && pszUnit[0] != '\0' )

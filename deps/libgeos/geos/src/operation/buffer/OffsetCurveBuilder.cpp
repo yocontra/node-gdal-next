@@ -27,7 +27,7 @@
 #include <geos/operation/buffer/BufferInputLineSimplifier.h>
 #include <geos/operation/buffer/BufferOp.h>
 #include <geos/operation/buffer/BufferParameters.h>
-#include <geos/geomgraph/Position.h>
+#include <geos/geom/Position.h>
 #include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Coordinate.h>
@@ -42,7 +42,6 @@
 #endif
 
 using namespace std;
-using namespace geos::geomgraph;
 using namespace geos::algorithm;
 using namespace geos::geom;
 
@@ -60,11 +59,7 @@ OffsetCurveBuilder::getLineCurve(const CoordinateSequence* inputPts,
 {
     distance = nDistance;
 
-    // a zero or (non-singlesided) negative width buffer of a line/point is empty
-    if(distance == 0.0) {
-        return;
-    }
-    if(distance < 0.0 && ! bufParams.isSingleSided()) {
+    if (isLineOffsetEmpty(distance)) {
         return;
     }
 
@@ -167,6 +162,19 @@ OffsetCurveBuilder::getSingleSidedLineCurve(const CoordinateSequence* inputPts,
 
     segGen->getCoordinates(lineList);
 }
+
+/*public*/
+bool
+OffsetCurveBuilder::isLineOffsetEmpty(double p_distance)
+{
+    // a zero width buffer of a line or point is empty
+    if (p_distance == 0.0) return true;
+    // a negative width buffer of a line or point is empty,
+    // except for single-sided buffers, where the sign indicates the side
+    if (p_distance < 0.0 && ! bufParams.isSingleSided()) return true;
+    return false;
+}
+
 
 /*public*/
 void

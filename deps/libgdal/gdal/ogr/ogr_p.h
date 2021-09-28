@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_p.h 27cc1fdfcd7b10f103b17b08e33fed860a10375e 2021-02-03 11:25:41 +0100 Even Rouault $
+ * $Id: ogr_p.h 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Some private helper functions and stuff for OGR implementation.
@@ -147,7 +147,7 @@ OGRErr CPL_DLL OSRGetEllipsoidInfo( int, char **, double *, double *);
 /* Fast atof function */
 double OGRFastAtof(const char* pszStr);
 
-OGRErr CPL_DLL OGRCheckPermutation(int* panPermutation, int nSize);
+OGRErr CPL_DLL OGRCheckPermutation(const int* panPermutation, int nSize);
 
 /* GML related */
 

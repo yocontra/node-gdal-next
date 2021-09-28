@@ -48,7 +48,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrgpxlayer.cpp 6e493a46d255d5d5c39929bb2442fa6d742cf6ae 2021-08-11 23:35:44 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgpxlayer.cpp d07e4b070cbabdfba2522d14d712dee2a8775c7f 2021-08-12 21:42:07 +0200 Even Rouault $")
 
 constexpr int FLD_TRACK_FID = 0;
 constexpr int FLD_TRACK_SEG_ID = 1;
@@ -1552,25 +1552,28 @@ OGRErr OGRGPXLayer::ICreateFeature( OGRFeature *poFeatureIn )
             }
         }
 
-        const int n = (line) ? line->getNumPoints() : 0;
         poDS->PrintLine("<rte>");
         WriteFeatureAttributes(poFeatureIn);
-        for( int i = 0; i < n; i++ )
+        if( line )
         {
-            double lat = line->getY(i);
-            double lon = line->getX(i);
-            CheckAndFixCoordinatesValidity(&lat, &lon);
-            poDS->AddCoord(lon, lat);
-            OGRFormatDouble(szLat, sizeof(szLat), lat, '.');
-            OGRFormatDouble(szLon, sizeof(szLon), lon, '.');
-            poDS->PrintLine("  <rtept lat=\"%s\" lon=\"%s\">", szLat, szLon);
-            if (poGeom->getGeometryType() == wkbLineString25D ||
-                poGeom->getGeometryType() == wkbMultiLineString25D)
+            const int n = line->getNumPoints();
+            for( int i = 0; i < n; i++ )
             {
-                OGRFormatDouble(szAlt, sizeof(szAlt), line->getZ(i), '.');
-                poDS->PrintLine("    <ele>%s</ele>", szAlt);
+                double lat = line->getY(i);
+                double lon = line->getX(i);
+                CheckAndFixCoordinatesValidity(&lat, &lon);
+                poDS->AddCoord(lon, lat);
+                OGRFormatDouble(szLat, sizeof(szLat), lat, '.');
+                OGRFormatDouble(szLon, sizeof(szLon), lon, '.');
+                poDS->PrintLine("  <rtept lat=\"%s\" lon=\"%s\">", szLat, szLon);
+                if (poGeom->getGeometryType() == wkbLineString25D ||
+                    poGeom->getGeometryType() == wkbMultiLineString25D)
+                {
+                    OGRFormatDouble(szAlt, sizeof(szAlt), line->getZ(i), '.');
+                    poDS->PrintLine("    <ele>%s</ele>", szAlt);
+                }
+                poDS->PrintLine("  </rtept>");
             }
-            poDS->PrintLine("  </rtept>");
         }
         poDS->PrintLine("</rte>");
     }

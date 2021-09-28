@@ -52,7 +52,7 @@
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrutils.cpp ec2f3126303c95ed1190097992f84739f33c8603 2021-05-06 12:51:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrutils.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 // Returns whether a double fits within an int.
 // Unable to put this in cpl_port.h as include limit breaks grib.
@@ -1563,7 +1563,7 @@ double OGRFastAtof(const char* pszStr)
  * @return OGRERR_NONE if panPermutation is a permutation of [0, nSize - 1].
  * @since OGR 1.9.0
  */
-OGRErr OGRCheckPermutation( int* panPermutation, int nSize )
+OGRErr OGRCheckPermutation( const int* panPermutation, int nSize )
 {
     OGRErr eErr = OGRERR_NONE;
     int* panCheck = static_cast<int *>(CPLCalloc(nSize, sizeof(int)));

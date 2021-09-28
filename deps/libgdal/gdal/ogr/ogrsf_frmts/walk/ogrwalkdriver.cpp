@@ -29,70 +29,34 @@
 
 #include "ogrwalk.h"
 
-CPL_CVSID("$Id: ogrwalkdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrwalkdriver.cpp 658d4f6254f467214d228ee9513838e9b1f878f9 2021-08-27 15:00:59 +1000 Nyall Dawson $")
+
 
 /************************************************************************/
-/*                          ~OGRWalkDriver()                            */
+/*                                OGRWalkDriverOpen()                   */
 /************************************************************************/
 
-OGRWalkDriver::~OGRWalkDriver()
-
-{
-}
-
-/************************************************************************/
-/*                              GetName()                               */
-/************************************************************************/
-
-const char *OGRWalkDriver::GetName()
-
-{
-    return "Walk";
-}
-
-/************************************************************************/
-/*                                Open()                                */
-/************************************************************************/
-
-OGRDataSource *OGRWalkDriver::Open( const char * pszFilename, int bUpdate )
+static GDALDataset *OGRWalkDriverOpen( GDALOpenInfo* poOpenInfo )
 {
 
-    if( STARTS_WITH_CI(pszFilename, "PGEO:") )
+    if( STARTS_WITH_CI(poOpenInfo->pszFilename, "PGEO:") )
         return nullptr;
 
-    if( STARTS_WITH_CI(pszFilename, "GEOMEDIA:") )
+    if( STARTS_WITH_CI(poOpenInfo->pszFilename, "GEOMEDIA:") )
         return nullptr;
 
-    if( !STARTS_WITH_CI(pszFilename, "WALK:")
-        && !EQUAL(CPLGetExtension(pszFilename), "MDB") )
+    if( !STARTS_WITH_CI(poOpenInfo->pszFilename, "WALK:")
+        && !EQUAL(CPLGetExtension(poOpenInfo->pszFilename), "MDB") )
         return nullptr;
 
 #ifndef WIN32
     // Try to register MDB Tools driver
-    //
-    // ODBCINST.INI NOTE:
-    // This operation requires write access to odbcinst.ini file
-    // located in directory pointed by ODBCINISYS variable.
-    // Usually, it points to /etc, so non-root users can overwrite this
-    // setting ODBCINISYS with location they have write access to, e.g.:
-    // $ export ODBCINISYS=$HOME/etc
-    // $ touch $ODBCINISYS/odbcinst.ini
-    //
-    // See: http://www.unixodbc.org/internals.html
-    //
-    if ( !InstallMdbDriver() )
-    {
-        CPLError( CE_Warning, CPLE_AppDefined,
-                  "Unable to install MDB driver for ODBC, MDB access may not supported.\n" );
-    }
-    else
-        CPLDebug( "Walk", "MDB Tools driver installed successfully!");
-
+    CPLODBCDriverInstaller::InstallMdbToolsDriver();
 #endif /* ndef WIN32 */
 
     OGRWalkDataSource  *poDS = new OGRWalkDataSource();
 
-    if( !poDS->Open( pszFilename, bUpdate ) )
+    if( !poDS->Open( poOpenInfo->pszFilename ) )
     {
         delete poDS;
         return nullptr;
@@ -107,38 +71,6 @@ OGRDataSource *OGRWalkDriver::Open( const char * pszFilename, int bUpdate )
     return poDS;
 }
 
-/************************************************************************/
-/*                          CreateDataSource()                          */
-/************************************************************************/
-
-OGRDataSource *OGRWalkDriver::CreateDataSource( const char * pszName,
-                                                CPL_UNUSED char **papszOptions )
-{
-    //if( !EQUAL(CPLGetExtension(pszName), "MDB") )
-    //    return NULL;
-
-    OGRWalkDataSource  *poDS = new OGRWalkDataSource();
-
-    if( !poDS->Open( pszName, TRUE ) )
-    {
-        delete poDS;
-        CPLError( CE_Failure, CPLE_AppDefined,
-         "Walk driver doesn't currently support database creation.\n"
-                  "Please create database with the `createdb' command." );
-        return nullptr;
-    }
-    else
-        return poDS;
-}
-
-/************************************************************************/
-/*                           TestCapability()                           */
-/************************************************************************/
-
-int OGRWalkDriver::TestCapability( CPL_UNUSED const char * pszCap )
-{
-    return FALSE;
-}
 
 /************************************************************************/
 /*                          RegisterOGRWalk()                           */
@@ -147,5 +79,15 @@ int OGRWalkDriver::TestCapability( CPL_UNUSED const char * pszCap )
 void RegisterOGRWalk()
 
 {
-    OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver( new OGRWalkDriver );
+    if( GDALGetDriverByName( "Walk" ) != nullptr )
+        return;
+
+    GDALDriver* poDriver = new GDALDriver;
+
+    poDriver->SetDescription( "Walk" );
+    poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
+
+    poDriver->pfnOpen = OGRWalkDriverOpen;
+
+    GetGDALDriverManager()->RegisterDriver( poDriver );
 }

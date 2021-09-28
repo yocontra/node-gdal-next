@@ -34,7 +34,7 @@
 #include "ogr_swq.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrlayer.cpp e620b541e9c5d62487fa9dbcf42c8ce2f10b4905 2020-12-04 13:56:44 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrlayer.cpp 7a0cb2387a94cca055e1cdbd96546f7bdaea2dfb 2021-08-12 22:58:45 +0200 Even Rouault $")
 
 struct OGRLayer::Private
 {
@@ -1297,8 +1297,7 @@ int OGRLayer::InstallFilter( OGRGeometry * poFilter )
     if( m_poFilterGeom == nullptr )
         return TRUE;
 
-    if( m_poFilterGeom != nullptr )
-        m_poFilterGeom->getEnvelope( &m_sFilterEnvelope );
+    m_poFilterGeom->getEnvelope( &m_sFilterEnvelope );
 
     /* Compile geometry filter as a prepared geometry */
     m_pPreparedFilterGeom = OGRCreatePreparedGeometry(OGRGeometry::ToHandle(m_poFilterGeom));

@@ -4,13 +4,6 @@ message(STATUS "Configuring proj library:")
 ### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
 ##############################################
 
-# Support older option, to be removed by PROJ 8.0
-if(DEFINED BUILD_LIBPROJ_SHARED)
-  message(DEPRECATION
-    "BUILD_LIBPROJ_SHARED has been replaced with BUILD_SHARED_LIBS")
-  set(BUILD_SHARED_LIBS ${BUILD_LIBPROJ_SHARED})
-endif()
-
 # default config is shared, except static on Windows
 set(BUILD_SHARED_LIBS_DEFAULT ON)
 if(WIN32)
@@ -32,12 +25,6 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
   message(FATAL_ERROR
     "No thread library found and thread/mutex support is "
     "required by USE_THREAD option")
-endif()
-
-# Support older option, to be removed by PROJ 8.0
-if(DEFINED ENABLE_LTO)
-  message(DEPRECATION "ENABLE_LTO has been replaced with ENABLE_IPO")
-  set(ENABLE_IPO ${ENABLE_LTO})
 endif()
 
 option(ENABLE_IPO
@@ -173,6 +160,7 @@ set(SRC_LIBPROJ_CONVERSIONS
   conversions/geoc.cpp
   conversions/geocent.cpp
   conversions/noop.cpp
+  conversions/topocentric.cpp
   conversions/set.cpp
   conversions/unitconvert.cpp
 )
@@ -198,11 +186,20 @@ set(SRC_LIBPROJ_ISO19111
   iso19111/crs.cpp
   iso19111/datum.cpp
   iso19111/coordinatesystem.cpp
-  iso19111/coordinateoperation.cpp
   iso19111/io.cpp
   iso19111/internal.cpp
   iso19111/factory.cpp
   iso19111/c_api.cpp
+  iso19111/operation/concatenatedoperation.cpp
+  iso19111/operation/coordinateoperationfactory.cpp
+  iso19111/operation/conversion.cpp
+  iso19111/operation/esriparammappings.cpp
+  iso19111/operation/oputils.cpp
+  iso19111/operation/parammappings.cpp
+  iso19111/operation/projbasedoperation.cpp
+  iso19111/operation/singleoperation.cpp
+  iso19111/operation/transformation.cpp
+  iso19111/operation/vectorofvaluesparams.cpp
 )
 
 set(SRC_LIBPROJ_CORE
@@ -217,9 +214,7 @@ set(SRC_LIBPROJ_CORE
   dmstor.cpp
   ell_set.cpp
   ellps.cpp
-  errno.cpp
   factors.cpp
-  fileapi.cpp
   fwd.cpp
   gauss.cpp
   generic_inverse.cpp
@@ -246,10 +241,8 @@ set(SRC_LIBPROJ_CORE
   rtodms.cpp
   strerrno.cpp
   strtod.cpp
-  transform.cpp
   tsfn.cpp
   units.cpp
-  utils.cpp
   wkt1_generated_parser.c
   wkt1_generated_parser.h
   wkt1_parser.cpp
@@ -275,7 +268,6 @@ set(SRC_LIBPROJ_CORE
 )
 
 set(HEADERS_LIBPROJ
-  proj_api.h
   proj.h
   proj_experimental.h
   proj_constants.h
@@ -301,7 +293,6 @@ include_directories(${PROJ_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 source_group("CMake Files" FILES CMakeLists.txt)
 
-
 # Embed PROJ_LIB data files location
 add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
 
@@ -317,24 +308,21 @@ set(ALL_LIBPROJ_SOURCES
 )
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ})
 
-# Core targets configuration
-string(TOLOWER "${PROJECT_NAME}" PROJECTNAMEL)
-set(PROJ_CORE_TARGET ${PROJECTNAMEL})
-proj_target_output_name(${PROJ_CORE_TARGET} PROJ_CORE_TARGET_OUTPUT_NAME)
+# Configuration for the core target "proj"
+proj_target_output_name(proj PROJ_CORE_TARGET_OUTPUT_NAME)
 
-add_library(
-  ${PROJ_CORE_TARGET}
+add_library(proj
   ${ALL_LIBPROJ_SOURCES}
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
 )
-target_compile_options(${PROJ_CORE_TARGET}
+target_compile_options(proj
   PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
 )
 
 if(MSVC OR MINGW)
-    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DNOMINMAX)
+    target_compile_definitions(proj PRIVATE -DNOMINMAX)
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to stop the
@@ -353,82 +341,95 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
 endif()
 
 if(ENABLE_IPO)
-  set_property(TARGET ${PROJ_CORE_TARGET}
+  set_property(TARGET proj
     PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-target_include_directories(${PROJ_CORE_TARGET} INTERFACE
+target_include_directories(proj INTERFACE
   $<INSTALL_INTERFACE:${INCLUDEDIR}>)
 
 if(WIN32)
-  set_target_properties(${PROJ_CORE_TARGET}
+  set_target_properties(proj
     PROPERTIES
     VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     OUTPUT_NAME "${PROJ_CORE_TARGET_OUTPUT_NAME}"
-    ARCHIVE_OUTPUT_NAME "${PROJ_CORE_TARGET}"
+    ARCHIVE_OUTPUT_NAME proj
     CLEAN_DIRECT_OUTPUT 1)
 elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
-  set_target_properties(${PROJ_CORE_TARGET}
+  set_target_properties(proj
     PROPERTIES
     VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     INSTALL_NAME_DIR ${PROJ_INSTALL_NAME_DIR}
     CLEAN_DIRECT_OUTPUT 1)
 else()
-  set_target_properties(${PROJ_CORE_TARGET}
+  set_target_properties(proj
     PROPERTIES
     VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     SOVERSION "${${PROJECT_NAME}_API_VERSION}"
     CLEAN_DIRECT_OUTPUT 1)
 endif()
 
-set_target_properties(${PROJ_CORE_TARGET}
+set_target_properties(proj
   PROPERTIES
   LINKER_LANGUAGE CXX)
 
 ##############################################
 # Link properties
 ##############################################
-set(PROJ_LIBRARIES ${PROJ_CORE_TARGET})
+set(PROJ_LIBRARIES proj)
 # hack, required for test/unit
 set(PROJ_LIBRARIES ${PROJ_LIBRARIES} PARENT_SCOPE)
 if(UNIX)
   find_library(M_LIB m)
   if(M_LIB)
-    target_link_libraries(${PROJ_CORE_TARGET} -lm)
+    target_link_libraries(proj PRIVATE -lm)
   endif()
   find_library(DL_LIB dl)
   if(M_LIB)
-    target_link_libraries(${PROJ_CORE_TARGET} -ldl)
+    target_link_libraries(proj PRIVATE -ldl)
   endif()
 endif()
 if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
-  target_link_libraries(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_INCLUDE_DIR})
-target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
+target_include_directories(proj PRIVATE ${SQLITE3_INCLUDE_DIR})
+target_link_libraries(proj PRIVATE ${SQLITE3_LIBRARY})
+
+if(NLOHMANN_JSON STREQUAL "external")
+  target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
+  target_link_libraries(proj
+    PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>)
+endif()
 
 if(TIFF_ENABLED)
-  target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DTIFF_ENABLED)
-  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${TIFF_INCLUDE_DIR})
-  target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
+  target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
+  target_include_directories(proj PRIVATE ${TIFF_INCLUDE_DIR})
+  target_link_libraries(proj PRIVATE ${TIFF_LIBRARY})
 endif()
 
 if(CURL_ENABLED)
-  target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DCURL_ENABLED)
-  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${CURL_INCLUDE_DIR})
-  target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
+  target_compile_definitions(proj PRIVATE -DCURL_ENABLED)
+  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIR})
+  target_link_libraries(proj
+    PRIVATE
+      ${CURL_LIBRARY}
+      $<$<CXX_COMPILER_ID:MSVC>:ws2_32>
+      $<$<CXX_COMPILER_ID:MSVC>:wldap32>
+      $<$<CXX_COMPILER_ID:MSVC>:advapi32>
+      $<$<CXX_COMPILER_ID:MSVC>:crypt32>
+      $<$<CXX_COMPILER_ID:MSVC>:normaliz>)
 endif()
 
 if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(${PROJ_CORE_TARGET}
+  target_compile_definitions(proj
     PRIVATE PROJ_MSVC_DLL_EXPORT=1)
 endif()
 
 ##############################################
 # install
 ##############################################
-install(TARGETS ${PROJ_CORE_TARGET}
+install(TARGETS proj
   EXPORT targets
   RUNTIME DESTINATION ${BINDIR}
   LIBRARY DESTINATION ${LIBDIR}
@@ -443,7 +444,6 @@ endif()
 ##############################################
 # Core configuration summary
 ##############################################
-print_variable(PROJ_CORE_TARGET)
 print_variable(PROJ_CORE_TARGET_OUTPUT_NAME)
 print_variable(BUILD_SHARED_LIBS)
 print_variable(PROJ_LIBRARIES)

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_port.h efdea747194ad7dc810fb30654f4cf3f09756013 2021-04-15 10:09:43 +0100 Andrew C Aitchison $
+ * $Id: cpl_port.h 2bd4204a46def1c897174d3d36c5f9c4cd3259c2 2021-09-25 17:32:16 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -237,10 +237,6 @@ typedef int             GBool;
 /*      64bit support                                                   */
 /* -------------------------------------------------------------------- */
 
-#if defined(WIN32) && defined(_MSC_VER)
-#define VSI_LARGE_API_SUPPORTED
-#endif
-
 #if HAVE_LONG_LONG
 
 /** Large signed integer type (generally 64-bit integer type).
@@ -316,10 +312,6 @@ typedef unsigned int  GUIntptr_t;
 #define CPL_FRMT_GIB     "%" CPL_FRMT_GB_WITHOUT_PREFIX "d"
 /** Printf formatting for GUIntBig */
 #define CPL_FRMT_GUIB    "%" CPL_FRMT_GB_WITHOUT_PREFIX "u"
-
-/*! @cond Doxygen_Suppress */
-#define GUINTBIG_TO_DOUBLE(x) CPL_STATIC_CAST(double, x)
-/*! @endcond */
 
 /*! @cond Doxygen_Suppress */
 #ifdef COMPAT_WITH_ICC_CONVERSION_CHECK
@@ -709,11 +701,7 @@ template<> struct CPLStaticAssert<true>
 /** Byte-swap a 16bit unsigned integer */
 #define CPL_SWAP16(x) CPL_STATIC_CAST(GUInt16, (CPL_STATIC_CAST(GUInt16, x) << 8) | (CPL_STATIC_CAST(GUInt16, x) >> 8) )
 
-#if defined(HAVE_GCC_BSWAP) && (defined(__i386__) || defined(__x86_64__))
-/* Could potentially be extended to other architectures but must be checked */
-/* that the intrinsic is indeed efficient */
-/* GCC (at least 4.6  or above) need that include */
-#include <x86intrin.h>
+#if defined(HAVE_GCC_BSWAP)
 /** Byte-swap a 32bit unsigned integer */
 #define CPL_SWAP32(x) CPL_STATIC_CAST(GUInt32, __builtin_bswap32(CPL_STATIC_CAST(GUInt32, x)))
 /** Byte-swap a 64bit unsigned integer */
@@ -739,52 +727,14 @@ template<> struct CPLStaticAssert<true>
 
 /** Byte-swap a 16 bit pointer */
 #define CPL_SWAP16PTR(x) \
-do {                                                              \
-    GByte       byTemp, *_pabyDataT = CPL_REINTERPRET_CAST(GByte*, x);              \
+do {                                                                        \
+    GUInt16 _n16;                                                           \
+    void* _lx = x;                                                          \
+    memcpy(&_n16, _lx, 2);                                                  \
     CPL_STATIC_ASSERT_IF_AVAILABLE(sizeof(*(x)) == 1 || sizeof(*(x)) == 2); \
-                                                                  \
-    byTemp = _pabyDataT[0];                                       \
-    _pabyDataT[0] = _pabyDataT[1];                                \
-    _pabyDataT[1] = byTemp;                                       \
+    _n16 = CPL_SWAP16(_n16);                                                \
+    memcpy(_lx, &_n16, 2);                                                  \
 } while(0)
-
-#if defined(MAKE_SANITIZE_HAPPY) || !(defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
-
-/** Byte-swap a 32 bit pointer */
-#define CPL_SWAP32PTR(x) \
-do {                                                              \
-    GByte       byTemp, *_pabyDataT = CPL_REINTERPRET_CAST(GByte*, x);              \
-    CPL_STATIC_ASSERT_IF_AVAILABLE(sizeof(*(x)) == 1 || sizeof(*(x)) == 4);  \
-                                                                  \
-    byTemp = _pabyDataT[0];                                       \
-    _pabyDataT[0] = _pabyDataT[3];                                \
-    _pabyDataT[3] = byTemp;                                       \
-    byTemp = _pabyDataT[1];                                       \
-    _pabyDataT[1] = _pabyDataT[2];                                \
-    _pabyDataT[2] = byTemp;                                       \
-} while(0)
-
-/** Byte-swap a 64 bit pointer */
-#define CPL_SWAP64PTR(x) \
-do {                                                              \
-    GByte       byTemp, *_pabyDataT = CPL_REINTERPRET_CAST(GByte*, x);              \
-    CPL_STATIC_ASSERT_IF_AVAILABLE(sizeof(*(x)) == 1 || sizeof(*(x)) == 8); \
-                                                                  \
-    byTemp = _pabyDataT[0];                                       \
-    _pabyDataT[0] = _pabyDataT[7];                                \
-    _pabyDataT[7] = byTemp;                                       \
-    byTemp = _pabyDataT[1];                                       \
-    _pabyDataT[1] = _pabyDataT[6];                                \
-    _pabyDataT[6] = byTemp;                                       \
-    byTemp = _pabyDataT[2];                                       \
-    _pabyDataT[2] = _pabyDataT[5];                                \
-    _pabyDataT[5] = byTemp;                                       \
-    byTemp = _pabyDataT[3];                                       \
-    _pabyDataT[3] = _pabyDataT[4];                                \
-    _pabyDataT[4] = byTemp;                                       \
-} while(0)
-
-#else
 
 /** Byte-swap a 32 bit pointer */
 #define CPL_SWAP32PTR(x) \
@@ -807,8 +757,6 @@ do {                                                                        \
     _n64 = CPL_SWAP64(_n64);                                                \
     memcpy(_lx, &_n64, 8);                                                    \
 } while(0)
-
-#endif
 
 /** Byte-swap a 64 bit pointer */
 #define CPL_SWAPDOUBLE(p) CPL_SWAP64PTR(p)
@@ -1051,10 +999,15 @@ CPL_C_END
 #endif
 
 #if defined(__cplusplus)
+#ifndef CPPCHECK
 /** Returns the size of C style arrays. */
 #define CPL_ARRAYSIZE(array) \
   ((sizeof(array) / sizeof(*(array))) / \
   static_cast<size_t>(!(sizeof(array) % sizeof(*(array)))))
+#else
+/* simplified version for cppcheck */
+#define CPL_ARRAYSIZE(array) (sizeof(array) / sizeof(array[0]))
+#endif
 
 extern "C++" {
 template<class T> static void CPL_IGNORE_RET_VAL(const T&) {}

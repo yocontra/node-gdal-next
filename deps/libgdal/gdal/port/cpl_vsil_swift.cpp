@@ -42,7 +42,7 @@
 
 #include "cpl_swift.h"
 
-CPL_CVSID("$Id: cpl_vsil_swift.cpp 978dfdb07e7a2ee3e7fc742b8cad366a264c0e65 2021-06-14 23:53:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_swift.cpp b0fb9dd96e27fa263058223b86e8289f5264c3f3 2021-08-31 21:44:33 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -64,7 +64,7 @@ namespace cpl {
 /*                       AnalyseSwiftFileList()                         */
 /************************************************************************/
 
-void VSICurlFilesystemHandler::AnalyseSwiftFileList(
+void VSICurlFilesystemHandlerBase::AnalyseSwiftFileList(
     const CPLString& osBaseURL,
     const CPLString& osPrefix,
     const char* pszJson,
@@ -250,11 +250,13 @@ public:
         VSIDIR* OpenDir( const char *pszPath, int nRecurseDepth,
                                 const char* const *papszOptions) override
         {
-            return VSICurlFilesystemHandler::OpenDir(pszPath, nRecurseDepth,
+            return VSICurlFilesystemHandlerBase::OpenDir(pszPath, nRecurseDepth,
                                                      papszOptions);
         }
 
         const char* GetOptions() override;
+
+        std::string GetStreamingFilename(const std::string& osFilename) const override { return osFilename; }
 };
 
 /************************************************************************/
@@ -325,7 +327,7 @@ VSIVirtualHandle* VSISwiftFSHandler::Open( const char *pszFilename,
     }
 
     return
-        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError, papszOptions);
+        VSICurlFilesystemHandlerBase::Open(pszFilename, pszAccess, bSetError, papszOptions);
 }
 
 /************************************************************************/
@@ -344,7 +346,7 @@ VSISwiftFSHandler::~VSISwiftFSHandler()
 
 void VSISwiftFSHandler::ClearCache()
 {
-    VSICurlFilesystemHandler::ClearCache();
+    VSICurlFilesystemHandlerBase::ClearCache();
 
     VSISwiftHandleHelper::ClearCache();
 }
@@ -384,7 +386,7 @@ const char* VSISwiftFSHandler::GetOptions()
         "description='Project domain name'/>"
     "  <Option name='OS_REGION_NAME' type='string' "
         "description='Region name'/>"
-    +  VSICurlFilesystemHandler::GetOptionsStatic() +
+    +  VSICurlFilesystemHandlerBase::GetOptionsStatic() +
         "</Options>");
     return osOptions.c_str();
 }
@@ -450,13 +452,16 @@ int VSISwiftFSHandler::Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
     if( !STARTS_WITH_CI(pszFilename, GetFSPrefix()) )
         return -1;
 
+    if( (nFlags & VSI_STAT_CACHE_ONLY) != 0 )
+        return VSICurlFilesystemHandlerBase::Stat(pszFilename, pStatBuf, nFlags);
+
     CPLString osFilename(pszFilename);
     if( osFilename.back() == '/' )
         osFilename.resize( osFilename.size() - 1 );
 
     memset(pStatBuf, 0, sizeof(VSIStatBufL));
 
-    if( VSICurlFilesystemHandler::Stat(pszFilename, pStatBuf, nFlags) == 0 )
+    if( VSICurlFilesystemHandlerBase::Stat(pszFilename, pStatBuf, nFlags) == 0 )
     {
         // if querying /vsiswift/container_name, the GET will succeed and
         // we would consider this as a file whereas it should be exposed as
@@ -464,18 +469,19 @@ int VSISwiftFSHandler::Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
         if( std::count(osFilename.begin(), osFilename.end(), '/') <= 2 )
         {
 
-            IVSIS3LikeHandleHelper* poS3HandleHelper =
-                CreateHandleHelper(pszFilename + GetFSPrefix().size(), true);
-            CPLString osURL(poS3HandleHelper->GetURL());
-            delete poS3HandleHelper;
-
-            FileProp cachedFileProp;
-            cachedFileProp.eExists = EXIST_YES;
-            cachedFileProp.bHasComputedFileSize = false;
-            cachedFileProp.fileSize = 0;
-            cachedFileProp.bIsDirectory = true;
-            cachedFileProp.mTime = 0;
-            SetCachedFileProp(osURL, cachedFileProp);
+            auto poHandleHelper = std::unique_ptr<IVSIS3LikeHandleHelper>(
+                CreateHandleHelper(pszFilename + GetFSPrefix().size(), true));
+            if( poHandleHelper )
+            {
+                FileProp cachedFileProp;
+                cachedFileProp.eExists = EXIST_YES;
+                cachedFileProp.bHasComputedFileSize = false;
+                cachedFileProp.fileSize = 0;
+                cachedFileProp.bIsDirectory = true;
+                cachedFileProp.mTime = 0;
+                cachedFileProp.nMode = S_IFDIR;
+                SetCachedFileProp(poHandleHelper->GetURL(), cachedFileProp);
+            }
 
             pStatBuf->st_size = 0;
             pStatBuf->st_mode = S_IFDIR;
@@ -492,10 +498,31 @@ int VSISwiftFSHandler::Stat( const char *pszFilename, VSIStatBufL *pStatBuf,
     int nRet = CSLFindStringCaseSensitive(papszContents,
                     CPLGetFilename(osFilename)) >= 0 ? 0 : -1;
     CSLDestroy(papszContents);
+
+    FileProp cachedFileProp;
     if( nRet == 0 )
     {
         pStatBuf->st_mode = S_IFDIR;
+
+        cachedFileProp.eExists = EXIST_YES;
+        cachedFileProp.bHasComputedFileSize = false;
+        cachedFileProp.fileSize = 0;
+        cachedFileProp.bIsDirectory = true;
+        cachedFileProp.mTime = 0;
+        cachedFileProp.nMode = S_IFDIR;
     }
+    else
+    {
+        cachedFileProp.eExists = EXIST_NO;
+    }
+
+    auto poHandleHelper = std::unique_ptr<IVSIS3LikeHandleHelper>(
+        CreateHandleHelper(pszFilename + GetFSPrefix().size(), true));
+    if( poHandleHelper )
+    {
+        SetCachedFileProp(poHandleHelper->GetURL(), cachedFileProp);
+    }
+
     return nRet;
 }
 

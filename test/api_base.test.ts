@@ -49,7 +49,7 @@ describe('gdal', () => {
   })
   describe('"version" property', () => {
     it('should exist', () => {
-      assert.match(gdal.version, /^\d+\.\d+\.\d+[a-zA-Z]*$/)
+      assert.match(gdal.version, /^\d+\.\d+\.\d+[a-zA-Z]*(-\w+)?$/)
     })
   })
   describe('"config" property', () => {

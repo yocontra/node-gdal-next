@@ -31,7 +31,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwglayer.cpp 95708c896583cc143c2ab314321aeb37483faed0 2021-08-19 20:35:04 +0800 GISerliang $")
+CPL_CVSID("$Id: ogrdwglayer.cpp f86de9ef404101500003396503c43609219aa339 2021-08-19 20:35:04 +0800 GISerliang $")
 
 /************************************************************************/
 /*                            OGRDWGLayer()                             */

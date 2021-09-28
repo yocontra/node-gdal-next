@@ -41,7 +41,7 @@
 
 #include "cpl_alibaba_oss.h"
 
-CPL_CVSID("$Id: cpl_vsil_oss.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_oss.cpp 7930624ea8fb161357da54ca71479b51ffdc8ede 2021-08-25 12:19:08 +0200 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -99,6 +99,8 @@ public:
             IVSIS3LikeHandleHelper * poHandleHelper ) override;
 
     char* GetSignedURL( const char* pszFilename, CSLConstList papszOptions ) override;
+
+    std::string GetStreamingFilename(const std::string& osFilename) const override { return osFilename; }
 };
 
 /************************************************************************/
@@ -169,7 +171,7 @@ VSIVirtualHandle* VSIOSSFSHandler::Open( const char *pszFilename,
     }
 
     return
-        VSICurlFilesystemHandler::Open(pszFilename, pszAccess, bSetError, papszOptions);
+        VSICurlFilesystemHandlerBase::Open(pszFilename, pszAccess, bSetError, papszOptions);
 }
 
 /************************************************************************/
@@ -187,7 +189,7 @@ VSIOSSFSHandler::~VSIOSSFSHandler()
 
 void VSIOSSFSHandler::ClearCache()
 {
-    VSICurlFilesystemHandler::ClearCache();
+    VSICurlFilesystemHandlerBase::ClearCache();
 
     oMapBucketsToOSSParams.clear();
 }
@@ -210,7 +212,7 @@ const char* VSIOSSFSHandler::GetOptions()
         "description='Size in MB for chunks of files that are uploaded. The"
         "default value of 50 MB allows for files up to 500 GB each' "
         "default='50' min='1' max='1000'/>" +
-        VSICurlFilesystemHandler::GetOptionsStatic() +
+        VSICurlFilesystemHandlerBase::GetOptionsStatic() +
         "</Options>");
     return osOptions.c_str();
 }

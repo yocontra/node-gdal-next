@@ -72,7 +72,7 @@ UnaryUnionOp::Union()
         return ret;
     }
 
-    /**
+    /*
      * For points and lines, only a single union operation is
      * required, since the OGC model allowings self-intersecting
      * MultiPoint and MultiLineStrings.
@@ -112,25 +112,22 @@ UnaryUnionOp::Union()
     GeomPtr unionPolygons;
     if(!polygons.empty()) {
         unionPolygons.reset(CascadedPolygonUnion::Union(polygons.begin(),
-                            polygons.end()));
+                            polygons.end(), unionFunction));
     }
 
-    /**
+    /*
      * Performing two unions is somewhat inefficient,
      * but is mitigated by unioning lines and points first
      */
 
     GeomPtr unionLA = unionWithNull(std::move(unionLines), std::move(unionPolygons));
-    assert(!unionLines.get());
-    assert(!unionPolygons.get());
+
 
     if(! unionPoints.get()) {
         ret = std::move(unionLA);
-        assert(!unionLA.get());
     }
     else if(! unionLA.get()) {
         ret = std::move(unionPoints);
-        assert(!unionPoints.get());
     }
     else {
         ret = PointGeometryUnion::Union(*unionPoints, *unionLA);

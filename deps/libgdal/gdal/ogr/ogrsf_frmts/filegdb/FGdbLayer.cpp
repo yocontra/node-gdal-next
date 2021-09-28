@@ -38,7 +38,7 @@
 #include "cpl_minixml.h" // the only way right now to extract schema information
 #include "filegdb_gdbtoogrfieldtype.h"
 
-CPL_CVSID("$Id: FGdbLayer.cpp 7819e495986c82c51d7023358b14ecb2b0fd4d98 2021-04-01 20:02:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: FGdbLayer.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
 
 using std::string;
 using std::wstring;
@@ -2019,7 +2019,7 @@ static CPLXMLNode* XMLSpatialReference(OGRSpatialReference* poSRS, char** papszO
                         break;
                     }
                     OGRSpatialReference oSRS_FromESRI;
-                    if( oSRS_FromESRI.SetFromUserInput(pszESRI_WKT) == OGRERR_NONE &&
+                    if( oSRS_FromESRI.importFromWkt(pszESRI_WKT) == OGRERR_NONE &&
                         poSRSClone->IsSame(&oSRS_FromESRI) )
                     {
                         /* Potential match found */

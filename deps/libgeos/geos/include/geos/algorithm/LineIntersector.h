@@ -56,7 +56,7 @@ public:
 
 
     /// Computes the "edge distance" of an intersection point p in an edge.
-    //
+    ///
     /// The edge distance is a metric of the point along the edge.
     /// The metric used is a robust and easy to compute metric function.
     /// It is <b>not</b> equivalent to the usual Euclidean metric.
@@ -103,10 +103,10 @@ public:
      * @return <code>true</code> if either intersection point is in
      * the interior of the input segment
      */
-    bool isInteriorIntersection(int inputLineIndex);
+    bool isInteriorIntersection(size_t inputLineIndex);
 
     /// Force computed intersection to be rounded to a given precision model.
-    //
+    ///
     /// No getter is provided, because the precision model is not required
     /// to be specified.
     /// @param newPM the PrecisionModel to use for rounding
@@ -118,24 +118,17 @@ public:
     }
 
     /// Compute the intersection of a point p and the line p1-p2.
-    //
+    ///
     /// This function computes the boolean value of the hasIntersection test.
     /// The actual value of the intersection (if there is one)
     /// is equal to the value of <code>p</code>.
     ///
     void computeIntersection(const geom::Coordinate& p, const geom::Coordinate& p1, const geom::Coordinate& p2);
 
-    /// Same as above but doen's compute intersection point. Faster.
+    /// Same as above but doesn't compute intersection point. Faster.
     static bool hasIntersection(const geom::Coordinate& p, const geom::Coordinate& p1, const geom::Coordinate& p2);
 
-    // These are deprecated, due to ambiguous naming
-    enum {
-        DONT_INTERSECT = 0,
-        DO_INTERSECT = 1,
-        COLLINEAR = 2
-    };
-
-    enum {
+    enum intersection_type : uint8_t {
         /// Indicates that line segments do not intersect
         NO_INTERSECTION = 0,
 
@@ -164,7 +157,7 @@ public:
     }
 
     /// Returns the number of intersection points found.
-    //
+    ///
     /// This will be either 0, 1 or 2.
     ///
     size_t
@@ -175,7 +168,7 @@ public:
 
 
     /// Returns the intIndex'th intersection point
-    //
+    ///
     /// @param intIndex is 0 or 1
     ///
     /// @return the intIndex'th intersection point
@@ -187,7 +180,7 @@ public:
     }
 
     /// Returns false if both numbers are zero.
-    //
+    ///
     /// @return true if both numbers are positive or if both numbers are negative.
     ///
     static bool isSameSignAndNonZero(double a, double b);
@@ -234,7 +227,7 @@ public:
      * @return the intIndex'th intersection point in the direction of the
      *         specified input line segment
      */
-    const geom::Coordinate& getIntersectionAlongSegment(int segmentIndex, int intIndex);
+    const geom::Coordinate& getIntersectionAlongSegment(size_t segmentIndex, size_t intIndex);
 
     /** \brief
      * Computes the index of the intIndex'th intersection point in the direction of
@@ -245,7 +238,7 @@ public:
      *
      * @return the index of the intersection point along the segment (0 or 1)
      */
-    int getIndexAlongSegment(int segmentIndex, int intIndex);
+    size_t getIndexAlongSegment(size_t segmentIndex, size_t intIndex);
 
     /** \brief
      * Computes the "edge distance" of an intersection point along the specified
@@ -280,7 +273,7 @@ private:
      * The indexes of the endpoints of the intersection lines, in order along
      * the corresponding line
      */
-    int intLineIndex[2][2];
+    size_t intLineIndex[2][2];
 
     bool isProperVar;
     //Coordinate &pa;
@@ -292,8 +285,8 @@ private:
         return result == COLLINEAR_INTERSECTION;
     }
 
-    int computeIntersect(const geom::Coordinate& p1, const geom::Coordinate& p2,
-                         const geom::Coordinate& q1, const geom::Coordinate& q2);
+    uint8_t computeIntersect(const geom::Coordinate& p1, const geom::Coordinate& p2,
+                             const geom::Coordinate& q1, const geom::Coordinate& q2);
 
     bool
     isEndPoint() const
@@ -303,10 +296,10 @@ private:
 
     void computeIntLineIndex();
 
-    void computeIntLineIndex(int segmentIndex);
+    void computeIntLineIndex(size_t segmentIndex);
 
-    int computeCollinearIntersection(const geom::Coordinate& p1, const geom::Coordinate& p2,
-                                     const geom::Coordinate& q1, const geom::Coordinate& q2);
+    uint8_t computeCollinearIntersection(const geom::Coordinate& p1, const geom::Coordinate& p2,
+                                         const geom::Coordinate& q1, const geom::Coordinate& q2);
 
     /** \brief
      * This method computes the actual value of the intersection point.
@@ -350,7 +343,55 @@ private:
     geom::Coordinate intersectionSafe(const geom::Coordinate& p1, const geom::Coordinate& p2,
                                       const geom::Coordinate& q1, const geom::Coordinate& q2) const;
 
+    /**
+     * Finds the endpoint of the segments P and Q which
+     * is closest to the other segment.
+     * This is a reasonable surrogate for the true
+     * intersection points in ill-conditioned cases
+     * (e.g. where two segments are nearly coincident,
+     * or where the endpoint of one segment lies almost on the other segment).
+     * <p>
+     * This replaces the older CentralEndpoint heuristic,
+     * which chose the wrong endpoint in some cases
+     * where the segments had very distinct slopes
+     * and one endpoint lay almost on the other segment.
+     *
+     * @param p1 an endpoint of segment P
+     * @param p2 an endpoint of segment P
+     * @param q1 an endpoint of segment Q
+     * @param q2 an endpoint of segment Q
+     * @return the nearest endpoint to the other segment
+     */
+    static geom::Coordinate nearestEndpoint(const geom::Coordinate& p1,
+                                            const geom::Coordinate& p2,
+                                            const geom::Coordinate& q1,
+                                            const geom::Coordinate& q2);
+
+    static double zGet(const geom::Coordinate& p, const geom::Coordinate& q);
+
+    static double zGetOrInterpolate(const geom::Coordinate& p,
+                                    const geom::Coordinate& p0,
+                                    const geom::Coordinate& p1);
+
+    static geom::Coordinate zGetOrInterpolateCopy(const geom::Coordinate& p,
+                                                  const geom::Coordinate& p0,
+                                                  const geom::Coordinate& p1);
+
+    /// \brief
+    /// Return a Z value being the interpolation of Z from p0 to p1 at
+    /// the given point p
+    static double zInterpolate(const geom::Coordinate& p,
+                               const geom::Coordinate& p0,
+                               const geom::Coordinate& p1);
+
+    static double zInterpolate(const geom::Coordinate& p,
+                               const geom::Coordinate& p1,
+                               const geom::Coordinate& p2,
+                               const geom::Coordinate& q1,
+                               const geom::Coordinate& q2);
+
 };
+
 
 } // namespace geos::algorithm
 } // namespace geos

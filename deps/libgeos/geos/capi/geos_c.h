@@ -55,22 +55,22 @@ extern "C" {
 #define GEOS_VERSION_MAJOR 3
 #endif
 #ifndef GEOS_VERSION_MINOR
-#define GEOS_VERSION_MINOR 8
+#define GEOS_VERSION_MINOR 9
 #endif
 #ifndef GEOS_VERSION_PATCH
 #define GEOS_VERSION_PATCH 1
 #endif
 #ifndef GEOS_VERSION
-#define GEOS_VERSION "3.8.1"
+#define GEOS_VERSION "3.9.1"
 #endif
 #ifndef GEOS_JTS_PORT
-#define GEOS_JTS_PORT "1.13.0"
+#define GEOS_JTS_PORT "1.17.0"
 #endif
 
 #define GEOS_CAPI_VERSION_MAJOR 1
-#define GEOS_CAPI_VERSION_MINOR 13
-#define GEOS_CAPI_VERSION_PATCH 3
-#define GEOS_CAPI_VERSION "3.8.1-CAPI-1.13.3"
+#define GEOS_CAPI_VERSION_MINOR 14
+#define GEOS_CAPI_VERSION_PATCH 2
+#define GEOS_CAPI_VERSION "3.9.1-CAPI-1.14.2"
 
 #define GEOS_CAPI_FIRST_INTERFACE GEOS_CAPI_VERSION_MAJOR
 #define GEOS_CAPI_LAST_INTERFACE (GEOS_CAPI_VERSION_MAJOR+GEOS_CAPI_VERSION_MINOR)
@@ -369,7 +369,8 @@ extern int GEOS_DLL GEOSCoordSeq_isCCW_r(GEOSContextHandle_t handle,
 
 
 /* Return distance of point 'p' projected on 'g' from origin
- * of 'g'. Geometry 'g' must be a lineal geometry */
+ * of 'g'. Geometry 'g' must be a lineal geometry.
+ * Return -1 on exception*/
 extern double GEOS_DLL GEOSProject_r(GEOSContextHandle_t handle,
                                      const GEOSGeometry *g,
                                      const GEOSGeometry *p);
@@ -550,6 +551,10 @@ extern GEOSGeometry GEOS_DLL *GEOSEnvelope_r(GEOSContextHandle_t handle,
 extern GEOSGeometry GEOS_DLL *GEOSIntersection_r(GEOSContextHandle_t handle,
                                                  const GEOSGeometry* g1,
                                                  const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSIntersectionPrec_r(GEOSContextHandle_t handle,
+                                                 const GEOSGeometry* g1,
+                                                 const GEOSGeometry* g2,
+                                                 double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSConvexHull_r(GEOSContextHandle_t handle,
                                                const GEOSGeometry* g);
 
@@ -560,6 +565,9 @@ extern GEOSGeometry GEOS_DLL *GEOSConvexHull_r(GEOSContextHandle_t handle,
  */
 extern GEOSGeometry GEOS_DLL *GEOSMinimumRotatedRectangle_r(GEOSContextHandle_t handle,
                                                const GEOSGeometry* g);
+
+extern GEOSGeometry GEOS_DLL *GEOSMaximumInscribedCircle_r(GEOSContextHandle_t handle, const GEOSGeometry* g, double tolerance);
+extern GEOSGeometry GEOS_DLL *GEOSLargestEmptyCircle_r(GEOSContextHandle_t handle, const GEOSGeometry* g, const GEOSGeometry* boundary, double tolerance);
 
 /* Returns a LINESTRING geometry which represents the minimum diameter of the geometry.
  * The minimum diameter is defined to be the width of the smallest band that
@@ -580,16 +588,31 @@ extern int GEOS_DLL GEOSMinimumClearance_r(GEOSContextHandle_t handle,
 extern GEOSGeometry GEOS_DLL *GEOSDifference_r(GEOSContextHandle_t handle,
                                                const GEOSGeometry* g1,
                                                const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSDifferencePrec_r(GEOSContextHandle_t handle,
+                                                   const GEOSGeometry* g1,
+                                                   const GEOSGeometry* g2,
+                                                   double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSSymDifference_r(GEOSContextHandle_t handle,
                                                   const GEOSGeometry* g1,
                                                   const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSSymDifferencePrec_r(GEOSContextHandle_t handle,
+                                                      const GEOSGeometry* g1,
+                                                      const GEOSGeometry* g2,
+                                                      double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSBoundary_r(GEOSContextHandle_t handle,
                                              const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSUnion_r(GEOSContextHandle_t handle,
                                           const GEOSGeometry* g1,
                                           const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSUnionPrec_r(GEOSContextHandle_t handle,
+                                              const GEOSGeometry* g1,
+                                              const GEOSGeometry* g2,
+                                              double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSUnaryUnion_r(GEOSContextHandle_t handle,
                                           const GEOSGeometry* g);
+extern GEOSGeometry GEOS_DLL *GEOSUnaryUnionPrec_r(GEOSContextHandle_t handle,
+                                          const GEOSGeometry* g,
+                                          double gridSize);
 /* GEOSCoverageUnion is an optimized union algorithm for polygonal inputs that are correctly
  * noded and do not overlap. It will not generate an error (return NULL) for inputs that
  * do not satisfy this constraint. */
@@ -858,6 +881,19 @@ extern char GEOS_DLL GEOSPreparedTouches_r(GEOSContextHandle_t handle,
 extern char GEOS_DLL GEOSPreparedWithin_r(GEOSContextHandle_t handle,
                                           const GEOSPreparedGeometry* pg1,
                                           const GEOSGeometry* g2);
+
+/* Return 0 on exception, the closest points of the two geometries otherwise.
+ * The first point comes from pg1 geometry and the second point comes from g2.
+ */
+extern GEOSCoordSequence GEOS_DLL *GEOSPreparedNearestPoints_r(
+                                          GEOSContextHandle_t handle,
+                                          const GEOSPreparedGeometry* pg1,
+                                          const GEOSGeometry* g2);
+
+extern int GEOS_DLL GEOSPreparedDistance_r(
+                                GEOSContextHandle_t handle,
+                                const GEOSPreparedGeometry* pg1,
+                                const GEOSGeometry* g2, double *dist);
 
 /************************************************************************
  *
@@ -1223,11 +1259,12 @@ extern int GEOS_DLL GEOSOrientationIndex_r(GEOSContextHandle_t handle,
  *
  ***********************************************************************/
 
+#ifndef GEOSWKTReader
 typedef struct GEOSWKTReader_t GEOSWKTReader;
 typedef struct GEOSWKTWriter_t GEOSWKTWriter;
 typedef struct GEOSWKBReader_t GEOSWKBReader;
 typedef struct GEOSWKBWriter_t GEOSWKBWriter;
-
+#endif
 
 /* WKT Reader */
 extern GEOSWKTReader GEOS_DLL *GEOSWKTReader_create_r(
@@ -1461,7 +1498,8 @@ extern int GEOS_DLL GEOSCoordSeq_isCCW(const GEOSCoordSequence* s, char* is_ccw)
 
 
 /* Return distance of point 'p' projected on 'g' from origin
- * of 'g'. Geometry 'g' must be a lineal geometry */
+ * of 'g'. Geometry 'g' must be a lineal geometry.
+ * Return -1 on exception */
 extern double GEOS_DLL GEOSProject(const GEOSGeometry *g,
                                    const GEOSGeometry* p);
 
@@ -1589,6 +1627,7 @@ extern void GEOS_DLL GEOSGeom_destroy(GEOSGeometry* g);
 
 extern GEOSGeometry GEOS_DLL *GEOSEnvelope(const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSIntersection(const GEOSGeometry* g1, const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSIntersectionPrec(const GEOSGeometry* g1, const GEOSGeometry* g2, double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSConvexHull(const GEOSGeometry* g);
 
 /* Returns the minimum rotated rectangular POLYGON which encloses the input geometry. The rectangle
@@ -1597,6 +1636,38 @@ extern GEOSGeometry GEOS_DLL *GEOSConvexHull(const GEOSGeometry* g);
  * be used as an extremely generalized representation for the given geometry.
  */
 extern GEOSGeometry GEOS_DLL *GEOSMinimumRotatedRectangle(const GEOSGeometry* g);
+
+/* Constructs the Maximum Inscribed Circle for a  polygonal geometry, up to a specified tolerance.
+ * The Maximum Inscribed Circle is determined by a point in the interior of the area
+ * which has the farthest distance from the area boundary, along with a boundary point at that distance.
+ * In the context of geography the center of the Maximum Inscribed Circle is known as the
+ * Pole of Inaccessibility. A cartographic use case is to determine a suitable point
+ * to place a map label within a polygon.
+ * The radius length of the Maximum Inscribed Circle is a  measure of how "narrow" a polygon is. It is the
+ * distance at which the negative buffer becomes empty.
+ * The class supports polygons with holes and multipolygons.
+ * The implementation uses a successive-approximation technique over a grid of square cells covering the area geometry.
+ * The grid is refined using a branch-and-bound algorithm. Point containment and distance are computed in a performant
+ * way by using spatial indexes.
+ * Returns a two-point linestring, with one point at the center of the inscribed circle and the other
+ * on the boundary of the inscribed circle.
+*/
+extern GEOSGeometry GEOS_DLL *GEOSMaximumInscribedCircle(const GEOSGeometry* g, double tolerance);
+
+/* Constructs the Largest Empty Circle for a set of obstacle geometries, up to a
+ * specified tolerance. The obstacles are point and line geometries.
+ * The Largest Empty Circle is the largest circle which  has its center in the convex hull of the
+ * obstacles (the boundary), and whose interior does not intersect with any obstacle.
+ * The circle center is the point in the interior of the boundary which has the farthest distance from
+ * the obstacles (up to tolerance). The circle is determined by the center point and a point lying on an
+ * obstacle indicating the circle radius.
+ * The implementation uses a successive-approximation technique over a grid of square cells covering the obstacles and boundary.
+ * The grid is refined using a branch-and-bound algorithm.  Point containment and distance are computed in a performant
+ * way by using spatial indexes.
+ * Returns a two-point linestring, with one point at the center of the inscribed circle and the other
+ * on the boundary of the inscribed circle.
+ */
+extern GEOSGeometry GEOS_DLL *GEOSLargestEmptyCircle(const GEOSGeometry* g, const GEOSGeometry* boundary, double tolerance);
 
 /* Returns a LINESTRING geometry which represents the minimum diameter of the geometry.
  * The minimum diameter is defined to be the width of the smallest band that
@@ -1633,10 +1704,14 @@ extern int GEOS_DLL GEOSMinimumClearance(const GEOSGeometry* g, double* d);
 extern GEOSGeometry GEOS_DLL *GEOSMinimumClearanceLine(const GEOSGeometry* g);
 
 extern GEOSGeometry GEOS_DLL *GEOSDifference(const GEOSGeometry* g1, const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSDifferencePrec(const GEOSGeometry* g1, const GEOSGeometry* g2, double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSSymDifference(const GEOSGeometry* g1, const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSSymDifferencePrec(const GEOSGeometry* g1, const GEOSGeometry* g2, double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSBoundary(const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSUnion(const GEOSGeometry* g1, const GEOSGeometry* g2);
+extern GEOSGeometry GEOS_DLL *GEOSUnionPrec(const GEOSGeometry* g1, const GEOSGeometry* g2, double gridSize);
 extern GEOSGeometry GEOS_DLL *GEOSUnaryUnion(const GEOSGeometry* g);
+extern GEOSGeometry GEOS_DLL *GEOSUnaryUnionPrec(const GEOSGeometry* g, double gridSize);
 
 /* GEOSCoverageUnion is an optimized union algorithm for polygonal inputs that are correctly
  * noded and do not overlap. It will not generate an error (return NULL) for inputs that
@@ -1806,6 +1881,8 @@ extern char GEOS_DLL GEOSPreparedIntersects(const GEOSPreparedGeometry* pg1, con
 extern char GEOS_DLL GEOSPreparedOverlaps(const GEOSPreparedGeometry* pg1, const GEOSGeometry* g2);
 extern char GEOS_DLL GEOSPreparedTouches(const GEOSPreparedGeometry* pg1, const GEOSGeometry* g2);
 extern char GEOS_DLL GEOSPreparedWithin(const GEOSPreparedGeometry* pg1, const GEOSGeometry* g2);
+extern GEOSCoordSequence GEOS_DLL *GEOSPreparedNearestPoints(const GEOSPreparedGeometry* pg1, const GEOSGeometry* g2);
+extern int GEOS_DLL GEOSPreparedDistance(const GEOSPreparedGeometry* pg1, const GEOSGeometry* g2, double *dist);
 
 /************************************************************************
  *

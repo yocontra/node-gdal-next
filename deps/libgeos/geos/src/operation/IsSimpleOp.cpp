@@ -151,7 +151,7 @@ IsSimpleOp::isSimpleMultiPoint(const MultiPoint& mp)
     set<const Coordinate*, CoordinateLessThen> points;
 
     for(std::size_t i = 0, n = mp.getNumGeometries(); i < n; ++i) {
-        const Point* pt = dynamic_cast<const Point*>(mp.getGeometryN(i));
+        const Point* pt = mp.getGeometryN(i);
         assert(pt);
         const Coordinate* p = pt->getCoordinate();
         if(points.find(p) != points.end()) {
@@ -203,8 +203,7 @@ bool
 IsSimpleOp::hasNonEndpointIntersection(GeometryGraph& graph)
 {
     vector<Edge*>* edges = graph.getEdges();
-    for(vector<Edge*>::iterator i = edges->begin(); i < edges->end(); i++) {
-        Edge* e = *i;
+    for(Edge* e: *edges) {
         auto maxSegmentIndex = e->getMaximumSegmentIndex();
         EdgeIntersectionList& eiL = e->getEdgeIntersectionList();
         for(const EdgeIntersection& ei : eiL) {
@@ -290,8 +289,7 @@ IsSimpleOp::hasClosedEndpointIntersection(GeometryGraph& graph)
 {
     map<const Coordinate*, EndpointInfo*, CoordinateLessThen> endPoints;
     vector<Edge*>* edges = graph.getEdges();
-    for(vector<Edge*>::iterator i = edges->begin(); i < edges->end(); i++) {
-        Edge* e = *i;
+    for(Edge* e: *edges) {
         //int maxSegmentIndex=e->getMaximumSegmentIndex();
         bool isClosed = e->isClosed();
         const Coordinate* p0 = &e->getCoordinate(0);

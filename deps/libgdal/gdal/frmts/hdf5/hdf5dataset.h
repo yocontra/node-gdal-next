@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hdf5dataset.h 16c87cd95f27db3344c6c034950fdf285666d924 2020-08-18 15:37:19 +0200 Even Rouault $
+ * $Id: hdf5dataset.h 2986c5478b030cbf210890376e28d4ccdec15991 2021-08-06 16:59:15 +0200 Even Rouault $
  *
  * Project:  Hierarchical Data Format Release 5 (HDF5)
  * Purpose:  Header file for HDF5 datasets reader.
@@ -105,12 +105,18 @@ class HDF5SharedResources
     bool m_bReadOnly = true;
     hid_t            m_hHDF5 = 0;
     CPLString        m_osFilename{};
+    std::shared_ptr<GDALPamMultiDim> m_poPAM{};
+
 public:
-    HDF5SharedResources() = default;
+    explicit HDF5SharedResources(const std::string& osFilename);
     ~HDF5SharedResources();
+
+    const std::string& GetFilename() const { return m_osFilename; }
 
     inline hid_t GetHDF5() const { return m_hHDF5; }
     inline bool IsReadOnly() const { return m_bReadOnly; }
+
+    const std::shared_ptr<GDALPamMultiDim>& GetPAM() { return m_poPAM; }
 };
 
 } // namespace GDAL

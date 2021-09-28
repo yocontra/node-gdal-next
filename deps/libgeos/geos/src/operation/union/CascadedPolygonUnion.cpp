@@ -18,16 +18,19 @@
  *
  **********************************************************************/
 
+
 #include <geos/operation/union/CascadedPolygonUnion.h>
 #include <geos/operation/union/OverlapUnion.h>
+#include <geos/operation/overlay/OverlayOp.h>
+#include <geos/geom/HeuristicOverlay.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/Polygon.h>
 #include <geos/geom/MultiPolygon.h>
-#include <geos/geom/util/GeometryCombiner.h>
 #include <geos/geom/util/PolygonExtracter.h>
 #include <geos/index/strtree/STRtree.h>
+
 // std
 #include <cassert>
 #include <cstddef>
@@ -47,6 +50,7 @@
 
 namespace {
 
+#if GEOS_DEBUG
 inline bool
 check_valid(const geos::geom::Geometry& g, const std::string& label, bool doThrow = false, bool validOnly = false)
 {
@@ -92,25 +96,34 @@ check_valid(const geos::geom::Geometry& g, const std::string& label, bool doThro
     }
     return true;
 }
+#endif
 
 } // anonymous namespace
+
 
 namespace geos {
 namespace operation { // geos.operation
 namespace geounion {  // geos.operation.geounion
 
-///////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 void
 GeometryListHolder::deleteItem(geom::Geometry* item)
 {
     delete item;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 geom::Geometry*
 CascadedPolygonUnion::Union(std::vector<geom::Polygon*>* polys)
 {
     CascadedPolygonUnion op(polys);
+    return op.Union();
+}
+
+geom::Geometry*
+CascadedPolygonUnion::Union(std::vector<geom::Polygon*>* polys, UnionStrategy* unionFun)
+{
+    CascadedPolygonUnion op(polys, unionFun);
     return op.Union();
 }
 
@@ -136,12 +149,13 @@ CascadedPolygonUnion::Union()
 
     geomFactory = inputPolys->front()->getFactory();
 
-    /**
+    /*
      * A spatial index to organize the collection
      * into groups of close geometries.
      * This makes unioning more efficient, since vertices are more likely
      * to be eliminated on each round.
      */
+
     index::strtree::STRtree index(STRTREE_NODE_CAPACITY);
 
     typedef std::vector<geom::Polygon*>::iterator iterator_type;
@@ -160,7 +174,7 @@ geom::Geometry*
 CascadedPolygonUnion::unionTree(
     index::strtree::ItemsList* geomTree)
 {
-    /**
+    /*
      * Recursively unions all subtrees in the list into single geometries.
      * The result is a list of Geometry's only
      */
@@ -234,15 +248,22 @@ CascadedPolygonUnion::unionSafe(geom::Geometry* g0, geom::Geometry* g1)
     return unionActual(g0, g1);
 }
 
+// geom::Geometry*
+// CascadedPolygonUnion::unionActual(geom::Geometry* g0, geom::Geometry* g1)
+// {
+//     OverlapUnion unionOp(g0, g1);
+//     geom::Geometry* justPolys = restrictToPolygons(
+//         std::unique_ptr<geom::Geometry>(unionOp.doUnion())
+//         ).release();
+//     return justPolys;
+// }
 
 geom::Geometry*
 CascadedPolygonUnion::unionActual(geom::Geometry* g0, geom::Geometry* g1)
 {
-    OverlapUnion unionOp(g0, g1);
-    geom::Geometry* justPolys = restrictToPolygons(
-        std::unique_ptr<geom::Geometry>(unionOp.doUnion())
-        ).release();
-    return justPolys;
+    std::unique_ptr<geom::Geometry> ug;
+    ug = unionFunction->Union(g0, g1);
+    return restrictToPolygons(std::move(ug)).release();
 }
 
 std::unique_ptr<geom::Geometry>
@@ -271,6 +292,46 @@ CascadedPolygonUnion::restrictToPolygons(std::unique_ptr<geom::Geometry> g)
     }
     return unique_ptr<Geometry>(g->getFactory()->createMultiPolygon(newpolys));
 }
+
+/************************************************************************/
+
+using operation::overlay::OverlayOp;
+
+std::unique_ptr<geom::Geometry>
+ClassicUnionStrategy::Union(const geom::Geometry* g0, const geom::Geometry* g1)
+{
+    try {
+        // return SnapIfNeededOverlayOp.union(g0, g1);
+        return geom::HeuristicOverlay(g0, g1, overlay::OverlayOp::opUNION);
+    }
+    catch (const util::TopologyException &ex) {
+        // union-by-buffer only works for polygons
+        if (g0->getDimension() != 2 || g1->getDimension() != 2)
+          throw ex;
+        return unionPolygonsByBuffer(g0, g1);
+    }
+}
+
+bool
+ClassicUnionStrategy::isFloatingPrecision() const
+{
+  return true;
+}
+
+/*private*/
+std::unique_ptr<geom::Geometry>
+ClassicUnionStrategy::unionPolygonsByBuffer(const geom::Geometry* g0, const geom::Geometry* g1)
+{
+    std::vector<std::unique_ptr<geom::Geometry>> geoms;
+    geoms.push_back(g0->clone());
+    geoms.push_back(g1->clone());
+    std::unique_ptr<geom::GeometryCollection> coll = g0->getFactory()->createGeometryCollection(std::move(geoms));
+    return coll->buffer(0);
+}
+
+
+
+
 
 } // namespace geos.operation.union
 } // namespace geos.operation

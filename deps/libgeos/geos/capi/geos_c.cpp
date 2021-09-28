@@ -21,10 +21,6 @@
 #include <geos/io/WKBReader.h>
 #include <geos/io/WKTWriter.h>
 #include <geos/io/WKBWriter.h>
-#include <geos/operation/overlay/OverlayOp.h>
-#include <geos/operation/union/CascadedPolygonUnion.h>
-#include <geos/algorithm/distance/DiscreteHausdorffDistance.h>
-#include <geos/algorithm/distance/DiscreteFrechetDistance.h>
 #include <geos/util/Interrupt.h>
 
 #include <stdexcept>
@@ -39,10 +35,10 @@
 #define GEOSPreparedGeometry geos::geom::prep::PreparedGeometry
 #define GEOSCoordSequence geos::geom::CoordinateSequence
 #define GEOSSTRtree geos::index::strtree::STRtree
-#define GEOSWKTReader_t geos::io::WKTReader
-#define GEOSWKTWriter_t geos::io::WKTWriter
-#define GEOSWKBReader_t geos::io::WKBReader
-#define GEOSWKBWriter_t geos::io::WKBWriter
+#define GEOSWKTReader geos::io::WKTReader
+#define GEOSWKTWriter geos::io::WKTWriter
+#define GEOSWKBReader geos::io::WKBReader
+#define GEOSWKBWriter geos::io::WKBWriter
 typedef struct GEOSBufParams_t GEOSBufferParams;
 
 #include "geos_c.h"
@@ -74,11 +70,7 @@ using geos::io::WKTWriter;
 using geos::io::WKBReader;
 using geos::io::WKBWriter;
 
-using geos::index::strtree::STRtree;
 
-using geos::operation::overlay::OverlayOp;
-using geos::operation::overlay::overlayOp;
-using geos::operation::geounion::CascadedPolygonUnion;
 
 typedef std::unique_ptr<Geometry> GeomPtr;
 
@@ -416,6 +408,12 @@ extern "C" {
     }
 
     Geometry*
+    GEOSIntersectionPrec(const Geometry* g1, const Geometry* g2, double gridSize)
+    {
+        return GEOSIntersectionPrec_r(handle, g1, g2, gridSize);
+    }
+
+    Geometry*
     GEOSBuffer(const Geometry* g, double width, int quadrantsegments)
     {
         return GEOSBuffer_r(handle, g, width, quadrantsegments);
@@ -458,6 +456,18 @@ extern "C" {
     }
 
     Geometry*
+    GEOSMaximumInscribedCircle(const Geometry* g, double tolerance)
+    {
+        return GEOSMaximumInscribedCircle_r(handle, g, tolerance);
+    }
+
+    Geometry*
+    GEOSLargestEmptyCircle(const Geometry* g, const Geometry* boundary, double tolerance)
+    {
+        return GEOSLargestEmptyCircle_r(handle, g, boundary, tolerance);
+    }
+
+    Geometry*
     GEOSMinimumWidth(const Geometry* g)
     {
         return GEOSMinimumWidth_r(handle, g);
@@ -482,6 +492,12 @@ extern "C" {
     }
 
     Geometry*
+    GEOSDifferencePrec(const Geometry* g1, const Geometry* g2, double gridSize)
+    {
+        return GEOSDifferencePrec_r(handle, g1, g2, gridSize);
+    }
+
+    Geometry*
     GEOSBoundary(const Geometry* g)
     {
         return GEOSBoundary_r(handle, g);
@@ -494,15 +510,33 @@ extern "C" {
     }
 
     Geometry*
+    GEOSSymDifferencePrec(const Geometry* g1, const Geometry* g2, double gridSize)
+    {
+        return GEOSSymDifferencePrec_r(handle, g1, g2, gridSize);
+    }
+
+    Geometry*
     GEOSUnion(const Geometry* g1, const Geometry* g2)
     {
         return GEOSUnion_r(handle, g1, g2);
     }
 
     Geometry*
+    GEOSUnionPrec(const Geometry* g1, const Geometry* g2, double gridSize)
+    {
+        return GEOSUnionPrec_r(handle, g1, g2, gridSize);
+    }
+
+    Geometry*
     GEOSUnaryUnion(const Geometry* g)
     {
         return GEOSUnaryUnion_r(handle, g);
+    }
+
+    Geometry*
+    GEOSUnaryUnionPrec(const Geometry* g, double gridSize)
+    {
+        return GEOSUnaryUnionPrec_r(handle, g, gridSize);
     }
 
     Geometry*
@@ -1264,14 +1298,26 @@ extern "C" {
         return GEOSPreparedWithin_r(handle, pg1, g2);
     }
 
-    STRtree*
+    CoordinateSequence*
+    GEOSPreparedNearestPoints(const geos::geom::prep::PreparedGeometry* g1, const Geometry* g2)
+    {
+        return GEOSPreparedNearestPoints_r(handle, g1, g2);
+    }
+
+    int
+    GEOSPreparedDistance(const geos::geom::prep::PreparedGeometry* g1, const Geometry* g2, double *dist)
+    {
+        return GEOSPreparedDistance_r(handle, g1, g2, dist);
+    }
+
+    GEOSSTRtree*
     GEOSSTRtree_create(size_t nodeCapacity)
     {
         return GEOSSTRtree_create_r(handle, nodeCapacity);
     }
 
     void
-    GEOSSTRtree_insert(geos::index::strtree::STRtree* tree,
+    GEOSSTRtree_insert(GEOSSTRtree* tree,
                        const geos::geom::Geometry* g,
                        void* item)
     {
@@ -1279,7 +1325,7 @@ extern "C" {
     }
 
     void
-    GEOSSTRtree_query(geos::index::strtree::STRtree* tree,
+    GEOSSTRtree_query(GEOSSTRtree* tree,
                       const geos::geom::Geometry* g,
                       GEOSQueryCallback cb,
                       void* userdata)
@@ -1288,7 +1334,7 @@ extern "C" {
     }
 
     const GEOSGeometry*
-    GEOSSTRtree_nearest(geos::index::strtree::STRtree* tree,
+    GEOSSTRtree_nearest(GEOSSTRtree* tree,
                         const geos::geom::Geometry* g)
     {
         return GEOSSTRtree_nearest_r(handle, tree, g);
@@ -1304,7 +1350,7 @@ extern "C" {
     }
 
     void
-    GEOSSTRtree_iterate(geos::index::strtree::STRtree* tree,
+    GEOSSTRtree_iterate(GEOSSTRtree* tree,
                         GEOSQueryCallback callback,
                         void* userdata)
     {
@@ -1312,7 +1358,7 @@ extern "C" {
     }
 
     char
-    GEOSSTRtree_remove(geos::index::strtree::STRtree* tree,
+    GEOSSTRtree_remove(GEOSSTRtree* tree,
                        const geos::geom::Geometry* g,
                        void* item)
     {
@@ -1320,7 +1366,7 @@ extern "C" {
     }
 
     void
-    GEOSSTRtree_destroy(geos::index::strtree::STRtree* tree)
+    GEOSSTRtree_destroy(GEOSSTRtree* tree)
     {
         GEOSSTRtree_destroy_r(handle, tree);
     }

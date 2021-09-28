@@ -48,7 +48,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalopeninfo.cpp 63047152a3b5ceb7293ae884fb96be39cd428383 2020-09-30 13:00:56 +0200 Thomas Bonfort $")
+CPL_CVSID("$Id: gdalopeninfo.cpp f1e98d9cbfee382987146ffbd8b5df288f07c069 2021-09-01 21:48:37 +0200 Even Rouault $")
 
 // Keep in sync prototype of those 2 functions between gdalopeninfo.cpp,
 // ogrsqlitedatasource.cpp and ogrgeopackagedatasource.cpp
@@ -213,12 +213,13 @@ retry:  // TODO(schwehr): Stop using goto.
 
 #endif  // HAVE_READLINK
 
-#ifdef __FreeBSD__
-    /* FreeBSD 8 oddity: fopen(a_directory, "rb") returns non NULL */
+#if !(defined(_WIN32) || defined(__linux__) || defined(__ANDROID__) || (defined(__MACH__) && defined(__APPLE__)))
+    /* On BSDs, fread() on a directory returns non zero, so we have to */
+    /* do a stat() before to check the nature of pszFilename. */
     bool bPotentialDirectory = (eAccess == GA_ReadOnly);
 #else
     bool bPotentialDirectory = false;
-#endif  // __FreeBDS__
+#endif
 
     /* Check if the filename might be a directory of a special virtual file system */
     if( STARTS_WITH(pszFilename, "/vsizip/") ||
@@ -350,7 +351,7 @@ retry:  // TODO(schwehr): Stop using goto.
         {
             bHasGotSiblingFiles = true;
         }
-        else 
+        else
         {
             const char* pszOptionVal =
                 CPLGetConfigOption( "GDAL_DISABLE_READDIR_ON_OPEN", "NO" );

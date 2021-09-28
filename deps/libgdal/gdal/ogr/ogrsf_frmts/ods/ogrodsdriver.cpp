@@ -30,7 +30,7 @@
 #include "ogr_ods.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrodsdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrodsdriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
 
 using namespace OGRODS;
 
@@ -217,6 +217,7 @@ void RegisterOGRODS()
                                "Time Binary" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONFIELDDATASUBTYPES, "Boolean" );
     poDriver->SetMetadataItem( GDAL_DCAP_NONSPATIAL, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
     poDriver->pfnIdentify = OGRODSDriverIdentify;
     poDriver->pfnOpen = OGRODSDriverOpen;

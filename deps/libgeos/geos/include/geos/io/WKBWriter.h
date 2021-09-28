@@ -24,6 +24,7 @@
 
 #include <geos/util/Machine.h> // for getMachineByteOrder
 #include <iosfwd>
+#include <cstdint>
 
 // Forward declarations
 namespace geos {
@@ -49,7 +50,7 @@ namespace io {
 
 /**
  *
- * \class WKBWriter io.h geos.h
+ * \class WKBWriter
  *
  * \brief Writes a Geometry into Well-Known Binary format.
  *
@@ -84,7 +85,7 @@ public:
      * @param incudeSRID true if SRID should be included in WKB (an
      * extension).
      */
-    WKBWriter(int dims = 2, int bo = getMachineByteOrder(), bool includeSRID = false);
+    WKBWriter(uint8_t dims = 2, int bo = getMachineByteOrder(), bool includeSRID = false);
 
     /*
      * \brief
@@ -97,7 +98,7 @@ public:
      * Returns the output dimension used by the
      * <code>WKBWriter</code>.
      */
-    virtual int
+    virtual uint8_t
     getOutputDimension() const
     {
         return defaultOutputDimension;
@@ -110,7 +111,7 @@ public:
      * Note that 3 indicates up to 3 dimensions will be written but
      * 2D WKB is still produced for 2D geometries.
      */
-    virtual void setOutputDimension(int newOutputDimension);
+    virtual void setOutputDimension(uint8_t newOutputDimension);
 
     /*
      * \brief
@@ -134,7 +135,7 @@ public:
      * Returns whether SRID values are output by the
      * <code>WKBWriter</code>.
      */
-    virtual int
+    virtual bool
     getIncludeSRID() const
     {
         return includeSRID;
@@ -145,9 +146,9 @@ public:
      * <code>WKBWriter</code>.
      */
     virtual void
-    setIncludeSRID(int newIncludeSRID)
+    setIncludeSRID(bool newIncludeSRID)
     {
-        includeSRID = (0 == newIncludeSRID ? false : true);
+        includeSRID = newIncludeSRID;
     }
 
     /**
@@ -172,8 +173,8 @@ public:
 
 private:
 
-    int defaultOutputDimension;
-    int outputDimension;
+    uint8_t defaultOutputDimension;
+    uint8_t outputDimension;
 
     int byteOrder;
 
@@ -184,6 +185,7 @@ private:
     unsigned char buf[8];
 
     void writePoint(const geom::Point& p);
+    void writePointEmpty(const geom::Point& p);
     // throws IOException
 
     void writeLineString(const geom::LineString& ls);

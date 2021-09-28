@@ -50,7 +50,7 @@
 #include "ogr_geometry.h"
 #include "ogrpgeogeometry.h"
 
-CPL_CVSID("$Id: filegdbtable.cpp 6b84484fd22d27a4611ab64da86ba221156293f8 2021-08-25 10:30:20 +0200 Even Rouault $")
+CPL_CVSID("$Id: filegdbtable.cpp 658c2d9b0784249ceeefd02044d19b6e5dfe50cd 2021-08-24 20:25:31 +0200 Even Rouault $")
 
 #define TEST_BIT(ar, bit)                       (ar[(bit) / 8] & (1 << ((bit) % 8)))
 #define BIT_ARRAY_SIZE_IN_BYTES(bitsize)        (((bitsize)+7)/8)

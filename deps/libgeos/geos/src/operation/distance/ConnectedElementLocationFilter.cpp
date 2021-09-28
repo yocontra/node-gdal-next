@@ -12,7 +12,7 @@
  *
  **********************************************************************
  *
- * Last port: operation/distance/ConnectedElementLocationFilter.java rev. 1.4 (JTS-1.10)
+ * Last port: operation/distance/ConnectedElementLocationFilter.java b98e8234
  *
  **********************************************************************/
 
@@ -46,6 +46,7 @@ ConnectedElementLocationFilter::getLocations(const Geometry* geom)
 void
 ConnectedElementLocationFilter::filter_ro(const Geometry* geom)
 {
+    if (geom->isEmpty()) return;
     if((typeid(*geom) == typeid(Point)) ||
             (typeid(*geom) == typeid(LineString)) ||
             (typeid(*geom) == typeid(LinearRing)) ||
@@ -57,6 +58,8 @@ ConnectedElementLocationFilter::filter_ro(const Geometry* geom)
 void
 ConnectedElementLocationFilter::filter_rw(Geometry* geom)
 {
+    // empty geometries do not provide a location
+    if (geom->isEmpty()) return;
     if((typeid(*geom) == typeid(Point)) ||
             (typeid(*geom) == typeid(LineString)) ||
             (typeid(*geom) == typeid(LinearRing)) ||

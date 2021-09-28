@@ -61,7 +61,7 @@
 
 using std::vector;
 
-CPL_CVSID("$Id: gdalinfo_lib.cpp a5cae02f42d9bfb7d0a254c5094df25615098633 2020-08-06 23:26:17 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalinfo_lib.cpp 3af75355638e2e3fe41e7e2a9c2d5f4694d9fa9d 2021-05-07 14:32:46 +0200 Even Rouault $")
 
 /*! output format */
 typedef enum {
@@ -361,6 +361,8 @@ char *GDALInfo( GDALDatasetH hDataset, const GDALInfoOptions *psOptions )
         int nAxesCount = 0;
         const int* panAxes = OSRGetDataAxisToSRSAxisMapping( hSRS, &nAxesCount );
 
+        const double dfCoordinateEpoch = OSRGetCoordinateEpoch(hSRS);
+
         if( bJson )
         {
             json_object *poWkt = json_object_new_string(pszPrettyWkt);
@@ -374,6 +376,13 @@ char *GDALInfo( GDALDatasetH hDataset, const GDALInfoOptions *psOptions )
             }
             json_object_object_add(
                 poCoordinateSystem, "dataAxisToSRSAxisMapping", poAxisMapping);
+
+            if( dfCoordinateEpoch > 0 )
+            {
+                json_object_object_add( poJsonObject,
+                                        "coordinateEpoch",
+                                        json_object_new_double(dfCoordinateEpoch) );
+            }
         }
         else
         {
@@ -392,6 +401,18 @@ char *GDALInfo( GDALDatasetH hDataset, const GDALInfoOptions *psOptions )
                 Concat( osStr, psOptions->bStdoutOutput, "%d", panAxes[i]);
             }
             Concat( osStr, psOptions->bStdoutOutput, "\n");
+
+            if( dfCoordinateEpoch > 0 )
+            {
+                std::string osCoordinateEpoch = CPLSPrintf("%f", dfCoordinateEpoch);
+                if( osCoordinateEpoch.find('.') != std::string::npos )
+                {
+                    while( osCoordinateEpoch.back() == '0' )
+                        osCoordinateEpoch.resize(osCoordinateEpoch.size()-1);
+                }
+                Concat( osStr, psOptions->bStdoutOutput,
+                        "Coordinate epoch: %s\n", osCoordinateEpoch.c_str() );
+            }
         }
         CPLFree( pszPrettyWkt );
 

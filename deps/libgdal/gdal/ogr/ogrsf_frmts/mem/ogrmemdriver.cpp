@@ -35,7 +35,7 @@
 #include "ogr_core.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrmemdriver.cpp 7b2fe2b7bb322fced40705b81d7bb8ae4eca1a7a 2018-02-16 00:23:04Z Kurt Schwehr $")
+CPL_CVSID("$Id: ogrmemdriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                          ~OGRMemDriver()                             */
@@ -105,6 +105,9 @@ void RegisterOGRMEM()
         "  <Option name='ADVERTIZE_UTF8' type='boolean' description='Whether "
         "the layer will contain UTF-8 strings' default='NO'/>"
         "</LayerCreationOptionList>");
+
+    poDriver->SetMetadataItem( GDAL_DCAP_COORDINATE_EPOCH, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
     OGRSFDriverRegistrar::GetRegistrar()->RegisterDriver(poDriver);
 }

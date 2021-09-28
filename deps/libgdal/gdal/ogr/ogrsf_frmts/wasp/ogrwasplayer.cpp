@@ -35,7 +35,7 @@
 #include <map>
 #include <sstream>
 
-CPL_CVSID("$Id: ogrwasplayer.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrwasplayer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            OGRWAsPLayer()                             */
@@ -158,7 +158,7 @@ OGRWAsPLayer::~OGRWAsPLayer()
                     startNeighbors[i] = j;
                 }
             }
-            if ( isEqual( p.dfRight, q.dfLeft) && isEqual( p.dfRight, q.dfLeft ) )
+            if ( isEqual( p.dfRight, q.dfLeft) && isEqual( p.dfLeft, q.dfRight ) )
             {
                 if ( startP.Equals( &startQ ) )
                 {
@@ -286,7 +286,7 @@ OGRLineString * OGRWAsPLayer::Simplify( const OGRLineString & line ) const
     if ( pdfAdjacentPointTolerance.get() && *pdfAdjacentPointTolerance > 0)
     {
         /* remove consecutive points that are too close */
-        std::unique_ptr< OGRLineString > newLine( new OGRLineString );
+        auto newLine = cpl::make_unique<OGRLineString>();
         const double dist = *pdfAdjacentPointTolerance;
         OGRPoint pt;
         poLine->StartPoint( &pt );
@@ -709,7 +709,7 @@ OGRErr OGRWAsPLayer::CreateGeomField( OGRGeomFieldDefn *poGeomFieldIn,
     {
         oFieldDefn.GetSpatialRef()->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
     }
-    poLayerDefn->AddGeomFieldDefn( &oFieldDefn, FALSE );
+    poLayerDefn->AddGeomFieldDefn( &oFieldDefn );
 
     /* Update geom field index */
     if ( -1 == iGeomFieldIdx )
@@ -763,7 +763,7 @@ OGRFeature *OGRWAsPLayer::GetNextRawFeature()
         return nullptr;
     }
 
-    std::unique_ptr< OGRFeature > poFeature( new OGRFeature( poLayerDefn ) );
+    auto poFeature = cpl::make_unique<OGRFeature>( poLayerDefn );
     poFeature->SetFID( ++iFeatureCount );
     for ( int i=0; i<iNumValues-1; i++ ) poFeature->SetField( i, dfValues[i] );
 
@@ -783,7 +783,7 @@ OGRFeature *OGRWAsPLayer::GetNextRawFeature()
         CPLError(CE_Failure, CPLE_FileIO, "No enough values for linestring" );
         return nullptr;
     }
-    std::unique_ptr< OGRLineString > poLine( new OGRLineString );
+    auto poLine = cpl::make_unique<OGRLineString>();
     poLine->setCoordinateDimension(3);
     poLine->assignSpatialReference( poSpatialReference );
     for ( int i=0; i<iNumValuesToRead; i+=2 )

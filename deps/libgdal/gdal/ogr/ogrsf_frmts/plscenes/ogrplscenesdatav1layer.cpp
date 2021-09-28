@@ -30,7 +30,7 @@
 #include "ogrgeojsonreader.h"
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrplscenesdatav1layer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrplscenesdatav1layer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GetFieldCount()                            */
@@ -38,9 +38,9 @@ CPL_CVSID("$Id: ogrplscenesdatav1layer.cpp fa752ad6eabafaf630a704e1892a9d837d683
 
 int OGRPLScenesDataV1FeatureDefn::GetFieldCount() const
 {
-    if( nFieldCount == 0 && m_poLayer != nullptr )
+    if( OGRFeatureDefn::GetFieldCount() == 0 && m_poLayer != nullptr )
         m_poLayer->EstablishLayerDefn();
-    return nFieldCount;
+    return OGRFeatureDefn::GetFieldCount();
 }
 
 /************************************************************************/

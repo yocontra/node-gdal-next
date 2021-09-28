@@ -67,14 +67,10 @@ public:
 
     LineSegment();
 
-    LineSegment(const LineSegment& ls);
-
     /// Constructs a LineSegment with the given start and end Coordinates.
     LineSegment(const Coordinate& c0, const Coordinate& c1);
 
     LineSegment(double x0, double y0, double x1, double y1);
-
-    virtual ~LineSegment();
 
     void setCoordinates(const Coordinate& c0, const Coordinate& c1);
 
@@ -90,13 +86,13 @@ public:
     double getLength() const;
 
     /// Tests whether the segment is horizontal.
-    //
+    ///
     /// @return <code>true</code> if the segment is horizontal
     ///
     bool isHorizontal() const;
 
     /// Tests whether the segment is vertical.
-    //
+    ///
     /// @return <code>true</code> if the segment is vertical
     ///
     bool isVertical() const;

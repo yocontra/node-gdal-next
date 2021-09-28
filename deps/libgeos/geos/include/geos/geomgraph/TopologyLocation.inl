@@ -20,7 +20,7 @@
 #ifndef GEOS_GEOMGRAPH_TOPOLOGYLOCATION_INL
 #define GEOS_GEOMGRAPH_TOPOLOGYLOCATION_INL
 
-#include <geos/geomgraph/Position.h>
+#include <geos/geom/Position.h>
 #include <geos/geom/Location.h>
 
 #include <cassert>
@@ -28,6 +28,7 @@
 namespace geos {
 namespace geomgraph { // geos.geomgraph
 
+using geos::geom::Position;
 using geos::geom::Location;
 
 /*public*/
@@ -45,7 +46,7 @@ INLINE
 TopologyLocation::TopologyLocation(Location on):
         locationSize(1)
 {
-    location.fill(Location::UNDEF);
+    location.fill(Location::NONE);
     location[Position::ON] = on;
 }
 
@@ -75,7 +76,7 @@ TopologyLocation::get(size_t posIndex) const
     if(posIndex < locationSize) {
         return location[posIndex];
     }
-    return Location::UNDEF;
+    return Location::NONE;
 }
 
 /*public*/
@@ -83,7 +84,7 @@ INLINE bool
 TopologyLocation::isNull() const
 {
     for(size_t i = 0; i < locationSize; ++i) {
-        if(location[i] != Location::UNDEF) {
+        if(location[i] != Location::NONE) {
             return false;
         }
     }
@@ -95,7 +96,7 @@ INLINE bool
 TopologyLocation::isAnyNull() const
 {
     for(size_t i = 0; i < locationSize; ++i) {
-        if(location[i] == Location::UNDEF) {
+        if(location[i] == Location::NONE) {
             return true;
         }
     }
@@ -104,7 +105,7 @@ TopologyLocation::isAnyNull() const
 
 /*public*/
 INLINE bool
-TopologyLocation::isEqualOnSide(const TopologyLocation& le, int locIndex) const
+TopologyLocation::isEqualOnSide(const TopologyLocation& le, uint32_t locIndex) const
 {
     return location[locIndex] == le.location[locIndex];
 }
@@ -145,7 +146,7 @@ INLINE void
 TopologyLocation::setAllLocationsIfNull(Location locValue)
 {
     for(size_t i = 0; i < locationSize; ++i) {
-        if(location[i] == Location::UNDEF) {
+        if(location[i] == Location::NONE) {
             location[i] = locValue;
         }
     }

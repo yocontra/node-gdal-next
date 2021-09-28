@@ -74,7 +74,7 @@
 
 #endif // HAVE_CURL
 
-CPL_CVSID("$Id: cpl_http.cpp 82a5cbd474601feaa3b63d624033e15022e48e4e 2021-03-24 11:46:35 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_http.cpp 5b73e27b97b55bf7a3c6899c79b999e6b390174d 2021-09-08 19:20:01 +0200 Even Rouault $")
 
 // list of named persistent http sessions
 
@@ -2239,13 +2239,8 @@ void *CPLHTTPSetOptions(void *pcurl, const char* pszURL,
         // Do not allow /vsicurl/ access from /vsicurl because of GetCurlHandleFor()
         // e.g. "/vsicurl/,HEADER_FILE=/vsicurl/,url= " would cause use of
         // memory after free
-        if( strstr(pszHeaderFile, "/vsicurl/") == nullptr &&
-            strstr(pszHeaderFile, "/vsicurl?") == nullptr &&
-            strstr(pszHeaderFile, "/vsis3/") == nullptr &&
-            strstr(pszHeaderFile, "/vsigs/") == nullptr &&
-            strstr(pszHeaderFile, "/vsiaz/") == nullptr &&
-            strstr(pszHeaderFile, "/vsioss/") == nullptr &&
-            strstr(pszHeaderFile, "/vsiswift/") == nullptr )
+        if( !STARTS_WITH(pszHeaderFile, "/vsi") ||
+            STARTS_WITH(pszHeaderFile, "/vsimem/") )
         {
             fp = VSIFOpenL( pszHeaderFile, "rb" );
         }

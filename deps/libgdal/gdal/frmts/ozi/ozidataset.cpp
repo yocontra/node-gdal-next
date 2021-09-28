@@ -32,7 +32,7 @@
 
 /* g++ -fPIC -g -Wall frmts/ozi/ozidataset.cpp -shared -o gdal_OZI.so -Iport -Igcore -Iogr -L. -lgdal  */
 
-CPL_CVSID("$Id: ozidataset.cpp 1ceb40fc17830ef802f4b56e34c6780e7b386351 2021-03-08 23:01:41 +0100 Even Rouault $")
+CPL_CVSID("$Id: ozidataset.cpp 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -138,7 +138,12 @@ static int ReadInt( VSILFILE* fp, int bOzi3 = FALSE, int nKeyInit = 0 )
     int nVal;
     VSIFReadL(&nVal, 1, 4, fp);
     if (bOzi3)
-        OZIDecrypt(&nVal, 4, static_cast<GByte>( nKeyInit ) );
+    {
+        GByte abyVal[4];
+        memcpy(&abyVal[0], &nVal, 4);
+        OZIDecrypt(&abyVal[0], 4, static_cast<GByte>( nKeyInit ) );
+        memcpy(&nVal, &abyVal[0], 4);
+    }
     CPL_LSBPTR32(&nVal);
     return nVal;
 }
@@ -148,7 +153,12 @@ static short ReadShort( VSILFILE* fp, int bOzi3 = FALSE, int nKeyInit = 0 )
     short nVal;
     VSIFReadL(&nVal, 1, 2, fp);
     if (bOzi3)
-        OZIDecrypt(&nVal, 2, static_cast<GByte>( nKeyInit ) );
+    {
+        GByte abyVal[2];
+        memcpy(&abyVal[0], &nVal, 2);
+        OZIDecrypt(&abyVal[0], 2, static_cast<GByte>( nKeyInit ) );
+        memcpy(&nVal, &abyVal[0], 2);
+    }
     CPL_LSBPTR16(&nVal);
     return nVal;
 }

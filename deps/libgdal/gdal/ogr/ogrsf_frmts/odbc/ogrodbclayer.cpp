@@ -31,7 +31,7 @@
 #include "ogr_odbc.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrodbclayer.cpp 085d851ca29ce323a5556449611935a5852cc9dc 2020-08-20 14:13:35 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrodbclayer.cpp c4f2ac8be65266d1bd278038c5df7ca3c1e0ce05 2021-08-27 08:58:28 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                            OGRODBCLayer()                            */
@@ -194,6 +194,7 @@ void OGRODBCLayer::ResetReading()
 
 {
     iNextShapeId = 0;
+    m_bEOF = false;
 }
 
 /************************************************************************/
@@ -226,7 +227,7 @@ OGRFeature *OGRODBCLayer::GetNextFeature()
 OGRFeature *OGRODBCLayer::GetNextRawFeature()
 
 {
-    if( GetStatement() == nullptr )
+    if( m_bEOF || GetStatement() == nullptr )
         return nullptr;
 
 /* -------------------------------------------------------------------- */
@@ -236,6 +237,7 @@ OGRFeature *OGRODBCLayer::GetNextRawFeature()
     {
         delete poStmt;
         poStmt = nullptr;
+        m_bEOF = true;
         return nullptr;
     }
 

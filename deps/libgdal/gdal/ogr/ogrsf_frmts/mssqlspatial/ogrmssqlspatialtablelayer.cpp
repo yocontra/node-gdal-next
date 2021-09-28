@@ -33,7 +33,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: ogrmssqlspatialtablelayer.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatialtablelayer.cpp 498a80077f2504ce756950b02fccc7144c28e163 2021-08-13 10:52:53 +0200 Even Rouault $")
 
 #define UNSUPPORTED_OP_READ_ONLY "%s : unsupported operation on a read-only datasource."
 
@@ -688,7 +688,7 @@ OGRErr OGRMSSQLSpatialTableLayer::GetExtent(int iGeomField, OGREnvelope *psExten
     if (nGeomColumnType == MSSQLCOLTYPE_GEOGRAPHY || nGeomColumnType == MSSQLCOLTYPE_GEOMETRY)
     {
         // Prepare statement
-        auto poStatement = std::unique_ptr<CPLODBCStatement>(new CPLODBCStatement(poDS->GetSession()));
+        auto poStatement = cpl::make_unique<CPLODBCStatement>(poDS->GetSession());
 
         if (poDS->sMSSQLVersion.nMajor >= 11) {
             // SQLServer 2012 or later:

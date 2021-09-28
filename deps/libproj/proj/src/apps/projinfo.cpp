@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <fstream> // std::ifstream
 #include <iostream>
+#include <set>
 #include <utility>
 
 #include "proj.h"
@@ -68,10 +69,15 @@ struct OutputOptions {
     bool WKT1_GDAL = false;
     bool WKT1_ESRI = false;
     bool PROJJSON = false;
+    bool SQL = false;
     bool c_ify = false;
     bool singleLine = false;
     bool strict = true;
     bool ballparkAllowed = true;
+    bool allowEllipsoidalHeightAsVerticalCRS = false;
+    std::string outputAuthName{};
+    std::string outputCode{};
+    std::vector<std::string> allowedAuthorities{};
 };
 } // anonymous namespace
 
@@ -79,7 +85,8 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation|datum|ellipsoid] "
+        << "usage: projinfo [-o formats] "
+           "[-k crs|operation|datum|ensemble|ellipsoid] "
            "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
@@ -93,26 +100,44 @@ static void usage() {
         << std::endl
         << "                [--pivot-crs always|if_no_direct_transformation|"
         << "never|{auth:code[,auth:code]*}]" << std::endl
-        << "                [--show-superseded] [--hide-ballpark]" << std::endl
+        << "                [--show-superseded] [--hide-ballpark] "
+           "[--accuracy {accuracy}]"
+        << std::endl
+        << "                [--allow-ellipsoidal-height-as-vertical-crs]"
+        << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
+        << "                [--authority name]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
         << "                [--identify] [--3d]" << std::endl
+        << "                [--output-id AUTH:CODE]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                --searchpaths | --remote-data |" << std::endl
-        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
+        << "                --list-crs [list-crs-filter] |" << std::endl
+        << "                --dump-db-structure [{object_definition} | "
+           "{object_reference}] |"
+        << std::endl
+        << "                {object_definition} | {object_reference} | "
+           "(-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
-                 "WKT1:ESRI,PROJJSON"
+                 "WKT1:ESRI,PROJJSON,SQL"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
               << std::endl;
     std::cerr << std::endl;
+    std::cerr << "list-crs-filter is a comma separated combination of: "
+                 "allow_deprecated,geodetic,geocentric,"
+              << std::endl;
+    std::cerr
+        << "geographic,geographic_2d,geographic_3d,vertical,projected,compound"
+        << std::endl;
+    std::cerr << std::endl;
     std::cerr << "{object_definition} might be a PROJ string, a WKT string, "
-                 " a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
+                 "a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
               << std::endl;
     std::exit(1);
 }
@@ -141,12 +166,98 @@ static std::string c_ify_string(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
+static ExtentPtr makeBboxFilter(DatabaseContextPtr dbContext,
+                                const std::string &bboxStr,
+                                const std::string &area,
+                                bool errorIfSeveralAreaMatches) {
+    ExtentPtr bboxFilter = nullptr;
+    if (!bboxStr.empty()) {
+        auto bbox(split(bboxStr, ','));
+        if (bbox.size() != 4) {
+            std::cerr << "Incorrect number of values for option --bbox: "
+                      << bboxStr << std::endl;
+            usage();
+        }
+        try {
+            std::vector<double> bboxValues = {
+                c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
+                c_locale_stod(bbox[2]), c_locale_stod(bbox[3])};
+            bboxFilter = Extent::createFromBBOX(bboxValues[0], bboxValues[1],
+                                                bboxValues[2], bboxValues[3])
+                             .as_nullable();
+        } catch (const std::exception &e) {
+            std::cerr << "Invalid value for option --bbox: " << bboxStr << ", "
+                      << e.what() << std::endl;
+            usage();
+        }
+    } else if (!area.empty()) {
+        assert(dbContext);
+        try {
+            if (area.find(' ') == std::string::npos &&
+                area.find(':') != std::string::npos) {
+                auto tokens = split(area, ':');
+                if (tokens.size() == 2) {
+                    const std::string &areaAuth = tokens[0];
+                    const std::string &areaCode = tokens[1];
+                    bboxFilter = AuthorityFactory::create(
+                                     NN_NO_CHECK(dbContext), areaAuth)
+                                     ->createExtent(areaCode)
+                                     .as_nullable();
+                }
+            }
+            if (!bboxFilter) {
+                auto authFactory = AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), std::string());
+                auto res = authFactory->listAreaOfUseFromName(area, false);
+                if (res.size() == 1) {
+                    bboxFilter = AuthorityFactory::create(
+                                     NN_NO_CHECK(dbContext), res.front().first)
+                                     ->createExtent(res.front().second)
+                                     .as_nullable();
+                } else {
+                    res = authFactory->listAreaOfUseFromName(area, true);
+                    if (res.size() == 1) {
+                        bboxFilter =
+                            AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                     res.front().first)
+                                ->createExtent(res.front().second)
+                                .as_nullable();
+                    } else if (res.empty()) {
+                        std::cerr << "No area of use matching provided name"
+                                  << std::endl;
+                        std::exit(1);
+                    } else if (errorIfSeveralAreaMatches) {
+                        std::cerr << "Several candidates area of use "
+                                     "matching provided name :"
+                                  << std::endl;
+                        for (const auto &candidate : res) {
+                            auto obj =
+                                AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                         candidate.first)
+                                    ->createExtent(candidate.second);
+                            std::cerr << "  " << candidate.first << ":"
+                                      << candidate.second << " : "
+                                      << *obj->description() << std::endl;
+                        }
+                        std::exit(1);
+                    }
+                }
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Area of use retrieval failed: " << e.what()
+                      << std::endl;
+            std::exit(1);
+        }
+    }
+    return bboxFilter;
+}
+
 static BaseObjectNNPtr buildObject(
     DatabaseContextPtr dbContext, const std::string &user_string,
     const std::string &kind, const std::string &context,
     bool buildBoundCRSToWGS84,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
-    bool promoteTo3D, bool quiet) {
+    bool promoteTo3D, bool normalizeAxisOrder, bool quiet) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -163,7 +274,7 @@ static BaseObjectNNPtr buildObject(
             char buffer[256];
             fs.read(buffer, sizeof(buffer));
             l_user_string.append(buffer, static_cast<size_t>(fs.gcount()));
-            if (l_user_string.size() > 100 * 1000) {
+            if (l_user_string.size() > 1000 * 1000) {
                 fs.close();
                 std::cerr << context << ": too big file" << std::endl;
                 std::exit(1);
@@ -181,14 +292,14 @@ static BaseObjectNNPtr buildObject(
     try {
         auto tokens = split(l_user_string, ':');
         if (kind == "operation" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
-                       tokens[1];
+            auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] +
+                       "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
-        } else if (kind == "ellipsoid" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
-            obj = createFromUserInput(urn, dbContext).as_nullable();
-        } else if (kind == "datum" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:datum:" + tokens[0] + "::" + tokens[1];
+        } else if ((kind == "ellipsoid" || kind == "datum" ||
+                    kind == "ensemble") &&
+                   tokens.size() == 2) {
+            auto urn =
+                "urn:ogc:def:" + kind + ":" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
@@ -222,6 +333,9 @@ static BaseObjectNNPtr buildObject(
                         AuthorityFactory::ObjectType::ELLIPSOID);
                 else if (kind == "datum")
                     allowedTypes.push_back(AuthorityFactory::ObjectType::DATUM);
+                else if (kind == "ensemble")
+                    allowedTypes.push_back(
+                        AuthorityFactory::ObjectType::DATUM_ENSEMBLE);
                 constexpr size_t limitResultCount = 10;
                 auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext),
                                                         std::string());
@@ -291,6 +405,13 @@ static BaseObjectNNPtr buildObject(
         }
     }
 
+    if (normalizeAxisOrder) {
+        auto crs = std::dynamic_pointer_cast<CRS>(obj);
+        if (crs) {
+            obj = crs->normalizeForVisualization().as_nullable();
+        }
+    }
+
     return NN_NO_CHECK(obj);
 }
 
@@ -301,7 +422,7 @@ static void outputObject(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const OutputOptions &outputOpt) {
 
-    auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
+    auto identified = nn_dynamic_pointer_cast<IdentifiedObject>(obj);
     if (!outputOpt.quiet && identified && identified->isDeprecated()) {
         std::cout << "Warning: object is deprecated" << std::endl;
         auto crs = dynamic_cast<const CRS *>(obj.get());
@@ -326,7 +447,7 @@ static void outputObject(
 
     auto projStringExportable =
         nn_dynamic_pointer_cast<IPROJStringExportable>(obj);
-    bool alreadyOutputed = false;
+    bool alreadyOutputted = false;
     if (projStringExportable) {
         if (outputOpt.PROJ5) {
             try {
@@ -360,7 +481,7 @@ static void outputObject(
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
     }
 
@@ -368,7 +489,7 @@ static void outputObject(
     if (wktExportable) {
         if (outputOpt.WKT2_2015) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -387,12 +508,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2015: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT2_2015_SIMPLIFIED) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -413,12 +534,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2015_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT2_2019) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -439,12 +560,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2019: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT2_2019_SIMPLIFIED) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -465,12 +586,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2019_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT1_GDAL && !nn_dynamic_pointer_cast<Conversion>(obj)) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -483,6 +604,8 @@ static void outputObject(
                     formatter->setMultiLine(false);
                 }
                 formatter->setStrict(outputOpt.strict);
+                formatter->setAllowEllipsoidalHeightAsVerticalCRS(
+                    outputOpt.allowEllipsoidalHeightAsVerticalCRS);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -493,12 +616,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT1:GDAL: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT1_ESRI && !nn_dynamic_pointer_cast<Conversion>(obj)) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -518,7 +641,7 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT1:ESRI: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
     }
 
@@ -526,7 +649,7 @@ static void outputObject(
     if (JSONExportable) {
         if (outputOpt.PROJJSON) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -545,8 +668,36 @@ static void outputObject(
                 std::cerr << "Error when exporting to PROJJSON: " << e.what()
                           << std::endl;
             }
-            // alreadyOutputed = true;
+            alreadyOutputted = true;
         }
+    }
+
+    if (identified && dbContext && outputOpt.SQL) {
+        try {
+            if (alreadyOutputted) {
+                std::cout << std::endl;
+            }
+            if (!outputOpt.quiet) {
+                std::cout << "SQL:" << std::endl;
+            }
+            dbContext->startInsertStatementsSession();
+            auto allowedAuthorities(outputOpt.allowedAuthorities);
+            if (allowedAuthorities.empty()) {
+                allowedAuthorities.emplace_back("EPSG");
+                allowedAuthorities.emplace_back("PROJ");
+            }
+            const auto statements = dbContext->getInsertStatementsFor(
+                NN_NO_CHECK(identified), outputOpt.outputAuthName,
+                outputOpt.outputCode, false, allowedAuthorities);
+            dbContext->stopInsertStatementsSession();
+            for (const auto &sql : statements) {
+                std::cout << sql << std::endl;
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Error when exporting to SQL: " << e.what()
+                      << std::endl;
+        }
+        // alreadyOutputted = true;
     }
 
     auto op = dynamic_cast<CoordinateOperation *>(obj.get());
@@ -663,12 +814,12 @@ static void outputOperations(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
-    bool showSuperseded, bool promoteTo3D, const OutputOptions &outputOpt,
-    bool summary) {
+    bool showSuperseded, bool promoteTo3D, bool normalizeAxisOrder,
+    double minimumAccuracy, const OutputOptions &outputOpt, bool summary) {
     auto sourceObj =
         buildObject(dbContext, sourceCRSStr, "crs", "source CRS", false,
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                    promoteTo3D, outputOpt.quiet);
+                    promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
@@ -679,7 +830,7 @@ static void outputOperations(
     auto targetObj =
         buildObject(dbContext, targetCRSStr, "crs", "target CRS", false,
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                    promoteTo3D, outputOpt.quiet);
+                    promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -689,6 +840,7 @@ static void outputOperations(
 
     std::vector<CoordinateOperationNNPtr> list;
     size_t spatialCriterionPartialIntersectionResultCount = 0;
+    bool spatialCriterionPartialIntersectionMoreRelevant = false;
     try {
         auto authFactory =
             dbContext
@@ -705,6 +857,9 @@ static void outputOperations(
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
         ctxt->setAllowBallparkTransformations(outputOpt.ballparkAllowed);
+        if (minimumAccuracy >= 0) {
+            ctxt->setDesiredAccuracy(minimumAccuracy);
+        }
         list = CoordinateOperationFactory::create()->createOperations(
             nnSourceCRS, nnTargetCRS, ctxt);
         if (!spatialCriterionExplicitlySpecified &&
@@ -714,10 +869,15 @@ static void outputOperations(
                 ctxt->setSpatialCriterion(
                     CoordinateOperationContext::SpatialCriterion::
                         PARTIAL_INTERSECTION);
-                spatialCriterionPartialIntersectionResultCount =
-                    CoordinateOperationFactory::create()
-                        ->createOperations(nnSourceCRS, nnTargetCRS, ctxt)
-                        .size();
+                auto list2 =
+                    CoordinateOperationFactory::create()->createOperations(
+                        nnSourceCRS, nnTargetCRS, ctxt);
+                spatialCriterionPartialIntersectionResultCount = list2.size();
+                if (spatialCriterionPartialIntersectionResultCount == 1 &&
+                    list.size() == 1 &&
+                    list2[0]->nameStr() != list[0]->nameStr()) {
+                    spatialCriterionPartialIntersectionMoreRelevant = true;
+                }
             } catch (const std::exception &) {
             }
         }
@@ -735,6 +895,10 @@ static void outputOperations(
         std::cout << "Note: using '--spatial-test intersects' would bring "
                      "more results ("
                   << spatialCriterionPartialIntersectionResultCount << ")"
+                  << std::endl;
+    } else if (spatialCriterionPartialIntersectionMoreRelevant) {
+        std::cout << "Note: using '--spatial-test intersects' would bring "
+                     "more relevant results."
                   << std::endl;
     }
     if (summary) {
@@ -772,11 +936,11 @@ int main(int argc, char **argv) {
     bool user_string_specified = false;
     std::string sourceCRSStr;
     std::string targetCRSStr;
-    bool outputSwithSpecified = false;
+    bool outputSwitchSpecified = false;
     OutputOptions outputOpt;
     std::string objectKind;
     bool summary = false;
-    ExtentPtr bboxFilter = nullptr;
+    std::string bboxStr;
     std::string area;
     bool spatialCriterionExplicitlySpecified = false;
     CoordinateOperationContext::SpatialCriterion spatialCriterion =
@@ -800,21 +964,29 @@ int main(int argc, char **argv) {
     bool identify = false;
     bool showSuperseded = false;
     bool promoteTo3D = false;
+    bool normalizeAxisOrder = false;
+    double minimumAccuracy = -1;
+    bool outputAll = false;
+    bool dumpDbStructure = false;
+    std::string listCRS;
+    bool listCRSSpecified = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
         if (arg == "-o" && i + 1 < argc) {
-            outputSwithSpecified = true;
+            outputSwitchSpecified = true;
             i++;
             auto formats(split(argv[i], ','));
             for (auto format : formats) {
                 if (ci_equal(format, "all")) {
+                    outputAll = true;
                     outputOpt.PROJ5 = true;
                     outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                     outputOpt.WKT1_ESRI = true;
                     outputOpt.PROJJSON = true;
+                    outputOpt.SQL = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
                     outputOpt.WKT2_2019 = true;
@@ -890,6 +1062,10 @@ int main(int argc, char **argv) {
                     outputOpt.PROJJSON = true;
                 } else if (ci_equal(format, "-PROJJSON")) {
                     outputOpt.PROJJSON = false;
+                } else if (ci_equal(format, "SQL")) {
+                    outputOpt.SQL = true;
+                } else if (ci_equal(format, "-SQL")) {
+                    outputOpt.SQL = false;
                 } else {
                     std::cerr << "Unrecognized value for option -o: " << format
                               << std::endl;
@@ -898,21 +1074,14 @@ int main(int argc, char **argv) {
             }
         } else if (arg == "--bbox" && i + 1 < argc) {
             i++;
-            auto bboxStr(argv[i]);
-            auto bbox(split(bboxStr, ','));
-            if (bbox.size() != 4) {
-                std::cerr << "Incorrect number of values for option --bbox: "
-                          << bboxStr << std::endl;
-                usage();
-            }
+            bboxStr = argv[i];
+        } else if (arg == "--accuracy" && i + 1 < argc) {
+            i++;
             try {
-                bboxFilter = Extent::createFromBBOX(
-                                 c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
-                                 c_locale_stod(bbox[2]), c_locale_stod(bbox[3]))
-                                 .as_nullable();
+                minimumAccuracy = c_locale_stod(argv[i]);
             } catch (const std::exception &e) {
-                std::cerr << "Invalid value for option --bbox: " << bboxStr
-                          << ", " << e.what() << std::endl;
+                std::cerr << "Invalid value for option --accuracy: " << e.what()
+                          << std::endl;
                 usage();
             }
         } else if (arg == "--area" && i + 1 < argc) {
@@ -929,6 +1098,8 @@ int main(int argc, char **argv) {
                 objectKind = "ellipsoid";
             } else if (ci_equal(kind, "datum")) {
                 objectKind = "datum";
+            } else if (ci_equal(kind, "ensemble")) {
+                objectKind = "ensemble";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;
@@ -1048,16 +1219,40 @@ int main(int argc, char **argv) {
         } else if (arg == "--authority" && i + 1 < argc) {
             i++;
             authority = argv[i];
+            outputOpt.allowedAuthorities = split(authority, ',');
         } else if (arg == "--identify") {
             identify = true;
         } else if (arg == "--show-superseded") {
             showSuperseded = true;
         } else if (arg == "--lax") {
             outputOpt.strict = false;
+        } else if (arg == "--allow-ellipsoidal-height-as-vertical-crs") {
+            outputOpt.allowEllipsoidalHeightAsVerticalCRS = true;
         } else if (arg == "--hide-ballpark") {
             outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
+        } else if (ci_equal(arg, "--normalize-axis-order")) {
+            // Undocumented for now
+            normalizeAxisOrder = true;
+        } else if (arg == "--output-id" && i + 1 < argc) {
+            i++;
+            const auto tokens = split(argv[i], ':');
+            if (tokens.size() != 2) {
+                std::cerr << "Invalid value for option --output-id"
+                          << std::endl;
+                usage();
+            }
+            outputOpt.outputAuthName = tokens[0];
+            outputOpt.outputCode = tokens[1];
+        } else if (arg == "--dump-db-structure") {
+            dumpDbStructure = true;
+        } else if (arg == "--list-crs") {
+            listCRSSpecified = true;
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                i++;
+                listCRS = argv[i];
+            }
         } else if (ci_equal(arg, "--searchpaths")) {
 #ifdef _WIN32
             constexpr char delim = ';';
@@ -1102,9 +1297,29 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (bboxFilter && !area.empty()) {
+    if (!bboxStr.empty() && !area.empty()) {
         std::cerr << "ERROR: --bbox and --area are exclusive" << std::endl;
         std::exit(1);
+    }
+
+    if (dumpDbStructure && user_string_specified && !outputSwitchSpecified) {
+        // Implicit settings in --output-db-structure mode + object
+        outputSwitchSpecified = true;
+        outputOpt.SQL = true;
+        outputOpt.quiet = true;
+    }
+    if (outputOpt.SQL && outputOpt.outputAuthName.empty()) {
+        if (outputAll) {
+            outputOpt.SQL = false;
+            std::cerr << "WARNING: SQL output disable since "
+                         "--output-id AUTH:CODE has not been specified."
+                      << std::endl;
+        } else {
+            std::cerr << "ERROR: --output-id AUTH:CODE must be specified when "
+                         "SQL output is enabled."
+                      << std::endl;
+            std::exit(1);
+        }
     }
 
     DatabaseContextPtr dbContext;
@@ -1112,13 +1327,121 @@ int main(int argc, char **argv) {
         dbContext =
             DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
     } catch (const std::exception &e) {
-        if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty()) {
+        if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty() ||
+            dumpDbStructure) {
             std::cerr << "ERROR: Cannot create database connection: "
                       << e.what() << std::endl;
             std::exit(1);
         }
         std::cerr << "WARNING: Cannot create database connection: " << e.what()
                   << std::endl;
+    }
+
+    if (dumpDbStructure) {
+        assert(dbContext);
+        try {
+            const auto structure = dbContext->getDatabaseStructure();
+            for (const auto &sql : structure) {
+                std::cout << sql << std::endl;
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "ERROR: getDatabaseStructure() failed: " << e.what()
+                      << std::endl;
+            std::exit(1);
+        }
+    }
+
+    if (listCRSSpecified) {
+        bool allow_deprecated = false;
+        std::set<AuthorityFactory::ObjectType> types;
+        auto tokens = split(listCRS, ',');
+        if (listCRS.empty()) {
+            tokens.clear();
+        }
+        for (auto token : tokens) {
+            if (ci_equal(token, "allow_deprecated")) {
+                allow_deprecated = true;
+            } else if (ci_equal(token, "geodetic")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+                types.insert(AuthorityFactory::ObjectType::GEOCENTRIC_CRS);
+            } else if (ci_equal(token, "geocentric")) {
+                types.insert(AuthorityFactory::ObjectType::GEOCENTRIC_CRS);
+            } else if (ci_equal(token, "geographic")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+            } else if (ci_equal(token, "geographic_2d")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+            } else if (ci_equal(token, "geographic_3d")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+            } else if (ci_equal(token, "vertical")) {
+                types.insert(AuthorityFactory::ObjectType::VERTICAL_CRS);
+            } else if (ci_equal(token, "projected")) {
+                types.insert(AuthorityFactory::ObjectType::PROJECTED_CRS);
+            } else if (ci_equal(token, "compound")) {
+                types.insert(AuthorityFactory::ObjectType::COMPOUND_CRS);
+            } else {
+                std::cerr << "Unrecognized value for option --list-crs: "
+                          << token << std::endl;
+                usage();
+            }
+        }
+
+        const std::string areaLower = tolower(area);
+        // If the area name has more than a single match, we
+        // will do filtering on info.areaName
+        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area, false);
+        auto allowedAuthorities(outputOpt.allowedAuthorities);
+        if (allowedAuthorities.empty()) {
+            allowedAuthorities.emplace_back(std::string());
+        }
+        for (const auto &auth_name : allowedAuthorities) {
+            try {
+                auto factory =
+                    AuthorityFactory::create(NN_NO_CHECK(dbContext), auth_name);
+                const auto list = factory->getCRSInfoList();
+                for (const auto &info : list) {
+                    if (!allow_deprecated && info.deprecated) {
+                        continue;
+                    }
+                    if (!types.empty() &&
+                        types.find(info.type) == types.end()) {
+                        continue;
+                    }
+                    if (bboxFilter) {
+                        if (!info.bbox_valid) {
+                            continue;
+                        }
+                        auto crsExtent = Extent::createFromBBOX(
+                            info.west_lon_degree, info.south_lat_degree,
+                            info.east_lon_degree, info.north_lat_degree);
+                        if (spatialCriterion ==
+                            CoordinateOperationContext::SpatialCriterion::
+                                STRICT_CONTAINMENT) {
+                            if (!bboxFilter->contains(crsExtent)) {
+                                continue;
+                            }
+                        } else {
+                            if (!bboxFilter->intersects(crsExtent)) {
+                                continue;
+                            }
+                        }
+                    } else if (!area.empty() &&
+                               tolower(info.areaName).find(areaLower) ==
+                                   std::string::npos) {
+                        continue;
+                    }
+                    std::cout << info.authName << ":" << info.code << " \""
+                              << info.name << "\""
+                              << (info.deprecated ? " [deprecated]" : "")
+                              << std::endl;
+                }
+            } catch (const std::exception &e) {
+                std::cerr << "ERROR: list-crs failed with: " << e.what()
+                          << std::endl;
+                std::exit(1);
+            }
+        }
     }
 
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {
@@ -1135,11 +1458,14 @@ int main(int argc, char **argv) {
             usage();
         }
     } else if (!user_string_specified) {
+        if (dumpDbStructure || listCRSSpecified) {
+            std::exit(0);
+        }
         std::cerr << "Missing user string" << std::endl;
         usage();
     }
 
-    if (!outputSwithSpecified) {
+    if (!outputSwitchSpecified) {
         outputOpt.PROJ5 = true;
         outputOpt.WKT2_2019 = true;
     }
@@ -1148,7 +1474,7 @@ int main(int argc, char **argv) {
         (outputOpt.PROJ5 + outputOpt.WKT2_2019 +
          outputOpt.WKT2_2019_SIMPLIFIED + outputOpt.WKT2_2015 +
          outputOpt.WKT2_2015_SIMPLIFIED + outputOpt.WKT1_GDAL +
-         outputOpt.WKT1_ESRI + outputOpt.PROJJSON) != 1) {
+         outputOpt.WKT1_ESRI + outputOpt.PROJJSON + outputOpt.SQL) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();
@@ -1159,7 +1485,7 @@ int main(int argc, char **argv) {
             auto obj(buildObject(dbContext, user_string, objectKind,
                                  "input string", buildBoundCRSToWGS84,
                                  allowUseIntermediateCRS, promoteTo3D,
-                                 outputOpt.quiet));
+                                 normalizeAxisOrder, outputOpt.quiet));
             if (guessDialect) {
                 auto dialect = WKTParser().guessDialect(user_string);
                 std::cout << "Guessed WKT dialect: ";
@@ -1182,11 +1508,10 @@ int main(int argc, char **argv) {
                 if (crs) {
                     try {
                         auto res = crs->identify(
-                            dbContext
-                                ? AuthorityFactory::create(
-                                      NN_NO_CHECK(dbContext), authority)
-                                      .as_nullable()
-                                : nullptr);
+                            dbContext ? AuthorityFactory::create(
+                                            NN_NO_CHECK(dbContext), authority)
+                                            .as_nullable()
+                                      : nullptr);
                         std::cout << std::endl;
                         std::cout
                             << "Identification match count: " << res.size()
@@ -1252,75 +1577,15 @@ int main(int argc, char **argv) {
             std::exit(1);
         }
     } else {
-
-        if (!area.empty()) {
-            assert(dbContext);
-            try {
-                if (area.find(' ') == std::string::npos &&
-                    area.find(':') != std::string::npos) {
-                    auto tokens = split(area, ':');
-                    if (tokens.size() == 2) {
-                        const std::string &areaAuth = tokens[0];
-                        const std::string &areaCode = tokens[1];
-                        bboxFilter = AuthorityFactory::create(
-                                         NN_NO_CHECK(dbContext), areaAuth)
-                                         ->createExtent(areaCode)
-                                         .as_nullable();
-                    }
-                }
-                if (!bboxFilter) {
-                    auto authFactory = AuthorityFactory::create(
-                        NN_NO_CHECK(dbContext), std::string());
-                    auto res = authFactory->listAreaOfUseFromName(area, false);
-                    if (res.size() == 1) {
-                        bboxFilter =
-                            AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                     res.front().first)
-                                ->createExtent(res.front().second)
-                                .as_nullable();
-                    } else {
-                        res = authFactory->listAreaOfUseFromName(area, true);
-                        if (res.size() == 1) {
-                            bboxFilter =
-                                AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                         res.front().first)
-                                    ->createExtent(res.front().second)
-                                    .as_nullable();
-                        } else if (res.empty()) {
-                            std::cerr << "No area of use matching provided name"
-                                      << std::endl;
-                            std::exit(1);
-                        } else {
-                            std::cerr << "Several candidates area of use "
-                                         "matching provided name :"
-                                      << std::endl;
-                            for (const auto &candidate : res) {
-                                auto obj =
-                                    AuthorityFactory::create(
-                                        NN_NO_CHECK(dbContext), candidate.first)
-                                        ->createExtent(candidate.second);
-                                std::cerr << "  " << candidate.first << ":"
-                                          << candidate.second << " : "
-                                          << *obj->description() << std::endl;
-                            }
-                            std::exit(1);
-                        }
-                    }
-                }
-            } catch (const std::exception &e) {
-                std::cerr << "Area of use retrieval failed: " << e.what()
-                          << std::endl;
-                std::exit(1);
-            }
-        }
-
+        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area, true);
         try {
             outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
                              spatialCriterion,
                              spatialCriterionExplicitlySpecified, crsExtentUse,
                              gridAvailabilityUse, allowUseIntermediateCRS,
                              pivots, authority, usePROJGridAlternatives,
-                             showSuperseded, promoteTo3D, outputOpt, summary);
+                             showSuperseded, promoteTo3D, normalizeAxisOrder,
+                             minimumAccuracy, outputOpt, summary);
         } catch (const std::exception &e) {
             std::cerr << "outputOperations() failed with: " << e.what()
                       << std::endl;

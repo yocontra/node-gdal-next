@@ -31,7 +31,7 @@
 
 #include <map>
 
-CPL_CVSID("$Id: ogreditablelayer.cpp 07880b5ca268a13af619c6a1774f9696cd7f6992 2019-03-28 00:41:48 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogreditablelayer.cpp 59137dac442baebe7feaef45175bf529101242cf 2021-08-29 17:05:23 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 
@@ -674,9 +674,6 @@ OGRErr      OGREditableLayer::CreateField( OGRFieldDefn *poField,
 
     m_oMapEditableFDefnFieldNameToIdx.clear();
 
-    // workarounds a bug in certain QGIS versions (2.0 for example)
-    SetIgnoredFields(nullptr);
-
     if( !m_bStructureModified &&
         m_poDecoratedLayer->TestCapability(OLCCreateField) )
     {
@@ -710,9 +707,6 @@ OGRErr      OGREditableLayer::DeleteField( int iField )
     if( !m_poDecoratedLayer ) return OGRERR_FAILURE;
 
     m_oMapEditableFDefnFieldNameToIdx.clear();
-
-    // workarounds a bug in certain QGIS versions (2.0 for example)
-    SetIgnoredFields(nullptr);
 
     CPLString osDeletedField;
     if( iField >= 0 && iField < m_poEditableFeatureDefn->GetFieldCount() )

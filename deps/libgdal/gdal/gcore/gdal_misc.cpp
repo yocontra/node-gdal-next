@@ -58,7 +58,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_geos.h"
 
-CPL_CVSID("$Id: gdal_misc.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_misc.cpp 65f193bbadc58b93509e024ce5edeb527fa072ac 2021-09-13 22:30:54 +0200 Even Rouault $")
 
 static int GetMinBitsForPair(
     const bool pabSigned[], const bool pabFloating[], const int panBits[])
@@ -175,6 +175,9 @@ GDALDataTypeUnion( GDALDataType eType1, GDALDataType eType2 )
 GDALDataType CPL_STDCALL GDALDataTypeUnionWithValue(
     GDALDataType eDT, double dValue, int bComplex )
 {
+    if( eDT == GDT_Float32 && !bComplex && static_cast<float>(dValue) == dValue )
+        return eDT;
+
     const GDALDataType eDT2 = GDALFindDataTypeForValue(dValue, bComplex);
     return GDALDataTypeUnion(eDT, eDT2);
 }
@@ -3212,7 +3215,7 @@ GDALGeneralCmdLineProcessor( int nArgc, char ***ppapszArgv, int nOptions )
                         CSLFetchNameValue( papszMD, GDAL_DMD_HELPTOPIC ) );
 
             if( CPLFetchBool( papszMD, GDAL_DMD_SUBDATASETS, false ) )
-                printf( "  Supports: Subdatasets\n" );/*ok*/
+                printf( "  Supports: Raster subdatasets\n" );/*ok*/
             if( CPLFetchBool( papszMD, GDAL_DCAP_OPEN, false ) )
                 printf( "  Supports: Open() - Open existing dataset.\n" );/*ok*/
             if( CPLFetchBool( papszMD, GDAL_DCAP_CREATE, false ) )
@@ -3244,6 +3247,10 @@ GDALGeneralCmdLineProcessor( int nArgc, char ***ppapszArgv, int nOptions )
                 printf( "  No support for geometries.\n" );/*ok*/
             if( CPLFetchBool( papszMD, GDAL_DCAP_FEATURE_STYLES, false ) )
                 printf( "  Supports: Feature styles.\n" );/*ok*/
+            if( CPLFetchBool( papszMD, GDAL_DCAP_COORDINATE_EPOCH, false ) )
+                printf( "  Supports: Coordinate epoch.\n" );/*ok*/
+            if( CPLFetchBool( papszMD, GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, false ) )
+                printf( "  Supports: Multiple vector layers.\n" );/*ok*/
 
             for( const char* key: { GDAL_DMD_CREATIONOPTIONLIST,
                                     GDAL_DMD_MULTIDIM_DATASET_CREATIONOPTIONLIST,
@@ -3853,7 +3860,7 @@ void GDALDeserializeGCPListFromXML( CPLXMLNode* psGCPList,
         if( pszRawProj && pszRawProj[0] )
         {
             *ppoGCP_SRS = new OGRSpatialReference();
-            (*ppoGCP_SRS)->SetFromUserInput( pszRawProj );
+            (*ppoGCP_SRS)->SetFromUserInput( pszRawProj, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS );
 
             const char* pszMapping =
                 CPLGetXMLValue(psGCPList, "dataAxisToSRSAxisMapping", nullptr);

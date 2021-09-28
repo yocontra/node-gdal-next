@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: kmlnode.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: kmlnode.cpp 8ae5111b5f0775a230a3d583e861627917c370d8 2021-07-06 12:15:32 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           Help functions                             */
@@ -279,7 +279,10 @@ int KMLNode::classify(KML* poKML, int nRecLevel)
         // Compare and return if it is mixed
         if(curr != all && all != Empty && curr != Empty)
         {
-            if (sName_.compare("MultiGeometry") == 0)
+            if (sName_.compare("MultiGeometry") == 0 ||
+                sName_.compare("MultiPolygon") == 0 ||
+                sName_.compare("MultiLineString") == 0 ||
+                sName_.compare("MultiPoint") == 0 )
                 eType_ = MultiGeometry;
             else
                 eType_ = Mixed;
@@ -292,7 +295,10 @@ int KMLNode::classify(KML* poKML, int nRecLevel)
 
     if(eType_ == Unknown)
     {
-        if (sName_.compare("MultiGeometry") == 0)
+        if (sName_.compare("MultiGeometry") == 0 ||
+            sName_.compare("MultiPolygon") == 0 ||
+            sName_.compare("MultiLineString") == 0 ||
+            sName_.compare("MultiPoint") == 0 )
         {
             if (all == Point)
                 eType_ = MultiPoint;
@@ -687,7 +693,10 @@ OGRGeometry* KMLNode::getGeometry(Nodetype eType)
         if( poLinearRing )
             poGeom->toPolygon()->addRingDirectly(poLinearRing);
     }
-    else if (sName_.compare("MultiGeometry") == 0)
+    else if (sName_.compare("MultiGeometry") == 0  ||
+             sName_.compare("MultiPolygon") == 0 ||
+             sName_.compare("MultiLineString") == 0 ||
+             sName_.compare("MultiPoint") == 0)
     {
         if (eType == MultiPoint)
             poGeom = new OGRMultiPoint();
@@ -775,7 +784,11 @@ Feature* KMLNode::getFeature(std::size_t nNum, int& nLastAsked, int &nLastCount)
 
     for(nCount = 0; nCount < poFeat->pvpoChildren_->size(); nCount++)
     {
-        if((*poFeat->pvpoChildren_)[nCount]->sName_.compare(sElementName) == 0)
+        const auto& sName = (*poFeat->pvpoChildren_)[nCount]->sName_;
+        if(sName.compare(sElementName) == 0 ||
+            (sElementName == "MultiGeometry" &&
+             (sName == "MultiPolygon" || sName == "MultiLineString" ||
+              sName == "MultiPoint")))
         {
             poTemp = (*poFeat->pvpoChildren_)[nCount];
             psReturn->poGeom = poTemp->getGeometry(poFeat->eType_);

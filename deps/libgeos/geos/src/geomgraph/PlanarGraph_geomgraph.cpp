@@ -29,7 +29,7 @@
 #include <geos/geomgraph/DirectedEdge.h>
 #include <geos/geomgraph/DirectedEdgeStar.h>
 #include <geos/geomgraph/NodeMap.h>
-#include <geos/geomgraph/Quadrant.h>
+#include <geos/geom/Quadrant.h>
 
 #include <geos/algorithm/Orientation.h>
 
@@ -164,7 +164,7 @@ PlanarGraph::getNodes(vector<Node*>& values)
     while(it != nodes->nodeMap.end()) {
         assert(it->second);
         values.push_back(it->second);
-        it++;
+        ++it;
     }
 }
 
@@ -233,15 +233,13 @@ PlanarGraph::linkResultDirectedEdges()
 #if GEOS_DEBUG
     cerr << "PlanarGraph::linkResultDirectedEdges called" << endl;
 #endif
-    NodeMap::iterator nodeit = nodes->nodeMap.begin();
-    for(; nodeit != nodes->nodeMap.end(); nodeit++) {
-        Node* node = nodeit->second;
+    for(auto& nodeIt: nodes->nodeMap) {
+        Node* node = nodeIt.second;
         assert(node);
 
         EdgeEndStar* ees = node->getEdges();
         assert(ees);
-        assert(dynamic_cast<DirectedEdgeStar*>(ees));
-        DirectedEdgeStar* des = static_cast<DirectedEdgeStar*>(ees);
+        DirectedEdgeStar* des = detail::down_cast<DirectedEdgeStar*>(ees);
 
         // this might throw an exception
         des->linkResultDirectedEdges();
@@ -259,17 +257,15 @@ PlanarGraph::linkAllDirectedEdges()
 #if GEOS_DEBUG
     cerr << "PlanarGraph::linkAllDirectedEdges called" << endl;
 #endif
-    NodeMap::iterator nodeit = nodes->nodeMap.begin();
-    for(; nodeit != nodes->nodeMap.end(); nodeit++) {
-        Node* node = nodeit->second;
+    for(auto& nodeIt: nodes->nodeMap) {
+        Node* node = nodeIt.second;
         assert(node);
 
         EdgeEndStar* ees = node->getEdges();
         assert(ees);
 
         // Unespected non-DirectedEdgeStar in node
-        assert(dynamic_cast<DirectedEdgeStar*>(ees));
-        DirectedEdgeStar* des = static_cast<DirectedEdgeStar*>(ees);
+        DirectedEdgeStar* des = detail::down_cast<DirectedEdgeStar*>(ees);
 
         des->linkAllDirectedEdges();
     }
@@ -319,11 +315,16 @@ Edge*
 PlanarGraph::findEdgeInSameDirection(const Coordinate& p0,
                                      const Coordinate& p1)
 {
-    for(size_t i = 0, n = edges->size(); i < n; i++) {
-        Edge* e = (*edges)[i];
-        assert(e);
+    Node* node = getNodeMap()->find(p0);
+    if (node == nullptr) {
+        return nullptr;
+    }
+
+    for (const auto& ee : *(node->getEdges())) {
+        Edge* e = ee->getEdge();
 
         const CoordinateSequence* eCoord = e->getCoordinates();
+
         assert(eCoord);
 
         size_t nCoords = eCoord->size();

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_utils_priv.h 1c7b950fc8754f6ba1d027f031886063675d2927 2020-06-02 15:06:07 +0200 Even Rouault $
+ * $Id: gdal_utils_priv.h f8d287e54f1e12adba6f163309d69b75fc539236 2021-08-25 12:19:06 +0200 Even Rouault $
  *
  * Project:  GDAL Utilities
  * Purpose:  GDAL Utilities Private Declarations.
@@ -163,6 +163,9 @@ struct GDALMultiDimTranslateOptionsForBinary
     char* pszFormat;
     int   bQuiet;
     int   bUpdate;
+
+    /* Open options. */
+    char** papszOpenOptions;
 };
 
 CPL_C_END

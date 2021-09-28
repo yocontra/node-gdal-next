@@ -11,7 +11,8 @@
 			"sources": [
 				'<!@(python ../glob-files.py "proj/src/*.c")',
 				'<!@(python ../glob-files.py "proj/src/*.cpp")',
-				'<!@(python ../glob-files.py "proj/src/*/*.cpp")'
+				'<!@(python ../glob-files.py "proj/src/*/*.cpp")',
+				'<!@(python ../glob-files.py "proj/src/*/*/*.cpp")'
 			],
 			"include_dirs": [
 				"./proj/src",

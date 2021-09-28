@@ -36,7 +36,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: gdalwarp_bin.cpp 9000eb0cdd0a06084ea41b1d4f7f885b64cc1cd2 2021-03-16 22:36:21 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalwarp_bin.cpp 13b397408a3c8a3558676d3fb1986215f418adf0 2021-06-18 16:11:15 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               GDALExit()                             */
@@ -70,6 +70,7 @@ static void Usage(const char* pszErrorMsg = nullptr)
     printf(
         "Usage: gdalwarp [--help-general] [--formats]\n"
         "    [-s_srs srs_def] [-t_srs srs_def] [-to \"NAME=VALUE\"]* [-novshiftgrid]\n"
+        "    [[-s_coord_epoch epoch] | [-t_coord_epoch epoch]]\n"
         "    [-order n | -tps | -rpc | -geoloc] [-et err_threshold]\n"
         "    [-refine_gcps tolerance [minimum_gcps]]\n"
         "    [-te xmin ymin xmax ymax] [-tr xres yres] [-tap] [-ts width height]\n"

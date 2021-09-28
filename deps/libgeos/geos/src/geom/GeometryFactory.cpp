@@ -34,6 +34,7 @@
 #include <geos/geom/Envelope.h>
 #include <geos/geom/util/CoordinateOperation.h>
 #include <geos/geom/util/GeometryEditor.h>
+#include <geos/util/IllegalArgumentException.h>
 #include <geos/util.h>
 
 #include <cassert>
@@ -255,7 +256,7 @@ GeometryFactory::toGeometry(const Envelope* envelope) const
     Coordinate coord;
 
     if(envelope->isNull()) {
-        return std::unique_ptr<Geometry>(createPoint());
+        return createPoint();
     }
     if(envelope->getMinX() == envelope->getMaxX() && envelope->getMinY() == envelope->getMaxY()) {
         coord.x = envelope->getMinX();
@@ -297,8 +298,12 @@ GeometryFactory::getPrecisionModel() const
 
 /*public*/
 std::unique_ptr<Point>
-GeometryFactory::createPoint() const
+GeometryFactory::createPoint(std::size_t coordinateDimension) const
 {
+    if (coordinateDimension == 3) {
+        geos::geom::FixedSizeCoordinateSequence<0> seq(coordinateDimension);
+        return std::unique_ptr<Point>(createPoint(seq));
+    }
     return std::unique_ptr<Point>(new Point(nullptr, this));
 }
 
@@ -396,12 +401,6 @@ GeometryCollection*
 GeometryFactory::createGeometryCollection(vector<Geometry*>* newGeoms) const
 {
     return new GeometryCollection(newGeoms, this);
-}
-
-std::unique_ptr<GeometryCollection>
-GeometryFactory::createGeometryCollection(std::vector<std::unique_ptr<geos::geom::Geometry>> && newGeoms) const {
-    // Can't use make_unique because constructor is protected
-    return std::unique_ptr<GeometryCollection>(new GeometryCollection(std::move(newGeoms), *this));
 }
 
 /*public*/
@@ -558,9 +557,11 @@ GeometryFactory::createMultiPoint(const std::vector<Coordinate>& fromCoords) con
 
 /*public*/
 std::unique_ptr<Polygon>
-GeometryFactory::createPolygon() const
+GeometryFactory::createPolygon(std::size_t coordinateDimension) const
 {
-    return std::unique_ptr<Polygon>(new Polygon(nullptr, nullptr, this));
+    auto cs = coordinateListFactory->create(std::size_t(0), coordinateDimension);
+    auto lr = createLinearRing(cs.release());
+    return std::unique_ptr<Polygon>(createPolygon(lr, nullptr));
 }
 
 /*public*/
@@ -605,8 +606,11 @@ const
 
 /*public*/
 std::unique_ptr<LineString>
-GeometryFactory::createLineString() const
+GeometryFactory::createLineString(std::size_t coordinateDimension) const
 {
+    if (coordinateDimension == 3) {
+        return createLineString(coordinateListFactory->create(std::size_t(0), coordinateDimension));
+    }
     return std::unique_ptr<LineString>(new LineString(nullptr, this));
 }
 
@@ -646,6 +650,21 @@ const
     g = new LineString(newCoords.release(), this);
     return g;
 }
+
+/*public*/
+std::unique_ptr<Geometry>
+GeometryFactory::createEmpty(int dimension) const
+{
+    switch (dimension) {
+        case -1: return createGeometryCollection();
+        case 0: return createPoint();
+        case 1: return createLineString();
+        case 2: return createPolygon();
+        default:
+            throw geos::util::IllegalArgumentException("Invalid dimension");
+    }
+}
+
 
 template<typename T>
 GeometryTypeId commonType(const T& geoms) {
@@ -718,6 +737,48 @@ GeometryFactory::buildGeometry(std::vector<std::unique_ptr<Geometry>> && geoms) 
         case GEOS_MULTIPOLYGON: return createMultiPolygon(std::move(geoms));
         default: return createGeometryCollection(std::move(geoms));
     }
+}
+
+std::unique_ptr<Geometry>
+GeometryFactory::buildGeometry(std::vector<std::unique_ptr<Point>> && geoms) const
+{
+    if (geoms.empty()) {
+        return createGeometryCollection();
+    }
+
+    if (geoms.size() == 1) {
+        return std::move(geoms[0]);
+    }
+
+    return createMultiPoint(std::move(geoms));
+}
+
+std::unique_ptr<Geometry>
+GeometryFactory::buildGeometry(std::vector<std::unique_ptr<LineString>> && geoms) const
+{
+    if (geoms.empty()) {
+        return createGeometryCollection();
+    }
+
+    if (geoms.size() == 1) {
+        return std::move(geoms[0]);
+    }
+
+    return createMultiLineString(std::move(geoms));
+}
+
+std::unique_ptr<Geometry>
+GeometryFactory::buildGeometry(std::vector<std::unique_ptr<Polygon>> && geoms) const
+{
+    if (geoms.empty()) {
+        return createGeometryCollection();
+    }
+
+    if (geoms.size() == 1) {
+        return std::move(geoms[0]);
+    }
+
+    return createMultiPolygon(std::move(geoms));
 }
 
 /*public*/

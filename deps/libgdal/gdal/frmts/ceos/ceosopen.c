@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceosopen.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $
+ * $Id: ceosopen.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $
  *
  * Project:  CEOS Translator
  * Purpose:  Implementation of non-GDAL dependent CEOS support.
@@ -30,7 +30,7 @@
 
 #include "ceosopen.h"
 
-CPL_CVSID("$Id: ceosopen.c b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ceosopen.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 
@@ -238,6 +238,14 @@ CEOSImage * CEOSOpen( const char * pszFilename, const char * pszAccess )
     psRecord = CEOSReadRecord( psImage );
     if( psRecord == NULL || psRecord->nLength < 288 + 4 )
     {
+        CEOSDestroyRecord( psRecord );
+        CEOSClose( psImage );
+        return NULL;
+    }
+
+    char format_doc[13] = { 0 };
+    memcpy(format_doc,psRecord->pachData+16,12);
+    if(strncmp("CEOS-SAR-CCT",format_doc,12) == 0) {
         CEOSDestroyRecord( psRecord );
         CEOSClose( psImage );
         return NULL;

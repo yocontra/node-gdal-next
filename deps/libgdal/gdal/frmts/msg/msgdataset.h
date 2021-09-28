@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: msgdataset.h d23b5a0d22b88657e4fc31f2513701842f0b0585 2019-08-11 03:09:59 +0200 Even Rouault $
+ * $Id: msgdataset.h 4dd19a2b96712950a8b0af78dfbe4178e180f12f 2021-08-12 14:55:50 +0200 Even Rouault $
  *
  * Project:  MSG Driver
  * Purpose:  GDALDataset driver for MSG translator for read support.
@@ -88,13 +88,14 @@ class MSGDataset final: public GDALDataset
   private:
     MSGCommand command;
     double adfGeoTransform[6]; // Calculate and store once as GetGeoTransform may be called multiple times
-    char   *pszProjection;
+    char   *pszProjection = nullptr;
     OGRSpatialReference oSRS;
     OGRSpatialReference oLL;
-    OGRCoordinateTransformation *poTransform;
+    OGRCoordinateTransformation *poTransform = nullptr;
     double rCalibrationOffset[12];
     double rCalibrationSlope[12];
-    static int iCurrentSatellite; // satellite number 1,2,3,4 for MSG1, MSG2, MSG3 and MSG4
+    int iCurrentSatellite = 0;            // satellite number 1,2,3,4 for MSG1, MSG2, MSG3 and MSG4
+    static int iCurrentSatelliteHint; // hint for satellite number 1,2,3,4 for MSG1, MSG2, MSG3 and MSG4
     static const double rCentralWvl[12];
     static const double rVc[12];
     static const double rA[12];

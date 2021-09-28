@@ -180,6 +180,7 @@
 				"./gdal/port/cpl_atomic_ops.cpp",
 				"./gdal/port/cpl_alibaba_oss.cpp",
         "./gdal/port/cpl_vax.cpp",
+        "./gdal/port/cpl_compressor.cpp",
 
 				'<!@(python ../glob-files.py "./gdal/gnm/*.cpp")',
 				'<!@(python ../glob-files.py "./gdal/frmts/jpeg/libjpeg/*.c")'

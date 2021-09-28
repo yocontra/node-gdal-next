@@ -50,7 +50,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: mbtilesdataset.cpp 09a48d5214b089c224b3b7afed5beee254d45614 2021-08-15 12:04:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: mbtilesdataset.cpp ab70db66553f198773c52a33ddbffea53f4f4881 2021-08-28 12:36:46 +0200 Even Rouault $")
 
 static const char * const apszAllowedDrivers[] = {"JPEG", "PNG", nullptr};
 
@@ -1913,8 +1913,8 @@ void MBTilesDataset::InitVector(double dfMinX, double dfMinY,
         {
             auto pszJson = OGR_F_GetFieldAsString(hFeat, 0);
             oDoc.GetRoot().Add( "json", pszJson );
-            oJsonDoc.LoadMemory(
-                    reinterpret_cast<const GByte*>(pszJson));
+            CPL_IGNORE_RET_VAL(oJsonDoc.LoadMemory(
+                    reinterpret_cast<const GByte*>(pszJson)));
             OGR_F_Destroy(hFeat);
         }
         OGR_DS_ReleaseResultSet(hDS, hSQLLyr);
@@ -2450,6 +2450,7 @@ int MBTilesGetBandCountAndTileSize(
         VSICurlUninstallReadCbk(fpCURLOGR);
 
         /* Did the spy intercept something interesting ? */
+        // cppcheck-suppress knownConditionTrueFalse
         if (nBands != -1)
         {
             CPLErrorReset();

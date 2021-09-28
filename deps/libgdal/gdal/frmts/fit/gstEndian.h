@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gstEndian.h 9005cb767a7601165bfe84b547737bceaab58565 2016-09-05 20:18:57Z Kurt Schwehr $
+ * $Id: gstEndian.h 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $
  *
  * Project:  FIT Driver
  * Purpose:  Implement FIT Support - not using the SGI iflFIT library.
@@ -33,7 +33,7 @@
 // endian swapping tools
 
 #include <stdio.h>
-#include <cpl_port.h>
+#include "cpl_port.h"
 
 #include "gstTypes.h"
 

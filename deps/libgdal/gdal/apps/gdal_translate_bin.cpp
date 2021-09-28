@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdal_translate_bin.cpp c3800f4cf2092dc8cefe57697b5071170663e392 2020-10-12 12:29:50 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_translate_bin.cpp e14c0c2f2272510e01c493512cbfef8671068c07 2021-05-07 14:17:42 +0200 Even Rouault $")
 
 /*  ******************************************************************* */
 /*                               Usage()                                */
@@ -55,7 +55,8 @@ static void Usage(const char* pszErrorMsg, int bShort)
             "       [-unscale] [-scale[_bn] [src_min src_max [dst_min dst_max]]]* [-exponent[_bn] exp_val]*\n"
             "       [-srcwin xoff yoff xsize ysize] [-epo] [-eco]\n"
             "       [-projwin ulx uly lrx lry] [-projwin_srs srs_def]\n"
-            "       [-a_srs srs_def] [-a_ullr ulx uly lrx lry] [-a_nodata value]\n"
+            "       [-a_srs srs_def] [-a_coord_epoch epoch]\n"
+            "       [-a_ullr ulx uly lrx lry] [-a_nodata value]\n"
             "       [-a_scale value] [-a_offset value]\n"
             "       [-nogcp] [-gcp pixel line easting northing [elevation]]*\n"
             "       |-colorinterp{_bn} {red|green|blue|alpha|gray|undefined}]\n"

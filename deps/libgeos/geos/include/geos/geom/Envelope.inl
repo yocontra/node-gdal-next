@@ -19,9 +19,15 @@
 #ifndef GEOS_GEOM_ENVELOPE_INL
 #define GEOS_GEOM_ENVELOPE_INL
 
+#include <algorithm> // std::min, std::max
 #include <cassert>
+#include <numeric> // std::signbit
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Envelope.h>
+
+#if GEOS_DEBUG
+# include <iostream>
+#endif
 
 namespace geos {
 namespace geom { // geos::geom
@@ -244,6 +250,26 @@ Envelope::intersects(double x, double y) const
     return (x <= maxx && x >= minx && y <= maxy && y >= miny);
 }
 
+/*public*/
+INLINE bool
+Envelope::disjoint(const Envelope& other) const
+{
+    return disjoint(&other);
+}
+
+/*public*/
+INLINE bool
+Envelope::disjoint(const Envelope* other) const
+{
+    if (isNull() || other->isNull()) {
+        return true;
+    }
+    return other->minx > maxx ||
+        other->maxx < minx ||
+        other->miny > maxy ||
+        other->maxy < miny;
+}
+
 
 /*public*/
 INLINE bool
@@ -260,6 +286,42 @@ Envelope::setToNull()
     maxx = -1;
     miny = 0;
     maxy = -1;
+}
+
+INLINE double
+Envelope::distanceSquared(const Envelope& env) const {
+    double dx = std::max(0.0,
+                         std::max(maxx, env.maxx) - std::min(minx, env.minx) - (maxx - minx) -
+                         (env.maxx - env.minx));
+    double dy = std::max(0.0,
+                         std::max(maxy, env.maxy) - std::min(miny, env.miny) - (maxy - miny) -
+                         (env.maxy - env.miny));
+
+    return dx * dx + dy * dy;
+}
+
+INLINE double
+Envelope::distance(const Envelope& env) const {
+    return std::sqrt(distanceSquared(env));
+}
+
+INLINE double
+Envelope::distanceToCoordinate(const Coordinate & c, const Coordinate & p0, const Coordinate & p1) {
+    return std::sqrt(distanceSquaredToCoordinate(c, p0, p1));
+}
+
+INLINE double
+Envelope::distanceSquaredToCoordinate(const Coordinate & c, const Coordinate & p0, const Coordinate & p1) {
+    double xa = c.x - p0.x;
+    double xb = c.x - p1.x;
+    double ya = c.y - p0.y;
+    double yb = c.y - p1.y;
+
+    // If sign of a and b are not the same, then Envelope spans c and distance is zero.
+    double dx = (std::signbit(xa) == std::signbit(xb)) * std::min(std::abs(xa), std::abs(xb));
+    double dy = (std::signbit(ya) == std::signbit(yb)) * std::min(std::abs(ya), std::abs(yb));
+
+    return dx*dx + dy*dy;
 }
 
 } // namespace geos::geom

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_quad_tree.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: cpl_quad_tree.h 79536ea3fcf18af9a8437aa30640e9d46d027787 2021-07-25 20:04:54 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implementation of quadtree building and searching functions.
@@ -85,6 +85,10 @@ void        CPL_DLL   CPLQuadTreeInsert(CPLQuadTree *hQuadtree,
 void        CPL_DLL   CPLQuadTreeInsertWithBounds(CPLQuadTree *hQuadtree,
                                                   void* hFeature,
                                                   const CPLRectObj* psBounds);
+
+void        CPL_DLL   CPLQuadTreeRemove(CPLQuadTree *hQuadtree,
+                                        void* hFeature,
+                                        const CPLRectObj* psBounds);
 
 void        CPL_DLL **CPLQuadTreeSearch(const CPLQuadTree *hQuadtree,
                                         const CPLRectObj* pAoi,

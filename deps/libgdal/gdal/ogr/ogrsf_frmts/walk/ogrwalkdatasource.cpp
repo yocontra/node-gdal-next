@@ -29,7 +29,7 @@
 #include "ogrwalk.h"
 #include <vector>
 
-CPL_CVSID("$Id: ogrwalkdatasource.cpp 316de08882c4b40ed999aa6e37198a5168b8e93c 2021-08-23 11:12:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrwalkdatasource.cpp 4b61c42c85ba2d57cac8e850a08b568a38711473 2021-08-26 14:14:22 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                         OGRWalkDataSource()                          */
@@ -63,7 +63,7 @@ OGRWalkDataSource::~OGRWalkDataSource()
 /*                              Open()                                  */
 /************************************************************************/
 
-int OGRWalkDataSource::Open( const char * pszNewName, int /* bUpdate */ )
+int OGRWalkDataSource::Open(const char * pszNewName)
 {
 /* -------------------------------------------------------------------- */
 /*      If this is the name of an MDB file, then construct the          */

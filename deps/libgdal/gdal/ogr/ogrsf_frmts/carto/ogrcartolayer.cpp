@@ -30,7 +30,7 @@
 #include "ogr_p.h"
 #include "ogrgeojsonreader.h"
 
-CPL_CVSID("$Id: ogrcartolayer.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcartolayer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRCARTOLayer()                            */
@@ -378,16 +378,15 @@ void OGRCARTOLayer::EstablishLayerDefn(const char* pszLayerName,
                 {
                     if( !EQUAL(pszColName, "the_geom_webmercator") )
                     {
-                        OGRCartoGeomFieldDefn *poFieldDefn =
-                            new OGRCartoGeomFieldDefn(pszColName, wkbUnknown);
-                        poFeatureDefn->AddGeomFieldDefn(poFieldDefn, FALSE);
+                        auto poFieldDefn =
+                            cpl::make_unique<OGRCartoGeomFieldDefn>(pszColName, wkbUnknown);
                         OGRSpatialReference* l_poSRS = GetSRS(pszColName, &poFieldDefn->nSRID);
                         if( l_poSRS != nullptr )
                         {
-                            poFeatureDefn->GetGeomFieldDefn(
-                                poFeatureDefn->GetGeomFieldCount() - 1)->SetSpatialRef(l_poSRS);
+                            poFieldDefn->SetSpatialRef(l_poSRS);
                             l_poSRS->Release();
                         }
+                        poFeatureDefn->AddGeomFieldDefn(std::move(poFieldDefn));
                     }
                 }
                 else if( EQUAL(pszType, "boolean") )
@@ -406,16 +405,15 @@ void OGRCARTOLayer::EstablishLayerDefn(const char* pszLayerName,
             else if( poType != nullptr && json_object_get_type(poType) == json_type_int )
             {
                 /* FIXME? manual creations of geometry columns return integer types */
-                OGRCartoGeomFieldDefn *poFieldDefn =
-                    new OGRCartoGeomFieldDefn(pszColName, wkbUnknown);
-                poFeatureDefn->AddGeomFieldDefn(poFieldDefn, FALSE);
+                auto poFieldDefn =
+                    cpl::make_unique<OGRCartoGeomFieldDefn>(pszColName, wkbUnknown);
                 OGRSpatialReference* l_poSRS = GetSRS(pszColName, &poFieldDefn->nSRID);
                 if( l_poSRS != nullptr )
                 {
-                    poFeatureDefn->GetGeomFieldDefn(
-                        poFeatureDefn->GetGeomFieldCount() - 1)->SetSpatialRef(l_poSRS);
+                    poFieldDefn->SetSpatialRef(l_poSRS);
                     l_poSRS->Release();
                 }
+                poFeatureDefn->AddGeomFieldDefn(std::move(poFieldDefn));
             }
         }
     }

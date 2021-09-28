@@ -31,7 +31,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: nearblack_bin.cpp 9bae05435e199592be48a2a6c8ef5f649fa5d113 2018-03-26 14:16:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: nearblack_bin.cpp c5adf201d7675caaacbe836d1aea293ecf20ce6a 2021-08-12 14:43:23 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -139,12 +139,19 @@ MAIN_START(argc, argv)
 /* -------------------------------------------------------------------- */
     GDALDatasetH hInDS = nullptr;
     GDALDatasetH hOutDS = nullptr;
+    bool bCloseRetDS = false;
 
     if( strcmp(psOptionsForBinary->pszOutFile,
                psOptionsForBinary->pszInFile) == 0 )
-        hInDS = hOutDS = GDALOpen(psOptionsForBinary->pszInFile, GA_Update);
+    {
+        hInDS = GDALOpen(psOptionsForBinary->pszInFile, GA_Update);
+        hOutDS = hInDS;
+    }
     else
+    {
         hInDS = GDALOpen(psOptionsForBinary->pszInFile, GA_ReadOnly);
+        bCloseRetDS = true;
+    }
 
     if( hInDS == nullptr )
         exit(1);
@@ -159,8 +166,8 @@ MAIN_START(argc, argv)
     const int nRetCode = hRetDS ? 0 : 1;
 
     GDALClose(hInDS);
-    if( hRetDS != hInDS )
-        GDALClose(hOutDS);
+    if( bCloseRetDS )
+        GDALClose(hRetDS);
     GDALNearblackOptionsFree(psOptions);
     GDALNearblackOptionsForBinaryFree(psOptionsForBinary);
 

@@ -337,6 +337,8 @@ TIFFRewriteDirectory( TIFF *tif )
 						return (0);
 					}
 					tif->tif_diroff=0;
+					/* Force a full-traversal to reach the zeroed pointer */
+					tif->tif_lastdiroff=0;
 					break;
 				}
 				nextdir=nextnextdir;
@@ -403,6 +405,8 @@ TIFFRewriteDirectory( TIFF *tif )
 						return (0);
 					}
 					tif->tif_diroff=0;
+					/* Force a full-traversal to reach the zeroed pointer */
+					tif->tif_lastdiroff=0;
 					break;
 				}
 				nextdir=nextnextdir;
@@ -476,6 +480,12 @@ TIFFWriteDirectorySec(TIFF* tif, int isimage, int imagedone, uint64_t* pdiroff)
                         tif->tif_rawdataloaded = 0;
 		}
 		tif->tif_flags &= ~(TIFF_BEENWRITING|TIFF_BUFFERSETUP);
+	}
+
+	if (TIFFFieldSet(tif,FIELD_COMPRESSION) && (tif->tif_dir.td_compression == COMPRESSION_DEFLATE)) {
+		TIFFWarningExt(tif->tif_clientdata, module,
+	                   "Creating TIFF with legacy Deflate codec identifier, "
+	                   "COMPRESSION_ADOBE_DEFLATE is more widely supported");
 	}
 	dir=NULL;
 	dirmem=NULL;
@@ -1774,6 +1784,7 @@ static int _WriteAsType(TIFF* tif, uint64_t strile_size, uint64_t uncompressed_t
     else if ( compression == COMPRESSION_JPEG ||
               compression == COMPRESSION_LZW ||
               compression == COMPRESSION_ADOBE_DEFLATE ||
+              compression == COMPRESSION_DEFLATE ||
               compression == COMPRESSION_LZMA ||
               compression == COMPRESSION_LERC ||
               compression == COMPRESSION_ZSTD ||
@@ -3161,6 +3172,7 @@ TIFFLinkDirectory(TIFF* tif)
 			 * First directory, overwrite offset in header.
 			 */
 			tif->tif_header.classic.tiff_diroff = (uint32_t) tif->tif_diroff;
+			tif->tif_lastdiroff = tif->tif_diroff;
 			(void) TIFFSeekFile(tif,4, SEEK_SET);
 			if (!WriteOK(tif, &m, 4)) {
 				TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
@@ -3172,7 +3184,13 @@ TIFFLinkDirectory(TIFF* tif)
 		/*
 		 * Not the first directory, search to the last and append.
 		 */
-		nextdir = tif->tif_header.classic.tiff_diroff;
+		if (tif->tif_lastdiroff != 0) {
+		    nextdir = (uint32_t) tif->tif_lastdiroff;
+		}
+		else {
+		    nextdir = tif->tif_header.classic.tiff_diroff;
+		}
+
 		while(1) {
 			uint16_t dircount;
 			uint32_t nextnextdir;
@@ -3203,6 +3221,7 @@ TIFFLinkDirectory(TIFF* tif)
 					     "Error writing directory link");
 					return (0);
 				}
+				tif->tif_lastdiroff = tif->tif_diroff;
 				break;
 			}
 			nextdir=nextnextdir;
@@ -3220,6 +3239,7 @@ TIFFLinkDirectory(TIFF* tif)
 			 * First directory, overwrite offset in header.
 			 */
 			tif->tif_header.big.tiff_diroff = tif->tif_diroff;
+			tif->tif_lastdiroff = tif->tif_diroff;
 			(void) TIFFSeekFile(tif,8, SEEK_SET);
 			if (!WriteOK(tif, &m, 8)) {
 				TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
@@ -3231,7 +3251,12 @@ TIFFLinkDirectory(TIFF* tif)
 		/*
 		 * Not the first directory, search to the last and append.
 		 */
-		nextdir = tif->tif_header.big.tiff_diroff;
+		if (tif->tif_lastdiroff != 0) {
+		    nextdir = tif->tif_lastdiroff;
+		}
+		else {
+		    nextdir = tif->tif_header.big.tiff_diroff;
+		}
 		while(1) {
 			uint64_t dircount64;
 			uint16_t dircount;
@@ -3270,6 +3295,7 @@ TIFFLinkDirectory(TIFF* tif)
 					     "Error writing directory link");
 					return (0);
 				}
+				tif->tif_lastdiroff = tif->tif_diroff;
 				break;
 			}
 			nextdir=nextnextdir;

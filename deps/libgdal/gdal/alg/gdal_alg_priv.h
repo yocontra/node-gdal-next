@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg_priv.h 47fcc5b4d15f1ac172b3b7b60f26f95905fa001a 2020-10-28 00:34:26 +0100 Even Rouault $
+ * $Id: gdal_alg_priv.h f0602c2d27b51faf8f846e4601b018865a902e83 2021-07-05 20:28:39 +0200 Even Rouault $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes and definitions for various GDAL based algorithms:
@@ -169,6 +169,61 @@ void CPL_DLL * GDALCloneTransformer( void *pTransformerArg );
 
 void GDALRefreshGenImgProjTransformer(void* hTransformArg);
 void GDALRefreshApproxTransformer(void* hTransformArg);
+
+int GDALTransformLonLatToDestGenImgProjTransformer(void* hTransformArg,
+                                                    double* pdfX,
+                                                    double* pdfY);
+int GDALTransformLonLatToDestApproxTransformer(void* hTransformArg,
+                                                    double* pdfX,
+                                                    double* pdfY);
+
+typedef struct {
+    GDALTransformerInfo sTI;
+
+    bool        bReversed;
+
+    // Map from target georef coordinates back to geolocation array
+    // pixel line coordinates.  Built only if needed.
+    size_t      nBackMapWidth;
+    size_t      nBackMapHeight;
+    double      adfBackMapGeoTransform[6];  // Maps georef to pixel/line.
+    float       *pafBackMapX;
+    float       *pafBackMapY;
+
+    // Geolocation bands.
+    GDALDatasetH     hDS_X;
+    GDALRasterBandH  hBand_X;
+    GDALDatasetH     hDS_Y;
+    GDALRasterBandH  hBand_Y;
+    int              bSwapXY;
+
+    // Located geolocation data.
+    size_t           nGeoLocXSize;
+    size_t           nGeoLocYSize;
+    double           *padfGeoLocX;
+    double           *padfGeoLocY;
+    double           dfMinX;
+    double           dfYAtMinX;
+    double           dfMinY;
+    double           dfXAtMinY;
+    double           dfMaxX;
+    double           dfYAtMaxX;
+    double           dfMaxY;
+    double           dfXAtMaxY;
+
+    int              bHasNoData;
+    double           dfNoDataX;
+
+    // Geolocation <-> base image mapping.
+    double           dfPIXEL_OFFSET;
+    double           dfPIXEL_STEP;
+    double           dfLINE_OFFSET;
+    double           dfLINE_STEP;
+
+    char **          papszGeolocationInfo;
+
+} GDALGeoLocTransformInfo;
+
 
 /************************************************************************/
 /*      Color table related                                             */

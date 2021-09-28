@@ -21,6 +21,7 @@
 #include <geos/geom/prep/PreparedPolygonContains.h>
 #include <geos/geom/prep/PreparedPolygonContainsProperly.h>
 #include <geos/geom/prep/PreparedPolygonCovers.h>
+#include <geos/geom/prep/PreparedPolygonDistance.h>
 #include <geos/geom/prep/PreparedPolygonIntersects.h>
 #include <geos/geom/prep/PreparedPolygonPredicate.h>
 #include <geos/noding/FastSegmentSetIntersectionFinder.h>
@@ -39,7 +40,7 @@ namespace prep { // geos.geom.prep
 // public:
 //
 PreparedPolygon::PreparedPolygon(const geom::Geometry* geom)
-    : BasicPreparedGeometry(geom), segIntFinder(nullptr), ptOnGeomLoc(nullptr)
+    : BasicPreparedGeometry(geom)
 {
     isRectangle = getGeometry().isRectangle();
 }
@@ -141,6 +142,23 @@ intersects(const geom::Geometry* g) const
     }
 
     return PreparedPolygonIntersects::intersects(this, g);
+}
+
+/* public */
+operation::distance::IndexedFacetDistance*
+PreparedPolygon::
+getIndexedFacetDistance() const
+{
+    if(! indexedDistance ) {
+        indexedDistance.reset(new operation::distance::IndexedFacetDistance(&getGeometry()));
+    }
+    return indexedDistance.get();
+}
+
+double
+PreparedPolygon::distance(const geom::Geometry* g) const
+{
+    return PreparedPolygonDistance::distance(*this, g);
 }
 
 } // namespace geos.geom.prep

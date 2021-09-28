@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: memdataset.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: memdataset.h daaf0fba724610bf5f3356496789f3a25cb48c27 2021-05-07 14:32:39 +0200 Even Rouault $
  *
  * Project:  Memory Array Translator
  * Purpose:  Declaration of MEMDataset, and MEMRasterBand.
@@ -61,7 +61,7 @@ class CPL_DLL MEMDataset CPL_NON_FINAL: public GDALDataset
     int         bGeoTransformSet;
     double      adfGeoTransform[6];
 
-    char        *pszProjection;
+    OGRSpatialReference m_oSRS{};
 
     int          m_nGCPCount;
     GDAL_GCP    *m_pasGCPs;
@@ -83,14 +83,8 @@ class CPL_DLL MEMDataset CPL_NON_FINAL: public GDALDataset
                  MEMDataset();
     virtual      ~MEMDataset();
 
-    const char *_GetProjectionRef(void) override;
-    CPLErr _SetProjection( const char * ) override;
-    const OGRSpatialReference* GetSpatialRef() const override {
-        return GetSpatialRefFromOldGetProjectionRef();
-    }
-    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override {
-        return OldSetProjectionFromSetSpatialRef(poSRS);
-    }
+    const OGRSpatialReference* GetSpatialRef() const override;
+    CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override;
 
     virtual CPLErr GetGeoTransform( double * ) override;
     virtual CPLErr SetGeoTransform( double * ) override;

@@ -37,7 +37,7 @@
 // #include "kmlnode.h"
 #include "kmlutility.h"
 
-CPL_CVSID("$Id: kmlvector.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: kmlvector.cpp 8ae5111b5f0775a230a3d583e861627917c370d8 2021-07-06 12:15:32 +0200 Even Rouault $")
 
 KMLVector::~KMLVector() {}
 
@@ -61,6 +61,9 @@ bool KMLVector::isContainer(std::string const& sIn) const
 bool KMLVector::isFeatureContainer(std::string const& sIn) const
 {
     return sIn.compare("MultiGeometry") == 0
+        || sIn.compare("MultiPolygon") == 0 // non conformant
+        || sIn.compare("MultiLineString") == 0 // non conformant
+        || sIn.compare("MultiPoint") == 0 // non conformant
         || sIn.compare("Placemark") == 0;
 }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrmutexeddatasource.h c9bb0a71c27de43dab42821569ee6d9baf2fdf8f 2021-04-01 19:20:15 +0200 Even Rouault $
+ * $Id: ogrmutexeddatasource.h 2bd4328a9cb58844cb91956f8bd9869218a45b1a 2021-04-29 18:40:02 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLMutexedDataSource class
@@ -117,6 +117,8 @@ class CPL_DLL OGRMutexedDataSource : public OGRDataSource
 
     virtual bool        AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
                                        std::string& failureReason) override;
+
+    virtual std::shared_ptr<GDALGroup> GetRootGroup() const override;
 
 };
 

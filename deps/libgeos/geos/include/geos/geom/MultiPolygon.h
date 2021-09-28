@@ -49,7 +49,7 @@ namespace geom { // geos::geom
 #endif
 
 /// Models a collection of {@link Polygon}s.
-//
+///
 /// As per the OGC SFS specification,
 /// the Polygons in a MultiPolygon may not overlap,
 /// and may only touch at single points.
@@ -80,6 +80,8 @@ public:
      * @see Geometry#getBoundary
      */
     std::unique_ptr<Geometry> getBoundary() const override;
+
+    const Polygon* getGeometryN(std::size_t n) const override;
 
     std::string getGeometryType() const override;
 

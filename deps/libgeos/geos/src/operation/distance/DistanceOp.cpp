@@ -99,10 +99,10 @@ DistanceOp::DistanceOp(const Geometry& g0, const Geometry& g1, double tdist)
 {}
 
 /**
-* Report the distance between the closest points on the input geometries.
-*
-* @return the distance between the geometries
-*/
+ * Report the distance between the closest points on the input geometries.
+ *
+ * @return the distance between the geometries
+ */
 double
 DistanceOp::distance()
 {
@@ -260,28 +260,15 @@ DistanceOp::computeInside(vector<unique_ptr<GeometryLocation>> & locs,
 {
     for(auto& loc : locs) {
         for(const auto& poly : polys) {
-            computeInside(loc, poly, locPtPoly);
-            if(minDistance <= terminateDistance) {
-                return;
-            }
+			const Coordinate& pt = loc->getCoordinate();
+
+			if (Location::EXTERIOR != ptLocator.locate(pt, static_cast<const Geometry*>(poly))) {
+				minDistance = 0.0;
+				locPtPoly[0] = std::move(loc);
+				locPtPoly[1].reset(new GeometryLocation(poly, pt));
+				return;
+			}
         }
-    }
-}
-
-/*private*/
-void
-DistanceOp::computeInside(std::unique_ptr<GeometryLocation> & ptLoc,
-                          const Polygon* poly,
-                          array<std::unique_ptr<GeometryLocation>, 2> & locPtPoly)
-{
-    const Coordinate& pt = ptLoc->getCoordinate();
-
-    // if pt is not in exterior, distance to geom is 0
-    if(Location::EXTERIOR != ptLocator.locate(pt, static_cast<const Geometry*>(poly))) {
-        minDistance = 0.0;
-        locPtPoly[0] = std::move(ptLoc);
-        locPtPoly[1].reset(new GeometryLocation(poly, pt));
-        return;
     }
 }
 
@@ -294,7 +281,7 @@ DistanceOp::computeFacetDistance()
 
     array<unique_ptr<GeometryLocation>, 2> locGeom;
 
-    /**
+    /*
      * Geometries are not wholly inside, so compute distance from lines
      * and points of one to lines and points of the other
      */
@@ -442,9 +429,9 @@ DistanceOp::computeMinDistance(
 {
     using geos::algorithm::Distance;
 
-    const Envelope* env0 = line0->getEnvelopeInternal();
-    const Envelope* env1 = line1->getEnvelopeInternal();
-    if(env0->distance(env1) > minDistance) {
+    const Envelope* lineEnv0 = line0->getEnvelopeInternal();
+    const Envelope* lineEnv1 = line1->getEnvelopeInternal();
+    if(lineEnv0->distance(*lineEnv1) > minDistance) {
         return;
     }
 
@@ -455,17 +442,34 @@ DistanceOp::computeMinDistance(
 
     // brute force approach!
     for(size_t i = 0; i < npts0 - 1; ++i) {
+        const Coordinate& p00 = coord0->getAt(i);
+        const Coordinate& p01 = coord0->getAt(i+1);
+
+        Envelope segEnv0(p00, p01);
+
+        if (segEnv0.distanceSquared(*lineEnv1) > minDistance*minDistance) {
+            continue;
+        }
+
         for(size_t j = 0; j < npts1 - 1; ++j) {
-            double dist = Distance::segmentToSegment(coord0->getAt(i), coord0->getAt(i + 1),
-                          coord1->getAt(j), coord1->getAt(j + 1));
+            const Coordinate& p10 = coord1->getAt(j);
+            const Coordinate& p11 = coord1->getAt(j+1);
+
+            Envelope segEnv1(p10, p11);
+
+            if (segEnv0.distanceSquared(segEnv1) > minDistance*minDistance) {
+                continue;
+            }
+
+            double dist = Distance::segmentToSegment(p00, p01, p10, p11);
             if(dist < minDistance) {
                 minDistance = dist;
 
                 // TODO avoid copy from constructing segs, maybe
                 // by making a static closestPoints that takes four
                 // coordinate references
-                LineSegment seg0(coord0->getAt(i), coord0->getAt(i + 1));
-                LineSegment seg1(coord1->getAt(j), coord1->getAt(j + 1));
+                LineSegment seg0(p00, p01);
+                LineSegment seg1(p10, p11);
                 auto closestPt = seg0.closestPoints(seg1);
 
                 locGeom[0].reset(new GeometryLocation(line0, i, closestPt[0]));
@@ -488,7 +492,7 @@ DistanceOp::computeMinDistance(const LineString* line,
 
     const Envelope* env0 = line->getEnvelopeInternal();
     const Envelope* env1 = pt->getEnvelopeInternal();
-    if(env0->distance(env1) > minDistance) {
+    if(env0->distance(*env1) > minDistance) {
         return;
     }
     const CoordinateSequence* coord0 = line->getCoordinatesRO();

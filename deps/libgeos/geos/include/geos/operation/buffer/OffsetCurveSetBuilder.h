@@ -59,7 +59,7 @@ namespace operation { // geos.operation
 namespace buffer { // geos.operation.buffer
 
 /**
- * \class OffsetCurveSetBuilder opBuffer.h geos/opBuffer.h
+ * \class OffsetCurveSetBuilder
  *
  * \brief
  * Creates all the raw offset curves for a buffer of a Geometry.
@@ -115,6 +115,8 @@ private:
 
     void addPolygon(const geom::Polygon* p);
 
+    void addRingBothSides(const geom::CoordinateSequence* coord, double p_distance);
+
     /**
      * Add an offset curve for a polygon ring.
      * The side and left and right topological location arguments
@@ -133,9 +135,9 @@ private:
      * @param cwRightLoc the location on the R side of the ring
      *                   (if it is CW)
      */
-    void addPolygonRing(const geom::CoordinateSequence* coord,
-                        double offsetDistance, int side, geom::Location cwLeftLoc,
-                        geom::Location cwRightLoc);
+    void addRingSide(const geom::CoordinateSequence* coord,
+                     double offsetDistance, int side, geom::Location cwLeftLoc,
+                     geom::Location cwRightLoc);
 
     /**
      * The ringCoord is assumed to contain no repeated points.

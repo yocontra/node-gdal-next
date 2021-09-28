@@ -43,7 +43,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gmlutils.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlutils.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                GML_ExtractSrsNameFromGeometry()                      */
@@ -109,7 +109,7 @@ bool GML_IsSRSLatLongOrder(const char *pszSRSName)
     else if( !EQUALN(pszSRSName, "EPSG:", 5) )
     {
         OGRSpatialReference oSRS;
-        if(oSRS.SetFromUserInput(pszSRSName) == OGRERR_NONE)
+        if(oSRS.SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) == OGRERR_NONE)
         {
             if(oSRS.EPSGTreatsAsLatLong() || oSRS.EPSGTreatsAsNorthingEasting())
                 return true;
@@ -166,7 +166,7 @@ class SRSCache
         oLastDesc.bAxisInvert = GML_IsSRSLatLongOrder(osSRSName.c_str());
         oLastDesc.poSRS = new OGRSpatialReference();
         oLastDesc.poSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-        if( oLastDesc.poSRS->SetFromUserInput(osSRSName.c_str()) !=
+        if( oLastDesc.poSRS->SetFromUserInput(osSRSName.c_str(), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) !=
             OGRERR_NONE )
         {
             delete oLastDesc.poSRS;
@@ -248,7 +248,7 @@ OGRGeometry* GML_BuildOGRGeometryFromList(
                                 wkbMultiPolygon)
                     {
                         OGRMultiPolygon *poGeomColl = poGeom->toMultiPolygon();
-                        for( auto&& poMember: poSubGeom->toMultiPolygon() ) 
+                        for( auto&& poMember: poSubGeom->toMultiPolygon() )
                         {
                             poGeomColl->addGeometry(poMember);
                         }

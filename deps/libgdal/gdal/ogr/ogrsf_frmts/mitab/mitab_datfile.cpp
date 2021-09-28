@@ -52,7 +52,7 @@
 #include "ogr_feature.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: mitab_datfile.cpp 267d2860dab2d5b922913563ee1c06de0367cf06 2019-06-27 11:07:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_datfile.cpp bb0e15c3736a0fb3139af2786ff9b6ae0331b16b 2021-08-28 00:03:45 +0200 Even Rouault $")
 
 /*=====================================================================
  *                      class TABDATFile
@@ -967,7 +967,7 @@ int TABDATFile::DeleteField( int iField )
         {
             if( i < iField )
                 nRecordSizeBefore += m_pasFieldDef[i].byLength;
-            else if( i > iField )
+            else /* if( i > iField ) */
                 nRecordSizeAfter += m_pasFieldDef[i].byLength;
             oTempFile.AddField(
                 m_pasFieldDef[i].szName, m_pasFieldDef[i].eTABType,
@@ -1315,7 +1315,7 @@ int TABDATFile::AlterFieldDefn( int iField, OGRFieldDefn *poNewFieldDefn,
         if( i != iField )
         {
             if( i < iField ) nRecordSizeBefore += m_pasFieldDef[i].byLength;
-            else if( i > iField ) nRecordSizeAfter += m_pasFieldDef[i].byLength;
+            else /*if( i > iField )*/ nRecordSizeAfter += m_pasFieldDef[i].byLength;
             oTempFile.AddField(m_pasFieldDef[i].szName,
                                m_pasFieldDef[i].eTABType,
                                m_pasFieldDef[i].byLength,

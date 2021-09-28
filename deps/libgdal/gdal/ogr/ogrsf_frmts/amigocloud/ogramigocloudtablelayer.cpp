@@ -33,7 +33,7 @@
 #include <sstream>
 #include <iomanip>
 
-CPL_CVSID("$Id: ogramigocloudtablelayer.cpp 13f84b05a4e4c31c976debc455c86e966e9974ae 2021-03-11 10:09:10 -0800 Victor Chernetsky $")
+CPL_CVSID("$Id: ogramigocloudtablelayer.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                    OGRAMIGOCLOUDEscapeIdentifier( )                     */
@@ -123,12 +123,9 @@ OGRFeatureDefn * OGRAmigoCloudTableLayer::GetLayerDefnInternal(CPL_UNUSED json_o
         return poFeatureDefn;
     }
 
-    if( poFeatureDefn == nullptr )
-    {
-        osBaseSQL.Printf("SELECT * FROM %s", OGRAMIGOCLOUDEscapeIdentifier(osTableName).c_str());
-        EstablishLayerDefn(osTableName, nullptr);
-        osBaseSQL = "";
-    }
+    osBaseSQL.Printf("SELECT * FROM %s", OGRAMIGOCLOUDEscapeIdentifier(osTableName).c_str());
+    EstablishLayerDefn(osTableName, nullptr);
+    osBaseSQL = "";
 
     if( !osFIDColName.empty() )
     {
@@ -997,16 +994,15 @@ void OGRAmigoCloudTableLayer::SetDeferredCreation(OGRwkbGeometryType eGType,
         eGType = wkbMultiPolygon25D;
     if( eGType != wkbNone )
     {
-        OGRAmigoCloudGeomFieldDefn *poFieldDefn =
-            new OGRAmigoCloudGeomFieldDefn("wkb_geometry", eGType);
+        auto poFieldDefn =
+            cpl::make_unique<OGRAmigoCloudGeomFieldDefn>("wkb_geometry", eGType);
         poFieldDefn->SetNullable(bGeomNullable);
-        poFeatureDefn->AddGeomFieldDefn(poFieldDefn, FALSE);
         if( poSRS != nullptr )
         {
             poFieldDefn->nSRID = poDS->FetchSRSId( poSRS );
-            poFeatureDefn->GetGeomFieldDefn(
-                poFeatureDefn->GetGeomFieldCount() - 1)->SetSpatialRef(poSRS);
+            poFieldDefn->SetSpatialRef(poSRS);
         }
+        poFeatureDefn->AddGeomFieldDefn(std::move(poFieldDefn));
     }
 
     osBaseSQL.Printf("SELECT * FROM %s",

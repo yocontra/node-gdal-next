@@ -142,7 +142,7 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     PROJ_INTERNAL bool mustAxisOrderBeSwitchedForVisualization() const;
 
-    PROJ_INTERNAL CRSNNPtr normalizeForVisualization() const;
+    PROJ_FOR_TEST CRSNNPtr normalizeForVisualization() const;
 
     PROJ_INTERNAL CRSNNPtr allowNonConformantWKT1Export() const;
 
@@ -155,6 +155,11 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
         const;
 
     PROJ_INTERNAL bool hasImplicitCS() const;
+
+    PROJ_INTERNAL static CRSNNPtr
+    getResolvedCRS(const CRSNNPtr &crs,
+                   const io::AuthorityFactoryPtr &authFactory,
+                   metadata::ExtentPtr &extentOut);
     //! @endcond
 
   protected:
@@ -167,6 +172,10 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     PROJ_INTERNAL virtual std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
+    PROJ_INTERNAL void
+    setProperties(const util::PropertyMap
+                      &properties); // throw(InvalidValueTypeException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -334,6 +343,11 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentToNoTypeCheck(const util::IComparable *other,
+                               util::IComparable::Criterion criterion,
+                               const io::DatabaseContextPtr &dbContext) const;
 
     INLINED_MAKE_SHARED
 
@@ -997,6 +1011,11 @@ class PROJ_GCC_DLL BoundCRS final : public CRS,
     //! @endcond
 
     PROJ_DLL static BoundCRSNNPtr
+    create(const util::PropertyMap &properties, const CRSNNPtr &baseCRSIn,
+           const CRSNNPtr &hubCRSIn,
+           const operation::TransformationNNPtr &transformationIn);
+
+    PROJ_DLL static BoundCRSNNPtr
     create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
            const operation::TransformationNNPtr &transformationIn);
 
@@ -1157,6 +1176,10 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS,
            const GeodeticCRSNNPtr &baseCRSIn,
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::EllipsoidalCSNNPtr &csIn);
+
+    PROJ_DLL DerivedGeographicCRSNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
 
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
@@ -1400,6 +1423,7 @@ class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
     DerivedCRSTemplate(const BaseNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const CSNNPtr &csIn);
+    // cppcheck-suppress noExplicitConstructor
     PROJ_INTERNAL DerivedCRSTemplate(const DerivedCRSTemplate &other);
 
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;

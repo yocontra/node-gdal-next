@@ -50,7 +50,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: gt_overview.cpp 3e61c10dec395d035fcfc97b423f3151d1e9e8cf 2021-07-07 11:39:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_overview.cpp 20cb378a1ac46515d1aad87e93dff401feedffa7 2021-07-06 18:17:27 +0200 Even Rouault $")
 
 // TODO(schwehr): Explain why 128 and not 127.
 constexpr int knMaxOverviews = 128;

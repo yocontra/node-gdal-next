@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: plmosaicdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: plmosaicdataset.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
 
 #define SPHERICAL_RADIUS        6378137.0
 #define GM_ORIGIN  -20037508.340
@@ -827,7 +827,7 @@ int PLMosaicDataset::OpenMosaic()
     }
 
     OGRSpatialReference oSRS;
-    oSRS.SetFromUserInput(pszSRS);
+    oSRS.SetFromUserInput(pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
     oSRS.exportToWkt(&pszWKT);
 
     json_object* poQuadDownload = CPL_json_object_object_get(

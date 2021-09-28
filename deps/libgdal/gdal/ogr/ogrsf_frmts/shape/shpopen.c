@@ -45,7 +45,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-SHP_CVSID("$Id: shpopen.c fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+SHP_CVSID("$Id: shpopen.c 91988f809f8b4357416f79832f68d01fdb6209b5 2021-07-28 18:14:22 +0200 tschmetzer $")
 
 typedef unsigned char uchar;
 
@@ -1573,9 +1573,10 @@ SHPWriteObject(SHPHandle psSHP, int nShapeId, SHPObject * psObject ) {
     {
         if( psSHP->nFileSize > UINT_MAX - nRecordSize)
         {
-            char str[128];
+            char str[255];
             snprintf( str, sizeof(str), "Failed to write shape object. "
-                     "File size cannot reach %u + %u.",
+                     "The maximum file size of %u has been reached. "
+                     "The current record of size %u cannot be added.",
                      psSHP->nFileSize, nRecordSize );
             str[sizeof(str)-1] = '\0';
             psSHP->sHooks.Error( str );

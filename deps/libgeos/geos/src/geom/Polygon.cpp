@@ -157,10 +157,10 @@ Polygon::getDimension() const
     return Dimension::A; // area
 }
 
-int
+uint8_t
 Polygon::getCoordinateDimension() const
 {
-    int dimension = 2;
+    uint8_t dimension = 2;
 
     if(shell != nullptr) {
         dimension = std::max(dimension, shell->getCoordinateDimension());
@@ -473,7 +473,7 @@ Polygon::isRectangle() const
 
     // check vertices have correct values
     const Envelope& env = *getEnvelopeInternal();
-    for(int i = 0; i < 5; i++) {
+    for(uint32_t i = 0; i < 5; i++) {
         double x = seq.getX(i);
         if(!(x == env.getMinX() || x == env.getMaxX())) {
             return false;

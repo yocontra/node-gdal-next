@@ -22,7 +22,7 @@
 
 #include <geos/geomgraph/Depth.h>
 #include <geos/geomgraph/Label.h>
-#include <geos/geomgraph/Position.h>
+#include <geos/geom/Position.h>
 #include <geos/geom/Location.h>
 
 #ifndef GEOS_INLINE
@@ -68,8 +68,8 @@ Depth::normalize()
 void
 Depth::add(const Label& lbl)
 {
-    for(int i = 0; i < 2; i++) {
-        for(int j = 1; j < 3; j++) {
+    for(uint32_t i = 0; i < 2; i++) {
+        for(uint32_t j = 1; j < 3; j++) {
             Location loc = lbl.getLocation(i, j);
             if(loc == Location::EXTERIOR || loc == Location::INTERIOR) {
                 // initialize depth if it is null, otherwise

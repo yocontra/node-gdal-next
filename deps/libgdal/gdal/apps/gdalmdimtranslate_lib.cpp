@@ -36,7 +36,7 @@
 #include <map>
 #include <set>
 
-CPL_CVSID("$Id: gdalmdimtranslate_lib.cpp 35484f86aa4de17ff9caf11c3e9442ca30e4963f 2021-03-15 14:52:04 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalmdimtranslate_lib.cpp f8d287e54f1e12adba6f163309d69b75fc539236 2021-08-25 12:19:06 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALMultiDimTranslateOptions                     */
@@ -1863,6 +1863,13 @@ GDALMultiDimTranslateOptions *GDALMultiDimTranslateOptionsNew(
             psOptions->aosCreateOptions.AddString( papszArgv[i] );
         }
 
+        else if( EQUAL(papszArgv[i], "-oo") && i+1 < argc )
+        {
+            if( psOptionsForBinary )
+                psOptionsForBinary->papszOpenOptions = CSLAddString(
+                                                psOptionsForBinary->papszOpenOptions,
+                                                papszArgv[++i] );
+        }
         else if( papszArgv[i][0] == '-' )
         {
             CPLError(CE_Failure, CPLE_NotSupported,

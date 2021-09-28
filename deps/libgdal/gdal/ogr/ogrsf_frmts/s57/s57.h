@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: s57.h 342855360b69569556916db63ea417dd3514f258 2020-06-14 15:44:48 +0200 Even Rouault $
+ * $Id: s57.h 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $
  *
  * Project:  S-57 Translator
  * Purpose:  Declarations for S-57 translator not including the
@@ -383,8 +383,8 @@ public:
     bool                CreateS57File( const char *pszFilename );
     bool                Close();
 
-    bool                WriteGeometry( DDFRecord *, int, double *, double *,
-                                       double * );
+    bool                WriteGeometry( DDFRecord *, int, const double *, const double *,
+                                       const double * );
     bool                WriteATTF( DDFRecord *, OGRFeature * );
     bool                WritePrimitive( OGRFeature *poFeature );
     bool                WriteCompleteFeature( OGRFeature *poFeature );

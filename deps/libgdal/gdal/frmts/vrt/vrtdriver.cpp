@@ -34,7 +34,7 @@
 #include "gdal_alg_priv.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: vrtdriver.cpp d83599e9d76b3a12acd9d519fa8bd21c7f9be44b 2020-11-13 17:05:11 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtdriver.cpp 0b332f1a2700726be41485d9802f777397d9fb29 2021-07-21 18:13:49 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -137,7 +137,6 @@ void VRTDriver::AddSourceParser( const char *pszElementName,
 /************************************************************************/
 
 VRTSource *VRTDriver::ParseSource( CPLXMLNode *psSrc, const char *pszVRTPath,
-                                   void* pUniqueHandle,
                                    std::map<CPLString, GDALDataset*>& oMapSharedSources )
 
 {
@@ -163,7 +162,7 @@ VRTSource *VRTDriver::ParseSource( CPLXMLNode *psSrc, const char *pszVRTPath,
     if( pfnParser == nullptr )
         return nullptr;
 
-    return pfnParser( psSrc, pszVRTPath, pUniqueHandle, oMapSharedSources );
+    return pfnParser( psSrc, pszVRTPath, oMapSharedSources );
 }
 
 /************************************************************************/
@@ -455,6 +454,7 @@ void GDALRegister_VRT()
 "</OpenOptionList>" );
 
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_COORDINATE_EPOCH, "YES" );
 
     poDriver->AddSourceParser( "SimpleSource", VRTParseCoreSources );
     poDriver->AddSourceParser( "ComplexSource", VRTParseCoreSources );

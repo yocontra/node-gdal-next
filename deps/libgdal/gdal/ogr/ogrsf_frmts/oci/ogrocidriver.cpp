@@ -28,7 +28,7 @@
 
 #include "ogr_oci.h"
 
-CPL_CVSID("$Id: ogrocidriver.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrocidriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                        OGROCIDriverIdentify()                        */
@@ -152,6 +152,7 @@ void RegisterOGROCI()
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
 
     poDriver->pfnOpen = OGROCIDriverOpen;
     poDriver->pfnIdentify = OGROCIDriverIdentify;

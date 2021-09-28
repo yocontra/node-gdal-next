@@ -46,7 +46,7 @@
 #include "ogrgeojsonutils.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrgeojsondriver.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsondriver.cpp d777e25ec135618f93516b492bb73548ea5e47a7 2021-09-02 20:10:57 +0200 Even Rouault $")
 
 static CPLMutex* ghMutex = nullptr;
 static char* gpszSource = nullptr;
@@ -522,19 +522,24 @@ GDALDataset* OGRGeoJSONDriverOpenInternal( GDALOpenInfo* poOpenInfo,
         poDS = nullptr;
     }
 
-    if( poDS != nullptr && poDS->HasOtherPages() &&
-        (STARTS_WITH(poOpenInfo->pszFilename, "http") ||
-         STARTS_WITH(poOpenInfo->pszFilename, "/vsimem/")) )
+    if( poDS != nullptr && poDS->HasOtherPages() )
     {
-        const char* pszFSP = CSLFetchNameValue(poOpenInfo->papszOpenOptions,
-                                               "FEATURE_SERVER_PAGING");
-        const bool bHasResultOffset =
-          !CPLURLGetValue(poOpenInfo->pszFilename, "resultOffset").empty();
-        if( (!bHasResultOffset && (pszFSP == nullptr || CPLTestBool(pszFSP))) ||
-            (bHasResultOffset && pszFSP != nullptr && CPLTestBool(pszFSP)) )
+        const char* pszFilename = poOpenInfo->pszFilename;
+        if( STARTS_WITH_CI(pszFilename, "ESRIJSON:") )
+            pszFilename += strlen("ESRIJSON:");
+        if( STARTS_WITH(pszFilename, "http") ||
+            STARTS_WITH(pszFilename, "/vsimem/") )
         {
-            return new OGRESRIFeatureServiceDataset(poOpenInfo->pszFilename,
-                                                    poDS);
+            const char* pszFSP = CSLFetchNameValue(poOpenInfo->papszOpenOptions,
+                                                   "FEATURE_SERVER_PAGING");
+            const bool bHasResultOffset =
+              !CPLURLGetValue(pszFilename, "resultOffset").empty();
+            if( (!bHasResultOffset && (pszFSP == nullptr || CPLTestBool(pszFSP))) ||
+                (bHasResultOffset && pszFSP != nullptr && CPLTestBool(pszFSP)) )
+            {
+                return new OGRESRIFeatureServiceDataset(pszFilename,
+                                                        poDS);
+            }
         }
     }
 

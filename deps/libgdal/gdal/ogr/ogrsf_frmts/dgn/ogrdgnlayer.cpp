@@ -35,7 +35,7 @@
 #include <cmath>
 #include <list>
 
-CPL_CVSID("$Id: ogrdgnlayer.cpp bed7caf904983fef4beb2a6ce67c26dcc84c9ed4 2021-03-11 11:28:21 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdgnlayer.cpp f18916aee1d945d5aa0b3d698852ac9c26d3efa2 2021-08-12 15:29:12 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRDGNLayer()                              */
@@ -293,17 +293,17 @@ void OGRDGNLayer::ConsiderBrush( DGNElemCore *psElement, const char *pszPen,
         && DGNLookupColor( hDGN, nFillColor,
                            &gv_red, &gv_green, &gv_blue ) )
     {
-        char szFullStyle[256];
-        snprintf( szFullStyle, sizeof(szFullStyle),
+        CPLString osFullStyle;
+        osFullStyle.Printf(
                  "BRUSH(fc:#%02x%02x%02x,id:\"ogr-brush-0\")",
                  gv_red, gv_green, gv_blue );
 
         if( nFillColor != psElement->color )
         {
-            strcat( szFullStyle, ";" );
-            strcat( szFullStyle, pszPen );
+            osFullStyle += ';';
+            osFullStyle += pszPen;
         }
-        poFeature->SetStyleString( szFullStyle );
+        poFeature->SetStyleString( osFullStyle.c_str() );
     }
     else
         poFeature->SetStyleString( pszPen );

@@ -18,7 +18,7 @@
 #include <geos/geomgraph/index/MonotoneChainIndexer.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geomgraph/Quadrant.h>
+#include <geos/geom/Quadrant.h>
 
 using namespace std;
 using namespace geos::geom;
@@ -47,8 +47,8 @@ MonotoneChainIndexer::getChainStartIndices(const CoordinateSequence* pts,
 }
 
 /**
-* @return the index of the last point in the monotone chain
-*/
+ * @return the index of the last point in the monotone chain
+ */
 size_t
 MonotoneChainIndexer::findChainEnd(const CoordinateSequence* pts, size_t start)
 {

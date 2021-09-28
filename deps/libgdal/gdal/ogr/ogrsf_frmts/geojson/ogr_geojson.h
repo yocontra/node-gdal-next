@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geojson.h 77ae389de75448298d20c8bf9b27fbccb257bd39 2020-02-25 23:27:58 +0100 Even Rouault $
+ * $Id: ogr_geojson.h 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions of OGR OGRGeoJSON driver types.
@@ -32,7 +32,7 @@
 #define OGR_GEOJSON_H_INCLUDED
 
 #include "cpl_port.h"
-#include <ogrsf_frmts.h>
+#include "ogrsf_frmts.h"
 #include "../mem/ogr_mem.h"
 
 #include <cstdio>

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_srs_api.h 9722d88648b7695fefda75ef93388bca2e7556f1 2021-03-24 00:21:44 +0300 drons $
+ * $Id: ogr_srs_api.h e12aac96b3d9d4bd9caa7c9215166a39cc617b56 2021-05-06 21:32:35 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  C API and constant declarations for OGR Spatial References.
@@ -553,11 +553,15 @@ int CPL_DLL OSRIsProjected( OGRSpatialReferenceH );
 int CPL_DLL OSRIsCompound( OGRSpatialReferenceH );
 int CPL_DLL OSRIsGeocentric( OGRSpatialReferenceH );
 int CPL_DLL OSRIsVertical( OGRSpatialReferenceH );
+int CPL_DLL OSRIsDynamic( OGRSpatialReferenceH );
 int CPL_DLL OSRIsSameGeogCS( OGRSpatialReferenceH, OGRSpatialReferenceH );
 int CPL_DLL OSRIsSameVertCS( OGRSpatialReferenceH, OGRSpatialReferenceH );
 int CPL_DLL OSRIsSame( OGRSpatialReferenceH, OGRSpatialReferenceH );
 int CPL_DLL OSRIsSameEx( OGRSpatialReferenceH, OGRSpatialReferenceH,
                          const char* const *papszOptions );
+
+void CPL_DLL OSRSetCoordinateEpoch( OGRSpatialReferenceH hSRS, double dfCoordinateEpoch );
+double CPL_DLL OSRGetCoordinateEpoch( OGRSpatialReferenceH hSRS );
 
 OGRErr CPL_DLL OSRSetLocalCS( OGRSpatialReferenceH hSRS, const char *pszName );
 OGRErr CPL_DLL OSRSetProjCS( OGRSpatialReferenceH hSRS, const char * pszName );
@@ -1020,7 +1024,7 @@ typedef struct
 } OSRCRSInfo;
 
 /** \brief Structure to describe optional parameters to OSRGetCRSInfoListFromDatabase()
- * 
+ *
  * Unused for now.
  */
 typedef struct OSRCRSListParameters OSRCRSListParameters;
@@ -1068,6 +1072,11 @@ OGRCoordinateTransformationH CPL_DLL
 OCTNewCoordinateTransformationEx( OGRSpatialReferenceH hSourceSRS,
                                   OGRSpatialReferenceH hTargetSRS,
                                   OGRCoordinateTransformationOptionsH hOptions );
+
+OGRCoordinateTransformationH CPL_DLL OCTClone(OGRCoordinateTransformationH hTransform);
+OGRSpatialReferenceH CPL_DLL OCTGetSourceCS(OGRCoordinateTransformationH hTransform);
+OGRSpatialReferenceH CPL_DLL OCTGetTargetCS(OGRCoordinateTransformationH hTransform);
+OGRCoordinateTransformationH CPL_DLL OCTGetInverse(OGRCoordinateTransformationH hTransform);
 
 void CPL_DLL CPL_STDCALL
       OCTDestroyCoordinateTransformation( OGRCoordinateTransformationH );

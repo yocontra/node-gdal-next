@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id: gdalvrt.xsd ca74100efca7e6715fc97a5a0174ebfc439db0d3 2021-02-27 13:45:16 -0500 luzpaz $
+ * $Id: gdalvrt.xsd ff6940238a51c58d14421fd94665e946afde76a7 2021-05-07 14:24:02 +0200 Even Rouault $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for GDAL VRT files.
@@ -70,6 +70,7 @@
         <xs:simpleContent>
             <xs:extension base="xs:string">
                 <xs:attribute name="dataAxisToSRSAxisMapping" type="xs:string"/>
+                <xs:attribute name="coordinateEpoch" type="xs:float"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -183,7 +184,7 @@
                 <xs:element name="Histograms" type="HistogramsType"/>
 
                 <!-- for a VRTSourcedRasterBand. Each element may be repeated -->
-                <xs:element name="SimpleSource" type="SimpleSourceType"/> 
+                <xs:element name="SimpleSource" type="SimpleSourceType"/>
                 <xs:element name="ComplexSource" type="ComplexSourceType"/>
                 <xs:element name="AveragedSource" type="SimpleSourceType"/>
                 <xs:element name="KernelFilteredSource" type="KernelFilteredSourceType"/>

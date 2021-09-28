@@ -1,5 +1,5 @@
 /*****************************************************************************
- * $Id: HdfEosDef.h 270b8b22231a4a8a728dc9ed3afc2fd454a139f5 2017-06-17 10:53:05Z Even Rouault $
+ * $Id: HdfEosDef.h 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $
  *
  * This module has a number of additions and improvements over the original
  * implementation to be suitable for usage in GDAL HDF driver.
@@ -20,7 +20,7 @@ this permission notice appear in supporting documentation.
 #define HDFEOSDEF_H_
 
 /* include header file for EASE grid */
-#include <ease.h>
+#include "ease.h"
 
 /* Working Buffer Sizes */
 #define HDFE_MAXMEMBUF  256*256*16

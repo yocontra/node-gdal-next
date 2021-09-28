@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_frmts.h 55ded3e021103ffa5634561565ba0ea37aab66ad 2021-02-28 00:00:37 +0100 Even Rouault $
+ * $Id: gdal_frmts.h ea49437af39fa2738de924701b87ad701d6530c2 2021-07-25 18:25:48 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  Prototypes for all format specific driver initialization.
@@ -204,6 +204,8 @@ void CPL_DLL GDALRegister_HEIF(void);
 void CPL_DLL GDALRegister_TGA(void);
 void CPL_DLL GDALRegister_OGCAPI(void);
 void CPL_DLL GDALRegister_STACTA(void);
+void CPL_DLL GDALRegister_Zarr(void);
+void CPL_DLL GDALRegister_STACIT(void);
 CPL_C_END
 
 #endif /* ndef GDAL_FRMTS_H_INCLUDED */

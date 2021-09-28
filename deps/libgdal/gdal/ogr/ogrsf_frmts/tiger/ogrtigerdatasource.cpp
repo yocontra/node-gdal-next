@@ -33,7 +33,7 @@
 #include <cctype>
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrtigerdatasource.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrtigerdatasource.cpp c8019208c66006ea89baa2b5bda4161f10a81c0b 2021-08-12 15:36:28 +0200 Even Rouault $")
 
 #define DIGIT_ZERO '0'
 
@@ -773,7 +773,7 @@ int OGRTigerDataSource::Create( const char *pszNameIn, char **papszOptionsIn )
 /* -------------------------------------------------------------------- */
     if( VSIStatL( pszNameIn, &stat ) != 0 )
     {
-        VSIMkdir( pszNameIn, 0755 );
+        CPL_IGNORE_RET_VAL(VSIMkdir( pszNameIn, 0755 ));
     }
 
     if( VSIStatL( pszNameIn, &stat ) != 0 || !VSI_ISDIR(stat.st_mode) )

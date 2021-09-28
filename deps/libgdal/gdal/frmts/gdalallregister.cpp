@@ -35,7 +35,7 @@
    #include "gnm_frmts.h"
 #endif
 
-CPL_CVSID("$Id: gdalallregister.cpp 55ded3e021103ffa5634561565ba0ea37aab66ad 2021-02-28 00:00:37 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalallregister.cpp ea49437af39fa2738de924701b87ad701d6530c2 2021-07-25 18:25:48 +0200 Even Rouault $")
 
 #ifdef notdef
 // we may have a use for this some day
@@ -588,6 +588,10 @@ void CPL_STDCALL GDALAllRegister()
     GDALRegister_STACTA();
 #endif
 
+#ifdef FRMT_stacit
+    GDALRegister_STACIT();
+#endif
+
     // NOTE: you need to generally your own driver before that line.
 
 /* -------------------------------------------------------------------- */
@@ -609,6 +613,10 @@ void CPL_STDCALL GDALAllRegister()
     GDALRegister_ENVI();
     GDALRegister_EHdr();
     GDALRegister_ISCE();
+#endif
+
+#ifdef FRMT_zarr
+    GDALRegister_Zarr();
 #endif
 
 /* -------------------------------------------------------------------- */

@@ -26,6 +26,8 @@
 #include <unordered_set>
 
 #include <geos/geom/Geometry.h>
+#include <geos/operation/union/UnionStrategy.h>
+#include <geos/operation/union/CascadedPolygonUnion.h>
 
 // Forward declarations
 namespace geos {
@@ -39,25 +41,28 @@ namespace geos {
 namespace operation { // geos::operation
 namespace geounion {  // geos::operation::geounion
 
-/**
- * Unions MultiPolygons efficiently by
- * using full topological union only for polygons which may overlap
- * by virtue of intersecting the common area of the inputs.
- * Other polygons are simply combined with the union result,
- * which is much more performant.
- * <p>
+/** \brief
+ * Unions MultiPolygons efficiently by using full topological union only
+ * for polygons which may overlap by virtue of intersecting the common
+ * area of the inputs.
+ *
+ * Other polygons are simply combined with the union result, which is much
+ * more performant.
+ *
  * This situation is likely to occur during cascaded polygon union,
  * since the partitioning of polygons is done heuristically
  * and thus may group disjoint polygons which can lie far apart.
  * It may also occur in real world data which contains many disjoint polygons
  * (e.g. polygons representing parcels on different street blocks).
- * <h2>Algorithm</h2>
+ *
+ * # Algorithm
+ *
  * The overlap region is determined as the common envelope of intersection.
  * The input polygons are partitioned into two sets:
- * <ul>
- * <li>Overlapping: Polygons which intersect the overlap region, and thus potentially overlap each other
- * <li>Disjoint: Polygons which are disjoint from (lie wholly outside) the overlap region
- * </ul>
+ *
+ * * Overlapping: Polygons which intersect the overlap region, and thus potentially overlap each other
+ * * Disjoint: Polygons which are disjoint from (lie wholly outside) the overlap region
+ *
  * The Overlapping set is fully unioned, and then combined with the Disjoint set.
  * Performing a simple combine works because
  * the disjoint polygons do not interact with each
@@ -65,7 +70,8 @@ namespace geounion {  // geos::operation::geounion
  * They also do not interact with the Overlapping polygons,
  * since they are outside their envelope.
  *
- * <h2>Verification</h2>
+ * # Verification
+ *
  * In the general case the Overlapping set of polygons will
  * extend beyond the overlap envelope.  This means that the union result
  * will extend beyond the overlap region.
@@ -77,35 +83,45 @@ namespace geounion {  // geos::operation::geounion
  * Detection is done by a fairly efficient comparison of edge segments which
  * extend beyond the overlap region.  If any segments have changed
  * then there is a risk of introduced intersections, and full union is performed.
- * <p>
+ *
  * This situation has not been observed in JTS using floating precision,
  * but it could happen due to snapping.  It has been observed
  * in other APIs (e.g. GEOS) due to more aggressive snapping.
  * And it will be more likely to happen if a snap-rounding overlay is used.
  *
+ * DEPRECATED: This optimization has been removed, since it impairs performance.
+ *
  * @author mbdavis
  *
  */
-
 class GEOS_DLL OverlapUnion {
 
 public:
 
+    OverlapUnion(const geom::Geometry* p_g0, const geom::Geometry* p_g1, geounion::UnionStrategy* unionFun)
+        : g0(p_g0)
+        , g1(p_g1)
+        , unionFunction(unionFun)
+        , geomFactory(p_g0->getFactory())
+        , isUnionSafe(false)
+        {};
+
     OverlapUnion(const geom::Geometry* p_g0, const geom::Geometry* p_g1)
-        : g0(p_g0), g1(p_g1)
-    {
-        geomFactory = g0->getFactory();
-        isUnionSafe = false;
-    };
+        : OverlapUnion(p_g0, p_g1, &defaultUnionFunction)
+        {};
+
 
     std::unique_ptr<geom::Geometry> doUnion();
 
 private:
 
-    const geom::GeometryFactory* geomFactory;
     const geom::Geometry* g0;
     const geom::Geometry* g1;
+    geounion::UnionStrategy* unionFunction;
+    const geom::GeometryFactory* geomFactory;
     bool isUnionSafe;
+
+    geounion::ClassicUnionStrategy defaultUnionFunction;
 
     geom::Envelope overlapEnvelope(const geom::Geometry* geom0, const geom::Geometry* geom1);
     std::unique_ptr<geom::Geometry> extractByEnvelope(const geom::Envelope& env, const geom::Geometry* geom, std::vector<std::unique_ptr<geom::Geometry>>& disjointGeoms);

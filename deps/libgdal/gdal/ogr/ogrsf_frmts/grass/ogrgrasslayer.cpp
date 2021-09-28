@@ -31,7 +31,7 @@
 #include "ogrgrass.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrgrasslayer.cpp a832da5b936bac8438f9c50e7c20e563fd94c9ff 2020-09-22 13:06:27 +0200 Markus Neteler $")
+CPL_CVSID("$Id: ogrgrasslayer.cpp 5163a8056bee931f5bc8e72676d90092cdd1d760 2021-08-12 22:25:24 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRGRASSLayer()                            */
@@ -486,8 +486,10 @@ bool OGRGRASSLayer::SetQueryMatch()
 
         // Go through category index until first record of current category
         // is found or a category > current is found
-        int cidxcat, type, id;
+        int id = -1;
         while ( cidx < ncats ) {
+            int cidxcat = 0;
+            int type = 0;
             Vect_cidx_get_cat_by_index ( poMap, iLayerIndex, cidx,
                                          &cidxcat, &type, &id );
 

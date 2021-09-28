@@ -23,7 +23,7 @@
 #include <geos/geomgraph/EdgeEnd.h>
 #include <geos/geomgraph/Edge.h>
 #include <geos/geomgraph/GeometryGraph.h>
-#include <geos/geomgraph/Position.h>
+#include <geos/geom/Position.h>
 
 #include <vector>
 
@@ -69,10 +69,10 @@ EdgeEndBundle::insert(EdgeEnd* e)
 
 
 /**
-* This computes the overall edge label for the set of
-* edges in this EdgeStubBundle.  It essentially merges
-* the ON and side labels for each edge.  These labels must be compatible
-*/
+ * This computes the overall edge label for the set of
+ * edges in this EdgeStubBundle.  It essentially merges
+ * the ON and side labels for each edge.  These labels must be compatible
+ */
 void
 EdgeEndBundle::computeLabel(
     const algorithm::BoundaryNodeRule& boundaryNodeRule)
@@ -81,18 +81,16 @@ EdgeEndBundle::computeLabel(
     // the label must be an area label
     bool isArea = false;
 
-    for(vector<EdgeEnd*>::iterator it = edgeEnds.begin(), itEnd = edgeEnds.end();
-            it != itEnd; it++) {
-        EdgeEnd* e = *it;
+    for(EdgeEnd* e: edgeEnds) {
         if(e->getLabel().isArea()) {
             isArea = true;
         }
     }
     if(isArea) {
-        label = Label(Location::UNDEF, Location::UNDEF, Location::UNDEF);
+        label = Label(Location::NONE, Location::NONE, Location::NONE);
     }
     else {
-        label = Label(Location::UNDEF);
+        label = Label(Location::NONE);
     }
     // compute the On label, and the side labels if present
     for(int i = 0; i < 2; i++) {
@@ -111,8 +109,7 @@ EdgeEndBundle::computeLabelOn(int geomIndex, const algorithm::BoundaryNodeRule& 
     int boundaryCount = 0;
     bool foundInterior = false;
 
-    for(vector<EdgeEnd*>::iterator it = edgeEnds.begin(); it < edgeEnds.end(); it++) {
-        EdgeEnd* e = *it;
+    for(EdgeEnd* e: edgeEnds) {
         Location loc = e->getLabel().getLocation(geomIndex);
         if(loc == Location::BOUNDARY) {
             boundaryCount++;
@@ -121,7 +118,7 @@ EdgeEndBundle::computeLabelOn(int geomIndex, const algorithm::BoundaryNodeRule& 
             foundInterior = true;
         }
     }
-    Location loc = Location::UNDEF;
+    Location loc = Location::NONE;
     if(foundInterior) {
         loc = Location::INTERIOR;
     }
@@ -134,8 +131,8 @@ EdgeEndBundle::computeLabelOn(int geomIndex, const algorithm::BoundaryNodeRule& 
 
 
 /**
-* Compute the labelling for each side
-*/
+ * Compute the labelling for each side
+ */
 void
 EdgeEndBundle::computeLabelSides(int geomIndex)
 {
@@ -144,24 +141,23 @@ EdgeEndBundle::computeLabelSides(int geomIndex)
 }
 
 /**
-* To compute the summary label for a side, the algorithm is:
-*   FOR all edges
-*     IF any edge's location is INTERIOR for the side, side location = INTERIOR
-*     ELSE IF there is at least one EXTERIOR attribute, side location = EXTERIOR
-*     ELSE  side location = NULL
-*  <br>
-*  Note that it is possible for two sides to have apparently contradictory information
-*  i.e. one edge side may indicate that it is in the interior of a geometry, while
-*  another edge side may indicate the exterior of the same geometry.  This is
-*  not an incompatibility - GeometryCollections may contain two Polygons that touch
-*  along an edge.  This is the reason for Interior-primacy rule above - it
-*  results in the summary label having the Geometry interior on <b>both</b> sides.
-*/
+ * To compute the summary label for a side, the algorithm is:
+ *   FOR all edges
+ *     IF any edge's location is INTERIOR for the side, side location = INTERIOR
+ *     ELSE IF there is at least one EXTERIOR attribute, side location = EXTERIOR
+ *     ELSE  side location = NULL
+ *  <br>
+ *  Note that it is possible for two sides to have apparently contradictory information
+ *  i.e. one edge side may indicate that it is in the interior of a geometry, while
+ *  another edge side may indicate the exterior of the same geometry.  This is
+ *  not an incompatibility - GeometryCollections may contain two Polygons that touch
+ *  along an edge.  This is the reason for Interior-primacy rule above - it
+ *  results in the summary label having the Geometry interior on <b>both</b> sides.
+ */
 void
 EdgeEndBundle::computeLabelSide(int geomIndex, int side)
 {
-    for(vector<EdgeEnd*>::iterator it = edgeEnds.begin(); it < edgeEnds.end(); it++) {
-        EdgeEnd* e = *it;
+    for(EdgeEnd* e: edgeEnds) {
         if(e->getLabel().isArea()) {
             Location loc = e->getLabel().getLocation(geomIndex, side);
             if(loc == Location::INTERIOR) {

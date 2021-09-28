@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_aws.h f87673d2ac225e117fd6f6d5b32443cab1c7460b 2020-07-21 15:14:42 +0200 Even Rouault $
+ * $Id: cpl_aws.h 35282e555185d7a64f56d1074ea12930d3f05dd7 2021-05-25 17:44:13 +0200 Even Rouault $
  *
  * Name:     cpl_aws.h
  * Project:  CPL - Common Portability Library
@@ -112,6 +112,7 @@ public:
         CPLString GetURLNoKVP() const;
 
         virtual CPLString GetCopySourceHeader() const { return std::string(); }
+        virtual const char* GetMetadataDirectiveREPLACE() const { return ""; }
 
         static bool GetBucketAndObjectKey(const char* pszURI,
                                           const char* pszFSPrefix,
@@ -210,6 +211,7 @@ class VSIS3HandleHelper final: public IVSIS3LikeHandleHelper
         void SetVirtualHosting(bool b);
 
         CPLString GetCopySourceHeader() const override { return "x-amz-copy-source"; }
+        const char* GetMetadataDirectiveREPLACE() const override { return "x-amz-metadata-directive: REPLACE"; }
 
         CPLString GetSignedURL(CSLConstList papszOptions);
 

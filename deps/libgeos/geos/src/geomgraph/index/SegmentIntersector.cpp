@@ -33,7 +33,9 @@
 #define GEOS_DEBUG 0
 #endif
 
+#ifndef DEBUG_INTERSECT
 #define DEBUG_INTERSECT 0
+#endif
 
 #if GEOS_DEBUG || DEBUG_INTERSECT
 #include <iostream>
@@ -161,8 +163,7 @@ SegmentIntersector::isBoundaryPoint(LineIntersector* p_li,
         return false;
     }
 
-    for(std::vector<Node*>::iterator i = tstBdyNodes->begin(); i < tstBdyNodes->end(); i++) {
-        Node* node = *i;
+    for(const Node* node: *tstBdyNodes) {
         const Coordinate& pt = node->getCoordinate();
         if(p_li->isIntersection(pt)) {
             return true;

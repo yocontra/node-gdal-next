@@ -52,7 +52,7 @@ namespace geos {
 namespace io {
 
 /**
- * \class WKTReader io.h geos.h
+ * \class WKTReader
  * \brief WKT parser class; see also WKTWriter.
  */
 class GEOS_DLL WKTReader {
@@ -88,7 +88,7 @@ public:
 protected:
     std::unique_ptr<geom::CoordinateSequence> getCoordinates(io::StringTokenizer* tokenizer);
     double getNextNumber(io::StringTokenizer* tokenizer);
-    std::string getNextEmptyOrOpener(io::StringTokenizer* tokenizer);
+    std::string getNextEmptyOrOpener(io::StringTokenizer* tokenizer, std::size_t& dim);
     std::string getNextCloserOrComma(io::StringTokenizer* tokenizer);
     std::string getNextCloser(io::StringTokenizer* tokenizer);
     std::string getNextWord(io::StringTokenizer* tokenizer);

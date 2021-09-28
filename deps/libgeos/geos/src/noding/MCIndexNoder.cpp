@@ -21,6 +21,7 @@
 #include <geos/noding/NodedSegmentString.h>
 #include <geos/index/chain/MonotoneChain.h>
 #include <geos/index/chain/MonotoneChainBuilder.h>
+#include <geos/geom/Envelope.h>
 #include <geos/util/Interrupt.h>
 
 #include <cassert>
@@ -70,19 +71,19 @@ MCIndexNoder::intersectChains()
 
         assert(queryChain);
         overlapChains.clear();
-        index.query(&(queryChain->getEnvelope()), overlapChains);
+        const geom::Envelope& queryEnv = queryChain->getEnvelope(overlapTolerance);
+        index.query(&queryEnv, overlapChains);
         for(void* hit : overlapChains) {
             MonotoneChain* testChain = static_cast<MonotoneChain*>(hit);
             assert(testChain);
 
-            /**
+            /*
              * following test makes sure we only compare each
              * pair of chains once and that we don't compare a
              * chain to itself
              */
             if(testChain->getId() > queryChain->getId()) {
-                queryChain->computeOverlaps(testChain,
-                                            &overlapAction);
+                queryChain->computeOverlaps(testChain, overlapTolerance, &overlapAction);
                 nOverlaps++;
             }
 
@@ -109,7 +110,8 @@ MCIndexNoder::add(SegmentString* segStr)
         assert(mc);
 
         mc->setId(idCounter++);
-        index.insert(&(mc->getEnvelope()), mc.get());
+        // index.insert(&(mc->getEnvelope()), mc.get());
+        index.insert(&(mc->getEnvelope(overlapTolerance)), mc.get());
 
         // MonotoneChain objects deletion delegated to destructor
         monoChains.push_back(mc.release());
@@ -118,11 +120,9 @@ MCIndexNoder::add(SegmentString* segStr)
 
 MCIndexNoder::~MCIndexNoder()
 {
-    for(vector<MonotoneChain*>::iterator
-            i = monoChains.begin(), iEnd = monoChains.end();
-            i != iEnd; ++i) {
-        assert(*i);
-        delete *i;
+    for(MonotoneChain* mc: monoChains) {
+        assert(mc);
+        delete mc;
     }
 }
 

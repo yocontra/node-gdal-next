@@ -44,7 +44,7 @@ IncrementalDelaunayTriangulator::insertSites(const VertexList& vertices)
 QuadEdge&
 IncrementalDelaunayTriangulator::insertSite(const Vertex& v)
 {
-    /**
+    /*
      * This code is based on Guibas and Stolfi (1985), with minor modifications
      * and a bug fix from Dani Lischinski (Graphic Gems 1993). (The modification
      * I believe is the test for the inserted site falling exactly on an
@@ -54,7 +54,7 @@ IncrementalDelaunayTriangulator::insertSite(const Vertex& v)
     QuadEdge* e = subdiv->locate(v);
 
     if(!e) {
-        throw LocateFailureException("");
+        throw LocateFailureException("Could not locate vertex.");
     }
 
     if(subdiv->isVertexOfEdge(*e, v)) {
@@ -68,7 +68,7 @@ IncrementalDelaunayTriangulator::insertSite(const Vertex& v)
         subdiv->remove(e->oNext());
     }
 
-    /**
+    /*
      * Connect the new point to the vertices of the containing triangle
      * (or quadrilateral, if the new point fell on an existing edge.)
      */

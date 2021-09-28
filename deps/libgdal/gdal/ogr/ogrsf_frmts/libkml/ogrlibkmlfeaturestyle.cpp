@@ -29,13 +29,13 @@
 
 #include "libkml_headers.h"
 
-#include <ogrsf_frmts.h>
-#include <ogr_featurestyle.h>
+#include "ogrsf_frmts.h"
+#include "ogr_featurestyle.h"
 #include <string>
 #include "ogrlibkmlfeaturestyle.h"
 #include "ogrlibkmlstyle.h"
 
-CPL_CVSID("$Id: ogrlibkmlfeaturestyle.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmlfeaturestyle.cpp 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $")
 
 using kmldom::FeaturePtr;
 using kmldom::IconStylePtr;

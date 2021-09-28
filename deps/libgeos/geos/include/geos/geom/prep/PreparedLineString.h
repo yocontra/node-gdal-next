@@ -3,6 +3,7 @@
  * GEOS - Geometry Engine Open Source
  * http://geos.osgeo.org
  *
+ * Copyright (C) 2020 Sandro Santilli <strk@kbt.io>
  * Copyright (C) 2006 Refractions Research Inc.
  *
  * This is free software; you can redistribute and/or modify it under
@@ -23,6 +24,7 @@
 #include <geos/geom/prep/BasicPreparedGeometry.h> // for inheritance
 #include <geos/noding/SegmentString.h>
 #include <geos/noding/FastSegmentSetIntersectionFinder.h>
+#include <geos/operation/distance/IndexedFacetDistance.h>
 
 #include <memory>
 
@@ -41,6 +43,7 @@ class PreparedLineString : public BasicPreparedGeometry {
 private:
     std::unique_ptr<noding::FastSegmentSetIntersectionFinder> segIntFinder;
     mutable noding::SegmentString::ConstVect segStrings;
+    mutable std::unique_ptr<operation::distance::IndexedFacetDistance> indexedDistance;
 
 protected:
 public:
@@ -55,6 +58,9 @@ public:
     noding::FastSegmentSetIntersectionFinder* getIntersectionFinder();
 
     bool intersects(const geom::Geometry* g) const override;
+    std::unique_ptr<geom::CoordinateSequence> nearestPoints(const geom::Geometry* g) const override;
+    double distance(const geom::Geometry* g) const override;
+    operation::distance::IndexedFacetDistance* getIndexedFacetDistance() const;
 
 };
 

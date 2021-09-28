@@ -41,7 +41,7 @@ static XSModel* getGrammarPool(XMLGrammarPool* pool)
 #include "ogr_gmlas.h"
 #include "ogr_pgdump.h"
 
-CPL_CVSID("$Id: ogrgmlasschemaanalyzer.cpp 13fb5edfd2b4d28203c98db3b755d014a36ede02 2021-08-22 17:23:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasschemaanalyzer.cpp 160635258110c89d7ef03683387b7f7e8e0b2cca 2021-09-22 22:10:50 +0200 Even Rouault $")
 
 static OGRwkbGeometryType GetOGRGeometryType( XSTypeDefinition* poTypeDef );
 
@@ -190,7 +190,35 @@ void CollectNamespacePrefixes(const char* pszXSDFilename,
     GMLASErrorHandler oErrorHandler;
     poReader->setErrorHandler(&oErrorHandler);
 
-    poReader->parse(oSource);
+    std::string osErrorMsg;
+    try
+    {
+        poReader->parse(oSource);
+    }
+    catch( const SAXException& e )
+    {
+        osErrorMsg += transcode(e.getMessage());
+    }
+    catch( const XMLException& e )
+    {
+        osErrorMsg += transcode(e.getMessage());
+    }
+    catch( const OutOfMemoryException& e )
+    {
+        if( strstr(CPLGetLastErrorMsg(), "configuration option") == nullptr )
+        {
+            osErrorMsg += transcode(e.getMessage());
+        }
+    }
+    catch( const DOMException& e )
+    {
+        osErrorMsg += transcode(e.getMessage());
+    }
+    if( !osErrorMsg.empty() )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "%s",
+                 osErrorMsg.c_str());
+    }
     delete poReader;
 }
 
@@ -347,7 +375,7 @@ static CPLString GetNSOfLastXPathComponent(const CPLString& osXPath )
 /************************************************************************/
 
 // Make sure that field names are unique within the class
-void GMLASSchemaAnalyzer::LaunderFieldNames( GMLASFeatureClass& oClass )
+bool GMLASSchemaAnalyzer::LaunderFieldNames( GMLASFeatureClass& oClass )
 {
     std::vector<GMLASField>& aoFields = oClass.GetFields();
 
@@ -437,6 +465,15 @@ void GMLASSchemaAnalyzer::LaunderFieldNames( GMLASFeatureClass& oClass )
         for(size_t i=0; i< aoFields.size();i++)
         {
             int nNameSize = static_cast<int>(aoFields[i].GetName().size());
+            /* Somewhat arbitrary limitation to avoid performance issues in */
+            /* OGRGMLASTruncateIdentifier() */
+            if( nNameSize > 1024 )
+            {
+                CPLError(CE_Failure, CPLE_NotSupported,
+                         "Field name with excessive length (%d) found",
+                         nNameSize);
+                return false;
+            }
             if( nNameSize > m_nIdentifierMaxLength )
             {
                 aoFields[i].SetName(
@@ -492,8 +529,10 @@ void GMLASSchemaAnalyzer::LaunderFieldNames( GMLASFeatureClass& oClass )
     std::vector<GMLASFeatureClass>& aoNestedClasses = oClass.GetNestedClasses();
     for(size_t i=0; i<aoNestedClasses.size();i++)
     {
-        LaunderFieldNames( aoNestedClasses[i] );
+        if( !LaunderFieldNames( aoNestedClasses[i] ) )
+            return false;
     }
+    return true;
 }
 
 /************************************************************************/
@@ -1282,7 +1321,8 @@ bool GMLASSchemaAnalyzer::InstantiateClassFromEltDeclaration(
             // TODO ?
         }
 
-        LaunderFieldNames( oClass );
+        if( !LaunderFieldNames( oClass ) )
+            return false;
 
         m_aoClasses.push_back(oClass);
         return true;

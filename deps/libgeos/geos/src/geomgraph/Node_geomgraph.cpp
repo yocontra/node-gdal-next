@@ -26,6 +26,7 @@
 #include <geos/geomgraph/DirectedEdge.h>
 #include <geos/geom/Location.h>
 #include <geos/util/IllegalArgumentException.h>
+#include <geos/util.h>
 
 #include <cmath>
 #include <string>
@@ -49,7 +50,7 @@ namespace geomgraph { // geos.geomgraph
 /*public*/
 Node::Node(const Coordinate& newCoord, EdgeEndStar* newEdges)
     :
-    GraphComponent(Label(0, Location::UNDEF)),
+    GraphComponent(Label(0, Location::NONE)),
     coord(newCoord),
     edges(newEdges)
 
@@ -123,8 +124,7 @@ Node::isIncidentEdgeInResult() const
     EdgeEndStar::iterator endIt = edges->end();
     for(; it != endIt; ++it) {
         assert(*it);
-        assert(dynamic_cast<DirectedEdge*>(*it));
-        DirectedEdge* de = static_cast<DirectedEdge*>(*it);
+        DirectedEdge* de = detail::down_cast<DirectedEdge*>(*it);
         if(de->getEdge()->isInResult()) {
             return true;
         }
@@ -177,7 +177,7 @@ Node::mergeLabel(const Label& label2)
     for(int i = 0; i < 2; i++) {
         Location loc = computeMergedLocation(label2, i);
         Location thisLoc = label.getLocation(i);
-        if(thisLoc == Location::UNDEF) {
+        if(thisLoc == Location::NONE) {
             label.setLocation(i, loc);
         }
     }
@@ -225,7 +225,7 @@ Node::setLabelBoundary(int argIndex)
 Location
 Node::computeMergedLocation(const Label& label2, int eltIndex)
 {
-    Location loc = Location::UNDEF;
+    Location loc = Location::NONE;
     loc = label.getLocation(eltIndex);
     if(!label2.isNull(eltIndex)) {
         Location nLoc = label2.getLocation(eltIndex);

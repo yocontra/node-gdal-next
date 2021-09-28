@@ -43,7 +43,7 @@
 #include <geo_normalize.h>
 #include <geovalues.h>
 
-CPL_CVSID("$Id: mrsiddataset.cpp bc8aee61f3c332c4841a782ae663140bf351ff92 2021-03-11 11:03:44 +0100 Even Rouault $")
+CPL_CVSID("$Id: mrsiddataset.cpp 35de9af4ed9fe83e95ce727f2d951b77f475e7cd 2021-08-12 22:04:30 +0200 Even Rouault $")
 
 CPL_C_START
 double GTIFAngleToDD( double dfAngle, int nUOMAngle );
@@ -1029,7 +1029,7 @@ static CPLString SerializeMetadataRec( const LTIMetadataRecord *poMetadataRec )
     CPLString      osMetadata;
     GUInt32        k = 0;
 
-    for ( GUInt32 i = 0; i < iNumDims; i++ )
+    for ( GUInt32 i = 0; paiDims != nullptr && i < iNumDims; i++ )
     {
         // stops on large binary data
         if ( poMetadataRec->getDataType() == LTI_METADATA_DATATYPE_UINT8
@@ -1264,11 +1264,10 @@ CPLErr MrSIDDataset::OpenZoomLevel( lt_int32 iZoom )
         if( oGeo.getWKT() )
         {
             /* Workaround probable issue with GeoDSK 7 on 64bit Linux */
-            if (!(pszProjection != nullptr && !STARTS_WITH_CI(pszProjection, "LOCAL_CS")
+            if (!(m_oSRS.IsEmpty() && !m_oSRS.IsLocal()
                 && STARTS_WITH_CI(oGeo.getWKT(), "LOCAL_CS")))
             {
-                CPLFree( pszProjection );
-                pszProjection =  CPLStrdup( oGeo.getWKT() );
+                m_oSRS.importFromWkt( oGeo.getWKT() );
             }
         }
     }
@@ -1279,7 +1278,7 @@ CPLErr MrSIDDataset::OpenZoomLevel( lt_int32 iZoom )
 /*      where LandSat .SID are accompanied by a .met file with the      */
 /*      projection                                                      */
 /* -------------------------------------------------------------------- */
-    if (iZoom == 0 && (pszProjection == nullptr || pszProjection[0] == '\0') &&
+    if (iZoom == 0 && m_oSRS.IsEmpty() &&
         EQUAL(CPLGetExtension(GetDescription()), "sid"))
     {
         const char* pszMETFilename = CPLResetExtension(GetDescription(), "met");
@@ -1313,11 +1312,8 @@ CPLErr MrSIDDataset::OpenZoomLevel( lt_int32 iZoom )
             {
                 osMETFilename = pszMETFilename;
 
-                OGRSpatialReference oSRS;
-                oSRS.importFromEPSG(32600 + nUTMZone);
-                CPLFree(pszProjection);
-                pszProjection = nullptr;
-                oSRS.exportToWkt(&pszProjection);
+                m_oSRS.importFromEPSG(32600 + nUTMZone);
+                m_oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
             }
         }
     }
@@ -2624,9 +2620,13 @@ void MrSIDDataset::GetGTIFDefn()
             psDefn->ProjParm[6] = 10000000.0;
     }
 
-    if ( pszProjection )
-        CPLFree( pszProjection );
-    pszProjection = GetOGISDefn( psDefn );
+    char* pszProjection = GetOGISDefn( psDefn );
+    if( pszProjection )
+    {
+        m_oSRS.importFromWkt(pszProjection);
+        m_oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    }
+    CPLFree(pszProjection);
 }
 
 /************************************************************************/

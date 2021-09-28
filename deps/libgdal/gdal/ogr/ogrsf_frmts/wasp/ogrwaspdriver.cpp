@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include <cassert>
 
-CPL_CVSID("$Id: ogrwaspdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrwaspdriver.cpp 498a80077f2504ce756950b02fccc7144c28e163 2021-08-13 10:52:53 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -55,7 +55,7 @@ OGRDataSource *OGRWAsPDriver::Open( const char * pszFilename, int bUpdate )
         /*CPLError( CE_Failure, CPLE_FileIO, "cannot open file %s", pszFilename );*/
         return nullptr;
     }
-    std::unique_ptr<OGRWAsPDataSource> pDataSource( new OGRWAsPDataSource( pszFilename, fh ));
+    auto pDataSource = cpl::make_unique<OGRWAsPDataSource>( pszFilename, fh );
 
     if ( pDataSource->Load(true) != OGRERR_NONE )
     {

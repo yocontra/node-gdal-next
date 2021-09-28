@@ -31,8 +31,8 @@ namespace strtree { // geos.index.strtree
 static bool
 compareSIRBoundables(Boundable* a, Boundable* b)
 {
-    return AbstractSTRtree::compareDoubles(((Interval*)a->getBounds())->getCentre(),
-                                           ((Interval*)b->getBounds())->getCentre());
+    return ((Interval*)a->getBounds())->getCentre() <
+           ((Interval*)b->getBounds())->getCentre() ? true : false;
 }
 
 /*protected*/
@@ -128,8 +128,8 @@ SIRtree::createNode(int level)
 }
 
 /**
-* Inserts an item having the given bounds into the tree.
-*/
+ * Inserts an item having the given bounds into the tree.
+ */
 void
 SIRtree::insert(double x1, double x2, void* item)
 {

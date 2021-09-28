@@ -46,7 +46,7 @@ namespace operation { // geos.operation
 namespace buffer { // geos.operation.buffer
 
 /**
- * \class OffsetCurveBuilder opBuffer.h geos/opBuffer.h
+ * \class OffsetCurveBuilder
  *
  * \brief
  * Computes the raw offset curve for a
@@ -87,6 +87,20 @@ public:
     {
         return bufParams;
     }
+
+    /**
+     * Tests whether the offset curve for line or point geometries
+     * at the given offset distance is empty (does not exist).
+     * This is the case if:
+     * <ul>
+     * <li>the distance is zero,
+     * <li>the distance is negative, except for the case of singled-sided buffers
+     * </ul>
+     *
+     * @param distance the offset curve distance
+     * @return true if the offset curve is empty
+     */
+    bool isLineOffsetEmpty(double distance);
 
     /** \brief
      * This method handles single points as well as lines.
@@ -131,7 +145,7 @@ public:
      * as well as rings.
      *
      * @param inputPts input points
-     * @param side a [Position](@ref geomgraph::Position)
+     * @param side a [Position](@ref geom::Position)
      * @param distance offset distance
      * @param lineList the std::vector to which CoordinateSequences will
      *                 be pushed_back
@@ -139,7 +153,6 @@ public:
     void getRingCurve(const geom::CoordinateSequence* inputPts, int side,
                       double distance,
                       std::vector<geom::CoordinateSequence*>& lineList);
-
 
 private:
 

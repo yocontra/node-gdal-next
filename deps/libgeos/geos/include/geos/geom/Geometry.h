@@ -361,8 +361,16 @@ public:
         return isDimensionStrict(Dimension::A);
     }
 
+    bool isCollection() const {
+        int t = getGeometryTypeId();
+        return t == GEOS_GEOMETRYCOLLECTION ||
+               t == GEOS_MULTIPOINT ||
+               t == GEOS_MULTILINESTRING ||
+               t == GEOS_MULTIPOLYGON;
+    }
+
     /// Returns the coordinate dimension of this Geometry (2=XY, 3=XYZ, 4=XYZM in future).
-    virtual int getCoordinateDimension() const = 0; //Abstract
+    virtual uint8_t getCoordinateDimension() const = 0; //Abstract
 
     /**
      * \brief
@@ -719,7 +727,7 @@ public:
      * vertices corresponding by index are equal up to a specified tolerance.
      */
     virtual bool equalsExact(const Geometry* other, double tolerance = 0)
-    const = 0; //Abstract
+        const = 0; // Abstract
 
     virtual void apply_rw(const CoordinateFilter* filter) = 0; //Abstract
     virtual void apply_ro(CoordinateFilter* filter) const = 0; //Abstract
@@ -764,9 +772,14 @@ public:
         }
     }
 
-    /// Converts this Geometry to normal form (or  canonical form).
+    /**
+     * Reorganizes this Geometry into normal form (or canonical form).
+     * Starting point of rings is lower left, collections are ordered
+     * by geometry type, etc.
+     */
     virtual void normalize() = 0; //Abstract
 
+    /// Comparator for sorting geometry
     virtual int compareTo(const Geometry* geom) const;
 
     /** \brief

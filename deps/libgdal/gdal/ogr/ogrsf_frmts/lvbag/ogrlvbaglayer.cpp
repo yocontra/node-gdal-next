@@ -235,6 +235,7 @@ void OGRLVBAGLayer::CreateFeatureDefn( const char *pszDataset )
         OGRFieldDefn oField3("postcode", OFTString);
         OGRFieldDefn oField4("typeAdresseerbaarObject", OFTString);
         OGRFieldDefn oField5("openbareruimteRef", OFTString);
+        OGRFieldDefn oField6("woonplaatsRef", OFTString);
 
         poFeatureDefn->AddFieldDefn(&oField0);
         poFeatureDefn->AddFieldDefn(&oField1);
@@ -242,6 +243,7 @@ void OGRLVBAGLayer::CreateFeatureDefn( const char *pszDataset )
         poFeatureDefn->AddFieldDefn(&oField3);
         poFeatureDefn->AddFieldDefn(&oField4);
         poFeatureDefn->AddFieldDefn(&oField5);
+        poFeatureDefn->AddFieldDefn(&oField6);
 
         AddIdentifierFieldDefn();
         AddDocumentFieldDefn();
@@ -289,10 +291,12 @@ void OGRLVBAGLayer::CreateFeatureDefn( const char *pszDataset )
         OGRFieldDefn oField0("naam", OFTString);
         OGRFieldDefn oField1("type", OFTString);
         OGRFieldDefn oField2("woonplaatsRef", OFTString);
+        OGRFieldDefn oField3("verkorteNaam", OFTString);
 
         poFeatureDefn->AddFieldDefn(&oField0);
         poFeatureDefn->AddFieldDefn(&oField1);
         poFeatureDefn->AddFieldDefn(&oField2);
+        poFeatureDefn->AddFieldDefn(&oField3);
 
         AddIdentifierFieldDefn();
         AddDocumentFieldDefn();
@@ -634,8 +638,8 @@ void OGRLVBAGLayer::EndElementCbk( const char *pszName )
         StopDataCollect();
         if( !osElementString.empty() )
         {
-            std::unique_ptr<OGRGeometry> poGeom = std::unique_ptr<OGRGeometry>{
-                reinterpret_cast<OGRGeometry *>(OGR_G_CreateFromGML(osElementString.c_str())) };
+            std::unique_ptr<OGRGeometry> poGeom = std::unique_ptr<OGRGeometry>(
+                OGRGeometry::FromHandle(OGR_G_CreateFromGML(osElementString.c_str())) );
             if( poGeom && !poGeom->IsEmpty() )
             {
                 // The specification only accounts for 2-dimensional datasets
@@ -668,7 +672,7 @@ void OGRLVBAGLayer::EndElementCbk( const char *pszName )
                         case wkbPolygon:
                         case wkbMultiPolygon:
                         {
-                            std::unique_ptr<OGRPoint> poPoint = std::unique_ptr<OGRPoint>{ new OGRPoint };
+                            auto poPoint = cpl::make_unique<OGRPoint>();
 #ifdef HAVE_GEOS
                             if( poGeom->Centroid(poPoint.get()) == OGRERR_NONE )
                                 poGeom.reset(poPoint.release());
@@ -687,7 +691,7 @@ void OGRLVBAGLayer::EndElementCbk( const char *pszName )
                 else if( poGeomField->GetType() == wkbMultiPolygon
                     && poGeom->getGeometryType() == wkbPolygon )
                 {
-                    std::unique_ptr<OGRMultiPolygon> poMultiPolygon = std::unique_ptr<OGRMultiPolygon>{ new OGRMultiPolygon };
+                    auto poMultiPolygon = cpl::make_unique<OGRMultiPolygon>();
                     poMultiPolygon->addGeometry(poGeom.get());
                     poGeom.reset(poMultiPolygon.release());
                 }
@@ -696,7 +700,7 @@ void OGRLVBAGLayer::EndElementCbk( const char *pszName )
                     && poGeom->toGeometryCollection()->getNumGeometries() > 0
                     && poGeom->toGeometryCollection()->getGeometryRef(0)->getGeometryType() == wkbPolygon )
                 {
-                    std::unique_ptr<OGRMultiPolygon> poMultiPolygon = std::unique_ptr<OGRMultiPolygon>{ new OGRMultiPolygon };
+                    auto poMultiPolygon = cpl::make_unique<OGRMultiPolygon>();
                     for( const auto &poChildGeom : poGeom->toGeometryCollection() )
                         poMultiPolygon->addGeometry(poChildGeom);
                     poGeom.reset(poMultiPolygon.release());

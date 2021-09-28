@@ -39,11 +39,12 @@
 #include <geos/geomgraph/EdgeEndStar.h>
 #include <geos/geomgraph/DirectedEdgeStar.h>
 #include <geos/geomgraph/DirectedEdge.h>
-#include <geos/geomgraph/Position.h>
+#include <geos/geom/Position.h>
 #include <geos/geomgraph/index/SegmentIntersector.h>
 #include <geos/util/Interrupt.h>
 #include <geos/util/TopologyException.h>
 #include <geos/geomgraph/EdgeNodingValidator.h>
+#include <geos/util.h>
 
 #include <cassert>
 #include <cmath>
@@ -319,8 +320,7 @@ OverlayOp::mergeSymLabels()
             it != itEnd; ++it) {
         Node* node = it->second;
         EdgeEndStar* ees = node->getEdges();
-        assert(dynamic_cast<DirectedEdgeStar*>(ees));
-        static_cast<DirectedEdgeStar*>(ees)->mergeSymLabels();
+        detail::down_cast<DirectedEdgeStar*>(ees)->mergeSymLabels();
         //((DirectedEdgeStar*)node->getEdges())->mergeSymLabels();
 #if GEOS_DEBUG
         cerr << "     " << node->print() << endl;
@@ -349,8 +349,7 @@ OverlayOp::updateNodeLabelling()
             it != itEnd; ++it) {
         Node* node = it->second;
         EdgeEndStar* ees = node->getEdges();
-        assert(dynamic_cast<DirectedEdgeStar*>(ees));
-        DirectedEdgeStar* des = static_cast<DirectedEdgeStar*>(ees);
+        DirectedEdgeStar* des = detail::down_cast<DirectedEdgeStar*>(ees);
         Label& lbl = des->getLabel();
         node->getLabel().merge(lbl);
 #if GEOS_DEBUG
@@ -383,8 +382,7 @@ OverlayOp::labelIncompleteNodes()
         }
         // now update the labelling for the DirectedEdges incident on this node
         EdgeEndStar* ees = n->getEdges();
-        assert(dynamic_cast<DirectedEdgeStar*>(ees));
-        DirectedEdgeStar* des = static_cast<DirectedEdgeStar*>(ees);
+        DirectedEdgeStar* des = detail::down_cast<DirectedEdgeStar*>(ees);
 
         des->updateLabelling(label);
         //((DirectedEdgeStar*)n->getEdges())->updateLabelling(label);
@@ -418,7 +416,7 @@ OverlayOp::labelIncompleteNode(Node* n, int targetIndex)
 
     // Only do this if input does have Z
     // See https://trac.osgeo.org/geos/ticket/811
-    if(targetGeom->getCoordinateDimension() < 3) {
+    if(targetGeom->getCoordinateDimension() < 3u) {
         return;
     }
 
@@ -795,7 +793,7 @@ OverlayOp::computeOverlay(OverlayOp::OpCode opCode)
     GEOS_CHECK_FOR_INTERRUPTS();
 
 #ifdef ENABLE_EDGE_NODING_VALIDATOR // {
-    /**
+    /*
      * Check that the noding completed correctly.
      *
      * This test is slow, but necessary in order to catch
