@@ -44,6 +44,9 @@
 #include "H5FDmpio.h"
 #endif /* H5_HAVE_PARALLEL */
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4311)
+#endif
 
 /****************/
 /* Local Macros */

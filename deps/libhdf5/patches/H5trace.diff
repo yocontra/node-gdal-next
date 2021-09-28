@@ -1,0 +1,14 @@
+diff --git a/deps/libhdf5/hdf5/src/H5trace.c b/deps/libhdf5/hdf5/src/H5trace.c
+index 26a59c77..4b635b5e 100644
+--- libhdf5/hdf5/src/H5trace.c
++++ libhdf5/hdf5/src/H5trace.c
+@@ -44,6 +44,9 @@
+ #include "H5FDmpio.h"
+ #endif /* H5_HAVE_PARALLEL */
+
++#ifdef _MSC_VER
++#pragma warning(disable : 4311)
++#endif
+
+ /****************/
+ /* Local Macros */
