@@ -309,6 +309,8 @@ template Local<Object> ObjectStore::get(shared_ptr<GDALMDArray>);
 
 const char warningDefault[] =
   "Sleeping on semaphore in garbage collector, this is a bug in gdal-async, event loop blocked for ";
+const char warningManual[] =
+  "Closing a dataset while background async operations are still running, event loop blocked for ";
 static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning = warningDefault) {
   if (uv_sem_trywait(sem) != 0) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -326,8 +328,8 @@ static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning = w
 // Removes the object and all its children for the ObjectStore
 
 // Disposing a Dataset is a special case - it has children (called with the master lock held)
-template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>> item) {
-  uv_sem_waitWithWarning(item->async_lock.get());
+template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>> item, bool manual) {
+  uv_sem_waitWithWarning(item->async_lock.get(), manual ? warningManual : warningDefault);
   uidMap<GDALDataset *>.erase(item->uid);
   ptrMap<GDALDataset *>.erase(item->ptr);
   if (item->parent != nullptr) item->parent->children.remove(item->uid);
@@ -341,7 +343,7 @@ template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>>
   while (!item->children.empty()) { do_dispose(item->children.back()); }
 
   if (item->ptr) {
-    LOG("Closing GDALDataset %ld [%p]", uid, ptr);
+    LOG("Closing GDALDataset %ld [%p]", uid, item->ptr);
     GDALClose(item->ptr);
     item->ptr = nullptr;
   }
@@ -354,12 +356,12 @@ const char warningSQL[] =
 //   A Dataset has multiple layers, one of them is an SQL results layer
 //   An asynchronous operation is running on one of the other layers
 //   The GC decides it is time to reclaim the SQL results
-template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<OGRLayer *>> item) {
+template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<OGRLayer *>> item, bool) {
   ptrMap<OGRLayer *>.erase(item->ptr);
   uidMap<OGRLayer *>.erase(item->uid);
   if (item->parent != nullptr) { item->parent->children.remove(item->uid); }
   if (item->is_result_set) {
-    LOG("Closing OGRLayer with SQL results [%ld] [%p]", uid, ptr);
+    LOG("Closing OGRLayer with SQL results [%ld] [%p]", uid, item->ptr);
     if (item->parent) {
       uv_sem_waitWithWarning(item->parent->async_lock.get(), warningSQL);
       GDALDataset *parent_ds = item->parent->ptr;
@@ -371,40 +373,40 @@ template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<OGRLayer *>> it
 }
 
 // Generic disposal (called with the master lock held)
-template <typename GDALPTR> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item) {
+template <typename GDALPTR> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item, bool) {
   ptrMap<GDALPTR>.erase(item->ptr);
   uidMap<GDALPTR>.erase(item->uid);
   if (item->parent != nullptr) { item->parent->children.remove(item->uid); }
 }
 
 // Called from the C++ destructor
-void ObjectStore::dispose(long uid) {
+void ObjectStore::dispose(long uid, bool manual) {
   LOG("ObjectStore: Dispose [%ld]", uid);
   uv_scoped_mutex lock(&master_lock);
-  do_dispose(uid);
+  do_dispose(uid, manual);
 }
 
 // The locked section of the above function
-void ObjectStore::do_dispose(long uid) {
+void ObjectStore::do_dispose(long uid, bool manual) {
   if (uidMap<GDALDataset *>.count(uid))
-    dispose(uidMap<GDALDataset *>[uid]);
+    dispose(uidMap<GDALDataset *>[uid], manual);
   else if (uidMap<OGRLayer *>.count(uid))
-    dispose(uidMap<OGRLayer *>[uid]);
+    dispose(uidMap<OGRLayer *>[uid], manual);
   else if (uidMap<GDALRasterBand *>.count(uid))
-    dispose(uidMap<GDALRasterBand *>[uid]);
+    dispose(uidMap<GDALRasterBand *>[uid], manual);
   else if (uidMap<GDALDriver *>.count(uid))
-    dispose(uidMap<GDALDriver *>[uid]);
+    dispose(uidMap<GDALDriver *>[uid], manual);
   else if (uidMap<OGRSpatialReference *>.count(uid))
-    dispose(uidMap<OGRSpatialReference *>[uid]);
+    dispose(uidMap<OGRSpatialReference *>[uid], manual);
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
   else if (uidMap<shared_ptr<GDALGroup>>.count(uid))
-    dispose(uidMap<shared_ptr<GDALGroup>>[uid]);
+    dispose(uidMap<shared_ptr<GDALGroup>>[uid], manual);
   else if (uidMap<shared_ptr<GDALMDArray>>.count(uid))
-    dispose(uidMap<shared_ptr<GDALMDArray>>[uid]);
+    dispose(uidMap<shared_ptr<GDALMDArray>>[uid], manual);
   else if (uidMap<shared_ptr<GDALDimension>>.count(uid))
-    dispose(uidMap<shared_ptr<GDALDimension>>[uid]);
+    dispose(uidMap<shared_ptr<GDALDimension>>[uid], manual);
   else if (uidMap<shared_ptr<GDALAttribute>>.count(uid))
-    dispose(uidMap<shared_ptr<GDALAttribute>>[uid]);
+    dispose(uidMap<shared_ptr<GDALAttribute>>[uid], manual);
 #endif
 }
 

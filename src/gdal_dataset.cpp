@@ -54,14 +54,14 @@ Dataset::Dataset(GDALDataset *ds) : Nan::ObjectWrap(), uid(0), parent_uid(0), th
 
 Dataset::~Dataset() {
   // Destroy at garbage collection time if not already explicitly destroyed
-  dispose();
+  dispose(false);
 }
 
-void Dataset::dispose() {
+void Dataset::dispose(bool manual) {
   if (this_dataset) {
     LOG("Disposing Dataset [%p]", this_dataset);
 
-    object_store.dispose(uid);
+    object_store.dispose(uid, manual);
 
     LOG("Disposed Dataset [%p]", this_dataset);
 
@@ -233,10 +233,10 @@ NAN_METHOD(Dataset::getGCPProjection) {
  * If this could potentially be the case and blocking the event loop is not possible (server code),
  * then the best option is to simply dereference it (ds = null) and leave
  * the garbage collector to expire it.
- * 
+ *
  * Implementing an asynchronous delete is difficult since all V8 object creation/deletion
  * must take place on the main thread.
- * 
+ *
  * flush[Async]() ensures that, when writing, all data has been written.
  *
  * @method close
@@ -249,7 +249,7 @@ NAN_METHOD(Dataset::close) {
     return;
   }
 
-  ds->dispose();
+  ds->dispose(true);
 
   return;
 }

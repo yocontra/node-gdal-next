@@ -61,7 +61,7 @@ class Dataset : public Nan::ObjectWrap {
     return this_dataset;
   }
 
-  void dispose();
+  void dispose(bool manual);
   long uid;
   long parent_uid;
 

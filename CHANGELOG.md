@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - GEOS 3.9.1
  - GDAL 3.4.0-git
 
+### Changed
+ - Fix #13, now two different warnings are emitted whether a dataset is closed by `gdal.Dataset.close` or it is destroyed by the GC - the former is indicative of a bug in the user application, while the latter is indicative of a bug in `gdal-async` itself
+
 ## [3.3.4] 2021-09-28
 
 ### Added

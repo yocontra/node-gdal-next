@@ -61,7 +61,7 @@ class ObjectStore {
   long add(OGRLayer *ptr, Nan::Persistent<Object> &obj, long parent_uid, bool is_result_set);
   long add(GDALDataset *ptr, Nan::Persistent<Object> &obj, long parent_uid);
 
-  void dispose(long uid);
+  void dispose(long uid, bool manual = false);
   bool isAlive(long uid);
   inline void lockDataset(AsyncLock lock) {
     uv_sem_wait(lock.get());
@@ -95,8 +95,8 @@ class ObjectStore {
   uv_mutex_t master_lock;
   uv_cond_t master_sleep;
   vector<AsyncLock> _tryLockDatasets(vector<long> uids);
-  template <typename GDALPTR> void dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item);
-  void do_dispose(long uid);
+  template <typename GDALPTR> void dispose(shared_ptr<ObjectStoreItem<GDALPTR>> item, bool manual);
+  void do_dispose(long uid, bool manual = false);
 };
 
 } // namespace node_gdal
