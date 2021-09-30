@@ -307,18 +307,19 @@ template Local<Object> ObjectStore::get(shared_ptr<GDALGroup>);
 template Local<Object> ObjectStore::get(shared_ptr<GDALMDArray>);
 #endif
 
-const char warningDefault[] =
+const char warningGCBug[] =
   "Sleeping on semaphore in garbage collector, this is a bug in gdal-async, event loop blocked for ";
-const char warningManual[] =
+const char warningManualClose[] =
   "Closing a dataset while background async operations are still running, event loop blocked for ";
-static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning = warningDefault) {
+static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning) {
   if (uv_sem_trywait(sem) != 0) {
     auto start = std::chrono::high_resolution_clock::now();
-    fprintf(stderr, "%s", warning);
+    if (warning != nullptr) fprintf(stderr, "%s", warning);
     uv_sem_wait(sem);
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
-    fprintf(
-      stderr, "%ld µs\n", static_cast<long>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
+    if (warning != nullptr)
+      fprintf(
+        stderr, "%ld µs\n", static_cast<long>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
   }
 }
 
@@ -329,7 +330,8 @@ static inline void uv_sem_waitWithWarning(uv_sem_t *sem, const char *warning = w
 
 // Disposing a Dataset is a special case - it has children (called with the master lock held)
 template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>> item, bool manual) {
-  uv_sem_waitWithWarning(item->async_lock.get(), manual ? warningManual : warningDefault);
+  uv_sem_waitWithWarning(
+    item->async_lock.get(), manual ? (eventLoopWarn ? warningManualClose : nullptr) : warningGCBug);
   uidMap<GDALDataset *>.erase(item->uid);
   ptrMap<GDALDataset *>.erase(item->ptr);
   if (item->parent != nullptr) item->parent->children.remove(item->uid);
