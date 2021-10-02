@@ -34,7 +34,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: eirdataset.cpp 8d92e271d9b95c366de74a872e92e8ce237daf24 2021-09-23 17:09:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: eirdataset.cpp 0313256f977c836123f613d6602c1f10462580e1 2021-10-01 17:54:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -487,6 +487,15 @@ GDALDataset *EIRDataset::Open( GDALOpenInfo * poOpenInfo )
         {
             return nullptr;
         }
+    }
+
+    if( !RAWDatasetCheckMemoryUsage(
+                        poDS->nRasterXSize, poDS->nRasterYSize, nBands,
+                        nItemSize,
+                        nPixelOffset, nLineOffset, nSkipBytes, nBandOffset,
+                        poDS->fpImage) )
+    {
+        return nullptr;
     }
 
     poDS->SetDescription( poOpenInfo->pszFilename );

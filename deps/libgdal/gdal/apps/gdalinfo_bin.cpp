@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdalinfo_bin.cpp d0052b5856982d5b0f42239ad15094f81c2b92d6 2020-12-18 19:11:05 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalinfo_bin.cpp 3f2c47e6f18986fe860d197a6a0998bc501a8ae7 2021-09-29 21:35:29 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -150,19 +150,34 @@ MAIN_START(argc, argv)
         if ( STARTS_WITH(psOptionsForBinary->pszFilename, "/vsizip/") ||
              STARTS_WITH(psOptionsForBinary->pszFilename, "/vsitar/") )
         {
-            char** papszFileList = VSIReadDirRecursive( psOptionsForBinary->pszFilename );
-            if ( papszFileList )
+            const char* const apszOptions[] = { "NAME_AND_TYPE_ONLY=YES", nullptr };
+            VSIDIR* psDir = VSIOpenDir(psOptionsForBinary->pszFilename, -1, apszOptions);
+            if( psDir )
             {
-                int nCount = CSLCount( papszFileList );
                 fprintf( stdout,
                          "Unable to open source `%s' directly.\n"
-                         "The archive contains %d files:\n",
-                         psOptionsForBinary->pszFilename, nCount );
-                for ( int i = 0; i < nCount; i++ )
+                         "The archive contains several files:\n",
+                         psOptionsForBinary->pszFilename );
+                int nCount = 0;
+                while( auto psEntry = VSIGetNextDirEntry(psDir) )
                 {
-                    fprintf( stdout, "       %s/%s\n", psOptionsForBinary->pszFilename, papszFileList[i] );
+                    if( VSI_ISDIR(psEntry->nMode) && psEntry->pszName[0] &&
+                        psEntry->pszName[strlen(psEntry->pszName)-1] != '/' )
+                    {
+                        fprintf( stdout, "       %s/%s/\n", psOptionsForBinary->pszFilename, psEntry->pszName );
+                    }
+                    else
+                    {
+                        fprintf( stdout, "       %s/%s\n", psOptionsForBinary->pszFilename, psEntry->pszName );
+                    }
+                    nCount ++;
+                    if( nCount == 100 )
+                    {
+                        fprintf( stdout, "[...trimmed...]\n" );
+                        break;
+                    }
                 }
-                CSLDestroy( papszFileList );
+                VSICloseDir(psDir);
             }
         }
 

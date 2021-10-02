@@ -42,7 +42,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: georaster_dataset.cpp d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $")
+CPL_CVSID("$Id: georaster_dataset.cpp 55a90e35b72467384a3316e0e5f65573cf3e74fe 2021-09-29 14:34:00 -0400 fechen123 $")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterDataset()
@@ -2499,8 +2499,9 @@ void GeoRasterDataset::SetSubdatasets( GeoRasterWrapper* poGRW )
     {
         OWStatement* poStmt = poConnection->CreateStatement( CPLSPrintf(
             "SELECT   DISTINCT COLUMN_NAME, OWNER FROM ALL_SDO_GEOR_SYSDATA\n"
-            "  WHERE  TABLE_NAME = UPPER('%s')\n"
+            "  WHERE  OWNER = UPPER('%s') AND TABLE_NAME = UPPER('%s')\n"
             "  ORDER  BY COLUMN_NAME ASC",
+                poGRW->sOwner.c_str(),
                 poGRW->sTable.c_str() ) );
 
         char szColumn[OWNAME];

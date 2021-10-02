@@ -67,7 +67,7 @@
     (PROJ_VERSION_NUMBER >= PROJ_COMPUTE_VERSION(maj,min,patch))
 #endif
 
-CPL_CVSID("$Id: ogrspatialreference.cpp 71389e922e77a1eca18d14f46b2aa9fc84d70e57 2021-09-18 20:24:28 +0900 mugwort_rc $")
+CPL_CVSID("$Id: ogrspatialreference.cpp 0da9b2c800c2d756a056027e43a6eba91ea056c3 2021-09-28 23:21:23 +0200 Even Rouault $")
 
 #define STRINGIFY(s) #s
 #define XSTRINGIFY(s) STRINGIFY(s)
@@ -1574,7 +1574,8 @@ OGRErr OGRSpatialReference::exportToWkt( char ** ppszResult,
     for( const auto& oError: aoErrors )
     {
         if( pszFormat[0] == '\0' &&
-            oError.msg.find("Unsupported conversion method") != std::string::npos )
+            (oError.msg.find("Unsupported conversion method") != std::string::npos ||
+             oError.msg.find("can only be exported to WKT2") != std::string::npos) )
         {
             CPLErrorReset();
             // If we cannot export in the default mode (WKT1), retry with WKT2

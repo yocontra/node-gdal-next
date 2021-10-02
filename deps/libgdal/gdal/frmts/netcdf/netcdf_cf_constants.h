@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdf_cf_constants.h 493c57e665b7b8ed2adc0d0bdf5cfacc0c84af05 2021-09-06 17:27:53 +0200 Even Rouault $
+ * $Id: netcdf_cf_constants.h e95eccd5c6c8cd6ae90f3d8a9782fd5e858ccb9c 2021-10-02 00:16:00 +0200 Momtchil Momtchev $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.
@@ -62,8 +62,10 @@
 #define CF_LATITUDE_LNG_NAME       "latitude"
 #define CF_DEGREES_NORTH           "degrees_north" /* recommended */
 #define CF_DEGREE_NORTH            "degree_north"  /* acceptable */
+#define CF_DEGREES_N               "degrees_N"     /* acceptable */
 #define CF_DEGREES_EAST            "degrees_east"  /* recommended */
 #define CF_DEGREE_EAST             "degree_east"   /* acceptable */
+#define CF_DEGREES_E               "degrees_E"     /* acceptable */
 
 #define CF_AXIS            "axis"
 /* #define CF_BOUNDS          "bounds" */
