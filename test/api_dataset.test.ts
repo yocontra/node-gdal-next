@@ -890,6 +890,63 @@ describe('gdal.Dataset', () => {
         })
       })
     })
+    describe('getMetadataAsync()', () => {
+      it('should return object', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.tif`)
+        const metadata = ds.getMetadataAsync()
+        return Promise.all([
+          assert.eventually.isObject(metadata),
+          assert.eventually.propertyVal(metadata, 'AREA_OR_POINT', 'Area')
+        ])
+      })
+      it('should reject if dataset already closed', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.tif`)
+        ds.close()
+        return assert.isRejected(ds.getMetadataAsync())
+      })
+    })
+    describe('setMetadata()', () => {
+      it('should set the metadata', () => {
+        const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+        ds.setMetadata({ name: 'temporary' })
+        let metadata = ds.getMetadata()
+        assert.isObject(metadata)
+        assert.equal(metadata.name, 'temporary')
+
+        ds.setMetadata([ 'name=temporary' ])
+        metadata = ds.getMetadata()
+        assert.isObject(metadata)
+        assert.equal(metadata.name, 'temporary')
+      })
+      it('should throw if dataset already closed', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.tif`)
+        ds.close()
+        assert.throws(() => {
+          ds.setMetadata({})
+        }, /destroyed/)
+      })
+      it('should throw on invalid arguments', () => {
+        const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+        assert.throws(() => {
+          ds.setMetadata(42 as unknown as string[])
+        }, /Failed parsing/)
+      })
+    })
+    describe('setMetadataAsync()', () => {
+      it('should set the metadata', () => {
+        const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+        return assert.isFulfilled(ds.setMetadataAsync({ name: 'temporary' }).then(() => {
+          const metadata = ds.getMetadata()
+          assert.isObject(metadata)
+          assert.equal(metadata.name, 'temporary')
+        }))
+      })
+      it('should reject if dataset already closed', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.tif`)
+        ds.close()
+        return assert.isRejected(ds.setMetadataAsync({}))
+      })
+    })
     describe('buildOverviews()', () => {
       it('should generate overviews for all bands', () => {
         const ds = gdal.open(

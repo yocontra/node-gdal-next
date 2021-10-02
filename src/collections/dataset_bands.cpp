@@ -135,7 +135,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  * @method create
  * @throws Error
  * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
- * @param {object} [options] Creation options
+ * @param {object|string[]} [options] Creation options
  * @return {gdal.RasterBand}
  */
 
@@ -146,7 +146,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  * @method createAsync
  * @throws Error
  * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
- * @param {object} [options] Creation options
+ * @param {object|string[]} [options] Creation options
  * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.RasterBand>}
  */
@@ -206,7 +206,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
  */
 
 /**
- * 
+ *
  * Returns the number of bands.
  * {{{async}}}
  *

@@ -578,5 +578,25 @@ describe('gdal.RasterBandAsync', () => {
         })
       })
     })
+    describe('getMetadataAsync()', () => {
+      it('should return object', () => {
+        const band = gdal.open(`${__dirname}/data/sample.tif`).bands.get(1)
+        const metadata = band.getMetadataAsync()
+        return Promise.all([
+          assert.eventually.isObject(metadata),
+          assert.eventually.propertyVal(metadata, 'STATISTICS_MINIMUM', '0')
+        ])
+      })
+    })
+    describe('setMetadataAsync()', () => {
+      it('should set the metadata', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte).bands.get(1)
+        return assert.isFulfilled(band.setMetadataAsync({ name: 'temporary' }).then(() => {
+          const metadata = band.getMetadata()
+          assert.isObject(metadata)
+          assert.equal(metadata.name, 'temporary')
+        }))
+      })
+    })
   })
 })

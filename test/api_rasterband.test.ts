@@ -1500,6 +1500,26 @@ describe('gdal.RasterBand', () => {
         assert.equal(meta.LAYER_TYPE, 'athematic')
       })
     })
+    describe('setMetadata()', () => {
+      it('should set the metadata', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte).bands.get(1)
+        band.setMetadata({ name: 'temporary' })
+        let metadata = band.getMetadata()
+        assert.isObject(metadata)
+        assert.equal(metadata.name, 'temporary')
+
+        band.setMetadata([ 'name=temporary' ])
+        metadata = band.getMetadata()
+        assert.isObject(metadata)
+        assert.equal(metadata.name, 'temporary')
+      })
+      it('should throw on invalid arguments', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte).bands.get(1)
+        assert.throws(() => {
+          band.setMetadata(42 as unknown as string[])
+        }, /Failed parsing/)
+      })
+    })
     describe('getMaskBand()', () => {
       it('should retrieve the band nodata mask', () => {
         const band = gdal.open(`${__dirname}/data/test_with_mask_1bit.tif`).bands.get(1)

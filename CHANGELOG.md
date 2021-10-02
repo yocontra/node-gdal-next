@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - PROJ 8.1.1
  - GEOS 3.9.1
  - GDAL 3.4.0-git
+ - Add `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
+ - Add `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
+
+### Changed
+ - `gdal.Driver.create{Async}` now throw if they fail to parse the options instead of returning `undefined`
+ - `gdal.DatasetBands.create{Async}` and `gdal.SpatialReference.fromESRI` now have correct TypeScript signatures, all options lists are supported either in `{object}` or in `string[]` form
 
 ### Changed
  - Fix #13, now two different warnings are emitted whether a dataset is closed by `gdal.Dataset.close` or it is destroyed by the GC - the former is indicative of a bug in the user application, while the latter is indicative of a bug in `gdal-async` itself

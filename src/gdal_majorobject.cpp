@@ -6,10 +6,8 @@
 
 namespace node_gdal {
 
-Local<Object> MajorObject::getMetadata(GDALMajorObject *obj, const char *domain) {
+Local<Object> MajorObject::getMetadata(char **metadata) {
   Nan::EscapableHandleScope scope;
-
-  char **metadata = obj->GetMetadata(domain);
 
   Local<Object> result = Nan::New<Object>();
 

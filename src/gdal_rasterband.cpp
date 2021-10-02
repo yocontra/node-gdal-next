@@ -7,6 +7,7 @@
 #include "gdal_mdarray.hpp"
 #include "gdal_majorobject.hpp"
 #include "gdal_rasterband.hpp"
+#include "utils/string_list.hpp"
 
 #include <cpl_port.h>
 #include <limits>
@@ -35,7 +36,8 @@ void RasterBand::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "getMaskBand", getMaskBand);
   Nan::SetPrototypeMethod(lcons, "getMaskFlags", getMaskFlags);
   Nan::SetPrototypeMethod(lcons, "createMaskBand", createMaskBand);
-  Nan::SetPrototypeMethod(lcons, "getMetadata", getMetadata);
+  Nan__SetPrototypeAsyncableMethod(lcons, "getMetadata", getMetadata);
+  Nan__SetPrototypeAsyncableMethod(lcons, "setMetadata", setMetadata);
 
   // unimplemented methods
   // Nan::SetPrototypeMethod(lcons, "buildOverviews", buildOverviews);
@@ -180,7 +182,7 @@ NAN_METHOD(RasterBand::toString) {
  * @method flushAsync
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
- * 
+ *
  */
 NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(RasterBand, flush, FlushCache);
 
@@ -302,9 +304,9 @@ void popStatsErrorHandler() {
  * Return a view of this raster band as a 2D multidimensional GDALMDArray.
  *
  * The band must be linked to a GDALDataset.
- * 
+ *
  * If the dataset has a geotransform attached, the X and Y dimensions of the returned array will have an associated indexing variable.
- * 
+ *
  * Requires GDAL>=3.3 with MDArray support, won't be defined otherwise
  *
  * @throws Error
@@ -493,16 +495,72 @@ NAN_METHOD(RasterBand::setStatistics) {
  * @param {string} [domain]
  * @return {any}
  */
-NAN_METHOD(RasterBand::getMetadata) {
+
+/**
+ * Returns band metadata
+ *
+ * @method getMetadataAsync
+ * @param {string} [domain]
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<any>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
   Nan::HandleScope scope;
 
   std::string domain("");
   NODE_ARG_OPT_STR(0, "domain", domain);
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  const Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE &meta =
-    MajorObject::getMetadata(band->this_, domain.empty() ? NULL : domain.c_str());
-  info.GetReturnValue().Set(meta);
+  GDAL_RAW_CHECK(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<char **> job(band->parent_uid);
+  job.main = [raw, domain](const GDALExecutionProgress &) {
+    return raw->GetMetadata(domain.empty() ? nullptr : domain.c_str());
+  };
+  job.rval = [](char **md, GetFromPersistentFunc) { return MajorObject::getMetadata(md); };
+  job.run(info, async, 1);
+}
+
+/**
+ * Set metadata. Can return a warning for formats not supporting persistent metadata.
+ *
+ * @method setMetadata
+ * @param {object|string[]} metadata
+ * @param {string} [domain]
+ * @return {number}
+ */
+
+/**
+ * Set metadata. Can return a warning for formats not supporting persistent metadata.
+ * {{{async}}}
+ *
+ * @method setMetadataAsync
+ * @param {object|string[]} metadata
+ * @param {string} [domain]
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<number>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
+  Nan::HandleScope scope;
+  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK(GDALRasterBand *, band, raw);
+
+  auto options = make_shared<StringList>();
+  if (info.Length() == 0 || options->parse(info[0])) {
+    Nan::ThrowError("Failed parsing metadata");
+    return;
+  }
+
+  std::string domain("");
+  NODE_ARG_OPT_STR(1, "domain", domain);
+
+  GDALAsyncableJob<CPLErr> job(band->parent_uid);
+  job.main = [raw, options, domain](const GDALExecutionProgress &) {
+    CPLErr r = raw->SetMetadata(options->get(), domain.empty() ? nullptr : domain.c_str());
+    if (r == CE_Failure) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.run(info, async, 2);
 }
 
 /**
@@ -712,7 +770,7 @@ NAN_GETTER(RasterBand::unitTypeGetter) {
 }
 
 /**
- * 
+ *
  * Pixel data type ({{#crossLink "Constants (GDT)"}}see GDT
  * constants{{/crossLink}}) used for this band.
  *

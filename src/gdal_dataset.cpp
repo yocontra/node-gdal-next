@@ -9,6 +9,7 @@
 #include "gdal_majorobject.hpp"
 #include "gdal_rasterband.hpp"
 #include "gdal_spatial_reference.hpp"
+#include "utils/string_list.hpp"
 
 namespace node_gdal {
 
@@ -28,7 +29,8 @@ void Dataset::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "getFileList", getFileList);
   Nan__SetPrototypeAsyncableMethod(lcons, "flush", flush);
   Nan::SetPrototypeMethod(lcons, "close", close);
-  Nan::SetPrototypeMethod(lcons, "getMetadata", getMetadata);
+  Nan__SetPrototypeAsyncableMethod(lcons, "getMetadata", getMetadata);
+  Nan__SetPrototypeAsyncableMethod(lcons, "setMetadata", setMetadata);
   Nan::SetPrototypeMethod(lcons, "testCapability", testCapability);
   Nan__SetPrototypeAsyncableMethod(lcons, "executeSQL", executeSQL);
   Nan__SetPrototypeAsyncableMethod(lcons, "buildOverviews", buildOverviews);
@@ -161,20 +163,73 @@ NAN_METHOD(Dataset::toString) {
  * @param {string} [domain]
  * @return {any}
  */
-NAN_METHOD(Dataset::getMetadata) {
-  Nan::HandleScope scope;
-  Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
-  if (!ds->isAlive()) {
-    Nan::ThrowError("Dataset object has already been destroyed");
+/**
+ * Fetch metadata.
+ * {{{async}}}
+ *
+ * @method getMetadataAsync
+ * @param {string} [domain]
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<any>}
+ */
+GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
+  Nan::HandleScope scope;
+  NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
+  GDAL_RAW_CHECK(GDALDataset *, ds, raw);
+
+  std::string domain("");
+  NODE_ARG_OPT_STR(0, "domain", domain);
+
+  GDALAsyncableJob<char **> job(ds->uid);
+  job.main = [raw, domain](const GDALExecutionProgress &) {
+    return raw->GetMetadata(domain.empty() ? nullptr : domain.c_str());
+  };
+  job.rval = [](char **md, GetFromPersistentFunc) { return MajorObject::getMetadata(md); };
+  job.run(info, async, 1);
+}
+
+/**
+ * Set metadata. Can return a warning for formats not supporting persistent metadata.
+ *
+ * @method setMetadata
+ * @param {object|string[]} metadata
+ * @param {string} [domain]
+ * @return {number}
+ */
+
+/**
+ * Set metadata. Can return a warning for formats not supporting persistent metadata.
+ * {{{async}}}
+ *
+ * @method setMetadataAsync
+ * @param {object|string[]} metadata
+ * @param {string} [domain]
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<number>}
+ */
+GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {
+  Nan::HandleScope scope;
+  NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
+  GDAL_RAW_CHECK(GDALDataset *, ds, raw);
+
+  auto options = make_shared<StringList>();
+  if (info.Length() == 0 || options->parse(info[0])) {
+    Nan::ThrowError("Failed parsing metadata");
     return;
   }
 
-  GDALDataset *raw = ds->get();
   std::string domain("");
-  NODE_ARG_OPT_STR(0, "domain", domain);
-  AsyncGuard lock({ds->uid}, eventLoopWarn);
-  info.GetReturnValue().Set(MajorObject::getMetadata(raw, domain.empty() ? NULL : domain.c_str()));
+  NODE_ARG_OPT_STR(1, "domain", domain);
+
+  GDALAsyncableJob<CPLErr> job(ds->uid);
+  job.main = [raw, options, domain](const GDALExecutionProgress &) {
+    CPLErr r = raw->SetMetadata(options->get(), domain.empty() ? nullptr : domain.c_str());
+    if (r == CE_Failure) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.run(info, async, 2);
 }
 
 /**

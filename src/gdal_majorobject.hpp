@@ -18,7 +18,7 @@ namespace node_gdal {
 
 class MajorObject {
     public:
-  static Local<Object> getMetadata(GDALMajorObject *obj, const char *domain);
+  static Local<Object> getMetadata(char **metadata);
 };
 
 } // namespace node_gdal

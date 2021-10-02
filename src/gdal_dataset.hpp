@@ -33,7 +33,8 @@ class Dataset : public Nan::ObjectWrap {
   static Local<Value> New(GDALDataset *ds, GDALDataset *parent = nullptr);
   static NAN_METHOD(toString);
   GDAL_ASYNCABLE_DECLARE(flush);
-  static NAN_METHOD(getMetadata);
+  GDAL_ASYNCABLE_DECLARE(getMetadata);
+  GDAL_ASYNCABLE_DECLARE(setMetadata);
   static NAN_METHOD(getFileList);
   static NAN_METHOD(getGCPProjection);
   static NAN_METHOD(getGCPs);

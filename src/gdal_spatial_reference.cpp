@@ -839,7 +839,7 @@ NAN_METHOD(SpatialReference::fromEPSGA) {
  * @static
  * @throws Error
  * @method fromESRI
- * @param {string[]} input
+ * @param {object|string[]} input
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromESRI) {
