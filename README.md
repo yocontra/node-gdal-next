@@ -45,11 +45,11 @@ By default all dependencies are the latest versions and bundled out of the box, 
 ```sh
 # --shared_gdal allows linking to the OS-provided libgdal, requires libgdal-dev
 # (debian: sudo apt-get install libgdal-dev)
-$ npm install gdal-async --build-from-source --shared_gdal  
+$ npm install gdal-async --build-from-source --shared_gdal
 ```
 
 If you have multiple versions of GDAL or your library is not in its standard location, you can use the usual `CXXFLAGS` and `LDFLAGS` variables:
-```sh 
+```sh
 $ CXXFLAGS="-I/some/path/include" LDFLAGS="-L/some/path/lib" npm install gdal-async --build-from-source --shared_gdal
 ```
 
@@ -249,7 +249,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 Release binaries with pre-built bundled GDAL are tested against the full matrix of:
 
 * Node.js versions: 12.x, 14.x, 16.x
-* OS: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, CentOS 8, Fedora 33, Debian 10 buster, Arch Linux current, Amazon Linux, Windows Server 2019, macOS Catalina 10.15
+* OS: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Ubuntu 21.04, CentOS 8, Fedora 33, Debian 10 buster, Debian 11 bullseye, Arch Linux current, Amazon Linux, Windows Server 2019, macOS Catalina 10.15
 
 
 Development versions are unit tested for the following targets:
