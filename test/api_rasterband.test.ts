@@ -1503,12 +1503,12 @@ describe('gdal.RasterBand', () => {
     describe('setMetadata()', () => {
       it('should set the metadata', () => {
         const band = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte).bands.get(1)
-        band.setMetadata({ name: 'temporary' })
+        assert.isTrue(band.setMetadata({ name: 'temporary' }))
         let metadata = band.getMetadata()
         assert.isObject(metadata)
         assert.equal(metadata.name, 'temporary')
 
-        band.setMetadata([ 'name=temporary' ])
+        assert.isTrue(band.setMetadata([ 'name=temporary' ]))
         metadata = band.getMetadata()
         assert.isObject(metadata)
         assert.equal(metadata.name, 'temporary')

@@ -908,12 +908,12 @@ describe('gdal.Dataset', () => {
     describe('setMetadata()', () => {
       it('should set the metadata', () => {
         const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
-        ds.setMetadata({ name: 'temporary' })
+        assert.isTrue(ds.setMetadata({ name: 'temporary' }))
         let metadata = ds.getMetadata()
         assert.isObject(metadata)
         assert.equal(metadata.name, 'temporary')
 
-        ds.setMetadata([ 'name=temporary' ])
+        assert.isTrue(ds.setMetadata([ 'name=temporary' ]))
         metadata = ds.getMetadata()
         assert.isObject(metadata)
         assert.equal(metadata.name, 'temporary')

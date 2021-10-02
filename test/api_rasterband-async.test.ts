@@ -591,7 +591,8 @@ describe('gdal.RasterBandAsync', () => {
     describe('setMetadataAsync()', () => {
       it('should set the metadata', () => {
         const band = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte).bands.get(1)
-        return assert.isFulfilled(band.setMetadataAsync({ name: 'temporary' }).then(() => {
+        return assert.isFulfilled(band.setMetadataAsync({ name: 'temporary' }).then((r) => {
+          assert.isTrue(r)
           const metadata = band.getMetadata()
           assert.isObject(metadata)
           assert.equal(metadata.name, 'temporary')

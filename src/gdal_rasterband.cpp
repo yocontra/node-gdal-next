@@ -521,23 +521,23 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
 }
 
 /**
- * Set metadata. Can return a warning for formats not supporting persistent metadata.
+ * Set metadata. Can return a warning (false) for formats not supporting persistent metadata.
  *
  * @method setMetadata
  * @param {object|string[]} metadata
  * @param {string} [domain]
- * @return {number}
+ * @return {boolean}
  */
 
 /**
- * Set metadata. Can return a warning for formats not supporting persistent metadata.
+ * Set metadata. Can return a warning (false) for formats not supporting persistent metadata.
  * {{{async}}}
  *
  * @method setMetadataAsync
  * @param {object|string[]} metadata
  * @param {string} [domain]
  * @param {callback<void>} [callback=undefined] {{{cb}}}
- * @return {Promise<number>}
+ * @return {Promise<boolean>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
   Nan::HandleScope scope;
@@ -559,7 +559,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
     if (r == CE_Failure) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::New<Boolean>(r == CE_None); };
   job.run(info, async, 2);
 }
 
