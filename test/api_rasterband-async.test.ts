@@ -580,11 +580,11 @@ describe('gdal.RasterBandAsync', () => {
     })
     describe('getMetadataAsync()', () => {
       it('should return object', () => {
-        const band = gdal.open(`${__dirname}/data/sample.tif`).bands.get(1)
-        const metadata = band.getMetadataAsync()
+        const band = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`).bands.get(1)
+        const meta = band.getMetadataAsync()
         return Promise.all([
-          assert.eventually.isObject(metadata),
-          assert.eventually.propertyVal(metadata, 'STATISTICS_MINIMUM', '0')
+          assert.eventually.isObject(meta),
+          assert.eventually.propertyVal(meta, 'LAYER_TYPE', 'athematic')
         ])
       })
     })
