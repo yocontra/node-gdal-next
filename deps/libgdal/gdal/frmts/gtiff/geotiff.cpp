@@ -27,14 +27,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// If we use sunpro compiler on linux. Weird idea indeed!
-#if defined(__SUNPRO_CC) && defined(__linux__)
-#define _GNU_SOURCE
-#elif defined(__GNUC__) && !defined(_GNU_SOURCE)
-// Required to use RTLD_DEFAULT of dlfcn.h.
-#define _GNU_SOURCE
-#endif
-
 #include "cpl_port.h"  // Must be first.
 #include "gtiff.h"
 
@@ -105,7 +97,7 @@
 #include "xtiffio.h"
 #include "quant_table_md5sum.h"
 
-CPL_CVSID("$Id: geotiff.cpp cfa2355f97dbdf1e280e799102916666bf58b75e 2021-10-01 11:23:33 +0200 Thomas Bonfort $")
+CPL_CVSID("$Id: geotiff.cpp 4752b79f749c00c1048c78e59e1c66b842269726 2021-10-05 14:05:28 +0200 Even Rouault $")
 
 static bool bGlobalInExternalOvr = false;
 
@@ -462,9 +454,6 @@ private:
 
     void        LoadMDAreaOrPoint();
     void        LookForProjection();
-#ifdef ESRI_BUILD
-    void        AdjustLinearUnit( short UOMLength );
-#endif
 
     void        Crystalize();  // TODO: Spelling.
     void        RestoreVolatileParameters(TIFF* hTIFF);
@@ -684,7 +673,7 @@ class GTiffJPEGOverviewDS final : public GDALDataset
     CPLString  m_osTmpFilenameJPEGTable{};
 
     CPLString    m_osTmpFilename{};
-    GDALDataset* m_poJPEGDS = nullptr;
+    std::unique_ptr<GDALDataset> m_poJPEGDS{};
     // Valid block id of the parent DS that match poJPEGDS.
     int          m_nBlockId = -1;
 
@@ -770,8 +759,7 @@ GTiffJPEGOverviewDS::GTiffJPEGOverviewDS( GTiffDataset* poParentDSIn,
 
 GTiffJPEGOverviewDS::~GTiffJPEGOverviewDS()
 {
-    if( m_poJPEGDS != nullptr )
-        GDALClose( m_poJPEGDS );
+    m_poJPEGDS.reset();
     VSIUnlink(m_osTmpFilenameJPEGTable);
     if( !m_osTmpFilename.empty() )
         VSIUnlink(m_osTmpFilename);
@@ -890,9 +878,7 @@ CPLErr GTiffJPEGOverviewBand::IReadBlock( int nBlockXOff, int nBlockYOff,
               m_poGDS->m_poJPEGDS->GetRasterYSize() !=
               nBlockYSize * nScaleFactor)) )
         {
-            if( m_poGDS->m_poJPEGDS != nullptr )
-                GDALClose( m_poGDS->m_poJPEGDS );
-            m_poGDS->m_poJPEGDS = nullptr;
+            m_poGDS->m_poJPEGDS.reset();
         }
 
         CPLString osFileToOpen;
@@ -909,8 +895,7 @@ CPLErr GTiffJPEGOverviewBand::IReadBlock( int nBlockXOff, int nBlockYOff,
             if( m_poGDS->m_poJPEGDS != nullptr &&
                 STARTS_WITH(m_poGDS->m_poJPEGDS->GetDescription(), "/vsisparse/") )
             {
-                GDALClose( m_poGDS->m_poJPEGDS );
-                m_poGDS->m_poJPEGDS = nullptr;
+                m_poGDS->m_poJPEGDS.reset();
             }
             osFileToOpen = m_poGDS->m_osTmpFilename;
 
@@ -943,8 +928,7 @@ CPLErr GTiffJPEGOverviewBand::IReadBlock( int nBlockXOff, int nBlockYOff,
             // fake JPEG file.
 
             // Always re-open.
-            GDALClose( m_poGDS->m_poJPEGDS );
-            m_poGDS->m_poJPEGDS = nullptr;
+            m_poGDS->m_poJPEGDS.reset();
 
             osFileToOpen =
                 CPLSPrintf("/vsisparse/%s", m_poGDS->m_osTmpFilename.c_str());
@@ -978,42 +962,28 @@ CPLErr GTiffJPEGOverviewBand::IReadBlock( int nBlockXOff, int nBlockYOff,
 
         if( m_poGDS->m_poJPEGDS == nullptr )
         {
-            const char* apszDrivers[] = { "JPEG", nullptr };
+            const char* const apszDrivers[] = { "JPEG", nullptr };
 
-            CPLString osOldVal;
-            if( m_poGDS->m_poParentDS->m_nPlanarConfig == PLANARCONFIG_CONTIG &&
-                m_poGDS->nBands == 4 )
-            {
-                osOldVal =
-                    CPLGetThreadLocalConfigOption("GDAL_JPEG_TO_RGB", "");
-                CPLSetThreadLocalConfigOption("GDAL_JPEG_TO_RGB", "NO");
-            }
+            CPLConfigOptionSetter oJPEGtoRGBSetter(
+                "GDAL_JPEG_TO_RGB",
+                m_poGDS->m_poParentDS->m_nPlanarConfig == PLANARCONFIG_CONTIG &&
+                m_poGDS->nBands == 4 ? "NO" : "YES",
+                false);
 
-            m_poGDS->m_poJPEGDS =
-                static_cast<GDALDataset *>( GDALOpenEx(
+            m_poGDS->m_poJPEGDS.reset(GDALDataset::Open(
                     osFileToOpen,
                     GDAL_OF_RASTER | GDAL_OF_INTERNAL,
-                    apszDrivers, nullptr, nullptr) );
+                    apszDrivers, nullptr, nullptr));
 
             if( m_poGDS->m_poJPEGDS != nullptr )
             {
                 // Force all implicit overviews to be available, even for
                 // small tiles.
-                CPLSetThreadLocalConfigOption( "JPEG_FORCE_INTERNAL_OVERVIEWS",
-                                               "YES");
-                GDALGetOverviewCount(GDALGetRasterBand(m_poGDS->m_poJPEGDS, 1));
-                CPLSetThreadLocalConfigOption( "JPEG_FORCE_INTERNAL_OVERVIEWS",
-                                               nullptr);
+                CPLConfigOptionSetter oInternalOverviewsSetter(
+                    "JPEG_FORCE_INTERNAL_OVERVIEWS", "YES", false);
+                GDALGetOverviewCount(GDALGetRasterBand(m_poGDS->m_poJPEGDS.get(), 1));
 
                 m_poGDS->m_nBlockId = nBlockId;
-            }
-
-            if( m_poGDS->m_poParentDS->m_nPlanarConfig == PLANARCONFIG_CONTIG &&
-                m_poGDS->nBands == 4 )
-            {
-                CPLSetThreadLocalConfigOption(
-                    "GDAL_JPEG_TO_RGB",
-                    !osOldVal.empty() ? osOldVal.c_str() : nullptr );
             }
         }
         else
@@ -1024,8 +994,7 @@ CPLErr GTiffJPEGOverviewBand::IReadBlock( int nBlockXOff, int nBlockYOff,
             m_poGDS->m_poJPEGDS->FlushCache();
             if( CPLGetLastErrorNo() != 0 )
             {
-                GDALClose( m_poGDS->m_poJPEGDS );
-                m_poGDS->m_poJPEGDS = nullptr;
+                m_poGDS->m_poJPEGDS.reset();
                 return CE_Failure;
             }
             m_poGDS->m_nBlockId = nBlockId;
@@ -1035,7 +1004,7 @@ CPLErr GTiffJPEGOverviewBand::IReadBlock( int nBlockXOff, int nBlockYOff,
     CPLErr eErr = CE_Failure;
     if( m_poGDS->m_poJPEGDS )
     {
-        GDALDataset* l_poDS = m_poGDS->m_poJPEGDS;
+        GDALDataset* l_poDS = m_poGDS->m_poJPEGDS.get();
 
         int nReqXOff = 0;
         int nReqYOff = 0;
@@ -11146,12 +11115,16 @@ void GTiffDataset::WriteGeoTIFFInfo()
         if( bHasProjection )
         {
             char* pszProjection = nullptr;
+            OGRErr eErr;
             {
                 CPLErrorStateBackuper oErrorStateBackuper;
                 CPLErrorHandlerPusher oErrorHandler(CPLQuietErrorHandler);
-                m_oSRS.exportToWkt(&pszProjection);
+                if( m_oSRS.IsDerivedGeographic() )
+                    eErr = OGRERR_FAILURE;
+                else
+                    eErr = m_oSRS.exportToWkt(&pszProjection);
             }
-            if( pszProjection && pszProjection[0] &&
+            if( eErr == OGRERR_NONE && pszProjection && pszProjection[0] &&
                 strstr(pszProjection, "custom_proj4") == nullptr )
             {
                 GTIFSetFromOGISDefnEx( psGTIF,
@@ -12839,11 +12812,6 @@ void GTiffDataset::LookForProjection()
             }
         }
 
-        // Check the tif linear unit and the CS linear unit.
-#ifdef ESRI_BUILD
-        AdjustLinearUnit(psGTIFDefn.UOMLength);
-#endif
-
         GTIFFreeDefn(psGTIFDefn);
 
         GTiffDatasetSetAreaOrPointMD( hGTIF, m_oGTiffMDMD );
@@ -12855,47 +12823,6 @@ void GTiffDataset::LookForProjection()
     m_bForceUnsetGTOrGCPs = false;
     m_bForceUnsetProjection = false;
 }
-
-/************************************************************************/
-/*                          AdjustLinearUnit()                          */
-/*                                                                      */
-/*      The following code is only used in ESRI Builds and there is     */
-/*      outstanding discussion on whether it is even appropriate        */
-/*      then.                                                           */
-/************************************************************************/
-#ifdef ESRI_BUILD
-
-void GTiffDataset::AdjustLinearUnit( short UOMLength )
-{
-    if( !pszProjection || strlen(pszProjection) == 0 )
-        return;
-    if( UOMLength == 9001 )
-    {
-        char* pstr = strstr(pszProjection, "PARAMETER");
-        if( !pstr )
-            return;
-        pstr = strstr(pstr, "UNIT[");
-        if( !pstr )
-            return;
-        pstr = strchr(pstr, ',') + 1;
-        if( !pstr )
-            return;
-        char* pstr1 = strchr(pstr, ']');
-        if( !pstr1 || pstr1 - pstr >= 128 )
-            return;
-        char csUnitStr[128];
-        strncpy(csUnitStr, pstr, pstr1 - pstr);
-        csUnitStr[pstr1-pstr] = '\0';
-        const double csUnit = CPLAtof(csUnitStr);
-        if( fabs(csUnit - 1.0) > 0.000001 )
-        {
-            for( long i = 0; i < 6; ++i )
-                adfGeoTransform[i] /= csUnit;
-        }
-    }
-}
-
-#endif  // def ESRI_BUILD
 
 /************************************************************************/
 /*                            ApplyPamInfo()                            */
@@ -17901,9 +17828,13 @@ GTiffDataset::CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
             {
                 CPLErrorStateBackuper oErrorStateBackuper;
                 CPLErrorHandlerPusher oErrorHandler(CPLQuietErrorHandler);
-                eErr = l_poSRS->exportToWkt(&pszWKT);
+                if( l_poSRS->IsDerivedGeographic() )
+                    eErr = OGRERR_FAILURE;
+                else
+                    eErr = l_poSRS->exportToWkt(&pszWKT);
             }
-            if( eErr == OGRERR_NONE && strstr(pszWKT, "custom_proj4") == nullptr )
+            if( eErr == OGRERR_NONE && pszWKT != nullptr &&
+                strstr(pszWKT, "custom_proj4") == nullptr )
             {
                 GTIFSetFromOGISDefnEx( psGTIF,
                                        OGRSpatialReference::ToHandle(
@@ -18842,6 +18773,12 @@ CPLErr GTiffDataset::SetSpatialRef( const OGRSpatialReference * poSRS )
 
     m_bGeoTIFFInfoChanged = true;
 
+    if( (m_eProfile == GTiffProfile::BASELINE) &&
+        (GetPamFlags() & GPF_DISABLED) == 0 )
+    {
+        GDALPamDataset::SetSpatialRef(poSRS);
+    }
+
     return CE_None;
 }
 
@@ -18924,6 +18861,14 @@ CPLErr GTiffDataset::SetGeoTransform( double * padfTransform )
         memcpy( m_adfGeoTransform, padfTransform, sizeof(double)*6 );
         m_bGeoTransformValid = true;
         m_bGeoTIFFInfoChanged = true;
+
+        if( (m_eProfile == GTiffProfile::BASELINE) &&
+            !CPLFetchBool( m_papszCreationOptions, "TFW", false ) &&
+            !CPLFetchBool( m_papszCreationOptions, "WORLDFILE", false ) &&
+            (GetPamFlags() & GPF_DISABLED) == 0 )
+        {
+            GDALPamDataset::SetGeoTransform(padfTransform);
+        }
 
         return CE_None;
     }
@@ -19033,6 +18978,12 @@ CPLErr GTiffDataset::SetGCPs( int nGCPCountIn, const GDAL_GCP *pasGCPListIn,
         m_pasGCPList = GDALDuplicateGCPs(m_nGCPCount, pasGCPListIn);
 
         m_bGeoTIFFInfoChanged = true;
+
+        if( (m_eProfile == GTiffProfile::BASELINE) &&
+            (GetPamFlags() & GPF_DISABLED) == 0 )
+        {
+            GDALPamDataset::SetGCPs(nGCPCountIn, pasGCPListIn, poGCPSRS);
+        }
 
         return CE_None;
     }
@@ -19903,9 +19854,6 @@ static void GTiffTagExtender(TIFF *tif)
 /*      unnecessary paging in of the library for GDAL apps that         */
 /*      don't use it.                                                   */
 /************************************************************************/
-#if defined(HAVE_DLFCN_H) && !defined(WIN32)
-#include <dlfcn.h>
-#endif
 
 static std::mutex oDeleteMutex;
 #ifdef HAVE_JXL
@@ -19929,38 +19877,6 @@ int GTiffOneTimeInit()
         return TRUE;
 
     bOneTimeInitDone = true;
-
-    // This is a frequent configuration error that is difficult to track down
-    // for people unaware of the issue : GDAL built against internal libtiff
-    // (4.X), but used by an application that links with external libtiff (3.X)
-    // Note: on my conf, the order that cause GDAL to crash - and that is
-    // detected by the following code - is "-ltiff -lgdal". "-lgdal -ltiff"
-    // works for the GTiff driver but probably breaks the application that
-    // believes it uses libtiff 3.X but we cannot detect that.
-#if !defined(RENAME_INTERNAL_LIBTIFF_SYMBOLS)
-#if defined(HAVE_DLFCN_H) && !defined(WIN32)
-    const char* (*pfnVersion)(void);
-#ifdef HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
-    pfnVersion = reinterpret_cast<const char* (*)(void)>(dlsym(RTLD_DEFAULT, "TIFFGetVersion"));
-#ifdef HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT
-#pragma GCC diagnostic pop
-#endif
-    if( pfnVersion )
-    {
-        const char* pszVersion = pfnVersion();
-        if( pszVersion && strstr(pszVersion, "Version 3.") != nullptr )
-        {
-            CPLError(
-                CE_Warning, CPLE_AppDefined,
-                "libtiff version mismatch: You're linking against libtiff 3.X, "
-                "but GDAL has been compiled against libtiff >= 4.0.0" );
-        }
-    }
-#endif  // HAVE_DLFCN_H
-#endif // !defined(RENAME_INTERNAL_LIBTIFF_SYMBOLS)
 
     _ParentExtender = TIFFSetTagExtender(GTiffTagExtender);
 

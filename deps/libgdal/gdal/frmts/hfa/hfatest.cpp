@@ -30,7 +30,7 @@
 #include "hfa_p.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: hfatest.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfatest.cpp 103cca9e043935bf3548fdf419ff34346ff448ee 2021-10-06 17:32:54 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -41,21 +41,6 @@ static void Usage()
 {
     printf( "hfatest [-dd] [-dt] [-dr] filename\n" );
 }
-
-/************************************************************************/
-/* Stub for HFAPCSStructToWKT, defined in hfadataset.cpp but used by    */
-/* hfaopen.cpp                                                          */
-/************************************************************************/
-#ifndef WIN32
-char *
-HFAPCSStructToWKT( const Eprj_Datum *,
-                   const Eprj_ProParameters *,
-                   const Eprj_MapInfo *,
-                   HFAEntry * )
-{
-    return nullptr;
-}
-#endif
 
 /************************************************************************/
 /*                                main()                                */

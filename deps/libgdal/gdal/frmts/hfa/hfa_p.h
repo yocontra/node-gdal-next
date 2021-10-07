@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hfa_p.h 085ace6b956265eaf2405b298048c59e7a9027cd 2019-10-19 23:19:13 +0200 Even Rouault $
+ * $Id: hfa_p.h 103cca9e043935bf3548fdf419ff34346ff448ee 2021-10-06 17:32:54 +0200 Even Rouault $
  *
  * Project:  Erdas Imagine (.img) Translator
  * Purpose:  Private class declarations for the HFA classes used to read
@@ -42,6 +42,7 @@
 
 #include "cpl_error.h"
 #include "cpl_vsi.h"
+#include "ogr_spatialref.h"
 
 #ifdef CPL_LSB
 #  define HFAStandard(n,p) {}
@@ -135,11 +136,14 @@ HFACreateLayer( HFAHandle psInfo, HFAEntry *poParent,
                 GIntBig nStackDataOffset,
                 int nStackCount, int nStackIndex );
 
-char *
-HFAPCSStructToWKT( const Eprj_Datum *psDatum,
+std::unique_ptr<OGRSpatialReference>
+HFAPCSStructToOSR( const Eprj_Datum *psDatum,
                    const Eprj_ProParameters *psPro,
                    const Eprj_MapInfo *psMapInfo,
                    HFAEntry *poMapInformation );
+
+const char *const* HFAGetDatumMap();
+const char *const* HFAGetUnitMap();
 
 /************************************************************************/
 /*                               HFABand                                */

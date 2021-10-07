@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "ershdrnode.h"
 
-CPL_CVSID("$Id: ershdrnode.cpp 681c3e492f9e8b4d60495c5038b583c8528c7d90 2019-08-23 12:48:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ershdrnode.cpp 324e06615e36abed5607db4d52e8e2107fd6afb3 2021-10-06 15:31:13 -0400 Matthew Plough $")
 
 /************************************************************************/
 /*                             ERSHdrNode()                             */
@@ -175,7 +175,7 @@ int ERSHdrNode::ParseChildren( VSILFILE * fp, int nRecLevel )
 
         if( (iOff = osLine.find_first_of( '=' )) != std::string::npos )
         {
-            CPLString osName = iOff == 0 ? std::string() : osLine.substr(0,iOff-1);
+            CPLString osName = iOff == 0 ? std::string() : osLine.substr(0,iOff);
             osName.Trim();
 
             CPLString osValue = osLine.c_str() + iOff + 1;

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - PROJ 8.1.1
  - GEOS 3.9.1
- - GDAL 3.4.0-git (2021-10-02)
+ - GDAL 3.4.0-git (2021-10-07)
  - Add `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - Add `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
 

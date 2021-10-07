@@ -67,7 +67,7 @@
     (PROJ_VERSION_NUMBER >= PROJ_COMPUTE_VERSION(maj,min,patch))
 #endif
 
-CPL_CVSID("$Id: ogrspatialreference.cpp 0da9b2c800c2d756a056027e43a6eba91ea056c3 2021-09-28 23:21:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrspatialreference.cpp b09e2ae746159c83f6d7d0aba12c3064f82dc41c 2021-09-29 23:48:48 +0200 Even Rouault $")
 
 #define STRINGIFY(s) #s
 #define XSTRINGIFY(s) STRINGIFY(s)
@@ -4020,6 +4020,9 @@ OGRErr OGRSpatialReference::importFromURN( const char *pszURN )
 
 {
 #if PROJ_AT_LEAST_VERSION(8,1,0)
+
+    // PROJ 8.2.0 has support for IAU codes now.
+#if !PROJ_AT_LEAST_VERSION(8,2,0)
 /* -------------------------------------------------------------------- */
 /*      Is this an IAU code?  Lets try for the IAU2000 dictionary.      */
 /* -------------------------------------------------------------------- */
@@ -4035,6 +4038,8 @@ OGRErr OGRSpatialReference::importFromURN( const char *pszURN )
             return importFromDict( "IAU2000.wkt", pszCode );
         }
     }
+#endif
+
     if( strlen(pszURN) >= 1000 )
     {
         CPLError(CE_Failure, CPLE_AppDefined, "Too long input string");

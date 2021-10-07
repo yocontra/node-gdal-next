@@ -70,7 +70,7 @@ CPL_C_END
 #include "ogr_spatialref.h"
 #include "memdataset.h"
 
-CPL_CVSID("$Id: gribdataset.cpp b3d3d0bf586706e89e65f1ed622933ec168ffb21 2021-09-27 07:58:41 +0200 Momtchil Momtchev $")
+CPL_CVSID("$Id: gribdataset.cpp a8c25e35bac116958aadff7ae462684875f6746e 2021-10-04 17:34:55 +0200 Even Rouault $")
 
 static CPLMutex *hGRIBMutex = nullptr;
 
@@ -2042,9 +2042,21 @@ const std::vector<double>& GRIBSharedResource::LoadData(vsi_l_offset nOffset,
         m_adfCurData.clear();
         return m_adfCurData;
     }
+    const size_t nPointCount = static_cast<size_t>(nx) * ny;
+    const size_t nByteCount = nPointCount * sizeof(double);
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if( nByteCount > static_cast<size_t>(INT_MAX) )
+    {
+        CPLError(CE_Failure, CPLE_OutOfMemory,
+                 "Too large memory allocation attempt");
+        free(data);
+        m_adfCurData.clear();
+        return m_adfCurData;
+    }
+#endif
     try
     {
-        m_adfCurData.resize( static_cast<size_t>(nx) * ny );
+        m_adfCurData.resize( nPointCount );
     }
     catch( const std::exception& e )
     {
@@ -2054,7 +2066,7 @@ const std::vector<double>& GRIBSharedResource::LoadData(vsi_l_offset nOffset,
         return m_adfCurData;
     }
     m_nOffsetCurData = nOffset;
-    memcpy(&m_adfCurData[0], data, static_cast<size_t>(nx) * ny * sizeof(double));
+    memcpy(&m_adfCurData[0], data, nByteCount);
     free(data);
     return m_adfCurData;
 }
