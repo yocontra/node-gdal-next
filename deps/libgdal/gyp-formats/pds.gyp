@@ -17,7 +17,9 @@
 			],
 			"include_dirs": [
 				"../gdal/frmts/pds",
-				"../gdal/frmts/raw"
+				"../gdal/frmts/raw",
+        "../gdal/frmts/gtiff/libgeotiff",
+        "../gdal/frmts/gtiff/libtiff"
 			]
 		}
 	]
