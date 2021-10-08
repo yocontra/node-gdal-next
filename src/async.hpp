@@ -178,7 +178,8 @@ class GDALExecutionProgress {
 };
 
 /**
- * @typedef ProgressOptions { progress_cb: ProgressCb }
+ * @typedef ProgressOptions
+ * @property {ProgressCb} progress_cb
  */
 
 /**

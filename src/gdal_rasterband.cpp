@@ -379,7 +379,11 @@ NAN_METHOD(RasterBand::getStatistics) {
 }
 
 /**
- * @typedef stats { min: number, max: number, mean: number, std_dev: number }
+ * @typedef stats
+ * @property {number} min
+ * @property {number} max
+ * @property {number} mean
+ * @property {number} std_dev
  */
 
 /**

@@ -255,7 +255,15 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
 }
 
 /**
- * @typedef ReadOptions { buffer_width?: number, buffer_height?: number, type?: string, pixel_space?: number, line_space?: number, resampling?: string, progress_cb?: ProgressCb, offset?: number }
+ * @typedef ReadOptions
+ * @property {number} [buffer_width]
+ * @property {number} [buffer_height]
+ * @property {string} [type]
+ * @property {number} [pixel_space]
+ * @property {number} [line_space]
+ * @property {string} [resampling]
+ * @property {ProgressCb} [progress_cb]
+ * @property {number} [offset]
  */
 
 /**
@@ -409,7 +417,13 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
 }
 
 /**
- * @typedef WriteOptions { buffer_width?: number, buffer_height?: number, pixel_space?: number, line_space?: number, progress_cb?: ProgressCb, offset?: number }
+ * @typedef WriteOptions
+ * @property {number} [buffer_width]
+ * @property {number} [buffer_height]
+ * @property {number} [pixel_space]
+ * @property {number} [line_space]
+ * @property {ProgressCb} [progress_cb]
+ * @property {number} [offset]
  */
 
 /**

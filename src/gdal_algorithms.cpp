@@ -17,7 +17,11 @@ void Algorithms::Initialize(Local<Object> target) {
 }
 
 /**
- * @typedef FillOptions { src: gdal.RasterBand, mask?: gdal.RasterBand, searchDist: number, smoothingIterations?: number }
+ * @typedef FillOptions
+ * @property {gdal.RasterBand} src
+ * @property {gdal.RasterBand} [mask]
+ * @property {number} searchDist
+ * @property {number} [smoothingIterations]
  */
 
 /**
@@ -87,7 +91,16 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
 }
 
 /**
- * @typedef ContourOptions { src: gdal.RasterBand, dst: gdal.Layer, offset?: number, interval?: number, fixedLevels?: number[], nodata?: number, idField?: number, elevField?: number, progress_cb?: ProgressCb }
+ * @typedef ContourOptions
+ * @property {gdal.RasterBand} src
+ * @property {gdal.Layer} dst
+ * @property {number} [offset]
+ * @property {number} [interval]
+ * @property {number[]} [fixedLevels]
+ * @property {number} [nodata]
+ * @property {number} [idField]
+ * @property {number} [elevField]
+ * @property {ProgressCb} [progress_cb]
  */
 
 /**
@@ -224,7 +237,13 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
 }
 
 /**
- * @typedef SieveOptions { src: gdal.RasterBand, dst: gdal.RasterBand, mask?: gdal.RasterBand, threshold: number, connectedness?: number, progress_cb?: ProgressCb }
+ * @typedef SieveOptions
+ * @property {gdal.RasterBand} src
+ * @property {gdal.RasterBand} dst
+ * @property {gdal.RasterBand} [mask]
+ * @property {number} threshold
+ * @property {number} [connectedness]
+ * @property {ProgressCb} [progress_cb]
  */
 
 /**
@@ -388,7 +407,14 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
 }
 
 /**
- * @typedef PolygonizeOptions { src: gdal.RasterBand, dst: gdal.Layer, mask?: gdal.RasterBand, pixValField: number, connectedness?: number, useFloats?: boolean, progress_cb?: ProgressCb }
+ * @typedef PolygonizeOptions
+ * @property {gdal.RasterBand} src
+ * @property {gdal.Layer} dst
+ * @property {gdal.RasterBand} [mask]
+ * @property {number} pixValField
+ * @property {number} [connectedness]
+ * @property {boolean} [useFloats]
+ * @property {ProgressCb} [progress_cb]
  */
 
 /**

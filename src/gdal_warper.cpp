@@ -163,7 +163,25 @@ CPLErr GDALReprojectImageMulti(
 }
 
 /**
- * @typedef ReprojectOptions { src: gdal.Dataset, dst: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, resampling?: string, cutline?: gdal.Geometry, srcBands?: number[], dstBands?: number[], srcAlphaBand?: number, dstAlphaBand?: number, srcNodata?: number, dstNodata?: number, blend?: number, memoryLimit?: number, maxError?: number, multi?: boolean, options?: object, progress_cb?: ProgressCb }
+ * @typedef ReprojectOptions
+ * @property {gdal.Dataset} src
+ * @property {gdal.Dataset} dst
+ * @property {gdal.SpatialReference} s_srs
+ * @property {gdal.SpatialReference} t_srs
+ * @property {string} [resampling]
+ * @property {gdal.Geometry} [cutline]
+ * @property {number[]} [srcBands]
+ * @property {number[]} [dstBands]
+ * @property {number} [srcAlphaBand]
+ * @property {number} [dstAlphaBand]
+ * @property {number} [srcNodata]
+ * @property {number} [dstNodata]
+ * @property {number} [blend]
+ * @property {number} [memoryLimit]
+ * @property {number} [maxError]
+ * @property {boolean} [multi]
+ * @property {object} [options]
+ * @property {ProgressCb} [progress_cb]
  */
 
 /**
@@ -316,11 +334,17 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
 }
 
 /**
- * @typedef WarpOptions { src: gdal.Dataset, s_srs: gdal.SpatialReference, t_srs: gdal.SpatialReference, maxError?: number }
+ * @typedef WarpOptions
+ * @property {gdal.Dataset} src
+ * @property {gdal.SpatialReference} s_srs
+ * @property {gdal.SpatialReference} t_srs
+ * @property {number} [maxError]
  */
 
 /**
- * @typedef WarpOutput { rasterSize: xyz, geoTransform: number[] }
+ * @typedef WarpOutput
+ * @property {xyz} rasterSize
+ * @property {number[]} geoTransform
  */
 
 /**

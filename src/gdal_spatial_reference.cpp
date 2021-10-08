@@ -868,7 +868,9 @@ NAN_METHOD(SpatialReference::fromESRI) {
 }
 
 /**
- * @typedef units { units: string, value: number }
+ * @typedef units
+ * @property {string} units
+ * @property {number} value
  */
 
 /**

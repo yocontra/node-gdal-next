@@ -144,7 +144,13 @@ NAN_METHOD(MDArray::toString) {
 }
 
 /**
- * @typedef MDArrayOptions { origin: number[], span: number[], stride?: number[], data_type?: string, data?: TypedArray, _offset?: number }
+ * @typedef MDArrayOptions
+ * @property {number[]} origin
+ * @property {number[]} span
+ * @property {number[]} [stride]
+ * @property {string} [data_type]
+ * @property {TypedArray} [data]
+ * @property {number} [_offset]
  */
 
 /* Find the lowest possible element index for the given spans and strides */
@@ -203,13 +209,13 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
 
 /**
  * Read data from the MDArray
- * 
+ *
  * This will extract the context of a (hyper-)rectangle from the array into a buffer.
  * If the buffer can be passed as an argument or it can be allocated by the function.
  * Generalized n-dimensional strides are supported.
- * 
+ *
  * Although this method can be used in its raw form, it works best when used with the ndarray plugin.
- * 
+ *
  * @method read
  * @throws Error
  * @param {MDArrayOptions} options
@@ -224,13 +230,13 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
 /**
  * Read data from the MDArray
  * {{{async}}}
- * 
+ *
  * This will extract the context of a (hyper-)rectangle from the array into a buffer.
  * If the buffer can be passed as an argument or it can be allocated by the function.
  * Generalized n-dimensional strides are supported.
- * 
+ *
  * Although this method can be used in its raw form, it works best when used with the ndarray plugin.
- * 
+ *
  * @method readAsync
  * @throws Error
  * @param {MDArrayOptions} options
@@ -349,7 +355,7 @@ GDAL_ASYNCABLE_DEFINE(MDArray::read) {
 
 /**
  * Get a partial view of the MDArray
- * 
+ *
  * The slice expression uses the same syntax as NumPy basic slicing and indexing. See (https://www.numpy.org/devdocs/reference/arrays.indexing.html#basic-slicing-and-indexing). Or it can use field access by name. See (https://www.numpy.org/devdocs/reference/arrays.indexing.html#field-access).
  *
  * @method getView
@@ -377,9 +383,9 @@ NAN_METHOD(MDArray::getView) {
 
 /**
  * Return an array that is a mask for the current array.
- * 
+ *
  * This array will be of type Byte, with values set to 0 to indicate invalid pixels of the current array, and values set to 1 to indicate valid pixels.
- * 
+ *
  * The generic implementation honours the NoDataValue, as well as various netCDF CF attributes: missing_value, _FillValue, valid_min, valid_max and valid_range.
  *
  * @method getMask
@@ -589,7 +595,7 @@ NAN_GETTER(MDArray::descriptionGetter) {
 
 /**
  * The flattened length of the array
- * 
+ *
  * @readOnly
  * @attribute length
  * @type {number}

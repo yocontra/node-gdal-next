@@ -3,12 +3,6 @@
 namespace node_gdal {
 
 /**
- * @for gdal
- * @property vsimem
- * @type {vsimem}
- */
-
-/**
  * @class vsimem
  * Operations on in-memory /vsimem/ files
  */
