@@ -178,10 +178,11 @@ describe('gdal.drivers', () => {
         outputFilename,
         gdal.open(`${__dirname}/data/12_791_1476.jpg`),
         {},
-        false,
         (): void => {
           calls++
-        })
+        },
+        false,
+      )
       assert.equal(ds.driver.description, 'MEM')
       assert.isAbove(calls, 0)
     })
