@@ -60,6 +60,7 @@
 #include "gdal_dimension.hpp"
 #include "gdal_attribute.hpp"
 #include "gdal_warper.hpp"
+#include "gdal_utils.hpp"
 
 #include "gdal_coordinate_transformation.hpp"
 #include "gdal_feature.hpp"
@@ -446,6 +447,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   RasterBandOverviews::Initialize(target);
   RasterBandPixels::Initialize(target);
   Memfile::Initialize(target);
+  Utils::Initialize(target);
 
   /**
    * The collection of all drivers registered with GDAL
@@ -895,7 +897,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   /**
    * String extended type for MDArrays (GDAL >= 3.1)
    * @final
-   * @property gdal.GEDTC_String 
+   * @property gdal.GEDTC_String
    * @type {string}
    */
   Nan::Set(target, Nan::New("GEDTC_String").ToLocalChecked(), Nan::New("String").ToLocalChecked());

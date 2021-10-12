@@ -12,6 +12,7 @@
 				"./gdal/apps/ogr2ogr_lib.cpp",
 				"./gdal/apps/gdalbuildvrt_lib.cpp",
         "./gdal/apps/gdal_translate_lib.cpp",
+        "./gdal/apps/gdalinfo_lib.cpp",
         "./gdal/apps/gdalwarp_lib.cpp",
 				"./gdal/apps/commonutils.cpp",
 				"./gdal/frmts/gdalallregister.cpp",
@@ -225,6 +226,7 @@
 					"./gdal/alg",
 					"./gdal/gcore",
 					"./gdal/port",
+					"./gdal/apps",
 					"./gdal/ogr",
 					"./gdal/ogr/ogrsf_frmts"
 				],

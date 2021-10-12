@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - GDAL 3.4.0-git (2021-10-07)
  - Add `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - Add `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
+ - Add `gdal.Utils.info{Async}`, `gdal.Utils.translate{Async}` and `gdal.Utils.vectorTranslate{Async}` - library versions of `gdalinfo`, `gdal_translate` and `ogr2ogr`
 
 ### Changed
  - (***BREAKING***) Move the progress callback of `gdal.Driver.createCopy{Async}` before `strict` to allow using it with a Promise

@@ -44,6 +44,7 @@
 				"src/gdal_warper.cpp",
 				"src/gdal_algorithms.cpp",
 				"src/gdal_memfile.cpp",
+				"src/gdal_utils.cpp",
 				"src/collections/dataset_bands.cpp",
 				"src/collections/dataset_layers.cpp",
 				"src/collections/layer_features.cpp",

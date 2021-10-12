@@ -6,6 +6,7 @@
             "${workspaceFolder}/deps/libgdal/gdal/ogr",
             "${workspaceFolder}/deps/libgdal/gdal/ogr/ogrsf_frmts",
             "${workspaceFolder}/deps/libgdal/gdal/alg",
+            "${workspaceFolder}/deps/libgdal/gdal/apps",
             "${workspaceFolder}/deps/libgdal/arch/unix",
             "${workspaceFolder}/node_modules/nan"
         ]
