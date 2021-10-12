@@ -16,8 +16,12 @@ const copyRecursiveSync = function (src, dest) {
 }
 
 module.exports.clone = function (file) {
-  const dotpos = file.lastIndexOf('.')
-  const result = `${file.substring(0, dotpos)}.tmp${String(Math.random()).substring(2)}${file.substring(dotpos)}`
+  const base = path.basename(file)
+  const dotpos = base.lastIndexOf('.')
+  const destname = `${base.substring(0, dotpos)}.tmp${String(Math.random()).substring(2)}${base.substring(dotpos)}`
+  const destdir = path.resolve(path.dirname(file), 'temp')
+  fs.mkdirSync(destdir, { recursive: true })
+  const result = path.resolve(destdir, destname)
 
   fs.writeFileSync(result, fs.readFileSync(file))
   return result
