@@ -372,6 +372,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
   int x = 0, y = 0, w, h, bandw, bandh;
 
   NODE_ARG_WRAPPED(0, "src", RasterBand, src);
+  GDAL_RAW_CHECK(GDALRasterBand *, src, gdal_src);
 
   w = bandw = src->get()->GetXSize();
   h = bandh = src->get()->GetYSize();
@@ -394,12 +395,14 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
     return;
   }
 
-  GDALRasterBand *gdal_src = src->get();
   long src_uid = src->parent_uid;
 
   GDALAsyncableJob<int> job(src_uid);
+  job.persist(src->handle());
   job.main = [gdal_src, x, y, w, h](const GDALExecutionProgress &) {
+    CPLErrorReset();
     int r = GDALChecksumImage(gdal_src, x, y, w, h);
+    if (CPLGetLastErrorType() != CE_None) throw CPLGetLastErrorMsg();
     return r;
   };
   job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Integer>(r); };
