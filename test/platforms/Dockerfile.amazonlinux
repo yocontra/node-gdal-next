@@ -9,7 +9,7 @@ RUN \
   yum install -y gcc-c++ make && \
   curl -sL https://rpm.nodesource.com/setup_${NODEJS}.x | bash - && \
   yum install -y nodejs && \
-  yum install -y git rsync python3 && \
+  yum install -y git rsync python3 yacc && \
   alternatives --install /usr/bin/python python /usr/bin/python3 60
 
 RUN if [ "${GDAL}" = "shared" ]; then error; fi
