@@ -41,14 +41,19 @@ GDALExecutionProgress::~GDALExecutionProgress() {
 
 // sync/async dispatcher
 void GDALExecutionProgress::Send(GDALProgressInfo *info) const {
-  // async mode -> we are in an aux thread, we can't go back to JS
-  // we must enqueue a job on the event loop and wait for the JS world to stop
-  // the enqueuing is in Nan::AsyncWorker, then once the JS world is not running
-  // AsyncWorker::HandleProgressCallback will get invoked on the main thread
-  if (async) async->Send(info, 1);
-  // sync mode -> the JS world is not running, we can go back directly
-  // this code is below
-  if (sync) sync->Send(info);
+  try {
+    // async mode -> we are in an aux thread, we can't go back to JS
+    // we must enqueue a job on the event loop and wait for the JS world to stop
+    // the enqueuing is in Nan::AsyncWorker, then once the JS world is not running
+    // AsyncWorker::HandleProgressCallback will get invoked on the main thread
+    if (async) async->Send(info, 1);
+    // sync mode -> the JS world is not running, we can go back directly
+    // this code is below
+    if (sync) sync->Send(info);
+  } catch (const char *msg) {
+    delete info;
+    throw msg;
+  }
   delete info;
 }
 
