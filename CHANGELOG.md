@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.Driver.create{Async}` now throw if they fail to parse the options instead of returning `undefined`
  - `gdal.DatasetBands.create{Async}` and `gdal.SpatialReference.fromESRI` now have correct TypeScript signatures, all options lists are supported either in `{object}` or in `string[]` form
  - `gdal.checksumImage{Async}` now throw/reject on error instead of returning 0 if the GDAL method returned an error, but the GDAL method still returns 0 on some errors and does take into account fractional numbers < 1.0
+ - Fix a memory leak in `gdal.Dataset.srsAsync`
 
 ### Changed
  - Fix #13, now two different warnings are emitted whether a dataset is closed by `gdal.Dataset.close` or it is destroyed by the GC - the former is indicative of a bug in the user application, while the latter is indicative of a bug in `gdal-async` itself

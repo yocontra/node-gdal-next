@@ -372,6 +372,8 @@ template <class GDALType> void GDALPromiseWorker<GDALType>::HandleErrorCallback(
 }
 
 template <class GDALType> GDALPromiseWorker<GDALType>::~GDALPromiseWorker() {
+  context_handle->Reset();
+  resolver_handle->Reset();
   delete context_handle;
   delete resolver_handle;
 }
