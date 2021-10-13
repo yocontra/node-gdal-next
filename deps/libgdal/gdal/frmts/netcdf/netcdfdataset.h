@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdfdataset.h e95eccd5c6c8cd6ae90f3d8a9782fd5e858ccb9c 2021-10-02 00:16:00 +0200 Momtchil Momtchev $
+ * $Id: netcdfdataset.h 681a087c9c1797c1a1a111713be205d229686615 2021-10-08 18:15:23 +0200 Even Rouault $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.
@@ -108,6 +108,8 @@ static const size_t NCDF_MAX_STR_LEN = 8192;
 #define NCDF_DIMNAME_LON     "lon"
 #define NCDF_DIMNAME_LAT     "lat"
 #define NCDF_LONLAT          "lon lat"
+#define NCDF_DIMNAME_RLON    "rlon" // rotated longitude
+#define NCDF_DIMNAME_RLAT    "rlat" // rotated latitude
 
 /* netcdf file types, as in libcdi/cdo and compat w/netcdf.h */
 typedef enum
@@ -1065,6 +1067,7 @@ class netCDFLayer final: public OGRLayer
 
 const char* NCDFGetProjectedCFUnit(const OGRSpatialReference *poSRS);
 void NCDFWriteLonLatVarsAttributes(nccfdriver::netCDFVID& vcdf, int nVarLonID, int nVarLatID);
+void NCDFWriteRLonRLatVarsAttributes(nccfdriver::netCDFVID& vcdf, int nVarRLonID, int nVarRLatID);
 void NCDFWriteXYVarsAttributes(nccfdriver::netCDFVID& vcdf, int nVarXID, int nVarYID,
                                       OGRSpatialReference* poSRS);
 int NCDFWriteSRSVariable(int cdfid, const OGRSpatialReference* poSRS,

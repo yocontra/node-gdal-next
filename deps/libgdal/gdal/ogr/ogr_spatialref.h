@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_spatialref.h 70d0856e6baecec8b082273d1a1105910da742ff 2021-09-03 11:56:55 +0200 Even Rouault $
+ * $Id: ogr_spatialref.h 4986eea379aaa3f553b9d612f6d5da103dc555a8 2021-10-11 23:07:35 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes for manipulating spatial reference systems in a
@@ -256,7 +256,8 @@ class CPL_DLL OGRSpatialReference
     int         EPSGTreatsAsNorthingEasting() const;
     int         GetAxesCount() const;
     const char *GetAxis( const char *pszTargetKey, int iAxis,
-                         OGRAxisOrientation *peOrientation ) const;
+                         OGRAxisOrientation *peOrientation,
+                         double* pdfConvFactor = nullptr ) const;
     OGRErr      SetAxes( const char *pszTargetKey,
                          const char *pszXAxisName,
                          OGRAxisOrientation eXAxisOrientation,

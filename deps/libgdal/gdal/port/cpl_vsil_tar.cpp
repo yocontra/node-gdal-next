@@ -45,7 +45,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_tar.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_tar.cpp 86edd3af84864fd64ed5b8b69d153feb92d3a3a5 2021-10-09 14:30:03 +0200 Even Rouault $")
 
 #if (defined(DEBUG) || defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)) && !defined(HAVE_FUZZER_FRIENDLY_ARCHIVE)
 /* This is a completely custom archive format that is rather inefficient */
@@ -414,6 +414,18 @@ int VSITarReader::GotoNextFile()
         }
         else
         {
+            // Is it a ustar extension ?
+            // Cf https://en.wikipedia.org/wiki/Tar_(computing)#UStar_format
+            if( memcmp(abyHeader + 257, "ustar\0", 6) == 0 &&
+                abyHeader[345] != '\0' )
+            {
+                std::string osFilenamePrefix;
+                osFilenamePrefix.assign(
+                    reinterpret_cast<const char*>(abyHeader + 345),
+                    CPLStrnlen(reinterpret_cast<const char*>(abyHeader + 345), 155));
+                osNextFileName = osFilenamePrefix + '/' + osNextFileName;
+            }
+
             break;
         }
     }

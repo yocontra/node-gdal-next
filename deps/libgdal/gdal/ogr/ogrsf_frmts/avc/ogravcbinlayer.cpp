@@ -33,7 +33,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: ogravcbinlayer.cpp 365a72f2b5a94946e92323060b68f9963cd2dbd5 2018-05-06 22:14:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogravcbinlayer.cpp 3a621d7b7c98d62dac36562b1c25a4257b1e47a6 2021-10-11 15:43:00 +1000 Nyall Dawson $")
 
 constexpr int SERIAL_ACCESS_FID = INT_MIN;
 
@@ -108,6 +108,7 @@ void OGRAVCBinLayer::ResetReading()
 
     bNeedReset = false;
     nNextFID = 1;
+    m_bEOF = false;
 
     if( hTable != nullptr )
     {
@@ -208,6 +209,9 @@ OGRFeature *OGRAVCBinLayer::GetFeature( GIntBig nFID )
 OGRFeature *OGRAVCBinLayer::GetNextFeature()
 
 {
+    if ( m_bEOF )
+        return nullptr;
+
     if( bNeedReset )
         ResetReading();
 
@@ -231,7 +235,7 @@ OGRFeature *OGRAVCBinLayer::GetNextFeature()
     }
 
     if( poFeature == nullptr )
-        ResetReading();
+        m_bEOF = true;
 
     return poFeature;
 }

@@ -38,7 +38,7 @@
 #include <map>
 #include <algorithm>
 
-CPL_CVSID("$Id: dimapdataset.cpp 9c009de3df5a15fc22abd54b52ec1688d431c937 2021-09-26 23:37:56 +0200 Even Rouault $")
+CPL_CVSID("$Id: dimapdataset.cpp 0c733ab43315de2a48d505c139078ea386804f71 2021-10-10 12:48:55 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -1602,15 +1602,19 @@ int DIMAPDataset::ReadImageInformation2()
                                 else
                                 {
                                     nBandIndex =
-                                        atoi(&psTag->psChild->pszValue[1]) + 1;
-                                    if( nBandIndex <= 0 ||
-                                    nBandIndex > poImageDS->GetRasterCount() )
+                                        atoi(&psTag->psChild->pszValue[1]);
+                                    if( nBandIndex < 0 ||
+                                        nBandIndex >= poImageDS->GetRasterCount() )
                                     {
                                         CPLError(
                                             CE_Warning, CPLE_AppDefined,
                                             "Bad BAND_INDEX value : %s",
                                             psTag->psChild->pszValue);
                                         nBandIndex = 0;
+                                    }
+                                    else
+                                    {
+                                        nBandIndex++;
                                     }
                                 }
                             }

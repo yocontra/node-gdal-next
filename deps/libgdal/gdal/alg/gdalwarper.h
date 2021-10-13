@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarper.h f0602c2d27b51faf8f846e4601b018865a902e83 2021-07-05 20:28:39 +0200 Even Rouault $
+ * $Id: gdalwarper.h 4986eea379aaa3f553b9d612f6d5da103dc555a8 2021-10-11 23:07:35 +0200 Even Rouault $
  *
  * Project:  GDAL High Performance Warper
  * Purpose:  Prototypes, and definitions for warping related work.
@@ -426,6 +426,10 @@ public:
 /*! @cond Doxygen_Suppress */
     /** Per-thread data. Internally set */
     void                *psThreadData;
+
+    bool                bApplyVerticalShift = false;
+
+    double              dfMultFactorVerticalShit = 1.0;
 /*! @endcond */
 
                        GDALWarpKernel();

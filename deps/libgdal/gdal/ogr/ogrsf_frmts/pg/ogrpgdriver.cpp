@@ -29,7 +29,7 @@
 #include "ogr_pg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgdriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrpgdriver.cpp e90bb80010a8c7c2f57378741b109a8f4e67c17a 2021-10-11 17:31:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                              Identify()                              */
@@ -38,7 +38,8 @@ CPL_CVSID("$Id: ogrpgdriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07
 static int OGRPGDriverIdentify( GDALOpenInfo* poOpenInfo )
 {
     if( !STARTS_WITH_CI(poOpenInfo->pszFilename, "PGB:") &&
-        !STARTS_WITH_CI(poOpenInfo->pszFilename, "PG:") )
+        !STARTS_WITH_CI(poOpenInfo->pszFilename, "PG:")&&
+        !STARTS_WITH(poOpenInfo->pszFilename, "postgresql://")  )
         return FALSE;
     return TRUE;
 }

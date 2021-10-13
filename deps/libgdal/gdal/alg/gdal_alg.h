@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg.h d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $
+ * $Id: gdal_alg.h 9b04a6ce329ade6272643ab59d0ffaabd313955c 2021-10-11 23:32:03 +0200 Even Rouault $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes, and definitions for various GDAL based algorithms.
@@ -688,16 +688,36 @@ void CPL_DLL GDALTriangulationFree(GDALTriangulation* psDT);
 void GDALTriangulationTerminate(void);
 /*! @endcond */
 
+/*! @cond Doxygen_Suppress */
+#ifndef CPL_WARN_DEPRECATED_GDALOpenVerticalShiftGrid
+#define CPL_WARN_DEPRECATED_GDALOpenVerticalShiftGrid CPL_WARN_DEPRECATED
+#endif
+/*! @endcond */
+
 GDALDatasetH CPL_DLL GDALOpenVerticalShiftGrid(
                                         const char* pszProj4Geoidgrids,
-                                        int* pbError );
+                                        int* pbError )
+/*! @cond Doxygen_Suppress */
+    CPL_WARN_DEPRECATED_GDALOpenVerticalShiftGrid("GDALOpenVerticalShiftGrid() will be removed in GDAL 4.0")
+/*! @endcond */
+    ;
+
+/*! @cond Doxygen_Suppress */
+#ifndef CPL_WARN_DEPRECATED_GDALApplyVerticalShiftGrid
+#define CPL_WARN_DEPRECATED_GDALApplyVerticalShiftGrid CPL_WARN_DEPRECATED
+#endif
+/*! @endcond */
 
 GDALDatasetH CPL_DLL GDALApplyVerticalShiftGrid( GDALDatasetH hSrcDataset,
                                          GDALDatasetH hGridDataset,
                                          int bInverse,
                                          double dfSrcUnitToMeter,
                                          double dfDstUnitToMeter,
-                                         const char* const* papszOptions );
+                                         const char* const* papszOptions )
+/*! @cond Doxygen_Suppress */
+    CPL_WARN_DEPRECATED_GDALApplyVerticalShiftGrid("GDALApplyVerticalShiftGrid() will be removed in GDAL 4.0")
+/*! @endcond */
+    ;
 
 CPL_C_END
 

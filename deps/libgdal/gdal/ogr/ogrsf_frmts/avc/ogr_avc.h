@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_avc.h 79184515dce9423c42e128d82d1d3136018d79b6 2019-08-17 11:53:00 +0200 Even Rouault $
+ * $Id: ogr_avc.h 3a621d7b7c98d62dac36562b1c25a4257b1e47a6 2021-10-11 15:43:00 +1000 Nyall Dawson $
  *
  * Project:  Arc/Info Coverage (E00 & Binary) Reader
  * Purpose:  Declarations for OGR wrapper classes for coverage access.
@@ -47,6 +47,8 @@ class OGRAVCLayer CPL_NON_FINAL: public OGRLayer
     OGRAVCDataSource    *poDS;
 
     AVCFileType         eSectionType;
+
+    bool                m_bEOF = false;
 
     int                 SetupFeatureDefinition( const char *pszName );
     bool                AppendTableDefinition( AVCTableDef *psTableDef );

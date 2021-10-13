@@ -52,7 +52,7 @@
 #include "gdal_priv.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vrtsourcedrasterband.cpp 7815992e34273baa03e8a816bf9b6e8ccff36812 2021-08-27 22:29:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtsourcedrasterband.cpp dc57d4fe042a175a8693beb24c9679f1dedeb736 2021-10-08 17:22:45 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -257,13 +257,23 @@ CPLErr VRTSourcedRasterBand::IRasterIO( GDALRWFlag eRWFlag,
             }
             if( bFallbackToBase )
             {
-                return GDALRasterBand::IRasterIO( eRWFlag,
+                const bool bBackupEnabledOverviews = l_poDS->AreOverviewsEnabled();
+                if( !l_poDS->m_apoOverviews.empty() &&
+                    l_poDS->AreOverviewsEnabled() )
+                {
+                    // Disable use of implicit overviews to avoid infinite
+                    // recursion
+                    l_poDS->SetEnableOverviews(false);
+                }
+                const auto eErr = GDALRasterBand::IRasterIO( eRWFlag,
                                                   nXOff, nYOff, nXSize, nYSize,
                                                   pData, nBufXSize, nBufYSize,
                                                   eBufType,
                                                   nPixelSpace,
                                                   nLineSpace,
                                                   psExtraArg );
+                l_poDS->SetEnableOverviews(bBackupEnabledOverviews);
+                return eErr;
             }
         }
     }

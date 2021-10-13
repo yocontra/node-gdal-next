@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vrtdataset.h 7815992e34273baa03e8a816bf9b6e8ccff36812 2021-08-27 22:29:29 +0200 Even Rouault $
+ * $Id: vrtdataset.h 9cf98dd84190a5def7fd017335bda07e3fb34cfa 2021-10-11 23:11:23 +0200 Even Rouault $
  *
  * Project:  Virtual GDAL Datasets
  * Purpose:  Declaration of virtual gdal dataset classes.
@@ -319,16 +319,6 @@ class CPL_DLL VRTWarpedDataset final: public VRTDataset
 
     void              CreateImplicitOverviews();
 
-    struct VerticalShiftGrid
-    {
-        CPLString osVGrids{};
-        int       bInverse = false;
-        double    dfToMeterSrc = 0.0;
-        double    dfToMeterDest = 0.0;
-        CPLStringList aosOptions{};
-    };
-    std::vector<VerticalShiftGrid> m_aoVerticalShiftGrids{};
-
     friend class VRTWarpedRasterBand;
 
     CPL_DISALLOW_COPY_ASSIGN(VRTWarpedDataset)
@@ -361,12 +351,6 @@ public:
     CPLErr            ProcessBlock( int iBlockX, int iBlockY );
 
     void              GetBlockSize( int *, int * ) const;
-
-    void              SetApplyVerticalShiftGrid(const char* pszVGrids,
-                                             int bInverse,
-                                             double dfToMeterSrc,
-                                             double dfToMeterDest,
-                                             char** papszOptions );
 };
 
 /************************************************************************/
@@ -948,8 +932,11 @@ protected:
     double              m_dfDstXSize = 0;
     double              m_dfDstYSize = 0;
 
-    int                 m_bNoDataSet = false;       // should really be a member of VRTComplexSource as only taken into account by it
-    double              m_dfNoDataValue = VRT_NODATA_UNSET;    // same as above
+    // should really be a member of VRTComplexSource as only taken into account by it
+    int                 m_bNoDataSet = false;
+
+    // same as above. adjusted value should be read with GetAdjustedNoDataValue()
+    double              m_dfNoDataValue = VRT_NODATA_UNSET;
     CPLString           m_osResampling{};
 
     int                 m_nMaxValue = 0;
@@ -962,6 +949,8 @@ protected:
     bool                m_bDropRefOnSrcBand = true;
 
     int                 NeedMaxValAdjustment() const;
+
+    double              GetAdjustedNoDataValue() const;
 
 public:
             VRTSimpleSource();

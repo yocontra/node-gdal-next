@@ -29,7 +29,7 @@
 #include "ogr_tiger.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrtigerdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrtigerdriver.cpp 8d7fe3d02ab9d6410b7603e029a589b7be2a12a1 2021-10-07 14:35:38 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                Open()                                */
@@ -89,6 +89,10 @@ static GDALDataset *OGRTigerDriverCreate( const char * pszName,
                                           CPL_UNUSED GDALDataType eDT,
                                           char **papszOptions )
 {
+    if( !GDALIsDriverDeprecatedForGDAL35StillEnabled(
+            "TIGER", "Note: only the writing side is planned for removal") )
+        return nullptr;
+
     OGRTigerDataSource *poDS = new OGRTigerDataSource();
 
     if( poDS->Create( pszName, papszOptions ) )

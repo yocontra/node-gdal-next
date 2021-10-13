@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp 74298e47853ed1ce0aa4f7a0d60b2bc49d798051 2021-08-18 13:16:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarper.cpp 4986eea379aaa3f553b9d612f6d5da103dc555a8 2021-10-11 23:07:35 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */
@@ -1547,6 +1547,20 @@ GDALWarpResolveWorkingDataType( GDALWarpOptions *psOptions )
                 psOptions->eWorkingDataType,
                 psOptions->padfDstNoDataImag[iBand],
                 true );
+        }
+    }
+
+    const bool bApplyVerticalShift = CPLFetchBool(
+        psOptions->papszWarpOptions, "APPLY_VERTICAL_SHIFT", false);
+    if( bApplyVerticalShift && GDALDataTypeIsInteger(psOptions->eWorkingDataType) )
+    {
+        const double dfMultFactorVerticalShit = CPLAtof(
+            CSLFetchNameValueDef(psOptions->papszWarpOptions,
+                                 "MULT_FACTOR_VERTICAL_SHIFT", "1.0") );
+        if( dfMultFactorVerticalShit != 1 )
+        {
+            psOptions->eWorkingDataType =
+                GDALDataTypeUnion( psOptions->eWorkingDataType, GDT_Float32 );
         }
     }
 }

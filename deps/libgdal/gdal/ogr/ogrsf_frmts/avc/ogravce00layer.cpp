@@ -35,7 +35,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: ogravce00layer.cpp 79184515dce9423c42e128d82d1d3136018d79b6 2019-08-17 11:53:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogravce00layer.cpp 3a621d7b7c98d62dac36562b1c25a4257b1e47a6 2021-10-11 15:43:00 +1000 Nyall Dawson $")
 
 constexpr int SERIAL_ACCESS_FID = INT_MIN;
 
@@ -130,6 +130,7 @@ void OGRAVCE00Layer::ResetReading()
         AVCE00ReadGotoSectionE00(psTableRead, psTableSection, 0);
     }
 
+    m_bEOF = false;
     bNeedReset = false;
     nNextFID = 1;
 }
@@ -245,6 +246,9 @@ OGRFeature *OGRAVCE00Layer::GetFeature( GIntBig nFID )
 OGRFeature *OGRAVCE00Layer::GetNextFeature()
 
 {
+    if ( m_bEOF )
+        return nullptr;
+
     if( bNeedReset )
         ResetReading();
 
@@ -268,7 +272,7 @@ OGRFeature *OGRAVCE00Layer::GetNextFeature()
     }
 
     if( poFeature == nullptr )
-        ResetReading();
+        m_bEOF = true;
 
     return poFeature;
 }

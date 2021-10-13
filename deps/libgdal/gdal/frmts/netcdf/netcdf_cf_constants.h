@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdf_cf_constants.h e95eccd5c6c8cd6ae90f3d8a9782fd5e858ccb9c 2021-10-02 00:16:00 +0200 Momtchil Momtchev $
+ * $Id: netcdf_cf_constants.h 681a087c9c1797c1a1a111713be205d229686615 2021-10-08 18:15:23 +0200 Even Rouault $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.
@@ -90,6 +90,7 @@
 #define CF_PT_POLAR_STEREO           "polar_stereographic"
 #define CF_PT_STEREO                 "stereographic"
 #define CF_PT_GEOS                   "geostationary"
+#define CF_PT_ROTATED_LATITUDE_LONGITUDE "rotated_latitude_longitude"
 
 /* projection parameters */
 #define CF_PP_STD_PARALLEL           "standard_parallel"

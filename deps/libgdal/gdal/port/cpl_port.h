@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_port.h 2bd4204a46def1c897174d3d36c5f9c4cd3259c2 2021-09-25 17:32:16 +0200 Even Rouault $
+ * $Id: cpl_port.h 9b04a6ce329ade6272643ab59d0ffaabd313955c 2021-10-11 23:32:03 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -958,7 +958,7 @@ static const char *cvsid_aw() { return( cvsid_aw() ? NULL : cpl_cvsid ); }
 
 #endif /* __cplusplus */
 
-#if !defined(DOXYGEN_SKIP)
+#if !defined(DOXYGEN_SKIP) && !defined(CPL_WARN_DEPRECATED)
 #if defined(__has_extension)
   #if __has_extension(attribute_deprecated_with_message)
     /* Clang extension */
