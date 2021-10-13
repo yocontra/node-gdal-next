@@ -14,26 +14,21 @@
 namespace node_gdal {
 
 void Utils::Initialize(Local<Object> target) {
-  Local<Object> utils = Nan::New<Object>();
-  Nan__SetAsyncableMethod(utils, "info", info);
-  Nan__SetAsyncableMethod(utils, "translate", translate);
-  Nan__SetAsyncableMethod(utils, "vectorTranslate", vectorTranslate);
-  Nan::Set(target, Nan::New("utils").ToLocalChecked(), utils);
+  Nan__SetAsyncableMethod(target, "info", info);
+  Nan__SetAsyncableMethod(target, "translate", translate);
+  Nan__SetAsyncableMethod(target, "vectorTranslate", vectorTranslate);
 }
-
-/**
- * @class gdal.utils
- */
 
 /**
  * Library version of gdal_translate.
  *
  * @example
  * const ds = gdal.open('input.tif')
- * const out = gdal.utils.translate('/vsimem/temp.tif', ds, [ '-b', '1' ])
+ * const out = gdal.translate('/vsimem/temp.tif', ds, [ '-b', '1' ])
  *
  * @throws Error
  * @method translate
+ * @for gdal
  * @static
  * @param {string} destination destination filename
  * @param {gdal.Dataset} source source dataset
@@ -47,10 +42,11 @@ void Utils::Initialize(Local<Object> target) {
  *
  * @example
  * const ds = gdal.open('input.tif')
- * const out = gdal.utils.translate('/vsimem/temp.tif', ds, [ '-b', '1' ])
+ * const out = gdal.translate('/vsimem/temp.tif', ds, [ '-b', '1' ])
  * @throws Error
  *
  * @method translateAsync
+ * @for gdal
  * @static
  * @param {string} destination destination filename
  * @param {gdal.Dataset} source source dataset
@@ -96,10 +92,11 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  *
  * @example
  * const ds = gdal.open('input.geojson')
- * const out = gdal.utils.vectorTranslate('/vsimem/temp.gpkg', [ '-of', 'GPKG' ], ds)
+ * const out = gdal.vectorTranslate('/vsimem/temp.gpkg', [ '-of', 'GPKG' ], ds)
  *
  * @throws Error
  * @method vectorTranslate
+ * @for gdal
  * @static
  * @param {string|gdal.Dataset} destination destination
  * @param {gdal.Dataset} source source dataset
@@ -113,10 +110,11 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  *
  * @example
  * const ds = gdal.open('input.geojson')
- * const out = gdal.utils.vectorTranslate('/vsimem/temp.gpkg', [ '-of', 'GPKG' ], ds)
+ * const out = gdal.vectorTranslate('/vsimem/temp.gpkg', [ '-of', 'GPKG' ], ds)
  * @throws Error
  *
  * @method vectorTranslateAsync
+ * @for gdal
  * @static
  * @param {string|gdal.Dataset} destination destination
  * @param {gdal.Dataset} source source dataset
@@ -185,10 +183,11 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  *
  * @example
  * const ds = gdal.open('input.tif')
- * const output = gdal.utils.info('/vsimem/temp.tif')
+ * const output = gdal.info('/vsimem/temp.tif')
  *
  * @throws Error
  * @method info
+ * @for gdal
  * @static
  * @param {gdal.Dataset} dataset
  * @param {string[]} array of CLI options for gdalinfo
@@ -201,10 +200,11 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  *
  * @example
  * const ds = gdal.open('input.tif')
- * const output = gdal.utils.info('/vsimem/temp.tif')
+ * const output = gdal.info('/vsimem/temp.tif')
  * @throws Error
  *
  * @method infoAsync
+ * @for gdal
  * @static
  * @param {gdal.Dataset} dataset
  * @param {string[]} array of CLI options for gdalinfo

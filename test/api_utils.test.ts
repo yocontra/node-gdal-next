@@ -6,14 +6,14 @@ chai.use(chaiAsPromised)
 import * as path from 'path'
 import * as semver from 'semver'
 
-describe('gdal.utils', () => {
+describe('gdal library versions of CLI tools', () => {
   afterEach(global.gc)
 
   describe('translate', () => {
     it('should be equivalent to gdal_translate', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
-      const out = gdal.utils.translate(tmpFile, ds, [ '-b', '1' ])
+      const out = gdal.translate(tmpFile, ds, [ '-b', '1' ])
       assert.equal(out.bands.count(), 1)
       out.close()
       gdal.vsimem.release(tmpFile)
@@ -24,7 +24,7 @@ describe('gdal.utils', () => {
     it('should be equivalent to gdal_translate', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
-      return assert.isFulfilled(gdal.utils.translateAsync(tmpFile, ds, [ '-b', '1' ])
+      return assert.isFulfilled(gdal.translateAsync(tmpFile, ds, [ '-b', '1' ])
         .then((out) => {
           assert.equal(out.bands.count(), 1)
           out.close()
@@ -40,7 +40,7 @@ describe('gdal.utils', () => {
         const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
         const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
 
-        const out = gdal.utils.vectorTranslate(tmpFile, ds, [ '-of', 'GPKG' ])
+        const out = gdal.vectorTranslate(tmpFile, ds, [ '-of', 'GPKG' ])
 
         assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
         out.close()
@@ -52,7 +52,7 @@ describe('gdal.utils', () => {
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
       const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
 
-      const out = gdal.utils.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ])
+      const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ])
       assert.strictEqual(out, tmpDS)
 
       assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
@@ -67,7 +67,7 @@ describe('gdal.utils', () => {
         const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
         const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
 
-        return assert.isFulfilled(gdal.utils.vectorTranslateAsync(tmpFile, ds, [ '-of', 'GPKG' ])
+        return assert.isFulfilled(gdal.vectorTranslateAsync(tmpFile, ds, [ '-of', 'GPKG' ])
           .then((out) => {
             assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
             out.close()
@@ -81,7 +81,7 @@ describe('gdal.utils', () => {
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
       const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
 
-      return assert.isFulfilled(gdal.utils.vectorTranslateAsync(tmpDS, ds, [ '-of', 'GPKG' ])
+      return assert.isFulfilled(gdal.vectorTranslateAsync(tmpDS, ds, [ '-of', 'GPKG' ])
         .then((out) => {
           assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
           assert.strictEqual(out, tmpDS)
@@ -95,7 +95,7 @@ describe('gdal.utils', () => {
   describe('info', () => {
     it('should be equivalent to gdalinfo', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
-      const out = JSON.parse(gdal.utils.info(ds, [ '-json' ]))
+      const out = JSON.parse(gdal.info(ds, [ '-json' ]))
       assert.equal(out.bands[0].type, 'Byte')
     })
   })
@@ -103,7 +103,7 @@ describe('gdal.utils', () => {
   describe('infoAsync', () => {
     it('should be equivalent to gdalinfo', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
-      return assert.isFulfilled(gdal.utils.infoAsync(ds, [ '-json' ])
+      return assert.isFulfilled(gdal.infoAsync(ds, [ '-json' ])
         .then((out) => JSON.parse(out))
         .then((json) => {
           assert.equal(json.bands[0].type, 'Byte')
