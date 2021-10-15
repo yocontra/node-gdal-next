@@ -21,7 +21,7 @@ using namespace v8;
 using namespace node;
 
 // Methods from gdal_alg.h
-// http://www.gdal.org/gdal__alg_8h.html
+// https://gdal.org/doxygen/gdal__alg_8h.html
 
 namespace node_gdal {
 namespace Algorithms {

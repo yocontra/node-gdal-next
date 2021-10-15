@@ -176,7 +176,7 @@ NAN_METHOD(Layer::toString) {
  * @method flushAsync
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
- * 
+ *
  */
 NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(Layer, syncToDisk, SyncToDisk);
 
@@ -311,7 +311,7 @@ NAN_METHOD(Layer::setSpatialFilter) {
  * "population > 1000000 and population < 5000000" where `population` is an
  * attribute in the layer. The query format is normally a restricted form of
  * SQL WHERE clause as described in the "WHERE" section of the [OGR SQL
- * tutorial](http://www.gdal.org/ogr_sql.html). In some cases (RDBMS backed
+ * tutorial](https://gdal.org/user/ogr_sql_dialect.html). In some cases (RDBMS backed
  * drivers) the native capabilities of the database may be used to interprete
  * the WHERE clause in which case the capabilities will be broader than those
  * of OGR SQL.

@@ -207,7 +207,7 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.memoryLimit]
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
- * @param {string[]|object} [options.options] Warp options (see: [reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {string[]|object} [options.options] Warp options (see: [reference](https://gdal.org/doxygen/structGDALWarpOptions.html))
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  */
 
@@ -235,7 +235,7 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.memoryLimit]
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
- * @param {string[]|object} [options.options] Warp options (see:[reference](http://www.gdal.org/structGDALWarpOptions.html#a0ed77f9917bb96c7a9aabd73d4d06e08))
+ * @param {string[]|object} [options.options] Warp options (see:[reference](https://gdal.org/doxygen/structGDALWarpOptions.html)
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}

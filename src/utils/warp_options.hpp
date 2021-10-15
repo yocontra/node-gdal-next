@@ -22,7 +22,7 @@ namespace node_gdal {
 
 // A class for parsing a V8::Value and constructing a GDALWarpOptions struct
 //
-// see: http://www.gdal.org/structGDALWarpOptions.html
+// see: https://www.gdal.org/doxygen/structGDALWarpOptions.html
 //
 // {
 //   options : string[] | object
