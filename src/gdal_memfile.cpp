@@ -3,8 +3,9 @@
 namespace node_gdal {
 
 /**
- * @class vsimem
- * Operations on in-memory /vsimem/ files
+ * Operations on in-memory `/vsimem/` files
+ *
+ * @class gdal.vsimem
  */
 
 std::map<void *, Memfile *> Memfile::memfile_collection;
@@ -80,15 +81,15 @@ Memfile *Memfile::get(Local<Object> buffer, const std::string &filename) {
 }
 
 /**
- * Create an in-memory /vsimem/ file from a Buffer.
+ * Create an in-memory `/vsimem/` file from a `Buffer`.
  * This is a zero-copy operation - GDAL will read from the Buffer which will be
  * protected by the GC even if it goes out of scope.
- * The file will stay in memory until it is deleted with gdal.vsimem.release.
+ * The file will stay in memory until it is deleted with `gdal.vsimem.release`.
  *
  * @static
  * @method set
  * @param {Buffer} data A binary buffer containing the file data
- * @param {string} filename A file name beginning with /vsimem/
+ * @param {string} filename A file name beginning with `/vsimem/`
  */
 NAN_METHOD(Memfile::vsimemSet) {
   Nan::HandleScope scope;
@@ -121,20 +122,22 @@ NAN_METHOD(Memfile::vsimemAnonymous) {
 }
 
 /**
- * Delete and retrieve the contents of an in-memory /vsimem/ file.
+ * Delete and retrieve the contents of an in-memory `/vsimem/` file.
  * This is a very fast zero-copy operation.
  * It does not block the event loop.
- * WARNING!
- * The file must not be open or random memory corruption is possible with GDAL <= 3.3.1.
- * GDAL >= 3.3.2 will fail gracefully further operations and this function is safe.
- * If the file was created by vsimem.set, it will return a reference
- * to the same Buffer that was used to create it.
- * Otherwise it will construct a new Buffer object with the GDAL
+ * If the file was created by `vsimem.set`, it will return a reference
+ * to the same `Buffer` that was used to create it.
+ * Otherwise it will construct a new `Buffer` object with the GDAL
  * allocated buffer as its backing store.
+ *
+ * ***WARNING***!
+ *
+ * The file must not be open or random memory corruption is possible with GDAL <= 3.3.1.
+ * GDAL >= 3.3.2 will gracefully fail further operations and this function is safe.
  *
  * @static
  * @method release
- * @param {string} filename A file name beginning with /vsimem/
+ * @param {string} filename A file name beginning with `/vsimem/`
  * @throws
  * @return {Buffer} A binary buffer containing all the data
  */
