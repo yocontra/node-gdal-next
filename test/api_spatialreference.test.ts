@@ -1,6 +1,9 @@
 import * as fs from 'fs'
 import * as gdal from '..'
-import { assert } from 'chai'
+import * as chaiAsPromised from 'chai-as-promised'
+import * as chai from 'chai'
+const assert = chai.assert
+chai.use(chaiAsPromised)
 import * as semver from 'semver'
 
 // http://epsg.io/
@@ -141,6 +144,17 @@ describe('gdal.SpatialReference', () => {
       })
     })
   })
+  describe('fromUserInputAsync', () => {
+    it('should return SpatialReference', () => {
+      const wms = 'urn:ogc:def:crs:EPSG::26912'
+      const refq = gdal.SpatialReference.fromUserInputAsync(wms)
+      return assert.eventually.instanceOf(refq, gdal.SpatialReference)
+    })
+    it('should reject on invalid URN', () => {
+      const wms = 'urn:ogc:def:crs:EPSG::99912'
+      return assert.isRejected(gdal.SpatialReference.fromUserInputAsync(wms))
+    })
+  })
   describe('fromURL w/Net', () => {
     it('should return SpatialReference', () => {
       const ref = gdal.SpatialReference.fromURL('http://spatialreference.org/ref/epsg/4326/')
@@ -153,6 +167,18 @@ describe('gdal.SpatialReference', () => {
       })
     })
   })
+  describe('fromURLAsync w/Net', () => {
+    it('should return SpatialReference', () => {
+      const refq = gdal.SpatialReference.fromURLAsync('http://spatialreference.org/ref/epsg/4326/')
+      return refq.then((ref) => {
+        assert.instanceOf(ref, gdal.SpatialReference)
+        assert.isTrue(ref.isSame(gdal.SpatialReference.fromEPSG(4326)))
+      })
+    })
+    it('should reject on invalid URL', () =>
+      assert.isRejected(gdal.SpatialReference.fromURLAsync('http://nosuchdomain/ref/epsg/4326/'))
+    )
+  })
   describe('fromCRSURL w/Net', () => {
     it('should return SpatialReference', () => {
       const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
@@ -164,6 +190,17 @@ describe('gdal.SpatialReference', () => {
       assert.throws(() => {
         gdal.SpatialReference.fromCRSURL(wms)
       })
+    })
+  })
+  describe('fromCRSURLAsync w/Net', () => {
+    it('should return SpatialReference', () => {
+      const wms = 'http://www.opengis.net/def/crs/EPSG/0/3857'
+      const refq = gdal.SpatialReference.fromCRSURLAsync(wms)
+      return assert.eventually.instanceOf(refq, gdal.SpatialReference)
+    })
+    it('should reject on invalid crs URL', () => {
+      const wms = 'http://www.opengis.cz/def/crs/EPSG/0/3857'
+      return assert.isRejected(gdal.SpatialReference.fromCRSURLAsync(wms))
     })
   })
   describe('fromMICoordSys', () => {

@@ -2,6 +2,7 @@
 #include "gdal_spatial_reference.hpp"
 #include "gdal_common.hpp"
 #include "utils/string_list.hpp"
+#include "async.hpp"
 
 namespace node_gdal {
 
@@ -14,7 +15,7 @@ void SpatialReference::Initialize(Local<Object> target) {
   lcons->InstanceTemplate()->SetInternalFieldCount(1);
   lcons->SetClassName(Nan::New("SpatialReference").ToLocalChecked());
 
-  Nan::SetMethod(lcons, "fromUserInput", fromUserInput);
+  Nan__SetAsyncableMethod(lcons, "fromUserInput", fromUserInput);
   Nan::SetMethod(lcons, "fromWKT", fromWKT);
   Nan::SetMethod(lcons, "fromProj4", fromProj4);
   Nan::SetMethod(lcons, "fromEPSG", fromEPSG);
@@ -23,8 +24,8 @@ void SpatialReference::Initialize(Local<Object> target) {
   Nan::SetMethod(lcons, "fromWMSAUTO", fromWMSAUTO);
   Nan::SetMethod(lcons, "fromXML", fromXML);
   Nan::SetMethod(lcons, "fromURN", fromURN);
-  Nan::SetMethod(lcons, "fromCRSURL", fromCRSURL);
-  Nan::SetMethod(lcons, "fromURL", fromURL);
+  Nan__SetAsyncableMethod(lcons, "fromCRSURL", fromCRSURL);
+  Nan__SetAsyncableMethod(lcons, "fromURL", fromURL);
   Nan::SetMethod(lcons, "fromMICoordSys", fromMICoordSys);
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
@@ -655,21 +656,41 @@ NAN_METHOD(SpatialReference::fromURN) {
  * @param {string} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromCRSURL) {
+
+/**
+ * Initialize from OGC URL.
+ * {{{async}}}
+ *
+ * The OGC URL should be prefixed with "http://opengis.net/def/crs" per best
+ * practice paper 11-135. Currently EPSG and OGC authority values are supported,
+ * including OGC auto codes, but not including CRS1 or CRS88 (NAVD88).
+ *
+ * @static
+ * @throws Error
+ * @method fromCRSURLAsync
+ * @param {string} input
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.SpatialReference>}
+ */
+GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
   Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "url", input);
 
-  OGRSpatialReference *srs = new OGRSpatialReference();
-  int err = srs->importFromCRSURL(input.c_str());
-  if (err) {
-    delete srs;
-    NODE_THROW_OGRERR(err);
-    return;
-  }
+  GDALAsyncableJob<OGRSpatialReference *> job(0);
 
-  info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  job.main = [input](const GDALExecutionProgress &progress) {
+    OGRSpatialReference *srs = new OGRSpatialReference();
+    int err = srs->importFromCRSURL(input.c_str());
+    if (err) {
+      delete srs;
+      throw getOGRErrMsg(err);
+    }
+    return srs;
+  };
+  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) { return SpatialReference::New(srs, true); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -683,21 +704,40 @@ NAN_METHOD(SpatialReference::fromCRSURL) {
  * @param {string} url
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromURL) {
+
+/**
+ * Initialize spatial reference from a URL.
+ * {{async}}
+ *
+ * This method will download the spatial reference from the given URL.
+ *
+ * @static
+ * @throws Error
+ * @method fromURLAsync
+ * @param {string} url
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.SpatialReference>}
+ */
+
+GDAL_ASYNCABLE_DEFINE(SpatialReference::fromURL) {
   Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "url", input);
 
-  OGRSpatialReference *srs = new OGRSpatialReference();
-  int err = srs->importFromUrl(input.c_str());
-  if (err) {
-    delete srs;
-    NODE_THROW_OGRERR(err);
-    return;
-  }
+  GDALAsyncableJob<OGRSpatialReference *> job(0);
 
-  info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  job.main = [input](const GDALExecutionProgress &progress) {
+    OGRSpatialReference *srs = new OGRSpatialReference();
+    OGRErr err = srs->importFromUrl(input.c_str());
+    if (err) {
+      delete srs;
+      throw getOGRErrMsg(err);
+    }
+    return srs;
+  };
+  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) { return SpatialReference::New(srs, true); };
+  job.run(info, async, 1);
 }
 
 /**
@@ -738,21 +778,40 @@ NAN_METHOD(SpatialReference::fromMICoordSys) {
  * @param {string} input
  * @return {gdal.SpatialReference}
  */
-NAN_METHOD(SpatialReference::fromUserInput) {
+
+/**
+ * Initialize from an arbitrary spatial reference string.
+ *
+ * This method will examine the provided input, and try to deduce the format,
+ * and then use it to initialize the spatial reference system.
+ * {{{async}}}
+ *
+ * @static
+ * @throws Error
+ * @method fromUserInputAsync
+ * @param {string} input
+ * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.SpatialReference>}
+ */
+GDAL_ASYNCABLE_DEFINE(SpatialReference::fromUserInput) {
   Nan::HandleScope scope;
 
   std::string input("");
-  NODE_ARG_STR(0, "input", input);
+  NODE_ARG_STR(0, "url", input);
 
-  OGRSpatialReference *srs = new OGRSpatialReference();
-  int err = srs->SetFromUserInput(input.c_str());
-  if (err) {
-    delete srs;
-    NODE_THROW_OGRERR(err);
-    return;
-  }
+  GDALAsyncableJob<OGRSpatialReference *> job(0);
 
-  info.GetReturnValue().Set(SpatialReference::New(srs, true));
+  job.main = [input](const GDALExecutionProgress &progress) {
+    OGRSpatialReference *srs = new OGRSpatialReference();
+    int err = srs->SetFromUserInput(input.c_str());
+    if (err) {
+      delete srs;
+      throw getOGRErrMsg(err);
+    }
+    return srs;
+  };
+  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) { return SpatialReference::New(srs, true); };
+  job.run(info, async, 1);
 }
 
 /**

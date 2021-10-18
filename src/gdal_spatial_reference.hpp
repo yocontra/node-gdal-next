@@ -11,6 +11,8 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "async.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -59,7 +61,7 @@ class SpatialReference : public Nan::ObjectWrap {
   static NAN_METHOD(getAttrValue);
   static NAN_METHOD(validate);
 
-  static NAN_METHOD(fromUserInput);
+  GDAL_ASYNCABLE_DECLARE(fromUserInput);
   static NAN_METHOD(fromWKT);
   static NAN_METHOD(fromProj4);
   static NAN_METHOD(fromEPSG);
@@ -68,8 +70,8 @@ class SpatialReference : public Nan::ObjectWrap {
   static NAN_METHOD(fromWMSAUTO);
   static NAN_METHOD(fromXML);
   static NAN_METHOD(fromURN);
-  static NAN_METHOD(fromCRSURL);
-  static NAN_METHOD(fromURL);
+  GDAL_ASYNCABLE_DECLARE(fromCRSURL);
+  GDAL_ASYNCABLE_DECLARE(fromURL);
   static NAN_METHOD(fromMICoordSys);
 
   SpatialReference();
