@@ -131,7 +131,7 @@ describe('gdal.Dataset', () => {
           })
         })
       })
-      describe('@@iterator', () => {
+      describe('@@iterator()', () => {
         it('should iterate over all values', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
           const expected_ids = [ 1 ]

@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - PROJ 8.1.1
  - GEOS 3.9.1
  - GDAL 3.4.0-git (2021-10-13)
- - Add `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
- - Add `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
- - Add `gdal.info{Async}`, `gdal.translate{Async}` and `gdal.vectorTranslate{Async}` - library versions of `gdalinfo`, `gdal_translate` and `ogr2ogr`
- - Add `gdal.SpatialReference.fromURLAsync`, `gdal.SpatialReference.fromCRSURLAsync` and `gdal.SpatialReference.fromUserInputAsync`
+ - Asynchronous iterators for all collections that have asynchronous getters
+ - `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
+ - `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
+ - `gdal.info{Async}`, `gdal.translate{Async}` and `gdal.vectorTranslate{Async}` - library versions of `gdalinfo`, `gdal_translate` and `ogr2ogr`
+ - `gdal.SpatialReference.fromURLAsync`, `gdal.SpatialReference.fromCRSURLAsync` and `gdal.SpatialReference.fromUserInputAsync`
+ - `gdal.RasterBandOverviews.countAsync`, `gdal.RasterBandOverviews.getAsync` and `gdal.RasterBandOverviews.getBySampleCountAsync`
 
 ### Changed
  - (***BREAKING***) Move the progress callback of `gdal.Driver.createCopy{Async}` before `strict` to allow using it with a Promise

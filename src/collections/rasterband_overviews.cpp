@@ -14,9 +14,9 @@ void RasterBandOverviews::Initialize(Local<Object> target) {
   lcons->SetClassName(Nan::New("RasterBandOverviews").ToLocalChecked());
 
   Nan::SetPrototypeMethod(lcons, "toString", toString);
-  Nan::SetPrototypeMethod(lcons, "count", count);
-  Nan::SetPrototypeMethod(lcons, "get", get);
-  Nan::SetPrototypeMethod(lcons, "getBySampleCount", getBySampleCount);
+  Nan__SetPrototypeAsyncableMethod(lcons, "count", count);
+  Nan__SetPrototypeAsyncableMethod(lcons, "get", get);
+  Nan__SetPrototypeAsyncableMethod(lcons, "getBySampleCount", getBySampleCount);
 
   Nan::Set(target, Nan::New("RasterBandOverviews").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
@@ -82,28 +82,40 @@ NAN_METHOD(RasterBandOverviews::toString) {
  * @param {number} index 0-based index
  * @return {gdal.RasterBand}
  */
-NAN_METHOD(RasterBandOverviews::get) {
+
+/**
+ * Fetches the overview at the provided index.
+ * {{{async}}}
+ *
+ * @method getAsync
+ * @throws Error
+ * @param {number} index 0-based index
+ * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.RasterBand>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+
+  NODE_UNWRAP_CHECK(RasterBand, parent, band);
 
   int id;
   NODE_ARG_INT(0, "id", id);
 
-  GDALRasterBand *result = band->get()->GetOverview(id);
-
-  if (result == nullptr) {
-    Nan::ThrowError("Specified overview not found");
-    return;
-  }
-
-  info.GetReturnValue().Set(RasterBand::New(result, band->getParent()));
+  GDALAsyncableJob<GDALRasterBand *> job(band->parent_uid);
+  job.persist(parent);
+  job.main = [band, id](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    GDALRasterBand *result = band->get()->GetOverview(id);
+    if (result == nullptr) { throw "Specified overview not found"; }
+    return result;
+  };
+  job.rval = [band](GDALRasterBand *result, GetFromPersistentFunc) {
+    return RasterBand::New(result, band->getParent());
+  };
+  job.run(info, async, 1);
 }
 
 /**
@@ -119,23 +131,44 @@ NAN_METHOD(RasterBandOverviews::get) {
  * @param {number} samples
  * @return {gdal.RasterBand}
  */
-NAN_METHOD(RasterBandOverviews::getBySampleCount) {
+
+/**
+ * Fetch best sampling overview.
+ * {{{async}}}
+ *
+ * Returns the most reduced overview of the given band that still satisfies the
+ * desired number of samples. This function can be used with zero as the number
+ * of desired samples to fetch the most reduced overview. The same band as was
+ * passed in will be returned if it has not overviews, or if none of the
+ * overviews have enough samples.
+ *
+ * @method getBySampleCountAsync
+ * @param {number} samples
+ * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
+ * @return {Promise<gdal.RasterBand>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  NODE_UNWRAP_CHECK(RasterBand, parent, band);
 
   int n_samples;
   NODE_ARG_INT(0, "minimum number of samples", n_samples);
 
-  GDALRasterBand *result = band->get()->GetRasterSampleOverview(n_samples);
-
-  info.GetReturnValue().Set(RasterBand::New(result, band->getParent()));
+  GDALAsyncableJob<GDALRasterBand *> job(band->parent_uid);
+  job.persist(parent);
+  job.main = [band, n_samples](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    GDALRasterBand *result = band->get()->GetRasterSampleOverview(n_samples);
+    if (result == nullptr) { throw "Specified overview not found"; }
+    return result;
+  };
+  job.rval = [band](GDALRasterBand *result, GetFromPersistentFunc) {
+    return RasterBand::New(result, band->getParent());
+  };
+  job.run(info, async, 1);
 }
 
 /**
@@ -144,18 +177,29 @@ NAN_METHOD(RasterBandOverviews::getBySampleCount) {
  * @method count
  * @return {number}
  */
-NAN_METHOD(RasterBandOverviews::count) {
+
+/**
+ * Returns the number of overviews.
+ *
+ * @method countAsync
+ * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
+ * @return {Promise<number>}
+ */
+GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::count) {
   Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
-  RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent);
-  if (!band->isAlive()) {
-    Nan::ThrowError("RasterBand object has already been destroyed");
-    return;
-  }
+  NODE_UNWRAP_CHECK(RasterBand, parent, band);
 
-  info.GetReturnValue().Set(Nan::New<Integer>(band->get()->GetOverviewCount()));
+  GDALAsyncableJob<int> job(band->parent_uid);
+  job.persist(parent);
+  job.main = [band](const GDALExecutionProgress &) {
+    int count = band->get()->GetOverviewCount();
+    return count;
+  };
+  job.rval = [](int count, GetFromPersistentFunc) { return Nan::New<Integer>(count); };
+  job.run(info, async, 0);
 }
 
 } // namespace node_gdal

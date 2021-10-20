@@ -173,6 +173,23 @@
     },
     {
       "files": [
+        "test/api_asyncIterators.test.js"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "plugins": [
+        "@typescript-eslint"
+      ],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+      ],
+      "parserOptions": {
+        "ecmaVersion": 2018
+      }
+    },
+    {
+      "files": [
         "scripts/publish-packages.js",
         "test/stress.js"
       ],

@@ -48,7 +48,7 @@ describe('gdal', () => {
         assert.equal(ds.root.groups.count(), 0)
       })
 
-      it('should be Iterable', () => {
+      it('@@iterator()', () => {
         for (const i of ds.root.groups) {
           assert.instanceOf(i, gdal.Group)
         }
@@ -77,7 +77,7 @@ describe('gdal', () => {
         assert.eventually.instanceOf(ds.root.arrays.getAsync('time'), gdal.MDArray)
       )
 
-      it('should be Iterable', () => {
+      it('@@iterator()', () => {
         let called = 0
         for (const i of ds.root.arrays) {
           called++
@@ -100,7 +100,7 @@ describe('gdal', () => {
         assert.equal(ds.root.dimensions.count(), 3)
       })
 
-      it('should be Iterable', () => {
+      it('@@iterator()', () => {
         let called = 0
         for (const i of ds.root.dimensions) {
           called++
@@ -123,7 +123,7 @@ describe('gdal', () => {
         assert.equal(ds.root.attributes.count(), 8)
       })
 
-      it('should be Iterable', () => {
+      it('@@iterator()', () => {
         let called = 0
         for (const i of ds.root.attributes) {
           called++
@@ -212,7 +212,7 @@ describe('gdal', () => {
         assert.equal(mdarray2.dimensions.count(), 2)
       })
 
-      it('should be Iterable', () => {
+      it('@@iterator()', () => {
         let called = 0
         for (const i of mdarray.dimensions) {
           called++
@@ -240,7 +240,7 @@ describe('gdal', () => {
         assert.equal(mdarray2.attributes.count(), 20)
       })
 
-      it('should be Iterable', () => {
+      it('@@iterator()', () => {
         let called = 0
         for (const i of mdarray.attributes) {
           called++

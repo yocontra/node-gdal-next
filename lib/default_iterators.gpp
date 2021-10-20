@@ -1,0 +1,180 @@
+<#define defaultForEach|
+/**
+ * Iterates through all #4 using a callback function.
+ *
+ * @example
+ * ```
+ * #3.forEach(function(array, i) { ... });```
+ *
+ * @for gdal.#1
+ * @method forEach
+ * @param {forEachCb<gdal.#2>} callback The callback to be called with each {{#crossLink "#2"}}#2{{/crossLink}}
+ */
+  gdal.#1.prototype.forEach = defaultForEach
+>
+
+<#define defaultMap|
+/**
+ * Iterates through #4 arrays using a callback function and builds
+ * an array of the returned values.
+ *
+ * @example
+ * ```
+ * var result = #3.map(function(array, i) {
+ *     return value;
+ * });```
+ *
+ * @for gdal.#1
+ * @method map<U>
+ * @param {mapCb<gdal.#2,U>} callback The callback to be called with each {{#crossLink "#2"}}#2{{/crossLink}}
+ * @return {U[]}
+ */
+  gdal.#1.prototype.map = defaultMap
+>
+
+<#define defaultToArray|
+/**
+ * Outputs all #4 as a regular javascript array.
+ *
+ * @for gdal.#1
+ * @method toArray
+ * @return {gdal.#2[]} List of {{#crossLink "#2"}}#2{{/crossLink}} instances.
+ */
+  gdal.#1.prototype.toArray = defaultToArray
+>
+
+<#define defaultIterator|
+/**
+ * Iterates through all #4 using an iterator
+ *
+ * @example
+ * ```
+ * for (const array of #3) {
+ * }
+ *
+ * @for gdal.#1
+ * @type {gdal.#2}
+ * @method Symbol.iterator
+ */
+  gdal.#1.prototype[Symbol.iterator] = defaultIterator
+>
+
+<#define defaultAsyncIterator|
+/**
+ * Iterates through all #4 using an async iterator
+ *
+ * @example
+ * ```
+ * for await (const array of #3) {
+ * }
+ *
+ * @for gdal.#1
+ * @type {gdal.#2}
+ * @method Symbol.asyncIterator
+ */
+  if (Symbol.asyncIterator)
+    gdal.#1.prototype[Symbol.asyncIterator] = defaultAsyncIterator
+>
+
+<#define defaultAllSync|
+  <#defaultForEach #1|#2|#3|#4>
+  <#defaultMap #1|#2|#3|#4>
+  <#defaultIterator #1|#2|#3|#4>
+>
+
+<#define defaultAll|
+  <#defaultAllSync #1|#2|#3|#4>
+  <#defaultAsyncIterator #1|#2|#3|#4>
+>
+
+module.exports = function (gdal) {
+
+function defaultForEach(callback) {
+  const n = this.count()
+  for (let i = 0; i < n; i++) {
+    if (callback(this.get(i), i) === false) return
+  }
+}
+
+/**
+ * map() callback type
+ * @element mapCb
+ * @typedef mapCb<T,U> (obj: T, index: number) => U
+ */
+function defaultMap(callback) {
+  const result = []
+  this.forEach((value, i) => {
+    result.push(callback(value, i))
+  })
+  return result
+}
+
+function defaultToArray() {
+  const array = []
+  this.forEach((geom) => {
+    array.push(geom)
+  })
+  return array
+}
+
+function defaultIterator() {
+  let i = 0
+
+  return {
+    next: () => {
+      const done = !(i < this.count())
+      return {
+        done,
+        value: done ? null : this.get(i++)
+      }
+    }
+  }
+}
+
+function defaultAsyncIterator() {
+  let i = 0
+
+  return {
+    next: () => this.countAsync()
+      .then((count) => {
+        if (i < count) {
+          return this.getAsync(i++).then((value) => ({ done: false, value }))
+        }
+        return { done: true, value: null }
+      })
+  }
+}
+
+
+<#defaultAll DatasetLayers|Layer|dataset.layers|layers>
+<#defaultMap DatasetBands|RasterBand|dataset.bands|raster bands>
+<#defaultAll RasterBandOverviews|RasterBand|band.overviews|overviews>
+
+<#defaultAllSync GDALDrivers|Driver|gdal.drivers|drivers>
+
+<#defaultMap LayerFeatures|Feature|layer.features|features>
+
+<#defaultMap FeatureFields|fieldValue|layer.features.get(0).fields|field definitions>
+<#defaultAll LayerFields|FieldDefn|layer.fields|field definitions>
+<#defaultAll FeatureDefnFields|FieldDefn|featureDefn|field definitions>
+
+<#defaultAllSync LineStringPoints|Point|lineString.points|points>
+<#defaultToArray LineStringPoints|Point|lineString.points|points>
+<#defaultAllSync PolygonRings|LineString|polygon.rings|rings>
+<#defaultToArray PolygonRings|LineString|polygon.rings|rings>
+if (gdal.CompoundCurveCurves) {
+  <#defaultAll CompoundCurveCurves|SimpleCurve|compoundCurves.curves|curves>
+  <#defaultToArray CompoundCurveCurves|SimpleCurve|compoundCurves.curves|curves>
+}
+<#defaultAllSync GeometryCollectionChildren|Geometry|geometryCollection.children|child geometries>
+
+if (gdal.MDArray) {
+  <#defaultAll GroupArrays|MDArray|group.arrays|arrays>
+  <#defaultAll GroupGroups|Group|group.groups|groups>
+  <#defaultAll GroupDimensions|Dimension|group.dimensions|dimensions>
+  <#defaultAll GroupAttributes|Attribute|group.attributes|attributes>
+  <#defaultAll ArrayDimensions|Dimension|array.dimensions|dimensions>
+  <#defaultAll ArrayAttributes|Attribute|array.attributes|attributes>
+}
+
+}

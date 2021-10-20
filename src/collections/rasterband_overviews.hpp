@@ -11,6 +11,8 @@
 // gdal
 #include <gdal_priv.h>
 
+#include "../async.hpp"
+
 using namespace v8;
 using namespace node;
 
@@ -25,9 +27,9 @@ class RasterBandOverviews : public Nan::ObjectWrap {
   static Local<Value> New(Local<Value> band_obj);
   static NAN_METHOD(toString);
 
-  static NAN_METHOD(get);
-  static NAN_METHOD(getBySampleCount);
-  static NAN_METHOD(count);
+  GDAL_ASYNCABLE_DECLARE(get);
+  GDAL_ASYNCABLE_DECLARE(getBySampleCount);
+  GDAL_ASYNCABLE_DECLARE(count);
 
   RasterBandOverviews();
 
