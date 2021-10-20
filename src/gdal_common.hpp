@@ -126,7 +126,7 @@ NAN_SETTER(READ_ONLY_SETTER);
 #define GDAL_RAW_CHECK(type, obj, var)                                                                                 \
   type var = obj->get();                                                                                               \
   if (!obj) {                                                                                                          \
-    Nan::ThrowError("Attribute object has already been destroyed");                                                    \
+    Nan::ThrowError(#type " object has already been destroyed");                                                       \
     return;                                                                                                            \
   }
 
