@@ -221,7 +221,6 @@ ObjectStoreItem<OGRLayer *>::ObjectStoreItem(Nan::Persistent<Object> &obj) : obj
 }
 
 template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, Nan::Persistent<Object> &obj, long parent_uid) {
-  LOG("ObjectStore: Add %s [<%ld]", typeid(ptr).name(), parent_uid);
   uv_scoped_mutex lock(&master_lock);
   shared_ptr<ObjectStoreItem<GDALPTR>> item(new ObjectStoreItem<GDALPTR>(obj));
   item->uid = uid++;
@@ -236,7 +235,7 @@ template <typename GDALPTR> long ObjectStore::add(GDALPTR ptr, Nan::Persistent<O
 
   uidMap<GDALPTR>[item->uid] = item;
   ptrMap<GDALPTR>[ptr] = item;
-  LOG("ObjectStore: Added %s [%ld]", typeid(ptr).name(), item->uid);
+  LOG("ObjectStore: Add %s [%ld]<[%ld]", typeid(ptr).name(), item->uid, parent_uid);
   return item->uid;
 }
 
@@ -345,7 +344,7 @@ template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>>
   while (!item->children.empty()) { do_dispose(item->children.back()); }
 
   if (item->ptr) {
-    LOG("Closing GDALDataset %ld [%p]", uid, item->ptr);
+    LOG("Closing GDALDataset %ld [%p]", item->uid, item->ptr);
     GDALClose(item->ptr);
     item->ptr = nullptr;
   }
