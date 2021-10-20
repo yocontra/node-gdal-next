@@ -7,7 +7,7 @@ ENV GDAL=${GDAL}
 ENV USER=root
 
 RUN \
-  pacman --noconfirm -Sy && \
+  pacman --noconfirm -Syu && \
   pacman --noconfirm -Sy base-devel git rsync && \
   pacman --noconfirm -Sy nodejs npm
 
