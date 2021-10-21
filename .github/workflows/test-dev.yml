@@ -51,13 +51,17 @@ jobs:
 
     strategy:
       matrix:
-        linux-version: [ 'ubuntu:18.04', 'ubuntu:20.04', 'debian:buster', 'centos:8', 'fedora:33', 'archlinux:latest' ]
+        linux-version: [ 'ubuntu:18.04', 'ubuntu:20.04', 'debian:bullseye', 'centos:8', 'fedora:34', 'archlinux:latest' ]
         gdal-version: [ 'shared', 'bundled' ]
         include:
           - linux-version: 'ubuntu:16.04'
             gdal-version: 'bundled'
           - linux-version: 'amazonlinux:latest'
             gdal-version: 'bundled'
+          - linux-version: 'debian:buster'
+            gdal-version: 'shared'
+          - linux-version: 'fedora:33'
+            gdal-version: 'shared'
 
     steps:
     - uses: actions/checkout@v2
