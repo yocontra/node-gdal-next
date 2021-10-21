@@ -86,7 +86,7 @@ if (Symbol.asyncIterator) {
             ds.buildOverviews('NEAREST', [ 2 ])
             ds.close()
             return assert.isRejected((async () => {
-              for (const overview of band.overviews) overview
+              for await (const overview of band.overviews) overview
             })(), /already been destroyed/)
           })
         }
@@ -94,15 +94,32 @@ if (Symbol.asyncIterator) {
     })
   })
   if (semver.gte(gdal.version, '3.1.0')) {
-    describe('gdal.Group', () => {
-      describe('"groups" property', () => {
-        it('@@asyncIterator()', () => {
-          const ds = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr')
-          for (const i of ds.root.groups) {
-            assert.instanceOf(i, gdal.Group)
-          }
-        })
+    const tests = {
+      Group: { groups: gdal.Group, arrays: gdal.MDArray, dimensions: gdal.Dimension, attributes: gdal.Attribute },
+      MDArray: { dimensions: gdal.Dimension, attributes: gdal.Attribute }
+    }
+    for (const tested of Object.keys(tests)) {
+      describe(`gdal.${tested}`, () => {
+        for (const prop of Object.keys(tests[tested])) {
+          describe(`"${prop}" property`, () => {
+            describe('@@asyncIterator()', () => {
+              it('should iterate over the values', () => {
+                const ds = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr')
+                for (const i of ds.root[prop]) {
+                  assert.instanceOf(i, tests[tested][prop])
+                }
+              })
+              it('should reject if the dataset is closed', () => {
+                const ds = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr')
+                ds.close()
+                return assert.isRejected((async () => {
+                  for await (const i of ds.root[prop]) i
+                })(), /already been destroyed/)
+              })
+            })
+          })
+        }
       })
-    })
+    }
   }
 }
