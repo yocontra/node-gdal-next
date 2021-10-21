@@ -144,6 +144,7 @@ struct GDALProgressInfo {
   GDALProgressInfo(const GDALProgressInfo &o);
   GDALProgressInfo(double, const char *);
   GDALProgressInfo();
+  ~GDALProgressInfo() = default;
 };
 
 class GDALSyncExecutionProgress {
