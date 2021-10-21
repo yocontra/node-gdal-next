@@ -6,7 +6,7 @@ chai.use(chaiAsPromised)
 import * as path from 'path'
 import * as semver from 'semver'
 
-describe('gdal library versions of CLI tools', () => {
+describe('gdal_utils', () => {
   afterEach(global.gc)
 
   describe('translate', () => {
@@ -188,4 +188,86 @@ describe('gdal library versions of CLI tools', () => {
     })
   })
 
+  describe('warp', () => {
+    it('should be equivalent to gdalwarp', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+
+      let out = gdal.warp(tmpFile, null, [ ds ], [ '-t_srs', 'epsg:3587' ])
+
+      assert.isTrue(out.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+      out.close()
+
+      out = gdal.open(tmpFile)
+      assert.isTrue(out.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+      out.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should accept a target dataset', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const src_ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const dst_ds = gdal.open(tmpFile, 'w', 'GTiff', src_ds.rasterSize.x, src_ds.rasterSize.y, 1, gdal.GDT_CFloat64)
+      dst_ds.srs = gdal.SpatialReference.fromEPSG(3587)
+      dst_ds.geoTransform = [
+        3968863.6398134492,
+        7.510187636375825,
+        0,
+        469467.09900118795,
+        0,
+        -7.510187636375825
+      ]
+
+      const out = gdal.warp(null, dst_ds, [ src_ds ])
+      assert.strictEqual(dst_ds, out)
+      assert.isTrue(dst_ds.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+      out.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should throw without destination', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      assert.throws(() => {
+        gdal.warp(null, null, [ ds ], [ '-t_srs', 'epsg:3587' ])
+      }, /must be given/)
+    })
+    it('should throw without src datasets', () => {
+      assert.throws(() => {
+        gdal.warp('/vsimem/out.tif', null, [])
+      }, /at least one/)
+    })
+    it('should throw if the source has been closed', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      ds.close()
+      assert.throws(() => {
+        gdal.warp('/vsimem/out.tif', null, [ ds ])
+      }, /already been destroyed/)
+    })
+  })
+
+  describe('warpAsync', () => {
+    it('should be equivalent to gdalwarp', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+
+      const out = gdal.warpAsync(tmpFile, null, [ ds ], [ '-t_srs', 'epsg:3587' ])
+
+      return assert.isFulfilled(out.then((out_ds) => {
+        assert.isTrue(out_ds.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+        out_ds.close()
+
+        out_ds = gdal.open(tmpFile)
+        assert.isTrue(out_ds.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+        out_ds.close()
+
+        gdal.vsimem.release(tmpFile)
+      }))
+    })
+    it('should reject on error', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      ds.close()
+      return assert.isRejected(gdal.warpAsync(tmpFile, null, [ ds ], [ '-t_srs', 'epsg:3587' ]))
+    })
+  })
 })

@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Asynchronous iterators for all collections that have asynchronous getters
  - `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
- - `gdal.info{Async}`, `gdal.translate{Async}` and `gdal.vectorTranslate{Async}` - library versions of `gdalinfo`, `gdal_translate` and `ogr2ogr`
+ - `gdal.info{Async}`, `gdal.translate{Async}`,`gdal.vectorTranslate{Async}` and `gdal.warp{Async}` - library versions of `gdalinfo`, `gdal_translate`, `ogr2ogr` and `gdalwarp`
  - `gdal.SpatialReference.fromURLAsync`, `gdal.SpatialReference.fromCRSURLAsync` and `gdal.SpatialReference.fromUserInputAsync`
  - `gdal.RasterBandOverviews.countAsync`, `gdal.RasterBandOverviews.getAsync` and `gdal.RasterBandOverviews.getBySampleCountAsync`
 

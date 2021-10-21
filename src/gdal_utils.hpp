@@ -32,6 +32,7 @@ void Initialize(Local<Object> target);
 GDAL_ASYNCABLE_GLOBAL(info);
 GDAL_ASYNCABLE_GLOBAL(translate);
 GDAL_ASYNCABLE_GLOBAL(vectorTranslate);
+GDAL_ASYNCABLE_GLOBAL(warp);
 
 } // namespace Utils
 } // namespace node_gdal
