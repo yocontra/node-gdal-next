@@ -15,7 +15,7 @@
 
 <#define defaultMap|
 /**
- * Iterates through #4 arrays using a callback function and builds
+ * Iterates through #4 using a callback function and builds
  * an array of the returned values.
  *
  * @example
