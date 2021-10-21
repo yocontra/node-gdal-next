@@ -1109,7 +1109,7 @@ describe('gdal.RasterBand', () => {
               assert.isAtLeast(calls, 1)
             })
             it('should call the write() progress callback when one is provided', () => {
-              const file = `${__dirname}/data/temp/write_progress_test.${String(
+              const file = `/vsimem/write_progress_test.${String(
                 Math.random()
               ).substring(2)}.tmp.tif`
               ds2 = gdal.open(file, 'w', 'GTiff', ds1.rasterSize.x, ds1.rasterSize.y, 1)
@@ -1266,7 +1266,7 @@ describe('gdal.RasterBand', () => {
     })
     describe('flush()', () => {
       it('should flush the written data', () => {
-        const file = `${__dirname}/data/temp/write_flush_test.${String(
+        const file = `/vsimem/write_flush_test.${String(
           Math.random()
         ).substring(2)}.tmp.tif`
         const size = 64

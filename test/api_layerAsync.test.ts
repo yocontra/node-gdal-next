@@ -33,7 +33,7 @@ describe('gdal.LayerAsync', () => {
         layer = ds.layers.get(0)
       } else {
         driver = gdal.drivers.get('ESRI Shapefile')
-        file = `${__dirname}/data/temp/layer_test.${String(
+        file = `/vsimem/layer_test.${String(
           Math.random()
         ).substring(2)}.tmp.shp`
         ds = driver.create(file)
