@@ -10,7 +10,7 @@ RUN \
   curl -fsSL https://rpm.nodesource.com/setup_${NODEJS}.x | bash - && \
   dnf module install -y nodejs:${NODEJS}/default && \
   dnf groupinstall -y 'Development Tools' && \
-  dnf install -y git python
+  dnf install -y g++ git python
 
 RUN if [ "${GDAL}" = "shared" ]; then dnf install -y gdal-devel; fi
 
