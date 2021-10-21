@@ -251,19 +251,65 @@ describe('gdal.MultiPolygon', () => {
     it('should be an instance of GeometryCollectionChildren', () => {
       assert.instanceOf(multiPolygon.children, gdal.GeometryCollectionChildren)
     })
-    it('get() should return a Geometry', () => {
-      const geom = multiPolygon.children.get(0)
-      assert.instanceOf(geom, gdal.Geometry)
-      assert.instanceOf(geom, gdal.Polygon)
+    describe('get()', () => {
+      it('should return a Geometry', () => {
+        const geom = multiPolygon.children.get(0)
+        assert.instanceOf(geom, gdal.Geometry)
+        assert.instanceOf(geom, gdal.Polygon)
+      })
+      it('should throw if the geometry does not exist', () => {
+        assert.throws(() => {
+          multiPolygon.children.get(112)
+        })
+      })
     })
     it('count() should return a number', () => {
       const n = multiPolygon.children.count()
       assert.isNumber(n)
       assert.equal(n, 1)
     })
-    it('get() should throw if the geometry does not exist', () => {
-      assert.throws(() => {
-        multiPolygon.children.get(112)
+    describe('add()', () => {
+      it('should add a new element', () => {
+        const geom = new gdal.Polygon()
+        const count = multiPolygon.children.count()
+        multiPolygon.children.add(geom)
+        assert.equal(multiPolygon.children.count(), count + 1)
+        assert.deepEqual(multiPolygon.children.get(count), geom)
+      })
+      it('should add an array of new elements', () => {
+        const geom = new gdal.Polygon()
+        const count = multiPolygon.children.count()
+        multiPolygon.children.add([ geom ])
+        assert.equal(multiPolygon.children.count(), count + 1)
+        assert.deepEqual(multiPolygon.children.get(count), geom)
+      })
+      it('should throw on no arguments', () => {
+        assert.throws(() => {
+          // eslint-disable-next-line no-useless-call
+          multiPolygon.children.add.call(multiPolygon.children)
+        }, /must be given/)
+      })
+      it('should throw on invalid elements', () => {
+        assert.throws(() => {
+          multiPolygon.children.add({} as gdal.Geometry)
+        }, /child must be a geometry/)
+      })
+      it('should throw on invalid array elements', () => {
+        assert.throws(() => {
+          multiPolygon.children.add([ {} as gdal.Geometry ])
+        }, /All array elements must be geometry objects/)
+      })
+    })
+    describe('remove()', () => {
+      it('should remove an element', () => {
+        const count = multiPolygon.children.count()
+        multiPolygon.children.remove(count - 1)
+        assert.equal(multiPolygon.children.count(), count - 1)
+      })
+      it('should throw on error', () => {
+        assert.throws(() => {
+          multiPolygon.children.remove(-2)
+        })
       })
     })
   })

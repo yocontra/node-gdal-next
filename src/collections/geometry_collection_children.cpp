@@ -122,7 +122,7 @@ NAN_METHOD(GeometryCollectionChildren::get) {
  * Removes the geometry at the specified index.
  *
  * @method remove
- * @param {number} index 0-based index
+ * @param {number} index 0-based index, -1 for all geometries
  */
 NAN_METHOD(GeometryCollectionChildren::remove) {
   Nan::HandleScope scope;
