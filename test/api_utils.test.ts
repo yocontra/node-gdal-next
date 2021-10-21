@@ -18,6 +18,22 @@ describe('gdal library versions of CLI tools', () => {
       out.close()
       gdal.vsimem.release(tmpFile)
     })
+    it('should be callable w/o options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      const out = gdal.translate(tmpFile, ds)
+      assert.equal(out.bands.count(), 3)
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should throw on error', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      ds.close()
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      assert.throws(() => {
+        gdal.translate(tmpFile, ds)
+      })
+    })
   })
 
   describe('translateAsync', () => {
@@ -31,6 +47,28 @@ describe('gdal library versions of CLI tools', () => {
           gdal.vsimem.release(tmpFile)
         })
       )
+    })
+    it('should be callable w/o options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      return assert.isFulfilled(gdal.translateAsync(tmpFile, ds,)
+        .then((out) => {
+          assert.equal(out.bands.count(), 3)
+          out.close()
+          gdal.vsimem.release(tmpFile)
+        })
+      )
+    })
+    it('should reject when the dataset is already closed', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      ds.close()
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      return assert.isRejected(gdal.translateAsync(tmpFile, ds), /already been destroyed/)
+    })
+    it('should reject on error', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      return assert.isRejected(gdal.translateAsync(tmpFile, ds, [ '-of', 'nosuchformat' ]), /not recognised/)
     })
   })
 
@@ -56,8 +94,17 @@ describe('gdal library versions of CLI tools', () => {
       assert.strictEqual(out, tmpDS)
 
       assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
+      assert.equal(out.driver.description, 'GPKG')
       out.close()
       gdal.vsimem.release(tmpFile)
+    })
+    it('should throw on error', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+
+      assert.throws(() => {
+        gdal.vectorTranslate(tmpFile, ds, [ '-f', 'nosuchformat' ])
+      }, /nosuchformat/)
     })
   })
 
@@ -90,6 +137,19 @@ describe('gdal library versions of CLI tools', () => {
         })
       )
     })
+    it('should reject on error', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+
+      return assert.isRejected(gdal.vectorTranslateAsync(tmpFile, ds, [ '-f', 'nosuchformat' ]), /nosuchformat/)
+    })
+    it('should reject when the dataset is already destroyed', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      ds.close()
+
+      return assert.isRejected(gdal.vectorTranslateAsync(tmpFile, ds), /already been destroyed/)
+    })
   })
 
   describe('info', () => {
@@ -97,6 +157,17 @@ describe('gdal library versions of CLI tools', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
       const out = JSON.parse(gdal.info(ds, [ '-json' ]))
       assert.equal(out.bands[0].type, 'Byte')
+    })
+    it('should be callable w/options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      assert.isString(gdal.info(ds))
+    })
+    it('should throw on error', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      ds.close()
+      assert.throws(() => {
+        gdal.info(ds)
+      }, /already been destroyed/)
     })
   })
 
@@ -109,6 +180,11 @@ describe('gdal library versions of CLI tools', () => {
           assert.equal(json.bands[0].type, 'Byte')
         })
       )
+    })
+    it('should reject on error', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      ds.close()
+      return assert.isRejected(gdal.infoAsync(ds), /already been destroyed/)
     })
   })
 
