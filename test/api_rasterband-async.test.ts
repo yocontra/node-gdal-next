@@ -508,7 +508,7 @@ describe('gdal.RasterBandAsync', () => {
     })
     describe('flushAsync()', () => {
       it('should flush the written data', () => {
-        const file = `${__dirname}/data/temp/write_flushAsync_test.${String(
+        const file = `/vsimem/write_flushAsync_test.${String(
           Math.random()
         ).substring(2)}.tmp.tif`
         const size = 64

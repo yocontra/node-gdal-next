@@ -349,7 +349,7 @@ describe('gdal.Dataset', () => {
       })
       describe('create()', () => {
         it('should return Layer', () => {
-          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+          const file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -359,7 +359,7 @@ describe('gdal.Dataset', () => {
           assert.equal(lyr.geomType, gdal.wkbPoint)
         })
         it('should set spatial reference of created layer', () => {
-          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+          const file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -368,7 +368,7 @@ describe('gdal.Dataset', () => {
           assert.instanceOf(lyr.srs, gdal.SpatialReference)
         })
         it('should accept null for srs', () => {
-          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+          const file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -376,7 +376,7 @@ describe('gdal.Dataset', () => {
           assert.instanceOf(lyr, gdal.Layer)
         })
         it('should accept Geometry constructor for geom_type', () => {
-          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+          const file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -385,7 +385,7 @@ describe('gdal.Dataset', () => {
           assert.equal(lyr.geomType, gdal.wkbPoint)
         })
         it('should accept 2.5D Types for geom_type', () => {
-          let file = `${__dirname}/data/temp/ds_layer_test.${String(
+          let file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           let ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -393,7 +393,7 @@ describe('gdal.Dataset', () => {
           assert.instanceOf(lyr, gdal.Layer)
           assert.equal(lyr.geomType, gdal.wkbPoint25D)
 
-          file = `${__dirname}/data/temp/ds_layer_test.${String(
+          file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -406,7 +406,7 @@ describe('gdal.Dataset', () => {
           assert.equal(lyr.geomType, gdal.wkbPoint25D)
         })
         it('should throw if bad geometry type is given', () => {
-          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+          const file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -443,7 +443,7 @@ describe('gdal.Dataset', () => {
           })
         })
         it('should throw if dataset is closed', () => {
-          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+          const file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -455,7 +455,7 @@ describe('gdal.Dataset', () => {
       })
       describe('createAsync()', () => {
         it('should return Layer', () => {
-          const file = `${__dirname}/data/temp/ds_layer_test.${String(
+          const file = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}.tmp.shp`
           const ds = gdal.open(file, 'w', 'ESRI Shapefile')
@@ -1195,7 +1195,7 @@ describe('gdal.Dataset', () => {
       assert.isFalse(ds.testCapability(gdal.ODsCDeleteLayer))
     })
     it('should return true when layer does support capability', () => {
-      const file = `${__dirname}/data/temp/ds_layer_test.${String(
+      const file = `/vsimem/ds_layer_test.${String(
         Math.random()
       ).substring(2)}.tmp.shp`
       const ds = gdal.open(file, 'w', 'ESRI Shapefile')
