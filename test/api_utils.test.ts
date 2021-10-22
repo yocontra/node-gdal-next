@@ -26,6 +26,15 @@ describe('gdal_utils', () => {
       out.close()
       gdal.vsimem.release(tmpFile)
     })
+    it('should support progress callbacks', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      let calls = 0
+      const out = gdal.translate(tmpFile, ds, [ '-b', '1' ], { progress_cb: () => calls++ })
+      assert.isAbove(calls, 0)
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
     it('should throw on error', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
       ds.close()
@@ -98,6 +107,18 @@ describe('gdal_utils', () => {
       out.close()
       gdal.vsimem.release(tmpFile)
     })
+    it('should support progress callbacks', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
+
+      let calls = 0
+      const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ], { progress_cb: () => calls++ })
+      assert.isAbove(calls, 0)
+
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
     it('should throw on error', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
@@ -158,7 +179,7 @@ describe('gdal_utils', () => {
       const out = JSON.parse(gdal.info(ds, [ '-json' ]))
       assert.equal(out.bands[0].type, 'Byte')
     })
-    it('should be callable w/options', () => {
+    it('should be callable w/o options', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
       assert.isString(gdal.info(ds))
     })
@@ -223,6 +244,17 @@ describe('gdal_utils', () => {
       assert.isTrue(dst_ds.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
       out.close()
 
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should support progress callbacks', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+
+      let calls = 0
+      const out = gdal.warp(tmpFile, null, [ ds ], [ '-t_srs', 'epsg:3587' ], { progress_cb: () => calls++ })
+      assert.isAbove(calls, 0)
+
+      out.close()
       gdal.vsimem.release(tmpFile)
     })
     it('should throw without destination', () => {
