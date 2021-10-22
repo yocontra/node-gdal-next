@@ -231,7 +231,7 @@ Before submitting pull requests, please update the [tests](test) and make sure t
 $ npm test # test against bundled gdal
 $ npm run test:shared # test against most major versions
 # test against shared gdal on given Linux version and Node.js version
-$ npm run container dev {ubuntu|centos|fedora|debian|archlinux|amazon}:{version} 12|14|16|lts shared
+$ npm run container dev {ubuntu|centos|fedora|debian|archlinux|amazon}:{version} 12|14|16|17|lts shared
 ```
 
 ## License
@@ -248,7 +248,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 Release binaries with pre-built bundled GDAL are tested against the full matrix of:
 
-* Node.js versions: 12.x, 14.x, 16.x
+* Node.js versions: 12.x, 14.x, 16.x, 17.x
 * OS: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Ubuntu 21.10, CentOS 8, Fedora 33, Fedora 34, Debian 10 buster, Debian 11 bullseye, Arch Linux current, Amazon Linux, Windows Server 2019, macOS Catalina 10.15
 
 
@@ -273,9 +273,11 @@ Development versions are unit tested for the following targets:
 | Node.js 12.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 14.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 16.x | Ubuntu 20.04 | system installed GDAL 3.0.4
+| Node.js 17.x | Ubuntu 20.04 | system installed GDAL 3.0.4
 | Node.js 12.x | Ubuntu 20.04 | bundled GDAL
 | Node.js 14.x | Ubuntu 20.04 | bundled GDAL (*code coverage platform*)
 | Node.js 16.x | Ubuntu 20.04 | bundled GDAL
+| Node.js 17.x | Ubuntu 20.04 | bundled GDAL
 | Node.js 14.x | Amazon Linux | bundled GDAL
 | Node.js 12.x | Windows Server 2019 | bundled GDAL
 | Node.js 14.x | Windows Server 2019 | bundled GDAL

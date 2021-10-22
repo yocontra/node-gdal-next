@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - PROJ 8.1.1
  - GEOS 3.9.1
  - Bundled GDAL 3.4.0-git (2021-10-13)
+ - Node 17 support and binary packages
  - Asynchronous iterators for all collections that have asynchronous getters
  - `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
