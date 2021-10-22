@@ -137,10 +137,11 @@ describe('gdal', () => {
         outputFilename,
         gdal.open(`${__dirname}/data/12_791_1476.jpg`),
         {},
-        (): void => {
+        false,
+        { progress_cb: (): void => {
           throw new Error('progress callback error')
-        },
-        false)
+        } }
+      )
     }, /sync progress callback exception/)
   })
 })

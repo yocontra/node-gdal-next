@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - Requires GDAL >= 2.1 if rebuilding against a system-installed GDAL library
- - (***BREAKING***) Move the progress callback of `gdal.Driver.createCopy{Async}` before `strict` to allow using it with a Promise
+ - (***BREAKING***) Switch the progress callback of `gdal.Driver.createCopy{Async}` from a raw argument to an argument inside an object to differentiate it from a result callback when some options are omitted in async mode
  - `gdal.Driver.create{Async}` now throw if they fail to parse the options instead of returning `undefined`
  - `gdal.DatasetBands.create{Async}` and `gdal.SpatialReference.fromESRI` now have correct TypeScript signatures, all options lists are supported either in `{object}` or in `string[]` form
  - `gdal.checksumImage{Async}` now throw/reject on error instead of returning 0 if the GDAL method returned an error, but the GDAL method still returns 0 on some errors and does take into account fractional numbers < 1.0
