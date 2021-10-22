@@ -282,8 +282,10 @@ Development versions are unit tested for the following targets:
 | Node.js 12.x | Windows Server 2019 | bundled GDAL
 | Node.js 14.x | Windows Server 2019 | bundled GDAL
 | Node.js 16.x | Windows Server 2019 | bundled GDAL
+| Node.js 17.x | Windows Server 2019 | bundled GDAL
 | Node.js 12.x | macOS Catalina 10.15 | bundled GDAL
 | Node.js 14.x | macOS Catalina 10.15 | bundled GDAL
 | Node.js 16.x | macOS Catalina 10.15 | bundled GDAL
+| Node.js 17.x | macOS Catalina 10.15 | bundled GDAL
 ---
 
