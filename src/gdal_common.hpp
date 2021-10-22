@@ -10,8 +10,8 @@
 
 #include "utils/ptr_manager.hpp"
 
-#if GDAL_VERSION_MAJOR < 2
-#error GDAL 1.x not supported since gdal-async@3.3.0
+#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 1)
+#error gdal-async now requires GDAL >= 2.1, downgrade to gdal-async@3.2.x for earlier versions
 #endif
 
 namespace node_gdal {

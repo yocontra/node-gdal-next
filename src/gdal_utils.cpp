@@ -93,6 +93,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
     CPLErrorReset();
     auto b = aosOptions;
     auto psOptions = GDALTranslateOptionsNew(aosOptions->List(), nullptr);
+    if (psOptions == nullptr) throw CPLGetLastErrorMsg();
     if (progress_cb) GDALTranslateOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
     GDALDataset *r = GDALDatasetFromHandle(GDALTranslate(dst.c_str(), GDALDatasetToHandle(raw), psOptions, nullptr));
     GDALTranslateOptionsFree(psOptions);
@@ -191,8 +192,9 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
     CPLErrorReset();
     if (progress_cb) aosOptions->AddString("-progress");
     auto psOptions = GDALVectorTranslateOptionsNew(aosOptions->List(), nullptr);
-    if (progress_cb && psOptions)
-      GDALVectorTranslateOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
+    if (psOptions == nullptr) throw CPLGetLastErrorMsg();
+
+    if (progress_cb) GDALVectorTranslateOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
 
     auto srcH = GDALDatasetToHandle(src_raw);
     GDALDataset *r = GDALDatasetFromHandle(
@@ -259,6 +261,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
   job.main = [raw, aosOptions](const GDALExecutionProgress &) {
     CPLErrorReset();
     auto psOptions = GDALInfoOptionsNew(aosOptions->List(), nullptr);
+    if (psOptions == nullptr) throw CPLGetLastErrorMsg();
     char *r = GDALInfo(GDALDatasetToHandle(raw), psOptions);
     GDALInfoOptionsFree(psOptions);
     if (r == nullptr) throw CPLGetLastErrorMsg();
@@ -368,6 +371,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::warp) {
     [dst_path, gdal_dst_ds, src_count, gdal_src_ds, aosOptions, progress_cb](const GDALExecutionProgress &progress) {
       CPLErrorReset();
       auto psOptions = GDALWarpAppOptionsNew(aosOptions->List(), nullptr);
+      if (psOptions == nullptr) throw CPLGetLastErrorMsg();
       if (progress_cb) GDALWarpAppOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
       GDALDatasetH r = GDALWarp(
         dst_path.length() > 0 ? dst_path.c_str() : nullptr,

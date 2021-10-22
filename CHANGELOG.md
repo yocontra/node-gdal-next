@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - PROJ 8.1.1
  - GEOS 3.9.1
- - GDAL 3.4.0-git (2021-10-13)
+ - Bundled GDAL 3.4.0-git (2021-10-13)
  - Asynchronous iterators for all collections that have asynchronous getters
  - `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.RasterBandOverviews.countAsync`, `gdal.RasterBandOverviews.getAsync` and `gdal.RasterBandOverviews.getBySampleCountAsync`
 
 ### Changed
+ - Requires GDAL >= 2.1 if rebuilding against a system-installed GDAL library
  - (***BREAKING***) Move the progress callback of `gdal.Driver.createCopy{Async}` before `strict` to allow using it with a Promise
  - `gdal.Driver.create{Async}` now throw if they fail to parse the options instead of returning `undefined`
  - `gdal.DatasetBands.create{Async}` and `gdal.SpatialReference.fromESRI` now have correct TypeScript signatures, all options lists are supported either in `{object}` or in `string[]` form

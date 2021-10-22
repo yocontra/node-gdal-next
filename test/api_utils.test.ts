@@ -35,7 +35,15 @@ describe('gdal_utils', () => {
       out.close()
       gdal.vsimem.release(tmpFile)
     })
-    it('should throw on error', () => {
+    it('should throw on unrecognized options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      ds.close()
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      assert.throws(() => {
+        gdal.translate(tmpFile, ds, [ '-nosuchoption' ])
+      })
+    })
+    it('should throw if the Dataset is closed', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
       ds.close()
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
@@ -82,48 +90,35 @@ describe('gdal_utils', () => {
   })
 
   describe('vectorTranslate', () => {
-    if (semver.gte(gdal.version, '3.0.0')) {
-      it('should accept a destination filename', () => {
-        const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
-        const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+    it('should accept a destination filename', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
 
-        const out = gdal.vectorTranslate(tmpFile, ds, [ '-of', 'GPKG' ])
+      const out = gdal.vectorTranslate(tmpFile, ds, [ '-f', 'GPKG' ])
 
-        assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
-        out.close()
-        gdal.vsimem.release(tmpFile)
-      })
-      it('should support progress callbacks', () => {
-        const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
-        const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
-        const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
+      assert.equal(out.driver.description, 'GPKG')
+      assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should support progress callbacks', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
 
-        let calls = 0
-        const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ], { progress_cb: () => calls++ })
-        assert.isAbove(calls, 0)
+      let calls = 0
+      const out = gdal.vectorTranslate(tmpDS, ds, [ '-f', 'GPKG' ], { progress_cb: () => calls++ })
+      assert.isAbove(calls, 0)
 
-        out.close()
-        gdal.vsimem.release(tmpFile)
-      })
-    } else {
-      it('should not crash on a progress callback', () => {
-        const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
-        const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
-        const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
-
-        let calls = 0
-        const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ], { progress_cb: () => calls++ })
-
-        out.close()
-        gdal.vsimem.release(tmpFile)
-      })
-    }
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
     it('should accept a destination dataset', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
       const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
 
-      const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ])
+      const out = gdal.vectorTranslate(tmpDS, ds, [ '-f', 'GPKG' ])
       assert.strictEqual(out, tmpDS)
 
       assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
@@ -139,6 +134,14 @@ describe('gdal_utils', () => {
         gdal.vectorTranslate(tmpFile, ds, [ '-f', 'nosuchformat' ])
       }, /nosuchformat/)
     })
+    it('should throw on unrecognized options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+
+      assert.throws(() => {
+        gdal.vectorTranslate(tmpFile, ds, [ '-nosuchoption' ])
+      }, /nosuchoption/)
+    })
   })
 
   describe('vectorTranslateAsync', () => {
@@ -147,8 +150,9 @@ describe('gdal_utils', () => {
         const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
         const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
 
-        return assert.isFulfilled(gdal.vectorTranslateAsync(tmpFile, ds, [ '-of', 'GPKG' ])
+        return assert.isFulfilled(gdal.vectorTranslateAsync(tmpFile, ds, [ '-f', 'GPKG' ])
           .then((out) => {
+            assert.equal(out.driver.description, 'GPKG')
             assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
             out.close()
             gdal.vsimem.release(tmpFile)
@@ -161,7 +165,7 @@ describe('gdal_utils', () => {
       const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
       const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
 
-      return assert.isFulfilled(gdal.vectorTranslateAsync(tmpDS, ds, [ '-of', 'GPKG' ])
+      return assert.isFulfilled(gdal.vectorTranslateAsync(tmpDS, ds, [ '-f', 'GPKG' ])
         .then((out) => {
           assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
           assert.strictEqual(out, tmpDS)
@@ -201,6 +205,12 @@ describe('gdal_utils', () => {
       assert.throws(() => {
         gdal.info(ds)
       }, /already been destroyed/)
+    })
+    it('should throw on unrecognized options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      assert.throws(() => {
+        gdal.info(ds, [ '-nosuchoption' ])
+      }, /nosuchoption/)
     })
   })
 
@@ -268,6 +278,14 @@ describe('gdal_utils', () => {
 
       out.close()
       gdal.vsimem.release(tmpFile)
+    })
+    it('should throw on unrecognized options', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+
+      assert.throws(() => {
+        gdal.warp(tmpFile, null, [ ds ], [ '-nosuchoption' ])
+      }, /nosuchoption/)
     })
     it('should throw without destination', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
