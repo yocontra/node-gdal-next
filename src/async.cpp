@@ -41,20 +41,15 @@ GDALExecutionProgress::~GDALExecutionProgress() {
 
 // sync/async dispatcher
 void GDALExecutionProgress::Send(GDALProgressInfo *info) const {
-  try {
-    // async mode -> we are in an aux thread, we can't go back to JS
-    // we must enqueue a job on the event loop and wait for the JS world to stop
-    // the enqueuing is in Nan::AsyncWorker, then once the JS world is not running
-    // AsyncWorker::HandleProgressCallback will get invoked on the main thread
-    if (async) async->Send(info, 1);
-    // sync mode -> the JS world is not running, we can go back directly
-    // this code is below
-    if (sync) sync->Send(info);
-  } catch (const char *msg) {
-    delete info;
-    throw msg;
-  }
-  delete info;
+  auto infoHolder = std::shared_ptr<GDALProgressInfo>(info);
+  // async mode -> we are in an aux thread, we can't go back to JS
+  // we must enqueue a job on the event loop and wait for the JS world to stop
+  // the enqueuing is in Nan::AsyncWorker, then once the JS world is not running
+  // AsyncWorker::HandleProgressCallback will get invoked on the main thread
+  if (async) async->Send(info, 1);
+  // sync mode -> the JS world is not running, we can go back directly
+  // this code is below
+  if (sync) sync->Send(info);
 }
 
 // This is the sync execution context, it is the final owner of the progress_callback
