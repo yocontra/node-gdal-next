@@ -93,6 +93,30 @@ describe('gdal_utils', () => {
         out.close()
         gdal.vsimem.release(tmpFile)
       })
+      it('should support progress callbacks', () => {
+        const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+        const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+        const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
+
+        let calls = 0
+        const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ], { progress_cb: () => calls++ })
+        assert.isAbove(calls, 0)
+
+        out.close()
+        gdal.vsimem.release(tmpFile)
+      })
+    } else {
+      it('should not crash on a progress callback', () => {
+        const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+        const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
+        const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
+
+        let calls = 0
+        const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ], { progress_cb: () => calls++ })
+
+        out.close()
+        gdal.vsimem.release(tmpFile)
+      })
     }
     it('should accept a destination dataset', () => {
       const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
@@ -104,18 +128,6 @@ describe('gdal_utils', () => {
 
       assert.equal(out.layers.get(0).features.first().fields.get('kind'), 'county')
       assert.equal(out.driver.description, 'GPKG')
-      out.close()
-      gdal.vsimem.release(tmpFile)
-    })
-    it('should support progress callbacks', () => {
-      const ds = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
-      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.gpkg`
-      const tmpDS = gdal.open(tmpFile, 'w', 'GPKG')
-
-      let calls = 0
-      const out = gdal.vectorTranslate(tmpDS, ds, [ '-of', 'GPKG' ], { progress_cb: () => calls++ })
-      assert.isAbove(calls, 0)
-
       out.close()
       gdal.vsimem.release(tmpFile)
     })

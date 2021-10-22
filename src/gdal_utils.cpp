@@ -191,7 +191,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
     CPLErrorReset();
     if (progress_cb) aosOptions->AddString("-progress");
     auto psOptions = GDALVectorTranslateOptionsNew(aosOptions->List(), nullptr);
-    if (progress_cb) GDALVectorTranslateOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
+    if (progress_cb && psOptions)
+      GDALVectorTranslateOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
 
     auto srcH = GDALDatasetToHandle(src_raw);
     GDALDataset *r = GDALDatasetFromHandle(
