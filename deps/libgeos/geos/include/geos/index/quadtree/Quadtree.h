@@ -115,10 +115,10 @@ public:
     ~Quadtree() override = default;
 
     /// Returns the number of levels in the tree.
-    int depth();
+    std::size_t depth();
 
     /// Returns the number of items in the tree.
-    size_t size();
+    std::size_t size();
 
     void insert(const geom::Envelope* itemEnv, void* item) override;
 

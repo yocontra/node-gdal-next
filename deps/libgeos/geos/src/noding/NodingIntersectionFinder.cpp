@@ -28,65 +28,12 @@ using namespace geos::geom;
 namespace geos {
 namespace noding { // geos.noding
 
-/* private */
-bool
-NodingIntersectionFinder::isEndSegment(const SegmentString* segStr, size_t index)
-{
-    if(index == 0) {
-        return true;
-    }
-    if(index >= segStr->size() - 2) {
-        return true;
-    }
-    return false;
-}
-
-/* private */
-bool
-NodingIntersectionFinder::isInteriorVertexIntersection(
-    const Coordinate& p0, const Coordinate& p1,
-    bool isEnd0, bool isEnd1)
-{
-    // Intersections between endpoints are valid nodes, so not reported
-    if(isEnd0 && isEnd1) {
-        return false;
-    }
-
-    if(p0.equals2D(p1)) {
-        return true;
-    }
-
-    return false;
-}
-
-
-/* private */
-bool
-NodingIntersectionFinder::isInteriorVertexIntersection(
-    const Coordinate& p00, const Coordinate& p01, const Coordinate& p10, const Coordinate& p11,
-    bool isEnd00, bool isEnd01, bool isEnd10, bool isEnd11)
-{
-    if(isInteriorVertexIntersection(p00, p10, isEnd00, isEnd10)) {
-        return true;
-    }
-    if(isInteriorVertexIntersection(p00, p11, isEnd00, isEnd11)) {
-        return true;
-    }
-    if(isInteriorVertexIntersection(p01, p10, isEnd01, isEnd10)) {
-        return true;
-    }
-    if(isInteriorVertexIntersection(p01, p11, isEnd01, isEnd11)) {
-        return true;
-    }
-    return false;
-}
-
 
 /* public (override) */
 void
 NodingIntersectionFinder::processIntersections(
-    SegmentString* e0,  size_t segIndex0,
-    SegmentString* e1,  size_t segIndex1)
+    SegmentString* e0,  std::size_t segIndex0,
+    SegmentString* e1,  std::size_t segIndex1)
 {
     using geos::geom::Coordinate;
 
@@ -132,7 +79,7 @@ NodingIntersectionFinder::processIntersections(
     /**
      * Check for an intersection between two vertices which are not both endpoints.
      */
-    long long segDiff = segIndex1 - segIndex0;
+    long long segDiff = static_cast<long long>(segIndex1 - segIndex0);
     bool isAdjacentSegment = isSameSegString && std::abs(segDiff) <= 1;
     bool isInteriorVertexInt = (!isAdjacentSegment) &&
                                isInteriorVertexIntersection(p00, p01, p10, p11, isEnd00, isEnd01, isEnd10, isEnd11);
@@ -151,6 +98,10 @@ NodingIntersectionFinder::processIntersections(
     }
 }
 
-
 } // namespace geos.noding
 } // namespace geos
+
+#ifndef GEOS_INLINE
+# include "geos/noding/NodingIntersectionFinder.inl"
+#endif
+

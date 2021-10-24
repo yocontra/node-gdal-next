@@ -19,7 +19,7 @@
 #include <vector>
 #include <algorithm>
 
-using namespace std;
+
 using namespace geos::geom;
 
 namespace geos {
@@ -44,34 +44,34 @@ DirectedEdgeStar::remove(DirectedEdge* de)
 {
     for(unsigned int i = 0; i < outEdges.size(); ++i) {
         if(outEdges[i] == de) {
-            outEdges.erase(outEdges.begin() + i);
+            outEdges.erase(std::next(outEdges.begin(), static_cast<int>(i)));
             --i;
         }
     }
 }
 
-vector<DirectedEdge*>::iterator
+std::vector<DirectedEdge*>::iterator
 DirectedEdgeStar::begin()
 {
     sortEdges();
     return outEdges.begin();
 }
 
-vector<DirectedEdge*>::iterator
+std::vector<DirectedEdge*>::iterator
 DirectedEdgeStar::end()
 {
     sortEdges();
     return outEdges.end();
 }
 
-vector<DirectedEdge*>::const_iterator
+std::vector<DirectedEdge*>::const_iterator
 DirectedEdgeStar::begin() const
 {
     sortEdges();
     return outEdges.begin();
 }
 
-vector<DirectedEdge*>::const_iterator
+std::vector<DirectedEdge*>::const_iterator
 DirectedEdgeStar::end() const
 {
     sortEdges();
@@ -79,7 +79,7 @@ DirectedEdgeStar::end() const
 }
 
 /*
- * Returns the coordinate for the node at wich this star is based
+ * Returns the coordinate for the node at which this star is based
  */
 Coordinate&
 DirectedEdgeStar::getCoordinate() const
@@ -95,7 +95,7 @@ DirectedEdgeStar::getCoordinate() const
  * Returns the DirectedEdges, in ascending order by angle with
  * the positive x-axis.
  */
-vector<DirectedEdge*>&
+std::vector<DirectedEdge*>&
 DirectedEdgeStar::getEdges()
 {
     sortEdges();
@@ -134,7 +134,7 @@ DirectedEdgeStar::getIndex(const Edge* edge)
     for(unsigned int i = 0; i < outEdges.size(); ++i) {
         DirectedEdge* de = outEdges[i];
         if(de->getEdge() == edge) {
-            return i;
+            return static_cast<int>(i);
         }
     }
     return -1;
@@ -151,7 +151,7 @@ DirectedEdgeStar::getIndex(const DirectedEdge* dirEdge)
     for(unsigned int i = 0; i < outEdges.size(); ++i) {
         DirectedEdge* de = outEdges[i];
         if(de == dirEdge) {
-            return i;
+            return static_cast<int>(i);
         }
     }
     return -1;
@@ -161,7 +161,7 @@ DirectedEdgeStar::getIndex(const DirectedEdge* dirEdge)
  * Returns the remainder when i is divided by the number of edges in this
  * DirectedEdgeStar.
  */
-int
+unsigned int
 DirectedEdgeStar::getIndex(int i) const
 {
     int modi = i % (int)outEdges.size();
@@ -169,7 +169,7 @@ DirectedEdgeStar::getIndex(int i) const
     if(modi < 0) {
         modi += (int)outEdges.size();
     }
-    return modi;
+    return static_cast<unsigned int>(modi);
 }
 
 /*

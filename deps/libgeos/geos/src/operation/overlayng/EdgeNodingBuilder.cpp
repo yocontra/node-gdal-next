@@ -18,6 +18,7 @@
 
 #include <geos/operation/overlayng/EdgeNodingBuilder.h>
 #include <geos/operation/overlayng/EdgeMerger.h>
+#include <geos/util.h>
 
 using geos::operation::valid::RepeatedPointRemover;
 
@@ -128,8 +129,8 @@ EdgeNodingBuilder::createEdges(std::vector<SegmentString*>* segStrings)
         // Record that a non-collapsed edge exists for the parent geometry
         hasEdges[info->getIndex()] = true;
         // Allocate the new Edge locally in a std::deque
-        std::unique_ptr<CoordinateSequence> ssPts = ss->getCoordinates()->clone();
-        edgeQue.emplace_back(ssPts.release(), info);
+        NodedSegmentString* nss = detail::down_cast<NodedSegmentString*>(ss);
+        edgeQue.emplace_back(nss->releaseCoordinates(), info);
         Edge* newEdge = &(edgeQue.back());
         createdEdges.push_back(newEdge);
     }
@@ -139,15 +140,15 @@ EdgeNodingBuilder::createEdges(std::vector<SegmentString*>* segStrings)
 
 /*public*/
 bool
-EdgeNodingBuilder::hasEdgesFor(int geomIndex) const
+EdgeNodingBuilder::hasEdgesFor(uint8_t geomIndex) const
 {
-    assert(geomIndex >= 0 && geomIndex < 2);
+    assert(geomIndex < 2);
     return hasEdges[geomIndex];
 }
 
 /*private*/
 void
-EdgeNodingBuilder::add(const Geometry* g, int geomIndex)
+EdgeNodingBuilder::add(const Geometry* g, uint8_t geomIndex)
 {
     if (g == nullptr || g->isEmpty())
         return;
@@ -177,7 +178,7 @@ EdgeNodingBuilder::add(const Geometry* g, int geomIndex)
 
 /*private*/
 void
-EdgeNodingBuilder::addCollection(const GeometryCollection* gc, int geomIndex)
+EdgeNodingBuilder::addCollection(const GeometryCollection* gc, uint8_t geomIndex)
 {
     for (std::size_t i = 0; i < gc->getNumGeometries(); i++) {
         const Geometry* g = gc->getGeometryN(i);
@@ -187,7 +188,7 @@ EdgeNodingBuilder::addCollection(const GeometryCollection* gc, int geomIndex)
 
 /*private*/
 void
-EdgeNodingBuilder::addGeometryCollection(const GeometryCollection* gc, int geomIndex, int expectedDim)
+EdgeNodingBuilder::addGeometryCollection(const GeometryCollection* gc, uint8_t geomIndex, int expectedDim)
 {
     for (std::size_t i = 0; i < gc->getNumGeometries(); i++) {
         const Geometry* g = gc->getGeometryN(i);
@@ -200,7 +201,7 @@ EdgeNodingBuilder::addGeometryCollection(const GeometryCollection* gc, int geomI
 
 /*private*/
 void
-EdgeNodingBuilder::addPolygon(const Polygon* poly, int geomIndex)
+EdgeNodingBuilder::addPolygon(const Polygon* poly, uint8_t geomIndex)
 {
     const LinearRing* shell = poly->getExteriorRing();
     addPolygonRing(shell, false, geomIndex);
@@ -217,7 +218,7 @@ EdgeNodingBuilder::addPolygon(const Polygon* poly, int geomIndex)
 
 /*private*/
 void
-EdgeNodingBuilder::addPolygonRing(const LinearRing* ring, bool isHole, int index)
+EdgeNodingBuilder::addPolygonRing(const LinearRing* ring, bool isHole, uint8_t geomIndex)
   {
     // don't add empty rings
     if (ring->isEmpty()) return;
@@ -235,12 +236,12 @@ EdgeNodingBuilder::addPolygonRing(const LinearRing* ring, bool isHole, int index
     }
 
     int depthDelta = computeDepthDelta(ring, isHole);
-    addEdge(pts, createEdgeSourceInfo(index, depthDelta, isHole));
+    addEdge(pts, createEdgeSourceInfo(geomIndex, depthDelta, isHole));
 }
 
 /*private*/
 const EdgeSourceInfo*
-EdgeNodingBuilder::createEdgeSourceInfo(int index)
+EdgeNodingBuilder::createEdgeSourceInfo(uint8_t index)
 {
     // Concentrate small memory allocations via std::deque and
     // retain ownership of the EdgeSourceInfo* in the EdgeNodingBuilder
@@ -250,7 +251,7 @@ EdgeNodingBuilder::createEdgeSourceInfo(int index)
 
 /*private*/
 const EdgeSourceInfo*
-EdgeNodingBuilder::createEdgeSourceInfo(int index, int depthDelta, bool isHole)
+EdgeNodingBuilder::createEdgeSourceInfo(uint8_t index, int depthDelta, bool isHole)
 {
     // Concentrate small memory allocations via std::deque and
     // retain ownership of the EdgeSourceInfo* in the EdgeNodingBuilder
@@ -348,7 +349,7 @@ EdgeNodingBuilder::computeDepthDelta(const LinearRing* ring, bool isHole)
 
 /*private*/
 void
-EdgeNodingBuilder::addLine(const LineString* line, int geomIndex)
+EdgeNodingBuilder::addLine(const LineString* line, uint8_t geomIndex)
 {
     // don't add empty lines
     if (line->isEmpty()) return;
@@ -370,7 +371,7 @@ EdgeNodingBuilder::addLine(const LineString* line, int geomIndex)
 
 /*private*/
 void
-EdgeNodingBuilder::addLine(std::unique_ptr<CoordinateArraySequence>& pts, int geomIndex)
+EdgeNodingBuilder::addLine(std::unique_ptr<CoordinateArraySequence>& pts, uint8_t geomIndex)
 {
     /**
      * Don't add edges that collapse to a point

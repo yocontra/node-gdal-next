@@ -49,17 +49,6 @@ namespace chain { // geos::index::chain
 class GEOS_DLL MonotoneChainBuilder {
 
 public:
-
-    MonotoneChainBuilder() {}
-
-    /** \brief
-     * Return a newly-allocated vector of newly-allocated
-     * MonotoneChain objects for the given CoordinateSequence.
-     */
-    static std::unique_ptr<std::vector<std::unique_ptr<MonotoneChain>>> getChains(
-        const geom::CoordinateSequence* pts,
-        void* context);
-
     /** \brief
      * Computes a list of the {@link MonotoneChain}s for a list of coordinates,
      * attaching a context data object to each.
@@ -70,13 +59,7 @@ public:
      */
     static void getChains(const geom::CoordinateSequence* pts,
                           void* context,
-                          std::vector<std::unique_ptr<MonotoneChain>>& mcList);
-
-    static std::unique_ptr<std::vector<std::unique_ptr<MonotoneChain>>>
-    getChains(const geom::CoordinateSequence* pts)
-    {
-        return getChains(pts, nullptr);
-    }
+                          std::vector<MonotoneChain>& mcList);
 
     /**
      * Disable copy construction and assignment. Apparently needed to make this
@@ -84,26 +67,6 @@ public:
      */
     MonotoneChainBuilder(const MonotoneChainBuilder&) = delete;
     MonotoneChainBuilder& operator=(const MonotoneChainBuilder&) = delete;
-
-
-private:
-
-    /** \brief
-     * Finds the index of the last point in a monotone chain
-     * starting at a given point.
-     *
-     * Repeated points (0-length segments) are included
-     * in the monotone chain returned.
-     *
-     * @param pts the points to scan
-     * @param start the index of the start of this chain
-     * @return the index of the last point in the monotone chain
-     *         starting at <code>start</code>.
-     *
-     * @note aborts if 'start' is >= pts.getSize()
-     */
-    static std::size_t findChainEnd(const geom::CoordinateSequence& pts,
-                                    std::size_t start);
 };
 
 } // namespace geos::index::chain

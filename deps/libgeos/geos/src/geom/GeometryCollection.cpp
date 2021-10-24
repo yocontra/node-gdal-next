@@ -46,7 +46,7 @@ GeometryCollection::GeometryCollection(const GeometryCollection& gc)
     Geometry(gc),
     geometries(gc.geometries.size())
 {
-    for(size_t i = 0; i < geometries.size(); ++i) {
+    for(std::size_t i = 0; i < geometries.size(); ++i) {
         geometries[i] = gc.geometries[i]->clone();
     }
 }
@@ -101,11 +101,11 @@ GeometryCollection::getCoordinates() const
 {
     std::vector<Coordinate> coordinates(getNumPoints());
 
-    size_t k = 0;
+    std::size_t k = 0;
     for(const auto& g : geometries) {
         auto childCoordinates = g->getCoordinates(); // TODO avoid this copy where getCoordinateRO() exists
-        size_t npts = childCoordinates->getSize();
-        for(size_t j = 0; j < npts; ++j) {
+        std::size_t npts = childCoordinates->getSize();
+        for(std::size_t j = 0; j < npts; ++j) {
             coordinates[k] = childCoordinates->getAt(j);
             k++;
         }
@@ -170,15 +170,23 @@ GeometryCollection::getNumGeometries() const
 }
 
 const Geometry*
-GeometryCollection::getGeometryN(size_t n) const
+GeometryCollection::getGeometryN(std::size_t n) const
 {
     return geometries[n].get();
+}
+
+std::vector<std::unique_ptr<Geometry>>
+GeometryCollection::releaseGeometries()
+{
+    auto ret = std::move(geometries);
+    geometryChanged();
+    return ret;
 }
 
 size_t
 GeometryCollection::getNumPoints() const
 {
-    size_t numPoints = 0;
+    std::size_t numPoints = 0;
     for(const auto& g : geometries) {
         numPoints += g->getNumPoints();
     }
@@ -204,15 +212,11 @@ GeometryCollection::equalsExact(const Geometry* other, double tolerance) const
         return false;
     }
 
-    const GeometryCollection* otherCollection = dynamic_cast<const GeometryCollection*>(other);
-    if(! otherCollection) {
-        return false;
-    }
-
+    const GeometryCollection* otherCollection = detail::down_cast<const GeometryCollection*>(other);
     if(geometries.size() != otherCollection->geometries.size()) {
         return false;
     }
-    for(size_t i = 0; i < geometries.size(); ++i) {
+    for(std::size_t i = 0; i < geometries.size(); ++i) {
         if(!(geometries[i]->equalsExact(otherCollection->geometries[i].get(), tolerance))) {
             return false;
         }
@@ -279,7 +283,7 @@ GeometryCollection::computeEnvelopeInternal() const
 int
 GeometryCollection::compareToSameClass(const Geometry* g) const
 {
-    const GeometryCollection* gc = dynamic_cast<const GeometryCollection*>(g);
+    const GeometryCollection* gc = detail::down_cast<const GeometryCollection*>(g);
     return compare(geometries, gc->geometries);
 }
 
@@ -378,11 +382,11 @@ GeometryCollection::getGeometryTypeId() const
     return GEOS_GEOMETRYCOLLECTION;
 }
 
-std::unique_ptr<Geometry>
-GeometryCollection::reverse() const
+GeometryCollection*
+GeometryCollection::reverseImpl() const
 {
     if(isEmpty()) {
-        return clone();
+        return clone().release();
     }
 
     std::vector<std::unique_ptr<Geometry>> reversed(geometries.size());
@@ -394,7 +398,7 @@ GeometryCollection::reverse() const
         return g->reverse();
     });
 
-    return getFactory()->createGeometryCollection(std::move(reversed));
+    return getFactory()->createGeometryCollection(std::move(reversed)).release();
 }
 
 } // namespace geos::geom

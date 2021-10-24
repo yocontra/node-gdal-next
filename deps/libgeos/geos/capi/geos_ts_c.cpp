@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2005-2006 Refractions Research Inc.
  * Copyright (C) 2010-2012 Sandro Santilli <strk@kbt.io>
- * Copyright (C) 2016-2019 Daniel Baston <dbaston@gmail.com>
+ * Copyright (C) 2016-2021 Daniel Baston <dbaston@gmail.com>
  *
  * This is free software; you can redistribute and/or modify it under
  * the terms of the GNU Lesser General Public Licence as published
@@ -37,13 +37,16 @@
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/IntersectionMatrix.h>
 #include <geos/geom/Envelope.h>
-#include <geos/index/strtree/SimpleSTRtree.h>
-#include <geos/index/strtree/GeometryItemDistance.h>
+#include <geos/geom/util/Densifier.h>
+#include <geos/geom/util/GeometryFixer.h>
+#include <geos/index/strtree/TemplateSTRtree.h>
 #include <geos/index/ItemVisitor.h>
 #include <geos/io/WKTReader.h>
 #include <geos/io/WKBReader.h>
 #include <geos/io/WKTWriter.h>
 #include <geos/io/WKBWriter.h>
+#include <geos/io/GeoJSONReader.h>
+#include <geos/io/GeoJSONWriter.h>
 #include <geos/algorithm/BoundaryNodeRule.h>
 #include <geos/algorithm/MinimumBoundingCircle.h>
 #include <geos/algorithm/MinimumDiameter.h>
@@ -82,6 +85,7 @@
 #include <geos/linearref/LengthIndexedLine.h>
 #include <geos/triangulate/DelaunayTriangulationBuilder.h>
 #include <geos/triangulate/VoronoiDiagramBuilder.h>
+#include <geos/triangulate/polygon/ConstrainedDelaunayTriangulator.h>
 #include <geos/util.h>
 #include <geos/util/IllegalArgumentException.h>
 #include <geos/util/Interrupt.h>
@@ -112,11 +116,19 @@
 #define GEOSPreparedGeometry geos::geom::prep::PreparedGeometry
 #define GEOSCoordSequence geos::geom::CoordinateSequence
 #define GEOSBufferParams geos::operation::buffer::BufferParameters
-#define GEOSSTRtree geos::index::strtree::SimpleSTRtree
+#define GEOSSTRtree geos::index::strtree::TemplateSTRtree<void*>
 #define GEOSWKTReader geos::io::WKTReader
 #define GEOSWKTWriter geos::io::WKTWriter
 #define GEOSWKBReader geos::io::WKBReader
 #define GEOSWKBWriter geos::io::WKBWriter
+#define GEOSGeoJSONReader geos::io::GeoJSONReader
+#define GEOSGeoJSONWriter geos::io::GeoJSONWriter
+
+// Implementation struct for the GEOSMakeValidParams object
+typedef struct {
+    int method;
+    int keepCollapsed;
+} GEOSMakeValidParams;
 
 #include "geos_c.h"
 
@@ -150,6 +162,8 @@ using geos::io::WKTReader;
 using geos::io::WKTWriter;
 using geos::io::WKBReader;
 using geos::io::WKBWriter;
+using geos::io::GeoJSONReader;
+using geos::io::GeoJSONWriter;
 
 using geos::algorithm::distance::DiscreteFrechetDistance;
 using geos::algorithm::distance::DiscreteHausdorffDistance;
@@ -161,6 +175,7 @@ using geos::operation::geounion::CascadedPolygonUnion;
 using geos::operation::overlayng::OverlayNG;
 using geos::operation::overlayng::UnaryUnionNG;
 using geos::operation::overlayng::OverlayNGRobust;
+using geos::operation::valid::TopologyValidationError;
 
 using geos::precision::GeometryPrecisionReducer;
 
@@ -177,7 +192,7 @@ typedef struct GEOSContextHandle_HS {
     GEOSMessageHandler errorMessageOld;
     GEOSMessageHandler_r errorMessageNew;
     void* errorData;
-    int WKBOutputDims;
+    uint8_t WKBOutputDims;
     int WKBByteOrder;
     int initialized;
 
@@ -298,6 +313,11 @@ class CAPI_ItemVisitor : public geos::index::ItemVisitor {
 public:
     CAPI_ItemVisitor(GEOSQueryCallback cb, void* ud)
         : ItemVisitor(), callback(cb), userdata(ud) {}
+
+    void operator()(void* item) {
+        callback(item, userdata);
+    }
+
     void
     visitItem(void* item) override
     {
@@ -679,10 +699,9 @@ extern "C" {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
 
             using geos::operation::valid::IsValidOp;
-            using geos::operation::valid::TopologyValidationError;
 
             IsValidOp ivo(g1);
-            TopologyValidationError* err = ivo.getValidationError();
+            const TopologyValidationError* err = ivo.getValidationError();
 
             if(err) {
                 handle->NOTICE_MESSAGE("%s", err->toString().c_str());
@@ -699,13 +718,12 @@ extern "C" {
     {
         return execute(extHandle, [&]() {
             using geos::operation::valid::IsValidOp;
-            using geos::operation::valid::TopologyValidationError;
 
             char* result = nullptr;
             char const* const validstr = "Valid Geometry";
 
             IsValidOp ivo(g1);
-            TopologyValidationError* err = ivo.getValidationError();
+            const TopologyValidationError* err = ivo.getValidationError();
 
             if(err) {
                 std::ostringstream ss;
@@ -729,14 +747,13 @@ extern "C" {
                         int flags, char** reason, Geometry** location)
     {
         using geos::operation::valid::IsValidOp;
-        using geos::operation::valid::TopologyValidationError;
 
         return execute(extHandle, 2, [&]() {
             IsValidOp ivo(g);
             if(flags & GEOSVALID_ALLOW_SELFTOUCHING_RING_FORMING_HOLE) {
                 ivo.setSelfTouchingRingFormingHoleValid(true);
             }
-            TopologyValidationError* err = ivo.getValidationError();
+            const TopologyValidationError* err = ivo.getValidationError();
             if(err != nullptr) {
                 if(location) {
                     *location = g->getFactory()->createPoint(err->getCoordinate());
@@ -785,6 +802,14 @@ extern "C" {
         return execute(extHandle, 0, [&]() {
             *dist = g1->distance(g2);
             return 1;
+        });
+    }
+
+    char
+    GEOSDistanceWithin_r(GEOSContextHandle_t extHandle, const Geometry* g1, const Geometry* g2, double dist)
+    {
+        return execute(extHandle, 2, [&]() {
+            return g1->isWithinDistance(g2, dist);
         });
     }
 
@@ -890,7 +915,7 @@ extern "C" {
 
     // Remember to free the result!
     unsigned char*
-    GEOSGeomToWKB_buf_r(GEOSContextHandle_t extHandle, const Geometry* g, size_t* size)
+    GEOSGeomToWKB_buf_r(GEOSContextHandle_t extHandle, const Geometry* g, std::size_t* size)
     {
         using geos::io::WKBWriter;
 
@@ -914,27 +939,22 @@ extern "C" {
     }
 
     Geometry*
-    GEOSGeomFromWKB_buf_r(GEOSContextHandle_t extHandle, const unsigned char* wkb, size_t size)
+    GEOSGeomFromWKB_buf_r(GEOSContextHandle_t extHandle, const unsigned char* wkb, std::size_t size)
     {
         using geos::io::WKBReader;
 
         return execute(extHandle, [&]() {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
 
-            std::string wkbstring(reinterpret_cast<const char*>(wkb), size); // make it binary !
             WKBReader r(*(static_cast<GeometryFactory const*>(handle->geomFactory)));
-            std::istringstream is(std::ios_base::binary);
-            is.str(wkbstring);
-            is.seekg(0, std::ios::beg); // rewind reader pointer
-            auto g = r.read(is);
-            return g.release();
+            return r.read(wkb, size).release();
         });
     }
 
     /* Read/write wkb hex values.  Returned geometries are
        owned by the caller.*/
     unsigned char*
-    GEOSGeomToHEX_buf_r(GEOSContextHandle_t extHandle, const Geometry* g, size_t* size)
+    GEOSGeomToHEX_buf_r(GEOSContextHandle_t extHandle, const Geometry* g, std::size_t* size)
     {
         using geos::io::WKBWriter;
 
@@ -957,7 +977,7 @@ extern "C" {
     }
 
     Geometry*
-    GEOSGeomFromHEX_buf_r(GEOSContextHandle_t extHandle, const unsigned char* hex, size_t size)
+    GEOSGeomFromHEX_buf_r(GEOSContextHandle_t extHandle, const unsigned char* hex, std::size_t size)
     {
         using geos::io::WKBReader;
 
@@ -994,6 +1014,7 @@ extern "C" {
     GEOSisRing_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
         return execute(extHandle, 2, [&]() {
+            // both LineString* and LinearRing* can cast to LineString*
             const LineString* ls = dynamic_cast<const LineString*>(g);
             if(ls) {
                 return ls->isRing();
@@ -1108,9 +1129,23 @@ extern "C" {
             );
             bp.setMitreLimit(mitreLimit);
             BufferOp op(g1, bp);
-            Geometry* g3 = op.getResultGeometry(width);
+            std::unique_ptr<Geometry> g3 = op.getResultGeometry(width);
             g3->setSRID(g1->getSRID());
-            return g3;
+            return g3.release();
+        });
+    }
+
+    Geometry*
+    GEOSDensify_r(GEOSContextHandle_t extHandle, const Geometry* g, double tolerance)
+    {
+        using geos::geom::util::Densifier;
+
+        return execute(extHandle, [&]() {
+            Densifier densifier(g);
+            densifier.setDistanceTolerance(tolerance);
+            auto g3 = densifier.getResultGeometry();
+            g3->setSRID(g->getSRID());
+            return g3.release();
         });
     }
 
@@ -1137,9 +1172,9 @@ extern "C" {
                 width = -width;
             }
             BufferBuilder bufBuilder(bp);
-            Geometry* g3 = bufBuilder.bufferLineSingleSided(g1, width, isLeftSide);
+            std::unique_ptr<Geometry> g3 = bufBuilder.bufferLineSingleSided(g1, width, isLeftSide);
             g3->setSRID(g1->getSRID());
-            return g3;
+            return g3.release();
         });
     }
 
@@ -1163,9 +1198,9 @@ extern "C" {
 
             bool isLeftSide = leftSide == 0 ? false : true;
             BufferBuilder bufBuilder(bp);
-            Geometry* g3 = bufBuilder.bufferLineSingleSided(g1, width, isLeftSide);
+            std::unique_ptr<Geometry> g3 = bufBuilder.bufferLineSingleSided(g1, width, isLeftSide);
             g3->setSRID(g1->getSRID());
-            return g3;
+            return g3.release();
         });
     }
 
@@ -1404,18 +1439,15 @@ extern "C" {
     Geometry*
     GEOSUnionCascaded_r(GEOSContextHandle_t extHandle, const Geometry* g1)
     {
-        using geos::operation::geounion::CascadedPolygonUnion;
-
         return execute(extHandle, [&]() {
+            // CascadedUnion is the same as UnaryUnion, except that
+            // CascadedUnion only works on MultiPolygon, so we just delegate
+            // now and retain a check on MultiPolygon type.
             const geos::geom::MultiPolygon *p = dynamic_cast<const geos::geom::MultiPolygon *>(g1);
-
             if (!p) {
                 throw IllegalArgumentException("Invalid argument (must be a MultiPolygon)");
             }
-
-            Geometry* g3 = CascadedPolygonUnion::Union(p);
-            g3->setSRID(g1->getSRID());
-            return g3;
+            return GEOSUnaryUnion_r(extHandle, g1);
         });
     }
 
@@ -1823,7 +1855,7 @@ extern "C" {
             const GeometryFactory* gf = handle->geomFactory;
 
             std::vector<std::unique_ptr<Geometry>> vgeoms(ngeoms);
-            for (size_t i = 0; i < ngeoms; i++) {
+            for (std::size_t i = 0; i < ngeoms; i++) {
                 vgeoms[i].reset(geoms[i]);
             }
 
@@ -1916,14 +1948,80 @@ extern "C" {
     Geometry*
     GEOSMakeValid_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
+        GEOSMakeValidParams params;
+        params.method = GEOS_MAKE_VALID_LINEWORK;
+        params.keepCollapsed = 1;
+        return GEOSMakeValidWithParams_r(extHandle, g, &params);
+    }
+
+    GEOSMakeValidParams*
+    GEOSMakeValidParams_create_r(GEOSContextHandle_t extHandle)
+    {
+        return execute(extHandle, [&]() {
+            GEOSMakeValidParams* p = new GEOSMakeValidParams();
+            p->method = GEOS_MAKE_VALID_LINEWORK;
+            p->keepCollapsed = 0;
+            return p;
+        });
+    }
+
+    void
+    GEOSMakeValidParams_destroy_r(GEOSContextHandle_t extHandle, GEOSMakeValidParams* parms)
+    {
+        (void)extHandle;
+        delete parms;
+    }
+
+    int
+    GEOSMakeValidParams_setKeepCollapsed_r(GEOSContextHandle_t extHandle,
+        GEOSMakeValidParams* p, int keepCollapsed)
+    {
+        return execute(extHandle, 0, [&]() {
+            p->keepCollapsed = keepCollapsed;
+            return 1;
+        });
+    }
+
+    int
+    GEOSMakeValidParams_setMethod_r(GEOSContextHandle_t extHandle,
+        GEOSMakeValidParams* p, GEOSMakeValidMethods method)
+    {
+        return execute(extHandle, 0, [&]() {
+            p->method = method;
+            return 1;
+        });
+    }
+
+    Geometry*
+    GEOSMakeValidWithParams_r(
+        GEOSContextHandle_t extHandle,
+        const Geometry* g,
+        const GEOSMakeValidParams* params)
+    {
+        using geos::geom::util::GeometryFixer;
         using geos::operation::valid::MakeValid;
 
-        return execute(extHandle, [&]() {
-            MakeValid makeValid;
-            auto out = makeValid.build(g);
-            out->setSRID(g->getSRID());
-            return out.release();
-        });
+        if (params && params->method == GEOS_MAKE_VALID_LINEWORK) {
+            return execute(extHandle, [&]() {
+                MakeValid makeValid;
+                auto out = makeValid.build(g);
+                out->setSRID(g->getSRID());
+                return out.release();
+            });
+        }
+        else if (params && params->method == GEOS_MAKE_VALID_STRUCTURE) {
+            return execute(extHandle, [&]() {
+                GeometryFixer fixer(g);
+                fixer.setKeepCollapsed(params->keepCollapsed == 0 ? false : true);
+                auto out = fixer.getResult();
+                out->setSRID(g->getSRID());
+                return out.release();
+            });
+        }
+        else {
+            extHandle->ERROR_MESSAGE("Unknown method in GEOSMakeValidParams");
+            return nullptr;
+        }
     }
 
     Geometry*
@@ -2096,7 +2194,7 @@ extern "C" {
     int
     GEOS_getWKBOutputDims_r(GEOSContextHandle_t extHandle)
     {
-        return execute(extHandle, -1, [&]() {
+        return execute(extHandle, -1, [&]() -> int {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             return handle->WKBOutputDims;
         });
@@ -2113,7 +2211,7 @@ extern "C" {
             }
 
             const int olddims = handle->WKBOutputDims;
-            handle->WKBOutputDims = newdims;
+            handle->WKBOutputDims = static_cast<uint8_t>(newdims);
 
             return olddims;
         });
@@ -2157,6 +2255,130 @@ extern "C" {
                     return gf->getCoordinateSequenceFactory()->create(size, dims).release();
                 }
             }
+        });
+    }
+
+    CoordinateSequence*
+    GEOSCoordSeq_copyFromBuffer_r(GEOSContextHandle_t extHandle, const double* buf, unsigned int size, int hasZ, int hasM)
+    {
+        return execute(extHandle, [&]() {
+            GEOSContextHandleInternal_t *handle = reinterpret_cast<GEOSContextHandleInternal_t *>(extHandle);
+            const GeometryFactory *gf = handle->geomFactory;
+
+            std::vector<geos::geom::Coordinate> coords(size);
+            std::ptrdiff_t stride = 2 + hasZ + hasM;
+
+            if (hasZ) {
+                if (stride == 3) {
+                    // special case, just memcpy the whole block
+                    static_assert(sizeof(geos::geom::Coordinate) == 3 * sizeof(double), "Coordinate is 3D");
+                    std::memcpy((double*) coords.data(), buf, size * sizeof(geos::geom::Coordinate));
+                } else {
+                    for (std::size_t i = 0; i < size; i++) {
+                        coords[i] = { *buf, *(buf + 1), *(buf + 2) };
+                        buf += stride;
+                    }
+                }
+            }  else {
+                for (std::size_t i = 0; i < size; i++) {
+                    coords[i] = { *buf, *(buf + 1) };
+                    buf += stride;
+                }
+            }
+
+            return gf->getCoordinateSequenceFactory()->create(std::move(coords)).release();
+        });
+    }
+
+    CoordinateSequence*
+    GEOSCoordSeq_copyFromArrays_r(GEOSContextHandle_t extHandle, const double* x, const double* y, const double* z, const double* m, unsigned int size)
+    {
+        (void) m;
+
+        return execute(extHandle, [&]() {
+            GEOSContextHandleInternal_t *handle = reinterpret_cast<GEOSContextHandleInternal_t *>(extHandle);
+            const GeometryFactory *gf = handle->geomFactory;
+
+            std::vector<geos::geom::Coordinate> coords(size);
+            for (std::size_t i = 0; i < size; i++) {
+                if (z) {
+                    coords[i] = { x[i], y[i], z[i] };
+                } else {
+                    coords[i] = { x[i], y[i] };
+                }
+            }
+
+            return gf->getCoordinateSequenceFactory()->create(std::move(coords)).release();
+        });
+    }
+
+    int
+    GEOSCoordSeq_copyToArrays_r(GEOSContextHandle_t extHandle, const CoordinateSequence* cs,
+                                double* x, double* y, double* z, double* m)
+    {
+        return execute(extHandle, 0, [&]() {
+
+            class CoordinateArrayCopier : public geos::geom::CoordinateFilter {
+            public:
+                CoordinateArrayCopier(double* p_x, double* p_y, double* p_z) : i(0), x(p_x), y(p_y), z(p_z) {}
+
+                void filter_ro(const geos::geom::Coordinate* c) override {
+                    x[i] = c->x;
+                    y[i] = c->y;
+                    if (z) {
+                        z[i] = c->z;
+                    }
+                    i++;
+                }
+
+            private:
+                size_t i;
+                double* x;
+                double* y;
+                double* z;
+            };
+
+            CoordinateArrayCopier cop(x, y, z);
+            cs->apply_ro(&cop);
+
+            if (m) {
+                std::fill(m, m + cs->getSize(), std::numeric_limits<double>::quiet_NaN());
+            }
+
+            return 1;
+        });
+    }
+
+    int
+    GEOSCoordSeq_copyToBuffer_r(GEOSContextHandle_t extHandle, const CoordinateSequence* cs,
+                                double* buf, int hasZ, int hasM)
+    {
+        return execute(extHandle, 0, [&]() {
+
+            class CoordinateBufferCopier : public geos::geom::CoordinateFilter {
+            public:
+                CoordinateBufferCopier(double* p_buf, bool p_hasZ, bool p_hasM) : buf(p_buf), m(p_hasM), dim(2 + p_hasZ) {}
+
+                void filter_ro(const geos::geom::Coordinate* c) override {
+                    std::memcpy(buf, c, dim * sizeof(double));
+                    buf += dim;
+
+                    if (m) {
+                        *buf = std::numeric_limits<double>::quiet_NaN();
+                        buf++;
+                    }
+                }
+
+            private:
+                double* buf;
+                bool m;
+                size_t dim;
+            };
+
+            CoordinateBufferCopier cop(buf, hasZ, hasM);
+            cs->apply_ro(&cop);
+
+            return 1;
         });
     }
 
@@ -2404,35 +2626,48 @@ extern "C" {
     {
         using geos::geom::LinearRing;
 
-        // FIXME: holes must be non-nullptr or may be nullptr?
-        //assert(0 != holes);
-
         return execute(extHandle, [&]() {
-
-            std::vector<LinearRing*> tmpholes(nholes);
-            for (size_t i = 0; i < nholes; i++) {
-                LinearRing* lr = dynamic_cast<LinearRing*>(holes[i]);
-                if (! lr) {
-                    throw IllegalArgumentException("Hole is not a LinearRing");
-                }
-                tmpholes[i] = lr;
-            }
-            LinearRing* nshell = dynamic_cast<LinearRing*>(shell);
-            if(! nshell) {
-                throw IllegalArgumentException("Shell is not a LinearRing");
-            }
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             const GeometryFactory* gf = handle->geomFactory;
+            bool good_holes = true, good_shell = true;
 
-            /* Create unique_ptr version for constructor */
-            std::vector<std::unique_ptr<LinearRing>> vholes;
-            vholes.reserve(nholes);
-            for (LinearRing* lr: tmpholes) {
-                vholes.emplace_back(lr);
+            // Validate input before taking ownership
+            for (std::size_t i = 0; i < nholes; i++) {
+                if ((!holes) || (!dynamic_cast<LinearRing*>(holes[i]))) {
+                    good_holes = false;
+                    break;
+                }
             }
-            std::unique_ptr<LinearRing> shell(nshell);
+            if (!dynamic_cast<LinearRing*>(shell)) {
+                good_shell = false;
+            }
 
-            return gf->createPolygon(std::move(shell), std::move(vholes)).release();
+            // Contract for GEOSGeom_createPolygon is to take ownership of arguments
+            // which implies freeing them on exception,
+            // see https://trac.osgeo.org/geos/ticket/1111
+            if (!(good_holes && good_shell)) {
+                if (shell) delete shell;
+                for (std::size_t i = 0; i < nholes; i++) {
+                    if (holes && holes[i])
+                        delete holes[i];
+                }
+                if (!good_shell)
+                    throw IllegalArgumentException("Shell is not a LinearRing");
+                else
+                    throw IllegalArgumentException("Hole is not a LinearRing");
+            }
+
+            std::unique_ptr<LinearRing> tmpshell(static_cast<LinearRing*>(shell));
+            if (nholes) {
+                std::vector<std::unique_ptr<LinearRing>> tmpholes(nholes);
+                for (size_t i = 0; i < nholes; i++) {
+                    tmpholes[i].reset(static_cast<LinearRing*>(holes[i]));
+                }
+
+                return gf->createPolygon(std::move(tmpshell), std::move(tmpholes)).release();
+            }
+
+            return gf->createPolygon(std::move(tmpshell)).release();
         });
     }
 
@@ -2663,7 +2898,7 @@ extern "C" {
     GEOSWKTWriter_setOutputDimension_r(GEOSContextHandle_t extHandle, WKTWriter* writer, int dim)
     {
         execute(extHandle, [&]() {
-            writer->setOutputDimension(dim);
+            writer->setOutputDimension(static_cast<uint8_t>(dim));
         });
     }
 
@@ -2711,19 +2946,15 @@ extern "C" {
     };
 
     Geometry*
-    GEOSWKBReader_read_r(GEOSContextHandle_t extHandle, WKBReader* reader, const unsigned char* wkb, size_t size)
+    GEOSWKBReader_read_r(GEOSContextHandle_t extHandle, WKBReader* reader, const unsigned char* wkb, std::size_t size)
     {
         return execute(extHandle, [&]() {
-            // http://stackoverflow.com/questions/2079912/simpler-way-to-create-a-c-memorystream-from-char-size-t-without-copying-t
-            membuf mb((char*)wkb, size);
-            istream is(&mb);
-
-            return reader->read(is).release();
+            return reader->read(wkb, size).release();
         });
     }
 
     Geometry*
-    GEOSWKBReader_readHEX_r(GEOSContextHandle_t extHandle, WKBReader* reader, const unsigned char* hex, size_t size)
+    GEOSWKBReader_readHEX_r(GEOSContextHandle_t extHandle, WKBReader* reader, const unsigned char* hex, std::size_t size)
     {
         return execute(extHandle, [&]() {
             std::string hexstring(reinterpret_cast<const char*>(hex), size);
@@ -2757,7 +2988,7 @@ extern "C" {
 
     /* The caller owns the result */
     unsigned char*
-    GEOSWKBWriter_write_r(GEOSContextHandle_t extHandle, WKBWriter* writer, const Geometry* geom, size_t* size)
+    GEOSWKBWriter_write_r(GEOSContextHandle_t extHandle, WKBWriter* writer, const Geometry* geom, std::size_t* size)
     {
         return execute(extHandle, [&]() {
             std::ostringstream os(std::ios_base::binary);
@@ -2775,7 +3006,7 @@ extern "C" {
 
     /* The caller owns the result */
     unsigned char*
-    GEOSWKBWriter_writeHEX_r(GEOSContextHandle_t extHandle, WKBWriter* writer, const Geometry* geom, size_t* size)
+    GEOSWKBWriter_writeHEX_r(GEOSContextHandle_t extHandle, WKBWriter* writer, const Geometry* geom, std::size_t* size)
     {
         return execute(extHandle, [&]() {
             std::ostringstream os(std::ios_base::binary);
@@ -2802,7 +3033,7 @@ extern "C" {
     GEOSWKBWriter_setOutputDimension_r(GEOSContextHandle_t extHandle, GEOSWKBWriter* writer, int newDimension)
     {
         execute(extHandle, [&]() {
-            writer->setOutputDimension(newDimension);
+            writer->setOutputDimension(static_cast<uint8_t>(newDimension));
         });
     }
 
@@ -2835,6 +3066,85 @@ extern "C" {
     {
         execute(extHandle, [&]{
             writer->setIncludeSRID(newIncludeSRID);
+        });
+    }
+
+    int
+    GEOSWKBWriter_getFlavor_r(GEOSContextHandle_t extHandle, const GEOSWKBWriter* writer)
+    {
+        return execute(extHandle, -1, [&]{
+            return writer->getFlavor();
+        });
+    }
+
+    void
+    GEOSWKBWriter_setFlavor_r(GEOSContextHandle_t extHandle, GEOSWKBWriter* writer, int flavor)
+    {
+        execute(extHandle, [&]{
+            writer->setFlavor(flavor);
+        });
+    }
+
+    /* GeoJSON Reader */
+    GeoJSONReader*
+    GEOSGeoJSONReader_create_r(GEOSContextHandle_t extHandle)
+    {
+        using geos::io::GeoJSONReader;
+
+        return execute(extHandle, [&]() {
+            GEOSContextHandleInternal_t *handle = reinterpret_cast<GEOSContextHandleInternal_t *>(extHandle);
+            return new GeoJSONReader(*(GeometryFactory*)handle->geomFactory);
+        });
+    }
+
+    void
+    GEOSGeoJSONReader_destroy_r(GEOSContextHandle_t extHandle, GEOSGeoJSONReader* reader)
+    {
+        return execute(extHandle, [&]() {
+            delete reader;
+        });
+    }
+
+    Geometry*
+    GEOSGeoJSONReader_readGeometry_r(GEOSContextHandle_t extHandle, GEOSGeoJSONReader* reader, const char* geojson)
+    {
+        return execute(extHandle, [&]() {
+            const std::string geojsonstring(geojson);
+            return reader->read(geojsonstring).release();
+        });
+    }
+
+    /* GeoJSON Writer */
+    GeoJSONWriter*
+    GEOSGeoJSONWriter_create_r(GEOSContextHandle_t extHandle)
+    {
+        using geos::io::GeoJSONWriter;
+
+        return execute(extHandle, [&]() {
+            return new GeoJSONWriter();
+        });
+    }
+
+    void
+    GEOSGeoJSONWriter_destroy_r(GEOSContextHandle_t extHandle, GEOSGeoJSONWriter* writer)
+    {
+        return execute(extHandle, [&]() {
+            delete writer;
+        });
+    }
+
+    char*
+    GEOSGeoJSONWriter_writeGeometry_r(GEOSContextHandle_t extHandle, GEOSGeoJSONWriter* writer, const GEOSGeometry* g, int indent)
+    {
+        return execute(extHandle, [&]() {
+            std::string geojson;
+            if (indent >= 0) {
+                geojson = writer->writeFormatted(g, geos::io::GeoJSONType::GEOMETRY, indent);
+            } else {
+                geojson = writer->write(g, geos::io::GeoJSONType::GEOMETRY);
+            }
+            char* result = gstrdup(geojson);
+            return result;
         });
     }
 
@@ -2971,13 +3281,23 @@ extern "C" {
         });
     }
 
+    char
+    GEOSPreparedDistanceWithin_r(GEOSContextHandle_t extHandle,
+                         const geos::geom::prep::PreparedGeometry* pg,
+                         const Geometry* g, double dist)
+    {
+        return execute(extHandle, 2, [&]() {
+            return pg->isWithinDistance(g, dist);
+        });
+    }
+
 //-----------------------------------------------------------------
 // STRtree
 //-----------------------------------------------------------------
 
     GEOSSTRtree*
     GEOSSTRtree_create_r(GEOSContextHandle_t extHandle,
-                         size_t nodeCapacity)
+                         std::size_t nodeCapacity)
     {
         return execute(extHandle, [&]() {
             return new GEOSSTRtree(nodeCapacity);
@@ -3026,18 +3346,15 @@ extern "C" {
     {
         using namespace geos::index::strtree;
 
-        struct CustomItemDistance : public ItemDistance {
+        struct CustomItemDistance {
             CustomItemDistance(GEOSDistanceCallback p_distancefn, void* p_userdata)
                 : m_distancefn(p_distancefn), m_userdata(p_userdata) {}
 
             GEOSDistanceCallback m_distancefn;
             void* m_userdata;
 
-            double
-            distance(const ItemBoundable* item1, const ItemBoundable* item2) override
+            double operator()(const void* a, const void* b) const
             {
-                const void* a = item1->getItem();
-                const void* b = item2->getItem();
                 double d;
 
                 if(!m_distancefn(a, b, &d, m_userdata)) {
@@ -3048,14 +3365,19 @@ extern "C" {
             }
         };
 
+        struct GeometryDistance {
+            double operator()(void* a, void* b) const {
+                return static_cast<const Geometry*>(a)->distance(static_cast<const Geometry*>(b));
+            }
+        };
+
         return execute(extHandle, [&]() {
             if(distancefn) {
                 CustomItemDistance itemDistance(distancefn, userdata);
-                return tree->nearestNeighbour(itemEnvelope->getEnvelopeInternal(), item, &itemDistance);
+                return tree->nearestNeighbour(*itemEnvelope->getEnvelopeInternal(), (void*) item, itemDistance);
             }
             else {
-                GeometryItemDistance itemDistance = GeometryItemDistance();
-                return tree->nearestNeighbour(itemEnvelope->getEnvelopeInternal(), item, &itemDistance);
+                return tree->nearestNeighbour<GeometryDistance>(*itemEnvelope->getEnvelopeInternal(), (void*) item);
             }
         });
     }
@@ -3133,8 +3455,14 @@ extern "C" {
         if(GEOSLength_r(extHandle, g, &length) != 1) {
             return -1.0;
         };
+
         distance = GEOSProject_r(extHandle, g, p);
-        if (distance == -1.0) {
+
+        if (distance == 0.0 && length == 0.0)
+            return 0.0;
+
+        /* Meaningless projection? error */
+        if (distance < 0.0 || ! std::isfinite(distance) || length == 0.0) {
             return -1.0;
         } else {
             return distance / length;
@@ -3234,14 +3562,14 @@ extern "C" {
         // our output GeometryCollections...
 
         const GeometryFactory* factory = g1->getFactory();
-        size_t count;
+        std::size_t count;
 
         std::unique_ptr< std::vector<Geometry*> > out1(
             new std::vector<Geometry*>()
         );
         count = forw.size();
         out1->reserve(count);
-        for(size_t i = 0; i < count; ++i) {
+        for(std::size_t i = 0; i < count; ++i) {
             out1->push_back(forw[i]);
         }
         std::unique_ptr<Geometry> out1g(
@@ -3253,7 +3581,7 @@ extern "C" {
         );
         count = back.size();
         out2->reserve(count);
-        for(size_t i = 0; i < count; ++i) {
+        for(std::size_t i = 0; i < count; ++i) {
             out2->push_back(back[i]);
         }
         std::unique_ptr<Geometry> out2g(
@@ -3368,9 +3696,9 @@ extern "C" {
 
         return execute(extHandle, [&]() {
             BufferOp op(g1, *bp);
-            Geometry* g3 = op.getResultGeometry(width);
+            std::unique_ptr<Geometry> g3 = op.getResultGeometry(width);
             g3->setSRID(g1->getSRID());
-            return g3;
+            return g3.release();
         });
     }
 
@@ -3394,6 +3722,16 @@ extern "C" {
                 out->setSRID(g1->getSRID());
                 return out;
             }
+        });
+    }
+
+    Geometry*
+    GEOSConstrainedDelaunayTriangulation_r(GEOSContextHandle_t extHandle, const Geometry* g1)
+    {
+        using geos::triangulate::polygon::ConstrainedDelaunayTriangulator;
+
+        return execute(extHandle, [&]() -> Geometry* {
+            return ConstrainedDelaunayTriangulator::triangulate(g1).release();
         });
     }
 

@@ -42,7 +42,11 @@ bool
 BasicPreparedGeometry::envelopesIntersect(const geom::Geometry* g) const
 {
     if (g->getGeometryTypeId() == GEOS_POINT) {
-        return baseGeom->getEnvelopeInternal()->intersects(*(g->getCoordinate()));
+        auto pt = g->getCoordinate();
+        if (pt == nullptr) {
+            return false;
+        }
+        return baseGeom->getEnvelopeInternal()->intersects(*pt);
     }
 
     return baseGeom->getEnvelopeInternal()->intersects(g->getEnvelopeInternal());
@@ -52,7 +56,11 @@ bool
 BasicPreparedGeometry::envelopeCovers(const geom::Geometry* g) const
 {
     if (g->getGeometryTypeId() == GEOS_POINT) {
-        return baseGeom->getEnvelopeInternal()->covers(g->getCoordinate());
+        auto pt = g->getCoordinate();
+        if (pt == nullptr) {
+            return false;
+        }
+        return baseGeom->getEnvelopeInternal()->covers(pt);
     }
 
     return baseGeom->getEnvelopeInternal()->covers(g->getEnvelopeInternal());
@@ -71,7 +79,7 @@ BasicPreparedGeometry::isAnyTargetComponentInTest(const geom::Geometry* testGeom
 {
     algorithm::PointLocator locator;
 
-    for(size_t i = 0, n = representativePts.size(); i < n; i++) {
+    for(std::size_t i = 0, n = representativePts.size(); i < n; i++) {
         const geom::Coordinate& c = *(representativePts[i]);
         if(locator.intersects(c, testGeom)) {
             return true;
@@ -159,8 +167,14 @@ double
 BasicPreparedGeometry::distance(const geom::Geometry* g) const
 {
     std::unique_ptr<geom::CoordinateSequence> coords = nearestPoints(g);
-    if ( ! coords ) return std::numeric_limits<double>::infinity();
+    if ( ! coords ) return DoubleInfinity;
     return coords->getAt(0).distance( coords->getAt(1) );
+}
+
+bool
+BasicPreparedGeometry::isWithinDistance(const geom::Geometry* g, double dist) const
+{
+    return baseGeom->isWithinDistance(g, dist);
 }
 
 std::string

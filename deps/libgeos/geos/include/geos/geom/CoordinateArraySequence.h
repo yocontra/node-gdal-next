@@ -48,7 +48,7 @@ public:
     /// Copy Coordinate at position i to Coordinate c
     void getAt(std::size_t i, Coordinate& c) const override;
 
-    size_t getSize() const override;
+    std::size_t getSize() const override;
 
     // See dox in CoordinateSequence.h
     void toVector(std::vector<Coordinate>&) const override;
@@ -122,6 +122,8 @@ public:
                      double value) override;
 
     void expandEnvelope(Envelope& env) const override;
+
+    void closeRing();
 
     std::size_t getDimension() const override;
 

@@ -23,7 +23,8 @@
 #include <geos/geom/LinearRing.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/util/LinearComponentExtracter.h>
-#include <geos/index/intervalrtree/SortedPackedIntervalRTree.h>
+#include <geos/index/strtree/Interval.h>
+#include <geos/index/strtree/TemplateSTRtree.h>
 #include <geos/util.h>
 #include <geos/algorithm/RayCrossingCounter.h>
 #include <geos/index/ItemVisitor.h>
@@ -38,12 +39,8 @@ namespace locate {
 // private:
 //
 IndexedPointInAreaLocator::IntervalIndexedGeometry::IntervalIndexedGeometry(const geom::Geometry& g)
-    : isEmpty(0)
 {
-    if (g.isEmpty())
-        isEmpty = true;
-    else
-        init(g);
+    init(g);
 }
 
 void
@@ -53,31 +50,25 @@ IndexedPointInAreaLocator::IntervalIndexedGeometry::init(const geom::Geometry& g
     geom::util::LinearComponentExtracter::getLines(g, lines);
 
     // pre-compute size of segment vector
-    size_t nsegs = 0;
+    std::size_t nsegs = 0;
     for(const geom::LineString* line : lines) {
         nsegs += line->getCoordinatesRO()->size() - 1;
     }
-    segments.reserve(nsegs);
+    index = decltype(index)(10, nsegs);
 
     for(const geom::LineString* line : lines) {
         addLine(line->getCoordinatesRO());
-    }
-
-    index = index::intervalrtree::SortedPackedIntervalRTree(segments.size());
-
-    for(geom::LineSegment& seg : segments) {
-        index.insert(
-            std::min(seg.p0.y, seg.p1.y),
-            std::max(seg.p0.y, seg.p1.y),
-            &seg);
     }
 }
 
 void
 IndexedPointInAreaLocator::IntervalIndexedGeometry::addLine(const geom::CoordinateSequence* pts)
 {
-    for(size_t i = 1, ni = pts->size(); i < ni; i++) {
-        segments.emplace_back((*pts)[i - 1], (*pts)[i]);
+    for(std::size_t i = 1, ni = pts->size(); i < ni; i++) {
+        SegmentView seg(&pts->getAt(i-1), &pts->getAt(i));
+        auto r = std::minmax(seg.p0().y, seg.p1().y);
+
+        index.insert(index::strtree::Interval(r.first, r.second), seg);
     }
 }
 
@@ -116,27 +107,11 @@ IndexedPointInAreaLocator::locate(const geom::Coordinate* /*const*/ p)
 
     algorithm::RayCrossingCounter rcc(*p);
 
-    IndexedPointInAreaLocator::SegmentVisitor visitor(&rcc);
-
-    index->query(p->y, p->y, &visitor);
+    index->query(p->y, p->y, [&rcc](const SegmentView& ls) {
+        rcc.countSegment(ls.p0(), ls.p1());
+    });
 
     return rcc.getLocation();
-}
-
-void
-IndexedPointInAreaLocator::SegmentVisitor::visitItem(void* item)
-{
-    geom::LineSegment* seg = static_cast<geom::LineSegment*>(item);
-
-    counter->countSegment(seg->p0, seg->p1);
-}
-
-void
-IndexedPointInAreaLocator::IntervalIndexedGeometry::query(double min, double max, index::ItemVisitor* visitor)
-{
-    if (isEmpty)
-        return;
-    index.query(min, max, visitor);
 }
 
 

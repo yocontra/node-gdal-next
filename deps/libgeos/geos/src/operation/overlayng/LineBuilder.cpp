@@ -138,7 +138,7 @@ LineBuilder::isResultLine(const OverlayLabel* lbl) const
 
 /*private*/
 Location
-LineBuilder::effectiveLocation(const OverlayLabel* lbl, int geomIndex) const
+LineBuilder::effectiveLocation(const OverlayLabel* lbl, uint8_t geomIndex)
 {
     if (lbl->isCollapse(geomIndex)) {
         return Location::INTERIOR;
@@ -176,7 +176,7 @@ LineBuilder::addResultLines()
 }
 
 std::unique_ptr<LineString>
-LineBuilder::toLine(OverlayEdge* edge)
+LineBuilder::toLine(OverlayEdge* edge) const
 {
     // bool isForward = edge->isForward();
     std::unique_ptr<CoordinateArraySequence> pts(new CoordinateArraySequence());
@@ -269,7 +269,7 @@ LineBuilder::buildLine(OverlayEdge* node)
 
 /*private*/
 OverlayEdge*
-LineBuilder::nextLineEdgeUnvisited(OverlayEdge* node) const
+LineBuilder::nextLineEdgeUnvisited(OverlayEdge* node)
 {
     OverlayEdge* e = node;
     do {
@@ -287,7 +287,7 @@ LineBuilder::nextLineEdgeUnvisited(OverlayEdge* node) const
 
 /*private*/
 int
-LineBuilder::degreeOfLines(OverlayEdge* node) const
+LineBuilder::degreeOfLines(OverlayEdge* node)
 {
     int degree = 0;
     OverlayEdge* e = node;

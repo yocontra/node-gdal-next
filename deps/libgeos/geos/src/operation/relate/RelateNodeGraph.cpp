@@ -31,7 +31,7 @@
 #include <vector>
 #include <map>
 
-using namespace std;
+
 using namespace geos::geomgraph;
 using namespace geos::geom;
 
@@ -86,11 +86,11 @@ RelateNodeGraph::build(GeometryGraph* geomGraph)
  * Precondition: edge intersections have been computed.
  */
 void
-RelateNodeGraph::computeIntersectionNodes(GeometryGraph* geomGraph,
-        int argIndex)
+RelateNodeGraph::computeIntersectionNodes(GeometryGraph *geomGraph,
+                                          uint8_t argIndex)
 {
-    vector<Edge*>* edges = geomGraph->getEdges();
-    vector<Edge*>::iterator edgeIt = edges->begin();
+    std::vector<Edge*>* edges = geomGraph->getEdges();
+    std::vector<Edge*>::iterator edgeIt = edges->begin();
     for(; edgeIt < edges->end(); ++edgeIt) {
         Edge* e = *edgeIt;
         Location eLoc = e->getLabel().getLocation(argIndex);
@@ -119,7 +119,7 @@ RelateNodeGraph::computeIntersectionNodes(GeometryGraph* geomGraph,
  * in the interior due to the Boundary Determination Rule)
  */
 void
-RelateNodeGraph::copyNodesAndLabels(GeometryGraph* geomGraph, int argIndex)
+RelateNodeGraph::copyNodesAndLabels(GeometryGraph *geomGraph, uint8_t argIndex)
 {
     auto& nMap = geomGraph->getNodeMap()->nodeMap;
     for(auto& entry : nMap) {
@@ -130,7 +130,7 @@ RelateNodeGraph::copyNodesAndLabels(GeometryGraph* geomGraph, int argIndex)
 }
 
 void
-RelateNodeGraph::insertEdgeEnds(vector<EdgeEnd*>* ee)
+RelateNodeGraph::insertEdgeEnds(std::vector<EdgeEnd*>* ee)
 {
     for(EdgeEnd* e: *ee) {
         nodes->add(e);

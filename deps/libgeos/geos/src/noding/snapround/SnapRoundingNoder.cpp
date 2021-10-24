@@ -96,26 +96,14 @@ SnapRoundingNoder::addVertexPixels(std::vector<SegmentString*>& segStrings)
 }
 
 /*private*/
-void
-SnapRoundingNoder::round(const Coordinate& pt, Coordinate& ptOut)
+std::vector<Coordinate>
+SnapRoundingNoder::round(const std::vector<Coordinate>& pts) const
 {
-    ptOut = pt;
-    pm->makePrecise(ptOut);
-    return;
-}
-
-/*private*/
-std::unique_ptr<std::vector<Coordinate>>
-SnapRoundingNoder::round(const std::vector<Coordinate>& pts)
-{
-    std::unique_ptr<std::vector<Coordinate>> roundPts(new std::vector<Coordinate>);
-    roundPts->reserve(pts.size());
-    for (auto pt: pts) {
-        Coordinate ptOut;
-        round(pt, ptOut);
-        roundPts->push_back(ptOut);
+    std::vector<Coordinate> roundPts = pts;
+    for (auto& pt: roundPts) {
+        pm->makePrecise(pt);
     }
-    roundPts->erase(std::unique(roundPts->begin(), roundPts->end()), roundPts->end());
+    roundPts.erase(std::unique(roundPts.begin(), roundPts.end()), roundPts.end());
     return roundPts;
 }
 
@@ -157,9 +145,9 @@ SnapRoundingNoder::computeSegmentSnaps(NodedSegmentString* ss)
     * The coordinates are now rounded to the grid,
     * in preparation for snapping to the Hot Pixels
     */
-    std::unique_ptr<std::vector<Coordinate>> pts = ss->getNodedCoordinates();
-    std::unique_ptr<std::vector<Coordinate>> ptsRoundVec = round(*pts);
-    std::unique_ptr<geom::CoordinateArraySequence> ptsRound(new CoordinateArraySequence(ptsRoundVec.release()));
+    std::vector<Coordinate> pts = ss->getNodedCoordinates();
+    std::vector<Coordinate> ptsRoundVec = round(pts);
+    std::unique_ptr<geom::CoordinateArraySequence> ptsRound(new CoordinateArraySequence(std::move(ptsRoundVec)));
 
     // if complete collapse this edge can be eliminated
     if (ptsRound->size() <= 1)
@@ -168,21 +156,21 @@ SnapRoundingNoder::computeSegmentSnaps(NodedSegmentString* ss)
     // Create new nodedSS to allow adding any hot pixel nodes
     NodedSegmentString* snapSS = new NodedSegmentString(ptsRound.release(), ss->getData());
 
-    size_t snapSSindex = 0;
-    for (size_t i = 0, sz = pts->size()-1; i < sz; i++ ) {
+    std::size_t snapSSindex = 0;
+    for (std::size_t i = 0, sz = pts.size()-1; i < sz; i++ ) {
 
         const geom::Coordinate& currSnap = snapSS->getCoordinate(snapSSindex);
 
         /**
         * If the segment has collapsed completely, skip it
         */
-        Coordinate p1 = (*pts)[i+1];
-        Coordinate p1Round;
-        round(p1, p1Round);
+        Coordinate p1 = pts[i+1];
+        Coordinate p1Round = p1;
+        pm->makePrecise(p1Round);
         if (p1Round.equals2D(currSnap))
             continue;
 
-        Coordinate p0 = (*pts)[i];
+        Coordinate p0 = pts[i];
 
         /**
         * Add any Hot Pixel intersections with *original* segment to rounded segment.
@@ -205,16 +193,16 @@ SnapRoundingNoder::computeSegmentSnaps(NodedSegmentString* ss)
 */
 /*private*/
 void
-SnapRoundingNoder::snapSegment(Coordinate& p0, Coordinate& p1, NodedSegmentString* ss, size_t segIndex)
+SnapRoundingNoder::snapSegment(Coordinate& p0, Coordinate& p1, NodedSegmentString* ss, std::size_t segIndex)
 {
     /* First define a visitor to use in the pixelIndex.query() */
     struct SnapRoundingVisitor : KdNodeVisitor {
         const Coordinate& p0;
         const Coordinate& p1;
         NodedSegmentString* ss;
-        size_t segIndex;
+        std::size_t segIndex;
 
-        SnapRoundingVisitor(const Coordinate& pp0, const Coordinate& pp1, NodedSegmentString* pss, size_t psegIndex)
+        SnapRoundingVisitor(const Coordinate& pp0, const Coordinate& pp1, NodedSegmentString* pss, std::size_t psegIndex)
             : p0(pp0), p1(pp1), ss(pss), segIndex(psegIndex) {};
 
         void visit(KdNode* node) override {
@@ -261,7 +249,7 @@ SnapRoundingNoder::addVertexNodeSnaps(NodedSegmentString* ss)
 }
 
 void
-SnapRoundingNoder::snapVertexNode(const Coordinate& p0, NodedSegmentString* ss, size_t segIndex)
+SnapRoundingNoder::snapVertexNode(const Coordinate& p0, NodedSegmentString* ss, std::size_t segIndex)
 {
 
     /* First define a visitor to use in the pixelIndex.query() */
@@ -269,9 +257,9 @@ SnapRoundingNoder::snapVertexNode(const Coordinate& p0, NodedSegmentString* ss, 
 
         const Coordinate& p0;
         NodedSegmentString* ss;
-        size_t segIndex;
+        std::size_t segIndex;
 
-        SnapRoundingVertexNodeVisitor(const Coordinate& pp0, NodedSegmentString* pss, size_t psegIndex)
+        SnapRoundingVertexNodeVisitor(const Coordinate& pp0, NodedSegmentString* pss, std::size_t psegIndex)
             : p0(pp0), ss(pss), segIndex(psegIndex) {};
 
         void visit(KdNode* node) override {

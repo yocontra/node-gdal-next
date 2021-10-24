@@ -16,11 +16,13 @@
  ***********************************************************************/
 
 #include <geos/geom/prep/PreparedGeometryFactory.h>
-#include <geos/index/strtree/STRtree.h>
+#include <geos/index/strtree/TemplateSTRtree.h>
 #include <geos/io/WKTReader.h>
 #include <geos/io/WKBReader.h>
 #include <geos/io/WKTWriter.h>
 #include <geos/io/WKBWriter.h>
+#include <geos/io/GeoJSONReader.h>
+#include <geos/io/GeoJSONWriter.h>
 #include <geos/util/Interrupt.h>
 
 #include <stdexcept>
@@ -34,12 +36,15 @@
 #define GEOSGeometry geos::geom::Geometry
 #define GEOSPreparedGeometry geos::geom::prep::PreparedGeometry
 #define GEOSCoordSequence geos::geom::CoordinateSequence
-#define GEOSSTRtree geos::index::strtree::STRtree
+#define GEOSSTRtree geos::index::strtree::TemplateSTRtree<void*>
 #define GEOSWKTReader geos::io::WKTReader
 #define GEOSWKTWriter geos::io::WKTWriter
 #define GEOSWKBReader geos::io::WKBReader
 #define GEOSWKBWriter geos::io::WKBWriter
+#define GEOSGeoJSONReader geos::io::GeoJSONReader
+#define GEOSGeoJSONWriter geos::io::GeoJSONWriter
 typedef struct GEOSBufParams_t GEOSBufferParams;
+typedef struct GEOSMakeValidParams_t GEOSMakeValidParams;
 
 #include "geos_c.h"
 
@@ -69,7 +74,8 @@ using geos::io::WKTReader;
 using geos::io::WKTWriter;
 using geos::io::WKBReader;
 using geos::io::WKBWriter;
-
+using geos::io::GeoJSONReader;
+using geos::io::GeoJSONWriter;
 
 
 typedef std::unique_ptr<Geometry> GeomPtr;
@@ -267,6 +273,12 @@ extern "C" {
         return GEOSDistance_r(handle, g1, g2, dist);
     }
 
+    char
+    GEOSDistanceWithin(const Geometry* g1, const Geometry* g2, double dist)
+    {
+        return GEOSDistanceWithin_r(handle, g1, g2, dist);
+    }
+
     int
     GEOSDistanceIndexed(const Geometry* g1, const Geometry* g2, double* dist)
     {
@@ -329,13 +341,13 @@ extern "C" {
 
 // Remember to free the result!
     unsigned char*
-    GEOSGeomToWKB_buf(const Geometry* g, size_t* size)
+    GEOSGeomToWKB_buf(const Geometry* g, std::size_t* size)
     {
         return GEOSGeomToWKB_buf_r(handle, g, size);
     }
 
     Geometry*
-    GEOSGeomFromWKB_buf(const unsigned char* wkb, size_t size)
+    GEOSGeomFromWKB_buf(const unsigned char* wkb, std::size_t size)
     {
         return GEOSGeomFromWKB_buf_r(handle, wkb, size);
     }
@@ -343,13 +355,13 @@ extern "C" {
     /* Read/write wkb hex values.  Returned geometries are
        owned by the caller.*/
     unsigned char*
-    GEOSGeomToHEX_buf(const Geometry* g, size_t* size)
+    GEOSGeomToHEX_buf(const Geometry* g, std::size_t* size)
     {
         return GEOSGeomToHEX_buf_r(handle, g, size);
     }
 
     Geometry*
-    GEOSGeomFromHEX_buf(const unsigned char* hex, size_t size)
+    GEOSGeomFromHEX_buf(const unsigned char* hex, std::size_t size)
     {
         return GEOSGeomFromHEX_buf_r(handle, hex, size);
     }
@@ -426,6 +438,13 @@ extern "C" {
         return GEOSBufferWithStyle_r(handle, g, width, quadsegs, endCapStyle,
                                      joinStyle, mitreLimit);
     }
+
+    Geometry*
+    GEOSDensify(const Geometry* g, double tolerance)
+    {
+        return GEOSDensify_r(handle, g, tolerance);
+    }
+
 
     Geometry*
     GEOSSingleSidedBuffer(const Geometry* g, double width, int quadsegs,
@@ -788,6 +807,42 @@ extern "C" {
         return GEOSMakeValid_r(handle, g);
     }
 
+    GEOSMakeValidParams*
+    GEOSMakeValidParams_create()
+    {
+        return GEOSMakeValidParams_create_r(handle);
+    }
+
+    void
+    GEOSMakeValidParams_destroy(GEOSMakeValidParams* parms)
+    {
+        return GEOSMakeValidParams_destroy_r(handle, parms);
+    }
+
+    int
+    GEOSMakeValidParams_setMethod(
+        GEOSMakeValidParams* p,
+        GEOSMakeValidMethods method)
+    {
+        return GEOSMakeValidParams_setMethod_r(handle, p, method);
+    }
+
+    int
+    GEOSMakeValidParams_setKeepCollapsed(
+        GEOSMakeValidParams* p,
+        int keepCollapsed)
+    {
+        return GEOSMakeValidParams_setKeepCollapsed_r(handle, p, keepCollapsed);
+    }
+
+    Geometry*
+    GEOSMakeValidWithParams(
+        const Geometry* g,
+        const GEOSMakeValidParams* params)
+    {
+        return GEOSMakeValidWithParams_r(handle, g, params);
+    }
+
     Geometry*
     GEOSLineMerge(const Geometry* g)
     {
@@ -854,11 +909,34 @@ extern "C" {
         return GEOS_setWKBByteOrder_r(handle, byteOrder);
     }
 
-
     CoordinateSequence*
     GEOSCoordSeq_create(unsigned int size, unsigned int dims)
     {
         return GEOSCoordSeq_create_r(handle, size, dims);
+    }
+
+    CoordinateSequence*
+    GEOSCoordSeq_copyFromBuffer(const double* buf, unsigned int size, int hasZ, int hasM)
+    {
+        return GEOSCoordSeq_copyFromBuffer_r(handle, buf, size, hasZ, hasM);
+    }
+
+    int
+    GEOSCoordSeq_copyToBuffer(const CoordinateSequence* s, double* buf, int hasZ, int hasM)
+    {
+        return GEOSCoordSeq_copyToBuffer_r(handle, s, buf, hasZ, hasM);
+    }
+
+    CoordinateSequence*
+    GEOSCoordSeq_copyFromArrays(const double* x, const double* y, const double* z, const double* m, unsigned int size)
+    {
+        return GEOSCoordSeq_copyFromArrays_r(handle, x, y, z, m, size);
+    }
+
+    int
+    GEOSCoordSeq_copyToArrays(const CoordinateSequence* s, double* x, double* y, double* z, double* m)
+    {
+        return GEOSCoordSeq_copyToArrays_r(handle, s, x, y, z, m);
     }
 
     int
@@ -1146,13 +1224,13 @@ extern "C" {
 
 
     Geometry*
-    GEOSWKBReader_read(WKBReader* reader, const unsigned char* wkb, size_t size)
+    GEOSWKBReader_read(WKBReader* reader, const unsigned char* wkb, std::size_t size)
     {
         return GEOSWKBReader_read_r(handle, reader, wkb, size);
     }
 
     Geometry*
-    GEOSWKBReader_readHEX(WKBReader* reader, const unsigned char* hex, size_t size)
+    GEOSWKBReader_readHEX(WKBReader* reader, const unsigned char* hex, std::size_t size)
     {
         return GEOSWKBReader_readHEX_r(handle, reader, hex, size);
     }
@@ -1173,14 +1251,14 @@ extern "C" {
 
     /* The caller owns the result */
     unsigned char*
-    GEOSWKBWriter_write(WKBWriter* writer, const Geometry* geom, size_t* size)
+    GEOSWKBWriter_write(WKBWriter* writer, const Geometry* geom, std::size_t* size)
     {
         return GEOSWKBWriter_write_r(handle, writer, geom, size);
     }
 
     /* The caller owns the result */
     unsigned char*
-    GEOSWKBWriter_writeHEX(WKBWriter* writer, const Geometry* geom, size_t* size)
+    GEOSWKBWriter_writeHEX(WKBWriter* writer, const Geometry* geom, std::size_t* size)
     {
         return GEOSWKBWriter_writeHEX_r(handle, writer, geom, size);
     }
@@ -1209,6 +1287,18 @@ extern "C" {
         GEOSWKBWriter_setByteOrder_r(handle, writer, newByteOrder);
     }
 
+    int
+    GEOSWKBWriter_getFlavor(const GEOSWKBWriter* writer)
+    {
+        return GEOSWKBWriter_getFlavor_r(handle, writer);
+    }
+
+    void
+    GEOSWKBWriter_setFlavor(GEOSWKBWriter* writer, int newFlavor)
+    {
+        GEOSWKBWriter_setFlavor_r(handle, writer, newFlavor);
+    }
+
     char
     GEOSWKBWriter_getIncludeSRID(const GEOSWKBWriter* writer)
     {
@@ -1219,6 +1309,44 @@ extern "C" {
     GEOSWKBWriter_setIncludeSRID(GEOSWKBWriter* writer, const char newIncludeSRID)
     {
         GEOSWKBWriter_setIncludeSRID_r(handle, writer, newIncludeSRID);
+    }
+
+    /* GeoJSON Reader */
+    GeoJSONReader*
+    GEOSGeoJSONReader_create()
+    {
+        return GEOSGeoJSONReader_create_r(handle);
+    }
+
+    void
+    GEOSGeoJSONReader_destroy(GeoJSONReader* reader)
+    {
+        GEOSGeoJSONReader_destroy_r(handle, reader);
+    }
+
+    Geometry*
+    GEOSGeoJSONReader_readGeometry(GeoJSONReader* reader, const char* geojson)
+    {
+        return GEOSGeoJSONReader_readGeometry_r(handle, reader, geojson);
+    }
+
+    /* GeoJSON Writer */
+    GeoJSONWriter*
+    GEOSGeoJSONWriter_create()
+    {
+        return GEOSGeoJSONWriter_create_r(handle);
+    }
+
+    void
+    GEOSGeoJSONWriter_destroy(GEOSGeoJSONWriter* writer)
+    {
+        GEOSGeoJSONWriter_destroy_r(handle, writer);
+    }
+
+    char*
+    GEOSGeoJSONWriter_writeGeometry(GEOSGeoJSONWriter* writer, const GEOSGeometry* g, int indent)
+    {
+        return GEOSGeoJSONWriter_writeGeometry_r(handle, writer, g, indent);
     }
 
 
@@ -1310,8 +1438,14 @@ extern "C" {
         return GEOSPreparedDistance_r(handle, g1, g2, dist);
     }
 
+    char
+    GEOSPreparedDistanceWithin(const geos::geom::prep::PreparedGeometry* g1, const Geometry* g2, double dist)
+    {
+        return GEOSPreparedDistanceWithin_r(handle, g1, g2, dist);
+    }
+
     GEOSSTRtree*
-    GEOSSTRtree_create(size_t nodeCapacity)
+    GEOSSTRtree_create(std::size_t nodeCapacity)
     {
         return GEOSSTRtree_create_r(handle, nodeCapacity);
     }
@@ -1500,6 +1634,12 @@ extern "C" {
     GEOSDelaunayTriangulation(const Geometry* g, double tolerance, int onlyEdges)
     {
         return GEOSDelaunayTriangulation_r(handle, g, tolerance, onlyEdges);
+    }
+
+    Geometry*
+    GEOSConstrainedDelaunayTriangulation(const Geometry* g)
+    {
+        return GEOSConstrainedDelaunayTriangulation_r(handle, g);
     }
 
     Geometry*

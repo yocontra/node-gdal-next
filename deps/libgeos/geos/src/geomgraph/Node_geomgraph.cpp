@@ -41,7 +41,6 @@
 #define COMPUTE_Z 1
 #endif
 
-using namespace std;
 using namespace geos::geom;
 
 namespace geos {
@@ -56,7 +55,7 @@ Node::Node(const Coordinate& newCoord, EdgeEndStar* newEdges)
 
 {
 #if GEOS_DEBUG
-    cerr << "[" << this << "] Node::Node(" << newCoord.toString() << ")" << endl;
+    std::cerr << "[" << this << "] Node::Node(" << newCoord.toString() << ")" << std::endl;
 #endif
 
 #if COMPUTE_Z
@@ -79,7 +78,7 @@ Node::~Node()
 {
     testInvariant();
 #if GEOS_DEBUG
-    cerr << "[" << this << "] Node::~Node()" << endl;
+    std::cerr << "[" << this << "] Node::~Node()" << std::endl;
 #endif
     delete edges;
 }
@@ -137,7 +136,7 @@ Node::add(EdgeEnd* e)
 {
     assert(e);
 #if GEOS_DEBUG
-    cerr << "[" << this << "] Node::add(" << e->print() << ")" << endl;
+    std::cerr << "[" << this << "] Node::add(" << e->print() << ")" << std::endl;
 #endif
     // Assert: start pt of e is equal to node point
     if(! e->getCoordinate().equals2D(coord)) {
@@ -174,7 +173,7 @@ Node::mergeLabel(const Node& n)
 void
 Node::mergeLabel(const Label& label2)
 {
-    for(int i = 0; i < 2; i++) {
+    for(uint8_t i = 0; i < 2; i++) {
         Location loc = computeMergedLocation(label2, i);
         Location thisLoc = label.getLocation(i);
         if(thisLoc == Location::NONE) {
@@ -186,7 +185,7 @@ Node::mergeLabel(const Label& label2)
 
 /*public*/
 void
-Node::setLabel(int argIndex, Location onLocation)
+Node::setLabel(uint8_t argIndex, Location onLocation)
 {
     if(label.isNull()) {
         label = Label(argIndex, onLocation);
@@ -200,7 +199,7 @@ Node::setLabel(int argIndex, Location onLocation)
 
 /*public*/
 void
-Node::setLabelBoundary(int argIndex)
+Node::setLabelBoundary(uint8_t argIndex)
 {
     Location loc = label.getLocation(argIndex);
     // flip the loc
@@ -223,10 +222,9 @@ Node::setLabelBoundary(int argIndex)
 
 /*public*/
 Location
-Node::computeMergedLocation(const Label& label2, int eltIndex)
+Node::computeMergedLocation(const Label& label2, uint8_t eltIndex)
 {
-    Location loc = Location::NONE;
-    loc = label.getLocation(eltIndex);
+    Location loc = label.getLocation(eltIndex);
     if(!label2.isNull(eltIndex)) {
         Location nLoc = label2.getLocation(eltIndex);
         if(loc != Location::BOUNDARY) {
@@ -240,12 +238,12 @@ Node::computeMergedLocation(const Label& label2, int eltIndex)
 }
 
 /*public*/
-string
+std::string
 Node::print()
 {
     testInvariant();
 
-    ostringstream ss;
+    std::ostringstream ss;
     ss << *this;
     return ss.str();
 }
@@ -255,17 +253,17 @@ void
 Node::addZ(double z)
 {
 #if GEOS_DEBUG
-    cerr << "[" << this << "] Node::addZ(" << z << ")";
+    std::cerr << "[" << this << "] Node::addZ(" << z << ")";
 #endif
     if(std::isnan(z)) {
 #if GEOS_DEBUG
-        cerr << " skipped" << endl;
+        std::cerr << " skipped" << std::endl;
 #endif
         return;
     }
     if(find(zvals.begin(), zvals.end(), z) != zvals.end()) {
 #if GEOS_DEBUG
-        cerr << " already stored" << endl;
+        std::cerr << " already stored" << std::endl;
 #endif
         return;
     }
@@ -273,12 +271,12 @@ Node::addZ(double z)
     ztot += z;
     coord.z = ztot / static_cast<double>(zvals.size());
 #if GEOS_DEBUG
-    cerr << " added " << z << ": [" << ztot << "/" << zvals.size() << "=" << coord.z << "]" << endl;
+    std::cerr << " added " << z << ": [" << ztot << "/" << zvals.size() << "=" << coord.z << "]" << std::endl;
 #endif
 }
 
 /*public*/
-const vector<double>&
+const std::vector<double>&
 Node::getZ() const
 {
     return zvals;

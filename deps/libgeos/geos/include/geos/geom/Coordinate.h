@@ -91,9 +91,15 @@ public:
 
     bool isNull() const;
 
-    Coordinate(double xNew = 0.0, double yNew = 0.0, double zNew = DoubleNotANumber);
+    bool isValid() const;
+
+    Coordinate();
+
+    Coordinate(double xNew, double yNew, double zNew = DoubleNotANumber);
 
     bool equals2D(const Coordinate& other) const;
+
+    bool equals2D(const Coordinate& other, double tolerance) const;
 
     /// 2D only
     bool equals(const Coordinate& other) const;
@@ -116,7 +122,7 @@ public:
     double distanceSquared(const Coordinate& p) const;
 
     struct GEOS_DLL HashCode {
-        size_t operator()(const Coordinate & c) const;
+        std::size_t operator()(const Coordinate & c) const;
     };
 
 };

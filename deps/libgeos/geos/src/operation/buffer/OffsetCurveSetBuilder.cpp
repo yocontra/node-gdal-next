@@ -67,17 +67,18 @@ OffsetCurveSetBuilder::OffsetCurveSetBuilder(const Geometry& newInputGeom,
     inputGeom(newInputGeom),
     distance(newDistance),
     curveBuilder(newCurveBuilder),
-    curveList()
+    curveList(),
+    isInvertOrientation(false)
 {
 }
 
 OffsetCurveSetBuilder::~OffsetCurveSetBuilder()
 {
-    for(size_t i = 0, n = curveList.size(); i < n; ++i) {
+    for(std::size_t i = 0, n = curveList.size(); i < n; ++i) {
         SegmentString* ss = curveList[i];
         delete ss;
     }
-    for(size_t i = 0, n = newLabels.size(); i < n; ++i) {
+    for(std::size_t i = 0, n = newLabels.size(); i < n; ++i) {
         delete newLabels[i];
     }
 }
@@ -95,7 +96,7 @@ void
 OffsetCurveSetBuilder::addCurves(const std::vector<CoordinateSequence*>& lineList,
                                  geom::Location leftLoc, geom::Location rightLoc)
 {
-    for(size_t i = 0, n = lineList.size(); i < n; ++i) {
+    for(std::size_t i = 0, n = lineList.size(); i < n; ++i) {
         CoordinateSequence* coords = lineList[i];
         addCurve(coords, leftLoc, rightLoc);
     }
@@ -174,7 +175,7 @@ OffsetCurveSetBuilder::add(const Geometry& g)
 void
 OffsetCurveSetBuilder::addCollection(const GeometryCollection* gc)
 {
-    for(size_t i = 0, n = gc->getNumGeometries(); i < n; i++) {
+    for(std::size_t i = 0, n = gc->getNumGeometries(); i < n; i++) {
         const Geometry* g = gc->getGeometryN(i);
         add(*g);
     }
@@ -189,6 +190,9 @@ OffsetCurveSetBuilder::addPoint(const Point* p)
         return;
     }
     const CoordinateSequence* coord = p->getCoordinatesRO();
+    if (coord->size() >= 1 && ! coord->getAt(0).isValid()) {
+        return;
+    }
     std::vector<CoordinateSequence*> lineList;
     curveBuilder.getLineCurve(coord, distance, lineList);
 
@@ -203,7 +207,7 @@ OffsetCurveSetBuilder::addLineString(const LineString* line)
         return;
     }
 
-    auto coord = operation::valid::RepeatedPointRemover::removeRepeatedPoints(line->getCoordinatesRO());
+    auto coord = operation::valid::RepeatedPointRemover::removeRepeatedAndInvalidPoints(line->getCoordinatesRO());
 
     /**
      * Rings (closed lines) are generated with a continuous curve,
@@ -249,7 +253,7 @@ OffsetCurveSetBuilder::addPolygon(const Polygon* p)
     }
 
     auto shellCoord =
-            operation::valid::RepeatedPointRemover::removeRepeatedPoints(shell->getCoordinatesRO());
+            operation::valid::RepeatedPointRemover::removeRepeatedAndInvalidPoints(shell->getCoordinatesRO());
 
     // don't attempt to buffer a polygon
     // with too few distinct vertices
@@ -264,7 +268,7 @@ OffsetCurveSetBuilder::addPolygon(const Polygon* p)
         Location::EXTERIOR,
         Location::INTERIOR);
 
-    for(size_t i = 0, n = p->getNumInteriorRing(); i < n; ++i) {
+    for(std::size_t i = 0, n = p->getNumInteriorRing(); i < n; ++i) {
         const LineString* hls = p->getInteriorRingN(i);
         const LinearRing* hole = detail::down_cast<const LinearRing*>(hls);
 
@@ -274,7 +278,7 @@ OffsetCurveSetBuilder::addPolygon(const Polygon* p)
             continue;
         }
 
-        auto holeCoord = valid::RepeatedPointRemover::removeRepeatedPoints(hole->getCoordinatesRO());
+        auto holeCoord = valid::RepeatedPointRemover::removeRepeatedAndInvalidPoints(hole->getCoordinatesRO());
 
         // Holes are topologically labelled opposite to the shell,
         // since the interior of the polygon lies on their opposite
@@ -320,8 +324,8 @@ OffsetCurveSetBuilder::addRingSide(const CoordinateSequence* coord,
 #if GEOS_DEBUG
     std::cerr << "OffsetCurveSetBuilder::addPolygonRing: CCW: " << Orientation::isCCW(coord) << std::endl;
 #endif
-    if(coord->size() >= LinearRing::MINIMUM_VALID_SIZE &&
-        Orientation::isCCWArea(coord))
+    bool isCCW = isRingCCW(coord);
+    if (coord->size() >= LinearRing::MINIMUM_VALID_SIZE && isCCW)
     {
         leftLoc = cwRightLoc;
         rightLoc = cwLeftLoc;
@@ -332,7 +336,76 @@ OffsetCurveSetBuilder::addRingSide(const CoordinateSequence* coord,
     }
     std::vector<CoordinateSequence*> lineList;
     curveBuilder.getRingCurve(coord, side, offsetDistance, lineList);
+    // ASSERT: lineList contains exactly 1 curve (this is teh JTS semantics)
+    if (lineList.size() > 0) {
+        const CoordinateSequence* curve = lineList[0];
+        /**
+         * If the offset curve has inverted completely it will produce
+         * an unwanted artifact in the result, so skip it.
+         */
+        if (isRingCurveInverted(coord, offsetDistance, curve)) {
+            for( auto line: lineList ) {
+                delete line;
+            }
+            return;
+        }
+    }
     addCurves(lineList, leftLoc, rightLoc);
+}
+
+/* private static*/
+bool
+OffsetCurveSetBuilder::isRingCurveInverted(
+    const CoordinateSequence* inputPts, double dist,
+    const CoordinateSequence* curvePts)
+{
+    if (dist == 0.0) return false;
+    /**
+     * Only proper rings can invert.
+     */
+    if (inputPts->size() <= 3) return false;
+    /**
+     * Heuristic based on low chance that a ring with many vertices will invert.
+     * This low limit ensures this test is fairly efficient.
+     */
+    if (inputPts->size() >= MAX_INVERTED_RING_SIZE) return false;
+
+    /**
+     * An inverted curve has no more points than the input ring.
+     * This also eliminates concave inputs (which will produce fillet arcs)
+     */
+    if (curvePts->size() > inputPts->size()) return false;
+
+    /**
+     * Check if the curve vertices are all closer to the input ring
+     * than the buffer distance.
+     * If so, the curve is NOT a valid buffer curve.
+     */
+    double distTol = NEARNESS_FACTOR * fabs(dist);
+    double maxDist = maxDistance(curvePts, inputPts);
+    bool isCurveTooClose = maxDist < distTol;
+    return isCurveTooClose;
+}
+
+/**
+ * Computes the maximum distance out of a set of points to a linestring.
+ *
+ * @param pts the points
+ * @param line the linestring vertices
+ * @return the maximum distance
+ */
+/* private static */
+double
+OffsetCurveSetBuilder::maxDistance(const CoordinateSequence*  pts, const CoordinateSequence*  line) {
+    double maxDistance = 0;
+    for (std::size_t i = 0; i < pts->size(); i++) {
+        const Coordinate& p = pts->getAt(i);
+        double dist = Distance::pointToSegmentString(p, line);
+        if (dist > maxDistance) {
+            maxDistance = dist;
+        }
+    }
+    return maxDistance;
 }
 
 /*private*/
@@ -358,28 +431,6 @@ OffsetCurveSetBuilder::isErodedCompletely(const LinearRing* ring,
     if(bufferDistance < 0.0 && 2 * std::abs(bufferDistance) > envMinDimension) {
         return true;
     }
-
-    /*
-     * The following is a heuristic test to determine whether an
-     * inside buffer will be eroded completely->
-     * It is based on the fact that the minimum diameter of the ring
-     * pointset
-     * provides an upper bound on the buffer distance which would erode the
-     * ring->
-     * If the buffer distance is less than the minimum diameter, the ring
-     * may still be eroded, but this will be determined by
-     * a full topological computation->
-     *
-     */
-
-    /* MD  7 Feb 2005 - there's an unknown bug in the MD code,
-     so disable this for now */
-#if 0
-    MinimumDiameter md(ring); //=new MinimumDiameter(ring);
-    double minDiam = md.getLength();
-    return minDiam < (2 * std::fabs(bufferDistance));
-#endif
-
     return false;
 }
 
@@ -397,6 +448,16 @@ OffsetCurveSetBuilder::isTriangleErodedCompletely(
     return ret;
 }
 
+
+/*private*/
+bool
+OffsetCurveSetBuilder::isRingCCW(const CoordinateSequence* coords) const
+{
+    bool isCCW = algorithm::Orientation::isCCWArea(coords);
+    //--- invert orientation if required
+    if (isInvertOrientation) return ! isCCW;
+    return isCCW;
+}
 
 } // namespace geos.operation.buffer
 } // namespace geos.operation

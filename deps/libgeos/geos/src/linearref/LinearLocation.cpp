@@ -24,7 +24,7 @@
 #include <geos/linearref/LengthLocationMap.h>
 #include <geos/util/IllegalArgumentException.h>
 
-using namespace std;
+
 
 using namespace geos::geom;
 
@@ -60,7 +60,7 @@ LinearLocation::pointAlongSegmentByFraction(const Coordinate& p0, const Coordina
 }
 
 /* public */
-LinearLocation::LinearLocation(size_t p_segmentIndex,
+LinearLocation::LinearLocation(std::size_t p_segmentIndex,
                                double p_segmentFraction)
     :
     componentIndex(0),
@@ -70,8 +70,8 @@ LinearLocation::LinearLocation(size_t p_segmentIndex,
 
 
 /* public */
-LinearLocation::LinearLocation(size_t p_componentIndex,
-                               size_t p_segmentIndex, double p_segmentFraction)
+LinearLocation::LinearLocation(std::size_t p_componentIndex,
+                               std::size_t p_segmentIndex, double p_segmentFraction)
     :
     componentIndex(p_componentIndex),
     segmentIndex(p_segmentIndex),
@@ -107,6 +107,9 @@ LinearLocation::clamp(const Geometry* linear)
     }
     if(segmentIndex >= linear->getNumPoints()) {
         const LineString* line = dynamic_cast<const LineString*>(linear->getGeometryN(componentIndex));
+        if(! line) {
+            throw util::IllegalArgumentException("LinearLocation::clamp only works with LineString geometries");
+        }
         segmentIndex = line->getNumPoints() - 1;
         segmentFraction = 1.0;
     }
@@ -135,9 +138,11 @@ double
 LinearLocation::getSegmentLength(const Geometry* linearGeom) const
 {
     const LineString* lineComp = dynamic_cast<const LineString*>(linearGeom->getGeometryN(componentIndex));
-
+    if(! lineComp) {
+        throw util::IllegalArgumentException("LinearLocation::getSegmentLength only works with LineString geometries");
+    }
     // ensure segment index is valid
-    size_t segIndex = segmentIndex;
+    std::size_t segIndex = segmentIndex;
     if(segmentIndex >= lineComp->getNumPoints() - 1) {
         segIndex = lineComp->getNumPoints() - 2;
     }
@@ -160,6 +165,9 @@ LinearLocation::setToEnd(const Geometry* linear)
     }
     componentIndex--;
     const LineString* lastLine = dynamic_cast<const LineString*>(linear->getGeometryN(componentIndex));
+    if(! lastLine) {
+        throw util::IllegalArgumentException("LinearLocation::setToEnd only works with LineString geometries");
+    }
     segmentIndex = lastLine->getNumPoints() - 1;
     segmentFraction = 1.0;
 }
@@ -216,6 +224,9 @@ std::unique_ptr<LineSegment>
 LinearLocation::getSegment(const Geometry* linearGeom) const
 {
     const LineString* lineComp = dynamic_cast<const LineString*>(linearGeom->getGeometryN(componentIndex));
+    if(! lineComp) {
+        throw util::IllegalArgumentException("LinearLocation::getSegment only works with LineString geometries");
+    }
     Coordinate p0 = lineComp->getCoordinateN(segmentIndex);
     // check for endpoint - return last segment of the line if so
     if(segmentIndex >= lineComp->getNumPoints() - 1) {
@@ -235,6 +246,9 @@ LinearLocation::isValid(const Geometry* linearGeom) const
     }
 
     const LineString* lineComp = dynamic_cast<const LineString*>(linearGeom->getGeometryN(componentIndex));
+    if(! lineComp) {
+        throw util::IllegalArgumentException("LinearLocation::isValid only works with LineString geometries");
+    }
     if(segmentIndex > lineComp->getNumPoints()) {
         return false;
     }
@@ -279,8 +293,8 @@ LinearLocation::compareTo(const LinearLocation& other) const
 
 /* public */
 int
-LinearLocation::compareLocationValues(size_t componentIndex1,
-                                      size_t segmentIndex1, double segmentFraction1) const
+LinearLocation::compareLocationValues(std::size_t componentIndex1,
+                                      std::size_t segmentIndex1, double segmentFraction1) const
 {
     // compare component indices
     if(componentIndex < componentIndex1) {
@@ -311,9 +325,9 @@ LinearLocation::compareLocationValues(size_t componentIndex1,
 /* public static */
 int
 LinearLocation::compareLocationValues(
-    size_t componentIndex0, size_t segmentIndex0,
+    std::size_t componentIndex0, std::size_t segmentIndex0,
     double segmentFraction0,
-    size_t componentIndex1, size_t segmentIndex1,
+    std::size_t componentIndex1, std::size_t segmentIndex1,
     double segmentFraction1)
 {
     // compare component indices
@@ -367,18 +381,21 @@ LinearLocation::isOnSameSegment(const LinearLocation& loc) const
 bool
 LinearLocation::isEndpoint(const Geometry& linearGeom) const
 {
-    const LineString& lineComp = dynamic_cast<const LineString&>(
-                                     *(linearGeom.getGeometryN(componentIndex)));
+    const LineString* lineComp = dynamic_cast<const LineString*>(
+                                     linearGeom.getGeometryN(componentIndex));
+    if(! lineComp) {
+        throw util::IllegalArgumentException("LinearLocation::isEndpoint only works with LineString geometries");
+    }
     // check for endpoint
-    auto nseg = lineComp.getNumPoints() - 1;
+    auto nseg = lineComp->getNumPoints() - 1;
     return segmentIndex >= nseg
            || (segmentIndex == nseg && segmentFraction >= 1.0);
 
 }
 
 
-ostream&
-operator<<(ostream& out, const LinearLocation& obj)
+std::ostream&
+operator<<(std::ostream& out, const LinearLocation& obj)
 {
     return out << "LinearLoc[" << obj.componentIndex << ", " <<
            obj.segmentIndex << ", " << obj.segmentFraction << "]";

@@ -20,44 +20,11 @@
 #include <typeinfo>
 #include <cassert>
 
-using namespace std;
+
 
 namespace geos {
 namespace index { // geos.index
 namespace strtree { // geos.index.strtree
-
-Interval::Interval(double newMin, double newMax)
-{
-    assert(newMin <= newMax);
-    imin = newMin;
-    imax = newMax;
-}
-
-double
-Interval::getCentre()
-{
-    return (imin + imax) / 2;
-}
-
-Interval*
-Interval::expandToInclude(const Interval* other)
-{
-    imax = max(imax, other->imax);
-    imin = min(imin, other->imin);
-    return this;
-}
-
-bool
-Interval::intersects(const Interval* other) const
-{
-    return !(other->imin > imax || other->imax < imin);
-}
-
-bool
-Interval::equals(const Interval* other) const
-{
-    return imin == other->imin && imax == other->imax;
-}
 
 } // namespace geos.index.strtree
 } // namespace geos.index

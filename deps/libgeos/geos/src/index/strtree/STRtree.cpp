@@ -29,7 +29,7 @@
 #include <limits>
 #include <geos/util/GEOSException.h>
 
-using namespace std;
+
 using namespace geos::geom;
 
 namespace geos {
@@ -38,7 +38,7 @@ namespace strtree { // geos.index.strtree
 
 
 /*public*/
-STRtree::STRtree(size_t p_nodeCapacity): AbstractSTRtree(p_nodeCapacity)
+STRtree::STRtree(std::size_t p_nodeCapacity): AbstractSTRtree(p_nodeCapacity)
 {
 }
 
@@ -57,14 +57,14 @@ STRtree::createParentBoundables(BoundableList* childBoundables, int newLevel)
 
     std::unique_ptr<BoundableList> sortedChildBoundables(sortBoundablesX(childBoundables));
 
-    std::unique_ptr< vector<BoundableList*> > verticalSlicesV(
-        verticalSlices(sortedChildBoundables.get(), (int)ceil(sqrt((double)minLeafCount)))
+    std::unique_ptr< std::vector<BoundableList*> > verticalSlicesV(
+        verticalSlices(sortedChildBoundables.get(), static_cast<std::size_t>(std::ceil(std::sqrt(static_cast<double>(minLeafCount)))))
     );
 
     std::unique_ptr<BoundableList> ret(
         createParentBoundablesFromVerticalSlices(verticalSlicesV.get(), newLevel)
     );
-    for(size_t i = 0, vssize = verticalSlicesV->size(); i < vssize; ++i) {
+    for(std::size_t i = 0, vssize = verticalSlicesV->size(); i < vssize; ++i) {
         BoundableList* inner = (*verticalSlicesV)[i];
         delete inner;
     }
@@ -79,7 +79,7 @@ STRtree::createParentBoundablesFromVerticalSlices(std::vector<BoundableList*>* p
     assert(!p_verticalSlices->empty());
     std::unique_ptr<BoundableList> parentBoundables(new BoundableList());
 
-    for(size_t i = 0, vssize = p_verticalSlices->size(); i < vssize; ++i) {
+    for(std::size_t i = 0, vssize = p_verticalSlices->size(); i < vssize; ++i) {
         std::unique_ptr<BoundableList> toAdd(
             createParentBoundablesFromVerticalSlice(
                 (*p_verticalSlices)[i], newLevel)
@@ -103,17 +103,17 @@ STRtree::createParentBoundablesFromVerticalSlice(BoundableList* childBoundables,
 
 /*private*/
 std::vector<BoundableList*>*
-STRtree::verticalSlices(BoundableList* childBoundables, size_t sliceCount)
+STRtree::verticalSlices(BoundableList* childBoundables, std::size_t sliceCount)
 {
-    size_t sliceCapacity = (size_t) ceil((double)childBoundables->size() / (double) sliceCount);
-    vector<BoundableList*>* slices = new vector<BoundableList*>(sliceCount);
+    std::size_t sliceCapacity = (std::size_t) ceil((double)childBoundables->size() / (double) sliceCount);
+    std::vector<BoundableList*>* slices = new std::vector<BoundableList*>(sliceCount);
 
-    size_t i = 0, nchilds = childBoundables->size();
+    std::size_t i = 0, nchilds = childBoundables->size();
 
-    for(size_t j = 0; j < sliceCount; j++) {
+    for(std::size_t j = 0; j < sliceCount; j++) {
         (*slices)[j] = new BoundableList();
         (*slices)[j]->reserve(sliceCapacity);
-        size_t boundablesAddedToSlice = 0;
+        std::size_t boundablesAddedToSlice = 0;
         while(i < nchilds && boundablesAddedToSlice < sliceCapacity) {
             Boundable* childBoundable = (*childBoundables)[i];
             ++i;
@@ -156,7 +156,7 @@ STRtree::nearestNeighbour(STRtree* tree, ItemDistance* itemDist)
 std::pair<const void*, const void*>
 STRtree::nearestNeighbour(BoundablePair* initBndPair)
 {
-    return nearestNeighbour(initBndPair, std::numeric_limits<double>::infinity());
+    return nearestNeighbour(initBndPair, DoubleInfinity);
 }
 
 /*public*/
@@ -244,7 +244,7 @@ STRtree::isWithinDistance(STRtree* tree, ItemDistance* itemDist, double maxDista
 /*private*/
 bool STRtree::isWithinDistance(BoundablePair* initBndPair, double maxDistance)
 {
-    double distanceUpperBound = std::numeric_limits<double>::infinity();
+    double distanceUpperBound = DoubleInfinity;
 
     // initialize search queue
     BoundablePair::BoundablePairQueue priQ;
@@ -304,7 +304,7 @@ bool STRtree::isWithinDistance(BoundablePair* initBndPair, double maxDistance)
 class STRAbstractNode: public AbstractNode {
 public:
 
-    STRAbstractNode(int p_level, size_t capacity)
+    STRAbstractNode(int p_level, std::size_t capacity)
         :
         AbstractNode(p_level, capacity)
     {}
@@ -374,7 +374,7 @@ STRtree::insert(const Envelope* itemEnv, void* item)
 // then a is less than c,
 // and so on.
 //
-// For some very low values, this predicate does not fulfill this requiremnet,
+// For some very low values, this predicate does not fulfill this requirement,
 
 // NOTE - strk:
 // It seems that the '<' comparison here gives unstable results.
@@ -384,7 +384,7 @@ STRtree::insert(const Envelope* itemEnv, void* item)
 
 // NOTE - mloskot:
 // This comparison does not answer if a is "lower" than b
-// what is required for sorting. This comparison only answeres
+// what is required for sorting. This comparison only answers
 // if a and b are "almost the same" or different
 
 /*NOTE - cfis

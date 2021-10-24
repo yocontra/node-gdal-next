@@ -20,7 +20,7 @@
 #include <geos/geom/LineSegment.h>
 #include <geos/algorithm/locate/PointOnGeometryLocator.h> // inherited
 #include <geos/index/ItemVisitor.h> // inherited
-#include <geos/index/intervalrtree/SortedPackedIntervalRTree.h> // inherited
+#include <geos/index/strtree/TemplateSTRtree.h>
 
 #include <memory>
 #include <vector> // composition
@@ -54,39 +54,41 @@ namespace locate { // geos::algorithm::locate
  */
 class IndexedPointInAreaLocator : public PointOnGeometryLocator {
 private:
+    struct SegmentView {
+        SegmentView(const geom::Coordinate* p_p0, const geom::Coordinate* p_p1) : m_p0(p_p0) {
+            // All GEOS CoordinateSequences store their coordinates sequentially.
+            // Should that ever change, this assert will fail.
+            (void) p_p1;
+            assert(p_p0 + 1 == p_p1);
+        }
+
+        const geom::Coordinate& p0() const {
+            return *m_p0;
+        }
+
+        const geom::Coordinate& p1() const {
+            return *(m_p0 + 1);
+        }
+
+        const geom::Coordinate* m_p0;
+    };
+
     class IntervalIndexedGeometry {
     private:
-        index::intervalrtree::SortedPackedIntervalRTree index;
-        bool isEmpty;
+
+        index::strtree::TemplateSTRtree<SegmentView, index::strtree::IntervalTraits> index;
 
         void init(const geom::Geometry& g);
         void addLine(const geom::CoordinateSequence* pts);
 
-        // To keep track of LineSegments
-        std::vector< geom::LineSegment > segments;
-
     public:
         IntervalIndexedGeometry(const geom::Geometry& g);
 
-        void query(double min, double max, index::ItemVisitor* visitor);
+        template<typename Visitor>
+        void query(double min, double max, Visitor&& f) {
+            index.query(index::strtree::Interval(min, max), f);
+        }
     };
-
-
-    class SegmentVisitor : public index::ItemVisitor {
-    private:
-        algorithm::RayCrossingCounter* counter;
-
-    public:
-        SegmentVisitor(algorithm::RayCrossingCounter* p_counter)
-            :	counter(p_counter)
-        { }
-
-        ~SegmentVisitor() override
-        { }
-
-        void visitItem(void* item) override;
-    };
-
 
     const geom::Geometry& areaGeom;
     std::unique_ptr<IntervalIndexedGeometry> index;

@@ -78,15 +78,14 @@ public:
      *
      * @return a clone of this instance
      */
-    std::unique_ptr<Geometry>
-    clone() const override
+    std::unique_ptr<Polygon> clone() const
     {
-        return std::unique_ptr<Geometry>(new Polygon(*this));
+        return std::unique_ptr<Polygon>(cloneImpl());
     }
 
     std::unique_ptr<CoordinateSequence> getCoordinates() const override;
 
-    size_t getNumPoints() const override;
+    std::size_t getNumPoints() const override;
 
     /// Returns surface dimension (2)
     Dimension::DimensionType getDimension() const override;
@@ -110,11 +109,31 @@ public:
     /// Returns the exterior ring (shell)
     const LinearRing* getExteriorRing() const;
 
+    /**
+     * \brief
+     * Take ownership of this Polygon's exterior ring.
+     * After releasing the exterior ring, the Polygon should be
+     * considered in a moved-from state and should not be accessed,
+     * except to release the interior rings (if desired.)
+     * @return exterior ring
+     */
+    std::unique_ptr<LinearRing> releaseExteriorRing();
+
     /// Returns number of interior rings (hole)
-    size_t getNumInteriorRing() const;
+    std::size_t getNumInteriorRing() const;
 
     /// Get nth interior ring (hole)
     const LinearRing* getInteriorRingN(std::size_t n) const;
+
+    /**
+     * \brief
+     * Take ownership of this Polygon's interior rings.
+     * After releasing the rings, the Polygon should be
+     * considered in a moved-from state and should not be accessed,
+     * except to release the exterior ring (if desired.)
+     * @return vector of rings (may be empty)
+     */
+    std::vector<std::unique_ptr<LinearRing>> releaseInteriorRings();
 
     std::string getGeometryType() const override;
     GeometryTypeId getGeometryTypeId() const override;
@@ -132,9 +151,7 @@ public:
 
     void normalize() override;
 
-    std::unique_ptr<Geometry> reverse() const override;
-
-    int compareToSameClass(const Geometry* p) const override; //was protected
+    std::unique_ptr<Polygon> reverse() const { return std::unique_ptr<Polygon>(reverseImpl()); }
 
     const Coordinate* getCoordinate() const override;
 
@@ -149,6 +166,8 @@ protected:
 
 
     Polygon(const Polygon& p);
+
+    int compareToSameClass(const Geometry* p) const override;
 
     /**
      * Constructs a <code>Polygon</code> with the given exterior
@@ -177,6 +196,10 @@ protected:
     Polygon(std::unique_ptr<LinearRing> && newShell,
             std::vector<std::unique_ptr<LinearRing>> && newHoles,
             const GeometryFactory& newFactory);
+
+    Polygon* cloneImpl() const override { return new Polygon(*this); }
+
+    Polygon* reverseImpl() const override;
 
     std::unique_ptr<LinearRing> shell;
 

@@ -83,14 +83,26 @@ public:
      *
      * @return A clone of this instance
      */
-    std::unique_ptr<Geometry> clone() const override;
+    std::unique_ptr<LineString> clone() const
+    {
+        return std::unique_ptr<LineString>(cloneImpl());
+    }
 
     std::unique_ptr<CoordinateSequence> getCoordinates() const override;
 
     /// Returns a read-only pointer to internal CoordinateSequence
     const CoordinateSequence* getCoordinatesRO() const;
 
-    virtual const Coordinate& getCoordinateN(size_t n) const;
+    virtual const Coordinate& getCoordinateN(std::size_t n) const;
+
+    /**
+     * \brief
+     * Take ownership of the CoordinateSequence managed by this geometry.
+     * After releasing the coordinates, the geometry should be considered
+     * in a moved-from state and should not be accessed.
+     * @return this Geometry's CoordinateSequence.
+     */
+    std::unique_ptr<CoordinateSequence> releaseCoordinates();
 
     /// Returns line dimension (1)
     Dimension::DimensionType getDimension() const override;
@@ -181,7 +193,7 @@ public:
      *
      * @return a LineString with coordinates in the reverse order
      */
-    std::unique_ptr<Geometry> reverse() const override;
+    std::unique_ptr<LineString> reverse() const { return std::unique_ptr<LineString>(reverseImpl()); }
 
 protected:
 
@@ -195,6 +207,10 @@ protected:
     /// Hopefully cleaner version of the above
     LineString(CoordinateSequence::Ptr && pts,
                const GeometryFactory& newFactory);
+
+    LineString* cloneImpl() const override { return new LineString(*this); }
+
+    LineString* reverseImpl() const override;
 
     Envelope::Ptr computeEnvelopeInternal() const override;
 
@@ -221,13 +237,6 @@ struct GEOS_DLL  LineStringLT {
         return ls1->compareTo(ls2) < 0;
     }
 };
-
-
-inline std::unique_ptr<Geometry>
-LineString::clone() const
-{
-    return std::unique_ptr<Geometry>(new LineString(*this));
-}
 
 } // namespace geos::geom
 } // namespace geos

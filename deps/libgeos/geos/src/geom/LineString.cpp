@@ -41,7 +41,6 @@
 #include <memory>
 #include <cassert>
 
-using namespace std;
 using namespace geos::algorithm;
 
 namespace geos {
@@ -58,18 +57,18 @@ LineString::LineString(const LineString& ls)
     //points=ls.points->clone();
 }
 
-std::unique_ptr<Geometry>
-LineString::reverse() const
+LineString*
+LineString::reverseImpl() const
 {
     if(isEmpty()) {
-        return clone();
+        return clone().release();
     }
 
     assert(points.get());
     auto seq = points->clone();
     CoordinateSequence::reverse(seq.get());
     assert(getFactory());
-    return std::unique_ptr<Geometry>(getFactory()->createLineString(seq.release()));
+    return getFactory()->createLineString(seq.release());
 }
 
 
@@ -123,8 +122,16 @@ LineString::getCoordinatesRO() const
     return points.get();
 }
 
+std::unique_ptr<CoordinateSequence>
+LineString::releaseCoordinates()
+{
+    auto ret = std::move(points);
+    geometryChanged();
+    return ret;
+}
+
 const Coordinate&
-LineString::getCoordinateN(size_t n) const
+LineString::getCoordinateN(std::size_t n) const
 {
     assert(points.get());
     return points->getAt(n);
@@ -158,7 +165,7 @@ LineString::isEmpty() const
     return points->isEmpty();
 }
 
-size_t
+std::size_t
 LineString::getNumPoints() const
 {
     assert(points.get());
@@ -166,7 +173,7 @@ LineString::getNumPoints() const
 }
 
 std::unique_ptr<Point>
-LineString::getPointN(size_t n) const
+LineString::getPointN(std::size_t n) const
 {
     assert(getFactory());
     assert(points.get());
@@ -208,7 +215,7 @@ LineString::isRing() const
     return isClosed() && isSimple();
 }
 
-string
+std::string
 LineString::getGeometryType() const
 {
     return "LineString";
@@ -267,13 +274,12 @@ LineString::equalsExact(const Geometry* other, double tolerance) const
         return false;
     }
 
-    const LineString* otherLineString = dynamic_cast<const LineString*>(other);
-    assert(otherLineString);
-    size_t npts = points->getSize();
+    const LineString* otherLineString = detail::down_cast<const LineString*>(other);
+    std::size_t npts = points->getSize();
     if(npts != otherLineString->points->getSize()) {
         return false;
     }
-    for(size_t i = 0; i < npts; ++i) {
+    for(std::size_t i = 0; i < npts; ++i) {
         if(!equal(points->getAt(i), otherLineString->points->getAt(i), tolerance)) {
             return false;
         }
@@ -357,8 +363,8 @@ LineString::normalize()
 int
 LineString::compareToSameClass(const Geometry* ls) const
 {
-    const LineString* line = dynamic_cast<const LineString*>(ls);
-    assert(line);
+    const LineString* line = detail::down_cast<const LineString*>(ls);
+
     // MD - optimized implementation
     std::size_t mynpts = points->getSize();
     std::size_t othnpts = line->points->getSize();
@@ -409,11 +415,11 @@ LineString::apply_ro(GeometryComponentFilter* filter) const
 void
 LineString::apply_rw(CoordinateSequenceFilter& filter)
 {
-    size_t npts = points->size();
+    std::size_t npts = points->size();
     if(!npts) {
         return;
     }
-    for(size_t i = 0; i < npts; ++i) {
+    for(std::size_t i = 0; i < npts; ++i) {
         filter.filter_rw(*points, i);
         if(filter.isDone()) {
             break;
@@ -427,11 +433,11 @@ LineString::apply_rw(CoordinateSequenceFilter& filter)
 void
 LineString::apply_ro(CoordinateSequenceFilter& filter) const
 {
-    size_t npts = points->size();
+    std::size_t npts = points->size();
     if(!npts) {
         return;
     }
-    for(size_t i = 0; i < npts; ++i) {
+    for(std::size_t i = 0; i < npts; ++i) {
         filter.filter_ro(*points, i);
         if(filter.isDone()) {
             break;

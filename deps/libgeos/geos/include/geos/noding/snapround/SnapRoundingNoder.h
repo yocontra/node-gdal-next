@@ -96,8 +96,6 @@ private:
     */
     void addIntersectionPixels(std::vector<SegmentString*>& segStrings);
 
-    void round(const geom::Coordinate& pt, geom::Coordinate& ptOut);
-
     /**
     * Gets a list of the rounded coordinates.
     * Duplicate (collapsed) coordinates are removed.
@@ -105,7 +103,7 @@ private:
     * @param pts the coordinates to round
     * @return array of rounded coordinates
     */
-    std::unique_ptr<std::vector<geom::Coordinate>> round(const std::vector<geom::Coordinate>& pts);
+    std::vector<geom::Coordinate> round(const std::vector<geom::Coordinate>& pts) const;
 
     /**
     * Computes new segment strings which are rounded and contain
@@ -125,7 +123,7 @@ private:
     * @param ss the segment string to add intersections to
     * @param segIndex the index of the segment
     */
-    void snapSegment(geom::Coordinate& p0, geom::Coordinate& p1, NodedSegmentString* ss, size_t segIndex);
+    void snapSegment(geom::Coordinate& p0, geom::Coordinate& p1, NodedSegmentString* ss, std::size_t segIndex);
 
     /**
     * Add nodes for any vertices in hot pixels that were
@@ -133,7 +131,7 @@ private:
     */
     void addVertexNodeSnaps(NodedSegmentString* ss);
 
-    void snapVertexNode(const geom::Coordinate& p0, NodedSegmentString* ss, size_t segIndex);
+    void snapVertexNode(const geom::Coordinate& p0, NodedSegmentString* ss, std::size_t segIndex);
 
 public:
 

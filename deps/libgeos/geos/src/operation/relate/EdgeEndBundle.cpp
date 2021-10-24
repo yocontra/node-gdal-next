@@ -27,7 +27,7 @@
 
 #include <vector>
 
-using namespace std;
+
 using namespace geos::geomgraph;
 using namespace geos::geom;
 
@@ -45,7 +45,7 @@ EdgeEndBundle::EdgeEndBundle(EdgeEnd* e):
 
 EdgeEndBundle::~EdgeEndBundle()
 {
-    for(size_t i = 0, n = edgeEnds.size(); i < n; i++) {
+    for(std::size_t i = 0, n = edgeEnds.size(); i < n; i++) {
         delete edgeEnds[i];
     }
 }
@@ -53,7 +53,7 @@ EdgeEndBundle::~EdgeEndBundle()
 //Not needed
 //public Iterator iterator() { return edgeEnds.iterator(); }
 
-const vector<EdgeEnd*>&
+const std::vector<EdgeEnd*>&
 EdgeEndBundle::getEdgeEnds()
 {
     return edgeEnds;
@@ -93,7 +93,7 @@ EdgeEndBundle::computeLabel(
         label = Label(Location::NONE);
     }
     // compute the On label, and the side labels if present
-    for(int i = 0; i < 2; i++) {
+    for(uint8_t i = 0; i < 2; i++) {
         computeLabelOn(i, boundaryNodeRule);
         if(isArea) {
             computeLabelSides(i);
@@ -103,7 +103,7 @@ EdgeEndBundle::computeLabel(
 
 
 void
-EdgeEndBundle::computeLabelOn(int geomIndex, const algorithm::BoundaryNodeRule& boundaryNodeRule)
+EdgeEndBundle::computeLabelOn(uint8_t geomIndex, const algorithm::BoundaryNodeRule& boundaryNodeRule)
 {
     // compute the ON location value
     int boundaryCount = 0;
@@ -134,7 +134,7 @@ EdgeEndBundle::computeLabelOn(int geomIndex, const algorithm::BoundaryNodeRule& 
  * Compute the labelling for each side
  */
 void
-EdgeEndBundle::computeLabelSides(int geomIndex)
+EdgeEndBundle::computeLabelSides(uint8_t geomIndex)
 {
     computeLabelSide(geomIndex, Position::LEFT);
     computeLabelSide(geomIndex, Position::RIGHT);
@@ -155,7 +155,7 @@ EdgeEndBundle::computeLabelSides(int geomIndex)
  *  results in the summary label having the Geometry interior on <b>both</b> sides.
  */
 void
-EdgeEndBundle::computeLabelSide(int geomIndex, int side)
+EdgeEndBundle::computeLabelSide(uint8_t geomIndex, uint32_t side)
 {
     for(EdgeEnd* e: edgeEnds) {
         if(e->getLabel().isArea()) {
@@ -177,10 +177,10 @@ EdgeEndBundle::updateIM(IntersectionMatrix& im)
     Edge::updateIM(label, im);
 }
 
-string
+std::string
 EdgeEndBundle::print() const
 {
-    string out = "EdgeEndBundle--> Label: " + label.toString() + "\n";
+    std::string out = "EdgeEndBundle--> Label: " + label.toString() + "\n";
     for(auto& e : edgeEnds) {
         out += e->print();
         out += "\n";

@@ -68,7 +68,7 @@ public:
     }
 
     // see dox in SegmentString.h
-    const geom::Coordinate& getCoordinate(size_t i) const override;
+    const geom::Coordinate& getCoordinate(std::size_t i) const override;
 
     /// @see SegmentString::getCoordinates() const
     geom::CoordinateSequence* getCoordinates() const override;
@@ -86,11 +86,15 @@ public:
      *        Must not be the last index in the vertex list
      * @return the octant of the segment at the vertex
      */
-    int getSegmentOctant(size_t index) const;
+    int getSegmentOctant(std::size_t index) const;
 
 private:
 
     geom::CoordinateSequence* pts;
+
+    // Declare type as noncopyable
+    BasicSegmentString(const BasicSegmentString& other) = delete;
+    BasicSegmentString& operator=(const BasicSegmentString& rhs) = delete;
 
 };
 

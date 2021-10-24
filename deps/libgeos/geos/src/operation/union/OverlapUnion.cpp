@@ -80,11 +80,11 @@ OverlapUnion::overlapEnvelope(const Geometry* geom0, const Geometry* geom1)
 std::unique_ptr<Geometry>
 OverlapUnion::combine(std::unique_ptr<Geometry>& unionGeom, std::vector<std::unique_ptr<Geometry>>& disjointPolys)
 {
-    if (disjointPolys.size() <= 0)
+    if (disjointPolys.empty())
         return std::move(unionGeom);
 
     disjointPolys.push_back(std::move(unionGeom));
-    return GeometryCombiner::combine(disjointPolys);
+    return GeometryCombiner::combine(std::move(disjointPolys));
 }
 
 /* private */
@@ -164,7 +164,7 @@ OverlapUnion::isEqual(std::vector<LineSegment>& segs0, std::vector<LineSegment>&
     std::sort(segs0.begin(), segs0.end(), lineSegmentPtrCmp);
     std::sort(segs1.begin(), segs1.end(), lineSegmentPtrCmp);
 
-    size_t sz = segs0.size();
+    std::size_t sz = segs0.size();
     for (std::size_t i = 0; i < sz; i++) {
         if (segs0[i].p0.x != segs1[i].p0.x ||
             segs0[i].p0.y != segs1[i].p0.y ||
@@ -214,21 +214,21 @@ containsProperly(const Envelope& env, const Coordinate& p0, const Coordinate& p1
     return containsProperly(env, p0) && containsProperly(env, p1);
 }
 
-/* privatef */
+/* private */
 void
 OverlapUnion::extractBorderSegments(const Geometry* geom, const Envelope& penv, std::vector<LineSegment>& psegs)
 {
     class BorderSegmentFilter : public CoordinateSequenceFilter {
 
     private:
-        const Envelope env;
-        std::vector<LineSegment>* segs;
+        const Envelope m_env;
+        std::vector<LineSegment>* m_segs;
 
     public:
 
-        BorderSegmentFilter(const Envelope& penv, std::vector<LineSegment>* psegs)
-            : env(penv),
-              segs(psegs) {};
+        BorderSegmentFilter(const Envelope& env, std::vector<LineSegment>* segs)
+            : m_env(env),
+              m_segs(segs) {};
 
         bool
         isDone() const override { return false; }
@@ -239,14 +239,14 @@ OverlapUnion::extractBorderSegments(const Geometry* geom, const Envelope& penv, 
         void
         filter_ro(const CoordinateSequence& seq, std::size_t i) override
         {
-            if (i <= 0) return;
+            if (i == 0) return;
 
             // extract LineSegment
             const Coordinate& p0 = seq.getAt(i-1);
             const Coordinate& p1 = seq.getAt(i  );
-            bool isBorder = intersects(env, p0, p1) && ! containsProperly(env, p0, p1);
+            bool isBorder = intersects(m_env, p0, p1) && ! containsProperly(m_env, p0, p1);
             if (isBorder) {
-                segs->emplace_back(p0, p1);
+                m_segs->emplace_back(p0, p1);
             }
         };
 

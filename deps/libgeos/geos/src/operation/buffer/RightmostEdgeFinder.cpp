@@ -55,15 +55,15 @@ RightmostEdgeFinder::findEdge(std::vector<DirectedEdge*>* dirEdgeList)
 {
 
 #ifndef NDEBUG
-    size_t checked = 0;
+    std::size_t checked = 0;
 #endif
 
     /*
      * Check all forward DirectedEdges only.  This is still general,
      * because each edge has a forward DirectedEdge.
      */
-    size_t dirEdgeListSize = dirEdgeList->size();
-    for(size_t i = 0; i < dirEdgeListSize; ++i) {
+    std::size_t dirEdgeListSize = dirEdgeList->size();
+    for(std::size_t i = 0; i < dirEdgeListSize; ++i) {
         DirectedEdge* de = (*dirEdgeList)[i];
         assert(de);
         if(!de->isForward()) {
@@ -163,10 +163,10 @@ RightmostEdgeFinder::findRightmostEdgeAtVertex()
 
     // rightmost point expected to be interior vertex of edge
     assert(minIndex > 0);
-    assert((size_t)minIndex < pts->getSize());
+    assert((std::size_t)minIndex < pts->getSize());
 
-    const Coordinate& pPrev = pts->getAt(minIndex - 1);
-    const Coordinate& pNext = pts->getAt(minIndex + 1);
+    const Coordinate& pPrev = pts->getAt(static_cast<std::size_t>(minIndex) - 1);
+    const Coordinate& pNext = pts->getAt(static_cast<std::size_t>(minIndex) + 1);
     int orientation = Orientation::index(
                           minCoord,
                           pNext,
@@ -202,8 +202,8 @@ RightmostEdgeFinder::checkForRightmostCoordinate(DirectedEdge* de)
 
     // only check vertices which are the starting point of
     // a non-horizontal segment
-    size_t n = coord->getSize() - 1;
-    for(size_t i = 0; i < n; i++) {
+    std::size_t n = coord->getSize() - 1;
+    for(std::size_t i = 0; i < n; i++) {
         // only check vertices which are the start or end point
         // of a non-horizontal segment
         // <FIX> MD 19 Sep 03 - NO!  we can test all vertices,
@@ -256,12 +256,14 @@ RightmostEdgeFinder::getRightmostSideOfSegment(DirectedEdge* de, int i)
     }
 
     // indicates edge is parallel to x-axis
-    if(coord->getAt(i).y == coord->getAt(i + 1).y) {
+    const Coordinate& p0 = coord->getAt(static_cast<std::size_t>(i));
+    const Coordinate& p1 = coord->getAt(static_cast<std::size_t>(i) + 1);
+    if(p0.y == p1.y) {
         return -1;
     }
 
     int pos = Position::LEFT;
-    if(coord->getAt(i).y < coord->getAt(i + 1).y) {
+    if(p0.y < p1.y) {
         pos = Position::RIGHT;
     }
     return pos;

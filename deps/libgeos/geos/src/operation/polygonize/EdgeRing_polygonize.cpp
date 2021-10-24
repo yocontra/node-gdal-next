@@ -31,7 +31,6 @@
 #include <geos/algorithm/Orientation.h>
 #include <geos/util/IllegalArgumentException.h>
 #include <geos/util.h> // TODO: drop this, includes too much
-#include <geos/index/strtree/STRtree.h>
 #include <geos/algorithm/locate/IndexedPointInAreaLocator.h>
 #include <geos/geom/Location.h>
 
@@ -41,7 +40,7 @@
 //#define DEBUG_ALLOC 1
 //#define GEOS_PARANOIA_LEVEL 2
 
-using namespace std;
+
 using namespace geos::planargraph;
 using namespace geos::algorithm;
 using namespace geos::geom;
@@ -141,7 +140,7 @@ EdgeRing::EdgeRing(const GeometryFactory* newFactory)
     is_hole(false)
 {
 #ifdef DEBUG_ALLOC
-    cerr << "[" << this << "] EdgeRing(factory)" << endl;
+    std::cerr << "[" << this << "] EdgeRing(factory)" << std::endl;
 #endif // DEBUG_ALLOC
 }
 
@@ -213,7 +212,7 @@ const CoordinateSequence*
 EdgeRing::getCoordinates()
 {
     if(ringPts == nullptr) {
-        ringPts = detail::make_unique<CoordinateArraySequence>(0, 0);
+        ringPts = detail::make_unique<CoordinateArraySequence>(0u, 0u);
         for(const auto& de : deList) {
             auto edge = dynamic_cast<PolygonizeEdge*>(de->getEdge());
             addEdge(edge->getLine()->getCoordinatesRO(),
@@ -248,7 +247,7 @@ EdgeRing::getRingInternal()
         // FIXME: print also ringPts
         std::cerr << "EdgeRing::getRingInternal: "
                   << e.what()
-                  << endl;
+                  << std::endl;
 #endif
         ::geos::ignore_unused_variable_warning(e);
     }

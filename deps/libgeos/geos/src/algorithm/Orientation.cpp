@@ -33,6 +33,7 @@ namespace geos {
 namespace algorithm { // geos.algorithm
 
 /* public static */
+// inlining this method worsened performance slightly
 int
 Orientation::index(const geom::Coordinate& p1, const geom::Coordinate& p2,
                    const geom::Coordinate& q)
@@ -61,12 +62,10 @@ Orientation::isCCW(const geom::CoordinateSequence* ring)
      * Note this relies on the convention that
      * rings have the same start and end point.
      */
-    geom::Coordinate upHiPt;
-    ring->getAt(0, upHiPt);
+    geom::Coordinate upHiPt(ring->getAt(0));
+    geom::Coordinate upLowPt(geom::Coordinate::getNull());
+
     double prevY = upHiPt.y;
-    geom::Coordinate upLowPt;
-    upLowPt.setNull();
-    // const geom::Coordinate& upLowPt = nullptr;
     uint32_t iUpHi = 0;
     for (uint32_t i = 1; i <= nPts; i++) {
         double py = ring->getY(i);
@@ -74,9 +73,9 @@ Orientation::isCCW(const geom::CoordinateSequence* ring)
         * If segment is upwards and endpoint is higher, record it
         */
         if (py > prevY && py >= upHiPt.y) {
-            ring->getAt(i, upHiPt);
             iUpHi = i;
-            ring->getAt(i-1, upLowPt);
+            upHiPt = ring->getAt(i);
+            upLowPt = ring->getAt(i-1);
         }
         prevY = py;
     }
@@ -109,29 +108,29 @@ Orientation::isCCW(const geom::CoordinateSequence* ring)
      *    The ring orientation is given by the direction of the flat segment
      */
     if (upHiPt.equals2D(downHiPt)) {
-      /**
-       * Check for the case where the cap has configuration A-B-A.
-       * This can happen if the ring does not contain 3 distinct points
-       * (including the case where the input array has fewer than 4 elements), or
-       * it contains coincident line segments.
-       */
-      if (upLowPt.equals2D(upHiPt) || downLowPt.equals2D(upHiPt) || upLowPt.equals2D(downLowPt))
-        return false;
+        /**
+        * Check for the case where the cap has configuration A-B-A.
+        * This can happen if the ring does not contain 3 distinct points
+        * (including the case where the input array has fewer than 4 elements), or
+        * it contains coincident line segments.
+        */
+        if (upLowPt.equals2D(upHiPt) || downLowPt.equals2D(upHiPt) || upLowPt.equals2D(downLowPt))
+            return false;
 
-      /**
-       * It can happen that the top segments are coincident.
-       * This is an invalid ring, which cannot be computed correctly.
-       * In this case the orientation is 0, and the result is false.
-       */
-      int orientationIndex = index(upLowPt, upHiPt, downLowPt);
-      return orientationIndex == COUNTERCLOCKWISE;
+        /**
+        * It can happen that the top segments are coincident.
+        * This is an invalid ring, which cannot be computed correctly.
+        * In this case the orientation is 0, and the result is false.
+        */
+        int orientationIndex = index(upLowPt, upHiPt, downLowPt);
+        return orientationIndex == COUNTERCLOCKWISE;
     }
     else {
-      /**
-       * Flat cap - direction of flat top determines orientation
-       */
-      double delX = downHiPt.x - upHiPt.x;
-      return delX < 0;
+        /**
+        * Flat cap - direction of flat top determines orientation
+        */
+        double delX = downHiPt.x - upHiPt.x;
+        return delX < 0;
     }
 }
 
@@ -141,6 +140,8 @@ Orientation::isCCWArea(const geom::CoordinateSequence* ring)
 {
     return algorithm::Area::ofRingSigned(ring) < 0;
 }
+
+
 
 
 } // namespace geos.algorithm

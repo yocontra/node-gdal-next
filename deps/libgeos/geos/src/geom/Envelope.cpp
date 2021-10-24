@@ -36,8 +36,6 @@
 #include <iostream>
 #endif
 
-using namespace std;
-
 namespace geos {
 namespace geom { // geos::geom
 
@@ -57,39 +55,13 @@ Envelope::intersects(const Coordinate& p1, const Coordinate& p2,
 
 /*public*/
 bool
-Envelope::intersects(const Coordinate& p1, const Coordinate& p2,
-                     const Coordinate& q1, const Coordinate& q2)
-{
-    double minq = min(q1.x, q2.x);
-    double maxq = max(q1.x, q2.x);
-    double minp = min(p1.x, p2.x);
-    double maxp = max(p1.x, p2.x);
-    if(minp > maxq) {
-        return false;
-    }
-    if(maxp < minq) {
-        return false;
-    }
-    minq = min(q1.y, q2.y);
-    maxq = max(q1.y, q2.y);
-    minp = min(p1.y, p2.y);
-    maxp = max(p1.y, p2.y);
-    if(minp > maxq) {
-        return false;
-    }
-    if(maxp < minq) {
-        return false;
-    }
-    return true;
-}
-
-/*public*/
-bool
 Envelope::intersects(const Coordinate& a, const Coordinate& b) const
 {
-
+    // These comparisons look redundant, but an alternative using
+    // std::minmax performs no better and compiles down to more
+    // instructions.
     double envminx = (a.x < b.x) ? a.x : b.x;
-    if(envminx > maxx) {
+    if(!(maxx >= envminx)) { // awkward comparison catches cases where this->isNull()
         return false;
     }
 
@@ -112,80 +84,30 @@ Envelope::intersects(const Coordinate& a, const Coordinate& b) const
 }
 
 /*public*/
-Envelope::Envelope(const string& str)
+Envelope::Envelope(const std::string& str)
 {
     // The string should be in the format:
     // Env[7.2:2.3,7.1:8.2]
 
     // extract out the values between the [ and ] characters
-    string::size_type index = str.find("[");
-    string coordString = str.substr(index + 1, str.size() - 1 - 1);
+    std::string::size_type index = str.find('[');
+    std::string coordString = str.substr(index + 1, str.size() - 1 - 1);
 
     // now split apart the string on : and , characters
-    vector<string> values = split(coordString, ":,");
+    std::vector<std::string> values = split(coordString, ":,");
 
-    // create a new envelopet
+    // create a new envelope
     init(strtod(values[0].c_str(), nullptr),
          strtod(values[1].c_str(), nullptr),
          strtod(values[2].c_str(), nullptr),
          strtod(values[3].c_str(), nullptr));
 }
 
-#if 0
-/**
- *  Initialize an <code>Envelope</code> from an existing Envelope.
- *
- *@param  env  the Envelope to initialize from
- */
-void
-Envelope::init(Envelope env)
-{
-    init(env.minx, env.maxx, env.miny, env.maxy);
-}
-#endif // 0
-
-/*public*/
-void
-Envelope::expandToInclude(const Envelope* other)
-{
-    if(other->isNull()) {
-        return;
-    }
-    if(isNull()) {
-        minx = other->getMinX();
-        maxx = other->getMaxX();
-        miny = other->getMinY();
-        maxy = other->getMaxY();
-    }
-    else {
-        if(other->minx < minx) {
-            minx = other->minx;
-        }
-        if(other->maxx > maxx) {
-            maxx = other->maxx;
-        }
-        if(other->miny < miny) {
-            miny = other->miny;
-        }
-        if(other->maxy > maxy) {
-            maxy = other->maxy;
-        }
-    }
-}
-
-void
-Envelope::expandToInclude(const Envelope& other)
-{
-    return expandToInclude(&other);
-}
 
 /*public*/
 bool
 Envelope::covers(double x, double y) const
 {
-    if(isNull()) {
-        return false;
-    }
     return x >= minx &&
            x <= maxx &&
            y >= miny &&
@@ -197,15 +119,11 @@ Envelope::covers(double x, double y) const
 bool
 Envelope::covers(const Envelope& other) const
 {
-    if(isNull() || other.isNull()) {
-        return false;
-    }
-
     return
-        other.getMinX() >= minx &&
-        other.getMaxX() <= maxx &&
-        other.getMinY() >= miny &&
-        other.getMaxY() <= maxy;
+        other.minx >= minx &&
+        other.maxx <= maxx &&
+        other.miny >= miny &&
+        other.maxy <= maxy;
 }
 
 /*public*/
@@ -215,10 +133,10 @@ Envelope::equals(const Envelope* other) const
     if(isNull()) {
         return other->isNull();
     }
-    return  other->getMinX() == minx &&
-            other->getMaxX() == maxx &&
-            other->getMinY() == miny &&
-            other->getMaxY() == maxy;
+    return  other->minx == minx &&
+            other->maxx == maxx &&
+            other->miny == miny &&
+            other->maxy == maxy;
 }
 
 /* public */
@@ -232,10 +150,10 @@ operator<< (std::ostream& os, const Envelope& o)
 
 
 /*public*/
-string
+std::string
 Envelope::toString() const
 {
-    ostringstream s;
+    std::ostringstream s;
     s << *this;
     return s.str();
 }
@@ -244,17 +162,42 @@ Envelope::toString() const
 bool
 operator==(const Envelope& a, const Envelope& b)
 {
-    if(a.isNull()) {
-        return b.isNull();
-    }
-    if(b.isNull()) {
-        return a.isNull();
-    }
-    return a.getMaxX() == b.getMaxX() &&
-           a.getMaxY() == b.getMaxY() &&
-           a.getMinX() == b.getMinX() &&
-           a.getMinY() == b.getMinY();
+    return a.equals(&b);
 }
+
+bool
+operator< (const Envelope& a, const Envelope& b)
+{
+    /*
+    * Compares two envelopes using lexicographic ordering.
+    * The ordering comparison is based on the usual numerical
+    * comparison between the sequence of ordinates.
+    * Null envelopes are less than all non-null envelopes.
+    */
+    if (a.isNull()) {
+        // null == null
+        if (b.isNull())
+            return false;
+        // null < notnull
+        else
+            return true;
+    }
+    // notnull > null
+    if (b.isNull())
+        return false;
+
+    // compare based on numerical ordering of ordinates
+    if (a.getMinX() < b.getMinX()) return true;
+    if (a.getMinX() > b.getMinX()) return false;
+    if (a.getMinY() < b.getMinY()) return true;
+    if (a.getMinY() > b.getMinY()) return false;
+    if (a.getMaxX() < b.getMaxX()) return true;
+    if (a.getMaxX() > b.getMaxX()) return false;
+    if (a.getMaxY() < b.getMaxY()) return true;
+    if (a.getMaxY() > b.getMaxY()) return false;
+    return false; // == is not strictly <
+}
+
 
 /*public*/
 size_t
@@ -263,7 +206,7 @@ Envelope::hashCode() const
     auto hash = std::hash<double>{};
 
     //Algorithm from Effective Java by Joshua Bloch [Jon Aquino]
-    size_t result = 17;
+    std::size_t result = 17;
     result = 37 * result + hash(minx);
     result = 37 * result + hash(maxx);
     result = 37 * result + hash(miny);
@@ -272,16 +215,16 @@ Envelope::hashCode() const
 }
 
 /*public static*/
-vector<string>
-Envelope::split(const string& str, const string& delimiters)
+std::vector<std::string>
+Envelope::split(const std::string& str, const std::string& delimiters)
 {
-    vector<string> tokens;
+    std::vector<std::string> tokens;
 
     // Find first "non-delimiter".
-    string::size_type lastPos = 0;
-    string::size_type pos = str.find_first_of(delimiters, lastPos);
+    std::string::size_type lastPos = 0;
+    std::string::size_type pos = str.find_first_of(delimiters, lastPos);
 
-    while(string::npos != pos || string::npos != lastPos) {
+    while(std::string::npos != pos || std::string::npos != lastPos) {
         // Found a token, add it to the vector.
         tokens.push_back(str.substr(lastPos, pos - lastPos));
 
@@ -339,10 +282,6 @@ Envelope::translate(double transX, double transY)
 void
 Envelope::expandBy(double deltaX, double deltaY)
 {
-    if(isNull()) {
-        return;
-    }
-
     minx -= deltaX;
     maxx += deltaX;
     miny -= deltaY;
@@ -354,21 +293,6 @@ Envelope::expandBy(double deltaX, double deltaY)
     }
 }
 
-/*public*/
-Envelope&
-Envelope::operator=(const Envelope& e)
-{
-#if GEOS_DEBUG
-    std::cerr << "Envelope assignment" << std::endl;
-#endif
-    if(&e != this) {  // is this check useful ?
-        minx = e.minx;
-        maxx = e.maxx;
-        miny = e.miny;
-        maxy = e.maxy;
-    }
-    return *this;
-}
 
 
 } // namespace geos::geom

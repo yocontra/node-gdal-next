@@ -21,6 +21,7 @@
 #include <geos/geom/Position.h>
 #include <geos/geom/Location.h>
 
+#include <algorithm>
 #include <vector>
 #include <sstream>
 #include <iostream>
@@ -40,15 +41,16 @@ void
 TopologyLocation::merge(const TopologyLocation& gl)
 {
     // if the src is an Area label & and the dest is not, increase the dest to be an Area
-    size_t sz = locationSize;
-    size_t glsz = gl.locationSize;
+    std::size_t sz = locationSize;
+    std::size_t glsz = gl.locationSize;
     if(glsz > sz) {
         locationSize = 3;
         location[Position::LEFT] = Location::NONE;
         location[Position::RIGHT] = Location::NONE;
     }
-    for(size_t i = 0; i < locationSize; ++i) {
-        if(location[i] == Location::NONE && i < glsz) {
+    const std::size_t maxIndex = std::min(static_cast<std::size_t>(locationSize), glsz);
+    for(std::size_t i = 0; i < maxIndex; ++i) {
+        if(location[i] == Location::NONE) {
             location[i] = gl.location[i];
         }
     }

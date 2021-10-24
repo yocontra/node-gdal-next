@@ -113,7 +113,7 @@ private:
         const std::vector<geom::Coordinate>& pts)
     {
         geom::Coordinate avg(0, 0);
-        size_t n = pts.size();
+        std::size_t n = pts.size();
         if(! n) {
             return avg;
         }
@@ -140,7 +140,7 @@ private:
     findNearestPoint(const geom::Coordinate& p,
                      const std::vector<geom::Coordinate>& pts) const
     {
-        double minDistSq = std::numeric_limits<double>::max();
+        double minDistSq = DoubleInfinity;
         geom::Coordinate result = geom::Coordinate::getNull();
         for(std::size_t i = 0, n = pts.size(); i < n; ++i) {
             double distSq = p.distanceSquared(pts[i]);

@@ -12,10 +12,12 @@
 				'<!@(python ../glob-files.py "geos/src/*.cpp")',
 				'<!@(python ../glob-files.py "geos/src/*/*.cpp")',
 				'<!@(python ../glob-files.py "geos/src/*/*/*.cpp")',
-				'<!@(python ../glob-files.py "geos/src/*/*/*/*.cpp")'
+				'<!@(python ../glob-files.py "geos/src/*/*/*/*.cpp")',
+				'<!@(python ../glob-files.py "geos/src/deps/*/*.c")'
 			],
 			"include_dirs": [
-				"./arch/common",
+				"./include",
+        "./geos/src/deps",
 				"./geos/include",
 				"./geos/capi"
 			],
@@ -33,7 +35,7 @@
 			],
 			"direct_dependent_settings": {
 				"include_dirs": [
-					"./arch/common",
+					"./include",
 					"./geos/include",
 					"./geos/capi"
 				],

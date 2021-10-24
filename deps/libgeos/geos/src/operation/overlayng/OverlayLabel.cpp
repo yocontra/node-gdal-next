@@ -14,13 +14,17 @@
 
 #include <geos/operation/overlayng/OverlayLabel.h>
 
+#ifndef GEOS_INLINE
+# include "geos/operation/overlayng/OverlayLabel.inl"
+#endif
+
 namespace geos {      // geos
 namespace operation { // geos.operation
 namespace overlayng { // geos.operation.overlayng
 
 /*public*/
 void
-OverlayLabel::initBoundary(int index, Location locLeft, Location locRight, bool p_isHole)
+OverlayLabel::initBoundary(uint8_t index, Location locLeft, Location locRight, bool p_isHole)
 {
     if (index == 0) {
         aDim = DIM_BOUNDARY;
@@ -40,7 +44,7 @@ OverlayLabel::initBoundary(int index, Location locLeft, Location locRight, bool 
 
 /*public*/
 void
-OverlayLabel::initCollapse(int index, bool p_isHole)
+OverlayLabel::initCollapse(uint8_t index, bool p_isHole)
 {
     if (index == 0) {
         aDim = DIM_COLLAPSE;
@@ -54,7 +58,7 @@ OverlayLabel::initCollapse(int index, bool p_isHole)
 
 /*public*/
 void
-OverlayLabel::initLine(int index)
+OverlayLabel::initLine(uint8_t index)
 {
     if (index == 0) {
         aDim = DIM_LINE;
@@ -68,7 +72,7 @@ OverlayLabel::initLine(int index)
 
 /*public*/
 void
-OverlayLabel::initNotPart(int index)
+OverlayLabel::initNotPart(uint8_t index)
 {
     // this assumes locations are initialized to UNKNOWN
     if (index == 0) {
@@ -81,7 +85,7 @@ OverlayLabel::initNotPart(int index)
 
 /*public*/
 void
-OverlayLabel::setLocationLine(int index, Location loc)
+OverlayLabel::setLocationLine(uint8_t index, Location loc)
 {
     if (index == 0) {
         aLocLine = loc;
@@ -93,7 +97,7 @@ OverlayLabel::setLocationLine(int index, Location loc)
 
 /*public*/
 void
-OverlayLabel::setLocationAll(int index, Location loc)
+OverlayLabel::setLocationAll(uint8_t index, Location loc)
 {
     if (index == 0) {
         aLocLine = loc;
@@ -109,7 +113,7 @@ OverlayLabel::setLocationAll(int index, Location loc)
 
 /*public*/
 void
-OverlayLabel::setLocationCollapse(int index)
+OverlayLabel::setLocationCollapse(uint8_t index)
 {
     Location loc = isHole(index) ? Location::INTERIOR : Location::EXTERIOR;
     if (index == 0) {
@@ -120,157 +124,6 @@ OverlayLabel::setLocationCollapse(int index)
     }
 }
 
-/*public*/
-bool
-OverlayLabel::isLine() const
-{
-    return aDim == DIM_LINE || bDim == DIM_LINE;
-}
-
-/*public*/
-bool
-OverlayLabel::isLine(int index) const
-{
-    return index == 0 ? aDim == DIM_LINE : bDim == DIM_LINE;
-}
-
-/*public*/
-bool
-OverlayLabel::isLinear(int index) const
-{
-    if (index == 0) {
-        return aDim == DIM_LINE || aDim == DIM_COLLAPSE;
-    }
-    return bDim == DIM_LINE || bDim == DIM_COLLAPSE;
-}
-
-/*public*/
-bool
-OverlayLabel::isKnown(int index) const
-{
-    if (index == 0) {
-        return aDim != DIM_UNKNOWN;
-    }
-    return bDim != DIM_UNKNOWN;
-}
-
-/*public*/
-bool
-OverlayLabel::isNotPart(int index) const
-{
-    if (index == 0) {
-        return aDim == DIM_NOT_PART;
-    }
-    return bDim == DIM_NOT_PART;
-}
-
-/*public*/
-bool
-OverlayLabel::isBoundaryEither() const
-{
-    return aDim == DIM_BOUNDARY || bDim == DIM_BOUNDARY;
-}
-
-/*public*/
-bool
-OverlayLabel::isBoundaryBoth() const
-{
-    return aDim == DIM_BOUNDARY && bDim == DIM_BOUNDARY;
-}
-
-/*public*/
-bool
-OverlayLabel::isBoundaryCollapse() const
-{
-    if (isLine()) return false;
-    return ! isBoundaryBoth();
-}
-
-/*public*/
-bool
-OverlayLabel::isBoundaryTouch() const
-{
-    return isBoundaryBoth() &&
-        getLocation(0, Position::RIGHT, true) != getLocation(1, Position::RIGHT, true);
-}
-
-/*public*/
-bool
-OverlayLabel::isBoundary(int index) const
-{
-    if (index == 0) {
-        return aDim == DIM_BOUNDARY;
-    }
-    return bDim == DIM_BOUNDARY;
-}
-
-/*public*/
-bool
-OverlayLabel::isBoundarySingleton() const
-{
-    if (aDim == DIM_BOUNDARY && bDim == DIM_NOT_PART) {
-        return true;
-    }
-
-    if (bDim == DIM_BOUNDARY && aDim == DIM_NOT_PART) {
-        return true;
-    }
-
-    return false;
-}
-
-/*public*/
-bool
-OverlayLabel::isLineLocationUnknown(int index) const
-{
-    if (index == 0) {
-        return aLocLine == LOC_UNKNOWN;
-    }
-    else {
-        return bLocLine == LOC_UNKNOWN;
-    }
-}
-
-/*public*/
-bool
-OverlayLabel::isLineInArea(int index) const
-{
-    if (index == 0) {
-        return aLocLine == Location::INTERIOR;
-    }
-    return bLocLine == Location::INTERIOR;
-}
-
-/*public*/
-bool
-OverlayLabel::isHole(int index) const
-{
-    if (index == 0) {
-        return aIsHole;
-    }
-    else {
-        return bIsHole;
-    }
-}
-
-/*public*/
-bool
-OverlayLabel::isCollapse(int index) const
-{
-    return dimension(index) == DIM_COLLAPSE;
-}
-
-/*public*/
-bool
-OverlayLabel::isInteriorCollapse() const
-{
-    if (aDim == DIM_COLLAPSE && aLocLine == Location::INTERIOR)
-        return true;
-    if (bDim == DIM_COLLAPSE && bLocLine == Location::INTERIOR)
-        return true;
-
-    return false;
-}
 
 /*public*/
 bool
@@ -291,29 +144,7 @@ OverlayLabel::isCollapseAndNotPartInterior() const
 
 /*public*/
 Location
-OverlayLabel::getLineLocation(int index) const
-{
-    if (index == 0) {
-        return aLocLine;
-    }
-    else {
-        return bLocLine;
-    }
-}
-
-/*public*/
-bool
-OverlayLabel::isLineInterior(int index) const
-{
-    if (index == 0) {
-        return aLocLine == Location::INTERIOR;
-    }
-    return bLocLine == Location::INTERIOR;
-}
-
-/*public*/
-Location
-OverlayLabel::getLocation(int index, int position, bool isForward) const
+OverlayLabel::getLocation(uint8_t index, int position, bool isForward) const
 {
     if (index == 0) {
         switch (position) {
@@ -337,47 +168,6 @@ OverlayLabel::getLocation(int index, int position, bool isForward) const
 
     return LOC_UNKNOWN;
 }
-
-
-/*public*/
-Location
-OverlayLabel::getLocationBoundaryOrLine(int index, int pos, bool isForward) const
-{
-    if (isBoundary(index)) {
-        return getLocation(index, pos, isForward);
-    }
-    return getLineLocation(index);
-}
-
-
-/*public*/
-Location
-OverlayLabel::getLocation(int index) const {
-    if (index == 0) {
-        return aLocLine;
-    }
-    return bLocLine;
-}
-
-/*public*/
-bool
-OverlayLabel::hasSides(int index) const {
-    if (index == 0) {
-        return aLocLeft != LOC_UNKNOWN
-            || aLocRight != LOC_UNKNOWN;
-    }
-    return bLocLeft != LOC_UNKNOWN
-        || bLocRight != LOC_UNKNOWN;
-}
-
-/*public*/
-OverlayLabel
-OverlayLabel::copy() const
-{
-    OverlayLabel lbl = *this;
-    return lbl;
-}
-
 
 /*private*/
 std::string
@@ -411,7 +201,7 @@ OverlayLabel::toString(bool isForward, std::ostream& os) const
 
 /*private*/
 void
-OverlayLabel::locationString(int index, bool isForward, std::ostream& os) const
+OverlayLabel::locationString(uint8_t index, bool isForward, std::ostream& os) const
 {
     if (isBoundary(index)) {
         os << getLocation(index, Position::LEFT, isForward);

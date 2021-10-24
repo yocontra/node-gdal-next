@@ -105,7 +105,8 @@ public:
         intersectionAdder(nullptr),
         workingNoder(nullptr),
         geomFact(nullptr),
-        edgeList()
+        edgeList(),
+        isInvertOrientation(false)
     {}
 
     ~BufferBuilder();
@@ -140,8 +141,22 @@ public:
         workingNoder = newNoder;
     }
 
-    geom::Geometry* buffer(const geom::Geometry* g, double distance);
-    // throw (GEOSException);
+    /**
+    * Sets whether the offset curve is generated
+    * using the inverted orientation of input rings.
+    * This allows generating a buffer(0) polygon from the smaller lobes
+    * of self-crossing rings.
+    *
+    * @param p_isInvertOrientation true if input ring orientation should be inverted
+    */
+    void
+    setInvertOrientation(bool p_isInvertOrientation)
+    {
+        isInvertOrientation = p_isInvertOrientation;
+    }
+
+
+    std::unique_ptr<geom::Geometry> buffer(const geom::Geometry* g, double distance);
 
     /**
      * Generates offset curve for linear geometry.
@@ -161,9 +176,9 @@ public:
      *
      * @note Not in JTS: this is a GEOS extension
      */
-    geom::Geometry* bufferLineSingleSided(const geom::Geometry* g,
-                                          double distance, bool leftSide) ;
-    // throw (GEOSException);
+    std::unique_ptr<geom::Geometry> bufferLineSingleSided(
+        const geom::Geometry* g,
+        double distance, bool leftSide);
 
 private:
 
@@ -188,6 +203,8 @@ private:
 
     std::vector<geomgraph::Label*> newLabels;
 
+    bool isInvertOrientation;
+
     void computeNodedEdges(std::vector<noding::SegmentString*>& bufSegStr,
                            const geom::PrecisionModel* precisionModel);
     // throw(GEOSException);
@@ -198,7 +215,7 @@ private:
      * If so, the edge is not inserted, but its label is merged
      * with the existing edge.
      *
-     * The function takes responsability of releasing the Edge parameter
+     * The function takes responsibility of releasing the Edge parameter
      * memory when appropriate.
      */
     void insertUniqueEdge(geomgraph::Edge* e);
@@ -237,7 +254,7 @@ private:
      *
      * @return the empty result geometry, transferring ownership to caller.
      */
-    geom::Geometry* createEmptyResultGeometry() const;
+    std::unique_ptr<geom::Geometry> createEmptyResultGeometry() const;
 
     // Declare type as noncopyable
     BufferBuilder(const BufferBuilder& other) = delete;

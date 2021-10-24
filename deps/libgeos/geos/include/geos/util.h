@@ -59,7 +59,7 @@ struct _Unique_if<T[]> {
     typedef std::unique_ptr<T[]> _Unknown_bound;
 };
 
-template<class T, size_t N>
+template<class T, std::size_t N>
 struct _Unique_if<T[N]> {
     typedef void _Known_bound;
 };
@@ -72,7 +72,7 @@ make_unique(Args &&... args) {
 
 template<class T>
 typename _Unique_if<T>::_Unknown_bound
-make_unique(size_t n) {
+make_unique(std::size_t n) {
     typedef typename std::remove_extent<T>::type U;
     return std::unique_ptr<T>(new U[n]());
 }
@@ -103,6 +103,17 @@ template<typename To, typename From> inline To down_cast(From* f)
 #endif
     return static_cast<To>(f);
 }
+
+// Avoid "redundant move" warning when calling std::move() to return
+// unique_ptr<Derived> from a function with return type unique_ptr<Base>
+// The std::move is required for the gcc 4.9 series, which has not addressed
+// CWG defect 1579 ("return by converting move constructor")
+// http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#1579
+#if __GNUC__ > 0 && __GNUC__ < 5
+#define RETURN_UNIQUE_PTR(x) (std::move(x))
+#else
+#define RETURN_UNIQUE_PTR(x) (x)
+#endif
 
 } // namespace detail
 } // namespace geos

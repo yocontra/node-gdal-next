@@ -39,9 +39,9 @@ namespace algorithm { // geos::algorithm
 class GEOS_DLL Angle {
 public:
 
-    static const double PI_TIMES_2; // 2.0 * PI;
-    static const double PI_OVER_2; // PI / 2.0;
-    static const double PI_OVER_4; // PI / 4.0;
+    static constexpr double PI_TIMES_2 = 2.0 * MATH_PI;
+    static constexpr double PI_OVER_2 = MATH_PI / 2.0;
+    static constexpr double PI_OVER_4 = MATH_PI / 4.0;
 
     /// Constant representing counterclockwise orientation
     static const int COUNTERCLOCKWISE = Orientation::COUNTERCLOCKWISE;
@@ -93,7 +93,7 @@ public:
     ///
     /// An angle is acute if it is less than 90 degrees.
     ///
-    /// Note: this implementation is not precise (determistic) for
+    /// Note: this implementation is not precise (deterministic) for
     ///       angles very close to 90 degrees.
     ///
     /// @param p0 an endpoint of the angle
@@ -108,7 +108,7 @@ public:
     ///
     /// An angle is obtuse if it is greater than 90 degrees.
     ///
-    /// Note: this implementation is not precise (determistic) for
+    /// Note: this implementation is not precise (deterministic) for
     ///       angles very close to 90 degrees.
     ///
     /// @param p0 an endpoint of the angle

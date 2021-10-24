@@ -21,6 +21,7 @@
 
 #include <typeinfo>
 #include <cassert>
+#include <limits>
 
 using namespace geos::geom;
 
@@ -30,7 +31,7 @@ namespace distance { // geos.algorithm.distance
 
 void
 DiscreteHausdorffDistance::MaxDensifiedByFractionDistanceFilter::filter_ro(
-    const geom::CoordinateSequence& seq, size_t index)
+    const geom::CoordinateSequence& seq, std::size_t index)
 {
     /*
      * This logic also handles skipping Point geometries
@@ -45,7 +46,7 @@ DiscreteHausdorffDistance::MaxDensifiedByFractionDistanceFilter::filter_ro(
     double delx = (p1.x - p0.x) / static_cast<double>(numSubSegs);
     double dely = (p1.y - p0.y) / static_cast<double>(numSubSegs);
 
-    for(size_t i = 0; i < numSubSegs; ++i) {
+    for(std::size_t i = 0; i < numSubSegs; ++i) {
         double x = p0.x + static_cast<double>(i) * delx;
         double y = p0.y + static_cast<double>(i) * dely;
         Coordinate pt(x, y);
@@ -74,6 +75,23 @@ DiscreteHausdorffDistance::distance(const geom::Geometry& g0,
     DiscreteHausdorffDistance dist(g0, g1);
     dist.setDensifyFraction(densifyFrac);
     return dist.distance();
+}
+
+/* public */
+
+void DiscreteHausdorffDistance::setDensifyFraction(double dFrac)
+{
+    // !(dFrac > 0) written that way to catch NaN
+    // and test on 1.0/dFrac to avoid a potential later undefined behaviour
+    // when casting to std::size_t
+    if(dFrac > 1.0 || !(dFrac > 0.0) ||
+       util::round(1.0 / dFrac) >
+           static_cast<double>(std::numeric_limits<std::size_t>::max())) {
+        throw util::IllegalArgumentException(
+            "Fraction is not in range (0.0 - 1.0]");
+    }
+
+    densifyFrac = dFrac;
 }
 
 /* private */

@@ -18,12 +18,13 @@
  **********************************************************************/
 
 #include <geos/io/StringTokenizer.h>
+#include <geos/constants.h>
 
 #include <string>
 #include <cstdlib>
 #include <limits>
 
-using namespace std;
+using std::string;
 
 namespace geos {
 namespace io { // geos.io
@@ -58,15 +59,15 @@ strtod_with_vc_fix(const char* str, char** str_end)
 
         if(stricmp(pos, "inf") == 0) {
             if(!sign || sign == '+') {
-                dbl = std::numeric_limits<double>::infinity();
+                dbl = DoubleInfinity;
             }
             else {
-                dbl = -(std::numeric_limits<double>::infinity)();
+                dbl = DoubleNegInfinity;
             }
             *str_end[0] = '\0';
         }
         else if(stricmp(pos, "nan") == 0) {
-            dbl = std::numeric_limits<double>::quiet_NaN();
+            dbl = DoubleNotANumber;
             *str_end[0] = '\0';
         }
     }
@@ -92,17 +93,17 @@ StringTokenizer::nextToken()
     case '\t':
     case ' ':
         string::size_type pos = str.find_first_not_of(" \n\r\t",
-                                iter - str.begin());
+                                static_cast<string::size_type>(iter - str.begin()));
         if(pos == string::npos) {
             return StringTokenizer::TT_EOF;
         }
         else {
-            iter = str.begin() + pos;
+            iter = str.begin() + static_cast<string::difference_type>(pos);
             return nextToken();
         }
     }
     string::size_type pos = str.find_first_of("\n\r\t() ,",
-                            iter - str.begin());
+                            static_cast<string::size_type>(iter - str.begin()));
     if(pos == string::npos) {
         if(iter != str.end()) {
             tok.assign(iter, str.end());
@@ -113,8 +114,8 @@ StringTokenizer::nextToken()
         }
     }
     else {
-        tok.assign(iter, str.begin() + pos);
-        iter = str.begin() + pos;
+        tok.assign(iter, str.begin() + static_cast<string::difference_type>(pos));
+        iter = str.begin() + static_cast<string::difference_type>(pos);
     }
     char* stopstring;
     double dbl = strtod_with_vc_fix(tok.c_str(), &stopstring);
@@ -141,7 +142,7 @@ StringTokenizer::peekNextToken()
         return StringTokenizer::TT_EOF;
     }
 
-    pos = str.find_first_not_of(" \r\n\t", iter - str.begin());
+    pos = str.find_first_not_of(" \r\n\t", static_cast<string::size_type>(iter - str.begin()));
 
     if(pos == string::npos) {
         return StringTokenizer::TT_EOF;
@@ -156,7 +157,7 @@ StringTokenizer::peekNextToken()
     // It's either a Number or a Word, let's
     // see when it ends
 
-    pos = str.find_first_of("\n\r\t() ,", iter - str.begin());
+    pos = str.find_first_of("\n\r\t() ,", static_cast<string::size_type>(iter - str.begin()));
 
     if(pos == string::npos) {
         if(iter != str.end()) {
@@ -167,7 +168,7 @@ StringTokenizer::peekNextToken()
         }
     }
     else {
-        tok.assign(iter, str.begin() + pos); //str.end());
+        tok.assign(iter, str.begin() + static_cast<string::difference_type>(pos)); //str.end());
     }
 
     char* stopstring;
@@ -186,14 +187,14 @@ StringTokenizer::peekNextToken()
 
 /*public*/
 double
-StringTokenizer::getNVal()
+StringTokenizer::getNVal() const
 {
     return ntok;
 }
 
 /*public*/
 string
-StringTokenizer::getSVal()
+StringTokenizer::getSVal() const
 {
     return stok;
 }

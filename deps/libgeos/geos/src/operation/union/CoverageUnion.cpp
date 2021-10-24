@@ -44,7 +44,7 @@ void CoverageUnion::extractSegments(const Geometry* geom) {
             throw geos::util::IllegalArgumentException("Unhandled geometry type in CoverageUnion.");
         }
 
-        for (size_t i = 0; i < gc->getNumGeometries(); i++) {
+        for (std::size_t i = 0; i < gc->getNumGeometries(); i++) {
             extractSegments(gc->getGeometryN(i));
         }
     }
@@ -54,7 +54,7 @@ void CoverageUnion::extractSegments(const Polygon* p) {
     const LineString* ring = p->getExteriorRing();
 
     extractSegments(ring);
-    for (size_t i = 0; i < p->getNumInteriorRing(); i++) {
+    for (std::size_t i = 0; i < p->getNumInteriorRing(); i++) {
         extractSegments(p->getInteriorRingN(i));
     }
 }
@@ -65,7 +65,7 @@ void CoverageUnion::extractSegments(const LineString* ls) {
     if (coords->isEmpty())
         return;
 
-    for (size_t i = 1; i < coords->size(); i++) {
+    for (std::size_t i = 1; i < coords->size(); i++) {
         LineSegment segment{coords->getAt(i), coords->getAt(i-1)};
         segment.normalize();
 
@@ -80,14 +80,13 @@ std::unique_ptr<Geometry> CoverageUnion::polygonize(const GeometryFactory* gf) {
 
     // Create a vector to manage the lifecycle of a geometry corresponding to each line segment.
     // Polygonizer needs these to stay alive until it does its work.
-    std::unique_ptr<std::vector<std::unique_ptr<Geometry>>> segment_geoms;
-    segment_geoms.reset(new std::vector<std::unique_ptr<Geometry>>());
-    segment_geoms->reserve(segments.size());
+    std::vector<std::unique_ptr<Geometry>> segment_geoms;
+    segment_geoms.reserve(segments.size());
 
     for (const LineSegment& segment : segments) {
         auto seg_geom = segment.toGeometry(*gf);
         p.add(static_cast<Geometry*>(seg_geom.get()));
-        segment_geoms->emplace_back(std::move(seg_geom));
+        segment_geoms.emplace_back(std::move(seg_geom));
     }
 
     if (!p.allInputsFormPolygons()) {
@@ -95,8 +94,6 @@ std::unique_ptr<Geometry> CoverageUnion::polygonize(const GeometryFactory* gf) {
     }
 
     auto polygons = p.getPolygons();
-    segment_geoms.reset();
-
     if (polygons.size() == 1) {
         return std::move(polygons[0]);
     }

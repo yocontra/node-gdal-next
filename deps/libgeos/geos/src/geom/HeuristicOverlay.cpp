@@ -51,7 +51,7 @@
 #include <geos/operation/overlayng/OverlayNGRobust.h>
 
 #include <geos/simplify/TopologyPreservingSimplifier.h>
-#include <geos/operation/IsSimpleOp.h>
+#include <geos/operation/valid/IsSimpleOp.h>
 #include <geos/operation/valid/IsValidOp.h>
 #include <geos/operation/valid/TopologyValidationError.h>
 #include <geos/util/TopologyException.h>
@@ -74,7 +74,7 @@
 #define GEOS_DEBUG_HEURISTICOVERLAY_PRINT_INVALID 0
 
 
-#ifdef GEOS_DEBUG_HEURISTICOVERLAY
+#if GEOS_DEBUG_HEURISTICOVERLAY
 # include <iostream>
 # include <iomanip>
 # include <sstream>
@@ -187,7 +187,7 @@ check_valid(const Geometry& g, const std::string& label, bool doThrow = false, b
 {
     if(g.isLineal()) {
         if(! validOnly) {
-            operation::IsSimpleOp sop(g, algorithm::BoundaryNodeRule::getBoundaryEndPoint());
+            operation::valid::IsSimpleOp sop(g, algorithm::BoundaryNodeRule::getBoundaryEndPoint());
             if(! sop.isSimple()) {
                 if(doThrow) {
                     throw geos::util::TopologyException(
@@ -201,14 +201,14 @@ check_valid(const Geometry& g, const std::string& label, bool doThrow = false, b
         operation::valid::IsValidOp ivo(&g);
         if(! ivo.isValid()) {
             using operation::valid::TopologyValidationError;
-            TopologyValidationError* err = ivo.getValidationError();
-#ifdef GEOS_DEBUG_HEURISTICOVERLAY
+            const TopologyValidationError* err = ivo.getValidationError();
+#if GEOS_DEBUG_HEURISTICOVERLAY
             std::cerr << label << " is INVALID: "
                       << err->toString()
                       << " (" << std::setprecision(20)
                       << err->getCoordinate() << ")"
                       << std::endl
-#ifdef GEOS_DEBUG_HEURISTICOVERLAY_PRINT_INVALID
+#if GEOS_DEBUG_HEURISTICOVERLAY_PRINT_INVALID
                       << "<A>" << std::endl
                       << g.toString()
                       << std::endl
@@ -237,7 +237,7 @@ inline std::unique_ptr<Geometry>
 fix_self_intersections(std::unique_ptr<Geometry> g, const std::string& label)
 {
     ::geos::ignore_unused_variable_warning(label);
-#ifdef GEOS_DEBUG_HEURISTICOVERLAY
+#if GEOS_DEBUG_HEURISTICOVERLAY
     std::cerr << label << " fix_self_intersection (UnaryUnion)" << std::endl;
 #endif
 
@@ -258,22 +258,22 @@ fix_self_intersections(std::unique_ptr<Geometry> g, const std::string& label)
     // Not all invalidities can be fixed by this code
 
     using operation::valid::TopologyValidationError;
-    TopologyValidationError* err = ivo.getValidationError();
+    const TopologyValidationError* err = ivo.getValidationError();
     switch(err->getErrorType()) {
     case TopologyValidationError::eRingSelfIntersection:
     case TopologyValidationError::eTooFewPoints: // collapsed lines
-#ifdef GEOS_DEBUG_HEURISTICOVERLAY
+#if GEOS_DEBUG_HEURISTICOVERLAY
         std::cerr << label << " ATTEMPT_TO_FIX: " << err->getErrorType() << ": " << *g << std::endl;
 #endif
         g = g->Union();
-#ifdef GEOS_DEBUG_HEURISTICOVERLAY
+#if GEOS_DEBUG_HEURISTICOVERLAY
         std::cerr << label << " ATTEMPT_TO_FIX succeeded.. " << std::endl;
 #endif
         return g;
     case TopologyValidationError::eSelfIntersection:
     // this one is within a single component, won't be fixed
     default:
-#ifdef GEOS_DEBUG_HEURISTICOVERLAY
+#if GEOS_DEBUG_HEURISTICOVERLAY
         std::cerr << label << " invalidity is: " << err->getErrorType() << std::endl;
 #endif
         return g;
@@ -381,7 +381,7 @@ HeuristicOverlay(const Geometry* g0, const Geometry* g1, int opCode)
 *    other nodes and lines, leaving all the rest undisturbed, for a very
 *    clean result, if it manages to create one.
 *    If a result is found with no exception, return.
-* 3. Peform overlay operation using a PrecisionModel(scale), which
+* 3. Perform overlay operation using a PrecisionModel(scale), which
 *    uses a SnapRoundingNoder. Every vertex will be noded to the snapping
 *    grid, resulting in a modified geometry. The SnapRoundingNoder approach
 *    reliably produces results, assuming valid inputs.
@@ -634,8 +634,9 @@ HeuristicOverlay(const Geometry* g0, const Geometry* g1, int opCode)
                 std::cerr << "Reduced with scale (" << scale << "): "
                           << ex.what() << std::endl;
 #endif
+                (void)ex; // quiet compiler warning about unused variable
                 if(scale == 1) {
-                    throw ex;
+                    throw;
                 }
             }
 
@@ -747,7 +748,7 @@ HeuristicOverlay(const Geometry* g0, const Geometry* g1, int opCode)
             }
             catch(const geos::util::TopologyException& ex) {
                 if(tol >= maxTolerance) {
-                    throw ex;
+                    throw;
                 }
 #if GEOS_DEBUG_HEURISTICOVERLAY
                 std::cerr << "Simplified with tolerance (" << tol << "): "

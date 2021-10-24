@@ -56,7 +56,6 @@ private:
     OverlayEdge* startEdge;
     std::unique_ptr<LinearRing> ring;
     bool m_isHole;
-    CoordinateArraySequence ringPts;
     std::unique_ptr<IndexedPointInAreaLocator> locator;
     OverlayEdgeRing* shell;
     // a list of EdgeRings which are holes in this EdgeRing
@@ -64,7 +63,7 @@ private:
 
     // Methods
     void computeRingPts(OverlayEdge* start, CoordinateArraySequence& pts);
-    void computeRing(const CoordinateArraySequence& ringPts, const GeometryFactory* geometryFactory);
+    void computeRing(std::unique_ptr<CoordinateArraySequence> && ringPts, const GeometryFactory* geometryFactory);
 
     /**
     * Computes the list of coordinates which are contained in this ring.
@@ -73,7 +72,7 @@ private:
     */
     const CoordinateArraySequence& getCoordinates();
     PointOnGeometryLocator* getLocator();
-    void closeRing(CoordinateArraySequence& pts);
+    static void closeRing(CoordinateArraySequence& pts);
 
 
 public:
@@ -142,7 +141,7 @@ public:
     * @return containing EdgeRing, if there is one
     * or null if no containing EdgeRing is found
     */
-    OverlayEdgeRing* findEdgeRingContaining(std::vector<OverlayEdgeRing*>& erList);
+    OverlayEdgeRing* findEdgeRingContaining(const std::vector<OverlayEdgeRing*>& erList);
 
 
 };

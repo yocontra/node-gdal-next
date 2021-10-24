@@ -21,7 +21,6 @@
 #include <algorithm> // for copy
 
 #include <geos/operation/union/UnaryUnionOp.h>
-#include <geos/operation/union/CascadedUnion.h>
 #include <geos/operation/union/CascadedPolygonUnion.h>
 #include <geos/operation/union/PointGeometryUnion.h>
 #include <geos/geom/Coordinate.h>
@@ -74,7 +73,7 @@ UnaryUnionOp::Union()
 
     /*
      * For points and lines, only a single union operation is
-     * required, since the OGC model allowings self-intersecting
+     * required, since the OGC model allows self-intersecting
      * MultiPoint and MultiLineStrings.
      * This is not the case for polygons, so Cascaded Union is required.
      */
@@ -88,31 +87,13 @@ UnaryUnionOp::Union()
 
     GeomPtr unionLines;
     if(!lines.empty()) {
-        /* JTS compatibility NOTE:
-         * we use cascaded here for robustness [1]
-         * but also add a final unionNoOpt step to deal with
-         * self-intersecting lines [2]
-         *
-         * [1](http://trac.osgeo.org/geos/ticket/392
-         * [2](http://trac.osgeo.org/geos/ticket/482
-         *
-         */
-        try {
-            auto combinedLines = geomFact->buildGeometry(lines.begin(), lines.end());
-            unionLines = unionNoOpt(*combinedLines);
-        } catch (geos::util::TopologyException &) {
-            unionLines.reset(CascadedUnion::Union(lines.begin(),
-                                                  lines.end()));
-            if(unionLines.get()) {
-                unionLines = unionNoOpt(*unionLines);
-            }
-        }
+        auto combinedLines = geomFact->buildGeometry(lines.begin(), lines.end());
+        unionLines = unionNoOpt(*combinedLines);
     }
 
     GeomPtr unionPolygons;
     if(!polygons.empty()) {
-        unionPolygons.reset(CascadedPolygonUnion::Union(polygons.begin(),
-                            polygons.end(), unionFunction));
+        unionPolygons = CascadedPolygonUnion::Union(polygons.begin(), polygons.end(), unionFunction);
     }
 
     /*

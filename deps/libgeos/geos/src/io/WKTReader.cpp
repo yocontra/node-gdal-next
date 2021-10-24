@@ -53,14 +53,14 @@
 #include <geos/io/WKTReader.inl>
 #endif
 
-using namespace std;
+
 using namespace geos::geom;
 
 namespace geos {
 namespace io { // geos.io
 
 std::unique_ptr<Geometry>
-WKTReader::read(const string& wellKnownText)
+WKTReader::read(const std::string& wellKnownText) const
 {
     CLocalizer clocale;
     StringTokenizer tokenizer(wellKnownText);
@@ -68,17 +68,17 @@ WKTReader::read(const string& wellKnownText)
 }
 
 std::unique_ptr<CoordinateSequence>
-WKTReader::getCoordinates(StringTokenizer* tokenizer)
+WKTReader::getCoordinates(StringTokenizer* tokenizer) const
 {
-    size_t dim = 2;
-    string nextToken = getNextEmptyOrOpener(tokenizer, dim);
+    std::size_t dim = 2;
+    std::string nextToken = getNextEmptyOrOpener(tokenizer, dim);
     if(nextToken == "EMPTY") {
         return geometryFactory->getCoordinateSequenceFactory()->create(std::size_t(0), dim);
     }
 
     Coordinate coord;
     getPreciseCoordinate(tokenizer, coord, dim);
-    auto coordinates = detail::make_unique<CoordinateArraySequence>(0, dim);
+    auto coordinates = detail::make_unique<CoordinateArraySequence>(0u, dim);
     coordinates->add(coord);
 
     nextToken = getNextCloserOrComma(tokenizer);
@@ -88,14 +88,14 @@ WKTReader::getCoordinates(StringTokenizer* tokenizer)
         nextToken = getNextCloserOrComma(tokenizer);
     }
 
-    return std::move(coordinates);
+    return RETURN_UNIQUE_PTR(coordinates);
 }
 
 
 void
 WKTReader::getPreciseCoordinate(StringTokenizer* tokenizer,
                                 Coordinate& coord,
-                                size_t& dim)
+                                size_t& dim) const
 {
     coord.x = getNextNumber(tokenizer);
     coord.y = getNextNumber(tokenizer);
@@ -146,10 +146,10 @@ WKTReader::getNextNumber(StringTokenizer* tokenizer)
     return 0;
 }
 
-string
+std::string
 WKTReader::getNextEmptyOrOpener(StringTokenizer* tokenizer, std::size_t& dim)
 {
-    string nextWord = getNextWord(tokenizer);
+    std::string nextWord = getNextWord(tokenizer);
 
     // Skip the Z, M or ZM of an SF1.2 3/4 dim coordinate.
     if(nextWord == "Z" || nextWord == "ZM") {
@@ -167,27 +167,27 @@ WKTReader::getNextEmptyOrOpener(StringTokenizer* tokenizer, std::size_t& dim)
     throw  ParseException("Expected 'Z', 'M', 'ZM', 'EMPTY' or '(' but encountered ", nextWord);
 }
 
-string
+std::string
 WKTReader::getNextCloserOrComma(StringTokenizer* tokenizer)
 {
-    string nextWord = getNextWord(tokenizer);
+    std::string nextWord = getNextWord(tokenizer);
     if(nextWord == "," || nextWord == ")") {
         return nextWord;
     }
     throw  ParseException("Expected ')' or ',' but encountered", nextWord);
 }
 
-string
+std::string
 WKTReader::getNextCloser(StringTokenizer* tokenizer)
 {
-    string nextWord = getNextWord(tokenizer);
+    std::string nextWord = getNextWord(tokenizer);
     if(nextWord == ")") {
         return nextWord;
     }
     throw  ParseException("Expected ')' but encountered", nextWord);
 }
 
-string
+std::string
 WKTReader::getNextWord(StringTokenizer* tokenizer)
 {
     int type = tokenizer->nextToken();
@@ -199,11 +199,11 @@ WKTReader::getNextWord(StringTokenizer* tokenizer)
     case StringTokenizer::TT_NUMBER:
         throw  ParseException("Expected word but encountered number", tokenizer->getNVal());
     case StringTokenizer::TT_WORD: {
-        string word = tokenizer->getSVal();
-        int i = static_cast<int>(word.size());
-
-        while(--i >= 0) {
-            word[i] = static_cast<char>(toupper(word[i]));
+        std::string word = tokenizer->getSVal();
+        for (char& c : word) {
+            // Avoid UB if c is not representable as unsigned char
+            // https://en.cppreference.com/w/cpp/string/byte/toupper
+            c = static_cast<char>(toupper(static_cast<unsigned char>(c)));
         }
         return word;
     }
@@ -220,9 +220,9 @@ WKTReader::getNextWord(StringTokenizer* tokenizer)
 }
 
 std::unique_ptr<Geometry>
-WKTReader::readGeometryTaggedText(StringTokenizer* tokenizer)
+WKTReader::readGeometryTaggedText(StringTokenizer* tokenizer) const
 {
-    string type = getNextWord(tokenizer);
+    std::string type = getNextWord(tokenizer);
     if(type == "POINT") {
         return readPointText(tokenizer);
     }
@@ -251,10 +251,10 @@ WKTReader::readGeometryTaggedText(StringTokenizer* tokenizer)
 }
 
 std::unique_ptr<Point>
-WKTReader::readPointText(StringTokenizer* tokenizer)
+WKTReader::readPointText(StringTokenizer* tokenizer) const
 {
-    size_t dim = 2;
-    string nextToken = getNextEmptyOrOpener(tokenizer, dim);
+    std::size_t dim = 2;
+    std::string nextToken = getNextEmptyOrOpener(tokenizer, dim);
     if(nextToken == "EMPTY") {
         return geometryFactory->createPoint(dim);
     }
@@ -267,24 +267,24 @@ WKTReader::readPointText(StringTokenizer* tokenizer)
 }
 
 std::unique_ptr<LineString>
-WKTReader::readLineStringText(StringTokenizer* tokenizer)
+WKTReader::readLineStringText(StringTokenizer* tokenizer) const
 {
     auto&& coords = getCoordinates(tokenizer);
     return geometryFactory->createLineString(std::move(coords));
 }
 
 std::unique_ptr<LinearRing>
-WKTReader::readLinearRingText(StringTokenizer* tokenizer)
+WKTReader::readLinearRingText(StringTokenizer* tokenizer) const
 {
     auto&& coords = getCoordinates(tokenizer);
     return geometryFactory->createLinearRing(std::move(coords));
 }
 
 std::unique_ptr<MultiPoint>
-WKTReader::readMultiPointText(StringTokenizer* tokenizer)
+WKTReader::readMultiPointText(StringTokenizer* tokenizer) const
 {
-    size_t dim = 2;
-    string nextToken = getNextEmptyOrOpener(tokenizer, dim);
+    std::size_t dim = 2;
+    std::string nextToken = getNextEmptyOrOpener(tokenizer, dim);
     if(nextToken == "EMPTY") {
         return geometryFactory->createMultiPoint();
     }
@@ -307,8 +307,9 @@ WKTReader::readMultiPointText(StringTokenizer* tokenizer)
         return std::unique_ptr<MultiPoint>(geometryFactory->createMultiPoint(*coords));
     }
 
-    else if(tok == '(') {
-        // Try to parse correct form "MULTIPOINT((0 0), (1 1))"
+    else if(tok == '(' ||  // Try to parse correct form "MULTIPOINT((0 0), (1 1))"
+            tok == StringTokenizer::TT_WORD)  // EMPTY?
+    {
         std::vector<std::unique_ptr<Point>> points;
 
         do {
@@ -320,7 +321,7 @@ WKTReader::readMultiPointText(StringTokenizer* tokenizer)
     }
 
     else {
-        stringstream err;
+        std::stringstream err;
         err << "Unexpected token: ";
         switch(tok) {
         case StringTokenizer::TT_WORD:
@@ -346,16 +347,16 @@ WKTReader::readMultiPointText(StringTokenizer* tokenizer)
             err << "??";
             break;
         }
-        err << endl;
+        err << std::endl;
         throw ParseException(err.str());
     }
 }
 
 std::unique_ptr<Polygon>
-WKTReader::readPolygonText(StringTokenizer* tokenizer)
+WKTReader::readPolygonText(StringTokenizer* tokenizer) const
 {
-    size_t dim = 2;
-    string nextToken = getNextEmptyOrOpener(tokenizer, dim);
+    std::size_t dim = 2;
+    std::string nextToken = getNextEmptyOrOpener(tokenizer, dim);
     if(nextToken == "EMPTY") {
         return geometryFactory->createPolygon(dim);
     }
@@ -372,10 +373,10 @@ WKTReader::readPolygonText(StringTokenizer* tokenizer)
 }
 
 std::unique_ptr<MultiLineString>
-WKTReader::readMultiLineStringText(StringTokenizer* tokenizer)
+WKTReader::readMultiLineStringText(StringTokenizer* tokenizer) const
 {
-    size_t dim = 2;
-    string nextToken = getNextEmptyOrOpener(tokenizer, dim);
+    std::size_t dim = 2;
+    std::string nextToken = getNextEmptyOrOpener(tokenizer, dim);
     if(nextToken == "EMPTY") {
         return geometryFactory->createMultiLineString();
     }
@@ -390,10 +391,10 @@ WKTReader::readMultiLineStringText(StringTokenizer* tokenizer)
 }
 
 std::unique_ptr<MultiPolygon>
-WKTReader::readMultiPolygonText(StringTokenizer* tokenizer)
+WKTReader::readMultiPolygonText(StringTokenizer* tokenizer) const
 {
-    size_t dim = 2;
-    string nextToken = getNextEmptyOrOpener(tokenizer, dim);
+    std::size_t dim = 2;
+    std::string nextToken = getNextEmptyOrOpener(tokenizer, dim);
     if(nextToken == "EMPTY") {
         return geometryFactory->createMultiPolygon();
     }
@@ -408,10 +409,10 @@ WKTReader::readMultiPolygonText(StringTokenizer* tokenizer)
 }
 
 std::unique_ptr<GeometryCollection>
-WKTReader::readGeometryCollectionText(StringTokenizer* tokenizer)
+WKTReader::readGeometryCollectionText(StringTokenizer* tokenizer) const
 {
-    size_t dim = 2;
-    string nextToken = getNextEmptyOrOpener(tokenizer, dim);
+    std::size_t dim = 2;
+    std::string nextToken = getNextEmptyOrOpener(tokenizer, dim);
     if(nextToken == "EMPTY") {
         return geometryFactory->createGeometryCollection();
     }

@@ -43,7 +43,7 @@
 
 
 using namespace geos::geom;
-using namespace std;
+
 
 namespace geos {
 namespace triangulate { //geos.triangulate
@@ -74,6 +74,10 @@ QuadEdgeSubdivision::QuadEdgeSubdivision(const geom::Envelope& env, double p_tol
 void
 QuadEdgeSubdivision::createFrame(const geom::Envelope& env)
 {
+    if (env.isNull()) {
+        throw util::IllegalArgumentException("Cannot create frame from empty Envelope.");
+    }
+
     double deltaX = env.getWidth();
     double deltaY = env.getHeight();
     double offset = 0.0;
@@ -140,7 +144,7 @@ QuadEdgeSubdivision::locateFromEdge(const Vertex& v,
 {
     ::geos::ignore_unused_variable_warning(startEdge);
 
-    size_t iter = 0;
+    std::size_t iter = 0;
     auto maxIter = quadEdges.size();
 
     QuadEdge* e = startingEdges[0];
@@ -320,15 +324,15 @@ QuadEdgeSubdivision::getPrimaryEdges(bool includeFrame)
     return std::unique_ptr<QuadEdgeList>(edges);
 }
 
-QuadEdge**
+std::array<QuadEdge*, 3>*
 QuadEdgeSubdivision::fetchTriangleToVisit(QuadEdge* edge,
         QuadEdgeStack& edgeStack, bool includeFrame)
 {
     QuadEdge* curr = edge;
-    int edgeCount = 0;
+    std::size_t edgeCount = 0;
     bool isFrame = false;
     do {
-        triEdges[edgeCount] = curr;
+        m_triEdges[edgeCount] = curr;
 
         if(!includeFrame && isFrameEdge(*curr)) {
             isFrame = true;
@@ -351,7 +355,7 @@ QuadEdgeSubdivision::fetchTriangleToVisit(QuadEdge* edge,
     if(!includeFrame && isFrame) {
         return nullptr;
     }
-    return triEdges;
+    return &m_triEdges;
 }
 
 class
@@ -366,10 +370,10 @@ public:
     }
 
     void
-    visit(QuadEdge* triEdges[3]) override
+    visit(std::array<QuadEdge*, 3>& triEdges) override
     {
         auto coordSeq = coordSeqFact.create(4, 0);
-        for(size_t i = 0; i < 3; i++) {
+        for(std::size_t i = 0; i < 3; i++) {
             Vertex v = triEdges[i]->orig();
             coordSeq->setAt(v.getCoordinate(), i);
         }
@@ -383,7 +387,7 @@ class
     QuadEdgeSubdivision::TriangleCircumcentreVisitor : public TriangleVisitor {
 public:
     void
-    visit(QuadEdge* triEdges[3]) override
+    visit(std::array<QuadEdge*, 3>& triEdges) override
     {
         Triangle triangle(triEdges[0]->orig().getCoordinate(),
                           triEdges[1]->orig().getCoordinate(), triEdges[2]->orig().getCoordinate());
@@ -394,7 +398,7 @@ public:
 
         Vertex ccVertex(cc);
 
-        for(int i = 0 ; i < 3 ; i++) {
+        for(uint8_t i = 0 ; i < 3 ; i++) {
             triEdges[i]->rot().setOrig(ccVertex);
         }
     }
@@ -431,9 +435,9 @@ QuadEdgeSubdivision::visitTriangles(TriangleVisitor* triVisitor, bool includeFra
         QuadEdge* edge = edgeStack.top();
         edgeStack.pop();
         if(!edge->isVisited()) {
-            QuadEdge** p_triEdges = fetchTriangleToVisit(edge, edgeStack, includeFrame);
-            if(p_triEdges != nullptr) {
-                triVisitor->visit(p_triEdges);
+            auto triEdges = fetchTriangleToVisit(edge, edgeStack, includeFrame);
+            if(triEdges != nullptr) {
+                triVisitor->visit(*triEdges);
             }
         }
     }

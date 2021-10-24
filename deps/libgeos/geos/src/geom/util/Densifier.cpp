@@ -18,6 +18,8 @@
  *
  **********************************************************************/
 
+#include <math.h>
+
 #include <geos/geom/util/Densifier.h>
 #include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/CoordinateList.h>
@@ -37,6 +39,7 @@
 #include <geos/util/Interrupt.h>
 #include <geos/util/IllegalArgumentException.h>
 
+#include <limits>
 #include <vector>
 
 using namespace geos::geom;
@@ -91,6 +94,8 @@ Densifier::DensifyTransformer::transformMultiPolygon(const MultiPolygon* geom, c
 std::unique_ptr<Geometry>
 Densifier::DensifyTransformer::createValidArea(const Geometry* roughAreaGeom)
 {
+    if (roughAreaGeom->isValid())
+        return Geometry::Ptr(roughAreaGeom->clone());
     return roughAreaGeom->buffer(0.0);
 }
 
@@ -110,8 +115,14 @@ Densifier::densifyPoints(const Coordinate::Vect pts, double distanceTolerance, c
         seg.p0 = *it;
         seg.p1 = *(it + 1);
         coordList.insert(coordList.end(), seg.p0, false);
-        double len = seg.getLength();
-        int densifiedSegCount = (int)(len / distanceTolerance) + 1;
+        const double len = seg.getLength();
+        const double densifiedSegCountDbl = ceil(len / distanceTolerance);
+        if(densifiedSegCountDbl > std::numeric_limits<int>::max()) {
+            throw geos::util::GEOSException(
+                "Tolerance is too small compared to geometry length");
+        }
+
+        const int densifiedSegCount = static_cast<int>(densifiedSegCountDbl);
         if(densifiedSegCount > 1) {
             double densifiedSegLen = len / densifiedSegCount;
             for(int j = 1; j < densifiedSegCount; j++) {
@@ -121,6 +132,10 @@ Densifier::densifyPoints(const Coordinate::Vect pts, double distanceTolerance, c
                 precModel->makePrecise(p);
                 coordList.insert(coordList.end(), p, false);
             }
+        }
+        else {
+            // no densification required; insert the last coordinate and continue
+            coordList.insert(coordList.end(), seg.p1, false);
         }
     }
     coordList.insert(coordList.end(), pts[pts.size() - 1], false);
@@ -146,7 +161,8 @@ Densifier::densify(const Geometry* geom, double distTol)
 void
 Densifier::setDistanceTolerance(double tol)
 {
-    if(tol <= 0.0) {
+    // Test written to catch NaN as well
+    if(!(tol > 0.0)) {
         throw geos::util::IllegalArgumentException("Tolerance must be positive");
     }
     distanceTolerance = tol;
@@ -155,6 +171,10 @@ Densifier::setDistanceTolerance(double tol)
 Geometry::Ptr
 Densifier::getResultGeometry() const
 {
+    if (inputGeom->isEmpty()) {
+        return inputGeom->clone();
+    }
+
     DensifyTransformer dt(distanceTolerance);
     return dt.transform(inputGeom);
 }

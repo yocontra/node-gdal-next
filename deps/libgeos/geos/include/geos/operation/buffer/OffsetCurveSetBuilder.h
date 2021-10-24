@@ -72,20 +72,21 @@ class GEOS_DLL OffsetCurveSetBuilder {
 
 private:
 
+    static constexpr int MAX_INVERTED_RING_SIZE = 9;
+    static constexpr double NEARNESS_FACTOR = 0.99;
+
     // To keep track of newly-created Labels.
-    // Labels will be relesed by object dtor
+    // Labels will be released by object dtor
     std::vector<geomgraph::Label*> newLabels;
-
     const geom::Geometry& inputGeom;
-
     double distance;
-
     OffsetCurveBuilder& curveBuilder;
 
     /// The raw offset curves computed.
     /// This class holds ownership of std::vector elements.
     ///
     std::vector<noding::SegmentString*> curveList;
+    bool isInvertOrientation = false;
 
     /**
      * Creates a noding::SegmentString for a coordinate list which is a raw
@@ -140,6 +141,42 @@ private:
                      geom::Location cwRightLoc);
 
     /**
+     * Tests whether the offset curve for a ring is fully inverted.
+     * An inverted ("inside-out") curve occurs in some specific situations
+     * involving a buffer distance which should result in a fully-eroded (empty) buffer.
+     * It can happen that the sides of a small, convex polygon
+     * produce offset segments which all cross one another to form
+     * a curve with inverted orientation.
+     * This happens at buffer distances slightly greater than the distance at
+     * which the buffer should disappear.
+     * The inverted curve will produce an incorrect non-empty buffer (for a shell)
+     * or an incorrect hole (for a hole).
+     * It must be discarded from the set of offset curves used in the buffer.
+     * Heuristics are used to reduce the number of cases which area checked,
+     * for efficiency and correctness.
+     * <p>
+     * See https://github.com/locationtech/jts/issues/472
+     *
+     * @param inputPts the input ring
+     * @param distance the buffer distance
+     * @param curvePts the generated offset curve
+     * @return true if the offset curve is inverted
+     */
+    static bool isRingCurveInverted(
+        const geom::CoordinateSequence* inputPts, double dist,
+        const geom::CoordinateSequence* curvePts);
+
+    /**
+     * Computes the maximum distance out of a set of points to a linestring.
+     *
+     * @param pts the points
+     * @param line the linestring vertices
+     * @return the maximum distance
+     */
+    static double maxDistance(
+        const geom::CoordinateSequence*  pts, const geom::CoordinateSequence*  line);
+
+    /**
      * The ringCoord is assumed to contain no repeated points.
      * It may be degenerate (i.e. contain only 1, 2, or 3 points).
      * In this case it has no area, and hence has a minimum diameter of 0.
@@ -176,6 +213,21 @@ private:
     OffsetCurveSetBuilder(const OffsetCurveSetBuilder& other) = delete;
     OffsetCurveSetBuilder& operator=(const OffsetCurveSetBuilder& rhs) = delete;
 
+    /**
+    * Computes orientation of a ring using a signed-area orientation test.
+    * For invalid (self-crossing) rings this ensures the largest enclosed area
+    * is taken to be the interior of the ring.
+    * This produces a more sensible result when
+    * used for repairing polygonal geometry via buffer-by-zero.
+    * For buffer, using the lower robustness of orientation-by-area
+    * doesn't matter, since narrow or flat rings
+    * produce an acceptable offset curve for either orientation.
+    *
+    * @param coord the ring coordinates
+    * @return true if the ring is CCW
+    */
+    bool isRingCCW(const geom::CoordinateSequence* coords) const;
+
 public:
 
     /// Constructor
@@ -205,6 +257,18 @@ public:
     void addCurves(const std::vector<geom::CoordinateSequence*>& lineList,
                    geom::Location leftLoc, geom::Location rightLoc);
 
+    /**
+    * Sets whether the offset curve is generated
+    * using the inverted orientation of input rings.
+    * This allows generating a buffer(0) polygon from the smaller lobes
+    * of self-crossing rings.
+    *
+    * @param p_isInvertOrientation true if input ring orientation should be inverted
+    */
+    void setInvertOrientation(bool p_isInvertOrientation) {
+        isInvertOrientation = p_isInvertOrientation;
+    }
+
 };
 
 } // namespace geos::operation::buffer
@@ -216,4 +280,3 @@ public:
 #endif
 
 #endif // ndef GEOS_OP_BUFFER_OFFSETCURVESETBUILDER_H
-

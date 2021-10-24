@@ -40,7 +40,7 @@ namespace algorithm { // geos.algorithm
 
 InteriorPointLine::InteriorPointLine(const Geometry* g)
 {
-    minDistance = DoubleMax;
+    minDistance = DoubleInfinity;
     hasInterior = false;
     if (g->getCentroid(centroid)) {
 #if GEOS_DEBUG
@@ -113,7 +113,7 @@ InteriorPointLine::addEndpoints(const Geometry* geom)
 void
 InteriorPointLine::addEndpoints(const CoordinateSequence* pts)
 {
-    size_t npts = pts->size();
+    std::size_t npts = pts->size();
     if (npts) {
         add(pts->getAt(0));
         if (npts > 1) {

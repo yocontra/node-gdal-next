@@ -34,10 +34,12 @@ namespace geom { // geos::geom
 
 /*public*/
 INLINE
-Envelope::Envelope()
-{
-    init();
-}
+Envelope::Envelope() :
+    minx(DoubleNotANumber),
+    maxx(DoubleNotANumber),
+    miny(DoubleNotANumber),
+    maxy(DoubleNotANumber)
+{}
 
 /*public*/
 INLINE
@@ -60,21 +62,6 @@ Envelope::Envelope(const Coordinate& p)
 }
 
 /*public*/
-INLINE
-Envelope::Envelope(const Envelope& env)
-        :
-        minx(env.minx),
-        maxx(env.maxx),
-        miny(env.miny),
-        maxy(env.maxy)
-{
-#if GEOS_DEBUG
-    std::cerr << "Envelope copy" << std::endl;
-#endif
-    //init(env.minx, env.maxx, env.miny, env.maxy);
-}
-
-/*public*/
 INLINE double
 Envelope::distance(double x0, double y0, double x1, double y1)
 {
@@ -88,6 +75,38 @@ INLINE void
 Envelope::expandToInclude(const Coordinate& p)
 {
     expandToInclude(p.x, p.y);
+}
+
+INLINE void
+Envelope::expandToInclude(const Envelope& other)
+{
+    return expandToInclude(&other);
+}
+
+/*public*/
+INLINE void
+Envelope::expandToInclude(const Envelope* other)
+{
+    if(isNull()) {
+        minx = other->minx;
+        maxx = other->maxx;
+        miny = other->miny;
+        maxy = other->maxy;
+    }
+    else {
+        if(other->minx < minx) {
+            minx = other->minx;
+        }
+        if(other->maxx > maxx) {
+            maxx = other->maxx;
+        }
+        if(other->miny < miny) {
+            miny = other->miny;
+        }
+        if(other->maxy > maxy) {
+            maxy = other->maxy;
+        }
+    }
 }
 
 /*public*/
@@ -120,6 +139,7 @@ Envelope::expandToInclude(double x, double y)
 INLINE double
 Envelope::getMaxY() const
 {
+    assert(!isNull());
     return maxy;
 }
 
@@ -127,6 +147,7 @@ Envelope::getMaxY() const
 INLINE double
 Envelope::getMaxX() const
 {
+    assert(!isNull());
     return maxx;
 }
 
@@ -134,6 +155,7 @@ Envelope::getMaxX() const
 INLINE double
 Envelope::getMinY() const
 {
+    assert(!isNull());
     return miny;
 }
 
@@ -141,6 +163,7 @@ Envelope::getMinY() const
 INLINE double
 Envelope::getMinX() const
 {
+    assert(!isNull());
     return minx;
 }
 
@@ -226,21 +249,17 @@ Envelope::intersects(const Envelope& other) const
 INLINE bool
 Envelope::isNull(void) const
 {
-    return maxx < minx;
+    return std::isnan(maxx);
 }
 
 /*public*/
 INLINE bool
 Envelope::intersects(const Envelope* other) const
 {
-    // Optimized to reduce function calls
-    if(isNull() || other->isNull()) {
-        return false;
-    }
-    return !(other->minx > maxx ||
-             other->maxx < minx ||
-             other->miny > maxy ||
-             other->maxy < miny);
+    return other->minx <= maxx &&
+           other->maxx >= minx &&
+           other->miny <= maxy &&
+           other->maxy >= miny;
 }
 
 /*public*/
@@ -261,13 +280,10 @@ Envelope::disjoint(const Envelope& other) const
 INLINE bool
 Envelope::disjoint(const Envelope* other) const
 {
-    if (isNull() || other->isNull()) {
-        return true;
-    }
-    return other->minx > maxx ||
-        other->maxx < minx ||
-        other->miny > maxy ||
-        other->maxy < miny;
+    return !(other->minx <= maxx ||
+             other->maxx >= minx ||
+             other->miny <= maxy ||
+             other->maxy >= miny);
 }
 
 
@@ -282,10 +298,7 @@ Envelope::covers(const Coordinate* p) const
 INLINE void
 Envelope::setToNull()
 {
-    minx = 0;
-    maxx = -1;
-    miny = 0;
-    maxy = -1;
+    minx = maxx = miny = maxy = DoubleNotANumber;
 }
 
 INLINE double
@@ -324,7 +337,40 @@ Envelope::distanceSquaredToCoordinate(const Coordinate & c, const Coordinate & p
     return dx*dx + dy*dy;
 }
 
-} // namespace geos::geom
+INLINE
+bool operator!=(const Envelope& a, const Envelope& b) {
+    return !(a == b);
+}
+
+INLINE bool
+Envelope::intersects(const Coordinate& p1, const Coordinate& p2,
+                     const Coordinate& q1, const Coordinate& q2)
+{
+    double minq = std::min(q1.x, q2.x);
+    double maxq = std::max(q1.x, q2.x);
+    double minp = std::min(p1.x, p2.x);
+    double maxp = std::max(p1.x, p2.x);
+    if(minp > maxq) {
+        return false;
+    }
+    if(maxp < minq) {
+        return false;
+    }
+    minq = std::min(q1.y, q2.y);
+    maxq = std::max(q1.y, q2.y);
+    minp = std::min(p1.y, p2.y);
+    maxp = std::max(p1.y, p2.y);
+    if(minp > maxq) {
+        return false;
+    }
+    if(maxp < minq) {
+        return false;
+    }
+    return true;
+}
+
+
+    } // namespace geos::geom
 } // namespace geos
 
 #endif // GEOS_GEOM_ENVELOPE_INL

@@ -105,6 +105,16 @@ LineSegment::project(const Coordinate& p, Coordinate& ret) const
     ret = Coordinate(p0.x + r * (p1.x - p0.x), p0.y + r * (p1.y - p0.y));
 }
 
+/*private*/
+void
+LineSegment::project(double factor, Coordinate& ret) const
+{
+    if( factor == 1.0 )
+        ret = p1;
+    else
+        ret = Coordinate(p0.x + factor * (p1.x - p0.x), p0.y + factor * (p1.y - p0.y));
+}
+
 bool
 LineSegment::project(const LineSegment& seg, LineSegment& ret) const
 {
@@ -121,9 +131,9 @@ LineSegment::project(const LineSegment& seg, LineSegment& ret) const
     }
 
     Coordinate newp0;
-    project(seg.p0, newp0);
+    project(pf0, newp0);
     Coordinate newp1;
-    project(seg.p1, newp1);
+    project(pf1, newp1);
 
     ret.setCoordinates(newp0, newp1);
 
@@ -136,7 +146,7 @@ LineSegment::closestPoint(const Coordinate& p, Coordinate& ret) const
 {
     double factor = projectionFactor(p);
     if(factor > 0 && factor < 1) {
-        project(p, ret);
+        project(factor, ret);
         return;
     }
     double dist0 = p0.distance(p);
@@ -190,7 +200,7 @@ LineSegment::closestPoints(const LineSegment& line)
     // test for intersection
     Coordinate intPt = intersection(line);
     if(!intPt.isNull()) {
-        return { intPt, intPt };
+        return {{ intPt, intPt }};
     }
 
     /*
@@ -199,12 +209,11 @@ LineSegment::closestPoints(const LineSegment& line)
      */
     std::array<Coordinate, 2> closestPt;
 
-    double minDistance = DoubleMax;
     double dist;
 
     Coordinate close00;
     closestPoint(line.p0, close00);
-    minDistance = close00.distance(line.p0);
+    double minDistance = close00.distance(line.p0);
 
     closestPt[0] = close00;
     closestPt[1] = line.p0;

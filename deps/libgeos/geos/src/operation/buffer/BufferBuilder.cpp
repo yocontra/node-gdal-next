@@ -71,7 +71,7 @@
 #define JTS_DEBUG 0
 #endif
 
-//using namespace std;
+//
 using namespace geos::geom;
 using namespace geos::geomgraph;
 using namespace geos::noding;
@@ -127,7 +127,7 @@ BufferBuilder::~BufferBuilder()
 }
 
 /*public*/
-Geometry*
+std::unique_ptr<Geometry>
 BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
                                      bool leftSide)
 {
@@ -140,7 +140,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
 
     // Nothing to do for a distance of zero
     if(distance == 0) {
-        return g->clone().release();
+        return g->clone();
     }
 
     // Get geometry factory and precision model.
@@ -158,16 +158,14 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
     BufferParameters modParams = bufParams;
     modParams.setEndCapStyle(BufferParameters::CAP_FLAT);
     modParams.setSingleSided(false); // ignore parameter for areal-only geometries
-    std::unique_ptr<Geometry> buf;
+
 
     // This is a (temp?) hack to workaround the fact that
-    // BufferBuilder BufferParamaters are immutable after
+    // BufferBuilder BufferParameters are immutable after
     // construction, while we want to force the end cap
     // style to FLAT for single-sided buffering
-    {
-        BufferBuilder tmp(modParams);
-        buf.reset(tmp.buffer(l, distance));
-    }
+    BufferBuilder tmpBB(modParams);
+    std::unique_ptr<Geometry> buf(tmpBB.buffer(l, distance));
 
     // Create MultiLineStrings from this polygon.
     std::unique_ptr<Geometry> bufLineString(buf->getBoundary());
@@ -223,7 +221,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
 
     delete nodedEdges;
 
-    for(size_t i = 0, n = curveList.size(); i < n; ++i) {
+    for(std::size_t i = 0, n = curveList.size(); i < n; ++i) {
         delete curveList[i];
     }
     curveList.clear();
@@ -262,13 +260,13 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
         // Remove end points if they are a part of the original line to be
         // buffered.
         CoordinateSequence::Ptr coords(mergedLines.back()->getCoordinates());
-        if(nullptr != coords.get()) {
+        if(nullptr != coords) {
             // Use 98% of the buffer width as the point-distance requirement - this
             // is to ensure that the point that is "distance" +/- epsilon is not
             // included.
             //
             // Let's try and estimate a more accurate bound instead of just assuming
-            // 98%. With 98%, the episilon grows as the buffer distance grows,
+            // 98%. With 98%, the epsilon grows as the buffer distance grows,
             // so that at large distance, artifacts may skip through this filter
             // Let the length of the line play a factor in the distance, which is still
             // going to be bounded by 98%. Take 10% of the length of the line  from the buffer distance
@@ -279,9 +277,9 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
             // epsilon is removed.
             const double segLengthAllowance = 1.02 * distance;
 
-            size_t front = 0;
-            size_t back = coords->size() - 1;
-            size_t sz = back - front + 1;
+            std::size_t front = 0;
+            std::size_t back = coords->size() - 1;
+            std::size_t sz = back - front + 1;
 
             // Clean up the front of the list.
             // Loop until the line's end is not inside the buffer width from
@@ -292,7 +290,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
 
                 // Stop looping if there are no more points, or if the segment
                 // length is larger than the buffer width.
-                if(sz <= 1 || segLength > segLengthAllowance) {
+                if(segLength > segLengthAllowance) {
                     break;
                 }
 
@@ -303,7 +301,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
             }
             while(sz > 1 && coords->getAt(front).distance(endPoint) < ptDistAllowance) {
                 double segLength = coords->getAt(front).distance(coords->getAt(front + 1));
-                if(sz <= 1 || segLength > segLengthAllowance) {
+                if(segLength > segLengthAllowance) {
                     break;
                 }
                 front++;
@@ -313,7 +311,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
             while(sz > 1 && coords->getAt(back).distance(startPoint) < ptDistAllowance) {
                 double segLength = coords->getAt(back).distance(coords->getAt(back - 1));
 
-                if(sz <= 1 || segLength > segLengthAllowance) {
+                if(segLength > segLengthAllowance) {
                     break;
                 }
                 back--;
@@ -322,7 +320,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
             while(sz > 1 && coords->getAt(back).distance(endPoint) < ptDistAllowance) {
                 double segLength = coords->getAt(back).distance(coords->getAt(back - 1));
 
-                if(sz <= 1 || segLength > segLengthAllowance) {
+                if(segLength > segLengthAllowance) {
                     break;
                 }
                 back--;
@@ -336,7 +334,7 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
 
                     auto newSeq = seqFactory->create(sz, coords->getDimension());
 
-                    for (size_t i = 0; i < sz; i++) {
+                    for (std::size_t i = 0; i < sz; i++) {
                         newSeq->setAt(coords->getAt(i + front), i);
                     }
 
@@ -360,22 +358,22 @@ BufferBuilder::bufferLineSingleSided(const Geometry* g, double distance,
     intersectedLines.reset();
 
     if(mergedLinesGeom->size() > 1) {
-        return geomFact->createMultiLineString(mergedLinesGeom);
+        return std::unique_ptr<Geometry>(geomFact->createMultiLineString(mergedLinesGeom));
     }
     else if(mergedLinesGeom->size() == 1) {
 
-        Geometry* single = (*mergedLinesGeom)[0];
+        std::unique_ptr<Geometry> single((*mergedLinesGeom)[0]);
         delete mergedLinesGeom;
         return single;
     }
     else {
         delete mergedLinesGeom;
-        return geomFact->createLineString().release();
+        return geomFact->createLineString();
     }
 }
 
 /*public*/
-Geometry*
+std::unique_ptr<Geometry>
 BufferBuilder::buffer(const Geometry* g, double distance)
 // throw(GEOSException *)
 {
@@ -396,6 +394,7 @@ BufferBuilder::buffer(const Geometry* g, double distance)
 
         OffsetCurveBuilder curveBuilder(precisionModel, bufParams);
         OffsetCurveSetBuilder curveSetBuilder(*g, distance, curveBuilder);
+        curveSetBuilder.setInvertOrientation(isInvertOrientation);
 
         GEOS_CHECK_FOR_INTERRUPTS();
 
@@ -424,7 +423,7 @@ BufferBuilder::buffer(const Geometry* g, double distance)
     std::cerr << std::endl << edgeList << std::endl;
 #endif
 
-    Geometry* resultGeom = nullptr;
+    std::unique_ptr<Geometry> resultGeom(nullptr);
     std::unique_ptr< std::vector<Geometry*> > resultPolyList;
     std::vector<BufferSubgraph*> subgraphList;
 
@@ -439,7 +438,7 @@ BufferBuilder::buffer(const Geometry* g, double distance)
 #if GEOS_DEBUG
         std::cerr << "Created " << subgraphList.size() << " subgraphs" << std::endl;
 #if GEOS_DEBUG > 1
-        for(size_t i = 0, n = subgraphList.size(); i < n; i++) {
+        for(std::size_t i = 0, n = subgraphList.size(); i < n; i++) {
             std::cerr << std::setprecision(10) << *(subgraphList[i]) << std::endl;
         }
 #endif
@@ -448,7 +447,7 @@ BufferBuilder::buffer(const Geometry* g, double distance)
         GEOS_CHECK_FOR_INTERRUPTS();
 
         {
-            // scope for earlier PolygonBuilder cleanupt
+            // scope for earlier PolygonBuilder cleanup
             PolygonBuilder polyBuilder(geomFact);
             buildSubgraphs(subgraphList, polyBuilder);
 
@@ -456,7 +455,7 @@ BufferBuilder::buffer(const Geometry* g, double distance)
         }
 
         // Get rid of the subgraphs, shouldn't be needed anymore
-        for(size_t i = 0, n = subgraphList.size(); i < n; i++) {
+        for(std::size_t i = 0, n = subgraphList.size(); i < n; i++) {
             delete subgraphList[i];
         }
         subgraphList.clear();
@@ -465,7 +464,7 @@ BufferBuilder::buffer(const Geometry* g, double distance)
         std::cerr << "PolygonBuilder got " << resultPolyList->size()
                   << " polygons" << std::endl;
 #if GEOS_DEBUG > 1
-        for(size_t i = 0, n = resultPolyList->size(); i < n; i++) {
+        for(std::size_t i = 0, n = resultPolyList->size(); i < n; i++) {
             std::cerr << (*resultPolyList)[i]->toString() << std::endl;
         }
 #endif
@@ -477,13 +476,13 @@ BufferBuilder::buffer(const Geometry* g, double distance)
         }
 
         // resultPolyList ownership transferred here
-        resultGeom = geomFact->buildGeometry(resultPolyList.release());
+        resultGeom.reset(geomFact->buildGeometry(resultPolyList.release()));
 
     }
     catch(const util::GEOSException& /* exc */) {
 
         // In case they're still around
-        for(size_t i = 0, n = subgraphList.size(); i < n; i++) {
+        for(std::size_t i = 0, n = subgraphList.size(); i < n; i++) {
             delete subgraphList[i];
         }
         subgraphList.clear();
@@ -518,7 +517,7 @@ BufferBuilder::getNoder(const PrecisionModel* pm)
 
 #if 0
     /* CoordinateArraySequence.cpp:84:
-     * virtual const geos::Coordinate& geos::CoordinateArraySequence::getAt(size_t) const:
+     * virtual const geos::Coordinate& geos::CoordinateArraySequence::getAt(std::size_t) const:
      * Assertion `pos<vect->size()' failed.
      */
 
@@ -651,7 +650,7 @@ BufferBuilder::createSubgraphs(PlanarGraph* graph, std::vector<BufferSubgraph*>&
 {
     std::vector<Node*> nodes;
     graph->getNodes(nodes);
-    for(size_t i = 0, n = nodes.size(); i < n; i++) {
+    for(std::size_t i = 0, n = nodes.size(); i < n; i++) {
         Node* node = nodes[i];
         if(!node->isVisited()) {
             BufferSubgraph* subgraph = new BufferSubgraph();
@@ -679,7 +678,7 @@ BufferBuilder::buildSubgraphs(const std::vector<BufferSubgraph*>& subgraphList,
     std::cerr << __FUNCTION__ << " got " << subgraphList.size() << " subgraphs" << std::endl;
 #endif
     std::vector<BufferSubgraph*> processedGraphs;
-    for(size_t i = 0, n = subgraphList.size(); i < n; i++) {
+    for(std::size_t i = 0, n = subgraphList.size(); i < n; i++) {
         BufferSubgraph* subgraph = subgraphList[i];
         Coordinate* p = subgraph->getRightmostCoordinate();
         assert(p);
@@ -715,11 +714,10 @@ BufferBuilder::buildSubgraphs(const std::vector<BufferSubgraph*>& subgraphList,
 }
 
 /*private*/
-geom::Geometry*
+std::unique_ptr<geom::Geometry>
 BufferBuilder::createEmptyResultGeometry() const
 {
-    geom::Geometry* emptyGeom = geomFact->createPolygon().release();
-    return emptyGeom;
+    return geomFact->createPolygon();
 }
 
 } // namespace geos.operation.buffer

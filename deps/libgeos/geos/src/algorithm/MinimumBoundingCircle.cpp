@@ -65,7 +65,7 @@ MinimumBoundingCircle::getMaximumDiameter()
 {
     compute();
     uint8_t dims = input->getCoordinateDimension();
-    size_t len = 2;
+    std::size_t len = 2;
     switch(extremalPts.size()) {
         case 0:
             return input->getFactory()->createLineString();
@@ -123,7 +123,7 @@ MinimumBoundingCircle::getDiameter()
         return std::unique_ptr<Geometry>(input->getFactory()->createPoint(centre));
     }
     uint8_t dims = input->getCoordinateDimension();
-    size_t len = 2;
+    std::size_t len = 2;
     auto cs = input->getFactory()->getCoordinateSequenceFactory()->create(len, dims);
     // TODO: handle case of 3 extremal points, by computing a line from one of
     // them through the centre point with len = 2*radius
@@ -251,7 +251,7 @@ MinimumBoundingCircle::computeCirclePoints()
      * at most <tt>pts.length</tt> iterations are required to terminate
      * with a correct result.
      */
-    size_t i = 0, n = pts.size();
+    std::size_t i = 0, n = pts.size();
     while(i++ < n) {
         Coordinate R = pointWithMinAngleWithSegment(pts, P, Q);
 
@@ -299,7 +299,7 @@ MinimumBoundingCircle::lowestPoint(std::vector<Coordinate>& pts)
 Coordinate
 MinimumBoundingCircle::pointWitMinAngleWithX(std::vector<Coordinate>& pts, Coordinate& P)
 {
-    double minSin = std::numeric_limits<double>::max();
+    double minSin = DoubleInfinity;
     Coordinate minAngPt;
     minAngPt.setNull();
     for(const auto& p : pts) {
@@ -333,7 +333,7 @@ Coordinate
 MinimumBoundingCircle::pointWithMinAngleWithSegment(std::vector<Coordinate>& pts, Coordinate& P, Coordinate& Q)
 {
     assert(!pts.empty());
-    double minAng = std::numeric_limits<double>::max();
+    double minAng = DoubleInfinity;
     const Coordinate* minAngPt = &pts[0];
 
     for(const auto& p : pts) {

@@ -92,13 +92,13 @@ public:
      */
     virtual void mergeLabel(const Label& label2);
 
-    virtual void setLabel(int argIndex, geom::Location onLocation);
+    virtual void setLabel(uint8_t argIndex, geom::Location onLocation);
 
     /** \brief
      * Updates the label of a node to BOUNDARY,
      * obeying the mod-2 boundaryDetermination rule.
      */
-    virtual void setLabelBoundary(int argIndex);
+    virtual void setLabelBoundary(uint8_t argIndex);
 
     /**
      * The location for a given eltIndex for a node will be one
@@ -108,7 +108,7 @@ public:
      * in the boundary.
      * The merged location is the maximum of the two input values.
      */
-    virtual geom::Location computeMergedLocation(const Label& label2, int eltIndex);
+    virtual geom::Location computeMergedLocation(const Label& label2, uint8_t eltIndex);
 
     virtual std::string print();
 
@@ -169,7 +169,8 @@ Node::testInvariant() const
         }
     }
 
-#if 0 // We can't rely on numerical stability with FP computations
+#if 0
+    // We can't rely on numerical stability with FP computations
     // ztot is the sum of doubnle sin zvals vector
     double ztot_check = 0.0;
     for(std::vector<double>::const_iterator

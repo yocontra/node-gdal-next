@@ -280,6 +280,9 @@ public:
     std::unique_ptr<Polygon> createPolygon(std::unique_ptr<LinearRing> && shell,
                                            std::vector<std::unique_ptr<LinearRing>> && holes) const;
 
+    /// Construct a Polygon from a Coordinate vector, taking ownership of the vector
+    std::unique_ptr<Polygon> createPolygon(std::vector<Coordinate> && coords) const;
+
     /// Construct a Polygon with a deep-copy of given arguments
     Polygon* createPolygon(const LinearRing& shell,
                            const std::vector<LinearRing*>& holes) const;
@@ -353,7 +356,7 @@ public:
     //
     /// Will clone the geometries accessible trough the iterator.
     ///
-    /// @tparam T an iterator yelding something which casts to const Geometry*
+    /// @tparam T an iterator yielding something which casts to const Geometry*
     /// @param from start iterator
     /// @param toofar end iterator
     ///
@@ -362,7 +365,7 @@ public:
     buildGeometry(T from, T toofar) const
     {
         bool isHeterogeneous = false;
-        size_t count = 0;
+        std::size_t count = 0;
         int geomClass = -1;
         for(T i = from; i != toofar; ++i) {
             ++count;

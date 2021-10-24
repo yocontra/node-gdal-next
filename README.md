@@ -251,29 +251,30 @@ Release binaries with pre-built bundled GDAL are tested against the full matrix 
 * Node.js versions: 12.x, 14.x, 16.x, 17.x
 * OS: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Ubuntu 21.10, CentOS 8, Fedora 33, Fedora 34, Debian 10 buster, Debian 11 bullseye, Arch Linux current, Amazon Linux, Windows Server 2019, macOS Catalina 10.15
 
+On Ubuntu 16.04, Amazon Linux, Windows and macOS only the bundled GDAL version is officially supported. On all other platforms both the bundled and the system-installed versions are supported.
 
 Development versions are unit tested for the following targets:
 
 ---
 | Node | OS | GDAL |
 | --- | --- | --- |
-| Node.js 14.x | CentOS 8 | system installed GDAL 3.0.4
+| Node.js 14.x | CentOS 8 | system-installed GDAL 3.0.4
 | Node.js 14.x | CentOS 8 | bundled GDAL
-| Node.js 14.x | Debian 10 buster | system installed GDAL 2.1.2 (*earliest unit-tested GDAL*)
-| Node.js 14.x | Debian 11 bullseye | system installed GDAL 3.2.2
+| Node.js 14.x | Debian 10 buster | system-installed GDAL 2.1.2 (*earliest unit-tested GDAL*)
+| Node.js 14.x | Debian 11 bullseye | system-installed GDAL 3.2.2
 | Node.js 14.x | Debian 11 bullseye | bundled GDAL
-| Node.js 14.x | Fedora 33 | system installed GDAL 3.1.4
-| Node.js 14.x | Fedora 34 | system installed GDAL 3.2.2
+| Node.js 14.x | Fedora 33 | system-installed GDAL 3.1.4
+| Node.js 14.x | Fedora 34 | system-installed GDAL 3.2.2
 | Node.js 14.x | Fedora 34 | bundled GDAL
 | Node.js 16.x | Arch Linux current | system installed GDAL 3.2.3
 | Node.js 16.x | Arch Linux current | bundled GDAL
 | Node.js 14.x | Ubuntu 16.04 | bundled GDAL (*glibc target platform*)
-| Node.js 14.x | Ubuntu 18.04 | system installed GDAL 2.2.3
+| Node.js 14.x | Ubuntu 18.04 | system-installed GDAL 2.2.3
 | Node.js 14.x | Ubuntu 18.04 | bundled GDAL
-| Node.js 12.x | Ubuntu 20.04 | system installed GDAL 3.0.4
-| Node.js 14.x | Ubuntu 20.04 | system installed GDAL 3.0.4
-| Node.js 16.x | Ubuntu 20.04 | system installed GDAL 3.0.4
-| Node.js 17.x | Ubuntu 20.04 | system installed GDAL 3.0.4
+| Node.js 12.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
+| Node.js 14.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
+| Node.js 16.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
+| Node.js 17.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
 | Node.js 12.x | Ubuntu 20.04 | bundled GDAL
 | Node.js 14.x | Ubuntu 20.04 | bundled GDAL (*code coverage platform*)
 | Node.js 16.x | Ubuntu 20.04 | bundled GDAL

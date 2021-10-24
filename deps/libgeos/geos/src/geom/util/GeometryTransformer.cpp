@@ -164,7 +164,7 @@ GeometryTransformer::transformMultiPoint(
 
     std::vector<std::unique_ptr<Geometry>> transGeomList;
 
-    for(size_t i = 0, n = geom->getNumGeometries(); i < n; i++) {
+    for(std::size_t i = 0, n = geom->getNumGeometries(); i < n; i++) {
         const Point* p = geom->getGeometryN(i);
         assert(p);
 
@@ -177,6 +177,10 @@ GeometryTransformer::transformMultiPoint(
         }
 
         transGeomList.push_back(std::move(transformGeom));
+    }
+
+    if (transGeomList.empty()) {
+        return factory->createMultiPoint();
     }
 
     return factory->buildGeometry(std::move(transGeomList));
@@ -240,7 +244,7 @@ GeometryTransformer::transformMultiLineString(
 
     std::vector<std::unique_ptr<Geometry>> transGeomList;
 
-    for(size_t i = 0, n = geom->getNumGeometries(); i < n; i++) {
+    for(std::size_t i = 0, n = geom->getNumGeometries(); i < n; i++) {
         const LineString* l = geom->getGeometryN(i);
         assert(l);
 
@@ -253,6 +257,10 @@ GeometryTransformer::transformMultiLineString(
         }
 
         transGeomList.push_back(std::move(transformGeom));
+    }
+
+    if (transGeomList.empty()) {
+        return factory->createMultiLineString();
     }
 
     return factory->buildGeometry(std::move(transGeomList));
@@ -272,8 +280,7 @@ GeometryTransformer::transformPolygon(
 
     bool isAllValidLinearRings = true;
 
-    const LinearRing* lr = dynamic_cast<const LinearRing*>(
-                               geom->getExteriorRing());
+    const LinearRing* lr = geom->getExteriorRing();
     assert(lr);
 
     Geometry::Ptr shell = transformLinearRing(lr, geom);
@@ -284,7 +291,7 @@ GeometryTransformer::transformPolygon(
     }
 
     std::vector<std::unique_ptr<LinearRing>> holes;
-    for(size_t i = 0, n = geom->getNumInteriorRing(); i < n; i++) {
+    for(std::size_t i = 0, n = geom->getNumInteriorRing(); i < n; i++) {
         const LinearRing* p_lr = geom->getInteriorRingN(i);
         assert(p_lr);
 
@@ -351,6 +358,10 @@ GeometryTransformer::transformMultiPolygon(
         }
 
         transGeomList.push_back(std::move(transformGeom));
+    }
+
+    if (transGeomList.empty()) {
+        return factory->createMultiPolygon();
     }
 
     return factory->buildGeometry(std::move(transGeomList));

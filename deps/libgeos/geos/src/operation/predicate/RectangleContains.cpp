@@ -50,7 +50,7 @@ RectangleContains::contains(const Geometry& geom)
 bool
 RectangleContains::isContainedInBoundary(const Geometry& geom)
 {
-    // polygons can never be wholely contained in the boundary
+    // polygons can never be wholly contained in the boundary
     if(dynamic_cast<const geom::Polygon*>(&geom)) {
         return false;
     }
@@ -61,7 +61,7 @@ RectangleContains::isContainedInBoundary(const Geometry& geom)
         return isLineStringContainedInBoundary(*l);
     }
 
-    for(size_t i = 0, n = geom.getNumGeometries(); i < n; ++i) {
+    for(std::size_t i = 0, n = geom.getNumGeometries(); i < n; ++i) {
         const Geometry& comp = *(geom.getGeometryN(i));
         if(!isContainedInBoundary(comp)) {
             return false;
@@ -99,7 +99,7 @@ bool
 RectangleContains::isLineStringContainedInBoundary(const LineString& line)
 {
     const CoordinateSequence& seq = *(line.getCoordinatesRO());
-    for(size_t i = 0, n = seq.size() - 1; i < n; ++i) {
+    for(std::size_t i = 0, n = seq.size() - 1; i < n; ++i) {
         const Coordinate& p0 = seq.getAt(i);
         const Coordinate& p1 = seq.getAt(i + 1);
         if(! isLineSegmentContainedInBoundary(p0, p1)) {
@@ -140,7 +140,7 @@ RectangleContains::isLineSegmentContainedInBoundary(const Coordinate& p0,
      *   one of x and y are the same, but the other ordinate
      *   is not the same as a boundary ordinate
      *
-     * In either case, the segment is not wholely in the boundary
+     * In either case, the segment is not wholly in the boundary
      */
     return false;
 }
