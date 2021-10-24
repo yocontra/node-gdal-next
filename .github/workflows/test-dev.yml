@@ -126,3 +126,26 @@ jobs:
       run: npm test
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
+
+  test_winmac_debug:
+
+    runs-on: ${{ matrix.platforms }}
+
+    strategy:
+      matrix:
+        platforms: [ windows-2019, macos-10.15 ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install --ignore-scripts
+    - run: npx @mapbox/node-pre-gyp configure --debug
+    - name: Build from sources
+      run: npx @mapbox/node-pre-gyp build -j max
+    - name: Run unit tests
+      run: npm test
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}

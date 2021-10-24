@@ -79,6 +79,16 @@
 				"debug_extra_ldflags" : [ "-lgcov", "--coverage" ],
 			},
 		}],
+    ["OS == 'mac'", {
+			"variables": {
+        "debug_extra_ldflags": [ "-Wl,-bind_at_load" ],
+      }
+    }],
+    ["OS == 'linux'", {
+			"variables": {
+        "debug_extra_ldflags": [ "-Wl,-z,now" ],
+      }
+    }]
 	],
 	"targets": [
 		{
@@ -97,10 +107,7 @@
 				"_FILE_OFFSET_BITS=64"
 			],
 			"xcode_settings": {
-				"GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-				"OTHER_LDFLAGS": [
-					"-Wl,-bind_at_load"
-				]
+				"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
 			},
 			"conditions": [
 				["enable_logging == 'true'", {
