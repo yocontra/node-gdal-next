@@ -45,23 +45,13 @@ jobs:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
 
-  test_distros:
+  test_distros_shared:
 
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         linux-version: [ 'ubuntu:18.04', 'ubuntu:20.04', 'debian:bullseye', 'centos:8', 'fedora:34', 'archlinux:latest' ]
-        gdal-version: [ 'shared', 'bundled' ]
-        include:
-          - linux-version: 'ubuntu:16.04'
-            gdal-version: 'bundled'
-          - linux-version: 'amazonlinux:latest'
-            gdal-version: 'bundled'
-          - linux-version: 'debian:buster'
-            gdal-version: 'shared'
-          - linux-version: 'fedora:33'
-            gdal-version: 'shared'
 
     steps:
     - uses: actions/checkout@v2
@@ -69,7 +59,26 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
-    - run: npm run container dev ${{ matrix.linux-version }} 14 ${{ matrix.gdal-version }}
+    - run: npm run container dev ${{ matrix.linux-version }} 14 shared
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
+
+
+  test_distros_bundled:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        linux-version: [ 'ubuntu:16.04', 'ubuntu:20.04', 'amazonlinux:latest' ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - run: npm run container dev ${{ matrix.linux-version }} 14 bundled
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
 
