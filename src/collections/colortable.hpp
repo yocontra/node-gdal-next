@@ -16,14 +16,6 @@
 using namespace v8;
 using namespace node;
 
-/**
- * @typedef Color
- * @property {number} c1
- * @property {number} c2
- * @property {number} c3
- * @property {number} c4
- */
-
 namespace node_gdal {
 
 class ColorTable : public Nan::ObjectWrap {

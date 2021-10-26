@@ -8,10 +8,6 @@
 
 namespace node_gdal {
 
-/**
- * @typedef TypedArray Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array
- */
-
 Nan::Persistent<FunctionTemplate> RasterBandPixels::constructor;
 
 void RasterBandPixels::Initialize(Local<Object> target) {
@@ -255,18 +251,6 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
 }
 
 /**
- * @typedef ReadOptions
- * @property {number} [buffer_width]
- * @property {number} [buffer_height]
- * @property {string} [type]
- * @property {number} [pixel_space]
- * @property {number} [line_space]
- * @property {string} [resampling]
- * @property {ProgressCb} [progress_cb]
- * @property {number} [offset]
- */
-
-/**
  * Reads a region of pixels.
  *
  * @method read
@@ -415,16 +399,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
   job.rval = [](CPLErr err, GetFromPersistentFunc getter) { return getter("array"); };
   job.run(info, async, 13);
 }
-
-/**
- * @typedef WriteOptions
- * @property {number} [buffer_width]
- * @property {number} [buffer_height]
- * @property {number} [pixel_space]
- * @property {number} [line_space]
- * @property {ProgressCb} [progress_cb]
- * @property {number} [offset]
- */
 
 /**
  * Writes a region of pixels.

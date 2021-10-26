@@ -178,15 +178,6 @@ class GDALExecutionProgress {
   void Send(GDALProgressInfo *info) const;
 };
 
-/**
- * @typedef ProgressOptions
- * @property {ProgressCb} progress_cb
- */
-
-/**
- * @typedef ProgressCb ( complete: number, msg: string ) => void
- */
-
 // This is the progress callback trampoline
 // It can be invoked both in the main thread (in sync mode) or in auxillary thread (in async mode)
 // It is essentially a gateway between the GDAL world and Node.js/V8 world

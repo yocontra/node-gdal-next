@@ -17,14 +17,6 @@ void Algorithms::Initialize(Local<Object> target) {
 }
 
 /**
- * @typedef FillOptions
- * @property {gdal.RasterBand} src
- * @property {gdal.RasterBand} [mask]
- * @property {number} searchDist
- * @property {number} [smoothingIterations]
- */
-
-/**
  * Fill raster regions by interpolation from edges.
  *
  * @throws Error
@@ -89,19 +81,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
-
-/**
- * @typedef ContourOptions
- * @property {gdal.RasterBand} src
- * @property {gdal.Layer} dst
- * @property {number} [offset]
- * @property {number} [interval]
- * @property {number[]} [fixedLevels]
- * @property {number} [nodata]
- * @property {number} [idField]
- * @property {number} [elevField]
- * @property {ProgressCb} [progress_cb]
- */
 
 /**
  * Create vector contours from raster DEM.
@@ -235,16 +214,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 1);
 }
-
-/**
- * @typedef SieveOptions
- * @property {gdal.RasterBand} src
- * @property {gdal.RasterBand} dst
- * @property {gdal.RasterBand} [mask]
- * @property {number} threshold
- * @property {number} [connectedness]
- * @property {ProgressCb} [progress_cb]
- */
 
 /**
  * Removes small raster polygons.
@@ -408,17 +377,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
   job.rval = [](int r, GetFromPersistentFunc) { return Nan::New<Integer>(r); };
   job.run(info, async, 5);
 }
-
-/**
- * @typedef PolygonizeOptions
- * @property {gdal.RasterBand} src
- * @property {gdal.Layer} dst
- * @property {gdal.RasterBand} [mask]
- * @property {number} pixValField
- * @property {number} [connectedness]
- * @property {boolean} [useFloats]
- * @property {ProgressCb} [progress_cb]
- */
 
 /**
  * Creates vector polygons for all connected regions of pixels in the raster

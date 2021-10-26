@@ -231,11 +231,6 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
 }
 
 /**
- * @typedef CreateOptions
- * @property {ProgressCb} [progress_cb]
- */
-
-/**
  * Create a copy of a dataset.
  *
  * @throws Error

@@ -143,16 +143,6 @@ NAN_METHOD(MDArray::toString) {
   info.GetReturnValue().Set(Nan::New("MDArray").ToLocalChecked());
 }
 
-/**
- * @typedef MDArrayOptions
- * @property {number[]} origin
- * @property {number[]} span
- * @property {number[]} [stride]
- * @property {string} [data_type]
- * @property {TypedArray} [data]
- * @property {number} [_offset]
- */
-
 /* Find the lowest possible element index for the given spans and strides */
 static inline int
 findLowest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDiff_t> stride, GPtrDiff_t offset) {

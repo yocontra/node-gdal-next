@@ -163,28 +163,6 @@ CPLErr GDALReprojectImageMulti(
 }
 
 /**
- * @typedef ReprojectOptions
- * @property {gdal.Dataset} src
- * @property {gdal.Dataset} dst
- * @property {gdal.SpatialReference} s_srs
- * @property {gdal.SpatialReference} t_srs
- * @property {string} [resampling]
- * @property {gdal.Geometry} [cutline]
- * @property {number[]} [srcBands]
- * @property {number[]} [dstBands]
- * @property {number} [srcAlphaBand]
- * @property {number} [dstAlphaBand]
- * @property {number} [srcNodata]
- * @property {number} [dstNodata]
- * @property {number} [blend]
- * @property {number} [memoryLimit]
- * @property {number} [maxError]
- * @property {boolean} [multi]
- * @property {object} [options]
- * @property {ProgressCb} [progress_cb]
- */
-
-/**
  * Reprojects a dataset.
  *
  * @throws Error
@@ -332,20 +310,6 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
   job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
   job.run(info, async, 1);
 }
-
-/**
- * @typedef WarpOptions
- * @property {gdal.Dataset} src
- * @property {gdal.SpatialReference} s_srs
- * @property {gdal.SpatialReference} t_srs
- * @property {number} [maxError]
- */
-
-/**
- * @typedef WarpOutput
- * @property {xyz} rasterSize
- * @property {number[]} geoTransform
- */
 
 /**
  * Used to determine the bounds and resolution of the output virtual file which

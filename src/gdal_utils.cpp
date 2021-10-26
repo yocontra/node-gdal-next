@@ -21,11 +21,6 @@ void Utils::Initialize(Local<Object> target) {
 }
 
 /**
- * @typedef UtilOptions
- * @property {ProgressCb} [progress_cb]
- */
-
-/**
  * Library version of gdal_translate.
  *
  * @example

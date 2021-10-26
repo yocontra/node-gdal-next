@@ -5,6 +5,7 @@
 	"logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/GDALLogoColor.svg/200px-GDALLogoColor.svg.png",
 	"options": {
 		"paths": ["./lib","./src"],
+    "exclude": "ts_types.cpp",
 		"outdir": "./yuidocs",
 		"themedir": "node_modules/yuidoc-lucid-theme",
 		"helpers": ["node_modules/yuidoc-lucid-theme/helpers/helpers.js", "scripts/yui-async.js"]

@@ -378,14 +378,6 @@ NAN_METHOD(RasterBand::getStatistics) {
 }
 
 /**
- * @typedef stats
- * @property {number} min
- * @property {number} max
- * @property {number} mean
- * @property {number} std_dev
- */
-
-/**
  * Computes image statistics.
  *
  * Returns the minimum, maximum, mean and standard deviation of all pixel values

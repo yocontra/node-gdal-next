@@ -927,12 +927,6 @@ NAN_METHOD(SpatialReference::fromESRI) {
 }
 
 /**
- * @typedef units
- * @property {string} units
- * @property {number} value
- */
-
-/**
  * Fetch linear geographic coordinate system units.
  *
  * @method getLinearUnits
