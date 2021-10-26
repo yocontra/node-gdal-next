@@ -63,7 +63,8 @@
 				"src/collections/compound_curves.cpp",
 				"src/collections/rasterband_overviews.cpp",
 				"src/collections/rasterband_pixels.cpp",
-				"src/collections/gdal_drivers.cpp"
+				"src/collections/gdal_drivers.cpp",
+        "src/collections/colortable.cpp"
 			]
 	},
 	"conditions": [

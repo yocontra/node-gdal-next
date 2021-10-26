@@ -65,7 +65,8 @@ class RasterBand : public Nan::ObjectWrap {
   static NAN_GETTER(offsetGetter);
   static NAN_GETTER(noDataValueGetter);
   static NAN_GETTER(categoryNamesGetter);
-  static NAN_GETTER(colorInterpretationGetter);
+  GDAL_ASYNCABLE_GETTER_DECLARE(colorInterpretationGetter);
+  GDAL_ASYNCABLE_GETTER_DECLARE(colorTableGetter);
   static NAN_GETTER(uidGetter);
 
   static NAN_SETTER(unitTypeSetter);
@@ -74,6 +75,7 @@ class RasterBand : public Nan::ObjectWrap {
   static NAN_SETTER(noDataValueSetter);
   static NAN_SETTER(categoryNamesSetter);
   static NAN_SETTER(colorInterpretationSetter);
+  static NAN_SETTER(colorTableSetter);
 
   RasterBand();
   RasterBand(GDALRasterBand *band);

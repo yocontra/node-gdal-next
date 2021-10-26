@@ -130,6 +130,17 @@ NAN_SETTER(READ_ONLY_SETTER);
     return;                                                                                                            \
   }
 
+#define NODE_UNWRAP_CHECK_ASYNC(type, obj, var)                                                                        \
+  type *var = Nan::ObjectWrap::Unwrap<type>(obj);                                                                      \
+  if (!var->isAlive()) {                                                                                               \
+    THROW_OR_REJECT(#type " object has already been destroyed");                                                       \
+    return;                                                                                                            \
+  }
+
+#define GDAL_RAW_CHECK_ASYNC(type, obj, var)                                                                           \
+  type var = obj->get();                                                                                               \
+  if (!obj) { THROW_OR_REJECT(#type " object has already been destroyed"); }
+
 // ----- object property conversion -------
 
 #define NODE_DOUBLE_FROM_OBJ(obj, key, var)                                                                            \

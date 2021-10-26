@@ -7,6 +7,7 @@ import * as gdal from '..'
 // create = array -> these are the arguments for the new
 const create = {
   CircularString: [],
+  ColorTable: [ gdal.GPI_HLS ],
   CompoundCurve: [],
   CompoundCurveCurves: () => new gdal.CompoundCurve().curves,
   CoordinateTransformation: [ gdal.SpatialReference.fromEPSG(4326), gdal.SpatialReference.fromEPSG(3857) ],

@@ -3,6 +3,7 @@
 
 #include "collections/rasterband_overviews.hpp"
 #include "collections/rasterband_pixels.hpp"
+#include "collections/colortable.hpp"
 #include "gdal_dataset.hpp"
 #include "gdal_mdarray.hpp"
 #include "gdal_majorobject.hpp"
@@ -41,9 +42,6 @@ void RasterBand::Initialize(Local<Object> target) {
 
   // unimplemented methods
   // Nan::SetPrototypeMethod(lcons, "buildOverviews", buildOverviews);
-  // Nan::SetPrototypeMethod(lcons, "rasterIO", rasterIO);
-  // Nan::SetPrototypeMethod(lcons, "getColorTable", getColorTable);
-  // Nan::SetPrototypeMethod(lcons, "setColorTable", setColorTable);
   // Nan::SetPrototypeMethod(lcons, "getHistogram", getHistogram);
   // Nan::SetPrototypeMethod(lcons, "getDefaultHistogram", getDefaultHistogram);
   // Nan::SetPrototypeMethod(lcons, "setDefaultHistogram", setDefaultHistogram);
@@ -66,7 +64,8 @@ void RasterBand::Initialize(Local<Object> target) {
   ATTR(lcons, "offset", offsetGetter, offsetSetter);
   ATTR(lcons, "noDataValue", noDataValueGetter, noDataValueSetter);
   ATTR(lcons, "categoryNames", categoryNamesGetter, categoryNamesSetter);
-  ATTR(lcons, "colorInterpretation", colorInterpretationGetter, colorInterpretationSetter);
+  ATTR_ASYNCABLE(lcons, "colorInterpretation", colorInterpretationGetter, colorInterpretationSetter);
+  ATTR_ASYNCABLE(lcons, "colorTable", colorTableGetter, colorTableSetter);
 
   Nan::Set(target, Nan::New("RasterBand").ToLocalChecked(), Nan::GetFunction(lcons).ToLocalChecked());
 
@@ -858,15 +857,31 @@ NAN_GETTER(RasterBand::categoryNamesGetter) {
  * @attribute colorInterpretation
  * @type {string}
  */
-NAN_GETTER(RasterBand::colorInterpretationGetter) {
+
+/**
+ * Color interpretation mode ({{#crossLink "Constants (GCI)"}}see GCI
+ * constants{{/crossLink}}).
+ * {{async_getter}}
+ *
+ * @attribute colorInterpretationAsync
+ * @type {Promise<string>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorInterpretationGetter) {
   Nan::HandleScope scope;
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  GDALColorInterp interp = band->this_->GetColorInterpretation();
-  if (interp == GCI_Undefined)
-    return;
-  else
-    info.GetReturnValue().Set(SafeString::New(GDALGetColorInterpretationName(interp)));
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<GDALColorInterp> job(band->parent_uid);
+  job.persist("this", info.This());
+  job.main = [raw](const GDALExecutionProgress &) { return raw->GetColorInterpretation(); };
+  job.rval = [](GDALColorInterp ci, GetFromPersistentFunc) {
+    if (ci == GCI_Undefined)
+      return Nan::Undefined().As<Value>();
+    else
+      return SafeString::New(GDALGetColorInterpretationName(ci));
+  };
+
+  job.run(info, async);
 }
 
 NAN_SETTER(RasterBand::unitTypeSetter) {
@@ -979,6 +994,58 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
   GDAL_LOCK_PARENT(band);
   CPLErr err = band->this_->SetColorInterpretation(ci);
   if (err) { NODE_THROW_LAST_CPLERR; }
+}
+
+/**
+ * Color table ({{#crossLink "ColorTable"}}see gdal.ColorTable{{/crossLink}}).
+ *
+ * @attribute colorTable
+ * @type {gdal.ColorTable}
+ */
+
+/**
+ * Color table ({{#crossLink "ColorTable"}}see gdal.ColorTable{{/crossLink}}).
+ * {{async_getter}}
+ *
+ * @attribute colorTableAsync
+ * @type {Promise<gdal.ColorTable>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorTableGetter) {
+  Nan::HandleScope scope;
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<GDALColorTable *> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) { return raw->GetColorTable(); };
+  job.rval = [](GDALColorTable *ct, GetFromPersistentFunc getter) {
+    if (ct != nullptr) return ColorTable::New(ct, getter("this"));
+    return Nan::Undefined().As<Value>();
+  };
+
+  job.run(info, async);
+}
+
+NAN_SETTER(RasterBand::colorTableSetter) {
+  Nan::HandleScope scope;
+
+  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
+
+  GDALColorTable *raw;
+  if (value->IsNullOrUndefined()) {
+    raw = nullptr;
+  } else if (IS_WRAPPED(value, ColorTable)) {
+    NODE_UNWRAP_CHECK(ColorTable, value.As<Object>(), ct);
+    GDAL_RAW_CHECK(GDALColorTable *, ct, _raw);
+    raw = _raw;
+  } else {
+    Nan::ThrowTypeError("color table must be a gdal.ColorTable object or null");
+    return;
+  }
+
+  GDAL_LOCK_PARENT(band);
+  CPLErr err = band->this_->SetColorTable(raw);
+  if (err != CE_None) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_GETTER(RasterBand::uidGetter) {

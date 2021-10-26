@@ -19,11 +19,11 @@ namespace node_gdal {
  * Geometry class inheritance hierarchy
  * It uses CRTP - https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
  * to get around the fact that the methods exposed to JS are static and cannot be virtual
- * 
+ *
  *
  * C++
  * (maximizes code reuse)
- * 
+ *
  * GeometryBase<>
  *    Geometry
  *    Point
@@ -37,11 +37,11 @@ namespace node_gdal {
  *    GeometryCollectionBase<>
  *        GeometryCollection
  *        Multi*
- * 
- * 
+ *
+ *
  * JS
  * (tries to follow GDAL and the ISO specification)
- * 
+ *
  * Geometry
  *    Point
  *    SimpleCurve
@@ -52,8 +52,8 @@ namespace node_gdal {
  *    CompoundCurve
  *    GeometryCollection
  *        Multi*
- * 
- * 
+ *
+ *
  * The full GDAL OGRGeometry class hierarchy
  * https://gdal.org/doxygen/classOGRGeometry.html
  */
@@ -99,7 +99,7 @@ template <class T, class OGRT> Local<Value> GeometryBase<T, OGRT>::New(OGRT *geo
 
   // make a copy of geometry owned by a feature
   // + no need to track when a feature is destroyed
-  // + no need to throw errors when a method trys to modify an owned read-only
+  // + no need to throw errors when a method tries to modify an owned read-only
   // geometry
   // - is slower
 

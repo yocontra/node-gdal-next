@@ -105,7 +105,7 @@ ObjectStore::~ObjectStore() {
 bool ObjectStore::isAlive(long uid) {
   if (uid == 0) return true;
   return uidMap<GDALRasterBand *>.count(uid) > 0 || uidMap<OGRLayer *>.count(uid) > 0 ||
-    uidMap<GDALDataset *>.count(uid) > 0
+    uidMap<GDALDataset *>.count(uid) > 0 || uidMap<GDALColorTable *>.count(uid)
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
     || uidMap<shared_ptr<GDALGroup>>.count(uid) > 0 || uidMap<shared_ptr<GDALMDArray>>.count(uid) > 0 ||
     uidMap<shared_ptr<GDALDimension>>.count(uid) > 0 || uidMap<shared_ptr<GDALAttribute>>.count(uid) > 0
@@ -280,16 +280,19 @@ template <typename GDALPTR> Local<Object> ObjectStore::get(long uid) {
 template long ObjectStore::add(GDALDriver *, Nan::Persistent<Object> &, long);
 template long ObjectStore::add(GDALRasterBand *, Nan::Persistent<Object> &, long);
 template long ObjectStore::add(OGRSpatialReference *, Nan::Persistent<Object> &, long);
+template long ObjectStore::add(GDALColorTable *, Nan::Persistent<Object> &, long);
 template bool ObjectStore::has(GDALDriver *);
 template bool ObjectStore::has(GDALDataset *);
 template bool ObjectStore::has(OGRLayer *);
 template bool ObjectStore::has(GDALRasterBand *);
 template bool ObjectStore::has(OGRSpatialReference *);
+template bool ObjectStore::has(GDALColorTable *);
 template Local<Object> ObjectStore::get(GDALDriver *);
 template Local<Object> ObjectStore::get(GDALDataset *);
 template Local<Object> ObjectStore::get(OGRLayer *);
 template Local<Object> ObjectStore::get(GDALRasterBand *);
 template Local<Object> ObjectStore::get(OGRSpatialReference *);
+template Local<Object> ObjectStore::get(GDALColorTable *);
 template Local<Object> ObjectStore::get<GDALDataset *>(long uid);
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
 template long ObjectStore::add(shared_ptr<GDALAttribute>, Nan::Persistent<Object> &, long);
@@ -340,7 +343,10 @@ template <> void ObjectStore::dispose(shared_ptr<ObjectStoreItem<GDALDataset *>>
   // Beyond this point the Dataset is not alive anymore ->
   // anyone who was waiting for this semaphore should fail
 
-  // Its children can still lock its item to remove themselves
+  // All the children are removed from the ObjectStore
+  // but the Node/V8 objects still exist
+  // They can be deleted only by the GC
+  // When this happens, they will skip this in do_dispose
   while (!item->children.empty()) { do_dispose(item->children.back()); }
 
   if (item->ptr) {
@@ -399,6 +405,8 @@ void ObjectStore::do_dispose(long uid, bool manual) {
     dispose(uidMap<GDALDriver *>[uid], manual);
   else if (uidMap<OGRSpatialReference *>.count(uid))
     dispose(uidMap<OGRSpatialReference *>[uid], manual);
+  else if (uidMap<GDALColorTable *>.count(uid))
+    dispose(uidMap<GDALColorTable *>[uid], manual);
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
   else if (uidMap<shared_ptr<GDALGroup>>.count(uid))
     dispose(uidMap<shared_ptr<GDALGroup>>[uid], manual);

@@ -433,9 +433,9 @@ template <class GDALType> class GDALAsyncableJob {
   }
 
   void run(const Nan::FunctionCallbackInfo<v8::Value> &info, bool async, int cb_arg) {
+    if (!info.This().IsEmpty() && info.This()->IsObject()) persist("this", info.This());
     if (async) {
       if (progress) persist("progress_cb", progress->GetFunction());
-      if (!info.This().IsEmpty() && info.This()->IsObject()) persist("this", info.This());
       Nan::Callback *callback;
       NODE_ARG_CB(cb_arg, "callback", callback);
       Nan::AsyncQueueWorker(new GDALCallbackWorker<GDALType>(callback, progress, main, rval, persistent, ds_uids));
@@ -452,8 +452,8 @@ template <class GDALType> class GDALAsyncableJob {
   }
 
   void run(Nan::NAN_GETTER_ARGS_TYPE info, bool async) {
+    if (!info.This().IsEmpty() && info.This()->IsObject()) persist("this", info.This());
     if (async) {
-      if (!info.This().IsEmpty() && info.This()->IsObject()) persist("this", info.This());
       auto worker = new GDALPromiseWorker<GDALType>(info, main, rval, persistent, ds_uids);
       info.GetReturnValue().Set(worker->Promise());
       Nan::AsyncQueueWorker(worker);

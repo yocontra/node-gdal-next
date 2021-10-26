@@ -599,5 +599,35 @@ describe('gdal.RasterBandAsync', () => {
         }))
       })
     })
+    describe('"colorInterpretation" property', () => {
+      describe('getter', () => {
+        it('should return colorInterpretation', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.colorInterpretationAsync, gdal.GCI_GrayIndex)
+        })
+        it('should reject if dataset already closed', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.colorInterpretationAsync, /already been destroyed/)
+        })
+      })
+    })
+    describe('"colorTable" property', () => {
+      describe('getter', () => {
+        it('should return a read-only colorTable', () => {
+          const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
+          const band = ds.bands.get(1)
+          return assert.eventually.instanceOf(band.colorTableAsync, gdal.ColorTable)
+        })
+        it('should reject if dataset already closed', () => {
+          const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.colorTableAsync, /already been destroyed/)
+        })
+      })
+    })
   })
 })

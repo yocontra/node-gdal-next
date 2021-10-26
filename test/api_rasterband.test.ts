@@ -63,6 +63,92 @@ describe('gdal.RasterBand', () => {
         })
       })
     })
+    describe('"colorTable" property', () => {
+      describe('getter', () => {
+        it('should return a read-only colorTable', () => {
+          const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
+          const band = ds.bands.get(1)
+          assert.instanceOf(band.colorTable, gdal.ColorTable)
+          assert.throws(() => {
+            band.colorTable.set(0, { c1: 0, c2: 0, c3: 0, c4: 0 })
+          }, /read-only/)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
+          const band = ds.bands.get(1)
+          ds.close()
+          assert.throws(() => {
+            console.log(band.colorTable)
+          }, /already been destroyed/)
+        })
+      })
+      describe('setter', () => {
+        it('should set and clear the colorTable', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          const colorTable = new gdal.ColorTable(gdal.GPI_CMYK)
+          band.colorTable = colorTable
+          assert.isTrue(band.colorTable.isSame(colorTable))
+          band.colorTable = null
+          assert.isUndefined(band.colorTable)
+        })
+        it('should throw error on invalid value', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          assert.throws(() => {
+            band.colorTable = 12 as unknown as gdal.ColorTable
+          }, /must be a gdal.ColorTable/)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          assert.throws(() => {
+            band.colorTable = undefined
+          }, /already been destroyed/)
+        })
+      })
+      describe('gdal.ColorTable', () => {
+        it('@@iterator()', () => {
+          const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
+          const band = ds.bands.get(1)
+          let count = 0
+          for (const color of band.colorTable) {
+            count++
+            assert.hasAllKeys(color, [ 'c1', 'c2', 'c3', 'c4' ])
+          }
+          assert.isAbove(count, 0)
+          assert.equal(count, band.colorTable.count())
+        })
+        it('clone()', () => {
+          const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
+          const band = ds.bands.get(1)
+          const colorTable = band.colorTable.clone()
+          assert.instanceOf(colorTable, gdal.ColorTable)
+          assert.equal(colorTable.count(), band.colorTable.count())
+          for (let i = 0; i < colorTable.count(); i++) {
+            assert.deepEqual(colorTable.get(i), band.colorTable.get(i))
+          }
+          colorTable.set(0, { c1: 0, c2: 0, c3: 0, c4: 0 })
+        })
+        it('"interpretation" property', () => {
+          const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
+          const band = ds.bands.get(1)
+          const interp = band.colorTable.interpretation
+          assert.equal(interp, gdal.GPI_RGB)
+        })
+        it('ramp()', () => {
+          const colorTable = new gdal.ColorTable(gdal.GPI_RGB)
+          assert.instanceOf(colorTable, gdal.ColorTable)
+          assert.equal(colorTable.count(), 0)
+          colorTable.ramp(0, { c1: 0, c2: 99, c3: 0, c4: 0 }, 99, { c1: 99, c2: 0, c3: 0, c4: 0 })
+          assert.equal(colorTable.count(), 100)
+          for (let i = 0; i < colorTable.count(); i++) {
+            assert.deepEqual(colorTable.get(i), { c1: i, c2: 99 - i , c3: 0, c4: 0 })
+          }
+        })
+      })
+    })
     describe('"description" property', () => {
       describe('getter', () => {
         it('should return string', () => {

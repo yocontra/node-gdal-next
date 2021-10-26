@@ -167,6 +167,7 @@ if (gdal.CompoundCurveCurves) {
   <#defaultToArray CompoundCurveCurves|SimpleCurve|compoundCurves.curves|curves>
 }
 <#defaultAllSync GeometryCollectionChildren|Geometry|geometryCollection.children|child geometries>
+<#defaultAllSync ColorTable|Color|band.colorTable|color entries>
 
 if (gdal.MDArray) {
   <#defaultAll GroupArrays|MDArray|group.arrays|arrays>

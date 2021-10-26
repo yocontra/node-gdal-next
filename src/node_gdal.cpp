@@ -105,6 +105,7 @@
 #include "collections/compound_curves.hpp"
 #include "collections/rasterband_overviews.hpp"
 #include "collections/rasterband_pixels.hpp"
+#include "collections/colortable.hpp"
 
 // std
 #include <sstream>
@@ -425,6 +426,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
   SpatialReference::Initialize(target);
   CoordinateTransformation::Initialize(target);
+  ColorTable::Initialize(target);
 
   DatasetBands::Initialize(target);
   DatasetLayers::Initialize(target);
@@ -1088,6 +1090,44 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
     target,
     Nan::New("GCI_YCbCr_CrBand").ToLocalChecked(),
     Nan::New(GDALGetColorInterpretationName(GCI_YCbCr_CrBand)).ToLocalChecked());
+
+  /**
+   * Palette types.
+   *
+   * @class Constants (GPI)
+   */
+
+  /**
+   * Grayscale, only c1 defined
+   * @final
+   * @property gdal.GPI_Gray
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("GPI_Gray").ToLocalChecked(), Nan::New("Gray").ToLocalChecked());
+
+  /**
+   * RGBA, alpha in c4
+   * @final
+   * @property gdal.GPI_RGB
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("GPI_RGB").ToLocalChecked(), Nan::New("RGB").ToLocalChecked());
+
+  /**
+   * CMYK
+   * @final
+   * @property gdal.GPI_CMYK
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("GPI_CMYK").ToLocalChecked(), Nan::New("CMYK").ToLocalChecked());
+
+  /**
+   * HLS, c4 is not defined
+   * @final
+   * @property gdal.GPI_HLS
+   * @type {string}
+   */
+  Nan::Set(target, Nan::New("GPI_HLS").ToLocalChecked(), Nan::New("HLS").ToLocalChecked());
 
   /**
    * @class Constants (wkbVariant)
