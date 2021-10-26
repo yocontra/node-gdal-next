@@ -43,7 +43,6 @@ void CircularString::Initialize(Local<Object> target) {
  */
 
 NAN_METHOD(CircularString::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("CircularString").ToLocalChecked());
 }
 

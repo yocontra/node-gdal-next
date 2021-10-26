@@ -35,7 +35,6 @@ void MultiLineString::Initialize(Local<Object> target) {
  */
 
 NAN_METHOD(MultiLineString::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("MultiLineString").ToLocalChecked());
 }
 
@@ -46,7 +45,6 @@ NAN_METHOD(MultiLineString::toString) {
  * @return {gdal.Polygon}
  */
 NAN_METHOD(MultiLineString::polygonize) {
-  Nan::HandleScope scope;
 
   MultiLineString *geom = Nan::ObjectWrap::Unwrap<MultiLineString>(info.This());
 

@@ -34,7 +34,6 @@ void MultiCurve::Initialize(Local<Object> target) {
  */
 
 NAN_METHOD(MultiCurve::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("MultiCurve").ToLocalChecked());
 }
 
@@ -45,7 +44,6 @@ NAN_METHOD(MultiCurve::toString) {
  * @return {gdal.Polygon}
  */
 NAN_METHOD(MultiCurve::polygonize) {
-  Nan::HandleScope scope;
 
   MultiCurve *geom = Nan::ObjectWrap::Unwrap<MultiCurve>(info.This());
 

@@ -11,7 +11,7 @@ void Warper::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "suggestedWarpOutput", suggestedWarpOutput);
 }
 
-/**
+/*
  * GDALReprojectImage() method with a ChunkAndWarpImage replaced with
  * ChunkAndWarpMulti
  */
@@ -219,7 +219,6 @@ CPLErr GDALReprojectImageMulti(
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
-  Nan::HandleScope scope;
 
   Local<Object> obj;
   Local<Value> prop;
@@ -346,7 +345,6 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @return {Promise<WarpOutput>}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
-  Nan::HandleScope scope;
 
   Local<Object> obj;
   Local<Value> prop;

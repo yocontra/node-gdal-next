@@ -41,7 +41,6 @@ LineStringPoints::~LineStringPoints() {
  * @class gdal.LineStringPoints
  */
 NAN_METHOD(LineStringPoints::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -75,7 +74,6 @@ Local<Value> LineStringPoints::New(Local<Value> geom) {
 }
 
 NAN_METHOD(LineStringPoints::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("LineStringPoints").ToLocalChecked());
 }
 
@@ -86,7 +84,6 @@ NAN_METHOD(LineStringPoints::toString) {
  * @return {number}
  */
 NAN_METHOD(LineStringPoints::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -101,7 +98,6 @@ NAN_METHOD(LineStringPoints::count) {
  * @method reverse
  */
 NAN_METHOD(LineStringPoints::reverse) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -119,7 +115,6 @@ NAN_METHOD(LineStringPoints::reverse) {
  * @param {number} count
  */
 NAN_METHOD(LineStringPoints::resize) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -141,7 +136,6 @@ NAN_METHOD(LineStringPoints::resize) {
  * @return {gdal.Point}
  */
 NAN_METHOD(LineStringPoints::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -184,7 +178,6 @@ NAN_METHOD(LineStringPoints::get) {
  * @param {number} [z]
  */
 NAN_METHOD(LineStringPoints::set) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -285,7 +278,6 @@ NAN_METHOD(LineStringPoints::set) {
  * @param {number} [z]
  */
 NAN_METHOD(LineStringPoints::add) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();

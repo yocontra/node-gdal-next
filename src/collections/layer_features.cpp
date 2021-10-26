@@ -43,7 +43,6 @@ LayerFeatures::~LayerFeatures() {
  * @class gdal.LayerFeatures
  */
 NAN_METHOD(LayerFeatures::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -76,7 +75,6 @@ Local<Value> LayerFeatures::New(Local<Value> layer_obj) {
 }
 
 NAN_METHOD(LayerFeatures::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("LayerFeatures").ToLocalChecked());
 }
 
@@ -108,7 +106,6 @@ NAN_METHOD(LayerFeatures::toString) {
  * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -151,7 +148,6 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
  * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -197,7 +193,6 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
  * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -254,7 +249,6 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -299,7 +293,6 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -360,7 +353,6 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  * @return {Promise<gdal.Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -437,7 +429,6 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
  */
 
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -471,7 +462,6 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
  * @type {gdal.Layer}
  */
 NAN_GETTER(LayerFeatures::layerGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 

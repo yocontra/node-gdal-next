@@ -29,7 +29,6 @@ template <class T, class OGRT, class COLLECTIONT> class CurveBase : public Geome
 };
 
 template <class T, class OGRT, class COLLECTIONT> NAN_METHOD((CurveBase<T, OGRT, COLLECTIONT>::New)) {
-  Nan::HandleScope scope;
   T *f;
 
   if (!info.IsConstructCall()) {

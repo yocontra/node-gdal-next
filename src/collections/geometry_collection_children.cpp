@@ -38,7 +38,6 @@ GeometryCollectionChildren::~GeometryCollectionChildren() {
  * @class gdal.GeometryCollectionChildren
  */
 NAN_METHOD(GeometryCollectionChildren::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -72,7 +71,6 @@ Local<Value> GeometryCollectionChildren::New(Local<Value> geom) {
 }
 
 NAN_METHOD(GeometryCollectionChildren::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("GeometryCollectionChildren").ToLocalChecked());
 }
 
@@ -83,7 +81,6 @@ NAN_METHOD(GeometryCollectionChildren::toString) {
  * @return {number}
  */
 NAN_METHOD(GeometryCollectionChildren::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -101,7 +98,6 @@ NAN_METHOD(GeometryCollectionChildren::count) {
  * @return {gdal.Geometry}
  */
 NAN_METHOD(GeometryCollectionChildren::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -125,7 +121,6 @@ NAN_METHOD(GeometryCollectionChildren::get) {
  * @param {number} index 0-based index, -1 for all geometries
  */
 NAN_METHOD(GeometryCollectionChildren::remove) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -161,7 +156,6 @@ NAN_METHOD(GeometryCollectionChildren::remove) {
  * @param {gdal.Geometry|gdal.Geometry[]} geometry
  */
 NAN_METHOD(GeometryCollectionChildren::add) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();

@@ -41,7 +41,6 @@ LayerFields::~LayerFields() {
  * @class gdal.LayerFields
  */
 NAN_METHOD(LayerFields::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -74,7 +73,6 @@ Local<Value> LayerFields::New(Local<Value> layer_obj) {
 }
 
 NAN_METHOD(LayerFields::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("LayerFields").ToLocalChecked());
 }
 
@@ -85,7 +83,6 @@ NAN_METHOD(LayerFields::toString) {
  * @return {number}
  */
 NAN_METHOD(LayerFields::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -112,7 +109,6 @@ NAN_METHOD(LayerFields::count) {
  * @return {number} Field index, or -1 if the field doesn't exist
  */
 NAN_METHOD(LayerFields::indexOf) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -143,7 +139,6 @@ NAN_METHOD(LayerFields::indexOf) {
  * @return {gdal.FieldDefn}
  */
 NAN_METHOD(LayerFields::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -183,7 +178,6 @@ NAN_METHOD(LayerFields::get) {
  * @return {string[]} List of strings.
  */
 NAN_METHOD(LayerFields::getNames) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -218,7 +212,6 @@ NAN_METHOD(LayerFields::getNames) {
  * @param {string|number} field Field name or index (0-based)
  */
 NAN_METHOD(LayerFields::remove) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -261,7 +254,6 @@ NAN_METHOD(LayerFields::remove) {
  * @param {boolean} [approx=true]
  */
 NAN_METHOD(LayerFields::add) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -325,7 +317,6 @@ NAN_METHOD(LayerFields::add) {
  * @param {number[]} map An array of new indexes (integers)
  */
 NAN_METHOD(LayerFields::reorder) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -391,7 +382,6 @@ NAN_METHOD(LayerFields::reorder) {
  * @type {gdal.Layer}
  */
 NAN_GETTER(LayerFields::layerGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 

@@ -47,7 +47,6 @@ DatasetLayers::~DatasetLayers() {
  * @class gdal.DatasetLayers
  */
 NAN_METHOD(DatasetLayers::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -81,7 +80,6 @@ Local<Value> DatasetLayers::New(Local<Value> ds_obj) {
 }
 
 NAN_METHOD(DatasetLayers::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("DatasetLayers").ToLocalChecked());
 }
 
@@ -106,7 +104,6 @@ NAN_METHOD(DatasetLayers::toString) {
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -194,7 +191,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -255,7 +251,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -302,7 +297,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -360,7 +354,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -395,7 +388,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
  * @type {gdal.Dataset}
  */
 NAN_GETTER(DatasetLayers::dsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 

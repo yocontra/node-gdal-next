@@ -64,7 +64,6 @@ void Driver::dispose() {
  * @class gdal.Driver
  */
 NAN_METHOD(Driver::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -104,7 +103,6 @@ Local<Value> Driver::New(GDALDriver *driver) {
 }
 
 NAN_METHOD(Driver::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Driver").ToLocalChecked());
 }
 
@@ -114,7 +112,6 @@ NAN_METHOD(Driver::toString) {
  * @type {string}
  */
 NAN_GETTER(Driver::descriptionGetter) {
-  Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
   info.GetReturnValue().Set(SafeString::New(driver->getGDALDriver()->GetDescription()));
@@ -126,7 +123,6 @@ NAN_GETTER(Driver::descriptionGetter) {
  * @param {string} filename
  */
 NAN_METHOD(Driver::deleteDataset) {
-  Nan::HandleScope scope;
 
   std::string name("");
   NODE_ARG_STR(0, "dataset name", name);
@@ -185,7 +181,6 @@ auto DatasetRval = [](GDALDataset *ds, GetFromPersistentFunc) { return Dataset::
  * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::create) {
-  Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
   std::string filename;
@@ -259,7 +254,6 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
-  Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
   if (!driver->isAlive()) {
@@ -325,7 +319,6 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
  * @param {string} name_new Old name of the dataset.
  */
 NAN_METHOD(Driver::copyFiles) {
-  Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
   std::string old_name;
   std::string new_name;
@@ -351,7 +344,6 @@ NAN_METHOD(Driver::copyFiles) {
  * @param {string} old_name Old name of the dataset.
  */
 NAN_METHOD(Driver::rename) {
-  Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
   std::string old_name;
   std::string new_name;
@@ -377,7 +369,6 @@ NAN_METHOD(Driver::rename) {
  * @return {any}
  */
 NAN_METHOD(Driver::getMetadata) {
-  Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
   Local<Object> result;
@@ -414,7 +405,6 @@ NAN_METHOD(Driver::getMetadata) {
  * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::open) {
-  Nan::HandleScope scope;
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
 
   std::string path;

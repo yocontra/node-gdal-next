@@ -41,7 +41,6 @@ void Polygon::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8::Local
  */
 
 NAN_METHOD(Polygon::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Polygon").ToLocalChecked());
 }
 
@@ -60,7 +59,6 @@ NODE_WRAPPED_METHOD_WITH_RESULT(Polygon, getArea, Number, get_Area);
  * @type {gdal.PolygonRings}
  */
 NAN_GETTER(Polygon::ringsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("rings_").ToLocalChecked()).ToLocalChecked());
 }
 

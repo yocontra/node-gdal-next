@@ -101,7 +101,6 @@ void Geometry::Initialize(Local<Object> target) {
  * @class gdal.Geometry
  */
 NAN_METHOD(Geometry::New) {
-  Nan::HandleScope scope;
   Geometry *f;
 
   if (!info.IsConstructCall()) {
@@ -169,7 +168,6 @@ OGRwkbGeometryType Geometry::getGeometryType_fixed(OGRGeometry *geom) {
 }
 
 NAN_METHOD(Geometry::toString) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   std::ostringstream ss;
   ss << "Geometry (" << geom->this_->getGeometryName() << ")";
@@ -561,7 +559,6 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(
  * @return {gdal.Geometry}
  */
 NAN_METHOD(Geometry::clone) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   info.GetReturnValue().Set(Geometry::New(geom->this_->clone()));
 }
@@ -585,7 +582,6 @@ NAN_METHOD(Geometry::clone) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
@@ -618,7 +614,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   OGRGeometry *gdal_geom = geom->this_;
   GDALAsyncableJob<OGRGeometry *> job(0);
@@ -653,7 +648,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   Geometry *x = NULL;
@@ -694,7 +688,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   Geometry *x = NULL;
@@ -735,7 +728,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   Geometry *x = NULL;
@@ -776,7 +768,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   Geometry *x = NULL;
@@ -817,7 +808,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   double tolerance;
@@ -857,7 +847,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   double tolerance;
@@ -899,7 +888,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
-  Nan::HandleScope scope;
 
   double distance;
   int number_of_segments = 30;
@@ -943,7 +931,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::makeValid) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   OGRGeometry *gdal_geom = geom->this_;
@@ -978,7 +965,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::makeValid) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
@@ -1033,7 +1019,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
@@ -1105,7 +1090,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
@@ -1150,7 +1134,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
@@ -1195,7 +1178,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
-  Nan::HandleScope scope;
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
@@ -1407,7 +1389,6 @@ NODE_WRAPPED_ASYNC_METHOD(Geometry, flattenTo2D, flattenTo2D);
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
-  Nan::HandleScope scope;
 
   std::string *wkt_string = new std::string;
   SpatialReference *srs = NULL;
@@ -1456,7 +1437,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
-  Nan::HandleScope scope;
 
   std::string wkb_string;
   SpatialReference *srs = NULL;
@@ -1521,7 +1501,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
  * @return {Promise<gdal.Geometry>}
  */
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
-  Nan::HandleScope scope;
 #if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
   Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
   return;
@@ -1577,7 +1556,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJsonBuffer) {
-  Nan::HandleScope scope;
 #if GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 3
   Nan::ThrowError("GDAL < 2.3 does not support parsing GeoJSON directly");
   return;
@@ -1624,7 +1602,6 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJsonBuffer) {
  * @return {gdal.Geometry}
  */
 NAN_METHOD(Geometry::create) {
-  Nan::HandleScope scope;
 
   OGRwkbGeometryType type = wkbUnknown;
   NODE_ARG_ENUM(0, "type", OGRwkbGeometryType, type);
@@ -1637,13 +1614,11 @@ NAN_METHOD(Geometry::create) {
  * @type {gdal.SpatialReference}
  */
 NAN_GETTER(Geometry::srsGetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   info.GetReturnValue().Set(SpatialReference::New(geom->this_->getSpatialReference(), false));
 }
 
 NAN_SETTER(Geometry::srsSetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   OGRSpatialReference *srs = NULL;
@@ -1664,7 +1639,6 @@ NAN_SETTER(Geometry::srsSetter) {
  * @type {string}
  */
 NAN_GETTER(Geometry::nameGetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   info.GetReturnValue().Set(SafeString::New(geom->this_->getGeometryName()));
 }
@@ -1677,7 +1651,6 @@ NAN_GETTER(Geometry::nameGetter) {
  * @type {number}
  */
 NAN_GETTER(Geometry::typeGetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   info.GetReturnValue().Set(Nan::New<Integer>(getGeometryType_fixed(geom->this_)));
 }
@@ -1688,7 +1661,6 @@ NAN_GETTER(Geometry::typeGetter) {
  * @type {number}
  */
 NAN_GETTER(Geometry::wkbSizeGetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   info.GetReturnValue().Set(Nan::New<Integer>(static_cast<int>(geom->this_->WkbSize())));
 }
@@ -1699,7 +1671,6 @@ NAN_GETTER(Geometry::wkbSizeGetter) {
  * @type {number}
  */
 NAN_GETTER(Geometry::dimensionGetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   info.GetReturnValue().Set(Nan::New<Integer>(geom->this_->getDimension()));
 }
@@ -1709,13 +1680,11 @@ NAN_GETTER(Geometry::dimensionGetter) {
  * @type {number}
  */
 NAN_GETTER(Geometry::coordinateDimensionGetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
   info.GetReturnValue().Set(Nan::New<Integer>(geom->this_->getCoordinateDimension()));
 }
 
 NAN_SETTER(Geometry::coordinateDimensionSetter) {
-  Nan::HandleScope scope;
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
   if (!value->IsInt32()) {
@@ -1765,7 +1734,6 @@ Local<Value> Geometry::getConstructor(OGRwkbGeometryType type) {
  * @return {Function}
  */
 NAN_METHOD(Geometry::getConstructor) {
-  Nan::HandleScope scope;
   OGRwkbGeometryType type;
   NODE_ARG_ENUM(0, "wkbType", OGRwkbGeometryType, type);
   info.GetReturnValue().Set(getConstructor(type));
@@ -1782,7 +1750,6 @@ NAN_METHOD(Geometry::getConstructor) {
  * @return {string}
  */
 NAN_METHOD(Geometry::getName) {
-  Nan::HandleScope scope;
   OGRwkbGeometryType type;
   NODE_ARG_ENUM(0, "wkbType", OGRwkbGeometryType, type);
   info.GetReturnValue().Set(SafeString::New(OGRGeometryTypeToName(type)));

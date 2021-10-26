@@ -29,7 +29,6 @@ template <class T, class OGRT> class GeometryCollectionBase : public GeometryBas
 };
 
 template <class T, class OGRT> NAN_METHOD((GeometryCollectionBase<T, OGRT>::New)) {
-  Nan::HandleScope scope;
   T *f;
 
   if (!info.IsConstructCall()) {

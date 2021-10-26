@@ -65,7 +65,6 @@ void Dimension::dispose() {
  * @class gdal.Dimension
  */
 NAN_METHOD(Dimension::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -122,7 +121,6 @@ Local<Value> Dimension::New(std::shared_ptr<GDALDimension> raw, GDALDataset *par
 }
 
 NAN_METHOD(Dimension::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Dimension").ToLocalChecked());
 }
 
@@ -155,7 +153,6 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, directionGetter, GetDirection)
 NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, typeGetter, GetType);
 
 NAN_GETTER(Dimension::uidGetter) {
-  Nan::HandleScope scope;
   Dimension *group = Nan::ObjectWrap::Unwrap<Dimension>(info.This());
   info.GetReturnValue().Set(Nan::New((int)group->uid));
 }

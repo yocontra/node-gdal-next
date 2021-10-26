@@ -44,7 +44,6 @@ DatasetBands::~DatasetBands() {
  * @class gdal.DatasetBands
  */
 NAN_METHOD(DatasetBands::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -77,7 +76,6 @@ Local<Value> DatasetBands::New(Local<Value> ds_obj) {
 }
 
 NAN_METHOD(DatasetBands::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("DatasetBands").ToLocalChecked());
 }
 
@@ -102,7 +100,6 @@ NAN_METHOD(DatasetBands::toString) {
  * @return {Promise<gdal.RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -152,7 +149,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -216,7 +212,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
  * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -246,7 +241,6 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
  * @type {gdal.Dataset}
  */
 NAN_GETTER(DatasetBands::dsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 

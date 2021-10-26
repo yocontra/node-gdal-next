@@ -101,7 +101,6 @@ void RasterBand::dispose() {
  * @class gdal.RasterBand
  */
 NAN_METHOD(RasterBand::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -165,7 +164,6 @@ Local<Value> RasterBand::New(GDALRasterBand *raw, GDALDataset *raw_parent) {
 }
 
 NAN_METHOD(RasterBand::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("RasterBand").ToLocalChecked());
 }
 
@@ -225,7 +223,6 @@ NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM_LOCKED(RasterBand, create
  * @return {gdal.RasterBand}
  */
 NAN_METHOD(RasterBand::getMaskBand) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   GDALRasterBand *mask_band = band->this_->GetMaskBand();
@@ -260,7 +257,6 @@ NAN_METHOD(RasterBand::getMaskBand) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
-  Nan::HandleScope scope;
   double real, imaginary = 0;
   NODE_ARG_DOUBLE(0, "real value", real);
   NODE_ARG_DOUBLE_OPT(1, "imaginary value", real);
@@ -314,7 +310,6 @@ void popStatsErrorHandler() {
  */
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
 NAN_METHOD(RasterBand::asMDArray) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_RAW_CHECK(GDALRasterBand *, band, raw);
   GDAL_LOCK_PARENT(band);
@@ -347,7 +342,6 @@ NAN_METHOD(RasterBand::asMDArray) {
  * `"std_dev"` properties.
  */
 NAN_METHOD(RasterBand::getStatistics) {
-  Nan::HandleScope scope;
   double min, max, mean, std_dev;
   int approx, force;
   NODE_ARG_BOOL(0, "allow approximation", approx);
@@ -411,7 +405,6 @@ NAN_METHOD(RasterBand::getStatistics) {
  * `"std_dev"` properties.
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::computeStatistics) {
-  Nan::HandleScope scope;
   struct stats_t {
     double min, max, mean, std_dev;
   };
@@ -465,7 +458,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::computeStatistics) {
  * @param {number} std_dev
  */
 NAN_METHOD(RasterBand::setStatistics) {
-  Nan::HandleScope scope;
   double min, max, mean, std_dev;
 
   NODE_ARG_DOUBLE(0, "min", min);
@@ -500,7 +492,6 @@ NAN_METHOD(RasterBand::setStatistics) {
  * @return {Promise<any>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
-  Nan::HandleScope scope;
 
   std::string domain("");
   NODE_ARG_OPT_STR(0, "domain", domain);
@@ -535,7 +526,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
  * @return {Promise<boolean>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_RAW_CHECK(GDALRasterBand *, band, raw);
 
@@ -564,7 +554,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
  * @type {gdal.Dataset}
  */
 NAN_GETTER(RasterBand::dsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("ds_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -574,7 +563,6 @@ NAN_GETTER(RasterBand::dsGetter) {
  * @type {gdal.RasterBandOverviews}
  */
 NAN_GETTER(RasterBand::overviewsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("overviews_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -584,7 +572,6 @@ NAN_GETTER(RasterBand::overviewsGetter) {
  * @type {gdal.RasterBandPixels}
  */
 NAN_GETTER(RasterBand::pixelsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("pixels_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -594,7 +581,6 @@ NAN_GETTER(RasterBand::pixelsGetter) {
  * @type {number|null}
  */
 NAN_GETTER(RasterBand::idGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   int id = band->this_->GetBand();
@@ -616,7 +602,6 @@ NAN_GETTER(RasterBand::idGetter) {
  * @type {string}
  */
 NAN_GETTER(RasterBand::descriptionGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   const char *desc = band->this_->GetDescription();
@@ -632,7 +617,6 @@ NAN_GETTER(RasterBand::descriptionGetter) {
  * @type {xyz}
  */
 NAN_GETTER(RasterBand::sizeGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   Local<Object> result = Nan::New<Object>();
   GDAL_LOCK_PARENT(band);
@@ -651,7 +635,6 @@ NAN_GETTER(RasterBand::sizeGetter) {
  * @type {xyz}
  */
 NAN_GETTER(RasterBand::blockSizeGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   int x, y;
   GDAL_LOCK_PARENT(band);
@@ -671,7 +654,6 @@ NAN_GETTER(RasterBand::blockSizeGetter) {
  * @type {number}
  */
 NAN_GETTER(RasterBand::minimumGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   int success = 0;
   GDAL_LOCK_PARENT(band);
@@ -687,7 +669,6 @@ NAN_GETTER(RasterBand::minimumGetter) {
  * @type {number}
  */
 NAN_GETTER(RasterBand::maximumGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   int success = 0;
   GDAL_LOCK_PARENT(band);
@@ -702,7 +683,6 @@ NAN_GETTER(RasterBand::maximumGetter) {
  * @type {number}
  */
 NAN_GETTER(RasterBand::offsetGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   int success = 0;
   GDAL_LOCK_PARENT(band);
@@ -717,7 +697,6 @@ NAN_GETTER(RasterBand::offsetGetter) {
  * @type {number}
  */
 NAN_GETTER(RasterBand::scaleGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   int success = 0;
   GDAL_LOCK_PARENT(band);
@@ -732,7 +711,6 @@ NAN_GETTER(RasterBand::scaleGetter) {
  * @type {number|null}
  */
 NAN_GETTER(RasterBand::noDataValueGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   int success = 0;
   GDAL_LOCK_PARENT(band);
@@ -757,7 +735,6 @@ NAN_GETTER(RasterBand::noDataValueGetter) {
  * @type {string}
  */
 NAN_GETTER(RasterBand::unitTypeGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   const char *result = band->this_->GetUnitType();
@@ -774,7 +751,6 @@ NAN_GETTER(RasterBand::unitTypeGetter) {
  * @type {string|undefined}
  */
 NAN_GETTER(RasterBand::dataTypeGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   GDALDataType type = band->this_->GetRasterDataType();
@@ -791,7 +767,6 @@ NAN_GETTER(RasterBand::dataTypeGetter) {
  * @type {boolean}
  */
 NAN_GETTER(RasterBand::readOnlyGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   GDALAccess result = band->this_->GetAccess();
@@ -810,7 +785,6 @@ NAN_GETTER(RasterBand::readOnlyGetter) {
  * @type {boolean}
  */
 NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   bool result = band->this_->HasArbitraryOverviews();
@@ -824,7 +798,6 @@ NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
  * @type {string[]}
  */
 NAN_GETTER(RasterBand::categoryNamesGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   GDAL_LOCK_PARENT(band);
   char **names = band->this_->GetCategoryNames();
@@ -859,7 +832,6 @@ NAN_GETTER(RasterBand::categoryNamesGetter) {
  * @type {Promise<string>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorInterpretationGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
   GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
 
@@ -877,7 +849,6 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorInterpretationGetter) {
 }
 
 NAN_SETTER(RasterBand::unitTypeSetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
   if (!value->IsString()) {
     Nan::ThrowError("Unit type must be a string");
@@ -890,7 +861,6 @@ NAN_SETTER(RasterBand::unitTypeSetter) {
 }
 
 NAN_SETTER(RasterBand::noDataValueSetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
   double input;
@@ -910,7 +880,6 @@ NAN_SETTER(RasterBand::noDataValueSetter) {
 }
 
 NAN_SETTER(RasterBand::scaleSetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
   if (!value->IsNumber()) {
@@ -924,7 +893,6 @@ NAN_SETTER(RasterBand::scaleSetter) {
 }
 
 NAN_SETTER(RasterBand::offsetSetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
   if (!value->IsNumber()) {
@@ -938,7 +906,6 @@ NAN_SETTER(RasterBand::offsetSetter) {
 }
 
 NAN_SETTER(RasterBand::categoryNamesSetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
   if (!value->IsArray()) {
@@ -970,7 +937,6 @@ NAN_SETTER(RasterBand::categoryNamesSetter) {
 }
 
 NAN_SETTER(RasterBand::colorInterpretationSetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
   GDALColorInterp ci = GCI_Undefined;
@@ -1003,7 +969,6 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
  * @type {Promise<gdal.ColorTable>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorTableGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
 
   GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
@@ -1019,7 +984,6 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorTableGetter) {
 }
 
 NAN_SETTER(RasterBand::colorTableSetter) {
-  Nan::HandleScope scope;
 
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
@@ -1041,7 +1005,6 @@ NAN_SETTER(RasterBand::colorTableSetter) {
 }
 
 NAN_GETTER(RasterBand::uidGetter) {
-  Nan::HandleScope scope;
   RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(info.This());
   info.GetReturnValue().Set(Nan::New((int)band->uid));
 }

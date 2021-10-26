@@ -39,7 +39,6 @@ CompoundCurveCurves::~CompoundCurveCurves() {
  * @class gdal.CompoundCurveCurves
  */
 NAN_METHOD(CompoundCurveCurves::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -73,7 +72,6 @@ Local<Value> CompoundCurveCurves::New(Local<Value> geom) {
 }
 
 NAN_METHOD(CompoundCurveCurves::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("CompoundCurveCurves").ToLocalChecked());
 }
 
@@ -84,7 +82,6 @@ NAN_METHOD(CompoundCurveCurves::toString) {
  * @return {number}
  */
 NAN_METHOD(CompoundCurveCurves::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -107,7 +104,6 @@ NAN_METHOD(CompoundCurveCurves::count) {
  * @return {gdal.CompoundCurve|gdal.SimpleCurve}
  */
 NAN_METHOD(CompoundCurveCurves::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -144,7 +140,6 @@ NAN_METHOD(CompoundCurveCurves::get) {
  * @param {gdal.SimpleCurve|gdal.SimpleCurve[]} curves
  */
 NAN_METHOD(CompoundCurveCurves::add) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();

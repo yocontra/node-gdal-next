@@ -47,12 +47,10 @@ class GroupCollection : public Nan::ObjectWrap {
   }
 
   static NAN_METHOD(toString) {
-    Nan::HandleScope scope;
     info.GetReturnValue().Set(Nan::New(SELF::_className).ToLocalChecked());
   }
 
   static NAN_METHOD(New) {
-    Nan::HandleScope scope;
 
     if (!info.IsConstructCall()) {
       Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -99,7 +97,6 @@ class GroupCollection : public Nan::ObjectWrap {
   };
 
   GDAL_ASYNCABLE_TEMPLATE(get) {
-    Nan::HandleScope scope;
 
     Local<Object> parent_ds =
       Nan::GetPrivate(info.This(), Nan::New("parent_ds_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -130,7 +127,6 @@ class GroupCollection : public Nan::ObjectWrap {
   }
 
   GDAL_ASYNCABLE_TEMPLATE(count) {
-    Nan::HandleScope scope;
 
     Local<Object> parent_ds =
       Nan::GetPrivate(info.This(), Nan::New("parent_ds_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -152,7 +148,6 @@ class GroupCollection : public Nan::ObjectWrap {
   }
 
   static NAN_GETTER(namesGetter) {
-    Nan::HandleScope scope;
 
     Local<Object> parent_ds =
       Nan::GetPrivate(info.This(), Nan::New("parent_ds_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -177,12 +172,10 @@ class GroupCollection : public Nan::ObjectWrap {
   }
 
   static NAN_GETTER(parentGetter) {
-    Nan::HandleScope scope;
     info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
   }
 
   static NAN_GETTER(dsGetter) {
-    Nan::HandleScope scope;
     info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_ds_").ToLocalChecked()).ToLocalChecked());
   }
 

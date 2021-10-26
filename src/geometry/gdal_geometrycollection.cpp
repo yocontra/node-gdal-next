@@ -37,7 +37,6 @@ void GeometryCollection::Initialize(Local<Object> target) {
 }
 
 NAN_METHOD(GeometryCollection::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("GeometryCollection").ToLocalChecked());
 }
 
@@ -64,7 +63,6 @@ NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getLength, Number, get_Lengt
  * @type {gdal.GeometryCollectionChildren}
  */
 NAN_GETTER(GeometryCollection::childrenGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("children_").ToLocalChecked()).ToLocalChecked());
 }
 

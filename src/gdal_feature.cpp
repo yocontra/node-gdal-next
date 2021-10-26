@@ -87,7 +87,6 @@ void Feature::dispose() {
  * @param {gdal.Layer|gdal.FeatureDefn} definition
  */
 NAN_METHOD(Feature::New) {
-  Nan::HandleScope scope;
   Feature *f;
 
   if (!info.IsConstructCall()) {
@@ -158,7 +157,6 @@ Local<Value> Feature::New(OGRFeature *feature, bool owned) {
 }
 
 NAN_METHOD(Feature::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Feature").ToLocalChecked());
 }
 
@@ -169,7 +167,6 @@ NAN_METHOD(Feature::toString) {
  * @return {gdal.Geometry}
  */
 NAN_METHOD(Feature::getGeometry) {
-  Nan::HandleScope scope;
 
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
   if (!feature->isAlive()) {
@@ -195,7 +192,6 @@ NAN_METHOD(Feature::getGeometry) {
  * _return {gdal.FieldDefn}
  */
 NAN_METHOD(Feature::getFieldDefn) {
-  Nan::HandleScope scope;
   int field_index;
   NODE_ARG_INT(0, "field index", field_index);
 
@@ -225,7 +221,6 @@ NAN_METHOD(Feature::getFieldDefn) {
  * @param {gdal.Geometry} geometry
  */
 NAN_METHOD(Feature::setGeometry) {
-  Nan::HandleScope scope;
 
   Geometry *geom = NULL;
   NODE_ARG_WRAPPED_OPT(0, "geometry", Geometry, geom);
@@ -258,7 +253,6 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Feature, equals, Boolean, Equal,
  * @return {gdal.Feature}
  */
 NAN_METHOD(Feature::clone) {
-  Nan::HandleScope scope;
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
   if (!feature->isAlive()) {
     Nan::ThrowError("Feature object already destroyed");
@@ -273,7 +267,6 @@ NAN_METHOD(Feature::clone) {
  * @method destroy
  */
 NAN_METHOD(Feature::destroy) {
-  Nan::HandleScope scope;
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
   if (!feature->isAlive()) {
     Nan::ThrowError("Feature object already destroyed");
@@ -305,7 +298,6 @@ NAN_METHOD(Feature::destroy) {
  * despite lacking output fields matching some of the source fields.
  */
 NAN_METHOD(Feature::setFrom) {
-  Nan::HandleScope scope;
   Feature *other_feature;
   int forgiving = 1;
   Local<Array> index_map;
@@ -367,7 +359,6 @@ NAN_METHOD(Feature::setFrom) {
  * @type {gdal.FeatureFields}
  */
 NAN_GETTER(Feature::fieldsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("fields_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -376,7 +367,6 @@ NAN_GETTER(Feature::fieldsGetter) {
  * @type {number}
  */
 NAN_GETTER(Feature::fidGetter) {
-  Nan::HandleScope scope;
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
   if (!feature->isAlive()) {
     Nan::ThrowError("Feature object already destroyed");
@@ -391,7 +381,6 @@ NAN_GETTER(Feature::fidGetter) {
  * @type {gdal.FeatureDefn}
  */
 NAN_GETTER(Feature::defnGetter) {
-  Nan::HandleScope scope;
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
   if (!feature->isAlive()) {
     Nan::ThrowError("Feature object already destroyed");
@@ -401,7 +390,6 @@ NAN_GETTER(Feature::defnGetter) {
 }
 
 NAN_SETTER(Feature::fidSetter) {
-  Nan::HandleScope scope;
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
   if (!feature->isAlive()) {
     Nan::ThrowError("Feature object already destroyed");

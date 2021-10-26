@@ -38,7 +38,6 @@ GDALDrivers::~GDALDrivers() {
  * @class gdal.GDALDrivers
  */
 NAN_METHOD(GDALDrivers::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -70,7 +69,6 @@ Local<Value> GDALDrivers::New() {
 }
 
 NAN_METHOD(GDALDrivers::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("GDALDrivers").ToLocalChecked());
 }
 
@@ -87,7 +85,6 @@ NAN_METHOD(GDALDrivers::toString) {
  * @return {gdal.Driver}
  */
 NAN_METHOD(GDALDrivers::get) {
-  Nan::HandleScope scope;
 
   GDALDriver *gdal_driver;
 
@@ -135,7 +132,6 @@ NAN_METHOD(GDALDrivers::get) {
  * @return {string[]}
  */
 NAN_METHOD(GDALDrivers::getNames) {
-  Nan::HandleScope scope;
   int gdal_count = GetGDALDriverManager()->GetDriverCount();
   int i, ogr_count = 0;
   std::string name;
@@ -160,7 +156,6 @@ NAN_METHOD(GDALDrivers::getNames) {
  * @return {number}
  */
 NAN_METHOD(GDALDrivers::count) {
-  Nan::HandleScope scope;
 
   int count = GetGDALDriverManager()->GetDriverCount();
 

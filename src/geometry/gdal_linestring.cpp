@@ -42,7 +42,6 @@ void LineString::Initialize(Local<Object> target) {
  */
 
 NAN_METHOD(LineString::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("LineString").ToLocalChecked());
 }
 

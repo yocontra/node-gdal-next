@@ -66,7 +66,6 @@ void Group::dispose() {
  * @class gdal.Group
  */
 NAN_METHOD(Group::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -140,7 +139,6 @@ Local<Value> Group::New(std::shared_ptr<GDALGroup> raw, Local<Object> parent_ds)
 }
 
 NAN_METHOD(Group::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Group").ToLocalChecked());
 }
 
@@ -157,7 +155,6 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Group, descriptionGetter, GetFullName);
  * @type {gdal.GroupGroups}
  */
 NAN_GETTER(Group::groupsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("groups_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -167,7 +164,6 @@ NAN_GETTER(Group::groupsGetter) {
  * @type {gdal.GroupArrays}
  */
 NAN_GETTER(Group::arraysGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("arrays_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -177,7 +173,6 @@ NAN_GETTER(Group::arraysGetter) {
  * @type {gdal.GroupDimensions}
  */
 NAN_GETTER(Group::dimensionsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("dims_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -187,12 +182,10 @@ NAN_GETTER(Group::dimensionsGetter) {
  * @type {gdal.GroupAttributes}
  */
 NAN_GETTER(Group::attributesGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("attrs_").ToLocalChecked()).ToLocalChecked());
 }
 
 NAN_GETTER(Group::uidGetter) {
-  Nan::HandleScope scope;
   Group *group = Nan::ObjectWrap::Unwrap<Group>(info.This());
   info.GetReturnValue().Set(Nan::New((int)group->uid));
 }

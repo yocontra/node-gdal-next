@@ -61,7 +61,6 @@ void ColorTable::dispose() {
  * @param {string} interpretation palette interpretation
  */
 NAN_METHOD(ColorTable::New) {
-  Nan::HandleScope scope;
   ColorTable *f;
 
   if (!info.IsConstructCall()) {
@@ -109,7 +108,6 @@ Local<Value> ColorTable::New(GDALColorTable *raw, Local<Value> parent) {
   RasterBand *band = Nan::ObjectWrap::Unwrap<RasterBand>(parent.As<Object>());
 
   ColorTable *wrapped = new ColorTable(raw, band->parent_uid);
-  wrapped->parent_uid = band->parent_uid;
 
   v8::Local<v8::Value> ext = Nan::New<External>(wrapped);
   v8::Local<v8::Object> obj =
@@ -139,7 +137,6 @@ Local<Value> ColorTable::New(GDALColorTable *raw) {
 }
 
 NAN_METHOD(ColorTable::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("ColorTable").ToLocalChecked());
 }
 
@@ -151,7 +148,6 @@ NAN_METHOD(ColorTable::toString) {
  * @return {gdal.ColorTable}
  */
 NAN_METHOD(ColorTable::clone) {
-  Nan::HandleScope scope;
   ColorTable *ct = Nan::ObjectWrap::Unwrap<ColorTable>(info.This());
   info.GetReturnValue().Set(ColorTable::New(ct->this_->Clone()));
 }
@@ -165,7 +161,6 @@ NAN_METHOD(ColorTable::clone) {
  * @return {boolean}
  */
 NAN_METHOD(ColorTable::isSame) {
-  Nan::HandleScope scope;
 
   NODE_UNWRAP_CHECK(ColorTable, info.This(), self);
   GDAL_RAW_CHECK(GDALColorTable *, self, raw);
@@ -187,7 +182,6 @@ NAN_METHOD(ColorTable::isSame) {
  * @return {Color}
  */
 NAN_METHOD(ColorTable::get) {
-  Nan::HandleScope scope;
 
   int index;
   NODE_ARG_INT(0, "index", index);
@@ -233,7 +227,6 @@ NAN_METHOD(ColorTable::get) {
  */
 
 NAN_METHOD(ColorTable::set) {
-  Nan::HandleScope scope;
 
   int index;
   NODE_ARG_INT(0, "index", index);
@@ -270,7 +263,6 @@ NAN_METHOD(ColorTable::set) {
  */
 
 NAN_METHOD(ColorTable::ramp) {
-  Nan::HandleScope scope;
 
   int start_index, end_index;
   NODE_ARG_INT(0, "start_index", start_index);
@@ -313,7 +305,6 @@ NAN_METHOD(ColorTable::ramp) {
  * @return {number}
  */
 NAN_METHOD(ColorTable::count) {
-  Nan::HandleScope scope;
 
   NODE_UNWRAP_CHECK(ColorTable, info.This(), self);
   GDAL_RAW_CHECK(GDALColorTable *, self, raw);
@@ -336,7 +327,6 @@ NAN_METHOD(ColorTable::count) {
  * @type {string}
  */
 NAN_GETTER(ColorTable::interpretationGetter) {
-  Nan::HandleScope scope;
 
   NODE_UNWRAP_CHECK(ColorTable, info.This(), self);
   GDAL_RAW_CHECK(GDALColorTable *, self, raw);
@@ -368,7 +358,6 @@ NAN_GETTER(ColorTable::interpretationGetter) {
  * @type {gdal.RasterBand|undefined}
  */
 NAN_GETTER(ColorTable::bandGetter) {
-  Nan::HandleScope scope;
   MaybeLocal<Value> parentMaybe = Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked());
   if (!parentMaybe.IsEmpty() && !parentMaybe.ToLocalChecked()->IsNullOrUndefined()) {
     info.GetReturnValue().Set(parentMaybe.ToLocalChecked());

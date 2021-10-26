@@ -52,7 +52,6 @@ FeatureDefn::~FeatureDefn() {
  * @class gdal.FeatureDefn
  */
 NAN_METHOD(FeatureDefn::New) {
-  Nan::HandleScope scope;
   FeatureDefn *f;
 
   if (!info.IsConstructCall()) {
@@ -113,7 +112,6 @@ Local<Value> FeatureDefn::New(OGRFeatureDefn *def, bool owned) {
 }
 
 NAN_METHOD(FeatureDefn::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("FeatureDefn").ToLocalChecked());
 }
 
@@ -124,7 +122,6 @@ NAN_METHOD(FeatureDefn::toString) {
  * @return {gdal.FeatureDefn}
  */
 NAN_METHOD(FeatureDefn::clone) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(FeatureDefn::New(def->this_->Clone()));
 }
@@ -135,7 +132,6 @@ NAN_METHOD(FeatureDefn::clone) {
  * @type {string}
  */
 NAN_GETTER(FeatureDefn::nameGetter) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(SafeString::New(def->this_->GetName()));
 }
@@ -148,7 +144,6 @@ NAN_GETTER(FeatureDefn::nameGetter) {
  * @type {number}
  */
 NAN_GETTER(FeatureDefn::geomTypeGetter) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(Nan::New<Integer>(def->this_->GetGeomType()));
 }
@@ -158,7 +153,6 @@ NAN_GETTER(FeatureDefn::geomTypeGetter) {
  * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(Nan::New<Boolean>(def->this_->IsGeometryIgnored()));
 }
@@ -168,7 +162,6 @@ NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
  * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   info.GetReturnValue().Set(Nan::New<Boolean>(def->this_->IsStyleIgnored()));
 }
@@ -179,12 +172,10 @@ NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
  * @type {gdal.FeatureDefnFields}
  */
 NAN_GETTER(FeatureDefn::fieldsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("fields_").ToLocalChecked()).ToLocalChecked());
 }
 
 NAN_SETTER(FeatureDefn::geomTypeSetter) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   if (!value->IsInt32()) {
     Nan::ThrowError("geomType must be an integer");
@@ -194,7 +185,6 @@ NAN_SETTER(FeatureDefn::geomTypeSetter) {
 }
 
 NAN_SETTER(FeatureDefn::geomIgnoredSetter) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   if (!value->IsBoolean()) {
     Nan::ThrowError("geomIgnored must be a boolean");
@@ -204,7 +194,6 @@ NAN_SETTER(FeatureDefn::geomIgnoredSetter) {
 }
 
 NAN_SETTER(FeatureDefn::styleIgnoredSetter) {
-  Nan::HandleScope scope;
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
   if (!value->IsBoolean()) {
     Nan::ThrowError("styleIgnored must be a boolean");

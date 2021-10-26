@@ -76,7 +76,6 @@ void Layer::dispose() {
  * @class gdal.Layer
  */
 NAN_METHOD(Layer::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -146,7 +145,6 @@ Local<Value> Layer::New(OGRLayer *raw, GDALDataset *raw_parent, bool result_set)
 }
 
 NAN_METHOD(Layer::toString) {
-  Nan::HandleScope scope;
 
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->this_) {
@@ -199,7 +197,6 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM_LOCKED(Layer, testCapability, Boo
  * @return {gdal.Envelope} Bounding envelope
  */
 NAN_METHOD(Layer::getExtent) {
-  Nan::HandleScope scope;
 
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
@@ -236,7 +233,6 @@ NAN_METHOD(Layer::getExtent) {
  * @return {gdal.Geometry}
  */
 NAN_METHOD(Layer::getSpatialFilter) {
-  Nan::HandleScope scope;
 
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
@@ -267,7 +263,6 @@ NAN_METHOD(Layer::getSpatialFilter) {
  * @param {gdal.Geometry} filter
  */
 NAN_METHOD(Layer::setSpatialFilter) {
-  Nan::HandleScope scope;
 
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
@@ -325,7 +320,6 @@ NAN_METHOD(Layer::setSpatialFilter) {
  * @param {string} filter
  */
 NAN_METHOD(Layer::setAttributeFilter) {
-  Nan::HandleScope scope;
 
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
@@ -355,8 +349,6 @@ NAN_METHOD(Layer::setAttributeFilter) {
 /*
 NAN_METHOD(Layer::getLayerDefn)
 {
-  Nan::HandleScope scope;
-
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
 
   if (!layer->isAlive()) {
@@ -374,7 +366,6 @@ false));
  * @type {gdal.Dataset}
  */
 NAN_GETTER(Layer::dsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("ds_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -384,7 +375,6 @@ NAN_GETTER(Layer::dsGetter) {
  * @type {gdal.SpatialReference}
  */
 NAN_GETTER(Layer::srsGetter) {
-  Nan::HandleScope scope;
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object has already been destroyed");
@@ -401,7 +391,6 @@ NAN_GETTER(Layer::srsGetter) {
  * @type {string}
  */
 NAN_GETTER(Layer::nameGetter) {
-  Nan::HandleScope scope;
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object has already been destroyed");
@@ -418,7 +407,6 @@ NAN_GETTER(Layer::nameGetter) {
  * @type {string}
  */
 NAN_GETTER(Layer::geomColumnGetter) {
-  Nan::HandleScope scope;
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object has already been destroyed");
@@ -435,7 +423,6 @@ NAN_GETTER(Layer::geomColumnGetter) {
  * @type {string}
  */
 NAN_GETTER(Layer::fidColumnGetter) {
-  Nan::HandleScope scope;
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object has already been destroyed");
@@ -453,7 +440,6 @@ NAN_GETTER(Layer::fidColumnGetter) {
  * types{{/crossLink}})
  */
 NAN_GETTER(Layer::geomTypeGetter) {
-  Nan::HandleScope scope;
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   if (!layer->isAlive()) {
     Nan::ThrowError("Layer object has already been destroyed");
@@ -470,7 +456,6 @@ NAN_GETTER(Layer::geomTypeGetter) {
  * @type {gdal.LayerFeatures}
  */
 NAN_GETTER(Layer::featuresGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("features_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -480,12 +465,10 @@ NAN_GETTER(Layer::featuresGetter) {
  * @type {gdal.LayerFields}
  */
 NAN_GETTER(Layer::fieldsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("fields_").ToLocalChecked()).ToLocalChecked());
 }
 
 NAN_GETTER(Layer::uidGetter) {
-  Nan::HandleScope scope;
   Layer *layer = Nan::ObjectWrap::Unwrap<Layer>(info.This());
   info.GetReturnValue().Set(Nan::New((int)layer->uid));
 }

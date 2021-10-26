@@ -43,7 +43,6 @@ FeatureFields::~FeatureFields() {
  * @class gdal.FeatureFields
  */
 NAN_METHOD(FeatureFields::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -76,7 +75,6 @@ Local<Value> FeatureFields::New(Local<Value> layer_obj) {
 }
 
 NAN_METHOD(FeatureFields::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("FeatureFields").ToLocalChecked());
 }
 
@@ -122,7 +120,6 @@ inline bool setField(OGRFeature *f, int field_index, Local<Value> val) {
  * @param {object} fields
  */
 NAN_METHOD(FeatureFields::set) {
-  Nan::HandleScope scope;
   int field_index;
   unsigned int i, n, n_fields_set;
 
@@ -222,7 +219,6 @@ NAN_METHOD(FeatureFields::set) {
  * @return {void}
  */
 NAN_METHOD(FeatureFields::reset) {
-  Nan::HandleScope scope;
   int field_index;
   unsigned int i, n;
 
@@ -281,7 +277,6 @@ NAN_METHOD(FeatureFields::reset) {
  * @return {number}
  */
 NAN_METHOD(FeatureFields::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -306,7 +301,6 @@ NAN_METHOD(FeatureFields::count) {
  * @return {number} Index or, `-1` if it cannot be found.
  */
 NAN_METHOD(FeatureFields::indexOf) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -330,7 +324,6 @@ NAN_METHOD(FeatureFields::indexOf) {
  * @return {any}
  */
 NAN_METHOD(FeatureFields::toObject) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -373,7 +366,6 @@ NAN_METHOD(FeatureFields::toObject) {
  * @return {any[]}
  */
 NAN_METHOD(FeatureFields::toArray) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -438,7 +430,6 @@ Local<Value> FeatureFields::get(OGRFeature *f, int field_index) {
  * @return {any}
  */
 NAN_METHOD(FeatureFields::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -470,7 +461,6 @@ NAN_METHOD(FeatureFields::get) {
  * @return {string[]} List of field names.
  */
 NAN_METHOD(FeatureFields::getNames) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -614,7 +604,6 @@ Local<Value> FeatureFields::getFieldAsDateTime(OGRFeature *feature, int field_in
  * @type {gdal.Feature}
  */
 NAN_GETTER(FeatureFields::featureGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 

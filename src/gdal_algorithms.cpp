@@ -48,8 +48,6 @@ void Algorithms::Initialize(Local<Object> target) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
-  Nan::HandleScope scope;
-
   Local<Object> obj;
   RasterBand *src;
   RasterBand *mask = NULL;
@@ -133,8 +131,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
-  Nan::HandleScope scope;
-
   Local<Object> obj;
   Local<Value> prop;
   RasterBand *src;
@@ -250,8 +246,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
-  Nan::HandleScope scope;
-
   Local<Object> obj;
   RasterBand *src;
   RasterBand *dst;
@@ -335,8 +329,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
  */
 
 GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
-  Nan::HandleScope scope;
-
   RasterBand *src;
   int x = 0, y = 0, w, h, bandw, bandh;
 
@@ -420,8 +412,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
-  Nan::HandleScope scope;
-
   Local<Object> obj;
   RasterBand *src;
   RasterBand *mask = NULL;
@@ -499,7 +489,6 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {
 // This is used for stress-testing the locking mechanism
 // it doesn't do anything but sollicit locks
 GDAL_ASYNCABLE_DEFINE(Algorithms::_acquireLocks) {
-  Nan::HandleScope scope;
   Dataset *ds1, *ds2, *ds3;
 
   NODE_ARG_WRAPPED(0, "ds1", Dataset, ds1);

@@ -98,7 +98,6 @@ void SpatialReference::dispose() {
  * @param {string} [wkt]
  */
 NAN_METHOD(SpatialReference::New) {
-  Nan::HandleScope scope;
   SpatialReference *f;
   OGRSpatialReference *srs;
   std::string wkt("");
@@ -171,7 +170,6 @@ Local<Value> SpatialReference::New(OGRSpatialReference *raw, bool owned) {
 }
 
 NAN_METHOD(SpatialReference::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("SpatialReference").ToLocalChecked());
 }
 
@@ -318,7 +316,6 @@ NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT(SpatialReference, autoIdentifyEPSG, AutoI
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::clone) {
-  Nan::HandleScope scope;
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
   info.GetReturnValue().Set(SpatialReference::New(srs->this_->Clone(), true));
 }
@@ -330,7 +327,6 @@ NAN_METHOD(SpatialReference::clone) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::cloneGeogCS) {
-  Nan::HandleScope scope;
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
   info.GetReturnValue().Set(SpatialReference::New(srs->this_->CloneGeogCS(), true));
 }
@@ -343,7 +339,6 @@ NAN_METHOD(SpatialReference::cloneGeogCS) {
  * @return {string}
  */
 NAN_METHOD(SpatialReference::getAuthorityName) {
-  Nan::HandleScope scope;
 
   std::string key = "";
   NODE_ARG_OPT_STR(0, "target key", key);
@@ -361,7 +356,6 @@ NAN_METHOD(SpatialReference::getAuthorityName) {
  * @return {string}
  */
 NAN_METHOD(SpatialReference::getAuthorityCode) {
-  Nan::HandleScope scope;
 
   std::string key = "";
   NODE_ARG_OPT_STR(0, "target key", key);
@@ -379,7 +373,6 @@ NAN_METHOD(SpatialReference::getAuthorityCode) {
  * @return {string}
  */
 NAN_METHOD(SpatialReference::exportToWKT) {
-  Nan::HandleScope scope;
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
   char *str;
@@ -406,7 +399,6 @@ NAN_METHOD(SpatialReference::exportToWKT) {
  * @return {string}
  */
 NAN_METHOD(SpatialReference::exportToPrettyWKT) {
-  Nan::HandleScope scope;
 
   int simplify = 0;
   NODE_ARG_BOOL_OPT(0, "simplify", simplify);
@@ -434,7 +426,6 @@ NAN_METHOD(SpatialReference::exportToPrettyWKT) {
  * @return {string}
  */
 NAN_METHOD(SpatialReference::exportToProj4) {
-  Nan::HandleScope scope;
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
   char *str;
@@ -464,7 +455,6 @@ NAN_METHOD(SpatialReference::exportToProj4) {
  * @return {string}
  */
 NAN_METHOD(SpatialReference::exportToXML) {
-  Nan::HandleScope scope;
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
   char *str;
@@ -490,7 +480,6 @@ NAN_METHOD(SpatialReference::exportToXML) {
  * @return {string}
  */
 NAN_METHOD(SpatialReference::getAttrValue) {
-  Nan::HandleScope scope;
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
   std::string node_name("");
@@ -510,7 +499,6 @@ NAN_METHOD(SpatialReference::getAttrValue) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromWKT) {
-  Nan::HandleScope scope;
 
   std::string wkt("");
   NODE_ARG_STR(0, "wkt", wkt);
@@ -537,7 +525,6 @@ NAN_METHOD(SpatialReference::fromWKT) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromProj4) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "input", input);
@@ -571,7 +558,6 @@ NAN_METHOD(SpatialReference::fromProj4) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromWMSAUTO) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "input", input);
@@ -597,7 +583,6 @@ NAN_METHOD(SpatialReference::fromWMSAUTO) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromXML) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "xml", input);
@@ -627,7 +612,6 @@ NAN_METHOD(SpatialReference::fromXML) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromURN) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "input", input);
@@ -673,7 +657,6 @@ NAN_METHOD(SpatialReference::fromURN) {
  * @return {Promise<gdal.SpatialReference>}
  */
 GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "url", input);
@@ -720,7 +703,6 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
  */
 
 GDAL_ASYNCABLE_DEFINE(SpatialReference::fromURL) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "url", input);
@@ -750,7 +732,6 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromURL) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromMICoordSys) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "input", input);
@@ -794,7 +775,6 @@ NAN_METHOD(SpatialReference::fromMICoordSys) {
  * @return {Promise<gdal.SpatialReference>}
  */
 GDAL_ASYNCABLE_DEFINE(SpatialReference::fromUserInput) {
-  Nan::HandleScope scope;
 
   std::string input("");
   NODE_ARG_STR(0, "url", input);
@@ -828,7 +808,6 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromUserInput) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromEPSG) {
-  Nan::HandleScope scope;
 
   int epsg;
   NODE_ARG_INT(0, "epsg", epsg);
@@ -864,7 +843,6 @@ NAN_METHOD(SpatialReference::fromEPSG) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromEPSGA) {
-  Nan::HandleScope scope;
 
   int epsg;
   NODE_ARG_INT(0, "epsg", epsg);
@@ -902,7 +880,6 @@ NAN_METHOD(SpatialReference::fromEPSGA) {
  * @return {gdal.SpatialReference}
  */
 NAN_METHOD(SpatialReference::fromESRI) {
-  Nan::HandleScope scope;
 
   StringList list;
 
@@ -933,7 +910,6 @@ NAN_METHOD(SpatialReference::fromESRI) {
  * @return {units} An object containing `value` and `unit` properties.
  */
 NAN_METHOD(SpatialReference::getLinearUnits) {
-  Nan::HandleScope scope;
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
 
@@ -954,7 +930,6 @@ NAN_METHOD(SpatialReference::getLinearUnits) {
  * @return {units} An object containing `value` and `unit` properties.
  */
 NAN_METHOD(SpatialReference::getAngularUnits) {
-  Nan::HandleScope scope;
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
 
@@ -978,7 +953,6 @@ NAN_METHOD(SpatialReference::getAngularUnits) {
  * @return {string|null} `"corrupt"`, '"unsupported"', `null` (if fine)
  */
 NAN_METHOD(SpatialReference::validate) {
-  Nan::HandleScope scope;
 
   SpatialReference *srs = Nan::ObjectWrap::Unwrap<SpatialReference>(info.This());
 

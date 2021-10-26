@@ -92,7 +92,6 @@ Memfile *Memfile::get(Local<Object> buffer, const std::string &filename) {
  * @param {string} filename A file name beginning with `/vsimem/`
  */
 NAN_METHOD(Memfile::vsimemSet) {
-  Nan::HandleScope scope;
   Local<Object> buffer;
   std::string filename;
 
@@ -109,7 +108,6 @@ NAN_METHOD(Memfile::vsimemSet) {
  * This is not a public method as it is not always safe
  */
 NAN_METHOD(Memfile::vsimemAnonymous) {
-  Nan::HandleScope scope;
   Local<Object> buffer;
 
   NODE_ARG_OBJECT(0, "buffer", buffer);

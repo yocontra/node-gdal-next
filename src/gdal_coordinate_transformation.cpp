@@ -51,7 +51,6 @@ CoordinateTransformation::~CoordinateTransformation() {
  * conversion will represent a conversion to pixel coordinates.
  */
 NAN_METHOD(CoordinateTransformation::New) {
-  Nan::HandleScope scope;
   CoordinateTransformation *f;
   SpatialReference *source, *target;
 
@@ -147,7 +146,6 @@ Local<Value> CoordinateTransformation::New(OGRCoordinateTransformation *transfor
 }
 
 NAN_METHOD(CoordinateTransformation::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("CoordinateTransformation").ToLocalChecked());
 }
 
@@ -177,8 +175,6 @@ NAN_METHOD(CoordinateTransformation::toString) {
  * @return {xyz} A regular object containing `x`, `y`, `z` properties.
  */
 NAN_METHOD(CoordinateTransformation::transformPoint) {
-  Nan::HandleScope scope;
-
   CoordinateTransformation *transform = Nan::ObjectWrap::Unwrap<CoordinateTransformation>(info.This());
 
   double x, y, z = 0;

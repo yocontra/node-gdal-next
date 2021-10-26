@@ -38,7 +38,6 @@ PolygonRings::~PolygonRings() {
  * @class gdal.PolygonRings
  */
 NAN_METHOD(PolygonRings::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -71,7 +70,6 @@ Local<Value> PolygonRings::New(Local<Value> geom) {
 }
 
 NAN_METHOD(PolygonRings::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("PolygonRings").ToLocalChecked());
 }
 
@@ -82,7 +80,6 @@ NAN_METHOD(PolygonRings::toString) {
  * @return {number}
  */
 NAN_METHOD(PolygonRings::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -109,7 +106,6 @@ NAN_METHOD(PolygonRings::count) {
  * @return {gdal.LinearRing}
  */
 NAN_METHOD(PolygonRings::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -153,7 +149,6 @@ NAN_METHOD(PolygonRings::get) {
  * @param {gdal.LinearRing|gdal.LinearRing[]} rings
  */
 NAN_METHOD(PolygonRings::add) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();

@@ -44,7 +44,6 @@ FeatureDefnFields::~FeatureDefnFields() {
  * @class gdal.FeatureDefnFields
  */
 NAN_METHOD(FeatureDefnFields::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -78,7 +77,6 @@ Local<Value> FeatureDefnFields::New(Local<Value> feature_defn) {
 }
 
 NAN_METHOD(FeatureDefnFields::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("FeatureDefnFields").ToLocalChecked());
 }
 
@@ -89,7 +87,6 @@ NAN_METHOD(FeatureDefnFields::toString) {
  * @return {number}
  */
 NAN_METHOD(FeatureDefnFields::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -110,7 +107,6 @@ NAN_METHOD(FeatureDefnFields::count) {
  * @return {number} Index or `-1` if not found.
  */
 NAN_METHOD(FeatureDefnFields::indexOf) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -135,7 +131,6 @@ NAN_METHOD(FeatureDefnFields::indexOf) {
  * @return {gdal.FieldDefn}
  */
 NAN_METHOD(FeatureDefnFields::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -166,7 +161,6 @@ NAN_METHOD(FeatureDefnFields::get) {
  * @return {string[]} List of field names.
  */
 NAN_METHOD(FeatureDefnFields::getNames) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -195,7 +189,6 @@ NAN_METHOD(FeatureDefnFields::getNames) {
  * @param {string|number} key Field name or index
  */
 NAN_METHOD(FeatureDefnFields::remove) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -230,7 +223,6 @@ NAN_METHOD(FeatureDefnFields::remove) {
  * @param {gdal.FieldDefn|gdal.FieldDefn[]} fields
  */
 NAN_METHOD(FeatureDefnFields::add) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -283,7 +275,6 @@ NAN_METHOD(FeatureDefnFields::add) {
  * @param {number[]} map An array representing the new field order.
  */
 NAN_METHOD(FeatureDefnFields::reorder) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -343,7 +334,6 @@ NAN_METHOD(FeatureDefnFields::reorder) {
  * @type {gdal.FeatureDefn}
  */
 NAN_GETTER(FeatureDefnFields::featureDefnGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 

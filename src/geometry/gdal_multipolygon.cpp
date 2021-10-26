@@ -35,7 +35,6 @@ void MultiPolygon::Initialize(Local<Object> target) {
  */
 
 NAN_METHOD(MultiPolygon::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("MultiPolygon").ToLocalChecked());
 }
 
@@ -46,7 +45,6 @@ NAN_METHOD(MultiPolygon::toString) {
  * @return {gdal.Geometry}
  */
 NAN_METHOD(MultiPolygon::unionCascaded) {
-  Nan::HandleScope scope;
 
   MultiPolygon *geom = Nan::ObjectWrap::Unwrap<MultiPolygon>(info.This());
   auto r = geom->this_->UnionCascaded();

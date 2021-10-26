@@ -63,8 +63,6 @@ void Attribute::dispose() {
  * @class gdal.Attribute
  */
 NAN_METHOD(Attribute::New) {
-  Nan::HandleScope scope;
-
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
     return;
@@ -120,7 +118,6 @@ Local<Value> Attribute::New(std::shared_ptr<GDALAttribute> raw, GDALDataset *par
 }
 
 NAN_METHOD(Attribute::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Attribute").ToLocalChecked());
 }
 
@@ -132,7 +129,6 @@ NAN_METHOD(Attribute::toString) {
  * @type {string|number}
  */
 NAN_GETTER(Attribute::valueGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(Attribute, info.This(), attribute);
   GDAL_RAW_CHECK(std::shared_ptr<GDALAttribute>, attribute, raw);
   GDAL_LOCK_PARENT(attribute);
@@ -153,7 +149,6 @@ NAN_GETTER(Attribute::valueGetter) {
  * @type {string}
  */
 NAN_GETTER(Attribute::typeGetter) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(Attribute, info.This(), attribute);
   GDAL_RAW_CHECK(std::shared_ptr<GDALAttribute>, attribute, raw);
   GDAL_LOCK_PARENT(attribute);
@@ -170,7 +165,6 @@ NAN_GETTER(Attribute::typeGetter) {
 }
 
 NAN_GETTER(Attribute::uidGetter) {
-  Nan::HandleScope scope;
   Attribute *group = Nan::ObjectWrap::Unwrap<Attribute>(info.This());
   info.GetReturnValue().Set(Nan::New((int)group->uid));
 }

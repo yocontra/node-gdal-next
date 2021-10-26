@@ -65,7 +65,6 @@ RasterBand *RasterBandPixels::parent(const Nan::FunctionCallbackInfo<v8::Value> 
  * @class gdal.RasterBandPixels
  */
 NAN_METHOD(RasterBandPixels::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -99,7 +98,6 @@ Local<Value> RasterBandPixels::New(Local<Value> band_obj) {
 }
 
 NAN_METHOD(RasterBandPixels::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("RasterBandPixels").ToLocalChecked());
 }
 
@@ -124,7 +122,6 @@ NAN_METHOD(RasterBandPixels::toString) {
  * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
-  Nan::HandleScope scope;
 
   RasterBand *band;
   if ((band = parent(info)) == nullptr) return;
@@ -171,7 +168,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::set) {
-  Nan::HandleScope scope;
 
   RasterBand *band;
   if ((band = parent(info)) == nullptr) return;
@@ -293,7 +289,6 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
  * @return {Promise<TypedArray>} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
-  Nan::HandleScope scope;
 
   RasterBand *band;
   if ((band = parent(info)) == nullptr) return;
@@ -438,7 +433,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
-  Nan::HandleScope scope;
 
   RasterBand *band;
   if ((band = parent(info)) == nullptr) return;
@@ -547,7 +541,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  */
 
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
-  Nan::HandleScope scope;
 
   RasterBand *band;
   if ((band = parent(info)) == nullptr) return;
@@ -617,7 +610,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
-  Nan::HandleScope scope;
 
   RasterBand *band;
   if ((band = parent(info)) == nullptr) return;
@@ -660,7 +652,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
  * @type {gdal.RasterBand}
  */
 NAN_GETTER(RasterBandPixels::bandGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());
 }
 

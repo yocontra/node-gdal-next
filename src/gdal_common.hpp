@@ -584,7 +584,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_RESULT(klass, method, result_type, wrapped_method)                                    \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -596,7 +595,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 #define NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(                                                               \
   klass, method, result_type, wrapped_method, param_type, param_name)                                                  \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     param_type *param;                                                                                                 \
     NODE_ARG_WRAPPED(0, #param_name, param_type, param);                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -607,7 +605,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 #define NODE_WRAPPED_METHOD_WITH_RESULT_1_ENUM_PARAM(                                                                  \
   klass, method, result_type, wrapped_method, enum_type, param_name)                                                   \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     enum_type param;                                                                                                   \
     NODE_ARG_ENUM(0, #param_name, enum_type, param);                                                                   \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -620,7 +617,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM(klass, method, result_type, wrapped_method, param_name)         \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     std::string param;                                                                                                 \
     NODE_ARG_STR(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -633,7 +629,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_RESULT_1_INTEGER_PARAM(klass, method, result_type, wrapped_method, param_name)        \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     int param;                                                                                                         \
     NODE_ARG_INT(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -646,7 +641,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_RESULT_1_DOUBLE_PARAM(klass, method, result_type, wrapped_method, param_name)         \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     double param;                                                                                                      \
     NODE_ARG_DOUBLE(0, #param_name, param);                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -661,7 +655,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_RESULT_LOCKED(klass, method, result_type, wrapped_method)                             \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -673,7 +666,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(klass, method, wrapped_method)                                          \
   NAN_GETTER(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -686,7 +678,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_GETTER_WITH_RESULT_LOCKED(klass, method, result_type, wrapped_method)                             \
   NAN_GETTER(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -700,7 +691,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 // ----- wrapped asyncable methods-------
 #define NODE_WRAPPED_ASYNC_METHOD(klass, method, wrapped_method)                                                       \
   GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -720,7 +710,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT(klass, async_type, method, result_type, wrapped_method)                  \
   GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -737,7 +726,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_WRAPPED_PARAM(                                                         \
   klass, async_type, method, result_type, wrapped_method, param_type, param_name)                                      \
   GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
-    Nan::HandleScope scope;                                                                                            \
     param_type *param;                                                                                                 \
     NODE_ARG_WRAPPED(0, #param_name, param_type, param);                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -754,7 +742,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_RESULT_1_ENUM_PARAM(                                                            \
   klass, async_type, method, result_type, wrapped_method, enum_type, param_name)                                       \
   GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
-    Nan::HandleScope scope;                                                                                            \
     enum_type param;                                                                                                   \
     NODE_ARG_ENUM(0, #param_name, enum_type, param);                                                                   \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -771,7 +758,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(klass, method, wrapped_method)                             \
   GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -791,7 +777,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 #define NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(                                                  \
   klass, async_type, method, wrapped_method, param_type, param_name)                                                   \
   GDAL_ASYNCABLE_DEFINE(klass::method) {                                                                               \
-    Nan::HandleScope scope;                                                                                            \
     param_type *param;                                                                                                 \
     NODE_ARG_WRAPPED(0, #param_name, param_type, param);                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -831,7 +816,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_WRAPPED_PARAM(klass, method, wrapped_method, param_type, param_name)  \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     param_type *param;                                                                                                 \
     NODE_ARG_WRAPPED(0, #param_name, param_type, param);                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -849,7 +833,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_STRING_PARAM(klass, method, wrapped_method, param_name)               \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     std::string param;                                                                                                 \
     NODE_ARG_STR(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -867,7 +850,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM(klass, method, wrapped_method, param_name)              \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     int param;                                                                                                         \
     NODE_ARG_INT(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -885,7 +867,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_INTEGER_PARAM_LOCKED(klass, method, wrapped_method, param_name)       \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     int param;                                                                                                         \
     NODE_ARG_INT(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -903,7 +884,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_CPLERR_RESULT_1_DOUBLE_PARAM(klass, method, wrapped_method, param_name)               \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     double param;                                                                                                      \
     NODE_ARG_DOUBLE(0, #param_name, param);                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -936,7 +916,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_WRAPPED_PARAM(klass, method, wrapped_method, param_type, param_name)  \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     param_type *param;                                                                                                 \
     NODE_ARG_WRAPPED(0, #param_name, param_type, param);                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -954,7 +933,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_STRING_PARAM(klass, method, wrapped_method, param_name)               \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     std::string param;                                                                                                 \
     NODE_ARG_STR(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -972,7 +950,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_INTEGER_PARAM(klass, method, wrapped_method, param_name)              \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     int param;                                                                                                         \
     NODE_ARG_INT(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -990,7 +967,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_OGRERR_RESULT_1_DOUBLE_PARAM(klass, method, wrapped_method, param_name)               \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     double param;                                                                                                      \
     NODE_ARG_DOUBLE(0, #param_name, param);                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -1026,7 +1002,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM_LOCKED(klass, method, result_type, wrapped_method, param_name)  \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     std::string param;                                                                                                 \
     NODE_ARG_STR(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -1043,7 +1018,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD(klass, method, wrapped_method)                                                             \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
     if (!obj->isAlive()) {                                                                                             \
       Nan::ThrowError(#klass " object has already been destroyed");                                                    \
@@ -1055,7 +1029,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_1_WRAPPED_PARAM(klass, method, wrapped_method, param_type, param_name)                \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     param_type *param;                                                                                                 \
     NODE_ARG_WRAPPED(0, #param_name, param_type, param);                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -1069,7 +1042,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_1_INTEGER_PARAM(klass, method, wrapped_method, param_name)                            \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     int param;                                                                                                         \
     NODE_ARG_INT(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -1083,7 +1055,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_1_DOUBLE_PARAM(klass, method, wrapped_method, param_name)                             \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     double param;                                                                                                      \
     NODE_ARG_DOUBLE(0, #param_name, param);                                                                            \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -1097,7 +1068,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_1_BOOLEAN_PARAM(klass, method, wrapped_method, param_name)                            \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     bool param;                                                                                                        \
     NODE_ARG_BOOL(0, #param_name, param);                                                                              \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -1111,7 +1081,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_1_ENUM_PARAM(klass, method, wrapped_method, enum_type, param_name)                    \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     enum_type param;                                                                                                   \
     NODE_ARG_ENUM(0, #param_name, enum_type, param);                                                                   \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \
@@ -1125,7 +1094,6 @@ NAN_SETTER(READ_ONLY_SETTER);
 
 #define NODE_WRAPPED_METHOD_WITH_1_STRING_PARAM(klass, method, wrapped_method, param_name)                             \
   NAN_METHOD(klass::method) {                                                                                          \
-    Nan::HandleScope scope;                                                                                            \
     std::string param;                                                                                                 \
     NODE_ARG_STR(0, #param_name, param);                                                                               \
     klass *obj = Nan::ObjectWrap::Unwrap<klass>(info.This());                                                          \

@@ -86,7 +86,6 @@ void Dataset::dispose(bool manual) {
  * @class gdal.Dataset
  */
 NAN_METHOD(Dataset::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -152,7 +151,6 @@ Local<Value> Dataset::New(GDALDataset *raw, GDALDataset *parent) {
 }
 
 NAN_METHOD(Dataset::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("Dataset").ToLocalChecked());
 }
 
@@ -174,7 +172,6 @@ NAN_METHOD(Dataset::toString) {
  * @return {Promise<any>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
   GDAL_RAW_CHECK(GDALDataset *, ds, raw);
 
@@ -209,7 +206,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
  * @return {Promise<boolean>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
   GDAL_RAW_CHECK(GDALDataset *, ds, raw);
 
@@ -241,7 +237,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {
  * @return {boolean}
  */
 NAN_METHOD(Dataset::testCapability) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -265,7 +260,6 @@ NAN_METHOD(Dataset::testCapability) {
  * @return {string}
  */
 NAN_METHOD(Dataset::getGCPProjection) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -326,7 +320,6 @@ NAN_METHOD(Dataset::close) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
-  Nan::HandleScope scope;
   NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
   GDAL_RAW_CHECK(GDALDataset *, ds, raw);
   GDALAsyncableJob<int> job(ds->uid);
@@ -374,7 +367,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  * @return {Promise<gdal.Layer>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -418,7 +410,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
  * @return {string[]}
  */
 NAN_METHOD(Dataset::getFileList) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   Local<Array> results = Nan::New<Array>(0);
@@ -459,7 +450,6 @@ NAN_METHOD(Dataset::getFileList) {
  * @return {any[]}
  */
 NAN_METHOD(Dataset::getGCPs) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   Local<Array> results = Nan::New<Array>(0);
@@ -509,7 +499,6 @@ NAN_METHOD(Dataset::getGCPs) {
  * @param {string} [projection]
  */
 NAN_METHOD(Dataset::setGCPs) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -594,7 +583,6 @@ NAN_METHOD(Dataset::setGCPs) {
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
-  Nan::HandleScope scope;
 
   NODE_UNWRAP_CHECK(Dataset, info.This(), ds);
   GDAL_RAW_CHECK(GDALDataset *, ds, raw);
@@ -673,7 +661,6 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
  * @type {string}
  */
 NAN_GETTER(Dataset::descriptionGetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -707,7 +694,6 @@ NAN_GETTER(Dataset::descriptionGetter) {
  * @type {Promise<xyz>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
   struct xy {
     int x, y;
@@ -766,7 +752,6 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * @type {Promise<gdal.SpatialReference>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -830,7 +815,6 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * @type {Promise<number[]>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -872,7 +856,6 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
  * @type {gdal.Driver}
  */
 NAN_GETTER(Dataset::driverGetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -885,7 +868,6 @@ NAN_GETTER(Dataset::driverGetter) {
 }
 
 NAN_SETTER(Dataset::srsSetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -920,7 +902,6 @@ NAN_SETTER(Dataset::srsSetter) {
 }
 
 NAN_SETTER(Dataset::geoTransformSetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
 
   if (!ds->isAlive()) {
@@ -963,7 +944,6 @@ NAN_SETTER(Dataset::geoTransformSetter) {
  * @type {gdal.DatasetBands}
  */
 NAN_GETTER(Dataset::bandsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("bands_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -973,7 +953,6 @@ NAN_GETTER(Dataset::bandsGetter) {
  * @type {gdal.DatasetLayers}
  */
 NAN_GETTER(Dataset::layersGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("layers_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -983,7 +962,6 @@ NAN_GETTER(Dataset::layersGetter) {
  * @type {gdal.Group}
  */
 NAN_GETTER(Dataset::rootGetter) {
-  Nan::HandleScope scope;
   Local<Value> rootObj = Nan::GetPrivate(info.This(), Nan::New("root_").ToLocalChecked()).ToLocalChecked();
   if (rootObj->IsUndefined()) {
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
@@ -1005,7 +983,6 @@ NAN_GETTER(Dataset::rootGetter) {
 }
 
 NAN_GETTER(Dataset::uidGetter) {
-  Nan::HandleScope scope;
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
   info.GetReturnValue().Set(Nan::New((int)ds->uid));
 }

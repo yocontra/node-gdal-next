@@ -36,7 +36,6 @@ RasterBandOverviews::~RasterBandOverviews() {
  * @class gdal.RasterBandOverviews
  */
 NAN_METHOD(RasterBandOverviews::New) {
-  Nan::HandleScope scope;
 
   if (!info.IsConstructCall()) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
@@ -70,7 +69,6 @@ Local<Value> RasterBandOverviews::New(Local<Value> band_obj) {
 }
 
 NAN_METHOD(RasterBandOverviews::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("RasterBandOverviews").ToLocalChecked());
 }
 
@@ -94,7 +92,6 @@ NAN_METHOD(RasterBandOverviews::toString) {
  * @return {Promise<gdal.RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -148,7 +145,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
  * @return {Promise<gdal.RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();
@@ -186,7 +182,6 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
  * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::count) {
-  Nan::HandleScope scope;
 
   Local<Object> parent =
     Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked().As<Object>();

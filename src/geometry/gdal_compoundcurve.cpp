@@ -47,7 +47,6 @@ void CompoundCurve::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8:
  */
 
 NAN_METHOD(CompoundCurve::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("CompoundCurve").ToLocalChecked());
 }
 
@@ -58,7 +57,6 @@ NAN_METHOD(CompoundCurve::toString) {
  * @type {gdal.CompoundCurveCurves}
  */
 NAN_GETTER(CompoundCurve::curvesGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("curves_").ToLocalChecked()).ToLocalChecked());
 }
 

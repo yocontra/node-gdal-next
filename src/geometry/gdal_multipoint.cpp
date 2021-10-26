@@ -34,7 +34,6 @@ void MultiPoint::Initialize(Local<Object> target) {
  */
 
 NAN_METHOD(MultiPoint::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("MultiPoint").ToLocalChecked());
 }
 

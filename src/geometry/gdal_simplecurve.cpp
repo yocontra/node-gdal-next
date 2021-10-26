@@ -40,12 +40,10 @@ void SimpleCurve::Initialize(Local<Object> target) {
  * @extends gdal.Geometry
  */
 NAN_METHOD(SimpleCurve::New) {
-  Nan::HandleScope scope;
   Nan::ThrowError("SimpleCurve is an abstract class and cannot be instantiated");
 }
 
 NAN_METHOD(SimpleCurve::toString) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::New("SimpleCurve").ToLocalChecked());
 }
 
@@ -57,7 +55,6 @@ NAN_METHOD(SimpleCurve::toString) {
  * @return {gdal.Point}
  */
 NAN_METHOD(SimpleCurve::value) {
-  Nan::HandleScope scope;
 
   SimpleCurve *geom = Nan::ObjectWrap::Unwrap<SimpleCurve>(info.This());
 
@@ -86,7 +83,6 @@ NODE_WRAPPED_METHOD_WITH_RESULT(SimpleCurve, getLength, Number, get_Length);
  * @type {gdal.LineStringPoints}
  */
 NAN_GETTER(SimpleCurve::pointsGetter) {
-  Nan::HandleScope scope;
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("points_").ToLocalChecked()).ToLocalChecked());
 }
 
@@ -106,7 +102,6 @@ NAN_GETTER(SimpleCurve::pointsGetter) {
  * @return {void}
  */
 NAN_METHOD(SimpleCurve::addSubLineString) {
-  Nan::HandleScope scope;
 
   SimpleCurve *geom = Nan::ObjectWrap::Unwrap<SimpleCurve>(info.This());
   LineString *other;
