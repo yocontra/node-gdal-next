@@ -784,6 +784,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
  * {{{async_getter}}}
  *
  * @attribute offsetAsync
+ * @readOnly
  * @type {Promise<number>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
@@ -814,6 +815,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
  * {{{async_getter}}}
  *
  * @attribute scaleAsync
+ * @readOnly
  * @type {Promise<number>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
@@ -844,6 +846,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
  * {{{async_getter}}}
  *
  * @attribute noDataValueAsync
+ * @readOnly
  * @type {Promise<number|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
@@ -888,6 +891,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
  * {{{async_getter}}}
  *
  * @attribute unitTypeAsync
+ * @readOnly
  * @type {Promise<string>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
@@ -1017,6 +1021,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::hasArbitraryOverviewsGetter) {
  * {{{async_getter}}}
  *
  * @attribute categoryNamesAsync
+ * @readOnly
  * @type {Promise<string[]>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
@@ -1063,6 +1068,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
  * {{{async_getter}}}
  *
  * @attribute colorInterpretationAsync
+ * @readOnly
  * @type {Promise<string>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorInterpretationGetter) {
@@ -1200,6 +1206,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
  * {{{async_getter}}}
  *
  * @attribute colorTableAsync
+ * @readOnly
  * @type {Promise<gdal.ColorTable>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorTableGetter) {

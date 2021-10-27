@@ -749,6 +749,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  *
  * @throws Error
  * @attribute srsAsync
+ * @readOnly
  * @type {Promise<gdal.SpatialReference>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
@@ -811,6 +812,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];```
  *
  * {{async_getter}}
+ * @readOnly
  * @attribute geoTransformAsync
  * @type {Promise<number[]>}
  */
