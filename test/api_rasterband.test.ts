@@ -511,6 +511,12 @@ describe('gdal.RasterBand', () => {
           band.noDataValue = NaN
           assert.isNaN(band.noDataValue)
         })
+        it('should clear the noDataValue when setting to null', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          band.noDataValue = null
+          assert.isNull(band.noDataValue)
+        })
         it('should throw error if dataset already closed', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)

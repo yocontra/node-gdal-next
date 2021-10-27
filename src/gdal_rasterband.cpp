@@ -1103,20 +1103,19 @@ NAN_SETTER(RasterBand::unitTypeSetter) {
 NAN_SETTER(RasterBand::noDataValueSetter) {
   NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
 
-  double input;
-
+  CPLErr err;
+  GDAL_LOCK_PARENT(band);
+  CPLErrorReset();
   if (value->IsNull() || value->IsUndefined()) {
-    input = std::numeric_limits<double>::quiet_NaN();
+    err = band->this_->DeleteNoDataValue();
   } else if (value->IsNumber()) {
-    input = Nan::To<double>(value).ToChecked();
+    err = band->this_->SetNoDataValue(Nan::To<double>(value).ToChecked());
   } else {
     Nan::ThrowError("No data value must be a number");
     return;
   }
 
-  GDAL_LOCK_PARENT(band);
-  CPLErr err = band->this_->SetNoDataValue(input);
-  if (err) { NODE_THROW_LAST_CPLERR; }
+  if (err != CE_None) { NODE_THROW_LAST_CPLERR; }
 }
 
 NAN_SETTER(RasterBand::scaleSetter) {
