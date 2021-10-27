@@ -197,7 +197,7 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
         * GDAL >= 2.1 is required
         * All platforms use lazy-binding meaning that parts of the binary won't be loaded in memory until the first function call
         * All `gdal.RasterBand` getters now throw an `Error` instead of returning null on error
-        * `gdal.RasterBand.noDataValue` now returns `NaN` if the original value was `NaN` instead of null; one should still exercise care when using `NaN` as a `NoDataValue` - since even if the binary representation is standardized by IEEE 754, different formats, compilers or architectures may exhibit different behavior; additionally `gdal.RasterBand.noDataValue` does not throw when the `NoDataValue` is not set, as this is not considered an error
+        * `gdal.RasterBand.noDataValue` now returns `NaN` if the original value was `NaN` instead of null; one should still exercise care when using `NaN` as a `NoDataValue` - since even if the binary representation is defined by IEEE 754, different formats, compilers or architectures may exhibit different behavior; additionally `gdal.RasterBand.noDataValue` does not throw when the `NoDataValue` is not set, as this is not considered an error
 
  * If you are coming from `node-gdal`, in addition to all of the above
     - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,

@@ -584,8 +584,8 @@ NAN_GETTER(RasterBand::pixelsGetter) {
 /**
  * @readOnly
  * @attribute idAsync
- * @type {number|null}
- * {{{Promise<async_getter>}}}
+ * @type {Promise<number|null>}
+ * {{{async_getter}}}
  */
 
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {

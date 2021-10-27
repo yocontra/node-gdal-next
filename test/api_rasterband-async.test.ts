@@ -14,21 +14,17 @@ describe('gdal.RasterBandAsync', () => {
     })
   })
   describe('instance', () => {
-    describe('"description" property', () => {
+    describe('"descriptionAsync" property', () => {
       describe('getter', () => {
         it('should return string', () => {
-          const ds = gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`)
-          return assert.eventually.equal(ds.then((r) => r.bands.get(1).description), 'hshade17')
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          return assert.eventually.equal(ds.bands.get(1).descriptionAsync, 'hshade17')
         })
         it('should throw error if dataset already closed', () => {
-          const ds = gdal.openAsync(`${__dirname}/data/dem_azimuth50_pa.img`)
-          return assert.isFulfilled(ds.then((r) => {
-            const band = r.bands.get(1)
-            r.close()
-            assert.throws(() => {
-              console.log(band.description)
-            })
-          }))
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.descriptionAsync)
         })
       })
       describe('setter', () => {
@@ -43,11 +39,11 @@ describe('gdal.RasterBandAsync', () => {
         })
       })
     })
-    describe('"readOnly" property', () => {
+    describe('"readOnlyAsync" property', () => {
       describe('getter', () => {
         it('should return true on readOnly dataset', () => {
-          const ds = gdal.openAsync(`${__dirname}/data/sample.tif`)
-          return assert.eventually.isTrue(ds.then((r) => r.bands.get(1).readOnly))
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          return assert.eventually.isTrue(ds.bands.get(1).readOnlyAsync)
         })
       })
     })
@@ -549,6 +545,149 @@ describe('gdal.RasterBandAsync', () => {
         const band = ds.bands.get(1)
         ds.close()
         return assert.isRejected(band.fillAsync(5))
+      })
+    })
+    describe('"idAsync" property', () => {
+      describe('getter', () => {
+        it('should return number', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.idAsync, 1)
+        })
+        it('should reject if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.idAsync)
+        })
+      })
+    })
+    describe('"sizeAsync" property', () => {
+      describe('getter', () => {
+        it('should return object', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 128, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.eventually.deepEqual(band.sizeAsync, { x: 128, y: 256 })
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.sizeAsync)
+        })
+      })
+    })
+    describe('"blockSizeAsync" property', () => {
+      describe('getter', () => {
+        it('should return object', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const band = ds.bands.get(1)
+          return assert.eventually.deepEqual(band.blockSizeAsync, { x: 984, y: 8 })
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.blockSizeAsync)
+        })
+      })
+    })
+    describe('"unitTypeAsync" property', () => {
+      describe('getter', () => {
+        it('should return string', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const band = ds.bands.get(1)
+          return assert.eventually.isString(band.unitTypeAsync)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.unitTypeAsync)
+        })
+      })
+    })
+    describe('"dataTypeAsync" property', () => {
+      describe('getter', () => {
+        it('should return dataType', () => {
+          const ds = gdal.open(
+            'temp',
+            'w',
+            'MEM',
+            256,
+            256,
+            1,
+            gdal.GDT_Float64
+          )
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.dataTypeAsync, gdal.GDT_Float64)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.dataTypeAsync)
+        })
+      })
+    })
+    describe('"minimumAsync" property', () => {
+      describe('getter', () => {
+        it('should return number', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.minimumAsync, 177)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.minimumAsync)
+        })
+      })
+    })
+    describe('"maximumAsync" property', () => {
+      describe('getter', () => {
+        it('should return number', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.maximumAsync, 182)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.maximumAsync)
+        })
+      })
+    })
+    describe('"offsetAsync" property', () => {
+      describe('getter', () => {
+        it('should return number', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.offsetAsync, 0)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.offsetAsync)
+        })
+      })
+    })
+    describe('"scaleAsync" property', () => {
+      describe('getter', () => {
+        it('should return number', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.scaleAsync, 1)
+        })
+        it('should throw error if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.scaleAsync)
+        })
       })
     })
     describe('"noDataValueAsync" property', () => {
