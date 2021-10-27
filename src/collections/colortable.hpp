@@ -48,7 +48,7 @@ class ColorTable : public Nan::ObjectWrap {
   long parent_uid;
 
   inline bool isAlive() {
-    return this_ && object_store.isAlive(uid);
+    return this_ && object_store.isAlive(uid) && (parent_uid == 0 || object_store.isAlive(parent_uid));
   }
 
     private:
