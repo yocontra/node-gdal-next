@@ -505,6 +505,12 @@ describe('gdal.RasterBand', () => {
           band.noDataValue = 5
           assert.equal(band.noDataValue, 5)
         })
+        it('should support NaN', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          band.noDataValue = NaN
+          assert.isNaN(band.noDataValue)
+        })
         it('should throw error if dataset already closed', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
@@ -1635,7 +1641,6 @@ describe('gdal.RasterBand', () => {
       })
     })
     describe('"hasArbitraryOverviews" property', () => {
-      // node-gdal doesn't support (yet) networking so this method is not really useful
       it('should always return false', () => {
         const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
         assert.equal(band.hasArbitraryOverviews, false)

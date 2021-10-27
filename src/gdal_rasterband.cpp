@@ -48,22 +48,22 @@ void RasterBand::Initialize(Local<Object> target) {
 
   ATTR_DONT_ENUM(lcons, "ds", dsGetter, READ_ONLY_SETTER);
   ATTR_DONT_ENUM(lcons, "_uid", uidGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "id", idGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "description", descriptionGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "size", sizeGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "id", idGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "description", descriptionGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "size", sizeGetter, READ_ONLY_SETTER);
   ATTR(lcons, "overviews", overviewsGetter, READ_ONLY_SETTER);
   ATTR(lcons, "pixels", pixelsGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "blockSize", blockSizeGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "minimum", minimumGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "maximum", maximumGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "readOnly", readOnlyGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "dataType", dataTypeGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "hasArbitraryOverviews", hasArbitraryOverviewsGetter, READ_ONLY_SETTER);
-  ATTR(lcons, "unitType", unitTypeGetter, unitTypeSetter);
-  ATTR(lcons, "scale", scaleGetter, scaleSetter);
-  ATTR(lcons, "offset", offsetGetter, offsetSetter);
-  ATTR(lcons, "noDataValue", noDataValueGetter, noDataValueSetter);
-  ATTR(lcons, "categoryNames", categoryNamesGetter, categoryNamesSetter);
+  ATTR_ASYNCABLE(lcons, "blockSize", blockSizeGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "minimum", minimumGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "maximum", maximumGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "readOnly", readOnlyGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "dataType", dataTypeGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "hasArbitraryOverviews", hasArbitraryOverviewsGetter, READ_ONLY_SETTER);
+  ATTR_ASYNCABLE(lcons, "unitType", unitTypeGetter, unitTypeSetter);
+  ATTR_ASYNCABLE(lcons, "scale", scaleGetter, scaleSetter);
+  ATTR_ASYNCABLE(lcons, "offset", offsetGetter, offsetSetter);
+  ATTR_ASYNCABLE(lcons, "noDataValue", noDataValueGetter, noDataValueSetter);
+  ATTR_ASYNCABLE(lcons, "categoryNames", categoryNamesGetter, categoryNamesSetter);
   ATTR_ASYNCABLE(lcons, "colorInterpretation", colorInterpretationGetter, colorInterpretationSetter);
   ATTR_ASYNCABLE(lcons, "colorTable", colorTableGetter, colorTableSetter);
 
@@ -580,18 +580,27 @@ NAN_GETTER(RasterBand::pixelsGetter) {
  * @attribute id
  * @type {number|null}
  */
-NAN_GETTER(RasterBand::idGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  int id = band->this_->GetBand();
 
-  if (id == 0) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  } else {
-    info.GetReturnValue().Set(Nan::New<Integer>(id));
-    return;
-  }
+/**
+ * @readOnly
+ * @attribute idAsync
+ * @type {number|null}
+ * {{{Promise<async_getter>}}}
+ */
+
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<int> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    int r = raw->GetBand();
+    if (r == 0) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](int id, GetFromPersistentFunc) { return Nan::New<Integer>(id).As<Value>(); };
+  job.run(info, async);
 }
 
 /**
@@ -601,12 +610,23 @@ NAN_GETTER(RasterBand::idGetter) {
  * @attribute description
  * @type {string}
  */
-NAN_GETTER(RasterBand::descriptionGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  const char *desc = band->this_->GetDescription();
 
-  info.GetReturnValue().Set(SafeString::New(desc));
+/**
+ * Name of of band.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute descriptionAsync
+ * @type {Promise<string>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::descriptionGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<const char *> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) { return raw->GetDescription(); };
+  job.rval = [](const char *desc, GetFromPersistentFunc) { return SafeString::New(desc); };
+  job.run(info, async);
 }
 
 /**
@@ -616,15 +636,37 @@ NAN_GETTER(RasterBand::descriptionGetter) {
  * @attribute size
  * @type {xyz}
  */
-NAN_GETTER(RasterBand::sizeGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  Local<Object> result = Nan::New<Object>();
-  GDAL_LOCK_PARENT(band);
-  int x = band->this_->GetXSize();
-  int y = band->this_->GetYSize();
-  Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(x));
-  Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(y));
-  info.GetReturnValue().Set(result);
+
+/**
+ * Size object containing `"x"` and `"y"` properties.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute sizeAsync
+ * @type {Promise<xyz>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::sizeGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  struct xy {
+    int x, y;
+  };
+  GDALAsyncableJob<xy> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    xy r;
+    r.x = raw->GetXSize();
+    r.y = raw->GetYSize();
+    return r;
+  };
+  job.rval = [](xy r, GetFromPersistentFunc) {
+    Nan::EscapableHandleScope scope;
+    Local<Object> result = Nan::New<Object>();
+    Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(r.x));
+    Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(r.y));
+    return scope.Escape(result);
+  };
+  job.run(info, async);
 }
 
 /**
@@ -634,16 +676,36 @@ NAN_GETTER(RasterBand::sizeGetter) {
  * @attribute blockSize
  * @type {xyz}
  */
-NAN_GETTER(RasterBand::blockSizeGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  int x, y;
-  GDAL_LOCK_PARENT(band);
-  band->this_->GetBlockSize(&x, &y);
 
-  Local<Object> result = Nan::New<Object>();
-  Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(x));
-  Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(y));
-  info.GetReturnValue().Set(result);
+/**
+ * Size object containing `"x"` and `"y"` properties.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute blockSizeAsync
+ * @type {Promise<xyz>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::blockSizeGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  struct xy {
+    int x, y;
+  };
+  GDALAsyncableJob<xy> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    xy r;
+    raw->GetBlockSize(&r.x, &r.y);
+    return r;
+  };
+  job.rval = [](xy r, GetFromPersistentFunc) {
+    Nan::EscapableHandleScope scope;
+    Local<Object> result = Nan::New<Object>();
+    Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(r.x));
+    Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(r.y));
+    return scope.Escape(result);
+  };
+  job.run(info, async);
 }
 
 /**
@@ -653,12 +715,29 @@ NAN_GETTER(RasterBand::blockSizeGetter) {
  * @attribute minimum
  * @type {number}
  */
-NAN_GETTER(RasterBand::minimumGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  int success = 0;
-  GDAL_LOCK_PARENT(band);
-  double result = band->this_->GetMinimum(&success);
-  info.GetReturnValue().Set(Nan::New<Number>(result));
+
+/**
+ * Minimum value for this band.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute minimumAsync
+ * @type {Promise<number>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<double> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    int success = 0;
+    CPLErrorReset();
+    double r = raw->GetMinimum(&success);
+    if (!success) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.run(info, async);
 }
 
 /**
@@ -668,12 +747,29 @@ NAN_GETTER(RasterBand::minimumGetter) {
  * @attribute maximum
  * @type {number}
  */
-NAN_GETTER(RasterBand::maximumGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  int success = 0;
-  GDAL_LOCK_PARENT(band);
-  double result = band->this_->GetMaximum(&success);
-  info.GetReturnValue().Set(Nan::New<Number>(result));
+
+/**
+ * Maximum value for this band.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute maximumAsync
+ * @type {Promise<number>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<double> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    int success = 0;
+    CPLErrorReset();
+    double r = raw->GetMaximum(&success);
+    if (!success) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.run(info, async);
 }
 
 /**
@@ -682,12 +778,28 @@ NAN_GETTER(RasterBand::maximumGetter) {
  * @attribute offset
  * @type {number}
  */
-NAN_GETTER(RasterBand::offsetGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  int success = 0;
-  GDAL_LOCK_PARENT(band);
-  double result = band->this_->GetOffset(&success);
-  info.GetReturnValue().Set(Nan::New<Number>(result));
+
+/**
+ * Raster value offset.
+ * {{{async_getter}}}
+ *
+ * @attribute offsetAsync
+ * @type {Promise<number>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<double> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    int success = 0;
+    CPLErrorReset();
+    double r = raw->GetOffset(&success);
+    if (!success) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.run(info, async);
 }
 
 /**
@@ -696,12 +808,28 @@ NAN_GETTER(RasterBand::offsetGetter) {
  * @attribute scale
  * @type {number}
  */
-NAN_GETTER(RasterBand::scaleGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  int success = 0;
-  GDAL_LOCK_PARENT(band);
-  double result = band->this_->GetScale(&success);
-  info.GetReturnValue().Set(Nan::New<Number>(result));
+
+/**
+ * Raster value scale.
+ * {{{async_getter}}}
+ *
+ * @attribute scaleAsync
+ * @type {Promise<number>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<double> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    int success = 0;
+    CPLErrorReset();
+    double r = raw->GetScale(&success);
+    if (!success) throw CPLGetLastErrorMsg();
+    return r;
+  };
+  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.run(info, async);
 }
 
 /**
@@ -710,19 +838,36 @@ NAN_GETTER(RasterBand::scaleGetter) {
  * @attribute noDataValue
  * @type {number|null}
  */
-NAN_GETTER(RasterBand::noDataValueGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  int success = 0;
-  GDAL_LOCK_PARENT(band);
-  double result = band->this_->GetNoDataValue(&success);
 
-  if (success && !std::isnan(result)) {
-    info.GetReturnValue().Set(Nan::New<Number>(result));
-    return;
-  } else {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
-  }
+/**
+ * No data value for this band.
+ * {{{async_getter}}}
+ *
+ * @attribute noDataValueAsync
+ * @type {Promise<number|null>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  struct result {
+    double value;
+    int success;
+  };
+  GDALAsyncableJob<result> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    result r;
+    CPLErrorReset();
+    r.value = raw->GetNoDataValue(&r.success);
+    return r;
+  };
+  job.rval = [](result r, GetFromPersistentFunc) {
+    if (r.success)
+      return Nan::New<Number>(r.value).As<Value>();
+    else
+      return Nan::Null().As<Value>();
+  };
+  job.run(info, async);
 }
 
 /**
@@ -734,11 +879,28 @@ NAN_GETTER(RasterBand::noDataValueGetter) {
  * @attribute unitType
  * @type {string}
  */
-NAN_GETTER(RasterBand::unitTypeGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  const char *result = band->this_->GetUnitType();
-  info.GetReturnValue().Set(SafeString::New(result));
+
+/**
+ * Raster unit type (name for the units of this raster's values).
+ * For instance, it might be `"m"` for an elevation model in meters,
+ * or `"ft"` for feet. If no units are available, a value of `""`
+ * will be returned.
+ * {{{async_getter}}}
+ *
+ * @attribute unitTypeAsync
+ * @type {Promise<string>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<const char *> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    return raw->GetUnitType();
+  };
+  job.rval = [](const char *r, GetFromPersistentFunc) { return SafeString::New(r); };
+  job.run(info, async);
 }
 
 /**
@@ -750,13 +912,31 @@ NAN_GETTER(RasterBand::unitTypeGetter) {
  * @attribute dataType
  * @type {string|undefined}
  */
-NAN_GETTER(RasterBand::dataTypeGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  GDALDataType type = band->this_->GetRasterDataType();
 
-  if (type == GDT_Unknown) return;
-  info.GetReturnValue().Set(SafeString::New(GDALGetDataTypeName(type)));
+/**
+ *
+ * Pixel data type ({{#crossLink "Constants (GDT)"}}see GDT
+ * constants{{/crossLink}}) used for this band.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute dataTypeAsync
+ * @type {Promise<string|undefined>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::dataTypeGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<GDALDataType> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    return raw->GetRasterDataType();
+  };
+  job.rval = [](GDALDataType type, GetFromPersistentFunc) {
+    if (type == GDT_Unknown) return Nan::Undefined().As<Value>();
+    return SafeString::New(GDALGetDataTypeName(type));
+  };
+  job.run(info, async);
 }
 
 /**
@@ -766,11 +946,26 @@ NAN_GETTER(RasterBand::dataTypeGetter) {
  * @attribute readOnly
  * @type {boolean}
  */
-NAN_GETTER(RasterBand::readOnlyGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  GDALAccess result = band->this_->GetAccess();
-  info.GetReturnValue().Set(result == GA_Update ? Nan::False() : Nan::True());
+
+/**
+ * Indicates if the band is read-only.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute readOnlyAsync
+ * @type {Promise<boolean>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::readOnlyGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<GDALAccess> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    return raw->GetAccess();
+  };
+  job.rval = [](GDALAccess r, GetFromPersistentFunc) { return (r == GA_Update ? Nan::False() : Nan::True()); };
+  job.run(info, async);
 }
 
 /**
@@ -784,11 +979,30 @@ NAN_GETTER(RasterBand::readOnlyGetter) {
  * @attribute hasArbitraryOverviews
  * @type {boolean}
  */
-NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  bool result = band->this_->HasArbitraryOverviews();
-  info.GetReturnValue().Set(Nan::New<Boolean>(result));
+
+/**
+ * An indicator if the underlying datastore can compute arbitrary overviews
+ * efficiently, such as is the case with OGDI over a network. Datastores with
+ * arbitrary overviews don't generally have any fixed overviews, but GDAL's
+ * `RasterIO()` method can be used in downsampling mode to get overview
+ * data efficiently.
+ * {{{async_getter}}}
+ *
+ * @readOnly
+ * @attribute hasArbitraryOverviewsAsync
+ * @type {Promise<boolean>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::hasArbitraryOverviewsGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
+
+  GDALAsyncableJob<bool> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    CPLErrorReset();
+    return static_cast<bool>(raw->HasArbitraryOverviews());
+  };
+  job.rval = [](bool r, GetFromPersistentFunc) { return Nan::New<Boolean>(r); };
+  job.run(info, async);
 }
 
 /**
@@ -797,22 +1011,42 @@ NAN_GETTER(RasterBand::hasArbitraryOverviewsGetter) {
  * @attribute categoryNames
  * @type {string[]}
  */
-NAN_GETTER(RasterBand::categoryNamesGetter) {
-  NODE_UNWRAP_CHECK(RasterBand, info.This(), band);
-  GDAL_LOCK_PARENT(band);
-  char **names = band->this_->GetCategoryNames();
 
-  Local<Array> results = Nan::New<Array>();
+/**
+ * List of list of category names for this raster.
+ * {{{async_getter}}}
+ *
+ * @attribute categoryNamesAsync
+ * @type {Promise<string[]>}
+ */
+GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
+  NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
+  GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
 
-  if (names) {
+  GDALAsyncableJob<std::shared_ptr<std::vector<std::string>>> job(band->parent_uid);
+  job.main = [raw](const GDALExecutionProgress &) {
+    auto names = std::make_shared<std::vector<std::string>>();
+    CPLErrorReset();
+    // Here we copy twice what we could have copied only once
+    // In practice, GetCategoryNames always returns the same buffer
+    // But in theory, a clever driver could implement some crazy lazy method
+    // So we do everything "The Right Way"
+    // This is not a performance-critical function anyway
+    char **raw_names = raw->GetCategoryNames();
     int i = 0;
-    while (names[i]) {
-      Nan::Set(results, i, Nan::New(names[i]).ToLocalChecked());
+    while (raw_names[i]) {
+      names->push_back(raw_names[i]);
       i++;
     }
-  }
-
-  info.GetReturnValue().Set(results);
+    return names;
+  };
+  job.rval = [](std::shared_ptr<std::vector<std::string>> names, GetFromPersistentFunc) {
+    Nan::EscapableHandleScope scope;
+    Local<Array> results = Nan::New<Array>();
+    for (std::size_t i = 0; i < names->size(); ++i) Nan::Set(results, i, Nan::New((*names.get())[i]).ToLocalChecked());
+    return scope.Escape(results);
+  };
+  job.run(info, async);
 }
 
 /**
@@ -826,7 +1060,7 @@ NAN_GETTER(RasterBand::categoryNamesGetter) {
 /**
  * Color interpretation mode ({{#crossLink "Constants (GCI)"}}see GCI
  * constants{{/crossLink}}).
- * {{async_getter}}
+ * {{{async_getter}}}
  *
  * @attribute colorInterpretationAsync
  * @type {Promise<string>}
@@ -963,7 +1197,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
 
 /**
  * Color table ({{#crossLink "ColorTable"}}see gdal.ColorTable{{/crossLink}}).
- * {{async_getter}}
+ * {{{async_getter}}}
  *
  * @attribute colorTableAsync
  * @type {Promise<gdal.ColorTable>}

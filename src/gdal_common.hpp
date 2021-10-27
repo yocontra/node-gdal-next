@@ -130,6 +130,9 @@ NAN_SETTER(READ_ONLY_SETTER);
     return;                                                                                                            \
   }
 
+// Defines to be used in async getters (returning a Promise)
+// DO NOT USE IN A NORMAL ASYNC METHOD
+// It will return a rejected Promise on error
 #define NODE_UNWRAP_CHECK_ASYNC(type, obj, var)                                                                        \
   type *var = Nan::ObjectWrap::Unwrap<type>(obj);                                                                      \
   if (!var->isAlive()) {                                                                                               \

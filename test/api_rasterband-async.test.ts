@@ -551,6 +551,26 @@ describe('gdal.RasterBandAsync', () => {
         return assert.isRejected(band.fillAsync(5))
       })
     })
+    describe('"noDataValueAsync" property', () => {
+      describe('getter', () => {
+        it('should return number', () => {
+          const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
+          const band = ds.bands.get(1)
+          return assert.eventually.equal(band.noDataValueAsync, 0)
+        })
+        it('should return null if not set', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          return assert.eventually.isNull(band.noDataValueAsync)
+        })
+        it('should reject if dataset already closed', () => {
+          const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
+          const band = ds.bands.get(1)
+          ds.close()
+          return assert.isRejected(band.noDataValueAsync)
+        })
+      })
+    })
     describe('statistics', () => {
       const statsBand = () => {
         const ds = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte)
@@ -600,7 +620,7 @@ describe('gdal.RasterBandAsync', () => {
         }))
       })
     })
-    describe('"colorInterpretation" property', () => {
+    describe('"colorInterpretationAsync" property', () => {
       describe('getter', () => {
         it('should return colorInterpretation', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
@@ -615,7 +635,7 @@ describe('gdal.RasterBandAsync', () => {
         })
       })
     })
-    describe('"colorTable" property', () => {
+    describe('"colorTableAsync" property', () => {
       describe('getter', () => {
         it('should return a read-only colorTable', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
@@ -628,6 +648,20 @@ describe('gdal.RasterBandAsync', () => {
           ds.close()
           return assert.isRejected(band.colorTableAsync, /already been destroyed/)
         })
+      })
+    })
+    describe('"categoryNamesAsync" property', () => {
+      it('should allow setting and retrieving the category names', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
+        const cats = [ 'dry', 'humid', 'wet', 'soaking' ]
+        band.categoryNames = cats
+        return assert.eventually.deepEqual(band.categoryNamesAsync, cats)
+      })
+    })
+    describe('"hasArbitraryOverviewsAsync" property', () => {
+      it('should always return false', () => {
+        const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
+        return assert.eventually.equal(band.hasArbitraryOverviewsAsync, false)
       })
     })
   })

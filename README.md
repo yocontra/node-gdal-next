@@ -176,10 +176,11 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
 
  * If you are coming from `node-gdal-next`
     - Starting with 3.2
-        * `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of simply returning a null geometry
+        * `gdal.Geometry.fromGeoJson` now throws an `Error` on error instead of returning a null geometry
     - Starting with 3.3
         * Drop support for linking against a shared GDAL 1.x library
         * Drop support for Node.js 10.x and 15.x
+        * Linux uses lazy-binding meaning that parts of the binary won't be loaded in memory until the first function call
         * `gdal.DatasetBands.get{Async}()` now throws an `Error` if an invalid band is requested instead of returning a null object
         * `gdal.DatasetLayers.get{Async}()` now throws an `Error` if an invalid layer is requested instead of returning a null object
         * `gdal.FeatureDefnFields.get{Async}()` now throws an `Error` if an invalid field definition is requested instead of returning a null object
@@ -192,6 +193,11 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
         * `gdal.LineStringPoints.get()` now throws an `Error` if an invalid point is requested instead of returning a null object
         * `gdal.PolygonRings.get()` now throws an `Error` if an invalid ring is requested instead of returning a null object
         * All `gdal.Geometry` methods that return a `gdal.Geometry` throw an `Error` on error instead of returning a null object
+    - Starting with 3.4
+        * GDAL >= 2.1 is required
+        * All platforms use lazy-binding meaning that parts of the binary won't be loaded in memory until the first function call
+        * All `gdal.RasterBand` getters now throw an `Error` instead of returning null on error
+        * `gdal.RasterBand.noDataValue` now returns `NaN` if the original value was `NaN` instead of null; one should still exercise care when using `NaN` as a `NoDataValue` - since even if the binary representation is standardized by IEEE 754, different formats, compilers or architectures may exhibit different behavior; additionally `gdal.RasterBand.noDataValue` does not throw when the `NoDataValue` is not set, as this is not considered an error
 
  * If you are coming from `node-gdal`, in addition to all of the above
     - With PROJ 6+, the order of coordinates for EPSG geographic coordinate reference systems is latitude first,

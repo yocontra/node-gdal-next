@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Node 17 support and binary packages
  - Asynchronous iterators for all collections that have asynchronous getters
  - `gdal.ColorTable` implementing `GDALColorTable` and `gdal.RasterBand.colorTable{Async}`
+ - All `gdal.RasterBand` getters now have an async version
  - `gdal.RasterBand.colorInterpretationAsync`
  - `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
@@ -23,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Requires GDAL >= 2.1 if rebuilding against a system-installed GDAL library
  - (***BREAKING***) Switch the progress callback of `gdal.Driver.createCopy{Async}` from a raw argument to an argument inside an object to differentiate it from a result callback when some options are omitted in async mode
+ - (***BREAKING***) All `gdal.RasterBand` getters now throw instead of returning null on error
+ - (***BREAKING***) `gdal.RasterBand.noDataValue` now returns `NaN` if the original value was `NaN` instead of null; one should still exercise care when using `NaN` as a `NoDataValue` - since even if the binary representation is standardized by IEEE 754, different formats, compilers or architectures may exhibit different behavior; additionally `gdal.RasterBand.noDataValue` does not throw when the `NoDataValue` is not set, as this is not considered an error
  - Enable lazy-binding on macOS, meaning that Release builds on all platforms use lazy-binding now
  - `gdal.Driver.create{Async}` now throw if they fail to parse the options instead of returning `undefined`
  - `gdal.DatasetBands.create{Async}` and `gdal.SpatialReference.fromESRI` now have correct TypeScript signatures, all options lists are supported either in `{object}` or in `string[]` form
