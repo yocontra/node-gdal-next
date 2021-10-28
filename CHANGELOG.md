@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.info{Async}`, `gdal.translate{Async}`,`gdal.vectorTranslate{Async}` and `gdal.warp{Async}` - library versions of `gdalinfo`, `gdal_translate`, `ogr2ogr` and `gdalwarp`
  - `gdal.SpatialReference.fromURLAsync`, `gdal.SpatialReference.fromCRSURLAsync` and `gdal.SpatialReference.fromUserInputAsync`
  - `gdal.RasterBandOverviews.countAsync`, `gdal.RasterBandOverviews.getAsync` and `gdal.RasterBandOverviews.getBySampleCountAsync`
+ - `gdal.fromDataType` and `gdal.toDataType` converters between `TypedArray` constructor and GDAL `dataType`
 
 ### Changed
  - Requires GDAL >= 2.1 if rebuilding against a system-installed GDAL library

@@ -144,4 +144,27 @@ describe('gdal', () => {
       )
     }, /sync progress callback exception/)
   })
+
+  describe('fromDataType()', () => {
+    it('fromDataType() should return a constructor', () => {
+      const ds = gdal.open(
+        'temp',
+        'w',
+        'MEM',
+        256,
+        256,
+        1,
+        gdal.GDT_Float64
+      )
+      const band = ds.bands.get(1)
+      assert.equal(gdal.fromDataType(band.dataType), Float64Array)
+    })
+  })
+
+  describe('toDataType()', () => {
+    it('toDataType() should return a GDAL data type', () => {
+      const array = new Float64Array(1)
+      assert.equal(gdal.toDataType(array), gdal.GDT_Float64)
+    })
+  })
 })
