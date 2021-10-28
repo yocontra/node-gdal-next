@@ -6,6 +6,6 @@
     "test/_hooks.js"
   ],
   "reporter": "tap",
-  "timeout": 0,
+  "timeout": 10000,
   "expose-gc": true
 }
