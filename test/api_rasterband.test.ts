@@ -1641,6 +1641,7 @@ describe('gdal.RasterBand', () => {
     describe('"categoryNames" property', () => {
       it('should allow setting and retrieving the category names', () => {
         const band = gdal.open('temp', 'w', 'MEM', 16, 16, 1, gdal.GDT_Byte).bands.get(1)
+        assert.isEmpty(band.categoryNames)
         const cats = [ 'dry', 'humid', 'wet', 'soaking' ]
         band.categoryNames = cats
         assert.deepEqual(band.categoryNames, cats)

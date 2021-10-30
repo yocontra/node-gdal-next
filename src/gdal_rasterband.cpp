@@ -1039,7 +1039,8 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
     // This is not a performance-critical function anyway
     char **raw_names = raw->GetCategoryNames();
     int i = 0;
-    while (raw_names[i]) {
+
+    while (raw_names != nullptr && raw_names[i] != nullptr) {
       names->push_back(raw_names[i]);
       i++;
     }
@@ -1048,7 +1049,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
   job.rval = [](std::shared_ptr<std::vector<std::string>> names, GetFromPersistentFunc) {
     Nan::EscapableHandleScope scope;
     Local<Array> results = Nan::New<Array>();
-    for (std::size_t i = 0; i < names->size(); ++i) Nan::Set(results, i, Nan::New((*names.get())[i]).ToLocalChecked());
+    for (std::size_t i = 0; i < names->size(); ++i) Nan::Set(results, i, SafeString::New((*names.get())[i].c_str()));
     return scope.Escape(results);
   };
   job.run(info, async);
