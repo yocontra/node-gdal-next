@@ -280,8 +280,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  * @method warp
  * @for gdal
  * @static
- * @param {string} [dst_path] destination path, null for an in-memory operation
- * @param {gdal.Dataset} [dst_ds] destination dataset, null for a new dataset
+ * @param {string|null} dst_path destination path, null for an in-memory operation
+ * @param {gdal.Dataset|null} dst_ds destination dataset, null for a new dataset
  * @param {gdal.Dataset[]} src_ds array of source datasets
  * @param {string[]} [args] array of CLI options for gdalwarp
  * @param {UtilOptions} [options] additional options
@@ -301,8 +301,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  * @method warpAsync
  * @for gdal
  * @static
- * @param {string} [dst_path] destination path, null for an in-memory operation
- * @param {gdal.Dataset} [dst_ds] destination dataset, null for a new dataset
+ * @param {string|null} dst_path destination path, null for an in-memory operation
+ * @param {gdal.Dataset|null} dst_ds destination dataset, null for a new dataset
  * @param {gdal.Dataset[]} src_ds array of source datasets
  * @param {string[]} [args] array of CLI options for gdalwarp
  * @param {UtilOptions} [options] additional options
