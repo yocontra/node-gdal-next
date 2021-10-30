@@ -86,6 +86,17 @@
  */
 
 /**
+ * @typedef PolygonizeOptions
+ * @property {gdal.RasterBand} src
+ * @property {gdal.Layer} dst
+ * @property {gdal.RasterBand} [mask]
+ * @property {number} pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
+ * @property {number} [connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
+ * @property {boolean} [useFloats=false] Use floating point buffers instead of int buffers.
+ * @property {ProgressCb} [progress_cb] {{{progress_cb}}}
+ */
+
+/**
  * @typedef ReprojectOptions
  * @property {gdal.Dataset} src
  * @property {gdal.Dataset} dst
