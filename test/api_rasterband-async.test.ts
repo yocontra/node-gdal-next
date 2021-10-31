@@ -33,7 +33,8 @@ describe('gdal.RasterBandAsync', () => {
             (e, ds) => {
               const band = ds.bands.get(1)
               assert.throws(() => {
-                band.description = 'test'
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (band as any).description = 'test'
               })
             })
         })
@@ -94,7 +95,7 @@ describe('gdal.RasterBandAsync', () => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
-            band.pixels.readAsync(190, 290, w, h, () => undefined)
+            band.pixels.readAsync(190, 290, w, h, undefined, undefined, () => undefined)
             ds.close()
           })
         })
@@ -103,7 +104,7 @@ describe('gdal.RasterBandAsync', () => {
             const band = ds.bands.get(1)
             const w = 20
             const h = 30
-            band.pixels.readAsync(190, 290, w, h, (e, data) => {
+            band.pixels.readAsync(190, 290, w, h, undefined, undefined, (e, data) => {
               assert.instanceOf(data, Uint8Array)
               assert.equal(data.length, w * h)
               assert.equal(data[10 * 20 + 10], 10)
