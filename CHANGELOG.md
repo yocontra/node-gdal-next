@@ -11,9 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - GEOS 3.10.0
  - Bundled GDAL 3.4.0-git (2021-10-13)
  - Node 17 support and binary packages
+ - Streams-based API for reading raster data as a stream of pixels
  - Asynchronous iterators for all collections that have asynchronous getters
  - `gdal.ColorTable` implementing `GDALColorTable` and `gdal.RasterBand.colorTable{Async}`
  - All `gdal.RasterBand` getters now have an async version
+ - `gdal.RasterBandPixels.clampBlock` for handling partial edge blocks
  - `gdal.RasterBand.colorInterpretationAsync`
  - `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`

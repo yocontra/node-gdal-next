@@ -39,13 +39,6 @@ void RasterBand::Initialize(Local<Object> target) {
   Nan::SetPrototypeMethod(lcons, "createMaskBand", createMaskBand);
   Nan__SetPrototypeAsyncableMethod(lcons, "getMetadata", getMetadata);
   Nan__SetPrototypeAsyncableMethod(lcons, "setMetadata", setMetadata);
-
-  // unimplemented methods
-  // Nan::SetPrototypeMethod(lcons, "buildOverviews", buildOverviews);
-  // Nan::SetPrototypeMethod(lcons, "getHistogram", getHistogram);
-  // Nan::SetPrototypeMethod(lcons, "getDefaultHistogram", getDefaultHistogram);
-  // Nan::SetPrototypeMethod(lcons, "setDefaultHistogram", setDefaultHistogram);
-
   ATTR_DONT_ENUM(lcons, "ds", dsGetter, READ_ONLY_SETTER);
   ATTR_DONT_ENUM(lcons, "_uid", uidGetter, READ_ONLY_SETTER);
   ATTR_ASYNCABLE(lcons, "id", idGetter, READ_ONLY_SETTER);

@@ -177,3 +177,22 @@
  * A simple key/value structure
  * @interface fieldValue { key: string, value: any }
  */
+
+/**
+ * @interface RasterReadableOptions
+ * @extends stream.ReadableOptions
+ * @property {boolean} blockOptimize
+ */
+
+/**
+ * @interface RasterWritableOptions
+ * @extends stream.WritableOptions
+ * @property {boolean} blockOptimize
+ */
+
+/**
+ * @interface RasterTransformOptions
+ * @extends stream.TransformOptions
+ * @property {Function} fn Function to be applied on all data
+ * @property {new (len: number) => TypedArray} type Typed array constructor
+ */

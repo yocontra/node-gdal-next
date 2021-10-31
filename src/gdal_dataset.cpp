@@ -725,11 +725,12 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
   };
 
   job.rval = [](xy xy, GetFromPersistentFunc) {
+    Nan::EscapableHandleScope scope;
     if (xy.null) return Nan::Null().As<Value>();
     Local<Object> result = Nan::New<Object>();
     Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(xy.x));
     Nan::Set(result, Nan::New("y").ToLocalChecked(), Nan::New<Integer>(xy.y));
-    return result.As<Value>();
+    return scope.Escape(result.As<Value>());
   };
 
   job.run(info, async);

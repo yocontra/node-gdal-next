@@ -34,6 +34,7 @@ class RasterBandPixels : public Nan::ObjectWrap {
   GDAL_ASYNCABLE_DECLARE(write);
   GDAL_ASYNCABLE_DECLARE(readBlock);
   GDAL_ASYNCABLE_DECLARE(writeBlock);
+  GDAL_ASYNCABLE_DECLARE(clampBlock);
 
   static NAN_GETTER(bandGetter);
 

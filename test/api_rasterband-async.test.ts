@@ -502,6 +502,18 @@ describe('gdal.RasterBandAsync', () => {
             return assert.isRejected(band.pixels.writeBlockAsync(0, 0, data))
           })
         })
+        it('clampBlockAsync()', () => {
+          const ds = gdal.open(`${__dirname}/data/sample.tif`)
+          const band = ds.bands.get(1)
+          assert.deepEqual(band.blockSize, { x: 984, y: 8 })
+          return assert.isFulfilled(Promise.all([
+            band.pixels.clampBlockAsync(0, 0),
+            band.pixels.clampBlockAsync(0, 100)
+          ]).then(([ size1, size2 ]) => {
+            assert.deepEqual(size1, { x: 984, y: 8 })
+            assert.deepEqual(size2, { x: 984, y: 4 })
+          }))
+        })
       })
     })
     describe('flushAsync()', () => {

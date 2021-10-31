@@ -1361,6 +1361,13 @@ describe('gdal.RasterBand', () => {
           })
         })
       })
+      it('clampBlock()', () => {
+        const ds = gdal.open(`${__dirname}/data/sample.tif`)
+        const band = ds.bands.get(1)
+        assert.deepEqual(band.blockSize, { x: 984, y: 8 })
+        assert.deepEqual(band.pixels.clampBlock(0, 0), { x: 984, y: 8 })
+        assert.deepEqual(band.pixels.clampBlock(0, 100), { x: 984, y: 4 })
+      })
     })
     describe('flush()', () => {
       it('should flush the written data', () => {

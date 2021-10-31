@@ -191,7 +191,11 @@
     {
       "files": [
         "scripts/publish-packages.js",
-        "test/stress.js"
+        "test/stress.js",
+        "lib/readable.js",
+        "lib/writable.js",
+        "lib/multiplexer.js",
+        "bench/*.js"
       ],
       "parserOptions": {
         "ecmaVersion": 2018
