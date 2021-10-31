@@ -136,7 +136,7 @@ async function muxTest(file1, file2, blockOptimize) {
     path.resolve(__dirname, '..', 'test', 'data', 'AROME_D2m_10.tiff')),
   '/vsimem/AROME_D2m_10.tiff')
 
-  // Uncompress in memory
+  // Decompress in memory
   await gdal.translateAsync('/vsimem/AROME_T2m_10_raw.tiff', await gdal.openAsync('/vsimem/AROME_T2m_10.tiff'))
   await gdal.translateAsync('/vsimem/AROME_D2m_10_raw.tiff', await gdal.openAsync('/vsimem/AROME_D2m_10.tiff'))
 
@@ -147,7 +147,7 @@ async function muxTest(file1, file2, blockOptimize) {
       async () => readTest('/vsimem/AROME_T2m_10_raw.tiff', true)),
     b.add('RasterReadStream w/o blockOptimize',
       async () => readTest('/vsimem/AROME_T2m_10_raw.tiff', false)),
-    b.add('RasterReadStream w/ blockOptimize w/async interator',
+    b.add('RasterReadStream w/ blockOptimize w/async iterator',
       async () => readTestAsyncIterator('/vsimem/AROME_T2m_10_raw.tiff', true)),
     b.add('RasterReadStream w/o blockOptimize w/async iterator',
       async () => readTestAsyncIterator('/vsimem/AROME_T2m_10_raw.tiff', false)),
@@ -163,7 +163,7 @@ async function muxTest(file1, file2, blockOptimize) {
       async () => readTest('/vsimem/AROME_T2m_10.tiff', true)),
     b.add('RasterReadStream w/o blockOptimize',
       async () => readTest('/vsimem/AROME_T2m_10.tiff', false)),
-    b.add('RasterReadStream w/ blockOptimize w/async interator',
+    b.add('RasterReadStream w/ blockOptimize w/async iterator',
       async () => readTestAsyncIterator('/vsimem/AROME_T2m_10.tiff', true)),
     b.add('RasterReadStream w/o blockOptimize w/async iterator',
       async () => readTestAsyncIterator('/vsimem/AROME_T2m_10.tiff', false)),
@@ -193,6 +193,10 @@ async function muxTest(file1, file2, blockOptimize) {
     b.complete()
   )
 
+  // This is (currently) not a very fair test:
+  // When writing in small chunks, the pattern will be much shorter
+  // and the compression ratio will be far greater - thus it
+  // can appear that writing small chunks is faster when it is not
   await b.suite(
     'RasterWriteStream w/Compression',
 
