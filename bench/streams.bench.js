@@ -176,9 +176,9 @@ async function muxTest(file1, file2, blockOptimize) {
     'RasterWriteStream',
 
     b.add('RasterWriteStream w/ block consolidation w/ big chunks',
-      async () => writeTest(801, 601, 1803, 2, false)),
+      async () => writeTest(801, 601, 1803, 2, true)),
     b.add('RasterWriteStream w/ block consolidation w/ small chunks',
-      async () => writeTest(801, 601, 267, 2, false)),
+      async () => writeTest(801, 601, 267, 2, true)),
     // This one is unusually fast because it uses static allocation
     // The same buffer, containing a pattern, is used over and over again
     // Reading can't do this - it must allocate a new buffer on every operation
