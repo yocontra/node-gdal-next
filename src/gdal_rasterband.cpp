@@ -588,11 +588,12 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {
   GDALAsyncableJob<int> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) {
     CPLErrorReset();
-    int r = raw->GetBand();
-    if (r == 0) throw CPLGetLastErrorMsg();
-    return r;
+    return raw->GetBand();
   };
-  job.rval = [](int id, GetFromPersistentFunc) { return Nan::New<Integer>(id).As<Value>(); };
+  job.rval = [](int id, GetFromPersistentFunc) {
+    if (id == 0) return Nan::Null().As<Value>();
+    return Nan::New<Integer>(id).As<Value>();
+  };
   job.run(info, async);
 }
 
@@ -701,12 +702,17 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::blockSizeGetter) {
   job.run(info, async);
 }
 
+template <typename T> struct MaybeResult {
+  T value;
+  int success;
+};
+
 /**
  * Minimum value for this band.
  *
  * @readOnly
  * @attribute minimum
- * @type {number}
+ * @type {number|null}
  */
 
 /**
@@ -715,21 +721,23 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::blockSizeGetter) {
  *
  * @readOnly
  * @attribute minimumAsync
- * @type {Promise<number>}
+ * @type {Promise<number|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
   GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
 
-  GDALAsyncableJob<double> job(band->parent_uid);
+  GDALAsyncableJob<MaybeResult<double>> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) {
-    int success = 0;
+    MaybeResult<double> r;
     CPLErrorReset();
-    double r = raw->GetMinimum(&success);
-    if (!success) throw CPLGetLastErrorMsg();
+    r.value = raw->GetMinimum(&r.success);
     return r;
   };
-  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+    if (r.success) return Nan::New<Number>(r.value).As<Value>();
+    return Nan::Null().As<Value>();
+  };
   job.run(info, async);
 }
 
@@ -738,7 +746,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
  *
  * @readOnly
  * @attribute maximum
- * @type {number}
+ * @type {number|null}
  */
 
 /**
@@ -747,21 +755,23 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
  *
  * @readOnly
  * @attribute maximumAsync
- * @type {Promise<number>}
+ * @type {Promise<number|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
   GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
 
-  GDALAsyncableJob<double> job(band->parent_uid);
+  GDALAsyncableJob<MaybeResult<double>> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) {
-    int success = 0;
+    MaybeResult<double> r;
     CPLErrorReset();
-    double r = raw->GetMaximum(&success);
-    if (!success) throw CPLGetLastErrorMsg();
+    r.value = raw->GetMaximum(&r.success);
     return r;
   };
-  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+    if (r.success) return Nan::New<Number>(r.value).As<Value>();
+    return Nan::Null().As<Value>();
+  };
   job.run(info, async);
 }
 
@@ -769,7 +779,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
  * Raster value offset.
  *
  * @attribute offset
- * @type {number}
+ * @type {number|null}
  */
 
 /**
@@ -778,21 +788,23 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
  *
  * @attribute offsetAsync
  * @readOnly
- * @type {Promise<number>}
+ * @type {Promise<number|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
   GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
 
-  GDALAsyncableJob<double> job(band->parent_uid);
+  GDALAsyncableJob<MaybeResult<double>> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) {
-    int success = 0;
+    MaybeResult<double> r;
     CPLErrorReset();
-    double r = raw->GetOffset(&success);
-    if (!success) throw CPLGetLastErrorMsg();
+    r.value = raw->GetOffset(&r.success);
     return r;
   };
-  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+    if (r.success) return Nan::New<Number>(r.value).As<Value>();
+    return Nan::Null().As<Value>();
+  };
   job.run(info, async);
 }
 
@@ -800,7 +812,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
  * Raster value scale.
  *
  * @attribute scale
- * @type {number}
+ * @type {number|null}
  */
 
 /**
@@ -809,21 +821,23 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
  *
  * @attribute scaleAsync
  * @readOnly
- * @type {Promise<number>}
+ * @type {Promise<number|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
   GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
 
-  GDALAsyncableJob<double> job(band->parent_uid);
+  GDALAsyncableJob<MaybeResult<double>> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) {
-    int success = 0;
+    MaybeResult<double> r;
     CPLErrorReset();
-    double r = raw->GetScale(&success);
-    if (!success) throw CPLGetLastErrorMsg();
+    r.value = raw->GetScale(&r.success);
     return r;
   };
-  job.rval = [](double r, GetFromPersistentFunc) { return Nan::New<Number>(r); };
+  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+    if (r.success) return Nan::New<Number>(r.value).As<Value>();
+    return Nan::Null().As<Value>();
+  };
   job.run(info, async);
 }
 
@@ -846,18 +860,14 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
   GDAL_RAW_CHECK_ASYNC(GDALRasterBand *, band, raw);
 
-  struct result {
-    double value;
-    int success;
-  };
-  GDALAsyncableJob<result> job(band->parent_uid);
+  GDALAsyncableJob<MaybeResult<double>> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) {
-    result r;
+    MaybeResult<double> r;
     CPLErrorReset();
     r.value = raw->GetNoDataValue(&r.success);
     return r;
   };
-  job.rval = [](result r, GetFromPersistentFunc) {
+  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
     if (r.success)
       return Nan::New<Number>(r.value).As<Value>();
     else
