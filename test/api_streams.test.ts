@@ -132,7 +132,7 @@ describe('gdal.RasterWriteStream', () => {
   }
 
   it('should write a raster band in zero-copy mode w/ edge block',
-    (done) => writeTest(done, 801, 601, 1803, 2, true, undefined))
+    (done) => writeTest(done, 801, 600, 1602, 2, true, undefined))
   it('should write a raster band in zero-copy mode w/o edge block',
     (done) => writeTest(done, 801, 601, 1803, 3, true, undefined))
   it('should write a raster band in block consolidation mode w/ big chunks w/ edge block',
