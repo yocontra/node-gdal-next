@@ -57,7 +57,7 @@ describe('gdal.RasterReadStream', () => {
   it('should accept a raster band w/o blockOptimize', (done) => readTest(done, 'sample.tif', Uint8Array, false))
   it('should accept a raster band w/Float', (done) => readTest(done, 'AROME_T2m_10.tiff', Float64Array, true))
   it('should accept a raster band w/Float w/o blockOptimize', (done) => readTest(done, 'AROME_T2m_10.tiff', Float64Array, false))
-  it('should support on the fly conversion w/ noData', (done) => noDataTest(done, 'dem_azimuth50_pa.img', false))
+  it('should support on the fly conversion w/ noData', (done) => noDataTest(done, 'dem_azimuth50_pa.img', undefined))
   it('should support noData conversion', (done) => noDataTest(done, 'dem_azimuth50_pa.img', true))
 })
 
