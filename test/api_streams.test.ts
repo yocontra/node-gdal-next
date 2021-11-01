@@ -7,6 +7,28 @@ const assert = chai.assert
 const finished = promisify(_finished)
 
 describe('gdal.RasterReadStream', () => {
+  function noDataTest(done, file, convert) {
+    const ds = gdal.open(path.resolve(__dirname, 'data', file))
+    const band = ds.bands.get(1)
+    const noData = ds.bands.get(1).noDataValue
+    let test
+    if (convert) test = isNaN
+    else test = (v) => v === noData
+    const rs = band.pixels.createReadStream({
+      convertNoData: convert,
+      type: Float64Array
+    })
+    rs.once('data', (chunk) => {
+      try {
+        assert.instanceOf(chunk, Float64Array)
+        assert.isTrue(chunk.subarray(0, 50).every(test))
+        done()
+      } catch (e) {
+        done(e)
+      }
+    })
+  }
+
   function readTest(done, file, type, blockOptimize) {
     const ds = gdal.open(path.resolve(__dirname, 'data', file))
     const band = ds.bands.get(1)
@@ -14,8 +36,12 @@ describe('gdal.RasterReadStream', () => {
     assert.instanceOf(rs, gdal.RasterReadStream)
     let length = 0
     rs.on('data', (chunk) => {
-      assert.instanceOf(chunk, type)
-      length += chunk.length
+      try {
+        assert.instanceOf(chunk, type)
+        length += chunk.length
+      } catch (e) {
+        done(e)
+      }
     })
     rs.on('end', () => {
       try {
@@ -31,18 +57,24 @@ describe('gdal.RasterReadStream', () => {
   it('should accept a raster band w/o blockOptimize', (done) => readTest(done, 'sample.tif', Uint8Array, false))
   it('should accept a raster band w/Float', (done) => readTest(done, 'AROME_T2m_10.tiff', Float64Array, true))
   it('should accept a raster band w/Float w/o blockOptimize', (done) => readTest(done, 'AROME_T2m_10.tiff', Float64Array, false))
+  it('should support on the fly conversion w/ noData', (done) => noDataTest(done, 'dem_azimuth50_pa.img', false))
+  it('should support noData conversion', (done) => noDataTest(done, 'dem_azimuth50_pa.img', true))
 })
 
 describe('gdal.RasterWriteStream', () => {
-  function writeTest(done, w, h, len, blockSize, blockOptimize) {
+  function writeTest(done, w, h, len, blockSize, blockOptimize, convertNoData) {
     const filename = `/vsimem/ds_ws_test.${String(
       Math.random()
     ).substring(2)}.tmp.tiff`
     const ds = gdal.open(filename, 'w', 'GTiff', w, h, 1, gdal.GDT_Float64, { BLOCKXSIZE: w, BLOCKYSIZE: blockSize })
     const band = ds.bands.get(1)
-    const ws = band.pixels.createWriteStream({ blockOptimize })
+    if (convertNoData) band.noDataValue = 1e38
+    const ws = band.pixels.createWriteStream({ blockOptimize, convertNoData })
     const pattern = new Float64Array(len)
-    for (let i = 0; i < len; i++) pattern[i] = i
+    for (let i = 0; i < len; i++) {
+      if (i % 10 == 0 && convertNoData) pattern[i] = NaN
+      else pattern[i] = i
+    }
 
     let written = 0
 
@@ -53,6 +85,9 @@ describe('gdal.RasterWriteStream', () => {
         ds.close()
         const testDS = gdal.open(filename)
         const testData = testDS.bands.get(1).pixels.read(0, 0, w, h)
+        if (convertNoData) {
+          for (let i = 0; i < pattern.length; i++) if (isNaN(pattern[i])) pattern[i] = 1e38
+        }
         for (let i = 0; i < w*h; i += len) {
           assert.deepEqual(pattern, testData.subarray(i, i + len))
         }
@@ -93,25 +128,25 @@ describe('gdal.RasterWriteStream', () => {
       else done(err)
     }
 
-    writeTest(doneInverted, w, h, len, blockSize, blockOptimize)
+    writeTest(doneInverted, w, h, len, blockSize, blockOptimize, undefined)
   }
 
   it('should write a raster band in zero-copy mode w/ edge block',
-    (done) => writeTest(done, 801, 601, 1803, 2, true))
+    (done) => writeTest(done, 801, 601, 1803, 2, true, undefined))
   it('should write a raster band in zero-copy mode w/o edge block',
-    (done) => writeTest(done, 801, 601, 1803, 3, true))
+    (done) => writeTest(done, 801, 601, 1803, 3, true, undefined))
   it('should write a raster band in block consolidation mode w/ big chunks w/ edge block',
-    (done) => writeTest(done, 801, 601, 1803, 2, true))
+    (done) => writeTest(done, 801, 601, 1803, 2, true, undefined))
   it('should write a raster band in block consolidation mode w/ small chunks w/ edge block',
-    (done) => writeTest(done, 801, 601, 267, 2, true))
+    (done) => writeTest(done, 801, 601, 267, 2, true, undefined))
   it('should write a raster band in block consolidation mode w/ big chunks w/o edge block',
-    (done) => writeTest(done, 801, 601, 1803, 6, true))
+    (done) => writeTest(done, 801, 601, 1803, 6, true, undefined))
   it('should write a raster band in block consolidation mode w/ small chunks w/o edge block',
-    (done) => writeTest(done, 801, 601, 267, 6, true))
+    (done) => writeTest(done, 801, 601, 267, 6, true, undefined))
   it('should write a raster band in line mode w/ big chunks',
-    (done) => writeTest(done, 801, 601, 1803, 2, false))
+    (done) => writeTest(done, 801, 601, 1803, 2, false, undefined))
   it('should write a raster band in line mode w/ small chunks',
-    (done) => writeTest(done, 801, 601, 267, 2, false))
+    (done) => writeTest(done, 801, 601, 267, 2, false, undefined))
 
   it('should throw on writing beyond the end in zero-copy mode w/ edge block',
     (done) => writeTestOverflow(done, 801, 601, 1804, 2, true))
@@ -129,6 +164,8 @@ describe('gdal.RasterWriteStream', () => {
     (done) => writeTestOverflow(done, 801, 601, 1804, 2, false))
   it('should throw on writing beyond the end in line mode w/ small chunks',
     (done) => writeTestOverflow(done, 801, 601, 268, 2, false))
+
+  it('should support noData conversion', (done) => writeTest(done, 801, 601, 1803, 2, true, true))
 
   it('should support an ill-behaved user application', (done) => {
     const filename = `/vsimem/ds_pressure_test.${String(

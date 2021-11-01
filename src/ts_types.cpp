@@ -181,13 +181,16 @@
 /**
  * @interface RasterReadableOptions
  * @extends stream.ReadableOptions
- * @property {boolean} blockOptimize
+ * @property {boolean} [blockOptimize]
+ * @property {boolean} [convertNoData]
+ * @property {new (len: number) => TypedArray} [type]
  */
 
 /**
  * @interface RasterWritableOptions
  * @extends stream.WritableOptions
- * @property {boolean} blockOptimize
+ * @property {boolean} [blockOptimize]
+ * @property {booleal} [convertNoData]
  */
 
 /**
