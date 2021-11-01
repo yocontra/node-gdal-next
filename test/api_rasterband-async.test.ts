@@ -792,7 +792,10 @@ describe('gdal.RasterBandAsync', () => {
         it('should return a read-only colorTable', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
           const band = ds.bands.get(1)
-          return assert.eventually.instanceOf(band.colorTableAsync, gdal.ColorTable)
+          return assert.isFulfilled(Promise.all([
+            assert.eventually.instanceOf(band.colorTableAsync, gdal.ColorTable),
+            assert.deepEqual(band.colorTable.get(1), { c1: 7, c2: 8, c3: 45, c4: 255 })
+          ]))
         })
         it('should reject if dataset already closed', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)

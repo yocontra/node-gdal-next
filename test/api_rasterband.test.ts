@@ -69,6 +69,7 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
           const band = ds.bands.get(1)
           assert.instanceOf(band.colorTable, gdal.ColorTable)
+          assert.deepEqual(band.colorTable.get(1), { c1: 7, c2: 8, c3: 45, c4: 255 })
           assert.throws(() => {
             band.colorTable.set(0, { c1: 0, c2: 0, c3: 0, c4: 0 })
           }, /read-only/)
