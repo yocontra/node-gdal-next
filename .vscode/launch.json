@@ -95,6 +95,15 @@
             "program": "${workspaceFolder}/node_modules/.bin/mocha"
         },
         {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch bench (JS)",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/bench/streams.bench.js"
+        },
+        {
             "name": "Load a core dump (gdb)",
             "type": "cppdbg",
             "request": "launch",

@@ -46,8 +46,8 @@ async function writeTest(w, h, len, blockSize, blockOptimize, compress) {
     { BLOCKXSIZE: w, BLOCKYSIZE: blockSize, COMPRESS: compress ? 'DEFLATE' : undefined })
   const band = await ds.bands.getAsync(1)
   const ws = band.pixels.createWriteStream({ blockOptimize })
-  const data = new Float64Array(len)
-  for (let i = 0; i < len; i++) data[i] = i
+  const data = new Float64Array(w * h)
+  for (let i = 0; i < w * h; i++) data[i] = i
 
   let written = 0
 
@@ -67,9 +67,9 @@ async function writeTest(w, h, len, blockSize, blockOptimize, compress) {
 
   function write() {
     while (written < w*h) {
-      written += data.length
+      written += len
       // write until finished or write returns false because the buffer is full
-      if (!ws.write(data, undefined, written == w*h ? end : undefined)) break
+      if (!ws.write(data.subarray(written - len, written), undefined, written >= w*h ? end : undefined)) break
     }
   }
 
@@ -193,19 +193,17 @@ async function muxTest(file1, file2, blockOptimize) {
     b.complete()
   )
 
-  // This is (currently) not a very fair test:
-  // When writing in small chunks, the pattern will be much shorter
-  // and the compression ratio will be far greater - thus it
-  // can appear that writing small chunks is faster when it is not
+  // It is unclear why GDAL's compression is faster
+  // when writing line-by-line, but it seems to be true
   await b.suite(
     'RasterWriteStream w/Compression',
 
     b.add('RasterWriteStream w/ block consolidation w/ big chunks',
-      async () => writeTest(801, 601, 1803, 2, false, true)),
+      async () => writeTest(801, 601, 1803, 2, true, true)),
     b.add('RasterWriteStream w/ block consolidation w/ small chunks',
-      async () => writeTest(801, 601, 267, 2, false, true)),
+      async () => writeTest(801, 601, 267, 2, true, true)),
     b.add('RasterWriteStream w/ zero-copy',
-      async () => writeTest(801, 601, 1803, 3, true, true)),
+      async () => writeTest(801, 601, 1602, 2, true, true)),
     b.add('RasterWriteStream in line mode w/ big chunks',
       async () => writeTest(801, 601, 1803, 2, false, true)),
     b.add('RasterWriteStream in line mode w/ small chunks',
