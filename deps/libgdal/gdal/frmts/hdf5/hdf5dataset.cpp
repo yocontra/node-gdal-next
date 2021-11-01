@@ -47,7 +47,7 @@
 #include "gdal_frmts.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: hdf5dataset.cpp 95a15ba5f7ec811536faa84323d9898ea404a555 2020-11-23 17:07:35 +0100 Even Rouault $")
+CPL_CVSID("$Id: hdf5dataset.cpp ca77809572a73b9018d6f71d698b0786263c105e 2021-10-29 00:44:42 +0200 Even Rouault $")
 
 constexpr size_t MAX_METADATA_LEN = 32768;
 
@@ -378,13 +378,14 @@ int HDF5Dataset::Identify( GDALOpenInfo * poOpenInfo )
     {
         if( (EQUAL(osExt, "NC") ||
              EQUAL(osExt, "CDF") ||
-             EQUAL(osExt, "NC4")) &&
+             EQUAL(osExt, "NC4") ||
+             EQUAL(osExt, "gmac")) &&
             GDALGetDriverByName("netCDF") != nullptr )
         {
             const char *const apszAllowedDriver[] = { "netCDF", nullptr };
             CPLPushErrorHandler(CPLQuietErrorHandler);
             GDALDatasetH hDS = GDALOpenEx(poOpenInfo->pszFilename,
-                                          GDAL_OF_RASTER | GDAL_OF_VECTOR,
+                                          GDAL_OF_RASTER | GDAL_OF_MULTIDIM_RASTER | GDAL_OF_VECTOR,
                                           apszAllowedDriver, nullptr, nullptr);
             CPLPopErrorHandler();
             if( hDS )

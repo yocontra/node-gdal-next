@@ -50,7 +50,7 @@
 #include <utility>
 #include <algorithm>
 
-CPL_CVSID("$Id: wmsdriver.cpp 3d8b1760d1ce536d02d2e69b0ef3d7d5195c121e 2021-09-07 22:48:43 +0200 Momtchil Momtchev $")
+CPL_CVSID("$Id: wmsdriver.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 //
 // A static map holding seen server GetTileService responses, per process
@@ -92,7 +92,7 @@ CPLXMLNode * GDALWMSDatasetGetConfigFromURL(GDALOpenInfo *poOpenInfo)
         VersionStringToInt(osVersion.c_str())>= VersionStringToInt("1.3.0") )
     {
         OGRSpatialReference oSRS;
-        oSRS.SetFromUserInput(osCRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
+        oSRS.SetFromUserInput(osCRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get());
         oSRS.AutoIdentifyEPSG();
         if( oSRS.EPSGTreatsAsLatLong() || oSRS.EPSGTreatsAsNorthingEasting() )
         {

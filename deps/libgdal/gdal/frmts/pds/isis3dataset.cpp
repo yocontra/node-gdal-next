@@ -107,7 +107,7 @@ static const char* const pszLABEL_BYTES_PLACEHOLDER = "!*^LABEL_BYTES^*!";
 static const char* const pszHISTORY_STARTBYTE_PLACEHOLDER =
                                                     "!*^HISTORY_STARTBYTE^*!";
 
-CPL_CVSID("$Id: isis3dataset.cpp c04e0ea92cfb521061e84b9c3ba75b0e30345ffd 2020-07-02 22:27:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: isis3dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -1051,7 +1051,7 @@ void ISIS3WrapperRasterBand::InitFile()
         {
             poGDS->m_poExternalDS->GetRasterBand(i+1)->Fill(m_dfNoData);
         }
-        poGDS->m_poExternalDS->FlushCache();
+        poGDS->m_poExternalDS->FlushCache(false);
 
         // Check that blocks are effectively written in expected order.
         const int nBlockSizeBytes = nBlockXSize * nBlockYSize *
@@ -1378,7 +1378,7 @@ ISIS3Dataset::~ISIS3Dataset()
         reinterpret_cast<ISIS3WrapperRasterBand*>(GetRasterBand(1))->
             InitFile();
     }
-    ISIS3Dataset::FlushCache();
+    ISIS3Dataset::FlushCache(true);
     if( m_fpLabel != nullptr )
         VSIFCloseL( m_fpLabel );
     if( m_fpImage != nullptr && m_fpImage != m_fpLabel )
@@ -4319,7 +4319,7 @@ GDALDataset* ISIS3Dataset::CreateCopy( const char *pszFilename,
     poDS->m_bInitToNodata = false;
     CPLErr eErr = GDALDatasetCopyWholeRaster( poSrcDS, poDS,
                                            nullptr, pfnProgress, pProgressData );
-    poDS->FlushCache();
+    poDS->FlushCache(false);
     poDS->m_bHasSrcNoData = false;
     if( eErr != CE_None )
     {

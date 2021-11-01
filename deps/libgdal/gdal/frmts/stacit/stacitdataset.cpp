@@ -35,7 +35,7 @@
 #include <map>
 #include <string>
 
-CPL_CVSID("$Id: stacitdataset.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: stacitdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 namespace {
 
@@ -484,7 +484,7 @@ bool STACITDataset::SetupDataset(GDALOpenInfo* poOpenInfo,
 
     // Set SRS
     OGRSpatialReference oSRS;
-    if( oSRS.SetFromUserInput(assetByProj.osProjUserString.c_str(), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) == OGRERR_NONE )
+    if( oSRS.SetFromUserInput(assetByProj.osProjUserString.c_str(), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
     {
         oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
         SetSpatialRef(&oSRS);

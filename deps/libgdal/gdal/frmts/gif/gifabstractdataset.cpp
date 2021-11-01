@@ -28,7 +28,7 @@
 
 #include "gifabstractdataset.h"
 
-CPL_CVSID("$Id: gifabstractdataset.cpp b55a33407a80673ec314b165c82f47dd02e9dc9c 2020-04-27 20:37:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: gifabstractdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 constexpr int InterlacedOffset[] = { 0, 4, 2, 1 };
 constexpr int InterlacedJumps[] = { 8, 8, 4, 2 };
@@ -67,7 +67,7 @@ GIFAbstractDataset::GIFAbstractDataset() :
 GIFAbstractDataset::~GIFAbstractDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if ( pszProjection )
         CPLFree( pszProjection );

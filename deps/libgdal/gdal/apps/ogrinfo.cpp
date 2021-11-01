@@ -53,7 +53,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id: ogrinfo.cpp a74c04943cc2d7463a7d9bd46ec05bdfacd54d7b 2021-08-27 12:28:04 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrinfo.cpp 90bba2e599f71074513a455a943a45ed056bf22b 2021-10-19 08:39:52 +1000 Nyall Dawson $")
 
 bool bVerbose = true;
 bool bSuperQuiet = false;
@@ -436,12 +436,12 @@ static void ReportOnLayer( OGRLayer * poLayer, const char *pszWHERE,
 
     if( nFetchFID == OGRNullFID && !bSummaryOnly )
     {
-        OGRFeature *poFeature = nullptr;
-        while( (poFeature = poLayer->GetNextFeature()) != nullptr )
+        if( !bSuperQuiet )
         {
-            if( !bSuperQuiet )
-                poFeature->DumpReadable(nullptr, papszOptions);
-            OGRFeature::DestroyFeature(poFeature);
+            for( auto& poFeature: poLayer )
+            {
+                    poFeature->DumpReadable(nullptr, papszOptions);
+            }
         }
     }
     else if( nFetchFID != OGRNullFID )

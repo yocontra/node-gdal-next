@@ -70,7 +70,7 @@ CPL_C_END
 #include "ogr_spatialref.h"
 #include "memdataset.h"
 
-CPL_CVSID("$Id: gribdataset.cpp a8c25e35bac116958aadff7ae462684875f6746e 2021-10-04 17:34:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: gribdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static CPLMutex *hGRIBMutex = nullptr;
 
@@ -1267,7 +1267,7 @@ GRIBDataset::GRIBDataset() :
 GRIBDataset::~GRIBDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if( fp != nullptr )
         VSIFCloseL(fp);
 }

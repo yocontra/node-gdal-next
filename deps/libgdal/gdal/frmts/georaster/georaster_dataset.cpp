@@ -42,7 +42,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: georaster_dataset.cpp 55a90e35b72467384a3316e0e5f65573cf3e74fe 2021-09-29 14:34:00 -0400 fechen123 $")
+CPL_CVSID("$Id: georaster_dataset.cpp 6833747591ce456fb5c056f450676629e1790d77 2021-10-17 18:49:56 +0200 Jürgen Fischer $")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterDataset()
@@ -72,7 +72,7 @@ GeoRasterDataset::GeoRasterDataset()
 
 GeoRasterDataset::~GeoRasterDataset()
 {
-    GeoRasterDataset::FlushCache();
+    GeoRasterDataset::FlushCache(true);
 
     poGeoRaster->FlushMetadata();
 
@@ -1720,7 +1720,7 @@ GDALDataset *GeoRasterDataset::CreateCopy( const char* pszFilename,
     //      Finalize
     // --------------------------------------------------------------------
 
-    poDstDS->FlushCache();
+    poDstDS->FlushCache(false);
 
     if( pfnProgress )
     {
@@ -1789,12 +1789,12 @@ CPLErr GeoRasterDataset::IRasterIO( GDALRWFlag eRWFlag,
 }
 
 //  ---------------------------------------------------------------------------
-//                                                                 FlushCache()
+//                                                  FlushCache(bool bAtClosing)
 //  ---------------------------------------------------------------------------
 
-void GeoRasterDataset::FlushCache()
+void GeoRasterDataset::FlushCache(bool bAtClosing)
 {
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 }
 
 //  ---------------------------------------------------------------------------

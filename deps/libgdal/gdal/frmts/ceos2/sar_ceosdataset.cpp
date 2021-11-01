@@ -34,7 +34,7 @@
 #include "rawdataset.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: sar_ceosdataset.cpp 6715af2442659e28fad6f5bf3be9283b37249914 2021-08-10 21:13:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: sar_ceosdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static GInt16 CastToGInt16(float val)
 {
@@ -686,7 +686,7 @@ SAR_CEOSDataset::SAR_CEOSDataset() :
 SAR_CEOSDataset::~SAR_CEOSDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     CSLDestroy( papszTempMD );
 

@@ -73,7 +73,7 @@
 
 #endif
 
-CPL_CVSID("$Id: gdalwarpkernel.cpp 4986eea379aaa3f553b9d612f6d5da103dc555a8 2021-10-11 23:07:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarpkernel.cpp 831355f692b610e0562802d39c65c015e68467d5 2021-10-28 11:30:49 +0200 Even Rouault $")
 
 constexpr double BAND_DENSITY_THRESHOLD = 0.0000000001;
 constexpr float SRC_DENSITY_THRESHOLD =  0.000000001f;
@@ -460,26 +460,29 @@ static CPLErr GWKRun( GDALWarpKernel *poWK,
     CPLDebug("WARP", "Using %d threads", nThreads);
 
     auto& jobs = *psThreadData->threadJobs;
+    CPLAssert( static_cast<int>(jobs.size()) >= nThreads );
     // Fill-in job structures.
-    GIntBig i = 0;
-    for (auto& job : jobs)
+    for (int i = 0; i < nThreads; ++i)
     {
+        auto& job = jobs[i];
         job.poWK = poWK;
-        job.iYMin = static_cast<int>(i * nDstYSize / nThreads);
-        job.iYMax = static_cast<int>((i + 1) * nDstYSize / nThreads);
+        job.iYMin = static_cast<int>(static_cast<int64_t>(i) * nDstYSize / nThreads);
+        job.iYMax = static_cast<int>(static_cast<int64_t>(i + 1) * nDstYSize / nThreads);
         if( poWK->pfnProgress != GDALDummyProgress )
             job.pfnProgress = GWKProgressThread;
         job.pfnFunc = pfnFunc;
-        i++;
     }
 
     {
         std::unique_lock<std::mutex> lock(psThreadData->mutex);
 
         // Start jobs.
-        for (auto& job : jobs)
+        for (int i = 0; i < nThreads; ++i)
+        {
+            auto& job = jobs[i];
             psThreadData->poJobQueue->SubmitJob( ThreadFuncAdapter,
                 static_cast<void*>(&job) );
+        }
 
 /* -------------------------------------------------------------------- */
 /*      Report progress.                                                */

@@ -34,7 +34,7 @@
 
 #include <set>
 
-CPL_CVSID("$Id: gnmgenericnetwork.cpp b878db8a22b3c59c80ab68c91b785227f347eced 2020-02-11 23:08:41 +0100 Even Rouault $")
+CPL_CVSID("$Id: gnmgenericnetwork.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 GNMGenericNetwork::GNMGenericNetwork() :
@@ -1407,11 +1407,11 @@ int GNMGenericNetwork::CloseDependentDatasets()
     return nCount > 0 ? TRUE : FALSE;
 }
 
-void GNMGenericNetwork::FlushCache()
+void GNMGenericNetwork::FlushCache(bool bAtClosing)
 {
     SaveRules();
 
-    GNMNetwork::FlushCache();
+    GNMNetwork::FlushCache(bAtClosing);
 }
 
 //--- C API --------------------------------------------------------------------

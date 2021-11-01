@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: fujibasdataset.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: fujibasdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -73,7 +73,7 @@ FujiBASDataset::FujiBASDataset() :
 FujiBASDataset::~FujiBASDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if( fpImage != nullptr )
         VSIFCloseL( fpImage );
     CSLDestroy( papszHeader );

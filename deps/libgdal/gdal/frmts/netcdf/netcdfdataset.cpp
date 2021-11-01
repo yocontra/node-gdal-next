@@ -73,7 +73,12 @@
 
 #define ROTATED_POLE_VAR_NAME "rotated_pole"
 
-CPL_CVSID("$Id: netcdfdataset.cpp 681a087c9c1797c1a1a111713be205d229686615 2021-10-08 18:15:23 +0200 Even Rouault $")
+// Detect netCDF 4.8
+#ifdef NC_ENCZARR
+#define NETCDF_USES_UTF8
+#endif
+
+CPL_CVSID("$Id: netcdfdataset.cpp beeda6da51ae7e7234dfbad32a69a37687706374 2021-10-31 17:47:01 +0100 Even Rouault $")
 
 // Internal function declarations.
 
@@ -910,7 +915,7 @@ netCDFRasterBand::netCDFRasterBand( netCDFDataset *poNCDFDS,
 
 netCDFRasterBand::~netCDFRasterBand()
 {
-    netCDFRasterBand::FlushCache();
+    netCDFRasterBand::FlushCache(true);
     CPLFree(panBandZPos);
     CPLFree(panBandZLev);
 }
@@ -2300,7 +2305,7 @@ netCDFDataset::~netCDFDataset()
         AddProjectionVars( false, nullptr, nullptr );
     }
 
-    netCDFDataset::FlushCache();
+    netCDFDataset::FlushCache(true);
     SGCommitPendingTransaction();
 
     for(size_t i = 0; i < apoVectorDatasets.size(); i++)
@@ -2651,6 +2656,9 @@ void netCDFDataset::SetProjectionFromVar( int nGroupId, int nVarId,
                 CPLDebug("GDAL_netCDF", "got grid_mapping %s",
                          pszGridMappingValue);
                 pszWKT = FetchAttr(pszGridMappingValue, NCDF_SPATIAL_REF);
+                if ( !pszWKT ) {
+                    pszWKT = FetchAttr(pszGridMappingValue, NCDF_CRS_WKT);
+                }
                 if( pszWKT )
                 {
                     pszGeoTransform = FetchAttr(pszGridMappingValue,
@@ -4024,7 +4032,7 @@ void netCDFDataset::SetProjectionFromVar( int nGroupId, int nVarId,
     if( pszSRID != nullptr )
     {
         oSRS.Clear();
-        if( oSRS.SetFromUserInput(pszSRID) == OGRERR_NONE )
+        if( oSRS.SetFromUserInput(pszSRID, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
         {
             char *pszWKTExport = nullptr;
             CPLDebug("GDAL_netCDF", "Got SRS from %s", pszSRID);
@@ -4393,6 +4401,7 @@ int NCDFWriteSRSVariable(int cdfid, const OGRSpatialReference* poSRS,
                                 char **ppszCFProjection, bool bWriteGDALTags, const std::string& srsVarName)
 {
     char *pszCFProjection = nullptr;
+    bool bWriteWkt = true;
 
     struct Value
     {
@@ -4539,7 +4548,7 @@ int NCDFWriteSRSVariable(int cdfid, const OGRSpatialReference* poSRS,
         if( EQUAL(pszMethod, "PROJ ob_tran o_proj=longlat") )
         {
             // Not enough interoperable to be written as WKT
-            bWriteGDALTags = false;
+            bWriteWkt = false;
 
             const double dfLon0 = oValMap["lon_0"];
             const double dfLonp = oValMap["o_lon_p"];
@@ -4554,7 +4563,7 @@ int NCDFWriteSRSVariable(int cdfid, const OGRSpatialReference* poSRS,
         else if( EQUAL(pszMethod, "Pole rotation (netCDF CF convention)") )
         {
             // Not enough interoperable to be written as WKT
-            bWriteGDALTags = false;
+            bWriteWkt = false;
 
             const double dfGridNorthPoleLat = oValMap["Grid north pole latitude (netCDF CF convention)"];
             const double dfGridNorthPoleLong = oValMap["Grid north pole longitude (netCDF CF convention)"];
@@ -4569,7 +4578,7 @@ int NCDFWriteSRSVariable(int cdfid, const OGRSpatialReference* poSRS,
         else if( EQUAL(pszMethod, "Pole rotation (GRIB convention)") )
         {
             // Not enough interoperable to be written as WKT
-            bWriteGDALTags = false;
+            bWriteWkt = false;
 
             const double dfLatSouthernPole = oValMap["Latitude of the southern pole (GRIB convention)"];
             const double dfLonSouthernPole = oValMap["Longitude of the southern pole (GRIB convention)"];
@@ -4611,13 +4620,17 @@ int NCDFWriteSRSVariable(int cdfid, const OGRSpatialReference* poSRS,
     addParamDouble(CF_PP_SEMI_MAJOR_AXIS, poSRS->GetSemiMajor());
     addParamDouble(CF_PP_INVERSE_FLATTENING, poSRS->GetInvFlattening());
 
-    if( bWriteGDALTags )
+    if( bWriteWkt )
     {
         char *pszSpatialRef = nullptr;
         poSRS->exportToWkt(&pszSpatialRef);
         if( pszSpatialRef && pszSpatialRef[0] )
         {
-            addParamString(NCDF_SPATIAL_REF, pszSpatialRef);
+            if ( bWriteGDALTags ) {
+                // SPATIAL_REF is deprecated. Will be removed in GDAL 4.
+                addParamString(NCDF_SPATIAL_REF, pszSpatialRef);
+            }
+            addParamString(NCDF_CRS_WKT, pszSpatialRef);
         }
         CPLFree(pszSpatialRef);
     }
@@ -6713,7 +6726,7 @@ bool netCDFDataset::GrowDim(int nLayerId, int nDimIdToGrow, size_t nNewSize)
     int new_cdfid = -1;
     CPLString osTmpFilename(osFilename + ".tmp");
     CPLString osFilenameForNCCreate(osTmpFilename);
-#ifdef WIN32
+#if defined(WIN32) && !defined(NETCDF_USES_UTF8)
     if( CPLTestBool(CPLGetConfigOption( "GDAL_FILENAME_IS_UTF8", "YES" ) ) )
     {
         char* pszTemp = CPLRecode( osFilenameForNCCreate, CPL_ENC_UTF8, "CP_ACP" );
@@ -6799,7 +6812,7 @@ bool netCDFDataset::GrowDim(int nLayerId, int nDimIdToGrow, size_t nNewSize)
     VSIUnlink(osOriFilename);
 
     CPLString osFilenameForNCOpen(osFilename);
-#ifdef WIN32
+#if defined(WIN32) && !defined(NETCDF_USES_UTF8)
     if( CPLTestBool(CPLGetConfigOption( "GDAL_FILENAME_IS_UTF8", "YES" ) ) )
     {
         char* pszTemp = CPLRecode( osFilenameForNCOpen, CPL_ENC_UTF8, "CP_ACP" );
@@ -7731,7 +7744,7 @@ GDALDataset *netCDFDataset::Open( GDALOpenInfo *poOpenInfo )
     const int nMode = ((poOpenInfo->nOpenFlags & (GDAL_OF_UPDATE | GDAL_OF_VECTOR)) ==
                 (GDAL_OF_UPDATE | GDAL_OF_VECTOR)) ? NC_WRITE : NC_NOWRITE;
     CPLString osFilenameForNCOpen(poDS->osFilename);
-#ifdef WIN32
+#if defined(WIN32) && !defined(NETCDF_USES_UTF8)
     if( CPLTestBool(CPLGetConfigOption( "GDAL_FILENAME_IS_UTF8", "YES" ) ) )
     {
         char* pszTemp = CPLRecode( osFilenameForNCOpen, CPL_ENC_UTF8, "CP_ACP" );
@@ -8673,7 +8686,7 @@ netCDFDataset::CreateLL( const char *pszFilename,
 
     // Create the dataset.
     CPLString osFilenameForNCCreate(pszFilename);
-#ifdef WIN32
+#if defined(WIN32) && !defined(NETCDF_USES_UTF8)
     if( CPLTestBool(CPLGetConfigOption( "GDAL_FILENAME_IS_UTF8", "YES" ) ) )
     {
         char* pszTemp = CPLRecode( osFilenameForNCCreate, CPL_ENC_UTF8, "CP_ACP" );
@@ -11596,7 +11609,9 @@ static CPLErr NCDFResolveElem( int nStartGroupId,
         return CE_Failure;
     }
 
+#ifdef NETCDF_HAS_NC4
     enum {NCRM_PARENT, NCRM_WIDTH_WISE} eNCResolveMode = NCRM_PARENT;
+#endif
 
     std::queue<int> aoQueueGroupIdsToVisit;
     aoQueueGroupIdsToVisit.push(nStartGroupId);

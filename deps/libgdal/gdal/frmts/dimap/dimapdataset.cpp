@@ -38,7 +38,7 @@
 #include <map>
 #include <algorithm>
 
-CPL_CVSID("$Id: dimapdataset.cpp 0c733ab43315de2a48d505c139078ea386804f71 2021-10-10 12:48:55 +0200 Even Rouault $")
+CPL_CVSID("$Id: dimapdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -143,7 +143,7 @@ DIMAPDataset::DIMAPDataset() :
 DIMAPDataset::~DIMAPDataset()
 
 {
-    DIMAPDataset::FlushCache();
+    DIMAPDataset::FlushCache(true);
 
     CPLDestroyXMLNode( psProduct );
 
@@ -950,7 +950,7 @@ int DIMAPDataset::ReadImageInformation()
     if( pszSRS != nullptr )
     {
         OGRSpatialReference oSRS;
-        if( oSRS.SetFromUserInput( pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS ) == OGRERR_NONE )
+        if( oSRS.SetFromUserInput( pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
         {
             if( nGCPCount > 0 )
             {
@@ -1471,7 +1471,7 @@ int DIMAPDataset::ReadImageInformation2()
     if( pszSRS != nullptr )
     {
         OGRSpatialReference oSRS;
-        if( oSRS.SetFromUserInput( pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS ) == OGRERR_NONE )
+        if( oSRS.SetFromUserInput( pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
         {
             if( nGCPCount > 0 )
             {

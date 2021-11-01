@@ -31,7 +31,7 @@
 #include "ogr_api.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrdatasource.cpp 428c6a6a0a81364b703d448b3baa74bb17ae2cbd 2020-10-21 15:43:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           ~OGRDataSource()                           */
@@ -312,7 +312,7 @@ OGRErr OGR_DS_SyncToDisk( OGRDataSourceH hDS )
 {
     VALIDATE_POINTER1( hDS, "OGR_DS_SyncToDisk", OGRERR_INVALID_HANDLE );
 
-    reinterpret_cast<GDALDataset *>(hDS)->FlushCache();
+    reinterpret_cast<GDALDataset *>(hDS)->FlushCache(false);
     if( CPLGetLastErrorType() != 0 )
         return OGRERR_FAILURE;
     else

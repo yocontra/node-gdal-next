@@ -35,7 +35,7 @@
 #include <cassert>
 #include <limits>
 
-CPL_CVSID("$Id: gdalgeopackagerasterband.cpp 0b9fb262654e49df9fbd344f3b2397322ff8d74e 2021-08-15 12:04:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalgeopackagerasterband.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 #if !defined(DEBUG_VERBOSE) && defined(DEBUG_VERBOSE_GPKG)
 #define DEBUG_VERBOSE
@@ -160,12 +160,12 @@ GDALGPKGMBTilesLikeRasterBand::GDALGPKGMBTilesLikeRasterBand(
 /*                              FlushCache()                            */
 /************************************************************************/
 
-CPLErr GDALGPKGMBTilesLikeRasterBand::FlushCache()
+CPLErr GDALGPKGMBTilesLikeRasterBand::FlushCache(bool bAtClosing)
 {
     m_poTPD->m_nLastSpaceCheckTimestamp = -1; // disable partial flushes
-    CPLErr eErr = GDALPamRasterBand::FlushCache();
+    CPLErr eErr = GDALPamRasterBand::FlushCache(bAtClosing);
     if( eErr == CE_None )
-        eErr = m_poTPD->IFlushCacheWithErrCode();
+        eErr = m_poTPD->IFlushCacheWithErrCode(bAtClosing);
     m_poTPD->m_nLastSpaceCheckTimestamp = 0;
     return eErr;
 }

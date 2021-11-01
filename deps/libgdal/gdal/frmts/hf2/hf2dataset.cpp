@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: hf2dataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: hf2dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -287,7 +287,7 @@ HF2Dataset::HF2Dataset() :
 HF2Dataset::~HF2Dataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     CPLFree(pszWKT);
     CPLFree(panBlockOffset);
     if (fp)

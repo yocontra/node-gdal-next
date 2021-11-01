@@ -52,7 +52,7 @@
 #include "ogr_expat.h"
 #endif
 
-CPL_CVSID("$Id: osm_parser.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: osm_parser.cpp bb58ee954c3df6e67c13cf059d7ceec95d3696a8 2021-10-23 13:21:31 +0200 Even Rouault $")
 
 // The buffer that are passed to GPB decoding are extended with 0's
 // to be sure that we will be able to read a single 64bit value without
@@ -1955,7 +1955,7 @@ static OSMRetCode PBF_ProcessBlock(OSMContext* psCtxt)
         psCtxt->nBytesRead += nHeaderSize;
 
         memset(psCtxt->pabyBlobHeader + nHeaderSize, 0, EXTRA_BYTES);
-        const bool bRet = ReadBlobHeader(psCtxt->pabyBlobHeader, 
+        const bool bRet = ReadBlobHeader(psCtxt->pabyBlobHeader,
                               psCtxt->pabyBlobHeader + nHeaderSize,
                               &nBlobSize, &eType);
         if( !bRet || eType == BLOB_UNKNOWN )
@@ -2483,8 +2483,9 @@ static void XMLCALL OSM_XML_endElementCbk( void *pUserData,
 
     if( psCtxt->bInNode && strcmp(pszName, "node") == 0 )
     {
-        if( psCtxt->pasNodes[0].dfLon < -180 || psCtxt->pasNodes[0].dfLon > 180 ||
-            psCtxt->pasNodes[0].dfLat < -90 || psCtxt->pasNodes[0].dfLat > 90 )
+        // Written this way to deal with NaN
+        if( !(psCtxt->pasNodes[0].dfLon >= -180 && psCtxt->pasNodes[0].dfLon <= 180 &&
+              psCtxt->pasNodes[0].dfLat >= -90 && psCtxt->pasNodes[0].dfLat <= 90) )
         {
             CPLError(CE_Failure, CPLE_AppDefined,
                      "Invalid lon=%f lat=%f",

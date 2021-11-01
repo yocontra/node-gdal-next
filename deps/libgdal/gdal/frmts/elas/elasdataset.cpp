@@ -36,7 +36,7 @@
 
 using std::fill;
 
-CPL_CVSID("$Id: elasdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: elasdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 typedef struct ELASHeader {
     ELASHeader();
@@ -142,7 +142,7 @@ class ELASDataset final: public GDALPamDataset
                                 int nXSize, int nYSize, int nBands,
                                 GDALDataType eType, char ** papszParamList );
 
-    void FlushCache() override;
+    void FlushCache(bool bAtClosing) override;
 };
 
 /************************************************************************/
@@ -274,7 +274,7 @@ ELASDataset::ELASDataset() :
 ELASDataset::~ELASDataset()
 
 {
-    ELASDataset::FlushCache();
+    ELASDataset::FlushCache(true);
 
     if( fp != nullptr )
     {
@@ -288,10 +288,10 @@ ELASDataset::~ELASDataset()
 /*      We also write out the header, if it is modified.                */
 /************************************************************************/
 
-void ELASDataset::FlushCache()
+void ELASDataset::FlushCache(bool bAtClosing)
 
 {
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 
     if( bHeaderModified )
     {

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cplkeywordparser.h c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $
+ * $Id: cplkeywordparser.h 07af6d281da30d52b00966db492e795d9e3ad1cd 2021-10-24 03:26:52 +0200 Even Rouault $
  *
  * Project:  Common Portability Library
  * Purpose:  Implementation of CPLKeywordParser - a class for parsing
@@ -43,7 +43,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-class CPLKeywordParser
+class CPL_DLL CPLKeywordParser
 {
     char     **papszKeywordList = nullptr;
 

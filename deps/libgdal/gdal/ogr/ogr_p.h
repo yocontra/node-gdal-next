@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_p.h 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $
+ * $Id: ogr_p.h ce3337bbff3fab9123cf589a727dc3d288318483 2021-10-24 04:30:26 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Some private helper functions and stuff for OGR implementation.
@@ -93,9 +93,9 @@ std::string CPL_DLL OGRMakeWktCoordinateM( double, double, double, double, OGRBo
 
 #endif
 
-void OGRFormatDouble( char *pszBuffer, int nBufferLen, double dfVal,
+void CPL_DLL OGRFormatDouble( char *pszBuffer, int nBufferLen, double dfVal,
                       char chDecimalSep, int nPrecision = 15, char chConversionSpecifier = 'f' );
-std::string OGRFormatDouble(double val, const OGRWktOptions& opts);
+std::string CPL_DLL OGRFormatDouble(double val, const OGRWktOptions& opts);
 
 int OGRFormatFloat(char *pszBuffer, int nBufferLen, float fVal,
                    int nPrecision, char chConversionSpecifier);

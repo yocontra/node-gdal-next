@@ -34,7 +34,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: genbindataset.cpp 18c08feb1540d58a5076265e837d49ace106f302 2021-03-08 23:30:56 +0100 Even Rouault $")
+CPL_CVSID("$Id: genbindataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /* ==================================================================== */
 /*      Table relating USGS and ESRI state plane zones.                 */
@@ -369,7 +369,7 @@ GenBinDataset::GenBinDataset() :
 GenBinDataset::~GenBinDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( fpImage != nullptr )
         CPL_IGNORE_RET_VAL(VSIFCloseL( fpImage ));

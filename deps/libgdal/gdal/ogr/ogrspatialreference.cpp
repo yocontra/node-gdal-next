@@ -67,7 +67,7 @@
     (PROJ_VERSION_NUMBER >= PROJ_COMPUTE_VERSION(maj,min,patch))
 #endif
 
-CPL_CVSID("$Id: ogrspatialreference.cpp 4986eea379aaa3f553b9d612f6d5da103dc555a8 2021-10-11 23:07:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrspatialreference.cpp 5d5a9396da0e1c66349b4fdbe9d01a6a719eb1e9 2021-10-26 11:22:02 +0200 Even Rouault $")
 
 #define STRINGIFY(s) #s
 #define XSTRINGIFY(s) STRINGIFY(s)
@@ -7166,9 +7166,9 @@ OGRErr OSRSetPolyconic( OGRSpatialReferenceH hSRS,
  *
  * Two variants are possible:
  * - Polar Stereographic Variant A: dfCenterLat must be +/- 90° and is
- *   interpretated as the latitude of origin, combined with the scale factor
+ *   interpreted as the latitude of origin, combined with the scale factor
  * - Polar Stereographic Variant B: dfCenterLat is different from +/- 90° and
- *   is interpretated as the latitude of true scale. In that situation, dfScale
+ *   is interpreted as the latitude of true scale. In that situation, dfScale
  *   must be set to 1 (it is ignored in the projection parameters)
  */
 OGRErr OGRSpatialReference::SetPS(

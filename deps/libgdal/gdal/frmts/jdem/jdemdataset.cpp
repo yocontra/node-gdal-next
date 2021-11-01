@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: jdemdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: jdemdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            JDEMGetField()                            */
@@ -221,7 +221,7 @@ JDEMDataset::JDEMDataset() :
 JDEMDataset::~JDEMDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if( fp != nullptr )
         CPL_IGNORE_RET_VAL(VSIFCloseL(fp));
 }

@@ -36,7 +36,7 @@
 
 #define MAX_GCPS 5000    //this should be more than enough ground control points
 
-CPL_CVSID("$Id: tsxdataset.cpp 4320c64a7648709cc69efbd39af2c63ff89252e5 2021-03-04 17:59:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: tsxdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 namespace {
 enum ePolarization {
@@ -239,7 +239,7 @@ TSXDataset::TSXDataset() :
 /************************************************************************/
 
 TSXDataset::~TSXDataset() {
-    FlushCache();
+    FlushCache(true);
 
     CPLFree( pszProjection );
 

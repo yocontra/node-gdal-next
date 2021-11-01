@@ -31,7 +31,7 @@
 
 #include "ogr_gpsbabel.h"
 
-CPL_CVSID("$Id: ogrgpsbabeldriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgpsbabeldriver.cpp 5c24ffa26207fc5b8ca9b2975f5c197a2b50757a 2021-10-24 12:28:29 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         OGRGPSBabelDriverIdentify()                  */
@@ -53,7 +53,11 @@ static bool OGRGPSBabelDriverIdentifyInternal(
     else if (memcmp(poOpenInfo->pabyHeader, "MsRcf", 5) == 0)
         pszGPSBabelDriverName = "gdb";
     else if (strstr(reinterpret_cast<const char*>(poOpenInfo->pabyHeader), "<osm") != nullptr)
+    {
+        if( GDALGetDriverByName("OSM") != nullptr )
+            return false;
         pszGPSBabelDriverName = "osm";
+    }
     else if (strstr(reinterpret_cast<const char*>(poOpenInfo->pabyHeader), "$GPGSA") != nullptr ||
                 strstr(reinterpret_cast<const char*>(poOpenInfo->pabyHeader), "$GPGGA") != nullptr)
         pszGPSBabelDriverName = "nmea";

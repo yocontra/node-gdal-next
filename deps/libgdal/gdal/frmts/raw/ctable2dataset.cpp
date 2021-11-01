@@ -32,7 +32,7 @@
 #include "ogr_srs_api.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: ctable2dataset.cpp 6e221b5fd9bb196492f09e52fd257158573f93b3 2019-12-28 02:02:25 +0100 Even Rouault $")
+CPL_CVSID("$Id: ctable2dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -58,8 +58,6 @@ class CTable2Dataset final: public RawDataset
     const OGRSpatialReference* GetSpatialRef() const override {
         return GetSpatialRefFromOldGetProjectionRef();
     }
-    void   FlushCache(void) override;
-
     static GDALDataset *Open( GDALOpenInfo * );
     static int          Identify( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
@@ -90,7 +88,7 @@ CTable2Dataset::CTable2Dataset() :
 CTable2Dataset::~CTable2Dataset()
 
 {
-    CTable2Dataset::FlushCache();
+    CTable2Dataset::FlushCache(true);
 
     if( fpImage != nullptr )
     {
@@ -99,16 +97,6 @@ CTable2Dataset::~CTable2Dataset()
             CPLError(CE_Failure, CPLE_FileIO, "I/O error");
         }
     }
-}
-
-/************************************************************************/
-/*                             FlushCache()                             */
-/************************************************************************/
-
-void CTable2Dataset::FlushCache()
-
-{
-    RawDataset::FlushCache();
 }
 
 /************************************************************************/

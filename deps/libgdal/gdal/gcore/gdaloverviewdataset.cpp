@@ -39,7 +39,7 @@
 #include "gdal_mdreader.h"
 #include "gdal_proxy.h"
 
-CPL_CVSID("$Id: gdaloverviewdataset.cpp 126b0897e64c233ed06ca072549e110bb6b28ced 2021-04-20 16:42:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaloverviewdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /** In GDAL, GDALRasterBand::GetOverview() returns a stand-alone band, that may
     have no parent dataset. This can be inconvenient in certain contexts, where
@@ -126,7 +126,7 @@ class GDALOverviewBand final: public GDALProxyRasterBand
     GDALOverviewBand( GDALOverviewDataset* poDS, int nBand );
     ~GDALOverviewBand() override;
 
-    CPLErr FlushCache() override;
+    CPLErr FlushCache(bool bAtClosing) override;
 
     int GetOverviewCount() override;
     GDALRasterBand *GetOverview( int ) override;
@@ -254,7 +254,7 @@ GDALOverviewDataset::GDALOverviewDataset( GDALDataset* poMainDSIn,
 
 GDALOverviewDataset::~GDALOverviewDataset()
 {
-    GDALOverviewDataset::FlushCache();
+    GDALOverviewDataset::FlushCache(true);
 
     GDALOverviewDataset::CloseDependentDatasets();
 
@@ -603,17 +603,17 @@ GDALOverviewBand::GDALOverviewBand( GDALOverviewDataset* poDSIn, int nBandIn )
 
 GDALOverviewBand::~GDALOverviewBand()
 {
-    GDALOverviewBand::FlushCache();
+    GDALOverviewBand::FlushCache(true);
 }
 
 /************************************************************************/
 /*                              FlushCache()                            */
 /************************************************************************/
 
-CPLErr GDALOverviewBand::FlushCache()
+CPLErr GDALOverviewBand::FlushCache(bool bAtClosing)
 {
     if( poUnderlyingBand )
-        return poUnderlyingBand->FlushCache();
+        return poUnderlyingBand->FlushCache(bAtClosing);
     return CE_None;
 }
 

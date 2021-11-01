@@ -38,7 +38,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: gdalproxydataset.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalproxydataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 /* ******************************************************************** */
@@ -144,12 +144,12 @@ D_PROXY_METHOD_WITH_RET(CPLErr, CE_Failure, IBuildOverviews,
                         ( pszResampling, nOverviews, panOverviewList,
                           nListBands, panBandList, pfnProgress, pProgressData ))
 
-void  GDALProxyDataset::FlushCache()
+void  GDALProxyDataset::FlushCache(bool bAtClosing)
 {
     GDALDataset* poUnderlyingDataset = RefUnderlyingDataset();
     if (poUnderlyingDataset)
     {
-        poUnderlyingDataset->FlushCache();
+        poUnderlyingDataset->FlushCache(bAtClosing);
         UnrefUnderlyingDataset(poUnderlyingDataset);
     }
 }
@@ -321,17 +321,17 @@ RB_PROXY_METHOD_WITH_RET(CPLErr, CE_Failure, SetMetadataItem,
                         (pszName, pszValue, pszDomain))
 
 
-CPLErr GDALProxyRasterBand::FlushCache()
+CPLErr GDALProxyRasterBand::FlushCache(bool bAtClosing)
 {
     // We need to make sure that all cached bocks at the proxy level are
     // first flushed
-    CPLErr ret = GDALRasterBand::FlushCache();
+    CPLErr ret = GDALRasterBand::FlushCache(bAtClosing);
     if( ret == CE_None )
     {
         GDALRasterBand* poSrcBand = RefUnderlyingRasterBand();
         if (poSrcBand)
         {
-            ret = poSrcBand->FlushCache();
+            ret = poSrcBand->FlushCache(bAtClosing);
             UnrefUnderlyingRasterBand(poSrcBand);
         }
         else

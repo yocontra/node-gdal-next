@@ -55,7 +55,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: envidataset.cpp 6a95fed35a4c6eee4cdbeaa4253cbec2917f7645 2021-09-09 19:10:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: envidataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // TODO(schwehr): This really should be defined in port/somewhere.h.
 constexpr double kdfDegToRad = M_PI / 180.0;
@@ -267,11 +267,11 @@ ENVIDataset::ENVIDataset() :
 ENVIDataset::~ENVIDataset()
 
 {
-    ENVIDataset::FlushCache();
+    ENVIDataset::FlushCache(true);
     if( fpImage )
     {
         // Make sure the binary file has the expected size
-        if( bFillFile && nBands > 0)
+        if( !bSuppressOnClose && bFillFile && nBands > 0)
         {
             const int nDataSize =
                 GDALGetDataTypeSizeBytes(GetRasterBand(1)->GetRasterDataType());
@@ -315,14 +315,14 @@ ENVIDataset::~ENVIDataset()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void ENVIDataset::FlushCache()
+void ENVIDataset::FlushCache(bool bAtClosing)
 
 {
-    RawDataset::FlushCache();
+    RawDataset::FlushCache(bAtClosing);
 
     GDALRasterBand *band = GetRasterCount() > 0 ? GetRasterBand(1) : nullptr;
 
-    if ( band == nullptr || !bHeaderDirty )
+    if ( band == nullptr || !bHeaderDirty || (bAtClosing && bSuppressOnClose) )
         return;
 
     // If opening an existing file in Update mode (i.e. "r+") we need to make

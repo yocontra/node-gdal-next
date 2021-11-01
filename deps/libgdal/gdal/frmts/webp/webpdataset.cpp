@@ -32,7 +32,7 @@
 
 #include "webp_headers.h"
 
-CPL_CVSID("$Id: webpdataset.cpp 90f4761b166a9b41231cb979e76e2d3eab6fdf31 2021-06-21 11:52:42 +1200 Benjamin Lewis $")
+CPL_CVSID("$Id: webpdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -174,7 +174,7 @@ WEBPDataset::WEBPDataset() :
 WEBPDataset::~WEBPDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if (fpImage)
         VSIFCloseL(fpImage);
     VSIFree(pabyUncompressed);

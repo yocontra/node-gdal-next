@@ -61,7 +61,7 @@
 
 //#define DEBUG_IO
 
-CPL_CVSID("$Id: openjpegdataset.cpp bb0e15c3736a0fb3139af2786ff9b6ae0331b16b 2021-08-28 00:03:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: openjpegdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                  JP2OpenJPEGDataset_ErrorCallback()                  */
@@ -1221,7 +1221,7 @@ JP2OpenJPEGDataset::JP2OpenJPEGDataset()
 JP2OpenJPEGDataset::~JP2OpenJPEGDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
 #if IS_OPENJPEG_OR_LATER(2,3,0)
     if( iLevel == 0 )

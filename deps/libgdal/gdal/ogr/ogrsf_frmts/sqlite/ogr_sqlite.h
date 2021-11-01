@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sqlite.h 8dc0a101c5e4667fc8dfddf2a96ff54209bf0bfe 2021-09-05 18:19:07 +0200 Even Rouault $
+ * $Id: ogr_sqlite.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/SQLite driver.
@@ -636,7 +636,7 @@ class OGRSQLiteDataSource final : public OGRSQLiteBaseDataSource
                                     const char *pszDialect ) override;
     virtual void        ReleaseResultSet( OGRLayer * poLayer ) override;
 
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
     virtual OGRErr      CommitTransaction() override;
     virtual OGRErr      RollbackTransaction() override;

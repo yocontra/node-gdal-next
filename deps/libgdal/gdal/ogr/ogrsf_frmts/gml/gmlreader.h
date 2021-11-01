@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gmlreader.h ee7d33b2b9929bdfd7f3a285c3777761b2a59ef2 2021-05-09 13:45:35 +0200 Even Rouault $
+ * $Id: gmlreader.h 636f324b250d023691781321f5016d48aeb9555d 2021-10-24 14:25:40 +0200 Even Rouault $
  *
  * Project:  GML Reader
  * Purpose:  Public Declarations for OGR free GML Reader code.
@@ -344,6 +344,6 @@ IGMLReader *CreateGMLReader(bool bUseExpatParserPreferably,
                             GMLSwapCoordinatesEnum eSwapCoordinates,
                             bool bGetSecondaryGeometryOption);
 
-OGRFieldType GML_GetOGRFieldType(GMLPropertyType eType, OGRFieldSubType& eSubType);
+OGRFieldType CPL_DLL GML_GetOGRFieldType(GMLPropertyType eType, OGRFieldSubType& eSubType);
 
 #endif /* GMLREADER_H_INCLUDED */

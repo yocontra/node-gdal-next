@@ -100,7 +100,7 @@ void GDALOpenInfoDeclareFileNotToOpen(const char* pszFilename,
 void GDALOpenInfoUnDeclareFileNotToOpen(const char* pszFilename);
 
 
-CPL_CVSID("$Id: ogrsqlitedatasource.cpp 8dc0a101c5e4667fc8dfddf2a96ff54209bf0bfe 2021-09-05 18:19:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitedatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      OGRSQLiteInitOldSpatialite()                    */
@@ -2278,7 +2278,7 @@ std::pair<OGRLayer*, IOGRSQLiteGetSpatialWhere*>
 /*                              FlushCache()                            */
 /************************************************************************/
 
-void OGRSQLiteDataSource::FlushCache()
+void OGRSQLiteDataSource::FlushCache(bool bAtClosing)
 {
     for( int iLayer = 0; iLayer < m_nLayers; iLayer++ )
     {
@@ -2289,7 +2289,7 @@ void OGRSQLiteDataSource::FlushCache()
             poLayer->CreateSpatialIndexIfNecessary();
         }
     }
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 }
 
 /************************************************************************/

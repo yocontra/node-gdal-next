@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcidskdataset2.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: pcidskdataset2.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  PCIDSK Database File
  * Purpose:  Read/write PCIDSK Database File used by the PCI software, using
@@ -95,7 +95,7 @@ class PCIDSK2Dataset final: public GDALPamDataset
     CPLErr              SetMetadataItem(const char*,const char*,const char*) override;
     const char         *GetMetadataItem( const char*, const char*) override;
 
-    virtual void FlushCache() override;
+    virtual void FlushCache(bool bAtClosing) override;
 
     virtual CPLErr IBuildOverviews( const char *, int, int *,
                                     int, int *, GDALProgressFunc, void * ) override;

@@ -63,7 +63,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: hfadataset.cpp 103cca9e043935bf3548fdf419ff34346ff448ee 2021-10-06 17:32:54 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfadataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 constexpr double D2R = M_PI / 180.0;
 
@@ -1861,7 +1861,7 @@ HFARasterBand::HFARasterBand( HFADataset *poDSIn, int nBandIn, int iOverview ) :
 HFARasterBand::~HFARasterBand()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     for( int iOvIndex = 0; iOvIndex < nOverviews; iOvIndex++ )
     {
@@ -3116,7 +3116,7 @@ HFADataset::HFADataset() :
 HFADataset::~HFADataset()
 
 {
-    HFADataset::FlushCache();
+    HFADataset::FlushCache(true);
 
     // Destroy the raster bands if they exist.  We forcibly clean
     // them up now to avoid any effort to write to them after the
@@ -3148,10 +3148,10 @@ HFADataset::~HFADataset()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void HFADataset::FlushCache()
+void HFADataset::FlushCache(bool bAtClosing)
 
 {
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(bAtClosing);
 
     if( eAccess != GA_Update )
         return;

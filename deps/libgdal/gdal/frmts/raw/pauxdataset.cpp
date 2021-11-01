@@ -34,7 +34,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: pauxdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: pauxdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -324,7 +324,7 @@ PAuxDataset::PAuxDataset() :
 PAuxDataset::~PAuxDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if( fpImage != nullptr && VSIFCloseL( fpImage ) != 0 )
     {
         CPLError( CE_Failure, CPLE_FileIO, "I/O error" );

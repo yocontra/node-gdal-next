@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vrtmultidim.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $
+ * $Id: vrtmultidim.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $
  *
  * Name:     vrtmultidim.cpp
  * Purpose:  Implementation of VRTDriver
@@ -225,7 +225,7 @@ void VRTGroup::Serialize() const
     if( fpVRT == nullptr )
     {
         CPLError( CE_Failure, CPLE_AppDefined,
-                "Failed to write .vrt file in FlushCache()." );
+                "Failed to write .vrt file in Serialize()." );
         return;
     }
 
@@ -250,7 +250,7 @@ void VRTGroup::Serialize() const
     if( !bOK )
     {
         CPLError( CE_Failure, CPLE_AppDefined,
-                "Failed to write .vrt file in FlushCache()." );
+                "Failed to write .vrt file in Serialize()." );
         return;
     }
 }
@@ -922,7 +922,7 @@ std::shared_ptr<VRTMDArray> VRTMDArray::Create(const std::shared_ptr<VRTGroup>& 
     if( psSRSNode )
     {
         poSRS = cpl::make_unique<OGRSpatialReference>();
-        poSRS->SetFromUserInput( CPLGetXMLValue(psSRSNode, nullptr, ""), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS );
+        poSRS->SetFromUserInput( CPLGetXMLValue(psSRSNode, nullptr, ""), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get());
         const char* pszMapping =
             CPLGetXMLValue(psSRSNode, "dataAxisToSRSAxisMapping", nullptr);
         if( pszMapping )

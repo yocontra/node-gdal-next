@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_minixml.h 7d6fac2a7dd6f5deed06d3ab591ba52f6bde7a70 2019-05-18 15:30:03 -0500 Even Rouault $
+ * $Id: cpl_minixml.h b389485e50f90c59f500ca18f2e69de34688925d 2021-10-24 04:17:20 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Declarations for MiniXML Handler.
@@ -193,7 +193,7 @@ extern "C++"
 #endif
 
 /*! @cond Doxygen_Suppress */
-struct CPLXMLTreeCloserDeleter
+struct CPL_DLL CPLXMLTreeCloserDeleter
 {
     void operator()(CPLXMLNode* psNode) const { CPLDestroyXMLNode(psNode); }
 };
@@ -202,7 +202,7 @@ struct CPLXMLTreeCloserDeleter
 /** Manage a tree of XML nodes so that all nodes are freed when the instance goes
  * out of scope.  Only the top level node should be in a CPLXMLTreeCloser.
  */
-class CPLXMLTreeCloser: public std::unique_ptr<CPLXMLNode, CPLXMLTreeCloserDeleter>
+class CPL_DLL CPLXMLTreeCloser: public std::unique_ptr<CPLXMLNode, CPLXMLTreeCloserDeleter>
 {
  public:
   /** Constructor */

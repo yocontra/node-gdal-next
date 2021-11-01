@@ -54,7 +54,7 @@
 #include "gdal_rat.h"
 #include "gdal_priv_templates.hpp"
 
-CPL_CVSID("$Id: gdalrasterband.cpp fdb4f0686fa4c07f69669f9683c8eb98e9e4fd39 2021-08-12 15:22:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalrasterband.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALRasterBand()                           */
@@ -86,7 +86,12 @@ GDALRasterBand::GDALRasterBand(int bForceCachedIOIn):
 GDALRasterBand::~GDALRasterBand()
 
 {
-    GDALRasterBand::FlushCache();
+    if( poDS && poDS->bSuppressOnClose )
+    {
+        if( poBandBlockCache )
+            poBandBlockCache->DisableDirtyBlockWriting();
+    }
+    GDALRasterBand::FlushCache(true);
 
     delete poBandBlockCache;
 
@@ -1010,12 +1015,16 @@ int GDALRasterBand::InitBlockInfo()
  *
  * This method is the same as the C function GDALFlushRasterCache().
  *
+ * @param bAtClosing Whether this is called from a GDALDataset destructor
  * @return CE_None on success.
  */
 
-CPLErr GDALRasterBand::FlushCache()
+CPLErr GDALRasterBand::FlushCache(bool bAtClosing)
 
 {
+    if( bAtClosing && poDS && poDS->bSuppressOnClose && poBandBlockCache )
+        poBandBlockCache->DisableDirtyBlockWriting();
+
     CPLErr eGlobalErr = eFlushBlockErr;
 
     if (eFlushBlockErr != CE_None)
@@ -1047,7 +1056,7 @@ CPLErr CPL_STDCALL GDALFlushRasterCache( GDALRasterBandH hBand )
 {
     VALIDATE_POINTER1( hBand, "GDALFlushRasterCache", CE_Failure );
 
-    return GDALRasterBand::FromHandle(hBand)->FlushCache();
+    return GDALRasterBand::FromHandle(hBand)->FlushCache(false);
 }
 
 /************************************************************************/

@@ -53,7 +53,7 @@
 #include "gdalwarper.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vrtwarped.cpp 9b04a6ce329ade6272643ab59d0ffaabd313955c 2021-10-11 23:32:03 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtwarped.cpp 831355f692b610e0562802d39c65c015e68467d5 2021-10-28 11:30:49 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                      GDALAutoCreateWarpedVRT()                       */
@@ -157,39 +157,47 @@ GDALAutoCreateWarpedVRTEx( GDALDatasetH hSrcDS,
     GDALWarpInitDefaultBandMapping( psWO, GDALGetRasterCount( hSrcDS ) );
 
 /* -------------------------------------------------------------------- */
-/*      Setup no data values                                            */
+/*      Setup no data values (if not done in psOptionsIn)               */
 /* -------------------------------------------------------------------- */
-    for( int i = 0; i < psWO->nBandCount; i++ )
+    if( psWO->padfSrcNoDataReal == nullptr &&
+        psWO->padfDstNoDataReal == nullptr &&
+        psWO->nSrcAlphaBand == 0 )
     {
-        GDALRasterBandH rasterBand = GDALGetRasterBand(psWO->hSrcDS, psWO->panSrcBands[i]);
-
-        int hasNoDataValue;
-        double noDataValue = GDALGetRasterNoDataValue(rasterBand, &hasNoDataValue);
-
-        if( hasNoDataValue )
+        for( int i = 0; i < psWO->nBandCount; i++ )
         {
-            // Check if the nodata value is out of range
-            int bClamped = FALSE;
-            int bRounded = FALSE;
-            CPL_IGNORE_RET_VAL(
-                GDALAdjustValueToDataType(GDALGetRasterDataType(rasterBand),
-                                      noDataValue, &bClamped, &bRounded ));
-            if( !bClamped )
-            {
-                GDALWarpInitNoDataReal(psWO, -1e10);
+            GDALRasterBandH rasterBand = GDALGetRasterBand(psWO->hSrcDS, psWO->panSrcBands[i]);
 
-                psWO->padfSrcNoDataReal[i] = noDataValue;
-                psWO->padfDstNoDataReal[i] = noDataValue;
+            int hasNoDataValue;
+            double noDataValue = GDALGetRasterNoDataValue(rasterBand, &hasNoDataValue);
+
+            if( hasNoDataValue )
+            {
+                // Check if the nodata value is out of range
+                int bClamped = FALSE;
+                int bRounded = FALSE;
+                CPL_IGNORE_RET_VAL(
+                    GDALAdjustValueToDataType(GDALGetRasterDataType(rasterBand),
+                                          noDataValue, &bClamped, &bRounded ));
+                if( !bClamped )
+                {
+                    GDALWarpInitNoDataReal(psWO, -1e10);
+                    if( psWO->padfSrcNoDataReal != nullptr &&
+                        psWO->padfDstNoDataReal != nullptr )
+                    {
+                        psWO->padfSrcNoDataReal[i] = noDataValue;
+                        psWO->padfDstNoDataReal[i] = noDataValue;
+                    }
+                }
             }
         }
-    }
 
-    if( psWO->padfDstNoDataReal != nullptr )
-    {
-        if (CSLFetchNameValue( psWO->papszWarpOptions, "INIT_DEST" ) == nullptr)
+        if( psWO->padfDstNoDataReal != nullptr )
         {
-            psWO->papszWarpOptions =
-                CSLSetNameValue(psWO->papszWarpOptions, "INIT_DEST", "NO_DATA");
+            if (CSLFetchNameValue( psWO->papszWarpOptions, "INIT_DEST" ) == nullptr)
+            {
+                psWO->papszWarpOptions =
+                    CSLSetNameValue(psWO->papszWarpOptions, "INIT_DEST", "NO_DATA");
+            }
         }
     }
 
@@ -262,14 +270,17 @@ GDALAutoCreateWarpedVRTEx( GDALDatasetH hSrcDS,
 
     GDALDestroyWarpOptions( psWO );
 
-    if( pszDstWKT != nullptr )
-        GDALSetProjection( hDstDS, pszDstWKT );
-    else if( pszSrcWKT != nullptr )
-        GDALSetProjection( hDstDS, pszSrcWKT );
-    else if( GDALGetGCPCount( hSrcDS ) > 0 )
-        GDALSetProjection( hDstDS, GDALGetGCPProjection( hSrcDS ) );
-    else
-        GDALSetProjection( hDstDS, GDALGetProjectionRef( hSrcDS ) );
+    if( hDstDS != nullptr )
+    {
+        if( pszDstWKT != nullptr )
+            GDALSetProjection( hDstDS, pszDstWKT );
+        else if( pszSrcWKT != nullptr )
+            GDALSetProjection( hDstDS, pszSrcWKT );
+        else if( GDALGetGCPCount( hSrcDS ) > 0 )
+            GDALSetProjection( hDstDS, GDALGetGCPProjection( hSrcDS ) );
+        else
+            GDALSetProjection( hDstDS, GDALGetProjectionRef( hSrcDS ) );
+    }
 
     return hDstDS;
 }
@@ -399,7 +410,7 @@ VRTWarpedDataset::VRTWarpedDataset( int nXSize, int nYSize ) :
 VRTWarpedDataset::~VRTWarpedDataset()
 
 {
-    VRTWarpedDataset::FlushCache();
+    VRTWarpedDataset::FlushCache(true);
     VRTWarpedDataset::CloseDependentDatasets();
 }
 
@@ -555,6 +566,11 @@ CPLErr VRTWarpedDataset::Initialize( void *psWO )
     }
 
     GDALDestroyWarpOptions(psWO_Dup);
+
+    if( nBands > 1 )
+    {
+        GDALDataset::SetMetadataItem("INTERLEAVE", "PIXEL", "IMAGE_STRUCTURE");
+    }
 
     return eErr;
 }
@@ -1231,6 +1247,26 @@ CPLErr VRTWarpedDataset::XMLInit( CPLXMLNode *psTree, const char *pszVRTPathIn )
             return eErr;
     }
 
+    // Check that band block sizes didn't change the dataset block size.
+    for(int i = 1; i <= nBands; i++ )
+    {
+        int nBlockXSize = 0;
+        int nBlockYSize = 0;
+        GetRasterBand(i)->GetBlockSize(&nBlockXSize, &nBlockYSize);
+        if( nBlockXSize != m_nBlockXSize || nBlockYSize != m_nBlockYSize )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Block size specified on band %d not consistent with "
+                     "dataset block size", i);
+            return CE_Failure;
+        }
+    }
+
+    if( nBands > 1 )
+    {
+        GDALDataset::SetMetadataItem("INTERLEAVE", "PIXEL", "IMAGE_STRUCTURE");
+    }
+
 /* -------------------------------------------------------------------- */
 /*      Find the GDALWarpOptions XML tree.                              */
 /* -------------------------------------------------------------------- */
@@ -1661,9 +1697,9 @@ CPLErr VRTWarpedDataset::ProcessBlock( int iBlockX, int iBlockY )
                     for(int iY=0;iY<nReqYSize;iY++)
                     {
                         GDALCopyWords(
-                            pabyDstBandBuffer + iY * nReqXSize*nWordSize,
+                            pabyDstBandBuffer + static_cast<GPtrDiff_t>(iY) * nReqXSize*nWordSize,
                             psWO->eWorkingDataType, nWordSize,
-                            pabyBlock + iY * m_nBlockXSize * nDTSize,
+                            pabyBlock + static_cast<GPtrDiff_t>(iY) * m_nBlockXSize * nDTSize,
                             poBlock->GetDataType(),
                             nDTSize,
                             nReqXSize );
@@ -1727,7 +1763,7 @@ VRTWarpedRasterBand::VRTWarpedRasterBand( GDALDataset *poDSIn, int nBandIn,
 VRTWarpedRasterBand::~VRTWarpedRasterBand()
 
 {
-    FlushCache();
+    FlushCache(true);
 }
 
 /************************************************************************/

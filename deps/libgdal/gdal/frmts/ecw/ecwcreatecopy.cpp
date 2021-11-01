@@ -34,7 +34,7 @@
 #include "gdaljp2metadata.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ecwcreatecopy.cpp 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: ecwcreatecopy.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 #if defined(FRMT_ecw) && defined(HAVE_COMPRESS)
 
@@ -1622,7 +1622,7 @@ class ECWWriteDataset final: public GDALDataset
                                  int );
             ~ECWWriteDataset();
 
-    virtual void   FlushCache( void ) override;
+    virtual void   FlushCache( bool bAtClosing ) override;
 
     virtual CPLErr GetGeoTransform( double * ) override;
     virtual CPLErr SetGeoTransform( double * ) override;
@@ -1737,7 +1737,7 @@ ECWWriteDataset::ECWWriteDataset( const char *pszFilenameIn,
 ECWWriteDataset::~ECWWriteDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( bCrystalized )
     {
@@ -1761,10 +1761,10 @@ ECWWriteDataset::~ECWWriteDataset()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void ECWWriteDataset::FlushCache()
+void ECWWriteDataset::FlushCache(bool bAtClosing)
 
 {
-    BlockBasedFlushCache();
+    BlockBasedFlushCache(bAtClosing);
 }
 
 /************************************************************************/

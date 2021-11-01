@@ -38,7 +38,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: byndataset.cpp 026ccc0bd255d04c0ece5f86190db8f992010531 2020-11-05 22:52:15 +0100 Even Rouault $")
+CPL_CVSID("$Id: byndataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // Specification at
 // https://www.nrcan.gc.ca/sites/www.nrcan.gc.ca/files/earthsciences/pdf/gpshgrid_e.pdf
@@ -145,7 +145,7 @@ BYNDataset::BYNDataset() :
 BYNDataset::~BYNDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( GetAccess() == GA_Update)
         UpdateHeader();

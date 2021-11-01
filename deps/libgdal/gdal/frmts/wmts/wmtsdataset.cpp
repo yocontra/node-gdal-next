@@ -50,7 +50,7 @@ extern "C" void GDALRegister_WMTS();
 
 #define WMTS_WGS84_DEG_PER_METER    (180 / M_PI / SRS_WGS84_SEMIMAJOR)
 
-CPL_CVSID("$Id: wmtsdataset.cpp e6166af3bd0657ecc2830cd90473158dac1462bf 2021-09-09 12:25:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: wmtsdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 typedef enum
 {
@@ -650,7 +650,7 @@ int WMTSDataset::ReadTMS(CPLXMLNode* psContents,
             return FALSE;
         }
         oTMS.osSRS = pszSupportedCRS;
-        if( oTMS.oSRS.SetFromUserInput(FixCRSName(pszSupportedCRS), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE )
+        if( oTMS.oSRS.SetFromUserInput(FixCRSName(pszSupportedCRS), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) != OGRERR_NONE )
         {
             CPLError(CE_Failure, CPLE_AppDefined, "Cannot parse CRS '%s'",
                      pszSupportedCRS);
@@ -1563,7 +1563,7 @@ GDALDataset* WMTSDataset::Open(GDALOpenInfo* poOpenInfo)
                 for(; oIter != aoMapBoundingBox.end(); ++oIter )
                 {
                     OGRSpatialReference oSRS;
-                    if( oSRS.SetFromUserInput(FixCRSName(oIter->first), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) == OGRERR_NONE )
+                    if( oSRS.SetFromUserInput(FixCRSName(oIter->first), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
                     {
                         OGRSpatialReference oWGS84;
                         oWGS84.SetFromUserInput(SRS_WKT_WGS84_LAT_LONG);
@@ -1630,7 +1630,7 @@ GDALDataset* WMTSDataset::Open(GDALOpenInfo* poOpenInfo)
             {
                 OGRSpatialReference oSRS;
                 oSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-                if( oSRS.SetFromUserInput(FixCRSName(oIter->first), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) == OGRERR_NONE )
+                if( oSRS.SetFromUserInput(FixCRSName(oIter->first), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
                 {
                     // Check if this doesn't match the most precise tile matrix
                     // by densifying its contour
@@ -1867,7 +1867,7 @@ GDALDataset* WMTSDataset::Open(GDALOpenInfo* poOpenInfo)
         if( !osProjection.empty() )
         {
             OGRSpatialReference oSRS;
-            if( oSRS.SetFromUserInput(osProjection, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) == OGRERR_NONE )
+            if( oSRS.SetFromUserInput(osProjection, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
             {
                 char* pszWKT = nullptr;
                 oSRS.exportToWkt(&pszWKT);

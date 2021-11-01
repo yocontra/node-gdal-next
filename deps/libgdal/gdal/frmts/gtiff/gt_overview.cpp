@@ -50,7 +50,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: gt_overview.cpp 20cb378a1ac46515d1aad87e93dff401feedffa7 2021-07-06 18:17:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_overview.cpp d588fcb910cbd2a5138fc7ba1a79452780133498 2021-10-19 12:41:27 +0200 Even Rouault $")
 
 // TODO(schwehr): Explain why 128 and not 127.
 constexpr int knMaxOverviews = 128;
@@ -837,34 +837,36 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
         GTIFFBuildOverviewMetadata( pszResampling, poBaseDS, osMetadata );
     }
 
-    const bool bStandardColorInterp =
-        poBaseDS != nullptr &&
-        GTIFFIsStandardColorInterpretation(GDALDataset::ToHandle(poBaseDS),
-                                           static_cast<uint16_t>(nPhotometric),
-                                           nullptr);
-    if( poBaseDS != nullptr && !bStandardColorInterp )
+    if( poBaseDS != nullptr && poBaseDS->GetRasterCount() == nBands )
     {
-        if( osMetadata.size() >= strlen("</GDALMetadata>") &&
-            osMetadata.substr(osMetadata.size() - strlen("</GDALMetadata>")) == "</GDALMetadata>" )
+        const bool bStandardColorInterp =
+            GTIFFIsStandardColorInterpretation(GDALDataset::ToHandle(poBaseDS),
+                                               static_cast<uint16_t>(nPhotometric),
+                                               nullptr);
+        if( !bStandardColorInterp )
         {
-            osMetadata.resize(osMetadata.size() - strlen("</GDALMetadata>"));
+            if( osMetadata.size() >= strlen("</GDALMetadata>") &&
+                osMetadata.substr(osMetadata.size() - strlen("</GDALMetadata>")) == "</GDALMetadata>" )
+            {
+                osMetadata.resize(osMetadata.size() - strlen("</GDALMetadata>"));
+            }
+            else
+            {
+                CPLAssert(osMetadata.empty());
+                osMetadata = "<GDALMetadata>";
+            }
+            for( int i = 0; i < poBaseDS->GetRasterCount(); ++i )
+            {
+                const GDALColorInterp eInterp =
+                    poBaseDS->GetRasterBand(i + 1)->GetColorInterpretation();
+                osMetadata += CPLSPrintf(
+                    "<Item sample=\"%d\" name=\"COLORINTERP\" role=\"colorinterp\">",
+                    i);
+                osMetadata += GDALGetColorInterpretationName(eInterp);
+                osMetadata += "</Item>";
+            }
+            osMetadata += "</GDALMetadata>";
         }
-        else
-        {
-            CPLAssert(osMetadata.empty());
-            osMetadata = "<GDALMetadata>";
-        }
-        for( int i = 0; i < poBaseDS->GetRasterCount(); ++i )
-        {
-            const GDALColorInterp eInterp =
-                poBaseDS->GetRasterBand(i + 1)->GetColorInterpretation();
-            osMetadata += CPLSPrintf(
-                "<Item sample=\"%d\" name=\"COLORINTERP\" role=\"colorinterp\">",
-                i);
-            osMetadata += GDALGetColorInterpretationName(eInterp);
-            osMetadata += "</Item>";
-        }
-        osMetadata += "</GDALMetadata>";
     }
 
 /* -------------------------------------------------------------------- */
@@ -1238,7 +1240,7 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
 /*      Cleanup                                                         */
 /* -------------------------------------------------------------------- */
     if( eErr == CE_None )
-        hODS->FlushCache();
+        hODS->FlushCache(true);
     delete hODS;
 
     GTIFFSetInExternalOvr(false);

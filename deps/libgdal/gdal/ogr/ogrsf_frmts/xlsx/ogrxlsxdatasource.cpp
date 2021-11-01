@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrxlsxdatasource.cpp 01a361c7662f881f73db6edcc8c739d79174049c 2021-04-23 21:22:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrxlsxdatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 namespace OGRXLSX {
 
@@ -94,7 +94,7 @@ void OGRXLSXLayer::SetUpdated( bool bUpdatedIn )
 
 OGRErr OGRXLSXLayer::SyncToDisk()
 {
-    poDS->FlushCache();
+    poDS->FlushCache(false);
     return OGRERR_NONE;
 }
 
@@ -227,7 +227,7 @@ OGRXLSXDataSource::OGRXLSXDataSource() :
 OGRXLSXDataSource::~OGRXLSXDataSource()
 
 {
-    OGRXLSXDataSource::FlushCache();
+    OGRXLSXDataSource::FlushCache(true);
 
     CPLFree( pszName );
 
@@ -2285,7 +2285,7 @@ static bool WriteDotRels(const char* pszName)
 /*                            FlushCache()                              */
 /************************************************************************/
 
-void OGRXLSXDataSource::FlushCache()
+void OGRXLSXDataSource::FlushCache(bool /* bAtClosing */)
 {
     if( !bUpdated )
         return;

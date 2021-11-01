@@ -31,7 +31,7 @@
 #include "ogrmutexeddatasource.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrmutexeddatasource.cpp 2bd4328a9cb58844cb91956f8bd9869218a45b1a 2021-04-29 18:40:02 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmutexeddatasource.cpp 5a8ccc891da4f76e423dec56c6babdc61425c02f 2021-10-15 18:58:04 +0200 Even Rouault $")
 
 OGRMutexedDataSource::OGRMutexedDataSource( OGRDataSource* poBaseDataSource,
                                             int bTakeOwnership,
@@ -114,6 +114,12 @@ OGRErr      OGRMutexedDataSource::DeleteLayer(int iIndex)
     return eErr;
 }
 
+bool OGRMutexedDataSource::IsLayerPrivate(int iLayer) const
+{
+    CPLMutexHolderOptionalLockD(m_hGlobalMutex);
+    return m_poBaseDataSource->IsLayerPrivate(iLayer);
+}
+
 int         OGRMutexedDataSource::TestCapability( const char * pszCap )
 {
     CPLMutexHolderOptionalLockD(m_hGlobalMutex);
@@ -181,10 +187,10 @@ void        OGRMutexedDataSource::ReleaseResultSet( OGRLayer * poResultsSet )
     m_poBaseDataSource->ReleaseResultSet(poResultsSet);
 }
 
-void      OGRMutexedDataSource::FlushCache()
+void      OGRMutexedDataSource::FlushCache(bool bAtClosing)
 {
     CPLMutexHolderOptionalLockD(m_hGlobalMutex);
-    return m_poBaseDataSource->FlushCache();
+    return m_poBaseDataSource->FlushCache(bAtClosing);
 }
 
 OGRErr OGRMutexedDataSource::StartTransaction(int bForce)

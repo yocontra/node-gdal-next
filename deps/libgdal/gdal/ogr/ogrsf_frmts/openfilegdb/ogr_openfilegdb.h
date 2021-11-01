@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_openfilegdb.h 975934b6f220124f41d59f88818e6a4a517f8a52 2021-08-24 15:40:35 +1000 Nyall Dawson $
+* $Id: ogr_openfilegdb.h a17ada94cb308964339f2ac5e2719fa855c22e69 2021-10-14 12:26:22 +1000 Nyall Dawson $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Implements Open FileGDB OGR driver.
@@ -186,18 +186,20 @@ class OGROpenFileGDBDataSource final: public OGRDataSource
                                 const CPLString& osDocumentation,
                                 const char* pszGeomName,
                                 OGRwkbGeometryType eGeomType );
+  static bool         IsPrivateLayerName( const CPLString& osName );
 
 public:
            OGROpenFileGDBDataSource();
   virtual ~OGROpenFileGDBDataSource();
 
-  int                 Open(const char * );
+  int                 Open( const GDALOpenInfo* poOpenInfo );
 
   virtual const char* GetName() override { return m_pszName; }
   virtual int         GetLayerCount() override { return static_cast<int>(m_apoLayers.size()); }
 
   virtual OGRLayer*   GetLayer( int ) override;
   virtual OGRLayer*   GetLayerByName( const char* pszName ) override;
+  bool                IsLayerPrivate( int ) const override;
 
   virtual OGRLayer *  ExecuteSQL( const char *pszSQLCommand,
                                   OGRGeometry *poSpatialFilter,

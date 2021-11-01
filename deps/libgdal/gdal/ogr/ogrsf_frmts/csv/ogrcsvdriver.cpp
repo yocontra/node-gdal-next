@@ -44,7 +44,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: ogrcsvdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcsvdriver.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static CPLMutex *hMutex = nullptr;
 static std::map<CPLString, GDALDataset *> *poMap = nullptr;
@@ -157,7 +157,7 @@ static GDALDataset *OGRCSVDriverOpen( GDALOpenInfo *poOpenInfo )
         if( oIter != poMap->end() )
         {
             GDALDataset *poOtherDS = oIter->second;
-            poOtherDS->FlushCache();
+            poOtherDS->FlushCache(false);
         }
     }
 

@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-CPL_CVSID("$Id: bsbdataset.cpp c143c2516730456e48277e7e64b3cc5b8f2e41ba 2020-03-26 22:45:59 -0400 Daniel Morissette $")
+CPL_CVSID("$Id: bsbdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 //Disabled as people may worry about the BSB patent
 //#define BSB_CREATE
@@ -217,7 +217,7 @@ BSBDataset::BSBDataset() :
 BSBDataset::~BSBDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     GDALDeinitGCPs( nGCPCount, pasGCPList );
     CPLFree( pasGCPList );

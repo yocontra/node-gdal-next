@@ -37,7 +37,7 @@
 #include "../../ogr/ogrsf_frmts/mitab/mitab.h"
 #endif
 
-CPL_CVSID("$Id: grcdataset.cpp edff0f6ff69efb760c7e123f7ca2e2b2038d3a7e 2021-03-27 10:49:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: grcdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -265,7 +265,7 @@ NWT_GRCDataset::~NWT_GRCDataset()
     delete poColorTable;
     CSLDestroy( papszCategories );
 
-    NWT_GRCDataset::FlushCache();
+    NWT_GRCDataset::FlushCache(true);
     pGrd->fp = nullptr;       // this prevents nwtCloseGrid from closing the fp
     nwtCloseGrid( pGrd );
 

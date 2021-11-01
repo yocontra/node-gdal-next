@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp 4986eea379aaa3f553b9d612f6d5da103dc555a8 2021-10-11 23:07:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarper.cpp 5d5a9396da0e1c66349b4fdbe9d01a6a719eb1e9 2021-10-26 11:22:02 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */
@@ -1136,7 +1136,7 @@ GDALWarpDstAlphaMasker( void *pMaskFuncArg, int nBandCount,
  *     <li>input pixel = (1, 2, 127) ==> output pixel = (0, 0, 127, 255)</li>
  *     </ul>
  *
- *     Note: NO was the default behaviour before GDAL 3.3.2
+ *     Note: NO was the default behavior before GDAL 3.3.2
  * </li>
  * <li>When PARTIAL, or not specified at all (default behavior),
  *     nodata masking values is considered independently for each band.

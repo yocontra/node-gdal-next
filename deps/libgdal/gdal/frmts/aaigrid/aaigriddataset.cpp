@@ -61,7 +61,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: aaigriddataset.cpp 59bbb1c290e9a951b141f68c17ce473ed2ad87ba 2021-08-12 21:59:39 +0200 Even Rouault $")
+CPL_CVSID("$Id: aaigriddataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 namespace {
 
@@ -279,7 +279,7 @@ AAIGDataset::AAIGDataset() :
 AAIGDataset::~AAIGDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( fp != nullptr )
     {

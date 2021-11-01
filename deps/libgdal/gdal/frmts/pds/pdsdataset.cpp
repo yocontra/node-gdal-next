@@ -49,7 +49,7 @@ constexpr double NULL3 = -3.4028226550889044521e+38;
 #include "cpl_safemaths.hpp"
 #include "vicardataset.h"
 
-CPL_CVSID("$Id: pdsdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: pdsdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 enum PDSLayout
 {
@@ -158,7 +158,7 @@ PDSDataset::PDSDataset() :
 PDSDataset::~PDSDataset()
 
 {
-    PDSDataset::FlushCache();
+    PDSDataset::FlushCache(true);
     if( fpImage != nullptr )
         VSIFCloseL( fpImage );
 

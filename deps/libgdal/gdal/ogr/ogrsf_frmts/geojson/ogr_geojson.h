@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geojson.h 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $
+ * $Id: ogr_geojson.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions of OGR OGRGeoJSON driver types.
@@ -224,7 +224,7 @@ class OGRGeoJSONDataSource final: public OGRDataSource
     bool IsUpdatable() const { return bUpdatable_; }
     const CPLString& GetJSonFlavor() const { return osJSonFlavor_; }
 
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
     static const size_t SPACE_FOR_BBOX = 130;
 

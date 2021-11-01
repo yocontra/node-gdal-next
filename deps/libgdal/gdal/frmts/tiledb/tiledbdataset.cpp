@@ -35,7 +35,7 @@
 
 #include "tiledb_headers.h"
 
-CPL_CVSID("$Id: tiledbdataset.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: tiledbdataset.cpp a19dcd938c7efd04bc9024357db92f30a2bd036b 2021-10-31 21:07:39 +0100 Even Rouault $")
 
 
 const CPLString TILEDB_VALUES( "TDB_VALUES" );
@@ -123,7 +123,7 @@ class TileDBDataset final: public GDALPamDataset
         static void             SetBlockSize( GDALRasterBand* poBand,
                                                 char ** &papszOptions );
 
-        virtual void            FlushCache( void ) override;
+        virtual void            FlushCache( bool bAtClosing ) override;
 
 
 };
@@ -163,7 +163,18 @@ static CPLString vsi_to_tiledb_uri( const char* pszUri )
     else if ( STARTS_WITH_CI( pszUri, "/VSIGS/") )
         osUri.Printf("gcs://%s", pszUri + 7);
     else
+    {
         osUri = pszUri;
+        // tiledb (at least at 2.4.2 on Conda) wrongly interprets relative
+        // directories on Windows as absolute ones.
+        if( CPLIsFilenameRelative(pszUri) )
+        {
+            char* pszCurDir = CPLGetCurrentDir();
+            if( pszCurDir )
+                osUri = CPLFormFilename(pszCurDir, pszUri, nullptr);
+            CPLFree(pszCurDir);
+        }
+    }
 
     return osUri;
 }
@@ -459,7 +470,7 @@ CPLErr TileDBRasterBand::IWriteBlock( int nBlockXOff,
     }
     else
     {
-        // global order requires ordered blocks (see FlushCache())
+        // global order requires ordered blocks (see FlushCache(bool bAtClosing))
         if ( ( nCurrBlockX != nBlockXOff ) || ( nCurrBlockY != nBlockYOff ) )
         {   CPLError( CE_Failure, CPLE_AppDefined,
                     "Non-sequential global write to TileDB.\n");
@@ -604,7 +615,7 @@ GDALColorInterp TileDBRasterBand::GetColorInterpretation()
 TileDBDataset::~TileDBDataset()
 
 {
-    TileDBDataset::FlushCache();
+    TileDBDataset::FlushCache(true);
 
     // important to finalize arrays before closing array when updating
     if ( bGlobalOrder )
@@ -667,10 +678,10 @@ CPLErr TileDBDataset::AddDimensions( tiledb::Domain& domain,
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void TileDBDataset::FlushCache()
+void TileDBDataset::FlushCache(bool bAtClosing)
 
 {
-    BlockBasedFlushCache();
+    BlockBasedFlushCache(bAtClosing);
 
     if( nPamFlags & GPF_DIRTY )
         TrySaveXML();
@@ -683,6 +694,9 @@ void TileDBDataset::FlushCache()
 CPLErr TileDBDataset::TrySaveXML()
 
 {
+    if( m_array == nullptr )
+        return CE_None;
+
     CPLXMLNode *psTree = nullptr;
     try
     {
@@ -1247,7 +1261,7 @@ GDALDataset *TileDBDataset::Open( GDALOpenInfo * poOpenInfo )
                 return nullptr;
             }
 
-            osArrayPath = apszName[1];
+            osArrayPath = vsi_to_tiledb_uri(apszName[1]);
             osSubdataset = apszName[2];
             poDS->SetSubdatasetName( osSubdataset.c_str() );
         }

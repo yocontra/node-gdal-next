@@ -46,7 +46,7 @@ constexpr int SUBBLOCK_SIZE = 64;
 #define TO_SUBBLOCK(x) ((x) >> 6)
 #define WITHIN_SUBBLOCK(x) ((x) & 0x3f)
 
-CPL_CVSID("$Id: gdalarraybandblockcache.cpp 2cef454ab06723a32379690b46581a40eb2e5af2 2019-11-13 16:36:03 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalarraybandblockcache.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /* ******************************************************************** */
 /*                        GDALArrayBandBlockCache                       */
@@ -429,7 +429,7 @@ CPLErr GDALArrayBandBlockCache::FlushBlock( int nXBlockOff, int nYBlockOff,
 
     CPLErr eErr = CE_None;
 
-    if( bWriteDirtyBlock && poBlock->GetDirty() )
+    if( m_bWriteDirtyBlocks && bWriteDirtyBlock && poBlock->GetDirty() )
     {
         UpdateDirtyBlockFlushingLog();
 

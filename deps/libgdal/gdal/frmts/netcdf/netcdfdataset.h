@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdfdataset.h 681a087c9c1797c1a1a111713be205d229686615 2021-10-08 18:15:23 +0200 Even Rouault $
+ * $Id: netcdfdataset.h e20d98098a12c9be57f50a36bc083b64e05f4ac2 2021-10-27 13:45:55 +0200 Even Rouault $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.
@@ -101,6 +101,7 @@ static const size_t NCDF_MAX_STR_LEN = 8192;
 #define NCDF_CONVENTIONS_CF_V1_5  "CF-1.5"
 #define NCDF_CONVENTIONS_CF_V1_6  "CF-1.6"
 #define NCDF_CONVENTIONS_CF_V1_8  "CF-1.8"
+#define NCDF_CRS_WKT         "crs_wkt"
 #define NCDF_SPATIAL_REF     "spatial_ref"
 #define NCDF_GEOTRANSFORM    "GeoTransform"
 #define NCDF_DIMNAME_X       "x"

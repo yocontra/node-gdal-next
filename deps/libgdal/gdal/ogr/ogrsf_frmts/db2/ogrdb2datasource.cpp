@@ -29,7 +29,7 @@
 
 #include "ogr_db2.h"
 
-CPL_CVSID("$Id: ogrdb2datasource.cpp 8d61c2d7f95f833cf04075914ed0eba06bd65ed5 2021-05-31 17:39:36 +0200 Julien Rebetez $")
+CPL_CVSID("$Id: ogrdb2datasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static GPKGTileFormat GetTileFormat(const char* pszTF );
 
@@ -223,7 +223,7 @@ OGRDB2DataSource::~OGRDB2DataSource()
                     m_osRasterTable.c_str());
         }
 
-        OGRDB2DataSource::FlushCache();
+        OGRDB2DataSource::FlushCache(true);
         FlushMetadata();
     }
 
@@ -2410,7 +2410,7 @@ int OGRDB2DataSource::HasExtensionsTable()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void OGRDB2DataSource::FlushCache()
+void OGRDB2DataSource::FlushCache(bool /* bAtClosing */)
 {
     DB2_DEBUG_ENTER("OGRDB2DataSource::FlushCache");
     FlushCacheWithErrCode();
@@ -3222,7 +3222,7 @@ CPLErr OGRDB2DataSource::IBuildOverviews(
     if( nOverviews == 0 )
     {
         for(int i=0; i<m_nOverviewCount; i++)
-            m_papoOverviewDS[i]->FlushCache();
+            m_papoOverviewDS[i]->FlushCache(false);
         oStatement.Appendf("DELETE FROM %s WHERE zoom_level < %d",
                            m_osRasterTable.c_str(),
                            m_nZoomLevel);
@@ -3254,7 +3254,7 @@ CPLErr OGRDB2DataSource::IBuildOverviews(
         return CE_Failure;
     }
 
-    FlushCache();
+    FlushCache(false);
     for(int i=0; i<nOverviews; i++)
     {
         if( panOverviewList[i] < 2 )

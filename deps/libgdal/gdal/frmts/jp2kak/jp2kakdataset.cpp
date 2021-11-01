@@ -53,7 +53,7 @@
 #include <cmath>
 #include <vector>
 
-CPL_CVSID("$Id: jp2kakdataset.cpp cc687e791c77528437ec447534467a4aa582a166 2021-10-02 13:11:47 +0200 Even Rouault $")
+CPL_CVSID("$Id: jp2kakdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // Before v7.5 Kakadu does not advertise its version well
 // After v7.5 Kakadu has KDU_{MAJOR,MINOR,PATCH}_VERSION defines so it is easier
@@ -660,7 +660,7 @@ JP2KAKDataset::JP2KAKDataset()
 JP2KAKDataset::~JP2KAKDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( poInput != nullptr )
     {

@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: gscdataset.cpp 95727499e1e118c5eeae7ca5bd5c4774ce32cb8a 2020-03-24 08:33:14 +0100 Kai Pastor $")
+CPL_CVSID("$Id: gscdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -78,7 +78,7 @@ GSCDataset::GSCDataset() :
 GSCDataset::~GSCDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if( fpImage != nullptr )
         CPL_IGNORE_RET_VAL(VSIFCloseL( fpImage ));
 }

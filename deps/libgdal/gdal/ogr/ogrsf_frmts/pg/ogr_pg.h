@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pg.h 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $
+ * $Id: ogr_pg.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL driver.
@@ -566,7 +566,7 @@ class OGRPGDataSource final: public OGRDataSource
     OGRLayer            *GetLayer( int ) override;
     OGRLayer            *GetLayerByName(const char * pszName) override;
 
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
     virtual OGRLayer    *ICreateLayer( const char *,
                                       OGRSpatialReference * = nullptr,

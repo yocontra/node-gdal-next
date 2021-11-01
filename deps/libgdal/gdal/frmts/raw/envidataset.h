@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: envidataset.h 6a95fed35a4c6eee4cdbeaa4253cbec2917f7645 2021-09-09 19:10:16 +0200 Even Rouault $
+ * $Id: envidataset.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  ENVI .hdr Driver
  * Purpose:  Implementation of ENVI .hdr labelled raw raster support.
@@ -111,7 +111,7 @@ class ENVIDataset final: public RawDataset
     ENVIDataset();
     ~ENVIDataset() override;
 
-    void    FlushCache() override;
+    void    FlushCache(bool bAtClosing) override;
     CPLErr  GetGeoTransform( double *padfTransform ) override;
     CPLErr  SetGeoTransform( double * ) override;
 

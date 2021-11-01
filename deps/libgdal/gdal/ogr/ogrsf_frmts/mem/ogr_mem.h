@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mem.h 92caa0d0f67bdff72b5f272d1558b1909bdbeaea 2021-03-31 14:38:01 +0200 Even Rouault $
+ * $Id: ogr_mem.h 8481fdde3a7154aefd628646a10a407353b8a3dc 2021-10-24 03:04:47 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the OGR Memory driver.
@@ -42,7 +42,7 @@ class OGRMemDataSource;
 
 class IOGRMemLayerFeatureIterator;
 
-class OGRMemLayer CPL_NON_FINAL: public OGRLayer
+class CPL_DLL OGRMemLayer CPL_NON_FINAL: public OGRLayer
 {
     CPL_DISALLOW_COPY_ASSIGN(OGRMemLayer)
 

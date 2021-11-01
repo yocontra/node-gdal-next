@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrunionlayer.h 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $
+ * $Id: ogrunionlayer.h 0a777cd8217f21db135ac880615c2dd9d3ff590d 2021-10-24 04:52:17 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRUnionLayer class
@@ -38,7 +38,7 @@
 /*                      OGRUnionLayerGeomFieldDefn                      */
 /************************************************************************/
 
-class OGRUnionLayerGeomFieldDefn final: public OGRGeomFieldDefn
+class CPL_DLL OGRUnionLayerGeomFieldDefn final: public OGRGeomFieldDefn
 {
     public:
 
@@ -64,7 +64,7 @@ typedef enum
     FIELD_SPECIFIED,
 } FieldUnionStrategy;
 
-class OGRUnionLayer final: public OGRLayer
+class CPL_DLL OGRUnionLayer final: public OGRLayer
 {
     CPL_DISALLOW_COPY_ASSIGN(OGRUnionLayer)
 

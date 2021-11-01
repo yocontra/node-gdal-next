@@ -32,7 +32,7 @@
 #include "ogr_srs_api.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: loslasdataset.cpp 86fc87cb5dbe16f6a72624564de23da35426ed67 2019-12-29 00:41:16 +0100 Even Rouault $")
+CPL_CVSID("$Id: loslasdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /**
 
@@ -121,7 +121,7 @@ LOSLASDataset::LOSLASDataset() : fpImage(nullptr), nRecordLength(0)
 LOSLASDataset::~LOSLASDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( fpImage != nullptr )
         CPL_IGNORE_RET_VAL(VSIFCloseL( fpImage ));

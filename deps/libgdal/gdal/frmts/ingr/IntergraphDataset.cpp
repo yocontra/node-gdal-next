@@ -40,7 +40,7 @@
 #include "IntergraphBand.h"
 #include "IngrTypes.h"
 
-CPL_CVSID("$Id: IntergraphDataset.cpp 452b07d9aa72be1d260abacca8a95367d32abc48 2021-03-08 17:45:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: IntergraphDataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 //  ----------------------------------------------------------------------------
 //                                        IntergraphDataset::IntergraphDataset()
@@ -71,7 +71,7 @@ IntergraphDataset::IntergraphDataset() :
 
 IntergraphDataset::~IntergraphDataset()
 {
-    FlushCache();
+    FlushCache(true);
 
     CPLFree( pszFilename );
 
@@ -833,7 +833,7 @@ GDALDataset *IntergraphDataset::CreateCopy( const char *pszFilename,
     // Finalize
     // --------------------------------------------------------------------
 
-    poDstDS->FlushCache();
+    poDstDS->FlushCache(false);
 
     return poDstDS;
 }

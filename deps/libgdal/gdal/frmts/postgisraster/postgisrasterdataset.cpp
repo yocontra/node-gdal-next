@@ -7,7 +7,7 @@
  *
  * Author:       David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisrasterdataset.cpp bd5a022eadf5eb934283f26e430767ddc8d14f59 2021-05-09 23:31:15 +0200 Even Rouault $
+ * Last changes: $Id: postgisrasterdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -41,7 +41,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: postgisrasterdataset.cpp bd5a022eadf5eb934283f26e430767ddc8d14f59 2021-05-09 23:31:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: postgisrasterdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 #ifdef _WIN32
 #define rint(x) floor((x) + 0.5)
@@ -304,9 +304,9 @@ int PostGISRasterDataset::CloseDependentDatasets()
 /*                            FlushCache()                              */
 /************************************************************************/
 
-void PostGISRasterDataset::FlushCache()
+void PostGISRasterDataset::FlushCache(bool bAtClosing)
 {
-    VRTDataset::FlushCache();
+    VRTDataset::FlushCache(bAtClosing);
     oOutDBDatasetCache.clear();
 }
 

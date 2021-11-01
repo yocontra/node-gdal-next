@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrlayerpool.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogrlayerpool.h a359854ac0e46a42e814a11320308fa4428124ce 2021-10-24 04:24:03 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLayerPool and OGRProxiedLayer class
@@ -43,7 +43,7 @@ class OGRLayerPool;
 /*                      OGRAbstractProxiedLayer                         */
 /************************************************************************/
 
-class OGRAbstractProxiedLayer : public OGRLayer
+class CPL_DLL OGRAbstractProxiedLayer : public OGRLayer
 {
         CPL_DISALLOW_COPY_ASSIGN(OGRAbstractProxiedLayer)
 
@@ -66,7 +66,7 @@ class OGRAbstractProxiedLayer : public OGRLayer
 /*                             OGRLayerPool                             */
 /************************************************************************/
 
-class OGRLayerPool
+class CPL_DLL OGRLayerPool
 {
         CPL_DISALLOW_COPY_ASSIGN(OGRLayerPool)
 

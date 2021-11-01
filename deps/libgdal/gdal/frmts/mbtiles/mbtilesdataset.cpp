@@ -50,7 +50,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: mbtilesdataset.cpp ab70db66553f198773c52a33ddbffea53f4f4881 2021-08-28 12:36:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: mbtilesdataset.cpp aeef8c81dfb7017bb6fb9277e375277f555a2d9a 2021-10-18 19:47:15 +0200 Even Rouault $")
 
 static const char * const apszAllowedDrivers[] = {"JPEG", "PNG", nullptr};
 
@@ -202,7 +202,7 @@ class MBTilesDataset final: public GDALPamDataset, public GDALGPKGMBTilesLikePse
     protected:
         // Coming from GDALGPKGMBTilesLikePseudoDataset
 
-        virtual CPLErr                  IFlushCacheWithErrCode() override;
+        virtual CPLErr                  IFlushCacheWithErrCode(bool bAtClosing) override;
         virtual int                     IGetRasterCount() override { return nBands; }
         virtual GDALRasterBand*         IGetRasterBand(int nBand) override { return GetRasterBand(nBand); }
         virtual sqlite3                *IGetDB() override { return hDB; }
@@ -552,7 +552,7 @@ char* MBTilesDataset::FindKey(int iPixel, int iLine)
         json_object* poRow;
         char* pszRow = nullptr;
 
-        const auto nLines = json_object_array_length(poGrid);
+        const int nLines = static_cast<int>(json_object_array_length(poGrid));
         if (nLines == 0)
             goto end;
 
@@ -852,7 +852,7 @@ MBTilesDataset::~MBTilesDataset()
     // Need to explicitly clear it before close hDS
     m_apoLayers.clear();
 
-    FlushCache();
+    FlushCache(true);
 
     if (poMainDS == nullptr)
     {
@@ -950,17 +950,17 @@ bool MBTilesDataset::ICanIWriteBlock()
 }
 
 /************************************************************************/
-/*                         IFlushCacheWithErrCode()                            */
+/*                         IFlushCacheWithErrCode()                     */
 /************************************************************************/
 
-CPLErr MBTilesDataset::IFlushCacheWithErrCode()
+CPLErr MBTilesDataset::IFlushCacheWithErrCode(bool bAtClosing)
 
 {
     if( m_bInFlushCache )
         return CE_None;
     m_bInFlushCache = true;
     // Short circuit GDALPamDataset to avoid serialization to .aux.xml
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 
     CPLErr eErr = FlushTiles();
 
@@ -3446,7 +3446,7 @@ CPLErr MBTilesDataset::IBuildOverviews(
     if( nOverviews == 0 )
     {
         for(int i=0;i<m_nOverviewCount;i++)
-            m_papoOverviewDS[i]->FlushCache();
+            m_papoOverviewDS[i]->FlushCache(false);
         char* pszSQL = sqlite3_mprintf("DELETE FROM 'tiles' WHERE zoom_level < %d",
                                        m_nZoomLevel);
         char* pszErrMsg = nullptr;
@@ -3491,7 +3491,7 @@ CPLErr MBTilesDataset::IBuildOverviews(
         return CE_Failure;
     }
 
-    FlushCache();
+    FlushCache(false);
     for(int i=0;i<nOverviews;i++)
     {
         if( panOverviewList[i] < 2 )

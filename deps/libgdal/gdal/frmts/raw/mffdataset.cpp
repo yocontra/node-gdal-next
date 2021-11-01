@@ -37,7 +37,7 @@
 #include <cmath>
 #include <algorithm>
 
-CPL_CVSID("$Id: mffdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: mffdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 enum {
   MFFPRJ_NONE,
@@ -271,7 +271,7 @@ MFFDataset::MFFDataset() :
 MFFDataset::~MFFDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     CSLDestroy( papszHdrLines );
     if( pafpBandFiles != nullptr )
     {
@@ -1611,7 +1611,7 @@ MFFDataset::CreateCopy( const char * pszFilename,
     {
         RawRasterBand *poDstBand = reinterpret_cast<RawRasterBand *>(
             poDS->GetRasterBand( iBand+1 ) );
-        poDstBand->FlushCache();
+        poDstBand->FlushCache(false);
     }
 
     if( !pfnProgress( 1.0, nullptr, pProgressData ) )

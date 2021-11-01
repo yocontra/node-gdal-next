@@ -31,7 +31,7 @@
 #include "gdal_frmts.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: doq2dataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: doq2dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static const char UTM_FORMAT[] =
     "PROJCS[\"%s / UTM zone %dN\",GEOGCS[%s,PRIMEM[\"Greenwich\",0],"
@@ -106,7 +106,7 @@ DOQ2Dataset::DOQ2Dataset() :
 DOQ2Dataset::~DOQ2Dataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     CPLFree( pszProjection );
     if( fpImage != nullptr )

@@ -1,6 +1,6 @@
---- libgdal/gdal/gcore/gdalexif.cpp.orig	2019-05-05 05:47:58.000000000 -0400
-+++ libgdal/gdal/gcore/gdalexif.cpp	2019-06-18 15:19:30.000000000 -0400
-@@ -457,6 +457,7 @@
+--- libgdal/gdal/gcore/gdalexif.cpp.orig	2021-11-01 16:45:12.000000000 +0100
++++ libgdal/gdal/gcore/gdalexif.cpp	2021-11-01 19:08:52.113993657 +0100
+@@ -458,6 +458,7 @@
  /*                                                                      */
  /*      Extract all entry from a IFD                                    */
  /************************************************************************/
@@ -8,11 +8,11 @@
  CPLErr EXIFExtractMetadata(char**& papszMetadata,
                             void *fpInL, int nOffset,
                             int bSwabflag, int nTIFFHEADER,
-@@ -756,6 +757,7 @@
-
+@@ -762,6 +763,7 @@
+ 
      return CE_None;
  }
 +#pragma optimize("", on)
-
+ 
  /************************************************************************/
  /*                        WriteLEUInt16()                               */

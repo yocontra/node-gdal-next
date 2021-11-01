@@ -166,7 +166,7 @@ bool COGGetWarpingCharacteristics(GDALDataset* poSrcDS,
 
         // "Normalize" SRS as AUTH:CODE
         OGRSpatialReference oTargetSRS;
-        oTargetSRS.SetFromUserInput(osTargetSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
+        oTargetSRS.SetFromUserInput(osTargetSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get());
         const char* pszAuthCode = oTargetSRS.GetAuthorityCode(nullptr);
         const char* pszAuthName = oTargetSRS.GetAuthorityName(nullptr);
         if( pszAuthName && pszAuthCode )
@@ -182,7 +182,7 @@ bool COGGetWarpingCharacteristics(GDALDataset* poSrcDS,
     void* hTransformArg = nullptr;
 
     OGRSpatialReference oTargetSRS;
-    oTargetSRS.SetFromUserInput(osTargetSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
+    oTargetSRS.SetFromUserInput(osTargetSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get());
     const char* pszAuthCode = oTargetSRS.GetAuthorityCode(nullptr);
     const int nEPSGCode = pszAuthCode ? atoi(pszAuthCode) : 0;
 
@@ -1090,7 +1090,7 @@ GDALDataset* GDALCOGCreator::Create(const char * pszFilename,
     GDALDestroyScaledProgress(pScaledProgress);
 
     if( poRet )
-        poRet->FlushCache();
+        poRet->FlushCache(false);
 
     CPLDebug("COG", "Generating final product: end");
     return poRet;

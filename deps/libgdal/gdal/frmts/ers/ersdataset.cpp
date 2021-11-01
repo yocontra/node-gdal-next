@@ -36,7 +36,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: ersdataset.cpp d921cfe761189c167173b7f41175ceb573e098ec 2021-08-11 14:20:19 +0200 Even Rouault $")
+CPL_CVSID("$Id: ersdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -89,7 +89,7 @@ class ERSDataset final: public RawDataset
     ERSDataset();
     ~ERSDataset() override;
 
-    void FlushCache(void) override;
+    void FlushCache(bool bAtClosing) override;
     CPLErr GetGeoTransform( double * padfTransform ) override;
     CPLErr SetGeoTransform( double *padfTransform ) override;
     const char *_GetProjectionRef(void) override;
@@ -160,7 +160,7 @@ ERSDataset::ERSDataset() :
 ERSDataset::~ERSDataset()
 
 {
-    ERSDataset::FlushCache();
+    ERSDataset::FlushCache(true);
 
     if( fpImage != nullptr )
     {
@@ -212,7 +212,7 @@ int ERSDataset::CloseDependentDatasets()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void ERSDataset::FlushCache()
+void ERSDataset::FlushCache(bool bAtClosing)
 
 {
     if( bHDRDirty )
@@ -233,7 +233,7 @@ void ERSDataset::FlushCache()
         }
     }
 
-    RawDataset::FlushCache();
+    RawDataset::FlushCache(bAtClosing);
 }
 
 /************************************************************************/

@@ -34,7 +34,7 @@
 #include "commonutils.h"
 #include <map>
 #include <list>
-CPL_CVSID("$Id: ogrdissolve.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdissolve.cpp 23ec9277c8238a42d82701ef2512270b2d0a86af 2021-10-19 08:38:45 +1000 Nyall Dawson $")
 
 static void Usage();
 
@@ -528,8 +528,6 @@ StringGeometryMap* CollectGeometries(   OGRLayer* poSrcLayer,
 
     StringGeometryMMap poGeometriesMap;
 
-    OGRFeature  *poFeature;
-
     poSrcLayer->ResetReading();
 
     int iField;
@@ -538,13 +536,8 @@ StringGeometryMap* CollectGeometries(   OGRLayer* poSrcLayer,
 /*      include values for which the selected fields is NULL.           */
 /* -------------------------------------------------------------------- */
 
-    while( true )
+    for( auto& poFeature: poSrcLayer )
     {
-
-        poFeature = poSrcLayer->GetNextFeature();
-
-        if( poFeature == NULL )
-            break;
         CPLString poKey("");
 
         for( iField=0; papszFields[iField] != NULL; iField++) {

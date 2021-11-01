@@ -39,7 +39,7 @@
 
 #include <limits.h>
 
-CPL_CVSID("$Id: keaband.cpp fab3246500a8fd0a11ed1f4ffe47c21dec1b8a2b 2020-09-13 16:32:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: keaband.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // constructor
 KEARasterBand::KEARasterBand( KEADataset *pDataset, int nSrcBand, GDALAccess eAccessIn, kealib::KEAImageIO *pImageIO, LockedRefCount *pRefCount ):
@@ -120,7 +120,7 @@ KEARasterBand::~KEARasterBand()
     }
 
     // according to the docs, this is required
-    this->FlushCache();
+    this->FlushCache(true);
 
     // decrement the recount and delete if needed
     if( m_pRefCount->DecRef() )
@@ -624,7 +624,7 @@ CPLErr KEARasterBand::GetDefaultHistogram( double *pdfMin, double *pdfMax,
 {
     if( bForce )
     {
-        return GDALPamRasterBand::GetDefaultHistogram(pdfMin, pdfMax, pnBuckets, 
+        return GDALPamRasterBand::GetDefaultHistogram(pdfMin, pdfMax, pnBuckets,
                         ppanHistogram, bForce, fn, pProgressData);
     }
     else
@@ -755,7 +755,7 @@ CPLErr KEARasterBand::SetDefaultRAT(const GDALRasterAttributeTable *poRAT)
         KEARasterAttributeTable *pKEATable = (KEARasterAttributeTable*)this->GetDefaultRAT();
         if( pKEATable == nullptr )
             return CE_Failure;
-            
+
         int numRows = poRAT->GetRowCount();
         pKEATable->SetRowCount(numRows);
 
@@ -1265,7 +1265,7 @@ kealib::KEALayerType KEARasterBand::getLayerType() const
 {
     return m_pImageIO->getImageBandLayerType(nBand);
 }
-void KEARasterBand::setLayerType(kealib::KEALayerType eLayerType) 
+void KEARasterBand::setLayerType(kealib::KEALayerType eLayerType)
 {
     m_pImageIO->setImageBandLayerType(nBand, eLayerType);
 }

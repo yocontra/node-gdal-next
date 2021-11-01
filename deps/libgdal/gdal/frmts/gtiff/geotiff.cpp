@@ -97,7 +97,7 @@
 #include "xtiffio.h"
 #include "quant_table_md5sum.h"
 
-CPL_CVSID("$Id: geotiff.cpp 4752b79f749c00c1048c78e59e1c66b842269726 2021-10-05 14:05:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: geotiff.cpp b15655226a04fc6bfa5a5aaeb2cb4a8d89c44d82 2021-10-20 23:53:37 +0200 Even Rouault $")
 
 static bool bGlobalInExternalOvr = false;
 
@@ -460,7 +460,7 @@ private:
 
     void        WriteGeoTIFFInfo();
     bool        SetDirectory();
-    void        ReloadDirectory();
+    void        ReloadDirectory(bool bReopenHandle = false);
 
     int         GetJPEGOverviewCount();
 
@@ -553,7 +553,8 @@ private:
 
     void        IdentifyAuthorizedGeoreferencingSources();
 
-    void        FlushCacheInternal( bool bFlushDirectory );
+    void        FlushCacheInternal( bool bAtClosing,
+                                    bool bFlushDirectory );
     bool        HasOptimizedReadMultiRange();
 
     bool        AssociateExternalMask();
@@ -614,7 +615,7 @@ private:
                                     int bStrict, char ** papszOptions,
                                     GDALProgressFunc pfnProgress,
                                     void * pProgressData );
-    virtual void    FlushCache() override;
+    virtual void    FlushCache(bool bAtClosing) override;
 
     virtual char  **GetMetadataDomainList() override;
     virtual CPLErr  SetMetadata( char **, const char * = "" ) override;
@@ -991,7 +992,7 @@ CPLErr GTiffJPEGOverviewBand::IReadBlock( int nBlockXOff, int nBlockYOff,
             // Trick: we invalidate the JPEG dataset to force a reload
             // of the new content.
             CPLErrorReset();
-            m_poGDS->m_poJPEGDS->FlushCache();
+            m_poGDS->m_poJPEGDS->FlushCache(false);
             if( CPLGetLastErrorNo() != 0 )
             {
                 m_poGDS->m_poJPEGDS.reset();
@@ -1573,7 +1574,7 @@ int GTiffRasterBand::DirectIO( GDALRWFlag eRWFlag,
     // Make sure that TIFFTAG_STRIPOFFSETS is up-to-date.
     if( m_poGDS->GetAccess() == GA_Update )
     {
-        m_poGDS->FlushCache();
+        m_poGDS->FlushCache(false);
         VSI_TIFFFlushBufferedWrite( TIFFClientdata( m_poGDS->m_hTIFF ) );
     }
 
@@ -1961,7 +1962,7 @@ CPLVirtualMem* GTiffRasterBand::GetVirtualMemAutoInternal( GDALRWFlag eRWFlag,
     // Make sure that TIFFTAG_STRIPOFFSETS is up-to-date.
     if( m_poGDS->GetAccess() == GA_Update )
     {
-        m_poGDS->FlushCache();
+        m_poGDS->FlushCache(false);
         VSI_TIFFFlushBufferedWrite( TIFFClientdata( m_poGDS->m_hTIFF ) );
     }
 
@@ -3819,7 +3820,7 @@ int GTiffDataset::DirectIO( GDALRWFlag eRWFlag,
     // Make sure that TIFFTAG_STRIPOFFSETS is up-to-date.
     if( GetAccess() == GA_Update )
     {
-        FlushCache();
+        FlushCache(false);
         VSI_TIFFFlushBufferedWrite( TIFFClientdata( m_hTIFF ) );
     }
 
@@ -4629,7 +4630,7 @@ int GTiffRasterBand::IGetDataCoverageStatus( int nXOff, int nYOff,
                                              double* pdfDataPct)
 {
     if( eAccess == GA_Update )
-        m_poGDS->FlushCache();
+        m_poGDS->FlushCache(false);
 
     const int iXBlockStart = nXOff / nBlockXSize;
     const int iXBlockEnd = (nXOff + nXSize - 1) / nBlockXSize;
@@ -7800,7 +7801,8 @@ int GTiffDataset::Finalize()
 /* -------------------------------------------------------------------- */
 /*  Ensure any blocks write cached by GDAL gets pushed through libtiff. */
 /* -------------------------------------------------------------------- */
-        FlushCacheInternal( false /* do not call FlushDirectory */ );
+        FlushCacheInternal( true, /* at closing */
+                            false /* do not call FlushDirectory */ );
 
         FillEmptyTiles();
         m_bFillEmptyTilesAtClosing = false;
@@ -7810,7 +7812,7 @@ int GTiffDataset::Finalize()
 /*      Force a complete flush, including either rewriting(moving)      */
 /*      of writing in place the current directory.                      */
 /* -------------------------------------------------------------------- */
-    FlushCacheInternal( true );
+    FlushCacheInternal( true /* at closing */, true );
 
     // Destroy compression queue
     if( m_poCompressQueue )
@@ -7838,7 +7840,7 @@ int GTiffDataset::Finalize()
     {
         PushMetadataToPam();
         m_bMetadataChanged = false;
-        GDALPamDataset::FlushCache();
+        GDALPamDataset::FlushCache(false);
     }
 
 /* -------------------------------------------------------------------- */
@@ -9748,18 +9750,19 @@ bool GTiffDataset::IsBlockAvailable( int nBlockId,
 /*      cache if need be.                                               */
 /************************************************************************/
 
-void GTiffDataset::FlushCache()
+void GTiffDataset::FlushCache(bool bAtClosing)
 
 {
-    FlushCacheInternal( true );
+    FlushCacheInternal( bAtClosing, true );
 }
 
-void GTiffDataset::FlushCacheInternal( bool bFlushDirectory )
+void GTiffDataset::FlushCacheInternal( bool bAtClosing,
+                                       bool bFlushDirectory )
 {
     if( m_bIsFinalized )
         return;
 
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(bAtClosing);
 
     if( m_bLoadedBlockDirty && m_nLoadedBlock != -1 )
         FlushBlockBuf();
@@ -9796,6 +9799,39 @@ void GTiffDataset::FlushCacheInternal( bool bFlushDirectory )
 void GTiffDataset::FlushDirectory()
 
 {
+    const auto ReloadAllOtherDirectories = [this]()
+    {
+        const auto poBaseDS = m_poBaseDS ? m_poBaseDS : this;
+        if( poBaseDS->m_papoOverviewDS )
+        {
+            for( int i = 0; i < poBaseDS->m_nOverviewCount; ++i )
+            {
+                if( poBaseDS->m_papoOverviewDS[i]->m_bCrystalized &&
+                    poBaseDS->m_papoOverviewDS[i] != this )
+                {
+                    poBaseDS->m_papoOverviewDS[i]->ReloadDirectory(true);
+                }
+
+                if( poBaseDS->m_papoOverviewDS[i]->m_poMaskDS &&
+                    poBaseDS->m_papoOverviewDS[i]->m_poMaskDS != this &&
+                    poBaseDS->m_papoOverviewDS[i]->m_poMaskDS->m_bCrystalized )
+                {
+                    poBaseDS->m_papoOverviewDS[i]->m_poMaskDS->ReloadDirectory(true);
+                }
+            }
+        }
+        if( poBaseDS->m_poMaskDS &&
+            poBaseDS->m_poMaskDS != this &&
+            poBaseDS->m_poMaskDS->m_bCrystalized )
+        {
+            poBaseDS->m_poMaskDS->ReloadDirectory(true);
+        }
+        if( poBaseDS->m_bCrystalized && poBaseDS != this )
+        {
+            poBaseDS->ReloadDirectory(true);
+        }
+    };
+
     if( GetAccess() == GA_Update )
     {
         if( m_bMetadataChanged )
@@ -9860,6 +9896,8 @@ void GTiffDataset::FlushDirectory()
 
                 TIFFSetSubDirectory( m_hTIFF, m_nDirOffset );
 
+                ReloadAllOtherDirectories();
+
                 if( m_bLayoutIFDSBeforeData &&
                     m_bBlockOrderRowMajor &&
                     m_bLeaderSizeAsUInt4 &&
@@ -9874,6 +9912,7 @@ void GTiffDataset::FlushDirectory()
                     m_bWriteKnownIncompatibleEdition = true;
                 }
             }
+
             m_bNeedsRewrite = false;
         }
     }
@@ -9894,6 +9933,7 @@ void GTiffDataset::FlushDirectory()
         if( m_nDirOffset != TIFFCurrentDirOffset( m_hTIFF ) )
         {
             m_nDirOffset = nNewDirOffset;
+            ReloadAllOtherDirectories();
             CPLDebug( "GTiff",
                       "directory moved during flush in FlushDirectory()" );
         }
@@ -10283,9 +10323,33 @@ CPLErr GTiffDataset::CreateOverviewsFromSrcOverviews(GDALDataset* poSrcDS,
 /*                           ReloadDirectory()                          */
 /************************************************************************/
 
-void GTiffDataset::ReloadDirectory()
+void GTiffDataset::ReloadDirectory(bool bReopenHandle)
 {
-    TIFFSetSubDirectory( m_hTIFF, 0 );
+    bool bNeedSetInvalidDir = true;
+    if( bReopenHandle )
+    {
+        // When issuing a TIFFRewriteDirectory() or when a TIFFFlush() has
+        // caused a move of the directory, we would need to invalidate the
+        // tif_lastdiroff member, but it is not possible to do so without
+        // re-opening the TIFF handle.
+        auto hTIFFNew = VSI_TIFFReOpen(m_hTIFF);
+        if( hTIFFNew != nullptr )
+        {
+            m_hTIFF = hTIFFNew;
+            bNeedSetInvalidDir = false; // we could do it, but not needed
+        }
+        else
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Cannot re-open TIFF handle for file %s. "
+                     "Directory chaining may be corrupted !",
+                     m_pszFilename);
+        }
+    }
+    if( bNeedSetInvalidDir )
+    {
+        TIFFSetSubDirectory( m_hTIFF, 0 );
+    }
     CPL_IGNORE_RET_VAL( SetDirectory() );
 }
 
@@ -17108,7 +17172,7 @@ CPLErr GTiffDataset::CopyImageryAndMask(GTiffDataset* poDstDS,
             }
         }
     }
-    poDstDS->FlushCache(); // mostly to wait for thread completion
+    poDstDS->FlushCache(false); // mostly to wait for thread completion
     VSIFree(pBlockBuffer);
 
     return eErr;
@@ -18438,7 +18502,7 @@ GTiffDataset::CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
                     dfCurPixels = dfNextCurPixels;
                     GDALDestroyScaledProgress(pScaledData);
 
-                    poDstDS->FlushCache();
+                    poDstDS->FlushCache(false);
 
                     // Copy mask of the overview.
                     if( eErr == CE_None &&
@@ -18461,7 +18525,7 @@ GTiffDataset::CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
                                 GDALScaledProgress, pScaledData );
                         dfCurPixels = dfNextCurPixels;
                         GDALDestroyScaledProgress(pScaledData);
-                        poDstDS->m_poMaskDS->FlushCache();
+                        poDstDS->m_poMaskDS->FlushCache(false);
                     }
                 }
 
@@ -19604,7 +19668,7 @@ bool GTiffDataset::GetRawBinaryLayout(GDALDataset::RawBinaryLayout& sLayout)
 {
     if( eAccess == GA_Update )
     {
-        FlushCache();
+        FlushCache(false);
         Crystalize();
     }
 

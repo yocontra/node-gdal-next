@@ -43,7 +43,7 @@
 #include <geo_normalize.h>
 #include <geovalues.h>
 
-CPL_CVSID("$Id: mrsiddataset.cpp 35de9af4ed9fe83e95ce727f2d951b77f475e7cd 2021-08-12 22:04:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: mrsiddataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 CPL_C_START
 double GTIFAngleToDD( double dfAngle, int nUOMAngle );
@@ -749,7 +749,7 @@ MrSIDDataset::MrSIDDataset(int bIsJPEG2000) :
 
 MrSIDDataset::~MrSIDDataset()
 {
-    MrSIDDataset::FlushCache();
+    MrSIDDataset::FlushCache(true);
 
 #ifdef MRSID_ESDK
     if ( poImageWriter )
@@ -3146,10 +3146,10 @@ LT_STATUS MrSIDDummyImageReader::decodeStrip(LTISceneBuffer& stripData,
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void MrSIDDataset::FlushCache()
+void MrSIDDataset::FlushCache(bool bAtClosing)
 
 {
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 }
 
 /************************************************************************/

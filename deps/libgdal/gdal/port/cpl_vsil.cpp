@@ -55,7 +55,7 @@
 #include "cpl_vsi_virtual.h"
 
 
-CPL_CVSID("$Id: cpl_vsil.cpp b0c2cc25f0802273e1c16958f04d0f59e1986a90 2021-08-30 14:36:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil.cpp 5d5a9396da0e1c66349b4fdbe9d01a6a719eb1e9 2021-10-26 11:22:02 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                             VSIReadDir()                             */
@@ -844,7 +844,7 @@ char** VSIGetFileMetadata( const char * pszFilename, const char* pszDomain,
  * <li>HEADERS: specific to /vsis3/ and /vsigs/: to set HTTP headers, such as
  * "Content-Type", or other file system specific header.
  * For /vsigs/, this also includes: x-goog-meta-{key}={value}. Note that you
- * should specify all metadata to be set, as existing metadata will be overriden.
+ * should specify all metadata to be set, as existing metadata will be overridden.
  * </li>
  * <li>TAGS: Content of papszMetadata should be KEY=VALUE pairs.
  *    <ul>

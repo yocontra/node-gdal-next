@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: gnm.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM general public declarations.
@@ -210,7 +210,7 @@ public:
                                    char **papszOptions = nullptr ) override;
 
     virtual int CloseDependentDatasets() override;
-    virtual void FlushCache(void) override;
+    virtual void FlushCache(bool bAtClosing) override;
 
     // GNMNetwork Interface
 

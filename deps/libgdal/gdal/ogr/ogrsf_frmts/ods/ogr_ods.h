@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_ods.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogr_ods.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  ODS Translator
  * Purpose:  Definition of classes for OGR OpenOfficeSpreadsheet .ods driver.
@@ -214,7 +214,7 @@ class OGRODSDataSource final: public GDALDataset
                                 char ** papszOptions ) override;
     virtual OGRErr      DeleteLayer(int iLayer) override;
 
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
     void startElementCbk(const char *pszName, const char **ppszAttr);
     void endElementCbk(const char *pszName);

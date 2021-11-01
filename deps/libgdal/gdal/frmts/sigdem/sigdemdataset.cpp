@@ -29,7 +29,7 @@
 #include "sigdemdataset.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: sigdemdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: sigdemdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 #ifdef CPL_IS_LSB
 #define SWAP_SIGDEM_HEADER(abyHeader) { \
@@ -148,7 +148,7 @@ SIGDEMDataset::SIGDEMDataset(const SIGDEMHeader& sHeaderIn) :
 }
 
 SIGDEMDataset::~SIGDEMDataset() {
-    FlushCache();
+    FlushCache(true);
 
     if (fpImage != nullptr) {
         if (VSIFCloseL(fpImage) != 0) {
@@ -578,6 +578,6 @@ CPLErr SIGDEMRasterBand::IWriteBlock(
 }
 
 SIGDEMRasterBand::~SIGDEMRasterBand() {
-    SIGDEMRasterBand::FlushCache();
+    SIGDEMRasterBand::FlushCache(true);
     VSIFree(pBlockBuffer);
 }

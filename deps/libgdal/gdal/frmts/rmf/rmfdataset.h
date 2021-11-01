@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rmfdataset.h 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $
+ * $Id: rmfdataset.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  Raster Matrix Format
  * Purpose:  Private class declarations for the RMF classes used to read/write
@@ -279,7 +279,7 @@ private:
     static GDALDataset  *Create( const char *, int, int, int,
                                  GDALDataType, char **,
                                  RMFDataset* poParentDS, double dfOvFactor );
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
     virtual CPLErr      GetGeoTransform( double * padfTransform ) override;
     virtual CPLErr      SetGeoTransform( double * ) override;

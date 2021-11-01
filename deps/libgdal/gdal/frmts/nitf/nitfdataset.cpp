@@ -61,7 +61,7 @@
 #include "ogr_core.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: nitfdataset.cpp 3cff1e81746abaf4f030b46c64242f0e6818e631 2021-08-19 10:20:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: nitfdataset.cpp 6833747591ce456fb5c056f450676629e1790d77 2021-10-17 18:49:56 +0200 Jürgen Fischer $")
 
 static bool NITFPatchImageLength( const char *pszFilename,
                                   int nIMIndex,
@@ -152,7 +152,7 @@ NITFDataset::~NITFDataset()
 
 int NITFDataset::CloseDependentDatasets()
 {
-    NITFDataset::FlushCache();
+    NITFDataset::FlushCache(true);
 
     int bHasDroppedRef = GDALPamDataset::CloseDependentDatasets();
 
@@ -256,7 +256,7 @@ int NITFDataset::CloseDependentDatasets()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void NITFDataset::FlushCache()
+void NITFDataset::FlushCache(bool bAtClosing)
 
 {
     // If the JPEG/JP2K dataset has dirty pam info, then we should consider
@@ -272,9 +272,9 @@ void NITFDataset::FlushCache()
         MarkPamDirty();
 
     if( poJ2KDataset != nullptr && bJP2Writing)
-        poJ2KDataset->FlushCache();
+        poJ2KDataset->FlushCache(bAtClosing);
 
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(bAtClosing);
 }
 
 #ifdef ESRI_BUILD

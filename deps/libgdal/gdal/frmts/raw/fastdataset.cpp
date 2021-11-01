@@ -32,7 +32,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: fastdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: fastdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // constexpr int ADM_STD_HEADER_SIZE = 4608;  // Format specification says it
 constexpr int ADM_HEADER_SIZE = 5000;  // Should be 4608, but some vendors
@@ -204,7 +204,7 @@ FASTDataset::FASTDataset() :
 FASTDataset::~FASTDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     CPLFree( pszDirname );
     CPLFree( pszProjection );

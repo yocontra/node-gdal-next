@@ -35,7 +35,7 @@
 #include "ogr_p.h"
 #include "cpl_vsi_error.h"
 
-CPL_CVSID("$Id: ogrlibkmldatasource.cpp bf254e6d344c4d2ed43058246b80742613b1c251 2021-08-12 15:31:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmldatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 using kmlbase::Attributes;
 using kmldom::ContainerPtr;
@@ -659,7 +659,7 @@ void OGRLIBKMLDataSource::WriteDir()
 
 ******************************************************************************/
 
-void OGRLIBKMLDataSource::FlushCache()
+void OGRLIBKMLDataSource::FlushCache(bool /* bAtClosing */)
 {
     if( !bUpdated )
         return;
@@ -692,7 +692,7 @@ void OGRLIBKMLDataSource::FlushCache()
 OGRLIBKMLDataSource::~OGRLIBKMLDataSource()
 {
     /***** sync the DS to disk *****/
-    OGRLIBKMLDataSource::FlushCache();
+    OGRLIBKMLDataSource::FlushCache(true);
 
     CPLFree( m_pszName );
 

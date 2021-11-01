@@ -54,7 +54,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: rawdataset.cpp f0c548a8672e140a8dc7fe8cceec71231772e17d 2021-05-31 13:13:20 +0200 Even Rouault $")
+CPL_CVSID("$Id: rawdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           RawRasterBand()                            */
@@ -304,7 +304,7 @@ RawRasterBand::~RawRasterBand()
 
     CSLDestroy(papszCategoryNames);
 
-    RawRasterBand::FlushCache();
+    RawRasterBand::FlushCache(true);
 
     if (bOwnsFP)
     {
@@ -360,10 +360,10 @@ void RawRasterBand::SetAccess(GDALAccess eAccessIn) { eAccess = eAccessIn; }
 /*      write block function as it is kind of expensive.                */
 /************************************************************************/
 
-CPLErr RawRasterBand::FlushCache()
+CPLErr RawRasterBand::FlushCache(bool bAtClosing)
 
 {
-    CPLErr eErr = GDALRasterBand::FlushCache();
+    CPLErr eErr = GDALRasterBand::FlushCache(bAtClosing);
     if( eErr != CE_None )
     {
         bNeedFileFlush = false;
@@ -1020,11 +1020,11 @@ CPLErr RawRasterBand::IRasterIO( GDALRWFlag eRWFlag,
                 cpl::down_cast<RawRasterBand *>(poDS->GetRasterBand(1));
             CPLAssert(poFirstBand);
             if( poFirstBand->bNeedFileFlush )
-                RawRasterBand::FlushCache();
+                RawRasterBand::FlushCache(false);
         }
     }
     if( bNeedFileFlush )
-        RawRasterBand::FlushCache();
+        RawRasterBand::FlushCache(false);
 
     // Read data.
     if ( eRWFlag == GF_Read )
@@ -1469,7 +1469,7 @@ CPLVirtualMem  *RawRasterBand::GetVirtualMemAuto( GDALRWFlag eRWFlag,
                                                  pnLineSpace, papszOptions);
     }
 
-    FlushCache();
+    FlushCache(false);
 
     CPLVirtualMem *pVMem = CPLVirtualMemFileMapNew(
         fpRawL, nImgOffset, nSize,

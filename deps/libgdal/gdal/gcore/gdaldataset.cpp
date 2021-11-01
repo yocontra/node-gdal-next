@@ -72,7 +72,7 @@
 #include "../sqlite/ogrsqliteexecutesql.h"
 #endif
 
-CPL_CVSID("$Id: gdaldataset.cpp 8ea07f0f9b7eedd58be89415f53578fafb3ee27e 2021-09-21 16:22:45 +0200 Andrea Giudiceandrea $")
+CPL_CVSID("$Id: gdaldataset.cpp 7fc1d9ac5540a1fd5c40ca7d38b63de2abfb77a6 2021-10-14 20:10:30 +0200 Even Rouault $")
 
 CPL_C_START
 GDALAsyncReader *
@@ -286,7 +286,19 @@ GDALDataset::~GDALDataset()
     }
 
     if( bSuppressOnClose )
-        VSIUnlink(GetDescription());
+    {
+        if( poDriver == nullptr ||
+            // Someone issuing Create("foo.tif") on a
+            // memory driver doesn't expect files with those names to be deleted
+            // on a file system...
+            // This is somewhat messy. Ideally there should be a way for the
+            // driver to overload the default behavior
+            (!EQUAL(poDriver->GetDescription(), "MEM") &&
+             !EQUAL(poDriver->GetDescription(), "Memory")) )
+        {
+            VSIUnlink(GetDescription());
+        }
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Remove dataset from the "open" dataset list.                    */
@@ -416,9 +428,11 @@ void GDALDataset::AddToDatasetOpenList()
  * by FlushCache() is written in the file.
  *
  * This method is the same as the C function GDALFlushCache().
+ *
+ * @param bAtClosing Whether this is called from a GDALDataset destructor
  */
 
-void GDALDataset::FlushCache()
+void GDALDataset::FlushCache(bool bAtClosing)
 
 {
     // This sometimes happens if a dataset is destroyed before completely
@@ -429,7 +443,7 @@ void GDALDataset::FlushCache()
         for( int i = 0; i < nBands; ++i )
         {
             if( papoBands[i] != nullptr )
-                papoBands[i]->FlushCache();
+                papoBands[i]->FlushCache(bAtClosing);
         }
     }
 
@@ -465,7 +479,7 @@ void CPL_STDCALL GDALFlushCache( GDALDatasetH hDS )
 {
     VALIDATE_POINTER0(hDS, "GDALFlushCache");
 
-    GDALDataset::FromHandle(hDS)->FlushCache();
+    GDALDataset::FromHandle(hDS)->FlushCache(false);
 }
 
 /************************************************************************/
@@ -480,13 +494,13 @@ void CPL_STDCALL GDALFlushCache( GDALDatasetH hDS )
 /************************************************************************/
 
 //! @cond Doxygen_Suppress
-void GDALDataset::BlockBasedFlushCache()
+void GDALDataset::BlockBasedFlushCache(bool bAtClosing)
 
 {
     GDALRasterBand *poBand1 = GetRasterBand(1);
-    if( poBand1 == nullptr )
+    if( poBand1 == nullptr || (bSuppressOnClose && bAtClosing) )
     {
-        GDALDataset::FlushCache();
+        GDALDataset::FlushCache(bAtClosing);
         return;
     }
 
@@ -505,7 +519,7 @@ void GDALDataset::BlockBasedFlushCache()
         poBand->GetBlockSize(&nThisBlockXSize, &nThisBlockYSize);
         if( nThisBlockXSize != nBlockXSize && nThisBlockYSize != nBlockYSize )
         {
-            GDALDataset::FlushCache();
+            GDALDataset::FlushCache(bAtClosing);
             return;
         }
     }

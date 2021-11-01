@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: vrtrawrasterband.cpp 0b332f1a2700726be41485d9802f777397d9fb29 2021-07-21 18:13:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtrawrasterband.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -82,7 +82,7 @@ VRTRawRasterBand::VRTRawRasterBand( GDALDataset *poDSIn, int nBandIn,
 VRTRawRasterBand::~VRTRawRasterBand()
 
 {
-    FlushCache();
+    FlushCache(true);
     ClearRawLink();
 }
 

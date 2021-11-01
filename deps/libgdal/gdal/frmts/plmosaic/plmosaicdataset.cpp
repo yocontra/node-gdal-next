@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: plmosaicdataset.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: plmosaicdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 #define SPHERICAL_RADIUS        6378137.0
 #define GM_ORIGIN  -20037508.340
@@ -130,7 +130,7 @@ class PLMosaicDataset final: public GDALPamDataset
                                GSpacing nBandSpace,
                                GDALRasterIOExtraArg* psExtraArg) override;
 
-    virtual void FlushCache(void) override;
+    virtual void FlushCache(bool bAtClosing) override;
 
     virtual const char *_GetProjectionRef() override;
     const OGRSpatialReference* GetSpatialRef() const override {
@@ -373,7 +373,7 @@ PLMosaicDataset::PLMosaicDataset() :
 PLMosaicDataset::~PLMosaicDataset()
 
 {
-    PLMosaicDataset::FlushCache();
+    PLMosaicDataset::FlushCache(true);
     CPLFree(pszWKT);
     for( auto& poDS: apoTMSDS )
         delete poDS;
@@ -412,7 +412,7 @@ void PLMosaicDataset::FlushDatasetsCache()
 /*                            FlushCache()                              */
 /************************************************************************/
 
-void PLMosaicDataset::FlushCache()
+void PLMosaicDataset::FlushCache(bool bAtClosing)
 {
     FlushDatasetsCache();
 
@@ -423,7 +423,7 @@ void PLMosaicDataset::FlushCache()
     poLastItemsInformation = nullptr;
     osLastRetGetLocationInfo.clear();
 
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 }
 
 /************************************************************************/
@@ -827,7 +827,7 @@ int PLMosaicDataset::OpenMosaic()
     }
 
     OGRSpatialReference oSRS;
-    oSRS.SetFromUserInput(pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
+    oSRS.SetFromUserInput(pszSRS, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get());
     oSRS.exportToWkt(&pszWKT);
 
     json_object* poQuadDownload = CPL_json_object_object_get(

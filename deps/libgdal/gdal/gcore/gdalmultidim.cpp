@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalmultidim.cpp 97bd8c71a010fea4465ee665f0e388b9799798af 2021-09-25 19:18:53 +0200 Even Rouault $
+ * $Id: gdalmultidim.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Name:     gdalmultidim.cpp
  * Project:  GDAL Core
@@ -6728,8 +6728,8 @@ lbl_next_depth:
         {
             flushCaches[0] = false;
             // When changing of 2D slice, flush GDAL 2D buffers
-            m_poParentDS->FlushCache();
-            m_poReprojectedDS->FlushCache();
+            m_poParentDS->FlushCache(false);
+            m_poReprojectedDS->FlushCache(false);
         }
 
         if( !GDALMDRasterIOFromBand(m_poReprojectedDS->GetRasterBand(1),

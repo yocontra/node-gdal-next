@@ -34,7 +34,7 @@
 #include "gdal_pam.h"
 #include "gifabstractdataset.h"
 
-CPL_CVSID("$Id: biggifdataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+CPL_CVSID("$Id: biggifdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -175,7 +175,7 @@ BIGGIFDataset::BIGGIFDataset() :
 BIGGIFDataset::~BIGGIFDataset()
 
 {
-    BIGGIFDataset::FlushCache();
+    BIGGIFDataset::FlushCache(true);
 
     BIGGIFDataset::CloseDependentDatasets();
 }

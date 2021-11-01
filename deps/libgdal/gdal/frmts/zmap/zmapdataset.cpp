@@ -33,7 +33,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: zmapdataset.cpp c41dfacd4808be3f4b3f659c50a73b902e6b0bba 2021-07-13 15:10:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: zmapdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -207,7 +207,7 @@ ZMapDataset::ZMapDataset() :
 ZMapDataset::~ZMapDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if (fp)
         VSIFCloseL(fp);
 }

@@ -38,7 +38,7 @@
 
 #include "../mem/memdataset.h"
 
-CPL_CVSID("$Id: ecwdataset.cpp 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: ecwdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 #undef NOISY_DEBUG
 
@@ -206,7 +206,7 @@ ECWRasterBand::ECWRasterBand( ECWDataset *poDSIn, int nBandIn, int iOverviewIn,
 
 ECWRasterBand::~ECWRasterBand()
 {
-    GDALRasterBand::FlushCache();
+    GDALRasterBand::FlushCache(true);
 
     while( !apoOverviews.empty() )
     {
@@ -1003,7 +1003,7 @@ ECWDataset::ECWDataset(int bIsJPEG2000In)
 ECWDataset::~ECWDataset()
 
 {
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(true);
     CleanupWindow();
 
 #if ECWSDK_VERSION>=50

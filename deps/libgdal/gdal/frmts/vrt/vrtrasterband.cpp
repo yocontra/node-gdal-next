@@ -50,7 +50,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: vrtrasterband.cpp da8f217a7c42b857b7dbcc2b5da4421db92231d5 2021-08-27 22:20:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtrasterband.cpp 831355f692b610e0562802d39c65c015e68467d5 2021-10-28 11:30:49 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -657,11 +657,16 @@ CPLXMLNode *VRTRasterBand::SerializeToXML( const char *pszVRTPath )
     if( nBand > 0 )
         CPLSetXMLValue( psTree, "#band", CPLSPrintf( "%d", GetBand() ) );
 
-    if( nBlockXSize != 128 && nBlockXSize != nRasterXSize )
-        CPLSetXMLValue( psTree, "#blockXSize", CPLSPrintf( "%d", nBlockXSize ) );
+    // Do not serialize block size of VRTWarpedRasterBand since it is already
+    // serialized at the dataset level.
+    if( dynamic_cast<VRTWarpedRasterBand*>(this) == nullptr )
+    {
+        if( nBlockXSize != 128 && nBlockXSize != nRasterXSize )
+            CPLSetXMLValue( psTree, "#blockXSize", CPLSPrintf( "%d", nBlockXSize ) );
 
-    if( nBlockYSize != 128 && nBlockYSize != nRasterYSize )
-        CPLSetXMLValue( psTree, "#blockYSize", CPLSPrintf( "%d", nBlockYSize ) );
+        if( nBlockYSize != 128 && nBlockYSize != nRasterYSize )
+            CPLSetXMLValue( psTree, "#blockYSize", CPLSPrintf( "%d", nBlockYSize ) );
+    }
 
     CPLXMLNode *psMD = oMDMD.Serialize();
     if( psMD != nullptr )

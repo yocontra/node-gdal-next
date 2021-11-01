@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rawdataset.h 11d5fd1088af3c1c129433e30914108ebbc82750 2021-04-06 21:39:37 +0200 Even Rouault $
+ * $Id: rawdataset.h 7cd1a184ecc7f36317cb9ef48fa98dc6aa309a3a 2021-10-24 03:31:15 +0200 Even Rouault $
  *
  * Project:  Raw Translator
  * Purpose:  Implementation of RawDataset class.  Intended to be subclassed
@@ -183,7 +183,7 @@ public:
     char **GetCategoryNames() override;
     CPLErr SetCategoryNames( char ** ) override;
 
-    CPLErr FlushCache() override;
+    CPLErr FlushCache(bool bAtClosing) override;
 
     CPLVirtualMem *GetVirtualMemAuto( GDALRWFlag eRWFlag,
                                       int *pnPixelSpace,
@@ -219,7 +219,7 @@ public:
 
 #ifdef GDAL_COMPILATION
 
-bool RAWDatasetCheckMemoryUsage(int nXSize, int nYSize, int nBands,
+bool CPL_DLL RAWDatasetCheckMemoryUsage(int nXSize, int nYSize, int nBands,
                                 int nDTSize,
                                 int nPixelOffset,
                                 int nLineOffset,

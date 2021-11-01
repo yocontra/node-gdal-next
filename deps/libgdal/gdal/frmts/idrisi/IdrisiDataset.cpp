@@ -47,7 +47,7 @@
 
 #include <cmath>
 
-CPL_CVSID( "$Id: IdrisiDataset.cpp 12469d3f0dcb60bb54ca1d4cee2fe9f5a7cacd90 2021-04-28 13:31:05 -0400 Hongmei-Coco $" )
+CPL_CVSID( "$Id: IdrisiDataset.cpp e23953512d0c32be42dbf02e89b65310bd8381bb 2021-10-19 22:01:37 +0200 Even Rouault $" )
 
 #ifdef WIN32
 #  define PATHDELIM       '\\'
@@ -627,7 +627,7 @@ IdrisiDataset::IdrisiDataset() :
 
 IdrisiDataset::~IdrisiDataset()
 {
-    FlushCache();
+    FlushCache(true);
 
     if( papszRDC != nullptr && eAccess == GA_Update  )
     {
@@ -1314,7 +1314,7 @@ GDALDataset *IdrisiDataset::CreateCopy( const char *pszFilename,
     //      Finalize
     // --------------------------------------------------------------------
 
-    poDS->FlushCache();
+    poDS->FlushCache(false);
 
     return poDS;
 }
@@ -2980,8 +2980,6 @@ CPLErr IdrisiDataset::Wkt2GeoReference( const char *pszProjString,
     //  Check for State Plane
     // -----------------------------------------------------
 
-#ifndef GDAL_RST_PLUGIN
-
     if( EQUAL( pszProjName, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP ) ||
         EQUAL( pszProjName, SRS_PT_TRANSVERSE_MERCATOR ) )
     {
@@ -3055,8 +3053,6 @@ CPLErr IdrisiDataset::Wkt2GeoReference( const char *pszProjString,
             return CE_None;
         }
     }
-
-#endif // GDAL_RST_PLUGIN
 
     const char *pszProjectionOut = nullptr;
 
@@ -3179,7 +3175,7 @@ CPLErr IdrisiDataset::Wkt2GeoReference( const char *pszProjString,
         {
             dfStdP2 = -dfStdP1;
             dfScale = 1.0;
-        } 
+        }
         else
         {
             dfStdP2 = oSRS.GetProjParm( SRS_PP_STANDARD_PARALLEL_2, -0.1, nullptr );

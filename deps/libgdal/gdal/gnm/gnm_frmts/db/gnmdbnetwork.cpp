@@ -31,7 +31,7 @@
 #include "gnmdb.h"
 #include "gnm_priv.h"
 
-CPL_CVSID("$Id: gnmdbnetwork.cpp 4b92a13c594df8c488d24a2299c64a31bb14668b 2019-03-23 13:03:10 +0100 Even Rouault $")
+CPL_CVSID("$Id: gnmdbnetwork.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 GNMDatabaseNetwork::GNMDatabaseNetwork() : GNMGenericNetwork()
 {
@@ -40,7 +40,7 @@ GNMDatabaseNetwork::GNMDatabaseNetwork() : GNMGenericNetwork()
 
 GNMDatabaseNetwork::~GNMDatabaseNetwork()
 {
-    FlushCache();
+    FlushCache(true);
 
     GDALClose(m_poDS);
 }

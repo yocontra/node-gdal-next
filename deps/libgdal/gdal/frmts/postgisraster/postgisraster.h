@@ -7,7 +7,7 @@
  *
  * Author:   David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisraster.h 61bf267d6638f77cd3f434c06485f459cadf2fa2 2021-05-09 19:14:32 +0100 Jorge Gustavo Rocha $
+ * Last changes: $Id: postgisraster.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -310,7 +310,7 @@ private:
 
   protected:
     virtual int         CloseDependentDatasets() override;
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
 public:
     PostGISRasterDataset();

@@ -91,7 +91,7 @@
 #include "gdal_pam.h"
 #include "gta_headers.h"
 
-CPL_CVSID("$Id: gtadataset.cpp 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: gtadataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* Helper functions                                                     */
@@ -796,7 +796,7 @@ GTADataset::GTADataset()
 GTADataset::~GTADataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     VSIFree( pszGCPProjection );
     for( int i = 0; i < nGCPs; i++ )
     {

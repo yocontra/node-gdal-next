@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_xlsx.h 01a361c7662f881f73db6edcc8c739d79174049c 2021-04-23 21:22:42 +0200 Even Rouault $
+ * $Id: ogr_xlsx.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  XLSX Translator
  * Purpose:  Definition of classes for OGR OpenOfficeSpreadsheet .xlsx driver.
@@ -246,7 +246,7 @@ class OGRXLSXDataSource final: public GDALDataset
                                 char ** papszOptions ) override;
     virtual OGRErr      DeleteLayer(int iLayer) override;
 
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
     void                startElementCbk(const char *pszName, const char **ppszAttr);
     void                endElementCbk(const char *pszName);

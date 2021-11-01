@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: pcidskdataset2.cpp f90ebb2a2eb4bcecff7da733e777e0cb98594aa1 2021-09-17 15:12:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: pcidskdataset2.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 const PCIDSK::PCIDSKInterfaces *PCIDSK2GetInterfaces(void);
 
@@ -829,7 +829,7 @@ PCIDSK2Dataset::PCIDSK2Dataset() :
 #endif
 PCIDSK2Dataset::~PCIDSK2Dataset()
 {
-    PCIDSK2Dataset::FlushCache();
+    PCIDSK2Dataset::FlushCache(true);
 
     while( !apoLayers.empty() )
     {
@@ -1037,10 +1037,10 @@ void PCIDSK2Dataset::ProcessRPC()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void PCIDSK2Dataset::FlushCache()
+void PCIDSK2Dataset::FlushCache(bool bAtClosing)
 
 {
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(bAtClosing);
 
     if( poFile )
     {

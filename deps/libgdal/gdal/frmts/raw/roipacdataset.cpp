@@ -30,7 +30,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: roipacdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: roipacdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -65,7 +65,7 @@ class ROIPACDataset final: public RawDataset
                                 int nXSize, int nYSize, int nBands,
                                 GDALDataType eType, char **papszOptions );
 
-    void        FlushCache() override;
+    void        FlushCache(bool bAtClosing) override;
     CPLErr              GetGeoTransform( double *padfTransform ) override;
     CPLErr      SetGeoTransform( double *padfTransform ) override;
     const char *_GetProjectionRef( void ) override;
@@ -161,7 +161,7 @@ ROIPACDataset::ROIPACDataset() :
 
 ROIPACDataset::~ROIPACDataset()
 {
-    ROIPACDataset::FlushCache();
+    ROIPACDataset::FlushCache(true);
     if ( fpRsc != nullptr && VSIFCloseL( fpRsc ) != 0 )
     {
         CPLError( CE_Failure, CPLE_FileIO, "I/O error" );
@@ -708,9 +708,9 @@ GDALDataset *ROIPACDataset::Create( const char *pszFilename,
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void ROIPACDataset::FlushCache( void )
+void ROIPACDataset::FlushCache(bool bAtClosing)
 {
-    RawDataset::FlushCache();
+    RawDataset::FlushCache(bAtClosing);
 
     GDALRasterBand *band = (GetRasterCount() > 0) ? GetRasterBand(1) : nullptr;
 

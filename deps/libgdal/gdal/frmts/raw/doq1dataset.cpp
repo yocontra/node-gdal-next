@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: doq1dataset.cpp d110d871fd27bbaef9499c77fac17bbecf274292 2020-11-05 10:24:24 +0100 Even Rouault $")
+CPL_CVSID("$Id: doq1dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static const char UTM_FORMAT[] =
     "PROJCS[\"%s / UTM zone %dN\",GEOGCS[%s,PRIMEM[\"Greenwich\",0],"
@@ -156,7 +156,7 @@ DOQ1Dataset::DOQ1Dataset() :
 DOQ1Dataset::~DOQ1Dataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     CPLFree( pszProjection );
     if( fpImage != nullptr )

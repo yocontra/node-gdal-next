@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_pam.h 2986c5478b030cbf210890376e28d4ccdec15991 2021-08-06 16:59:15 +0200 Even Rouault $
+ * $Id: gdal_pam.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Declaration for Peristable Auxiliary Metadata classes.
@@ -159,7 +159,7 @@ class CPL_DLL GDALPamDataset : public GDALDataset
   public:
     ~GDALPamDataset() override;
 
-    void FlushCache(void) override;
+    void FlushCache(bool bAtClosing) override;
 
     const OGRSpatialReference* GetSpatialRef() const override;
     CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override;

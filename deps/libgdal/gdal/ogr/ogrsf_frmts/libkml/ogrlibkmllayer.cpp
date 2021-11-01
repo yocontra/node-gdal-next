@@ -40,7 +40,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrlibkmllayer.cpp 302fafdd3a779d0c6c2cc714481b38e964fb45a9 2020-09-29 21:26:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmllayer.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 using kmldom::CameraPtr;
 using kmldom::ChangePtr;
@@ -751,7 +751,7 @@ OGRErr OGRLIBKMLLayer::CreateField(
 
 OGRErr OGRLIBKMLLayer::SyncToDisk()
 {
-    m_poOgrDS->FlushCache();
+    m_poOgrDS->FlushCache(false);
     return OGRERR_NONE;
 }
 

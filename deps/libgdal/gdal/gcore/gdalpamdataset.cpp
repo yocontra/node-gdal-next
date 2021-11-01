@@ -47,7 +47,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gdalpamdataset.cpp 0704211e56751241c1728a7d2cd347772a19a085 2021-08-12 19:29:01 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalpamdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALPamDataset()                           */
@@ -165,10 +165,10 @@ GDALPamDataset::~GDALPamDataset()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void GDALPamDataset::FlushCache()
+void GDALPamDataset::FlushCache(bool bAtClosing)
 
 {
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
     if( nPamFlags & GPF_DIRTY )
         TrySaveXML();
 }

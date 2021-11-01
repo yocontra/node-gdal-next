@@ -30,7 +30,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: iscedataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: iscedataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static const char * const apszISCE2GDALDatatypes[] = {
     "BYTE:Byte",
@@ -90,7 +90,7 @@ class ISCEDataset final: public RawDataset
     ISCEDataset();
     ~ISCEDataset() override;
 
-    void FlushCache() override;
+    void FlushCache(bool bAtClosing) override;
     char **GetFileList() override;
 
     static int          Identify( GDALOpenInfo *poOpenInfo );
@@ -179,7 +179,7 @@ ISCEDataset::ISCEDataset() :
 
 ISCEDataset::~ISCEDataset( void )
 {
-    ISCEDataset::FlushCache();
+    ISCEDataset::FlushCache(true);
     if ( fpImage != nullptr )
     {
         if( VSIFCloseL( fpImage ) != 0 )
@@ -194,9 +194,9 @@ ISCEDataset::~ISCEDataset( void )
 /*                            FlushCache()                              */
 /************************************************************************/
 
-void ISCEDataset::FlushCache( void )
+void ISCEDataset::FlushCache(bool bAtClosing)
 {
-    RawDataset::FlushCache();
+    RawDataset::FlushCache(bAtClosing);
 
     GDALRasterBand *band = (GetRasterCount() > 0) ? GetRasterBand(1) : nullptr;
 

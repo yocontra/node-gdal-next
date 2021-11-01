@@ -49,7 +49,7 @@
 #include <utility>
 #include <set>
 
-CPL_CVSID("$Id: bagdataset.cpp 2986c5478b030cbf210890376e28d4ccdec15991 2021-08-06 16:59:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: bagdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 struct BAGRefinementGrid
 {
@@ -1895,7 +1895,7 @@ BAGDataset::~BAGDataset()
         }
     }
 
-    FlushCache();
+    FlushCache(true);
 
     m_apoOverviewDS.clear();
     if( !m_bIsChild )

@@ -44,7 +44,7 @@
 #include "netcdf.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gmtdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: gmtdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 extern CPLMutex *hNCMutex; /* shared with netcdf. See netcdfdataset.cpp */
 
@@ -203,7 +203,7 @@ GMTDataset::~GMTDataset()
 
 {
     CPLMutexHolderD(&hNCMutex);
-    FlushCache();
+    FlushCache(true);
     nc_close (cdfid);
 }
 

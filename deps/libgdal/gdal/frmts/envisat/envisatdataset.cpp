@@ -34,7 +34,7 @@
 #include "ogr_srs_api.h"
 #include "timedelta.hpp"
 
-CPL_CVSID("$Id: envisatdataset.cpp 930aad0b9faed99e277da3cd649d4bef0b13f3c8 2021-08-12 14:52:44 +0200 Even Rouault $")
+CPL_CVSID("$Id: envisatdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 CPL_C_START
 #include "EnvisatFile.h"
@@ -215,7 +215,7 @@ EnvisatDataset::EnvisatDataset() :
 EnvisatDataset::~EnvisatDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( hEnvisatFile != nullptr )
         EnvisatFile_Close( hEnvisatFile );

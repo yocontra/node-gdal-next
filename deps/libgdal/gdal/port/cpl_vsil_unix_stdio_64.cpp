@@ -88,7 +88,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_error.h"
 
-CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp 74f5f10eaf79400a00f8a7e30f1e6a629c5ab83f 2021-09-25 17:27:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp de72a2315d30725440fd660a49de2e0232992149 2021-10-29 19:25:07 +0200 Even Rouault $")
 
 #if defined(UNIX_STDIO_64)
 
@@ -1023,12 +1023,14 @@ begin:
                 osCurFile += '/';
             osCurFile += entry.pszName;
 
+#if !defined(__sun)
             if( psEntry->d_type == DT_REG )
                 entry.nMode = S_IFREG;
             else if( psEntry->d_type == DT_DIR )
                 entry.nMode = S_IFDIR;
             else if( psEntry->d_type == DT_LNK )
                 entry.nMode = S_IFLNK;
+#endif
 
             const auto StatFile = [&osCurFile, this]()
             {
@@ -1050,8 +1052,12 @@ begin:
                 if( STARTS_WITH(m_osFilterPrefix.c_str(), osName.c_str()) &&
                     m_osFilterPrefix[osName.size()] == '/' )
                 {
+#if !defined(__sun)
                     if( psEntry->d_type == DT_UNKNOWN )
+#endif
+                    {
                         StatFile();
+                    }
                     if( VSI_ISDIR(entry.nMode) )
                     {
                         goto begin;
@@ -1065,7 +1071,11 @@ begin:
                 continue;
             }
 
-            if( !m_bNameAndTypeOnly || psEntry->d_type == DT_UNKNOWN )
+            if( !m_bNameAndTypeOnly
+#if !defined(__sun)
+                || psEntry->d_type == DT_UNKNOWN
+#endif
+                )
             {
                 StatFile();
             }

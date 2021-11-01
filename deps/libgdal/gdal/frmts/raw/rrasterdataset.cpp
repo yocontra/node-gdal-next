@@ -39,7 +39,7 @@
 #include <limits>
 #include <memory>
 
-CPL_CVSID("$Id: rrasterdataset.cpp ab70db66553f198773c52a33ddbffea53f4f4881 2021-08-28 12:36:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: rrasterdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -489,7 +489,7 @@ RRASTERDataset::~RRASTERDataset()
     if( m_fpImage != nullptr )
     {
         InitImageIfNeeded();
-        FlushCache();
+        FlushCache(true);
         VSIFCloseL(m_fpImage);
     }
     if( m_bHeaderDirty )
@@ -561,7 +561,7 @@ void RRASTERDataset::RewriteHeader()
     if( !m_osProjection.empty() )
     {
         OGRSpatialReference oSRS;
-        oSRS.SetFromUserInput(m_osProjection, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
+        oSRS.SetFromUserInput(m_osProjection, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get());
         char* pszProj4 = nullptr;
         oSRS.exportToProj4(&pszProj4);
         if( pszProj4 )
@@ -1538,7 +1538,7 @@ GDALDataset *RRASTERDataset::CreateCopy( const char * pszFilename,
     CSLDestroy(papszAdjustedOptions);
 
     if( poOutDS != nullptr )
-        poOutDS->FlushCache();
+        poOutDS->FlushCache(false);
 
     return poOutDS;
 }

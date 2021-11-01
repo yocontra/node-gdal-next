@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gpkgmbtilescommon.h 0b9fb262654e49df9fbd344f3b2397322ff8d74e 2021-08-15 12:04:53 +0200 Even Rouault $
+ * $Id: gpkgmbtilescommon.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  GeoPackage/MBTiles Translator
  * Purpose:  Definition of common classes for GeoPackage and MBTiles drivers.
@@ -143,7 +143,7 @@ class GDALGPKGMBTilesLikePseudoDataset
                                                  int nDstXSize, int nDstYSize);
         CPLErr                  DoPartialFlushOfPartialTilesIfNecessary();
 
-        virtual CPLErr                  IFlushCacheWithErrCode() = 0;
+        virtual CPLErr                  IFlushCacheWithErrCode(bool bAtClosing) = 0;
         virtual int                     IGetRasterCount() = 0;
         virtual GDALRasterBand*         IGetRasterBand(int nBand) = 0;
         virtual sqlite3                *IGetDB() = 0;
@@ -172,7 +172,7 @@ class GDALGPKGMBTilesLikeRasterBand: public GDALPamRasterBand
                                            void* pData) override;
         virtual CPLErr          IWriteBlock(int nBlockXOff, int nBlockYOff,
                                            void* pData) override;
-        virtual CPLErr          FlushCache() override;
+        virtual CPLErr          FlushCache(bool bAtClosing) override;
 
         virtual GDALColorTable* GetColorTable() override;
         virtual CPLErr          SetColorTable(GDALColorTable* poCT) override;

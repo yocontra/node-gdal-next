@@ -47,7 +47,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdaldefaultoverviews.cpp cd9e30f12c3c75eef8c341492c6d6bdfd89ab8e5 2021-08-12 21:45:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldefaultoverviews.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/
@@ -91,7 +91,7 @@ int GDALDefaultOverviews::CloseDependentDatasets()
     if( poODS != nullptr )
     {
         bHasDroppedRef = true;
-        poODS->FlushCache();
+        poODS->FlushCache(true);
         GDALClose( poODS );
         poODS = nullptr;
     }
@@ -101,7 +101,7 @@ int GDALDefaultOverviews::CloseDependentDatasets()
         if( bOwnMaskDS )
         {
             bHasDroppedRef = true;
-            poMaskDS->FlushCache();
+            poMaskDS->FlushCache(true);
             GDALClose( poMaskDS );
         }
         poMaskDS = nullptr;

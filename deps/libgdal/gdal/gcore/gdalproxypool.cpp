@@ -44,7 +44,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: gdalproxypool.cpp 85ab8a22983140e86451ced0c2ce84d2e55cfcbe 2021-08-28 16:44:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalproxypool.cpp 5d5a9396da0e1c66349b4fdbe9d01a6a719eb1e9 2021-10-26 11:22:02 +0200 Even Rouault $")
 
 /* We *must* share the same mutex as the gdaldataset.cpp file, as we are */
 /* doing GDALOpen() calls that can indirectly call GDALOpenShared() on */
@@ -683,9 +683,9 @@ GDALProxyPoolDataset::GDALProxyPoolDataset( const char* pszSourceDatasetDescript
 /*                              Create()                                */
 /************************************************************************/
 
-/* Instanciate a GDALProxyPoolDataset where the parameters (raster size, etc.)
+/* Instantiate a GDALProxyPoolDataset where the parameters (raster size, etc.)
  * are obtained by opening the underlying dataset.
- * Its bands are also instanciated.
+ * Its bands are also instantiated.
  */
 GDALProxyPoolDataset* GDALProxyPoolDataset::Create( const char* pszSourceDatasetDescription,
                                                     CSLConstList papszOpenOptions,
@@ -845,12 +845,12 @@ void GDALProxyPoolDataset::UnrefUnderlyingDataset(
 /*                         FlushCache()                                 */
 /************************************************************************/
 
-void  GDALProxyPoolDataset::FlushCache()
+void  GDALProxyPoolDataset::FlushCache(bool bAtClosing)
 {
     GDALDataset* poUnderlyingDataset = RefUnderlyingDataset(false);
     if (poUnderlyingDataset)
     {
-        poUnderlyingDataset->FlushCache();
+        poUnderlyingDataset->FlushCache(bAtClosing);
         UnrefUnderlyingDataset(poUnderlyingDataset);
     }
 }
@@ -1258,12 +1258,12 @@ void GDALProxyPoolRasterBand::UnrefUnderlyingRasterBand(GDALRasterBand* poUnderl
 /*                             FlushCache()                             */
 /************************************************************************/
 
-CPLErr GDALProxyPoolRasterBand::FlushCache()
+CPLErr GDALProxyPoolRasterBand::FlushCache(bool bAtClosing)
 {
     GDALRasterBand* poUnderlyingRasterBand = RefUnderlyingRasterBand(false);
     if (poUnderlyingRasterBand)
     {
-        CPLErr eErr = poUnderlyingRasterBand->FlushCache();
+        CPLErr eErr = poUnderlyingRasterBand->FlushCache(bAtClosing);
         UnrefUnderlyingRasterBand(poUnderlyingRasterBand);
         return eErr;
     }

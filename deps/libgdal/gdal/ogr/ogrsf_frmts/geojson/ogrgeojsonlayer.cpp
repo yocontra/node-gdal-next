@@ -48,7 +48,7 @@
 #include "ogr_geojson.h"
 #include "ogrgeojsonreader.h"
 
-CPL_CVSID("$Id: ogrgeojsonlayer.cpp 245fbcca246f2fd183176dcacd68e3b4e98622df 2020-01-07 04:30:14 -0700 Sean Gillies $")
+CPL_CVSID("$Id: ogrgeojsonlayer.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       STATIC MEMBERS DEFINITION                      */
@@ -467,7 +467,7 @@ OGRErr OGRGeoJSONLayer::SyncToDisk()
 {
     TerminateAppendSession();
 
-    poDS_->FlushCache();
+    poDS_->FlushCache(false);
     return OGRERR_NONE;
 }
 

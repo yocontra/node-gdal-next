@@ -110,7 +110,7 @@
 
 #include <algorithm>
 
-// CPL_CVSID("$Id: terragendataset.cpp a5d5ed208537a05de4437e97b6a09b7ba44f76c9 2020-03-24 08:27:48 +0100 Kai Pastor $")
+// CPL_CVSID("$Id: terragendataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 const double kdEarthCircumPolar = 40007849;
 const double kdEarthCircumEquat = 40075004;
@@ -466,7 +466,7 @@ TerragenDataset::TerragenDataset() :
 TerragenDataset::~TerragenDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     CPLFree(m_pszProjection);
     CPLFree(m_pszFilename);

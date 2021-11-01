@@ -44,7 +44,7 @@
 #include <set>
 #include <vector>
 
-CPL_CVSID("$Id: ogrlineref.cpp ba6b40f6e6a9d787c27271bc6cacb3fe5733bc27 2019-08-12 22:23:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlineref.cpp 23ec9277c8238a42d82701ef2512270b2d0a86af 2021-10-19 08:38:45 +1000 Nyall Dawson $")
 
 #if defined(HAVE_GEOS)
 #if GEOS_VERSION_MAJOR > 3 || (GEOS_VERSION_MAJOR == 3 && GEOS_VERSION_MINOR >= 2)
@@ -1247,8 +1247,7 @@ static OGRErr GetCoordinates( OGRLayer* const poPkLayer,
     poPkLayer->ResetReading();
 
     bool bHaveCoords = false;
-    OGRFeature* pFeature = nullptr;
-    while( (pFeature = poPkLayer->GetNextFeature()) != nullptr )
+    for( auto& pFeature: poPkLayer )
     {
         bHaveCoords = true;
         const double dfStart = pFeature->GetFieldAsDouble(FIELD_START);
@@ -1271,7 +1270,6 @@ static OGRErr GetCoordinates( OGRLayer* const poPkLayer,
                 "The position for distance %f is lat:%f, long:%f, height:%f\n",
                 dfPos, pt.getY(), pt.getX(), pt.getZ()));
         }
-        OGRFeature::DestroyFeature(pFeature);
     }
 
     if( bHaveCoords )

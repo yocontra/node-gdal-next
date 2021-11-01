@@ -26,7 +26,6 @@
  */
 
 #include "blx.h"
-#include "cpl_port.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

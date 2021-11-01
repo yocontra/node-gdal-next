@@ -48,7 +48,7 @@
 #include "gdal.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: memdataset.cpp baf128e8f032140fcb17e6b912e09387680e3514 2021-09-24 17:02:42 +0800 solym $")
+CPL_CVSID("$Id: memdataset.cpp 7fc1d9ac5540a1fd5c40ca7d38b63de2abfb77a6 2021-10-14 20:10:30 +0200 Even Rouault $")
 
 struct MEMDataset::Private
 {
@@ -259,7 +259,7 @@ CPLErr MEMRasterBand::IRasterIO( GDALRWFlag eRWFlag,
     }
 
     // In case block based I/O has been done before.
-    FlushCache();
+    FlushCache(false);
 
     if( eRWFlag == GF_Read )
     {
@@ -352,7 +352,7 @@ CPLErr MEMDataset::IRasterIO( GDALRWFlag eRWFlag,
         }
         if( iBandIndex == nBandCount )
         {
-            FlushCache();
+            FlushCache(false);
             if( eRWFlag == GF_Read )
             {
                 for(int iLine=0;iLine<nYSize;iLine++)
@@ -792,7 +792,10 @@ MEMDataset::MEMDataset() :
 MEMDataset::~MEMDataset()
 
 {
-    FlushCache();
+    const bool bSuppressOnCloseBackup = bSuppressOnClose;
+    bSuppressOnClose = true;
+    FlushCache(true);
+    bSuppressOnClose = bSuppressOnCloseBackup;
 
     GDALDeinitGCPs( m_nGCPCount, m_pasGCPs );
     CPLFree( m_pasGCPs );

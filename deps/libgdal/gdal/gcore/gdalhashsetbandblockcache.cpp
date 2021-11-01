@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: gdalhashsetbandblockcache.cpp 2cef454ab06723a32379690b46581a40eb2e5af2 2019-11-13 16:36:03 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalhashsetbandblockcache.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 
@@ -172,7 +172,7 @@ CPLErr GDALHashSetBandBlockCache::FlushCache()
         {
             CPLErr eErr = CE_None;
 
-            if( eGlobalErr == CE_None && poBlock->GetDirty() )
+            if( m_bWriteDirtyBlocks && eGlobalErr == CE_None && poBlock->GetDirty() )
             {
                 UpdateDirtyBlockFlushingLog();
                 eErr = poBlock->Write();
@@ -228,7 +228,7 @@ CPLErr GDALHashSetBandBlockCache::FlushBlock( int nXBlockOff, int nYBlockOff,
 
     CPLErr eErr = CE_None;
 
-    if( bWriteDirtyBlock && poBlock->GetDirty() )
+    if( m_bWriteDirtyBlocks && bWriteDirtyBlock && poBlock->GetDirty() )
         eErr = poBlock->Write();
 
     delete poBlock;

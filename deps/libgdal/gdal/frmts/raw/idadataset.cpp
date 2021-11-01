@@ -33,7 +33,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: idadataset.cpp 452b07d9aa72be1d260abacca8a95367d32abc48 2021-03-08 17:45:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: idadataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                                tp2c()                                */
@@ -151,7 +151,7 @@ class IDADataset final: public RawDataset
     IDADataset();
     ~IDADataset() override;
 
-    void FlushCache() override;
+    void FlushCache(bool bAtClosing) override;
 
     const OGRSpatialReference* GetSpatialRef() const override;
     CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override;
@@ -391,7 +391,7 @@ IDADataset::IDADataset() :
 IDADataset::~IDADataset()
 
 {
-    IDADataset::FlushCache();
+    IDADataset::FlushCache(true);
 
     if( fpRaw != nullptr )
     {
@@ -471,10 +471,10 @@ void IDADataset::ProcessGeoref()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void IDADataset::FlushCache()
+void IDADataset::FlushCache(bool bAtClosing)
 
 {
-    RawDataset::FlushCache();
+    RawDataset::FlushCache(bAtClosing);
 
     if( bHeaderDirty )
     {

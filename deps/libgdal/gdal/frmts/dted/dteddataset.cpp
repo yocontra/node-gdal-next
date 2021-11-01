@@ -35,7 +35,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-CPL_CVSID("$Id: dteddataset.cpp 9af5234c2196ddf8583713437c0ad6aed9de3b27 2020-10-09 13:47:12 -0400 Michael D. Smith $")
+CPL_CVSID("$Id: dteddataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -257,7 +257,7 @@ DTEDDataset::DTEDDataset() :
 DTEDDataset::~DTEDDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     CPLFree(pszFilename);
     CPLFree( pszProjection );
     if( psDTED != nullptr )

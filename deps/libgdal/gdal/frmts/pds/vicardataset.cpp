@@ -50,7 +50,7 @@ constexpr double NULL3 = -32768.0;
 #include <limits>
 #include <string>
 
-CPL_CVSID("$Id: vicardataset.cpp dda8c11016a65a845091113b02931d73cd59da1c 2021-10-07 09:10:50 +0200 Even Rouault $")
+CPL_CVSID("$Id: vicardataset.cpp a9aeb422489c8d418bbddb73b9fab0ebeb53454e 2021-10-26 21:30:25 +0200 Even Rouault $")
 
 /* GeoTIFF 1.0 geokeys */
 
@@ -1137,7 +1137,7 @@ VICARDataset::~VICARDataset()
 {
     if( !m_bIsLabelWritten )
         WriteLabel();
-    VICARDataset::FlushCache();
+    VICARDataset::FlushCache(true);
     PatchLabel();
     if( fpImage != nullptr )
         VSIFCloseL( fpImage );
@@ -2580,8 +2580,11 @@ GDALDataset *VICARDataset::Open( GDALOpenInfo * poOpenInfo )
     GUInt64 nNBB;
     GUInt64 nImageSize;
     if( !GetSpacings(poDS->oKeywords, nPixelOffset, nLineOffset, nBandOffset,
-                     nImageOffsetWithoutNBB, nNBB, nImageSize) )
+                     nImageOffsetWithoutNBB, nNBB, nImageSize) ||
+         nImageOffsetWithoutNBB >
+             std::numeric_limits<GUInt64>::max() - (nNBB + nBandOffset * (nBands - 1)) )
     {
+        CPLDebug("VICAR", "Invalid spacings found");
         delete poDS;
         return nullptr;
     }
@@ -3257,7 +3260,7 @@ GDALDataset* VICARDataset::CreateCopy( const char *pszFilename,
     poDS->m_bInitToNodata = false;
     CPLErr eErr = GDALDatasetCopyWholeRaster( poSrcDS, poDS,
                                            nullptr, pfnProgress, pProgressData );
-    poDS->FlushCache();
+    poDS->FlushCache(false);
     if( eErr != CE_None )
     {
         delete poDS;

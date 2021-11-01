@@ -35,7 +35,7 @@
 #include <mutex>
 #include <vector>
 
-CPL_CVSID("$Id: xyzdataset.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
+CPL_CVSID("$Id: xyzdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 constexpr double RELATIVE_ERROR = 1e-3;
 
@@ -666,7 +666,7 @@ XYZDataset::XYZDataset() :
 XYZDataset::~XYZDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if (fp)
         VSIFCloseL(fp);
 

@@ -55,7 +55,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hdf4imagedataset.cpp 6ec9fe9f7ecfdf8b0f333833577d72a0daa1c253 2021-08-12 22:02:31 +0200 Even Rouault $")
+CPL_CVSID("$Id: hdf4imagedataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 constexpr int HDF4_SDS_MAXNAMELEN = 65;
 
@@ -163,7 +163,7 @@ class HDF4ImageDataset final: public HDF4Dataset
     static GDALDataset  *Create( const char * pszFilename,
                                  int nXSize, int nYSize, int nBands,
                                  GDALDataType eType, char ** papszParamList );
-    virtual void        FlushCache( void ) override;
+    virtual void        FlushCache( bool bAtClosing ) override;
     CPLErr              GetGeoTransform( double * padfTransform ) override;
     virtual CPLErr      SetGeoTransform( double * ) override;
     const char          *_GetProjectionRef() override;
@@ -827,7 +827,7 @@ HDF4ImageDataset::~HDF4ImageDataset()
 {
     CPLMutexHolderD(&hHDF4Mutex);
 
-    HDF4ImageDataset::FlushCache();
+    HDF4ImageDataset::FlushCache(true);
 
     CPLFree( pszFilename );
     if( iSDS != FAIL )
@@ -972,12 +972,12 @@ const GDAL_GCP *HDF4ImageDataset::GetGCPs()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void HDF4ImageDataset::FlushCache()
+void HDF4ImageDataset::FlushCache(bool bAtClosing)
 
 {
     CPLMutexHolderD(&hHDF4Mutex);
 
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 
     if( eAccess == GA_ReadOnly )
         return;

@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrodsdatasource.cpp a70daecdb1c167c72e6d50057048b73a3af55b61 2021-09-20 01:07:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrodsdatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 namespace OGRODS {
 
@@ -105,7 +105,7 @@ void OGRODSLayer::SetUpdated(bool bUpdatedIn)
 
 OGRErr OGRODSLayer::SyncToDisk()
 {
-    poDS->FlushCache();
+    poDS->FlushCache(false);
     return OGRERR_NONE;
 }
 
@@ -251,7 +251,7 @@ OGRODSDataSource::OGRODSDataSource() :
 OGRODSDataSource::~OGRODSDataSource()
 
 {
-    OGRODSDataSource::FlushCache();
+    OGRODSDataSource::FlushCache(true);
 
     CPLFree( pszName );
 
@@ -1838,7 +1838,7 @@ static void WriteLayer(VSILFILE* fp, OGRLayer* poLayer)
 /*                            FlushCache()                              */
 /************************************************************************/
 
-void OGRODSDataSource::FlushCache()
+void OGRODSDataSource::FlushCache(bool /* bAtClosing */)
 {
     if (!bUpdated)
         return;

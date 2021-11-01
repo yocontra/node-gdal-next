@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeojsonreader.h f28f5e8137ffeb479da480dc99e4dedbeec895ab 2021-09-26 20:02:01 +0200 Even Rouault $
+ * $Id: ogrgeojsonreader.h 080432539615ef1dbc7826822af549f09b985c5c 2021-10-24 04:46:04 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines GeoJSON reader within OGR OGRGeoJSON Driver.
@@ -240,7 +240,7 @@ json_object* OGRGeoJSONFindMemberByName( json_object* poObj,
                                          const char* pszName );
 GeoJSONObject::Type OGRGeoJSONGetType( json_object* poObj );
 
-json_object* json_ex_get_object_by_path( json_object* poObj,
+json_object CPL_DLL* json_ex_get_object_by_path( json_object* poObj,
                                          const char* pszPath );
 
 json_object CPL_DLL*  CPL_json_object_object_get( struct json_object* obj,
@@ -259,7 +259,7 @@ bool OGRGeoJSONUpdateLayerGeomType( OGRLayer* poLayer,
 /************************************************************************/
 
 bool OGRGeoJSONReadRawPoint( json_object* poObj, OGRPoint& point );
-OGRGeometry* OGRGeoJSONReadGeometry( json_object* poObj );
+OGRGeometry CPL_DLL * OGRGeoJSONReadGeometry( json_object* poObj );
 OGRPoint* OGRGeoJSONReadPoint( json_object* poObj );
 OGRMultiPoint* OGRGeoJSONReadMultiPoint( json_object* poObj );
 OGRLineString* OGRGeoJSONReadLineString( json_object* poObj, bool bRaw=false );

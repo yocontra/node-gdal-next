@@ -34,7 +34,7 @@
 #include "gdal_alg_priv.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: vrtdriver.cpp 0b332f1a2700726be41485d9802f777397d9fb29 2021-07-21 18:13:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtdriver.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -404,7 +404,7 @@ VRTCreateCopy( const char * pszFilename,
     }
 
     CPLErrorReset();
-    poVRTDS->FlushCache();
+    poVRTDS->FlushCache(true);
     if( CPLGetLastErrorType() != CE_None )
     {
         delete poVRTDS;

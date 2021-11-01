@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geo_utils.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogr_geo_utils.h 080432539615ef1dbc7826822af549f09b985c5c 2021-10-24 04:46:04 +0200 Even Rouault $
  *
  * Project:  X-Plane aeronautical data reader
  * Purpose:  Definition of geo-computation functions
@@ -30,6 +30,8 @@
 #ifndef OGR_GEO_UTILS_H_INCLUDED
 #define OGR_GEO_UTILS_H_INCLUDED
 
+#include "cpl_port.h"
+
 /** The following functions provide computations based on great-circle/
  * orthodromic path, on a sphere with a radius of ~6366707 m.
  * The computations are not necessarily implemented in a very accurate/
@@ -46,7 +48,7 @@ double OGR_GreatCircle_InitialHeading(double dfLatA_deg, double dfLonA_deg,
                                       double dfLatB_deg, double dfLonB_deg);
 
 /* such as ExtendPosition(A, Distance(A,B), InitialHeading(A,B)) ~= B */
-int OGR_GreatCircle_ExtendPosition(double dfLatA_deg, double dfLonA_deg,
+int CPL_DLL OGR_GreatCircle_ExtendPosition(double dfLatA_deg, double dfLonA_deg,
                                    double dfDistance, double dfHeadingInA,
                                    double* pdfLatB_deg, double* pdfLonB_deg);
 

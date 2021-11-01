@@ -46,7 +46,7 @@
 #include <set>
 #include <vector>
 
-CPL_CVSID("$Id: fitsdataset.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: fitsdataset.cpp f523ba1e00b467564b83fea05bf997f1bcbed29a 2021-10-18 19:47:07 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -69,7 +69,7 @@ class FITSDataset final : public GDALPamDataset {
   int m_fitsDataType = 0;   // FITS code for the image type
 
   bool m_isExistingFile = false;
-  long m_highestOffsetWritten = 0;  // How much of image has been written
+  LONGLONG m_highestOffsetWritten = 0;  // How much of image has been written
 
   bool        m_bNoDataChanged = false;
   bool        m_bNoDataSet = false;
@@ -1730,7 +1730,7 @@ FITSRasterBand::FITSRasterBand( FITSDataset *poDSIn, int nBandIn ) :
 
 FITSRasterBand::~FITSRasterBand()
 {
-    FlushCache();
+    FlushCache(true);
 }
 
 /************************************************************************/
@@ -1989,7 +1989,7 @@ FITSDataset::~FITSDataset() {
       }
 
       // Make sure we flush the raster cache before we close the file!
-      FlushCache();
+      FlushCache(true);
     }
 
     // Close the FITS handle

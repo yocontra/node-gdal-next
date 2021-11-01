@@ -34,7 +34,7 @@
 #include <cmath>
 #include <cstdlib>
 
-CPL_CVSID("$Id: btdataset.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: btdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -77,7 +77,7 @@ class BTDataset final: public GDALPamDataset
     CPLErr GetGeoTransform( double * ) override;
     CPLErr SetGeoTransform( double * ) override;
 
-    void FlushCache() override;
+    void FlushCache(bool bAtClosing) override;
 
     static GDALDataset *Open( GDALOpenInfo * );
     static GDALDataset *Create( const char * pszFilename,
@@ -390,7 +390,7 @@ BTDataset::BTDataset() :
 BTDataset::~BTDataset()
 
 {
-    BTDataset::FlushCache();
+    BTDataset::FlushCache(true);
     if( fpImage != nullptr )
     {
         if( VSIFCloseL( fpImage ) != 0 )
@@ -407,10 +407,10 @@ BTDataset::~BTDataset()
 /*      We override this to include flush out the header block.         */
 /************************************************************************/
 
-void BTDataset::FlushCache()
+void BTDataset::FlushCache(bool bAtClosing)
 
 {
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 
     if( !bHeaderModified )
         return;

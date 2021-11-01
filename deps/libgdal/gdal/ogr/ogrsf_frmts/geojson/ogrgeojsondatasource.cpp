@@ -57,7 +57,7 @@
 // #include "symbol_renames.h"
 
 
-CPL_CVSID("$Id: ogrgeojsondatasource.cpp 3a7914cee018d5b65dc1639368edbd8faac2543d 2020-01-07 22:30:27 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsondatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                           OGRGeoJSONDataSource()                     */
@@ -85,7 +85,7 @@ OGRGeoJSONDataSource::OGRGeoJSONDataSource() :
 
 OGRGeoJSONDataSource::~OGRGeoJSONDataSource()
 {
-    OGRGeoJSONDataSource::FlushCache();
+    OGRGeoJSONDataSource::FlushCache(true);
     OGRGeoJSONDataSource::Clear();
 }
 
@@ -1006,7 +1006,7 @@ void OGRGeoJSONDataSource::AddLayer( OGRGeoJSONLayer* poLayer )
 /*                            FlushCache()                              */
 /************************************************************************/
 
-void OGRGeoJSONDataSource::FlushCache()
+void OGRGeoJSONDataSource::FlushCache(bool /*bAtClosing*/)
 {
     if( papoLayersWriter_ != nullptr )
         return;

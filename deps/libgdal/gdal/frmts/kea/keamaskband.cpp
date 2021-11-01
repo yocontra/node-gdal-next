@@ -29,7 +29,7 @@
 
 #include "keamaskband.h"
 
-CPL_CVSID("$Id: keamaskband.cpp 980fee897f6fd8cf10fa0f62936cca216cd76cf7 2020-04-03 17:54:46 +1000 Sam Gillingham $")
+CPL_CVSID("$Id: keamaskband.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // constructor
 KEAMaskBand::KEAMaskBand(GDALRasterBand *pParent,
@@ -56,7 +56,7 @@ KEAMaskBand::KEAMaskBand(GDALRasterBand *pParent,
 KEAMaskBand::~KEAMaskBand()
 {
     // according to the docs, this is required
-    this->FlushCache();
+    this->FlushCache(true);
 
     // decrement the recount and delete if needed
     if( m_pRefCount->DecRef() )

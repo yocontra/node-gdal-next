@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_pleiades.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
+ * $Id: reader_pleiades.h 07af6d281da30d52b00966db492e795d9e3ad1cd 2021-10-24 03:26:52 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from Pleiades imagery.
@@ -46,7 +46,7 @@ Common metadata (from metadata filename):
 
 */
 
-class GDALMDReaderPleiades: public GDALMDReaderBase
+class CPL_DLL GDALMDReaderPleiades: public GDALMDReaderBase
 {
 public:
     GDALMDReaderPleiades(const char *pszPath, char **papszSiblingFiles);

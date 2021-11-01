@@ -5,8 +5,8 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libgdal"
 
-GDAL_VERSION=3.4.0-git3
-GDAL_VERSION_SUFFIX=
+GDAL_VERSION=3.4.0
+GDAL_VERSION_SUFFIX=rc1
 dir_gdal=./gdal
 dir_formats_gyp=./gyp-formats
 dir_gyp_templates=./gyp-templates
@@ -17,7 +17,7 @@ dir_gyp_templates=./gyp-templates
 
 rm -rf $dir_gdal
 if [[ ! -f gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz ]]; then
-	curl -L http://download.osgeo.org/gdal/${GDAL_VERSION}${GDAL_VERSION_SUFFIX}/gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz -o gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz
+	curl -L http://download.osgeo.org/gdal/${GDAL_VERSION}/gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz -o gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz
 fi
 tar -xzf gdal-${GDAL_VERSION}${GDAL_VERSION_SUFFIX}.tar.gz
 mv gdal-${GDAL_VERSION} $dir_gdal
@@ -26,14 +26,10 @@ mv $dir_gdal/gcore/gdal_version.h.in $dir_gdal/gcore/gdal_version.h
 # apply patches
 #
 
-#patch $dir_gdal/gcore/gdal_priv.h < patches/gcore_gdal_priv.diff # clang support
-#patch $dir_gdal/frmts/wms/gdalwmsdataset.cpp < patches/frmts_wms_gdalwmsdataset.diff # fixes error in wms driver
-patch $dir_gdal/ogr/ogrsf_frmts/shape/shptree.c < patches/ogrsf_frmts_shape_shptree.diff # fixes INT_MAX undeclared error
-patch $dir_gdal/gcore/gdalexif.cpp < patches/gcore_gdalexif.diff # fixes MSVC++ internal compiler error (https://github.com/naturalatlas/node-gdal/issues/45)
-patch $dir_gdal/ogr/ogrsf_frmts/shape/shpopen.c < patches/ogrsf_frmts_shape_shpopenc.diff # missing cpl_port.h
-patch $dir_gdal/ogr/ogrsf_frmts/shape/dbfopen.c < patches/ogrsf_frmts_shape_dbfopen.diff
-patch $dir_gdal/ogr/ogrsf_frmts/shape/sbnsearch.c < patches/ogrsf_frmts_shape_sbnsearch.diff
-patch $dir_gdal/frmts/blx/blx.c < patches/frmts_blx_blxc.diff # missing cpl_port.h
+for PATCH in patches/*.diff; do
+  echo "Applying ${PATCH}"
+  patch -p1 < $PATCH
+done
 
 #
 # create format gyps

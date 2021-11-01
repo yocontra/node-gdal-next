@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfdataset.h c55ce8971e0803b48417055e975d7963c2beb758 2021-08-19 10:20:30 +0200 Even Rouault $
+ * $Id: nitfdataset.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  NITF Read/Write Translator
  * Purpose:  GDALDataset/GDALRasterBand declarations.
@@ -178,7 +178,7 @@ class NITFDataset final: public GDALPamDataset
     virtual char      **GetMetadata( const char * pszDomain = "" ) override;
     virtual const char *GetMetadataItem( const char * pszName,
                                          const char * pszDomain = "" ) override;
-    virtual void   FlushCache() override;
+    virtual void   FlushCache(bool bAtClosing) override;
     virtual CPLErr IBuildOverviews( const char *, int, int *,
                                     int, int *, GDALProgressFunc, void * ) override;
 
@@ -270,7 +270,7 @@ class NITFProxyPamRasterBand CPL_NON_FINAL: public GDALPamRasterBand
         /*virtual CPLErr      SetMetadataItem( const char * pszName,
                                             const char * pszValue,
                                             const char * pszDomain = "" );*/
-        virtual CPLErr FlushCache() override;
+        virtual CPLErr FlushCache(bool bAtClosing) override;
         /*virtual char **GetCategoryNames();*/
         virtual double GetNoDataValue( int *pbSuccess = nullptr ) override;
         virtual double GetMinimum( int *pbSuccess = nullptr ) override;

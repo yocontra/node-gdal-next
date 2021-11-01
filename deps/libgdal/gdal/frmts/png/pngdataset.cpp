@@ -50,7 +50,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: pngdataset.cpp f6099e5ed704166bf5cc113a053dd1b2725cb391 2020-03-22 11:20:10 +0100 Kai Pastor $")
+CPL_CVSID("$Id: pngdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // Note: Callers must provide blocks in increasing Y order.
 // Disclaimer (E. Rouault): this code is not production ready at all. A lot of
@@ -295,7 +295,7 @@ PNGDataset::PNGDataset() :
 PNGDataset::~PNGDataset()
 
 {
-    PNGDataset::FlushCache();
+    PNGDataset::FlushCache(true);
 
     if( hPNG != nullptr )
         png_destroy_read_struct( &hPNG, &psPNGInfo, nullptr );
@@ -448,10 +448,10 @@ CPLErr PNGDataset::GetGeoTransform( double * padfTransform )
 /*      cache if need be.                                               */
 /************************************************************************/
 
-void PNGDataset::FlushCache()
+void PNGDataset::FlushCache(bool bAtClosing)
 
 {
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(bAtClosing);
 
     if( pabyBuffer != nullptr )
     {
@@ -473,7 +473,7 @@ static void PNGDatasetDisableCRCCheck( png_structp hPNG )
     hPNG->flags |= PNG_FLAG_CRC_CRITICAL_IGNORE;
 
     hPNG->flags &= ~PNG_FLAG_CRC_ANCILLARY_MASK;
-    hPNG->flags |= PNG_FLAG_CRC_ANCILLARY_NOWARN; 
+    hPNG->flags |= PNG_FLAG_CRC_ANCILLARY_NOWARN;
 }
 #endif
 

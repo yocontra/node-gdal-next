@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_multiproc.h 5bf28e3bebd1032c4c8f50564d077f95cdf897d3 2020-09-30 14:07:46 +0200 Even Rouault $
+ * $Id: cpl_multiproc.h 824cb92ff140186b52c29d02cfec5ef8177d8748 2021-10-15 08:35:20 +1000 Nyall Dawson $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL Multi-Threading, and process handling portability functions.
@@ -132,15 +132,15 @@ CPL_C_END
 #if defined(__cplusplus) && !defined(CPL_SUPRESS_CPLUSPLUS)
 
 /* Instantiates the mutex if not already done. The parameter x should be a (void**). */
-#define CPLMutexHolderD(x)  CPLMutexHolder oHolder(x,1000.0,__FILE__,__LINE__);
+#define CPLMutexHolderD(x)  CPLMutexHolder oHolder(x,1000.0,__FILE__,__LINE__)
 
 /* Instantiates the mutex with options if not already done. */
 /* The parameter x should be a (void**). */
-#define CPLMutexHolderExD(x, nOptions)  CPLMutexHolder oHolder(x,1000.0,__FILE__,__LINE__,nOptions);
+#define CPLMutexHolderExD(x, nOptions)  CPLMutexHolder oHolder(x,1000.0,__FILE__,__LINE__,nOptions)
 
 /* This variant assumes the mutex has already been created. If not, it will */
 /* be a no-op. The parameter x should be a (void*) */
-#define CPLMutexHolderOptionalLockD(x)  CPLMutexHolder oHolder(x,1000.0,__FILE__,__LINE__);
+#define CPLMutexHolderOptionalLockD(x)  CPLMutexHolder oHolder(x,1000.0,__FILE__,__LINE__)
 
 /** Object to hold a mutex */
 class CPL_DLL CPLMutexHolder

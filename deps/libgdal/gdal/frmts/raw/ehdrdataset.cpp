@@ -57,7 +57,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ehdrdataset.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: ehdrdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 constexpr int HAS_MIN_FLAG = 0x1;
 constexpr int HAS_MAX_FLAG = 0x2;
@@ -402,7 +402,7 @@ EHdrDataset::EHdrDataset() :
 EHdrDataset::~EHdrDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( nBands > 0 && GetAccess() == GA_Update )
     {
@@ -1857,7 +1857,7 @@ GDALDataset *EHdrDataset::CreateCopy( const char * pszFilename,
     CSLDestroy(papszAdjustedOptions);
 
     if( poOutDS != nullptr )
-        poOutDS->FlushCache();
+        poOutDS->FlushCache(false);
 
     return poOutDS;
 }

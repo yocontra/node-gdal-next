@@ -66,7 +66,7 @@
 #define isnan std::isnan
 #endif
 
-CPL_CVSID("$Id: vrtsources.cpp f560c3eaab8216afc45b0eaf00ef4aa195607564 2021-10-08 19:03:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtsources.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -154,16 +154,16 @@ VRTSimpleSource::~VRTSimpleSource()
 /*                           FlushCache()                               */
 /************************************************************************/
 
-CPLErr VRTSimpleSource::FlushCache()
+CPLErr VRTSimpleSource::FlushCache(bool bAtClosing)
 
 {
     if( m_poMaskBandMainBand != nullptr )
     {
-        return m_poMaskBandMainBand->FlushCache();
+        return m_poMaskBandMainBand->FlushCache(bAtClosing);
     }
     else if( m_poRasterBand != nullptr )
     {
-        return m_poRasterBand->FlushCache();
+        return m_poRasterBand->FlushCache(bAtClosing);
     }
     return CE_None;
 }

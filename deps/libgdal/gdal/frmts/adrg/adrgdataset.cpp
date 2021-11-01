@@ -34,7 +34,7 @@
 #include <limits>
 #include <new>
 
-CPL_CVSID("$Id: adrgdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: adrgdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 #define N_ELEMENTS(x)  (sizeof(x)/sizeof(x[0]))
 
@@ -569,7 +569,7 @@ ADRGDataset::~ADRGDataset()
 
     if( bCreation )
     {
-        GDALPamDataset::FlushCache();
+        GDALPamDataset::FlushCache(true);
 
         /* Write header and padding of image */
         VSIFSeekL(fdIMG, 0, SEEK_SET);

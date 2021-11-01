@@ -70,7 +70,7 @@ CPL_C_END
 #include "rawdataset.h"
 #include "vsidataio.h"
 
-CPL_CVSID("$Id: jpgdataset.cpp 46d6c378a52872bbc5bdbd8ef1550dc9720f1888 2021-09-25 23:40:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpgdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 constexpr int TIFF_VERSION = 42;
 
@@ -1820,13 +1820,13 @@ CPLErr JPGDatasetCommon::IBuildOverviews( const char *pszResampling,
 }
 
 /************************************************************************/
-/*                           FlushCache()                               */
+/*                           FlushCache(bool bAtClosing)                               */
 /************************************************************************/
 
-void JPGDatasetCommon::FlushCache()
+void JPGDatasetCommon::FlushCache(bool bAtClosing)
 
 {
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(bAtClosing);
 
     if (bHasDoneJpegStartDecompress)
     {
@@ -1835,7 +1835,7 @@ void JPGDatasetCommon::FlushCache()
 
     // For the needs of the implicit JPEG-in-TIFF overview mechanism.
     for(int i = 0; i < nInternalOverviewsCurrent; i++)
-        papoInternalOverviews[i]->FlushCache();
+        papoInternalOverviews[i]->FlushCache(bAtClosing);
 }
 
 #endif  // !defined(JPGDataset)
@@ -1860,7 +1860,7 @@ JPGDataset::JPGDataset() : nQLevel(0)
 JPGDataset::~JPGDataset()
 
 {
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(true);
     JPGDataset::StopDecompress();
 }
 

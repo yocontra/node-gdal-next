@@ -38,7 +38,7 @@
 
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: ilwisdataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ilwisdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 namespace GDAL
 {
@@ -465,7 +465,7 @@ ILWISDataset::ILWISDataset() :
 ILWISDataset::~ILWISDataset()
 
 {
-    ILWISDataset::FlushCache();
+    ILWISDataset::FlushCache(true);
     CPLFree( pszProjection );
 }
 
@@ -843,10 +843,10 @@ GDALDataset *ILWISDataset::Open( GDALOpenInfo * poOpenInfo )
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void ILWISDataset::FlushCache()
+void ILWISDataset::FlushCache(bool bAtClosing)
 
 {
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 
     if( bGeoDirty == TRUE )
     {
@@ -1216,7 +1216,7 @@ ILWISDataset::CreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
         CPLFree( pData );
     }
 
-    poDS->FlushCache();
+    poDS->FlushCache(false);
 
     if( !pfnProgress( 1.0, nullptr, pProgressData ) )
     {

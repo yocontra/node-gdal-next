@@ -45,7 +45,7 @@
 #include "gmlutils.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: gmlreader.cpp 71389e922e77a1eca18d14f46b2aa9fc84d70e57 2021-09-18 20:24:28 +0900 mugwort_rc $")
+CPL_CVSID("$Id: gmlreader.cpp 844805efe831e6f6363a1d39c28b93fa78daaa73 2021-10-27 13:49:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            ~IGMLReader()                             */
@@ -954,8 +954,8 @@ GMLFeatureClass *GMLReader::GetClass( const char *pszName ) const
 {
     for( int iClass = 0; iClass < m_nClassCount; iClass++ )
     {
-        if( EQUAL(GetClass(iClass)->GetName(),pszName) )
-            return GetClass(iClass);
+        if( EQUAL(m_papoClass[iClass]->GetName(),pszName) )
+            return m_papoClass[iClass];
     }
 
     return nullptr;

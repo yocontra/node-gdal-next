@@ -36,7 +36,7 @@
 
 #include "cpl_safemaths.hpp"
 
-CPL_CVSID("$Id: rmfdataset.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: rmfdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 constexpr int RMF_DEFAULT_BLOCKXSIZE = 256;
 constexpr int RMF_DEFAULT_BLOCKYSIZE = 256;
@@ -763,10 +763,10 @@ RMFDataset::RMFDataset() :
 
 RMFDataset::~RMFDataset()
 {
-    RMFDataset::FlushCache();
+    RMFDataset::FlushCache(true);
     for( size_t n = 0; n != poOvrDatasets.size(); ++n )
     {
-        poOvrDatasets[n]->RMFDataset::FlushCache();
+        poOvrDatasets[n]->RMFDataset::FlushCache(true);
     }
 
     VSIFree( paiTiles );
@@ -1041,10 +1041,10 @@ do {                                                    \
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void RMFDataset::FlushCache()
+void RMFDataset::FlushCache(bool bAtClosing)
 
 {
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 
     if(poCompressData != nullptr &&
        poCompressData->oThreadPool.GetThreadCount() > 0)

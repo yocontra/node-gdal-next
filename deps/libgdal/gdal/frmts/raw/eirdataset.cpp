@@ -34,7 +34,7 @@
 
 #include <limits>
 
-CPL_CVSID("$Id: eirdataset.cpp 0313256f977c836123f613d6602c1f10462580e1 2021-10-01 17:54:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: eirdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -91,7 +91,7 @@ EIRDataset::EIRDataset() = default;
 EIRDataset::~EIRDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( nBands > 0 && GetAccess() == GA_Update )
     {

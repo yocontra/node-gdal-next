@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hdf5imagedataset.cpp 6a29d59d705abb5c8fe71248cace9753d7ff34ab 2020-09-10 18:33:24 +0200 Even Rouault $")
+CPL_CVSID("$Id: hdf5imagedataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 class HDF5ImageDataset final: public HDF5Dataset
 {
@@ -186,7 +186,7 @@ HDF5ImageDataset::HDF5ImageDataset() :
 /************************************************************************/
 HDF5ImageDataset::~HDF5ImageDataset()
 {
-    FlushCache();
+    FlushCache(true);
 
     if( dataset_id > 0 )
         H5Dclose(dataset_id);

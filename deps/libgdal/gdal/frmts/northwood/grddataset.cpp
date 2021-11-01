@@ -41,7 +41,7 @@
 #include "../../ogr/ogrsf_frmts/mitab/mitab.h"
 #endif
 
-CPL_CVSID("$Id: grddataset.cpp edff0f6ff69efb760c7e123f7ca2e2b2038d3a7e 2021-03-27 10:49:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: grddataset.cpp 6833747591ce456fb5c056f450676629e1790d77 2021-10-17 18:49:56 +0200 Jürgen Fischer $")
 
 constexpr float NODATA = -1.e37f;
 constexpr double SCALE16BIT = 65534.0;
@@ -98,7 +98,7 @@ public:
 
     CPLErr GetGeoTransform(double *padfTransform) override;
     CPLErr SetGeoTransform(double *padfTransform) override;
-    void FlushCache() override;
+    void FlushCache(bool bAtClosing) override;
 
     const OGRSpatialReference* GetSpatialRef() const override;
     CPLErr SetSpatialRef(const OGRSpatialReference* poSRS) override;
@@ -410,7 +410,7 @@ NWT_GRDDataset::~NWT_GRDDataset() {
     // Make sure any changes to the header etc are written
     // if we are in update mode.
     if (eAccess == GA_Update) {
-        NWT_GRDDataset::FlushCache();
+        NWT_GRDDataset::FlushCache(true);
     }
     pGrd->fp = nullptr;       // this prevents nwtCloseGrid from closing the fp
     nwtCloseGrid(pGrd);
@@ -422,16 +422,16 @@ NWT_GRDDataset::~NWT_GRDDataset() {
 }
 
 /************************************************************************/
-/*                            ~FlushCache()                             */
+/*                 ~FlushCache(bool bAtClosing)                         */
 /************************************************************************/
-void NWT_GRDDataset::FlushCache() {
+void NWT_GRDDataset::FlushCache(bool bAtClosing) {
     // Ensure the header and TAB file are up to date
     if (bUpdateHeader) {
         UpdateHeader();
     }
 
     // Call the parent method
-    GDALPamDataset::FlushCache();
+    GDALPamDataset::FlushCache(bAtClosing);
 }
 
 /************************************************************************/
@@ -968,7 +968,7 @@ GDALDataset *NWT_GRDDataset::Create(const char * pszFilename, int nXSize,
     poDS->SetBand(1, new NWT_GRDRasterBand(poDS, 1, 1));    //z
 
     poDS->oOvManager.Initialize(poDS, pszFilename);
-    poDS->FlushCache(); // Write the header to disk.
+    poDS->FlushCache(false); // Write the header to disk.
 
     return poDS;
 }

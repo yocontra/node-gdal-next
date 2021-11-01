@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_http.h 5bf28e3bebd1032c4c8f50564d077f95cdf897d3 2020-09-30 14:07:46 +0200 Even Rouault $
+ * $Id: cpl_http.h 0aaf941e652f4950616aff612169985b6fd66cdd 2021-10-24 14:24:39 +0200 Even Rouault $
  *
  * Project:  Common Portability Library
  * Purpose:  Function wrapper for libcurl HTTP access.
@@ -174,20 +174,20 @@ CPL_C_END
 #if defined(__cplusplus) && !defined(CPL_SUPRESS_CPLUSPLUS)
 /*! @cond Doxygen_Suppress */
 // Not sure if this belong here, used in cpl_http.cpp, cpl_vsil_curl.cpp and frmts/wms/gdalhttp.cpp
-void* CPLHTTPSetOptions(void *pcurl, const char *pszURL, const char * const* papszOptions);
+void CPL_DLL* CPLHTTPSetOptions(void *pcurl, const char *pszURL, const char * const* papszOptions);
 char** CPLHTTPGetOptionsFromEnv();
 double CPLHTTPGetNewRetryDelay(int response_code, double dfOldDelay,
                                const char* pszErrBuf, const char* pszCurlError);
-void* CPLHTTPIgnoreSigPipe();
-void CPLHTTPRestoreSigPipeHandler(void* old_handler);
+void CPL_DLL* CPLHTTPIgnoreSigPipe();
+void CPL_DLL CPLHTTPRestoreSigPipeHandler(void* old_handler);
 bool CPLMultiPerformWait(void* hCurlMultiHandle, int& repeats);
 /*! @endcond */
 
-bool CPLIsMachinePotentiallyGCEInstance();
+bool CPL_DLL CPLIsMachinePotentiallyGCEInstance();
 bool CPLIsMachineForSureGCEInstance();
 
 /** Manager of Google OAuth2 authentication.
- * 
+ *
  * This class handles different authentication methods and handles renewal
  * of access token.
  *

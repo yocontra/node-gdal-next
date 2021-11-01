@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_mdreader.h d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $
+ * $Id: gdal_mdreader.h 07af6d281da30d52b00966db492e795d9e3ad1cd 2021-10-24 03:26:52 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata (mainly the remote sensing imagery) from files of
@@ -98,7 +98,7 @@ typedef enum {
 /**
  * The base class for all metadata readers
  */
-class GDALMDReaderBase{
+class CPL_DLL GDALMDReaderBase{
 
     CPL_DISALLOW_COPY_ASSIGN(GDALMDReaderBase)
 

@@ -31,7 +31,7 @@
 #include "gdal_pam.h"
 #include "gxfopen.h"
 
-CPL_CVSID("$Id: gxfdataset.cpp 3565f178b0cf927c6e755d7da1af362499edca5f 2021-03-08 21:56:06 +0100 Even Rouault $")
+CPL_CVSID("$Id: gxfdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -173,7 +173,7 @@ GXFDataset::GXFDataset() :
 GXFDataset::~GXFDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
     if( hGXF != nullptr )
         GXFClose( hGXF );
     CPLFree( pszProjection );

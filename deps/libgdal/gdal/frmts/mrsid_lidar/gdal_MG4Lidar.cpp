@@ -48,7 +48,7 @@ LT_USE_LIDAR_NAMESPACE
 #include "gdal_pam.h"
 // #include "gdal_alg.h" // 1.6 and later have gridding algorithms
 
-CPL_CVSID("$Id: gdal_MG4Lidar.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_MG4Lidar.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -544,7 +544,7 @@ MG4LidarDataset::MG4LidarDataset() :
 MG4LidarDataset::~MG4LidarDataset()
 
 {
-   FlushCache();
+   FlushCache(true);
    if ( papoOverviewDS )
    {
       for( int i = 0; i < nOverviewCount; i++ )

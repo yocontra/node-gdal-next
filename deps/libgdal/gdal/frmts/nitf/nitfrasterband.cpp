@@ -54,7 +54,7 @@
 #include "nitflib.h"
 
 
-CPL_CVSID("$Id: nitfrasterband.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: nitfrasterband.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                       NITFMakeColorTable()                           */
@@ -319,7 +319,7 @@ retType NITFProxyPamRasterBand::methodName argList \
     return ret; \
 }
 
-RB_PROXY_METHOD_WITH_RET(CPLErr, CE_Failure, FlushCache, (), ())
+RB_PROXY_METHOD_WITH_RET(CPLErr, CE_Failure, FlushCache, (bool bAtClosing), (bAtClosing))
 
 RB_PROXY_METHOD_WITH_RET(GDALColorInterp, GCI_Undefined, GetColorInterpretation, (), ())
 RB_PROXY_METHOD_WITH_RET(GDALColorTable*, nullptr, GetColorTable, (), ())

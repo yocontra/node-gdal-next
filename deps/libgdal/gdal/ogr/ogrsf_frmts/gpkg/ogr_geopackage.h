@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h 8dc0a101c5e4667fc8dfddf2a96ff54209bf0bfe 2021-09-05 18:19:07 +0200 Even Rouault $
+ * $Id: ogr_geopackage.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -248,7 +248,7 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
         virtual CPLErr      GetGeoTransform( double* padfGeoTransform ) override;
         virtual CPLErr      SetGeoTransform( double* padfGeoTransform ) override;
 
-        virtual void        FlushCache() override;
+        virtual void        FlushCache(bool bAtClosing) override;
         virtual CPLErr      IBuildOverviews( const char *, int, int *,
                                              int, int *, GDALProgressFunc, void * ) override;
 
@@ -313,7 +313,7 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
     protected:
         // Coming from GDALGPKGMBTilesLikePseudoDataset
 
-        virtual CPLErr                  IFlushCacheWithErrCode() override;
+        virtual CPLErr                  IFlushCacheWithErrCode(bool bAtClosing) override;
         virtual int                     IGetRasterCount() override { return nBands; }
         virtual GDALRasterBand*         IGetRasterBand(int nBand) override { return GetRasterBand(nBand); }
         virtual sqlite3                *IGetDB() override { return GetDB(); }

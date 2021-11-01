@@ -51,7 +51,7 @@
 #include "parsexsd.h"
 #include "../mem/ogr_mem.h"
 
-CPL_CVSID("$Id: ogrgmldatasource.cpp 5ff9da12db9ed222a3e721aa11e6c675db28c63a 2021-08-10 17:25:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmldatasource.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                   ReplaceSpaceByPct20IfNeeded()                      */
@@ -1549,7 +1549,7 @@ OGRGMLLayer *OGRGMLDataSource::TranslateGMLSchema( GMLFeatureClass *poClass )
         poSRS = new OGRSpatialReference();
         poSRS->SetAxisMappingStrategy(
             m_bInvertAxisOrderIfLatLong ? OAMS_TRADITIONAL_GIS_ORDER : OAMS_AUTHORITY_COMPLIANT);
-        if (poSRS->SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE)
+        if (poSRS->SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) != OGRERR_NONE)
         {
             delete poSRS;
             poSRS = nullptr;
@@ -1564,7 +1564,7 @@ OGRGMLLayer *OGRGMLDataSource::TranslateGMLSchema( GMLFeatureClass *poClass )
             poSRS = new OGRSpatialReference();
             poSRS->SetAxisMappingStrategy(
                 m_bInvertAxisOrderIfLatLong ? OAMS_TRADITIONAL_GIS_ORDER : OAMS_AUTHORITY_COMPLIANT);
-            if (poSRS->SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) != OGRERR_NONE)
+            if (poSRS->SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) != OGRERR_NONE)
             {
                 delete poSRS;
                 poSRS = nullptr;
@@ -1640,7 +1640,7 @@ OGRGMLLayer *OGRGMLDataSource::TranslateGMLSchema( GMLFeatureClass *poClass )
             OGRSpatialReference* poSRS2 = new OGRSpatialReference();
             poSRS2->SetAxisMappingStrategy(
                 m_bInvertAxisOrderIfLatLong ? OAMS_TRADITIONAL_GIS_ORDER : OAMS_AUTHORITY_COMPLIANT);
-            if( poSRS2->SetFromUserInput(osSRSName.c_str(), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) == OGRERR_NONE )
+            if( poSRS2->SetFromUserInput(osSRSName.c_str(), OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) == OGRERR_NONE )
             {
                 oField.SetSpatialRef(poSRS2);
             }
@@ -2896,7 +2896,7 @@ void OGRGMLDataSource::FindAndParseTopElements(VSILFILE *fp)
                                 const char* pszSRSName = CPLGetXMLValue(psCur, "srsName", nullptr);
                                 if( pszSRSName )
                                 {
-                                    m_oStandaloneGeomSRS.SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS);
+                                    m_oStandaloneGeomSRS.SetFromUserInput(pszSRSName, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get());
                                     m_oStandaloneGeomSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
                                     if( GML_IsSRSLatLongOrder(pszSRSName) )
                                         m_poStandaloneGeom->swapXY();

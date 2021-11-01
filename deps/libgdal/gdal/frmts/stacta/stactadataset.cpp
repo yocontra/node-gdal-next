@@ -43,7 +43,7 @@
 
 extern "C" void GDALRegister_STACTA();
 
-CPL_CVSID("$Id: stactadataset.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: stactadataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // Implements a driver for
 // https://github.com/stac-extensions/tiled-assets
@@ -1067,10 +1067,10 @@ STACTADataset::~STACTADataset()
 /*                          FlushCache()                                */
 /************************************************************************/
 
-void STACTADataset::FlushCache()
+void STACTADataset::FlushCache(bool bAtClosing)
 {
     m_oCacheTileDS.clear();
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 }
 
 /************************************************************************/

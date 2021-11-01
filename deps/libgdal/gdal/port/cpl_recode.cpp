@@ -30,7 +30,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: cpl_recode.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_recode.cpp 1dfc4244072e57fa57a45e564a0033b782c34975 2021-10-31 15:02:42 +0100 Even Rouault $")
 
 #ifdef CPL_RECODE_ICONV
 extern void CPLClearRecodeIconvWarningFlags();
@@ -109,6 +109,17 @@ char CPL_DLL *CPLRecode( const char *pszSource,
     {
         return CPLRecodeStub( pszSource, pszSrcEncoding, pszDstEncoding );
     }
+#ifdef _WIN32
+    else if( ( (EQUAL(pszSrcEncoding, "CP_ACP") ||
+                EQUAL(pszSrcEncoding, "CP_OEMCP"))
+              && EQUAL(pszDstEncoding, CPL_ENC_UTF8) )
+            || ( EQUAL(pszSrcEncoding, CPL_ENC_UTF8)
+                 && (EQUAL(pszDstEncoding, "CP_ACP")||
+                     EQUAL(pszDstEncoding, "CP_OEMCP")) ) )
+    {
+        return CPLRecodeStub( pszSource, pszSrcEncoding, pszDstEncoding );
+    }
+#endif
     else
     {
         return CPLRecodeIconv( pszSource, pszSrcEncoding, pszDstEncoding );

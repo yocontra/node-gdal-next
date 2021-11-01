@@ -36,7 +36,7 @@
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpgdatasource.cpp e90bb80010a8c7c2f57378741b109a8f4e67c17a 2021-10-11 17:31:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 static void OGRPGNoticeProcessor( void *arg, const char * pszMessage );
 
@@ -53,7 +53,7 @@ OGRPGDataSource::OGRPGDataSource() = default;
 OGRPGDataSource::~OGRPGDataSource()
 
 {
-    OGRPGDataSource::FlushCache();
+    OGRPGDataSource::FlushCache(true);
 
     CPLFree( pszName );
     CPLFree( pszForcedTables );
@@ -102,7 +102,7 @@ OGRPGDataSource::~OGRPGDataSource()
 /*                              FlushCache()                            */
 /************************************************************************/
 
-void OGRPGDataSource::FlushCache(void)
+void OGRPGDataSource::FlushCache(bool /* bAtClosing */)
 {
     EndCopy();
     for( int iLayer = 0; iLayer < nLayers; iLayer++ )
@@ -2568,7 +2568,7 @@ OGRErr OGRPGDataSource::CommitTransaction()
     /*CPLDebug("PG", "poDS=%p CommitTransaction() nSoftTransactionLevel=%d",
              this, nSoftTransactionLevel);*/
 
-    FlushCache();
+    FlushCache(false);
 
     nSoftTransactionLevel--;
     bUserTransactionActive = FALSE;
@@ -2614,7 +2614,7 @@ OGRErr OGRPGDataSource::RollbackTransaction()
     /*CPLDebug("PG", "poDS=%p RollbackTransaction() nSoftTransactionLevel=%d",
              this, nSoftTransactionLevel);*/
 
-    FlushCache();
+    FlushCache(false);
 
     nSoftTransactionLevel--;
     bUserTransactionActive = FALSE;
@@ -2929,7 +2929,7 @@ OGRLayer * OGRPGDataSource::ExecuteSQL( const char *pszSQLCommand,
     while(*pszSQLCommand == ' ')
         pszSQLCommand ++;
 
-    FlushCache();
+    FlushCache(false);
 
 /* -------------------------------------------------------------------- */
 /*      Use generic implementation for recognized dialects              */

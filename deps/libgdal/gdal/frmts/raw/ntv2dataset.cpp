@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ntv2dataset.cpp 5d2753a91a0a6d24c06938181a890487daae3833 2020-01-01 21:04:35 +0100 Even Rouault $")
+CPL_CVSID("$Id: ntv2dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // Format documentation: https://github.com/Esri/ntv2-file-routines
 // Original archived specification: https://web.archive.org/web/20091227232322/http://www.mgs.gov.on.ca/stdprodconsume/groups/content/@mgs/@iandit/documents/resourcelist/stel02_047447.pdf
@@ -122,7 +122,7 @@ class NTv2Dataset final: public RawDataset
         return GetSpatialRefFromOldGetProjectionRef();
     }
 
-    void FlushCache(void) override;
+    void FlushCache(bool bAtClosing) override;
 
     static GDALDataset *Open( GDALOpenInfo * );
     static int          Identify( GDALOpenInfo * );
@@ -161,7 +161,7 @@ NTv2Dataset::NTv2Dataset() :
 NTv2Dataset::~NTv2Dataset()
 
 {
-    NTv2Dataset::FlushCache();
+    NTv2Dataset::FlushCache(true);
 
     if( fpImage != nullptr )
     {
@@ -200,7 +200,7 @@ static void SwapPtr64IfNecessary( bool bMustSwap, void* ptr )
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void NTv2Dataset::FlushCache()
+void NTv2Dataset::FlushCache(bool bAtClosing)
 
 {
 /* -------------------------------------------------------------------- */
@@ -209,7 +209,7 @@ void NTv2Dataset::FlushCache()
 /* -------------------------------------------------------------------- */
     if( eAccess != GA_Update || !(GetPamFlags() & GPF_DIRTY) )
     {
-        RawDataset::FlushCache();
+        RawDataset::FlushCache(bAtClosing);
         return;
     }
 
@@ -350,7 +350,7 @@ void NTv2Dataset::FlushCache()
     if( !bSomeLeftOver )
         SetPamFlags( GetPamFlags() & (~GPF_DIRTY) );
 
-    RawDataset::FlushCache();
+    RawDataset::FlushCache(bAtClosing);
 }
 
 /************************************************************************/

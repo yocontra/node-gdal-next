@@ -44,7 +44,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: jpeg2000dataset.cpp 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: jpeg2000dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // XXX: Part of code below extracted from the JasPer internal headers and
 // must be in sync with JasPer version (this one works with JasPer 1.900.1)
@@ -456,7 +456,7 @@ JPEG2000Dataset::JPEG2000Dataset() :
 JPEG2000Dataset::~JPEG2000Dataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if ( psStream )
         jas_stream_close( psStream );

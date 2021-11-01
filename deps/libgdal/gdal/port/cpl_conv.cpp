@@ -27,6 +27,9 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include "cpl_config.h"
+
+#ifdef HAVE_USELOCALE
 // For uselocale, define _XOPEN_SOURCE = 700
 // but on Solaris, we don't have uselocale and we cannot have
 // std=c++11 with _XOPEN_SOURCE != 600
@@ -42,6 +45,7 @@
 #undef _XOPEN_SOURCE
 #endif
 #define _XOPEN_SOURCE 700
+#endif
 #endif
 
 // For atoll (at least for NetBSD)
@@ -92,7 +96,7 @@ void OGRAPISPYCPLSetThreadLocalConfigOption(const char*, const char*);
 // Uncomment to get list of options that have been fetched and set.
 // #define DEBUG_CONFIG_OPTIONS
 
-CPL_CVSID("$Id: cpl_conv.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_conv.cpp e3f27085d5a0960ce7058d9dcbea803fe4792957 2021-10-30 15:07:06 +0200 Even Rouault $")
 
 static CPLMutex *hConfigMutex = nullptr;
 static volatile char **g_papszConfigOptions = nullptr;

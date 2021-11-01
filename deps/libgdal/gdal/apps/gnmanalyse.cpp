@@ -33,7 +33,7 @@
 #include "gnm_priv.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: gnmanalyse.cpp 2dd182b498f0381aa3bc200928681dfbcf2ecfa6 2020-02-04 10:22:31 +0100 Enrico Weigelt, metux IT consult $")
+CPL_CVSID("$Id: gnmanalyse.cpp 23ec9277c8238a42d82701ef2512270b2d0a86af 2021-10-19 08:38:45 +1000 Nyall Dawson $")
 
 enum operation
 {
@@ -347,11 +347,9 @@ static void ReportOnLayer( OGRLayer * poLayer, int bVerbose )
 /* -------------------------------------------------------------------- */
 /*      Read, and dump features.                                        */
 /* -------------------------------------------------------------------- */
-    OGRFeature  *poFeature = nullptr;
-    while( (poFeature = poLayer->GetNextFeature()) != nullptr )
+    for( auto& poFeature: poLayer )
     {
         poFeature->DumpReadable( nullptr );
-        OGRFeature::DestroyFeature( poFeature );
     }
 }
 

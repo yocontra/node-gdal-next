@@ -43,7 +43,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: ogrgeopackagedatasource.cpp fd3f98b3b3c5caa081c03ac5ad3cdf01199967c2 2021-09-11 12:35:22 +0200 Edzer Pebesma $")
+CPL_CVSID("$Id: ogrgeopackagedatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 // Keep in sync prototype of those 2 functions between gdalopeninfo.cpp,
 // ogrsqlitedatasource.cpp and ogrgeopackagedatasource.cpp
@@ -969,7 +969,7 @@ GDALGeoPackageDataset::~GDALGeoPackageDataset()
                   m_osRasterTable.c_str());
     }
 
-    GDALGeoPackageDataset::FlushCache();
+    GDALGeoPackageDataset::FlushCache(true);
     FlushMetadata();
 
     // Destroy bands now since we don't want
@@ -2818,19 +2818,19 @@ CPLErr GDALGeoPackageDataset::FinalizeRasterRegistration()
 /*                             FlushCache()                             */
 /************************************************************************/
 
-void GDALGeoPackageDataset::FlushCache()
+void GDALGeoPackageDataset::FlushCache(bool bAtClosing)
 {
-    IFlushCacheWithErrCode();
+    IFlushCacheWithErrCode(bAtClosing);
 }
 
-CPLErr GDALGeoPackageDataset::IFlushCacheWithErrCode()
+CPLErr GDALGeoPackageDataset::IFlushCacheWithErrCode(bool bAtClosing)
 
 {
     if( m_bInFlushCache )
         return CE_None;
     m_bInFlushCache = true;
     // Short circuit GDALPamDataset to avoid serialization to .aux.xml
-    GDALDataset::FlushCache();
+    GDALDataset::FlushCache(bAtClosing);
 
     for( int i = 0; i < m_nLayers; i++ )
     {
@@ -2908,7 +2908,7 @@ CPLErr GDALGeoPackageDataset::IBuildOverviews(
     if( nOverviews == 0 )
     {
         for(int i=0;i<m_nOverviewCount;i++)
-            m_papoOverviewDS[i]->FlushCache();
+            m_papoOverviewDS[i]->FlushCache(false);
 
         SoftStartTransaction();
 
@@ -2961,7 +2961,7 @@ CPLErr GDALGeoPackageDataset::IBuildOverviews(
         return CE_Failure;
     }
 
-    FlushCache();
+    FlushCache(false);
     for(int i=0;i<nOverviews;i++)
     {
         if( panOverviewList[i] < 2 )

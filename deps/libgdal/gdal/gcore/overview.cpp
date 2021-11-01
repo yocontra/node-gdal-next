@@ -70,7 +70,7 @@
 
 #endif
 
-CPL_CVSID("$Id: overview.cpp 190e5a96f1459e48d067ea175180c323898a53d4 2021-08-28 13:18:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: overview.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                     GDALResampleChunk32R_Near()                      */
@@ -4680,7 +4680,7 @@ GDALRegenerateOverviews( GDALRasterBandH hSrcBand,
          eErr == CE_None && iOverview < nOverviewCount;
          ++iOverview )
     {
-        eErr = papoOvrBands[iOverview]->FlushCache();
+        eErr = papoOvrBands[iOverview]->FlushCache(false);
     }
 
     if( eErr == CE_None )
@@ -5320,7 +5320,7 @@ GDALRegenerateOverviewsMultiBand( int nBands, GDALRasterBand** papoSrcBands,
         for( int iBand = 0; iBand < nBands; ++iBand )
         {
             CPLFree(apaChunk[iBand]);
-            papapoOverviewBands[iBand][iOverview]->FlushCache();
+            papapoOverviewBands[iBand][iOverview]->FlushCache(false);
 
             CPLFree(apabyChunkNoDataMask[iBand]);
         }

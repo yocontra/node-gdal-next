@@ -54,7 +54,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: vrtpansharpened.cpp cc81ce193b4ef67ddcea2692d0bcc8b4be78be29 2020-11-17 19:21:57 +0100 Even Rouault $")
+CPL_CVSID("$Id: vrtpansharpened.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                    GDALCreatePansharpenedVRT()                       */
@@ -153,7 +153,7 @@ VRTPansharpenedDataset::VRTPansharpenedDataset( int nXSize, int nYSize ) :
 VRTPansharpenedDataset::~VRTPansharpenedDataset()
 
 {
-    VRTPansharpenedDataset::FlushCache();
+    VRTPansharpenedDataset::FlushCache(true);
     VRTPansharpenedDataset::CloseDependentDatasets();
     CPLFree(m_pabyLastBufferBandRasterIO);
 }
@@ -1418,7 +1418,7 @@ VRTPansharpenedRasterBand::VRTPansharpenedRasterBand( GDALDataset *poDSIn, int n
 VRTPansharpenedRasterBand::~VRTPansharpenedRasterBand()
 
 {
-    FlushCache();
+    FlushCache(true);
 }
 
 /************************************************************************/

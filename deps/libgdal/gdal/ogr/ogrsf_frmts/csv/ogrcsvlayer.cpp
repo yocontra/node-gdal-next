@@ -59,7 +59,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: ogrcsvlayer.cpp fca1a539b0302ff4f394ae133cf1af6e5adb07b2 2021-09-22 13:42:20 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcsvlayer.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
 
 /************************************************************************/
 /*                            CSVSplitLine()                            */
@@ -971,7 +971,7 @@ void OGRCSVLayer::BuildFeatureDefn( const char *pszNfdcGeomField,
             {
                 OGRSpatialReference *poSRS = new OGRSpatialReference();
                 poSRS->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-                if( poSRS->SetFromUserInput((const char *)pabyRet, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS) ==
+                if( poSRS->SetFromUserInput((const char *)pabyRet, OGRSpatialReference::SET_FROM_USER_INPUT_LIMITATIONS_get()) ==
                     OGRERR_NONE )
                 {
                     poFeatureDefn->GetGeomFieldDefn(0)->SetSpatialRef(poSRS);

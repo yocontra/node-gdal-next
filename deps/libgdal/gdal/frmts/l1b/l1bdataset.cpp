@@ -40,7 +40,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: l1bdataset.cpp 70c086916d3b0b14f6b5ed9c793dd62daca8d14d 2021-03-08 22:56:55 +0100 Even Rouault $")
+CPL_CVSID("$Id: l1bdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
 
 typedef enum {                  // File formats
     L1B_NONE,           // Not a L1B format
@@ -606,7 +606,7 @@ L1BDataset::L1BDataset( L1BFileFormat eL1BFormatIn ) :
 L1BDataset::~L1BDataset()
 
 {
-    FlushCache();
+    FlushCache(true);
 
     if( nGCPCount > 0 )
     {

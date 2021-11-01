@@ -56,7 +56,7 @@
 #include "ogr_srs_api.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdal_grid_lib.cpp 3facda23f7b853fb1ad72e4631ed4f70fd6c29c5 2021-04-22 19:00:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_grid_lib.cpp 23ec9277c8238a42d82701ef2512270b2d0a86af 2021-10-19 08:38:45 +1000 Nyall Dawson $")
 
 /************************************************************************/
 /*                          GDALGridOptions                             */
@@ -650,8 +650,7 @@ static OGRGeometryCollection* LoadGeometry( const char* pszDS,
         poLyr->SetAttributeFilter( pszWhere );
 
     OGRGeometryCollection *poGeom = nullptr;
-    OGRFeature *poFeat = nullptr;
-    while ( (poFeat = poLyr->GetNextFeature()) != nullptr )
+    for( auto& poFeat: poLyr )
     {
         OGRGeometry* poSrcGeom = poFeat->GetGeometryRef();
         if ( poSrcGeom )
@@ -684,15 +683,12 @@ static OGRGeometryCollection* LoadGeometry( const char* pszDS,
                 CPLError(CE_Failure, CPLE_AppDefined,
                          "Geometry not of polygon type.");
                 OGRGeometryFactory::destroyGeometry( poGeom );
-                OGRFeature::DestroyFeature( poFeat );
                 if ( pszSQL != nullptr )
                     poDS->ReleaseResultSet( poLyr );
                 GDALClose(poDS);
                 return nullptr;
             }
         }
-
-        OGRFeature::DestroyFeature( poFeat );
     }
 
     if( pszSQL != nullptr )

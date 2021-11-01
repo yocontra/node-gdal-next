@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrmutexeddatasource.h 2bd4328a9cb58844cb91956f8bd9869218a45b1a 2021-04-29 18:40:02 +0200 Even Rouault $
+ * $Id: ogrmutexeddatasource.h 5a8ccc891da4f76e423dec56c6babdc61425c02f 2021-10-15 18:58:04 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLMutexedDataSource class
@@ -67,7 +67,7 @@ class CPL_DLL OGRMutexedDataSource : public OGRDataSource
                                       int bWrapLayersInMutexedLayer);
 
     /* The destruction of the object isn't protected by the mutex */
-    virtual     ~OGRMutexedDataSource();
+    virtual     ~OGRMutexedDataSource() override;
 
     OGRDataSource*      GetBaseDataSource() { return m_poBaseDataSource; }
 
@@ -77,6 +77,7 @@ class CPL_DLL OGRMutexedDataSource : public OGRDataSource
     virtual OGRLayer    *GetLayer(int) override;
     virtual OGRLayer    *GetLayerByName(const char *) override;
     virtual OGRErr      DeleteLayer(int) override;
+    virtual bool        IsLayerPrivate(int iLayer) const override;
 
     virtual int         TestCapability( const char * ) override;
 
@@ -98,7 +99,7 @@ class CPL_DLL OGRMutexedDataSource : public OGRDataSource
                                     const char *pszDialect ) override;
     virtual void        ReleaseResultSet( OGRLayer * poResultsSet ) override;
 
-    virtual void        FlushCache() override;
+    virtual void        FlushCache(bool bAtClosing) override;
 
     virtual OGRErr      StartTransaction(int bForce=FALSE) override;
     virtual OGRErr      CommitTransaction() override;
