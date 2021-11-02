@@ -639,12 +639,12 @@ describe('gdal.LayerAsync', () => {
             })
           })
           it('should reject if layer doesnt support changing features', () =>
-            prepare_dataset_layer_test('r', (dataset, layer) =>
+            prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer) =>
               assert.isRejected(layer.features.setAsync(1, new gdal.Feature(layer)), /read-only/)
             ))
         })
         it('should reject if dataset is destroyed', () =>
-          prepare_dataset_layer_test('r', (dataset, layer: gdal.Layer) => {
+          prepare_dataset_layer_test('r', { autoclose: false }, (dataset, layer: gdal.Layer) => {
             const newFeature = new gdal.Feature(layer)
             dataset.close()
             return assert.isRejected(layer.features.setAsync(1, newFeature), /already destroyed/)
