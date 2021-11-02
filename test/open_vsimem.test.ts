@@ -13,10 +13,6 @@ describe('Open', () => {
     let filename, ds: gdal.Dataset, buffer: Buffer
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 
-    after(() => {
-      ds.close()
-      global.gc()
-    })
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/park.geo.json')
       buffer = fs.readFileSync(filename)
@@ -88,11 +84,12 @@ describe('Open', () => {
       return assert.isRejected(gdal.openAsync(buffer2))
     })
   })
+})
 
-  describe('vsimem/set', () => {
-    after(() => {
-      global.gc()
-    })
+describe('gdal.vsimem', () => {
+  afterEach(global.gc)
+
+  describe('set', () => {
     it('should create a vsimem file from a Buffer', () => {
       const buffer_in = fs.readFileSync(path.join(__dirname, 'data/park.geo.json'))
       gdal.vsimem.set(buffer_in, '/vsimem/park.geo.json')
@@ -109,7 +106,24 @@ describe('Open', () => {
     })
   })
 
-  describe('vsimem/release', () => {
+  describe('copy', () => {
+    it('should create a vsimem file from a Buffer', () => {
+      const buffer_in = fs.readFileSync(path.join(__dirname, 'data/park.geo.json'))
+      gdal.vsimem.copy(buffer_in, '/vsimem/park.geo.json')
+      const ds = gdal.open('/vsimem/park.geo.json')
+      ds.close()
+      const buffer_out = gdal.vsimem.release('/vsimem/park.geo.json')
+      assert.deepEqual(buffer_in, buffer_out)
+    })
+    it('should throw if the buffer is not a Buffer', () => {
+      assert.throws(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        gdal.vsimem.copy(({}) as any, '/vsimem/park.geo.json')
+      })
+    })
+  })
+
+  describe('release', () => {
     it('should allow to retrieve the contents from a vsimem', () => {
       const size = 64
       const ds = gdal.open('/vsimem/temp1.tiff', 'w', 'GTiff', size, size, 1, gdal.GDT_Byte)

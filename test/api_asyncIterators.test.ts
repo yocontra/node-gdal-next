@@ -65,10 +65,8 @@ if (Symbol.asyncIterator) {
           // Work around https://github.com/OSGeo/gdal/issues/3746
           // on Fedora 33
           it('should iterate through the overviews', async () => {
-            const ds = gdal.open(
-              fileUtils.clone(`${__dirname}/data/sample.tif`),
-              'r+'
-            )
+            const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+            const ds = gdal.open(tempFile, 'r+')
             const band = ds.bands.get(1)
             ds.buildOverviews('NEAREST', [ 2, 4 ])
             const w = []
@@ -76,15 +74,16 @@ if (Symbol.asyncIterator) {
               w.push(overview.size.x)
             }
             assert.sameMembers(w, [ ds.rasterSize.x / 2, ds.rasterSize.x / 4 ])
+            ds.close()
+            gdal.vsimem.release(tempFile)
           })
           it('should throw error if dataset already closed', () => {
-            const ds = gdal.open(
-              fileUtils.clone(`${__dirname}/data/sample.tif`),
-              'r+'
-            )
+            const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+            const ds = gdal.open(tempFile, 'r+')
             const band = ds.bands.get(1)
             ds.buildOverviews('NEAREST', [ 2 ])
             ds.close()
+            gdal.vsimem.release(tempFile)
             return assert.isRejected((async () => {
               for await (const overview of band.overviews) overview
             })(), /already been destroyed/)

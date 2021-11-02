@@ -1430,44 +1430,41 @@ describe('gdal.RasterBand', () => {
       })
       describe('get()', () => {
         it('should return a RasterBand', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2 ])
           assert.instanceOf(band.overviews.get(0), gdal.RasterBand)
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw error if dataset already closed', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2 ])
           ds.close()
+          gdal.vsimem.release(tempFile)
           assert.throws(() => {
             band.overviews.get(0)
           })
         })
         it('should throw error if id out of range', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2 ])
           assert.throws(() => {
             band.overviews.get(2)
           })
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
       })
       describe('forEach()', () => {
         it('should pass each overview to the callback', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2, 4 ])
           const w = [] as number[]
@@ -1476,15 +1473,16 @@ describe('gdal.RasterBand', () => {
             w.push(overview.size.x)
           })
           assert.sameMembers(w, [ ds.rasterSize.x / 2, ds.rasterSize.x / 4 ])
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw error if dataset already closed', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2 ])
           ds.close()
+          gdal.vsimem.release(tempFile)
           assert.throws(() => {
             band.overviews.forEach(() => undefined)
           })
@@ -1492,10 +1490,8 @@ describe('gdal.RasterBand', () => {
       })
       describe('@@iterator()', () => {
         it('should iterate through the overviews', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2, 4 ])
           const w = []
@@ -1503,15 +1499,16 @@ describe('gdal.RasterBand', () => {
             w.push(overview.size.x)
           }
           assert.sameMembers(w, [ ds.rasterSize.x / 2, ds.rasterSize.x / 4 ])
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw error if dataset already closed', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2 ])
           ds.close()
+          gdal.vsimem.release(tempFile)
           assert.throws(() => {
             for (const overview of band.overviews) overview
           })
@@ -1519,10 +1516,8 @@ describe('gdal.RasterBand', () => {
       })
       describe('map()', () => {
         it('should operate normally', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2, 4 ])
 
@@ -1534,6 +1529,8 @@ describe('gdal.RasterBand', () => {
           assert.isArray(result)
           assert.lengthOf(result, band.overviews.count())
           assert.equal(result[0], 'a')
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
       })
     })

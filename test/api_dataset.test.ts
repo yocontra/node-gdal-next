@@ -418,16 +418,20 @@ describe('gdal.Dataset', () => {
           })
         })
         it('should error if dataset doesnt support creating layers', () => {
-          ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/park.geo.json`),
-            'r'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/park.geo.json`)
+          ds = gdal.open(tempFile, 'r')
           assert.throws(() => {
-            ds.layers.create('layer_name', null, gdal.wkbPoint)
+            try {
+              ds.layers.create('layer_name', null, gdal.wkbPoint)
+            } catch (e) {
+              ds.close()
+              gdal.vsimem.release(tempFile)
+              throw e
+            }
           })
         })
         it('should accept layer creation options', () => {
-          const basename = `${__dirname}/data/temp/ds_layer_test.${String(
+          const basename = `${fileUtils.tempDir(__dirname)}/ds_layer_test.${String(
             Math.random()
           ).substring(2)}`
           const file = `${basename}.dbf`
@@ -512,23 +516,25 @@ describe('gdal.Dataset', () => {
           }, /srs must be SpatialReference object/)
         })
         it('should set projection', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
+          const ds = gdal.open(tempFile)
           const expected = [
             'PROJCS["NAD83 / UTM zone 10N",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-123],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]', // new gdal
             'PROJCS["NAD_1983_UTM_Zone_10N",GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-123.0],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_of_Origin",0.0],UNIT["Meter",1.0]]' // old gdal
           ]
           ds.srs = gdal.SpatialReference.fromWKT(NAD83_WKT)
           assert.include(expected, ds.srs.toWKT())
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should clear projection', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
+          const ds = gdal.open(tempFile)
           assert.isNotNull(ds.srs)
           ds.srs = null
           assert.isNull(ds.srs)
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw error if dataset doesnt support setting srs', () => {
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
@@ -537,13 +543,18 @@ describe('gdal.Dataset', () => {
           })
         })
         it('should throw if dataset is already closed', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
+          const ds = gdal.open(tempFile)
           ds.close()
 
           assert.throws(() => {
-            ds.srs = gdal.SpatialReference.fromWKT(NAD83_WKT)
+            try {
+              ds.srs = gdal.SpatialReference.fromWKT(NAD83_WKT)
+            } catch (e) {
+              ds.close()
+              gdal.vsimem.release(tempFile)
+              throw e
+            }
           })
         })
       })
@@ -759,29 +770,40 @@ describe('gdal.Dataset', () => {
       })
       describe('setter', () => {
         it('should set geotransform', () => {
-          const ds = gdal.open(fileUtils.clone(`${__dirname}/data/sample.vrt`))
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.vrt`)
+          const ds = gdal.open(tempFile)
 
           const transform = [ 0, 2, 0, 0, 0, 2 ]
           ds.geoTransform = transform
           assert.deepEqual(ds.geoTransform, transform)
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw if dataset doesnt support setting geotransform', () => {
           let ds: gdal.Dataset
           const transform = [ 0, 2, 0, 0, 0, 2 ]
 
-          ds = gdal.open(fileUtils.clone(`${__dirname}/data/park.geo.json`))
+          let tempFile = fileUtils.clone(`${__dirname}/data/park.geo.json`)
+          ds = gdal.open(tempFile)
           assert.throws(() => {
             ds.geoTransform = transform
           })
+          ds.close()
+          gdal.vsimem.release(tempFile)
 
-          ds = gdal.open(fileUtils.clone(`${__dirname}/data/sample.tif`))
+          tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          ds = gdal.open(tempFile)
           assert.throws(() => {
             ds.geoTransform = transform
           })
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw if dataset is already closed', () => {
-          const ds = gdal.open(fileUtils.clone(`${__dirname}/data/sample.vrt`))
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.vrt`)
+          const ds = gdal.open(tempFile)
           ds.close()
+          gdal.vsimem.release(tempFile)
 
           const transform = [ 0, 2, 0, 0, 0, 2 ]
           assert.throws(() => {
@@ -789,7 +811,8 @@ describe('gdal.Dataset', () => {
           })
         })
         it('should throw if geotransform is invalid', () => {
-          const ds = gdal.open(fileUtils.clone(`${__dirname}/data/sample.vrt`))
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.vrt`)
+          const ds = gdal.open(tempFile)
           assert.throws(() => {
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.geoTransform = [ 0, 1, 'bad_value' as any, 0, 0, 1 ]
@@ -797,6 +820,8 @@ describe('gdal.Dataset', () => {
           assert.throws(() => {
             ds.geoTransform = [ 0, 1 ]
           })
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw if geotransform is not an array', () => {
           const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
@@ -961,10 +986,8 @@ describe('gdal.Dataset', () => {
     })
     describe('buildOverviews()', () => {
       it('should generate overviews for all bands', () => {
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/multiband.tif`),
-          'r+'
-        )
+        const tempFile = fileUtils.clone(`${__dirname}/data/multiband.tif`)
+        const ds = gdal.open(tempFile, 'r+')
         const expected_w = [
           ds.rasterSize.x / 2,
           ds.rasterSize.x / 4,
@@ -980,67 +1003,67 @@ describe('gdal.Dataset', () => {
           assert.sameMembers(w, expected_w)
         })
         ds.close()
+        gdal.vsimem.release(tempFile)
       })
       it('should not fail hard if invalid overview is given', () => {
         // 1.11 introduced an error for this, but 1.10 and lower
         // fail silently - so really all we can do is make sure
         // nothing fatal (segfault, etc) happens
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/sample.tif`),
-          'r+'
-        )
+        const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+        const ds = gdal.open(tempFile, 'r+')
         try {
           ds.buildOverviews('NEAREST', [ 2, 4, -3 ])
         } catch (e) {
           /* ignore (see above) */
         }
+        ds.close()
+        gdal.vsimem.release(tempFile)
       })
       it('should throw if overview is not a number', () => {
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/sample.tif`),
-          'r+'
-        )
+        const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+        const ds = gdal.open(tempFile, 'r+')
         assert.throws(() => {
           /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           ds.buildOverviews('NEAREST', [ 2, 4, {} as any ])
         })
+        ds.close()
+        gdal.vsimem.release(tempFile)
       })
       describe('w/bands argument', () => {
         before(() => gdal.config.set('USE_RRD', 'YES'))
         it('should generate overviews only for the given bands', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/multiband.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/multiband.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 1 ])
           assert.equal(ds.bands.get(1).overviews.count(), 3)
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw if invalid band given', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           assert.throws(() => {
             ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 4 ])
           })
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw if band id is not a number', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           assert.throws(() => {
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ {} as any ])
           })
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
       })
       it('should throw if dataset already closed', () => {
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/sample.tif`),
-          'r+'
-        )
+        const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+        const ds = gdal.open(tempFile, 'r+')
         ds.close()
+        gdal.vsimem.release(tempFile)
         assert.throws(() => {
           ds.buildOverviews('NEAREST', [ 2, 4, 8 ])
         })
@@ -1048,10 +1071,8 @@ describe('gdal.Dataset', () => {
       describe('w/progress_cb option', () => {
         before(() => gdal.config.set('USE_RRD', 'YES'))
         it('should invoke the progress callback', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/multiband.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/multiband.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           let calls = 0
           ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 1 ], { progress_cb: (complete) => {
             calls++
@@ -1063,15 +1084,15 @@ describe('gdal.Dataset', () => {
           } })
           assert.isAbove(calls, 0)
           assert.equal(ds.bands.get(1).overviews.count(), 3)
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
       })
     })
     describe('buildOverviewsAsync()', () => {
       it('should generate overviews for all bands', () => {
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/multiband.tif`),
-          'r+'
-        )
+        const tempFile = fileUtils.clone(`${__dirname}/data/multiband.tif`)
+        const ds = gdal.open(tempFile, 'r+')
         const expected_w = [
           ds.rasterSize.x / 2,
           ds.rasterSize.x / 4,
@@ -1087,48 +1108,51 @@ describe('gdal.Dataset', () => {
             assert.sameMembers(w, expected_w)
           })
           ds.close()
+          gdal.vsimem.release(tempFile)
         }))
       })
       it('should throw if overview is not a number', () => {
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/sample.tif`),
-          'r+'
-        )
+        const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+        const ds = gdal.open(tempFile, 'r+')
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, {} as any ]))
+        return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, {} as any ])).then(() => {
+          ds.close()
+          gdal.vsimem.release(tempFile)
+        })
       })
       describe('w/bands argument', () => {
         it('should generate overviews only for the given bands', () => {
           gdal.config.set('USE_RRD', 'YES')
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/multiband.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/multiband.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           ds.buildOverviews('NEAREST', [ 2, 4, 8 ], [ 1 ])
           assert.equal(ds.bands.get(1).overviews.count(), 3)
+          ds.close()
+          gdal.vsimem.release(tempFile)
         })
         it('should throw if invalid band given', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
-          return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ], [ 4 ]))
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
+          return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ], [ 4 ])).then(() => {
+            ds.close()
+            gdal.vsimem.release(tempFile)
+          })
         })
         it('should throw if band id is not a number', () => {
-          const ds = gdal.open(
-            fileUtils.clone(`${__dirname}/data/sample.tif`),
-            'r+'
-          )
+          const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+          const ds = gdal.open(tempFile, 'r+')
           /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-          return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ], [ {} as any ]))
+          return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ], [ {} as any ])).then(() => {
+            ds.close()
+            gdal.vsimem.release(tempFile)
+          })
         })
       })
       it('should throw if dataset already closed', () => {
-        const ds = gdal.open(
-          fileUtils.clone(`${__dirname}/data/sample.tif`),
-          'r+'
-        )
+        const tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
+        const ds = gdal.open(tempFile, 'r+')
         ds.close()
+        gdal.vsimem.release(tempFile)
         return assert.isRejected(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ]))
       })
     })

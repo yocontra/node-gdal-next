@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import * as gdal from '../..'
 
 export function copyRecursiveSync (src: string, dest: string) {
   const exists = fs.existsSync(src)
@@ -18,13 +19,10 @@ export function copyRecursiveSync (src: string, dest: string) {
 export function clone(file: string) {
   const base = path.basename(file)
   const dotpos = base.lastIndexOf('.')
-  const destname = `${base.substring(0, dotpos)}.tmp${String(Math.random()).substring(2)}${base.substring(dotpos)}`
-  const destdir = path.resolve(path.dirname(file), 'temp')
-  fs.mkdirSync(destdir, { recursive: true })
-  const result = path.resolve(destdir, destname)
-
-  fs.writeFileSync(result, fs.readFileSync(file))
-  return result
+  const destname = `/vsimem/${base.substring(0, dotpos)}.tmp${String(Math.random()).substring(2)}${base.substring(dotpos)}`
+  const buffer = fs.readFileSync(file)
+  gdal.vsimem.copy(buffer, destname)
+  return destname
 }
 
 export function cloneDir(dir: string) {
@@ -33,4 +31,10 @@ export function cloneDir(dir: string) {
   const result = `${path.resolve(__dirname, '..')}/data/temp/${name_new}`
   copyRecursiveSync(dir, result)
   return result
+}
+
+export function tempDir(dir: string) {
+  const destdir = path.resolve(dir, 'data', 'temp')
+  fs.mkdirSync(destdir, { recursive: true })
+  return destdir
 }
