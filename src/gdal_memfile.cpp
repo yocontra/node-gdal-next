@@ -37,6 +37,7 @@ void Memfile::Initialize(Local<Object> target) {
   Nan::SetMethod(vsimem, "_anonymous", Memfile::vsimemAnonymous); // not a public API
   Nan::SetMethod(vsimem, "set", Memfile::vsimemSet);
   Nan::SetMethod(vsimem, "release", Memfile::vsimemRelease);
+  Nan::SetMethod(vsimem, "copy", Memfile::vsimemCopy);
 }
 
 // Anonymous buffers are handled by the GC
@@ -80,16 +81,44 @@ Memfile *Memfile::get(Local<Object> buffer, const std::string &filename) {
   return mem;
 }
 
+// GDAL buffers handled by GDAL and are not referenced by node-gdal-async
+bool Memfile::copy(Local<Object> buffer, const std::string &filename) {
+  if (!Buffer::HasInstance(buffer)) return false;
+  void *data = node::Buffer::Data(buffer);
+  if (data == nullptr) return false;
+
+  size_t len = node::Buffer::Length(buffer);
+
+  void *dataCopy = CPLMalloc(len);
+  if (dataCopy == nullptr) return false;
+  memcpy(dataCopy, data, len);
+
+  VSILFILE *vsi = VSIFileFromMemBuffer(filename.c_str(), (GByte *)dataCopy, len, 1);
+  if (vsi == nullptr) {
+    CPLFree(dataCopy);
+    return false;
+  }
+  VSIFCloseL(vsi);
+  return true;
+}
+
 /**
  * Create an in-memory `/vsimem/` file from a `Buffer`.
  * This is a zero-copy operation - GDAL will read from the Buffer which will be
  * protected by the GC even if it goes out of scope.
+ *
  * The file will stay in memory until it is deleted with `gdal.vsimem.release`.
+ *
+ * The file will be in read-write mode, but GDAL won't
+ * be able to extend it as the allocated memory will be tied to the `Buffer` object.
+ * Use `gdal.vsimem.copy` to create an extendable copy.
  *
  * @static
  * @method set
+ * @throws Error
  * @param {Buffer} data A binary buffer containing the file data
  * @param {string} filename A file name beginning with `/vsimem/`
+ * @param {boolean} [copy=false] Copy the memory buffer into GDAL's own heap allowing extending of the file
  */
 NAN_METHOD(Memfile::vsimemSet) {
   Local<Object> buffer;
@@ -100,6 +129,29 @@ NAN_METHOD(Memfile::vsimemSet) {
 
   Memfile *memfile = Memfile::get(buffer, filename);
   if (memfile == nullptr) Nan::ThrowError("Failed creating in-memory file");
+}
+
+/**
+ * Create an in-memory `/vsimem/` file from a `Buffer`.
+ * This method copies the `Buffer` into GDAL's own memory heap
+ * creating a in-memory file that can be freely extended by GDAL.
+ *
+ * The file will stay in memory until it is deleted with `gdal.vsimem.release`.
+ * *
+ * @static
+ * @method copy
+ * @throws Error
+ * @param {Buffer} data A binary buffer containing the file data
+ * @param {string} filename A file name beginning with `/vsimem/`
+ */
+NAN_METHOD(Memfile::vsimemCopy) {
+  Local<Object> buffer;
+  std::string filename;
+
+  NODE_ARG_OBJECT(0, "buffer", buffer);
+  NODE_ARG_STR(1, "filename", filename);
+
+  if (!Memfile::copy(buffer, filename)) Nan::ThrowError("Failed creating in-memory file");
 }
 
 /*
@@ -131,12 +183,12 @@ NAN_METHOD(Memfile::vsimemAnonymous) {
  * ***WARNING***!
  *
  * The file must not be open or random memory corruption is possible with GDAL <= 3.3.1.
- * GDAL >= 3.3.2 will gracefully fail further operations and this function is safe.
+ * GDAL >= 3.3.2 will gracefully fail further operations and this function will always be safe.
  *
  * @static
  * @method release
  * @param {string} filename A file name beginning with `/vsimem/`
- * @throws
+ * @throws Error
  * @return {Buffer} A binary buffer containing all the data
  */
 NAN_METHOD(Memfile::vsimemRelease) {

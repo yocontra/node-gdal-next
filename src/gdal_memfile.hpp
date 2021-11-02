@@ -33,12 +33,14 @@ class Memfile {
   ~Memfile();
   static Memfile *get(Local<Object>);
   static Memfile *get(Local<Object>, const std::string &filename);
+  static bool copy(Local<Object>, const std::string &filename);
   static std::map<void *, Memfile *> memfile_collection;
 
   static void Initialize(Local<Object> target);
   static NAN_METHOD(vsimemSet);
   static NAN_METHOD(vsimemAnonymous);
   static NAN_METHOD(vsimemRelease);
+  static NAN_METHOD(vsimemCopy);
 };
 } // namespace node_gdal
 #endif
