@@ -132,12 +132,13 @@ NAN_METHOD(Memfile::vsimemSet) {
 }
 
 /**
- * Create an in-memory `/vsimem/` file from a `Buffer`.
+ * Create an in-memory `/vsimem/` file copying a `Buffer`.
  * This method copies the `Buffer` into GDAL's own memory heap
- * creating a in-memory file that can be freely extended by GDAL.
+ * creating an in-memory file that can be freely extended by GDAL.
+ * `gdal.vsimem.set` is the better choice unless the file needs to be extended.
  *
  * The file will stay in memory until it is deleted with `gdal.vsimem.release`.
- * *
+ *
  * @static
  * @method copy
  * @throws Error
