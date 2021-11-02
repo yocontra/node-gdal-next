@@ -1,6 +1,7 @@
 import * as gdal from '..'
 import { assert } from 'chai'
 import * as path from 'path'
+import * as cp from 'child_process'
 
 if (process.env.GDAL_DATA !== undefined) {
   throw new Error(
@@ -77,7 +78,6 @@ describe('gdal', () => {
         const env = Object.assign({}, process.env)
         env.GDAL_DATA = 'bogus'
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const cp = require('child_process')
         // The manual delete/global.gc() allows for error-free unit testing of the ASAN build
         const command =
           "\"const gdal = require('./lib/gdal.js'); console.log(gdal.config.get('GDAL_DATA')); delete gdal.drivers; global.gc();\""
@@ -157,7 +157,7 @@ describe('gdal', () => {
         gdal.GDT_Float64
       )
       const band = ds.bands.get(1)
-      assert.equal(gdal.fromDataType(band.dataType), Float64Array)
+      assert.equal(gdal.fromDataType(band.dataType as string), Float64Array)
     })
   })
 

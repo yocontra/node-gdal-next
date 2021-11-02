@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import * as gdal from '..'
-import * as fileUtils from './utils/file.js'
+import * as fileUtils from './utils/file'
 
 describe('gdal.RasterBand', () => {
   afterEach(global.gc)
@@ -69,9 +69,9 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
           const band = ds.bands.get(1)
           assert.instanceOf(band.colorTable, gdal.ColorTable)
-          assert.deepEqual(band.colorTable.get(1), { c1: 7, c2: 8, c3: 45, c4: 255 })
+          assert.deepEqual(band.colorTable?.get(1), { c1: 7, c2: 8, c3: 45, c4: 255 })
           assert.throws(() => {
-            band.colorTable.set(0, { c1: 0, c2: 0, c3: 0, c4: 0 })
+            band.colorTable?.set(0, { c1: 0, c2: 0, c3: 0, c4: 0 })
           }, /read-only/)
         })
         it('should throw error if dataset already closed', () => {
@@ -105,7 +105,7 @@ describe('gdal.RasterBand', () => {
           const band = ds.bands.get(1)
           ds.close()
           assert.throws(() => {
-            band.colorTable = undefined
+            band.colorTable = null
           }, /already been destroyed/)
         })
       })
@@ -114,28 +114,29 @@ describe('gdal.RasterBand', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
           const band = ds.bands.get(1)
           let count = 0
-          for (const color of band.colorTable) {
+          for (const color of band.colorTable || []) {
             count++
             assert.hasAllKeys(color, [ 'c1', 'c2', 'c3', 'c4' ])
           }
           assert.isAbove(count, 0)
-          assert.equal(count, band.colorTable.count())
+          assert.equal(count, band.colorTable?.count())
         })
         it('clone()', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
           const band = ds.bands.get(1)
-          const colorTable = band.colorTable.clone()
+          assert.isNotNull(band.colorTable)
+          const colorTable = band.colorTable?.clone()
           assert.instanceOf(colorTable, gdal.ColorTable)
-          assert.equal(colorTable.count(), band.colorTable.count())
-          for (let i = 0; i < colorTable.count(); i++) {
-            assert.deepEqual(colorTable.get(i), band.colorTable.get(i))
+          assert.equal(colorTable?.count(), band?.colorTable?.count())
+          for (let i = 0; i < (colorTable?.count() || 0); i++) {
+            assert.deepEqual(colorTable?.get(i), band?.colorTable?.get(i))
           }
-          colorTable.set(0, { c1: 0, c2: 0, c3: 0, c4: 0 })
+          colorTable?.set(0, { c1: 0, c2: 0, c3: 0, c4: 0 })
         })
         it('"interpretation" property', () => {
           const ds = gdal.open(`${__dirname}/data/CM13ct.png`)
           const band = ds.bands.get(1)
-          const interp = band.colorTable.interpretation
+          const interp = band.colorTable?.interpretation
           assert.equal(interp, gdal.GPI_RGB)
         })
         it('ramp()', () => {
@@ -634,7 +635,7 @@ describe('gdal.RasterBand', () => {
               gdal.GDT_Byte
             )
             const band = ds.bands.get(1)
-            const data = band.pixels.read(0, 0, 20, 30, null)
+            const data = band.pixels.read(0, 0, 20, 30)
             assert.instanceOf(data, Uint8Array)
             assert.equal(data.length, 20 * 30)
           })
@@ -804,7 +805,7 @@ describe('gdal.RasterBand', () => {
                 gdal.GDT_Byte
               )
               const band = ds.bands.get(1)
-              const data = band.pixels.read(0, 0, 20, 30, null, {
+              const data = band.pixels.read(0, 0, 20, 30, undefined, {
                 buffer_width: 10,
                 buffer_height: 15
               })
@@ -859,7 +860,7 @@ describe('gdal.RasterBand', () => {
                 gdal.GDT_Byte
               )
               const band = ds.bands.get(1)
-              const data = band.pixels.read(0, 0, 20, 30, null, {
+              const data = band.pixels.read(0, 0, 20, 30, undefined, {
                 type: gdal.GDT_Float64
               })
               assert.instanceOf(data, Float64Array)
@@ -1158,7 +1159,7 @@ describe('gdal.RasterBand', () => {
               h = 8
             const stripes = new Uint8Array(new ArrayBuffer(w * h))
 
-            let band_stripes, band_solid
+            let band_stripes: gdal.RasterBand, band_solid: gdal.RasterBand
             before(() => {
               for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
@@ -1192,7 +1193,7 @@ describe('gdal.RasterBand', () => {
             })
           })
           describe('"progress_cb"', () => {
-            let data, ds1, ds2
+            let data: gdal.TypedArray, ds1: gdal.Dataset, ds2: gdal.Dataset
             it('should call the read() progress callback when one is provided', () => {
               ds1 = gdal.open(`${__dirname}/data/sample.tif`)
               const band = ds1.bands.get(1)
@@ -1469,7 +1470,7 @@ describe('gdal.RasterBand', () => {
           )
           const band = ds.bands.get(1)
           ds.buildOverviews('NEAREST', [ 2, 4 ])
-          const w = []
+          const w = [] as number[]
           band.overviews.forEach((overview, i) => {
             assert.isNumber(i)
             w.push(overview.size.x)

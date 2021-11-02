@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as gdal from '..'
 import * as path from 'path'
 import { assert } from 'chai'
-import * as fileUtils from './utils/file.js'
+import * as fileUtils from './utils/file'
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
 import * as semver from 'semver'
@@ -21,7 +21,7 @@ const NAD83_WKT =
 describe('gdal.Dataset', () => {
   afterEach(global.gc)
 
-  let ds
+  let ds: gdal.Dataset
   before(() => {
     ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
   })
@@ -113,8 +113,8 @@ describe('gdal.Dataset', () => {
       describe('forEach()', () => {
         it('should call callback for each RasterBand', () => {
           const ds = gdal.open(`${__dirname}/data/sample.tif`)
-          const expected_ids = [ 1 ]
-          const ids = []
+          const expected_ids = [ 1 ] as (number|null)[]
+          const ids = [] as (number|null)[]
           ds.bands.forEach((band, i) => {
             assert.isNumber(i)
             assert.isTrue(i > 0)
@@ -317,7 +317,7 @@ describe('gdal.Dataset', () => {
         it('should call callback for each Layer', () => {
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
           const expected_names = [ 'sample' ]
-          const names = []
+          const names = [] as string[]
           ds.layers.forEach((layer, i) => {
             assert.isNumber(i)
             assert.instanceOf(layer, gdal.Layer)
@@ -470,7 +470,7 @@ describe('gdal.Dataset', () => {
       describe('getter', () => {
         it('should return SpatialReference', () => {
           const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
-          assert.ok(ds.srs.toWKT().indexOf('PROJCS["WGS_1984_Albers"') > -1)
+          assert.ok(ds?.srs?.toWKT()?.indexOf('PROJCS["WGS_1984_Albers"') as number > -1)
         })
         it("should return null when dataset doesn't have projection", () => {
           let ds
@@ -491,7 +491,7 @@ describe('gdal.Dataset', () => {
       describe('getter/Async', () => {
         it('should return SpatialReference', () => {
           const ds = gdal.open(`${__dirname}/data/dem_azimuth50_pa.img`)
-          return assert.eventually.isTrue(ds.srsAsync.then((srs) => srs.toWKT().indexOf('PROJCS["WGS_1984_Albers"') > -1))
+          return assert.eventually.isTrue(ds.srsAsync.then((srs) => srs?.toWKT()?.indexOf('PROJCS["WGS_1984_Albers"') as number > -1))
         })
         it("should return null when dataset doesn't have projection", () => {
           const ds = gdal.open(`${__dirname}/data/blank.jpg`)
@@ -521,6 +521,13 @@ describe('gdal.Dataset', () => {
           ]
           ds.srs = gdal.SpatialReference.fromWKT(NAD83_WKT)
           assert.include(expected, ds.srs.toWKT())
+        })
+        it('should clear projection', () => {
+          const ds = gdal.open(
+            fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
+          )
+          ds.srs = null
+          assert.isNull(ds.srs)
         })
         it('should throw error if dataset doesnt support setting srs', () => {
           const ds = gdal.open(`${__dirname}/data/shp/sample.shp`)
@@ -644,6 +651,8 @@ describe('gdal.Dataset', () => {
           ]
 
           const actual_geotransform = ds.geoTransform
+          assert.isNotNull(ds.geoTransform)
+          if (actual_geotransform === null) return // TS type guard
           const delta = 0.00001
           assert.closeTo(
             actual_geotransform[0],
@@ -703,6 +712,8 @@ describe('gdal.Dataset', () => {
           const p = ds.geoTransformAsync
           return assert.isFulfilled(p.then((actual_geotransform) => {
             const delta = 0.00001
+            assert.isNotNull(ds.geoTransform)
+            if (actual_geotransform === null) return // TS type guard
             assert.closeTo(
               actual_geotransform[0],
               expected_geotransform[0],
@@ -754,7 +765,7 @@ describe('gdal.Dataset', () => {
           assert.deepEqual(ds.geoTransform, transform)
         })
         it('should throw if dataset doesnt support setting geotransform', () => {
-          let ds
+          let ds: gdal.Dataset
           const transform = [ 0, 2, 0, 0, 0, 2 ]
 
           ds = gdal.open(fileUtils.clone(`${__dirname}/data/park.geo.json`))
@@ -960,7 +971,7 @@ describe('gdal.Dataset', () => {
         ]
         ds.buildOverviews('NEAREST', [ 2, 4, 8 ])
         ds.bands.forEach((band) => {
-          const w = []
+          const w = [] as number[]
           assert.equal(band.overviews.count(), 3)
           band.overviews.forEach((overview) => {
             w.push(overview.size.x)
@@ -1067,7 +1078,7 @@ describe('gdal.Dataset', () => {
         ]
         return assert.isFulfilled(ds.buildOverviewsAsync('NEAREST', [ 2, 4, 8 ]).then(() => {
           ds.bands.forEach((band) => {
-            const w = []
+            const w = [] as number[]
             assert.equal(band.overviews.count(), 3)
             band.overviews.forEach((overview) => {
               w.push(overview.size.x)

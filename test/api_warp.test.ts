@@ -6,7 +6,7 @@ describe('gdal', () => {
   afterEach(global.gc)
 
   describe('suggestedWarpOutput()', () => {
-    let src
+    let src: gdal.Dataset
     beforeEach(() => {
       src = gdal.open(`${__dirname}/data/sample.tif`)
     })
@@ -21,10 +21,12 @@ describe('gdal', () => {
 
       // warp options
       const s_srs = src.srs
+      if (s_srs === null) throw new TypeError('No SRS')
       const t_srs = gdal.SpatialReference.fromProj4('+init=epsg:4326')
       const tx = new gdal.CoordinateTransformation(s_srs, t_srs)
 
       // compute output extent
+      if (gt === null) throw new TypeError('No GeoTransform')
       const ul = tx.transformPoint(gt[0], gt[3])
       const ur = tx.transformPoint(gt[0] + gt[1] * w, gt[3])
       const lr = tx.transformPoint(gt[0] + gt[1] * w, gt[3] + gt[5] * h)
@@ -75,7 +77,7 @@ describe('gdal', () => {
     })
   })
   describe('reprojectImage()', () => {
-    let src
+    let src: gdal.Dataset
     beforeEach(() => {
       src = gdal.open(`${__dirname}/data/sample.tif`)
     })
@@ -122,6 +124,7 @@ describe('gdal', () => {
       const s_srs = src.srs
       const t_srs = gdal.SpatialReference.fromProj4('+init=epsg:4326')
       const tr = { x: 0.0005, y: 0.0005 } // target resolution
+      if (t_srs === null || s_srs === null) throw new TypeError('No SRS')
       const tx = new gdal.CoordinateTransformation(s_srs, t_srs)
       const cutline = cutline_ds.layers
         .get(0)
@@ -133,6 +136,7 @@ describe('gdal', () => {
       cutline.transform(geotransformer)
 
       // compute output geotransform / dimensions
+      if (gt === null) throw new TypeError('No GeoTransform')
       const ul = tx.transformPoint(gt[0], gt[3])
       const ur = tx.transformPoint(gt[0] + gt[1] * w, gt[3])
       const lr = tx.transformPoint(gt[0] + gt[1] * w, gt[3] + gt[5] * h)
@@ -304,7 +308,7 @@ describe('gdal', () => {
       assert.equal(result_checksum, expected_checksum)
     })
     describe('argument errors', () => {
-      let warpOptions, reprojectOptions
+      let warpOptions, reprojectOptions: gdal.ReprojectOptions
 
       beforeEach(() => {
         warpOptions = {
@@ -325,7 +329,7 @@ describe('gdal', () => {
             1,
             gdal.GDT_Byte
           )
-        } as gdal.ReprojectOptions
+        }
         reprojectOptions.dst.geoTransform = info.geoTransform
       })
 
@@ -438,6 +442,8 @@ describe('gdal', () => {
 
       it("should throw error if GDAL can't create transformer", () => {
         src = gdal.open(`${__dirname}/data/unsupported-srs.tif`)
+
+        if (src.srs === null) throw new TypeError('No SRS')
 
         const options = {
           src: src,

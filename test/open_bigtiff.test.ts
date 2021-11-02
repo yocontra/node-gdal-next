@@ -5,7 +5,7 @@ import { assert } from 'chai'
 if (process.env.TARGET !== 'SHARED') {
   describe('Open', () => {
     describe('BIGTIFF', () => {
-      let filename, ds
+      let filename, ds: gdal.Dataset
 
       // https://github.com/naturalatlas/node-gdal/issues/139
       // > tifftopnm sample.tif | pamscale -width=100000 -height=1 | pnmtotiff > sample_wide.tif

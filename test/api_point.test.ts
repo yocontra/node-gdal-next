@@ -4,8 +4,8 @@ import { assert } from 'chai'
 describe('gdal.Point', () => {
   afterEach(global.gc)
 
-  let point2d
-  let point3d
+  let point2d: gdal.Point
+  let point3d: gdal.Point
   before(() => {
     point2d = new gdal.Point(1, 2)
     point3d = new gdal.Point(1, 2, 3)

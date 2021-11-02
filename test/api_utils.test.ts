@@ -238,11 +238,11 @@ describe('gdal_utils', () => {
 
       let out = gdal.warp(tmpFile, null, [ ds ], [ '-t_srs', 'epsg:3587' ])
 
-      assert.isTrue(out.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+      assert.isTrue(out.srs?.isSame(gdal.SpatialReference.fromEPSG(3587)))
       out.close()
 
       out = gdal.open(tmpFile)
-      assert.isTrue(out.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+      assert.isTrue(out.srs?.isSame(gdal.SpatialReference.fromEPSG(3587)))
       out.close()
 
       gdal.vsimem.release(tmpFile)
@@ -315,11 +315,11 @@ describe('gdal_utils', () => {
       const out = gdal.warpAsync(tmpFile, null, [ ds ], [ '-t_srs', 'epsg:3587' ])
 
       return assert.isFulfilled(out.then((out_ds) => {
-        assert.isTrue(out_ds.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+        assert.isTrue(out_ds.srs?.isSame(gdal.SpatialReference.fromEPSG(3587)))
         out_ds.close()
 
         out_ds = gdal.open(tmpFile)
-        assert.isTrue(out_ds.srs.isSame(gdal.SpatialReference.fromEPSG(3587)))
+        assert.isTrue(out_ds.srs?.isSame(gdal.SpatialReference.fromEPSG(3587)))
         out_ds.close()
 
         gdal.vsimem.release(tmpFile)

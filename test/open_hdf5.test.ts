@@ -6,7 +6,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('HDF5', () => {
-    let filename, ds
+    let filename, ds: gdal.Dataset
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/h5ex_t_array.h5')
@@ -25,7 +25,7 @@ describe('Open', () => {
   })
 
   describe('HDF5/gzip', () => {
-    let filename, ds
+    let filename, ds: gdal.Dataset
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/h5ex_d_gzip.h5')
@@ -51,7 +51,7 @@ describe('Open', () => {
         std_dev: 430.61431409093
       }
 
-      const actual_stats = band.getStatistics(false, true)
+      const actual_stats = band.getStatistics(false, true) as typeof expected_stats
       const delta = 0.00001
       assert.closeTo(expected_stats.min, actual_stats.min, delta)
       assert.closeTo(expected_stats.max, actual_stats.max, delta)

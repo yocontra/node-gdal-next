@@ -21,8 +21,8 @@ describe('object cache', () => {
 })
 describe('object lifetimes', () => {
   it('datasets should stay alive until all bands go out of scope', () => {
-    let ds = gdal.open('temp', 'w', 'MEM', 4, 4, 1)
-    let band = ds.bands.get(1)
+    let ds: gdal.Dataset | null = gdal.open('temp', 'w', 'MEM', 4, 4, 1)
+    let band: gdal.RasterBand | null = ds.bands.get(1)
 
     const ds_uid = (ds as any)._uid
     const band_uid = (band as any)._uid
@@ -53,8 +53,8 @@ describe('object lifetimes', () => {
     assert.isFalse((gdal as any)._isAlive(band_uid))
   })
   it('datasets should stay alive until all layers go out of scope', () => {
-    let ds = gdal.open(path.join(__dirname, 'data/shp/sample.shp'))
-    let layer = ds.layers.get(0)
+    let ds: gdal.Dataset | null = gdal.open(path.join(__dirname, 'data/shp/sample.shp'))
+    let layer: gdal.Layer | null = ds.layers.get(0)
 
     const ds_uid = (ds as any)._uid
     const layer_uid = (layer as any)._uid
@@ -72,8 +72,8 @@ describe('object lifetimes', () => {
     assert.isFalse((gdal as any)._isAlive(layer_uid))
   })
   it('layers should immediately be garbage collected as they go out of scope', () => {
-    const ds = gdal.open(path.join(__dirname, 'data/shp/sample.shp'))
-    let layer = ds.layers.get(0)
+    const ds: gdal.Dataset | null = gdal.open(path.join(__dirname, 'data/shp/sample.shp'))
+    let layer: gdal.Layer | null = ds.layers.get(0)
 
     const ds_uid = (ds as any)._uid
     const layer_uid = (layer as any)._uid

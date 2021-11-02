@@ -6,7 +6,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('ESRI Shapefile', () => {
-    let filename, ds
+    let filename, ds: gdal.Dataset
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/shp/sample.shp')
@@ -17,7 +17,7 @@ describe('Open', () => {
     })
 
     describe('layer', () => {
-      let layer
+      let layer: gdal.Layer
       before(() => {
         layer = ds.layers.get(0)
       })
@@ -35,7 +35,7 @@ describe('Open', () => {
         ])
       })
       describe('field properties', () => {
-        let integerDs, integerLayer
+        let integerDs, integerLayer: gdal.Layer
 
         before(() => {
           integerDs = gdal.open(

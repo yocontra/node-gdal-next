@@ -6,7 +6,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('NetCDF', () => {
-    let filename, ds
+    let filename, ds: gdal.Dataset
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/gfs.t00z.alnsf.nc')
@@ -24,6 +24,7 @@ describe('Open', () => {
 
       const actual_geotransform = ds.geoTransform
       const delta = 0.00001
+      if (actual_geotransform === null) throw new Error('No GeoTransform')
       assert.closeTo(actual_geotransform[0], expected_geotransform[0], delta)
       assert.closeTo(actual_geotransform[1], expected_geotransform[1], delta)
       assert.closeTo(actual_geotransform[2], expected_geotransform[2], delta)

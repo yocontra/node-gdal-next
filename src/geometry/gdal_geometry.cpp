@@ -1611,7 +1611,7 @@ NAN_METHOD(Geometry::create) {
 
 /**
  * @attribute srs
- * @type {gdal.SpatialReference}
+ * @type {gdal.SpatialReference|null}
  */
 NAN_GETTER(Geometry::srsGetter) {
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());

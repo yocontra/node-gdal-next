@@ -741,7 +741,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  *
  * @throws Error
  * @attribute srs
- * @type {gdal.SpatialReference}
+ * @type {gdal.SpatialReference|null}
  */
 
 /**
@@ -751,7 +751,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * @throws Error
  * @attribute srsAsync
  * @readOnly
- * @type {Promise<gdal.SpatialReference>}
+ * @type {Promise<gdal.SpatialReference|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
@@ -799,7 +799,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];```
  *
  * @attribute geoTransform
- * @type {number[]}
+ * @type {number[]|null}
  */
 
 /**
@@ -815,7 +815,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * {{async_getter}}
  * @readOnly
  * @attribute geoTransformAsync
- * @type {Promise<number[]>}
+ * @type {Promise<number[]|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());

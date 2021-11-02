@@ -5,7 +5,7 @@ import { assert } from 'chai'
 if (process.env.TARGET !== 'SHARED') {
   describe('Open', () => {
     describe('DEFLATE-compressed TIFF', () => {
-      let filename, ds
+      let filename, ds: gdal.Dataset
 
       it('should not throw', () => {
         filename = path.join(__dirname, 'data/sample_deflate.tif')

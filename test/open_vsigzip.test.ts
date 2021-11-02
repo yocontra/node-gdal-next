@@ -9,7 +9,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('vsigzip', () => {
-    let filename, ds
+    let filename, ds: gdal.Dataset
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/vsigzip/hp40ne.gz')
@@ -20,7 +20,7 @@ describe('Open', () => {
     })
 
     describe('layer', () => {
-      let layer
+      let layer: gdal.Layer
       before(() => {
         layer = ds.layers.get(0)
       })
@@ -37,7 +37,7 @@ describe('Open', () => {
           'textString'
         ])
       })
-      let layer2
+      let layer2: gdal.Layer
       before(() => {
         layer2 = ds.layers.get(1)
       })
@@ -66,7 +66,7 @@ describe('Open', () => {
   })
 
   describe('vsigzip/Async', () => {
-    let filename, dsq
+    let filename, dsq: Promise<gdal.Dataset>
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/vsigzip/hp40ne.gz')

@@ -218,7 +218,7 @@ NAN_METHOD(Feature::getFieldDefn) {
  *
  * @throws Error
  * @method setGeometry
- * @param {gdal.Geometry} geometry
+ * @param {gdal.Geometry|null} geometry new geometry or null to clear the field
  */
 NAN_METHOD(Feature::setGeometry) {
 

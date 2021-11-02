@@ -1,10 +1,10 @@
-const fs = require('fs')
-const path = require('path')
+import * as fs from 'fs'
+import * as path from 'path'
 
-const copyRecursiveSync = function (src, dest) {
+export function copyRecursiveSync (src: string, dest: string) {
   const exists = fs.existsSync(src)
   const stats = exists && fs.statSync(src)
-  const isDirectory = exists && stats.isDirectory()
+  const isDirectory = stats && stats.isDirectory()
   if (exists && isDirectory) {
     fs.mkdirSync(dest)
     fs.readdirSync(src).forEach((child) => {
@@ -15,7 +15,7 @@ const copyRecursiveSync = function (src, dest) {
   }
 }
 
-module.exports.clone = function (file) {
+export function clone(file: string) {
   const base = path.basename(file)
   const dotpos = base.lastIndexOf('.')
   const destname = `${base.substring(0, dotpos)}.tmp${String(Math.random()).substring(2)}${base.substring(dotpos)}`
@@ -27,7 +27,7 @@ module.exports.clone = function (file) {
   return result
 }
 
-module.exports.cloneDir = function (dir) {
+export function cloneDir(dir: string) {
   const name = path.basename(dir)
   const name_new = `${name}.${String(Math.random()).substring(2)}.tmp`
   const result = `${path.resolve(__dirname, '..')}/data/temp/${name_new}`

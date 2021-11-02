@@ -26,7 +26,7 @@ describe('Open', () => {
     })
 
     it('should have projection', () => {
-      assert.isTrue(ds.srs.isSame(gdal.SpatialReference.fromEPSG(4326)))
+      assert.isTrue(ds.srs?.isSame(gdal.SpatialReference.fromEPSG(4326)))
     })
   })
 
@@ -49,7 +49,7 @@ describe('Open', () => {
 
     it('should have projection', () =>
       assert.eventually.isTrue(ds.then((r) =>
-        r.srs.isSame(gdal.SpatialReference.fromEPSG(4326))
+        r.srs?.isSame(gdal.SpatialReference.fromEPSG(4326))
       )))
   })
 })

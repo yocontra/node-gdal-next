@@ -1,14 +1,16 @@
 import * as gdal from '..'
 import { assert } from 'chai'
-import * as fileUtils from './utils/file.js'
+import * as fileUtils from './utils/file'
 
 describe('gdal.Layer', () => {
   afterEach(global.gc)
 
   describe('instance', () => {
+    type prepareCb = (ds: gdal.Dataset, l: gdal.Layer) => void
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const prepare_dataset_layer_test = function (mode: string, _arg2: unknown, _arg3?: unknown) {
-      let ds, layer, options, callback, err, file, dir, driver
+    const prepare_dataset_layer_test = function (mode: string, _arg2: Record<string, unknown> | prepareCb, _arg3?: prepareCb) {
+      let ds: gdal.Dataset, layer: gdal.Layer, options, callback: prepareCb,
+        err, file: string, dir: string, driver: gdal.Driver
 
       if (arguments.length === 2) {
         options = {}
@@ -52,6 +54,7 @@ describe('gdal.Layer', () => {
         }
         if (file && mode === 'w') {
           try {
+            driver = gdal.drivers.get('ESRI Shapefile')
             driver.deleteDataset(file)
           } catch (e) {
             /* ignore */
@@ -83,7 +86,8 @@ describe('gdal.Layer', () => {
         it('should throw error', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             assert.throws(() => {
-              layer.ds = null
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer as any).ds = null
             }, /ds is a read-only property/)
           })
         })
@@ -141,7 +145,8 @@ describe('gdal.Layer', () => {
         it('should throw error', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             assert.throws(() => {
-              layer.srs = 'ESPG:4326'
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer as any).srs = 'ESPG:4326'
             }, /srs is a read-only property/)
           })
         })
@@ -168,7 +173,8 @@ describe('gdal.Layer', () => {
         it('should throw error', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             assert.throws(() => {
-              layer.name = null
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer as any).name = null
             }, /name is a read-only property/)
           })
         })
@@ -195,7 +201,8 @@ describe('gdal.Layer', () => {
         it('should throw error', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             assert.throws(() => {
-              layer.geomType = null
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer as any).geomType = null
             }, /geomType is a read-only property/)
           })
         })
@@ -405,7 +412,8 @@ describe('gdal.Layer', () => {
         it('should throw error', () => {
           prepare_dataset_layer_test('r', (dataset, layer) => {
             assert.throws(() => {
-              layer.features = null
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer as any).features = null
             }, /features is a read-only property/)
           })
         })
@@ -576,7 +584,7 @@ describe('gdal.Layer', () => {
       })
 
       describe('set()', () => {
-        let f0, f1, f1_new, layer, dataset
+        let f0: gdal.Feature, f1: gdal.Feature, f1_new: gdal.Feature, layer: gdal.Layer, dataset: gdal.Dataset
         beforeEach(() => {
           prepare_dataset_layer_test('w', { autoclose: false }, (ds, lyr) => {
             layer = lyr
@@ -686,7 +694,8 @@ describe('gdal.Layer', () => {
         it('should throw error', () => {
           prepare_dataset_layer_test('w', (dataset, layer) => {
             assert.throws(() => {
-              layer.fields = null
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer as any).fields = null
             }, /fields is a read-only property/)
           })
         })

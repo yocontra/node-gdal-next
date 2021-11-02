@@ -160,7 +160,7 @@ describe('gdal.RasterBandAsync', () => {
               gdal.GDT_Byte)
             return assert.isFulfilled(ds.then((r) => {
               const band = r.bands.get(1)
-              const p = band.pixels.readAsync(0, 0, 20, 30, null)
+              const p = band.pixels.readAsync(0, 0, 20, 30)
               return assert.isFulfilled(p.then((data) => {
                 assert.instanceOf(data, Uint8Array)
                 assert.equal(data.length, 20 * 30)
@@ -206,7 +206,7 @@ describe('gdal.RasterBandAsync', () => {
             it("should create new array with given dimensions if array isn't given", () => {
               const ds = gdal.open(`${__dirname}/data/sample.tif`)
               const band = ds.bands.get(1)
-              const data = band.pixels.readAsync(0, 0, 20, 30, null, {
+              const data = band.pixels.readAsync(0, 0, 20, 30, undefined, {
                 buffer_width: 10,
                 buffer_height: 15
               })
@@ -235,7 +235,7 @@ describe('gdal.RasterBandAsync', () => {
             it('should create output array with given type', () =>
               assert.isFulfilled(gdal.openAsync(`${__dirname}/data/sample.tif`).then((ds) => {
                 const band = ds.bands.get(1)
-                const data = band.pixels.read(0, 0, 20, 30, null, {
+                const data = band.pixels.read(0, 0, 20, 30, undefined, {
                   type: gdal.GDT_Float64
                 })
                 assert.instanceOf(data, Float64Array)
@@ -794,7 +794,7 @@ describe('gdal.RasterBandAsync', () => {
           const band = ds.bands.get(1)
           return assert.isFulfilled(Promise.all([
             assert.eventually.instanceOf(band.colorTableAsync, gdal.ColorTable),
-            assert.deepEqual(band.colorTable.get(1), { c1: 7, c2: 8, c3: 45, c4: 255 })
+            assert.deepEqual(band.colorTable?.get(1), { c1: 7, c2: 8, c3: 45, c4: 255 })
           ]))
         })
         it('should reject if dataset already closed', () => {

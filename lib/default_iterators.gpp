@@ -154,7 +154,7 @@ function defaultAsyncIterator() {
 
 <#defaultMap LayerFeatures|Feature|layer.features|features>
 
-<#defaultMap FeatureFields|fieldValue|layer.features.get(0).fields|field definitions>
+<#defaultMap FeatureFields|any|layer.features.get(0).fields|field definitions>
 <#defaultAll LayerFields|FieldDefn|layer.fields|field definitions>
 <#defaultAll FeatureDefnFields|FieldDefn|featureDefn|field definitions>
 

@@ -94,6 +94,7 @@
     "@types/chai-as-promised": "^7.1.4",
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.0.3",
+    "@types/semver": "^7.3.9",
     "@typescript-eslint/eslint-plugin": "^4.23.0",
     "@typescript-eslint/parser": "^4.23.0",
     "aws-sdk": "^2.614.0",

@@ -335,7 +335,7 @@ NAN_METHOD(SpatialReference::cloneGeogCS) {
  * Get the authority name for a node. The most common authority is "EPSG".
  *
  * @method getAuthorityName
- * @param {string} [target_key] The partial or complete path to the node to get an authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to search for an authority node on the root element.
+ * @param {string|null} [target_key] The partial or complete path to the node to get an authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to search for an authority node on the root element.
  * @return {string}
  */
 NAN_METHOD(SpatialReference::getAuthorityName) {
@@ -352,7 +352,7 @@ NAN_METHOD(SpatialReference::getAuthorityName) {
  * Get the authority code for a node.
  *
  * @method getAuthorityCode
- * @param {string} [target_key] The partial or complete path to the node to get an authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to search for an authority node on the root element.
+ * @param {string|null} [target_key] The partial or complete path to the node to get an authority from. ie. `"PROJCS"`, `"GEOGCS"`, "`GEOGCS|UNIT"` or `null` to search for an authority node on the root element.
  * @return {string}
  */
 NAN_METHOD(SpatialReference::getAuthorityCode) {

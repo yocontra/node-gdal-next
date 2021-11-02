@@ -41,6 +41,7 @@ describe('gdal.drivers', () => {
       })
     })
 
+    type driverMeta = Record<'DMD_LONGNAME' | 'DMD_MIMETYPE' | 'DMD_EXTENSION' | 'DCAP_CREATE', string | undefined>
     // raster drivers
     const expected = {
       GTiff: {
@@ -73,14 +74,14 @@ describe('gdal.drivers', () => {
         DMD_EXTENSION: 'jpg',
         DCAP_CREATE: undefined
       }
-    }
+    } as Record<string, driverMeta>
 
     Object.keys(expected).forEach((o) => {
       it(`should support "${o}" driver`, () => {
         const driver = gdal.drivers.get(o)
         assert.ok(driver)
 
-        const metadata = driver.getMetadata()
+        const metadata = driver.getMetadata() as driverMeta
         const expected_meta = expected[o]
         assert.equal(expected_meta.DMD_LONGNAME, metadata.DMD_LONGNAME)
         assert.equal(expected_meta.DMD_MIMETYPE, metadata.DMD_MIMETYPE)

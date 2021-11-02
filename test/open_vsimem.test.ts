@@ -10,7 +10,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('vsimem/open', () => {
-    let filename, ds, buffer
+    let filename, ds: gdal.Dataset, buffer: Buffer
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 
     after(() => {
@@ -26,8 +26,10 @@ describe('Open', () => {
       assert.equal(ds.layers.count(), 1)
     })
     it('should keep the buffer in the dataset', () => {
-      assert.instanceOf(ds.buffer, Buffer)
-      assert.equal(ds.buffer, buffer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      assert.instanceOf((ds as any).buffer, Buffer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      assert.equal((ds as any).buffer, buffer)
     })
     it('should throw on an empty buffer', () => {
       const buffer2 = Buffer.alloc(0)
@@ -40,7 +42,7 @@ describe('Open', () => {
     it('should be shareable across datasets', () => {
       const ds2 = gdal.open(buffer)
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      assert.equal((ds2 as any).buffer, ds.buffer)
+      assert.equal((ds2 as any).buffer, (ds as any).buffer)
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       ds2.close()
     })
@@ -55,7 +57,7 @@ describe('Open', () => {
     })
   })
   describe('vsimem/openAsync', () => {
-    let filename, ds, buffer
+    let filename, ds: Promise<gdal.Dataset>, buffer: Buffer
     after(() => ds.then((r) => {
       r.close()
       global.gc()
@@ -71,8 +73,10 @@ describe('Open', () => {
       assert.eventually.equal(ds.then((ds) => ds.layers.count()), 1)
     )
     it('should keep the buffer in the dataset', () =>
-      Promise.all([ assert.eventually.instanceOf(ds.then((ds) => ds.buffer), Buffer),
-        assert.eventually.equal(ds.then((ds) => ds.buffer), buffer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Promise.all([ assert.eventually.instanceOf(ds.then((ds) => (ds as any).buffer), Buffer),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        assert.eventually.equal(ds.then((ds) => (ds as any).buffer), buffer)
       ])
     )
     it('should throw on an empty buffer', () => {

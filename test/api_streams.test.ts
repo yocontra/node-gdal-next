@@ -6,12 +6,14 @@ import * as path from 'path'
 const assert = chai.assert
 const finished = promisify(_finished)
 
+type doneCb = (err?: unknown) => void
+
 describe('gdal.RasterReadStream', () => {
-  function noDataTest(done, file, convert) {
+  function noDataTest(done: doneCb, file: string, convert?: boolean) {
     const ds = gdal.open(path.resolve(__dirname, 'data', file))
     const band = ds.bands.get(1)
     const noData = ds.bands.get(1).noDataValue
-    let test
+    let test: (v: number) => boolean
     if (convert) test = isNaN
     else test = (v) => v === noData
     const rs = band.pixels.createReadStream({
@@ -29,7 +31,7 @@ describe('gdal.RasterReadStream', () => {
     })
   }
 
-  function readTest(done, file, type, blockOptimize) {
+  function readTest(done: doneCb, file: string, type: new () => gdal.TypedArray, blockOptimize: boolean) {
     const ds = gdal.open(path.resolve(__dirname, 'data', file))
     const band = ds.bands.get(1)
     const rs = band.pixels.createReadStream({ blockOptimize })
@@ -62,7 +64,7 @@ describe('gdal.RasterReadStream', () => {
 })
 
 describe('gdal.RasterWriteStream', () => {
-  function writeTest(done, w, h, len, blockSize, blockOptimize, convertNoData) {
+  function writeTest(done: doneCb, w: number, h: number, len: number, blockSize: number, blockOptimize: boolean, convertNoData?: boolean) {
     const filename = `/vsimem/ds_ws_test.${String(
       Math.random()
     ).substring(2)}.tmp.tiff`
@@ -105,7 +107,7 @@ describe('gdal.RasterWriteStream', () => {
       while (written < w*h) {
         written += pattern.length
         // write until finished or write returns false because the buffer is full
-        if (!ws.write(pattern, undefined, written == w*h ? endCheck : undefined)) break
+        if (!ws.write(pattern, written == w*h ? endCheck : undefined)) break
       }
     }
 
@@ -121,14 +123,14 @@ describe('gdal.RasterWriteStream', () => {
     write()
   }
 
-  function writeTestOverflow(done, w, h, len, blockSize, blockOptimize) {
-    const doneInverted = (err) => {
+  function writeTestOverflow(done: doneCb, w: number, h: number, len: number, blockSize: number, blockOptimize: boolean) {
+    const doneInverted = (err: Error) => {
       if (!err) done('did not throw')
       else if (err.toString().match(/beyond the end/)) done()
       else done(err)
     }
 
-    writeTest(doneInverted, w, h, len, blockSize, blockOptimize, undefined)
+    writeTest(doneInverted as doneCb, w, h, len, blockSize, blockOptimize, undefined)
   }
 
   it('should write a raster band in zero-copy mode w/ edge block',
@@ -260,7 +262,7 @@ describe('gdal.RasterReadStream + gdal.RasterWriteStream', () => {
 })
 
 describe('gdal.RasterMuxStream', () => {
-  function testMux(blockOptimize) {
+  function testMux(blockOptimize?: boolean) {
     const dsT2m = gdal.open(path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff'))
     const dsD2m = gdal.open(path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff'))
 
@@ -279,7 +281,7 @@ describe('gdal.RasterMuxStream', () => {
     // Espy's estimation for cloud base height (lifted condensation level)
     // LCL = 125 * (T2m - Td2m)
     // where T2m is the temperature at 2m and Td2m is the dew point at 2m
-    const fn = (t,td) => 125 * (t - td)
+    const fn = (t: number, td: number) => 125 * (t - td)
     const espyEstimation = new gdal.RasterTransform({ type: Float64Array, fn })
 
     mux.pipe(espyEstimation).pipe(ws)

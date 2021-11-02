@@ -84,7 +84,7 @@ describe('gdal.Polygon', () => {
           }, /must be a LinearRing/)
         })
       })
-      let polygon
+      let polygon: gdal.Polygon
       const createRings = () => {
         const ring1 = new gdal.LinearRing()
         ring1.points.add(0, 0, 0)
@@ -143,7 +143,7 @@ describe('gdal.Polygon', () => {
           assert.equal(count, 2)
         })
         it('should iterate through all points', () => {
-          const result = []
+          const result = [] as string[][]
           polygon.rings.forEach((ring) => {
             result.push(ring.points.toArray().map((pt) => pt.toJSON()))
           })
@@ -285,8 +285,7 @@ describe('gdal.MultiPolygon', () => {
       })
       it('should throw on no arguments', () => {
         assert.throws(() => {
-          // eslint-disable-next-line no-useless-call
-          multiPolygon.children.add.call(multiPolygon.children)
+          (multiPolygon.children.add as () => void)()
         }, /must be given/)
       })
       it('should throw on invalid elements', () => {

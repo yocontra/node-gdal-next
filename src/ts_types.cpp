@@ -190,7 +190,7 @@
  * @interface RasterWritableOptions
  * @extends stream.WritableOptions
  * @property {boolean} [blockOptimize]
- * @property {booleal} [convertNoData]
+ * @property {boolean} [convertNoData]
  */
 
 /**

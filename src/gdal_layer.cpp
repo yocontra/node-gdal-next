@@ -255,12 +255,30 @@ NAN_METHOD(Layer::getSpatialFilter) {
  *
  * @example
  * ```
- * layer.setSpatialFilter(geometry);
+ * layer.setSpatialFilter(geometry);```
+ *
+ * @throws Error
+ * @method setSpatialFilter
+ * @param {gdal.Geometry|null} filter
+ */
+
+/**
+ * This method sets the geometry to be used as a spatial filter when fetching
+ * features via the `layer.features.next()` method. Only features that
+ * geometrically intersect the filter geometry will be returned.
+ *
+ * Alernatively you can pass it envelope bounds as individual arguments.
+ *
+ * @example
+ * ```
  * layer.setSpatialFilter(minX, minY, maxX, maxY);```
  *
  * @throws Error
  * @method setSpatialFilter
- * @param {gdal.Geometry} filter
+ * @param {number} minxX
+ * @param {number} minyY
+ * @param {number} maxX
+ * @param {number} maxY
  */
 NAN_METHOD(Layer::setSpatialFilter) {
 
@@ -317,7 +335,7 @@ NAN_METHOD(Layer::setSpatialFilter) {
  *
  * @throws Error
  * @method setAttributeFilter
- * @param {string} filter
+ * @param {string|null} [filter=null]
  */
 NAN_METHOD(Layer::setAttributeFilter) {
 

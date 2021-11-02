@@ -342,7 +342,8 @@ describe('gdal.Geometry', () => {
 
     // comparison functions
     (function () {
-      let ring, square, point_inner, point_inner_clone, point_outer, arc
+      let ring: gdal.LinearRing, square: gdal.Polygon, point_inner: gdal.Point,
+        point_inner_clone: gdal.Point, point_outer: gdal.Point, arc: gdal.SimpleCurve
       before(() => {
         ring = new gdal.LinearRing()
         ring.points.add({ x: 0, y: 0 })

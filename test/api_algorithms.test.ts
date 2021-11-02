@@ -8,7 +8,7 @@ describe('gdal', () => {
   afterEach(global.gc)
 
   describe('contourGenerate()', () => {
-    let src, srcband, dst, lyr
+    let src: gdal.Dataset, srcband: gdal.RasterBand, dst: gdal.Dataset, lyr: gdal.Layer
 
     before(() => {
       // create a simple ramp in memory
@@ -63,7 +63,7 @@ describe('gdal', () => {
       })
     })
     it('should accept an array of fixed levels', () => {
-      const order = (a, b) => a - b
+      const order = (a: number, b: number) => a - b
       const levels = [ 53, 43, 193 ].sort(order)
 
       gdal.contourGenerate({
@@ -76,7 +76,7 @@ describe('gdal', () => {
 
       assert(lyr.features.count() > 0, 'features were created')
 
-      const actual_levels = []
+      const actual_levels = [] as number[]
 
       lyr.features.forEach((feature) => {
         const elev = feature.fields.get('elev')
@@ -112,7 +112,7 @@ describe('gdal', () => {
     })
   })
   describe('contourGenerateAsync()', () => {
-    let src, srcband, dst, lyr
+    let src: gdal.Dataset, srcband: gdal.RasterBand, dst: gdal.Dataset, lyr: gdal.Layer
 
     before(() => {
       // create a simple ramp in memory
@@ -150,7 +150,7 @@ describe('gdal', () => {
     })
   })
   describe('fillNodata()', () => {
-    let src, srcband
+    let src: gdal.Dataset, srcband: gdal.RasterBand
     const holes_x = [ 53, 61, 61, 1, 43, 44, 5 ]
     const holes_y = [ 11, 5, 6, 33, 22, 11, 0 ]
     const nodata = 33
@@ -192,7 +192,7 @@ describe('gdal', () => {
     })
   })
   describe('fillNodataAsync()', () => {
-    let src, srcband
+    let src: gdal.Dataset, srcband: gdal.RasterBand
     const holes_x = [ 53, 61, 61, 1, 43, 44, 5 ]
     const holes_y = [ 11, 5, 6, 33, 22, 11, 0 ]
     const nodata = 33
@@ -230,7 +230,7 @@ describe('gdal', () => {
   })
 
   describe('checksumImage()', () => {
-    let src, band
+    let src: gdal.Dataset, band: gdal.RasterBand
     const w = 16
     const h = 16
     beforeEach(() => {
@@ -261,7 +261,7 @@ describe('gdal', () => {
     })
   })
   describe('checksumImageAsync()', () => {
-    let src, band
+    let src: gdal.Dataset, band: gdal.RasterBand
     const w = 16
     const h = 16
     beforeEach(() => {
@@ -285,7 +285,7 @@ describe('gdal', () => {
   })
 
   describe('sieveFilter()', () => {
-    let src, band
+    let src: gdal.Dataset, band: gdal.RasterBand
     const w = 64
     const h = 64
     beforeEach(() => {
@@ -339,7 +339,7 @@ describe('gdal', () => {
     })
   })
   describe('sieveFilterAsync()', () => {
-    let src, band
+    let src: gdal.Dataset, band: gdal.RasterBand
     const w = 64
     const h = 64
     beforeEach(() => {
@@ -369,7 +369,7 @@ describe('gdal', () => {
     })
   })
   describe('polygonize()', () => {
-    let src, srcband, dst, lyr
+    let src: gdal.Dataset, srcband: gdal.RasterBand, dst: gdal.Dataset, lyr: gdal.Layer
 
     before(() => {
       // create two identical rectangles

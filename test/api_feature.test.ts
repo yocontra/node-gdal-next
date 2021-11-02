@@ -5,7 +5,7 @@ import * as path from 'path'
 describe('gdal.Feature', () => {
   afterEach(global.gc)
 
-  let ds, lyr, defn, fields
+  let ds: gdal.Dataset, lyr: gdal.Layer, defn: gdal.FeatureDefn, fields: gdal.FieldDefn[]
   before(() => {
     ds = gdal.open('', 'w', 'Memory')
     lyr = ds.layers.create('', null, gdal.Point)
@@ -446,8 +446,8 @@ describe('gdal.Feature', () => {
           const feature = new gdal.Feature(defn)
           const expected_keys = [ 'id', 'name', 'value' ]
           const expected_values = [ 5, 'test', 3.14 ]
-          const values = []
-          const keys = []
+          const values = [] as (string|number)[]
+          const keys = [] as (string|number)[]
           feature.fields.set(expected_values)
           feature.fields.forEach((value, key) => {
             values.push(value)
@@ -457,7 +457,7 @@ describe('gdal.Feature', () => {
           assert.deepEqual(keys, expected_keys)
           assert.equal(values[0], expected_values[0])
           assert.equal(values[1], expected_values[1])
-          assert.closeTo(values[2], expected_values[2] as number, 0.0001)
+          assert.closeTo(values[2] as number, expected_values[2] as number, 0.0001)
         })
       })
       describe('getNames()', () => {
@@ -538,7 +538,7 @@ describe('gdal.Feature', () => {
       it('should clear geometry if undefined is passed', () => {
         const feature = new gdal.Feature(defn)
         feature.setGeometry(new gdal.Point(5, 10))
-        feature.setGeometry(undefined)
+        feature.setGeometry(undefined as unknown as null)
         assert.isNull(feature.getGeometry())
       })
       /*

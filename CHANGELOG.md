@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.SpatialReference.fromURLAsync`, `gdal.SpatialReference.fromCRSURLAsync` and `gdal.SpatialReference.fromUserInputAsync`
  - `gdal.RasterBandOverviews.countAsync`, `gdal.RasterBandOverviews.getAsync` and `gdal.RasterBandOverviews.getBySampleCountAsync`
  - `gdal.fromDataType` and `gdal.toDataType` converters between `TypedArray` constructor and GDAL `dataType`
+ - TypeScript bindings now officially support `strict: true`
 
 ### Changed
  - Requires GDAL >= 2.1 if rebuilding against a system-installed GDAL library
@@ -36,6 +37,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fix a memory leak in the exception-handling path of the progress callbacks
  - Fix #13, now two different warnings are emitted whether a dataset is closed by `gdal.Dataset.close` or it is destroyed by the GC - the former is indicative of a bug in the user application, while the latter is indicative of a bug in `gdal-async` itself
  - Correctly identify all async getters as being read-only in TypeScript
+ - TypeScript signature and documentation entry for `gdal.LayerFields.fromObject`, it did not exist before
+ - Correct TypeScript signatures for all `gdal.FeatureFields` iterators, they now return `any` objects instead of a `gdal.fieldValue`
+ - Correct TypeScript signature for `gdal.Dataset.srs{Async}` - now it can be `null`
+ - Correct TypeScript signature for `gdal.Dataset.geoTransform{Async}` - now it can be `null`
+ - Correct TypeScript signatures for `gdal.RasterBand.id{Async}`, `gdal.RasterBand.minimum{Async}`, `gdal.RasterBand.maximum{Async}`, `gdal.RasterBand.offset{Async}`, `gdal.RasterBand.scale{Async}` - now they can be `null`
+ - Correct TypeScript signature for `gdal.DatasetLayers.create{Async}` - `srs` and `geometry` are optional and default to `null`
+ - Correct TypeScript signature for `gdal.DatasetLayers.copy{Async}`, the first argument is of type `gdal.Layer`
+ - Correct TypeScript signature for `gdal.Layer.setSpatialFilter`, it now has two separate signatures, one that accepts a `gdal.Geometry|null` and another that accepts `number, number, number, number`
+ - Correct TypeScript signature for `gdal.Layer.setAttributeFilter`, it now accepts `null` as argument
+ - Correct TypeScript signature for `gdal.Feature.setGeometry`, it now accepts `null` as argument
+ - Correct TypeScript signature for `gdal.Geometry.srs`, now it can be `null`
+ - Correct TypeScript signatures for `gdal.SpatialReference.getAuthority{Code,Name}`, now they accept `null` as argument
+ - Correct TypeScript signatures for `gdal.config.set` and `gdal.config.get`, now they can accept/return `null`
 
 ## [3.3.4] 2021-09-28
 

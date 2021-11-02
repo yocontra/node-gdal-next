@@ -42,7 +42,7 @@ const create = {
   RasterBandPixels: () => gdal.open('temp', 'w', 'MEM', 32, 32, 1, gdal.GDT_Byte).bands.get(1).pixels,
   SimpleCurve: () => new gdal.LineString(),
   SpatialReference: []
-}
+} as Record<string, unknown>
 
 const create31 = {
   Attribute: () => gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr').root.attributes.get(1),
@@ -69,18 +69,18 @@ describe('Class semantics', () => {
     it(`gdal.${name}`, () => {
       let o
       if (typeof create[name] === 'function') {
-        o = create[name]()
+        o = ((create as Record<string, () => unknown>)[name])()
         assert.throws(() => {
-          new gdal[name]()
+          new ((gdal as Record<string, unknown>)[name] as new () => unknown)()
         }, /Cannot create .* directly|doesnt have a constructor|abstract/)
       } else if (Array.isArray(create[name])) {
-        // This is a technique for calling apply on the new operator
-        o = new (Function.prototype.bind.apply(gdal[name], [ null, ...create[name] ]))()
+        // This is a technique for calling apply on the new operator, it is ugly enough in JS, but TS transforms it into a modern art piece
+        o = new (Function.prototype.bind.apply(((gdal as Record<string, unknown>)[name] as new () => unknown), [ null, ...(create[name] as unknown[]) ]))()
       }
-      assert.instanceOf(o, gdal[name])
-      assert.match(gdal[name].prototype.toString.call(o), new RegExp(name))
+      assert.instanceOf(o, ((gdal as Record<string, unknown>)[name] as new () => unknown))
+      assert.match(((gdal as Record<string, unknown>)[name] as new () => unknown).prototype.toString.call(o), new RegExp(name))
       assert.throws(() => {
-        gdal[name]()
+        ((gdal as Record<string, unknown>)[name] as () => unknown)()
       }, /Cannot call constructor|abstract/)
     })
   }

@@ -6,7 +6,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('TIFF', () => {
-    let filename, ds
+    let filename, ds: gdal.Dataset
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/sample.tif')
@@ -31,6 +31,7 @@ describe('Open', () => {
 
       const actual_geotransform = ds.geoTransform
       const delta = 0.00001
+      if (actual_geotransform === null) throw new Error('No GeoTransform')
       assert.closeTo(actual_geotransform[0], expected_geotransform[0], delta)
       assert.closeTo(actual_geotransform[1], expected_geotransform[1], delta)
       assert.closeTo(actual_geotransform[2], expected_geotransform[2], delta)
@@ -40,6 +41,7 @@ describe('Open', () => {
     })
 
     it('should have projection', () => {
+      if (ds.srs === null) throw new Error('No SRS')
       assert.match(ds.srs.toWKT(), /PROJCS/)
     })
 
@@ -52,7 +54,7 @@ describe('Open', () => {
         std_dev: 36.98885954363488
       }
 
-      const actual_stats = band.getStatistics(false, true)
+      const actual_stats = band.getStatistics(false, true) as typeof expected_stats
       const delta = 0.00001
       assert.closeTo(actual_stats.min, expected_stats.min, delta)
       assert.closeTo(actual_stats.max, expected_stats.max, delta)

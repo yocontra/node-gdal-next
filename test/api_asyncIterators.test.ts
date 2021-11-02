@@ -1,7 +1,7 @@
 import * as gdal from '..'
 import * as path from 'path'
 import { assert } from 'chai'
-import * as fileUtils from './utils/file.js'
+import * as fileUtils from './utils/file'
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
 import * as semver from 'semver'
@@ -97,10 +97,10 @@ if (Symbol.asyncIterator) {
     const tests = {
       Group: { groups: gdal.Group, arrays: gdal.MDArray, dimensions: gdal.Dimension, attributes: gdal.Attribute },
       MDArray: { dimensions: gdal.Dimension, attributes: gdal.Attribute }
-    }
-    for (const tested of Object.keys(tests)) {
+    } as Record<string, Record<string, new () => gdal.Attribute | gdal.Dimension | gdal.MDArray | gdal.Group>>
+    for (const tested of Object.keys(tests) as ('Group' | 'MDArray')[]) {
       describe(`gdal.${tested}`, () => {
-        for (const prop of Object.keys(tests[tested])) {
+        for (const prop of Object.keys(tests[tested]) as ('groups' | 'arrays' | 'dimensions' | 'attributes')[]) {
           describe(`"${prop}" property`, () => {
             describe('@@asyncIterator()', () => {
               it('should iterate over the values', () => {

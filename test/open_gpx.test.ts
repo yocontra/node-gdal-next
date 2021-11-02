@@ -6,7 +6,7 @@ describe('Open', () => {
   afterEach(global.gc)
 
   describe('GPX', () => {
-    let filename, ds
+    let filename, ds: gdal.Dataset
 
     it('should not throw', () => {
       filename = path.join(__dirname, 'data/gpx/spiritmountain.gpx')
@@ -17,7 +17,7 @@ describe('Open', () => {
     })
 
     describe('layer', () => {
-      let layer
+      let layer: gdal.Layer
       it('should exist', () => {
         layer = ds.layers.get(0)
         assert.ok(layer)

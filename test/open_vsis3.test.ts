@@ -16,7 +16,7 @@ describe('Open', () => {
   })
 
   describe('vsis3 w/Net', () => {
-    let ds
+    let ds: gdal.Dataset
 
     it('should not throw', () => {
       ds = gdal.open('/vsis3/elevation-tiles-prod/geotiff/12/1/1.tif')
@@ -29,12 +29,12 @@ describe('Open', () => {
     })
 
     it('should have projection', () => {
-      assert.isTrue(ds.srs.isSame(gdal.SpatialReference.fromEPSG(3857)))
+      assert.isTrue(ds.srs?.isSame(gdal.SpatialReference.fromEPSG(3857)))
     })
   })
 
   describe('vsis3/Async w/Net', () => {
-    let ds
+    let ds: Promise<gdal.Dataset>
 
     it('should not throw', () => {
       ds = gdal.openAsync('/vsis3/elevation-tiles-prod/geotiff/12/1/1.tif')
@@ -46,7 +46,7 @@ describe('Open', () => {
       assert.eventually.equal(ds.then((r) => r.bands.count()), 1) ])))
 
     it('should have projection', () => {
-      assert.eventually.isTrue(ds.then((r) => r.srs.isSame(gdal.SpatialReference.fromEPSG(3857))))
+      assert.eventually.isTrue(ds.then((r) => r.srs?.isSame(gdal.SpatialReference.fromEPSG(3857))))
     })
   })
 })

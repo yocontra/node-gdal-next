@@ -292,7 +292,7 @@ describe('gdal', () => {
     })
 
     describe('getView', () => {
-      let view
+      let view: gdal.MDArray
 
       before(() => {
         const ds = gdal.open(path.resolve(__dirname, 'data', 'gfs.t00z.alnsf.nc'), 'mr')

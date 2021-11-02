@@ -883,7 +883,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
  * will be returned.
  *
  * @attribute unitType
- * @type {string}
+ * @type {string|null}
  */
 
 /**
@@ -895,7 +895,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
  *
  * @attribute unitTypeAsync
  * @readOnly
- * @type {Promise<string>}
+ * @type {Promise<string|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
@@ -917,7 +917,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
  *
  * @readOnly
  * @attribute dataType
- * @type {string|undefined}
+ * @type {string|null}
  */
 
 /**
@@ -928,7 +928,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
  *
  * @readOnly
  * @attribute dataTypeAsync
- * @type {Promise<string|undefined>}
+ * @type {Promise<string|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::dataTypeGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
@@ -1063,7 +1063,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
  * constants{{/crossLink}}).
  *
  * @attribute colorInterpretation
- * @type {string}
+ * @type {string|null}
  */
 
 /**
@@ -1073,7 +1073,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
  *
  * @attribute colorInterpretationAsync
  * @readOnly
- * @type {Promise<string>}
+ * @type {Promise<string|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorInterpretationGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);
@@ -1201,7 +1201,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
  * Color table ({{#crossLink "ColorTable"}}see gdal.ColorTable{{/crossLink}}).
  *
  * @attribute colorTable
- * @type {gdal.ColorTable}
+ * @type {gdal.ColorTable|null}
  */
 
 /**
@@ -1210,7 +1210,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
  *
  * @attribute colorTableAsync
  * @readOnly
- * @type {Promise<gdal.ColorTable>}
+ * @type {Promise<gdal.ColorTable|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorTableGetter) {
   NODE_UNWRAP_CHECK_ASYNC(RasterBand, info.This(), band);

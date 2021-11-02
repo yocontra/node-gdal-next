@@ -160,8 +160,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * @method create
  * @throws Error
  * @param {string} name Layer name
- * @param {gdal.SpatialReference|null} srs Layer projection
- * @param {number|Function} geomType Geometry type or constructor ({{#crossLink
+ * @param {gdal.SpatialReference|null} [srs=null] Layer projection
+ * @param {number|Function|null} [geomType=null] Geometry type or constructor ({{#crossLink
  * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
  * @param {string[]|object} [creation_options] driver-specific layer creation
  * options
@@ -181,8 +181,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * @method createAsync
  * @throws Error
  * @param {string} name Layer name
- * @param {gdal.SpatialReference|null} srs Layer projection
- * @param {number|Function} geomType Geometry type or constructor ({{#crossLink
+ * @param {gdal.SpatialReference|null} [srs=null] Layer projection
+ * @param {number|Function|null} [geomType=null] Geometry type or constructor ({{#crossLink
  * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
  * @param {string[]|object} [creation_options] driver-specific layer creation
  * options
@@ -278,7 +278,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  * Copies a layer.
  *
  * @method copy
- * @param {string} src_lyr_name
+ * @param {gdal.Layer} src_lyr_name
  * @param {string} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
  * @return {gdal.Layer}
@@ -289,7 +289,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  * {{{async}}}
  *
  * @method copyAsync
- * @param {string} src_lyr_name
+ * @param {gdal.Layer} src_lyr_name
  * @param {string} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
  * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
