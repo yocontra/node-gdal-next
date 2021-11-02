@@ -526,6 +526,7 @@ describe('gdal.Dataset', () => {
           const ds = gdal.open(
             fileUtils.clone(`${__dirname}/data/dem_azimuth50_pa.img`)
           )
+          assert.isNotNull(ds.srs)
           ds.srs = null
           assert.isNull(ds.srs)
         })
