@@ -332,4 +332,50 @@ describe('gdal_utils', () => {
       return assert.isRejected(gdal.warpAsync(tmpFile, null, [ ds ], [ '-t_srs', 'epsg:3587' ]))
     })
   })
+
+  describe('calcAsync', () => {
+    it('should perform the given calculation', async () => {
+      const tempFile = `/vsimem/cloudbase_${String(Math.random()).substring(2)}.tiff`
+      const T2m = await gdal.openAsync(path.resolve(__dirname, 'data','AROME_T2m_10.tiff'))
+      const D2m = await gdal.openAsync(path.resolve(__dirname, 'data','AROME_D2m_10.tiff'))
+      const size = await T2m.rasterSizeAsync
+      const cloudBase = await gdal.openAsync(tempFile,
+        'w', 'GTiff', size.x, size.y, 1, gdal.GDT_Float64)
+
+      // Espy's estimation for cloud base height
+      const espyFn = (t: number, td: number) => 125 * (t - td);
+
+      // Underground clouds are very rare
+      (await cloudBase.bands.getAsync(1)).noDataValue = -1e38
+
+      await gdal.calcAsync({
+        t: await T2m.bands.getAsync(1),
+        td: await D2m.bands.getAsync(1)
+      }, await cloudBase.bands.getAsync(1), espyFn, { convertNoData: true })
+
+      const t2mData = await (await T2m.bands.getAsync(1)).pixels.readAsync(0, 0, size.x, size.y)
+      const d2mData = await (await D2m.bands.getAsync(1)).pixels.readAsync(0, 0, size.x, size.y)
+      const cbData = await (await cloudBase.bands.getAsync(1)).pixels.readAsync(0, 0, size.x, size.y)
+
+      // check every 1000th element, there are lots of them
+      for (let i = 0; i < cbData.length; i+=1000) {
+        assert.closeTo(cbData[i], espyFn(t2mData[i], d2mData[i]), 1e-6)
+      }
+      cloudBase.close()
+      gdal.vsimem.release(tempFile)
+    })
+    it('should reject when raster sizes do not match', () => {
+      const tempFile = `/vsimem/invalid_calc_${String(Math.random()).substring(2)}.tiff`
+      const espyFn = (t: number, td: number) => 125 * (t - td)
+      return assert.isRejected(
+        gdal.calcAsync({
+          A: gdal.open(path.resolve(__dirname, 'data','AROME_T2m_10.tiff')).bands.get(1),
+          B: gdal.open(path.resolve(__dirname, 'data','sample.tif')).bands.get(1)
+        },
+        gdal.open(tempFile, 'w', 'GTiff', 128, 128, 1, gdal.GDT_Float64).bands.get(1),
+        espyFn),
+        /dimensions must match/
+      )
+    })
+  })
 })

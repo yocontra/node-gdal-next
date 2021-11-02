@@ -13,13 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Node 17 support and binary packages
  - Streams-based API for reading raster data as a stream of pixels
  - Asynchronous iterators for all collections that have asynchronous getters
+ - `gdal.info{Async}`, `gdal.translate{Async}`,`gdal.vectorTranslate{Async}` and `gdal.warp{Async}` - library versions of `gdalinfo`, `gdal_translate`, `ogr2ogr` and `gdalwarp`
+ - `gdal.calcAsync`, an alternative implementation of `gdal_calc.py`
  - `gdal.ColorTable` implementing `GDALColorTable` and `gdal.RasterBand.colorTable{Async}`
  - All `gdal.RasterBand` getters now have an async version
  - `gdal.RasterBandPixels.clampBlock` for handling partial edge blocks
  - `gdal.RasterBand.colorInterpretationAsync`
  - `gdal.Dataset.getMetadataAsync` and `gdal.RasterBand.getMetadataAsync`
  - `gdal.Dataset.setMetadata{Async}` and `gdal.RasterBand.setMetadata{Async}`
- - `gdal.info{Async}`, `gdal.translate{Async}`,`gdal.vectorTranslate{Async}` and `gdal.warp{Async}` - library versions of `gdalinfo`, `gdal_translate`, `ogr2ogr` and `gdalwarp`
  - `gdal.SpatialReference.fromURLAsync`, `gdal.SpatialReference.fromCRSURLAsync` and `gdal.SpatialReference.fromUserInputAsync`
  - `gdal.RasterBandOverviews.countAsync`, `gdal.RasterBandOverviews.getAsync` and `gdal.RasterBandOverviews.getBySampleCountAsync`
  - `gdal.fromDataType` and `gdal.toDataType` converters between `TypedArray` constructor and GDAL `dataType`
