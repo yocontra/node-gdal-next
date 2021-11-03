@@ -31,23 +31,31 @@ describe('gdal.RasterReadStream', () => {
     })
   }
 
-  function readTest(done: doneCb, file: string, type: new () => gdal.TypedArray, blockOptimize: boolean) {
+  function readTest(done: doneCb, file: string, blockOptimize: boolean) {
     const ds = gdal.open(path.resolve(__dirname, 'data', file))
     const band = ds.bands.get(1)
+    const expected = band.pixels.read(0, 0, band.size.x, band.size.y)
+    const type = gdal.fromDataType(band.dataType)
+    const actual = new type(band.size.x * band.size.y)
+
     const rs = band.pixels.createReadStream({ blockOptimize })
     assert.instanceOf(rs, gdal.RasterReadStream)
     let length = 0
     rs.on('data', (chunk) => {
       try {
         assert.instanceOf(chunk, type)
+        actual.set(chunk, length - 1)
         length += chunk.length
       } catch (e) {
+        rs.removeAllListeners('data')
+        rs.removeAllListeners('end')
         done(e)
       }
     })
     rs.on('end', () => {
       try {
         assert.equal(length, band.size.x * band.size.y)
+        assert.deepEqual(actual, expected)
         done()
       } catch (e) {
         done(e)
@@ -55,12 +63,22 @@ describe('gdal.RasterReadStream', () => {
     })
   }
 
-  it('should accept a raster band', (done) => readTest(done, 'sample.tif', Uint8Array, true))
-  it('should accept a raster band w/o blockOptimize', (done) => readTest(done, 'sample.tif', Uint8Array, false))
-  it('should accept a raster band w/Float', (done) => readTest(done, 'AROME_T2m_10.tiff', Float64Array, true))
-  it('should accept a raster band w/Float w/o blockOptimize', (done) => readTest(done, 'AROME_T2m_10.tiff', Float64Array, false))
+  it('should accept a raster band', (done) => readTest(done, 'sample.tif', true))
+  it('should accept a raster band w/o blockOptimize', (done) => readTest(done, 'sample.tif', false))
+  it('should accept a raster band w/Float', (done) => readTest(done, 'AROME_T2m_10.tiff', true))
+  it('should accept a raster band w/Float w/o blockOptimize', (done) => readTest(done, 'AROME_T2m_10.tiff', false))
   it('should support on the fly conversion w/ noData', (done) => noDataTest(done, 'dem_azimuth50_pa.img', undefined))
   it('should support noData conversion', (done) => noDataTest(done, 'dem_azimuth50_pa.img', true))
+  for (const file of [
+    'France_120km_WRF_WAM_210525-00.grb',
+    'gfs.t00z.pgrb2b.4p.f000.grb2',
+    'gfs.t00z.alnsf.nc',
+    'h5ex_d_gzip.h5',
+    'sample.tif',
+    'a39se10.jpg'
+  ]) {
+    it(`should accept various formats (${file})`, (done) => readTest(done, file, true))
+  }
 })
 
 describe('gdal.RasterWriteStream', () => {
