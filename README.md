@@ -10,7 +10,7 @@ Read and write raster and vector geospatial datasets straight from [Node.js](htt
 
 When in doubt on how to use a method, check also the [unit tests](https://github.com/mmomtchev/node-gdal-async/tree/master/test).
 
-# Fork notes
+## Fork notes
 
 This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal>.
 
@@ -21,6 +21,9 @@ It adds a number of features:
 - **Built-in networking support** with native support for cloud services (since 3.2)
 - **scijs/ndarray integration** with zero-copy I/O (since 3.3)
 - **Read-only support for the new Multidimensional Raster Data Model of GDAL 3.1** (since 3.3)
+- **Library versions of GDAL's command-line utilities `gdalinfo`, `gdal_translate`, `ogr2ogr` and `gdalwarp`** (since 3.4)
+- **Node.js Streams API for raster datasets** (since 3.4)
+- **An alternative `gdal_calc.py` implementation supporting JS functions** (since 3.4)
 - Support for curve geometries (since 3.1)
 - Progress callbacks (since 3.2)
 - Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (since 3.3)
@@ -29,6 +32,14 @@ It adds a number of features:
 The default install is currently the 3.3 branch which is bundled with GDAL 3.3.2.
 
 Support for `worker_threads` is planned but it is not a priority project
+
+## Project maturity
+
+`gdal-async` is a young and complex project that is currently evolving very fast.
+ * `gdal-async@3.3`, the current stable branch
+    * The raster data processing is used, in conjunction with `Express` and `scijs` on at least one production site (<https://www.velivole.fr> - <https://www.meteo.guru> where it is serving requests to thousands of visitors with process uptimes measured in months, so most of the basic raster functions are to be considered stable and without any major leaks
+    * The vector data processing is used occasionally and mostly in offline batch mode
+ * `gdal-async@3.4`, the `next` branch is to be considered experimental and of beta quality
 
 ## Installation
 
