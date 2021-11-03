@@ -114,6 +114,7 @@ class AsyncGuard {
       if (locks->size() == 0) {
         auto start = std::chrono::high_resolution_clock::now();
         fprintf(stderr, eventLoopWarning);
+        locks = make_shared<vector<AsyncLock>>(object_store.lockDatasets(uids));
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
         fprintf(
           stderr,
