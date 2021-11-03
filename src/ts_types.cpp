@@ -199,3 +199,8 @@
  * @property {Function} fn Function to be applied on all data
  * @property {new (len: number) => TypedArray} type Typed array constructor
  */
+
+/**
+ * @interface CalcOptions
+ * @property {boolean} [convertNoData]
+ */
