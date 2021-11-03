@@ -53,6 +53,7 @@
   ],
   "scripts": {
     "test": "mocha && npm run test:stress 20",
+    "bench": "node bench/streams.js",
     "lint:cpp": "clang-format -i src/*.cpp src/*.hpp && clang-format -i src/*/*.cpp src/*/*.hpp",
     "lint:js": "eslint lib test examples",
     "lint:fix": "eslint lib test examples --fix",
