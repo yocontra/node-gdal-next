@@ -44,7 +44,7 @@ describe('gdal.RasterReadStream', () => {
     rs.on('data', (chunk) => {
       try {
         assert.instanceOf(chunk, type)
-        actual.set(chunk, length - 1)
+        actual.set(chunk, length)
         length += chunk.length
       } catch (e) {
         rs.removeAllListeners('data')
