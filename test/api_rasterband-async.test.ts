@@ -92,18 +92,22 @@ describe('gdal.RasterBandAsync', () => {
       describe('readAsync() w/cb', () => {
         it('should not crash if the dataset is immediately closed', () => {
           // This test has good chances of triggering the event loop warning
-          for (let i = 0; i < 10; i++) {
-            gdal.openAsync(`${__dirname}/data/sample.tif`, (e, ds) => {
-              const band = ds.bands.get(1)
-              const w = 20
-              const h = 30
-              // This is an intentional race condition, two things can happen here:
-              // a) the async op starts before the dataset is closed and ds.close has to block the event loop
-              // b) the dataset is closed before the read starts, readAsync will report an error through the empty callback
-              band.pixels.readAsync(190, 290, w, h, undefined, undefined, () => undefined)
-              ds.close()
-            })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (gdal as any).eventLoopWarning = false
+          for (let i = 0; i < 20; i++) {
+            const ds = gdal.open(`${__dirname}/data/sample.tif`)
+            const band = ds.bands.get(1)
+            const w = 20
+            const h = 30
+            // This is an intentional race condition, two things can happen here:
+            // a) the async op starts before the dataset is closed and ds.close has to block the event loop
+            // b) the dataset is closed before the read starts, readAsync will report an error through the empty callback
+            band.pixels.readAsync(190, 290, w, h, undefined, undefined, () => undefined)
+            band.pixels.readAsync(190, 290, w, h, undefined, undefined, () => undefined)
+            ds.close()
           }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (gdal as any).eventLoopWarning = true
         })
         it('should return a TypedArray', () => {
           gdal.openAsync(`${__dirname}/data/sample.tif`, (e, ds) => {
