@@ -1108,4 +1108,17 @@ NAN_SETTER(READ_ONLY_SETTER);
     return;                                                                                                            \
   }
 
+#define MEASURE_EXECUTION_TIME(msg, op)                                                                                \
+  {                                                                                                                    \
+    auto start = std::chrono::high_resolution_clock::now();                                                            \
+    if (msg != nullptr) fprintf(stderr, "%s", msg);                                                                    \
+    op;                                                                                                                \
+    auto elapsed = std::chrono::high_resolution_clock::now() - start;                                                  \
+    if (msg != nullptr)                                                                                                \
+      fprintf(                                                                                                         \
+        stderr,                                                                                                        \
+        "%ld µs\n",                                                                                                    \
+        static_cast<long>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));                    \
+  }
+
 #endif
