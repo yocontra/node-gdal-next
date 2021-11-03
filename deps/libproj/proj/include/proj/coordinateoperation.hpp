@@ -1340,6 +1340,12 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const common::Angle &southPoleLongInUnrotatedCRS,
         const common::Angle &axisRotation);
 
+    PROJ_DLL static ConversionNNPtr createPoleRotationNetCDFCFConvention(
+        const util::PropertyMap &properties,
+        const common::Angle &gridNorthPoleLatitude,
+        const common::Angle &gridNorthPoleLongitude,
+        const common::Angle &northPoleGridLongitude);
+
     PROJ_DLL static ConversionNNPtr
     createChangeVerticalUnit(const util::PropertyMap &properties,
                              const common::Scale &factor);
@@ -1378,6 +1384,10 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_INTERNAL static ConversionNNPtr
     createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
                                const crs::CRSNNPtr &targetCRS);
+
+    PROJ_INTERNAL static ConversionNNPtr
+    createGeographicGeocentricLatitude(const crs::CRSNNPtr &sourceCRS,
+                                       const crs::CRSNNPtr &targetCRS);
 
     //! @endcond
 

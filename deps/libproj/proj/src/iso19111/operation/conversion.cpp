@@ -79,6 +79,7 @@ constexpr double UTM_SCALE_FACTOR = 0.9996;
 constexpr double UTM_FALSE_EASTING = 500000.0;
 constexpr double UTM_NORTH_FALSE_NORTHING = 0.0;
 constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -264,7 +265,8 @@ createConversion(const util::PropertyMap &properties,
                  const std::vector<ParameterValueNNPtr> &values) {
 
     std::vector<OperationParameterNNPtr> parameters;
-    for (int i = 0; mapping->params[i] != nullptr; i++) {
+    for (int i = 0; mapping->params != nullptr && mapping->params[i] != nullptr;
+         i++) {
         const auto *param = mapping->params[i];
         auto paramProperties = util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY, param->wkt2_name);
@@ -2227,6 +2229,51 @@ ConversionNNPtr Conversion::createPoleRotationGRIBConvention(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion based on the Pole Rotation method, using
+ * the conventions of the netCDF CF convention for the netCDF format.
+ *
+ * Those are mentioned in the Note 2 of
+ * https://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html#_rotated_pole
+ *
+ * Several conventions for the pole rotation method exists.
+ * The parameters provided in this method are remapped to the PROJ ob_tran
+ * operation with:
+ * <pre>
+ * +proj=ob_tran +o_proj=longlat +o_lon_p=northPoleGridLongitude
+ *                               +o_lat_p=gridNorthPoleLatitude
+ *                               +lon_0=180+gridNorthPoleLongitude
+ * </pre>
+ *
+ * Another implementation of that convention is also in the netcdf-java library:
+ * https://github.com/Unidata/netcdf-java/blob/3ce72c0cd167609ed8c69152bb4a004d1daa9273/cdm/core/src/main/java/ucar/unidata/geoloc/projection/RotatedPole.java
+ *
+ * The PROJ implementation of this method assumes a spherical ellipsoid.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param gridNorthPoleLatitude True latitude of the north pole of the rotated
+ * grid
+ * @param gridNorthPoleLongitude True longitude of the north pole of the rotated
+ * grid.
+ * @param northPoleGridLongitude Longitude of the true north pole in the rotated
+ * grid.
+ * @return a new Conversion.
+ *
+ * @since 8.2
+ */
+ConversionNNPtr Conversion::createPoleRotationNetCDFCFConvention(
+    const util::PropertyMap &properties,
+    const common::Angle &gridNorthPoleLatitude,
+    const common::Angle &gridNorthPoleLongitude,
+    const common::Angle &northPoleGridLongitude) {
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_POLE_ROTATION_NETCDF_CF_CONVENTION,
+                  createParams(gridNorthPoleLatitude, gridNorthPoleLongitude,
+                               northPoleGridLongitude));
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instantiate a conversion based on the Change of Vertical Unit
  * method.
  *
@@ -2314,12 +2361,11 @@ ConversionNNPtr Conversion::createAxisOrderReversal(bool is3D) {
                       createMethodMapNameEPSGCode(
                           EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_3D),
                       {}, {});
-    } else {
-        return create(createMapNameEPSGCode(AXIS_ORDER_CHANGE_2D_NAME, 15498),
-                      createMethodMapNameEPSGCode(
-                          EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D),
-                      {}, {});
     }
+    return create(
+        createMapNameEPSGCode(AXIS_ORDER_CHANGE_2D_NAME, 15498),
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D),
+        {}, {});
 }
 
 // ---------------------------------------------------------------------------
@@ -2352,6 +2398,28 @@ Conversion::createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
         common::IdentifiedObject::NAME_KEY,
         buildOpName("Conversion", sourceCRS, targetCRS));
     auto conv = createGeographicGeocentric(properties);
+    conv->setCRSs(sourceCRS, targetCRS, nullptr);
+    return conv;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion between a GeographicCRS and a spherical
+ * planetocentric GeodeticCRS
+ *
+ * This method peforms conversion between geodetic latitude and geocentric
+ * latitude
+ *
+ * @return a new Conversion.
+ */
+ConversionNNPtr
+Conversion::createGeographicGeocentricLatitude(const crs::CRSNNPtr &sourceCRS,
+                                               const crs::CRSNNPtr &targetCRS) {
+    auto properties = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY,
+        buildOpName("Conversion", sourceCRS, targetCRS));
+    auto conv = create(
+        properties, PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE, {});
     conv->setCRSs(sourceCRS, targetCRS, nullptr);
     return conv;
 }
@@ -2425,6 +2493,9 @@ CoordinateOperationNNPtr Conversion::inverse() const {
     if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
         const double convFactor = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        if (convFactor == 0) {
+            throw InvalidOperation("Invalid conversion factor");
+        }
         auto conv = createChangeVerticalUnit(
             createPropertiesForInverse(this, false, false),
             common::Scale(1.0 / convFactor));
@@ -2460,6 +2531,15 @@ CoordinateOperationNNPtr Conversion::inverse() const {
 
         auto conv = createHeightDepthReversal(
             createPropertiesForInverse(this, false, false));
+        conv->setCRSs(this, true);
+        return conv;
+    }
+
+    if (method()->nameStr() ==
+        PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE) {
+        auto conv =
+            create(createPropertiesForInverse(this, false, false),
+                   PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE, {});
         conv->setCRSs(this, true);
         return conv;
     }
@@ -3402,6 +3482,79 @@ void Conversion::_exportToPROJString(
     auto l_sourceCRS = sourceCRS();
     auto l_targetCRS = targetCRS();
 
+    if (methodName == PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE) {
+
+        const auto extractGeodeticCRSIfGeodeticCRSOrEquivalent =
+            [](const crs::CRSPtr &crs) {
+                auto geodCRS = std::dynamic_pointer_cast<crs::GeodeticCRS>(crs);
+                if (!geodCRS) {
+                    auto compoundCRS =
+                        std::dynamic_pointer_cast<crs::CompoundCRS>(crs);
+                    if (compoundCRS) {
+                        const auto &components =
+                            compoundCRS->componentReferenceSystems();
+                        if (!components.empty()) {
+                            geodCRS =
+                                util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                                    components[0]);
+                            if (!geodCRS) {
+                                auto boundCRS = util::nn_dynamic_pointer_cast<
+                                    crs::BoundCRS>(components[0]);
+                                if (boundCRS) {
+                                    geodCRS = util::nn_dynamic_pointer_cast<
+                                        crs::GeodeticCRS>(boundCRS->baseCRS());
+                                }
+                            }
+                        }
+                    } else {
+                        auto boundCRS =
+                            std::dynamic_pointer_cast<crs::BoundCRS>(crs);
+                        if (boundCRS) {
+                            geodCRS =
+                                util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                                    boundCRS->baseCRS());
+                        }
+                    }
+                }
+                return geodCRS;
+            };
+
+        auto sourceCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(
+            extractGeodeticCRSIfGeodeticCRSOrEquivalent(l_sourceCRS).get());
+        auto targetCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(
+            extractGeodeticCRSIfGeodeticCRSOrEquivalent(l_targetCRS).get());
+        if (sourceCRSGeod && targetCRSGeod) {
+            auto sourceCRSGeog =
+                dynamic_cast<const crs::GeographicCRS *>(sourceCRSGeod);
+            auto targetCRSGeog =
+                dynamic_cast<const crs::GeographicCRS *>(targetCRSGeod);
+            bool isSrcGeocentricLat =
+                sourceCRSGeod->isSphericalPlanetocentric();
+            bool isSrcGeographic = sourceCRSGeog != nullptr;
+            bool isTargetGeocentricLat =
+                targetCRSGeod->isSphericalPlanetocentric();
+            bool isTargetGeographic = targetCRSGeog != nullptr;
+            if ((isSrcGeocentricLat && isTargetGeographic) ||
+                (isSrcGeographic && isTargetGeocentricLat)) {
+
+                formatter->setOmitProjLongLatIfPossible(true);
+                formatter->startInversion();
+                sourceCRSGeod->_exportToPROJString(formatter);
+                formatter->stopInversion();
+
+                targetCRSGeod->_exportToPROJString(formatter);
+                formatter->setOmitProjLongLatIfPossible(false);
+
+                return;
+            }
+        }
+
+        throw io::FormattingException("Invalid nature of source and/or "
+                                      "targetCRS for Geographic latitude / "
+                                      "Geocentric latitude"
+                                      "conversion");
+    }
+
     crs::GeographicCRSPtr srcGeogCRS;
     if (!formatter->getCRSExport() && l_sourceCRS && applySourceCRSModifiers) {
 
@@ -3415,11 +3568,15 @@ void Conversion::_exportToPROJString(
             }
         }
 
-        srcGeogCRS = std::dynamic_pointer_cast<crs::GeographicCRS>(horiz);
-        if (srcGeogCRS) {
+        auto srcGeodCRS = dynamic_cast<const crs::GeodeticCRS *>(horiz.get());
+        if (srcGeodCRS) {
+            srcGeogCRS = std::dynamic_pointer_cast<crs::GeographicCRS>(horiz);
+        }
+        if (srcGeodCRS &&
+            (srcGeogCRS || srcGeodCRS->isSphericalPlanetocentric())) {
             formatter->setOmitProjLongLatIfPossible(true);
             formatter->startInversion();
-            srcGeogCRS->_exportToPROJString(formatter);
+            srcGeodCRS->_exportToPROJString(formatter);
             formatter->stopInversion();
             formatter->setOmitProjLongLatIfPossible(false);
         }
@@ -3627,6 +3784,24 @@ void Conversion::_exportToPROJString(
         formatter->addParam("o_lon_p", -rotation);
         formatter->addParam("o_lat_p", -southPoleLat);
         formatter->addParam("lon_0", southPoleLon);
+        bConversionDone = true;
+    } else if (ci_equal(
+                   methodName,
+                   PROJ_WKT2_NAME_METHOD_POLE_ROTATION_NETCDF_CF_CONVENTION)) {
+        double gridNorthPoleLatitude = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_GRID_NORTH_POLE_LATITUDE_NETCDF_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        double gridNorthPoleLongitude = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_GRID_NORTH_POLE_LONGITUDE_NETCDF_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        double northPoleGridLongitude = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_NORTH_POLE_GRID_LONGITUDE_NETCDF_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        formatter->addStep("ob_tran");
+        formatter->addParam("o_proj", "longlat");
+        formatter->addParam("o_lon_p", northPoleGridLongitude);
+        formatter->addParam("o_lat_p", gridNorthPoleLatitude);
+        formatter->addParam("lon_0", 180 + gridNorthPoleLongitude);
         bConversionDone = true;
     } else if (ci_equal(methodName, "Adams_Square_II")) {
         // Look for ESRI method and parameter names (to be opposed

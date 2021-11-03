@@ -78,6 +78,20 @@
 // parallel. This is slightly faster
 #define ENABLE_CUSTOM_LOCKLESS_VFS
 
+#if defined(_WIN32) && defined(MUTEX_pthread)
+#undef MUTEX_pthread
+#endif
+
+/* SQLite3 might use seak()+read() or pread[64]() to read data */
+/* The later allows the same SQLite handle to be safely used in forked */
+/* children of a parent process, while the former doesn't. */
+/* So we use pthread_atfork() to set a flag in forked children, to ask them */
+/* to close and reopen their database handle. */
+#if defined(MUTEX_pthread) && !defined(SQLITE_USE_PREAD)
+#include <pthread.h>
+#define REOPEN_SQLITE_DB_AFTER_FORK
+#endif
+
 using namespace NS_PROJ::internal;
 using namespace NS_PROJ::common;
 
@@ -90,6 +104,7 @@ namespace io {
 #define GEOG_2D "geographic 2D"
 #define GEOG_3D "geographic 3D"
 #define GEOCENTRIC "geocentric"
+#define OTHER "other"
 #define PROJECTED "projected"
 #define VERTICAL "vertical"
 #define COMPOUND "compound"
@@ -102,7 +117,7 @@ namespace io {
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 1;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 2;
 
 constexpr size_t N_MAX_PARAMS = 7;
 
@@ -217,6 +232,10 @@ class SQLiteHandle {
     sqlite3 *sqlite_handle_ = nullptr;
     bool close_handle_ = true;
 
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    bool is_valid_ = true;
+#endif
+
     int nLayoutVersionMajor_ = 0;
     int nLayoutVersionMinor_ = 0;
 
@@ -243,6 +262,12 @@ class SQLiteHandle {
     ~SQLiteHandle();
 
     sqlite3 *handle() { return sqlite_handle_; }
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    bool isValid() const { return is_valid_; }
+
+    void invalidate() { is_valid_ = false; }
+#endif
 
     static std::shared_ptr<SQLiteHandle> open(PJ_CONTEXT *ctx,
                                               const std::string &path);
@@ -470,21 +495,6 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
         return;
     }
     if (res.size() != 2) {
-        // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
-        // at the time of writing still compatible of the one we support.
-        static_assert(
-            // cppcheck-suppress knownConditionTrueFalse
-            DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
-                // cppcheck-suppress knownConditionTrueFalse
-                DATABASE_LAYOUT_VERSION_MINOR == 1,
-            "remove that assertion and below lines next time we upgrade "
-            "database structure");
-        res = run("SELECT 1 FROM metadata WHERE key = 'EPSG.VERSION' AND "
-                  "value = 'v10.003'");
-        if (!res.empty()) {
-            return;
-        }
-
         throw FactoryException(
             path + " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
                    "DATABASE.LAYOUT.VERSION.MINOR "
@@ -507,15 +517,7 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
             " is expected. "
             "It comes from another PROJ installation.");
     }
-    // Database layout v1.0 of PROJ 8.0 is forward compatible with v1.1
-    static_assert(
-        // cppcheck-suppress knownConditionTrueFalse
-        DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
-            // cppcheck-suppress knownConditionTrueFalse
-            DATABASE_LAYOUT_VERSION_MINOR == 1,
-        "re-enable the check below if database layout v1.0 and v1.1 is no "
-        "longer compatible");
-#if 0
+
     if (minor < DATABASE_LAYOUT_VERSION_MINOR) {
         throw FactoryException(
             path +
@@ -524,7 +526,7 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
             " is expected. "
             "It comes from another PROJ installation.");
     }
-#endif
+
     if (dbNamePrefix.empty()) {
         nLayoutVersionMajor_ = major;
         nLayoutVersionMinor_ = minor;
@@ -559,6 +561,10 @@ void SQLiteHandle::registerFunctions() {
 // ---------------------------------------------------------------------------
 
 class SQLiteHandleCache {
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    bool firstTime_ = true;
+#endif
+
     NS_PROJ::mutex sMutex_{};
 
     // Map dbname to SQLiteHandle
@@ -571,6 +577,10 @@ class SQLiteHandleCache {
                                             PJ_CONTEXT *ctx);
 
     void clear();
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    void invalidateHandles();
+#endif
 };
 
 // ---------------------------------------------------------------------------
@@ -593,6 +603,15 @@ void SQLiteHandleCache::clear() {
 std::shared_ptr<SQLiteHandle>
 SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
     NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    if (firstTime_) {
+        firstTime_ = false;
+        pthread_atfork(nullptr, nullptr,
+                       []() { SQLiteHandleCache::get().invalidateHandles(); });
+    }
+#endif
+
     std::shared_ptr<SQLiteHandle> handle;
     std::string key = path + ctx->custom_sqlite3_vfs_name;
     if (!cache_.tryGet(key, handle)) {
@@ -601,6 +620,19 @@ SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
     }
     return handle;
 }
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+// ---------------------------------------------------------------------------
+
+void SQLiteHandleCache::invalidateHandles() {
+    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    const auto lambda =
+        [](const lru11::KeyValuePair<std::string, std::shared_ptr<SQLiteHandle>>
+               &kvp) { kvp.value->invalidate(); };
+    cache_.cwalk(lambda);
+    cache_.clear();
+}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -611,9 +643,7 @@ struct DatabaseContext::Private {
     void open(const std::string &databasePath, PJ_CONTEXT *ctx);
     void setHandle(sqlite3 *sqlite_handle);
 
-    sqlite3 *handle() const {
-        return sqlite_handle_ ? sqlite_handle_->handle() : nullptr;
-    }
+    const std::shared_ptr<SQLiteHandle> &handle();
 
     PJ_CONTEXT *pjCtxt() const { return pjCtxt_; }
     void setPjCtxt(PJ_CONTEXT *ctxt) { pjCtxt_ = ctxt; }
@@ -724,6 +754,14 @@ struct DatabaseContext::Private {
     // cppcheck-suppress functionStatic
     void cache(const std::string &code, const GridInfoCache &info);
 
+    struct VersionedAuthName {
+        std::string versionedAuthName{};
+        std::string authName{};
+        std::string version{};
+        int priority = 0;
+    };
+    const std::vector<VersionedAuthName> &getCacheAuthNameWithVersion();
+
   private:
     friend class DatabaseContext;
 
@@ -764,6 +802,8 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
+
+    std::vector<VersionedAuthName> cacheAuthNameWithVersion_{};
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -927,6 +967,21 @@ void DatabaseContext::Private::clearCaches() {
     cacheGridInfo_.clear();
     cacheAllowedAuthorities_.clear();
     cacheAliasNames_.clear();
+}
+
+// ---------------------------------------------------------------------------
+
+const std::shared_ptr<SQLiteHandle> &DatabaseContext::Private::handle() {
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    if (sqlite_handle_ && !sqlite_handle_->isValid()) {
+        closeDB();
+        open(databasePath_, pjCtxt_);
+        if (!auxiliaryDatabasePaths_.empty()) {
+            attachExtraDatabases(auxiliaryDatabasePaths_);
+        }
+    }
+#endif
+    return sqlite_handle_;
 }
 
 // ---------------------------------------------------------------------------
@@ -1170,7 +1225,8 @@ std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
 void DatabaseContext::Private::attachExtraDatabases(
     const std::vector<std::string> &auxiliaryDatabasePaths) {
 
-    assert(sqlite_handle_);
+    auto l_handle = handle();
+    assert(l_handle);
 
     auto tables =
         run("SELECT name FROM sqlite_master WHERE type IN ('table', 'view') "
@@ -1186,8 +1242,8 @@ void DatabaseContext::Private::attachExtraDatabases(
         }
     }
 
-    const int nLayoutVersionMajor = sqlite_handle_->getLayoutVersionMajor();
-    const int nLayoutVersionMinor = sqlite_handle_->getLayoutVersionMinor();
+    const int nLayoutVersionMajor = l_handle->getLayoutVersionMajor();
+    const int nLayoutVersionMinor = l_handle->getLayoutVersionMinor();
 
     closeDB();
     if (auxiliaryDatabasePaths.empty()) {
@@ -1204,6 +1260,7 @@ void DatabaseContext::Private::attachExtraDatabases(
     }
     sqlite_handle_ = SQLiteHandle::initFromExisting(
         sqlite_handle, true, nLayoutVersionMajor, nLayoutVersionMinor);
+    l_handle = sqlite_handle_;
 
     run("ATTACH DATABASE '" + replaceAll(databasePath_, "'", "''") +
         "' AS db_0");
@@ -1218,8 +1275,8 @@ void DatabaseContext::Private::attachExtraDatabases(
         count++;
         run(sql);
 
-        sqlite_handle_->checkDatabaseLayout(databasePath_, otherDbPath,
-                                            attachedDbName + '.');
+        l_handle->checkDatabaseLayout(databasePath_, otherDbPath,
+                                      attachedDbName + '.');
     }
 
     for (const auto &pair : tableStructure) {
@@ -1263,23 +1320,26 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
                                            const ListOfParams &parameters,
                                            bool useMaxFloatPrecision) {
 
+    auto l_handle = handle();
+    assert(l_handle);
+
     sqlite3_stmt *stmt = nullptr;
     auto iter = mapSqlToStatement_.find(sql);
     if (iter != mapSqlToStatement_.end()) {
         stmt = iter->second;
         sqlite3_reset(stmt);
     } else {
-        if (sqlite3_prepare_v2(handle(), sql.c_str(),
+        if (sqlite3_prepare_v2(l_handle->handle(), sql.c_str(),
                                static_cast<int>(sql.size()), &stmt,
                                nullptr) != SQLITE_OK) {
             throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(handle()));
+                                   sqlite3_errmsg(l_handle->handle()));
         }
         mapSqlToStatement_.insert(
             std::pair<std::string, sqlite3_stmt *>(sql, stmt));
     }
 
-    return sqlite_handle_->run(stmt, sql, parameters, useMaxFloatPrecision);
+    return l_handle->run(stmt, sql, parameters, useMaxFloatPrecision);
 }
 
 // ---------------------------------------------------------------------------
@@ -1298,6 +1358,19 @@ static std::string formatStatement(const char *fmt, ...) {
                     if (arg[j] == '\'')
                         res += arg[j];
                     res += arg[j];
+                }
+            } else if (fmt[i + 1] == 'Q') {
+                const char *arg = va_arg(args, const char *);
+                if (arg == nullptr)
+                    res += "NULL";
+                else {
+                    res += '\'';
+                    for (int j = 0; arg[j] != '\0'; ++j) {
+                        if (arg[j] == '\'')
+                            res += arg[j];
+                        res += arg[j];
+                    }
+                    res += '\'';
                 }
             } else if (fmt[i + 1] == 's') {
                 const char *arg = va_arg(args, const char *);
@@ -2103,13 +2176,15 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         frameReferenceEpoch =
             toString(dynamicDatum->frameReferenceEpoch().value());
     }
+    const std::string anchor = *(datum->anchorDefinition());
     const auto sql = formatStatement(
         "INSERT INTO geodetic_datum VALUES("
-        "'%q','%q','%q','%q','%q','%q','%q','%q',%s,%s,NULL,0);",
+        "'%q','%q','%q','%q','%q','%q','%q','%q',%s,%s,NULL,%Q,0);",
         authName.c_str(), code.c_str(), datum->nameStr().c_str(),
         "", // description
         ellipsoidAuthName.c_str(), ellipsoidCode.c_str(), pmAuthName.c_str(),
-        pmCode.c_str(), publicationDate.c_str(), frameReferenceEpoch.c_str());
+        pmCode.c_str(), publicationDate.c_str(), frameReferenceEpoch.c_str(),
+        anchor.empty() ? nullptr : anchor.c_str());
     appendSql(sqlStatements, sql);
 
     identifyOrInsertUsages(datum, "geodetic_datum", authName, code,
@@ -2190,21 +2265,28 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         assert(!pmIds.empty());
         const std::string &pmAuthName = *(pmIds.front()->codeSpace());
         const std::string &pmCode = pmIds.front()->code();
+        const auto anchor = *(firstDatum->anchorDefinition());
         const auto sql = formatStatement(
             "INSERT INTO geodetic_datum VALUES("
-            "'%q','%q','%q','%q','%q','%q','%q','%q',NULL,NULL,%f,0);",
+            "'%q','%q','%q','%q','%q','%q','%q','%q',NULL,NULL,%f,%Q,0);",
             authName.c_str(), code.c_str(), ensemble->nameStr().c_str(),
             "", // description
             ellipsoidAuthName.c_str(), ellipsoidCode.c_str(),
-            pmAuthName.c_str(), pmCode.c_str(), accuracy);
+            pmAuthName.c_str(), pmCode.c_str(), accuracy,
+            anchor.empty() ? nullptr : anchor.c_str());
         appendSql(sqlStatements, sql);
     } else {
-        const auto sql = formatStatement("INSERT INTO vertical_datum VALUES("
-                                         "'%q','%q','%q','%q',NULL,NULL,%f,0);",
-                                         authName.c_str(), code.c_str(),
-                                         ensemble->nameStr().c_str(),
-                                         "", // description
-                                         accuracy);
+        const auto firstDatum =
+            AuthorityFactory::create(self, membersId.front().first)
+                ->createVerticalDatum(membersId.front().second);
+        const auto anchor = *(firstDatum->anchorDefinition());
+        const auto sql = formatStatement(
+            "INSERT INTO vertical_datum VALUES("
+            "'%q','%q','%q','%q',NULL,NULL,%f,%Q,"
+            "0);",
+            authName.c_str(), code.c_str(), ensemble->nameStr().c_str(),
+            "", // description
+            accuracy, anchor.empty() ? nullptr : anchor.c_str());
         appendSql(sqlStatements, sql);
     }
     identifyOrInsertUsages(ensemble,
@@ -2363,6 +2445,7 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         const auto &methodIds = method->identifiers();
         std::string methodAuthName;
         std::string methodCode;
+        const operation::MethodMapping *methodMapping = nullptr;
         if (methodIds.empty()) {
             const int epsgCode = method->getEPSGCode();
             if (epsgCode > 0) {
@@ -2374,7 +2457,6 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
                 const auto projectionMethodMappings =
                     operation::getProjectionMethodMappings(
                         nProjectionMethodMappings);
-                const operation::MethodMapping *methodMapping = nullptr;
                 for (size_t i = 0; i < nProjectionMethodMappings; ++i) {
                     const auto &mapping = projectionMethodMappings[i];
                     if (metadata::Identifier::isEquivalentName(
@@ -2399,18 +2481,52 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
             methodAuthName = *(methodId->codeSpace());
             methodCode = methodId->code();
         }
+
         auto sql = formatStatement("INSERT INTO conversion VALUES("
                                    "'%q','%q','%q','','%q','%q','%q'",
                                    convAuthName.c_str(), convCode.c_str(),
                                    conversion->nameStr().c_str(),
                                    methodAuthName.c_str(), methodCode.c_str(),
                                    method->nameStr().c_str());
-        const auto &values = conversion->parameterValues();
-        if (values.size() > N_MAX_PARAMS) {
+        const auto &srcValues = conversion->parameterValues();
+        if (srcValues.size() > N_MAX_PARAMS) {
             throw FactoryException("Cannot insert projection with more than " +
                                    toString(static_cast<int>(N_MAX_PARAMS)) +
                                    " parameters");
         }
+
+        std::vector<operation::GeneralParameterValueNNPtr> values;
+        if (methodMapping == nullptr) {
+            if (methodAuthName == metadata::Identifier::EPSG) {
+                methodMapping = operation::getMapping(atoi(methodCode.c_str()));
+            } else {
+                methodMapping =
+                    operation::getMapping(method->nameStr().c_str());
+            }
+        }
+        if (methodMapping != nullptr) {
+            // Re-order projection parameters in their reference order
+            for (size_t j = 0; methodMapping->params[j] != nullptr; ++j) {
+                for (size_t i = 0; i < srcValues.size(); ++i) {
+                    auto opParamValue = dynamic_cast<
+                        const operation::OperationParameterValue *>(
+                        srcValues[i].get());
+                    if (!opParamValue) {
+                        throw FactoryException("Cannot insert projection with "
+                                               "non-OperationParameterValue");
+                    }
+                    if (methodMapping->params[j]->wkt2_name &&
+                        opParamValue->parameter()->nameStr() ==
+                            methodMapping->params[j]->wkt2_name) {
+                        values.emplace_back(srcValues[i]);
+                    }
+                }
+            }
+        }
+        if (values.size() != srcValues.size()) {
+            values = srcValues;
+        }
+
         for (const auto &genOpParamvalue : values) {
             auto opParamValue =
                 dynamic_cast<const operation::OperationParameterValue *>(
@@ -2516,12 +2632,14 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         frameReferenceEpoch =
             toString(dynamicDatum->frameReferenceEpoch().value());
     }
+    const auto anchor = *(datum->anchorDefinition());
     const auto sql = formatStatement(
         "INSERT INTO vertical_datum VALUES("
-        "'%q','%q','%q','%q',%s,%s,NULL,0);",
+        "'%q','%q','%q','%q',%s,%s,NULL,%Q,0);",
         authName.c_str(), code.c_str(), datum->nameStr().c_str(),
         "", // description
-        publicationDate.c_str(), frameReferenceEpoch.c_str());
+        publicationDate.c_str(), frameReferenceEpoch.c_str(),
+        anchor.empty() ? nullptr : anchor.c_str());
     appendSql(sqlStatements, sql);
 
     identifyOrInsertUsages(datum, "vertical_datum", authName, code,
@@ -3083,9 +3201,7 @@ DatabaseContextNNPtr DatabaseContext::create(void *sqlite_handle) {
 
 // ---------------------------------------------------------------------------
 
-void *DatabaseContext::getSqliteHandle() const {
-    return getPrivate()->handle();
-}
+void *DatabaseContext::getSqliteHandle() const { return d->handle()->handle(); }
 
 // ---------------------------------------------------------------------------
 
@@ -3326,6 +3442,29 @@ std::list<std::string> DatabaseContext::getAliases(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the 'name' column of a table for an object
+ *
+ * @param tableName Table name/category.
+ * @param authName Authority name of the object.
+ * @param code Code of the object
+ * @return Name (or empty)
+ * @throw FactoryException
+ */
+std::string DatabaseContext::getName(const std::string &tableName,
+                                     const std::string &authName,
+                                     const std::string &code) const {
+    std::string sql("SELECT name FROM \"");
+    sql += replaceAll(tableName, "\"", "\"\"");
+    sql += "\" WHERE auth_name = ? AND code = ?";
+    auto res = d->run(sql, {authName, code});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res.front()[0];
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the 'text_definition' column of a table for an object
  *
  * @param tableName Table name/category.
@@ -3423,6 +3562,87 @@ DatabaseContext::getNonDeprecated(const std::string &tableName,
         const auto &replacement_auth_name = row[0];
         const auto &replacement_code = row[1];
         res.emplace_back(replacement_auth_name, replacement_code);
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<DatabaseContext::Private::VersionedAuthName> &
+DatabaseContext::Private::getCacheAuthNameWithVersion() {
+    if (cacheAuthNameWithVersion_.empty()) {
+        const auto sqlRes =
+            run("SELECT versioned_auth_name, auth_name, version, priority "
+                "FROM versioned_auth_name_mapping");
+        for (const auto &row : sqlRes) {
+            VersionedAuthName van;
+            van.versionedAuthName = row[0];
+            van.authName = row[1];
+            van.version = row[2];
+            van.priority = atoi(row[3].c_str());
+            cacheAuthNameWithVersion_.emplace_back(std::move(van));
+        }
+    }
+    return cacheAuthNameWithVersion_;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU_2015 returns (IAU,2015)
+bool DatabaseContext::getAuthorityAndVersion(
+    const std::string &versionedAuthName, std::string &authNameOut,
+    std::string &versionOut) {
+
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.versionedAuthName == versionedAuthName) {
+            authNameOut = van.authName;
+            versionOut = van.version;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU and 2015, returns IAU_2015
+bool DatabaseContext::getVersionedAuthority(const std::string &authName,
+                                            const std::string &version,
+                                            std::string &versionedAuthNameOut) {
+
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.authName == authName && van.version == version) {
+            versionedAuthNameOut = van.versionedAuthName;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU returns IAU_latest, ... IAU_2015
+std::vector<std::string>
+DatabaseContext::getVersionedAuthoritiesFromName(const std::string &authName) {
+
+    typedef std::pair<std::string, int> VersionedAuthNamePriority;
+    std::vector<VersionedAuthNamePriority> tmp;
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.authName == authName) {
+            tmp.emplace_back(
+                VersionedAuthNamePriority(van.versionedAuthName, van.priority));
+        }
+    }
+    std::vector<std::string> res;
+    if (!tmp.empty()) {
+        // Sort by decreasing priority
+        std::sort(tmp.begin(), tmp.end(),
+                  [](const VersionedAuthNamePriority &a,
+                     const VersionedAuthNamePriority &b) {
+                      return b.second > a.second;
+                  });
+        for (const auto &pair : tmp)
+            res.emplace_back(pair.first);
     }
     return res;
 }
@@ -4080,7 +4300,11 @@ AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
         throw FactoryException("no match found");
     }
     if (res.size() > 1) {
-        throw FactoryException("more than one match found");
+        for (const auto &row : res) {
+            if (row[0] != res.front()[0]) {
+                throw FactoryException("more than one match found");
+            }
+        }
     }
     return res.front()[0];
 }
@@ -4193,14 +4417,14 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
             return;
         }
     }
-    auto res =
-        d->runWithCodeParam("SELECT name, ellipsoid_auth_name, ellipsoid_code, "
-                            "prime_meridian_auth_name, prime_meridian_code, "
-                            "publication_date, frame_reference_epoch, "
-                            "ensemble_accuracy, deprecated FROM geodetic_datum "
-                            "WHERE "
-                            "auth_name = ? AND code = ?",
-                            code);
+    auto res = d->runWithCodeParam(
+        "SELECT name, ellipsoid_auth_name, ellipsoid_code, "
+        "prime_meridian_auth_name, prime_meridian_code, "
+        "publication_date, frame_reference_epoch, "
+        "ensemble_accuracy, anchor, deprecated FROM geodetic_datum "
+        "WHERE "
+        "auth_name = ? AND code = ?",
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("geodetic datum not found",
                                            d->authority(), code);
@@ -4215,7 +4439,8 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
         const auto &publication_date = row[5];
         const auto &frame_reference_epoch = row[6];
         const auto &ensemble_accuracy = row[7];
-        const bool deprecated = row[8] == "1";
+        const auto &anchor = row[8];
+        const bool deprecated = row[9] == "1";
 
         std::string massagedName = name;
         if (turnEnsembleAsDatum) {
@@ -4253,17 +4478,19 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
             auto pm = d->createFactory(prime_meridian_auth_name)
                           ->createPrimeMeridian(prime_meridian_code);
 
-            auto anchor = util::optional<std::string>();
+            auto anchorOpt = util::optional<std::string>();
+            if (!anchor.empty())
+                anchorOpt = anchor;
             if (!publication_date.empty()) {
                 props.set("PUBLICATION_DATE", publication_date);
             }
             auto datum = frame_reference_epoch.empty()
                              ? datum::GeodeticReferenceFrame::create(
-                                   props, ellipsoid, anchor, pm)
+                                   props, ellipsoid, anchorOpt, pm)
                              : util::nn_static_pointer_cast<
                                    datum::GeodeticReferenceFrame>(
                                    datum::DynamicGeodeticReferenceFrame::create(
-                                       props, ellipsoid, anchor, pm,
+                                       props, ellipsoid, anchorOpt, pm,
                                        common::Measure(
                                            c_locale_stod(frame_reference_epoch),
                                            common::UnitOfMeasure::YEAR),
@@ -4303,7 +4530,7 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
     datum::DatumEnsemblePtr &outDatumEnsemble, bool turnEnsembleAsDatum) const {
     auto res =
         d->runWithCodeParam("SELECT name, publication_date, "
-                            "frame_reference_epoch, ensemble_accuracy, "
+                            "frame_reference_epoch, ensemble_accuracy, anchor, "
                             "deprecated FROM "
                             "vertical_datum WHERE auth_name = ? AND code = ?",
                             code);
@@ -4317,7 +4544,8 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
         const auto &publication_date = row[1];
         const auto &frame_reference_epoch = row[2];
         const auto &ensemble_accuracy = row[3];
-        const bool deprecated = row[4] == "1";
+        const auto &anchor = row[4];
+        const bool deprecated = row[5] == "1";
         auto props = d->createPropertiesSearchUsages("vertical_datum", code,
                                                      name, deprecated);
         if (!turnEnsembleAsDatum && !ensemble_accuracy.empty()) {
@@ -4345,14 +4573,17 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
                 starts_with(code, "from_geogdatum_")) {
                 props.set("VERT_DATUM_TYPE", "2002");
             }
-            auto anchor = util::optional<std::string>();
+            auto anchorOpt = util::optional<std::string>();
+            if (!anchor.empty())
+                anchorOpt = anchor;
             if (frame_reference_epoch.empty()) {
-                outDatum = datum::VerticalReferenceFrame::create(props, anchor)
-                               .as_nullable();
+                outDatum =
+                    datum::VerticalReferenceFrame::create(props, anchorOpt)
+                        .as_nullable();
             } else {
                 outDatum =
                     datum::DynamicVerticalReferenceFrame::create(
-                        props, anchor,
+                        props, anchorOpt,
                         util::optional<datum::RealizationMethod>(),
                         common::Measure(c_locale_stod(frame_reference_epoch),
                                         common::UnitOfMeasure::YEAR),
@@ -4581,6 +4812,17 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         }
         throw FactoryException("invalid number of axis for CartesianCS");
     }
+    if (csType == "spherical") {
+        if (axisList.size() == 2) {
+            return cacheAndRet(
+                cs::SphericalCS::create(props, axisList[0], axisList[1]));
+        }
+        if (axisList.size() == 3) {
+            return cacheAndRet(cs::SphericalCS::create(
+                props, axisList[0], axisList[1], axisList[2]));
+        }
+        throw FactoryException("invalid number of axis for SphericalCS");
+    }
     if (csType == "vertical") {
         if (axisList.size() == 1) {
             return cacheAndRet(cs::VerticalCS::create(props, axisList[0]));
@@ -4662,8 +4904,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
     }
     std::string sql("SELECT name, type, coordinate_system_auth_name, "
                     "coordinate_system_code, datum_auth_name, datum_code, "
-                    "text_definition, "
-                    "deprecated FROM "
+                    "text_definition, deprecated, description FROM "
                     "geodetic_crs WHERE auth_name = ? AND code = ?");
     if (geographicOnly) {
         sql += " AND type in (" GEOG_2D_SINGLE_QUOTED "," GEOG_3D_SINGLE_QUOTED
@@ -4684,9 +4925,10 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         const auto &datum_code = row[5];
         const auto &text_definition = row[6];
         const bool deprecated = row[7] == "1";
+        const auto &remarks = row[8];
 
         auto props = d->createPropertiesSearchUsages("geodetic_crs", code, name,
-                                                     deprecated);
+                                                     deprecated, remarks);
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
@@ -4734,6 +4976,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
+
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (type == GEOCENTRIC && geocentricCS) {
             auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
@@ -4741,6 +4984,15 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
+
+        auto sphericalCS = util::nn_dynamic_pointer_cast<cs::SphericalCS>(cs);
+        if (type == OTHER && sphericalCS) {
+            auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
+                                                   NN_NO_CHECK(sphericalCS));
+            d->context()->d->cache(cacheKey, crsRet);
+            return crsRet;
+        }
+
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
                                type + ", " + cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
@@ -5219,7 +5471,8 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                            code);
     }
     const auto &type = res.front()[0];
-    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC) {
+    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC ||
+        type == OTHER) {
         return createGeodeticCRS(code);
     }
     if (type == VERTICAL) {

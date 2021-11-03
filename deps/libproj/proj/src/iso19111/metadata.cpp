@@ -41,6 +41,7 @@
 #include "proj_json_streaming_writer.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <string>
 #include <vector>
@@ -1057,7 +1058,12 @@ const optional<std::string> &Identifier::uri() PROJ_PURE_DEFN {
 void Identifier::_exportToWKT(WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     const std::string &l_code = code();
-    const std::string &l_codeSpace = *codeSpace();
+    std::string l_codeSpace = *codeSpace();
+    std::string l_version = *version();
+    const auto &dbContext = formatter->databaseContext();
+    if (dbContext) {
+        dbContext->getAuthorityAndVersion(*codeSpace(), l_codeSpace, l_version);
+    }
     if (!l_codeSpace.empty() && !l_code.empty()) {
         if (isWKT2) {
             formatter->startNode(WKTConstants::ID, false);
@@ -1068,8 +1074,7 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
             } catch (const std::exception &) {
                 formatter->addQuotedString(l_code);
             }
-            if (version().has_value()) {
-                auto l_version = *(version());
+            if (!l_version.empty()) {
                 try {
                     (void)c_locale_stod(l_version);
                     formatter->add(l_version);
@@ -1078,7 +1083,7 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
                 }
             }
             if (authority().has_value() &&
-                *(authority()->title()) != l_codeSpace) {
+                *(authority()->title()) != *codeSpace()) {
                 formatter->startNode(WKTConstants::CITATION, false);
                 formatter->addQuotedString(*(authority()->title()));
                 formatter->endNode();
@@ -1102,7 +1107,12 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
 
 void Identifier::_exportToJSON(JSONFormatter *formatter) const {
     const std::string &l_code = code();
-    const std::string &l_codeSpace = *codeSpace();
+    std::string l_codeSpace = *codeSpace();
+    std::string l_version = *version();
+    const auto &dbContext = formatter->databaseContext();
+    if (dbContext) {
+        dbContext->getAuthorityAndVersion(*codeSpace(), l_codeSpace, l_version);
+    }
     if (!l_codeSpace.empty() && !l_code.empty()) {
         auto writer = formatter->writer();
         auto objContext(formatter->MakeObjectContext(nullptr, false));
@@ -1113,6 +1123,31 @@ void Identifier::_exportToJSON(JSONFormatter *formatter) const {
             writer->Add(std::stoi(l_code));
         } catch (const std::exception &) {
             writer->Add(l_code);
+        }
+
+        if (!l_version.empty()) {
+            writer->AddObjKey("version");
+            try {
+                const double dblVersion = c_locale_stod(l_version);
+                if (dblVersion >= std::numeric_limits<int>::min() &&
+                    dblVersion <= std::numeric_limits<int>::max() &&
+                    static_cast<int>(dblVersion) == dblVersion) {
+                    writer->Add(static_cast<int>(dblVersion));
+                } else {
+                    writer->Add(dblVersion);
+                }
+            } catch (const std::exception &) {
+                writer->Add(l_version);
+            }
+        }
+        if (authority().has_value() &&
+            *(authority()->title()) != *codeSpace()) {
+            writer->AddObjKey("authority_citation");
+            writer->Add(*(authority()->title()));
+        }
+        if (uri().has_value()) {
+            writer->AddObjKey("uri");
+            writer->Add(*(uri()));
         }
     }
 }

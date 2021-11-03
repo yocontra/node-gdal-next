@@ -110,9 +110,14 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 8 MINOR 1 PATCH 1)
-set(PROJ_API_VERSION "22")
-set(PROJ_BUILD_VERSION "22.1.1")
+proj_version(MAJOR 8 MINOR 2 PATCH 0)
+# Use libtool convention to build the CMake's VERSION and SOVERSION
+# See https://github.com/pvanhoof/dir-examples#cmake-in-the-cmake-example
+set(PROJ_LIBTOOL_CURRENT    24)
+set(PROJ_LIBTOOL_REVISION   0)
+set(PROJ_LIBTOOL_AGE        2)
+math(EXPR PROJ_API_VERSION "${PROJ_LIBTOOL_CURRENT} - ${PROJ_LIBTOOL_AGE}")
+set(PROJ_BUILD_VERSION "${PROJ_API_VERSION}.${PROJ_LIBTOOL_AGE}.${PROJ_LIBTOOL_REVISION}")
 
 ################################################################################
 # Build features and variants
@@ -228,8 +233,6 @@ endif()
 ################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads)
-
-include(CheckIncludeFiles)
 
 include(CheckCSourceCompiles)
 if(MSVC)

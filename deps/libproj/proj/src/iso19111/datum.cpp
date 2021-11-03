@@ -363,6 +363,18 @@ void PrimeMeridian::_exportToWKT(
                     aliasFound = true;
                 }
             }
+            if (!aliasFound && dbContext) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), "ESRI");
+                aliasFound =
+                    authFactory
+                        ->createObjectsFromName(
+                            l_name,
+                            {io::AuthorityFactory::ObjectType::PRIME_MERIDIAN},
+                            false // approximateMatch
+                            )
+                        .size() == 1;
+            }
             if (!aliasFound) {
                 l_name = io::WKTFormatter::morphNameToESRI(l_name);
             }
@@ -820,6 +832,18 @@ void Ellipsoid::_exportToWKT(
                             aliasFound = true;
                         }
                     }
+                    if (!aliasFound && dbContext) {
+                        auto authFactory = io::AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext), "ESRI");
+                        aliasFound = authFactory
+                                         ->createObjectsFromName(
+                                             l_name,
+                                             {io::AuthorityFactory::ObjectType::
+                                                  ELLIPSOID},
+                                             false // approximateMatch
+                                             )
+                                         .size() == 1;
+                    }
                     if (!aliasFound) {
                         l_name = io::WKTFormatter::morphNameToESRI(l_name);
                     }
@@ -1247,6 +1271,18 @@ void GeodeticReferenceFrame::_exportToWKT(
                         }
                     }
                 }
+                if (!aliasFound && dbContext) {
+                    auto authFactory = io::AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), "ESRI");
+                    aliasFound = authFactory
+                                     ->createObjectsFromName(
+                                         l_name,
+                                         {io::AuthorityFactory::ObjectType::
+                                              GEODETIC_REFERENCE_FRAME},
+                                         false // approximateMatch
+                                         )
+                                     .size() == 1;
+                }
                 if (!aliasFound) {
                     l_name = io::WKTFormatter::morphNameToESRI(l_name);
                     if (!starts_with(l_name, "D_")) {
@@ -1401,17 +1437,32 @@ bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
     if (dbContext) {
         if (!identifiers().empty()) {
             const auto &id = identifiers().front();
-            auto aliasesResult =
+
+            const std::string officialNameFromId = dbContext->getName(
+                "geodetic_datum", *(id->codeSpace()), id->code());
+            const auto aliasesResult =
                 dbContext->getAliases(*(id->codeSpace()), id->code(), nameStr(),
                                       "geodetic_datum", std::string());
-            const char *otherName = other->nameStr().c_str();
-            for (const auto &aliasResult : aliasesResult) {
-                if (metadata::Identifier::isEquivalentName(
-                        otherName, aliasResult.c_str())) {
-                    return true;
-                }
-            }
-            return false;
+
+            const auto isNameMatching =
+                [&aliasesResult, &officialNameFromId](const std::string &name) {
+                    const char *nameCstr = name.c_str();
+                    if (metadata::Identifier::isEquivalentName(
+                            nameCstr, officialNameFromId.c_str())) {
+                        return true;
+                    } else {
+                        for (const auto &aliasResult : aliasesResult) {
+                            if (metadata::Identifier::isEquivalentName(
+                                    nameCstr, aliasResult.c_str())) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                };
+
+            return isNameMatching(nameStr()) &&
+                   isNameMatching(other->nameStr());
         } else if (!other->identifiers().empty()) {
             auto otherGRF = dynamic_cast<const GeodeticReferenceFrame *>(other);
             if (otherGRF) {
@@ -1969,6 +2020,18 @@ void VerticalReferenceFrame::_exportToWKT(
                     l_name = l_alias;
                     aliasFound = true;
                 }
+            }
+            if (!aliasFound && dbContext) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), "ESRI");
+                aliasFound = authFactory
+                                 ->createObjectsFromName(
+                                     l_name,
+                                     {io::AuthorityFactory::ObjectType::
+                                          VERTICAL_REFERENCE_FRAME},
+                                     false // approximateMatch
+                                     )
+                                 .size() == 1;
             }
             if (!aliasFound) {
                 l_name = io::WKTFormatter::morphNameToESRI(l_name);

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.4.0] WIP
 
 ### Added
- - PROJ 8.1.1
+ - PROJ 8.2.0
  - GEOS 3.10.0
  - Bundled GDAL 3.4.0rc1
  - Node 17 support and binary packages

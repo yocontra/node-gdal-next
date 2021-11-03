@@ -115,7 +115,8 @@ static void process(FILE *fid) {
                 facs_bad = proj_errno(Proj);
             }
 
-            data.xy = (*proj.fwd)(data.lp, Proj);
+            const auto xy = (*proj.fwd)(data.lp, Proj);
+            data.xy = xy;
 
             if (dofactors && inverse) {
                 facs = proj_factors(Proj, coord);
@@ -302,7 +303,8 @@ int main(int argc, char **argv) {
     if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != nullptr)
         ++emess_dat.Prog_name;
     else emess_dat.Prog_name = *argv;
-    inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
+    inverse = strncmp(emess_dat.Prog_name, "inv", 3) == 0 ||
+              strncmp(emess_dat.Prog_name, "lt-inv", 6) == 0; // older libtool have a lt- prefix
     if (argc <= 1 ) {
         (void)fprintf(stderr, usage, pj_get_release(), emess_dat.Prog_name);
         exit (0);
