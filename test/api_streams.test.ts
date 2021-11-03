@@ -3,6 +3,7 @@ import { Transform, finished as _finished } from 'stream'
 import { promisify } from 'util'
 import * as chai from 'chai'
 import * as path from 'path'
+import * as semver from 'semver'
 const assert = chai.assert
 const finished = promisify(_finished)
 
@@ -63,20 +64,24 @@ describe('gdal.RasterReadStream', () => {
     })
   }
 
+  const inputFiles = [
+    'gfs.t00z.alnsf.nc',
+    'h5ex_d_gzip.h5',
+    'sample.tif',
+    'a39se10.jpg'
+  ]
+  if (semver.gte(gdal.version, '3.0.0')) {
+    inputFiles.push('gfs.t00z.pgrb2b.4p.f000.grb2')
+    inputFiles.push('France_120km_WRF_WAM_210525-00.grb')
+  }
+
   it('should accept a raster band', (done) => readTest(done, 'sample.tif', true))
   it('should accept a raster band w/o blockOptimize', (done) => readTest(done, 'sample.tif', false))
   it('should accept a raster band w/Float', (done) => readTest(done, 'AROME_T2m_10.tiff', true))
   it('should accept a raster band w/Float w/o blockOptimize', (done) => readTest(done, 'AROME_T2m_10.tiff', false))
   it('should support on the fly conversion w/ noData', (done) => noDataTest(done, 'dem_azimuth50_pa.img', undefined))
   it('should support noData conversion', (done) => noDataTest(done, 'dem_azimuth50_pa.img', true))
-  for (const file of [
-    'France_120km_WRF_WAM_210525-00.grb',
-    'gfs.t00z.pgrb2b.4p.f000.grb2',
-    'gfs.t00z.alnsf.nc',
-    'h5ex_d_gzip.h5',
-    'sample.tif',
-    'a39se10.jpg'
-  ]) {
+  for (const file of inputFiles) {
     it(`should accept various formats (${file})`, (done) => readTest(done, file, true))
   }
 })
