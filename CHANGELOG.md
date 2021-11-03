@@ -7,9 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.4.0] WIP
 
 ### Added
+ - Bundled GDAL 3.4.0rc1
  - PROJ 8.2.0
  - GEOS 3.10.0
- - Bundled GDAL 3.4.0rc1
+ - libcurl 7.79.1
  - Node 17 support and binary packages
  - Streams-based API for reading raster data as a stream of pixels
  - Asynchronous iterators for all collections that have asynchronous getters

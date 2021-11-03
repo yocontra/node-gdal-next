@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libcurl"
 
-CURL_VERSION=7.76.1
+CURL_VERSION=7.79.1
 dir_curl=./curl
 
 #
