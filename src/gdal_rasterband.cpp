@@ -940,7 +940,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::dataTypeGetter) {
     return raw->GetRasterDataType();
   };
   job.rval = [](GDALDataType type, GetFromPersistentFunc) {
-    if (type == GDT_Unknown) return Nan::Undefined().As<Value>();
+    if (type == GDT_Unknown) return Nan::Null().As<Value>();
     return SafeString::New(GDALGetDataTypeName(type));
   };
   job.run(info, async);
