@@ -6,14 +6,14 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Purpose:     This is a small program that checks if the HDF5_DRIVER
  *              environment variable is set to a value that supports SWMR.
- *              
+ *
  *              It is intended for use in shell scripts.
  */
 
@@ -22,11 +22,10 @@
 #include "H5private.h"
 
 /* This file needs to access the file driver testing code */
-#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
+#define H5FD_FRIEND /*suppress error about including H5FDpkg	  */
 #define H5FD_TESTING
-#include "H5FDpkg.h"	/* File drivers	 			*/
+#include "H5FDpkg.h" /* File drivers	 			*/
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -48,10 +47,9 @@ main(void)
 
     driver = HDgetenv("HDF5_DRIVER");
 
-    if(H5FD__supports_swmr_test(driver))
+    if (H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;
     else
         return EXIT_FAILURE;
 
 } /* end main() */
-

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - PROJ 8.2.0
  - GEOS 3.10.0
  - libcurl 7.79.1
+ - hdf5 1.12.1
  - Node 17 support and binary packages
  - Streams-based API for reading raster data as a stream of pixels
  - Asynchronous iterators for all collections that have asynchronous getters

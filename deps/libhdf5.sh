@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libhdf5"
 
-HDF5_VERSION=1.12.0
+HDF5_VERSION=1.12.1
 dir_hdf5=./hdf5
 
 #
@@ -23,7 +23,12 @@ cp H5pubconf.h $dir_hdf5/src/H5pubconf.h
 # make, called by gyp, called by node-gyp has a built-in rule that will sometimes mess with .l/.y files
 find ${dir_hdf5} -name *.[ly] -delete
 
-# disable an obnoxious warning
-patch ${dir_hdf5}/src/H5trace.c < patches/H5trace.diff
+#
+# apply patches
+#
+for PATCH in patches/*.diff; do
+  echo "Applying ${PATCH}"
+  patch -p1 < $PATCH
+done
 
 [ -d ${dir_hdf5} ] && rm -rf ${dir_hdf5}/{tools,test,testpar}

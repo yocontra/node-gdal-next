@@ -1,0 +1,13 @@
+--- libhdf5/hdf5/src/H5trace.c.orig	2021-11-03 14:15:11.310888728 +0100
++++ libhdf5/hdf5/src/H5trace.c	2021-11-03 14:16:10.918452952 +0100
+@@ -45,6 +45,10 @@
+ #include "H5FDmpio.h"
+ #endif /* H5_HAVE_PARALLEL */
+ 
++#ifdef _MSC_VER
++#pragma warning(disable : 4311)
++#endif
++
+ /****************/
+ /* Local Macros */
+ /****************/
