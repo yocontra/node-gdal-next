@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab_priv.h a40fc640782d3f2b3889ee92dfcf4aa545733bc8 2020-11-06 21:56:04 +0100 Even Rouault $
+ * $Id: mitab_priv.h b4f8e2941b9293c66cb4646cea332d5fb132405a 2021-11-02 19:25:58 +0100 Even Rouault $
  *
  * Name:     mitab_priv.h
  * Project:  MapInfo TAB Read/Write library
@@ -1906,10 +1906,8 @@ class MIDDATAFile
        VSILFILE *m_fp;
        const char *m_pszDelimiter;
 
-       // Set limit for the length of a line
-#define MIDMAXCHAR 10000
-       char m_szLastRead[MIDMAXCHAR];
-       char m_szSavedLine[MIDMAXCHAR];
+       std::string m_osLastRead{};
+       std::string m_osSavedLine{};
 
        char        *m_pszFname;
        TABAccess   m_eAccessMode;

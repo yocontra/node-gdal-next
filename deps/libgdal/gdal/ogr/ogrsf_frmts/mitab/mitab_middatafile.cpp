@@ -41,7 +41,7 @@
 #include "cpl_vsi.h"
 #include "mitab_priv.h"
 
-CPL_CVSID("$Id: mitab_middatafile.cpp 7355f684f451b09efde7b4c59aae57454fa85541 2019-03-17 12:47:10 +0100 Even Rouault $")
+CPL_CVSID("$Id: mitab_middatafile.cpp b4f8e2941b9293c66cb4646cea332d5fb132405a 2021-11-02 19:25:58 +0100 Even Rouault $")
 
 /*=====================================================================
  *                      class MIDDATAFile
@@ -53,8 +53,6 @@ MIDDATAFile::MIDDATAFile( const char* pszEncoding ) :
     m_pszDelimiter("\t"),  // Encom 2003 (was NULL).
     m_pszFname(nullptr),
     m_eAccessMode(TABRead),
-    // TODO(schwehr): m_szLastRead({}),
-    // TODO(schwehr): m_szSavedLine({}),
     m_dfXMultiplier(1.0),
     m_dfYMultiplier(1.0),
     m_dfXDisplacement(0.0),
@@ -62,8 +60,6 @@ MIDDATAFile::MIDDATAFile( const char* pszEncoding ) :
     m_bEof(FALSE),
     m_osEncoding(pszEncoding)
 {
-    m_szLastRead[0] = '\0';
-    m_szSavedLine[0] = '\0';
 }
 
 MIDDATAFile::~MIDDATAFile() { Close(); }
@@ -72,15 +68,15 @@ void MIDDATAFile::SaveLine(const char *pszLine)
 {
     if(pszLine == nullptr)
     {
-        m_szSavedLine[0] = '\0';
+        m_osSavedLine.clear();
     }
     else
     {
-        CPLStrlcpy(m_szSavedLine, pszLine, MIDMAXCHAR);
+        m_osSavedLine = pszLine;
     }
 }
 
-const char *MIDDATAFile::GetSavedLine() { return m_szSavedLine; }
+const char *MIDDATAFile::GetSavedLine() { return m_osSavedLine.c_str(); }
 
 int MIDDATAFile::Open(const char *pszFname, const char *pszAccess)
 {
@@ -159,21 +155,30 @@ const char *MIDDATAFile::GetLine()
         return nullptr;
     }
 
-    const char *pszLine = CPLReadLine2L(m_fp, MIDMAXCHAR, nullptr);
+    static const int nMaxLineLength = atoi(
+        CPLGetConfigOption("MITAB_MAX_LINE_LENGTH", "1000000"));
+    const char *pszLine = CPLReadLine2L(m_fp, nMaxLineLength, nullptr);
 
     if(pszLine == nullptr)
     {
+        if( strstr(CPLGetLastErrorMsg(), "Maximum number of characters allowed reached") )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Maximum number of characters allowed reached. "
+                     "You can set the MITAB_MAX_LINE_LENGTH configuration option "
+                     "to the desired number of bytes (or -1 for unlimited)");
+        }
         SetEof(TRUE);
-        m_szLastRead[0] = '\0';
+        m_osLastRead.clear();
     }
     else
     {
         // Skip leading spaces and tabs except if the delimiter is tab.
-        while(pszLine && (*pszLine == ' ' ||
-                          (*m_pszDelimiter != '\t' && *pszLine == '\t')))
+        while(*pszLine == ' ' ||
+                          (*m_pszDelimiter != '\t' && *pszLine == '\t'))
             pszLine++;
 
-        CPLStrlcpy(m_szLastRead, pszLine, MIDMAXCHAR);
+        m_osLastRead = pszLine;
     }
 
 #if DEBUG_VERBOSE
@@ -194,9 +199,9 @@ const char *MIDDATAFile::GetLastLine()
     if(m_eAccessMode == TABRead)
     {
 #if DEBUG_VERBOSE
-        CPLDebug("MITAB", "m_szLastRead: %s", m_szLastRead);
+        CPLDebug("MITAB", "m_osLastRead: %s", m_osLastRead.c_str());
 #endif
-        return m_szLastRead;
+        return m_osLastRead.c_str();
     }
 
     // We should never get here.  Read/Write mode not implemented.

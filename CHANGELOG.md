@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.4.0] WIP
 
 ### Added
- - Bundled GDAL 3.4.0rc1
+ - Bundled GDAL 3.4.0rc2
  - PROJ 8.2.0
  - GEOS 3.10.0
  - libcurl 7.79.1

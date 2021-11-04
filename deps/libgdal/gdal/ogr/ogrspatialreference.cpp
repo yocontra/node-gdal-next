@@ -67,7 +67,7 @@
     (PROJ_VERSION_NUMBER >= PROJ_COMPUTE_VERSION(maj,min,patch))
 #endif
 
-CPL_CVSID("$Id: ogrspatialreference.cpp 5d5a9396da0e1c66349b4fdbe9d01a6a719eb1e9 2021-10-26 11:22:02 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrspatialreference.cpp e38f4025035bf7286d2061f619b1c2fd01554868 2021-11-03 11:07:04 +0100 Even Rouault $")
 
 #define STRINGIFY(s) #s
 #define XSTRINGIFY(s) STRINGIFY(s)
@@ -1200,7 +1200,22 @@ const char* OGRSpatialReference::GetName() const
     d->refreshProjObj();
     if( !d->m_pj_crs )
         return nullptr;
-    return proj_get_name(d->m_pj_crs);
+    const char* pszName = proj_get_name(d->m_pj_crs);
+#if PROJ_VERSION_NUMBER == PROJ_COMPUTE_VERSION(8,2,0)
+    if( d->m_pjType == PJ_TYPE_BOUND_CRS && EQUAL(pszName, "SOURCECRS") )
+    {
+        // Work around a bug of PROJ 8.2.0 (fixed in 8.2.1)
+        PJ* baseCRS = proj_get_source_crs(d->getPROJContext(), d->m_pj_crs);
+        if( baseCRS )
+        {
+            pszName = proj_get_name(baseCRS);
+            // pszName still remains valid after proj_destroy(), since
+            // d->m_pj_crs keeps a reference to the base CRS C++ object.
+            proj_destroy(baseCRS);
+        }
+    }
+#endif
+    return pszName;
 }
 
 /************************************************************************/

@@ -97,7 +97,7 @@
 #include "xtiffio.h"
 #include "quant_table_md5sum.h"
 
-CPL_CVSID("$Id: geotiff.cpp b15655226a04fc6bfa5a5aaeb2cb4a8d89c44d82 2021-10-20 23:53:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: geotiff.cpp 42676e6b614ed9243e47fe4cf29b4c6d8175b3c1 2021-11-01 23:53:06 +0100 Even Rouault $")
 
 static bool bGlobalInExternalOvr = false;
 
@@ -12558,7 +12558,6 @@ GDALDataset *GTiffDataset::Open( GDALOpenInfo * poOpenInfo )
 /* -------------------------------------------------------------------- */
 /*      Try opening the dataset.                                        */
 /* -------------------------------------------------------------------- */
-    // Disable strip chop for now.
     bool bStreaming = false;
     const char* pszReadStreaming =
         CPLGetConfigOption("TIFF_READ_STREAMING", nullptr);
@@ -12594,8 +12593,8 @@ GDALDataset *GTiffDataset::Open( GDALOpenInfo * poOpenInfo )
     TIFF *l_hTIFF =
         VSI_TIFFOpen( pszFilename,
                       poOpenInfo->eAccess == GA_ReadOnly ?
-                        ((bStreaming || !bDeferStrileLoading) ? "r" : "rDO") :
-                        (!bDeferStrileLoading ? "r+" : "r+D"),
+                        ((bStreaming || !bDeferStrileLoading) ? "rC" : "rDOC") :
+                        (!bDeferStrileLoading ? "r+C" : "r+DC"),
                       poOpenInfo->fpL );
     CPLUninstallErrorHandlerAccumulator();
 
@@ -13164,7 +13163,7 @@ GDALDataset *GTiffDataset::OpenDir( GDALOpenInfo * poOpenInfo )
     if( !GTiffOneTimeInit() )
         return nullptr;
 
-    const char* pszFlag = poOpenInfo->eAccess == GA_Update ? "r+D" : "rDO";
+    const char* pszFlag = poOpenInfo->eAccess == GA_Update ? "r+DC" : "rDOC";
     VSILFILE* l_fpL = VSIFOpenL(pszFilename, pszFlag);
     if( l_fpL == nullptr )
         return nullptr;
