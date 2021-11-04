@@ -32,7 +32,7 @@
 		},
 		"conditions": [
 			["OS == 'win'", {
-				"defines": [ "NOMINMAX", "WIN32", "CURL_STATICLIB" ],
+				"defines": [ "NOMINMAX", "WIN32", "CURL_STATICLIB", "PROJ_DLL=" ],
 				"libraries": [
 					"secur32.lib",
 					"odbccp32.lib",
