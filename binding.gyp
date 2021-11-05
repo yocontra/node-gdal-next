@@ -112,7 +112,7 @@
 				"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
 			},
 			"conditions": [
-				["enable_logging == 'true'", {
+				["enable_logging != 'false'", {
 					"defines": [
 						"ENABLE_LOGGING=1"
 					]
