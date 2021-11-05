@@ -62,10 +62,18 @@ GDAL_ASYNCABLE_DEFINE(VSI::stat) {
     Nan::Set(result, Nan::New("rdev").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_rdev)));
     Nan::Set(result, Nan::New("nlink").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_nlink)));
 
+#ifndef WIN32
     Nan::Set(result, Nan::New("blksize").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_blksize));
-    Nan::Set(result, Nan::New("ino").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_ino));
-    Nan::Set(result, Nan::New("size").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_size));
+#else
+    Nan::Set(result, Nan::New("blksize").ToLocalChecked(), Nan::Undefined());
+#endif
     Nan::Set(result, Nan::New("blocks").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_blocks));
+    Nan::Set(result, Nan::New("ino").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_ino));
+#ifndef WIN32
+    Nan::Set(result, Nan::New("size").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_size));
+#else
+    Nan::Set(result, Nan::New("size").ToLocalChecked(), Nan::Undefined());
+#endif
 
     Nan::Set(result, Nan::New("atime").ToLocalChecked(), Nan::New<Date>(stat.st_atime * 1000).ToLocalChecked());
     Nan::Set(result, Nan::New("mtime").ToLocalChecked(), Nan::New<Date>(stat.st_mtime * 1000).ToLocalChecked());
