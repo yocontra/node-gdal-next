@@ -82,6 +82,7 @@
 #include "geometry/gdal_polygon.hpp"
 #include "gdal_spatial_reference.hpp"
 #include "gdal_memfile.hpp"
+#include "gdal_fs.hpp"
 
 #include "utils/field_types.hpp"
 
@@ -438,6 +439,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   RasterBandPixels::Initialize(target);
   Memfile::Initialize(target);
   Utils::Initialize(target);
+  VSI::Initialize(target);
 
   /**
    * The collection of all drivers registered with GDAL

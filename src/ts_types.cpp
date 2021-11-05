@@ -204,3 +204,20 @@
  * @interface CalcOptions
  * @property {boolean} [convertNoData]
  */
+
+/**
+ * @typedef VSIStat
+ * @property {number} dev
+ * @property {number} mode
+ * @property {number} nlink
+ * @property {number} uid
+ * @property {number} gid
+ * @property {number} rdev
+ * @property {BigInt} blksize
+ * @property {BigInt} ino
+ * @property {BigInt} size
+ * @property {BigInt} blocks
+ * @property {Date} atime
+ * @property {Date} mtime
+ * @property {Date} ctime
+ */

@@ -45,6 +45,7 @@
 				"src/gdal_algorithms.cpp",
 				"src/gdal_memfile.cpp",
 				"src/gdal_utils.cpp",
+				"src/gdal_fs.cpp",
 				"src/collections/dataset_bands.cpp",
 				"src/collections/dataset_layers.cpp",
 				"src/collections/layer_features.cpp",

@@ -3,7 +3,7 @@
 namespace node_gdal {
 
 /**
- * Operations on in-memory `/vsimem/` files
+ * File operations specific to in-memory `/vsimem/` files
  *
  * @class gdal.vsimem
  */

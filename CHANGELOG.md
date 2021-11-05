@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.fromDataType` and `gdal.toDataType` converters between `TypedArray` constructor and GDAL `dataType`
  - TypeScript bindings now officially support `strict: true`
  - `gdal.vsimem.copy` allowing to copy a `Buffer` to GDAL's own memory heap to create an in-memory file extendable by GDAL
+ - `gdal.fs.stat` allowing for querying GDAL VSI filesystem objects
 
 ### Changed
  - Requires GDAL >= 2.1 if rebuilding against a system-installed GDAL library
