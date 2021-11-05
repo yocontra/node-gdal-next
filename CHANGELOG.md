@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.fromDataType` and `gdal.toDataType` converters between `TypedArray` constructor and GDAL `dataType`
  - TypeScript bindings now officially support `strict: true`
  - `gdal.vsimem.copy` allowing to copy a `Buffer` to GDAL's own memory heap to create an in-memory file extendable by GDAL
- - `gdal.fs.stat` allowing for querying GDAL VSI filesystem objects
+ - `gdal.fs.stat{Async}` and `gdal.fs.readDir{Async}` allowing for querying GDAL VSI filesystem objects
 
 ### Changed
  - Requires GDAL >= 2.1 if rebuilding against a system-installed GDAL library
@@ -57,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Correct TypeScript signatures for `gdal.SpatialReference.getAuthority{Code,Name}`, now they accept `null` as argument
  - Correct TypeScript signatures for `gdal.config.set` and `gdal.config.get`, now they can accept/return `null`
  - Correct numerous TypeScript signatures for callback functions to match the return type of the function
+ - Do not produce persistent temporary files in the unit tests
 
 ## [3.3.4] 2021-09-28
 

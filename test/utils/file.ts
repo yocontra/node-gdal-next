@@ -7,13 +7,17 @@ export function copyRecursiveSync (src: string, dest: string) {
   const stats = exists && fs.statSync(src)
   const isDirectory = stats && stats.isDirectory()
   if (exists && isDirectory) {
-    fs.mkdirSync(dest)
     fs.readdirSync(src).forEach((child) => {
       copyRecursiveSync(path.join(src, child), path.join(dest, child))
     })
   } else {
-    fs.linkSync(src, dest)
+    gdal.vsimem.copy(fs.readFileSync(src), dest)
   }
+}
+
+export function deleteRecursiveVSIMEM(dir: string) {
+  const list = gdal.fs.readDir(dir)
+  for (const file of list) gdal.vsimem.release(dir + '/' + file)
 }
 
 export function clone(file: string) {
@@ -28,13 +32,7 @@ export function clone(file: string) {
 export function cloneDir(dir: string) {
   const name = path.basename(dir)
   const name_new = `${name}.${String(Math.random()).substring(2)}.tmp`
-  const result = `${path.resolve(__dirname, '..')}/data/temp/${name_new}`
+  const result = `/vsimem/${name_new}`
   copyRecursiveSync(dir, result)
   return result
-}
-
-export function tempDir(dir: string) {
-  const destdir = path.resolve(dir, 'data', 'temp')
-  fs.mkdirSync(destdir, { recursive: true })
-  return destdir
 }

@@ -10,7 +10,7 @@ describe('gdal.Layer', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const prepare_dataset_layer_test = function (mode: string, _arg2: Record<string, unknown> | prepareCb, _arg3?: prepareCb) {
       let ds: gdal.Dataset, layer: gdal.Layer, options, callback: prepareCb,
-        err, file: string, dir: string, driver: gdal.Driver
+        err, file: string, dir: string | null, driver: gdal.Driver
 
       if (arguments.length === 2) {
         options = {}
@@ -23,6 +23,7 @@ describe('gdal.Layer', () => {
         callback = arguments[2]
       }
 
+      dir = null
       // set dataset / layer
       if (mode === 'r') {
         dir = fileUtils.cloneDir(`${__dirname}/data/shp`)
@@ -56,6 +57,13 @@ describe('gdal.Layer', () => {
           try {
             driver = gdal.drivers.get('ESRI Shapefile')
             driver.deleteDataset(file)
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        if (dir) {
+          try {
+            fileUtils.deleteRecursiveVSIMEM(dir)
           } catch (e) {
             /* ignore */
           }
@@ -606,8 +614,12 @@ describe('gdal.Layer', () => {
         })
         afterEach(() => {
           try {
+            const driver = dataset.driver
+            const file = dataset.description
             dataset.close()
+            driver.deleteDataset(file)
           } catch (e) {
+            console.error(e)
             /* ignore */
           }
         })

@@ -431,7 +431,7 @@ describe('gdal.Dataset', () => {
           })
         })
         it('should accept layer creation options', () => {
-          const basename = `${fileUtils.tempDir(__dirname)}/ds_layer_test.${String(
+          const basename = `/vsimem/ds_layer_test.${String(
             Math.random()
           ).substring(2)}`
           const file = `${basename}.dbf`
@@ -440,11 +440,12 @@ describe('gdal.Dataset', () => {
           assert.instanceOf(lyr, gdal.Layer)
           ds.close()
           // check if .dbf file was created
-          fs.statSync(file)
+          gdal.fs.stat(file)
           // make sure that .shp file wasnt created
           assert.throws(() => {
-            fs.statSync(`${basename}.shp`)
+            gdal.fs.stat(`${basename}.shp`)
           })
+          gdal.drivers.get('ESRI Shapefile').deleteDataset(file)
         })
         it('should throw if dataset is closed', () => {
           const file = `/vsimem/ds_layer_test.${String(

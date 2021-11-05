@@ -27,4 +27,25 @@ describe('gdal.fs', () => {
     it('should reject on non-existent files', () =>
       assert.isRejected(gdal.fs.statAsync(path.resolve(__dirname, 'data', 'sample2.tif'))))
   })
+  describe('readDir()', () => {
+    it('should return all files in a directory', () => {
+      const list = gdal.fs.readDir(path.resolve(__dirname, 'data'))
+      assert.include(list, 'sample.tif')
+    })
+    it('should throw on non-existent directories', () => {
+      assert.throws(() => {
+        gdal.fs.readDir(path.resolve(__dirname, 'data2'))
+      })
+    })
+  })
+  describe('readDirAsync()', () => {
+    it('should return all files in a directory', () => {
+      const list = gdal.fs.readDirAsync(path.resolve(__dirname, 'data'))
+      // There seems to be a bug in the TS typing of assert.eventually.include
+      return assert.eventually.include(list as unknown as string[], 'sample.tif')
+    })
+    it('should throw on non-existent directories', () =>
+      assert.isRejected(gdal.fs.readDirAsync(path.resolve(__dirname, 'data2')))
+    )
+  })
 })

@@ -12,6 +12,7 @@ void VSI::Initialize(Local<Object> target) {
   Local<Object> fs = Nan::New<Object>();
   Nan::Set(target, Nan::New("fs").ToLocalChecked(), fs);
   Nan__SetAsyncableMethod(fs, "stat", stat);
+  Nan__SetAsyncableMethod(fs, "readDir", readDir);
 }
 
 /**
@@ -73,6 +74,56 @@ GDAL_ASYNCABLE_DEFINE(VSI::stat) {
     return scope.Escape(result);
   };
 
+  job.run(info, async, 1);
+}
+
+/**
+ * Read file names in a directory.
+ *
+ * @static
+ * @method readDir
+ * @param {string} directory
+ * @throws Error
+ * @returns {string[]}
+ */
+
+/**
+ * Read file names in a directory.
+ * {{{async_}}}
+ *
+ * @static
+ * @method readDirAsync
+ * @param {string} directory
+ * @throws Error
+ * @param {callback<string[]>} [callback=undefined] {{{cb}}}
+ * @returns {Promise<string[]>}
+ */
+GDAL_ASYNCABLE_DEFINE(VSI::readDir) {
+  std::string directory;
+
+  NODE_ARG_STR(0, "directory", directory);
+
+  GDALAsyncableJob<std::shared_ptr<std::vector<std::string>>> job(0);
+  job.main = [directory](const GDALExecutionProgress &) {
+    auto names = std::make_shared<std::vector<std::string>>();
+    CPLErrorReset();
+
+    char **raw_names = VSIReadDir(directory.c_str());
+    if (raw_names == nullptr) throw CPLGetLastErrorMsg();
+
+    int i = 0;
+    while (raw_names[i] != nullptr) {
+      names->push_back(raw_names[i]);
+      i++;
+    }
+    return names;
+  };
+  job.rval = [](std::shared_ptr<std::vector<std::string>> names, GetFromPersistentFunc) {
+    Nan::EscapableHandleScope scope;
+    Local<Array> results = Nan::New<Array>();
+    for (std::size_t i = 0; i < names->size(); ++i) Nan::Set(results, i, SafeString::New((*names.get())[i].c_str()));
+    return scope.Escape(results);
+  };
   job.run(info, async, 1);
 }
 } // namespace node_gdal

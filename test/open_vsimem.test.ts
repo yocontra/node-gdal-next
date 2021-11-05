@@ -89,7 +89,7 @@ describe('Open', () => {
 describe('gdal.vsimem', () => {
   afterEach(global.gc)
 
-  describe('set', () => {
+  describe('set()', () => {
     it('should create a vsimem file from a Buffer', () => {
       const buffer_in = fs.readFileSync(path.join(__dirname, 'data/park.geo.json'))
       gdal.vsimem.set(buffer_in, '/vsimem/park.geo.json')
@@ -106,7 +106,7 @@ describe('gdal.vsimem', () => {
     })
   })
 
-  describe('copy', () => {
+  describe('copy()', () => {
     it('should create a vsimem file from a Buffer', () => {
       const buffer_in = fs.readFileSync(path.join(__dirname, 'data/park.geo.json'))
       gdal.vsimem.copy(buffer_in, '/vsimem/park.geo.json')
@@ -123,7 +123,7 @@ describe('gdal.vsimem', () => {
     })
   })
 
-  describe('release', () => {
+  describe('release()', () => {
     it('should allow to retrieve the contents from a vsimem', () => {
       const size = 64
       const ds = gdal.open('/vsimem/temp1.tiff', 'w', 'GTiff', size, size, 1, gdal.GDT_Byte)
@@ -133,12 +133,15 @@ describe('gdal.vsimem', () => {
       ds.close()
       const buffer = gdal.vsimem.release('/vsimem/temp1.tiff')
       assert.instanceOf(buffer, Buffer)
+
       const tmpName = path.join(__dirname, 'data', 'temp', `temp_vsimem_${Date.now()}.tiff`)
       fs.writeFileSync(tmpName, buffer)
+
       const tmp = gdal.open(tmpName)
       assert.instanceOf(tmp, gdal.Dataset)
       assert.deepEqual(tmp.rasterSize, { x: size, y: size })
       assert.deepEqual(tmp.bands.get(1).pixels.read(0, 0, size, size), data)
+
       tmp.close()
       fs.unlinkSync(tmpName)
     })
