@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Correct TypeScript signature for `gdal.Geometry.srs`, now it can be `null`
  - Correct TypeScript signatures for `gdal.SpatialReference.getAuthority{Code,Name}`, now they accept `null` as argument
  - Correct TypeScript signatures for `gdal.config.set` and `gdal.config.get`, now they can accept/return `null`
+ - Correct numerous TypeScript signatures for callback functions to match the return type of the function
 
 ## [3.3.4] 2021-09-28
 

@@ -395,6 +395,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * sharing a common pixel value. Each polygon is created with an attribute
  * indicating the pixel value of that polygon. A raster mask may also be
  * provided to determine which pixels are eligible for processing.
+ * {{{async}}}
  *
  * @throws Error
  * @method polygonizeAsync

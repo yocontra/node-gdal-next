@@ -240,6 +240,7 @@ NAN_METHOD(RasterBand::getMaskBand) {
 
 /**
  * Fill this band with a constant value.
+ * {{{async}}}
  *
  * @throws Error
  * @method fillAsync
@@ -477,11 +478,12 @@ NAN_METHOD(RasterBand::setStatistics) {
  */
 
 /**
- * Returns band metadata
+ * Returns band metadata.
+ * {{{async}}}
  *
  * @method getMetadataAsync
  * @param {string} [domain]
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<any>} [callback=undefined] {{{cb}}}
  * @return {Promise<any>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
@@ -515,7 +517,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
  * @method setMetadataAsync
  * @param {object|string[]} metadata
  * @param {string} [domain]
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
  * @return {Promise<boolean>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {

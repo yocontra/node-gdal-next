@@ -653,7 +653,7 @@ NAN_METHOD(SpatialReference::fromURN) {
  * @throws Error
  * @method fromCRSURLAsync
  * @param {string} input
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<gdal.SpatialReference>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.SpatialReference>}
  */
 GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
@@ -698,7 +698,7 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
  * @throws Error
  * @method fromURLAsync
  * @param {string} url
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<gdal.SpatialReference>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.SpatialReference>}
  */
 
@@ -771,7 +771,7 @@ NAN_METHOD(SpatialReference::fromMICoordSys) {
  * @throws Error
  * @method fromUserInputAsync
  * @param {string} input
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<gdal.SpatialReference>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.SpatialReference>}
  */
 GDAL_ASYNCABLE_DEFINE(SpatialReference::fromUserInput) {

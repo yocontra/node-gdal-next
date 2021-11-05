@@ -176,9 +176,10 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
 
 /**
  * Returns the number of overviews.
+ * {{{async}}}
  *
  * @method countAsync
- * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::count) {

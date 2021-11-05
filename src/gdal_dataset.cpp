@@ -202,7 +202,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
  * @method setMetadataAsync
  * @param {object|string[]} metadata
  * @param {string} [domain]
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<boolean>} [callback=undefined] {{{cb}}}
  * @return {Promise<boolean>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {

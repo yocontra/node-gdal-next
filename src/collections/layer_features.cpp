@@ -420,6 +420,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
 
 /**
  * Removes a feature from the layer.
+ * {{{async}}}
  *
  * @method removeAsync
  * @throws Error

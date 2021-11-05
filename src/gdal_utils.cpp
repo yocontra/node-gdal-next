@@ -56,7 +56,7 @@ void Utils::Initialize(Local<Object> target) {
  * @param {string[]} [args] array of CLI options for gdal_translate
  * @param {UtilOptions} [options] additional options
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::translate) {
@@ -136,7 +136,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  * @param {string[]} [args] array of CLI options for ogr2ogr
  * @param {UtilOptions} [options] additional options
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
@@ -234,7 +234,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  * @static
  * @param {gdal.Dataset} dataset
  * @param {string[]} [args] array of CLI options for gdalinfo
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<string>} [callback=undefined] {{{cb}}}
  * @return {Promise<string>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::info) {
@@ -307,7 +307,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  * @param {string[]} [args] array of CLI options for gdalwarp
  * @param {UtilOptions} [options] additional options
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::warp) {

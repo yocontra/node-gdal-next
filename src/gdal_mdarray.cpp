@@ -216,7 +216,7 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  */
 
 /**
- * Read data from the MDArray
+ * Read data from the MDArray.
  * {{{async}}}
  *
  * This will extract the context of a (hyper-)rectangle from the array into a buffer.
