@@ -103,25 +103,25 @@ GDAL_ASYNCABLE_DEFINE(VSI::readDir) {
 
   NODE_ARG_STR(0, "directory", directory);
 
-  GDALAsyncableJob<std::shared_ptr<std::vector<std::string>>> job(0);
+  GDALAsyncableJob<char **> job(0);
   job.main = [directory](const GDALExecutionProgress &) {
-    auto names = std::make_shared<std::vector<std::string>>();
     CPLErrorReset();
 
-    char **raw_names = VSIReadDir(directory.c_str());
-    if (raw_names == nullptr) throw CPLGetLastErrorMsg();
+    char **names = VSIReadDir(directory.c_str());
+    if (names == nullptr) throw CPLGetLastErrorMsg();
 
-    int i = 0;
-    while (raw_names[i] != nullptr) {
-      names->push_back(raw_names[i]);
-      i++;
-    }
     return names;
   };
-  job.rval = [](std::shared_ptr<std::vector<std::string>> names, GetFromPersistentFunc) {
+
+  job.rval = [](char **names, GetFromPersistentFunc) {
     Nan::EscapableHandleScope scope;
     Local<Array> results = Nan::New<Array>();
-    for (std::size_t i = 0; i < names->size(); ++i) Nan::Set(results, i, SafeString::New((*names.get())[i].c_str()));
+    int i = 0;
+    while (names[i] != nullptr) {
+      Nan::Set(results, i, SafeString::New(names[i]));
+      i++;
+    }
+    CSLDestroy(names);
     return scope.Escape(results);
   };
   job.run(info, async, 1);
