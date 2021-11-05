@@ -182,7 +182,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
   job.main = [raw, domain](const GDALExecutionProgress &) {
     return raw->GetMetadata(domain.empty() ? nullptr : domain.c_str());
   };
-  job.rval = [](char **md, GetFromPersistentFunc) { return MajorObject::getMetadata(md); };
+  job.rval = [](char **md, const GetFromPersistentFunc &) { return MajorObject::getMetadata(md); };
   job.run(info, async, 1);
 }
 
@@ -224,7 +224,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {
     if (r == CE_Failure) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::New<Boolean>(r == CE_None); };
+  job.rval = [](CPLErr r, const GetFromPersistentFunc &) { return Nan::New<Boolean>(r == CE_None); };
   job.run(info, async, 2);
 }
 
@@ -327,7 +327,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
     raw->FlushCache();
     return 0;
   };
-  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](int, const GetFromPersistentFunc &) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 0);
 
   return;
@@ -392,7 +392,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
     if (layer == nullptr) throw CPLGetLastErrorMsg();
     return layer;
   };
-  job.rval = [raw](OGRLayer *layer, GetFromPersistentFunc) { return Layer::New(layer, raw, true); };
+  job.rval = [raw](OGRLayer *layer, const GetFromPersistentFunc &) { return Layer::New(layer, raw, true); };
 
   job.run(info, async, 3);
 }
@@ -650,7 +650,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](CPLErr, const GetFromPersistentFunc &) { return Nan::Undefined().As<Value>(); };
 
   job.run(info, async, 4);
 }
@@ -724,7 +724,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
     return result;
   };
 
-  job.rval = [](xy xy, GetFromPersistentFunc) {
+  job.rval = [](xy xy, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     if (xy.null) return Nan::Null().As<Value>();
     Local<Object> result = Nan::New<Object>();
@@ -779,7 +779,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
     return srs;
   };
 
-  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) {
+  job.rval = [](OGRSpatialReference *srs, const GetFromPersistentFunc &) {
     if (srs != nullptr)
       return SpatialReference::New(srs, true);
     else
@@ -837,7 +837,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
     return transform;
   };
 
-  job.rval = [](std::shared_ptr<double> transform, GetFromPersistentFunc) {
+  job.rval = [](std::shared_ptr<double> transform, const GetFromPersistentFunc &) {
     if (transform == nullptr) return Nan::Null().As<v8::Value>();
     Local<Array> result = Nan::New<Array>(6);
     Nan::Set(result, 0, Nan::New<Number>(transform.get()[0]));

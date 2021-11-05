@@ -306,7 +306,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
     };
   }
 
-  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
+  job.rval = [](CPLErr r, const GetFromPersistentFunc &) { return Nan::Undefined(); };
   job.run(info, async, 1);
 }
 
@@ -437,7 +437,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {
     return r;
   };
 
-  job.rval = [](warpOutputResult r, GetFromPersistentFunc) {
+  job.rval = [](warpOutputResult r, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     Local<Array> result_geotransform = Nan::New<Array>();
     Nan::Set(result_geotransform, 0, Nan::New<Number>(r.geotransform[0]));

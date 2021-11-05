@@ -266,7 +266,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };
+  job.rval = [](CPLErr, const GetFromPersistentFunc &) { return Nan::Undefined().As<Value>(); };
 
   job.run(info, async, 2);
 }
@@ -427,7 +427,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::computeStatistics) {
     return stats;
   };
 
-  job.rval = [](stats_t r, GetFromPersistentFunc) {
+  job.rval = [](stats_t r, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     Local<Object> result = Nan::New<Object>();
     Nan::Set(result, Nan::New("min").ToLocalChecked(), Nan::New<Number>(r.min));
@@ -497,7 +497,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
   job.main = [raw, domain](const GDALExecutionProgress &) {
     return raw->GetMetadata(domain.empty() ? nullptr : domain.c_str());
   };
-  job.rval = [](char **md, GetFromPersistentFunc) { return MajorObject::getMetadata(md); };
+  job.rval = [](char **md, const GetFromPersistentFunc &) { return MajorObject::getMetadata(md); };
   job.run(info, async, 1);
 }
 
@@ -539,7 +539,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
     if (r == CE_Failure) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::New<Boolean>(r == CE_None); };
+  job.rval = [](CPLErr r, const GetFromPersistentFunc &) { return Nan::New<Boolean>(r == CE_None); };
   job.run(info, async, 2);
 }
 
@@ -592,7 +592,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {
     CPLErrorReset();
     return raw->GetBand();
   };
-  job.rval = [](int id, GetFromPersistentFunc) {
+  job.rval = [](int id, const GetFromPersistentFunc &) {
     if (id == 0) return Nan::Null().As<Value>();
     return Nan::New<Integer>(id).As<Value>();
   };
@@ -621,7 +621,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::descriptionGetter) {
 
   GDALAsyncableJob<const char *> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) { return raw->GetDescription(); };
-  job.rval = [](const char *desc, GetFromPersistentFunc) { return SafeString::New(desc); };
+  job.rval = [](const char *desc, const GetFromPersistentFunc &) { return SafeString::New(desc); };
   job.run(info, async);
 }
 
@@ -655,7 +655,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::sizeGetter) {
     r.y = raw->GetYSize();
     return r;
   };
-  job.rval = [](xy r, GetFromPersistentFunc) {
+  job.rval = [](xy r, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     Local<Object> result = Nan::New<Object>();
     Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(r.x));
@@ -694,7 +694,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::blockSizeGetter) {
     raw->GetBlockSize(&r.x, &r.y);
     return r;
   };
-  job.rval = [](xy r, GetFromPersistentFunc) {
+  job.rval = [](xy r, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     Local<Object> result = Nan::New<Object>();
     Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(r.x));
@@ -736,7 +736,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
     r.value = raw->GetMinimum(&r.success);
     return r;
   };
-  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+  job.rval = [](MaybeResult<double> r, const GetFromPersistentFunc &) {
     if (r.success) return Nan::New<Number>(r.value).As<Value>();
     return Nan::Null().As<Value>();
   };
@@ -770,7 +770,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
     r.value = raw->GetMaximum(&r.success);
     return r;
   };
-  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+  job.rval = [](MaybeResult<double> r, const GetFromPersistentFunc &) {
     if (r.success) return Nan::New<Number>(r.value).As<Value>();
     return Nan::Null().As<Value>();
   };
@@ -803,7 +803,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
     r.value = raw->GetOffset(&r.success);
     return r;
   };
-  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+  job.rval = [](MaybeResult<double> r, const GetFromPersistentFunc &) {
     if (r.success) return Nan::New<Number>(r.value).As<Value>();
     return Nan::Null().As<Value>();
   };
@@ -836,7 +836,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
     r.value = raw->GetScale(&r.success);
     return r;
   };
-  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+  job.rval = [](MaybeResult<double> r, const GetFromPersistentFunc &) {
     if (r.success) return Nan::New<Number>(r.value).As<Value>();
     return Nan::Null().As<Value>();
   };
@@ -869,7 +869,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
     r.value = raw->GetNoDataValue(&r.success);
     return r;
   };
-  job.rval = [](MaybeResult<double> r, GetFromPersistentFunc) {
+  job.rval = [](MaybeResult<double> r, const GetFromPersistentFunc &) {
     if (r.success)
       return Nan::New<Number>(r.value).As<Value>();
     else
@@ -908,7 +908,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
     CPLErrorReset();
     return raw->GetUnitType();
   };
-  job.rval = [](const char *r, GetFromPersistentFunc) { return SafeString::New(r); };
+  job.rval = [](const char *r, const GetFromPersistentFunc &) { return SafeString::New(r); };
   job.run(info, async);
 }
 
@@ -941,7 +941,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::dataTypeGetter) {
     CPLErrorReset();
     return raw->GetRasterDataType();
   };
-  job.rval = [](GDALDataType type, GetFromPersistentFunc) {
+  job.rval = [](GDALDataType type, const GetFromPersistentFunc &) {
     if (type == GDT_Unknown) return Nan::Null().As<Value>();
     return SafeString::New(GDALGetDataTypeName(type));
   };
@@ -973,7 +973,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::readOnlyGetter) {
     CPLErrorReset();
     return raw->GetAccess();
   };
-  job.rval = [](GDALAccess r, GetFromPersistentFunc) { return (r == GA_Update ? Nan::False() : Nan::True()); };
+  job.rval = [](GDALAccess r, const GetFromPersistentFunc &) { return (r == GA_Update ? Nan::False() : Nan::True()); };
   job.run(info, async);
 }
 
@@ -1010,7 +1010,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::hasArbitraryOverviewsGetter) {
     CPLErrorReset();
     return static_cast<bool>(raw->HasArbitraryOverviews());
   };
-  job.rval = [](bool r, GetFromPersistentFunc) { return Nan::New<Boolean>(r); };
+  job.rval = [](bool r, const GetFromPersistentFunc &) { return Nan::New<Boolean>(r); };
   job.run(info, async);
 }
 
@@ -1051,7 +1051,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
     }
     return names;
   };
-  job.rval = [](std::shared_ptr<std::vector<std::string>> names, GetFromPersistentFunc) {
+  job.rval = [](std::shared_ptr<std::vector<std::string>> names, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     Local<Array> results = Nan::New<Array>();
     for (std::size_t i = 0; i < names->size(); ++i) Nan::Set(results, i, SafeString::New((*names.get())[i].c_str()));
@@ -1084,7 +1084,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorInterpretationGetter) {
   GDALAsyncableJob<GDALColorInterp> job(band->parent_uid);
   job.persist("this", info.This());
   job.main = [raw](const GDALExecutionProgress &) { return raw->GetColorInterpretation(); };
-  job.rval = [](GDALColorInterp ci, GetFromPersistentFunc) {
+  job.rval = [](GDALColorInterp ci, const GetFromPersistentFunc &) {
     if (ci == GCI_Undefined)
       return Nan::Undefined().As<Value>();
     else
@@ -1221,7 +1221,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::colorTableGetter) {
 
   GDALAsyncableJob<GDALColorTable *> job(band->parent_uid);
   job.main = [raw](const GDALExecutionProgress &) { return raw->GetColorTable(); };
-  job.rval = [](GDALColorTable *ct, GetFromPersistentFunc getter) {
+  job.rval = [](GDALColorTable *ct, const GetFromPersistentFunc &getter) {
     if (ct != nullptr) return ColorTable::New(ct, getter("this"));
     return Nan::Undefined().As<Value>();
   };

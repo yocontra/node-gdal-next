@@ -126,7 +126,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
     if (feature == nullptr) throw CPLGetLastErrorMsg();
     return feature;
   };
-  job.rval = [](OGRFeature *feature, GetFromPersistentFunc) { return Feature::New(feature); };
+  job.rval = [](OGRFeature *feature, const GetFromPersistentFunc &) { return Feature::New(feature); };
   job.run(info, async, 1);
 }
 
@@ -165,7 +165,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
     OGRFeature *feature = gdal_layer->GetNextFeature();
     return feature;
   };
-  job.rval = [](OGRFeature *feature, GetFromPersistentFunc) { return Feature::New(feature); };
+  job.rval = [](OGRFeature *feature, const GetFromPersistentFunc &) { return Feature::New(feature); };
   job.run(info, async, 0);
 }
 
@@ -209,7 +209,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
     OGRFeature *feature = gdal_layer->GetNextFeature();
     return feature;
   };
-  job.rval = [](OGRFeature *feature, GetFromPersistentFunc) { return Feature::New(feature); };
+  job.rval = [](OGRFeature *feature, const GetFromPersistentFunc &) { return Feature::New(feature); };
   job.run(info, async, 0);
 }
 
@@ -270,7 +270,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
     if (err != CE_None) throw getOGRErrMsg(err);
     return err;
   };
-  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined(); };
+  job.rval = [](int, const GetFromPersistentFunc &) { return Nan::Undefined(); };
   job.run(info, async, 1);
 }
 
@@ -320,7 +320,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
     GIntBig count = gdal_layer->GetFeatureCount(force);
     return count;
   };
-  job.rval = [](GIntBig count, GetFromPersistentFunc) { return Nan::New<Number>(count); };
+  job.rval = [](GIntBig count, const GetFromPersistentFunc &) { return Nan::New<Number>(count); };
   job.run(info, async, 1);
 }
 
@@ -406,7 +406,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
     return err;
   };
 
-  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined(); };
+  job.rval = [](int, const GetFromPersistentFunc &) { return Nan::Undefined(); };
   job.run(info, async, 2);
 }
 
@@ -450,7 +450,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
     if (err) { throw getOGRErrMsg(err); }
     return err;
   };
-  job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined(); };
+  job.rval = [](int, const GetFromPersistentFunc &) { return Nan::Undefined(); };
   job.run(info, async, 1);
 
   return;

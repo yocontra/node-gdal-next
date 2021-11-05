@@ -109,7 +109,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
     if (result == nullptr) { throw "Specified overview not found"; }
     return result;
   };
-  job.rval = [band](GDALRasterBand *result, GetFromPersistentFunc) {
+  job.rval = [band](GDALRasterBand *result, const GetFromPersistentFunc &) {
     return RasterBand::New(result, band->getParent());
   };
   job.run(info, async, 1);
@@ -161,7 +161,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
     if (result == nullptr) { throw "Specified overview not found"; }
     return result;
   };
-  job.rval = [band](GDALRasterBand *result, GetFromPersistentFunc) {
+  job.rval = [band](GDALRasterBand *result, const GetFromPersistentFunc &) {
     return RasterBand::New(result, band->getParent());
   };
   job.run(info, async, 1);
@@ -194,7 +194,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::count) {
     int count = band->get()->GetOverviewCount();
     return count;
   };
-  job.rval = [](int count, GetFromPersistentFunc) { return Nan::New<Integer>(count); };
+  job.rval = [](int count, const GetFromPersistentFunc &) { return Nan::New<Integer>(count); };
   job.run(info, async, 0);
 }
 

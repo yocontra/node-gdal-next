@@ -144,7 +144,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
     return val;
   };
 
-  job.rval = [](double val, GetFromPersistentFunc) { return Nan::New<Number>(val); };
+  job.rval = [](double val, const GetFromPersistentFunc &) { return Nan::New<Number>(val); };
   job.run(info, async, 2);
 }
 
@@ -191,7 +191,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::set) {
     return err;
   };
 
-  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
+  job.rval = [](CPLErr r, const GetFromPersistentFunc &) { return Nan::Undefined(); };
   job.run(info, async, 3);
 }
 
@@ -392,7 +392,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
     return err;
   };
 
-  job.rval = [](CPLErr err, GetFromPersistentFunc getter) { return getter("array"); };
+  job.rval = [](CPLErr err, const GetFromPersistentFunc &getter) { return getter("array"); };
   job.run(info, async, 13);
 }
 
@@ -512,7 +512,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
     if (err != CE_None) throw CPLGetLastErrorMsg();
     return err;
   };
-  job.rval = [](CPLErr, GetFromPersistentFunc getter) { return getter("array"); };
+  job.rval = [](CPLErr, const GetFromPersistentFunc &getter) { return getter("array"); };
 
   job.run(info, async, 11);
 }
@@ -584,7 +584,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr r, GetFromPersistentFunc getter) { return getter("array"); };
+  job.rval = [](CPLErr r, const GetFromPersistentFunc &getter) { return getter("array"); };
   job.run(info, async, 3);
 }
 
@@ -641,7 +641,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
     if (err) { throw CPLGetLastErrorMsg(); }
     return err;
   };
-  job.rval = [](CPLErr r, GetFromPersistentFunc) { return Nan::Undefined(); };
+  job.rval = [](CPLErr r, const GetFromPersistentFunc &) { return Nan::Undefined(); };
   job.run(info, async, 3);
 }
 
@@ -691,7 +691,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::clampBlock) {
     if (err != CE_None) { throw CPLGetLastErrorMsg(); }
     return r;
   };
-  job.rval = [](xy r, GetFromPersistentFunc) {
+  job.rval = [](xy r, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     Local<Object> result = Nan::New<Object>();
     Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Integer>(r.x));

@@ -705,7 +705,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       gdal_obj->wrapped_method();                                                                                      \
       return 0;                                                                                                        \
     };                                                                                                                 \
-    job.rval = [](int, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };                                \
+    job.rval = [](int, const GetFromPersistentFunc &) { return Nan::Undefined().As<Value>(); };                        \
     job.run(info, async, 0);                                                                                           \
   }
 
@@ -721,7 +721,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     auto *gdal_obj = obj->this_;                                                                                       \
     GDALAsyncableJob<async_type> job(0);                                                                               \
     job.main = [gdal_obj](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(); };                       \
-    job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
+    job.rval = [](async_type r, const GetFromPersistentFunc &) { return Nan::New<result_type>(r); };                   \
     job.run(info, async, 0);                                                                                           \
   }
 
@@ -738,7 +738,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     GDALAsyncableJob<async_type> job(0);                                                                               \
     job.persist(info[0].As<Object>());                                                                                 \
     job.main = [gdal_obj, gdal_param](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(gdal_param); }; \
-    job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
+    job.rval = [](async_type r, const GetFromPersistentFunc &) { return Nan::New<result_type>(r); };                   \
     job.run(info, async, 1);                                                                                           \
   }
 
@@ -755,7 +755,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     auto *gdal_obj = obj->this_;                                                                                       \
     GDALAsyncableJob<async_type> job(0);                                                                               \
     job.main = [gdal_obj, param](const GDALExecutionProgress &) { return gdal_obj->wrapped_method(param); };           \
-    job.rval = [](async_type r, GetFromPersistentFunc) { return Nan::New<result_type>(r); };                           \
+    job.rval = [](async_type r, const GetFromPersistentFunc &) { return Nan::New<result_type>(r); };                   \
     job.run(info, async, 1);                                                                                           \
   }
 
@@ -773,7 +773,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       if (err) throw getOGRErrMsg(err);                                                                                \
       return err;                                                                                                      \
     };                                                                                                                 \
-    job.rval = [](OGRErr, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };                             \
+    job.rval = [](OGRErr, const GetFromPersistentFunc &) { return Nan::Undefined().As<Value>(); };                     \
     job.run(info, async, 0);                                                                                           \
   }
 
@@ -796,7 +796,7 @@ NAN_SETTER(READ_ONLY_SETTER);
       if (err) throw getOGRErrMsg(err);                                                                                \
       return err;                                                                                                      \
     };                                                                                                                 \
-    job.rval = [](async_type, GetFromPersistentFunc) { return Nan::Undefined().As<Value>(); };                         \
+    job.rval = [](async_type, const GetFromPersistentFunc &) { return Nan::Undefined().As<Value>(); };                 \
     job.run(info, async, 1);                                                                                           \
   }
 

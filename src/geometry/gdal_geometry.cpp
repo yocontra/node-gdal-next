@@ -591,7 +591,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::convexHull) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
 
@@ -623,7 +623,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::boundary) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
 
@@ -663,7 +663,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::intersection) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -703,7 +703,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::unionGeometry) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -743,7 +743,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::difference) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -783,7 +783,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::symDifference) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -822,7 +822,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplify) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -861,7 +861,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::simplifyPreserveTopology) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 1);
 }
 
@@ -906,7 +906,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::buffer) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 2);
 }
 
@@ -941,7 +941,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::makeValid) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](OGRGeometry *r, GetFromPersistentFunc) { return Geometry::New(r); };
+  job.rval = [](OGRGeometry *r, const GetFromPersistentFunc &) { return Geometry::New(r); };
   job.run(info, async, 0);
 }
 #endif
@@ -980,7 +980,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKT) {
     return text;
   };
 
-  job.rval = [](char *text, GetFromPersistentFunc) {
+  job.rval = [](char *text, const GetFromPersistentFunc &) {
     if (text) {
       auto r = SafeString::New(text);
       CPLFree(text);
@@ -1064,7 +1064,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     return data;
   };
   //^^ export to wkb and fill buffer ^^
-  job.rval = [size](unsigned char *data, GetFromPersistentFunc) {
+  job.rval = [size](unsigned char *data, const GetFromPersistentFunc &) {
     Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
     return result;
   };
@@ -1104,7 +1104,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToKML) {
     if (text == nullptr) throw CPLGetLastErrorMsg();
     return text;
   };
-  job.rval = [](char *text, GetFromPersistentFunc) {
+  job.rval = [](char *text, const GetFromPersistentFunc &) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1148,7 +1148,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToGML) {
     if (text == nullptr) throw CPLGetLastErrorMsg();
     return text;
   };
-  job.rval = [](char *text, GetFromPersistentFunc) {
+  job.rval = [](char *text, const GetFromPersistentFunc &) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1192,7 +1192,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToJSON) {
     if (text == nullptr) throw CPLGetLastErrorMsg();
     return text;
   };
-  job.rval = [](char *text, GetFromPersistentFunc) {
+  job.rval = [](char *text, const GetFromPersistentFunc &) {
     if (text) {
       Local<Value> result = Nan::New(text).ToLocalChecked();
       CPLFree(text);
@@ -1243,7 +1243,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::centroid) {
     }
     return point;
   };
-  job.rval = [](OGRPoint *point, GetFromPersistentFunc) { return Point::New(point); };
+  job.rval = [](OGRPoint *point, const GetFromPersistentFunc &) { return Point::New(point); };
   job.run(info, async, 0);
 }
 
@@ -1282,7 +1282,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope) {
     return envelope;
   };
 
-  job.rval = [](OGREnvelope *envelope, GetFromPersistentFunc) {
+  job.rval = [](OGREnvelope *envelope, const GetFromPersistentFunc &) {
     Local<Object> obj = Nan::New<Object>();
     Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
     Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
@@ -1330,7 +1330,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::getEnvelope3D) {
     return envelope;
   };
 
-  job.rval = [](OGREnvelope3D *envelope, GetFromPersistentFunc) {
+  job.rval = [](OGREnvelope3D *envelope, const GetFromPersistentFunc &) {
     Local<Object> obj = Nan::New<Object>();
     Nan::Set(obj, Nan::New("minX").ToLocalChecked(), Nan::New<Number>(envelope->MinX));
     Nan::Set(obj, Nan::New("maxX").ToLocalChecked(), Nan::New<Number>(envelope->MaxX));
@@ -1408,7 +1408,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkt) {
     if (err) throw getOGRErrMsg(err);
     return geom;
   };
-  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
+  job.rval = [](OGRGeometry *geom, const GetFromPersistentFunc &) { return Geometry::New(geom, true); };
   job.run(info, async, 2);
 }
 
@@ -1465,7 +1465,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromWkb) {
     if (err) throw getOGRErrMsg(err);
     return geom;
   };
-  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
+  job.rval = [](OGRGeometry *geom, const GetFromPersistentFunc &) { return Geometry::New(geom, true); };
   job.run(info, async, 2);
 }
 
@@ -1528,7 +1528,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJson) {
     if (geom == nullptr) throw CPLGetLastErrorMsg();
     return geom;
   };
-  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
+  job.rval = [](OGRGeometry *geom, const GetFromPersistentFunc &) { return Geometry::New(geom, true); };
   job.run(info, async, 1);
 #endif
 }
@@ -1587,7 +1587,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::createFromGeoJsonBuffer) {
     if (geom == nullptr) throw CPLGetLastErrorMsg();
     return geom;
   };
-  job.rval = [](OGRGeometry *geom, GetFromPersistentFunc) { return Geometry::New(geom, true); };
+  job.rval = [](OGRGeometry *geom, const GetFromPersistentFunc &) { return Geometry::New(geom, true); };
   job.run(info, async, 1);
 #endif
 }

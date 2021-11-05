@@ -51,7 +51,7 @@ GDAL_ASYNCABLE_DEFINE(VSI::stat) {
     return stat;
   };
 
-  job.rval = [](VSIStatBufL stat, GetFromPersistentFunc) {
+  job.rval = [](VSIStatBufL stat, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
 
     Local<Object> result = Nan::New<Object>();
@@ -120,7 +120,7 @@ GDAL_ASYNCABLE_DEFINE(VSI::readDir) {
     return names;
   };
 
-  job.rval = [](char **names, GetFromPersistentFunc) {
+  job.rval = [](char **names, const GetFromPersistentFunc &) {
     Nan::EscapableHandleScope scope;
     Local<Array> results = Nan::New<Array>();
     int i = 0;

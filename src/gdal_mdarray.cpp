@@ -336,7 +336,7 @@ GDAL_ASYNCABLE_DEFINE(MDArray::read) {
       if (!success) { throw CPLGetLastErrorMsg(); }
       return success;
     };
-  job.rval = [](bool success, GetFromPersistentFunc getter) { return getter("array"); };
+  job.rval = [](bool success, const GetFromPersistentFunc &getter) { return getter("array"); };
   job.run(info, async, 1);
 }
 

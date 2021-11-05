@@ -95,7 +95,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](GDALDataset *ds, GetFromPersistentFunc) { return Dataset::New(ds); };
+  job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
 
   job.run(info, async, 4);
 }
@@ -199,7 +199,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
     if (r == nullptr) throw CPLGetLastErrorMsg();
     return r;
   };
-  job.rval = [](GDALDataset *ds, GetFromPersistentFunc) { return Dataset::New(ds); };
+  job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
 
   job.run(info, async, 4);
 }
@@ -264,7 +264,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
     CPLFree(r);
     return s;
   };
-  job.rval = [](std::string s, GetFromPersistentFunc) { return SafeString::New(s.c_str()); };
+  job.rval = [](std::string s, const GetFromPersistentFunc &) { return SafeString::New(s.c_str()); };
 
   job.run(info, async, 2);
 }
@@ -379,7 +379,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::warp) {
       if (r == nullptr) throw CPLGetLastErrorMsg();
       return GDALDatasetFromHandle(r);
     };
-  job.rval = [](GDALDataset *ds, GetFromPersistentFunc) { return Dataset::New(ds); };
+  job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
 
   job.run(info, async, 5);
 }

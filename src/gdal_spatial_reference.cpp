@@ -672,7 +672,7 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
     }
     return srs;
   };
-  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) { return SpatialReference::New(srs, true); };
+  job.rval = [](OGRSpatialReference *srs, const GetFromPersistentFunc &) { return SpatialReference::New(srs, true); };
   job.run(info, async, 1);
 }
 
@@ -718,7 +718,7 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromURL) {
     }
     return srs;
   };
-  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) { return SpatialReference::New(srs, true); };
+  job.rval = [](OGRSpatialReference *srs, const GetFromPersistentFunc &) { return SpatialReference::New(srs, true); };
   job.run(info, async, 1);
 }
 
@@ -790,7 +790,7 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromUserInput) {
     }
     return srs;
   };
-  job.rval = [](OGRSpatialReference *srs, GetFromPersistentFunc) { return SpatialReference::New(srs, true); };
+  job.rval = [](OGRSpatialReference *srs, const GetFromPersistentFunc &) { return SpatialReference::New(srs, true); };
   job.run(info, async, 1);
 }
 
