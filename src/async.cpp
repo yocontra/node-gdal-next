@@ -41,7 +41,7 @@ GDALExecutionProgress::~GDALExecutionProgress() {
 
 // sync/async dispatcher
 void GDALExecutionProgress::Send(GDALProgressInfo *info) const {
-  auto infoHolder = std::shared_ptr<GDALProgressInfo>(info);
+  auto infoHolder = std::unique_ptr<GDALProgressInfo>(info);
   // async mode -> we are in an aux thread, we can't go back to JS
   // we must enqueue a job on the event loop and wait for the JS world to stop
   // the enqueuing is in Nan::AsyncWorker, then once the JS world is not running
