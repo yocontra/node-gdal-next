@@ -213,6 +213,23 @@
  * @property {number} uid
  * @property {number} gid
  * @property {number} rdev
+ * @property {number} blksize
+ * @property {number} ino
+ * @property {number} size
+ * @property {number} blocks
+ * @property {Date} atime
+ * @property {Date} mtime
+ * @property {Date} ctime
+ */
+
+/**
+ * @typedef VSIStat64
+ * @property {BigInt} dev
+ * @property {BigInt} mode
+ * @property {BigInt} nlink
+ * @property {BigInt} uid
+ * @property {BigInt} gid
+ * @property {BigInt} rdev
  * @property {BigInt} blksize
  * @property {BigInt} ino
  * @property {BigInt} size

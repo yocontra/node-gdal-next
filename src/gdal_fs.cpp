@@ -16,13 +16,35 @@ void VSI::Initialize(Local<Object> target) {
 }
 
 /**
- * Get VSI file info
+ * Get VSI file info.
+ *
+ * @example
+ * ```
+ * const gdalStats = gdal.fs.stat('/vsis3/noaa-gfs-bdp-pds/gfs.20210918/06/atmos/gfs.t06z.pgrb2.0p25.f010')
+ * if ((gdalStats.mode & fs.constants.S_IFREG) === fs.constants.S_IFREG) console.log('is regular file')
+ *
+ * // convert to Node.js fs.Stats
+ * const fsStats = new (Function.prototype.bind.apply(fs.Stats, [null, ...Object.keys(s).map(k => s[k])]))
+ * if (fsStats.isFile) console.log('is regular file')
+ * ```
  *
  * @static
  * @method stat
  * @param {string} filename
+ * @param {boolean} [bigint=false] Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
  * @returns {gdal.VSIStat}
+ */
+
+/**
+ * Get VSI file info.
+ *
+ * @static
+ * @method stat
+ * @param {string} filename
+ * @param {true} True Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
+ * @throws Error
+ * @returns {gdal.VSIStat64}
  */
 
 /**
@@ -32,6 +54,20 @@ void VSI::Initialize(Local<Object> target) {
  * @static
  * @method statAsync
  * @param {string} filename
+ * @param {boolean} [bigint=false] Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
+ * @throws Error
+ * @param {callback<gdal.VSIStat>} [callback=undefined] {{{cb}}}
+ * @returns {Promise<gdal.VSIStat>}
+ */
+
+/**
+ * Get VSI file info.
+ * {{{async}}}
+ *
+ * @static
+ * @method statAsync
+ * @param {string} filename
+ * @param {true} True Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
  * @param {callback<gdal.VSIStat>} [callback=undefined] {{{cb}}}
  * @returns {Promise<gdal.VSIStat>}
@@ -39,8 +75,10 @@ void VSI::Initialize(Local<Object> target) {
 
 GDAL_ASYNCABLE_DEFINE(VSI::stat) {
   std::string filename;
+  bool bigint = false;
 
   NODE_ARG_STR(0, "filename", filename);
+  NODE_ARG_BOOL_OPT(1, "bigint", bigint);
 
   GDALAsyncableJob<VSIStatBufL> job(0);
   job.main = [filename](const GDALExecutionProgress &) {
@@ -51,37 +89,73 @@ GDAL_ASYNCABLE_DEFINE(VSI::stat) {
     return stat;
   };
 
-  job.rval = [](VSIStatBufL stat, const GetFromPersistentFunc &) {
-    Nan::EscapableHandleScope scope;
+  if (bigint) {
+    job.rval = [](VSIStatBufL stat, const GetFromPersistentFunc &) {
+      Nan::EscapableHandleScope scope;
 
-    Local<Object> result = Nan::New<Object>();
-    Nan::Set(result, Nan::New("dev").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_dev)));
-    Nan::Set(result, Nan::New("mode").ToLocalChecked(), Nan::New<Integer>(stat.st_mode));
-    Nan::Set(result, Nan::New("uid").ToLocalChecked(), Nan::New<Integer>(stat.st_uid));
-    Nan::Set(result, Nan::New("gid").ToLocalChecked(), Nan::New<Integer>(stat.st_gid));
-    Nan::Set(result, Nan::New("rdev").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_rdev)));
-    Nan::Set(result, Nan::New("nlink").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_nlink)));
+      Local<Object> result = Nan::New<Object>();
+      Nan::Set(result, Nan::New("dev").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_dev));
+      Nan::Set(result, Nan::New("mode").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_mode));
+      Nan::Set(result, Nan::New("nlink").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_nlink));
+      Nan::Set(result, Nan::New("uid").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_uid));
+      Nan::Set(result, Nan::New("gid").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_gid));
+      Nan::Set(result, Nan::New("rdev").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_rdev));
 
 #ifndef WIN32
-    Nan::Set(result, Nan::New("blksize").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_blksize));
-    Nan::Set(result, Nan::New("ino").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_ino));
-    Nan::Set(result, Nan::New("size").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_size));
-    Nan::Set(result, Nan::New("blocks").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_blocks));
+      Nan::Set(
+        result, Nan::New("blksize").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_blksize));
+      Nan::Set(result, Nan::New("ino").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_ino));
+      Nan::Set(result, Nan::New("size").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_size));
+      Nan::Set(result, Nan::New("blocks").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_blocks));
 #else
-    Nan::Set(result, Nan::New("blksize").ToLocalChecked(), Nan::Undefined());
-    Nan::Set(result, Nan::New("ino").ToLocalChecked(), Nan::Undefined());
-    Nan::Set(result, Nan::New("size").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_size));
-    Nan::Set(result, Nan::New("blocks").ToLocalChecked(), Nan::Undefined());
+      Nan::Set(result, Nan::New("blksize").ToLocalChecked(), Nan::Undefined());
+      Nan::Set(result, Nan::New("ino").ToLocalChecked(), Nan::Undefined());
+      Nan::Set(result, Nan::New("size").ToLocalChecked(), v8::BigInt::New(v8::Isolate::GetCurrent(), stat.st_size));
+      Nan::Set(result, Nan::New("blocks").ToLocalChecked(), Nan::Undefined());
 #endif
 
-    Nan::Set(result, Nan::New("atime").ToLocalChecked(), Nan::New<Date>(stat.st_atime * 1000).ToLocalChecked());
-    Nan::Set(result, Nan::New("mtime").ToLocalChecked(), Nan::New<Date>(stat.st_mtime * 1000).ToLocalChecked());
-    Nan::Set(result, Nan::New("ctime").ToLocalChecked(), Nan::New<Date>(stat.st_ctime * 1000).ToLocalChecked());
+      Nan::Set(result, Nan::New("atime").ToLocalChecked(), Nan::New<Date>(stat.st_atime * 1000).ToLocalChecked());
+      Nan::Set(result, Nan::New("mtime").ToLocalChecked(), Nan::New<Date>(stat.st_mtime * 1000).ToLocalChecked());
+      Nan::Set(result, Nan::New("ctime").ToLocalChecked(), Nan::New<Date>(stat.st_ctime * 1000).ToLocalChecked());
 
-    return scope.Escape(result);
-  };
+      return scope.Escape(result);
+    };
+  } else {
+    // Ahh, the joy of JavaScript number types
+    // Which other language has floating-point file sizes
+    // Anyway, 2^53 bytes ought to be enough for anybody
+    job.rval = [](VSIStatBufL stat, const GetFromPersistentFunc &) {
+      Nan::EscapableHandleScope scope;
 
-  job.run(info, async, 1);
+      Local<Object> result = Nan::New<Object>();
+      Nan::Set(result, Nan::New("dev").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_dev)));
+      Nan::Set(result, Nan::New("mode").ToLocalChecked(), Nan::New<Integer>(stat.st_mode));
+      Nan::Set(result, Nan::New("nlink").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_nlink)));
+      Nan::Set(result, Nan::New("uid").ToLocalChecked(), Nan::New<Integer>(stat.st_uid));
+      Nan::Set(result, Nan::New("gid").ToLocalChecked(), Nan::New<Integer>(stat.st_gid));
+      Nan::Set(result, Nan::New("rdev").ToLocalChecked(), Nan::New<Integer>(static_cast<uint32_t>(stat.st_rdev)));
+
+#ifndef WIN32
+      Nan::Set(result, Nan::New("blksize").ToLocalChecked(), Nan::New<Number>(static_cast<double>(stat.st_blksize)));
+      Nan::Set(result, Nan::New("ino").ToLocalChecked(), Nan::New<Number>(static_cast<double>(stat.st_ino)));
+      Nan::Set(result, Nan::New("size").ToLocalChecked(), Nan::New<Number>(static_cast<double>(stat.st_size)));
+      Nan::Set(result, Nan::New("blocks").ToLocalChecked(), Nan::New<Number>(static_cast<double>(stat.st_blocks)));
+#else
+      Nan::Set(result, Nan::New("blksize").ToLocalChecked(), Nan::Undefined());
+      Nan::Set(result, Nan::New("ino").ToLocalChecked(), Nan::Undefined());
+      Nan::Set(result, Nan::New("size").ToLocalChecked(), Nan::New<Number>(static_cast<double>(stat.st_size)));
+      Nan::Set(result, Nan::New("blocks").ToLocalChecked(), Nan::Undefined());
+#endif
+
+      Nan::Set(result, Nan::New("atime").ToLocalChecked(), Nan::New<Date>(stat.st_atime * 1000).ToLocalChecked());
+      Nan::Set(result, Nan::New("mtime").ToLocalChecked(), Nan::New<Date>(stat.st_mtime * 1000).ToLocalChecked());
+      Nan::Set(result, Nan::New("ctime").ToLocalChecked(), Nan::New<Date>(stat.st_ctime * 1000).ToLocalChecked());
+
+      return scope.Escape(result);
+    };
+  }
+
+  job.run(info, async, 2);
 }
 
 /**
