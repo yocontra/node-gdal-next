@@ -30,6 +30,7 @@ It adds a number of features:
 - Numerous bugfixes including a number of memory leaks
 
 The default install is currently the 3.3 branch which is bundled with GDAL 3.3.3.
+GDAL 3.4.0 is available on the 3.4 branch which can be installed as `gdal-async@next`.
 
 Support for `worker_threads` is planned but it is not a priority project
 
@@ -39,7 +40,7 @@ Support for `worker_threads` is planned but it is not a priority project
  * `gdal-async@3.3`, the current stable branch
     * The raster data processing is used, in conjunction with `Express` and `scijs` on at least one production site (<https://www.velivole.fr> - <https://www.meteo.guru> where it is serving requests to thousands of visitors with process uptimes measured in months, so most of the basic raster functions are to be considered stable and without any major leaks
     * The vector data processing is used occasionally and mostly in offline batch mode
- * `gdal-async@3.4`, the `next` branch is to be considered experimental and of beta quality
+ * `gdal-async@3.4`, the `next` branch, is still to be considered somewhat experimental
 
 ## Installation
 
@@ -104,7 +105,7 @@ Simultaneous operations on distinct dataset objects are always safe and can run 
 
 Simultaneous operations on the same dataset object are safe too but they won't run in parallel. This is a limitation of GDAL. The only way to have multiple parallel operations on the same file is to use multiple dataset objects. Keep in mind that Node.js/libuv won't be able to detect which async contexts are waiting on each other, so if you launch 16 simultaneous operations on 4 different datasets, there is always a chance that libuv will pick 4 operations on the same dataset to run - which will take all 4 slots on the thread pool. It is recommended to either increase `UV_THREADPOOL_SIZE` or to make sure that every dataset has exactly one operation running at any given time. Take a look at `ASYNCIO.md` which explains this in detail.
 
-Also be particularly careful when mixing synchronous and asynchronous operations in server code. If a GDAL operation is running in the background for any given Dataset, all synchronous operations on that same Dataset on the main thread will block the event loop until the background operation is finished. **This includes synchronous getters and setters that might otherwise be instantaneous.**. It is recommended to retrieve all values such as raster size or no data value or spatial reference **before** starting any I/O operations or use the new asynchronous getters introduced in 3.3.2.
+Also be particularly careful when mixing synchronous and asynchronous operations in server code. If a GDAL operation is running in the background for any given Dataset, all synchronous operations on that same Dataset on the main thread will block the event loop until the background operation is finished. **This includes synchronous getters and setters that might otherwise be instantaneous.**. It is recommended to retrieve all values such as raster size or no data value or spatial reference **before** starting any I/O operations or use the new asynchronous getters available in 3.3.2 and later.
 
 **Does not support `worker_threads` yet**
 
@@ -215,8 +216,7 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
 
 ### With `ndarray` from `scijs`
 
-The 3.2 branch of `gdal-async` is compatible with [`ndarray` from `scijs`](https://github.com/scijs/ndarray), but the array must be in a positive/positive row-major stride.
-A separate plugin [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal) allows zero-copy I/O, with GDAL-backed interleaving in C++ using SIMD instructions, for all possible strides both for 2D raster data and N-dimensional `MDArray` data. The plugin requires `gdal-async@3.3` and it is not compatible with the `gdal-async@3.2` branch.
+A separate plugin [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal) allows zero-copy I/O, with GDAL-backed interleaving in C++ using SIMD instructions, for all possible strides both for 2D raster data and N-dimensional `MDArray` data. The plugin requires at least `gdal-async@3.3`.
 
 ### Pruning the source tree
 
