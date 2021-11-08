@@ -27,6 +27,12 @@ jobs:
         - archlinux:latest
         - amazonlinux:latest
         node-version: [ 12, 14, 16, 17 ]
+        exclude:
+          - linux-version: fedora:33
+            node-version: 17
+          - linux-version: fedora:34
+            node-version: 17
+
 
     steps:
     - uses: actions/checkout@v2
