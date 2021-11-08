@@ -1,4 +1,3 @@
-import * as fs from 'fs'
 import * as gdal from '..'
 import * as path from 'path'
 import { assert } from 'chai'
