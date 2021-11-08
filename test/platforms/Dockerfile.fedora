@@ -8,7 +8,7 @@ ENV GDAL=${GDAL}
 RUN \
   dnf install -y curl rsync && \
   curl -fsSL https://rpm.nodesource.com/setup_${NODEJS}.x | bash - && \
-  dnf module install -y nodejs:${NODEJS}/default && \
+  dnf module install -y nodejs:${NODEJS} && \
   dnf groupinstall -y 'Development Tools' && \
   dnf install -y g++ git python
 
