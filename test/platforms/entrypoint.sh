@@ -28,7 +28,9 @@ case ${1} in
 
   RELEASE)
     echo -e "${SEP}Testing pre-built binary${SEP}"
+    npm install --ignore-scripts
     npx @mapbox/node-pre-gyp install
+    npx yatag
     npm test
     R=$?
     ;;

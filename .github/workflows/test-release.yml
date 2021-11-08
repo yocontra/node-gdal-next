@@ -56,6 +56,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp install
+    - run: npx yatag
     - run: npm test
       env:
         MOCHA_TEST_NETWORK: 1
