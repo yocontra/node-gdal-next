@@ -9,19 +9,31 @@ const gdal = require('..')
 const initTest = (() => {
   let initDone = false
   return async function () {
-    if (initDone) return
-    initDone = true
+    // First test to execute does the initialization and creates
+    // a Promise for the other tests to await upon
+    // (because benny runs the initialization of all tests in parallel)
+    if (initDone) return initDone
+    let resolve, reject
+    initDone = new Promise((res, rej) => {
+      resolve = res
+      reject = rej
+    })
 
-    gdal.vsimem.set(await fs.promises.readFile(
-      path.resolve(__dirname, '..', 'test', 'data', 'AROME_T2m_10.tiff')),
-    '/vsimem/AROME_T2m_10.tiff')
-    gdal.vsimem.set(await fs.promises.readFile(
-      path.resolve(__dirname, '..', 'test', 'data', 'AROME_D2m_10.tiff')),
-    '/vsimem/AROME_D2m_10.tiff')
+    try {
+      gdal.vsimem.set(await fs.promises.readFile(
+        path.resolve(__dirname, '..', 'test', 'data', 'AROME_T2m_10.tiff')),
+      '/vsimem/AROME_T2m_10.tiff')
+      gdal.vsimem.set(await fs.promises.readFile(
+        path.resolve(__dirname, '..', 'test', 'data', 'AROME_D2m_10.tiff')),
+      '/vsimem/AROME_D2m_10.tiff')
 
-    // Decompress in memory
-    await gdal.translateAsync('/vsimem/AROME_T2m_10_raw.tiff', await gdal.openAsync('/vsimem/AROME_T2m_10.tiff'))
-    await gdal.translateAsync('/vsimem/AROME_D2m_10_raw.tiff', await gdal.openAsync('/vsimem/AROME_D2m_10.tiff'))
+      // Decompress in memory
+      await gdal.translateAsync('/vsimem/AROME_T2m_10_raw.tiff', await gdal.openAsync('/vsimem/AROME_T2m_10.tiff'))
+      await gdal.translateAsync('/vsimem/AROME_D2m_10_raw.tiff', await gdal.openAsync('/vsimem/AROME_D2m_10.tiff'))
+      resolve()
+    } catch (e) {
+      reject(e)
+    }
   }
 })()
 
