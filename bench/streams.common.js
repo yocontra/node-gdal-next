@@ -27,9 +27,9 @@ const initTest = (() => {
 
 // This is to signal benny that we have an asynchronous initialization part that is not to be measured
 // see (Async benchmark with setup - return a promise wrapped in a function) at <https://github.com/caderek/benny>
-const runTest = async (test) => {
+const runTest = async (test, args) => {
   await initTest()
-  return async () => test
+  return async () => test.apply(null, args)
 }
 
 async function readTest(file, blockOptimize) {
@@ -153,9 +153,9 @@ async function muxTest(file1, file2, blockOptimize) {
 }
 
 module.exports = {
-  readTest: () => runTest(readTest),
-  readTestAsyncIterator: () => runTest(readTestAsyncIterator),
-  writeTest: () => runTest(writeTest),
-  pipeTest: () => runTest(pipeTest),
-  muxTest: () => runTest(muxTest)
+  readTest: (...args) => runTest(readTest, args),
+  readTestAsyncIterator: (...args) => runTest(readTestAsyncIterator, args),
+  writeTest: (...args) => runTest(writeTest, args),
+  pipeTest: (...args) => runTest(pipeTest, args),
+  muxTest: (...args) => runTest(muxTest, args)
 }
