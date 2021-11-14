@@ -103,6 +103,21 @@ jobs:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
 
 
+  test_asan:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - run: npm run container asan ubuntu:20.04 14 bundled
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
+
+
   test_winmac:
 
     runs-on: ${{ matrix.platforms }}

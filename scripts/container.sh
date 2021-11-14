@@ -52,4 +52,8 @@ case ${OP} in
     echo -e "${SEP}Testing in ${CONTAINER} and running a shell${SEP}"
     docker run -it --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} DEV /bin/bash
     ;;
+  asan)
+    echo -e "${SEP}Testing w/asan in ${CONTAINER}${SEP}"
+    docker run --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} DEV || exit 1
+    ;;
 esac

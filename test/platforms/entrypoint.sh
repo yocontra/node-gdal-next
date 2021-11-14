@@ -44,6 +44,20 @@ case ${1} in
     npx node-pre-gyp-github publish
     R=$?
     ;;
+
+  ASAN)
+    echo -e "${SEP}Testing w/ASAN current version against ${GDAL_NAME} GDAL${SEP}"
+    echo npx @mapbox/node-pre-gyp configure ${GDAL_OPT} --enable-asan --debug
+    npx @mapbox/node-pre-gyp configure ${GDAL_OPT} --enable-asan --debug
+    npx @mapbox/node-pre-gyp build -j max
+    LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.5.0.0 npm test 2> asan.output
+    ! egrep -q "node_gdal|GDAL" asan.output
+    R=$?
+    if [ "$R" -ne 0 ]; then
+      echo ${SEP}${SEP}Memory leaks detected${SEP}${SEP}
+      cat asan.output
+    fi
+    ;;
 esac
 
 # Launch docker -it ... /bin/bash to get a shell after running the test
