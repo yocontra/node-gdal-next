@@ -226,6 +226,12 @@ A special NPM script target, `npm run prune` allows to delete most of the bundle
 
 Amazon Linux will be supported starting from `gdal-async@3.3.4`. There is no shared GDAL support, only the bundled GDAL version is supported. It is highly recommended that you prune the module before deploying to an Amazon Lambda - when pruned the module is only 16MB zipped.
 
+## Known issues
+
+* [#2](https://github.com/mmomtchev/node-gdal-async/issues/2) When running multiple parallel async operations per `Dataset` and on multiple `Dataset`s, thread starvation is possible as explained in [`ASYNCIO.md`](https://github.com/mmomtchev/node-gdal-async/blob/master/ASYNCIO.md)
+* [#11](https://github.com/mmomtchev/node-gdal-async/issues/11) Accessing a closed `Dataset` object results in a warning with a stack trace printed out to stdout
+* [#17](https://github.com/mmomtchev/node-gdal-async/issues/17) HDF5 on Windows is not thread-safe
+
 ## Bundled Drivers
 
 When using the bundled GDAL version, the following drivers will be available:
