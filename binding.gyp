@@ -72,7 +72,9 @@
 		["enable_asan == 'true'", {
 			"variables": {
 				"debug_extra_ccflags_cc": [ "-fsanitize=address" ],
-				"debug_extra_ldflags" : [ "-fsanitize=address" ]
+				"debug_extra_ldflags" : [ "-fsanitize=address" ],
+				"debug_extra_VCCLCompilerTool": [ "/fsanitize=address" ],
+				"debug_extra_VCLinkerTool" : [ "/fsanitize=address" ]
 			}
 		}],
 		["enable_coverage == 'true'", {

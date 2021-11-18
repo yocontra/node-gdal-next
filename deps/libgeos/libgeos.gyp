@@ -28,7 +28,7 @@
 				["OS == 'win'", {
 					"include_dirs": ["./arch/win"],
 					# not every file that needs to requires arch/win, so do a couple extra defines
-					"defines": [ "NOMINMAX", "TTMATH_NOASM" ]
+					"defines": ["TTMATH_NOASM" ],
 				}, {
 					"include_dirs": ["./arch/unix"]
 				}]

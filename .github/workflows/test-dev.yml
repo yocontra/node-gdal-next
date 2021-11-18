@@ -148,7 +148,7 @@ jobs:
 
     strategy:
       matrix:
-        platforms: [ macos-10.15 ]
+        platforms: [ windows-2019, macos-10.15 ]
 
     steps:
     - uses: actions/checkout@v2

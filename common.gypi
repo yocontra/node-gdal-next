@@ -8,7 +8,9 @@
 		"cflags!": ["-fno-rtti", "-fno-exceptions"],
 		"variables": {
 			"debug_extra_ccflags_cc%": [],
-			"debug_extra_ldflags%" : []
+			"debug_extra_ldflags%" : [],
+      "debug_extra_VCCLCompilerTool%": [],
+      "debug_extra_VCLinkerTool%": []
 		},
 		"defines": [
 			"NOGDI=1",
@@ -30,6 +32,19 @@
 				"-fexceptions"
 			]
 		},
+    "msvs_settings": {
+      "VCCLCompilerTool": {
+        #"Optimization": 0, # 0:/Od disable, 1:/O1 min size, 2:/O2 max speed, 3:/Ox full optimization
+        #"InlineFunctionExpansion": 0, #0:/Ob0: disable, 1:/Ob1 inline only marked funtions, 2:/Ob2 inline anything eligible
+        "AdditionalOptions": [
+          "/MP", # compile across multiple CPUs
+          "/GR", # force RTTI on (see https://github.com/nodejs/node-gyp/issues/2412)
+          "/EHsc"
+        ],
+        "ExceptionHandling": 1,
+        "RuntimeTypeInfo": "true",
+      }
+    },
 		"conditions": [
 			["OS == 'win'", {
 				"defines": [ "NOMINMAX", "WIN32", "CURL_STATICLIB", "PROJ_DLL=" ],
@@ -63,12 +78,6 @@
 					"GCC_GENERATE_DEBUGGING_SYMBOLS": "YES",
 					"OTHER_CPLUSPLUSFLAGS": [ "<@(debug_extra_ccflags_cc)" ],
 					"OTHER_LDFLAGS": [ "<@(debug_extra_ldflags)" ]
-				},
-				"msvs_settings": {
-					"VCCLCompilerTool": {
-						"ExceptionHandling": 1,
-						"RuntimeTypeInfo": "true"
-					}
 				}
 			},
 			"Release": {
@@ -85,14 +94,6 @@
 				],
 				"msvs_settings": {
 					"VCCLCompilerTool": {
-						#"Optimization": 0, # 0:/Od disable, 1:/O1 min size, 2:/O2 max speed, 3:/Ox full optimization
-						#"InlineFunctionExpansion": 0, #0:/Ob0: disable, 1:/Ob1 inline only marked funtions, 2:/Ob2 inline anything eligible
-						"AdditionalOptions": [
-							"/MP", # compile across multiple CPUs
-							"/GR"
-						],
-						"ExceptionHandling": 1,
-						"RuntimeTypeInfo": "true",
 						"DebugInformationFormat": "0",
 					},
 					"VCLinkerTool": {
