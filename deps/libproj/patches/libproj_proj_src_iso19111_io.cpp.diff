@@ -1,0 +1,11 @@
+--- libproj/proj/src/iso19111/io.cpp.orig	2021-11-18 21:04:10.708477463 +0100
++++ libproj/proj/src/iso19111/io.cpp	2021-11-18 21:04:13.528455257 +0100
+@@ -7675,7 +7675,7 @@
+                 iterCur = steps.erase(iterPrev, std::next(iterCur));
+                 if (iterCur != steps.begin())
+                     iterCur = std::prev(iterCur);
+-                if (iterCur == steps.begin())
++                if (iterCur == steps.begin() && iterCur != steps.end())
+                     ++iterCur;
+             };
+ 

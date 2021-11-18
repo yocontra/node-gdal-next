@@ -7675,7 +7675,7 @@ const std::string &PROJStringFormatter::toString() const {
                 iterCur = steps.erase(iterPrev, std::next(iterCur));
                 if (iterCur != steps.begin())
                     iterCur = std::prev(iterCur);
-                if (iterCur == steps.begin())
+                if (iterCur == steps.begin() && iterCur != steps.end())
                     ++iterCur;
             };
 
