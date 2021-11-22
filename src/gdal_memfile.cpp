@@ -118,7 +118,6 @@ bool Memfile::copy(Local<Object> buffer, const std::string &filename) {
  * @throws Error
  * @param {Buffer} data A binary buffer containing the file data
  * @param {string} filename A file name beginning with `/vsimem/`
- * @param {boolean} [copy=false] Copy the memory buffer into GDAL's own heap allowing extending of the file
  */
 NAN_METHOD(Memfile::vsimemSet) {
   Local<Object> buffer;
