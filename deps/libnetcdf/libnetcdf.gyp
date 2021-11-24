@@ -183,14 +183,6 @@
 					]
 				}]
 			],
-			"msvs_settings": {
-				"VCCLCompilerTool": {
-					"AdditionalOptions": [
-						"/W3",
-						"/EHsc"
-					],
-				},
-			},
 			"dependencies": [
 				"<(deps_dir)/libcurl/libcurl.gyp:libcurl",
 				"<(deps_dir)/libhdf5/libhdf5.gyp:libhdf5"

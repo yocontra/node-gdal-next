@@ -39,10 +39,10 @@
         "AdditionalOptions": [
           "/MP", # compile across multiple CPUs
           "/GR", # force RTTI on (see https://github.com/nodejs/node-gyp/issues/2412)
-          "/EHsc"
+          "/EHsc" # same for ExceptionHandling
         ],
         "ExceptionHandling": 1,
-        "RuntimeTypeInfo": "true",
+        "RuntimeTypeInfo": "true"
       }
     },
 		"conditions": [
@@ -79,7 +79,7 @@
 					"OTHER_CPLUSPLUSFLAGS": [ "<@(debug_extra_ccflags_cc)" ],
 					"OTHER_LDFLAGS": [ "<@(debug_extra_ldflags)" ]
 				}
-			},
+      },
 			"Release": {
 				"defines": [ "NDEBUG" ],
 				"defines!": [ "DEBUG" ],

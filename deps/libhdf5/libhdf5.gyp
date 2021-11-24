@@ -377,14 +377,6 @@
 					]
 				}]
 			],
-			"msvs_settings": {
-				"VCCLCompilerTool": {
-					"AdditionalOptions": [
-						"/W3",
-						"/EHsc"
-					],
-				},
-			},
 			"direct_dependent_settings": {
 				"include_dirs": [
 					"./hdf5/src",

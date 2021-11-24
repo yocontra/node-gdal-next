@@ -1,4 +1,7 @@
 {
+  "includes": [
+		"common.gypi"
+	],
 	"variables": {
 		"shared_gdal%": "false",
 		"runtime_link%": "shared",
@@ -73,6 +76,9 @@
 			"variables": {
 				"debug_extra_ccflags_cc": [ "-fsanitize=address" ],
 				"debug_extra_ldflags" : [ "-fsanitize=address" ],
+        # using ASan in a Node.js add-on on Windows requires an /MDd build (RuntimeLibrary: 3)
+        # which is not a safe build, so this option is to remain out of reach of children
+        # (see https://github.com/nodejs/node-gyp/issues/1686)
 				"debug_extra_VCCLCompilerTool": [ "/fsanitize=address" ],
 				"debug_extra_VCLinkerTool" : [ "/fsanitize=address" ]
 			}
