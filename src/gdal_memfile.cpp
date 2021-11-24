@@ -91,6 +91,9 @@ bool Memfile::copy(Local<Object> buffer, const std::string &filename) {
 
   void *dataCopy = CPLMalloc(len);
   if (dataCopy == nullptr) return false;
+
+  // If you malloc, you adjust external memory too (https://github.com/nodejs/node/issues/40936)
+  Nan::AdjustExternalMemory(len);
   memcpy(dataCopy, data, len);
 
   VSILFILE *vsi = VSIFileFromMemBuffer(filename.c_str(), (GByte *)dataCopy, len, 1);
@@ -217,10 +220,20 @@ NAN_METHOD(Memfile::vsimemRelease) {
     // -> a new Buffer is constructed and GDAL has to relinquish control
     // The GC will call the lambda at some point to free the backing storage
     VSIGetMemFileBuffer(filename.c_str(), &len, true);
-    info.GetReturnValue().Set(
-      Nan::NewBuffer(
-        static_cast<char *>(data), static_cast<uint32_t>(len), [](char *data, void *hint) { CPLFree(data); }, nullptr)
-        .ToLocalChecked());
+    // Alas we can't take the address of a capturing lambda
+    // so we fall back to doing this like it was back in the day
+    int *hint = new int{static_cast<int>(len)};
+    info.GetReturnValue().Set(Nan::NewBuffer(
+                                static_cast<char *>(data),
+                                static_cast<size_t>(len),
+                                [](char *data, void *hint) {
+                                  int *len = reinterpret_cast<int *>(hint);
+                                  Nan::AdjustExternalMemory(-(*len));
+                                  delete len;
+                                  CPLFree(data);
+                                },
+                                hint)
+                                .ToLocalChecked());
   }
 }
 

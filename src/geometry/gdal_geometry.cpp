@@ -1022,8 +1022,7 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
 
   Geometry *geom = Nan::ObjectWrap::Unwrap<Geometry>(info.This());
 
-  int size = geom->this_->WkbSize();
-  unsigned char *data = (unsigned char *)malloc(size);
+  size_t size = geom->this_->WkbSize();
 
   // byte order
   OGRwkbByteOrder byte_order;
@@ -1050,6 +1049,13 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     Nan::ThrowError("variant must be 'OGC' or 'ISO'");
     return;
   }
+
+  unsigned char *data = (unsigned char *)malloc(size);
+  if (data == nullptr) {
+    Nan::ThrowError("Failed allocating memory");
+    return;
+  }
+
   OGRGeometry *gdal_geom = geom->this_;
   uv_sem_t *async_lock = geom->async_lock;
   GDALAsyncableJob<unsigned char *> job(0);
@@ -1063,11 +1069,24 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
     }
     return data;
   };
-  //^^ export to wkb and fill buffer ^^
+
+  Nan::AdjustExternalMemory(size);
+
   job.rval = [size](unsigned char *data, const GetFromPersistentFunc &) {
-    Local<Value> result =
-      Nan::NewBuffer((char *)data, size, [](char *data, void *hint) { free(data); }, nullptr).ToLocalChecked();
-    return result;
+    Nan::EscapableHandleScope scope;
+    int *hint = new int{static_cast<int>(size)};
+    Local<Value> result = Nan::NewBuffer(
+                            reinterpret_cast<char *>(data),
+                            size,
+                            [](char *data, void *hint) {
+                              int *size = reinterpret_cast<int *>(hint);
+                              Nan::AdjustExternalMemory(-(*size));
+                              delete size;
+                              free(data);
+                            },
+                            hint)
+                            .ToLocalChecked();
+    return scope.Escape(result);
   };
   job.run(info, async, 2);
 }
