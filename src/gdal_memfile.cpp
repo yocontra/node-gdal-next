@@ -216,8 +216,12 @@ NAN_METHOD(Memfile::vsimemRelease) {
   } else {
     // the file has been created by GDAL and the buffer is owned by GDAL
     // -> a new Buffer is constructed and GDAL has to relinquish control
+    // The GC will call the lambda at some point to free the backing storage
     VSIGetMemFileBuffer(filename.c_str(), &len, true);
-    info.GetReturnValue().Set(Nan::NewBuffer(static_cast<char *>(data), static_cast<uint32_t>(len)).ToLocalChecked());
+    info.GetReturnValue().Set(
+      Nan::NewBuffer(
+        static_cast<char *>(data), static_cast<uint32_t>(len), [](char *data, void *hint) { CPLFree(data); }, nullptr)
+        .ToLocalChecked());
   }
 }
 

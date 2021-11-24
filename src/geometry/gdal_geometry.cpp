@@ -1065,7 +1065,8 @@ GDAL_ASYNCABLE_DEFINE(Geometry::exportToWKB) {
   };
   //^^ export to wkb and fill buffer ^^
   job.rval = [size](unsigned char *data, const GetFromPersistentFunc &) {
-    Local<Value> result = Nan::NewBuffer((char *)data, size).ToLocalChecked();
+    Local<Value> result =
+      Nan::NewBuffer((char *)data, size, [](char *data, void *hint) { free(data); }, nullptr).ToLocalChecked();
     return result;
   };
   job.run(info, async, 2);

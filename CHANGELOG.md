@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Fix #19, benchmarks do not execute
  - Fix #20, do not block the event loop in `calcAsync`
+ - Fix #21, `gdal.vsimem.copy` doesn't properly deallocate the returned `Buffer` on Windows
 
 ## [3.4.0] 2021-11-08
 
