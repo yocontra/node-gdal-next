@@ -5,7 +5,7 @@ import * as chaiAsPromised from 'chai-as-promised'
 import * as semver from 'semver'
 chai.use(chaiAsPromised)
 
-const wcsURL = 'WCS:https://geobretagne.fr/geoserver/photo/wcs?version=2.0.1&coverage=photo__ir-35-2020'
+const wcsURL = 'WCS:https://demo.mapserver.org/cgi-bin/wcs?VERSION=1.0.0&COVERAGE=ndvi'
 
 describe('Open', () => {
   afterEach(global.gc)
@@ -28,11 +28,11 @@ describe('Open', () => {
     })
 
     it('should be able to the bands', () => {
-      assert.equal(ds.bands.count(), 3)
+      assert.equal(ds.bands.count(), 1)
     })
 
     it('should have projection', () => {
-      assert.isTrue(ds.srs?.isSame(gdal.SpatialReference.fromEPSG(2154)))
+      assert.isTrue(ds.srs?.isSame(gdal.SpatialReference.fromEPSG(26915)))
     })
   })
 
@@ -48,13 +48,13 @@ describe('Open', () => {
 
     it('should be able to read raster size', () =>
       assert.isFulfilled(Promise.all([
-        assert.eventually.equal(ds.then((r) => r.bands.count()), 3)
+        assert.eventually.equal(ds.then((r) => r.bands.count()), 1)
       ]))
     )
 
     it('should have projection', () =>
       assert.eventually.isTrue(ds.then((r) =>
-        r.srs?.isSame(gdal.SpatialReference.fromEPSG(2154))
+        r.srs?.isSame(gdal.SpatialReference.fromEPSG(26915))
       )))
   })
 })
