@@ -21,7 +21,6 @@ Memfile::Memfile(void *data) : data(data) {
 }
 
 Memfile::~Memfile() {
-  persistent->Reset();
   delete persistent;
 }
 
