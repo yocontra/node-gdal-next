@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "/usr/bin/node",
             "args": [
-                "--expose-gc",
+                "--v8-expose-gc",
                 "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
                 "-R", "tap",
                 "--timeout", "0",
@@ -38,7 +38,7 @@
             "request": "launch",
             "program": "/usr/local/bin/node",
             "args": [
-                "--expose-gc",
+                "--v8-expose-gc",
                 "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
                 "-R", "tap",
                 "--timeout", "0",
@@ -59,7 +59,7 @@
             "request": "launch",
             "program": "node.exe",
             "args": [
-                "--expose-gc",
+                "--v8-expose-gc",
                 "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
                 "-R", "tap",
                 "--timeout", "0",
@@ -83,13 +83,10 @@
             "args": [
                 "-R", "tap",
                 "--timeout", "0",
-                "--expose-gc",
-                "--require",
-                "ts-node/register",
-                "--require",
-                "./test/_common.js",
-                "--require",
-                "./test/_hooks.js",
+                "--v8-expose-gc",
+                "--require", "ts-node/register",
+                "--require", "./test/_common.js",
+                "--require", "./test/_hooks.js",
                 "test/*.ts"
             ],
             "program": "${workspaceFolder}/node_modules/.bin/mocha"

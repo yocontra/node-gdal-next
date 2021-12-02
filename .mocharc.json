@@ -7,5 +7,5 @@
   ],
   "reporter": "tap",
   "timeout": 20000,
-  "expose-gc": true
+  "v8-expose-gc": true
 }

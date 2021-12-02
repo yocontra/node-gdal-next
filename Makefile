@@ -1,6 +1,6 @@
 .PHONY: clean clean-test build rebuild release test test-concurrent test-syntax authors
 
-MOCHA_ARGS=test -R list --expose-gc --require ./test/_common.js
+MOCHA_ARGS=test -R list --v8-expose-gc --require ./test/_common.js
 
 all: build
 
