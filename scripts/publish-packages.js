@@ -20,7 +20,9 @@ const workflowPublish = { ...pkg, workflow_id: 7048427, ref: `v${version}` };
   } while (status.data.workflow_runs[0].status !== 'completed')
   process.stdout.write('\n')
   if (status.data.workflow_runs[0].conclusion !== 'success') {
-    const jobs = await octokit.request(status.data.workflow_runs[0].jobs_url)
+    const url = new URL(status.data.workflow_runs[0].jobs_url)
+    if (url.protocol !== 'https:') throw new Error(`unexpected protocol in ${url}`)
+    const jobs = await octokit.request(url.toString())
     const failedJob = jobs.data.jobs.filter((j) => ![ 'success', 'cancelled' ].includes(j.conclusion))
     const failedStep = failedJob[0].steps.filter((j) => ![ 'success', 'cancelled' ].includes(j.conclusion))
     console.error(failedJob[0].name, failedStep[0].name, 'failed')
