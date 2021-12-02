@@ -23,7 +23,7 @@ const workflowPublish = { ...pkg, workflow_id: workflowPublishId, ref: `v${versi
   process.stdout.write('\n')
   if (status.data.workflow_runs[0].conclusion !== 'success') {
     const url = new URL(status.data.workflow_runs[0].jobs_url)
-    if (url.protocol !== 'https:' || url.hostname !== 'api.github.com' || url.pathname.match(/^[a-z0-9\/\-]+$/g)) {
+    if (url.protocol !== 'https:' || url.hostname !== 'api.github.com' || url.pathname.match(/^[a-z0-9/-]+$/g)) {
       throw new Error(`unexpected protocol URL ${url}`)
     }
     const jobs = await octokit.request(url.toString())
