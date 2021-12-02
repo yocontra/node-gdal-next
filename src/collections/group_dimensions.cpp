@@ -41,16 +41,19 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  * An encapsulation of a {{#crossLink "gdal.Group"}}Group{{/crossLink}}'s
  * descendant dimensions.
  *
- * ```
- * const dimensions = group.dimensions;```
  *
- * @class gdal.GroupDimensions
+ * const dimensions = group.dimensions;
+ *
+ * @class GroupDimensions
+ * @memberof gdal
  */
 
 /**
  * Returns the array with the given name/index.
  *
  * @method get
+ * @instance
+ * @memberof gdal.GroupDimensions
  * @param {string|number} array
  * @return {gdal.Dimension}
  */
@@ -60,6 +63,8 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  * {{{async}}}
  *
  * @method getAsync
+ * @instance
+ * @memberof gdal.GroupDimensions
  *
  * @param {string|number} array
  * @param {callback<gdal.Dimension>} [callback=undefined] {{{cb}}}
@@ -70,6 +75,8 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  * Returns the number of dimensions in the collection.
  *
  * @method count
+ * @instance
+ * @memberof gdal.GroupDimensions
  * @return {number}
  */
 
@@ -78,22 +85,30 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  * {{{async}}}
  *
  * @method countAsync
+ * @instance
+ * @memberof gdal.GroupDimensions
  *
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */
 
 /**
- * @readOnly
- * @attribute names
+ * @readonly
+ * @property
+ * @name names
+ * @instance
+ * @memberof gdal.GroupDimensions
  * @type {string[]}
  */
 
 /**
  * Parent dataset
  *
- * @readOnly
- * @attribute ds
+ * @readonly
+ * @property
+ * @name ds
+ * @instance
+ * @memberof gdal.GroupDimensions
  * @type {gdal.Dataset}
  */
 #endif

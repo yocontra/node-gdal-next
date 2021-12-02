@@ -21,6 +21,12 @@ void Utils::Initialize(Local<Object> target) {
 }
 
 /**
+ * @typedef {object} UtilOptions
+ * @memberof gdal
+ * @property {ProgressCb} [progress_cb]
+ */
+
+/**
  * Library version of gdal_translate.
  *
  * @example
@@ -29,7 +35,9 @@ void Utils::Initialize(Local<Object> target) {
  *
  * @throws Error
  * @method translate
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {string} destination destination filename
  * @param {gdal.Dataset} source source dataset
@@ -49,7 +57,9 @@ void Utils::Initialize(Local<Object> target) {
  * @throws Error
  *
  * @method translateAsync
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {string} destination destination filename
  * @param {gdal.Dataset} source source dataset
@@ -109,7 +119,9 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  *
  * @throws Error
  * @method vectorTranslate
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {string|gdal.Dataset} destination destination
  * @param {gdal.Dataset} source source dataset
@@ -129,7 +141,9 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  * @throws Error
  *
  * @method vectorTranslateAsync
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {string|gdal.Dataset} destination destination
  * @param {gdal.Dataset} source source dataset
@@ -213,7 +227,9 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  *
  * @throws Error
  * @method info
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {gdal.Dataset} dataset
  * @param {string[]} [args] array of CLI options for gdalinfo
@@ -230,7 +246,9 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  * @throws Error
  *
  * @method infoAsync
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {gdal.Dataset} dataset
  * @param {string[]} [args] array of CLI options for gdalinfo
@@ -278,7 +296,9 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  *
  * @throws Error
  * @method warp
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {string|null} dst_path destination path, null for an in-memory operation
  * @param {gdal.Dataset|null} dst_ds destination dataset, null for a new dataset
@@ -299,7 +319,9 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  * @throws Error
  *
  * @method warpAsync
- * @for gdal
+ * @instance
+ * @memberof gdal
+ * @memberof gdal
  * @static
  * @param {string|null} dst_path destination path, null for an in-memory operation
  * @param {gdal.Dataset|null} dst_ds destination dataset, null for a new dataset

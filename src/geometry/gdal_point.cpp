@@ -32,11 +32,12 @@ void Point::Initialize(Local<Object> target) {
  * Point class.
  *
  * @constructor
- * @class gdal.Point
+ * @class Point
  * @extends gdal.Geometry
  * @param {number} x
  * @param {number} y
  * @param {number} [z]
+ * @memberof gdal
  */
 NAN_METHOD(Point::New) {
   Point *f;
@@ -81,7 +82,10 @@ NAN_METHOD(Point::toString) {
 }
 
 /**
- * @attribute x
+ * @property
+ * @name x
+ * @instance
+ * @memberof gdal.Point
  * @type {number}
  */
 NAN_GETTER(Point::xGetter) {
@@ -102,7 +106,10 @@ NAN_SETTER(Point::xSetter) {
 }
 
 /**
- * @attribute y
+ * @property
+ * @name y
+ * @instance
+ * @memberof gdal.Point
  * @type {number}
  */
 NAN_GETTER(Point::yGetter) {
@@ -123,7 +130,10 @@ NAN_SETTER(Point::ySetter) {
 }
 
 /**
- * @attribute z
+ * @property
+ * @name z
+ * @instance
+ * @memberof gdal.Point
  * @type {number}
  */
 NAN_GETTER(Point::zGetter) {

@@ -30,8 +30,9 @@ void MultiPolygon::Initialize(Local<Object> target) {
 
 /**
  * @constructor
- * @class gdal.MultiPolygon
+ * @class MultiPolygon
  * @extends gdal.GeometryCollection
+ * @memberof gdal
  */
 
 NAN_METHOD(MultiPolygon::toString) {
@@ -42,6 +43,8 @@ NAN_METHOD(MultiPolygon::toString) {
  * Unions all the geometries and returns the result.
  *
  * @method unionCascaded
+ * @instance
+ * @memberof gdal.MultiPolygon
  * @return {gdal.Geometry}
  */
 NAN_METHOD(MultiPolygon::unionCascaded) {
@@ -60,6 +63,8 @@ NAN_METHOD(MultiPolygon::unionCascaded) {
  * Computes the combined area of the collection.
  *
  * @method getArea
+ * @instance
+ * @memberof gdal.MultiPolygon
  * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(MultiPolygon, getArea, Number, get_Area);

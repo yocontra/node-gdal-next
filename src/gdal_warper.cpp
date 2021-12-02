@@ -11,6 +11,29 @@ void Warper::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "suggestedWarpOutput", suggestedWarpOutput);
 }
 
+/**
+ * @typedef {object} ReprojectOptions
+ * @memberof gdal
+ * @property {gdal.Dataset} src
+ * @property {gdal.Dataset} dst
+ * @property {gdal.SpatialReference} s_srs
+ * @property {gdal.SpatialReference} t_srs
+ * @property {string} [resampling]
+ * @property {gdal.Geometry} [cutline]
+ * @property {number[]} [srcBands]
+ * @property {number[]} [dstBands]
+ * @property {number} [srcAlphaBand]
+ * @property {number} [dstAlphaBand]
+ * @property {number} [srcNodata]
+ * @property {number} [dstNodata]
+ * @property {number} [blend]
+ * @property {number} [memoryLimit]
+ * @property {number} [maxError]
+ * @property {boolean} [multi]
+ * @property {object} [options]
+ * @property {ProgressCb} [progress_cb]
+ */
+
 /*
  * GDALReprojectImage() method with a ChunkAndWarpImage replaced with
  * ChunkAndWarpMulti
@@ -168,7 +191,7 @@ CPLErr GDALReprojectImageMulti(
  * @throws Error
  * @method reprojectImage
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {ReprojectOptions} options
  * @param {gdal.Dataset} options.src
  * @param {gdal.Dataset} options.dst
@@ -196,7 +219,7 @@ CPLErr GDALReprojectImageMulti(
  * @throws Error
  * @method reprojectImageAsync
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {ReprojectOptions} options
  * @param {gdal.Dataset} options.src
  * @param {gdal.Dataset} options.dst
@@ -311,13 +334,29 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
 }
 
 /**
+ * @typedef {object} WarpOptions
+ * @memberof gdal
+ * @property {gdal.Dataset} src
+ * @property {gdal.SpatialReference} s_srs
+ * @property {gdal.SpatialReference} t_srs
+ * @property {number} [maxError]
+ */
+
+/**
+ * @typedef {object} WarpOutput
+ * @memberof gdal
+ * @property {xyz} rasterSize
+ * @property {number[]} geoTransform
+ */
+
+/**
  * Used to determine the bounds and resolution of the output virtual file which
  * should be large enough to include all the input image.
  *
  * @throws Error
  * @method suggestedWarpOutput
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {WarpOptions} options Warp options
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs
@@ -335,7 +374,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @throws Error
  * @method suggestedWarpOutputAsync
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {WarpOptions} options Warp options
  * @param {gdal.Dataset} options.src
  * @param {gdal.SpatialReference} options.s_srs

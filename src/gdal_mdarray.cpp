@@ -68,7 +68,8 @@ void MDArray::dispose() {
 /**
  * A representation of an array with access methods.
  *
- * @class gdal.MDArray
+ * @class MDArray
+ * @memberof gdal
  */
 NAN_METHOD(MDArray::New) {
 
@@ -196,6 +197,17 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
 }
 
 /**
+ * @typedef {object} MDArrayOptions
+ * @memberof gdal
+ * @property {number[]} origin
+ * @property {number[]} span
+ * @property {number[]} [stride]
+ * @property {string} [data_type]
+ * @property {TypedArray} [data]
+ * @property {number} [_offset]
+ */
+
+/**
  * Read data from the MDArray
  *
  * This will extract the context of a (hyper-)rectangle from the array into a buffer.
@@ -205,6 +217,8 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  * Although this method can be used in its raw form, it works best when used with the ndarray plugin.
  *
  * @method read
+ * @instance
+ * @memberof gdal.MDArray
  * @throws Error
  * @param {MDArrayOptions} options
  * @param {number[]} options.origin An array of the starting indices
@@ -226,6 +240,8 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  * Although this method can be used in its raw form, it works best when used with the ndarray plugin.
  *
  * @method readAsync
+ * @instance
+ * @memberof gdal.MDArray
  * @throws Error
  * @param {MDArrayOptions} options
  * @param {number[]} options.origin An array of the starting indices
@@ -346,6 +362,8 @@ GDAL_ASYNCABLE_DEFINE(MDArray::read) {
  * The slice expression uses the same syntax as NumPy basic slicing and indexing. See (https://www.numpy.org/devdocs/reference/arrays.indexing.html#basic-slicing-and-indexing). Or it can use field access by name. See (https://www.numpy.org/devdocs/reference/arrays.indexing.html#field-access).
  *
  * @method getView
+ * @instance
+ * @memberof gdal.MDArray
  * @throws Error
  * @param {string} view
  * @return {gdal.MDArray}
@@ -375,6 +393,8 @@ NAN_METHOD(MDArray::getView) {
  * The generic implementation honours the NoDataValue, as well as various netCDF CF attributes: missing_value, _FillValue, valid_min, valid_max and valid_range.
  *
  * @method getMask
+ * @instance
+ * @memberof gdal.MDArray
  * @throws Error
  * @return {gdal.MDArray}
  */
@@ -399,6 +419,8 @@ NAN_METHOD(MDArray::getMask) {
  * In the case of > 2D arrays, additional dimensions will be represented as raster bands.
  *
  * @method asDataset
+ * @instance
+ * @memberof gdal.MDArray
  * @param {number|string} x dimension to be used as X axis
  * @param {number|string} y dimension to be used as Y axis
  * @throws Error
@@ -430,7 +452,10 @@ NAN_METHOD(MDArray::asDataset) {
  * Spatial reference associated with MDArray
  *
  * @throws Error
- * @attribute srs
+ * @property
+ * @name srs
+ * @instance
+ * @memberof gdal.MDArray
  * @type {gdal.SpatialReference}
  */
 NAN_GETTER(MDArray::srsGetter) {
@@ -449,7 +474,10 @@ NAN_GETTER(MDArray::srsGetter) {
 /**
  * Raster value offset.
  *
- * @attribute offset
+ * @property
+ * @name offset
+ * @instance
+ * @memberof gdal.MDArray
  * @type {number}
  */
 NAN_GETTER(MDArray::offsetGetter) {
@@ -466,7 +494,10 @@ NAN_GETTER(MDArray::offsetGetter) {
 /**
  * Raster value scale.
  *
- * @attribute scale
+ * @property
+ * @name scale
+ * @instance
+ * @memberof gdal.MDArray
  * @type {number}
  */
 NAN_GETTER(MDArray::scaleGetter) {
@@ -483,7 +514,10 @@ NAN_GETTER(MDArray::scaleGetter) {
 /**
  * No data value for this array.
  *
- * @attribute noDataValue
+ * @property
+ * @name noDataValue
+ * @instance
+ * @memberof gdal.MDArray
  * @type {number|null}
  */
 NAN_GETTER(MDArray::noDataValueGetter) {
@@ -507,7 +541,10 @@ NAN_GETTER(MDArray::noDataValueGetter) {
  * or `"ft"` for feet. If no units are available, a value of `""`
  * will be returned.
  *
- * @attribute unitType
+ * @property
+ * @name unitType
+ * @instance
+ * @memberof gdal.MDArray
  * @type {string}
  */
 NAN_GETTER(MDArray::unitTypeGetter) {
@@ -518,8 +555,11 @@ NAN_GETTER(MDArray::unitTypeGetter) {
 }
 
 /**
- * @readOnly
- * @attribute dataType
+ * @readonly
+ * @property
+ * @name dataType
+ * @instance
+ * @memberof gdal.MDArray
  * @type {string}
  */
 NAN_GETTER(MDArray::typeGetter) {
@@ -538,8 +578,11 @@ NAN_GETTER(MDArray::typeGetter) {
 }
 
 /**
- * @readOnly
- * @attribute dimensions
+ * @readonly
+ * @property
+ * @name dimensions
+ * @instance
+ * @memberof gdal.MDArray
  * @type {gdal.GroupDimensions}
  */
 NAN_GETTER(MDArray::dimensionsGetter) {
@@ -547,8 +590,11 @@ NAN_GETTER(MDArray::dimensionsGetter) {
 }
 
 /**
- * @readOnly
- * @attribute attributes
+ * @readonly
+ * @property
+ * @name attributes
+ * @instance
+ * @memberof gdal.MDArray
  * @type {gdal.ArrayAttributes}
  */
 NAN_GETTER(MDArray::attributesGetter) {
@@ -556,8 +602,11 @@ NAN_GETTER(MDArray::attributesGetter) {
 }
 
 /**
- * @readOnly
- * @attribute description
+ * @readonly
+ * @property
+ * @name description
+ * @instance
+ * @memberof gdal.MDArray
  * @type {string}
  */
 NAN_GETTER(MDArray::descriptionGetter) {
@@ -571,8 +620,11 @@ NAN_GETTER(MDArray::descriptionGetter) {
 /**
  * The flattened length of the array
  *
- * @readOnly
- * @attribute length
+ * @readonly
+ * @property
+ * @name length
+ * @instance
+ * @memberof gdal.MDArray
  * @type {number}
  */
 NODE_WRAPPED_GETTER_WITH_RESULT_LOCKED(MDArray, lengthGetter, Number, GetTotalElementsCount);

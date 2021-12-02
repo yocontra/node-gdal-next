@@ -35,13 +35,16 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  * descendant groups.
  *
  *
- * @class gdal.GroupGroups
+ * @class GroupGroups
+ * @memberof gdal
  */
 
 /**
  * Returns the group with the given name/index.
  *
  * @method get
+ * @instance
+ * @memberof gdal.GroupGroups
  * @param {string|number} group
  * @return {gdal.Group}
  */
@@ -51,6 +54,8 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  * {{{async}}}
  *
  * @method getAsync
+ * @instance
+ * @memberof gdal.GroupGroups
  *
  * @param {string|number} group
  * @param {callback<gdal.Group>} [callback=undefined] {{{cb}}}
@@ -61,6 +66,8 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  * Returns the number of groups in the collection.
  *
  * @method count
+ * @instance
+ * @memberof gdal.GroupGroups
  * @return {number}
  */
 
@@ -69,22 +76,30 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  * {{{async}}}
  *
  * @method countAsync
+ * @instance
+ * @memberof gdal.GroupGroups
  *
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */
 
 /**
- * @readOnly
- * @attribute names
+ * @readonly
+ * @property
+ * @name names
+ * @instance
+ * @memberof gdal.GroupGroups
  * @type {string[]}
  */
 
 /**
  * Parent dataset
  *
- * @readOnly
- * @attribute ds
+ * @readonly
+ * @property
+ * @name ds
+ * @instance
+ * @memberof gdal.GroupGroups
  * @type {gdal.Dataset}
  */
 #endif

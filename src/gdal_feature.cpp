@@ -67,7 +67,7 @@ void Feature::dispose() {
  * A simple feature, including geometry and attributes. Its fields and geometry
  * type is defined by the given definition.
  *
- * ```
+ *
  * //create layer and specify geometry type
  * var layer = dataset.layers.create('mylayer', null, gdal.Point);
  *
@@ -80,11 +80,12 @@ void Feature::dispose() {
  * feature.fields.set('elevation', 13775);
  * feature.fields.set('name', 'Grand Teton');
  * feature.setGeometry(new gdal.Point(43.741208, -110.802414));
- * layer.features.add(feature);```
+ * layer.features.add(feature);
  *
  * @constructor
- * @class gdal.Feature
+ * @class Feature
  * @param {gdal.Layer|gdal.FeatureDefn} definition
+ * @memberof gdal
  */
 NAN_METHOD(Feature::New) {
   Feature *f;
@@ -164,6 +165,8 @@ NAN_METHOD(Feature::toString) {
  * Returns the geometry of the feature.
  *
  * @method getGeometry
+ * @instance
+ * @memberof gdal.Feature
  * @return {gdal.Geometry}
  */
 NAN_METHOD(Feature::getGeometry) {
@@ -184,7 +187,7 @@ NAN_METHOD(Feature::getGeometry) {
 }
 
 #if 0
-/**
+/*
  * Returns the definition of a particular field at an index.
  *
  * _method getFieldDefn
@@ -218,6 +221,8 @@ NAN_METHOD(Feature::getFieldDefn) {
  *
  * @throws Error
  * @method setGeometry
+ * @instance
+ * @memberof gdal.Feature
  * @param {gdal.Geometry|null} geometry new geometry or null to clear the field
  */
 NAN_METHOD(Feature::setGeometry) {
@@ -241,6 +246,8 @@ NAN_METHOD(Feature::setGeometry) {
  * Determines if the features are the same.
  *
  * @method equals
+ * @instance
+ * @memberof gdal.Feature
  * @param {gdal.Feature} feature
  * @return {boolean} `true` if the features are the same, `false` if different
  */
@@ -250,6 +257,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Feature, equals, Boolean, Equal,
  * Clones the feature.
  *
  * @method clone
+ * @instance
+ * @memberof gdal.Feature
  * @return {gdal.Feature}
  */
 NAN_METHOD(Feature::clone) {
@@ -265,6 +274,8 @@ NAN_METHOD(Feature::clone) {
  * Releases the feature from memory.
  *
  * @method destroy
+ * @instance
+ * @memberof gdal.Feature
  */
 NAN_METHOD(Feature::destroy) {
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
@@ -281,15 +292,17 @@ NAN_METHOD(Feature::destroy) {
  * from the geometry and attributes of another.
  *
  * @example
- * ```
+ *
  * var feature1 = new gdal.Feature(defn);
  * var feature2 = new gdal.Feature(defn);
  * feature1.setGeometry(new gdal.Point(5, 10));
  * feature1.fields.set([5, 'test', 3.14]);
- * feature2.setFrom(feature1);```
+ * feature2.setFrom(feature1);
  *
  * @throws Error
  * @method setFrom
+ * @instance
+ * @memberof gdal.Feature
  * @param {gdal.Feature} feature
  * @param {number[]} [index_map] Array mapping each field from the source feature
  * to the given index in the destination feature. -1 ignores the source field.
@@ -354,8 +367,11 @@ NAN_METHOD(Feature::setFrom) {
 }
 
 /**
- * @readOnly
- * @attribute fields
+ * @readonly
+ * @property
+ * @name fields
+ * @instance
+ * @memberof gdal.Feature
  * @type {gdal.FeatureFields}
  */
 NAN_GETTER(Feature::fieldsGetter) {
@@ -363,7 +379,10 @@ NAN_GETTER(Feature::fieldsGetter) {
 }
 
 /**
- * @attribute fid
+ * @property
+ * @name fid
+ * @instance
+ * @memberof gdal.Feature
  * @type {number}
  */
 NAN_GETTER(Feature::fidGetter) {
@@ -376,8 +395,11 @@ NAN_GETTER(Feature::fidGetter) {
 }
 
 /**
- * @readOnly
- * @attribute defn
+ * @readonly
+ * @property
+ * @name defn
+ * @instance
+ * @memberof gdal.Feature
  * @type {gdal.FeatureDefn}
  */
 NAN_GETTER(Feature::defnGetter) {

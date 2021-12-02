@@ -41,7 +41,8 @@ FeatureDefnFields::~FeatureDefnFields() {
  * An encapsulation of a {{#crossLink
  * "gdal.FeatureDefn"}}FeatureDefn{{/crossLink}}'s fields.
  *
- * @class gdal.FeatureDefnFields
+ * @class FeatureDefnFields
+ * @memberof gdal
  */
 NAN_METHOD(FeatureDefnFields::New) {
 
@@ -84,6 +85,8 @@ NAN_METHOD(FeatureDefnFields::toString) {
  * Returns the number of fields.
  *
  * @method count
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @return {number}
  */
 NAN_METHOD(FeatureDefnFields::count) {
@@ -103,6 +106,8 @@ NAN_METHOD(FeatureDefnFields::count) {
  * Returns the index of field definition.
  *
  * @method indexOf
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @param {string} name
  * @return {number} Index or `-1` if not found.
  */
@@ -126,6 +131,8 @@ NAN_METHOD(FeatureDefnFields::indexOf) {
  * Returns a field definition.
  *
  * @method get
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @param {string|number} key Field name or index
  * @throws Error
  * @return {gdal.FieldDefn}
@@ -158,6 +165,8 @@ NAN_METHOD(FeatureDefnFields::get) {
  * Returns a list of field names.
  *
  * @method getNames
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @return {string[]} List of field names.
  */
 NAN_METHOD(FeatureDefnFields::getNames) {
@@ -185,6 +194,8 @@ NAN_METHOD(FeatureDefnFields::getNames) {
  * Removes a field definition.
  *
  * @method remove
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @throws Error
  * @param {string|number} key Field name or index
  */
@@ -219,6 +230,8 @@ NAN_METHOD(FeatureDefnFields::remove) {
  * Adds field definition(s).
  *
  * @method add
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @throws Error
  * @param {gdal.FieldDefn|gdal.FieldDefn[]} fields
  */
@@ -266,11 +279,13 @@ NAN_METHOD(FeatureDefnFields::add) {
  * Reorders the fields.
  *
  * @example
- * ```
+ *
  * // reverse fields:
- * featureDef.fields.reorder([2, 1, 0]);```
+ * featureDef.fields.reorder([2, 1, 0]);
  *
  * @method reorder
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @throws Error
  * @param {number[]} map An array representing the new field order.
  */
@@ -329,8 +344,11 @@ NAN_METHOD(FeatureDefnFields::reorder) {
 /**
  * Parent feature definition.
  *
- * @readOnly
- * @attribute featureDefn
+ * @readonly
+ * @property
+ * @name featureDefn
+ * @instance
+ * @memberof gdal.FeatureDefnFields
  * @type {gdal.FeatureDefn}
  */
 NAN_GETTER(FeatureDefnFields::featureDefnGetter) {

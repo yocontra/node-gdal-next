@@ -36,14 +36,15 @@ void CompoundCurve::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8:
  * Concrete representation of a compound contionuos curve.
  *
  * @example
- * ```
+ *
  * var CompoundCurve = new gdal.CompoundCurve();
  * CompoundCurve.points.add(new gdal.Point(0,0));
- * CompoundCurve.points.add(new gdal.Point(0,10));```
+ * CompoundCurve.points.add(new gdal.Point(0,10));
  *
  * @constructor
- * @class gdal.CompoundCurve
+ * @class CompoundCurve
  * @extends gdal.Geometry
+ * @memberof gdal
  */
 
 NAN_METHOD(CompoundCurve::toString) {
@@ -53,7 +54,10 @@ NAN_METHOD(CompoundCurve::toString) {
 /**
  * Points that make up the compound curve.
  *
- * @attribute curves
+ * @property
+ * @name curves
+ * @instance
+ * @memberof gdal.CompoundCurve
  * @type {gdal.CompoundCurveCurves}
  */
 NAN_GETTER(CompoundCurve::curvesGetter) {

@@ -38,10 +38,11 @@ DatasetBands::~DatasetBands() {
  * An encapsulation of a {{#crossLink "gdal.Dataset"}}Dataset{{/crossLink}}'s
  * raster bands.
  *
- * ```
- * var bands = dataset.bands;```
  *
- * @class gdal.DatasetBands
+ * var bands = dataset.bands;
+ *
+ * @class DatasetBands
+ * @memberof gdal
  */
 NAN_METHOD(DatasetBands::New) {
 
@@ -83,6 +84,8 @@ NAN_METHOD(DatasetBands::toString) {
  * Returns the band with the given ID.
  *
  * @method get
+ * @instance
+ * @memberof gdal.DatasetBands
  * @param {number} id
  * @throws Error
  * @return {gdal.RasterBand}
@@ -93,6 +96,8 @@ NAN_METHOD(DatasetBands::toString) {
  * {{{async}}}
  *
  * @method getAsync
+ * @instance
+ * @memberof gdal.DatasetBands
  *
  * @param {number} id
  * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
@@ -130,6 +135,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  * Adds a new band.
  *
  * @method create
+ * @instance
+ * @memberof gdal.DatasetBands
  * @throws Error
  * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
  * @param {object|string[]} [options] Creation options
@@ -141,6 +148,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  * {{{async}}}
  *
  * @method createAsync
+ * @instance
+ * @memberof gdal.DatasetBands
  * @throws Error
  * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
  * @param {object|string[]} [options] Creation options
@@ -198,6 +207,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
  * Returns the number of bands.
  *
  * @method count
+ * @instance
+ * @memberof gdal.DatasetBands
  * @return {number}
  */
 
@@ -207,6 +218,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
  * {{{async}}}
  *
  * @method countAsync
+ * @instance
+ * @memberof gdal.DatasetBands
  *
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
@@ -236,8 +249,11 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
 /**
  * Parent dataset
  *
- * @readOnly
- * @attribute ds
+ * @readonly
+ * @property
+ * @name ds
+ * @instance
+ * @memberof gdal.DatasetBands
  * @type {gdal.Dataset}
  */
 NAN_GETTER(DatasetBands::dsGetter) {

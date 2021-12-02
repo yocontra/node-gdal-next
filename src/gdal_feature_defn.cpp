@@ -49,7 +49,8 @@ FeatureDefn::~FeatureDefn() {
  * Definition of a feature class or feature layer.
  *
  * @constructor
- * @class gdal.FeatureDefn
+ * @class FeatureDefn
+ * @memberof gdal
  */
 NAN_METHOD(FeatureDefn::New) {
   FeatureDefn *f;
@@ -119,6 +120,8 @@ NAN_METHOD(FeatureDefn::toString) {
  * Clones the feature definition.
  *
  * @method clone
+ * @instance
+ * @memberof gdal.FeatureDefn
  * @return {gdal.FeatureDefn}
  */
 NAN_METHOD(FeatureDefn::clone) {
@@ -127,8 +130,11 @@ NAN_METHOD(FeatureDefn::clone) {
 }
 
 /**
- * @readOnly
- * @attribute name
+ * @readonly
+ * @property
+ * @name name
+ * @instance
+ * @memberof gdal.FeatureDefn
  * @type {string}
  */
 NAN_GETTER(FeatureDefn::nameGetter) {
@@ -140,7 +146,10 @@ NAN_GETTER(FeatureDefn::nameGetter) {
  * WKB geometry type ({{#crossLink "Constants (wkbGeometryType)"}}see
  * table{{/crossLink}})
  *
- * @attribute geomType
+ * @property
+ * @name geomType
+ * @instance
+ * @memberof gdal.FeatureDefn
  * @type {number}
  */
 NAN_GETTER(FeatureDefn::geomTypeGetter) {
@@ -149,7 +158,10 @@ NAN_GETTER(FeatureDefn::geomTypeGetter) {
 }
 
 /**
- * @attribute geomIgnored
+ * @property
+ * @name geomIgnored
+ * @instance
+ * @memberof gdal.FeatureDefn
  * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
@@ -158,7 +170,10 @@ NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
 }
 
 /**
- * @attribute styleIgnored
+ * @property
+ * @name styleIgnored
+ * @instance
+ * @memberof gdal.FeatureDefn
  * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
@@ -167,8 +182,11 @@ NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
 }
 
 /**
- * @readOnly
- * @attribute fields
+ * @readonly
+ * @property
+ * @name fields
+ * @instance
+ * @memberof gdal.FeatureDefn
  * @type {gdal.FeatureDefnFields}
  */
 NAN_GETTER(FeatureDefn::fieldsGetter) {

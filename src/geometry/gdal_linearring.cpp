@@ -55,8 +55,9 @@ Local<Value> LinearRing::New(OGRLinearRing *geom, bool owned) {
  * Concrete representation of a closed ring.
  *
  * @constructor
- * @class gdal.LinearRing
+ * @class LinearRing
  * @extends gdal.LineString
+ * @memberof gdal
  */
 
 NAN_METHOD(LinearRing::toString) {
@@ -67,6 +68,8 @@ NAN_METHOD(LinearRing::toString) {
  * Computes the area enclosed by the ring.
  *
  * @method getArea
+ * @instance
+ * @memberof gdal.LinearRing
  * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(LinearRing, getArea, Number, get_Area);

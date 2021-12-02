@@ -63,7 +63,8 @@ void Group::dispose() {
 /**
  * A representation of a group with access methods.
  *
- * @class gdal.Group
+ * @class Group
+ * @memberof gdal
  */
 NAN_METHOD(Group::New) {
 
@@ -143,15 +144,21 @@ NAN_METHOD(Group::toString) {
 }
 
 /**
- * @readOnly
- * @attribute description
+ * @readonly
+ * @property
+ * @name description
+ * @instance
+ * @memberof gdal.Group
  * @type {string}
  */
 NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Group, descriptionGetter, GetFullName);
 
 /**
- * @readOnly
- * @attribute groups
+ * @readonly
+ * @property
+ * @name groups
+ * @instance
+ * @memberof gdal.Group
  * @type {gdal.GroupGroups}
  */
 NAN_GETTER(Group::groupsGetter) {
@@ -159,8 +166,11 @@ NAN_GETTER(Group::groupsGetter) {
 }
 
 /**
- * @readOnly
- * @attribute arrays
+ * @readonly
+ * @property
+ * @name arrays
+ * @instance
+ * @memberof gdal.Group
  * @type {gdal.GroupArrays}
  */
 NAN_GETTER(Group::arraysGetter) {
@@ -168,8 +178,11 @@ NAN_GETTER(Group::arraysGetter) {
 }
 
 /**
- * @readOnly
- * @attribute dimensions
+ * @readonly
+ * @property
+ * @name dimensions
+ * @instance
+ * @memberof gdal.Group
  * @type {gdal.GroupDimensions}
  */
 NAN_GETTER(Group::dimensionsGetter) {
@@ -177,8 +190,11 @@ NAN_GETTER(Group::dimensionsGetter) {
 }
 
 /**
- * @readOnly
- * @attribute attributes
+ * @readonly
+ * @property
+ * @name attributes
+ * @instance
+ * @memberof gdal.Group
  * @type {gdal.GroupAttributes}
  */
 NAN_GETTER(Group::attributesGetter) {

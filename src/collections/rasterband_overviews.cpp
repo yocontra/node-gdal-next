@@ -33,7 +33,8 @@ RasterBandOverviews::~RasterBandOverviews() {
  * An encapsulation of a {{#crossLink
  * "gdal.RasterBand"}}RasterBand{{/crossLink}} overview functionality.
  *
- * @class gdal.RasterBandOverviews
+ * @class RasterBandOverviews
+ * @memberof gdal
  */
 NAN_METHOD(RasterBandOverviews::New) {
 
@@ -76,6 +77,8 @@ NAN_METHOD(RasterBandOverviews::toString) {
  * Fetches the overview at the provided index.
  *
  * @method get
+ * @instance
+ * @memberof gdal.RasterBandOverviews
  * @throws Error
  * @param {number} index 0-based index
  * @return {gdal.RasterBand}
@@ -86,6 +89,8 @@ NAN_METHOD(RasterBandOverviews::toString) {
  * {{{async}}}
  *
  * @method getAsync
+ * @instance
+ * @memberof gdal.RasterBandOverviews
  * @throws Error
  * @param {number} index 0-based index
  * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
@@ -125,6 +130,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
  * overviews have enough samples.
  *
  * @method getBySampleCount
+ * @instance
+ * @memberof gdal.RasterBandOverviews
  * @param {number} samples
  * @return {gdal.RasterBand}
  */
@@ -140,6 +147,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
  * overviews have enough samples.
  *
  * @method getBySampleCountAsync
+ * @instance
+ * @memberof gdal.RasterBandOverviews
  * @param {number} samples
  * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
  * @return {Promise<gdal.RasterBand>}
@@ -171,6 +180,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
  * Returns the number of overviews.
  *
  * @method count
+ * @instance
+ * @memberof gdal.RasterBandOverviews
  * @return {number}
  */
 
@@ -179,6 +190,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
  * {{{async}}}
  *
  * @method countAsync
+ * @instance
+ * @memberof gdal.RasterBandOverviews
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */

@@ -14,8 +14,9 @@ Nan::Persistent<FunctionTemplate> GeometryCollection::constructor;
  * A collection of 1 or more geometry objects.
  *
  * @constructor
- * @class gdal.GeometryCollection
+ * @class GeometryCollection
  * @extends gdal.Geometry
+ * @memberof gdal
  */
 void GeometryCollection::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -44,6 +45,8 @@ NAN_METHOD(GeometryCollection::toString) {
  * Computes the combined area of the geometries.
  *
  * @method getArea
+ * @instance
+ * @memberof gdal.GeometryCollection
  * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getArea, Number, get_Area);
@@ -52,6 +55,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getArea, Number, get_Area);
  * Compute the length of a multicurve.
  *
  * @method getLength
+ * @instance
+ * @memberof gdal.GeometryCollection
  * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getLength, Number, get_Length);
@@ -59,7 +64,10 @@ NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getLength, Number, get_Lengt
 /**
  * All geometries represented by this collection.
  *
- * @attribute children
+ * @property
+ * @name children
+ * @instance
+ * @memberof gdal.GeometryCollection
  * @type {gdal.GeometryCollectionChildren}
  */
 NAN_GETTER(GeometryCollection::childrenGetter) {

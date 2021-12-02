@@ -61,7 +61,8 @@ void Driver::dispose() {
  * This roughly corresponds to a file format, though some drivers may
  * be gateways to many formats through a secondary multi-library.
  *
- * @class gdal.Driver
+ * @class Driver
+ * @memberof gdal
  */
 NAN_METHOD(Driver::New) {
 
@@ -107,8 +108,11 @@ NAN_METHOD(Driver::toString) {
 }
 
 /**
- * @readOnly
- * @attribute description
+ * @readonly
+ * @property
+ * @name description
+ * @instance
+ * @memberof gdal.Driver
  * @type {string}
  */
 NAN_GETTER(Driver::descriptionGetter) {
@@ -120,6 +124,8 @@ NAN_GETTER(Driver::descriptionGetter) {
 /**
  * @throws Error
  * @method deleteDataset
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} filename
  */
 NAN_METHOD(Driver::deleteDataset) {
@@ -145,6 +151,8 @@ auto DatasetRval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return D
  *
  * @throws Error
  * @method create
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} filename
  * @param {number} [x_size=0] raster width in pixels (ignored for vector
  * datasets)
@@ -165,6 +173,8 @@ auto DatasetRval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return D
  *
  * @throws Error
  * @method createAsync
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} filename
  * @param {number} [x_size=0] raster width in pixels (ignored for vector
  * datasets)
@@ -226,10 +236,18 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
 }
 
 /**
+ * @typedef {object} CreateOptions
+ * @memberof gdal
+ * @property {ProgressCb} [progress_cb]
+ */
+
+/**
  * Create a copy of a dataset.
  *
  * @throws Error
  * @method createCopy
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} filename
  * @param {gdal.Dataset} src
  * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
@@ -244,6 +262,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  *
  * @throws Error
  * @method createCopyAsync
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} filename
  * @param {gdal.Dataset} src
  * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
@@ -315,6 +335,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
  *
  * @throws Error
  * @method copyFiles
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} name_old New name for the dataset.
  * @param {string} name_new Old name of the dataset.
  */
@@ -340,6 +362,8 @@ NAN_METHOD(Driver::copyFiles) {
  *
  * @throws Error
  * @method rename
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} new_name New name for the dataset.
  * @param {string} old_name Old name of the dataset.
  */
@@ -365,6 +389,8 @@ NAN_METHOD(Driver::rename) {
  *
  * @throws Error
  * @method getMetadata
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} [domain]
  * @return {any}
  */
@@ -387,6 +413,8 @@ NAN_METHOD(Driver::getMetadata) {
  *
  * @throws Error
  * @method open
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} path
  * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
@@ -398,6 +426,8 @@ NAN_METHOD(Driver::getMetadata) {
  *
  * @throws Error
  * @method openAsync
+ * @instance
+ * @memberof gdal.Driver
  * @param {string} path
  * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`

@@ -74,16 +74,17 @@ void Dataset::dispose(bool manual) {
 /**
  * A set of associated raster bands and/or vector layers, usually from one file.
  *
- * ```
+ *
  * // raster dataset:
  * dataset = gdal.open('file.tif');
  * bands = dataset.bands;
  *
  * // vector dataset:
  * dataset = gdal.open('file.shp');
- * layers = dataset.layers;```
+ * layers = dataset.layers;
  *
- * @class gdal.Dataset
+ * @class Dataset
+ * @memberof gdal
  */
 NAN_METHOD(Dataset::New) {
 
@@ -158,6 +159,8 @@ NAN_METHOD(Dataset::toString) {
  * Fetch metadata.
  *
  * @method getMetadata
+ * @instance
+ * @memberof gdal.Dataset
  * @param {string} [domain]
  * @return {any}
  */
@@ -167,6 +170,8 @@ NAN_METHOD(Dataset::toString) {
  * {{{async}}}
  *
  * @method getMetadataAsync
+ * @instance
+ * @memberof gdal.Dataset
  * @param {string} [domain]
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<any>}
@@ -190,6 +195,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
  * Set metadata. Can return a warning (false) for formats not supporting persistent metadata.
  *
  * @method setMetadata
+ * @instance
+ * @memberof gdal.Dataset
  * @param {object|string[]} metadata
  * @param {string} [domain]
  * @return {boolean}
@@ -200,6 +207,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
  * {{{async}}}
  *
  * @method setMetadataAsync
+ * @instance
+ * @memberof gdal.Dataset
  * @param {object|string[]} metadata
  * @param {string} [domain]
  * @param {callback<boolean>} [callback=undefined] {{{cb}}}
@@ -232,6 +241,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {
  * Determines if the dataset supports the indicated operation.
  *
  * @method testCapability
+ * @instance
+ * @memberof gdal.Dataset
  * @param {string} capability (see {{#crossLink "Constants (ODsC)"}}capability
  * list{{/crossLink}})
  * @return {boolean}
@@ -257,6 +268,8 @@ NAN_METHOD(Dataset::testCapability) {
  * Get output projection for GCPs.
  *
  * @method getGCPProjection
+ * @instance
+ * @memberof gdal.Dataset
  * @return {string}
  */
 NAN_METHOD(Dataset::getGCPProjection) {
@@ -289,6 +302,8 @@ NAN_METHOD(Dataset::getGCPProjection) {
  * flush[Async]() ensures that, when writing, all data has been written.
  *
  * @method close
+ * @instance
+ * @memberof gdal.Dataset
  */
 NAN_METHOD(Dataset::close) {
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
@@ -308,6 +323,8 @@ NAN_METHOD(Dataset::close) {
  *
  * @throws Error
  * @method flush
+ * @instance
+ * @memberof gdal.Dataset
  */
 
 /**
@@ -315,6 +332,8 @@ NAN_METHOD(Dataset::close) {
  * {{{async}}}
  *
  * @method flushAsync
+ * @instance
+ * @memberof gdal.Dataset
  * @throws Error
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
@@ -338,6 +357,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  *
  * @throws Error
  * @method executeSQL
+ * @instance
+ * @memberof gdal.Dataset
  * @param {string} statement SQL statement to execute.
  * @param {gdal.Geometry} [spatial_filter=null] Geometry which represents a
  * spatial filter.
@@ -355,6 +376,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  *
  * @throws Error
  * @method executeSQLAsync
+ * @instance
+ * @memberof gdal.Dataset
  * @param {string} statement SQL statement to execute.
  * @param {gdal.Geometry} [spatial_filter=null] Geometry which represents a
  * spatial filter.
@@ -407,6 +430,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
  * Returns an empty array for vector datasets if GDAL version is below 2.0
  *
  * @method getFileList
+ * @instance
+ * @memberof gdal.Dataset
  * @return {string[]}
  */
 NAN_METHOD(Dataset::getFileList) {
@@ -447,6 +472,8 @@ NAN_METHOD(Dataset::getFileList) {
  * Fetches GCPs.
  *
  * @method getGCPs
+ * @instance
+ * @memberof gdal.Dataset
  * @return {any[]}
  */
 NAN_METHOD(Dataset::getGCPs) {
@@ -495,6 +522,8 @@ NAN_METHOD(Dataset::getGCPs) {
  *
  * @throws Error
  * @method setGCPs
+ * @instance
+ * @memberof gdal.Dataset
  * @param {object[]} gcps
  * @param {string} [projection]
  */
@@ -559,6 +588,8 @@ NAN_METHOD(Dataset::setGCPs) {
  *
  * @throws Error
  * @method buildOverviews
+ * @instance
+ * @memberof gdal.Dataset
  * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
  * @param {number[]} overviews
@@ -573,6 +604,8 @@ NAN_METHOD(Dataset::setGCPs) {
  *
  * @throws Error
  * @method buildOverviewsAsync
+ * @instance
+ * @memberof gdal.Dataset
  * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
  * @param {number[]} overviews
@@ -656,8 +689,11 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
 }
 
 /**
- * @readOnly
- * @attribute description
+ * @readonly
+ * @property
+ * @name description
+ * @instance
+ * @memberof gdal.Dataset
  * @type {string}
  */
 NAN_GETTER(Dataset::descriptionGetter) {
@@ -680,8 +716,11 @@ NAN_GETTER(Dataset::descriptionGetter) {
 /**
  * Raster dimensions. An object containing `x` and `y` properties.
  *
- * @readOnly
- * @attribute rasterSize
+ * @readonly
+ * @property
+ * @name rasterSize
+ * @instance
+ * @memberof gdal.Dataset
  * @type {xyz}
  */
 
@@ -689,8 +728,11 @@ NAN_GETTER(Dataset::descriptionGetter) {
  * Raster dimensions. An object containing `x` and `y` properties.
  * {{async_getter}}
  *
- * @readOnly
- * @attribute rasterSizeAsync
+ * @readonly
+ * @property
+ * @name rasterSizeAsync
+ * @instance
+ * @memberof gdal.Dataset
  * @type {Promise<xyz>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
@@ -740,7 +782,10 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * Spatial reference associated with raster dataset
  *
  * @throws Error
- * @attribute srs
+ * @property
+ * @name srs
+ * @instance
+ * @memberof gdal.Dataset
  * @type {gdal.SpatialReference|null}
  */
 
@@ -749,8 +794,11 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * {{async_getter}}
  *
  * @throws Error
- * @attribute srsAsync
- * @readOnly
+ * @property
+ * @name srsAsync
+ * @instance
+ * @memberof gdal.Dataset
+ * @readonly
  * @type {Promise<gdal.SpatialReference|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
@@ -793,12 +841,15 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * space using the following relationship:
  *
  * @example
- * ```
+ *
  * var GT = dataset.geoTransform;
  * var Xgeo = GT[0] + Xpixel*GT[1] + Yline*GT[2];
- * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];```
+ * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];
  *
- * @attribute geoTransform
+ * @property
+ * @name geoTransform
+ * @instance
+ * @memberof gdal.Dataset
  * @type {number[]|null}
  */
 
@@ -807,14 +858,17 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * space using the following relationship:
  *
  * @example
- * ```
+ *
  * var GT = dataset.geoTransform;
  * var Xgeo = GT[0] + Xpixel*GT[1] + Yline*GT[2];
- * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];```
+ * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];
  *
  * {{async_getter}}
- * @readOnly
- * @attribute geoTransformAsync
+ * @readonly
+ * @property
+ * @name geoTransformAsync
+ * @instance
+ * @memberof gdal.Dataset
  * @type {Promise<number[]|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
@@ -854,8 +908,11 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
 }
 
 /**
- * @readOnly
- * @attribute driver
+ * @readonly
+ * @property
+ * @name driver
+ * @instance
+ * @memberof gdal.Dataset
  * @type {gdal.Driver}
  */
 NAN_GETTER(Dataset::driverGetter) {
@@ -942,8 +999,11 @@ NAN_SETTER(Dataset::geoTransformSetter) {
 }
 
 /**
- * @readOnly
- * @attribute bands
+ * @readonly
+ * @property
+ * @name bands
+ * @instance
+ * @memberof gdal.Dataset
  * @type {gdal.DatasetBands}
  */
 NAN_GETTER(Dataset::bandsGetter) {
@@ -951,8 +1011,11 @@ NAN_GETTER(Dataset::bandsGetter) {
 }
 
 /**
- * @readOnly
- * @attribute layers
+ * @readonly
+ * @property
+ * @name layers
+ * @instance
+ * @memberof gdal.Dataset
  * @type {gdal.DatasetLayers}
  */
 NAN_GETTER(Dataset::layersGetter) {
@@ -960,8 +1023,11 @@ NAN_GETTER(Dataset::layersGetter) {
 }
 
 /**
- * @readOnly
- * @attribute root
+ * @readonly
+ * @property
+ * @name root
+ * @instance
+ * @memberof gdal.Dataset
  * @type {gdal.Group}
  */
 NAN_GETTER(Dataset::rootGetter) {

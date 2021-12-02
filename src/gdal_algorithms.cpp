@@ -17,12 +17,21 @@ void Algorithms::Initialize(Local<Object> target) {
 }
 
 /**
+ * @typedef {object} FillOptions
+ * @memberof gdal
+ * @property {gdal.RasterBand} src
+ * @property {gdal.RasterBand} [mask]
+ * @property {number} searchDist
+ * @property {number} [smoothingIterations]
+ */
+
+/**
  * Fill raster regions by interpolation from edges.
  *
  * @throws Error
  * @method fillNodata
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {FillOptions} options
  * @param {gdal.RasterBand} options.src This band to be updated in-place.
  * @param {gdal.RasterBand} [options.mask] Mask band
@@ -37,7 +46,7 @@ void Algorithms::Initialize(Local<Object> target) {
  * @throws Error
  * @method fillNodataAsync
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {FillOptions} options
  * @param {gdal.RasterBand} options.src This band to be updated in-place.
  * @param {gdal.RasterBand} [options.mask] Mask band
@@ -81,6 +90,20 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
 }
 
 /**
+ * @typedef {object} ContourOptions
+ * @memberof gdal
+ * @property {gdal.RasterBand} src
+ * @property {gdal.Layer} dst
+ * @property {number} [offset]
+ * @property {number} [interval]
+ * @property {number[]} [fixedLevels]
+ * @property {number} [nodata]
+ * @property {number} [idField]
+ * @property {number} [elevField]
+ * @property {ProgressCb} [progress_cb]
+ */
+
+/**
  * Create vector contours from raster DEM.
  *
  * This algorithm will generate contour vectors for the input raster band on the
@@ -91,7 +114,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @throws Error
  * @method contourGenerate
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {ContourOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
@@ -116,7 +139,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @throws Error
  * @method contourGenerateAsync
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {ContourOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
@@ -212,12 +235,23 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
 }
 
 /**
+ * @typedef {object} SieveOptions
+ * @memberof gdal
+ * @property {gdal.RasterBand} src
+ * @property {gdal.RasterBand} dst
+ * @property {gdal.RasterBand} [mask]
+ * @property {number} threshold
+ * @property {number} [connectedness]
+ * @property {ProgressCb} [progress_cb]
+ */
+
+/**
  * Removes small raster polygons.
  *
  * @throws Error
  * @method sieveFilter
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {SieveOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.RasterBand} options.dst Output raster band. It may be the same as src band to update the source in place.
@@ -234,7 +268,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @throws Error
  * @method sieveFilterAsync
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {SieveOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.RasterBand} options.dst Output raster band. It may be the same as src band to update the source in place.
@@ -302,7 +336,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
  * @throws Error
  * @method checksumImage
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {gdal.RasterBand} src
  * @param {number} [x=0]
  * @param {number} [y=0]
@@ -317,7 +351,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
  * @throws Error
  * @method checksumImageAsync
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {gdal.RasterBand} src
  * @param {number} [x=0]
  * @param {number} [y=0]
@@ -371,6 +405,18 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
 }
 
 /**
+ * @typedef {object} PolygonizeOptions
+ * @memberof gdal
+ * @property {gdal.RasterBand} src
+ * @property {gdal.Layer} dst
+ * @property {gdal.RasterBand} [mask]
+ * @property {number} pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
+ * @property {number} [connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
+ * @property {boolean} [useFloats=false] Use floating point buffers instead of int buffers.
+ * @property {ProgressCb} [progress_cb] {{{progress_cb}}}
+ */
+
+/**
  * Creates vector polygons for all connected regions of pixels in the raster
  * sharing a common pixel value. Each polygon is created with an attribute
  * indicating the pixel value of that polygon. A raster mask may also be
@@ -379,7 +425,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @throws Error
  * @method polygonize
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {PolygonizeOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst
@@ -400,7 +446,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @throws Error
  * @method polygonizeAsync
  * @static
- * @for gdal
+ * @memberof gdal
  * @param {PolygonizeOptions} options
  * @param {gdal.RasterBand} options.src
  * @param {gdal.Layer} options.dst

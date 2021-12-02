@@ -73,7 +73,8 @@ void Layer::dispose() {
 /**
  * A representation of a layer of simple vector features, with access methods.
  *
- * @class gdal.Layer
+ * @class Layer
+ * @memberof gdal
  */
 NAN_METHOD(Layer::New) {
 
@@ -164,6 +165,8 @@ NAN_METHOD(Layer::toString) {
  *
  * @throws Error
  * @method flush
+ * @instance
+ * @memberof gdal.Layer
  */
 
 /**
@@ -172,6 +175,8 @@ NAN_METHOD(Layer::toString) {
  *
  * @throws Error
  * @method flushAsync
+ * @instance
+ * @memberof gdal.Layer
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  *
@@ -182,6 +187,8 @@ NODE_WRAPPED_ASYNC_METHOD_WITH_OGRERR_RESULT_LOCKED(Layer, syncToDisk, SyncToDis
  * Determines if the dataset supports the indicated operation.
  *
  * @method testCapability
+ * @instance
+ * @memberof gdal.Layer
  * @param {string} capability (see {{#crossLink "Constants (OLC)"}}capability
  * list{{/crossLink}})
  * @return {boolean}
@@ -193,6 +200,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_STRING_PARAM_LOCKED(Layer, testCapability, Boo
  *
  * @throws Error
  * @method getExtent
+ * @instance
+ * @memberof gdal.Layer
  * @param {boolean} [force=true]
  * @return {gdal.Envelope} Bounding envelope
  */
@@ -230,6 +239,8 @@ NAN_METHOD(Layer::getExtent) {
  *
  * @throws Error
  * @method getSpatialFilter
+ * @instance
+ * @memberof gdal.Layer
  * @return {gdal.Geometry}
  */
 NAN_METHOD(Layer::getSpatialFilter) {
@@ -254,11 +265,13 @@ NAN_METHOD(Layer::getSpatialFilter) {
  * Alernatively you can pass it envelope bounds as individual arguments.
  *
  * @example
- * ```
- * layer.setSpatialFilter(geometry);```
+ *
+ * layer.setSpatialFilter(geometry);
  *
  * @throws Error
  * @method setSpatialFilter
+ * @instance
+ * @memberof gdal.Layer
  * @param {gdal.Geometry|null} filter
  */
 
@@ -270,11 +283,13 @@ NAN_METHOD(Layer::getSpatialFilter) {
  * Alernatively you can pass it envelope bounds as individual arguments.
  *
  * @example
- * ```
- * layer.setSpatialFilter(minX, minY, maxX, maxY);```
+ *
+ * layer.setSpatialFilter(minX, minY, maxX, maxY);
  *
  * @throws Error
  * @method setSpatialFilter
+ * @instance
+ * @memberof gdal.Layer
  * @param {number} minxX
  * @param {number} minyY
  * @param {number} maxX
@@ -330,11 +345,13 @@ NAN_METHOD(Layer::setSpatialFilter) {
  * of OGR SQL.
  *
  * @example
- * ```
- * layer.setAttributeFilter('population > 1000000 and population < 5000000');```
+ *
+ * layer.setAttributeFilter('population > 1000000 and population < 5000000');
  *
  * @throws Error
  * @method setAttributeFilter
+ * @instance
+ * @memberof gdal.Layer
  * @param {string|null} [filter=null]
  */
 NAN_METHOD(Layer::setAttributeFilter) {
@@ -379,8 +396,11 @@ false));
 }*/
 
 /**
- * @readOnly
- * @attribute ds
+ * @readonly
+ * @property
+ * @name ds
+ * @instance
+ * @memberof gdal.Layer
  * @type {gdal.Dataset}
  */
 NAN_GETTER(Layer::dsGetter) {
@@ -388,8 +408,11 @@ NAN_GETTER(Layer::dsGetter) {
 }
 
 /**
- * @readOnly
- * @attribute srs
+ * @readonly
+ * @property
+ * @name srs
+ * @instance
+ * @memberof gdal.Layer
  * @type {gdal.SpatialReference}
  */
 NAN_GETTER(Layer::srsGetter) {
@@ -404,8 +427,11 @@ NAN_GETTER(Layer::srsGetter) {
 }
 
 /**
- * @readOnly
- * @attribute name
+ * @readonly
+ * @property
+ * @name name
+ * @instance
+ * @memberof gdal.Layer
  * @type {string}
  */
 NAN_GETTER(Layer::nameGetter) {
@@ -420,8 +446,11 @@ NAN_GETTER(Layer::nameGetter) {
 }
 
 /**
- * @readOnly
- * @attribute geomColumn
+ * @readonly
+ * @property
+ * @name geomColumn
+ * @instance
+ * @memberof gdal.Layer
  * @type {string}
  */
 NAN_GETTER(Layer::geomColumnGetter) {
@@ -436,8 +465,11 @@ NAN_GETTER(Layer::geomColumnGetter) {
 }
 
 /**
- * @readOnly
- * @attribute fidColumn
+ * @readonly
+ * @property
+ * @name fidColumn
+ * @instance
+ * @memberof gdal.Layer
  * @type {string}
  */
 NAN_GETTER(Layer::fidColumnGetter) {
@@ -452,8 +484,11 @@ NAN_GETTER(Layer::fidColumnGetter) {
 }
 
 /**
- * @readOnly
- * @attribute geomType
+ * @readonly
+ * @property
+ * @name geomType
+ * @instance
+ * @memberof gdal.Layer
  * @type {number} (see {{#crossLink "Constants (wkb)"}}geometry
  * types{{/crossLink}})
  */
@@ -469,8 +504,11 @@ NAN_GETTER(Layer::geomTypeGetter) {
 }
 
 /**
- * @readOnly
- * @attribute features
+ * @readonly
+ * @property
+ * @name features
+ * @instance
+ * @memberof gdal.Layer
  * @type {gdal.LayerFeatures}
  */
 NAN_GETTER(Layer::featuresGetter) {
@@ -478,8 +516,11 @@ NAN_GETTER(Layer::featuresGetter) {
 }
 
 /**
- * @readOnly
- * @attribute fields
+ * @readonly
+ * @property
+ * @name fields
+ * @instance
+ * @memberof gdal.Layer
  * @type {gdal.LayerFields}
  */
 NAN_GETTER(Layer::fieldsGetter) {

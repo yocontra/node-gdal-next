@@ -41,10 +41,11 @@ DatasetLayers::~DatasetLayers() {
  * An encapsulation of a {{#crossLink "gdal.Dataset"}}Dataset{{/crossLink}}'s
  * vector layers.
  *
- * ```
- * var layers = dataset.layers;```
  *
- * @class gdal.DatasetLayers
+ * var layers = dataset.layers;
+ *
+ * @class DatasetLayers
+ * @memberof gdal
  */
 NAN_METHOD(DatasetLayers::New) {
 
@@ -87,6 +88,8 @@ NAN_METHOD(DatasetLayers::toString) {
  * Returns the layer with the given name or identifier.
  *
  * @method get
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @param {string|number} key Layer name or ID.
  * @throws Error
  * @return {gdal.Layer}
@@ -97,6 +100,8 @@ NAN_METHOD(DatasetLayers::toString) {
  * {{{async}}}
  *
  * @method getAsync
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @param {string|number} key Layer name or ID.
  * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
  * @throws Error
@@ -153,11 +158,13 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * Adds a new layer.
  *
  * @example
- * ```
+ *
  * dataset.layers.create('layername', null, gdal.Point);
- * ```
+ *
  *
  * @method create
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @throws Error
  * @param {string} name Layer name
  * @param {gdal.SpatialReference|null} [srs=null] Layer projection
@@ -173,12 +180,14 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * {{{async}}}
  *
  * @example
- * ```
+ *
  * await dataset.layers.createAsync('layername', null, gdal.Point);
  * dataset.layers.createAsync('layername', null, gdal.Point, (e, r) => console.log(e, r));
- * ```
+ *
  *
  * @method createAsync
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @throws Error
  * @param {string} name Layer name
  * @param {gdal.SpatialReference|null} [srs=null] Layer projection
@@ -238,6 +247,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
  * Returns the number of layers.
  *
  * @method count
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @return {number}
  */
 
@@ -246,6 +257,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
  * {{{async}}}
  *
  * @method countAsync
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */
@@ -278,6 +291,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  * Copies a layer.
  *
  * @method copy
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @param {gdal.Layer} src_lyr_name
  * @param {string} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
@@ -289,6 +304,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  * {{{async}}}
  *
  * @method copyAsync
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @param {gdal.Layer} src_lyr_name
  * @param {string} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
@@ -338,6 +355,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
  * Removes a layer.
  *
  * @method remove
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @throws Error
  * @param {number} index
  */
@@ -347,6 +366,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
  * {{{async}}}
  *
  * @method removeAsync
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @throws Error
  * @param {number} index
  * @param {callback<void>} [callback=undefined] {{{cb}}}
@@ -383,8 +404,11 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
 /**
  * Parent dataset
  *
- * @readOnly
- * @attribute ds
+ * @readonly
+ * @property
+ * @name ds
+ * @instance
+ * @memberof gdal.DatasetLayers
  * @type {gdal.Dataset}
  */
 NAN_GETTER(DatasetLayers::dsGetter) {

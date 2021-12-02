@@ -30,8 +30,9 @@ void MultiLineString::Initialize(Local<Object> target) {
 
 /**
  * @constructor
- * @class gdal.MultiLineString
+ * @class MultiLineString
  * @extends gdal.GeometryCollection
+ * @memberof gdal
  */
 
 NAN_METHOD(MultiLineString::toString) {
@@ -42,6 +43,8 @@ NAN_METHOD(MultiLineString::toString) {
  * Converts it to a polygon.
  *
  * @method polygonize
+ * @instance
+ * @memberof gdal.MultiLineString
  * @return {gdal.Polygon}
  */
 NAN_METHOD(MultiLineString::polygonize) {

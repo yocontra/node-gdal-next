@@ -5,7 +5,8 @@ namespace node_gdal {
 /**
  * File operations specific to in-memory `/vsimem/` files
  *
- * @class gdal.vsimem
+ * @namespace vsimem
+ * @memberof gdal
  */
 
 std::map<void *, Memfile *> Memfile::memfile_collection;
@@ -118,6 +119,8 @@ bool Memfile::copy(Local<Object> buffer, const std::string &filename) {
  *
  * @static
  * @method set
+ * @instance
+ * @memberof gdal.vsimem
  * @throws Error
  * @param {Buffer} data A binary buffer containing the file data
  * @param {string} filename A file name beginning with `/vsimem/`
@@ -143,6 +146,8 @@ NAN_METHOD(Memfile::vsimemSet) {
  *
  * @static
  * @method copy
+ * @instance
+ * @memberof gdal.vsimem
  * @throws Error
  * @param {Buffer} data A binary buffer containing the file data
  * @param {string} filename A file name beginning with `/vsimem/`
@@ -190,6 +195,8 @@ NAN_METHOD(Memfile::vsimemAnonymous) {
  *
  * @static
  * @method release
+ * @instance
+ * @memberof gdal.vsimem
  * @param {string} filename A file name beginning with `/vsimem/`
  * @throws Error
  * @return {Buffer} A binary buffer containing all the data
