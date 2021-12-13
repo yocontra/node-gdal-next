@@ -619,7 +619,7 @@ Local<Value> FeatureFields::getFieldAsDateTime(OGRFeature *feature, int field_in
  * Parent feature
  *
  * @readonly
- * @property
+ * @kind member
  * @name feature
  * @instance
  * @memberof gdal.FeatureFields

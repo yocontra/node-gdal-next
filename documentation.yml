@@ -1,0 +1,35 @@
+plugin:
+  - documentation-polyglot
+
+shallow: true
+
+sortOrder:
+  - kind:
+    - namespace
+    - class
+    - interface
+    - typedef
+    - enum
+    - constant
+    - property
+    - function
+    - member
+  - memberof
+  - alpha
+
+sortOrderKind:
+
+
+documentation-polyglot:
+  extensions: [ .cpp, .hpp, .h ]
+  infer:
+    kind:
+      function: [ NAN_METHOD\(.+\), GDAL_ASYNCABLE_DEFINE\(.+\), NODE_WRAPPED_METHOD.+\(.+\) ]
+      property: [ NAN_GETTER\(.+\), GDAL_ASYNCABLE_GETTER_DECLARE\(.+\) ]
+    name:
+      - NAN_METHOD\s*\(.+::([a-zA-Z0-9_]+)\)
+      - NAN_METHOD\s*\(([a-zA-Z0-9_]+)\)
+      - GDAL_ASYNCABLE_DEFINE\s*\(.+::([a-zA-Z0-9_]+)\)
+      - NODE_WRAPPED_METHOD_.+\(.+,\s*(.+),\s*.+,\s*.+,\s*.+,\s*.+,\s*\)
+      - NAN_GETTER\s*\(.+::([a-zA-Z0-9_]+)\)
+      - GDAL_ASYNCABLE_GETTER_DECLARE\s*\(.+::([a-zA-Z0-9_]+)\)

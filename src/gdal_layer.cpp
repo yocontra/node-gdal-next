@@ -397,7 +397,7 @@ false));
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name ds
  * @instance
  * @memberof gdal.Layer
@@ -409,7 +409,7 @@ NAN_GETTER(Layer::dsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name srs
  * @instance
  * @memberof gdal.Layer
@@ -428,7 +428,7 @@ NAN_GETTER(Layer::srsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name name
  * @instance
  * @memberof gdal.Layer
@@ -447,7 +447,7 @@ NAN_GETTER(Layer::nameGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name geomColumn
  * @instance
  * @memberof gdal.Layer
@@ -466,7 +466,7 @@ NAN_GETTER(Layer::geomColumnGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name fidColumn
  * @instance
  * @memberof gdal.Layer
@@ -485,7 +485,7 @@ NAN_GETTER(Layer::fidColumnGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name geomType
  * @instance
  * @memberof gdal.Layer
@@ -505,7 +505,7 @@ NAN_GETTER(Layer::geomTypeGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name features
  * @instance
  * @memberof gdal.Layer
@@ -517,7 +517,7 @@ NAN_GETTER(Layer::featuresGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name fields
  * @instance
  * @memberof gdal.Layer

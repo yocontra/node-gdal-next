@@ -125,7 +125,7 @@ NAN_METHOD(Attribute::toString) {
 /**
  * Complex GDAL data types introduced in 3.1 are not yet supported
  * @readonly
- * @property
+ * @kind member
  * @name value
  * @instance
  * @memberof gdal.Attribute
@@ -149,7 +149,7 @@ NAN_GETTER(Attribute::valueGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name dataType
  * @instance
  * @memberof gdal.Attribute

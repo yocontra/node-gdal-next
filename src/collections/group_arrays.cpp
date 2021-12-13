@@ -85,7 +85,7 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name names
  * @instance
  * @memberof gdal.GroupArrays
@@ -96,7 +96,7 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
  * Parent dataset
  *
  * @readonly
- * @property
+ * @kind member
  * @name ds
  * @instance
  * @memberof gdal.GroupArrays

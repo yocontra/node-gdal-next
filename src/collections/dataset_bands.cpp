@@ -250,7 +250,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
  * Parent dataset
  *
  * @readonly
- * @property
+ * @kind member
  * @name ds
  * @instance
  * @memberof gdal.DatasetBands

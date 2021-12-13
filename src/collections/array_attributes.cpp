@@ -42,8 +42,6 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  * @memberof gdal
  */
 
-/** @lends gdal.ArrayAttributes */
-
 /**
  * Returns the attribute with the given name/index.
  *
@@ -90,7 +88,7 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  * Attributes' names
  *
  * @readonly
- * @property
+ * @kind member
  * @name names
  * @instance
  * @memberof gdal.ArrayAttributes
@@ -102,7 +100,7 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @readonly
  * @name ds
- * @property
+ * @kind member
  * @instance
  * @memberof gdal.ArrayAttributes
  */

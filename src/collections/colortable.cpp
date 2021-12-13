@@ -344,7 +344,7 @@ NAN_METHOD(ColorTable::count) {
  * Color interpretation of the palette
  *
  * @readonly
- * @property
+ * @kind member
  * @name interpretation
  * @instance
  * @memberof gdal.ColorTable
@@ -378,7 +378,7 @@ NAN_GETTER(ColorTable::interpretationGetter) {
  * Parent band
  *
  * @readonly
- * @property
+ * @kind member
  * @name band
  * @instance
  * @memberof gdal.ColorTable

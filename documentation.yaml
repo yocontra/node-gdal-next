@@ -1,5 +1,0 @@
-plugin:
-  - documentation-polyglot
-
-documentation-polyglot:
-  extensions: [ .cpp ]

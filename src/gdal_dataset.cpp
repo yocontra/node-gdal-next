@@ -690,7 +690,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name description
  * @instance
  * @memberof gdal.Dataset
@@ -717,7 +717,7 @@ NAN_GETTER(Dataset::descriptionGetter) {
  * Raster dimensions. An object containing `x` and `y` properties.
  *
  * @readonly
- * @property
+ * @kind member
  * @name rasterSize
  * @instance
  * @memberof gdal.Dataset
@@ -729,7 +729,7 @@ NAN_GETTER(Dataset::descriptionGetter) {
  * {{async_getter}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name rasterSizeAsync
  * @instance
  * @memberof gdal.Dataset
@@ -782,7 +782,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * Spatial reference associated with raster dataset
  *
  * @throws Error
- * @property
+ * @kind member
  * @name srs
  * @instance
  * @memberof gdal.Dataset
@@ -794,7 +794,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * {{async_getter}}
  *
  * @throws Error
- * @property
+ * @kind member
  * @name srsAsync
  * @instance
  * @memberof gdal.Dataset
@@ -846,7 +846,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * var Xgeo = GT[0] + Xpixel*GT[1] + Yline*GT[2];
  * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];
  *
- * @property
+ * @kind member
  * @name geoTransform
  * @instance
  * @memberof gdal.Dataset
@@ -865,7 +865,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  *
  * {{async_getter}}
  * @readonly
- * @property
+ * @kind member
  * @name geoTransformAsync
  * @instance
  * @memberof gdal.Dataset
@@ -909,7 +909,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name driver
  * @instance
  * @memberof gdal.Dataset
@@ -1000,7 +1000,7 @@ NAN_SETTER(Dataset::geoTransformSetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name bands
  * @instance
  * @memberof gdal.Dataset
@@ -1012,7 +1012,7 @@ NAN_GETTER(Dataset::bandsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name layers
  * @instance
  * @memberof gdal.Dataset
@@ -1024,7 +1024,7 @@ NAN_GETTER(Dataset::layersGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name root
  * @instance
  * @memberof gdal.Dataset

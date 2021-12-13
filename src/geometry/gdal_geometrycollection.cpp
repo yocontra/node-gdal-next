@@ -64,7 +64,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getLength, Number, get_Lengt
 /**
  * All geometries represented by this collection.
  *
- * @property
+ * @kind member
  * @name children
  * @instance
  * @memberof gdal.GeometryCollection

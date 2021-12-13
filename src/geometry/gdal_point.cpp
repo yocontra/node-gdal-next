@@ -82,7 +82,7 @@ NAN_METHOD(Point::toString) {
 }
 
 /**
- * @property
+ * @kind member
  * @name x
  * @instance
  * @memberof gdal.Point
@@ -106,7 +106,7 @@ NAN_SETTER(Point::xSetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name y
  * @instance
  * @memberof gdal.Point
@@ -130,7 +130,7 @@ NAN_SETTER(Point::ySetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name z
  * @instance
  * @memberof gdal.Point

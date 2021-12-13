@@ -102,6 +102,8 @@
     "benny": "^3.7.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
+    "documentation": "git+https://github.com/mmomtchev/documentation.git#plugin-framework",
+    "documentation-polyglot": "git+https://github.com/mmomtchev/documentation-polyglot.git",
     "eslint": "^7.26.0",
     "eslint-plugin-array-func": "^3.0.0",
     "eslint-plugin-mocha": "^8.0.0",
@@ -112,9 +114,7 @@
     "semver": "^7.3.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4",
-    "yatag": "1.1.2",
-    "yuidoc-lucid-theme": "~0.1.2",
-    "yuidocjs": "^0.10.2"
+    "yatag": "1.1.2"
   },
   "engines": {
     "node": ">=12"

@@ -764,7 +764,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::clampBlock) {
  * Parent raster band
  *
  * @readonly
- * @property
+ * @kind member
  * @name band
  * @instance
  * @memberof gdal.RasterBandPixels

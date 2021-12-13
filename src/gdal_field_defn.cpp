@@ -119,7 +119,7 @@ NAN_METHOD(FieldDefn::toString) {
 }
 
 /**
- * @property
+ * @kind member
  * @name name
  * @instance
  * @memberof gdal.FieldDefn
@@ -133,7 +133,7 @@ NAN_GETTER(FieldDefn::nameGetter) {
 /**
  * Data type (see {{#crossLink "Constants (OFT)"}}OFT constants{{/crossLink}})
  *
- * @property
+ * @kind member
  * @name type
  * @instance
  * @memberof gdal.FieldDefn
@@ -145,7 +145,7 @@ NAN_GETTER(FieldDefn::typeGetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name ignored
  * @instance
  * @memberof gdal.FieldDefn
@@ -160,7 +160,7 @@ NAN_GETTER(FieldDefn::ignoredGetter) {
  * Field justification (see {{#crossLink "Constants (OJ)"}}OJ
  * constants{{/crossLink}})
  *
- * @property
+ * @kind member
  * @name justification
  * @instance
  * @memberof gdal.FieldDefn
@@ -181,7 +181,7 @@ NAN_GETTER(FieldDefn::justificationGetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name width
  * @instance
  * @memberof gdal.FieldDefn
@@ -193,7 +193,7 @@ NAN_GETTER(FieldDefn::widthGetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name precision
  * @instance
  * @memberof gdal.FieldDefn

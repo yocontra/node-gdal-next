@@ -131,7 +131,7 @@ NAN_METHOD(FeatureDefn::clone) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name name
  * @instance
  * @memberof gdal.FeatureDefn
@@ -146,7 +146,7 @@ NAN_GETTER(FeatureDefn::nameGetter) {
  * WKB geometry type ({{#crossLink "Constants (wkbGeometryType)"}}see
  * table{{/crossLink}})
  *
- * @property
+ * @kind member
  * @name geomType
  * @instance
  * @memberof gdal.FeatureDefn
@@ -158,7 +158,7 @@ NAN_GETTER(FeatureDefn::geomTypeGetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name geomIgnored
  * @instance
  * @memberof gdal.FeatureDefn
@@ -170,7 +170,7 @@ NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name styleIgnored
  * @instance
  * @memberof gdal.FeatureDefn
@@ -183,7 +183,7 @@ NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name fields
  * @instance
  * @memberof gdal.FeatureDefn

@@ -145,7 +145,7 @@ NAN_METHOD(Group::toString) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name description
  * @instance
  * @memberof gdal.Group
@@ -155,7 +155,7 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Group, descriptionGetter, GetFullName);
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name groups
  * @instance
  * @memberof gdal.Group
@@ -167,7 +167,7 @@ NAN_GETTER(Group::groupsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name arrays
  * @instance
  * @memberof gdal.Group
@@ -179,7 +179,7 @@ NAN_GETTER(Group::arraysGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name dimensions
  * @instance
  * @memberof gdal.Group
@@ -191,7 +191,7 @@ NAN_GETTER(Group::dimensionsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name attributes
  * @instance
  * @memberof gdal.Group

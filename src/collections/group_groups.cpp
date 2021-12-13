@@ -85,7 +85,7 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name names
  * @instance
  * @memberof gdal.GroupGroups
@@ -96,7 +96,7 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  * Parent dataset
  *
  * @readonly
- * @property
+ * @kind member
  * @name ds
  * @instance
  * @memberof gdal.GroupGroups

@@ -102,7 +102,7 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  * Dimensions' names
  *
  * @readonly
- * @attribute
+ * @kind member
  * @instance
  * @memberof gdal.ArrayDimensions
  * @name names
@@ -113,7 +113,7 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  * Parent group
  *
  * @readonly
- * @attribute
+ * @kind member
  * @instance
  * @memberof gdal.ArrayDimensions
  * @name parent
@@ -124,7 +124,7 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  * Parent dataset
  *
  * @readonly
- * @attribute
+ * @kind member
  * @instance
  * @memberof gdal.ArrayDimensions
  * @name ds

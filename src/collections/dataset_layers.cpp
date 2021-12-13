@@ -405,7 +405,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
  * Parent dataset
  *
  * @readonly
- * @property
+ * @kind member
  * @name ds
  * @instance
  * @memberof gdal.DatasetLayers

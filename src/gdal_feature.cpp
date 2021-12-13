@@ -368,7 +368,7 @@ NAN_METHOD(Feature::setFrom) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name fields
  * @instance
  * @memberof gdal.Feature
@@ -379,7 +379,7 @@ NAN_GETTER(Feature::fieldsGetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name fid
  * @instance
  * @memberof gdal.Feature
@@ -396,7 +396,7 @@ NAN_GETTER(Feature::fidGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name defn
  * @instance
  * @memberof gdal.Feature

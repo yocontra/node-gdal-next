@@ -127,7 +127,7 @@ NAN_METHOD(Dimension::toString) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name size
  * @instance
  * @memberof gdal.Dimension
@@ -137,7 +137,7 @@ NODE_WRAPPED_GETTER_WITH_RESULT_LOCKED(Dimension, sizeGetter, Number, GetSize);
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name description
  * @instance
  * @memberof gdal.Dimension
@@ -147,7 +147,7 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, descriptionGetter, GetFullName
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name direction
  * @instance
  * @memberof gdal.Dimension
@@ -157,7 +157,7 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, directionGetter, GetDirection)
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name type
  * @instance
  * @memberof gdal.Dimension

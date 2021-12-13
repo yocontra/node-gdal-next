@@ -589,7 +589,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name ds
  * @instance
  * @memberof gdal.RasterBand
@@ -601,7 +601,7 @@ NAN_GETTER(RasterBand::dsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name overviews
  * @instance
  * @memberof gdal.RasterBand
@@ -613,7 +613,7 @@ NAN_GETTER(RasterBand::overviewsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name pixels
  * @instance
  * @memberof gdal.RasterBand
@@ -625,7 +625,7 @@ NAN_GETTER(RasterBand::pixelsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name id
  * @instance
  * @memberof gdal.RasterBand
@@ -634,7 +634,7 @@ NAN_GETTER(RasterBand::pixelsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name idAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -662,7 +662,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {
  * Name of of band.
  *
  * @readonly
- * @property
+ * @kind member
  * @name description
  * @instance
  * @memberof gdal.RasterBand
@@ -674,7 +674,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name descriptionAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -694,7 +694,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::descriptionGetter) {
  * Size object containing `"x"` and `"y"` properties.
  *
  * @readonly
- * @property
+ * @kind member
  * @name size
  * @instance
  * @memberof gdal.RasterBand
@@ -706,7 +706,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::descriptionGetter) {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name sizeAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -740,7 +740,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::sizeGetter) {
  * Size object containing `"x"` and `"y"` properties.
  *
  * @readonly
- * @property
+ * @kind member
  * @name blockSize
  * @instance
  * @memberof gdal.RasterBand
@@ -752,7 +752,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::sizeGetter) {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name blockSizeAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -790,7 +790,7 @@ template <typename T> struct MaybeResult {
  * Minimum value for this band.
  *
  * @readonly
- * @property
+ * @kind member
  * @name minimum
  * @instance
  * @memberof gdal.RasterBand
@@ -802,7 +802,7 @@ template <typename T> struct MaybeResult {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name minimumAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -830,7 +830,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
  * Maximum value for this band.
  *
  * @readonly
- * @property
+ * @kind member
  * @name maximum
  * @instance
  * @memberof gdal.RasterBand
@@ -842,7 +842,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name maximumAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -869,7 +869,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
 /**
  * Raster value offset.
  *
- * @property
+ * @kind member
  * @name offset
  * @instance
  * @memberof gdal.RasterBand
@@ -880,7 +880,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
  * Raster value offset.
  * {{{async_getter}}}
  *
- * @property
+ * @kind member
  * @name offsetAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -908,7 +908,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
 /**
  * Raster value scale.
  *
- * @property
+ * @kind member
  * @name scale
  * @instance
  * @memberof gdal.RasterBand
@@ -919,7 +919,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
  * Raster value scale.
  * {{{async_getter}}}
  *
- * @property
+ * @kind member
  * @name scaleAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -947,7 +947,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
 /**
  * No data value for this band.
  *
- * @property
+ * @kind member
  * @name noDataValue
  * @instance
  * @memberof gdal.RasterBand
@@ -958,7 +958,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
  * No data value for this band.
  * {{{async_getter}}}
  *
- * @property
+ * @kind member
  * @name noDataValueAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -991,7 +991,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
  * or `"ft"` for feet. If no units are available, a value of `""`
  * will be returned.
  *
- * @property
+ * @kind member
  * @name unitType
  * @instance
  * @memberof gdal.RasterBand
@@ -1005,7 +1005,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
  * will be returned.
  * {{{async_getter}}}
  *
- * @property
+ * @kind member
  * @name unitTypeAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -1031,7 +1031,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
  * constants{{/crossLink}}) used for this band.
  *
  * @readonly
- * @property
+ * @kind member
  * @name dataType
  * @instance
  * @memberof gdal.RasterBand
@@ -1045,7 +1045,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name dataTypeAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -1071,7 +1071,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::dataTypeGetter) {
  * Indicates if the band is read-only.
  *
  * @readonly
- * @property
+ * @kind member
  * @name readOnly
  * @instance
  * @memberof gdal.RasterBand
@@ -1083,7 +1083,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::dataTypeGetter) {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name readOnlyAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -1110,7 +1110,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::readOnlyGetter) {
  * data efficiently.
  *
  * @readonly
- * @property
+ * @kind member
  * @name hasArbitraryOverviews
  * @instance
  * @memberof gdal.RasterBand
@@ -1126,7 +1126,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::readOnlyGetter) {
  * {{{async_getter}}}
  *
  * @readonly
- * @property
+ * @kind member
  * @name hasArbitraryOverviewsAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -1148,7 +1148,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::hasArbitraryOverviewsGetter) {
 /**
  * List of list of category names for this raster.
  *
- * @property
+ * @kind member
  * @name categoryNames
  * @instance
  * @memberof gdal.RasterBand
@@ -1159,7 +1159,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::hasArbitraryOverviewsGetter) {
  * List of list of category names for this raster.
  * {{{async_getter}}}
  *
- * @property
+ * @kind member
  * @name categoryNamesAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -1201,7 +1201,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
  * Color interpretation mode ({{#crossLink "Constants (GCI)"}}see GCI
  * constants{{/crossLink}}).
  *
- * @property
+ * @kind member
  * @name colorInterpretation
  * @instance
  * @memberof gdal.RasterBand
@@ -1213,7 +1213,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
  * constants{{/crossLink}}).
  * {{{async_getter}}}
  *
- * @property
+ * @kind member
  * @name colorInterpretationAsync
  * @instance
  * @memberof gdal.RasterBand
@@ -1345,7 +1345,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
 /**
  * Color table ({{#crossLink "ColorTable"}}see gdal.ColorTable{{/crossLink}}).
  *
- * @property
+ * @kind member
  * @name colorTable
  * @instance
  * @memberof gdal.RasterBand
@@ -1356,7 +1356,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
  * Color table ({{#crossLink "ColorTable"}}see gdal.ColorTable{{/crossLink}}).
  * {{{async_getter}}}
  *
- * @property
+ * @kind member
  * @name colorTableAsync
  * @instance
  * @memberof gdal.RasterBand

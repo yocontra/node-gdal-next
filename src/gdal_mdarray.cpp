@@ -452,7 +452,7 @@ NAN_METHOD(MDArray::asDataset) {
  * Spatial reference associated with MDArray
  *
  * @throws Error
- * @property
+ * @kind member
  * @name srs
  * @instance
  * @memberof gdal.MDArray
@@ -474,7 +474,7 @@ NAN_GETTER(MDArray::srsGetter) {
 /**
  * Raster value offset.
  *
- * @property
+ * @kind member
  * @name offset
  * @instance
  * @memberof gdal.MDArray
@@ -494,7 +494,7 @@ NAN_GETTER(MDArray::offsetGetter) {
 /**
  * Raster value scale.
  *
- * @property
+ * @kind member
  * @name scale
  * @instance
  * @memberof gdal.MDArray
@@ -514,7 +514,7 @@ NAN_GETTER(MDArray::scaleGetter) {
 /**
  * No data value for this array.
  *
- * @property
+ * @kind member
  * @name noDataValue
  * @instance
  * @memberof gdal.MDArray
@@ -541,7 +541,7 @@ NAN_GETTER(MDArray::noDataValueGetter) {
  * or `"ft"` for feet. If no units are available, a value of `""`
  * will be returned.
  *
- * @property
+ * @kind member
  * @name unitType
  * @instance
  * @memberof gdal.MDArray
@@ -556,7 +556,7 @@ NAN_GETTER(MDArray::unitTypeGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name dataType
  * @instance
  * @memberof gdal.MDArray
@@ -579,7 +579,7 @@ NAN_GETTER(MDArray::typeGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name dimensions
  * @instance
  * @memberof gdal.MDArray
@@ -591,7 +591,7 @@ NAN_GETTER(MDArray::dimensionsGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name attributes
  * @instance
  * @memberof gdal.MDArray
@@ -603,7 +603,7 @@ NAN_GETTER(MDArray::attributesGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name description
  * @instance
  * @memberof gdal.MDArray
@@ -621,7 +621,7 @@ NAN_GETTER(MDArray::descriptionGetter) {
  * The flattened length of the array
  *
  * @readonly
- * @property
+ * @kind member
  * @name length
  * @instance
  * @memberof gdal.MDArray

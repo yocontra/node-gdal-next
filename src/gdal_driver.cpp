@@ -109,7 +109,7 @@ NAN_METHOD(Driver::toString) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name description
  * @instance
  * @memberof gdal.Driver

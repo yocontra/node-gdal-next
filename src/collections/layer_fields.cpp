@@ -393,7 +393,7 @@ NAN_METHOD(LayerFields::reorder) {
  * Parent layer
  *
  * @readonly
- * @property
+ * @kind member
  * @name layer
  * @instance
  * @memberof gdal.LayerFields

@@ -490,7 +490,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
 /**
  * Parent layer
  *
- * @property
+ * @kind member
  * @name layer
  * @instance
  * @memberof gdal.LayerFeatures

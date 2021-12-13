@@ -345,7 +345,7 @@ NAN_METHOD(FeatureDefnFields::reorder) {
  * Parent feature definition.
  *
  * @readonly
- * @property
+ * @kind member
  * @name featureDefn
  * @instance
  * @memberof gdal.FeatureDefnFields

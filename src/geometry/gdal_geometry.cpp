@@ -1801,7 +1801,7 @@ NAN_METHOD(Geometry::create) {
 }
 
 /**
- * @property
+ * @kind member
  * @name srs
  * @instance
  * @memberof gdal.Geometry
@@ -1829,7 +1829,7 @@ NAN_SETTER(Geometry::srsSetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name name
  * @instance
  * @memberof gdal.Geometry
@@ -1844,7 +1844,7 @@ NAN_GETTER(Geometry::nameGetter) {
  * See {{#crossLink "Constants
  * (wkbGeometryType)"}}wkbGeometryTypes{{/crossLink}}.
  * @readonly
- * @property
+ * @kind member
  * @name wkbType
  * @instance
  * @memberof gdal.Geometry
@@ -1857,7 +1857,7 @@ NAN_GETTER(Geometry::typeGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name wkbSize
  * @instance
  * @memberof gdal.Geometry
@@ -1870,7 +1870,7 @@ NAN_GETTER(Geometry::wkbSizeGetter) {
 
 /**
  * @readonly
- * @property
+ * @kind member
  * @name dimension
  * @instance
  * @memberof gdal.Geometry
@@ -1882,7 +1882,7 @@ NAN_GETTER(Geometry::dimensionGetter) {
 }
 
 /**
- * @property
+ * @kind member
  * @name coordinateDimension
  * @instance
  * @memberof gdal.Geometry

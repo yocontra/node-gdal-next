@@ -58,7 +58,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(Polygon, getArea, Number, get_Area);
 /**
  * The rings that make up the polygon geometry.
  *
- * @property
+ * @kind member
  * @name rings
  * @instance
  * @memberof gdal.Polygon

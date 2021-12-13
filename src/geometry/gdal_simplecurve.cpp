@@ -84,7 +84,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(SimpleCurve, getLength, Number, get_Length);
 /**
  * The points that make up the SimpleCurve geometry.
  *
- * @property
+ * @kind member
  * @name points
  * @instance
  * @memberof gdal.Geometry
