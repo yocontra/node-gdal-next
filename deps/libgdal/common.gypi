@@ -53,7 +53,8 @@
 			"<(deps_dir)/libsqlite/libsqlite.gyp:libsqlite",
 			"<(deps_dir)/libcurl/libcurl.gyp:libcurl",
 			"<(deps_dir)/libhdf5/libhdf5.gyp:libhdf5",
-			"<(deps_dir)/libnetcdf/libnetcdf.gyp:libnetcdf"
+			"<(deps_dir)/libnetcdf/libnetcdf.gyp:libnetcdf",
+			"<(deps_dir)/libopenjpeg/libopenjpeg.gyp:libopenjpeg"
 		],
 		"conditions": [
 			["OS == 'win'", {

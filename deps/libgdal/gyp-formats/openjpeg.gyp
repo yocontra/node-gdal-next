@@ -1,0 +1,17 @@
+{
+	"includes": [
+		"../common.gypi"
+	],
+	"targets": [
+		{
+			"target_name": "libgdal_openjpeg_frmt",
+			"type": "static_library",
+			"sources": [
+				"../gdal/frmts/openjpeg/openjpegdataset.cpp"
+			],
+			"include_dirs": [
+				"../gdal/frmts/openjpeg"
+			]
+		}
+	]
+}
