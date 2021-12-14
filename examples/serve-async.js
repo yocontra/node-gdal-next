@@ -2,7 +2,7 @@
 // supporting multiple concurrent connections
 // serving raster data from a GDAL dataset
 //
-// This is the same as serve.js but using pre-ES2017 syntax
+// This is the same as serve.js but using ES2017 async/await
 
 const gdal = require('..')
 const http = require('http')
@@ -14,29 +14,31 @@ const port = 8010
 gdal.openAsync(datasetFile).then((ds) => {
   console.log(`Opened ${datasetFile}`)
 
-  const server = http.createServer((req, res) => {
+  const server = http.createServer(async (req, res) => {
     const params = req.url.split('/')
     if (params.length > 2 && params[1].length && params[2].length
         && !isNaN(params[1]) && ! isNaN(params[2])) {
+          let band, value
 
-      ds.bands.getAsync(1)
-        .catch((e) => {
-          e.httpCode = 500
-          throw e
-        })
-        .then((band) => band.pixels.getAsync(+params[1], +params[2]))
-        .catch((e) => {
-          if (!e.httpCode) e.httpCode = 404
-          throw e
-        })
-        .then((value) => {
+          try {
+            band = await ds.bands.getAsync(1)
+          } catch (e) {
+            res.writeHead(500)
+            res.end(e.toString())
+            return
+          }
+
+          try {
+            value = await band.pixels.getAsync(+params[1], +params[2])
+          } catch (e) {
+            res.writeHead(404)
+            res.end(e.toString())
+            return
+          }
+
           res.writeHead(200)
           res.end(`Value at position ${params[1]}:${params[2]} is ${value}\n`)
-        })
-        .catch((e) => {
-          res.writeHead(e.httpCode)
-          res.end(e.toString())
-        })
+
     } else {
       res.writeHead(400)
       res.end('No or invalid coordinates specified')
