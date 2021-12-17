@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "/usr/bin/node",
             "args": [
-                "--v8-expose-gc",
+                "--expose-gc",
                 "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
                 "-R", "tap",
                 "--timeout", "0",
@@ -38,7 +38,7 @@
             "request": "launch",
             "program": "/usr/local/bin/node",
             "args": [
-                "--v8-expose-gc",
+                "--expose-gc",
                 "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
                 "-R", "tap",
                 "--timeout", "0",
@@ -59,7 +59,7 @@
             "request": "launch",
             "program": "node.exe",
             "args": [
-                "--v8-expose-gc",
+                "--expose-gc",
                 "${workspaceFolder}/node_modules/mocha/lib/cli/cli.js",
                 "-R", "tap",
                 "--timeout", "0",
