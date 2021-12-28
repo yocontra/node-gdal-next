@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_priv.h 6803b51bee1a39f759198a2b6f196d8c6c518555 2021-10-21 14:20:50 +0200 chacha21 $
+ * $Id: gdal_priv.h a52e59ceeaf2526250d1aab947c5cf914104db22 2021-12-06 15:41:59 +0100 Even Rouault $
  *
  * Name:     gdal_priv.h
  * Project:  GDAL Core
@@ -437,6 +437,9 @@ class CPL_DLL GDALDataset : public GDALMajorObject
     void  ShareLockWithParentDataset(GDALDataset* poParentDataset);
 
 //! @endcond
+
+    void                CleanupPostFileClosing();
+
     virtual int         CloseDependentDatasets();
 //! @cond Doxygen_Suppress
     int                 ValidateLayerCreationOptions( const char* const* papszLCO );
@@ -599,8 +602,7 @@ class CPL_DLL GDALDataset : public GDALMajorObject
     int           GetShared() const;
     void          MarkAsShared();
 
-    /** Set that the dataset must be deleted on close. */
-    void          MarkSuppressOnClose() { bSuppressOnClose = true; }
+    void          MarkSuppressOnClose();
 
     /** Return open options.
      * @return open options.
@@ -1040,6 +1042,7 @@ public:
     void          SetColorEntry( int, const GDALColorEntry * );
     int           CreateColorRamp( int, const GDALColorEntry * ,
                                    int, const GDALColorEntry * );
+    bool          IsIdentity() const;
 
     /** Convert a GDALColorTable* to a GDALRasterBandH.
      * @since GDAL 2.3
@@ -1601,7 +1604,7 @@ class CPL_DLL GDALDriver : public GDALMajorObject
                                            void * pProgressData );
 //! @endcond
     static CPLErr       QuietDelete( const char * pszName,
-                                     const char *const *papszAllowedDrivers = nullptr);
+                                     CSLConstList papszAllowedDrivers = nullptr);
 
 //! @cond Doxygen_Suppress
     static CPLErr       DefaultRename( const char * pszNewName,

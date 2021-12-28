@@ -47,7 +47,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdaldefaultoverviews.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldefaultoverviews.cpp 55217f601926b441b75aa5104b7d95bbe488c174 2021-11-04 15:21:09 +0100 Even Rouault $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/
@@ -533,7 +533,7 @@ CPLErr GDALDefaultOverviews::CleanOverviews()
     GDALClose( poODS );
     poODS = nullptr;
 
-    const CPLErr eErr = poOvrDriver != nullptr ?
+    CPLErr eErr = poOvrDriver != nullptr ?
         poOvrDriver->Delete( osOvrFilename ) : CE_None;
 
     // Reset the saved overview filename.
@@ -549,6 +549,15 @@ CPLErr GDALDefaultOverviews::CleanOverviews()
     else
     {
         osOvrFilename = "";
+    }
+
+    if( HaveMaskFile() && poMaskDS )
+    {
+        const CPLErr eErr2 = poMaskDS->BuildOverviews(
+                            nullptr, 0, nullptr, 0, nullptr,
+                            nullptr, nullptr);
+        if( eErr2 != CE_None )
+            return eErr2;
     }
 
     return eErr;

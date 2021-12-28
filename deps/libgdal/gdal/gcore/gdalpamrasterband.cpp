@@ -49,7 +49,7 @@
 #include "gdal_priv.h"
 #include "gdal_rat.h"
 
-CPL_CVSID("$Id: gdalpamrasterband.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalpamrasterband.cpp e98fb9d264612518a041be8fa018ffdff3834bdb 2021-11-22 03:26:17 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                         GDALPamRasterBand()                          */
@@ -564,15 +564,23 @@ CPLErr GDALPamRasterBand::CloneInfo( GDALRasterBand *poSrcBand,
 /* -------------------------------------------------------------------- */
     if( nCloneFlags & GCIF_NODATA )
     {
-        int bSuccess = FALSE;  // TODO(schwehr): int -> bool.
+        int bSuccess = FALSE;
         const double dfNoData = poSrcBand->GetNoDataValue( &bSuccess );
 
         if( bSuccess )
         {
-            if( !bOnlyIfMissing
-                || GetNoDataValue( &bSuccess ) != dfNoData
-                || !bSuccess )
+            if( !bOnlyIfMissing )
                 GDALPamRasterBand::SetNoDataValue( dfNoData );
+            else
+            {
+                const double dfExistingNoData = GetNoDataValue( &bSuccess );
+                if( !bSuccess ||
+                    !((std::isnan(dfExistingNoData) && std::isnan(dfNoData)) ||
+                      dfExistingNoData == dfNoData) )
+                {
+                    GDALPamRasterBand::SetNoDataValue( dfNoData );
+                }
+            }
         }
     }
 

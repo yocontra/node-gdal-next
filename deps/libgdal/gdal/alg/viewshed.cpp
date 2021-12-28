@@ -46,7 +46,7 @@
 #include "ogr_core.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: viewshed.cpp 2049f70c4d6d999c5acbb5e539debc54c872d258 2021-08-30 20:49:53 +0200 Tamas Szekeres $")
+CPL_CVSID("$Id: viewshed.cpp 85dfaa122ba5861e5350f34850c217a8e52ae3f8 2021-12-26 10:08:17 +0100 Even Rouault $")
 
 
 inline static void SetVisibility(int iPixel, double dfZ, double dfZTarget, double* padfZVal,
@@ -165,7 +165,7 @@ inline static double CalcHeight(double dfZ, double dfZ2, GDALViewshedMode eMode)
  * @param dfCurvCoeff Coefficient to consider the effect of the curvature and refraction.
  * The height of the DEM is corrected according to the following formula:
  * [Height] -= dfCurvCoeff * [Target Distance]^2 / [Earth Diameter]
- * For the effect of the atmospheric refraction we can use 0.85714‬.
+ * For the effect of the atmospheric refraction we can use 0.85714.
  *
  * @param eMode The mode of the viewshed calculation.
  * Possible values GVM_Diagonal = 1, GVM_Edge = 2 (default), GVM_Max = 3, GVM_Min = 4.

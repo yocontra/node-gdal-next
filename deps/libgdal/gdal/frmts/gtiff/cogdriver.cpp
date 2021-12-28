@@ -765,7 +765,8 @@ GDALDataset* GDALCOGCreator::Create(const char * pszFilename,
     CPLString osCompress = CSLFetchNameValueDef(papszOptions, "COMPRESS",
                                                 gbHasLZW ? "LZW" : "NONE");
     if( EQUAL(osCompress, "JPEG") &&
-        poCurDS->GetRasterCount() == 4 )
+        poCurDS->GetRasterCount() == 4 &&
+        poCurDS->GetRasterBand(4)->GetColorInterpretation() == GCI_AlphaBand )
     {
         char** papszArg = nullptr;
         papszArg = CSLAddString(papszArg, "-of");
@@ -848,13 +849,28 @@ GDALDataset* GDALCOGCreator::Create(const char * pszFilename,
             nCurLevel --;
         }
     }
-    else
+    else if( bGenerateMskOvr || bGenerateOvr )
     {
-        while( nTmpXSize > nOvrThresholdSize || nTmpYSize > nOvrThresholdSize )
+        if( !bGenerateOvr )
         {
-            nTmpXSize /= 2;
-            nTmpYSize /= 2;
-            asOverviewDims.push_back(std::pair<int,int>(nTmpXSize, nTmpYSize));
+            // If generating only .msk.ovr, use the exact overview size as
+            // the overviews of the imagery.
+            for(int i = 0; i < poFirstBand->GetOverviewCount(); i++ )
+            {
+                auto poOvrBand = poFirstBand->GetOverview(i);
+                asOverviewDims.push_back(std::pair<int,int>(
+                    poOvrBand->GetXSize(), poOvrBand->GetYSize()));
+            }
+        }
+        else
+        {
+            while( nTmpXSize > nOvrThresholdSize ||
+                   nTmpYSize > nOvrThresholdSize )
+            {
+                nTmpXSize /= 2;
+                nTmpYSize /= 2;
+                asOverviewDims.push_back(std::pair<int,int>(nTmpXSize, nTmpYSize));
+            }
         }
     }
 

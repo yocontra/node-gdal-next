@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_pam.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
+ * $Id: gdal_pam.h c6cd0c925b6b3e838e01ab730a793e2aa818110e 2021-12-10 11:37:30 +0100 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Declaration for Peristable Auxiliary Metadata classes.
@@ -166,6 +166,7 @@ class CPL_DLL GDALPamDataset : public GDALDataset
 
     CPLErr GetGeoTransform( double * ) override;
     CPLErr SetGeoTransform( double * ) override;
+    void DeleteGeoTransform();
 
     int GetGCPCount() override;
     const OGRSpatialReference* GetGCPSpatialRef() const override;

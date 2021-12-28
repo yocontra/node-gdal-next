@@ -70,7 +70,7 @@ CPL_C_END
 #include "ogr_spatialref.h"
 #include "memdataset.h"
 
-CPL_CVSID("$Id: gribdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: gribdataset.cpp 9c1a477986c00dc3a779236e4622b38f2119a772 2021-12-08 16:04:20 +0100 Even Rouault $")
 
 static CPLMutex *hGRIBMutex = nullptr;
 
@@ -2378,7 +2378,7 @@ void GRIBDataset::SetGribMetaData(grib_MetaData *meta)
         break;
     case GS3_TRANSVERSE_MERCATOR:
         oSRS.SetTM(meta->gds.latitude_of_origin,
-                   meta->gds.central_meridian,
+                   Lon360to180(meta->gds.central_meridian),
                    std::abs(meta->gds.scaleLat1 - 0.9996) < 1e8 ?
                         0.9996 : meta->gds.scaleLat1,
                    meta->gds.x0,
@@ -2390,11 +2390,11 @@ void GRIBDataset::SetGribMetaData(grib_MetaData *meta)
         break;
     case GS3_LAMBERT:
         oSRS.SetLCC(meta->gds.scaleLat1, meta->gds.scaleLat2, meta->gds.meshLat,
-                    meta->gds.orientLon, 0.0, 0.0);
+                    Lon360to180(meta->gds.orientLon), 0.0, 0.0);
         break;
     case GS3_ALBERS_EQUAL_AREA:
         oSRS.SetACEA(meta->gds.scaleLat1, meta->gds.scaleLat2, meta->gds.meshLat,
-                    meta->gds.orientLon, 0.0, 0.0);
+                     Lon360to180(meta->gds.orientLon), 0.0, 0.0);
         break;
 
     case GS3_ORTHOGRAPHIC:
@@ -2409,7 +2409,9 @@ void GRIBDataset::SetGribMetaData(grib_MetaData *meta)
         oSRS.SetGEOS(0, 35785831, 0, 0);
         break;
     case GS3_LAMBERT_AZIMUTHAL:
-        oSRS.SetLAEA(meta->gds.meshLat, meta->gds.orientLon, 0.0, 0.0);
+        oSRS.SetLAEA(meta->gds.meshLat,
+                     Lon360to180(meta->gds.orientLon),
+                     0.0, 0.0);
         break;
 
     case GS3_EQUATOR_EQUIDIST:
@@ -2467,8 +2469,7 @@ void GRIBDataset::SetGribMetaData(grib_MetaData *meta)
         oSRS.SetDerivedGeogCRSWithPoleRotationGRIBConvention(
             oSRS.GetName(),
             meta->gds.southLat,
-            meta->gds.southLon > 180 ?
-                meta->gds.southLon - 360 : meta->gds.southLon,
+            Lon360to180(meta->gds.southLon),
             meta->gds.angleRotate);
     }
 
@@ -2594,13 +2595,18 @@ void GRIBDataset::SetGribMetaData(grib_MetaData *meta)
                 CPLDebug("GRIB",
                     "Cannot properly handle GRIB2 files with overlaps and 0-360 longitudes");
             else if (fabs(360 - rPixelSizeX * nRasterXSize) < rPixelSizeX/4 &&
-                meta->gds.projType == GS3_LATLON)
+                     rMinX <= 180 &&
+                     meta->gds.projType == GS3_LATLON)
             {
                 // Find the first row number east of the antimeridian
-                nSplitAndSwapColumn = static_cast<int>(ceil((180 - rMinX) / rPixelSizeX));
-                CPLDebug("GRIB", "Rewrapping around the antimeridian at column %d",
-                    nSplitAndSwapColumn);
-                rMinX = -180;
+                const int nSplitAndSwapColumnCandidate = static_cast<int>(ceil((180 - rMinX) / rPixelSizeX));
+                if( nSplitAndSwapColumnCandidate < nRasterXSize )
+                {
+                    nSplitAndSwapColumn = nSplitAndSwapColumnCandidate;
+                    CPLDebug("GRIB", "Rewrapping around the antimeridian at column %d",
+                        nSplitAndSwapColumn);
+                    rMinX = -180;
+                }
             }
             else if (Lon360to180(rMinX) > Lon360to180(rMaxX))
             {

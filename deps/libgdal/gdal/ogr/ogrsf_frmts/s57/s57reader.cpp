@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <string>
 
-CPL_CVSID("$Id: s57reader.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: s57reader.cpp 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $")
 
 /**
 * Recode the given string from a source encoding to UTF-8 encoding.  The source
@@ -407,7 +407,7 @@ bool S57Reader::SetOptions( char ** papszOptionsIn )
         nOptionFlags &= ~S57M_RETURN_DSID;
 
     pszOptionValue = CSLFetchNameValue( papszOptions, S57O_RECODE_BY_DSSI );
-    if( pszOptionValue != nullptr && CPLTestBool(pszOptionValue) )
+    if( pszOptionValue == nullptr || CPLTestBool(pszOptionValue) )
         nOptionFlags |= S57M_RECODE_BY_DSSI;
     else
         nOptionFlags &= ~S57M_RECODE_BY_DSSI;

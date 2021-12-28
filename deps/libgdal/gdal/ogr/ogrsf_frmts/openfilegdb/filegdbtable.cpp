@@ -50,7 +50,7 @@
 #include "ogr_geometry.h"
 #include "ogrpgeogeometry.h"
 
-CPL_CVSID("$Id: filegdbtable.cpp 658c2d9b0784249ceeefd02044d19b6e5dfe50cd 2021-08-24 20:25:31 +0200 Even Rouault $")
+CPL_CVSID("$Id: filegdbtable.cpp fba4fe318e223b8a5d27a90ed3944ceb2306d724 2021-11-23 14:25:00 +0100 Even Rouault $")
 
 #define TEST_BIT(ar, bit)                       (ar[(bit) / 8] & (1 << ((bit) % 8)))
 #define BIT_ARRAY_SIZE_IN_BYTES(bitsize)        (((bitsize)+7)/8)
@@ -401,7 +401,7 @@ int FileGDBTable::IsLikelyFeatureAtOffset(vsi_l_offset nOffset,
             case FGFT_RASTER:
             {
                 const FileGDBRasterField* rasterField = cpl::down_cast<const FileGDBRasterField*>(apoFields[i]);
-                if( rasterField->IsManaged() )
+                if( rasterField->GetType() == FileGDBRasterField::Type::MANAGED )
                     nRequiredLength += sizeof(GInt32);
                 else
                     nRequiredLength += 1; /* varuint32 so at least one byte */
@@ -483,7 +483,7 @@ int FileGDBTable::IsLikelyFeatureAtOffset(vsi_l_offset nOffset,
                 case FGFT_RASTER:
                 {
                     const FileGDBRasterField* rasterField = cpl::down_cast<const FileGDBRasterField*>(apoFields[i]);
-                    if( rasterField->IsManaged() )
+                    if( rasterField->GetType() == FileGDBRasterField::Type::MANAGED )
                         nRequiredLength += sizeof(GInt32);
                     else
                     {
@@ -1074,7 +1074,17 @@ int FileGDBTable::Open(const char* pszFilename,
             if( eType == FGFT_RASTER )
             {
                 returnErrorIf(nRemaining < 1 );
-                poRasterField->m_bIsManaged = *pabyIter != 0;
+                if( *pabyIter == 0 )
+                    poRasterField->m_eType = FileGDBRasterField::Type::EXTERNAL;
+                else if( *pabyIter == 1 )
+                    poRasterField->m_eType = FileGDBRasterField::Type::MANAGED;
+                else if( *pabyIter == 2 )
+                    poRasterField->m_eType = FileGDBRasterField::Type::INLINE;
+                else
+                {
+                    CPLError(CE_Warning, CPLE_NotSupported,
+                             "Unknown raster field type %d", *pabyIter);
+                }
                 pabyIter += 1;
                 nRemaining -= 1;
             }
@@ -1490,7 +1500,7 @@ OGRField* FileGDBTable::GetFieldValue(int iCol)
             case FGFT_RASTER:
             {
                 const FileGDBRasterField* rasterField = cpl::down_cast<const FileGDBRasterField*>(apoFields[j]);
-                if( rasterField->IsManaged() )
+                if( rasterField->GetType() == FileGDBRasterField::Type::MANAGED )
                     nLength = sizeof(GInt32);
                 else
                 {
@@ -1687,7 +1697,7 @@ OGRField* FileGDBTable::GetFieldValue(int iCol)
         case FGFT_RASTER:
         {
             const FileGDBRasterField* rasterField = cpl::down_cast<const FileGDBRasterField*>(apoFields[iCol]);
-            if( rasterField->IsManaged() )
+            if( rasterField->GetType() == FileGDBRasterField::Type::MANAGED )
             {
                 if( pabyIterVals + sizeof(GInt32) > pabyEnd )
                 {
@@ -1716,11 +1726,26 @@ OGRField* FileGDBTable::GetFieldValue(int iCol)
                     returnError();
                 }
 
-                // coverity[tainted_data,tainted_data_argument]
-                m_osCacheRasterFieldPath = ReadUTF16String(pabyIterVals, nLength / 2);
-                pabyIterVals += nLength;
+                if( rasterField->GetType() == FileGDBRasterField::Type::EXTERNAL )
+                {
+                    // coverity[tainted_data,tainted_data_argument]
+                    m_osCacheRasterFieldPath = ReadUTF16String(pabyIterVals, nLength / 2);
+                    sCurField.String = &m_osCacheRasterFieldPath[0];
+                    pabyIterVals += nLength;
+                }
+                else
+                {
+                    /* eCurFieldType = OFTBinary; */
+                    sCurField.Binary.nCount = nLength;
+                    sCurField.Binary.paData = (GByte*) pabyIterVals;
 
-                sCurField.String = &m_osCacheRasterFieldPath[0];
+                    pabyIterVals += nLength;
+
+                    /* Null terminate binary in case it is used as a string */
+                    nChSaved = *pabyIterVals;
+                    *pabyIterVals = '\0';
+                }
+
             }
             break;
         }

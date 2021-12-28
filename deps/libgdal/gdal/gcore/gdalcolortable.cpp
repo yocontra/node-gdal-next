@@ -38,7 +38,7 @@
 #include "cpl_error.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalcolortable.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalcolortable.cpp a52e59ceeaf2526250d1aab947c5cf914104db22 2021-12-06 15:41:59 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                           GDALColorTable()                           */
@@ -473,4 +473,30 @@ int GDALColorTable::IsSame(const GDALColorTable* poOtherCT) const
            (aoEntries.empty() ||
             memcmp(&aoEntries[0], &poOtherCT->aoEntries[0], aoEntries.size()
                    * sizeof(GDALColorEntry)) == 0);
+}
+
+/************************************************************************/
+/*                          IsIdentity()                                */
+/************************************************************************/
+
+/**
+ * \brief Returns if the current color table is the identity, that is
+ * for each index i, colortable[i].c1 = .c2 = .c3 = i and .c4 = 255
+ *
+ * @since GDAL 3.4.1
+ */
+
+bool GDALColorTable::IsIdentity() const
+{
+    for( int i = 0; i < static_cast<int>(aoEntries.size()); ++i )
+    {
+        if( aoEntries[i].c1 != i ||
+            aoEntries[i].c2 != i ||
+            aoEntries[i].c3 != i ||
+            aoEntries[i].c4 != 255 )
+        {
+            return false;
+        }
+    }
+    return true;
 }

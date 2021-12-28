@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: cpl_recode_iconv.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_recode_iconv.cpp 07d22b7d8a4f947d2fb9bbab1ef546c6ade46d00 2021-11-20 17:01:02 +0100 Even Rouault $")
 
 #ifdef CPL_RECODE_ICONV
 
@@ -129,6 +129,8 @@ char *CPLRecodeIconv( const char *pszSource,
                              "This warning will not be emitted anymore",
                              pszSrcEncoding, pszDstEncoding);
                 }
+                if( nSrcLen == 0 )
+                    break;
                 nSrcLen--;
                 pszSrcBuf++;
                 continue;

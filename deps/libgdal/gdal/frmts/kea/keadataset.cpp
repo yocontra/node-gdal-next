@@ -32,7 +32,7 @@
 #include "keacopy.h"
 #include "../frmts/hdf5/hdf5vfl.h"
 
-CPL_CVSID("$Id: keadataset.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: keadataset.cpp 355ae691460a078009b325f71212879b939b3ba8 2021-12-01 15:01:02 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                     KEADatasetDriverUnload()                        */
@@ -151,9 +151,12 @@ GDALDataset *KEADataset::Open( GDALOpenInfo * poOpenInfo )
 
             return pDataset;
         }
-        catch (const kealib::KEAIOException &)
+        catch (const kealib::KEAIOException &e)
         {
             // was a problem - can't be a valid file
+            CPLError( CE_Failure, CPLE_OpenFailed,
+                  "Attempt to open file `%s' failed. Error: %s\n",
+                  poOpenInfo->pszFilename, e.what() );
             return nullptr;
         }
     }

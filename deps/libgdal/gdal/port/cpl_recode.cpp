@@ -30,7 +30,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: cpl_recode.cpp 1dfc4244072e57fa57a45e564a0033b782c34975 2021-10-31 15:02:42 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_recode.cpp 6c139301664733abd24a2f0263bce449be527fcf 2021-11-22 00:15:21 +0100 Even Rouault $")
 
 #ifdef CPL_RECODE_ICONV
 extern void CPLClearRecodeIconvWarningFlags();
@@ -93,6 +93,29 @@ char CPL_DLL *CPLRecode( const char *pszSource,
         && ( EQUAL(pszDstEncoding, CPL_ENC_UTF8)
              || EQUAL(pszDstEncoding, CPL_ENC_ISO8859_1) ) )
         return CPLStrdup(pszSource);
+
+/* -------------------------------------------------------------------- */
+/*      For ZIP file handling                                           */
+/*      (CP437 might be missing even on some iconv, like on Mac)        */
+/* -------------------------------------------------------------------- */
+    if( EQUAL(pszSrcEncoding, "CP437") &&
+        EQUAL(pszDstEncoding, CPL_ENC_UTF8) ) //
+    {
+        bool bIsAllPrintableASCII = true;
+        const size_t nCharCount = strlen(pszSource);
+        for( size_t i = 0; i <nCharCount; i++ )
+        {
+            if( pszSource[i] < 32 || pszSource[i] > 126 )
+            {
+                bIsAllPrintableASCII = false;
+                break;
+            }
+        }
+        if( bIsAllPrintableASCII )
+        {
+            return CPLStrdup(pszSource);
+        }
+    }
 
 #ifdef CPL_RECODE_ICONV
 /* -------------------------------------------------------------------- */

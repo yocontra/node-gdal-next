@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <ctime>
 
-CPL_CVSID("$Id: ogrselafindatasource.cpp 7021dc4f10c17b71347f2ed349c6d1768425e847 2021-03-07 19:12:46 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrselafindatasource.cpp 1c4f9786d6314c895a6de1fd12ccebd261cfc941 2021-12-06 15:44:51 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          Range                                       */
@@ -414,7 +414,13 @@ int OGRSelafinDataSource::OpenTable(const char * pszFilename) {
 
     // Create two layers for each selected time step: one for points, the other for elements
     poRange.setMaxValue(poHeader->nSteps);
-    const int nNewLayers = static_cast<int>(poRange.getSize());
+    size_t size=poRange.getSize();
+    if (size > INT32_MAX)
+    {
+        CPLError( CE_Failure, CPLE_OpenFailed, "Invalid size" );
+        return FALSE;
+    }
+    const int nNewLayers = static_cast<int>(size);
     if (EQUAL(pszFilename, "/vsistdin/")) osBaseLayerName = "layer";
     CPLString osLayerName;
     papoLayers = (OGRSelafinLayer **) CPLRealloc(papoLayers, sizeof(void*) * (nLayers+nNewLayers));

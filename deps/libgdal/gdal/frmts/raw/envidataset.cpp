@@ -55,7 +55,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: envidataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: envidataset.cpp 03855908e6edbe812777775bf3996e137d153a9d 2021-11-10 11:24:41 +0100 Even Rouault $")
 
 // TODO(schwehr): This really should be defined in port/somewhere.h.
 constexpr double kdfDegToRad = M_PI / 180.0;
@@ -308,6 +308,10 @@ ENVIDataset::~ENVIDataset()
     {
         GDALDeinitGCPs(static_cast<int>(m_asGCPs.size()), m_asGCPs.data());
     }
+
+    // Should be called before pszHDRFilename is freed.
+    CleanupPostFileClosing();
+
     CPLFree(pszHDRFilename);
 }
 

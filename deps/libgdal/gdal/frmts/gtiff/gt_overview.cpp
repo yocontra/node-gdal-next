@@ -50,7 +50,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: gt_overview.cpp d588fcb910cbd2a5138fc7ba1a79452780133498 2021-10-19 12:41:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_overview.cpp f7164f2eb4e74f42497b83f85815850db6ea3e0d 2021-12-06 21:43:56 +0100 Even Rouault $")
 
 // TODO(schwehr): Explain why 128 and not 127.
 constexpr int knMaxOverviews = 128;
@@ -85,9 +85,8 @@ toff_t GTIFFWriteDirectory( TIFF *hTIFF, int nSubfileType,
                             const char* pszJPEGQuality,
                             const char* pszJPEGTablesMode,
                             const char* pszNoData,
-                            CPL_UNUSED const uint32_t* panLercAddCompressionAndVersion,
-                            bool bDeferStrileArrayWriting,
-                            const char *pszWebpLevel)
+                            const uint32_t* panLercAddCompressionAndVersion,
+                            bool bDeferStrileArrayWriting)
 
 {
     const toff_t nBaseDirOffset = TIFFCurrentDirOffset( hTIFF );
@@ -169,13 +168,6 @@ toff_t GTIFFWriteDirectory( TIFF *hTIFF, int nSubfileType,
             // is a no-op (helps for cloud optimized geotiffs)
             TIFFSetField( hTIFF, TIFFTAG_YCBCRSUBSAMPLING, 2, 2 );
         }
-    }
-
-    if (nCompressFlag == COMPRESSION_WEBP  && pszWebpLevel != nullptr)
-    {
-        const int nWebpLevel = atoi(pszWebpLevel);
-        if ( nWebpLevel >= 1 )
-            TIFFSetField( hTIFF, TIFFTAG_WEBP_LEVEL, nWebpLevel );
     }
 
     if( nCompressFlag == COMPRESSION_LERC && panLercAddCompressionAndVersion )
@@ -520,6 +512,10 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
             bSourceIsJPEG2000 = EQUAL(pszSrcCompression, "JPEG2000");
         }
         if( bSourceIsPixelInterleaved && bSourceIsJPEG2000 )
+        {
+            nPlanarConfig = PLANARCONFIG_CONTIG;
+        }
+        else if( nCompression == COMPRESSION_WEBP )
         {
             nPlanarConfig = PLANARCONFIG_CONTIG;
         }
@@ -904,6 +900,20 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
         }
     }
 
+    const uint32_t* panLercAddCompressionAndVersion = nullptr;
+    uint32_t anLercAddCompressionAndVersion[2] = {LERC_VERSION_2_4,
+                                                  LERC_ADD_COMPRESSION_NONE};
+    if( pszCompress && EQUAL(pszCompress, "LERC_DEFLATE") )
+    {
+        anLercAddCompressionAndVersion[1] = LERC_ADD_COMPRESSION_DEFLATE;
+        panLercAddCompressionAndVersion = anLercAddCompressionAndVersion;
+    }
+    else if( pszCompress && EQUAL(pszCompress, "LERC_ZSTD") )
+    {
+        anLercAddCompressionAndVersion[1] = LERC_ADD_COMPRESSION_ZSTD;
+        panLercAddCompressionAndVersion = anLercAddCompressionAndVersion;
+    }
+
     for( iOverview = 0; iOverview < nOverviews; iOverview++ )
     {
         const int nOXSize = panOverviewList ?
@@ -946,11 +956,8 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
                                 CSLFetchNameValue(papszOptions, "JPEG_TABLESMODE") :
                                 CPLGetConfigOption( "JPEG_TABLESMODE_OVERVIEW", nullptr ),
                              pszNoData,
-                             nullptr,
-                             false,
-                             papszOptions ?
-                                CSLFetchNameValue(papszOptions, "WEBP_LEVEL") :
-                                CPLGetConfigOption( "WEBP_LEVEL_OVERVIEW", nullptr )
+                             panLercAddCompressionAndVersion,
+                             false
                            ) == 0 )
         {
             XTIFFClose( hOTIFF );
@@ -982,7 +989,8 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
     aosOpenOptions.SetNameValue("NUM_THREADS",
                                 CSLFetchNameValue(papszOptions, "NUM_THREADS"));
     aosOpenOptions.SetNameValue("SPARSE_OK",
-                                CSLFetchNameValue(papszOptions, "SPARSE_OK"));
+                                CSLFetchNameValueDef(papszOptions, "SPARSE_OK",
+                                     CPLGetConfigOption("SPARSE_OK_OVERVIEW", nullptr)));
     aosOpenOptions.SetNameValue("@MASK_OVERVIEW_DATASET",
                                 CSLFetchNameValue(papszOptions, "MASK_OVERVIEW_DATASET"));
     GDALDataset *hODS = GDALDataset::Open( pszFilename,
@@ -1034,6 +1042,53 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
         GTIFFSetJpegTablesMode(GDALDataset::ToHandle(hODS), nJpegTablesMode);
     }
 
+    const char* pszZLevel =
+        papszOptions ?
+            CSLFetchNameValue(papszOptions, "ZLEVEL") :
+            CPLGetConfigOption( "ZLEVEL_OVERVIEW", nullptr );
+    if( (nCompression == COMPRESSION_DEFLATE ||
+         anLercAddCompressionAndVersion[1] == LERC_ADD_COMPRESSION_DEFLATE) &&
+         pszZLevel != nullptr )
+    {
+        const int nZLevel = atoi(pszZLevel);
+        if ( nZLevel >= 1 )
+        {
+            TIFFSetField( hTIFF, TIFFTAG_ZIPQUALITY, nZLevel );
+            GTIFFSetZLevel(GDALDataset::ToHandle(hODS), nZLevel);
+        }
+    }
+
+    const char* pszZSTDLevel =
+        papszOptions ?
+            CSLFetchNameValue(papszOptions, "ZSTD_LEVEL") :
+            CPLGetConfigOption( "ZSTD_LEVEL_OVERVIEW", nullptr );
+    if( (nCompression == COMPRESSION_ZSTD ||
+         anLercAddCompressionAndVersion[1] == LERC_ADD_COMPRESSION_ZSTD) &&
+         pszZSTDLevel != nullptr )
+    {
+        const int nZSTDLevel = atoi(pszZSTDLevel);
+        if ( nZSTDLevel >= 1 )
+        {
+            TIFFSetField( hTIFF, TIFFTAG_ZSTD_LEVEL, nZSTDLevel );
+            GTIFFSetZSTDLevel(GDALDataset::ToHandle(hODS), nZSTDLevel);
+        }
+    }
+
+    const char* pszMaxZError =
+        papszOptions ?
+            CSLFetchNameValue(papszOptions, "MAX_Z_ERROR") :
+            CPLGetConfigOption( "MAX_Z_ERROR_OVERVIEW", nullptr );
+    if( nCompression == COMPRESSION_LERC &&
+         pszMaxZError != nullptr )
+    {
+        const double dfMaxZError = CPLAtof(pszMaxZError);
+        if ( dfMaxZError >= 0 )
+        {
+            TIFFSetField( hTIFF, TIFFTAG_LERC_MAXZERROR, dfMaxZError );
+            GTIFFSetMaxZError(GDALDataset::ToHandle(hODS), dfMaxZError);
+        }
+    }
+
 /* -------------------------------------------------------------------- */
 /*      Loop writing overview data.                                     */
 /* -------------------------------------------------------------------- */
@@ -1050,11 +1105,14 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
 
     CPLErr eErr = CE_None;
 
+    const auto poColorTable = papoBandList[0]->GetColorTable();
     if(  ((bSourceIsPixelInterleaved && bSourceIsJPEG2000) ||
           (nCompression != COMPRESSION_NONE)) &&
          nPlanarConfig == PLANARCONFIG_CONTIG &&
          !GDALDataTypeIsComplex(papoBandList[0]->GetRasterDataType()) &&
-         papoBandList[0]->GetColorTable() == nullptr &&
+          (poColorTable == nullptr ||
+           STARTS_WITH_CI(pszResampling, "NEAR") ||
+           poColorTable->IsIdentity()) &&
          (STARTS_WITH_CI(pszResampling, "NEAR") ||
           EQUAL(pszResampling, "AVERAGE") ||
           EQUAL(pszResampling, "RMS") ||

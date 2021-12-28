@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfimage.c d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $
+ * $Id: nitfimage.c 5e2a80b58c701de57548788ed4067da8203a7773 2021-11-30 14:04:02 +0100 Even Rouault $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Module responsible for implementation of most NITFImage
@@ -36,7 +36,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: nitfimage.c d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $")
+CPL_CVSID("$Id: nitfimage.c 5e2a80b58c701de57548788ed4067da8203a7773 2021-11-30 14:04:02 +0100 Even Rouault $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 
@@ -361,9 +361,11 @@ NITFImage *NITFImageAccess( NITFFile *psFile, int iSegment )
         if ( (int)psSegInfo->nSegmentHeaderSize < nOffset + 80 * nNICOM )
             GOTO_header_too_small();
 
-        psImage->pszComments = (char *) CPLMalloc(nNICOM*80+1);
-        NITFGetField( psImage->pszComments, pachHeader,
-                      nOffset, 80 * nNICOM );
+        char *pszICOM = (char *) CPLMalloc(nNICOM*80+1);
+        psImage->pszComments = CPLRecode(
+            NITFGetField( pszICOM, pachHeader, nOffset, 80 * nNICOM ),
+            CPL_ENC_ISO8859_1, CPL_ENC_UTF8 );
+        CPLFree(pszICOM);
         nOffset += nNICOM * 80;
     }
 

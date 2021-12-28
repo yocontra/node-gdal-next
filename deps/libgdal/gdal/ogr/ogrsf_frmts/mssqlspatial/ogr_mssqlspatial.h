@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mssqlspatial.h d4f8ce3534e7f16fb3eb0eed97b7cb301828ccd3 2021-03-28 15:45:02 +0200 Even Rouault $
+ * $Id: ogr_mssqlspatial.h 3f43e75e42f950a2a864d3d46ae1544cf5adb738 2021-12-11 12:39:35 +0100 Even Rouault $
  *
  * Project:  MSSQL Spatial driver
  * Purpose:  Definition of classes for OGR MSSQL Spatial driver.
@@ -292,13 +292,16 @@ class OGRMSSQLSpatialLayer CPL_NON_FINAL: public OGRLayer
     char               *pszFIDColumn = nullptr;
     int                nFIDColumnIndex = -1;
 
+    // UUID doesn't work for now in bulk copy mode
+    bool               m_bHasUUIDColumn = false;
+
     int                bIsIdentityFid = FALSE;
 
     int                nLayerStatus = MSSQLLAYERSTATUS_ORIGINAL;
 
     int                *panFieldOrdinals = nullptr;
 
-    CPLErr              BuildFeatureDefn( const char *pszLayerName,
+    void               BuildFeatureDefn( const char *pszLayerName,
                                           CPLODBCStatement *poStmt );
 
     virtual CPLODBCStatement *  GetStatement() { return poStmt; }
@@ -428,6 +431,7 @@ class OGRMSSQLSpatialTableLayer final: public OGRMSSQLSpatialLayer
     virtual const char* GetName() override;
 
     virtual OGRErr      SetAttributeFilter( const char * ) override;
+    virtual OGRFeature *GetNextFeature() override;
 
     virtual OGRErr      ISetFeature( OGRFeature *poFeature ) override;
     virtual OGRErr      DeleteFeature( GIntBig nFID ) override;

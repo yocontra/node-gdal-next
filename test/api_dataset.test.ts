@@ -780,22 +780,13 @@ describe('gdal.Dataset', () => {
           gdal.vsimem.release(tempFile)
         })
         it('should throw if dataset doesnt support setting geotransform', () => {
-          let ds: gdal.Dataset
           const transform = [ 0, 2, 0, 0, 0, 2 ]
 
-          let tempFile = fileUtils.clone(`${__dirname}/data/park.geo.json`)
-          ds = gdal.open(tempFile)
+          const tempFile = fileUtils.clone(`${__dirname}/data/park.geo.json`)
+          const ds = gdal.open(tempFile)
           assert.throws(() => {
             ds.geoTransform = transform
-          })
-          ds.close()
-          gdal.vsimem.release(tempFile)
-
-          tempFile = fileUtils.clone(`${__dirname}/data/sample.tif`)
-          ds = gdal.open(tempFile)
-          assert.throws(() => {
-            ds.geoTransform = transform
-          })
+          }, /not supported for this dataset/)
           ds.close()
           gdal.vsimem.release(tempFile)
         })

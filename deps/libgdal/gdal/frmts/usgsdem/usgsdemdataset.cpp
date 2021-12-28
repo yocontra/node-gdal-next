@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: usgsdemdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: usgsdemdataset.cpp 14cd5449ff8c51f2212a04fb6ad1fbce4ce7a972 2021-12-22 22:38:33 +0100 Even Rouault $")
 
 typedef struct {
     double      x;
@@ -620,7 +620,20 @@ int USGSDEMDataset::LoadFromFile(VSILFILE *InDem)
                 nDataStartOffset = 893;
         }
         else
+        {
             nDataStartOffset = 1024;
+
+            // Some files use 1025 byte records ending with a newline character.
+            // See https://github.com/OSGeo/gdal/issues/5007
+            CPL_IGNORE_RET_VAL(VSIFSeekL(InDem, 1024, 0));
+            char c;
+            if( VSIFReadL(&c, 1, 1, InDem) == 1 && c == '\n' &&
+                VSIFSeekL(InDem, 1024 + 1024 + 1, 0) == 0 &&
+                VSIFReadL(&c, 1, 1, InDem) == 1 && c == '\n' )
+            {
+                nDataStartOffset = 1025;
+            }
+        }
     }
     else
         nDataStartOffset = 864;

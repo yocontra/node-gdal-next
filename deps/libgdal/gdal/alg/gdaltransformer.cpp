@@ -59,7 +59,7 @@
 #include "ogr_srs_api.h"
 
 
-CPL_CVSID("$Id: gdaltransformer.cpp 71fd52ac879d480f1a81e06f2454593178718a90 2021-08-04 12:51:25 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaltransformer.cpp 4870e07928a7429a1c906a9b6d1b16e81ee101e5 2021-12-16 12:48:08 +0100 Even Rouault $")
 
 CPL_C_START
 void *GDALDeserializeGCPTransformer( CPLXMLNode *psTree );
@@ -1347,6 +1347,8 @@ bool GDALComputeAreaOfInterest(OGRSpatialReference* poSRS,
         auto poCT = OGRCreateCoordinateTransformation(&oSrcSRSHoriz, poGeog);
         if( poCT )
         {
+            poCT->SetEmitErrors(false);
+
             double x[4], y[4];
             x[0] = adfGT[0];
             y[0] = adfGT[3];
@@ -2614,6 +2616,7 @@ int GDALTransformLonLatToDestGenImgProjTransformer(void* hTransformArg,
     if( poCT == nullptr )
         return false;
 
+    poCT->SetEmitErrors(false);
     if( !poCT->Transform(1, pdfX, pdfY) )
         return false;
 

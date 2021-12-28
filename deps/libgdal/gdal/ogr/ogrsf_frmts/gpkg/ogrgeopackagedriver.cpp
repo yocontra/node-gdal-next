@@ -30,7 +30,7 @@
 
 #include "tilematrixset.hpp"
 
-CPL_CVSID("$Id: ogrgeopackagedriver.cpp 00b8f446656188f765e29f0a3a961d25cbc53df4 2021-07-28 00:52:06 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrgeopackagedriver.cpp e3f0c514b88bdc600a3544c8374cafdb63a9668f 2021-11-04 22:31:49 +0100 Even Rouault $")
 
 // g++ -g -Wall -fPIC -shared -o ogr_geopackage.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/gpkg ogr/ogrsf_frmts/gpkg/*.c* -L. -lgdal
 
@@ -430,7 +430,7 @@ void RegisterOGRGeoPackage()
 
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GeoPackage" );
     poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "gpkg" );
-    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/geopackage.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/gpkg.html" );
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte Int16 UInt16 Float32" );
 
     poDriver->SetMetadataItem( GDAL_DMD_OPENOPTIONLIST, "<OpenOptionList>"

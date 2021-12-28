@@ -47,7 +47,7 @@
 
 #include "cpl_aws.h"
 
-CPL_CVSID("$Id: cpl_vsil_s3.cpp b0c2cc25f0802273e1c16958f04d0f59e1986a90 2021-08-30 14:36:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_s3.cpp 2390c642672ff70834a7d39db523cf5976829644 2021-11-23 14:25:11 +0100 Even Rouault $")
 
 #ifndef HAVE_CURL
 
@@ -3461,7 +3461,7 @@ bool IVSIS3LikeFSHandler::CopyFile(VSILFILE* fpIn,
         STARTS_WITH(pszTarget, osPrefix) )
     {
         bool bRet = CopyObject(pszSource, pszTarget, nullptr) == 0;
-        if( pProgressFunc )
+        if( bRet && pProgressFunc )
         {
             bRet = pProgressFunc(1.0, osMsg.c_str(), pProgressData) != 0;
         }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gtiff.h 20cb378a1ac46515d1aad87e93dff401feedffa7 2021-07-06 18:17:27 +0200 Even Rouault $
+ * $Id: gtiff.h 9381354a483fa662e43f9611dc5d4dd98dcfda29 2021-11-19 21:36:00 +0100 Even Rouault $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  GDAL GeoTIFF support.
@@ -48,6 +48,9 @@ void    GTIFFGetOverviewBlockSize( GDALRasterBandH hBand, int* pnBlockXSize, int
 void    GTIFFSetJpegQuality( GDALDatasetH hGTIFFDS, int nJpegQuality );
 void    GTIFFSetWebPLevel( GDALDatasetH hGTIFFDS, int nWebPLevel );
 void    GTIFFSetJpegTablesMode( GDALDatasetH hGTIFFDS, int nJpegTablesMode );
+void    GTIFFSetZLevel( GDALDatasetH hGTIFFDS, int nZLevel );
+void    GTIFFSetZSTDLevel( GDALDatasetH hGTIFFDS, int nZSTDLevel );
+void    GTIFFSetMaxZError( GDALDatasetH hGTIFFDS, double dfMaxZError );
 int     GTIFFGetCompressionMethod( const char* pszValue,
                                    const char* pszVariableName );
 bool    GTIFFSupportsPredictor(int nCompression);

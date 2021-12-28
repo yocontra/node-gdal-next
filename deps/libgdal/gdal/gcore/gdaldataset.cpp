@@ -72,7 +72,7 @@
 #include "../sqlite/ogrsqliteexecutesql.h"
 #endif
 
-CPL_CVSID("$Id: gdaldataset.cpp 7fc1d9ac5540a1fd5c40ca7d38b63de2abfb77a6 2021-10-14 20:10:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldataset.cpp 03855908e6edbe812777775bf3996e137d153a9d 2021-11-10 11:24:41 +0100 Even Rouault $")
 
 CPL_C_START
 GDALAsyncReader *
@@ -1501,6 +1501,36 @@ void GDALDataset::MarkAsShared()
         CPLHashSetInsert(phSharedDatasetSet, psStruct);
 
         (*poAllDatasetMap)[this] = nPID;
+    }
+}
+
+/************************************************************************/
+/*                            MarkAsShared()                            */
+/************************************************************************/
+
+/** Set that the dataset must be deleted on close. */
+void  GDALDataset::MarkSuppressOnClose()
+{
+    bSuppressOnClose = true;
+}
+
+/************************************************************************/
+/*                        CleanupPostFileClosing()                      */
+/************************************************************************/
+
+/** This method should be called by driver implementations in their destructor,
+ * after having closed all files, but before having freed resources that
+ * are needed for their GetFileList() implementation.
+ * This is used to implement MarkSuppressOnClose behavior.
+ */
+void GDALDataset::CleanupPostFileClosing()
+{
+    if( bSuppressOnClose )
+    {
+        char** papszFileList = GetFileList();
+        for( int i = 0; papszFileList && papszFileList[i]; ++i )
+            VSIUnlink(papszFileList[i]);
+        CSLDestroy(papszFileList);
     }
 }
 

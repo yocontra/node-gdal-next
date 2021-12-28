@@ -38,7 +38,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrwfsdatasource.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrwfsdatasource.cpp 18a6887e37793b65da4771507139fec5f7e417f9 2021-11-29 15:31:40 +0100 Even Rouault $")
 
 constexpr int DEFAULT_BASE_START_INDEX = 0;
 constexpr int DEFAULT_PAGE_SIZE = 100;
@@ -664,7 +664,14 @@ bool OGRWFSDataSource::DetectSupportPagingWFS2( CPLXMLNode* psRoot )
             {
                 int nVal = atoi(CPLGetXMLValue(psChild, "DefaultValue", "0"));
                 if( nVal > 0 )
+                {
                     nPageSize = nVal;
+                    const int nPageSizeURL = atoi(CPLURLGetValue(osBaseURL, "COUNT"));
+                    if( nPageSizeURL > 0 && nPageSizeURL < nPageSize )
+                    {
+                        nPageSize = nPageSizeURL;
+                    }
+                }
 
                 break;
             }

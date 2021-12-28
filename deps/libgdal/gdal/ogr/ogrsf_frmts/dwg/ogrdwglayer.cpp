@@ -31,7 +31,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwglayer.cpp f86de9ef404101500003396503c43609219aa339 2021-08-19 20:35:04 +0800 GISerliang $")
+CPL_CVSID("$Id: ogrdwglayer.cpp ea130963224cca8e3124b8d406b5698deac3bd81 2021-12-21 18:16:26Z Jorge Gustavo Rocha $")
 
 /************************************************************************/
 /*                            OGRDWGLayer()                             */
@@ -1178,6 +1178,22 @@ OGRFeature *OGRDWGLayer::TranslateINSERT( OdDbEntityPtr poEntity )
 
         poFeature->SetField( "BlockAngle", dfAngle );
         poFeature->SetField( "BlockScale", 3, &(oTransformer.dfXScale) );
+
+        OdDbObjectIteratorPtr pEntIter = poRef->attributeIterator();
+        OdDbAttributePtr openAttr;
+
+        CPLJSONObject uAttrData = CPLJSONObject();
+        for (; !pEntIter->done(); pEntIter->step())
+        {
+            openAttr = pEntIter->entity()->objectId().safeOpenObject(OdDb::kForRead);
+            
+            CPLString attrText = TextUnescape( openAttr->textString(), false );
+
+            if ( !openAttr->isInvisible() && openAttr->visibility() != OdDb::kInvisible)
+                uAttrData.Add( CPLSPrintf("%ls", openAttr->tag().c_str()), attrText );
+        }
+
+        poFeature->SetField( "BlockAttributes", uAttrData.ToString().c_str() );
 
         return poFeature;
     }

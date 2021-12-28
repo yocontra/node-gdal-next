@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.4.1] WIP
 
 ### Added
+ - Bundled GDAL 3.4.1
  - Bundled OpenJPEG and enabled the JPEG2000 driver
 
 ### Changed

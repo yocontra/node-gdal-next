@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pg.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
+ * $Id: ogr_pg.h 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL driver.
@@ -486,6 +486,8 @@ class OGRPGDataSource final: public OGRDataSource
 
     char               *pszName = nullptr;
 
+    bool                m_bUTF8ClientEncoding = false;
+
     int                 bDSUpdate = false;
     int                 bHavePostGIS = false;
     int                 bHaveGeography = false;
@@ -540,7 +542,8 @@ class OGRPGDataSource final: public OGRDataSource
     bool                m_bHasGeometryColumns = false;
     bool                m_bHasSpatialRefSys = false;
 
-    int                GetUndefinedSRID() const { return nUndefinedSRID; }
+    int                 GetUndefinedSRID() const { return nUndefinedSRID; }
+    bool                IsUTF8ClientEncoding() const { return m_bUTF8ClientEncoding; }
 
   public:
                         OGRPGDataSource();

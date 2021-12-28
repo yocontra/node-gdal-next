@@ -37,7 +37,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_recode_stub.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_recode_stub.cpp 6c139301664733abd24a2f0263bce449be527fcf 2021-11-22 00:15:21 +0100 Even Rouault $")
 
 #ifdef CPL_RECODE_STUB
 
@@ -209,27 +209,8 @@ char *CPLRecodeStub( const char *pszSource,
 /* -------------------------------------------------------------------- */
     if( strcmp(pszDstEncoding, CPL_ENC_UTF8) == 0 )
     {
-        int nCharCount = static_cast<int>(strlen(pszSource));
+        const int nCharCount = static_cast<int>(strlen(pszSource));
         char *pszResult = static_cast<char *>(CPLCalloc(1, nCharCount * 2 + 1));
-
-        if( EQUAL( pszSrcEncoding, "CP437") ) // For ZIP file handling.
-        {
-            bool bIsAllPrintableASCII = true;
-            for( int i = 0; i <nCharCount; i++ )
-            {
-                if( pszSource[i] < 32 || pszSource[i] > 126 )
-                {
-                    bIsAllPrintableASCII = false;
-                    break;
-                }
-            }
-            if( bIsAllPrintableASCII )
-            {
-                if( nCharCount )
-                    memcpy( pszResult, pszSource, nCharCount );
-                return pszResult;
-            }
-        }
 
         if( !bHaveWarned1 )
         {

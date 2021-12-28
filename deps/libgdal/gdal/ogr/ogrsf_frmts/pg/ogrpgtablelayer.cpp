@@ -36,7 +36,7 @@
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpgtablelayer.cpp bb0e15c3736a0fb3139af2786ff9b6ae0331b16b 2021-08-28 00:03:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgtablelayer.cpp 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $")
 
 #define UNSUPPORTED_OP_READ_ONLY "%s : unsupported operation on a read-only datasource."
 
@@ -1973,6 +1973,20 @@ OGRErr OGRPGTableLayer::CreateFeatureViaCopy( OGRFeature *poFeature )
 
     /* Add end of line marker */
     osCommand += "\n";
+
+    // PostgreSQL doesn't provide very helpful reporting of invalid UTF-8
+    // content in COPY mode.
+    if( poDS->IsUTF8ClientEncoding() &&
+        !CPLIsUTF8(osCommand.c_str(), static_cast<int>(osCommand.size())) )
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Non UTF-8 content found when writing feature " CPL_FRMT_GIB
+                 " of layer %s: %s",
+                 poFeature->GetFID(),
+                 poFeatureDefn->GetName(),
+                 osCommand.c_str());
+        return OGRERR_FAILURE;
+    }
 
     /* ------------------------------------------------------------ */
     /*      Execute the copy.                                       */

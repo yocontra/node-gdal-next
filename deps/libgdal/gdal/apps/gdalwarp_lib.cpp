@@ -71,7 +71,7 @@
 #define USE_PROJ_BASED_VERTICAL_SHIFT_METHOD
 #endif
 
-CPL_CVSID("$Id: gdalwarp_lib.cpp 4986eea379aaa3f553b9d612f6d5da103dc555a8 2021-10-11 23:07:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarp_lib.cpp 7d4e0a40f8f0c1aabb80a381ec7be3971e80e7fd 2021-11-15 13:07:06 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        GDALWarpAppOptions                            */
@@ -451,7 +451,9 @@ static CPLErr CropToCutline( OGRGeometryH hCutline, char** papszTO,
         if( hCTCutlineToSrc != nullptr )
             OGR_G_Transform( hGeomInSrcSRS, hCTCutlineToSrc );
 
-        const double epsilon = std::numeric_limits<double>::epsilon();
+        // Do not use a smaller epsilon, otherwise it could cause useless
+        // segmentization (https://github.com/OSGeo/gdal/issues/4826)
+        constexpr double epsilon = 1e-10;
         for(int nIter=0;nIter<10;nIter++)
         {
             OGR_G_DestroyGeometry(hTransformedGeom);

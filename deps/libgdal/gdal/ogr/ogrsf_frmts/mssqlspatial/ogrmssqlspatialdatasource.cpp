@@ -29,7 +29,7 @@
 
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlspatialdatasource.cpp 327bfdc0f5dd563c3b1c4cbf26d34967c5c9c790 2020-02-28 13:51:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatialdatasource.cpp 3a9c0d3520ce6626a2e3b47f5a54b77727860739 2021-12-11 11:22:15 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          OGRMSSQLSpatialDataSource()                 */
@@ -279,9 +279,6 @@ OGRErr OGRMSSQLSpatialDataSource::DeleteLayer( int iLayer )
     memmove( papoLayers + iLayer, papoLayers + iLayer + 1,
              sizeof(void *) * (nLayers - iLayer - 1) );
     nLayers--;
-
-    if ( strlen(pszTableName) == 0 )
-        return OGRERR_NONE;
 
 /* -------------------------------------------------------------------- */
 /*      Remove from the database.                                       */

@@ -35,7 +35,7 @@
 #include "ogrgeojsonreader.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrelasticdatasource.cpp 5ae55ccc4f55697df4063b8e728e05cf0dff2418 2020-11-11 22:17:37 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrelasticdatasource.cpp d5fde470d01991b31a91805338e0154ccf95097f 2021-11-26 15:26:02 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                        OGRElasticDataSource()                        */
@@ -124,7 +124,8 @@ int OGRElasticDataSource::GetLayerCount()
         pszNextEOL = strchr(pszCur, '\n');
 
         if( STARTS_WITH(pszIndexName, ".security") ||
-            STARTS_WITH(pszIndexName, ".monitoring") )
+            STARTS_WITH(pszIndexName, ".monitoring") ||
+            STARTS_WITH(pszIndexName, ".geoip_databases") )
         {
             continue;
         }

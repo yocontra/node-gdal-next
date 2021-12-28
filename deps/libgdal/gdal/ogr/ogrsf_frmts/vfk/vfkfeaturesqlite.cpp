@@ -34,7 +34,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: vfkfeaturesqlite.cpp 5ac206dab33d1174cb9af152d4781655eb345e73 2018-05-20 23:57:27 +0200 Even Rouault $")
+CPL_CVSID("$Id: vfkfeaturesqlite.cpp 6e86409bd5bea444c1c1106d103355560ee4490a 2021-11-22 13:40:48 +0100 Even Rouault $")
 
 /*!
   \brief VFKFeatureSQLite constructor (from DB)
@@ -235,7 +235,10 @@ OGRErr VFKFeatureSQLite::LoadProperties(OGRFeature *poFeature)
         /* sequential access */
         VFKReaderSQLite *poReader = (VFKReaderSQLite *) m_poDataBlock->GetReader();
         if ( poReader->ExecuteSQL(hStmt) != OGRERR_NONE )
+        {
+            ((VFKDataBlockSQLite *) m_poDataBlock)->m_hStmt = nullptr;
             return OGRERR_FAILURE;
+        }
     }
 
     int nPropertyCount = m_poDataBlock->GetPropertyCount();

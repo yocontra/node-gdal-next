@@ -52,7 +52,7 @@
 #include "filegdbtable.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogropenfilegdblayer.cpp 6eb3d717253fcedb0d78334bed6bc8487c3c1392 2021-08-25 18:01:51 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogropenfilegdblayer.cpp fba4fe318e223b8a5d27a90ed3944ceb2306d724 2021-11-23 14:25:00 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                      OGROpenFileGDBGeomFieldDefn                     */
@@ -689,10 +689,12 @@ int OGROpenFileGDBLayer::BuildLayerDefinition()
             case FGFT_RASTER:
             {
                 const FileGDBRasterField* rasterField = cpl::down_cast<const FileGDBRasterField*>(poGDBField);
-                if( rasterField->IsManaged() )
+                if( rasterField->GetType() == FileGDBRasterField::Type::MANAGED )
                     eType = OFTInteger;
-                else
+                else if( rasterField->GetType() == FileGDBRasterField::Type::EXTERNAL )
                     eType = OFTString;
+                else
+                    eType = OFTBinary;
                 break;
             }
         }

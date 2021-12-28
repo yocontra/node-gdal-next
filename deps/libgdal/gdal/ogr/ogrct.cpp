@@ -49,7 +49,7 @@
 #include "proj.h"
 #include "proj_experimental.h"
 
-CPL_CVSID("$Id: ogrct.cpp ed03372732878b73c2d7043c0bd8f0a3cc01ca8d 2021-10-18 05:00:39 -0500 Alan D. Snow $")
+CPL_CVSID("$Id: ogrct.cpp 245553df85775d83fdcd81dfcaba6e4d062af655 2021-11-24 12:14:17 +0100 Even Rouault $")
 
 #ifdef DEBUG_PERF
 static double g_dfTotalTimeCRStoCRS = 0;
@@ -839,6 +839,13 @@ OGRCreateCoordinateTransformation( const OGRSpatialReference *poSource,
  *     3.0.2</li>
  * </ul>
  *
+ * By default, if the source or target SRS definition refers to an official
+ * CRS through a code, GDAL will use the official definition if the official
+ * definition and the source/target SRS definition are equivalent. Note that TOWGS84[]
+ * clauses are ignored when checking equivalence. Starting with GDAL 3.4.1, if
+ * you set the OGR_CT_PREFER_OFFICIAL_SRS_DEF configuration option to NO,
+ * the source or target SRS definition will be always used.
+ *
  * If options contains a user defined coordinate transformation pipeline, it
  * will be unconditionally used.
  * If options has an area of interest defined, it will be used to research the
@@ -1422,9 +1429,11 @@ int OGRProjCT::Initialize( const OGRSpatialReference * poSourceIn,
             char* pszText = nullptr;
             // If we have a AUTH:CODE attached, use it to retrieve the full
             // definition in case a trip to WKT1 has lost the area of use.
+            // unless OGR_CT_PREFER_OFFICIAL_SRS_DEF=NO (see https://github.com/OSGeo/PROJ/issues/2955)
             const char* pszAuth = poSRS->GetAuthorityName(nullptr);
             const char* pszCode = poSRS->GetAuthorityCode(nullptr);
-            if( pszAuth && pszCode )
+            if( pszAuth && pszCode &&
+                CPLTestBool(CPLGetConfigOption("OGR_CT_PREFER_OFFICIAL_SRS_DEF", "YES")) )
             {
                 CPLString osAuthCode(pszAuth);
                 osAuthCode += ':';
@@ -3382,7 +3391,7 @@ int OCTTransform4DWithErrorCodes( OGRCoordinateTransformationH hTransform,
 /*                           OCTTransformBounds()                           */
 /************************************************************************/
 /** \brief Transform boundary.
- * 
+ *
  * Transform boundary densifying the edges to account for nonlinear
  * transformations along these edges and extracting the outermost bounds.
  *
@@ -3427,7 +3436,7 @@ int CPL_STDCALL OCTTransformBounds( OGRCoordinateTransformationH hTransform,
     VALIDATE_POINTER1( hTransform, "TransformBounds", FALSE );
 
     return OGRProjCT::FromHandle(hTransform)->
-        TransformBounds( 
+        TransformBounds(
             xmin, ymin, xmax, ymax, out_xmin, out_ymin, out_xmax, out_ymax, densify_pts
         );
 }

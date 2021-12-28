@@ -115,7 +115,7 @@
 #include "cpl_vsi_virtual.h"
 #include "cpl_worker_thread_pool.h"
 
-CPL_CVSID("$Id: cpl_vsil_gzip.cpp 5707f160e52541613a6be8151bb0c61e13d19a77 2021-08-11 20:58:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gzip.cpp be255935dc8ed9cadd624afa55a84f43faf4b52e 2021-12-24 17:35:07 +0100 Even Rouault $")
 
 constexpr int Z_BUFSIZE = 65536;  // Original size is 16384
 constexpr int gz_magic[2] = {0x1f, 0x8b};  // gzip magic header
@@ -3510,7 +3510,20 @@ void* CPLZLibInflate( const void* ptr, size_t nBytes,
     strm.opaque = nullptr;
     strm.avail_in = static_cast<uInt>(nBytes);
     strm.next_in = static_cast<Bytef*>(const_cast<void*>(ptr));
-    int ret = inflateInit2(&strm, MAX_WBITS + 32);
+    int ret;
+    // MAX_WBITS + 32 mode which detects automatically gzip vs zlib encapsulation
+    // seems to be broken with /opt/intel/oneapi/intelpython/latest/lib/libz.so.1
+    // from intel/oneapi-basekit Docker image
+    if(  nBytes > 2 &&
+         static_cast<const GByte*>(ptr)[0] == 0x1F &&
+         static_cast<const GByte*>(ptr)[1] == 0x8B )
+    {
+        ret = inflateInit2(&strm, MAX_WBITS + 16); // gzip
+    }
+    else
+    {
+        ret = inflateInit2(&strm, MAX_WBITS); // zlib
+    }
     if( ret != Z_OK )
     {
         return nullptr;

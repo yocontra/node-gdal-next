@@ -32,7 +32,7 @@
 #include "ods_formula.h"
 #include "cpl_safemaths.hpp"
 
-CPL_CVSID("$Id: ods_formula_node.cpp 3a0d5f82c70162bc7dd669cf264bbc4b9c724c27 2020-05-22 19:48:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: ods_formula_node.cpp 8a6c2962fc03cc6b221b6108d359650f6422bc60 2021-11-30 22:45:38 +0100 Even Rouault $")
 
 /************************************************************************/
 /*                          ods_formula_node()                          */
@@ -1120,9 +1120,15 @@ ods_formula_node::EvaluateBinaryArithmetic( IODSCellEvaluator* poEvaluator )
                         return false;
                     break;
                 case ODS_MODULUS  :
-                    if( papoSubExpr[1]->int_value != 0 )
+                    if( papoSubExpr[0]->int_value == INT_MIN && papoSubExpr[1]->int_value == -1 )
+                    {
+                        nVal = 0;
+                    }
+                    else if( papoSubExpr[1]->int_value != 0 )
+                    {
                         nVal = papoSubExpr[0]->int_value %
                             papoSubExpr[1]->int_value;
+                    }
                     else
                         return false;
                     break;

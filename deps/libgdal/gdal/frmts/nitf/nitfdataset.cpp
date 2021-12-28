@@ -61,7 +61,7 @@
 #include "ogr_core.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: nitfdataset.cpp 6833747591ce456fb5c056f450676629e1790d77 2021-10-17 18:49:56 +0200 Jürgen Fischer $")
+CPL_CVSID("$Id: nitfdataset.cpp 5e2a80b58c701de57548788ed4067da8203a7773 2021-11-30 14:04:02 +0100 Even Rouault $")
 
 static bool NITFPatchImageLength( const char *pszFilename,
                                   int nIMIndex,
@@ -6358,7 +6358,7 @@ static const NITFFieldDescription asFieldDescription [] =
     {  8, "ICAT", "Image Category" } ,
     {  2, "ABPP", "Actual Bits-Per-Pixel Per Band" } ,
     {  1, "PJUST", "Pixel Justification" } ,
-    {780, "ICOM", "Image Comments (up to 9x80 characters)" } ,
+    {720, "ICOM", "Image Comments (up to 9x80 characters)" } ,
     {  3, "IDLVL", "Image Display Level" },
     {  3, "IALVL", "Image Attachment Level" },
     {  5, "ILOCROW", "Image Location Row" },

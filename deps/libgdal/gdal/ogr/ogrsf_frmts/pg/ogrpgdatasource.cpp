@@ -32,11 +32,12 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 #include "cpl_hash_set.h"
+#include <cctype>
 #include <set>
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpgdatasource.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdatasource.cpp 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $")
 
 static void OGRPGNoticeProcessor( void *arg, const char * pszMessage );
 
@@ -610,13 +611,31 @@ int OGRPGDataSource::Open( const char * pszNewName, int bUpdate,
 /* -------------------------------------------------------------------- */
     if (CPLGetConfigOption("PGCLIENTENCODING", nullptr) == nullptr)
     {
-        const char* encoding = "UNICODE";
+        const char* encoding = "UTF8";
         if (PQsetClientEncoding(hPGConn, encoding) == -1)
         {
             CPLError( CE_Warning, CPLE_AppDefined,
                     "PQsetClientEncoding(%s) failed.\n%s",
                     encoding, PQerrorMessage( hPGConn ) );
         }
+    }
+
+    {
+        PGresult* hResult = OGRPG_PQexec(hPGConn, "SHOW client_encoding" );
+        if( hResult && PQresultStatus(hResult) == PGRES_TUPLES_OK
+            && PQntuples(hResult) == 1 )
+        {
+            const char* pszClientEncoding = PQgetvalue(hResult,0,0);
+            if( pszClientEncoding )
+            {
+                CPLDebug("PG","Client encoding: '%s'", pszClientEncoding);
+                if( EQUAL(pszClientEncoding, "UTF8") )
+                {
+                    m_bUTF8ClientEncoding = true;
+                }
+            }
+        }
+        OGRPGClearResult(hResult);
     }
 
 /* -------------------------------------------------------------------- */
@@ -2925,8 +2944,8 @@ OGRLayer * OGRPGDataSource::ExecuteSQL( const char *pszSQLCommand,
                                         const char *pszDialect )
 
 {
-    /* Skip leading spaces */
-    while(*pszSQLCommand == ' ')
+    /* Skip leading whitespace characters */
+    while(std::isspace(static_cast<unsigned char>(*pszSQLCommand)))
         pszSQLCommand ++;
 
     FlushCache(false);
