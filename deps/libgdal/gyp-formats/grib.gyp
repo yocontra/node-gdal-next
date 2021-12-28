@@ -42,7 +42,7 @@
 				"../gdal/frmts/grib/degrib/degrib/grib2api.c",
 				"../gdal/frmts/grib/degrib/degrib/myutil.c",
 				"../gdal/frmts/grib/degrib/degrib/metaparse.cpp",
-				"../gdal/frmts/grib/degrib/degrib/myerror.c",
+				"../gdal/frmts/grib/degrib/degrib/myerror.cpp",
 				"../gdal/frmts/grib/degrib/degrib/tendian.cpp",
 				"../gdal/frmts/grib/degrib/degrib/inventory.cpp",
 				"../gdal/frmts/grib/degrib/degrib/metaprint.cpp",
