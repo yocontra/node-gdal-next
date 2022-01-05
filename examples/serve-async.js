@@ -18,26 +18,26 @@ gdal.openAsync(datasetFile).then((ds) => {
     const params = req.url.split('/')
     if (params.length > 2 && params[1].length && params[2].length
         && !isNaN(params[1]) && ! isNaN(params[2])) {
-          let band, value
+      let band, value
 
-          try {
-            band = await ds.bands.getAsync(1)
-          } catch (e) {
-            res.writeHead(500)
-            res.end(e.toString())
-            return
-          }
+      try {
+        band = await ds.bands.getAsync(1)
+      } catch (e) {
+        res.writeHead(500)
+        res.end(e.toString())
+        return
+      }
 
-          try {
-            value = await band.pixels.getAsync(+params[1], +params[2])
-          } catch (e) {
-            res.writeHead(404)
-            res.end(e.toString())
-            return
-          }
+      try {
+        value = await band.pixels.getAsync(+params[1], +params[2])
+      } catch (e) {
+        res.writeHead(404)
+        res.end(e.toString())
+        return
+      }
 
-          res.writeHead(200)
-          res.end(`Value at position ${params[1]}:${params[2]} is ${value}\n`)
+      res.writeHead(200)
+      res.end(`Value at position ${params[1]}:${params[2]} is ${value}\n`)
 
     } else {
       res.writeHead(400)
