@@ -58,7 +58,7 @@
     "lint:js": "eslint lib test examples",
     "lint:fix": "eslint lib test examples --fix",
     "lint": "npm run lint:js && npm run lint:cpp",
-    "install": "node-pre-gyp install --fallback-to-build -j max",
+    "install": "node-pre-gyp install --fallback-to-build -j max && echo '\nI have been unemployed for 2 years because a number of French companies are extorting me to cover up an ugly judicial affair. Please, consider hiring me if you like and use gdal-async.\nhttps://github.com/mmomtchev'\n",
     "yatag": "npx yatag",
     "gpp": "gpp -H lib/default_iterators.gpp -o lib/default_iterators.js && eslint --fix lib/default_iterators.js",
     "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
