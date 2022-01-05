@@ -28,8 +28,12 @@ const workflowPublish = { ...pkg, workflow_id: workflowPublishId, ref: `v${versi
     }
     const jobs = await octokit.request(url.toString())
     const failedJob = jobs.data.jobs.filter((j) => ![ 'success', 'cancelled' ].includes(j.conclusion))
-    const failedStep = failedJob[0].steps.filter((j) => ![ 'success', 'cancelled' ].includes(j.conclusion))
-    console.error('failed job', failedJob[0].name, failedStep[0].name)
+    if (failedJob[0]) {
+      const failedStep = failedJob[0].steps.filter((j) => ![ 'success', 'cancelled' ].includes(j.conclusion))
+      console.error('failed job', failedJob[0].name, failedStep[0].name)
+    } else {
+      console.error('job cancelled')
+    }
     throw new Error('Github actions build failed')
   }
   process.stdout.write('success')
