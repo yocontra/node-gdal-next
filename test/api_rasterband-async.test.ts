@@ -804,7 +804,8 @@ describe('gdal.RasterBandAsync', () => {
           const band = ds.bands.get(1)
           return assert.isFulfilled(Promise.all([
             assert.eventually.instanceOf(band.colorTableAsync, gdal.ColorTable),
-            assert.deepEqual(band.colorTable?.get(1), { c1: 7, c2: 8, c3: 45, c4: 255 })
+            assert.eventually.deepEqual(band.colorTableAsync.then((c) => c?.get(1)),
+              { c1: 7, c2: 8, c3: 45, c4: 255 })
           ]))
         })
         it('should reject if dataset already closed', () => {
