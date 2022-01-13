@@ -19,6 +19,14 @@ fi
 tar -xzf curl-${CURL_VERSION}.tar.gz
 mv curl-${CURL_VERSION} $dir_curl
 
+#
+# apply patches
+#
+for PATCH in patches/*.diff; do
+  echo "Applying ${PATCH}"
+  patch -p1 < $PATCH
+done
+
 # update the CA bundle
 curl -L https://curl.se/ca/cacert.pem -o cacert.pem
 [ -d ${dir_curl} ] && rm -rf ${dir_curl}/{tests,projects}
