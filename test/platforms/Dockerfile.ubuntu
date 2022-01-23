@@ -12,7 +12,7 @@ RUN \
   DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs && \
   if [ `lsb_release -cs` = 'xenial' ]; then \
     DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common python-software-properties && \
-    DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:deadsnakes/ppa && \
+    DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:jblgf0/python && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y python3.6 && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3.6 10; \
