@@ -1,5 +1,7 @@
 import * as gdal from '..'
 import * as path from 'path'
+import * as fs from 'fs'
+import * as cp from 'child_process'
 import { assert } from 'chai'
 import * as fileUtils from './utils/file'
 import * as chai from 'chai'
@@ -34,6 +36,28 @@ describe('gdal.Dataset', () => {
   })
 
   describe('instance', () => {
+
+    it('properly close open Datasets when exiting the process', () => {
+      const tempFile = path.join(__dirname, 'data', 'temp', 'destructor_close.tiff')
+      const command =
+          `"const gdal = require('./lib/gdal.js'); gdal.open('${tempFile}', 'w', 'GTiff', 100, 100, 1, gdal.GDT_Float64);"`
+      let execPath = process.execPath
+      if (process.platform === 'win32') {
+        // quotes to avoid errors like ''C:\Program' is not recognized as an internal or external command'
+        execPath = `"${execPath}"`
+      }
+      try {
+        cp.execSync(`${execPath} ${[ '-e', command ].join(' ')}`)
+      } catch (e) {
+        // This test will return an error when built with ASAN
+        console.warn(e)
+      }
+      const ds = gdal.open(tempFile)
+      assert.instanceOf(ds.bands.get(1).pixels.read(0, 0, 100, 100), Float64Array)
+      ds.close()
+      fs.unlinkSync(tempFile)
+    })
+
     describe('"bands" property', () => {
       it('should exist', () => {
         assert.instanceOf(ds.bands, gdal.DatasetBands)

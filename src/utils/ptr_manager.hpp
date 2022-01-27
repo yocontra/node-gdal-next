@@ -87,6 +87,8 @@ class ObjectStore {
   template <typename GDALPTR> Local<Object> get(GDALPTR ptr);
   template <typename GDALPTR> Local<Object> get(long uid);
 
+  void cleanup();
+
   ObjectStore();
   ~ObjectStore();
 

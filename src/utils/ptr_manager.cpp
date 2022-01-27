@@ -411,4 +411,11 @@ void ObjectStore::do_dispose(long uid, bool manual) {
 #endif
 }
 
+// Closes still open Datasets on process exit
+// Called on the main thread after the event loop has exited
+void ObjectStore::cleanup() {
+  // This unusual loop is needed since dispose deletes elements from the map
+  while (uidMap<GDALDataset *>.size() > 0) { dispose(uidMap<GDALDataset *>.cbegin()->second->uid, true); }
+}
+
 } // namespace node_gdal

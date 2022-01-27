@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.4.2] WIP
  - Support the ArchLinux Node.js 17 ABI - see https://github.com/nodejs/node/issues/41410
+ - Fix #25, always close open Datasets when the process exits
 
 ## [3.4.1] 2021-01-05
 

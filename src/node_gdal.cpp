@@ -372,6 +372,10 @@ static NAN_METHOD(isAlive) {
   info.GetReturnValue().Set(Nan::New(object_store.isAlive(uid)));
 }
 
+void Cleanup(void *) {
+  object_store.cleanup();
+}
+
 static void Init(Local<Object> target, Local<v8::Value>, void *) {
 
   Nan__SetAsyncableMethod(target, "open", gdal_open);
@@ -1663,6 +1667,9 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   NODE_DEFINE_CONSTANT(target, CPLE_AssertionFailed);
   NODE_DEFINE_CONSTANT(target, CPLE_NoWriteAccess);
   NODE_DEFINE_CONSTANT(target, CPLE_UserInterrupt);
+
+  auto *env = GetCurrentEnvironment(target->CreationContext());
+  AtExit(env, Cleanup, nullptr);
 }
 }
 
