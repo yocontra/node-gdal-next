@@ -377,6 +377,12 @@ void Cleanup(void *) {
 }
 
 static void Init(Local<Object> target, Local<v8::Value>, void *) {
+  static bool initialized = false;
+  if (initialized) {
+    Nan::ThrowError("gdal-async does not yet support multiple instances per V8 isolate");
+    return;
+  }
+  initialized = true;
 
   Nan__SetAsyncableMethod(target, "open", gdal_open);
   Nan::SetMethod(target, "setConfigOption", setConfigOption);
