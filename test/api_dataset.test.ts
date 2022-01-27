@@ -38,7 +38,7 @@ describe('gdal.Dataset', () => {
   describe('instance', () => {
 
     it('properly close open Datasets when exiting the process', () => {
-      const tempFile = path.join(__dirname, 'data', 'temp', 'destructor_close.tiff')
+      const tempFile = path.join(__dirname, 'data', 'temp', 'destructor_close.tiff').replace(/\\/g, '/')
       const command =
           `"const gdal = require('./lib/gdal.js'); gdal.open('${tempFile}', 'w', 'GTiff', 100, 100, 1, gdal.GDT_Float64);"`
       let execPath = process.execPath
