@@ -9,7 +9,7 @@ RUN \
   dnf install -y curl rsync && \
   curl -fsSL https://rpm.nodesource.com/setup_${NODEJS}.x | bash - && \
   if [ "${NODEJS}" -le 16 ]; \
-  then dnf module install -y nodejs:${NODEJS}/default; \
+  then dnf module install -y nodejs:${NODEJS}/development; \
   else dnf install -y nodejs; fi && \
   dnf groupinstall -y 'Development Tools' && \
   dnf install -y g++ git python
