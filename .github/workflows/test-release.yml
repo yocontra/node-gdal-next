@@ -19,7 +19,6 @@ jobs:
         - ubuntu:18.04
         - ubuntu:20.04
         - ubuntu:21.10
-        - centos:8
         - debian:buster
         - debian:bullseye
         - fedora:33
