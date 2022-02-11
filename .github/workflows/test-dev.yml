@@ -51,7 +51,7 @@ jobs:
 
     strategy:
       matrix:
-        linux-version: [ 'ubuntu:18.04', 'debian:bullseye', 'centos:8', 'fedora:34', 'archlinux:latest' ]
+        linux-version: [ 'ubuntu:18.04', 'debian:bullseye', 'fedora:34', 'archlinux:latest' ]
 
     steps:
     - uses: actions/checkout@v2
