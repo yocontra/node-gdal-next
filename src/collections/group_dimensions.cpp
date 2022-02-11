@@ -38,14 +38,13 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Group"}}Group{{/crossLink}}'s
+ * An encapsulation of a {@link Group}
  * descendant dimensions.
  *
- *
+ * @example
  * const dimensions = group.dimensions;
  *
  * @class GroupDimensions
- * @memberof gdal
  */
 
 /**
@@ -53,9 +52,9 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method get
  * @instance
- * @memberof gdal.GroupDimensions
+ * @memberof GroupDimensions
  * @param {string|number} array
- * @return {gdal.Dimension}
+ * @return {Dimension}
  */
 
 /**
@@ -64,11 +63,11 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.GroupDimensions
+ * @memberof GroupDimensions
  *
  * @param {string|number} array
- * @param {callback<gdal.Dimension>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Dimension>}
+ * @param {callback<Dimension>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Dimension>}
  */
 
 /**
@@ -76,7 +75,7 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method count
  * @instance
- * @memberof gdal.GroupDimensions
+ * @memberof GroupDimensions
  * @return {number}
  */
 
@@ -86,7 +85,7 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.GroupDimensions
+ * @memberof GroupDimensions
  *
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
@@ -97,7 +96,7 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  * @kind member
  * @name names
  * @instance
- * @memberof gdal.GroupDimensions
+ * @memberof GroupDimensions
  * @type {string[]}
  */
 
@@ -108,8 +107,8 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
  * @kind member
  * @name ds
  * @instance
- * @memberof gdal.GroupDimensions
- * @type {gdal.Dataset}
+ * @memberof GroupDimensions
+ * @type {Dataset}
  */
 #endif
 

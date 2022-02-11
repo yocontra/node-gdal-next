@@ -37,11 +37,9 @@ FeatureFields::~FeatureFields() {
 }
 
 /**
- * An encapsulation of all field data that makes up a {{#crossLink
- * "gdal.Feature"}}Feature{{/crossLink}}.
+ * An encapsulation of all field data that makes up a {@link Feature}.
  *
  * @class FeatureFields
- * @memberof gdal
  */
 NAN_METHOD(FeatureFields::New) {
 
@@ -111,7 +109,7 @@ inline bool setField(OGRFeature *f, int field_index, Local<Value> val) {
  *
  * @method set
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @throws Error
  * @param {string|number} key Field name or index
  * @param {any} value
@@ -120,7 +118,7 @@ inline bool setField(OGRFeature *f, int field_index, Local<Value> val) {
 /**
  * @method set
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @throws Error
  * @param {object} fields
  */
@@ -220,7 +218,7 @@ NAN_METHOD(FeatureFields::set) {
  *
  * @method reset
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @throws Error
  * @param {object} [values]
  * @return {void}
@@ -282,7 +280,7 @@ NAN_METHOD(FeatureFields::reset) {
  *
  * @method count
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @return {number}
  */
 NAN_METHOD(FeatureFields::count) {
@@ -307,7 +305,7 @@ NAN_METHOD(FeatureFields::count) {
  *
  * @method indexOf
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @param {string} name
  * @return {number} Index or, `-1` if it cannot be found.
  */
@@ -333,7 +331,7 @@ NAN_METHOD(FeatureFields::indexOf) {
  * @throws Error
  * @method toObject
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @return {any}
  */
 NAN_METHOD(FeatureFields::toObject) {
@@ -377,7 +375,7 @@ NAN_METHOD(FeatureFields::toObject) {
  * @throws Error
  * @method toArray
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @return {any[]}
  */
 NAN_METHOD(FeatureFields::toArray) {
@@ -441,7 +439,7 @@ Local<Value> FeatureFields::get(OGRFeature *f, int field_index) {
  *
  * @method get
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @param {string|number} key Feature name or index.
  * @throws Error
  * @return {any}
@@ -475,7 +473,7 @@ NAN_METHOD(FeatureFields::get) {
  *
  * @method getNames
  * @instance
- * @memberof gdal.FeatureFields
+ * @memberof FeatureFields
  * @throws Error
  * @return {string[]} List of field names.
  */
@@ -622,8 +620,8 @@ Local<Value> FeatureFields::getFieldAsDateTime(OGRFeature *feature, int field_in
  * @kind member
  * @name feature
  * @instance
- * @memberof gdal.FeatureFields
- * @type {gdal.Feature}
+ * @memberof FeatureFields
+ * @type {Feature}
  */
 NAN_GETTER(FeatureFields::featureGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());

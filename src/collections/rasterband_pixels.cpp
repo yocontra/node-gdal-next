@@ -51,8 +51,7 @@ RasterBand *RasterBandPixels::parent(const Nan::FunctionCallbackInfo<v8::Value> 
 }
 
 /**
- * A representation of a {{#crossLink
- * "gdal.RasterBand"}}RasterBand{{/crossLink}}'s pixels.
+ * A representation of a {@link RasterBand}'s pixels.
  *
  *
  * Note: Typed arrays should be created with an external ArrayBuffer for
@@ -65,7 +64,6 @@ RasterBand *RasterBandPixels::parent(const Nan::FunctionCallbackInfo<v8::Value> 
  * band.pixels.read(0,0,16,16,data);
  *
  * @class RasterBandPixels
- * @memberof gdal
  */
 NAN_METHOD(RasterBandPixels::New) {
 
@@ -109,7 +107,7 @@ NAN_METHOD(RasterBandPixels::toString) {
  *
  * @method get
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @param {number} x
  * @param {number} y
  * @throws Error
@@ -122,7 +120,7 @@ NAN_METHOD(RasterBandPixels::toString) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @param {number} x
  * @param {number} y
  * @param {callback<number>} [callback=undefined] {{{cb}}}
@@ -159,7 +157,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
  *
  * @method set
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @param {number} x
  * @param {number} y
  * @param {number} value
@@ -171,7 +169,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
  *
  * @method setAsync
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @param {number} x
  * @param {number} y
  * @param {number} value
@@ -259,12 +257,12 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
 
 /**
  * @typedef {Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array} TypedArray
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  */
 
 /**
  * @typedef {object} ReadOptions
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @property {number} [buffer_width]
  * @property {number} [buffer_height]
  * @property {string} [type]
@@ -280,7 +278,7 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
  *
  * @method read
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -290,10 +288,10 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
  * @param {ReadOptions} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
- * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT constants{{/crossLink}}.
+ * @param {string} [options.data_type] See {@link GDT|GDT constants}
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
- * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
+ * @param {string} [options.resampling] Resampling algorithm ({@link GRA|available options})
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @return {TypedArray} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
@@ -304,7 +302,7 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
  *
  * @method readAsync
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @param {number} x
  * @param {number} y
  * @param {number} width the width
@@ -313,10 +311,10 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
  * @param {ReadOptions} [options]
  * @param {number} [options.buffer_width=x_size]
  * @param {number} [options.buffer_height=y_size]
- * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT constants{{/crossLink}}.
+ * @param {string} [options.data_type] See {@link GDT|GDT constants}
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
- * @param {string} [options.resampling] Resampling algorithm ({{#crossLink "Constants (GRA)"}}available options{{/crossLink}})
+ * @param {string} [options.resampling] Resampling algorithm ({@link GRA|available options}
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
  * @return {Promise<TypedArray>} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
@@ -430,7 +428,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
 
 /**
  * @typedef {object} WriteOptions
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @property {number} [buffer_width]
  * @property {number} [buffer_height]
  * @property {number} [pixel_space]
@@ -444,7 +442,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  *
  * @method write
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -465,7 +463,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  *
  * @method writeAsync
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @param {number} x
  * @param {number} y
  * @param {number} width
@@ -569,7 +567,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  *
  * @method readBlock
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -583,7 +581,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  *
  * @method readBlockAsync
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -644,7 +642,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
  *
  * @method writeBlock
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -657,7 +655,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
  *
  * @method writeBlockAsync
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -706,7 +704,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
  *
  * @method clampBlock
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -720,7 +718,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
  *
  * @method clampBlockAsync
  * @instance
- * @memberof gdal.RasterBandPixels
+ * @memberof RasterBandPixels
  * @throws Error
  * @param {number} x
  * @param {number} y
@@ -767,8 +765,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::clampBlock) {
  * @kind member
  * @name band
  * @instance
- * @memberof gdal.RasterBandPixels
- * @type {gdal.RasterBand}
+ * @memberof RasterBandPixels
+ * @type {RasterBand}
  */
 NAN_GETTER(RasterBandPixels::bandGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());

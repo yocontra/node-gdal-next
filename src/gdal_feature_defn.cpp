@@ -50,7 +50,6 @@ FeatureDefn::~FeatureDefn() {
  *
  * @constructor
  * @class FeatureDefn
- * @memberof gdal
  */
 NAN_METHOD(FeatureDefn::New) {
   FeatureDefn *f;
@@ -121,8 +120,8 @@ NAN_METHOD(FeatureDefn::toString) {
  *
  * @method clone
  * @instance
- * @memberof gdal.FeatureDefn
- * @return {gdal.FeatureDefn}
+ * @memberof FeatureDefn
+ * @return {FeatureDefn}
  */
 NAN_METHOD(FeatureDefn::clone) {
   FeatureDefn *def = Nan::ObjectWrap::Unwrap<FeatureDefn>(info.This());
@@ -134,7 +133,7 @@ NAN_METHOD(FeatureDefn::clone) {
  * @kind member
  * @name name
  * @instance
- * @memberof gdal.FeatureDefn
+ * @memberof FeatureDefn
  * @type {string}
  */
 NAN_GETTER(FeatureDefn::nameGetter) {
@@ -143,13 +142,12 @@ NAN_GETTER(FeatureDefn::nameGetter) {
 }
 
 /**
- * WKB geometry type ({{#crossLink "Constants (wkbGeometryType)"}}see
- * table{{/crossLink}})
+ * WKB geometry type ({@link wkbGeometryType|see table}
  *
  * @kind member
  * @name geomType
  * @instance
- * @memberof gdal.FeatureDefn
+ * @memberof FeatureDefn
  * @type {number}
  */
 NAN_GETTER(FeatureDefn::geomTypeGetter) {
@@ -161,7 +159,7 @@ NAN_GETTER(FeatureDefn::geomTypeGetter) {
  * @kind member
  * @name geomIgnored
  * @instance
- * @memberof gdal.FeatureDefn
+ * @memberof FeatureDefn
  * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
@@ -173,7 +171,7 @@ NAN_GETTER(FeatureDefn::geomIgnoredGetter) {
  * @kind member
  * @name styleIgnored
  * @instance
- * @memberof gdal.FeatureDefn
+ * @memberof FeatureDefn
  * @type {boolean}
  */
 NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
@@ -186,8 +184,8 @@ NAN_GETTER(FeatureDefn::styleIgnoredGetter) {
  * @kind member
  * @name fields
  * @instance
- * @memberof gdal.FeatureDefn
- * @type {gdal.FeatureDefnFields}
+ * @memberof FeatureDefn
+ * @type {FeatureDefnFields}
  */
 NAN_GETTER(FeatureDefn::fieldsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("fields_").ToLocalChecked()).ToLocalChecked());

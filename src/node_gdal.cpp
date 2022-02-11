@@ -269,7 +269,6 @@ static NAN_METHOD(getConfigOption) {
 /**
  * Convert decimal degrees to degrees, minutes, and seconds string
  *
- * @memberof gdal
  * @static
  * @method decToDMS
  * @param {number} angle
@@ -300,7 +299,6 @@ static NAN_METHOD(decToDMS) {
 /**
  * Set paths where proj will search it data.
  *
- * @memberof gdal
  * @static
  * @method setPROJSearchPaths
  * @param {string} path `c:\ProjData`
@@ -415,17 +413,13 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @static
    * @constant
    * @name drivers
-   * @memberof gdal
-   * @type {gdal.GDALDrivers}
+   * @type {GDALDrivers}
    */
   GDALDrivers::Initialize(target); // calls GDALRegisterAll()
   Nan::Set(target, Nan::New("drivers").ToLocalChecked(), GDALDrivers::New());
 
-  /**
+  /*
    * DMD Constants
-   *
-   * @namespace DMD
-   * @memberof gdal
    */
 
   /**
@@ -433,14 +427,12 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @constant
    * @type {string}
    * @name DMD_LONGNAME
-   * @memberof gdal.DMD
    */
   Nan::Set(target, Nan::New("DMD_LONGNAME").ToLocalChecked(), Nan::New(GDAL_DMD_LONGNAME).ToLocalChecked());
   /**
    * @final
    * @constant
    * @name DMD_MIMETYPE
-   * @memberof gdal.DMD
    * @type {string}
    */
   Nan::Set(target, Nan::New("DMD_MIMETYPE").ToLocalChecked(), Nan::New(GDAL_DMD_MIMETYPE).ToLocalChecked());
@@ -448,7 +440,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DMD_HELPTOPIC
-   * @memberof gdal.DMD
    * @type {string}
    */
   Nan::Set(target, Nan::New("DMD_HELPTOPIC").ToLocalChecked(), Nan::New(GDAL_DMD_HELPTOPIC).ToLocalChecked());
@@ -456,7 +447,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DMD_EXTENSION
-   * @memberof gdal.DMD
    * @type {string}
    */
   Nan::Set(target, Nan::New("DMD_EXTENSION").ToLocalChecked(), Nan::New(GDAL_DMD_EXTENSION).ToLocalChecked());
@@ -464,7 +454,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DMD_CREATIONOPTIONLIST
-   * @memberof gdal.DMD
    * @type {string}
    */
   Nan::Set(
@@ -475,17 +464,13 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DMD_CREATIONDATATYPES
-   * @memberof gdal.DMD
    * @type {string}
    */
   Nan::Set(
     target, Nan::New("DMD_CREATIONDATATYPES").ToLocalChecked(), Nan::New(GDAL_DMD_CREATIONDATATYPES).ToLocalChecked());
 
-  /**
+  /*
    * CE Error levels
-   *
-   * @namespace CE
-   * @memberof gdal
    */
 
   /**
@@ -494,7 +479,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CE_None
-   * @memberof gdal.CE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CE_None").ToLocalChecked(), Nan::New(CE_None));
@@ -504,7 +488,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CE_Debug
-   * @memberof gdal.CE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CE_Debug").ToLocalChecked(), Nan::New(CE_Debug));
@@ -514,7 +497,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CE_Warning
-   * @memberof gdal.CE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CE_Warning").ToLocalChecked(), Nan::New(CE_Warning));
@@ -524,7 +506,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CE_Failure
-   * @memberof gdal.CE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CE_Failure").ToLocalChecked(), Nan::New(CE_Failure));
@@ -534,23 +515,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CE_Fatal
-   * @memberof gdal.CE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CE_Fatal").ToLocalChecked(), Nan::New(CE_Fatal));
 
-  /**
+  /*
    * CPL Error codes
-   *
-   * @namespace CPLE
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name CPLE_None
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_None").ToLocalChecked(), Nan::New(CPLE_None));
@@ -558,7 +534,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_AppDefined
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_AppDefined").ToLocalChecked(), Nan::New(CPLE_AppDefined));
@@ -566,7 +541,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_OutOfMemory
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_OutOfMemory").ToLocalChecked(), Nan::New(CPLE_OutOfMemory));
@@ -574,7 +548,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_FileIO
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_FileIO").ToLocalChecked(), Nan::New(CPLE_FileIO));
@@ -582,7 +555,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_OpenFailed
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_OpenFailed").ToLocalChecked(), Nan::New(CPLE_OpenFailed));
@@ -590,7 +562,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_IllegalArg
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_IllegalArg").ToLocalChecked(), Nan::New(CPLE_IllegalArg));
@@ -598,7 +569,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_NotSupported
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_NotSupported").ToLocalChecked(), Nan::New(CPLE_NotSupported));
@@ -606,7 +576,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_AssertionFailed
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_AssertionFailed").ToLocalChecked(), Nan::New(CPLE_AssertionFailed));
@@ -614,7 +583,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_NoWriteAccess
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_NoWriteAccess").ToLocalChecked(), Nan::New(CPLE_NoWriteAccess));
@@ -622,7 +590,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_UserInterrupt
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_UserInterrupt").ToLocalChecked(), Nan::New(CPLE_UserInterrupt));
@@ -630,23 +597,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name CPLE_objectNull
-   * @memberof gdal.CPLE
    * @type {number}
    */
   Nan::Set(target, Nan::New("CPLE_ObjectNull").ToLocalChecked(), Nan::New(CPLE_ObjectNull));
 
-  /**
+  /*
    * Driver Dataset creation constants
-   *
-   * @namespace DCAP
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name DCAP_CREATE
-   * @memberof gdal.DCAP
    * @type {string}
    */
   Nan::Set(target, Nan::New("DCAP_CREATE").ToLocalChecked(), Nan::New(GDAL_DCAP_CREATE).ToLocalChecked());
@@ -654,7 +616,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DCAP_CREATECOPY
-   * @memberof gdal.DCAP
    * @type {string}
    */
   Nan::Set(target, Nan::New("DCAP_CREATECOPY").ToLocalChecked(), Nan::New(GDAL_DCAP_CREATECOPY).ToLocalChecked());
@@ -662,23 +623,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DCAP_VIRTUALIO
-   * @memberof gdal.DCAP
    * @type {string}
    */
   Nan::Set(target, Nan::New("DCAP_VIRTUALIO").ToLocalChecked(), Nan::New(GDAL_DCAP_VIRTUALIO).ToLocalChecked());
 
-  /**
+  /*
    * OLC Constants
-   *
-   * @namespace OLC
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name OLCRandomRead
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCRandomRead").ToLocalChecked(), Nan::New(OLCRandomRead).ToLocalChecked());
@@ -686,7 +642,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCSequentialWrite
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCSequentialWrite").ToLocalChecked(), Nan::New(OLCSequentialWrite).ToLocalChecked());
@@ -694,7 +649,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCRandomWrite
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCRandomWrite").ToLocalChecked(), Nan::New(OLCRandomWrite).ToLocalChecked());
@@ -702,7 +656,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCFastSpatialFilter
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCFastSpatialFilter").ToLocalChecked(), Nan::New(OLCFastSpatialFilter).ToLocalChecked());
@@ -710,7 +663,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCFastFeatureCount
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCFastFeatureCount").ToLocalChecked(), Nan::New(OLCFastFeatureCount).ToLocalChecked());
@@ -718,7 +670,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCFastGetExtent
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCFastGetExtent").ToLocalChecked(), Nan::New(OLCFastGetExtent).ToLocalChecked());
@@ -726,7 +677,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCCreateField
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCCreateField").ToLocalChecked(), Nan::New(OLCCreateField).ToLocalChecked());
@@ -734,7 +684,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCDeleteField
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCDeleteField").ToLocalChecked(), Nan::New(OLCDeleteField).ToLocalChecked());
@@ -742,7 +691,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCReorderFields
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCReorderFields").ToLocalChecked(), Nan::New(OLCReorderFields).ToLocalChecked());
@@ -750,7 +698,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCAlterFieldDefn
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCAlterFieldDefn").ToLocalChecked(), Nan::New(OLCAlterFieldDefn).ToLocalChecked());
@@ -758,7 +705,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCTransactions
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCTransactions").ToLocalChecked(), Nan::New(OLCTransactions).ToLocalChecked());
@@ -766,7 +712,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCDeleteFeature
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCDeleteFeature").ToLocalChecked(), Nan::New(OLCDeleteFeature).ToLocalChecked());
@@ -774,7 +719,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCFastSetNextByIndex
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(
@@ -783,7 +727,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCStringsAsUTF8
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCStringsAsUTF8").ToLocalChecked(), Nan::New(OLCStringsAsUTF8).ToLocalChecked());
@@ -791,7 +734,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCIgnoreFields
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCIgnoreFields").ToLocalChecked(), Nan::New(OLCIgnoreFields).ToLocalChecked());
@@ -801,25 +743,20 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OLCCreateGeomField
-   * @memberof gdal.OLC
    * @type {string}
    */
   Nan::Set(target, Nan::New("OLCCreateGeomField").ToLocalChecked(), Nan::New(OLCCreateGeomField).ToLocalChecked());
 #endif
 #ifdef ODsCCreateGeomFieldAfterCreateLayer
 
-  /**
+  /*
    * ODsC constants
-   *
-   * @namespace ODsC
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name ODsCCreateLayer
-   * @memberof gdal.ODsC
    * @type {string}
    */
   Nan::Set(target, Nan::New("ODsCCreateLayer").ToLocalChecked(), Nan::New(ODsCCreateLayer).ToLocalChecked());
@@ -827,7 +764,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name ODsCDeleteLayer
-   * @memberof gdal.ODsC
    * @type {string}
    */
   Nan::Set(target, Nan::New("ODsCDeleteLayer").ToLocalChecked(), Nan::New(ODsCDeleteLayer).ToLocalChecked());
@@ -835,7 +771,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name ODsCCreateGeomFieldAfterCreateLayer
-   * @memberof gdal.ODsC
    * @type {string}
    */
   Nan::Set(
@@ -847,7 +782,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name ODrCCreateDataSource
-   * @memberof gdal.ODsC
    * @type {string}
    */
   Nan::Set(target, Nan::New("ODrCCreateDataSource").ToLocalChecked(), Nan::New(ODrCCreateDataSource).ToLocalChecked());
@@ -855,23 +789,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name ODrCDeleteDataSource
-   * @memberof gdal.ODsC
    * @type {string}
    */
   Nan::Set(target, Nan::New("ODrCDeleteDataSource").ToLocalChecked(), Nan::New(ODrCDeleteDataSource).ToLocalChecked());
 
-  /**
+  /*
    * open flags
-   *
-   * @namespace GA
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name GA_Readonly
-   * @memberof gdal.GA
    * @type {number}
    */
   NODE_DEFINE_CONSTANT(target, GA_ReadOnly);
@@ -880,23 +809,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GA_Update
-   * @memberof gdal.GA
    * @type {number}
    */
   NODE_DEFINE_CONSTANT(target, GA_Update);
 
-  /**
+  /*
    * RasterIO flags
-   *
-   * @namespace GF
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name GF_Read
-   * @memberof gdal.GF
    * @type {number}
    */
   NODE_DEFINE_CONSTANT(target, GF_Read);
@@ -905,16 +829,12 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GF_Write
-   * @memberof gdal.GF
    * @type {number}
    */
   NODE_DEFINE_CONSTANT(target, GF_Write);
 
-  /**
+  /*
    * Pixel data types.
-   *
-   * @namespace GDT
-   * @memberof gdal
    */
 
   /**
@@ -922,7 +842,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_Unknown
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_Unknown").ToLocalChecked(), Nan::Undefined());
@@ -931,7 +850,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_Byte
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_Byte").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_Byte)).ToLocalChecked());
@@ -940,7 +858,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_UInt16
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_UInt16").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_UInt16)).ToLocalChecked());
@@ -949,7 +866,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_Int16
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_Int16").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_Int16)).ToLocalChecked());
@@ -958,7 +874,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_UInt32
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_UInt32").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_UInt32)).ToLocalChecked());
@@ -967,7 +882,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_Int32
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_Int32").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_Int32)).ToLocalChecked());
@@ -976,7 +890,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_Float32
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(
@@ -986,7 +899,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_Float64
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(
@@ -996,7 +908,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_CInt16
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_CInt16").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_CInt16)).ToLocalChecked());
@@ -1005,7 +916,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_CInt32
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GDT_CInt32").ToLocalChecked(), Nan::New(GDALGetDataTypeName(GDT_CInt32)).ToLocalChecked());
@@ -1014,7 +924,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_CFloat32
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(
@@ -1024,7 +933,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GDT_CFloat64
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(
@@ -1036,7 +944,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GEDTC_String
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GEDTC_String").ToLocalChecked(), Nan::New("String").ToLocalChecked());
@@ -1046,22 +953,19 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GEDTC_Compound
-   * @memberof gdal.GDT
    * @type {string}
    */
   Nan::Set(target, Nan::New("GEDTC_Compound").ToLocalChecked(), Nan::New("Compound").ToLocalChecked());
 #endif
 
-  /**
-   * @namespace OJ
-   * @memberof gdal
+  /*
+   * Justification
    */
 
   /**
    * @final
    * @constant
    * @name OJUndefined
-   * @memberof gdal.OJ
    * @type {string}
    */
   Nan::Set(target, Nan::New("OJUndefined").ToLocalChecked(), Nan::Undefined());
@@ -1069,7 +973,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OJLeft
-   * @memberof gdal.OJ
    * @type {string}
    */
   Nan::Set(target, Nan::New("OJLeft").ToLocalChecked(), Nan::New("Left").ToLocalChecked());
@@ -1077,23 +980,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OJRight
-   * @memberof gdal.OJ
    * @type {string}
    */
   Nan::Set(target, Nan::New("OJRight").ToLocalChecked(), Nan::New("Right").ToLocalChecked());
 
-  /**
+  /*
    * Color interpretation constants
-   *
-   * @namespace GCI
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name GCI_Undefined
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(target, Nan::New("GCI_Undefined").ToLocalChecked(), Nan::Undefined());
@@ -1101,7 +999,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_GrayIndex
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1112,7 +1009,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_PaletteIndex
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1123,7 +1019,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_RedBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1134,7 +1029,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_GreenBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1145,7 +1039,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_BlueBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1156,7 +1049,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_AlphaBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1167,7 +1059,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_HueBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1178,7 +1069,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_SaturationBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1189,7 +1079,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_LightnessBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1200,7 +1089,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_CyanBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1211,7 +1099,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_MagentaBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1222,7 +1109,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_YellowBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1233,7 +1119,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_BlackBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1244,7 +1129,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_YCbCr_YBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1255,7 +1139,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_YCbCr_CbBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1266,7 +1149,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GCI_YCbCr_CrBand
-   * @memberof gdal.GCI
    * @type {string}
    */
   Nan::Set(
@@ -1274,11 +1156,8 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
     Nan::New("GCI_YCbCr_CrBand").ToLocalChecked(),
     Nan::New(GDALGetColorInterpretationName(GCI_YCbCr_CrBand)).ToLocalChecked());
 
-  /**
+  /*
    * Palette types.
-   *
-   * @namespace GPI
-   * @memberof gdal
    */
 
   /**
@@ -1286,7 +1165,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GPI_Gray
-   * @memberof gdal.GPI
    * @type {string}
    */
   Nan::Set(target, Nan::New("GPI_Gray").ToLocalChecked(), Nan::New("Gray").ToLocalChecked());
@@ -1296,7 +1174,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GPI_RGB
-   * @memberof gdal.GPI
    * @type {string}
    */
   Nan::Set(target, Nan::New("GPI_RGB").ToLocalChecked(), Nan::New("RGB").ToLocalChecked());
@@ -1306,7 +1183,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GPI_CMYK
-   * @memberof gdal.GPI
    * @type {string}
    */
   Nan::Set(target, Nan::New("GPI_CMYK").ToLocalChecked(), Nan::New("CMYK").ToLocalChecked());
@@ -1316,16 +1192,12 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GPI_HLS
-   * @memberof gdal.GPI
    * @type {string}
    */
   Nan::Set(target, Nan::New("GPI_HLS").ToLocalChecked(), Nan::New("HLS").ToLocalChecked());
 
-  /**
+  /*
    * WKB Variants
-   *
-   * @namespace wkbVariant
-   * @memberof gdal
    */
 
   /**
@@ -1335,7 +1207,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbVariantOgc
-   * @memberof gdal.wkbVariant
    * @type {string}
    */
   Nan::Set(target, Nan::New("wkbVariantOgc").ToLocalChecked(), Nan::New("OGC").ToLocalChecked());
@@ -1347,7 +1218,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbVariantOldOgc
-   * @memberof gdal.wkbVariant
    * @type {string}
    */
   Nan::Set(target, Nan::New("wkbVariantOldOgc").ToLocalChecked(), Nan::New("OGC").ToLocalChecked());
@@ -1358,23 +1228,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbVariantIso
-   * @memberof gdal.wkbVariant
    * @type {string}
    */
   Nan::Set(target, Nan::New("wkbVariantIso").ToLocalChecked(), Nan::New("ISO").ToLocalChecked());
 
-  /**
+  /*
    * WKB Byte Ordering
-   *
-   * @namespace wkbByteOrder
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name wkbXDR
-   * @memberof gdal.wkbByteOrder
    * @type {string}
    */
   Nan::Set(target, Nan::New("wkbXDR").ToLocalChecked(), Nan::New("MSB").ToLocalChecked());
@@ -1382,16 +1247,12 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbNDR
-   * @memberof gdal.wkbByteOrder
    * @type {string}
    */
   Nan::Set(target, Nan::New("wkbNDR").ToLocalChecked(), Nan::New("LSB").ToLocalChecked());
 
-  /**
+  /*
    * WKB Geometry Types
-   *
-   * @namespace wkbGeometryType
-   * @memberof gdal
    */
 
   /**
@@ -1410,7 +1271,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    *
    * @constant
    * @name wkb25DBit
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkb25DBit").ToLocalChecked(), Nan::New<Integer>(wkb25DBit));
@@ -1421,7 +1281,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbUnknown
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbUnknown").ToLocalChecked(), Nan::New<Integer>(wkbUnknown));
@@ -1429,7 +1288,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbPoint
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbPoint").ToLocalChecked(), Nan::New<Integer>(wkbPoint));
@@ -1437,7 +1295,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbLineString
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbLineString").ToLocalChecked(), Nan::New<Integer>(wkbLineString));
@@ -1445,7 +1302,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbCircularString
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbCircularString").ToLocalChecked(), Nan::New<Integer>(wkbCircularString));
@@ -1453,7 +1309,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbCompoundCurve
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbCompoundCurve").ToLocalChecked(), Nan::New<Integer>(wkbCompoundCurve));
@@ -1461,7 +1316,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbMultiCurve
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiCurve").ToLocalChecked(), Nan::New<Integer>(wkbMultiCurve));
@@ -1469,7 +1323,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbPolygon
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbPolygon").ToLocalChecked(), Nan::New<Integer>(wkbPolygon));
@@ -1477,7 +1330,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbMultiPoint
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiPoint").ToLocalChecked(), Nan::New<Integer>(wkbMultiPoint));
@@ -1485,7 +1337,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbMultiLineString
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiLineString").ToLocalChecked(), Nan::New<Integer>(wkbMultiLineString));
@@ -1493,7 +1344,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbMultiPolygon
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiPolygon").ToLocalChecked(), Nan::New<Integer>(wkbMultiPolygon));
@@ -1501,7 +1351,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbGeometryCollection
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbGeometryCollection").ToLocalChecked(), Nan::New<Integer>(wkbGeometryCollection));
@@ -1509,7 +1358,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbNone
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbNone").ToLocalChecked(), Nan::New<Integer>(wkbNone));
@@ -1517,7 +1365,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbLinearRing
-   * @memberof gdal.wkbGeometryType
    * @type {string}
    */
   Nan::Set(target, Nan::New("wkbLinearRing").ToLocalChecked(), Nan::New<Integer>(wkbLinearRing));
@@ -1525,7 +1372,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbPoint25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbPoint25D").ToLocalChecked(), Nan::New<Integer>(wkbPoint25D));
@@ -1533,7 +1379,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbLineString25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbLineString25D").ToLocalChecked(), Nan::New<Integer>(wkbLineString25D));
@@ -1541,7 +1386,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbPolygon25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbPolygon25D").ToLocalChecked(), Nan::New<Integer>(wkbPolygon25D));
@@ -1549,7 +1393,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbMultiPoint25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiPoint25D").ToLocalChecked(), Nan::New<Integer>(wkbMultiPoint25D));
@@ -1557,7 +1400,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbMultiLineString25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiLineString25D").ToLocalChecked(), Nan::New<Integer>(wkbMultiLineString25D));
@@ -1565,7 +1407,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbMultiPolygon25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbMultiPolygon25D").ToLocalChecked(), Nan::New<Integer>(wkbMultiPolygon25D));
@@ -1573,7 +1414,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbGeometryCollection25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbGeometryCollection25D").ToLocalChecked(), Nan::New<Integer>(wkbGeometryCollection25D));
@@ -1581,23 +1421,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name wkbLinearRing25D
-   * @memberof gdal.wkbGeometryType
    * @type {number}
    */
   Nan::Set(target, Nan::New("wkbLinearRing25D").ToLocalChecked(), Nan::New<Integer>(wkbLinearRing25D));
 
-  /**
+  /*
    * Field types
-   *
-   * @namespace OFT
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name OFTInteger
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTInteger").ToLocalChecked(), Nan::New(getFieldTypeName(OFTInteger)).ToLocalChecked());
@@ -1605,7 +1440,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTIntegerList
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(
@@ -1615,7 +1449,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTInteger64
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(
@@ -1624,7 +1457,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTInteger64List
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(
@@ -1635,7 +1467,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTReal
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTReal").ToLocalChecked(), Nan::New(getFieldTypeName(OFTReal)).ToLocalChecked());
@@ -1643,7 +1474,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTRealList
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTRealList").ToLocalChecked(), Nan::New(getFieldTypeName(OFTRealList)).ToLocalChecked());
@@ -1651,7 +1481,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTString
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTString").ToLocalChecked(), Nan::New(getFieldTypeName(OFTString)).ToLocalChecked());
@@ -1659,7 +1488,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTStringList
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(
@@ -1668,7 +1496,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTWideString
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(
@@ -1677,7 +1504,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTWideStringList
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(
@@ -1688,7 +1514,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTBinary
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTBinary").ToLocalChecked(), Nan::New(getFieldTypeName(OFTBinary)).ToLocalChecked());
@@ -1696,7 +1521,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTDate
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTDate").ToLocalChecked(), Nan::New(getFieldTypeName(OFTDate)).ToLocalChecked());
@@ -1704,7 +1528,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTTime
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTTime").ToLocalChecked(), Nan::New(getFieldTypeName(OFTTime)).ToLocalChecked());
@@ -1712,23 +1535,18 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name OFTDateTime
-   * @memberof gdal.OFT
    * @type {string}
    */
   Nan::Set(target, Nan::New("OFTDateTime").ToLocalChecked(), Nan::New(getFieldTypeName(OFTDateTime)).ToLocalChecked());
 
-  /**
+  /*
    * Resampling options that can be used with the gdal.reprojectImage() and gdal.RasterBandPixels.read methods.
-   *
-   * @namespace GRA
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name GRA_NearestNeighbor
-   * @memberof gdal.GRA
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_NearestNeighbor").ToLocalChecked(), Nan::New("NearestNeighbor").ToLocalChecked());
@@ -1736,7 +1554,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GRA_Bilinear
-   * @memberof gdal.GRA
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_Bilinear").ToLocalChecked(), Nan::New("Bilinear").ToLocalChecked());
@@ -1744,7 +1561,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GRA_Cubic
-   * @memberof gdal.GRA
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_Cubic").ToLocalChecked(), Nan::New("Cubic").ToLocalChecked());
@@ -1752,7 +1568,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GRA_CubicSpline
-   * @memberof gdal.GRA
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_CubicSpline").ToLocalChecked(), Nan::New("CubicSpline").ToLocalChecked());
@@ -1760,7 +1575,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GRA_Lanczos
-   * @memberof gdal.GRA
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_Lanczos").ToLocalChecked(), Nan::New("Lanczos").ToLocalChecked());
@@ -1768,7 +1582,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GRA_Average
-   * @memberof gdal.GRA
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_Average").ToLocalChecked(), Nan::New("Average").ToLocalChecked());
@@ -1776,24 +1589,19 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name GRA_Mode
-   * @memberof gdal.GRA
    * @type {string}
    */
   Nan::Set(target, Nan::New("GRA_Mode").ToLocalChecked(), Nan::New("Mode").ToLocalChecked());
 
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 1)
-  /**
+  /*
    * Dimension types for gdal.Dimension (GDAL >= 3.3)
-   *
-   * @namespace DIM
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name DIM_HORIZONTAL_X
-   * @memberof gdal.DIM
    * @type {string}
    */
   Nan::Set(
@@ -1803,7 +1611,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIM_HORIZONTAL_Y
-   * @memberof gdal.DIM
    * @type {string}
    */
   Nan::Set(
@@ -1813,7 +1620,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIM_VERTICAL
-   * @memberof gdal.DIM
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIM_VERTICAL").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_VERTICAL).ToLocalChecked());
@@ -1822,7 +1628,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIM_TEMPORAL
-   * @memberof gdal.DIM
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIM_TEMPORAL").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_TEMPORAL).ToLocalChecked());
@@ -1831,24 +1636,19 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIM_PARAMETRIC
-   * @memberof gdal.DIM
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIM_PARAMETRIC").ToLocalChecked(), Nan::New(GDAL_DIM_TYPE_PARAMETRIC).ToLocalChecked());
 #endif
 
-  /**
+  /*
    * Direction types for gdal.Dimension (GDAL >= 3.3)
-   *
-   * @namespace DIR
-   * @memberof gdal
    */
 
   /**
    * @final
    * @constant
    * @name DIR_EAST
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_EAST").ToLocalChecked(), Nan::New("EAST").ToLocalChecked());
@@ -1857,7 +1657,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIR_WEST
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_WEST").ToLocalChecked(), Nan::New("WEST").ToLocalChecked());
@@ -1866,7 +1665,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIR_SOUTH
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_SOUTH").ToLocalChecked(), Nan::New("SOUTH").ToLocalChecked());
@@ -1875,7 +1673,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIR_NORTH
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_NORTH").ToLocalChecked(), Nan::New("NORTH").ToLocalChecked());
@@ -1884,7 +1681,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIR_UP
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_UP").ToLocalChecked(), Nan::New("UP").ToLocalChecked());
@@ -1893,7 +1689,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIR_DOWN
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_DOWN").ToLocalChecked(), Nan::New("DOWN").ToLocalChecked());
@@ -1902,7 +1697,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIR_FUTURE
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_FUTURE").ToLocalChecked(), Nan::New("FUTURE").ToLocalChecked());
@@ -1911,7 +1705,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * @final
    * @constant
    * @name DIR_PAST
-   * @memberof gdal.DIR
    * @type {string}
    */
   Nan::Set(target, Nan::New("DIR_PAST").ToLocalChecked(), Nan::New("PAST").ToLocalChecked());
@@ -1920,7 +1713,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * GDAL version (not the binding version)
    *
    * @final
-   * @memberof gdal
    * @constant {string} version
    */
   Nan::Set(target, Nan::New("version").ToLocalChecked(), Nan::New(GDAL_RELEASE_NAME).ToLocalChecked());
@@ -1929,7 +1721,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * GDAL library - system library (false) or bundled (true)
    *
    * @final
-   * @memberof gdal
    * @constant {boolean} bundled
    */
 #ifdef BUNDLED_GDAL
@@ -1943,7 +1734,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * will be null or an object containing three properties: "number",
    * "message", and "type".
    *
-   * @memberof gdal
    * @var {object} lastError
    */
   Nan::SetAccessor(target, Nan::New<v8::String>("lastError").ToLocalChecked(), LastErrorGetter, LastErrorSetter);
@@ -1954,7 +1744,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
    * the user application needs to remain responsive at all times
    * Use `(gdal as any).eventLoopWarning = false` to set the value from TypeScript
    *
-   * @memberof gdal
    * @var {boolean} eventLoopWarning
    */
   Nan::SetAccessor(
@@ -1969,7 +1758,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   /**
    * Disables all output.
    *
-   * @memberof gdal
    * @static
    * @method quiet
    */
@@ -1978,7 +1766,6 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
   /**
    * Displays extra debugging information from GDAL.
    *
-   * @memberof gdal
    * @static
    * @method verbose
    */

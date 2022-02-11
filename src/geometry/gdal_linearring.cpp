@@ -56,8 +56,7 @@ Local<Value> LinearRing::New(OGRLinearRing *geom, bool owned) {
  *
  * @constructor
  * @class LinearRing
- * @extends gdal.LineString
- * @memberof gdal
+ * @extends LineString
  */
 
 NAN_METHOD(LinearRing::toString) {
@@ -69,7 +68,7 @@ NAN_METHOD(LinearRing::toString) {
  *
  * @method getArea
  * @instance
- * @memberof gdal.LinearRing
+ * @memberof LinearRing
  * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(LinearRing, getArea, Number, get_Area);

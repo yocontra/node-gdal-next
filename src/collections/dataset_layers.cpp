@@ -38,14 +38,13 @@ DatasetLayers::~DatasetLayers() {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Dataset"}}Dataset{{/crossLink}}'s
+ * An encapsulation of a {@link Dataset}
  * vector layers.
  *
- *
+ * @example
  * var layers = dataset.layers;
  *
  * @class DatasetLayers
- * @memberof gdal
  */
 NAN_METHOD(DatasetLayers::New) {
 
@@ -89,10 +88,10 @@ NAN_METHOD(DatasetLayers::toString) {
  *
  * @method get
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @param {string|number} key Layer name or ID.
  * @throws Error
- * @return {gdal.Layer}
+ * @return {Layer}
  */
 
 /**
@@ -101,11 +100,11 @@ NAN_METHOD(DatasetLayers::toString) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @param {string|number} key Layer name or ID.
- * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
+ * @param {callback<Layer>} [callback=undefined] {{{cb}}}
  * @throws Error
- * @return {Promise<gdal.Layer>}
+ * @return {Promise<Layer>}
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
@@ -164,15 +163,14 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  *
  * @method create
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @throws Error
  * @param {string} name Layer name
- * @param {gdal.SpatialReference|null} [srs=null] Layer projection
- * @param {number|Function|null} [geomType=null] Geometry type or constructor ({{#crossLink
- * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
+ * @param {SpatialReference|null} [srs=null] Layer projection
+ * @param {number|Function|null} [geomType=null] Geometry type or constructor ({@link wkbGeometryType|see geometry types})
  * @param {string[]|object} [creation_options] driver-specific layer creation
  * options
- * @return {gdal.Layer}
+ * @return {Layer}
  */
 
 /**
@@ -187,16 +185,15 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  *
  * @method createAsync
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @throws Error
  * @param {string} name Layer name
- * @param {gdal.SpatialReference|null} [srs=null] Layer projection
- * @param {number|Function|null} [geomType=null] Geometry type or constructor ({{#crossLink
- * "Constants (wkbGeometryType)"}}see geometry types{{/crossLink}})
+ * @param {SpatialReference|null} [srs=null] Layer projection
+ * @param {number|Function|null} [geomType=null] Geometry type or constructor ({@link wkbGeometryType|see geometry types})
  * @param {string[]|object} [creation_options] driver-specific layer creation
  * options
- * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Layer>}
+ * @param {callback<Layer>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Layer>}
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
@@ -248,7 +245,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
  *
  * @method count
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @return {number}
  */
 
@@ -258,7 +255,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */
@@ -292,11 +289,11 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  *
  * @method copy
  * @instance
- * @memberof gdal.DatasetLayers
- * @param {gdal.Layer} src_lyr_name
+ * @memberof DatasetLayers
+ * @param {Layer} src_lyr_name
  * @param {string} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
- * @return {gdal.Layer}
+ * @return {Layer}
  */
 
 /**
@@ -305,12 +302,12 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  *
  * @method copyAsync
  * @instance
- * @memberof gdal.DatasetLayers
- * @param {gdal.Layer} src_lyr_name
+ * @memberof DatasetLayers
+ * @param {Layer} src_lyr_name
  * @param {string} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
- * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Layer>}
+ * @param {callback<Layer>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Layer>}
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
@@ -356,7 +353,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
  *
  * @method remove
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @throws Error
  * @param {number} index
  */
@@ -367,7 +364,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
  *
  * @method removeAsync
  * @instance
- * @memberof gdal.DatasetLayers
+ * @memberof DatasetLayers
  * @throws Error
  * @param {number} index
  * @param {callback<void>} [callback=undefined] {{{cb}}}
@@ -408,8 +405,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::remove) {
  * @kind member
  * @name ds
  * @instance
- * @memberof gdal.DatasetLayers
- * @type {gdal.Dataset}
+ * @memberof DatasetLayers
+ * @type {Dataset}
  */
 NAN_GETTER(DatasetLayers::dsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());

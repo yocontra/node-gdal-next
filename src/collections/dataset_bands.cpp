@@ -35,14 +35,13 @@ DatasetBands::~DatasetBands() {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Dataset"}}Dataset{{/crossLink}}'s
+ * An encapsulation of a {@link Dataset}
  * raster bands.
  *
- *
+ * @example
  * var bands = dataset.bands;
  *
  * @class DatasetBands
- * @memberof gdal
  */
 NAN_METHOD(DatasetBands::New) {
 
@@ -85,10 +84,10 @@ NAN_METHOD(DatasetBands::toString) {
  *
  * @method get
  * @instance
- * @memberof gdal.DatasetBands
+ * @memberof DatasetBands
  * @param {number} id
  * @throws Error
- * @return {gdal.RasterBand}
+ * @return {RasterBand}
  */
 
 /**
@@ -97,12 +96,12 @@ NAN_METHOD(DatasetBands::toString) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.DatasetBands
+ * @memberof DatasetBands
  *
  * @param {number} id
- * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
+ * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
  * @throws Error
- * @return {Promise<gdal.RasterBand>}
+ * @return {Promise<RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
 
@@ -136,11 +135,11 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  *
  * @method create
  * @instance
- * @memberof gdal.DatasetBands
+ * @memberof DatasetBands
  * @throws Error
- * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
+ * @param {string} dataType Type of band ({@link GDT|see GDT constants})
  * @param {object|string[]} [options] Creation options
- * @return {gdal.RasterBand}
+ * @return {RasterBand}
  */
 
 /**
@@ -149,12 +148,12 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  *
  * @method createAsync
  * @instance
- * @memberof gdal.DatasetBands
+ * @memberof DatasetBands
  * @throws Error
- * @param {string} dataType Type of band ({{#crossLink "Constants (GDT)"}}see GDT constants{{/crossLink}}).
+ * @param {string} dataType Type of band ({@link GDT|see GDT constants})
  * @param {object|string[]} [options] Creation options
- * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.RasterBand>}
+ * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
+ * @return {Promise<RasterBand>}
  */
 
 GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
@@ -208,7 +207,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
  *
  * @method count
  * @instance
- * @memberof gdal.DatasetBands
+ * @memberof DatasetBands
  * @return {number}
  */
 
@@ -219,7 +218,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.DatasetBands
+ * @memberof DatasetBands
  *
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
@@ -253,8 +252,8 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {
  * @kind member
  * @name ds
  * @instance
- * @memberof gdal.DatasetBands
- * @type {gdal.Dataset}
+ * @memberof DatasetBands
+ * @type {Dataset}
  */
 NAN_GETTER(DatasetBands::dsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());

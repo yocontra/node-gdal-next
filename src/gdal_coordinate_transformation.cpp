@@ -46,9 +46,8 @@ CoordinateTransformation::~CoordinateTransformation() {
  * @throws Error
  * @constructor
  * @class CoordinateTransformation
- * @memberof gdal
- * @param {gdal.SpatialReference} source
- * @param {gdal.SpatialReference|gdal.Dataset} target If a raster Dataset, the
+ * @param {SpatialReference} source
+ * @param {gdal.SpatialReference|Dataset} target If a raster Dataset, the
  * conversion will represent a conversion to pixel coordinates.
  */
 NAN_METHOD(CoordinateTransformation::New) {
@@ -159,7 +158,7 @@ NAN_METHOD(CoordinateTransformation::toString) {
  *
  * @method transformPoint
  * @instance
- * @memberof gdal.CoordinateTransformation
+ * @memberof CoordinateTransformation
  * @param {number} x
  * @param {number} y
  * @param {number} [z]
@@ -175,7 +174,7 @@ NAN_METHOD(CoordinateTransformation::toString) {
  *
  * @method transformPoint
  * @instance
- * @memberof gdal.CoordinateTransformation
+ * @memberof CoordinateTransformation
  * @param {xyz} point
  * @return {xyz} A regular object containing `x`, `y`, `z` properties.
  */

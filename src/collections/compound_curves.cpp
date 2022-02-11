@@ -33,11 +33,9 @@ CompoundCurveCurves::~CompoundCurveCurves() {
 }
 
 /**
- * A collection of connected curves, used by {{#crossLink
- * "gdal.CompoundCurve"}}gdal.CompoundCurve{{/crossLink}}.
+ * A collection of connected curves, used by {@link CompoundCurve}
  *
  * @class CompoundCurveCurves
- * @memberof gdal
  */
 NAN_METHOD(CompoundCurveCurves::New) {
 
@@ -81,7 +79,7 @@ NAN_METHOD(CompoundCurveCurves::toString) {
  *
  * @method count
  * @instance
- * @memberof gdal.CompoundCurveCurves
+ * @memberof CompoundCurveCurves
  * @return {number}
  */
 NAN_METHOD(CompoundCurveCurves::count) {
@@ -103,10 +101,10 @@ NAN_METHOD(CompoundCurveCurves::count) {
  *
  * @method get
  * @instance
- * @memberof gdal.CompoundCurveCurves
+ * @memberof CompoundCurveCurves
  * @param {number} index
  * @throws Error
- * @return {gdal.CompoundCurve|gdal.SimpleCurve}
+ * @return {gdal.CompoundCurve|SimpleCurve}
  */
 NAN_METHOD(CompoundCurveCurves::get) {
 
@@ -143,8 +141,8 @@ NAN_METHOD(CompoundCurveCurves::get) {
  *
  * @method add
  * @instance
- * @memberof gdal.CompoundCurveCurves
- * @param {gdal.SimpleCurve|gdal.SimpleCurve[]} curves
+ * @memberof CompoundCurveCurves
+ * @param {gdal.SimpleCurve|SimpleCurve[]} curves
  */
 NAN_METHOD(CompoundCurveCurves::add) {
 

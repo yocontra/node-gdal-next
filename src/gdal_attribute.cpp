@@ -61,7 +61,6 @@ void Attribute::dispose() {
  * A representation of a group with access methods.
  *
  * @class Attribute
- * @memberof gdal
  */
 NAN_METHOD(Attribute::New) {
   if (!info.IsConstructCall()) {
@@ -128,7 +127,7 @@ NAN_METHOD(Attribute::toString) {
  * @kind member
  * @name value
  * @instance
- * @memberof gdal.Attribute
+ * @memberof Attribute
  * @throws Error
  * @type {string|number}
  */
@@ -152,7 +151,7 @@ NAN_GETTER(Attribute::valueGetter) {
  * @kind member
  * @name dataType
  * @instance
- * @memberof gdal.Attribute
+ * @memberof Attribute
  * @type {string}
  */
 NAN_GETTER(Attribute::typeGetter) {

@@ -30,11 +30,9 @@ RasterBandOverviews::~RasterBandOverviews() {
 }
 
 /**
- * An encapsulation of a {{#crossLink
- * "gdal.RasterBand"}}RasterBand{{/crossLink}} overview functionality.
+ * An encapsulation of a {@link RasterBand} overview functionality.
  *
  * @class RasterBandOverviews
- * @memberof gdal
  */
 NAN_METHOD(RasterBandOverviews::New) {
 
@@ -78,10 +76,10 @@ NAN_METHOD(RasterBandOverviews::toString) {
  *
  * @method get
  * @instance
- * @memberof gdal.RasterBandOverviews
+ * @memberof RasterBandOverviews
  * @throws Error
  * @param {number} index 0-based index
- * @return {gdal.RasterBand}
+ * @return {RasterBand}
  */
 
 /**
@@ -90,11 +88,11 @@ NAN_METHOD(RasterBandOverviews::toString) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.RasterBandOverviews
+ * @memberof RasterBandOverviews
  * @throws Error
  * @param {number} index 0-based index
- * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.RasterBand>}
+ * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
+ * @return {Promise<RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
 
@@ -131,9 +129,9 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
  *
  * @method getBySampleCount
  * @instance
- * @memberof gdal.RasterBandOverviews
+ * @memberof RasterBandOverviews
  * @param {number} samples
- * @return {gdal.RasterBand}
+ * @return {RasterBand}
  */
 
 /**
@@ -148,10 +146,10 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
  *
  * @method getBySampleCountAsync
  * @instance
- * @memberof gdal.RasterBandOverviews
+ * @memberof RasterBandOverviews
  * @param {number} samples
- * @param {callback<gdal.RasterBand>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.RasterBand>}
+ * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
+ * @return {Promise<RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
 
@@ -181,7 +179,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
  *
  * @method count
  * @instance
- * @memberof gdal.RasterBandOverviews
+ * @memberof RasterBandOverviews
  * @return {number}
  */
 
@@ -191,7 +189,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.RasterBandOverviews
+ * @memberof RasterBandOverviews
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */

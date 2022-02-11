@@ -39,7 +39,6 @@ LayerFields::~LayerFields() {
 
 /**
  * @class LayerFields
- * @memberof gdal
  */
 NAN_METHOD(LayerFields::New) {
 
@@ -82,7 +81,7 @@ NAN_METHOD(LayerFields::toString) {
  *
  * @method count
  * @instance
- * @memberof gdal.LayerFields
+ * @memberof LayerFields
  * @return {number}
  */
 NAN_METHOD(LayerFields::count) {
@@ -109,7 +108,7 @@ NAN_METHOD(LayerFields::count) {
  *
  * @method indexOf
  * @instance
- * @memberof gdal.LayerFields
+ * @memberof LayerFields
  * @param {string} field
  * @return {number} Field index, or -1 if the field doesn't exist
  */
@@ -141,9 +140,9 @@ NAN_METHOD(LayerFields::indexOf) {
  * @throws Error
  * @method get
  * @instance
- * @memberof gdal.LayerFields
+ * @memberof LayerFields
  * @param {string|number} field Field name or index (0-based)
- * @return {gdal.FieldDefn}
+ * @return {FieldDefn}
  */
 NAN_METHOD(LayerFields::get) {
 
@@ -183,7 +182,7 @@ NAN_METHOD(LayerFields::get) {
  * @throws Error
  * @method getNames
  * @instance
- * @memberof gdal.LayerFields
+ * @memberof LayerFields
  * @return {string[]} List of strings.
  */
 NAN_METHOD(LayerFields::getNames) {
@@ -219,7 +218,7 @@ NAN_METHOD(LayerFields::getNames) {
  * @throws Error
  * @method remove
  * @instance
- * @memberof gdal.LayerFields
+ * @memberof LayerFields
  * @param {string|number} field Field name or index (0-based)
  */
 NAN_METHOD(LayerFields::remove) {
@@ -261,8 +260,8 @@ NAN_METHOD(LayerFields::remove) {
  * @throws Error
  * @method add
  * @instance
- * @memberof gdal.LayerFields
- * @param {gdal.FieldDefn|gdal.FieldDefn[]} defs A field definition, or array of field
+ * @memberof LayerFields
+ * @param {gdal.FieldDefn|FieldDefn[]} defs A field definition, or array of field
  * definitions.
  * @param {boolean} [approx=true]
  */
@@ -328,7 +327,7 @@ NAN_METHOD(LayerFields::add) {
  * @throws Error
  * @method reorder
  * @instance
- * @memberof gdal.LayerFields
+ * @memberof LayerFields
  * @param {number[]} map An array of new indexes (integers)
  */
 NAN_METHOD(LayerFields::reorder) {
@@ -396,8 +395,8 @@ NAN_METHOD(LayerFields::reorder) {
  * @kind member
  * @name layer
  * @instance
- * @memberof gdal.LayerFields
- * @type {gdal.Layer}
+ * @memberof LayerFields
+ * @type {Layer}
  */
 NAN_GETTER(LayerFields::layerGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());

@@ -43,8 +43,7 @@ void CompoundCurve::SetPrivate(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE _this, v8:
  *
  * @constructor
  * @class CompoundCurve
- * @extends gdal.Geometry
- * @memberof gdal
+ * @extends Geometry
  */
 
 NAN_METHOD(CompoundCurve::toString) {
@@ -57,8 +56,8 @@ NAN_METHOD(CompoundCurve::toString) {
  * @kind member
  * @name curves
  * @instance
- * @memberof gdal.CompoundCurve
- * @type {gdal.CompoundCurveCurves}
+ * @memberof CompoundCurve
+ * @type {CompoundCurveCurves}
  */
 NAN_GETTER(CompoundCurve::curvesGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("curves_").ToLocalChecked()).ToLocalChecked());

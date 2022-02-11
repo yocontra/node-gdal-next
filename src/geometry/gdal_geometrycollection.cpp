@@ -15,8 +15,7 @@ Nan::Persistent<FunctionTemplate> GeometryCollection::constructor;
  *
  * @constructor
  * @class GeometryCollection
- * @extends gdal.Geometry
- * @memberof gdal
+ * @extends Geometry
  */
 void GeometryCollection::Initialize(Local<Object> target) {
   Nan::HandleScope scope;
@@ -46,7 +45,7 @@ NAN_METHOD(GeometryCollection::toString) {
  *
  * @method getArea
  * @instance
- * @memberof gdal.GeometryCollection
+ * @memberof GeometryCollection
  * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getArea, Number, get_Area);
@@ -56,7 +55,7 @@ NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getArea, Number, get_Area);
  *
  * @method getLength
  * @instance
- * @memberof gdal.GeometryCollection
+ * @memberof GeometryCollection
  * @return {number}
  */
 NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getLength, Number, get_Length);
@@ -67,8 +66,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT(GeometryCollection, getLength, Number, get_Lengt
  * @kind member
  * @name children
  * @instance
- * @memberof gdal.GeometryCollection
- * @type {gdal.GeometryCollectionChildren}
+ * @memberof GeometryCollection
+ * @type {GeometryCollectionChildren}
  */
 NAN_GETTER(GeometryCollection::childrenGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("children_").ToLocalChecked()).ToLocalChecked());

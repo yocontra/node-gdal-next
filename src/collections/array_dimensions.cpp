@@ -46,14 +46,13 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Group"}}Group{{/crossLink}}'s
+ * An encapsulation of a {@link MDArray}
  * descendant dimensions.
  *
- *
+ * @example
  * const dimensions = group.dimensions;
  *
  * @class ArrayDimensions
- * @memberof gdal
  */
 
 /**
@@ -61,9 +60,9 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method get
  * @instance
- * @memberof gdal.ArrayDimensions
+ * @memberof ArrayDimensions
  * @param {string|number} array
- * @return {gdal.Dimension}
+ * @return {Dimension}
  */
 
 /**
@@ -72,10 +71,10 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.ArrayDimensions
+ * @memberof ArrayDimensions
  * @param {string|number} array
- * @param {callback<gdal.Dimension>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Dimension>}
+ * @param {callback<Dimension>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Dimension>}
  */
 
 /**
@@ -83,7 +82,7 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method count
  * @instance
- * @memberof gdal.ArrayDimensions
+ * @memberof ArrayDimensions
 * @return {number}
  */
 
@@ -93,7 +92,7 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.ArrayDimensions
+ * @memberof ArrayDimensions
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */
@@ -104,7 +103,7 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  * @readonly
  * @kind member
  * @instance
- * @memberof gdal.ArrayDimensions
+ * @memberof ArrayDimensions
  * @name names
  * @type {string[]}
  */
@@ -115,9 +114,9 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  * @readonly
  * @kind member
  * @instance
- * @memberof gdal.ArrayDimensions
+ * @memberof ArrayDimensions
  * @name parent
- * @type {gdal.Group}
+ * @type {Group}
  */
 
 /**
@@ -126,9 +125,9 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
  * @readonly
  * @kind member
  * @instance
- * @memberof gdal.ArrayDimensions
+ * @memberof ArrayDimensions
  * @name ds
- * @type {gdal.Dataset}
+ * @type {Dataset}
  */
 #endif
 

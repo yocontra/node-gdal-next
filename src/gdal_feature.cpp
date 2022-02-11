@@ -67,7 +67,7 @@ void Feature::dispose() {
  * A simple feature, including geometry and attributes. Its fields and geometry
  * type is defined by the given definition.
  *
- *
+ * @example
  * //create layer and specify geometry type
  * var layer = dataset.layers.create('mylayer', null, gdal.Point);
  *
@@ -84,8 +84,7 @@ void Feature::dispose() {
  *
  * @constructor
  * @class Feature
- * @param {gdal.Layer|gdal.FeatureDefn} definition
- * @memberof gdal
+ * @param {gdal.Layer|FeatureDefn} definition
  */
 NAN_METHOD(Feature::New) {
   Feature *f;
@@ -166,8 +165,8 @@ NAN_METHOD(Feature::toString) {
  *
  * @method getGeometry
  * @instance
- * @memberof gdal.Feature
- * @return {gdal.Geometry}
+ * @memberof Feature
+ * @return {Geometry}
  */
 NAN_METHOD(Feature::getGeometry) {
 
@@ -222,8 +221,8 @@ NAN_METHOD(Feature::getFieldDefn) {
  * @throws Error
  * @method setGeometry
  * @instance
- * @memberof gdal.Feature
- * @param {gdal.Geometry|null} geometry new geometry or null to clear the field
+ * @memberof Feature
+ * @param {Geometry|null} geometry new geometry or null to clear the field
  */
 NAN_METHOD(Feature::setGeometry) {
 
@@ -247,8 +246,8 @@ NAN_METHOD(Feature::setGeometry) {
  *
  * @method equals
  * @instance
- * @memberof gdal.Feature
- * @param {gdal.Feature} feature
+ * @memberof Feature
+ * @param {Feature} feature
  * @return {boolean} `true` if the features are the same, `false` if different
  */
 NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Feature, equals, Boolean, Equal, Feature, "feature");
@@ -258,8 +257,8 @@ NODE_WRAPPED_METHOD_WITH_RESULT_1_WRAPPED_PARAM(Feature, equals, Boolean, Equal,
  *
  * @method clone
  * @instance
- * @memberof gdal.Feature
- * @return {gdal.Feature}
+ * @memberof Feature
+ * @return {Feature}
  */
 NAN_METHOD(Feature::clone) {
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
@@ -275,7 +274,7 @@ NAN_METHOD(Feature::clone) {
  *
  * @method destroy
  * @instance
- * @memberof gdal.Feature
+ * @memberof Feature
  */
 NAN_METHOD(Feature::destroy) {
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());
@@ -302,8 +301,8 @@ NAN_METHOD(Feature::destroy) {
  * @throws Error
  * @method setFrom
  * @instance
- * @memberof gdal.Feature
- * @param {gdal.Feature} feature
+ * @memberof Feature
+ * @param {Feature} feature
  * @param {number[]} [index_map] Array mapping each field from the source feature
  * to the given index in the destination feature. -1 ignores the source field.
  * The field types must still match otherwise the behavior is undefined.
@@ -371,8 +370,8 @@ NAN_METHOD(Feature::setFrom) {
  * @kind member
  * @name fields
  * @instance
- * @memberof gdal.Feature
- * @type {gdal.FeatureFields}
+ * @memberof Feature
+ * @type {FeatureFields}
  */
 NAN_GETTER(Feature::fieldsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("fields_").ToLocalChecked()).ToLocalChecked());
@@ -382,7 +381,7 @@ NAN_GETTER(Feature::fieldsGetter) {
  * @kind member
  * @name fid
  * @instance
- * @memberof gdal.Feature
+ * @memberof Feature
  * @type {number}
  */
 NAN_GETTER(Feature::fidGetter) {
@@ -399,8 +398,8 @@ NAN_GETTER(Feature::fidGetter) {
  * @kind member
  * @name defn
  * @instance
- * @memberof gdal.Feature
- * @type {gdal.FeatureDefn}
+ * @memberof Feature
+ * @type {FeatureDefn}
  */
 NAN_GETTER(Feature::defnGetter) {
   Feature *feature = Nan::ObjectWrap::Unwrap<Feature>(info.This());

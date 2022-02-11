@@ -61,8 +61,8 @@
     "install": "node-pre-gyp install --fallback-to-build -j max && echo '\nI have been unemployed for 2 years because a number of French companies are extorting me to cover up an ugly judicial affair. Please, consider hiring me if you like and use gdal-async.\nhttps://github.com/mmomtchev'\n",
     "yatag": "npx yatag",
     "gpp": "gpp -H lib/default_iterators.gpp -o lib/default_iterators.js && eslint --fix lib/default_iterators.js",
-    "yuidoc": "yuidoc --extension .js,.cpp,.hpp",
-    "publish-yuidoc": "npm run yuidoc && node ./scripts/publish-docs.js",
+    "doc:build": "npx documentation build --config=documentation.yml src/*.cpp src/collections/*.cpp src/geometry/*.cpp lib/*.js -f html -o doc",
+    "doc:publish": "npm run doc:build && node ./scripts/publish-docs.js",
     "preversion": "npm run lint && npx yatag && npm run test",
     "gcov": "mkdir -p coverage && cd coverage && gcov -o ../build/Debug/obj.target/gdal/src ../src/*",
     "codecov": "cd coverage && curl -s https://codecov.io/bash | bash",
@@ -89,10 +89,11 @@
     "@mapbox/node-pre-gyp"
   ],
   "devDependencies": {
+    "@mmomtchev/documentation": "^14.0.0",
     "@mmomtchev/node-pre-gyp-github": "^2.0.0",
     "@octokit/core": "^3.5.1",
     "@types/chai": "^4.2.18",
-    "@types/chai-as-promised": "^7.1.4",
+    "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^9.0.0",
     "@types/node": "^15.0.3",
     "@types/semver": "^7.3.9",
@@ -102,8 +103,7 @@
     "benny": "^3.7.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "documentation": "git+https://github.com/mmomtchev/documentation.git#plugin-framework",
-    "documentation-polyglot": "git+https://github.com/mmomtchev/documentation-polyglot.git",
+    "documentation-polyglot": "^1.0.0",
     "eslint": "^7.26.0",
     "eslint-plugin-array-func": "^3.0.0",
     "eslint-plugin-mocha": "^8.0.0",
@@ -114,7 +114,7 @@
     "semver": "^7.3.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4",
-    "yatag": "1.1.2"
+    "yatag": "^1.2.0"
   },
   "engines": {
     "node": ">=12"

@@ -6,7 +6,6 @@ namespace node_gdal {
  * GDAL VSI layer file operations
  *
  * @namespace fs
- * @memberof gdal
  */
 
 void VSI::Initialize(Local<Object> target) {
@@ -18,7 +17,7 @@ void VSI::Initialize(Local<Object> target) {
 
 /**
  * @typedef {object} VSIStat
- * @memberof gdal.fs
+ * @memberof fs
  * @property {number} dev
  * @property {number} mode
  * @property {number} nlink
@@ -36,7 +35,7 @@ void VSI::Initialize(Local<Object> target) {
 
 /**
  * @typedef {object} VSIStat64
- * @memberof gdal.fs
+ * @memberof fs
  * @property {BigInt} dev
  * @property {BigInt} mode
  * @property {BigInt} nlink
@@ -66,11 +65,11 @@ void VSI::Initialize(Local<Object> target) {
  *
  * @static
  * @method stat
- * @memberof gdal.fs
+ * @memberof fs
  * @param {string} filename
  * @param {boolean} [bigint=false] Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
- * @returns {gdal.VSIStat}
+ * @returns {VSIStat}
  */
 
 /**
@@ -78,11 +77,11 @@ void VSI::Initialize(Local<Object> target) {
  *
  * @static
  * @method stat
- * @memberof gdal.fs
+ * @memberof fs
  * @param {string} filename
  * @param {true} True Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
- * @returns {gdal.VSIStat64}
+ * @returns {VSIStat64}
  */
 
 /**
@@ -91,12 +90,12 @@ void VSI::Initialize(Local<Object> target) {
  *
  * @static
  * @method statAsync
- * @memberof gdal.fs
+ * @memberof fs
  * @param {string} filename
  * @param {boolean} [bigint=false] Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
- * @param {callback<gdal.VSIStat>} [callback=undefined] {{{cb}}}
- * @returns {Promise<gdal.VSIStat>}
+ * @param {callback<VSIStat>} [callback=undefined] {{{cb}}}
+ * @returns {Promise<VSIStat>}
  */
 
 /**
@@ -105,12 +104,12 @@ void VSI::Initialize(Local<Object> target) {
  *
  * @static
  * @method statAsync
- * @memberof gdal.fs
+ * @memberof fs
  * @param {string} filename
  * @param {true} True Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
- * @param {callback<gdal.VSIStat>} [callback=undefined] {{{cb}}}
- * @returns {Promise<gdal.VSIStat>}
+ * @param {callback<VSIStat>} [callback=undefined] {{{cb}}}
+ * @returns {Promise<VSIStat>}
  */
 
 GDAL_ASYNCABLE_DEFINE(VSI::stat) {
@@ -203,7 +202,7 @@ GDAL_ASYNCABLE_DEFINE(VSI::stat) {
  *
  * @static
  * @method readDir
- * @memberof gdal.fs
+ * @memberof fs
  * @param {string} directory
  * @throws Error
  * @returns {string[]}
@@ -215,7 +214,7 @@ GDAL_ASYNCABLE_DEFINE(VSI::stat) {
  *
  * @static
  * @method readDirAsync
- * @memberof gdal.fs
+ * @memberof fs
  * @param {string} directory
  * @throws Error
  * @param {callback<string[]>} [callback=undefined] {{{cb}}}

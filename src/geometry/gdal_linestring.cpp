@@ -38,8 +38,7 @@ void LineString::Initialize(Local<Object> target) {
  *
  * @constructor
  * @class LineString
- * @extends gdal.SimpleCurve
- * @memberof gdal
+ * @extends SimpleCurve
  */
 
 NAN_METHOD(LineString::toString) {

@@ -64,7 +64,6 @@ void Group::dispose() {
  * A representation of a group with access methods.
  *
  * @class Group
- * @memberof gdal
  */
 NAN_METHOD(Group::New) {
 
@@ -148,7 +147,7 @@ NAN_METHOD(Group::toString) {
  * @kind member
  * @name description
  * @instance
- * @memberof gdal.Group
+ * @memberof Group
  * @type {string}
  */
 NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Group, descriptionGetter, GetFullName);
@@ -158,8 +157,8 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Group, descriptionGetter, GetFullName);
  * @kind member
  * @name groups
  * @instance
- * @memberof gdal.Group
- * @type {gdal.GroupGroups}
+ * @memberof Group
+ * @type {GroupGroups}
  */
 NAN_GETTER(Group::groupsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("groups_").ToLocalChecked()).ToLocalChecked());
@@ -170,8 +169,8 @@ NAN_GETTER(Group::groupsGetter) {
  * @kind member
  * @name arrays
  * @instance
- * @memberof gdal.Group
- * @type {gdal.GroupArrays}
+ * @memberof Group
+ * @type {GroupArrays}
  */
 NAN_GETTER(Group::arraysGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("arrays_").ToLocalChecked()).ToLocalChecked());
@@ -182,8 +181,8 @@ NAN_GETTER(Group::arraysGetter) {
  * @kind member
  * @name dimensions
  * @instance
- * @memberof gdal.Group
- * @type {gdal.GroupDimensions}
+ * @memberof Group
+ * @type {GroupDimensions}
  */
 NAN_GETTER(Group::dimensionsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("dims_").ToLocalChecked()).ToLocalChecked());
@@ -194,8 +193,8 @@ NAN_GETTER(Group::dimensionsGetter) {
  * @kind member
  * @name attributes
  * @instance
- * @memberof gdal.Group
- * @type {gdal.GroupAttributes}
+ * @memberof Group
+ * @type {GroupAttributes}
  */
 NAN_GETTER(Group::attributesGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("attrs_").ToLocalChecked()).ToLocalChecked());

@@ -62,7 +62,6 @@ void Driver::dispose() {
  * be gateways to many formats through a secondary multi-library.
  *
  * @class Driver
- * @memberof gdal
  */
 NAN_METHOD(Driver::New) {
 
@@ -112,7 +111,7 @@ NAN_METHOD(Driver::toString) {
  * @kind member
  * @name description
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @type {string}
  */
 NAN_GETTER(Driver::descriptionGetter) {
@@ -125,7 +124,7 @@ NAN_GETTER(Driver::descriptionGetter) {
  * @throws Error
  * @method deleteDataset
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} filename
  */
 NAN_METHOD(Driver::deleteDataset) {
@@ -152,20 +151,19 @@ auto DatasetRval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return D
  * @throws Error
  * @method create
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} filename
  * @param {number} [x_size=0] raster width in pixels (ignored for vector
  * datasets)
  * @param {number} [y_size=0] raster height in pixels (ignored for vector
  * datasets)
  * @param {number} [band_count=0]
- * @param {number} [data_type=gdal.GDT_Byte] pixel data type (ignored for
- * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
- * types{{/crossLink}})
+ * @param {number} [data_type=GDT_Byte] pixel data type (ignored for
+ * vector datasets) (see {@link GDT|data types}
  * @param {string[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
  * @throws
- * @return {gdal.Dataset}
+ * @return {Dataset}
  */
 
 /**
@@ -174,21 +172,20 @@ auto DatasetRval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return D
  * @throws Error
  * @method createAsync
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} filename
  * @param {number} [x_size=0] raster width in pixels (ignored for vector
  * datasets)
  * @param {number} [y_size=0] raster height in pixels (ignored for vector
  * datasets)
  * @param {number} [band_count=0]
- * @param {number} [data_type=gdal.GDT_Byte] pixel data type (ignored for
- * vector datasets) (see {{#crossLink "Constants (GDT)"}}data
- * types{{/crossLink}})
+ * @param {number} [data_type=GDT_Byte] pixel data type (ignored for
+ * vector datasets) (see {@link GDT|data types}
  * @param {string[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
- * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
+ * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
  * @throws
- * @return {Promise<gdal.Dataset>}
+ * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::create) {
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
@@ -237,7 +234,6 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
 
 /**
  * @typedef {object} CreateOptions
- * @memberof gdal
  * @property {ProgressCb} [progress_cb]
  */
 
@@ -247,14 +243,14 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @throws Error
  * @method createCopy
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} filename
- * @param {gdal.Dataset} src
+ * @param {Dataset} src
  * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
  * @param {boolean} [strict=false] strict mode
  * @param {CreateOptions} [jsoptions] additional options
  * @param {ProgressCb} [jsoptions.progress_cb] {{{progress_cb}}}
- * @return {gdal.Dataset}
+ * @return {Dataset}
  */
 
 /**
@@ -263,15 +259,15 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @throws Error
  * @method createCopyAsync
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} filename
- * @param {gdal.Dataset} src
+ * @param {Dataset} src
  * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
  * @param {boolean} [strict=false] strict mode
  * @param {CreateOptions} [jsoptions] additional options
  * @param {ProgressCb} [jsoptions.progress_cb] {{{progress_cb}}}
- * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Dataset>}
+ * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());
@@ -336,7 +332,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
  * @throws Error
  * @method copyFiles
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} name_old New name for the dataset.
  * @param {string} name_new Old name of the dataset.
  */
@@ -363,7 +359,7 @@ NAN_METHOD(Driver::copyFiles) {
  * @throws Error
  * @method rename
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} new_name New name for the dataset.
  * @param {string} old_name Old name of the dataset.
  */
@@ -390,7 +386,7 @@ NAN_METHOD(Driver::rename) {
  * @throws Error
  * @method getMetadata
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} [domain]
  * @return {any}
  */
@@ -414,11 +410,11 @@ NAN_METHOD(Driver::getMetadata) {
  * @throws Error
  * @method open
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} path
  * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
- * @return {gdal.Dataset}
+ * @return {Dataset}
  */
 
 /**
@@ -427,12 +423,12 @@ NAN_METHOD(Driver::getMetadata) {
  * @throws Error
  * @method openAsync
  * @instance
- * @memberof gdal.Driver
+ * @memberof Driver
  * @param {string} path
  * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
- * @param {callback<gdal.Dataset>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Dataset>}
+ * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::open) {
   Driver *driver = Nan::ObjectWrap::Unwrap<Driver>(info.This());

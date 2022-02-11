@@ -32,11 +32,9 @@ GeometryCollectionChildren::~GeometryCollectionChildren() {
 }
 
 /**
- * A collection of Geometries, used by {{#crossLink
- * "gdal.GeometryCollection"}}gdal.GeometryCollection{{/crossLink}}.
+ * A collection of Geometries, used by {@link GeometryCollection}.
  *
  * @class GeometryCollectionChildren
- * @memberof gdal
  */
 NAN_METHOD(GeometryCollectionChildren::New) {
 
@@ -80,7 +78,7 @@ NAN_METHOD(GeometryCollectionChildren::toString) {
  *
  * @method count
  * @instance
- * @memberof gdal.GeometryCollectionChildren
+ * @memberof GeometryCollectionChildren
  * @return {number}
  */
 NAN_METHOD(GeometryCollectionChildren::count) {
@@ -97,10 +95,10 @@ NAN_METHOD(GeometryCollectionChildren::count) {
  *
  * @method get
  * @instance
- * @memberof gdal.GeometryCollectionChildren
+ * @memberof GeometryCollectionChildren
  * @param {number} index 0-based index
  * @throws Error
- * @return {gdal.Geometry}
+ * @return {Geometry}
  */
 NAN_METHOD(GeometryCollectionChildren::get) {
 
@@ -124,7 +122,7 @@ NAN_METHOD(GeometryCollectionChildren::get) {
  *
  * @method remove
  * @instance
- * @memberof gdal.GeometryCollectionChildren
+ * @memberof GeometryCollectionChildren
  * @param {number} index 0-based index, -1 for all geometries
  */
 NAN_METHOD(GeometryCollectionChildren::remove) {
@@ -161,8 +159,8 @@ NAN_METHOD(GeometryCollectionChildren::remove) {
  *
  * @method add
  * @instance
- * @memberof gdal.GeometryCollectionChildren
- * @param {gdal.Geometry|gdal.Geometry[]} geometry
+ * @memberof GeometryCollectionChildren
+ * @param {gdal.Geometry|Geometry[]} geometry
  */
 NAN_METHOD(GeometryCollectionChildren::add) {
 

@@ -63,7 +63,6 @@ void Dimension::dispose() {
  * A representation of a group with access methods.
  *
  * @class Dimension
- * @memberof gdal
  */
 NAN_METHOD(Dimension::New) {
 
@@ -130,7 +129,7 @@ NAN_METHOD(Dimension::toString) {
  * @kind member
  * @name size
  * @instance
- * @memberof gdal.Dimension
+ * @memberof Dimension
  * @type {number}
  */
 NODE_WRAPPED_GETTER_WITH_RESULT_LOCKED(Dimension, sizeGetter, Number, GetSize);
@@ -140,7 +139,7 @@ NODE_WRAPPED_GETTER_WITH_RESULT_LOCKED(Dimension, sizeGetter, Number, GetSize);
  * @kind member
  * @name description
  * @instance
- * @memberof gdal.Dimension
+ * @memberof Dimension
  * @type {string}
  */
 NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, descriptionGetter, GetFullName);
@@ -150,7 +149,7 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, descriptionGetter, GetFullName
  * @kind member
  * @name direction
  * @instance
- * @memberof gdal.Dimension
+ * @memberof Dimension
  * @type {string}
  */
 NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, directionGetter, GetDirection);
@@ -160,7 +159,7 @@ NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, directionGetter, GetDirection)
  * @kind member
  * @name type
  * @instance
- * @memberof gdal.Dimension
+ * @memberof Dimension
  * @type {string}
  */
 NODE_WRAPPED_GETTER_WITH_STRING_LOCKED(Dimension, typeGetter, GetType);

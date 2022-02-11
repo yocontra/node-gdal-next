@@ -37,11 +37,10 @@ LayerFeatures::~LayerFeatures() {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Layer"}}Layer{{/crossLink}}'s
+ * An encapsulation of a {@link Layer}
  * features.
  *
  * @class LayerFeatures
- * @memberof gdal
  */
 NAN_METHOD(LayerFeatures::New) {
 
@@ -88,10 +87,10 @@ NAN_METHOD(LayerFeatures::toString) {
  *
  * @method get
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @param {number} id The feature ID of the feature to read.
  * @throws Error
- * @return {gdal.Feature}
+ * @return {Feature}
  */
 
 /**
@@ -104,11 +103,11 @@ NAN_METHOD(LayerFeatures::toString) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @param {number} id The feature ID of the feature to read.
- * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
+ * @param {callback<Feature>} [callback=undefined] {{{cb}}}
  * @throws Error
- * @return {Promise<gdal.Feature>}
+ * @return {Promise<Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
 
@@ -141,8 +140,8 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
  *
  * @method first
  * @instance
- * @memberof gdal.LayerFeatures
- * @return {gdal.Feature}
+ * @memberof LayerFeatures
+ * @return {Feature}
  */
 
 /**
@@ -152,9 +151,9 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
  *
  * @method firstAsync
  * @instance
- * @memberof gdal.LayerFeatures
- * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Feature>}
+ * @memberof LayerFeatures
+ * @param {callback<Feature>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
 
@@ -187,8 +186,8 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
  *
  * @method next
  * @instance
- * @memberof gdal.LayerFeatures
- * @return {gdal.Feature}
+ * @memberof LayerFeatures
+ * @return {Feature}
  */
 
 /**
@@ -201,9 +200,9 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
  *
  * @method nextAsync
  * @instance
- * @memberof gdal.LayerFeatures
- * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Feature>}
+ * @memberof LayerFeatures
+ * @param {callback<Feature>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
 
@@ -239,9 +238,9 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
  *
  * @method add
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @throws Error
- * @param {gdal.Feature} feature
+ * @param {Feature} feature
  */
 
 /**
@@ -258,9 +257,9 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
  *
  * @method addAsync
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @throws Error
- * @param {gdal.Feature} feature
+ * @param {Feature} feature
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
  */
@@ -296,7 +295,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
  *
  * @method count
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @param {boolean} [force=true]
  * @return {number} number of features in the layer.
  */
@@ -307,7 +306,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @param {boolean} [force=true]
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>} number of features in the layer.
@@ -350,9 +349,9 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  *
  * @method set
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @throws Error
- * @param {gdal.Feature} feature
+ * @param {Feature} feature
  */
 
 /**
@@ -360,10 +359,10 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  *
  * @method set
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @throws Error
  * @param {number} id
- * @param {gdal.Feature} feature
+ * @param {Feature} feature
  */
 
 /**
@@ -372,12 +371,12 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  *
  * @method setAsync
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @throws Error
  * @param {number} id
- * @param {gdal.Feature} feature
- * @param {callback<gdal.Feature>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Feature>}
+ * @param {Feature} feature
+ * @param {callback<Feature>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
 
@@ -442,7 +441,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
  *
  * @method remove
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @throws Error
  * @param {number} id
  */
@@ -453,7 +452,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
  *
  * @method removeAsync
  * @instance
- * @memberof gdal.LayerFeatures
+ * @memberof LayerFeatures
  * @throws Error
  * @param {number} id
  * @param {callback<void>} [callback=undefined] {{{cb}}}
@@ -493,8 +492,8 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::remove) {
  * @kind member
  * @name layer
  * @instance
- * @memberof gdal.LayerFeatures
- * @type {gdal.Layer}
+ * @memberof LayerFeatures
+ * @type {Layer}
  */
 NAN_GETTER(LayerFeatures::layerGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());

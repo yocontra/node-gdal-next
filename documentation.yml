@@ -17,8 +17,249 @@ sortOrder:
   - memberof
   - alpha
 
-sortOrderKind:
+defaultGlobals: false
 
+toc:
+  - name: gdal
+    file: gdal-async.md
+  - name: Constants
+    description: All constants
+    children:
+      - name: CPL Error Codes
+        children:
+          - CE_Debug
+          - CE_Failure
+          - CE_Fatal
+          - CE_None
+          - CE_Warning
+          - CPLE_AppDefined
+          - CPLE_AssertionFailed
+          - CPLE_FileIO
+          - CPLE_IllegalArg
+          - CPLE_None
+          - CPLE_NotSupported
+          - CPLE_NoWriteAccess
+          - CPLE_objectNull
+          - CPLE_OpenFailed
+          - CPLE_OutOfMemory
+          - CPLE_UserInterrupt
+      - name: Dataset creation
+        children:
+          - DCAP_CREATE
+          - DCAP_CREATECOPY
+          - DCAP_VIRTUALIO
+      - name: Dimensions
+        children:
+          - DIM_HORIZONTAL_X
+          - DIM_HORIZONTAL_Y
+          - DIM_PARAMETRIC
+          - DIM_TEMPORAL
+          - DIM_VERTICAL
+          - DIR_DOWN
+          - DIR_EAST
+          - DIR_FUTURE
+          - DIR_NORTH
+          - DIR_PAST
+          - DIR_SOUTH
+          - DIR_UP
+          - DIR_WEST
+      - name: DMD
+        children:
+          - DMD_CREATIONDATATYPES
+          - DMD_CREATIONOPTIONLIST
+          - DMD_EXTENSION
+          - DMD_HELPTOPIC
+          - DMD_LONGNAME
+          - DMD_MIMETYPE
+      - name: IO Flags
+        children:
+          - GA_Readonly
+          - GA_Update
+          - GF_Read
+          - GF_Write
+      - name: Color Interpretation
+        children:
+          - GCI_AlphaBand
+          - GCI_BlackBand
+          - GCI_BlueBand
+          - GCI_CyanBand
+          - GCI_GrayIndex
+          - GCI_GreenBand
+          - GCI_HueBand
+          - GCI_LightnessBand
+          - GCI_MagentaBand
+          - GCI_PaletteIndex
+          - GCI_RedBand
+          - GCI_SaturationBand
+          - GCI_Undefined
+          - GCI_YCbCr_CbBand
+          - GCI_YCbCr_CrBand
+          - GCI_YCbCr_YBand
+          - GCI_YellowBand
+          - GPI_CMYK
+          - GPI_Gray
+          - GPI_HLS
+          - GPI_RGB
+      - name: Pixel Types
+        children:
+          - GDT_Byte
+          - GDT_CFloat32
+          - GDT_CFloat64
+          - GDT_CInt16
+          - GDT_CInt32
+          - GDT_Float32
+          - GDT_Float64
+          - GDT_Int16
+          - GDT_Int32
+          - GDT_UInt16
+          - GDT_UInt32
+          - GDT_Unknown
+          - GEDTC_Compound
+          - GEDTC_String
+      - name: Resampling Algorithms
+        children:
+          - GRA_Average
+          - GRA_Bilinear
+          - GRA_Cubic
+          - GRA_CubicSpline
+          - GRA_Lanczos
+          - GRA_Mode
+          - GRA_NearestNeighbor
+      - name: ODsCC
+        children:
+          - ODrCCreateDataSource
+          - ODrCDeleteDataSource
+          - ODsCCreateGeomFieldAfterCreateLayer
+          - ODsCCreateLayer
+          - ODsCDeleteLayer
+      - name: Feature Field Types
+        children:
+          - OFTBinary
+          - OFTDate
+          - OFTDateTime
+          - OFTInteger
+          - OFTInteger64
+          - OFTInteger64List
+          - OFTIntegerList
+          - OFTReal
+          - OFTRealList
+          - OFTString
+          - OFTStringList
+          - OFTTime
+          - OFTWideString
+          - OFTWideStringList
+      - name: Justification
+        children:
+          - OJLeft
+          - OJRight
+          - OJUndefined
+      - name: OLC
+        children:
+          - OLCAlterFieldDefn
+          - OLCCreateField
+          - OLCCreateGeomField
+          - OLCDeleteFeature
+          - OLCDeleteField
+          - OLCFastFeatureCount
+          - OLCFastGetExtent
+          - OLCFastSetNextByIndex
+          - OLCFastSpatialFilter
+          - OLCIgnoreFields
+          - OLCRandomRead
+          - OLCRandomWrite
+          - OLCReorderFields
+          - OLCSequentialWrite
+          - OLCStringsAsUTF8
+          - OLCTransactions
+      - name: wkbGeometryType
+        children:
+          - wkb25DBit
+          - wkbCircularString
+          - wkbCompoundCurve
+          - wkbGeometryCollection
+          - wkbGeometryCollection25D
+          - wkbLinearRing
+          - wkbLinearRing25D
+          - wkbLineString
+          - wkbLineString25D
+          - wkbMultiCurve
+          - wkbMultiLineString
+          - wkbMultiLineString25D
+          - wkbMultiPoint
+          - wkbMultiPoint25D
+          - wkbMultiPolygon
+          - wkbMultiPolygon25D
+      - name: wkbByteOrder
+        children:
+          - wkbNDR
+          - wkbNone
+          - wkbPoint
+          - wkbPoint25D
+          - wkbPolygon
+          - wkbPolygon25D
+          - wkbUnknown
+      - name: wkbVariant
+        children:
+          - wkbVariantIso
+          - wkbVariantOgc
+          - wkbVariantOldOgc
+
+  - name: Data Types
+    children:
+      - forEachCb
+      - mapCb
+      - callback
+      - stats
+      - units
+      - xyz
+      - RasterReadableOptions
+      - RasterWritableOptions
+      - RasterTransformOptions
+      - CalcOptions
+      - ContourOptions
+      - CreateOptions
+      - FillOptions
+      - MDArrayOptions
+      - PolygonizeOptions
+      - ProgressCb
+      - ProgressOptions
+      - ReprojectOptions
+      - SieveOptions
+      - UtilOptions
+      - WarpOptions
+      - WarpOutput
+  - name: Utilities
+    children:
+      - calcAsync
+      - checksumImage
+      - checksumImageAsync
+      - contourGenerate
+      - contourGenerateAsync
+      - decToDMS
+      - fillNodata
+      - fillNodataAsync
+      - fromDataType
+      - info
+      - infoAsync
+      - open
+      - openAsync
+      - polygonize
+      - polygonizeAsync
+      - quiet
+      - reprojectImage
+      - reprojectImageAsync
+      - setPROJSearchPaths
+      - sieveFilter
+      - sieveFilterAsync
+      - suggestedWarpOutput
+      - suggestedWarpOutputAsync
+      - toDataType
+      - translate
+      - translateAsync
+      - vectorTranslate
+      - vectorTranslateAsync
+      - warp
+      - warpAsync
 
 documentation-polyglot:
   extensions: [ .cpp, .hpp, .h ]

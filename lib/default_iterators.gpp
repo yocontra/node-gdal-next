@@ -9,8 +9,8 @@
  * @method
  * @name forEach
  * @instance
- * @memberof gdal.#1
- * @param {forEachCb<gdal.#2>} callback The callback to be called with each {{#crossLink "#2"}}#2{{/crossLink}}
+ * @memberof #1
+ * @param {forEachCb<#2>} callback The callback to be called with each {@link #2}
  */
   gdal.#1.prototype.forEach = defaultForEach
 >
@@ -27,10 +27,10 @@
  * });
  *
  * @method
- * @name map
+ * @name map<U>
  * @instance
- * @memberof gdal.#1
- * @param {mapCb<gdal.#2,U>} callback The callback to be called with each {{#crossLink "#2"}}#2{{/crossLink}}
+ * @memberof #1
+ * @param {mapCb<#2,U>} callback The callback to be called with each {@link #2}
  * @return {U[]}
  */
   gdal.#1.prototype.map = defaultMap
@@ -43,8 +43,8 @@
  * @method
  * @name toArray
  * @instance
- * @memberof gdal.#1
- * @return {gdal.#2[]} List of {{#crossLink "#2"}}#2{{/crossLink}} instances.
+ * @memberof #1
+ * @return {#2[]} List of {@link #2|#2 instances}
  */
   gdal.#1.prototype.toArray = defaultToArray
 >
@@ -61,8 +61,8 @@
  * @method
  * @name @@iterator
  * @instance
- * @memberof gdal.#1
- * @type {gdal.#2}
+ * @memberof #1
+ * @type {#2}
  */
   gdal.#1.prototype[Symbol.iterator] = defaultIterator
 >
@@ -79,8 +79,8 @@
  * @method
  * @name @@asyncIterator
  * @instance
- * @memberof gdal.#1
- * @type {gdal.#2}
+ * @memberof #1
+ * @type {#2}
  */
   if (Symbol.asyncIterator)
     gdal.#1.prototype[Symbol.asyncIterator] = defaultAsyncIterator
@@ -107,9 +107,8 @@ function defaultForEach(callback) {
 }
 
 /**
- * map() callback type
- * @element mapCb
- * @typedef mapCb<T,U> (obj: T, index: number) => U
+ * @callback mapCb
+ * @typedef {(obj: T, index: number) => U} mapCb<T,U>
  */
 function defaultMap(callback) {
   const result = []

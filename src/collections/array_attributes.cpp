@@ -35,11 +35,10 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Group"}}Array{{/crossLink}}'s
+ * An encapsulation of a {@link Array}
  * descendant attributes.
  *
  * @class ArrayAttributes
- * @memberof gdal
  */
 
 /**
@@ -47,9 +46,9 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method get
  * @instance
- * @memberof gdal.ArrayAttributes
+ * @memberof ArrayAttributes
  * @param {string|number} attribute
- * @return {gdal.Attribute}
+ * @return {Attribute}
  */
 
 /**
@@ -58,10 +57,10 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.ArrayAttributes
+ * @memberof ArrayAttributes
  * @param {string|number} attribute
- * @param {callback<gdal.Attribute>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Attribute>}
+ * @param {callback<Attribute>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Attribute>}
  */
 
 /**
@@ -69,7 +68,7 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method count
  * @instance
- * @memberof gdal.ArrayAttributes
+ * @memberof ArrayAttributes
  * @return {number}
  */
 
@@ -79,7 +78,7 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.ArrayAttributes
+ * @memberof ArrayAttributes
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
  */
@@ -91,7 +90,7 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  * @kind member
  * @name names
  * @instance
- * @memberof gdal.ArrayAttributes
+ * @memberof ArrayAttributes
  * @type {string[]}
  */
 
@@ -102,7 +101,7 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
  * @name ds
  * @kind member
  * @instance
- * @memberof gdal.ArrayAttributes
+ * @memberof ArrayAttributes
  */
 #endif
 

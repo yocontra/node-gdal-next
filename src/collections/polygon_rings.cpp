@@ -32,11 +32,9 @@ PolygonRings::~PolygonRings() {
 }
 
 /**
- * A collection of polygon rings, used by {{#crossLink
- * "gdal.Polygon"}}gdal.Polygon{{/crossLink}}.
+ * A collection of polygon rings, used by {@link Polygon}.
  *
  * @class PolygonRings
- * @memberof gdal
  */
 NAN_METHOD(PolygonRings::New) {
 
@@ -79,7 +77,7 @@ NAN_METHOD(PolygonRings::toString) {
  *
  * @method count
  * @instance
- * @memberof gdal.PolygonRings
+ * @memberof PolygonRings
  * @return {number}
  */
 NAN_METHOD(PolygonRings::count) {
@@ -105,10 +103,10 @@ NAN_METHOD(PolygonRings::count) {
  *
  * @method get
  * @instance
- * @memberof gdal.PolygonRings
+ * @memberof PolygonRings
  * @param {number} index
  * @throws Error
- * @return {gdal.LinearRing}
+ * @return {LinearRing}
  */
 NAN_METHOD(PolygonRings::get) {
 
@@ -152,8 +150,8 @@ NAN_METHOD(PolygonRings::get) {
  *
  * @method add
  * @instance
- * @memberof gdal.PolygonRings
- * @param {gdal.LinearRing|gdal.LinearRing[]} rings
+ * @memberof PolygonRings
+ * @param {gdal.LinearRing|LinearRing[]} rings
  */
 NAN_METHOD(PolygonRings::add) {
 

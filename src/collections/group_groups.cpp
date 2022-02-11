@@ -31,12 +31,11 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Group"}}Group{{/crossLink}}'s
+ * An encapsulation of a {@link Group}
  * descendant groups.
  *
  *
  * @class GroupGroups
- * @memberof gdal
  */
 
 /**
@@ -44,9 +43,9 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method get
  * @instance
- * @memberof gdal.GroupGroups
+ * @memberof GroupGroups
  * @param {string|number} group
- * @return {gdal.Group}
+ * @return {Group}
  */
 
 /**
@@ -55,11 +54,11 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.GroupGroups
+ * @memberof GroupGroups
  *
  * @param {string|number} group
- * @param {callback<gdal.Group>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Group>}
+ * @param {callback<Group>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Group>}
  */
 
 /**
@@ -67,7 +66,7 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method count
  * @instance
- * @memberof gdal.GroupGroups
+ * @memberof GroupGroups
  * @return {number}
  */
 
@@ -77,7 +76,7 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.GroupGroups
+ * @memberof GroupGroups
  *
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
@@ -88,7 +87,7 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  * @kind member
  * @name names
  * @instance
- * @memberof gdal.GroupGroups
+ * @memberof GroupGroups
  * @type {string[]}
  */
 
@@ -99,8 +98,8 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
  * @kind member
  * @name ds
  * @instance
- * @memberof gdal.GroupGroups
- * @type {gdal.Dataset}
+ * @memberof GroupGroups
+ * @type {Dataset}
  */
 #endif
 } // namespace node_gdal

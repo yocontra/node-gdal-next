@@ -38,11 +38,9 @@ FeatureDefnFields::~FeatureDefnFields() {
 }
 
 /**
- * An encapsulation of a {{#crossLink
- * "gdal.FeatureDefn"}}FeatureDefn{{/crossLink}}'s fields.
+ * An encapsulation of a {@link FeatureDefn}'s fields.
  *
  * @class FeatureDefnFields
- * @memberof gdal
  */
 NAN_METHOD(FeatureDefnFields::New) {
 
@@ -86,7 +84,7 @@ NAN_METHOD(FeatureDefnFields::toString) {
  *
  * @method count
  * @instance
- * @memberof gdal.FeatureDefnFields
+ * @memberof FeatureDefnFields
  * @return {number}
  */
 NAN_METHOD(FeatureDefnFields::count) {
@@ -107,7 +105,7 @@ NAN_METHOD(FeatureDefnFields::count) {
  *
  * @method indexOf
  * @instance
- * @memberof gdal.FeatureDefnFields
+ * @memberof FeatureDefnFields
  * @param {string} name
  * @return {number} Index or `-1` if not found.
  */
@@ -132,10 +130,10 @@ NAN_METHOD(FeatureDefnFields::indexOf) {
  *
  * @method get
  * @instance
- * @memberof gdal.FeatureDefnFields
+ * @memberof FeatureDefnFields
  * @param {string|number} key Field name or index
  * @throws Error
- * @return {gdal.FieldDefn}
+ * @return {FieldDefn}
  */
 NAN_METHOD(FeatureDefnFields::get) {
 
@@ -166,7 +164,7 @@ NAN_METHOD(FeatureDefnFields::get) {
  *
  * @method getNames
  * @instance
- * @memberof gdal.FeatureDefnFields
+ * @memberof FeatureDefnFields
  * @return {string[]} List of field names.
  */
 NAN_METHOD(FeatureDefnFields::getNames) {
@@ -195,7 +193,7 @@ NAN_METHOD(FeatureDefnFields::getNames) {
  *
  * @method remove
  * @instance
- * @memberof gdal.FeatureDefnFields
+ * @memberof FeatureDefnFields
  * @throws Error
  * @param {string|number} key Field name or index
  */
@@ -231,9 +229,9 @@ NAN_METHOD(FeatureDefnFields::remove) {
  *
  * @method add
  * @instance
- * @memberof gdal.FeatureDefnFields
+ * @memberof FeatureDefnFields
  * @throws Error
- * @param {gdal.FieldDefn|gdal.FieldDefn[]} fields
+ * @param {gdal.FieldDefn|FieldDefn[]} fields
  */
 NAN_METHOD(FeatureDefnFields::add) {
 
@@ -285,7 +283,7 @@ NAN_METHOD(FeatureDefnFields::add) {
  *
  * @method reorder
  * @instance
- * @memberof gdal.FeatureDefnFields
+ * @memberof FeatureDefnFields
  * @throws Error
  * @param {number[]} map An array representing the new field order.
  */
@@ -348,8 +346,8 @@ NAN_METHOD(FeatureDefnFields::reorder) {
  * @kind member
  * @name featureDefn
  * @instance
- * @memberof gdal.FeatureDefnFields
- * @type {gdal.FeatureDefn}
+ * @memberof FeatureDefnFields
+ * @type {FeatureDefn}
  */
 NAN_GETTER(FeatureDefnFields::featureDefnGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("parent_").ToLocalChecked()).ToLocalChecked());

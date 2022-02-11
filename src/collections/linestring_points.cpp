@@ -35,11 +35,9 @@ LineStringPoints::~LineStringPoints() {
 }
 
 /**
- * An encapsulation of a {{#crossLink
- * "gdal.LineString"}}LineString{{/crossLink}}'s points.
+ * An encapsulation of a {@link LineString}'s points.
  *
  * @class LineStringPoints
- * @memberof gdal
  */
 NAN_METHOD(LineStringPoints::New) {
 
@@ -83,7 +81,7 @@ NAN_METHOD(LineStringPoints::toString) {
  *
  * @method count
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  * @return {number}
  */
 NAN_METHOD(LineStringPoints::count) {
@@ -100,7 +98,7 @@ NAN_METHOD(LineStringPoints::count) {
  *
  * @method reverse
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  */
 NAN_METHOD(LineStringPoints::reverse) {
 
@@ -118,7 +116,7 @@ NAN_METHOD(LineStringPoints::reverse) {
  *
  * @method resize
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  * @param {number} count
  */
 NAN_METHOD(LineStringPoints::resize) {
@@ -139,10 +137,10 @@ NAN_METHOD(LineStringPoints::resize) {
  *
  * @method get
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  * @param {number} index 0-based index
  * @throws Error
- * @return {gdal.Point}
+ * @return {Point}
  */
 NAN_METHOD(LineStringPoints::get) {
 
@@ -174,16 +172,16 @@ NAN_METHOD(LineStringPoints::get) {
  *
  * @method set
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  * @throws Error
  * @param {number} index 0-based index
- * @param {gdal.Point|xyz} point
+ * @param {Point|xyz} point
  */
 
 /**
  * @method set
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  * @throws Error
  * @param {number} index 0-based index
  * @param {number} x
@@ -279,16 +277,16 @@ NAN_METHOD(LineStringPoints::set) {
  *
  * @method add
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  * @throws Error
- * @param {gdal.Point|xyz|(gdal.Point|xyz)[]} points
+ * @param {gdal.Point|xyz|(Point|xyz)[]} points
  */
 
 /**
  *
  * @method add
  * @instance
- * @memberof gdal.LineStringPoints
+ * @memberof LineStringPoints
  * @throws Error
  * @param {number} x
  * @param {number} y

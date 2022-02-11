@@ -74,7 +74,7 @@ void Dataset::dispose(bool manual) {
 /**
  * A set of associated raster bands and/or vector layers, usually from one file.
  *
- *
+ * @example
  * // raster dataset:
  * dataset = gdal.open('file.tif');
  * bands = dataset.bands;
@@ -84,7 +84,6 @@ void Dataset::dispose(bool manual) {
  * layers = dataset.layers;
  *
  * @class Dataset
- * @memberof gdal
  */
 NAN_METHOD(Dataset::New) {
 
@@ -160,7 +159,7 @@ NAN_METHOD(Dataset::toString) {
  *
  * @method getMetadata
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {string} [domain]
  * @return {any}
  */
@@ -171,7 +170,7 @@ NAN_METHOD(Dataset::toString) {
  *
  * @method getMetadataAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {string} [domain]
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<any>}
@@ -196,7 +195,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
  *
  * @method setMetadata
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {object|string[]} metadata
  * @param {string} [domain]
  * @return {boolean}
@@ -208,7 +207,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
  *
  * @method setMetadataAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {object|string[]} metadata
  * @param {string} [domain]
  * @param {callback<boolean>} [callback=undefined] {{{cb}}}
@@ -242,9 +241,8 @@ GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {
  *
  * @method testCapability
  * @instance
- * @memberof gdal.Dataset
- * @param {string} capability (see {{#crossLink "Constants (ODsC)"}}capability
- * list{{/crossLink}})
+ * @memberof Dataset
+ * @param {string} capability {@link ODsC|capability list}
  * @return {boolean}
  */
 NAN_METHOD(Dataset::testCapability) {
@@ -269,7 +267,7 @@ NAN_METHOD(Dataset::testCapability) {
  *
  * @method getGCPProjection
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @return {string}
  */
 NAN_METHOD(Dataset::getGCPProjection) {
@@ -303,7 +301,7 @@ NAN_METHOD(Dataset::getGCPProjection) {
  *
  * @method close
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  */
 NAN_METHOD(Dataset::close) {
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
@@ -324,7 +322,7 @@ NAN_METHOD(Dataset::close) {
  * @throws Error
  * @method flush
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  */
 
 /**
@@ -333,7 +331,7 @@ NAN_METHOD(Dataset::close) {
  *
  * @method flushAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @throws Error
  * @param {callback<void>} [callback=undefined] {{{cb}}}
  * @return {Promise<void>}
@@ -358,16 +356,16 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  * @throws Error
  * @method executeSQL
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {string} statement SQL statement to execute.
- * @param {gdal.Geometry} [spatial_filter=null] Geometry which represents a
+ * @param {Geometry} [spatial_filter=null] Geometry which represents a
  * spatial filter.
  * @param {string} [dialect=null] Allows control of the statement dialect. If
  * set to `null`, the OGR SQL engine will be used, except for RDBMS drivers that
  * will use their dedicated SQL engine, unless `"OGRSQL"` is explicitely passed
  * as the dialect. Starting with OGR 1.10, the `"SQLITE"` dialect can also be
  * used.
- * @return {gdal.Layer}
+ * @return {Layer}
  */
 
 /**
@@ -377,17 +375,17 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  * @throws Error
  * @method executeSQLAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {string} statement SQL statement to execute.
- * @param {gdal.Geometry} [spatial_filter=null] Geometry which represents a
+ * @param {Geometry} [spatial_filter=null] Geometry which represents a
  * spatial filter.
  * @param {string} [dialect=null] Allows control of the statement dialect. If
  * set to `null`, the OGR SQL engine will be used, except for RDBMS drivers that
  * will use their dedicated SQL engine, unless `"OGRSQL"` is explicitely passed
  * as the dialect. Starting with OGR 1.10, the `"SQLITE"` dialect can also be
  * used.
- * @param {callback<gdal.Layer>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.Layer>}
+ * @param {callback<Layer>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Layer>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
@@ -431,7 +429,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
  *
  * @method getFileList
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @return {string[]}
  */
 NAN_METHOD(Dataset::getFileList) {
@@ -473,7 +471,7 @@ NAN_METHOD(Dataset::getFileList) {
  *
  * @method getGCPs
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @return {any[]}
  */
 NAN_METHOD(Dataset::getGCPs) {
@@ -523,7 +521,7 @@ NAN_METHOD(Dataset::getGCPs) {
  * @throws Error
  * @method setGCPs
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {object[]} gcps
  * @param {string} [projection]
  */
@@ -589,7 +587,7 @@ NAN_METHOD(Dataset::setGCPs) {
  * @throws Error
  * @method buildOverviews
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
  * @param {number[]} overviews
@@ -605,7 +603,7 @@ NAN_METHOD(Dataset::setGCPs) {
  * @throws Error
  * @method buildOverviewsAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @param {string} resampling `"NEAREST"`, `"GAUSS"`, `"CUBIC"`, `"AVERAGE"`,
  * `"MODE"`, `"AVERAGE_MAGPHASE"` or `"NONE"`
  * @param {number[]} overviews
@@ -693,7 +691,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
  * @kind member
  * @name description
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @type {string}
  */
 NAN_GETTER(Dataset::descriptionGetter) {
@@ -720,7 +718,7 @@ NAN_GETTER(Dataset::descriptionGetter) {
  * @kind member
  * @name rasterSize
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @type {xyz}
  */
 
@@ -732,7 +730,7 @@ NAN_GETTER(Dataset::descriptionGetter) {
  * @kind member
  * @name rasterSizeAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @type {Promise<xyz>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
@@ -785,8 +783,8 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * @kind member
  * @name srs
  * @instance
- * @memberof gdal.Dataset
- * @type {gdal.SpatialReference|null}
+ * @memberof Dataset
+ * @type {SpatialReference|null}
  */
 
 /**
@@ -797,9 +795,9 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
  * @kind member
  * @name srsAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @readonly
- * @type {Promise<gdal.SpatialReference|null>}
+ * @type {Promise<SpatialReference|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
@@ -849,7 +847,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * @kind member
  * @name geoTransform
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @type {number[]|null}
  */
 
@@ -868,7 +866,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * @kind member
  * @name geoTransformAsync
  * @instance
- * @memberof gdal.Dataset
+ * @memberof Dataset
  * @type {Promise<number[]|null>}
  */
 GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
@@ -912,8 +910,8 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::geoTransformGetter) {
  * @kind member
  * @name driver
  * @instance
- * @memberof gdal.Dataset
- * @type {gdal.Driver}
+ * @memberof Dataset
+ * @type {Driver}
  */
 NAN_GETTER(Dataset::driverGetter) {
   Dataset *ds = Nan::ObjectWrap::Unwrap<Dataset>(info.This());
@@ -1003,8 +1001,8 @@ NAN_SETTER(Dataset::geoTransformSetter) {
  * @kind member
  * @name bands
  * @instance
- * @memberof gdal.Dataset
- * @type {gdal.DatasetBands}
+ * @memberof Dataset
+ * @type {DatasetBands}
  */
 NAN_GETTER(Dataset::bandsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("bands_").ToLocalChecked()).ToLocalChecked());
@@ -1015,8 +1013,8 @@ NAN_GETTER(Dataset::bandsGetter) {
  * @kind member
  * @name layers
  * @instance
- * @memberof gdal.Dataset
- * @type {gdal.DatasetLayers}
+ * @memberof Dataset
+ * @type {DatasetLayers}
  */
 NAN_GETTER(Dataset::layersGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("layers_").ToLocalChecked()).ToLocalChecked());
@@ -1027,8 +1025,8 @@ NAN_GETTER(Dataset::layersGetter) {
  * @kind member
  * @name root
  * @instance
- * @memberof gdal.Dataset
- * @type {gdal.Group}
+ * @memberof Dataset
+ * @type {Group}
  */
 NAN_GETTER(Dataset::rootGetter) {
   Local<Value> rootObj = Nan::GetPrivate(info.This(), Nan::New("root_").ToLocalChecked()).ToLocalChecked();

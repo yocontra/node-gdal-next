@@ -32,11 +32,10 @@ GDALDrivers::~GDALDrivers() {
 }
 
 /**
- * An collection of all {{#crossLink "gdal.Driver"}}drivers{{/crossLink}}
+ * An collection of all {@link Driver}
  * registered with GDAL.
  *
  * @class GDALDrivers
- * @memberof gdal
  */
 NAN_METHOD(GDALDrivers::New) {
 
@@ -82,10 +81,10 @@ NAN_METHOD(GDALDrivers::toString) {
  *
  * @method get
  * @instance
- * @memberof gdal.GDALDrivers
+ * @memberof GDALDrivers
  * @param {number|string} index 0-based index or driver name
  * @throws Error
- * @return {gdal.Driver}
+ * @return {Driver}
  */
 NAN_METHOD(GDALDrivers::get) {
 
@@ -133,7 +132,7 @@ NAN_METHOD(GDALDrivers::get) {
  *
  * @method getNames
  * @instance
- * @memberof gdal.GDALDrivers
+ * @memberof GDALDrivers
  * @return {string[]}
  */
 NAN_METHOD(GDALDrivers::getNames) {
@@ -159,7 +158,7 @@ NAN_METHOD(GDALDrivers::getNames) {
  *
  * @method count
  * @instance
- * @memberof gdal.GDALDrivers
+ * @memberof GDALDrivers
  * @return {number}
  */
 NAN_METHOD(GDALDrivers::count) {

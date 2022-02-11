@@ -32,11 +32,10 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
 }
 
 /**
- * An encapsulation of a {{#crossLink "gdal.Group"}}Group{{/crossLink}}'s
+ * An encapsulation of a {@link Group}
  * descendant arrays.
  *
  * @class GroupArrays
- * @memberof gdal
  */
 
 /**
@@ -44,9 +43,9 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method get
  * @instance
- * @memberof gdal.GroupArrays
+ * @memberof GroupArrays
  * @param {string|number} array
- * @return {gdal.MDArray}
+ * @return {MDArray}
  */
 
 /**
@@ -55,11 +54,11 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method getAsync
  * @instance
- * @memberof gdal.GroupArrays
+ * @memberof GroupArrays
  *
  * @param {string|number} array
- * @param {callback<gdal.MDArray>} [callback=undefined] {{{cb}}}
- * @return {Promise<gdal.MDArray>}
+ * @param {callback<MDArray>} [callback=undefined] {{{cb}}}
+ * @return {Promise<MDArray>}
  */
 
 /**
@@ -67,7 +66,7 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method count
  * @instance
- * @memberof gdal.GroupArrays
+ * @memberof GroupArrays
  * @return {number}
  */
 
@@ -77,7 +76,7 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
  *
  * @method countAsync
  * @instance
- * @memberof gdal.GroupArrays
+ * @memberof GroupArrays
  *
  * @param {callback<number>} [callback=undefined] {{{cb}}}
  * @return {Promise<number>}
@@ -88,7 +87,7 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
  * @kind member
  * @name names
  * @instance
- * @memberof gdal.GroupArrays
+ * @memberof GroupArrays
  * @type {string[]}
  */
 
@@ -99,8 +98,8 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
  * @kind member
  * @name ds
  * @instance
- * @memberof gdal.GroupArrays
- * @type {gdal.Dataset}
+ * @memberof GroupArrays
+ * @type {Dataset}
  */
 #endif
 

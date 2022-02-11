@@ -69,7 +69,6 @@ void MDArray::dispose() {
  * A representation of an array with access methods.
  *
  * @class MDArray
- * @memberof gdal
  */
 NAN_METHOD(MDArray::New) {
 
@@ -198,7 +197,6 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
 
 /**
  * @typedef {object} MDArrayOptions
- * @memberof gdal
  * @property {number[]} origin
  * @property {number[]} span
  * @property {number[]} [stride]
@@ -218,13 +216,13 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  *
  * @method read
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @throws Error
  * @param {MDArrayOptions} options
  * @param {number[]} options.origin An array of the starting indices
  * @param {number[]} options.span An array specifying the number of elements to read in each dimension
  * @param {number[]} [options.stride] An array of strides for the output array, mandatory if the array is specified
- * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT constants{{/crossLink}}.
+ * @param {string} [options.data_type] See {@link GDT|GDT constants}
  * @param {TypedArray} [options.data] The TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
  * @return {TypedArray}
  */
@@ -241,13 +239,13 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  *
  * @method readAsync
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @throws Error
  * @param {MDArrayOptions} options
  * @param {number[]} options.origin An array of the starting indices
  * @param {number[]} options.span An array specifying the number of elements to read in each dimension
  * @param {number[]} [options.stride] An array of strides for the output array, mandatory if the array is specified
- * @param {string} [options.data_type] See {{#crossLink "Constants (GDT)"}}GDT constants{{/crossLink}}.
+ * @param {string} [options.data_type] See {@link GDT|GDT constants}
  * @param {TypedArray} [options.data] The TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
  * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
  * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
@@ -363,10 +361,10 @@ GDAL_ASYNCABLE_DEFINE(MDArray::read) {
  *
  * @method getView
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @throws Error
  * @param {string} view
- * @return {gdal.MDArray}
+ * @return {MDArray}
  */
 NAN_METHOD(MDArray::getView) {
   NODE_UNWRAP_CHECK(MDArray, info.This(), array);
@@ -394,9 +392,9 @@ NAN_METHOD(MDArray::getView) {
  *
  * @method getMask
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @throws Error
- * @return {gdal.MDArray}
+ * @return {MDArray}
  */
 NAN_METHOD(MDArray::getMask) {
   NODE_UNWRAP_CHECK(MDArray, info.This(), array);
@@ -420,11 +418,11 @@ NAN_METHOD(MDArray::getMask) {
  *
  * @method asDataset
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @param {number|string} x dimension to be used as X axis
  * @param {number|string} y dimension to be used as Y axis
  * @throws Error
- * @return {gdal.Dataset}
+ * @return {Dataset}
  */
 NAN_METHOD(MDArray::asDataset) {
   NODE_UNWRAP_CHECK(MDArray, info.This(), array);
@@ -455,8 +453,8 @@ NAN_METHOD(MDArray::asDataset) {
  * @kind member
  * @name srs
  * @instance
- * @memberof gdal.MDArray
- * @type {gdal.SpatialReference}
+ * @memberof MDArray
+ * @type {SpatialReference}
  */
 NAN_GETTER(MDArray::srsGetter) {
   NODE_UNWRAP_CHECK(MDArray, info.This(), array);
@@ -477,7 +475,7 @@ NAN_GETTER(MDArray::srsGetter) {
  * @kind member
  * @name offset
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @type {number}
  */
 NAN_GETTER(MDArray::offsetGetter) {
@@ -497,7 +495,7 @@ NAN_GETTER(MDArray::offsetGetter) {
  * @kind member
  * @name scale
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @type {number}
  */
 NAN_GETTER(MDArray::scaleGetter) {
@@ -517,7 +515,7 @@ NAN_GETTER(MDArray::scaleGetter) {
  * @kind member
  * @name noDataValue
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @type {number|null}
  */
 NAN_GETTER(MDArray::noDataValueGetter) {
@@ -544,7 +542,7 @@ NAN_GETTER(MDArray::noDataValueGetter) {
  * @kind member
  * @name unitType
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @type {string}
  */
 NAN_GETTER(MDArray::unitTypeGetter) {
@@ -559,7 +557,7 @@ NAN_GETTER(MDArray::unitTypeGetter) {
  * @kind member
  * @name dataType
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @type {string}
  */
 NAN_GETTER(MDArray::typeGetter) {
@@ -582,8 +580,8 @@ NAN_GETTER(MDArray::typeGetter) {
  * @kind member
  * @name dimensions
  * @instance
- * @memberof gdal.MDArray
- * @type {gdal.GroupDimensions}
+ * @memberof MDArray
+ * @type {GroupDimensions}
  */
 NAN_GETTER(MDArray::dimensionsGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("dims_").ToLocalChecked()).ToLocalChecked());
@@ -594,8 +592,8 @@ NAN_GETTER(MDArray::dimensionsGetter) {
  * @kind member
  * @name attributes
  * @instance
- * @memberof gdal.MDArray
- * @type {gdal.ArrayAttributes}
+ * @memberof MDArray
+ * @type {ArrayAttributes}
  */
 NAN_GETTER(MDArray::attributesGetter) {
   info.GetReturnValue().Set(Nan::GetPrivate(info.This(), Nan::New("attrs_").ToLocalChecked()).ToLocalChecked());
@@ -606,7 +604,7 @@ NAN_GETTER(MDArray::attributesGetter) {
  * @kind member
  * @name description
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @type {string}
  */
 NAN_GETTER(MDArray::descriptionGetter) {
@@ -624,7 +622,7 @@ NAN_GETTER(MDArray::descriptionGetter) {
  * @kind member
  * @name length
  * @instance
- * @memberof gdal.MDArray
+ * @memberof MDArray
  * @type {number}
  */
 NODE_WRAPPED_GETTER_WITH_RESULT_LOCKED(MDArray, lengthGetter, Number, GetTotalElementsCount);

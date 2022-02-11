@@ -30,8 +30,7 @@ deps/libhdf5/hdf5*.tar.gz
 deps/libnetcdf/netcdf*.tar.gz
 lib/binding
 lib/index.d.ts
-yuidocs
-docs
+doc
 coverage
 package-lock.json
 yarn.lock
