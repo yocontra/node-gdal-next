@@ -23,6 +23,7 @@ jobs:
         - debian:bullseye
         - fedora:33
         - fedora:34
+        - centos:stream8
         - amazonlinux:latest
         node-version: [ 12, 14, 16, 17 ]
 

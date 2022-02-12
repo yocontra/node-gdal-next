@@ -1,5 +1,5 @@
-ARG VERSION=8
-FROM centos:${VERSION}
+ARG VERSION=stream8
+FROM quay.io/centos/centos:${VERSION}
 
 ARG NODEJS=lts
 ARG GDAL=""
