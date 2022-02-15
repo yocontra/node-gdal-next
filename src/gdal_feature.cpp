@@ -84,7 +84,7 @@ void Feature::dispose() {
  *
  * @constructor
  * @class Feature
- * @param {gdal.Layer|FeatureDefn} definition
+ * @param {Layer|FeatureDefn} definition
  */
 NAN_METHOD(Feature::New) {
   Feature *f;
@@ -191,7 +191,7 @@ NAN_METHOD(Feature::getGeometry) {
  *
  * _method getFieldDefn
  * _param {number} index Field index (0-based)
- * _return {gdal.FieldDefn}
+ * _return {FieldDefn}
  */
 NAN_METHOD(Feature::getFieldDefn) {
   int field_index;

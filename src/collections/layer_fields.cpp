@@ -261,7 +261,7 @@ NAN_METHOD(LayerFields::remove) {
  * @method add
  * @instance
  * @memberof LayerFields
- * @param {gdal.FieldDefn|FieldDefn[]} defs A field definition, or array of field
+ * @param {FieldDefn|FieldDefn[]} defs A field definition, or array of field
  * definitions.
  * @param {boolean} [approx=true]
  */

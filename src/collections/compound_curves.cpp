@@ -104,7 +104,7 @@ NAN_METHOD(CompoundCurveCurves::count) {
  * @memberof CompoundCurveCurves
  * @param {number} index
  * @throws Error
- * @return {gdal.CompoundCurve|SimpleCurve}
+ * @return {CompoundCurve|SimpleCurve}
  */
 NAN_METHOD(CompoundCurveCurves::get) {
 
@@ -142,7 +142,7 @@ NAN_METHOD(CompoundCurveCurves::get) {
  * @method add
  * @instance
  * @memberof CompoundCurveCurves
- * @param {gdal.SimpleCurve|SimpleCurve[]} curves
+ * @param {SimpleCurve|SimpleCurve[]} curves
  */
 NAN_METHOD(CompoundCurveCurves::add) {
 

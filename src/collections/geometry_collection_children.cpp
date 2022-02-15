@@ -160,7 +160,7 @@ NAN_METHOD(GeometryCollectionChildren::remove) {
  * @method add
  * @instance
  * @memberof GeometryCollectionChildren
- * @param {gdal.Geometry|Geometry[]} geometry
+ * @param {Geometry|Geometry[]} geometry
  */
 NAN_METHOD(GeometryCollectionChildren::add) {
 

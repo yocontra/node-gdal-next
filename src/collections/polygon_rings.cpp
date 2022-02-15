@@ -151,7 +151,7 @@ NAN_METHOD(PolygonRings::get) {
  * @method add
  * @instance
  * @memberof PolygonRings
- * @param {gdal.LinearRing|LinearRing[]} rings
+ * @param {LinearRing|LinearRing[]} rings
  */
 NAN_METHOD(PolygonRings::add) {
 

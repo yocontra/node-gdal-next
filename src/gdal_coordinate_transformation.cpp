@@ -47,7 +47,7 @@ CoordinateTransformation::~CoordinateTransformation() {
  * @constructor
  * @class CoordinateTransformation
  * @param {SpatialReference} source
- * @param {gdal.SpatialReference|Dataset} target If a raster Dataset, the
+ * @param {SpatialReference|Dataset} target If a raster Dataset, the
  * conversion will represent a conversion to pixel coordinates.
  */
 NAN_METHOD(CoordinateTransformation::New) {

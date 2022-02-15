@@ -231,7 +231,7 @@ NAN_METHOD(FeatureDefnFields::remove) {
  * @instance
  * @memberof FeatureDefnFields
  * @throws Error
- * @param {gdal.FieldDefn|FieldDefn[]} fields
+ * @param {FieldDefn|FieldDefn[]} fields
  */
 NAN_METHOD(FeatureDefnFields::add) {
 

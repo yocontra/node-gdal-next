@@ -279,7 +279,7 @@ NAN_METHOD(LineStringPoints::set) {
  * @instance
  * @memberof LineStringPoints
  * @throws Error
- * @param {gdal.Point|xyz|(Point|xyz)[]} points
+ * @param {Point|xyz|(Point|xyz)[]} points
  */
 
 /**
