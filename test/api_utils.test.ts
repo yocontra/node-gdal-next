@@ -348,10 +348,18 @@ describe('gdal_utils', () => {
       // Underground clouds are very rare
       (await cloudBase.bands.getAsync(1)).noDataValue = -1e38
 
+      let done = 0
       await gdal.calcAsync({
         t: await T2m.bands.getAsync(1),
         td: await D2m.bands.getAsync(1)
-      }, await cloudBase.bands.getAsync(1), espyFn, { convertNoData: true })
+      }, await cloudBase.bands.getAsync(1), espyFn, {
+        convertNoData: true,
+        progress_cb: (complete) => {
+          assert.isAbove(complete, done)
+          done = complete
+        }
+      })
+      assert.closeTo(done, 1, 0.1)
 
       const t2mData = await (await T2m.bands.getAsync(1)).pixels.readAsync(0, 0, size.x, size.y)
       const d2mData = await (await D2m.bands.getAsync(1)).pixels.readAsync(0, 0, size.x, size.y)
