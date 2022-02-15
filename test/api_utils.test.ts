@@ -364,6 +364,7 @@ describe('gdal_utils', () => {
       cloudBase.close()
       gdal.vsimem.release(tempFile)
     })
+
     it('should reject when raster sizes do not match', () => {
       const tempFile = `/vsimem/invalid_calc_${String(Math.random()).substring(2)}.tiff`
       const espyFn = (t: number, td: number) => 125 * (t - td)
@@ -376,6 +377,46 @@ describe('gdal_utils', () => {
         espyFn),
         /dimensions must match/
       )
+    })
+
+    it('should support ignoring NoData values', async () => {
+      const tempFile = `/vsimem/calc_nodata1_${String(Math.random()).substring(2)}.tiff`
+      const dem = await gdal.openAsync(path.resolve(__dirname, 'data', 'dem_azimuth50_pa.img'))
+      const size = await dem.rasterSizeAsync
+      const output = await gdal.openAsync(tempFile,
+        'w', 'GTiff', size.x, size.y, 1, gdal.GDT_Float64)
+
+      const fn = (dem: number) => (dem + 1);
+
+      (await output.bands.getAsync(1)).noDataValue = -100
+
+      await gdal.calcAsync({
+        dem: await dem.bands.getAsync(1)
+      }, await output.bands.getAsync(1), fn, { convertNoData: false })
+
+      assert.equal(output.bands.get(1).pixels.get(0, 0), 1)
+      output.close()
+      gdal.vsimem.release(tempFile)
+    })
+
+    it('should support converting NoData values', async () => {
+      const tempFile = `/vsimem/calc_nodata2_${String(Math.random()).substring(2)}.tiff`
+      const dem = await gdal.openAsync(path.resolve(__dirname, 'data', 'dem_azimuth50_pa.img'))
+      const size = await dem.rasterSizeAsync
+      const output = await gdal.openAsync(tempFile,
+        'w', 'GTiff', size.x, size.y, 1, gdal.GDT_Float64)
+
+      const fn = (dem: number) => (dem + 1);
+
+      (await output.bands.getAsync(1)).noDataValue = -100
+
+      await gdal.calcAsync({
+        dem: await dem.bands.getAsync(1)
+      }, await output.bands.getAsync(1), fn, { convertNoData: true, convertInput: true })
+
+      assert.equal(output.bands.get(1).pixels.get(0, 0), -100)
+      output.close()
+      gdal.vsimem.release(tempFile)
     })
   })
 })
