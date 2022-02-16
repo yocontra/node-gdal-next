@@ -272,8 +272,8 @@ Development versions are unit tested for the following targets:
 ---
 | Node | OS | GDAL |
 | --- | --- | --- |
-| Node.js 14.x | CentOS 8 | system-installed GDAL 3.0.4
-| Node.js 14.x | CentOS 8 | bundled GDAL
+| Node.js 14.x | CentOS 8 Stream | system-installed GDAL 3.0.4
+| Node.js 14.x | CentOS 8 Stream | bundled GDAL
 | Node.js 14.x | Debian 10 buster | system-installed GDAL 2.1.2 (*earliest unit-tested GDAL*)
 | Node.js 14.x | Debian 11 bullseye | system-installed GDAL 3.2.2
 | Node.js 14.x | Debian 11 bullseye | bundled GDAL
