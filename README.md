@@ -31,18 +31,7 @@ It adds a number of features:
 - Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (since 3.3)
 - Numerous bugfixes including a number of memory leaks
 
-The default install is currently the 3.3 branch which is bundled with GDAL 3.3.3.
-GDAL 3.4.0 is available on the 3.4 branch which can be installed as `gdal-async@next`.
-
 Support for `worker_threads` is planned but it is not a priority project
-
-## Project maturity
-
-`gdal-async` is a young and complex project that is currently evolving very fast.
- * `gdal-async@3.3`, the current stable branch
-    * The raster data processing is used, in conjunction with `Express` and `scijs` on at least one production site (<https://www.velivole.fr> - <https://www.meteo.guru> where it is serving requests to thousands of visitors with process uptimes measured in months, so most of the basic raster functions are to be considered stable and without any major leaks
-    * The vector data processing is used occasionally and mostly in offline batch mode
- * `gdal-async@3.4`, the `next` branch, is still to be considered somewhat experimental
 
 ## Installation
 
