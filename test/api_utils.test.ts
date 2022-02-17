@@ -51,6 +51,11 @@ describe('gdal_utils', () => {
         gdal.translate(tmpFile, ds)
       })
     })
+    it('should throw if the Dataset object is of wrong type', () => {
+      assert.throws(() => {
+        gdal.translate('a', {} as gdal.Dataset)
+      })
+    })
   })
 
   describe('translateAsync', () => {
