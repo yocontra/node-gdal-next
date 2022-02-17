@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - API documentation now uses `documentation.js` with `documentation-polyglot`
  - `gdal.calcAsync` can now convert input data to the output type before applying the user function
  - `gdal.calcAsync` can now call a progress callback
+ - Add `gdal.buildVRT` and `gdal.rasterize`
 
 ## [3.4.2] WIP
  - Support the ArchLinux Node.js 17 ABI - see https://github.com/nodejs/node/issues/41410

@@ -121,7 +121,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     Nan::ThrowTypeError("Object must be a " #type " object");                                                          \
     return;                                                                                                            \
   }                                                                                                                    \
-  type *var = Nan::ObjectWrap::Unwrap<type>(obj);                                                                      \
+  type *var = Nan::ObjectWrap::Unwrap<type>(obj.As<Object>());                                                         \
   if (!var->isAlive()) {                                                                                               \
     Nan::ThrowError(#type " object has already been destroyed");                                                       \
     return;                                                                                                            \
@@ -142,7 +142,7 @@ NAN_SETTER(READ_ONLY_SETTER);
     THROW_OR_REJECT("Object must be a " #type " object");                                                              \
     return;                                                                                                            \
   }                                                                                                                    \
-  type *var = Nan::ObjectWrap::Unwrap<type>(obj);                                                                      \
+  type *var = Nan::ObjectWrap::Unwrap<type>(obj.As<Object>());                                                         \
   if (!var->isAlive()) {                                                                                               \
     THROW_OR_REJECT(#type " object has already been destroyed");                                                       \
     return;                                                                                                            \

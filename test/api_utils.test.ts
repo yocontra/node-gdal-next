@@ -338,6 +338,201 @@ describe('gdal_utils', () => {
     })
   })
 
+  describe('buildVRT', () => {
+    it('should be equivalent to gdalbuildvrt', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      const t = path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')
+      const td = path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')
+
+      let out_ds = gdal.buildVRT(tmpFile, [ t, td ])
+
+      assert.equal(out_ds.bands.count(), 1)
+      out_ds.close()
+
+      out_ds = gdal.open(tmpFile)
+      assert.equal(out_ds.bands.count(), 1)
+      out_ds.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+
+    it('should accept open Datasets', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      const t = gdal.open(path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff'))
+      const td = gdal.open(path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff'))
+
+      let out_ds = gdal.buildVRT(tmpFile, [ t, td ])
+
+      assert.equal(out_ds.bands.count(), 1)
+      assert.deepEqual(out_ds.rasterSize, t.rasterSize)
+      assert.deepEqual(out_ds.geoTransform, t.geoTransform)
+      out_ds.close()
+
+      out_ds = gdal.open(tmpFile)
+      assert.equal(out_ds.bands.count(), 1)
+      assert.deepEqual(out_ds.rasterSize, t.rasterSize)
+      assert.deepEqual(out_ds.geoTransform, t.geoTransform)
+      out_ds.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+
+    it('should accept gdalbuildvrt command-line options', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      const t = path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')
+      const td = path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')
+
+      let out_ds = gdal.buildVRT(tmpFile, [ t, td ], [ '-separate' ])
+
+      assert.equal(out_ds.bands.count(), 2)
+      out_ds.close()
+
+      out_ds = gdal.open(tmpFile)
+      assert.equal(out_ds.bands.count(), 2)
+      out_ds.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+
+    it('should call a progress callback', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      const t = path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')
+      const td = path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')
+
+      let called = 0
+      const out_ds = gdal.buildVRT(tmpFile, [ t, td ], [], { progress_cb: () => {
+        called++
+      } })
+      assert.equal(out_ds.bands.count(), 1)
+      assert.isAbove(called, 0)
+      out_ds.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+
+    it('should throw when mixing input types', () => {
+      assert.throws(() => {
+        gdal.buildVRT('file', [ 'a', {} as string ])
+      }, /must have the same type/)
+      assert.throws(() => {
+        gdal.buildVRT('file', [
+          gdal.open(path.resolve(__dirname, 'data', 'sample.tif')),
+          'a' as unknown as gdal.Dataset
+        ])
+      }, /Object must be a Dataset object/)
+    })
+  })
+
+  describe('buildVRTAsync', () => {
+    it('should be equivalent to gdalbuildvrt', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      const t = path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')
+      const td = path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')
+
+      const out = gdal.buildVRTAsync(tmpFile, [ t, td ])
+
+      return assert.isFulfilled(out.then((out_ds) => {
+        assert.equal(out_ds.bands.count(), 1)
+        out_ds.close()
+
+        out_ds = gdal.open(tmpFile)
+        assert.equal(out_ds.bands.count(), 1)
+        out_ds.close()
+
+        gdal.vsimem.release(tmpFile)
+      }))
+    })
+    it('should reject on error', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      return assert.isRejected(gdal.buildVRTAsync(tmpFile, [ path.resolve(__dirname, 'data', 'nofile') ]),
+        /nofile/)
+    })
+  })
+
+  describe('rasterize', () => {
+    it('should be equivalent to gdal_rasterize', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tiff`
+      const dst = gdal.open(tmpFile, 'w', 'GTiff', 256, 256, 1, gdal.GDT_Float32)
+
+      let out_ds = gdal.rasterize(dst, gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')))
+
+      assert.equal(out_ds.bands.count(), 1)
+      out_ds.close()
+
+      out_ds = gdal.open(tmpFile)
+      assert.equal(out_ds.bands.count(), 1)
+      out_ds.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should accept open Dataset', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tiff`
+      let out_ds = gdal.rasterize(tmpFile, gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')),
+        [ '-ts', '256', '256' ])
+
+      assert.equal(out_ds.bands.count(), 1)
+      assert.deepEqual(out_ds.rasterSize, { x: 256, y: 256 })
+      out_ds.close()
+
+      out_ds = gdal.open(tmpFile)
+      assert.equal(out_ds.bands.count(), 1)
+      assert.deepEqual(out_ds.rasterSize, { x: 256, y: 256 })
+      out_ds.close()
+
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should call a progress callback', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tiff`
+      let called = 0
+      const out_ds = gdal.rasterize(tmpFile,
+        gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')),
+        [ '-ts', '256', '256' ],
+        { progress_cb: () => {
+          called++
+        } })
+
+      assert.isAbove(called, 0)
+
+      out_ds.close()
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should reject on error', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      const src = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      src.close()
+      assert.throws(() => {
+        gdal.rasterize(tmpFile, src)
+      }, /Dataset object has already been destroyed/)
+    })
+  })
+
+  describe('rasterizeAsync', () => {
+    it('should be equivalent to gdal_rasterize', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tiff`
+      const dst = gdal.open(tmpFile, 'w', 'GTiff', 256, 256, 1, gdal.GDT_Float32)
+
+      const out = gdal.rasterizeAsync(dst, gdal.open(path.resolve(__dirname, 'data', 'park.geo.json')))
+
+      return assert.isFulfilled(out.then((out_ds) => {
+        assert.equal(out_ds.bands.count(), 1)
+        out_ds.close()
+
+        out_ds = gdal.open(tmpFile)
+        assert.equal(out_ds.bands.count(), 1)
+        out_ds.close()
+
+        gdal.vsimem.release(tmpFile)
+      }))
+    })
+    it('should reject on error', () => {
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.vrt`
+      const src = gdal.open(path.resolve(__dirname, 'data', 'park.geo.json'))
+      src.close()
+      return assert.isRejected(gdal.rasterizeAsync(tmpFile, src),
+        /Dataset object has already been destroyed/)
+    })
+  })
+
   describe('calcAsync', () => {
     it('should perform the given calculation', async () => {
       const tempFile = `/vsimem/cloudbase_${String(Math.random()).substring(2)}.tiff`

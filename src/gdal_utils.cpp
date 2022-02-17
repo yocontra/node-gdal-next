@@ -18,6 +18,8 @@ void Utils::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "translate", translate);
   Nan__SetAsyncableMethod(target, "vectorTranslate", vectorTranslate);
   Nan__SetAsyncableMethod(target, "warp", warp);
+  Nan__SetAsyncableMethod(target, "buildVRT", buildvrt);
+  Nan__SetAsyncableMethod(target, "rasterize", rasterize);
 }
 
 /**
@@ -34,7 +36,6 @@ void Utils::Initialize(Local<Object> target) {
  *
  * @throws Error
  * @method translate
- * @instance
  * @static
  * @param {string} destination destination filename
  * @param {Dataset} source source dataset
@@ -54,7 +55,6 @@ void Utils::Initialize(Local<Object> target) {
  * @throws Error
  *
  * @method translateAsync
- * @instance
  * @static
  * @param {string} destination destination filename
  * @param {Dataset} source source dataset
@@ -114,7 +114,6 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  *
  * @throws Error
  * @method vectorTranslate
- * @instance
  * @static
  * @param {string|Dataset} destination destination
  * @param {Dataset} source source dataset
@@ -134,7 +133,6 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  * @throws Error
  *
  * @method vectorTranslateAsync
- * @instance
  * @static
  * @param {string|Dataset} destination destination
  * @param {Dataset} source source dataset
@@ -218,7 +216,6 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  *
  * @throws Error
  * @method info
- * @instance
  * @static
  * @param {Dataset} dataset
  * @param {string[]} [args] array of CLI options for gdalinfo
@@ -235,7 +232,6 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  * @throws Error
  *
  * @method infoAsync
- * @instance
  * @static
  * @param {Dataset} dataset
  * @param {string[]} [args] array of CLI options for gdalinfo
@@ -283,7 +279,6 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  *
  * @throws Error
  * @method warp
- * @instance
  * @static
  * @param {string|null} dst_path destination path, null for an in-memory operation
  * @param {Dataset|null} dst_ds destination dataset, null for a new dataset
@@ -304,7 +299,6 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  * @throws Error
  *
  * @method warpAsync
- * @instance
  * @static
  * @param {string|null} dst_path destination path, null for an in-memory operation
  * @param {Dataset|null} dst_ds destination dataset, null for a new dataset
@@ -387,6 +381,239 @@ GDAL_ASYNCABLE_DEFINE(Utils::warp) {
   job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
 
   job.run(info, async, 5);
+}
+
+/**
+ * Library version of gdalbuildvrt
+ *
+ * @example
+ * const ds1 = gdal.buildVRT('/vsimem/target.tiff',
+ *    [ 'input1.tif', 'input2.tif' ],
+ *    [ '-resolution', 'highest' ] );
+ *
+ * const ds2 = gdal.buildVRT('/vsimem/target.tiff',
+ *    [ gdal.open('input1.tif'), gdal.open('input2.tif') ],
+ *    [ '-resolution', 'highest' ] );
+ *
+ * @throws Error
+ * @method buildVRT
+ * @static
+ * @param {string|null} dst_path destination path, null for an in-memory operation
+ * @param {Dataset[]|string[]} src_ds array of source datasets
+ * @param {string[]} [args] array of CLI options for gdalbuildvrt
+ * @param {UtilOptions} [options] additional options
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @return {Dataset}
+ */
+
+/**
+ * Library version of gdalbuildvrt
+ * {{{async}}}
+ *
+ * @example
+ * const ds1 = await gdal.buildVRTAsync('/vsimem/target.tiff',
+ *    [ 'input1.tif', 'input2.tif' ],
+ *    [ '-resolution', 'highest' ] );
+ *
+ * const ds2 = gdal.buildVRT('/vsimem/target.tiff',
+ *    [ await gdal.openAsync('input1.tif'), await gdal.openAsync('input2.tif') ],
+ *    [ '-resolution', 'highest' ] );
+ *
+ * @throws Error
+ *
+ * @method buildVRTAsync
+ * @static
+ * @param {string|null} dst_path destination path, null for an in-memory operation
+ * @param {Dataset[]|string[]} src_ds array of source datasets
+ * @param {string[]} [args] array of CLI options for gdalbuildvrt
+ * @param {UtilOptions} [options] additional options
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Dataset>}
+ */
+GDAL_ASYNCABLE_DEFINE(Utils::buildvrt) {
+  auto aosOptions = std::make_shared<CPLStringList>();
+  std::vector<long> uids;
+
+  std::string dst_path("");
+  Local<Object> dst_ds;
+
+  NODE_ARG_STR(0, "dst_path", dst_path);
+
+  Local<Array> src_ds;
+  NODE_ARG_ARRAY(1, "src_ds", src_ds);
+  if (src_ds->Length() < 1) {
+    Nan::ThrowError("\"src_ds\" must contain at least one element");
+    return;
+  }
+
+  std::shared_ptr<CPLStringList> aosSrcDs = nullptr;
+  std::shared_ptr<GDALDatasetH> gdalSrcDs = nullptr;
+  if (Nan::Get(src_ds, 0).ToLocalChecked()->IsString()) {
+    aosSrcDs = std::make_shared<CPLStringList>();
+    for (unsigned i = 0; i < src_ds->Length(); ++i) {
+      if (!Nan::Get(src_ds, i).ToLocalChecked()->IsString()) {
+        Nan::ThrowError("All \"src_ds\" elements must have the same type");
+        return;
+      }
+      aosSrcDs->AddString(*Nan::Utf8String(Nan::Get(src_ds, i).ToLocalChecked()));
+    }
+    uids.push_back(0);
+  } else {
+    gdalSrcDs = std::shared_ptr<GDALDatasetH>(new GDALDatasetH[src_ds->Length()], array_deleter<GDALDatasetH>());
+    for (unsigned i = 0; i < src_ds->Length(); ++i) {
+      Local<Value> v = Nan::Get(src_ds, i).ToLocalChecked();
+      NODE_UNWRAP_CHECK(Dataset, v, ds);
+      GDAL_RAW_CHECK(GDALDataset *, ds, raw);
+      gdalSrcDs.get()[i] = GDALDatasetToHandle(raw);
+      uids.push_back(ds->uid);
+    }
+  }
+
+  Local<Array> args;
+  NODE_ARG_ARRAY_OPT(2, "args", args);
+  if (!args.IsEmpty())
+    for (unsigned i = 0; i < args->Length(); ++i) {
+      aosOptions->AddString(*Nan::Utf8String(Nan::Get(args, i).ToLocalChecked()));
+    }
+
+  Local<Object> options;
+  Nan::Callback *progress_cb = nullptr;
+  NODE_ARG_OBJECT_OPT(3, "options", options);
+  if (!options.IsEmpty()) NODE_CB_FROM_OBJ_OPT(options, "progress_cb", progress_cb);
+
+  GDALAsyncableJob<GDALDataset *> job(uids);
+  int src_count = src_ds->Length();
+  job.progress = progress_cb;
+  job.main =
+    [dst_path, src_count, gdalSrcDs, aosSrcDs, aosOptions, progress_cb](const GDALExecutionProgress &progress) {
+      CPLErrorReset();
+      auto psOptions = GDALBuildVRTOptionsNew(aosOptions->List(), nullptr);
+      if (psOptions == nullptr) throw CPLGetLastErrorMsg();
+      if (progress_cb) GDALBuildVRTOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
+
+      GDALDatasetH r = GDALBuildVRT(
+        dst_path.c_str(),
+        src_count,
+        gdalSrcDs.get(),
+        aosSrcDs.get() != nullptr ? aosSrcDs->List() : nullptr,
+        psOptions,
+        nullptr);
+
+      GDALBuildVRTOptionsFree(psOptions);
+      if (r == nullptr) throw CPLGetLastErrorMsg();
+      return GDALDatasetFromHandle(r);
+    };
+  job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
+
+  job.run(info, async, 4);
+}
+
+/**
+ * Library version of gdal_rasterize
+ *
+ * @example
+ * const ds1 = gdal.rasterize('/vsimem/target.tiff',
+ *    src_ds,
+ *    [ '-b', '1' ] );
+ *
+ * const ds2 = gdal.rasterize(dst_ds,
+ *    src_ds,
+ *    [ '-b', '1' ] );
+ *
+ * @throws Error
+ * @method rasterize
+ * @static
+ * @param {string|Dataset} destination
+ * @param {Dataset} source dataset
+ * @param {string[]} [args] array of CLI options for gdal_rasterize
+ * @param {UtilOptions} [options] additional options
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @return {Dataset}
+ */
+
+/**
+ * Library version of gdal_rasterize
+ * {{{async}}}
+ *
+ * @example
+ * const ds1 = await gdal.rasterizeAsync('/vsimem/target.tiff',
+ *    src_ds,
+ *    [ '-b', '1' ] );
+ *
+ * const ds2 = await gdal.rasterizeAsync(dst_ds,
+ *    src_ds,
+ *    [ '-b', '1' ] );
+ *
+ * @throws Error
+ * @method rasterizeAsync
+ * @static
+ * @param {string|Dataset} destination
+ * @param {Dataset} source dataset
+ * @param {string[]} [args] array of CLI options for gdal_rasterize
+ * @param {UtilOptions} [options] additional options
+ * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @return {Promise<Dataset>}
+ */
+GDAL_ASYNCABLE_DEFINE(Utils::rasterize) {
+  auto aosOptions = std::make_shared<CPLStringList>();
+
+  std::string dst_path("");
+  Local<Object> dst_ds;
+
+  GDALDataset *dst_raw = nullptr;
+  if (info.Length() > 1 && info[0]->IsString()) {
+    NODE_ARG_STR(0, "dst", dst_path);
+  } else if (info.Length() > 1 && info[0]->IsObject()) {
+    NODE_ARG_OBJECT(0, "dst", dst_ds);
+    NODE_UNWRAP_CHECK(Dataset, dst_ds, dst_obj);
+    GDAL_RAW_CHECK(GDALDataset *, dst_obj, _dst_raw);
+    dst_raw = _dst_raw;
+  } else {
+    Nan::ThrowError("dst must be given");
+    return;
+  }
+
+  Local<Object> src;
+  NODE_ARG_OBJECT(1, "src", src);
+  NODE_UNWRAP_CHECK(Dataset, src, ds);
+  GDAL_RAW_CHECK(GDALDataset *, ds, src_raw);
+
+  Local<Array> args;
+  NODE_ARG_ARRAY_OPT(2, "args", args);
+  if (!args.IsEmpty())
+    for (unsigned i = 0; i < args->Length(); ++i) {
+      aosOptions->AddString(*Nan::Utf8String(Nan::Get(args, i).ToLocalChecked()));
+    }
+
+  Local<Object> options;
+  Nan::Callback *progress_cb = nullptr;
+  NODE_ARG_OBJECT_OPT(3, "options", options);
+  if (!options.IsEmpty()) NODE_CB_FROM_OBJ_OPT(options, "progress_cb", progress_cb);
+
+  GDALAsyncableJob<GDALDataset *> job(ds->uid);
+  job.progress = progress_cb;
+  job.main = [dst_path, dst_raw, src_raw, aosOptions, progress_cb](const GDALExecutionProgress &progress) {
+    CPLErrorReset();
+    auto psOptions = GDALRasterizeOptionsNew(aosOptions->List(), nullptr);
+    if (psOptions == nullptr) throw CPLGetLastErrorMsg();
+    if (progress_cb) GDALRasterizeOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
+
+    GDALDatasetH r = GDALRasterize(
+      dst_path.length() > 0 ? dst_path.c_str() : nullptr,
+      dst_raw != nullptr ? dst_raw : nullptr,
+      src_raw,
+      psOptions,
+      nullptr);
+
+    GDALRasterizeOptionsFree(psOptions);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return GDALDatasetFromHandle(r);
+  };
+  job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
+
+  job.run(info, async, 4);
 }
 
 } // namespace node_gdal
