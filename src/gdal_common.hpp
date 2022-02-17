@@ -117,6 +117,10 @@ NAN_SETTER(READ_ONLY_SETTER);
   Nan::SetPrototypeMethod(lcons, name "Async", method##Async)
 
 #define NODE_UNWRAP_CHECK(type, obj, var)                                                                              \
+  if (!obj->IsObject() || obj->IsNull() || !Nan::New(type::constructor)->HasInstance(obj)) {                           \
+    Nan::ThrowTypeError("Object must be a " #type " object");                                                          \
+    return;                                                                                                            \
+  }                                                                                                                    \
   type *var = Nan::ObjectWrap::Unwrap<type>(obj);                                                                      \
   if (!var->isAlive()) {                                                                                               \
     Nan::ThrowError(#type " object has already been destroyed");                                                       \
@@ -134,6 +138,10 @@ NAN_SETTER(READ_ONLY_SETTER);
 // DO NOT USE IN A NORMAL ASYNC METHOD
 // It will return a rejected Promise on error
 #define NODE_UNWRAP_CHECK_ASYNC(type, obj, var)                                                                        \
+  if (!obj->IsObject() || obj->IsNull() || !Nan::New(type::constructor)->HasInstance(obj)) {                           \
+    THROW_OR_REJECT("Object must be a " #type " object");                                                              \
+    return;                                                                                                            \
+  }                                                                                                                    \
   type *var = Nan::ObjectWrap::Unwrap<type>(obj);                                                                      \
   if (!var->isAlive()) {                                                                                               \
     THROW_OR_REJECT(#type " object has already been destroyed");                                                       \
