@@ -67,13 +67,13 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
 
 /**
  * Returns the array with the given name/index.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof ArrayDimensions
  * @param {string|number} array
- * @param {callback<Dimension>} [callback=undefined] {{{cb}}}
+ * @param {callback<Dimension>} [callback=undefined]
  * @return {Promise<Dimension>}
  */
 
@@ -88,12 +88,12 @@ int ArrayDimensions::__count(std::shared_ptr<GDALMDArray> parent) {
 
 /**
  * Returns the number of dimensions in the collection.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof ArrayDimensions
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 

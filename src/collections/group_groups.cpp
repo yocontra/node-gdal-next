@@ -50,14 +50,14 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * Returns the group with the given name/index.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof GroupGroups
  *
  * @param {string|number} group
- * @param {callback<Group>} [callback=undefined] {{{cb}}}
+ * @param {callback<Group>} [callback=undefined]
  * @return {Promise<Group>}
  */
 
@@ -72,13 +72,13 @@ int GroupGroups::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * Returns the number of groups in the collection.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof GroupGroups
  *
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 

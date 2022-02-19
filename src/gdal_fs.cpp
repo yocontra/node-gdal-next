@@ -86,7 +86,7 @@ void VSI::Initialize(Local<Object> target) {
 
 /**
  * Get VSI file info.
- * {{{async}}}
+ * @async
  *
  * @static
  * @method statAsync
@@ -94,13 +94,13 @@ void VSI::Initialize(Local<Object> target) {
  * @param {string} filename
  * @param {boolean} [bigint=false] Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
- * @param {callback<VSIStat>} [callback=undefined] {{{cb}}}
+ * @param {callback<VSIStat>} [callback=undefined]
  * @returns {Promise<VSIStat>}
  */
 
 /**
  * Get VSI file info.
- * {{{async}}}
+ * @async
  *
  * @static
  * @method statAsync
@@ -108,7 +108,7 @@ void VSI::Initialize(Local<Object> target) {
  * @param {string} filename
  * @param {true} True Return BigInt numbers. JavaScript numbers are safe for integers up to 2^53.
  * @throws Error
- * @param {callback<VSIStat>} [callback=undefined] {{{cb}}}
+ * @param {callback<VSIStat>} [callback=undefined]
  * @returns {Promise<VSIStat>}
  */
 
@@ -210,14 +210,14 @@ GDAL_ASYNCABLE_DEFINE(VSI::stat) {
 
 /**
  * Read file names in a directory.
- * {{{async_}}}
+ * @async
  *
  * @static
  * @method readDirAsync
  * @memberof fs
  * @param {string} directory
  * @throws Error
- * @param {callback<string[]>} [callback=undefined] {{{cb}}}
+ * @param {callback<string[]>} [callback=undefined]
  * @returns {Promise<string[]>}
  */
 GDAL_ASYNCABLE_DEFINE(VSI::readDir) {

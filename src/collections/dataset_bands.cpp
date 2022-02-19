@@ -92,14 +92,14 @@ NAN_METHOD(DatasetBands::toString) {
 
 /**
  * Returns the band with the given ID.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof DatasetBands
  *
  * @param {number} id
- * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
+ * @param {callback<RasterBand>} [callback=undefined]
  * @throws Error
  * @return {Promise<RasterBand>}
  */
@@ -144,7 +144,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
 
 /**
  * Adds a new band.
- * {{{async}}}
+ * @async
  *
  * @method createAsync
  * @instance
@@ -152,7 +152,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::get) {
  * @throws Error
  * @param {string} dataType Type of band ({@link GDT|see GDT constants})
  * @param {object|string[]} [options] Creation options
- * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
+ * @param {callback<RasterBand>} [callback=undefined]
  * @return {Promise<RasterBand>}
  */
 
@@ -214,13 +214,13 @@ GDAL_ASYNCABLE_DEFINE(DatasetBands::create) {
 /**
  *
  * Returns the number of bands.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof DatasetBands
  *
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(DatasetBands::count) {

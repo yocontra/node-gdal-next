@@ -41,13 +41,13 @@ void Utils::Initialize(Local<Object> target) {
  * @param {Dataset} source source dataset
  * @param {string[]} [args] array of CLI options for gdal_translate
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  * @return {Dataset}
  */
 
 /**
  * Library version of gdal_translate
- * {{{async}}}
+ * @async
  *
  * @example
  * const ds = gdal.open('input.tif')
@@ -60,8 +60,8 @@ void Utils::Initialize(Local<Object> target) {
  * @param {Dataset} source source dataset
  * @param {string[]} [args] array of CLI options for gdal_translate
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::translate) {
@@ -119,13 +119,13 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  * @param {Dataset} source source dataset
  * @param {string[]} [args] array of CLI options for ogr2ogr
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  * @return {Dataset}
  */
 
 /**
  * Library version of ogr2ogr
- * {{{async}}}
+ * @async
  *
  * @example
  * const ds = gdal.open('input.geojson')
@@ -138,8 +138,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  * @param {Dataset} source source dataset
  * @param {string[]} [args] array of CLI options for ogr2ogr
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
@@ -224,7 +224,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
 
 /**
  * Library version of gdalinfo
- * {{{async}}}
+ * @async
  *
  * @example
  * const ds = gdal.open('input.tif')
@@ -235,7 +235,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  * @static
  * @param {Dataset} dataset
  * @param {string[]} [args] array of CLI options for gdalinfo
- * @param {callback<string>} [callback=undefined] {{{cb}}}
+ * @param {callback<string>} [callback=undefined]
  * @return {Promise<string>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::info) {
@@ -285,13 +285,13 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  * @param {Dataset[]} src_ds array of source datasets
  * @param {string[]} [args] array of CLI options for gdalwarp
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  * @return {Dataset}
  */
 
 /**
  * Library version of gdalwarp
- * {{{async}}}
+ * @async
  *
  * @example
  * const ds = await gdal.openAsync('input.tif')
@@ -305,8 +305,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  * @param {Dataset[]} src_ds array of source datasets
  * @param {string[]} [args] array of CLI options for gdalwarp
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::warp) {
@@ -402,13 +402,13 @@ GDAL_ASYNCABLE_DEFINE(Utils::warp) {
  * @param {Dataset[]|string[]} src_ds array of source datasets
  * @param {string[]} [args] array of CLI options for gdalbuildvrt
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  * @return {Dataset}
  */
 
 /**
  * Library version of gdalbuildvrt
- * {{{async}}}
+ * @async
  *
  * @example
  * const ds1 = await gdal.buildVRTAsync('/vsimem/target.tiff',
@@ -427,8 +427,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::warp) {
  * @param {Dataset[]|string[]} src_ds array of source datasets
  * @param {string[]} [args] array of CLI options for gdalbuildvrt
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::buildvrt) {
@@ -528,13 +528,13 @@ GDAL_ASYNCABLE_DEFINE(Utils::buildvrt) {
  * @param {Dataset} source dataset
  * @param {string[]} [args] array of CLI options for gdal_rasterize
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  * @return {Dataset}
  */
 
 /**
  * Library version of gdal_rasterize
- * {{{async}}}
+ * @async
  *
  * @example
  * const ds1 = await gdal.rasterizeAsync('/vsimem/target.tiff',
@@ -552,8 +552,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::buildvrt) {
  * @param {Dataset} source dataset
  * @param {string[]} [args] array of CLI options for gdal_rasterize
  * @param {UtilOptions} [options] additional options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Utils::rasterize) {

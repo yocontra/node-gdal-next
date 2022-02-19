@@ -99,13 +99,13 @@ NAN_METHOD(LayerFeatures::toString) {
  * **Important:** The `id` argument is not an index. In most cases it will be
  * zero-based, but in some cases it will not. If iterating, it's best to use the
  * `next()` method.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof LayerFeatures
  * @param {number} id The feature ID of the feature to read.
- * @param {callback<Feature>} [callback=undefined] {{{cb}}}
+ * @param {callback<Feature>} [callback=undefined]
  * @throws Error
  * @return {Promise<Feature>}
  */
@@ -147,12 +147,12 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::get) {
 /**
  * Resets the feature pointer used by `next()` and
  * returns the first feature in the layer.
- * {{{async}}}
+ * @async
  *
  * @method firstAsync
  * @instance
  * @memberof LayerFeatures
- * @param {callback<Feature>} [callback=undefined] {{{cb}}}
+ * @param {callback<Feature>} [callback=undefined]
  * @return {Promise<Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
@@ -192,7 +192,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
 
 /**
  * Returns the next feature in the layer. Returns null if no more features.
- * {{{async}}}
+ * @async
  *
  * @example
  *
@@ -201,7 +201,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::first) {
  * @method nextAsync
  * @instance
  * @memberof LayerFeatures
- * @param {callback<Feature>} [callback=undefined] {{{cb}}}
+ * @param {callback<Feature>} [callback=undefined]
  * @return {Promise<Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
@@ -246,7 +246,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
 /**
  * Adds a feature to the layer. The feature should be created using the current
  * layer as the definition.
- * {{{async}}}
+ * @async
  *
  * @example
  *
@@ -260,7 +260,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::next) {
  * @memberof LayerFeatures
  * @throws Error
  * @param {Feature} feature
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 
@@ -302,13 +302,13 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::add) {
 
 /**
  * Returns the number of features in the layer.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof LayerFeatures
  * @param {boolean} [force=true]
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>} number of features in the layer.
  */
 
@@ -367,7 +367,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
 
 /**
  * Sets a feature in the layer.
- * {{{async}}}
+ * @async
  *
  * @method setAsync
  * @instance
@@ -375,7 +375,7 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::count) {
  * @throws Error
  * @param {number} id
  * @param {Feature} feature
- * @param {callback<Feature>} [callback=undefined] {{{cb}}}
+ * @param {callback<Feature>} [callback=undefined]
  * @return {Promise<Feature>}
  */
 GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
@@ -448,14 +448,14 @@ GDAL_ASYNCABLE_DEFINE(LayerFeatures::set) {
 
 /**
  * Removes a feature from the layer.
- * {{{async}}}
+ * @async
  *
  * @method removeAsync
  * @instance
  * @memberof LayerFeatures
  * @throws Error
  * @param {number} id
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 

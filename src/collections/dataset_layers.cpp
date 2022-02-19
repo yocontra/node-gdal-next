@@ -96,13 +96,13 @@ NAN_METHOD(DatasetLayers::toString) {
 
 /**
  * Returns the layer with the given name or identifier.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof DatasetLayers
  * @param {string|number} key Layer name or ID.
- * @param {callback<Layer>} [callback=undefined] {{{cb}}}
+ * @param {callback<Layer>} [callback=undefined]
  * @throws Error
  * @return {Promise<Layer>}
  */
@@ -175,7 +175,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
 
 /**
  * Adds a new layer.
- * {{{async}}}
+ * @async
  *
  * @example
  *
@@ -192,7 +192,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::get) {
  * @param {number|Function|null} [geomType=null] Geometry type or constructor ({@link wkbGeometryType|see geometry types})
  * @param {string[]|object} [creation_options] driver-specific layer creation
  * options
- * @param {callback<Layer>} [callback=undefined] {{{cb}}}
+ * @param {callback<Layer>} [callback=undefined]
  * @return {Promise<Layer>}
  */
 
@@ -251,12 +251,12 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::create) {
 
 /**
  * Returns the number of layers.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof DatasetLayers
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 
@@ -298,7 +298,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
 
 /**
  * Copies a layer.
- * {{{async}}}
+ * @async
  *
  * @method copyAsync
  * @instance
@@ -306,7 +306,7 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::count) {
  * @param {Layer} src_lyr_name
  * @param {string} dst_lyr_name
  * @param {object|string[]} [options=null] layer creation options
- * @param {callback<Layer>} [callback=undefined] {{{cb}}}
+ * @param {callback<Layer>} [callback=undefined]
  * @return {Promise<Layer>}
  */
 
@@ -360,14 +360,14 @@ GDAL_ASYNCABLE_DEFINE(DatasetLayers::copy) {
 
 /**
  * Removes a layer.
- * {{{async}}}
+ * @async
  *
  * @method removeAsync
  * @instance
  * @memberof DatasetLayers
  * @throws Error
  * @param {number} index
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 

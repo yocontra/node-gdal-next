@@ -1,5 +1,6 @@
 plugin:
   - documentation-polyglot
+  - ../../../../scripts/documentation-async.js
 
 shallow: true
 

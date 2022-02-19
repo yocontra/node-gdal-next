@@ -116,14 +116,14 @@ NAN_METHOD(RasterBandPixels::toString) {
 
 /**
  * Returns the value at the x, y coordinate.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof RasterBandPixels
  * @param {number} x
  * @param {number} y
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
@@ -165,7 +165,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
 
 /**
  * Sets the value at the x, y coordinate.
- * {{{async}}}
+ * @async
  *
  * @method setAsync
  * @instance
@@ -173,7 +173,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::get) {
  * @param {number} x
  * @param {number} y
  * @param {number} value
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::set) {
@@ -292,13 +292,13 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
  * @param {string} [options.resampling] Resampling algorithm ({@link GRA|available options})
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  * @return {TypedArray} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 
 /**
  * Asynchronously reads a region of pixels.
- * {{{async}}}
+ * @async
  *
  * @method readAsync
  * @instance
@@ -315,8 +315,8 @@ static inline int findHighest(int w, int h, int px, int ln, int offset) {
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
  * @param {string} [options.resampling] Resampling algorithm ({@link GRA|available options}
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<TypedArray>} [callback=undefined]
  * @return {Promise<TypedArray>} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
@@ -454,12 +454,12 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @param {number} [options.buffer_height=y_size]
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  */
 
 /**
  * Asynchronously writes a region of pixels.
- * {{{async}}}
+ * @async
  *
  * @method writeAsync
  * @instance
@@ -474,8 +474,8 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::read) {
  * @param {number} [options.buffer_height=y_size]
  * @param {number} [options.pixel_space]
  * @param {number} [options.line_space]
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
@@ -577,7 +577,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
 
 /**
  * Reads a block of pixels.
- * {{{async}}}
+ * @async
  *
  * @method readBlockAsync
  * @instance
@@ -586,7 +586,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::write) {
  * @param {number} x
  * @param {number} y
  * @param {TypedArray} [data] The TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
- * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
+ * @param {callback<TypedArray>} [callback=undefined]
  * @return {Promise<TypedArray>} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 
@@ -651,7 +651,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
 
 /**
  * Writes a block of pixels.
- * {{{async}}}
+ * @async
  *
  * @method writeBlockAsync
  * @instance
@@ -660,7 +660,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::readBlock) {
  * @param {number} x
  * @param {number} y
  * @param {TypedArray} data The TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values to write to the band.
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
@@ -714,7 +714,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
 /**
  * Clamp the block size for a given block offset.
  * Handles partial blocks at the edges of the raster and returns the true number of pixels.
- * {{{async}}}
+ * @async
  *
  * @method clampBlockAsync
  * @instance
@@ -722,7 +722,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandPixels::writeBlock) {
  * @throws Error
  * @param {number} x
  * @param {number} y
- * @param {callback<xyz>} [callback=undefined] {{{cb}}}
+ * @param {callback<xyz>} [callback=undefined]
  * @return {Promise<xyz>} A size object.
  */
 

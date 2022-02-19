@@ -169,12 +169,12 @@ NAN_METHOD(RasterBand::toString) {
 
 /**
  * Saves changes to disk.
- * {{{async}}}
+ * @async
  *
  * @method flushAsync
  * @instance
  * @memberof RasterBand
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  *
  */
@@ -253,7 +253,7 @@ NAN_METHOD(RasterBand::getMaskBand) {
 
 /**
  * Fill this band with a constant value.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method fillAsync
@@ -262,7 +262,7 @@ NAN_METHOD(RasterBand::getMaskBand) {
  * @throws Error
  * @param {number} real_value
  * @param {number} [imaginary_value]
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::fill) {
@@ -426,7 +426,7 @@ NAN_METHOD(RasterBand::getStatistics) {
  * @memberof RasterBand
  * @param {boolean} allow_approximation If `true` statistics may be computed
  * based on overviews or a subset of all tiles.
- * @param {callback<stats>} [callback=undefined] {{{cb}}}
+ * @param {callback<stats>} [callback=undefined]
  * @return {Promise<stats>} Statistics containing `"min"`, `"max"`, `"mean"`,
  * `"std_dev"` properties.
  */
@@ -515,13 +515,13 @@ NAN_METHOD(RasterBand::setStatistics) {
 
 /**
  * Returns band metadata.
- * {{{async}}}
+ * @async
  *
  * @method getMetadataAsync
  * @instance
  * @memberof RasterBand
  * @param {string} [domain]
- * @param {callback<any>} [callback=undefined] {{{cb}}}
+ * @param {callback<any>} [callback=undefined]
  * @return {Promise<any>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
@@ -552,14 +552,14 @@ GDAL_ASYNCABLE_DEFINE(RasterBand::getMetadata) {
 
 /**
  * Set metadata. Can return a warning (false) for formats not supporting persistent metadata.
- * {{{async}}}
+ * @async
  *
  * @method setMetadataAsync
  * @instance
  * @memberof RasterBand
  * @param {object|string[]} metadata
  * @param {string} [domain]
- * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @param {callback<boolean>} [callback=undefined]
  * @return {Promise<boolean>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBand::setMetadata) {
@@ -637,7 +637,7 @@ NAN_GETTER(RasterBand::pixelsGetter) {
  * @instance
  * @memberof RasterBand
  * @type {Promise<number|null>}
- * {{{async_getter}}}
+ * @asyncGetter
  */
 
 GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {
@@ -669,7 +669,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::idGetter) {
 
 /**
  * Name of of band.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -701,7 +701,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::descriptionGetter) {
 
 /**
  * Size object containing `"x"` and `"y"` properties.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -747,7 +747,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::sizeGetter) {
 
 /**
  * Size object containing `"x"` and `"y"` properties.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -797,7 +797,7 @@ template <typename T> struct MaybeResult {
 
 /**
  * Minimum value for this band.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -837,7 +837,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::minimumGetter) {
 
 /**
  * Maximum value for this band.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -876,7 +876,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::maximumGetter) {
 
 /**
  * Raster value offset.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @kind member
  * @name offsetAsync
@@ -915,7 +915,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::offsetGetter) {
 
 /**
  * Raster value scale.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @kind member
  * @name scaleAsync
@@ -954,7 +954,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::scaleGetter) {
 
 /**
  * No data value for this band.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @kind member
  * @name noDataValueAsync
@@ -1001,7 +1001,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::noDataValueGetter) {
  * For instance, it might be `"m"` for an elevation model in meters,
  * or `"ft"` for feet. If no units are available, a value of `""`
  * will be returned.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @kind member
  * @name unitTypeAsync
@@ -1038,7 +1038,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::unitTypeGetter) {
 /**
  *
  * Pixel data type ({@link GDT|see GDT constants} used for this band.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -1076,7 +1076,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::dataTypeGetter) {
 
 /**
  * Indicates if the band is read-only.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -1119,7 +1119,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::readOnlyGetter) {
  * arbitrary overviews don't generally have any fixed overviews, but GDAL's
  * `RasterIO()` method can be used in downsampling mode to get overview
  * data efficiently.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -1153,7 +1153,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::hasArbitraryOverviewsGetter) {
 
 /**
  * List of list of category names for this raster.
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @kind member
  * @name categoryNamesAsync
@@ -1205,7 +1205,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(RasterBand::categoryNamesGetter) {
 
 /**
  * Color interpretation mode ({@link GCI|see GCI constants})
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @kind member
  * @name colorInterpretationAsync
@@ -1348,7 +1348,7 @@ NAN_SETTER(RasterBand::colorInterpretationSetter) {
 
 /**
  * Color table ({@link ColorTable|see ColorTable})
- * {{{async_getter}}}
+ * @asyncGetter
  *
  * @kind member
  * @name colorTableAsync

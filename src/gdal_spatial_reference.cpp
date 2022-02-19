@@ -703,7 +703,7 @@ NAN_METHOD(SpatialReference::fromURN) {
 
 /**
  * Initialize from OGC URL.
- * {{{async}}}
+ * @async
  *
  * The OGC URL should be prefixed with "http://opengis.net/def/crs" per best
  * practice paper 11-135. Currently EPSG and OGC authority values are supported,
@@ -715,7 +715,7 @@ NAN_METHOD(SpatialReference::fromURN) {
  * @instance
  * @memberof SpatialReference
  * @param {string} input
- * @param {callback<SpatialReference>} [callback=undefined] {{{cb}}}
+ * @param {callback<SpatialReference>} [callback=undefined]
  * @return {Promise<SpatialReference>}
  */
 GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
@@ -764,7 +764,7 @@ GDAL_ASYNCABLE_DEFINE(SpatialReference::fromCRSURL) {
  * @instance
  * @memberof SpatialReference
  * @param {string} url
- * @param {callback<SpatialReference>} [callback=undefined] {{{cb}}}
+ * @param {callback<SpatialReference>} [callback=undefined]
  * @return {Promise<SpatialReference>}
  */
 
@@ -835,7 +835,7 @@ NAN_METHOD(SpatialReference::fromMICoordSys) {
  *
  * This method will examine the provided input, and try to deduce the format,
  * and then use it to initialize the spatial reference system.
- * {{{async}}}
+ * @async
  *
  * @static
  * @throws Error
@@ -843,7 +843,7 @@ NAN_METHOD(SpatialReference::fromMICoordSys) {
  * @instance
  * @memberof SpatialReference
  * @param {string} input
- * @param {callback<SpatialReference>} [callback=undefined] {{{cb}}}
+ * @param {callback<SpatialReference>} [callback=undefined]
  * @return {Promise<SpatialReference>}
  */
 GDAL_ASYNCABLE_DEFINE(SpatialReference::fromUserInput) {

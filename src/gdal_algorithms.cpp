@@ -39,7 +39,7 @@ void Algorithms::Initialize(Local<Object> target) {
 
 /**
  * Fill raster regions by interpolation from edges.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method fillNodataAsync
@@ -49,7 +49,7 @@ void Algorithms::Initialize(Local<Object> target) {
  * @param {RasterBand} [options.mask] Mask band
  * @param {number} options.searchDist The maximum distance (in pixels) that the algorithm will search out for values to interpolate.
  * @param {number} [options.smoothingIterations=0] The number of 3x3 average filter smoothing iterations to run after the interpolation to dampen artifacts.
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 
@@ -119,12 +119,12 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @param {number} [options.nodata] The value to use as a "nodata" value. That is, a pixel value which should be ignored in generating contours as if the value of the pixel were not known.
  * @param {number} [options.idField] A field index to indicate where a unique id should be written for each feature (contour) written.
  * @param {number} [options.elevField] A field index to indicate where the elevation value of the contour should be written.
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
 */
 
 /**
  * Create vector contours from raster DEM.
- * {{{async}}}
+ * @async
  *
  * This algorithm will generate contour vectors for the input raster band on the
  * requested set of contour levels. The vector contours are written to the
@@ -143,8 +143,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::fillNodata) {
  * @param {number} [options.nodata] The value to use as a "nodata" value. That is, a pixel value which should be ignored in generating contours as if the value of the pixel were not known.
  * @param {number} [options.idField] A field index to indicate where a unique id should be written for each feature (contour) written.
  * @param {number} [options.elevField] A field index to indicate where the elevation value of the contour should be written.
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
@@ -250,12 +250,12 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @param {RasterBand} [options.mask] All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.
  * @param {number} options.threshold Raster polygons with sizes smaller than this will be merged into their largest neighbour.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  */
 
 /**
  * Removes small raster polygons.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method sieveFilterAsync
@@ -266,8 +266,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::contourGenerate) {
  * @param {RasterBand} [options.mask] All pixels in the mask band with a value other than zero will be considered suitable for inclusion in polygons.
  * @param {number} options.threshold Raster polygons with sizes smaller than this will be merged into their largest neighbour.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
@@ -346,7 +346,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::sieveFilter) {
  * @param {number} [y=0]
  * @param {number} [w=src.width]
  * @param {number} [h=src.height]
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {number}
  * @return {Promise<number>}
  */
@@ -401,7 +401,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @property {number} pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
  * @property {number} [connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
  * @property {boolean} [useFloats=false] Use floating point buffers instead of int buffers.
- * @property {ProgressCb} [progress_cb] {{{progress_cb}}}
+ * @property {ProgressCb} [progress_cb]
  */
 
 /**
@@ -420,7 +420,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @param {number} options.pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
  * @param {boolean} [options.useFloats=false] Use floating point buffers instead of int buffers.
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  */
 
 /**
@@ -428,7 +428,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * sharing a common pixel value. Each polygon is created with an attribute
  * indicating the pixel value of that polygon. A raster mask may also be
  * provided to determine which pixels are eligible for processing.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method polygonizeAsync
@@ -440,8 +440,8 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::checksumImage) {
  * @param {number} options.pixValField The attribute field index indicating the feature attribute into which the pixel value of the polygon should be written.
  * @param {number} [options.connectedness=4] Either 4 indicating that diagonal pixels are not considered directly adjacent for polygon membership purposes or 8 indicating they are.
  * @param {boolean} [options.useFloats=false] Use floating point buffers instead of int buffers.
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Algorithms::polygonize) {

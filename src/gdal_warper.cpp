@@ -207,12 +207,12 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
  * @param {string[]|object} [options.options] Warp options (see: [reference](https://gdal.org/doxygen/structGDALWarpOptions.html))
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  */
 
 /**
  * Reprojects a dataset.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method reprojectImageAsync
@@ -234,8 +234,8 @@ CPLErr GDALReprojectImageMulti(
  * @param {number} [options.maxError]
  * @param {boolean} [options.multi]
  * @param {string[]|object} [options.options] Warp options (see:[reference](https://gdal.org/doxygen/structGDALWarpOptions.html)
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
@@ -363,7 +363,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
 /**
  * Used to determine the bounds and resolution of the output virtual file which
  * should be large enough to include all the input image.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method suggestedWarpOutputAsync
@@ -373,7 +373,7 @@ GDAL_ASYNCABLE_DEFINE(Warper::reprojectImage) {
  * @param {SpatialReference} options.s_srs
  * @param {SpatialReference} options.t_srs
  * @param {number} [options.maxError=0]
- * @param {callback<WarpOutput>} [callback=undefined] {{{cb}}}
+ * @param {callback<WarpOutput>} [callback=undefined]
  * @return {Promise<WarpOutput>}
  */
 GDAL_ASYNCABLE_DEFINE(Warper::suggestedWarpOutput) {

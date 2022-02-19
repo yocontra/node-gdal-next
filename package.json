@@ -89,7 +89,7 @@
     "@mapbox/node-pre-gyp"
   ],
   "devDependencies": {
-    "@mmomtchev/documentation": "^14.0.0",
+    "@mmomtchev/documentation": "^14.0.1",
     "@mmomtchev/node-pre-gyp-github": "^2.0.0",
     "@octokit/core": "^3.5.1",
     "@types/chai": "^4.2.18",
@@ -103,7 +103,7 @@
     "benny": "^3.7.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "documentation-polyglot": "^1.0.0",
+    "documentation-polyglot": "^1.0.1",
     "eslint": "^7.26.0",
     "eslint-plugin-array-func": "^3.0.0",
     "eslint-plugin-mocha": "^8.0.0",

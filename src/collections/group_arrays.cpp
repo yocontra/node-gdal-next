@@ -50,14 +50,14 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * Returns the array with the given name/index.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof GroupArrays
  *
  * @param {string|number} array
- * @param {callback<MDArray>} [callback=undefined] {{{cb}}}
+ * @param {callback<MDArray>} [callback=undefined]
  * @return {Promise<MDArray>}
  */
 
@@ -72,13 +72,13 @@ int GroupArrays::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * Returns the number of arrays in the collection.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof GroupArrays
  *
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 

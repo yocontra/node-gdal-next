@@ -84,14 +84,14 @@ NAN_METHOD(RasterBandOverviews::toString) {
 
 /**
  * Fetches the overview at the provided index.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof RasterBandOverviews
  * @throws Error
  * @param {number} index 0-based index
- * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
+ * @param {callback<RasterBand>} [callback=undefined]
  * @return {Promise<RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
@@ -136,7 +136,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
 
 /**
  * Fetch best sampling overview.
- * {{{async}}}
+ * @async
  *
  * Returns the most reduced overview of the given band that still satisfies the
  * desired number of samples. This function can be used with zero as the number
@@ -148,7 +148,7 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::get) {
  * @instance
  * @memberof RasterBandOverviews
  * @param {number} samples
- * @param {callback<RasterBand>} [callback=undefined] {{{cb}}}
+ * @param {callback<RasterBand>} [callback=undefined]
  * @return {Promise<RasterBand>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
@@ -185,12 +185,12 @@ GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::getBySampleCount) {
 
 /**
  * Returns the number of overviews.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof RasterBandOverviews
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 GDAL_ASYNCABLE_DEFINE(RasterBandOverviews::count) {

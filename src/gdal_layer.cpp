@@ -170,13 +170,13 @@ NAN_METHOD(Layer::toString) {
 
 /**
  * Flush pending changes to disk.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method flushAsync
  * @instance
  * @memberof Layer
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  *
  */

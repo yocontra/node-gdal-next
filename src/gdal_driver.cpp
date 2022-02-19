@@ -183,7 +183,7 @@ auto DatasetRval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return D
  * vector datasets) (see {@link GDT|data types}
  * @param {string[]|object} [creation_options] An array or object containing
  * driver-specific dataset creation options
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {callback<Dataset>} [callback=undefined]
  * @throws
  * @return {Promise<Dataset>}
  */
@@ -249,7 +249,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
  * @param {boolean} [strict=false] strict mode
  * @param {CreateOptions} [jsoptions] additional options
- * @param {ProgressCb} [jsoptions.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [jsoptions.progress_cb]
  * @return {Dataset}
  */
 
@@ -265,8 +265,8 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
  * @param {boolean} [strict=false] strict mode
  * @param {CreateOptions} [jsoptions] additional options
- * @param {ProgressCb} [jsoptions.progress_cb] {{{progress_cb}}}
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [jsoptions.progress_cb]
+ * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::createCopy) {
@@ -427,7 +427,7 @@ NAN_METHOD(Driver::getMetadata) {
  * @param {string} path
  * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
- * @param {callback<Dataset>} [callback=undefined] {{{cb}}}
+ * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
 GDAL_ASYNCABLE_DEFINE(Driver::open) {

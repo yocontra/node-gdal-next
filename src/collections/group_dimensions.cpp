@@ -59,14 +59,14 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * Returns the array with the given name/index.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof GroupDimensions
  *
  * @param {string|number} array
- * @param {callback<Dimension>} [callback=undefined] {{{cb}}}
+ * @param {callback<Dimension>} [callback=undefined]
  * @return {Promise<Dimension>}
  */
 
@@ -81,13 +81,13 @@ int GroupDimensions::__count(std::shared_ptr<GDALGroup> parent) {
 
 /**
  * Returns the number of dimensions in the collection.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof GroupDimensions
  *
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 

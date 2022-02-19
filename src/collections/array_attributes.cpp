@@ -53,13 +53,13 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
 
 /**
  * Returns the attribute with the given name/index.
- * {{{async}}}
+ * @async
  *
  * @method getAsync
  * @instance
  * @memberof ArrayAttributes
  * @param {string|number} attribute
- * @param {callback<Attribute>} [callback=undefined] {{{cb}}}
+ * @param {callback<Attribute>} [callback=undefined]
  * @return {Promise<Attribute>}
  */
 
@@ -74,12 +74,12 @@ int ArrayAttributes::__count(std::shared_ptr<GDALMDArray> parent) {
 
 /**
  * Returns the number of attributes in the collection.
- * {{{async}}}
+ * @async
  *
  * @method countAsync
  * @instance
  * @memberof ArrayAttributes
- * @param {callback<number>} [callback=undefined] {{{cb}}}
+ * @param {callback<number>} [callback=undefined]
  * @return {Promise<number>}
  */
 

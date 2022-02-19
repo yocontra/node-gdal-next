@@ -166,13 +166,13 @@ NAN_METHOD(Dataset::toString) {
 
 /**
  * Fetch metadata.
- * {{{async}}}
+ * @async
  *
  * @method getMetadataAsync
  * @instance
  * @memberof Dataset
  * @param {string} [domain]
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<any>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
@@ -203,14 +203,14 @@ GDAL_ASYNCABLE_DEFINE(Dataset::getMetadata) {
 
 /**
  * Set metadata. Can return a warning (false) for formats not supporting persistent metadata.
- * {{{async}}}
+ * @async
  *
  * @method setMetadataAsync
  * @instance
  * @memberof Dataset
  * @param {object|string[]} metadata
  * @param {string} [domain]
- * @param {callback<boolean>} [callback=undefined] {{{cb}}}
+ * @param {callback<boolean>} [callback=undefined]
  * @return {Promise<boolean>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::setMetadata) {
@@ -327,13 +327,13 @@ NAN_METHOD(Dataset::close) {
 
 /**
  * Flushes all changes to disk.
- * {{{async}}}
+ * @async
  *
  * @method flushAsync
  * @instance
  * @memberof Dataset
  * @throws Error
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
@@ -370,7 +370,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
 
 /**
  * Execute an SQL statement against the data store.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method executeSQLAsync
@@ -384,7 +384,7 @@ GDAL_ASYNCABLE_DEFINE(Dataset::flush) {
  * will use their dedicated SQL engine, unless `"OGRSQL"` is explicitely passed
  * as the dialect. Starting with OGR 1.10, the `"SQLITE"` dialect can also be
  * used.
- * @param {callback<Layer>} [callback=undefined] {{{cb}}}
+ * @param {callback<Layer>} [callback=undefined]
  * @return {Promise<Layer>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::executeSQL) {
@@ -593,12 +593,12 @@ NAN_METHOD(Dataset::setGCPs) {
  * @param {number[]} overviews
  * @param {number[]} [bands] Note: Generation of overviews in external TIFF currently only supported when operating on all bands.
  * @param {ProgressOptions} [options] options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
+ * @param {ProgressCb} [options.progress_cb]
  */
 
 /**
  * Builds dataset overviews.
- * {{{async}}}
+ * @async
  *
  * @throws Error
  * @method buildOverviewsAsync
@@ -609,8 +609,8 @@ NAN_METHOD(Dataset::setGCPs) {
  * @param {number[]} overviews
  * @param {number[]} [bands] Note: Generation of overviews in external TIFF currently only supported when operating on all bands.
  * @param {ProgressOptions} [options] options
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<void>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<void>} [callback=undefined]
  * @return {Promise<void>}
  */
 GDAL_ASYNCABLE_DEFINE(Dataset::buildOverviews) {
@@ -724,7 +724,7 @@ NAN_GETTER(Dataset::descriptionGetter) {
 
 /**
  * Raster dimensions. An object containing `x` and `y` properties.
- * {{async_getter}}
+ * @asyncGetter
  *
  * @readonly
  * @kind member
@@ -789,7 +789,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::rasterSizeGetter) {
 
 /**
  * Spatial reference associated with raster dataset
- * {{async_getter}}
+ * @asyncGetter
  *
  * @throws Error
  * @kind member
@@ -861,7 +861,7 @@ GDAL_ASYNCABLE_GETTER_DEFINE(Dataset::srsGetter) {
  * var Xgeo = GT[0] + Xpixel*GT[1] + Yline*GT[2];
  * var Ygeo = GT[3] + Xpixel*GT[4] + Yline*GT[5];
  *
- * {{async_getter}}
+ * @asyncGetter
  * @readonly
  * @kind member
  * @name geoTransformAsync

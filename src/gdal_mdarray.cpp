@@ -229,7 +229,7 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
 
 /**
  * Read data from the MDArray.
- * {{{async}}}
+ * @async
  *
  * This will extract the context of a (hyper-)rectangle from the array into a buffer.
  * If the buffer can be passed as an argument or it can be allocated by the function.
@@ -247,8 +247,8 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  * @param {number[]} [options.stride] An array of strides for the output array, mandatory if the array is specified
  * @param {string} [options.data_type] See {@link GDT|GDT constants}
  * @param {TypedArray} [options.data] The TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
- * @param {ProgressCb} [options.progress_cb] {{{progress_cb}}}
- * @param {callback<TypedArray>} [callback=undefined] {{{cb}}}
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<TypedArray>} [callback=undefined]
  * @return {Promise<TypedArray>} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
  */
 GDAL_ASYNCABLE_DEFINE(MDArray::read) {
