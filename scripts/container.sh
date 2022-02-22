@@ -35,25 +35,40 @@ docker build \
         --build-arg VERSION=${VERSION} --build-arg NODEJS=${NODEJS} --build-arg GDAL=${GDAL} \
         -t ${CONTAINER} -f test/platforms/Dockerfile.${DIST} test/platforms
 
+COMMON_ARGS="--user `id -u`:`id -g` --env MOCHA_TEST_NETWORK -v `pwd`:/src:ro"
+
+echo "Checking for ccache"
+if which ccache; then
+  if [ -z "${CC}" ]; then
+    CC=ccache gcc
+  fi
+  if [ -z "${CXX}" ]; then
+    CC=ccache g++
+  fi
+  CCACHE_DIR=`ccache --get-config=cache_dir`
+  echo "cache in ${CCACHE_DIR}"
+  COMMON_ARGS="${COMMON_ARGS} -v ${CCACHE_DIR}:/ccache --env CCACHE_DIR=/ccache --env CXX --env CC"
+fi
+
 case ${OP} in
   release)
     echo -e "${SEP}Testing in ${CONTAINER}${SEP}"
-    docker run --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} RELEASE || exit 1
+    docker run ${COMMON_ARGS} ${CONTAINER} RELEASE || exit 1
     ;;
   dev)
     echo -e "${SEP}Testing in ${CONTAINER}${SEP}"
-    docker run --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} DEV || exit 1
+    docker run ${COMMON_ARGS} ${CONTAINER} DEV || exit 1
     ;;
   publish)
     echo -e "${SEP}Publishing in ${CONTAINER}${SEP}"
-    docker run --env MOCHA_TEST_NETWORK --env NODE_PRE_GYP_GITHUB_TOKEN -v `pwd`:/src ${CONTAINER} PUBLISH || exit 1
+    docker run ${COMMON_ARGS} --env NODE_PRE_GYP_GITHUB_TOKEN PUBLISH ${CONTAINER} || exit 1
     ;;
   shell)
     echo -e "${SEP}Testing in ${CONTAINER} and running a shell${SEP}"
-    docker run -it --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} DEV /bin/bash
+    docker run -it ${COMMON_ARGS} ${CONTAINER} DEV /bin/bash
     ;;
   asan)
     echo -e "${SEP}Testing w/asan in ${CONTAINER}${SEP}"
-    docker run --env MOCHA_TEST_NETWORK -v `pwd`:/src ${CONTAINER} DEV || exit 1
+    docker run ${COMMON_ARGS} ${CONTAINER} DEV || exit 1
     ;;
 esac

@@ -12,7 +12,8 @@ RUN \
   then dnf module install -y nodejs:${NODEJS}/development; \
   else dnf install -y nodejs; fi && \
   dnf groupinstall -y 'Development Tools' && \
-  dnf install -y g++ git python
+  dnf install -y g++ git python ccache && \
+  mkdir -p /target && chmod 777 /target
 
 RUN if [ "${GDAL}" = "shared" ]; then dnf install -y gdal-devel; fi
 

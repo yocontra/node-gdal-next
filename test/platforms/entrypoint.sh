@@ -1,9 +1,13 @@
 #!/bin/bash
 
+export HOME=/target
 SEP="\n=======================================================\n"
 echo -e "${SEP}Preparing source tree${SEP}"
-rsync -r /src/ /target --exclude=build --exclude=test/data --exclude node_modules
-cd /target
+if [ -n "${CCACHE_DIR}" ]; then
+  echo -e "${SEP}Using ccache in ${CCACHE_DIR} CC=${CC} CXX=${CXX}${SEP}"
+fi
+rsync -r /src/ /target/src --exclude=build --exclude=test/data --exclude node_modules
+cd /target/src
 rm -rf lib/binding package-lock.json
 git checkout test/data
 npm install --ignore-scripts

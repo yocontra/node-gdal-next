@@ -13,8 +13,9 @@ RUN \
   curl -fsSL https://rpm.nodesource.com/setup_${NODEJS}.x | bash - && \
   dnf install -y nodejs && \
   dnf groupinstall -y 'Development Tools' && \
-  dnf install -y git python36 && \
-  alternatives --set python /usr/bin/python3
+  dnf install -y git python36 ccache && \
+  alternatives --set python /usr/bin/python3 && \
+  mkdir -p /target && chmod 777 /target
 
 RUN if [ "${GDAL}" = "shared" ]; then dnf install -y gdal-devel; fi
 

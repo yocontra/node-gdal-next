@@ -31,10 +31,15 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure --debug --enable_coverage
     - name: Build from sources
       run: npx @mapbox/node-pre-gyp build -j max --debug --enable_coverage
+      env:
+        CXX: ccache g++
+        CC: ccache gcc
     - name: Run unit tests
       run: npm test
       env:
@@ -59,6 +64,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
     - run: npm run container dev ${{ matrix.linux-version }} 14 shared
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -78,6 +85,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
     - run: npm run container dev ${{ matrix.linux-version }} 14 bundled
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -98,6 +107,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
     - run: npm run container dev ubuntu:20.04 ${{ matrix.node-version }} ${{ matrix.gdal-version }}
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -113,19 +124,72 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
     - run: npm run container asan ubuntu:20.04 14 bundled
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
 
 
-  test_winmac:
+  test_mac:
 
-    runs-on: ${{ matrix.platforms }}
+    runs-on: macos-10.15
 
     strategy:
       matrix:
         node-version: [ 12.x, 14.x, 16.x, 17.x ]
-        platforms: [ windows-2019, macos-10.15 ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+    - run: npm install --ignore-scripts
+    - run: npx @mapbox/node-pre-gyp configure
+    - name: Build from sources
+      run: npx @mapbox/node-pre-gyp build -j max
+      env:
+        CXX: ccache g++
+        CC: ccache gcc
+    - name: Run unit tests
+      run: npm test
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
+
+  test_mac_debug:
+
+    runs-on: macos-10.15
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+    - run: npm install --ignore-scripts
+    - run: npx @mapbox/node-pre-gyp configure --debug
+    - name: Build from sources
+      run: npx @mapbox/node-pre-gyp build -j max
+      env:
+        CXX: ccache g++
+        CC: ccache gcc
+    - name: Run unit tests
+      run: npm test
+      env:
+        MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
+
+  test_win:
+
+    runs-on: windows-2019
+
+    strategy:
+      matrix:
+        node-version: [ 12.x, 14.x, 16.x, 17.x ]
 
     steps:
     - uses: actions/checkout@v2
@@ -142,13 +206,9 @@ jobs:
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
 
-  test_winmac_debug:
+  test_win_debug:
 
-    runs-on: ${{ matrix.platforms }}
-
-    strategy:
-      matrix:
-        platforms: [ windows-2019, macos-10.15 ]
+    runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
