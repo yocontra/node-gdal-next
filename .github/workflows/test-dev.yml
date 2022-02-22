@@ -35,6 +35,9 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure --debug --enable_coverage
+      env:
+        CXX: ccache g++
+        CC: ccache gcc
     - name: Build from sources
       run: npx @mapbox/node-pre-gyp build -j max --debug --enable_coverage
       env:
@@ -149,6 +152,9 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure
+      env:
+        CXX: ccache g++
+        CC: ccache gcc
     - name: Build from sources
       run: npx @mapbox/node-pre-gyp build -j max
       env:
@@ -173,6 +179,9 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure --debug
+      env:
+        CXX: ccache g++
+        CC: ccache gcc
     - name: Build from sources
       run: npx @mapbox/node-pre-gyp build -j max
       env:
