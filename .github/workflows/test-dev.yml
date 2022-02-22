@@ -30,6 +30,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       with:
         max-size: 1000M
+        key: coverage
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure --debug --enable_coverage
       env:
@@ -71,6 +72,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       with:
         max-size: 1000M
+        key: distros-shared-${{ matrix.linux-version }}
     - run: npm run container dev ${{ matrix.linux-version }} 14 shared
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -94,6 +96,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       with:
         max-size: 1000M
+        key: distros-bundled-${{ matrix.linux-version }}
     - run: npm run container dev ${{ matrix.linux-version }} 14 bundled
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -118,6 +121,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       with:
         max-size: 1000M
+        key: node-${{ matrix.node-version }}
     - run: npm run container dev ubuntu:20.04 ${{ matrix.node-version }} ${{ matrix.gdal-version }}
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -137,6 +141,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       with:
         max-size: 1000M
+        key: asan
     - run: npm run container asan ubuntu:20.04 14 bundled
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -160,6 +165,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       with:
         max-size: 1000M
+        key: mac-${{ matrix.node-version }}
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure
       env:
@@ -189,6 +195,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1
       with:
         max-size: 1000M
+        key: mac-debug
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure --debug
       env:
