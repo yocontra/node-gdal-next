@@ -18,21 +18,18 @@ on:
 jobs:
   bundled_gdal_coverage:
 
-    runs-on: ${{ matrix.platforms }}
-
-    strategy:
-      matrix:
-        node-version: [ 14.x ]
-        platforms: [ ubuntu-20.04 ]
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 14.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 14.x
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 1000M
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure --debug --enable_coverage
       env:
@@ -69,6 +66,8 @@ jobs:
         node-version: 14.x
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 1000M
     - run: npm run container dev ${{ matrix.linux-version }} 14 shared
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -90,6 +89,8 @@ jobs:
         node-version: 14.x
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 1000M
     - run: npm run container dev ${{ matrix.linux-version }} 14 bundled
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -112,6 +113,8 @@ jobs:
         node-version: 14.x
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 1000M
     - run: npm run container dev ubuntu:20.04 ${{ matrix.node-version }} ${{ matrix.gdal-version }}
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -129,6 +132,8 @@ jobs:
         node-version: 14.x
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 1000M
     - run: npm run container asan ubuntu:20.04 14 bundled
       env:
         MOCHA_TEST_NETWORK: ${{ github.event.inputs.testNetwork }}
@@ -150,6 +155,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 1000M
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure
       env:
@@ -177,6 +184,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 1000M
     - run: npm install --ignore-scripts
     - run: npx @mapbox/node-pre-gyp configure --debug
       env:
