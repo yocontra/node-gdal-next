@@ -41,10 +41,13 @@ jobs:
         CXX: ccache g++
         CC: ccache gcc
     - name: Run unit tests
-      run: npm test
+      run: npx c8 npm test
       env:
         MOCHA_TEST_NETWORK: 1
-    - run: npm run gcov
+    - name: Collect code coverage
+      run: |
+        npm run gcov
+        npm run lcov
     - run: npm run codecov
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
