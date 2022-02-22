@@ -3,7 +3,14 @@
 export HOME=/target
 SEP="\n=======================================================\n"
 echo -e "${SEP}Preparing source tree${SEP}"
+
 if [ -n "${CCACHE_DIR}" ]; then
+  if [ -z "${CC}" ]; then
+    export CC=ccache gcc
+  fi
+  if [ -z "${CXX}" ]; then
+    export CXX=ccache g++
+  fi
   echo -e "${SEP}Using ccache in ${CCACHE_DIR} CC=${CC} CXX=${CXX}${SEP}"
 fi
 rsync -r /src/ /target/src --exclude=build --exclude=test/data --exclude node_modules

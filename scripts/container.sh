@@ -39,15 +39,9 @@ COMMON_ARGS="--user `id -u`:`id -g` --env MOCHA_TEST_NETWORK -v `pwd`:/src:ro"
 
 echo "Checking for ccache"
 if which ccache; then
-  if [ -z "${CC}" ]; then
-    CC=ccache gcc
-  fi
-  if [ -z "${CXX}" ]; then
-    CC=ccache g++
-  fi
   CCACHE_DIR=`ccache --get-config=cache_dir`
   echo "cache in ${CCACHE_DIR}"
-  COMMON_ARGS="${COMMON_ARGS} -v ${CCACHE_DIR}:/ccache --env CCACHE_DIR=/ccache --env CXX --env CC"
+  COMMON_ARGS="${COMMON_ARGS} -v ${CCACHE_DIR}:/ccache --env CCACHE_DIR=/ccache"
 fi
 
 case ${OP} in
