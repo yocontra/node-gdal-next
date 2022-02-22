@@ -13,7 +13,7 @@ if [ -n "${CCACHE_DIR}" ]; then
     if [ -z "${CXX}" ]; then
       export CXX="ccache g++"
     fi
-    echo -e "Using ccache in ${CCACHE_DIR} CC=\"${CC}\" CXX=\"${CXX}${SEP}\""
+    echo -e "Using ccache in ${CCACHE_DIR} CC=\"${CC}\" CXX=\"${CXX}\"${SEP}"
   else
     echo -e "Container has no ccache installed${SEP}"
   fi
