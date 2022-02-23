@@ -84,7 +84,8 @@
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.3",
-    "nan": "^2.14.0"
+    "nan": "^2.14.0",
+    "xmlbuilder2": "^3.0.2"
   },
   "bundledDependencies": [
     "@mapbox/node-pre-gyp"
