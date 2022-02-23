@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.5.0] WIP
+# [3.5.0] WIP
+ - PROJ 8.2.1
  - API documentation now uses `documentation.js` with `documentation-polyglot`
  - `gdal.calcAsync` can now convert input data to the output type before applying the user function
  - `gdal.calcAsync` can now call a progress callback
@@ -30,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Remove the documentation reference to the non-existing `copy` argument of `vsimem.set`, use `vsimem.copy` instead
  - Fix a memory leak when throwing an exception in `gdal.Geometry.exportToWKB{Async}`
 
-## [3.4.0] 2021-11-08
+# [3.4.0] 2021-11-08
 
 ### Added
  - Bundled GDAL 3.4.0
@@ -149,7 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fix several potential race conditions in `gdal.RasterBand`
  - Correctly throw an `Error` with an empty message if a GDAL method fails without setting the error message instead of the last previously encountered error
 
-## [3.3.0] 2021-06-15
+# [3.3.0] 2021-06-15
 
 ### Added
   - GDAL 3.3.0
@@ -195,7 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Fix a number of memory leaks (exception throwing paths in all `gdal.SpatialReference.from*`, `gdal.DatasetBands.create`)
 
-## [3.2.0] 2021-05-21
+# [3.2.0] 2021-05-21
 
 ### Added
  - GDAL 3.2.3

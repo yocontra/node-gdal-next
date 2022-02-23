@@ -373,6 +373,24 @@ const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
  * The returned pointer remains valid while ctx is valid, and until
  * proj_context_get_database_metadata() is called.
  *
+ * Available keys:
+ *
+ * - DATABASE.LAYOUT.VERSION.MAJOR
+ * - DATABASE.LAYOUT.VERSION.MINOR
+ * - EPSG.VERSION
+ * - EPSG.DATE
+ * - ESRI.VERSION
+ * - ESRI.DATE
+ * - IGNF.SOURCE
+ * - IGNF.VERSION
+ * - IGNF.DATE
+ * - NKG.SOURCE
+ * - NKG.VERSION
+ * - NKG.DATE
+ * - PROJ.VERSION
+ * - PROJ_DATA.VERSION : PROJ-data version most compatible with this database.
+ *
+ *
  * @param ctx PROJ context, or NULL for default context
  * @param key Metadata key. Must not be NULL
  * @return value, or nullptr
@@ -1132,98 +1150,106 @@ PJ_TYPE proj_get_type(const PJ *obj) {
     if (!obj || !obj->iso_obj) {
         return PJ_TYPE_UNKNOWN;
     }
-    auto ptr = obj->iso_obj.get();
-    if (dynamic_cast<Ellipsoid *>(ptr)) {
-        return PJ_TYPE_ELLIPSOID;
-    }
+    if (obj->type != PJ_TYPE_UNKNOWN)
+        return obj->type;
 
-    if (dynamic_cast<PrimeMeridian *>(ptr)) {
-        return PJ_TYPE_PRIME_MERIDIAN;
-    }
+    const auto getType = [&obj]() {
+        auto ptr = obj->iso_obj.get();
+        if (dynamic_cast<Ellipsoid *>(ptr)) {
+            return PJ_TYPE_ELLIPSOID;
+        }
 
-    if (dynamic_cast<DynamicGeodeticReferenceFrame *>(ptr)) {
-        return PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<GeodeticReferenceFrame *>(ptr)) {
-        return PJ_TYPE_GEODETIC_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<DynamicVerticalReferenceFrame *>(ptr)) {
-        return PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<VerticalReferenceFrame *>(ptr)) {
-        return PJ_TYPE_VERTICAL_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<DatumEnsemble *>(ptr)) {
-        return PJ_TYPE_DATUM_ENSEMBLE;
-    }
-    if (dynamic_cast<TemporalDatum *>(ptr)) {
-        return PJ_TYPE_TEMPORAL_DATUM;
-    }
-    if (dynamic_cast<EngineeringDatum *>(ptr)) {
-        return PJ_TYPE_ENGINEERING_DATUM;
-    }
-    if (dynamic_cast<ParametricDatum *>(ptr)) {
-        return PJ_TYPE_PARAMETRIC_DATUM;
-    }
+        if (dynamic_cast<PrimeMeridian *>(ptr)) {
+            return PJ_TYPE_PRIME_MERIDIAN;
+        }
 
-    {
-        auto crs = dynamic_cast<GeographicCRS *>(ptr);
-        if (crs) {
-            if (crs->coordinateSystem()->axisList().size() == 2) {
-                return PJ_TYPE_GEOGRAPHIC_2D_CRS;
-            } else {
-                return PJ_TYPE_GEOGRAPHIC_3D_CRS;
+        if (dynamic_cast<DynamicGeodeticReferenceFrame *>(ptr)) {
+            return PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<GeodeticReferenceFrame *>(ptr)) {
+            return PJ_TYPE_GEODETIC_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<DynamicVerticalReferenceFrame *>(ptr)) {
+            return PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<VerticalReferenceFrame *>(ptr)) {
+            return PJ_TYPE_VERTICAL_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<DatumEnsemble *>(ptr)) {
+            return PJ_TYPE_DATUM_ENSEMBLE;
+        }
+        if (dynamic_cast<TemporalDatum *>(ptr)) {
+            return PJ_TYPE_TEMPORAL_DATUM;
+        }
+        if (dynamic_cast<EngineeringDatum *>(ptr)) {
+            return PJ_TYPE_ENGINEERING_DATUM;
+        }
+        if (dynamic_cast<ParametricDatum *>(ptr)) {
+            return PJ_TYPE_PARAMETRIC_DATUM;
+        }
+
+        {
+            auto crs = dynamic_cast<GeographicCRS *>(ptr);
+            if (crs) {
+                if (crs->coordinateSystem()->axisList().size() == 2) {
+                    return PJ_TYPE_GEOGRAPHIC_2D_CRS;
+                } else {
+                    return PJ_TYPE_GEOGRAPHIC_3D_CRS;
+                }
             }
         }
-    }
 
-    {
-        auto crs = dynamic_cast<GeodeticCRS *>(ptr);
-        if (crs) {
-            if (crs->isGeocentric()) {
-                return PJ_TYPE_GEOCENTRIC_CRS;
-            } else {
-                return PJ_TYPE_GEODETIC_CRS;
+        {
+            auto crs = dynamic_cast<GeodeticCRS *>(ptr);
+            if (crs) {
+                if (crs->isGeocentric()) {
+                    return PJ_TYPE_GEOCENTRIC_CRS;
+                } else {
+                    return PJ_TYPE_GEODETIC_CRS;
+                }
             }
         }
-    }
 
-    if (dynamic_cast<VerticalCRS *>(ptr)) {
-        return PJ_TYPE_VERTICAL_CRS;
-    }
-    if (dynamic_cast<ProjectedCRS *>(ptr)) {
-        return PJ_TYPE_PROJECTED_CRS;
-    }
-    if (dynamic_cast<CompoundCRS *>(ptr)) {
-        return PJ_TYPE_COMPOUND_CRS;
-    }
-    if (dynamic_cast<TemporalCRS *>(ptr)) {
-        return PJ_TYPE_TEMPORAL_CRS;
-    }
-    if (dynamic_cast<EngineeringCRS *>(ptr)) {
-        return PJ_TYPE_ENGINEERING_CRS;
-    }
-    if (dynamic_cast<BoundCRS *>(ptr)) {
-        return PJ_TYPE_BOUND_CRS;
-    }
-    if (dynamic_cast<CRS *>(ptr)) {
-        return PJ_TYPE_OTHER_CRS;
-    }
+        if (dynamic_cast<VerticalCRS *>(ptr)) {
+            return PJ_TYPE_VERTICAL_CRS;
+        }
+        if (dynamic_cast<ProjectedCRS *>(ptr)) {
+            return PJ_TYPE_PROJECTED_CRS;
+        }
+        if (dynamic_cast<CompoundCRS *>(ptr)) {
+            return PJ_TYPE_COMPOUND_CRS;
+        }
+        if (dynamic_cast<TemporalCRS *>(ptr)) {
+            return PJ_TYPE_TEMPORAL_CRS;
+        }
+        if (dynamic_cast<EngineeringCRS *>(ptr)) {
+            return PJ_TYPE_ENGINEERING_CRS;
+        }
+        if (dynamic_cast<BoundCRS *>(ptr)) {
+            return PJ_TYPE_BOUND_CRS;
+        }
+        if (dynamic_cast<CRS *>(ptr)) {
+            return PJ_TYPE_OTHER_CRS;
+        }
 
-    if (dynamic_cast<Conversion *>(ptr)) {
-        return PJ_TYPE_CONVERSION;
-    }
-    if (dynamic_cast<Transformation *>(ptr)) {
-        return PJ_TYPE_TRANSFORMATION;
-    }
-    if (dynamic_cast<ConcatenatedOperation *>(ptr)) {
-        return PJ_TYPE_CONCATENATED_OPERATION;
-    }
-    if (dynamic_cast<CoordinateOperation *>(ptr)) {
-        return PJ_TYPE_OTHER_COORDINATE_OPERATION;
-    }
+        if (dynamic_cast<Conversion *>(ptr)) {
+            return PJ_TYPE_CONVERSION;
+        }
+        if (dynamic_cast<Transformation *>(ptr)) {
+            return PJ_TYPE_TRANSFORMATION;
+        }
+        if (dynamic_cast<ConcatenatedOperation *>(ptr)) {
+            return PJ_TYPE_CONCATENATED_OPERATION;
+        }
+        if (dynamic_cast<CoordinateOperation *>(ptr)) {
+            return PJ_TYPE_OTHER_COORDINATE_OPERATION;
+        }
 
-    return PJ_TYPE_UNKNOWN;
+        return PJ_TYPE_UNKNOWN;
+    };
+
+    obj->type = getType();
+    return obj->type;
 }
 
 // ---------------------------------------------------------------------------
@@ -1571,6 +1597,11 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
  * The returned string is valid while the input obj parameter is valid,
  * and until a next call to proj_as_proj_string() with the same input
  * object.
+ * 
+ * \warning If a CRS object was not created from a PROJ string, 
+ *          exporting to a PROJ string will in most cases
+ *          cause a loss of information. This can potentially lead to
+ *          erroneous transformations.
  *
  * This function calls
  * osgeo::proj::io::IPROJStringExportable::exportToPROJString().

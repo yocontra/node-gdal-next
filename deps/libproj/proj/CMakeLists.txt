@@ -91,6 +91,13 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
   endif()
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+  # Intel CXX compiler based on clang defaults to -ffast-math, which
+  # breaks std::isinf(), std::isnan(), etc.
+  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -fno-fast-math)
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-fast-math)
+endif ()
+
 set(PROJ_C_WARN_FLAGS "${PROJ_C_WARN_FLAGS}"
   CACHE STRING "C flags used to compile PROJ targets")
 set(PROJ_CXX_WARN_FLAGS "${PROJ_CXX_WARN_FLAGS}"
@@ -110,11 +117,11 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 8 MINOR 2 PATCH 0)
+proj_version(MAJOR 8 MINOR 2 PATCH 1)
 # Use libtool convention to build the CMake's VERSION and SOVERSION
 # See https://github.com/pvanhoof/dir-examples#cmake-in-the-cmake-example
 set(PROJ_LIBTOOL_CURRENT    24)
-set(PROJ_LIBTOOL_REVISION   0)
+set(PROJ_LIBTOOL_REVISION   1)
 set(PROJ_LIBTOOL_AGE        2)
 math(EXPR PROJ_API_VERSION "${PROJ_LIBTOOL_CURRENT} - ${PROJ_LIBTOOL_AGE}")
 set(PROJ_BUILD_VERSION "${PROJ_API_VERSION}.${PROJ_LIBTOOL_AGE}.${PROJ_LIBTOOL_REVISION}")

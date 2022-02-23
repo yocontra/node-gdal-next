@@ -40,6 +40,10 @@ COMMON_ARGS="--user `id -u`:`id -g` --env MOCHA_TEST_NETWORK -v `pwd`:/src:ro"
 echo "Checking for ccache"
 if which ccache; then
   CCACHE_DIR=`ccache --get-config=cache_dir`
+  if [ ! -w ${CCACHE_DIR} ]; then
+    echo "${CCACHE_DIR} not available, creating it"
+    mkdir -p ${CCACHE_DIR}
+  fi
   echo "cache in ${CCACHE_DIR}"
   COMMON_ARGS="${COMMON_ARGS} -v ${CCACHE_DIR}:/ccache --env CCACHE_DIR=/ccache"
 fi
