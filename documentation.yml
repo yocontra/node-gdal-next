@@ -193,6 +193,7 @@ toc:
       - name: wkbByteOrder
         children:
           - wkbNDR
+          - wkbXDR
           - wkbNone
           - wkbPoint
           - wkbPoint25D
