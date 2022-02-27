@@ -1,0 +1,43 @@
+name: MacOS build
+
+on:
+    push:
+        paths-ignore:
+            - 'doc/**'
+    pull_request:
+        paths-ignore:
+            - 'doc/**'
+
+
+jobs:
+
+  macos_build:
+    runs-on: macos-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+            channels: conda-forge
+            auto-update-conda: true
+
+      - name: Install Requirements
+        shell: bash -l {0}
+        run: |
+          source ./ci/travis/osx/before_install.sh
+
+      - name: Build
+        shell: bash -l {0}
+        run: |
+          source ./ci/travis/osx/install.sh
+
+      - name: Run tests
+        shell: bash -l {0}
+        run: |
+          source ./ci/travis/osx/script.sh
+        env:
+            # Emulate a few Travis-CI env variable so that some tests get properly skipped
+            TRAVIS: true
+            TRAVIS_OS_NAME: osx

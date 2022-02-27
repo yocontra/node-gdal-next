@@ -36,7 +36,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: gdal_create.cpp afe0ca2685295d7225aaea219a61df71f8c048c4 2020-12-01 20:31:50 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdal_create.cpp  $")
 
 static void Usage()
 

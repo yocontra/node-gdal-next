@@ -44,7 +44,7 @@
 #include <limits>
 #include <map>
 
-CPL_CVSID("$Id: ogr_xerces.cpp e31972b472ea7e2f14c7881d5d180efcf98ed79b 2021-09-26 23:19:24 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_xerces.cpp  $")
 
 #ifdef HAVE_XERCES
 

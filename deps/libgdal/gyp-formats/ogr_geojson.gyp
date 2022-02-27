@@ -19,6 +19,8 @@
 				"../gdal/ogr/ogrsf_frmts/geojson/libjson/json_c_version.c",
 				"../gdal/ogr/ogrsf_frmts/geojson/libjson/linkhash.c",
 				"../gdal/ogr/ogrsf_frmts/geojson/libjson/printbuf.c",
+				"../gdal/ogr/ogrsf_frmts/geojson/libjson/strerror_override.c",
+				"../gdal/ogr/ogrsf_frmts/geojson/libjson/random_seed.c",
 				"../gdal/ogr/ogrsf_frmts/geojson/ogrgeojsonlayer.cpp",
 				"../gdal/ogr/ogrsf_frmts/geojson/ogrtopojsonreader.cpp",
 				"../gdal/ogr/ogrsf_frmts/geojson/ogresrijsondriver.cpp",

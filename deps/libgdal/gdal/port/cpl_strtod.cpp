@@ -38,15 +38,7 @@
 
 #include "cpl_config.h"
 
-CPL_CVSID("$Id: cpl_strtod.cpp 2750a2a20b7024e64509cdbfc50fdd6b1a186550 2020-05-25 14:36:21 +0200 Even Rouault $")
-
-// XXX: with GCC 2.95 strtof() function is only available when in c99 mode.
-// Fix it here not touching the compiler options.
-#if defined(HAVE_STRTOF) && !HAVE_DECL_STRTOF
-extern "C" {
-extern float strtof(const char *nptr, char **endptr);
-}
-#endif
+CPL_CVSID("$Id: cpl_strtod.cpp  $")
 
 /************************************************************************/
 /*                            CPLAtofDelim()                            */
@@ -351,7 +343,6 @@ double CPLStrtod(const char *nptr, char **endptr)
  */
 float CPLStrtofDelim(const char *nptr, char **endptr, char point)
 {
-#if defined(HAVE_STRTOF)
 /* -------------------------------------------------------------------- */
 /*  We are implementing a simple method here: copy the input string     */
 /*  into the temporary buffer, replace the specified decimal delimiter  */
@@ -360,7 +351,7 @@ float CPLStrtofDelim(const char *nptr, char **endptr, char point)
 /* -------------------------------------------------------------------- */
     char * const pszNewNumberOrNull = CPLReplacePointByLocalePoint(nptr, point);
     const char* pszNumber = pszNewNumberOrNull ? pszNewNumberOrNull : nptr;
-    double dfValue = strtof( pszNumber, endptr );
+    const float fValue = strtof( pszNumber, endptr );
     const int nError = errno;
 
     if( endptr )
@@ -370,13 +361,7 @@ float CPLStrtofDelim(const char *nptr, char **endptr, char point)
         CPLFree( pszNewNumberOrNull );
 
     errno = nError;
-    return static_cast<float>(dfValue);
-
-#else
-
-    return static_cast<float>( CPLStrtodDelim(nptr, endptr, point) );
-
-#endif  // HAVE_STRTOF
+    return fValue;
 }
 
 /************************************************************************/

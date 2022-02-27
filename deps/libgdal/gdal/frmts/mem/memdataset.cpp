@@ -48,7 +48,7 @@
 #include "gdal.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: memdataset.cpp 7fc1d9ac5540a1fd5c40ca7d38b63de2abfb77a6 2021-10-14 20:10:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: memdataset.cpp  $")
 
 struct MEMDataset::Private
 {

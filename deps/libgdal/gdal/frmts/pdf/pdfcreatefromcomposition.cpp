@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pdfcreatefromcomposition.cpp 004e6931f2f46c3f4d262932933f3fd7628d9132 2021-08-13 11:06:15 +0200 Even Rouault $
+ * $Id: pdfcreatefromcomposition.cpp  $
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.

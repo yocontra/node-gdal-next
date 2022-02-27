@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: ogrgtmdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgtmdriver.cpp  $")
 
 /************************************************************************/
 /*                                Open()                                */

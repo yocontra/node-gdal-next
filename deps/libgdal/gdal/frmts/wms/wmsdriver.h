@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: wmsdriver.h 818288a58e026803402172eaa5a53bcc31ebf7aa 2021-03-14 17:20:00 +0300 drons $
+ * $Id: wmsdriver.h  $
  *
  * Project:  WMS Client Driver
  * Purpose:  Implementation of Dataset and RasterBand classes for WMS

@@ -40,7 +40,7 @@
 
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vfkreader.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: vfkreader.cpp  $")
 
 static char *GetDataBlockName(const char *);
 
@@ -329,7 +329,7 @@ int VFKReader::ReadDataRecords(IVFKDataBlock *poDataBlock)
                     pszLine[nLength] = '\0';
                 }
 
-                if (!poDataBlock && pszBlockName) { /* read all data blocks */
+                if (!poDataBlock) { /* read all data blocks */
                     if (osBlockNameLast.empty() ||
                         !EQUAL(pszBlockName, osBlockNameLast.c_str())) {
                         poDataBlockCurrent = GetDataBlock(pszBlockName);

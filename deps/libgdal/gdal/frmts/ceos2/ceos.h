@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceos.h c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $
+ * $Id: ceos.h  $
  *
  * Project:  ASI CEOS Translator
  * Purpose:  CEOS library prototypes
@@ -275,7 +275,7 @@ void PutCeosRecordStruct(CeosRecord_t *record, const void *struct_ptr);
 
 void GetCeosField(CeosRecord_t *, int32, const char *, void *);
 
-void SetCeosField(CeosRecord_t *record, int32 start_byte, char *format, void *value);
+void SetCeosField(CeosRecord_t *record, int32 start_byte, const char *format, int intValue, double dblValue);
 
 void SetIntCeosField(CeosRecord_t *record, int32 start_byte, int32 length, int32 value);
 

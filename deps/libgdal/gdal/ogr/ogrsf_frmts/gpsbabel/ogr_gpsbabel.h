@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gpsbabel.h 86083eda37a69a700825c6128034b4d5a789d05f 2021-03-11 11:39:44 +0100 Even Rouault $
+ * $Id: ogr_gpsbabel.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/GPSBabel driver.

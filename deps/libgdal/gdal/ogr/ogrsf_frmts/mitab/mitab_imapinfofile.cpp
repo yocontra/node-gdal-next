@@ -53,7 +53,7 @@
 #  include <wctype.h>      /* iswspace() */
 #endif
 
-CPL_CVSID("$Id: mitab_imapinfofile.cpp eafaac6247973312c34e401b210ad0ed662ab400 2020-10-21 12:28:12 +0200 Krister Wicksell $")
+CPL_CVSID("$Id: mitab_imapinfofile.cpp  $")
 
 /**********************************************************************
  *                   IMapInfoFile::IMapInfoFile()

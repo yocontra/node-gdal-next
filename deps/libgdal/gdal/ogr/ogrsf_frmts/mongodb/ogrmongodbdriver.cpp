@@ -37,7 +37,7 @@
 #include <limits>
 
 // g++ -DDEBUG -g -Wall -fPIC -shared -o ogr_MongoDB.so -I/home/even/boost_1_53_0 -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/mongodb ogr/ogrsf_frmts/mongodb/*.c* -L. -lgdal -I/home/even/mongo-cxx-1.0.2-install/include -L/home/even/mongo-cxx-1.0.2-install/lib -lmongoclient -L/home/even/boost_1_53_0/stage/lib -lboost_system -lboost_thread -lboost_regex
-CPL_CVSID("$Id: ogrmongodbdriver.cpp 2dc350b1c738a002da1ec5c4cbe3e42fec4069dc 2021-03-04 16:15:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmongodbdriver.cpp  $")
 
 #define MAX_DOCS_IN_BULK                1000
 
@@ -2730,11 +2730,9 @@ void OGRMongoDBDataSource::ReleaseResultSet( OGRLayer * poLayer )
 /*                          OGRMongoDBDriverUnload()                    */
 /************************************************************************/
 
-extern "C" int GDALIsInGlobalDestructor();
-
 static void OGRMongoDBDriverUnload( CPL_UNUSED GDALDriver* poDriver )
 {
-    if( bMongoInitialized != -1 && !GDALIsInGlobalDestructor() )
+    if( bMongoInitialized != -1 )
     {
         client::shutdown();
     }

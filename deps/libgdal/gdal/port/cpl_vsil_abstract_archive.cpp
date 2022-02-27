@@ -48,7 +48,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsil_abstract_archive.cpp 87733df0a658f5c24312c5a98954117f53b0ca94 2021-09-22 22:17:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_abstract_archive.cpp  $")
 
 static bool IsEitherSlash( char c )
 {

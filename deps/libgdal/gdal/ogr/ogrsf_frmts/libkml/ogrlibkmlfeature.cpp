@@ -38,7 +38,7 @@
 #include "ogrlibkmlgeometry.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrlibkmlfeature.cpp 86933038c3926cd4dc3ff37c431b317abb69e602 2021-03-27 23:20:49 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrlibkmlfeature.cpp  $")
 
 using kmldom::AliasPtr;
 using kmldom::CameraPtr;

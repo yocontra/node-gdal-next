@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: tifvsi.h b15655226a04fc6bfa5a5aaeb2cb4a8d89c44d82 2021-10-20 23:53:37 +0200 Even Rouault $
+ * $Id: tifvsi.h  $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implement system hook functions for libtiff on top of CPL/VSI,
@@ -37,7 +37,7 @@
 #include "cpl_vsi.h"
 #include "tiffio.h"
 
-TIFF* VSI_TIFFOpen( const char* name, const char* mode, VSILFILE* fp );
+TIFF CPL_DLL * VSI_TIFFOpen( const char* name, const char* mode, VSILFILE* fp );
 TIFF* VSI_TIFFOpenChild( TIFF* parent ); // the returned handle must be closed before the parent. They share the same underlying VSILFILE
 TIFF* VSI_TIFFReOpen( TIFF* tif );
 VSILFILE* VSI_TIFFGetVSILFile( thandle_t th );

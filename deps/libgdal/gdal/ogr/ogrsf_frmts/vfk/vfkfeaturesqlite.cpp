@@ -34,7 +34,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: vfkfeaturesqlite.cpp 6e86409bd5bea444c1c1106d103355560ee4490a 2021-11-22 13:40:48 +0100 Even Rouault $")
+CPL_CVSID("$Id: vfkfeaturesqlite.cpp  $")
 
 /*!
   \brief VFKFeatureSQLite constructor (from DB)

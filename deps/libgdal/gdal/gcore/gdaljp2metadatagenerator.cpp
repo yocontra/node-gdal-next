@@ -31,9 +31,14 @@
 
 #include <cstddef>
 
-CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp d1b96f561f28cb16ce6529b452926cc0de27f55d 2019-08-14 15:08:38 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp  $")
 
 #ifdef HAVE_LIBXML2
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -48,6 +53,10 @@ CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp d1b96f561f28cb16ce6529b452926cc0de2
 
 #ifdef __clang__
 #pragma clang diagnostic pop
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif
 
 // For CHECK_ARITY and clang 5

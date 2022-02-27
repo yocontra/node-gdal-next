@@ -41,7 +41,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cplstringlist.cpp 237cce44e47cca3290bf053bbfa153856575017e 2019-08-17 15:01:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: cplstringlist.cpp  $")
 
 /************************************************************************/
 /*                           CPLStringList()                            */
@@ -74,7 +74,7 @@ CPLStringList::CPLStringList( char **papszListIn, int bTakeOwnership ):
 
 /**
  * CPLStringList constructor.
- * 
+ *
  * The input list is copied.
  *
  * @param papszListIn the NULL terminated list of strings to ingest.
@@ -357,7 +357,10 @@ CPLStringList &CPLStringList::AddStringDirectly( char *pszNewString )
 CPLStringList &CPLStringList::AddString( const char *pszNewString )
 
 {
-    return AddStringDirectly( CPLStrdup( pszNewString ) );
+    char* pszDupString = VSI_STRDUP_VERBOSE(pszNewString);
+    if( pszDupString == nullptr )
+        return *this;
+    return AddStringDirectly(pszDupString);
 }
 
 /************************************************************************/

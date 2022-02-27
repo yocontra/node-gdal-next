@@ -27,6 +27,7 @@
  ****************************************************************************/
 
 #include "cpl_port.h"
+
 #include "gt_jpeg_copy.h"
 
 #include "cpl_vsi.h"
@@ -40,7 +41,7 @@
 // Note: JPEG_DIRECT_COPY is not defined by default, because it is mainly
 // useful for debugging purposes.
 
-CPL_CVSID("$Id: gt_jpeg_copy.cpp d80d9db4c465d5a3a22407e3a07d85ea4b583ced 2021-03-07 13:00:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gt_jpeg_copy.cpp  $")
 
 #if defined(JPEG_DIRECT_COPY) || defined(HAVE_LIBJPEG)
 

@@ -32,7 +32,7 @@
 
 #include <cstddef>
 
-CPL_CVSID("$Id: vsidataio.cpp 0838dbe06a3e8c96f9930ecbfed79940b7aba3cc 2021-08-14 17:10:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: vsidataio.cpp  $")
 
 CPL_C_START
 #include "jerror.h"

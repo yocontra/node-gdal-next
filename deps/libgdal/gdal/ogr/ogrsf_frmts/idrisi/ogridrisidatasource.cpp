@@ -31,7 +31,7 @@
 #include "idrisi.h"
 #include "ogr_idrisi.h"
 
-CPL_CVSID("$Id: ogridrisidatasource.cpp ce778433e8ac725886855a39d2fe26f25aaf1fa4 2021-03-12 12:42:06 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogridrisidatasource.cpp  $")
 
 /************************************************************************/
 /*                        OGRIdrisiDataSource()                         */

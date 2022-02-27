@@ -62,7 +62,7 @@
 #   include <errno.h>
 #endif
 
-CPL_CVSID("$Id: cpl_minizip_zip.cpp a530d0e8e49140f2dcc38504b31bc3e658107728 2021-03-11 12:00:21 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_minizip_zip.cpp  $")
 
 #ifndef VERSIONMADEBY
 # define VERSIONMADEBY   (0x0) /* platform dependent */

@@ -45,7 +45,7 @@
 #include "ogr_p.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: gmlfeatureclass.cpp efee158e3eb4676f8d0cc09c12514d13b967dd87 2021-09-18 14:05:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlfeatureclass.cpp  $")
 
 /************************************************************************/
 /*                          GMLFeatureClass()                           */

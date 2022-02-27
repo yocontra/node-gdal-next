@@ -29,7 +29,7 @@
 #include "ogr_pg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgdriver.cpp e90bb80010a8c7c2f57378741b109a8f4e67c17a 2021-10-11 17:31:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdriver.cpp  $")
 
 /************************************************************************/
 /*                              Identify()                              */

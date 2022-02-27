@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gensql.h 246a4f741a9d75e92b896efb4062f7d08c071daf 2019-10-11 10:37:12 +0300 drons $
+ * $Id: ogr_gensql.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes related to generic implementation of ExecuteSQL().

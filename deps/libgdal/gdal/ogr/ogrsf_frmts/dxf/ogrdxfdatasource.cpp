@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxfdatasource.cpp 8d5b1df5a0e407130147947c7b88456c0659aa56 2021-06-03 19:13:55 +1000 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxfdatasource.cpp  $")
 
 /************************************************************************/
 /*                          OGRDXFDataSource()                          */

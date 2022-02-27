@@ -39,7 +39,7 @@
 #include <stdexcept>
 #include <memory>
 
-CPL_CVSID("$Id: ogrdxflayer.cpp a717b1a3230a636bdd09937253aef9ca36e6e28b 2021-08-13 20:46:09 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxflayer.cpp  $")
 
 
 /************************************************************************/
@@ -2591,8 +2591,8 @@ OGRDXFFeature *OGRDXFLayer::TranslateASMEntity()
         DXF_LAYER_READER_ERROR();
         return nullptr;
     }
-    if (nCode == 0)
-        poDS->UnreadValue();
+
+    poDS->UnreadValue();
 
     const char* pszEntityHandle =
         poFeature->GetFieldAsString( "EntityHandle" );

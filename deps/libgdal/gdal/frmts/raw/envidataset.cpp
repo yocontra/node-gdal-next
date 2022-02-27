@@ -55,7 +55,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: envidataset.cpp 03855908e6edbe812777775bf3996e137d153a9d 2021-11-10 11:24:41 +0100 Even Rouault $")
+CPL_CVSID("$Id: envidataset.cpp  $")
 
 // TODO(schwehr): This really should be defined in port/somewhere.h.
 constexpr double kdfDegToRad = M_PI / 180.0;

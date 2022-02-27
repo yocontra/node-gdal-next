@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_priv.h a52e59ceeaf2526250d1aab947c5cf914104db22 2021-12-06 15:41:59 +0100 Even Rouault $
+ * $Id: gdal_priv.h  $
  *
  * Name:     gdal_priv.h
  * Project:  GDAL Core
@@ -798,10 +798,18 @@ private:
 
     virtual int         TestCapability( const char * );
 
+    virtual std::vector<std::string> GetFieldDomainNames(CSLConstList papszOptions = nullptr) const;
+
     virtual const OGRFieldDomain* GetFieldDomain(const std::string& name) const;
 
     virtual bool        AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
                                        std::string& failureReason);
+
+    virtual bool        DeleteFieldDomain(const std::string& name,
+                                          std::string& failureReason);
+
+    virtual bool        UpdateFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                          std::string& failureReason);
 
     virtual OGRLayer   *CreateLayer( const char *pszName,
                                      OGRSpatialReference *poSpatialRef = nullptr,
@@ -1645,13 +1653,16 @@ class CPL_DLL GDALDriverManager : public GDALMajorObject
     int         nDrivers = 0;
     GDALDriver  **papoDrivers = nullptr;
     std::map<CPLString, GDALDriver*> oMapNameToDrivers{};
+    std::string                      m_osDriversIniPath{};
 
     GDALDriver  *GetDriver_unlocked( int iDriver )
             { return (iDriver >= 0 && iDriver < nDrivers) ?
                   papoDrivers[iDriver] : nullptr; }
 
-    GDALDriver  *GetDriverByName_unlocked( const char * pszName )
-            { return oMapNameToDrivers[CPLString(pszName).toupper()]; }
+    GDALDriver  *GetDriverByName_unlocked( const char * pszName ) const
+            { auto oIter = oMapNameToDrivers.find(CPLString(pszName).toupper());
+              return oIter == oMapNameToDrivers.end() ? nullptr : oIter->second;
+            }
 
     static char** GetSearchPaths(const char* pszGDAL_DRIVER_PATH);
 
@@ -1671,8 +1682,9 @@ class CPL_DLL GDALDriverManager : public GDALMajorObject
     void        DeregisterDriver( GDALDriver * );
 
     // AutoLoadDrivers is a no-op if compiled with GDAL_NO_AUTOLOAD defined.
-    static void        AutoLoadDrivers();
-    void        AutoSkipDrivers();
+    void               AutoLoadDrivers();
+    void               AutoSkipDrivers();
+    void               ReorderDrivers();
 
     static void        AutoLoadPythonDrivers();
 };

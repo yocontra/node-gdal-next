@@ -91,7 +91,7 @@
 #include "gdal_pam.h"
 #include "gta_headers.h"
 
-CPL_CVSID("$Id: gtadataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: gtadataset.cpp  $")
 
 /************************************************************************/
 /* Helper functions                                                     */
@@ -134,6 +134,12 @@ static CPLString PrintDouble( double dfVal )
 /* GTA custom IO class using GDAL's IO abstraction layer                */
 /* ==================================================================== */
 /************************************************************************/
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+// Suppresses warning: base class ‘class gta::custom_io’ has accessible non-virtual destructor [-Wnon-virtual-dtor]
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
 
 class GTAIO final: public gta::custom_io
 {
@@ -211,6 +217,10 @@ class GTAIO final: public gta::custom_io
         }
     }
 };
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 /************************************************************************/
 /* ==================================================================== */

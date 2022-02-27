@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hfa.h f9a7f39dfcdd2cbbfec35ecbe69515fc411731e7 2017-05-15 12:57:00Z Kurt Schwehr $
+ * $Id: hfa.h  $
  *
  * Project:  Erdas Imagine (.img) Translator
  * Purpose:  Public (C callable) interface for the Erdas Imagine reading

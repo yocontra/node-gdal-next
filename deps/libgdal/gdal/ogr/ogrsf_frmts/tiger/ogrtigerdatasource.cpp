@@ -33,7 +33,7 @@
 #include <cctype>
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrtigerdatasource.cpp c8019208c66006ea89baa2b5bda4161f10a81c0b 2021-08-12 15:36:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrtigerdatasource.cpp  $")
 
 #define DIGIT_ZERO '0'
 

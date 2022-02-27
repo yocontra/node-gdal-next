@@ -38,7 +38,7 @@
 
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: ilwisdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: ilwisdataset.cpp  $")
 
 namespace GDAL
 {
@@ -412,7 +412,7 @@ static std::string GDALType2ILWIS(GDALDataType type)
     return sStoreType;
 }
 
-static CPLErr GetStoreType(std::string pszFileName, ilwisStoreType &stStoreType)
+static CPLErr GetStoreType(const std::string& pszFileName, ilwisStoreType &stStoreType)
 {
     std::string st = ReadElement("MapStore", "Type", pszFileName.c_str());
 

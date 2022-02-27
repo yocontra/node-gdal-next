@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceossar.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $
+ * $Id: ceossar.c  $
  *
  * Project:  ASI CEOS Translator
  * Purpose:  Functions related to CeosSARVolume_t.
@@ -29,7 +29,7 @@
 
 #include "ceos.h"
 
-CPL_CVSID("$Id: ceossar.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $")
+CPL_CVSID("$Id: ceossar.c  $")
 
 extern Link_t *RecipeFunctions;
 

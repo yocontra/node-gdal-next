@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dumpgeo.c bde879dd6c2dd67ecf317ad588846089f0905cb9 2016-03-15 00:39:53Z Kurt Schwehr $
+ * $Id: dumpgeo.c  $
  *
  * Project:  APP ENVISAT Support
  * Purpose:  Test mainline for dumping ENVISAT format files.

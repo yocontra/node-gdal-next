@@ -53,7 +53,7 @@
 
 using std::vector;
 
-CPL_CVSID("$Id: gdalexif.cpp 56c357e05ed806dfda76c504fbaaf703bde3cea7 2021-03-03 13:44:46 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalexif.cpp  $")
 
 constexpr int MAXSTRINGLENGTH = 65535;
 constexpr int EXIFOFFSETTAG = 0x8769;

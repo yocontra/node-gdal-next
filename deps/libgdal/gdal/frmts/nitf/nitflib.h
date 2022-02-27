@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitflib.h 3cff1e81746abaf4f030b46c64242f0e6818e631 2021-08-19 10:20:33 +0200 Even Rouault $
+ * $Id: nitflib.h  $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Main GDAL independent include file for NITF support.

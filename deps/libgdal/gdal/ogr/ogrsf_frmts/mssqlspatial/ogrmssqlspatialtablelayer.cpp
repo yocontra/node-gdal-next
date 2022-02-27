@@ -33,7 +33,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: ogrmssqlspatialtablelayer.cpp 9be722d4162edd5087a9c2d57ccf3ab310e1c282 2021-12-14 12:23:32 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatialtablelayer.cpp  $")
 
 #define UNSUPPORTED_OP_READ_ONLY "%s : unsupported operation on a read-only datasource."
 
@@ -1411,8 +1411,7 @@ int OGRMSSQLSpatialTableLayer::InitBCP(const char* pszDSN)
         return FALSE;
     }
 
-    SQLUINTEGER timeout = 30;
-    Failed(SQLSetConnectAttr(hDBCBCP, SQL_ATTR_LOGIN_TIMEOUT, (void*)timeout, SQL_IS_INTEGER));
+    Failed(SQLSetConnectAttr(hDBCBCP, SQL_ATTR_LOGIN_TIMEOUT, (void*)30, SQL_IS_INTEGER));
 
     SQLCHAR szOutConnString[1024];
     SQLSMALLINT nOutConnStringLen = 0;

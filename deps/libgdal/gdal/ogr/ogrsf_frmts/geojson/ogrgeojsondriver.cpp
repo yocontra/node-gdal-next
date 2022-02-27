@@ -46,7 +46,7 @@
 #include "ogrgeojsonutils.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrgeojsondriver.cpp d777e25ec135618f93516b492bb73548ea5e47a7 2021-09-02 20:10:57 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsondriver.cpp  $")
 
 static CPLMutex* ghMutex = nullptr;
 static char* gpszSource = nullptr;

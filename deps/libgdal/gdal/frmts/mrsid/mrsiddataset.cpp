@@ -43,7 +43,7 @@
 #include <geo_normalize.h>
 #include <geovalues.h>
 
-CPL_CVSID("$Id: mrsiddataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: mrsiddataset.cpp  $")
 
 CPL_C_START
 double GTIFAngleToDD( double dfAngle, int nUOMAngle );

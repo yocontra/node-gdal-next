@@ -49,7 +49,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_hdfs.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_hdfs.cpp  $")
 
 #ifdef HDFS_ENABLED
 

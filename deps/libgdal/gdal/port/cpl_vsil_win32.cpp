@@ -29,7 +29,7 @@
 
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_win32.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_win32.cpp  $")
 
 #if defined(WIN32)
 
@@ -451,7 +451,10 @@ const char* CPLGetWineVersion()
     }
 
     const char * (CDECL *pwine_get_version)(void);
-    pwine_get_version = reinterpret_cast<const char* (*)(void)>(GetProcAddress(hntdll, "wine_get_version"));
+    const auto ret = GetProcAddress(hntdll, "wine_get_version");
+    static_assert(sizeof(pwine_get_version) == sizeof(ret),
+                  "sizeof(pwine_get_version) == sizeof(ret)");
+    memcpy(&pwine_get_version, &ret, sizeof(ret));
     if( pwine_get_version == nullptr )
     {
         return nullptr;

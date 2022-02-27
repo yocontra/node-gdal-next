@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: cpl_recode_iconv.cpp 07d22b7d8a4f947d2fb9bbab1ef546c6ade46d00 2021-11-20 17:01:02 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_recode_iconv.cpp  $")
 
 #ifdef CPL_RECODE_ICONV
 

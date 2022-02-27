@@ -47,7 +47,7 @@
 #include "nitflib.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: rpftocdataset.cpp 502ef117f5528fbfa9d9768eb4fdd351e9196fca 2021-03-16 21:15:08 +0100 Even Rouault $")
+CPL_CVSID("$Id: rpftocdataset.cpp  $")
 
 constexpr int GEOTRSFRM_TOPLEFT_X = 0;
 constexpr int GEOTRSFRM_WE_RES = 1;

@@ -32,7 +32,7 @@
 #include <json.h>  // JSON-C
 #include "ogr_api.h"
 
-CPL_CVSID("$Id: ogrtopojsonreader.cpp 04dd18c09ee9cbebb168f1c6777b3394e09e520a 2021-12-05 00:26:28 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrtopojsonreader.cpp  $")
 
 /************************************************************************/
 /*                          OGRTopoJSONReader()                         */

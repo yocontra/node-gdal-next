@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_virtual.h 7930624ea8fb161357da54ca71479b51ffdc8ede 2021-08-25 12:19:08 +0200 Even Rouault $
+ * $Id: cpl_vsi_virtual.h  $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Declarations for classes related to the virtual filesystem.

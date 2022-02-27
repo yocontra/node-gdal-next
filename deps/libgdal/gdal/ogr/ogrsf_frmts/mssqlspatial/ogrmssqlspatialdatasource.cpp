@@ -29,7 +29,7 @@
 
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlspatialdatasource.cpp 3a9c0d3520ce6626a2e3b47f5a54b77727860739 2021-12-11 11:22:15 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatialdatasource.cpp  $")
 
 /************************************************************************/
 /*                          OGRMSSQLSpatialDataSource()                 */

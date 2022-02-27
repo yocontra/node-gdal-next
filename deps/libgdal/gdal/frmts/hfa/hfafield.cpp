@@ -48,7 +48,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: hfafield.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfafield.cpp  $")
 
 constexpr int MAX_ENTRY_REPORT = 16;
 

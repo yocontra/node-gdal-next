@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "ogr_ingres.h"
 
-CPL_CVSID("$Id: ogringresresultlayer.cpp ff8146d84de7cba8e09d212d5481ea7d2ede3e98 2017-06-27 20:47:31Z Even Rouault $")
+CPL_CVSID("$Id: ogringresresultlayer.cpp  $")
 
 /************************************************************************/
 /*                        OGRIngresResultLayer()                         */

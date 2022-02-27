@@ -33,6 +33,7 @@ constexpr int NULL2 = -32768;
 constexpr double NULL3 = -32768.0;
 
 #include "cpl_port.h"
+
 #include "cpl_safemaths.hpp"
 #include "cpl_vax.h"
 #include "cpl_vsi_error.h"
@@ -50,7 +51,7 @@ constexpr double NULL3 = -32768.0;
 #include <limits>
 #include <string>
 
-CPL_CVSID("$Id: vicardataset.cpp a9aeb422489c8d418bbddb73b9fab0ebeb53454e 2021-10-26 21:30:25 +0200 Even Rouault $")
+CPL_CVSID("$Id: vicardataset.cpp  $")
 
 /* GeoTIFF 1.0 geokeys */
 

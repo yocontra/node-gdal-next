@@ -32,7 +32,7 @@
 #include "keacopy.h"
 #include "../frmts/hdf5/hdf5vfl.h"
 
-CPL_CVSID("$Id: keadataset.cpp 355ae691460a078009b325f71212879b939b3ba8 2021-12-01 15:01:02 +0100 Even Rouault $")
+CPL_CVSID("$Id: keadataset.cpp  $")
 
 /************************************************************************/
 /*                     KEADatasetDriverUnload()                        */

@@ -48,7 +48,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsil_cache.cpp 2e3fadd924984450f4171730a7cb3517baf9a80f 2021-09-29 12:05:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_cache.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -308,7 +308,7 @@ int VSICachedFile::LoadBlocks( vsi_l_offset nStartBlock, size_t nBlockCount,
         }
 
         auto poBlock = cpl::make_unique<VSICacheChunk>();
-        if( !poBlock || !poBlock->Allocate( m_nChunkSize ) )
+        if( !poBlock->Allocate( m_nChunkSize ) )
         {
             return FALSE;
         }
@@ -371,7 +371,7 @@ int VSICachedFile::LoadBlocks( vsi_l_offset nStartBlock, size_t nBlockCount,
         const vsi_l_offset iBlock = nStartBlock + i;
 
         auto poBlock = cpl::make_unique<VSICacheChunk>();
-        if( !poBlock || !poBlock->Allocate( m_nChunkSize ) )
+        if( !poBlock->Allocate( m_nChunkSize ) )
         {
             return FALSE;
         }

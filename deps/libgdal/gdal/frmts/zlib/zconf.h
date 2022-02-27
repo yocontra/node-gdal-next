@@ -3,7 +3,7 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-/* @(#) $Id: zconf.h d9ee6d6b507afa7d588b44d82597e411855e0bfd 2015-10-08 04:18:30Z Kurt Schwehr $ */
+/* @(#) $Id: zconf.h  $ */
 
 #ifndef ZCONF_H
 #define ZCONF_H
@@ -327,6 +327,10 @@ typedef uLong FAR uLongf;
 #   pragma map(inflate_table,"INTABL")
 #   pragma map(inflate_fast,"INFA")
 #   pragma map(inflate_copyright,"INCOPY")
+#endif
+
+#ifdef RENAME_INTERNAL_ZLIB_SYMBOLS
+#include "gdal_zlib_symbol_rename.h"
 #endif
 
 #endif /* ZCONF_H */

@@ -36,7 +36,7 @@
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpgtablelayer.cpp 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrpgtablelayer.cpp  $")
 
 #define UNSUPPORTED_OP_READ_ONLY "%s : unsupported operation on a read-only datasource."
 
@@ -562,7 +562,12 @@ int OGRPGTableLayer::ReadTableDefinition()
                 else if( EQUAL(pszType,"geography") )
                 {
                     poGeomFieldDefn->ePostgisType = GEOM_TYPE_GEOGRAPHY;
-                    poGeomFieldDefn->nSRSId = 4326;
+                    if( !(poDS->sPostGISVersion.nMajor >= 3 ||
+                         (poDS->sPostGISVersion.nMajor == 2 && poDS->sPostGISVersion.nMinor >= 2)) )
+                    {
+                        // EPSG:4326 was a requirement for geography before PostGIS 2.2
+                        poGeomFieldDefn->nSRSId = 4326;
+                    }
                 }
                 else
                 {
@@ -749,7 +754,7 @@ void OGRPGTableLayer::SetTableDefinition(const char* pszFIDColumnName,
         else if( EQUAL(pszGeomType,"geography") )
         {
             poGeomFieldDefn->ePostgisType = GEOM_TYPE_GEOGRAPHY;
-            poGeomFieldDefn->nSRSId = 4326;
+            poGeomFieldDefn->nSRSId = nSRSId;
         }
         else
         {

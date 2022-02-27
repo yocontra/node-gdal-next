@@ -45,7 +45,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: swq_op_general.cpp f74e78169b319b9465e0260da8e61c59362634ca 2021-06-14 19:24:54 +0200 Alessandro Pasotti $")
+CPL_CVSID("$Id: swq_op_general.cpp  $")
 
 /************************************************************************/
 /*                           swq_test_like()                            */

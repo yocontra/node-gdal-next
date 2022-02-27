@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_pam.h c6cd0c925b6b3e838e01ab730a793e2aa818110e 2021-12-10 11:37:30 +0100 Even Rouault $
+ * $Id: gdal_pam.h  $
  *
  * Project:  GDAL Core
  * Purpose:  Declaration for Peristable Auxiliary Metadata classes.

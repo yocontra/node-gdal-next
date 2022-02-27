@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geo_utils.h 080432539615ef1dbc7826822af549f09b985c5c 2021-10-24 04:46:04 +0200 Even Rouault $
+ * $Id: ogr_geo_utils.h  $
  *
  * Project:  X-Plane aeronautical data reader
  * Purpose:  Definition of geo-computation functions

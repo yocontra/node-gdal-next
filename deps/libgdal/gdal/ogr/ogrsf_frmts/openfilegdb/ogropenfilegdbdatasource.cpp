@@ -53,7 +53,7 @@
 
 #include "filegdb_fielddomain.h"
 
-CPL_CVSID("$Id: ogropenfilegdbdatasource.cpp a17ada94cb308964339f2ac5e2719fa855c22e69 2021-10-14 12:26:22 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogropenfilegdbdatasource.cpp  $")
 
 
 /***********************************************************************/

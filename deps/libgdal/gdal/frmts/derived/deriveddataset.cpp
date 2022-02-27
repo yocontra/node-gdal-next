@@ -29,7 +29,7 @@
 #include "gdal_pam.h"
 #include "derivedlist.h"
 
-CPL_CVSID("$Id: deriveddataset.cpp 66e6b22db751bbf143ec873cbca2ce69255b5e90 2021-07-21 20:30:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: deriveddataset.cpp  $")
 
 class DerivedDataset final: public VRTDataset
 {

@@ -56,7 +56,7 @@
 #endif
 #include "ogrgeojsonwriter.h"
 
-CPL_CVSID("$Id: gdal_rat.cpp 63bfc5a68638c1bcb0efc729ca39e101ecf29691 2019-09-24 17:55:12 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_rat.cpp  $")
 
 /**
  * \class GDALRasterAttributeTable

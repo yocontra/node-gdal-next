@@ -36,10 +36,12 @@
 
 #include "cpl_error.h"
 #include "cpl_string.h"
+#include "cpl_time.h"
+
 #include "gdal_mdreader.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: reader_kompsat.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: reader_kompsat.cpp  $")
 
 /**
  * GDALMDReaderKompsat()
@@ -162,9 +164,10 @@ void GDALMDReaderKompsat::LoadMetadata()
             pszTime = "000000.000000";
 
         char buffer[80];
-        time_t timeMid = GetAcquisitionTimeFromString(CPLSPrintf( "%sT%s",
+        GIntBig timeMid = GetAcquisitionTimeFromString(CPLSPrintf( "%sT%s",
                                                      pszDate, pszTime));
-        strftime (buffer, 80, MD_DATETIMEFORMAT, localtime(&timeMid));
+        struct tm tmBuf;
+        strftime (buffer, 80, MD_DATETIMEFORMAT, CPLUnixTimeToYMDHMS(timeMid, &tmBuf));
         m_papszIMAGERYMD = CSLAddNameValue(m_papszIMAGERYMD,
                                            MD_NAME_ACQDATETIME, buffer);
     }
@@ -258,7 +261,7 @@ char** GDALMDReaderKompsat::ReadTxtToList()
 /**
  * GetAcqisitionTimeFromString()
  */
-time_t GDALMDReaderKompsat::GetAcquisitionTimeFromString(
+GIntBig GDALMDReaderKompsat::GetAcquisitionTimeFromString(
         const char* pszDateTime)
 {
     if(nullptr == pszDateTime)
@@ -286,5 +289,5 @@ time_t GDALMDReaderKompsat::GetAcquisitionTimeFromString(
     tmDateTime.tm_year = iYear - 1900;
     tmDateTime.tm_isdst = -1;
 
-    return mktime(&tmDateTime);
+    return CPLYMDHMSToUnixTime(&tmDateTime);
 }

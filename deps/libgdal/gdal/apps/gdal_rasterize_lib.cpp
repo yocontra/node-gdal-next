@@ -50,7 +50,7 @@
 #include "ogr_core.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: gdal_rasterize_lib.cpp 6a73451ff0b40272a30aa9470d5493f6970ab096 2021-03-28 15:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdal_rasterize_lib.cpp  $")
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */

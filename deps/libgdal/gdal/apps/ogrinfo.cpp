@@ -53,7 +53,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id: ogrinfo.cpp 90bba2e599f71074513a455a943a45ed056bf22b 2021-10-19 08:39:52 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrinfo.cpp  $")
 
 bool bVerbose = true;
 bool bSuperQuiet = false;

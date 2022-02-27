@@ -54,7 +54,7 @@
 #  include "ogr_xerces.h"
 #endif
 
-CPL_CVSID("$Id: gmlhandler.cpp d4c015887b310b83780f7d3ad242def9138e2397 2021-08-31 11:20:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: gmlhandler.cpp  $")
 
 #ifdef HAVE_XERCES
 

@@ -28,7 +28,7 @@
 #include "wmsdriver.h"
 #include "minidriver_ogcapicoverage.h"
 
-CPL_CVSID("$Id: minidriver_ogcapicoverage.cpp dfd3042c13a9dc18cc6f5191521679e77383b1cf 2021-01-13 23:36:33 +0100 Even Rouault $")
+CPL_CVSID("$Id: minidriver_ogcapicoverage.cpp  $")
 
 CPLErr WMSMiniDriver_OGCAPICoverage::Initialize(CPLXMLNode *config, CPL_UNUSED char **papszOpenOptions) {
     CPLErr ret = CE_None;

@@ -31,7 +31,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwglayer.cpp ea130963224cca8e3124b8d406b5698deac3bd81 2021-12-21 18:16:26Z Jorge Gustavo Rocha $")
+CPL_CVSID("$Id: ogrdwglayer.cpp  $")
 
 /************************************************************************/
 /*                            OGRDWGLayer()                             */
@@ -57,6 +57,15 @@ OGRDWGLayer::OGRDWGLayer( OGRDWGDataSource *poDSIn )
 
         OGRFieldDefn  oBlockAngleField( "BlockAngle", OFTReal );
         poFeatureDefn->AddFieldDefn( &oBlockAngleField );
+    }
+
+    if (!poDS->GetAttributes().empty()) {
+        std::set<CPLString>::iterator it;
+        for (it = poDS->GetAttributes().begin(); it != poDS->GetAttributes().end(); ++it) {
+            OGRFieldDefn  oAttField(*it, OFTString);
+            poFeatureDefn->AddFieldDefn(&oAttField);
+        }
+      
     }
 
 /* -------------------------------------------------------------------- */
@@ -1129,6 +1138,39 @@ public:
 };
 
 /************************************************************************/
+/*                        Translate3DFACE()                             */
+/************************************************************************/
+
+OGRFeature* OGRDWGLayer::Translate3DFACE(OdDbEntityPtr poEntity)
+{
+    OGRFeature* poFeature = new OGRFeature(poFeatureDefn);
+    OdDbFacePtr pFace = OdDbFace::cast(poEntity);
+
+    TranslateGenericProperties(poFeature, poEntity);
+
+    /* -------------------------------------------------------------------- */
+    /*      Create a polygon geometry from the vertices.                    */
+    /* -------------------------------------------------------------------- */
+    OGRPolygon* poPolygon = new OGRPolygon();
+
+    OGRLinearRing* poLinearRing = new OGRLinearRing();
+
+    OdInt16 index;
+    OdGePoint3d point;
+
+    for (index = 0; index <= 3; index++)
+    {
+        pFace->getVertexAt(index, point);
+        poLinearRing->addPoint(point.x,point.y,point.z);
+    }
+    poLinearRing->closeRings();
+    poPolygon->addRingDirectly(poLinearRing);
+    poFeature->SetGeometryDirectly(poPolygon);
+    PrepareLineStyle(poFeature);
+    return poFeature;
+}
+
+/************************************************************************/
 /*                          TranslateINSERT()                           */
 /************************************************************************/
 
@@ -1188,9 +1230,17 @@ OGRFeature *OGRDWGLayer::TranslateINSERT( OdDbEntityPtr poEntity )
             openAttr = pEntIter->entity()->objectId().safeOpenObject(OdDb::kForRead);
             
             CPLString attrText = TextUnescape( openAttr->textString(), false );
+            
+            const char* fieldName = CPLSPrintf("%ls", openAttr->tag().c_str());
+            if (poDS->AllAttributes() || (!openAttr->isInvisible() && openAttr->visibility() != OdDb::kInvisible)) {
+                uAttrData.Add(fieldName, attrText );
+            }
 
-            if ( !openAttr->isInvisible() && openAttr->visibility() != OdDb::kInvisible)
-                uAttrData.Add( CPLSPrintf("%ls", openAttr->tag().c_str()), attrText );
+            if (poDS->Attributes() && poFeatureDefn->GetFieldIndex(fieldName) != -1)
+            {
+                poFeature->SetField(fieldName, attrText);
+            }
+
         }
 
         poFeature->SetField( "BlockAttributes", uAttrData.ToString().c_str() );
@@ -1265,7 +1315,14 @@ OGRFeature *OGRDWGLayer::TranslateINSERT( OdDbEntityPtr poEntity )
             oStyleProperties.clear();
 
             OGRFeature *poAttrFeat = TranslateTEXT( pAttr );
-
+            const char* fieldName = CPLSPrintf("%ls", pAttr->tag().c_str());
+            if( poDS->Attributes() && poFeatureDefn->GetFieldIndex(fieldName) != -1)
+            {
+                CPLString attrText = TextUnescape(pAttr->textString(), false);
+                poFeature->SetField(fieldName, attrText);
+                if (poAttrFeat)
+                    poAttrFeat->SetField(fieldName, attrText);
+            }
             if( poAttrFeat )
                 apoPendingFeatures.push( poAttrFeat );
         }
@@ -1385,6 +1442,10 @@ OGRFeature *OGRDWGLayer::GetNextUnfilteredFeature()
         else if( EQUAL(pszEntityClassName,"AcDbHatch") )
         {
             poFeature = TranslateHATCH( poEntity );
+        }
+        else if (EQUAL(pszEntityClassName, "AcDbFace"))
+        {
+            poFeature = Translate3DFACE(poEntity);
         }
         else if( EQUAL(pszEntityClassName,"AcDbBlockReference") )
         {

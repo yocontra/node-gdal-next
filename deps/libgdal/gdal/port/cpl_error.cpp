@@ -52,7 +52,7 @@
 #define TIMESTAMP_DEBUG
 // #define MEMORY_DEBUG
 
-CPL_CVSID("$Id: cpl_error.cpp 6e72a7007ebe699ab9be5defd1ca63ecfba99257 2021-09-24 19:35:24 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_error.cpp  $")
 
 static CPLMutex *hErrorMutex = nullptr;
 static void *pErrorHandlerUserData = nullptr;
@@ -937,6 +937,7 @@ void CPL_STDCALL CPLDefaultErrorHandler( CPLErr eErrClass, CPLErrorNum nError,
 {
     static int nCount = 0;
     static int nMaxErrors = -1;
+    static const char* pszErrorSeparator = ":";
 
     if( eErrClass != CE_Debug )
     {
@@ -944,6 +945,9 @@ void CPL_STDCALL CPLDefaultErrorHandler( CPLErr eErrClass, CPLErrorNum nError,
         {
             nMaxErrors =
                 atoi(CPLGetConfigOption( "CPL_MAX_ERROR_REPORTS", "1000" ));
+            // If running GDAL as a CustomBuild Command os MSBuild, "ERROR bla:" is
+            // considered as failing the job. This is rarely the intended behavior
+            pszErrorSeparator = CPLGetConfigOption("CPL_ERROR_SEPARATOR", ":");
         }
 
         nCount++;
@@ -972,7 +976,7 @@ void CPL_STDCALL CPLDefaultErrorHandler( CPLErr eErrClass, CPLErrorNum nError,
     else if( eErrClass == CE_Warning )
         fprintf( fpLog, "Warning %d: %s\n", nError, pszErrorMsg );
     else
-        fprintf( fpLog, "ERROR %d: %s\n", nError, pszErrorMsg );
+        fprintf( fpLog, "ERROR %d%s %s\n", nError, pszErrorSeparator, pszErrorMsg );
 
     if( eErrClass != CE_Debug
         && nMaxErrors > 0

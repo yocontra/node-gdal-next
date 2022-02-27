@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_ods.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
+ * $Id: ogr_ods.h  $
  *
  * Project:  ODS Translator
  * Purpose:  Definition of classes for OGR OpenOfficeSpreadsheet .ods driver.
@@ -156,6 +156,8 @@ class OGRODSDataSource final: public GDALDataset
     int                 nRowsRepeated;
     int                 nCurCol;
     int                 nCellsRepeated;
+    // Accumulated memory allocations related to repeated cells.
+    size_t              m_nAccRepeatedMemory = 0;
     bool                bEndTableParsing;
 
     OGRODSLayer        *poCurLayer;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_kompsat.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
+ * $Id: reader_kompsat.h  $
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from Kompsat imagery.
@@ -55,7 +55,7 @@ public:
 protected:
     virtual void LoadMetadata() override;
     char** ReadTxtToList();
-    virtual time_t GetAcquisitionTimeFromString(const char* pszDateTime) override;
+    virtual GIntBig GetAcquisitionTimeFromString(const char* pszDateTime) override;
 protected:
     CPLString m_osIMDSourceFilename{};
     CPLString m_osRPBSourceFilename{};

@@ -123,7 +123,7 @@
 #include "emmintrin.h"
 #endif
 
-CPL_CVSID("$Id: gdaldem_lib.cpp b2a0a5dbde71bd05c0de077c91ba4a2292e21b80 2021-01-04 11:05:07 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdaldem_lib.cpp  $")
 
 static const double kdfDegreesToRadians = M_PI / 180.0;
 static const double kdfRadiansToDegrees = 180.0 / M_PI;

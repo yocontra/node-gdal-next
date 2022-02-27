@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrvfkdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrvfkdriver.cpp  $")
 
 static int OGRVFKDriverIdentify(GDALOpenInfo* poOpenInfo)
 {
@@ -46,7 +46,8 @@ static int OGRVFKDriverIdentify(GDALOpenInfo* poOpenInfo)
     /* valid datasource can be also SQLite DB previously created by
        VFK driver, the real check is done by VFKReaderSQLite */
     if ( poOpenInfo->nHeaderBytes >= 100 &&
-         STARTS_WITH((const char*)poOpenInfo->pabyHeader, "SQLite format 3") )
+         STARTS_WITH((const char*)poOpenInfo->pabyHeader, "SQLite format 3") &&
+         !EQUAL(CPLGetExtension(poOpenInfo->pszFilename), "gpkg") )
     {
         // The driver is not ready for virtual file systems
         if( STARTS_WITH(poOpenInfo->pszFilename, "/vsi") )

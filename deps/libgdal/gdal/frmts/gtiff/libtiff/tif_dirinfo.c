@@ -420,11 +420,13 @@ _TIFFSetupFields(TIFF* tif, const TIFFFieldArray* fieldarray)
 
 		for (i = 0; i < tif->tif_nfields; i++) {
 			TIFFField *fld = tif->tif_fields[i];
-			if (fld->field_bit == FIELD_CUSTOM &&
-				strncmp("Tag ", fld->field_name, 4) == 0) {
+			if (fld->field_name != NULL) {
+				if (fld->field_bit == FIELD_CUSTOM &&
+					strncmp("Tag ", fld->field_name, 4) == 0) {
 					_TIFFfree(fld->field_name);
 					_TIFFfree(fld);
 				}
+			}
 		}
 
 		_TIFFfree(tif->tif_fields);
@@ -531,7 +533,7 @@ _TIFFPrintFieldInfo(TIFF* tif, FILE* fd)
 }
 
 /*
- * Return size of TIFFDataType in bytes
+ * Return size of TIFFDataType within TIFF-file in bytes
  */
 int
 TIFFDataWidth(TIFFDataType type)
@@ -603,7 +605,7 @@ _TIFFDataSize(TIFFDataType type)
 
 /*
  * Rational2Double: 
- * Return size of TIFFSetGetFieldType in bytes.
+ * Return size of TIFFSetGetFieldType for internal storage in bytes.
  *
  * XXX: TIFF_RATIONAL values for FIELD_CUSTOM are stored internally as 4-byte float.
  * However, some of them should be stored internally as 8-byte double. 
@@ -620,7 +622,7 @@ _TIFFSetGetFieldSize(TIFFSetGetFieldType setgettype)
 		case TIFF_SETGET_C16_ASCII:
 		case TIFF_SETGET_C32_ASCII:
 		case TIFF_SETGET_OTHER:
-		    return 0;
+		    return 1;
 		case TIFF_SETGET_UINT8:
 		case TIFF_SETGET_SINT8:
 		case TIFF_SETGET_C0_UINT8:
@@ -1115,6 +1117,11 @@ TIFFMergeFieldInfo(TIFF* tif, const TIFFFieldInfo info[], uint32_t n)
 		tp->field_bit = info[i].field_bit;
 		tp->field_oktochange = info[i].field_oktochange;
 		tp->field_passcount = info[i].field_passcount;
+		if (info[i].field_name == NULL) {
+			TIFFErrorExt(tif->tif_clientdata, module,
+				"Field_name of %d.th allocation tag %d is NULL", i, info[i].field_tag);
+			return -1;
+		}
 		tp->field_name = info[i].field_name;
 		tp->field_subfields = NULL;
 		tp++;

@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include "iso8211.h"
 
-CPL_CVSID("$Id: timetest.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: timetest.cpp  $")
 
 static void ViewRecordField( DDFField * poField );
 static int ViewSubfield( DDFSubfieldDefn *poSFDefn,

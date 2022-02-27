@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrodbcdatasource.cpp 1dace7b6156cd93332bee0844e65806fc560cb7e 2021-08-31 10:37:00 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrodbcdatasource.cpp  $")
 /************************************************************************/
 /*                         OGRODBCDataSource()                          */
 /************************************************************************/
@@ -132,6 +132,10 @@ int OGRODBCDataSource::OpenMDB( GDALOpenInfo* poOpenInfo )
     {
         return FALSE;
     }
+
+    // Retrieve numeric values from MS Access files using ODBC numeric types, to avoid
+    // loss of precision and missing values on Windows (see https://github.com/OSGeo/gdal/issues/3885)
+    m_nStatementFlags |= CPLODBCStatement::Flag::RetrieveNumericColumnsAsDouble;
 
     pszName = CPLStrdup( pszNewName );
 
@@ -514,7 +518,7 @@ int OGRODBCDataSource::OpenTable( const char *pszNewName,
 /* -------------------------------------------------------------------- */
 /*      Create the layer object.                                        */
 /* -------------------------------------------------------------------- */
-    OGRODBCTableLayer *poLayer = new OGRODBCTableLayer( this );
+    OGRODBCTableLayer *poLayer = new OGRODBCTableLayer( this, m_nStatementFlags );
 
     if( poLayer->Initialize( pszNewName, pszGeomCol ) )
     {
@@ -621,7 +625,7 @@ OGRLayer * OGRODBCDataSource::ExecuteSQL( const char *pszSQLCommand,
 /* -------------------------------------------------------------------- */
 /*      Execute statement.                                              */
 /* -------------------------------------------------------------------- */
-    CPLODBCStatement *poStmt = new CPLODBCStatement( &oSession );
+    CPLODBCStatement *poStmt = new CPLODBCStatement( &oSession, m_nStatementFlags );
 
     CPLDebug( "ODBC", "ExecuteSQL(%s) called.", pszSQLCommand );
     poStmt->Append( pszSQLCommand );

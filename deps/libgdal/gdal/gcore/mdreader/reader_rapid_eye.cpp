@@ -35,8 +35,9 @@
 #include "cpl_error.h"
 #include "cpl_minixml.h"
 #include "cpl_string.h"
+#include "cpl_time.h"
 
-CPL_CVSID("$Id: reader_rapid_eye.cpp ec7b85e6bb8f9737693a31f0bf7166e31e10992e 2018-04-16 00:08:36 +0200 Even Rouault $")
+CPL_CVSID("$Id: reader_rapid_eye.cpp  $")
 
 /**
  * GDALMDReaderRapidEye()
@@ -146,8 +147,9 @@ void GDALMDReaderRapidEye::LoadMetadata()
     if(nullptr != pszDateTime)
     {
         char buffer[80];
-        time_t timeMid = GetAcquisitionTimeFromString(pszDateTime);
-        strftime (buffer, 80, MD_DATETIMEFORMAT, localtime(&timeMid));
+        GIntBig timeMid = GetAcquisitionTimeFromString(pszDateTime);
+        struct tm tmBuf;
+        strftime (buffer, 80, MD_DATETIMEFORMAT, CPLUnixTimeToYMDHMS(timeMid, &tmBuf));
         m_papszIMAGERYMD = CSLAddNameValue(m_papszIMAGERYMD,
                                            MD_NAME_ACQDATETIME, buffer);
     }

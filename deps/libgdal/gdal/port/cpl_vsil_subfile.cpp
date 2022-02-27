@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_subfile.cpp 6ff924dfc704776cbdeff1e0e23da6452cf06933 2021-03-03 17:22:05 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_subfile.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -499,10 +499,12 @@ char **VSISubFileFilesystemHandler::ReadDir( const char * /* pszPath */ )
 /*                 VSIInstallSubFileFilesystemHandler()                 */
 /************************************************************************/
 
-/**
- * Install /vsisubfile/ virtual file handler.
- *
- * @see <a href="gdal_virtual_file_systems.html#gdal_virtual_file_systems_subfile">/vsisubfile/ documentation</a>
+/*!
+ \brief Install /vsisubfile/ virtual file handler.
+
+ \verbatim embed:rst
+ See :ref:`/vsisubfile/ documentation <vsisubfile>`
+ \endverbatim
  */
 
 void VSIInstallSubFileHandler()

@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrxlslayer.cpp 1e6faeb033524d59e555086562ef856b57aef82f 2021-07-15 22:22:47 +0200 Andrea Giudiceandrea $")
+CPL_CVSID("$Id: ogrxlslayer.cpp  $")
 
 /************************************************************************/
 /*                            OGRXLSLayer()                             */

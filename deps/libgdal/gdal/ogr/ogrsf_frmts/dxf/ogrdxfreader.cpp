@@ -32,7 +32,7 @@
 #include "cpl_string.h"
 #include "cpl_csv.h"
 
-CPL_CVSID("$Id: ogrdxfreader.cpp 9e5efa394ced27cb93794156bc869c414772527b 2021-08-10 11:51:28 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxfreader.cpp  $")
 
 /************************************************************************/
 /*                            OGRDXFReader()                            */
@@ -201,15 +201,15 @@ int OGRDXFReader::ReadValueRaw( char *pszValueBuf, int nValueBufSize )
         iEOL = iSrcBufferOffset;
         bLongLine = true;
 
+        // Have we prematurely reached the end of the file?
+        if( achSrcBuffer[iEOL] == '\0' )
+            return -1;
+
         // Proceed to newline again
         while( achSrcBuffer[iEOL] != '\n'
                && achSrcBuffer[iEOL] != '\r'
                && achSrcBuffer[iEOL] != '\0' )
             iEOL++;
-
-        // If nothing was read, we have prematurely reached the end of the file
-        if( iEOL == iSrcBufferOffset )
-            return -1;
     }
 
     size_t nValueBufLen = 0;

@@ -32,7 +32,7 @@
 #include "memdataset.h"
 #include "gdal_alg_priv.h"
 
-CPL_CVSID("$Id: gdaldb2rasterband.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdaldb2rasterband.cpp  $")
 
 static char* GByteArrayToHexString( const GByte* pabyData, int nLen);
 //#define DEBUG_VERBOSE

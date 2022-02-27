@@ -34,7 +34,7 @@
 #include "ogr_swq.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrlayer.cpp 7a0cb2387a94cca055e1cdbd96546f7bdaea2dfb 2021-08-12 22:58:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrlayer.cpp  $")
 
 struct OGRLayer::Private
 {

@@ -30,7 +30,7 @@
 #include "ogr_gtm.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: gtmwaypointlayer.cpp 6f6da6fd366fe38931e39c94d9548aa4d5083137 2020-06-21 00:34:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: gtmwaypointlayer.cpp  $")
 
 GTMWaypointLayer::GTMWaypointLayer( const char* pszNameIn,
                                     OGRSpatialReference* poSRSIn,

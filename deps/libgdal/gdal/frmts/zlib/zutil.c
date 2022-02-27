@@ -3,7 +3,7 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-/* @(#) $Id: zutil.c 9f9d3ce06ea49f1227077eb168728ce74a51e857 2016-11-21 12:56:56Z Even Rouault $ */
+/* @(#) $Id: zutil.c  $ */
 
 #include "zutil.h"
 

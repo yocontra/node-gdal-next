@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: geoconcept.c 32e5b9f8df67107313a1a803f4bb422369b8de90 2021-03-07 19:12:09 +0100 Even Rouault $
+ * $Id: geoconcept.c  $
  *
  * Name:     geoconcept.c
  * Project:  OpenGIS Simple Features Reference Implementation
@@ -36,7 +36,7 @@
 #include "cpl_string.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: geoconcept.c 32e5b9f8df67107313a1a803f4bb422369b8de90 2021-03-07 19:12:09 +0100 Even Rouault $")
+CPL_CVSID("$Id: geoconcept.c  $")
 
 #define kItemSize_GCIO      256
 #define kExtraSize_GCIO    4096

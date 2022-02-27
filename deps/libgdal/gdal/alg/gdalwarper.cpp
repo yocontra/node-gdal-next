@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp 5d5a9396da0e1c66349b4fdbe9d01a6a719eb1e9 2021-10-26 11:22:02 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarper.cpp  $")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */
@@ -1954,7 +1954,7 @@ GDALWarpOptions * CPL_STDCALL GDALDeserializeWarpOptions( CPLXMLNode *psTree )
 
         char** papszOpenOptions = GDALDeserializeOpenOptionsFromXML(psTree);
         psWO->hSrcDS = GDALOpenEx(
-            pszValue, GDAL_OF_SHARED | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
+            pszValue, GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
             nullptr,
             papszOpenOptions, nullptr );
         CSLDestroy(papszOpenOptions);

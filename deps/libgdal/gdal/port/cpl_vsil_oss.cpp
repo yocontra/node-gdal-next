@@ -41,7 +41,7 @@
 
 #include "cpl_alibaba_oss.h"
 
-CPL_CVSID("$Id: cpl_vsil_oss.cpp 7930624ea8fb161357da54ca71479b51ffdc8ede 2021-08-25 12:19:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_oss.cpp  $")
 
 #ifndef HAVE_CURL
 
@@ -385,13 +385,15 @@ bool VSIOSSHandle::CanRestartOnError(const char* pszErrorMsg,
 /*                      VSIInstallOSSFileHandler()                      */
 /************************************************************************/
 
-/**
- * \brief Install /vsioss/ Alibaba Cloud Object Storage Service (OSS) file
- * system handler (requires libcurl)
- *
- * @see <a href="gdal_virtual_file_systems.html#gdal_virtual_file_systems_vsioss">/vsioss/ documentation</a>
- *
- * @since GDAL 2.3
+/*!
+ \brief Install /vsioss/ Alibaba Cloud Object Storage Service (OSS) file
+ system handler (requires libcurl)
+
+ \verbatim embed:rst
+ See :ref:`/vsioss/ documentation <vsioss>`
+ \endverbatim
+
+ @since GDAL 2.3
  */
 void VSIInstallOSSFileHandler( void )
 {

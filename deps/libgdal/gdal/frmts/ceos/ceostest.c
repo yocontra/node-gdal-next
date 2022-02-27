@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceostest.c bde879dd6c2dd67ecf317ad588846089f0905cb9 2016-03-15 00:39:53Z Kurt Schwehr $
+ * $Id: ceostest.c  $
  *
  * Project:  CEOS Translator
  * Purpose:  Test mainline.

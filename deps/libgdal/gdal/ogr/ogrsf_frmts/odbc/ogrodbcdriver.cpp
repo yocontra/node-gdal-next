@@ -29,7 +29,7 @@
 #include "ogr_odbc.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrodbcdriver.cpp f60db6b9481fc35b2fac0c1f7808f0240c15b7d6 2021-08-31 10:17:36 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrodbcdriver.cpp  $")
 
 /************************************************************************/
 /*                     OGRODBCDriverIdentify()                          */

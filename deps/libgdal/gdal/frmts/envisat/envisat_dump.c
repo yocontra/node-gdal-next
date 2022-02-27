@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: envisat_dump.c fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: envisat_dump.c  $
  *
  * Project:  APP ENVISAT Support
  * Purpose:  Test mainline for dumping ENVISAT format files.

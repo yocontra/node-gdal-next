@@ -35,7 +35,7 @@
 #include "cpl_multiproc.h"
 #include "ogrmutexeddatasource.h"
 
-CPL_CVSID("$Id: FGdbDriver.cpp ab83782e9a1dc49e949679ea1dd055ee171d483f 2021-10-21 16:57:07 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: FGdbDriver.cpp  $")
 
 extern "C" void RegisterOGRFileGDB();
 
@@ -888,6 +888,7 @@ void RegisterOGRFileGDB()
     poDriver->SetMetadataItem( GDAL_DCAP_DEFAULT_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_FIELD_DOMAINS, "YES" );
 
     poDriver->pfnOpen = OGRFileGDBDriverOpen;
     poDriver->pfnIdentify = OGRFileGDBDriverIdentify;

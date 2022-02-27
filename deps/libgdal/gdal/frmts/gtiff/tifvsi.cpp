@@ -52,7 +52,7 @@
 #include "gdal_libgeotiff_symbol_rename.h"
 #endif
 
-CPL_CVSID("$Id: tifvsi.cpp b15655226a04fc6bfa5a5aaeb2cb4a8d89c44d82 2021-10-20 23:53:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: tifvsi.cpp  $")
 
 CPL_C_START
 extern TIFF CPL_DLL * XTIFFClientOpen( const char* name, const char* mode,

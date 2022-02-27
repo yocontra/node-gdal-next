@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: commonutils.h 9bdd970e68dc2f9974afd1994c414e449acedcae 2020-11-20 14:09:34 +0100 Even Rouault $
+ * $Id: commonutils.h  $
  *
  * Project:  GDAL Utilities
  * Purpose:  Common utility routines

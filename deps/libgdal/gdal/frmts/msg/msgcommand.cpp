@@ -32,7 +32,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-CPL_CVSID("$Id: msgcommand.cpp d17899843661a30622f17189d934607af23aa00b 2019-03-24 13:33:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: msgcommand.cpp  $")
 
 using namespace std;
 

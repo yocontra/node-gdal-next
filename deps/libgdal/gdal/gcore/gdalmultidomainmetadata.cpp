@@ -39,7 +39,7 @@
 #include "cpl_string.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gdalmultidomainmetadata.cpp 040f61f730ba200425e9791d8cf2511ba978751b 2020-02-27 23:24:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalmultidomainmetadata.cpp  $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/

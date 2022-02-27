@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqlitebase.h 8dc0a101c5e4667fc8dfddf2a96ff54209bf0bfe 2021-09-05 18:19:07 +0200 Even Rouault $
+ * $Id: ogrsqlitebase.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definition of classes and functions used by SQLite and GPKG drivers
@@ -120,6 +120,9 @@ class OGRSQLiteBaseDataSource CPL_NON_FINAL: public GDALPamDataset
 {
   protected:
     char               *m_pszFilename = nullptr;
+    std::string         m_osFilenameForSQLiteOpen{}; // generally m_pszFilename, but can be also file:{m_pszFilename}?nolock=1
+    bool                m_bNoLock = false;
+    std::string         m_osFinalFilename{}; // use when generating a network hosted file with CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE=YES
     bool                m_bCallUndeclareFileNotToOpen = false;
 
     sqlite3             *hDB = nullptr;
@@ -132,6 +135,7 @@ class OGRSQLiteBaseDataSource CPL_NON_FINAL: public GDALPamDataset
     int                 OpenOrCreateDB(int flags, bool bRegisterOGR2SQLiteExtensions);
     bool                SetSynchronous();
     bool                SetCacheSize();
+    void                LoadExtensions();
 
     void                CloseDB();
 
@@ -174,6 +178,8 @@ class OGRSQLiteBaseDataSource CPL_NON_FINAL: public GDALPamDataset
     OGRErr              SoftStartTransaction();
     OGRErr              SoftCommitTransaction();
     OGRErr              SoftRollbackTransaction();
+
+    OGRErr              PragmaCheck(const char * pszPragma, const char * pszExpected, int nRowsExpected);
 };
 
 /************************************************************************/

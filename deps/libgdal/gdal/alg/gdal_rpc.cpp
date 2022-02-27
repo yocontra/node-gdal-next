@@ -57,7 +57,7 @@
 
 // #define DEBUG_VERBOSE_EXTRACT_DEM
 
-CPL_CVSID("$Id: gdal_rpc.cpp d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $")
+CPL_CVSID("$Id: gdal_rpc.cpp  $")
 
 CPL_C_START
 CPLXMLNode *GDALSerializeRPCTransformer( void *pTransformArg );
@@ -1950,11 +1950,19 @@ static bool GDALRPCOpenDEM( GDALRPCTransformInfo* psTransform )
         psTransform->nBufferMaxRadius =
             atoi(CPLGetConfigOption("GDAL_RPC_DEM_BUFFER_MAX_RADIUS", "2"));
         psTransform->nHitsInBuffer = 0;
-        const int nMaxWindowSize = 4;
-        psTransform->padfDEMBuffer = static_cast<double*>(VSIMalloc(
-            (nMaxWindowSize + 2 * psTransform->nBufferMaxRadius) *
-            (nMaxWindowSize + 2 * psTransform->nBufferMaxRadius) *
-            sizeof(double) ));
+        constexpr int nMaxWindowSize = 4;
+        if( psTransform->nBufferMaxRadius <= 0 ||
+            psTransform->nBufferMaxRadius > (INT_MAX - nMaxWindowSize) / 2 )
+        {
+            return false;
+        }
+        const int nWindowSize = nMaxWindowSize + 2 * psTransform->nBufferMaxRadius;
+        psTransform->padfDEMBuffer = static_cast<double*>(VSI_MALLOC3_VERBOSE(
+            nWindowSize, nWindowSize, sizeof(double) ));
+        if( psTransform->padfDEMBuffer == nullptr )
+        {
+            return false;
+        }
         psTransform->nBufferX = -1;
         psTransform->nBufferY = -1;
         psTransform->nBufferWidth = -1;

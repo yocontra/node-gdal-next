@@ -31,7 +31,7 @@
 #include "gnm_api.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gnmnetwork.cpp 8e5eeb35bf76390e3134a4ea7076dab7d478ea0e 2018-11-14 22:55:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: gnmnetwork.cpp  $")
 
 GNMNetwork::GNMNetwork() : GDALDataset() {}
 

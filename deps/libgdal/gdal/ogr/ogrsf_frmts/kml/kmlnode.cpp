@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: kmlnode.cpp 8ae5111b5f0775a230a3d583e861627917c370d8 2021-07-06 12:15:32 +0200 Even Rouault $")
+CPL_CVSID("$Id: kmlnode.cpp  $")
 
 /************************************************************************/
 /*                           Help functions                             */

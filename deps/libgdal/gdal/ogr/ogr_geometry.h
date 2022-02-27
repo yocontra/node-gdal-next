@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geometry.h 9f57a8d3c5f327cb02bb78ef23479c4b74143220 2021-05-22 00:41:26 +0200 Momtchil Momtchev $
+ * $Id: ogr_geometry.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes for manipulating simple features that is not specific

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceosrecipe.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $
+ * $Id: ceosrecipe.c  $
  *
  * Project:  ASI CEOS Translator
  * Purpose:  CEOS field layout recipes.
@@ -29,7 +29,7 @@
 
 #include "ceos.h"
 
-CPL_CVSID("$Id: ceosrecipe.c c7ac76af198f38718a8727705ec78456c64ea9e2 2021-06-26 04:15:24 -0400 kdesjard $")
+CPL_CVSID("$Id: ceosrecipe.c  $")
 
 /* Array of Datatypes and their names/values */
 

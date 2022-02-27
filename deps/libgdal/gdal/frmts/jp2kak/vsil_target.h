@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vsil_target.h b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $
+ * $Id: vsil_target.h  $
  *
  * Project:  JPEG-2000
  * Purpose:  Implements VSI*L based writer.

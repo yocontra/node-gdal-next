@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gml.h 978ba46f732b27073d5bbc30f427a311d9daed28 2020-04-08 01:11:41 +0200 Even Rouault $
+ * $Id: ogr_gml.h  $
  *
  * Project:  GML Reader
  * Purpose:  Declarations for OGR wrapper classes for GML, and GML<->OGR

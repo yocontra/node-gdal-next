@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrdwgdatasource.cpp ea130963224cca8e3124b8d406b5698deac3bd81 2021-12-21 18:16:26Z Jorge Gustavo Rocha $")
+CPL_CVSID("$Id: ogrdwgdatasource.cpp  $")
 
 /************************************************************************/
 /*                          OGRDWGDataSource()                          */
@@ -40,6 +40,8 @@ OGRDWGDataSource::OGRDWGDataSource() :
   fp(nullptr),
   iEntitiesSectionOffset(0),
   bInlineBlocks(FALSE),
+  bAttributes(FALSE),
+  bAllAttributes(TRUE),
   poServices(nullptr),
   poDb(static_cast<const OdRxObject*>(nullptr))
 
@@ -102,6 +104,10 @@ int OGRDWGDataSource::Open( OGRDWGServices *poServicesIn,
 
     bInlineBlocks = CPLTestBool(
         CPLGetConfigOption( "DWG_INLINE_BLOCKS", "TRUE" ) );
+    bAttributes = CPLTestBool(
+    CPLGetConfigOption( "DWG_ATTRIBUTES", "FALSE" ) );
+    bAllAttributes = CPLTestBool(
+        CPLGetConfigOption("DWG_ALL_ATTRIBUTES", "TRUE"));
 
 /* -------------------------------------------------------------------- */
 /*      Open the file.                                                  */
@@ -145,6 +151,9 @@ int OGRDWGDataSource::Open( OGRDWGServices *poServicesIn,
 /*      Create out layer object - we will need it when interpreting     */
 /*      blocks.                                                         */
 /* -------------------------------------------------------------------- */
+    if(bAttributes){
+        ReadAttDefinitions();
+    }
     apoLayers.push_back( new OGRDWGLayer( this ) );
 
     ReadBlocksSection();
@@ -152,6 +161,54 @@ int OGRDWGDataSource::Open( OGRDWGServices *poServicesIn,
     return TRUE;
 }
 
+
+/************************************************************************/
+/*                        ReadAttDefinitions()                          */
+/************************************************************************/
+
+void OGRDWGDataSource::ReadAttDefinitions()
+
+{
+    OdDbBlockTablePtr pTable = poDb->getBlockTableId().safeOpenObject();
+    OdDbSymbolTableIteratorPtr pBlkIter = pTable->newIterator();
+    OdDbBlockTableRecordPtr  poModelSpace, poBlock;
+  
+    for (pBlkIter->start(); !pBlkIter->done(); pBlkIter->step())
+    {
+        poBlock = pBlkIter->getRecordId().safeOpenObject();
+        OdDbObjectIteratorPtr poEntIter = poBlock->newIterator();
+
+        CPLString* attName = nullptr;
+        /* -------------------------------------------------------------------- */
+        /*      Fetch the next attribute definition.                            */
+        /* -------------------------------------------------------------------- */
+        for (poEntIter->start(); !poEntIter->done(); poEntIter->step())
+        {
+            OdDbObjectId oId = poEntIter->objectId();
+            OdDbEntityPtr poEntity = OdDbEntity::cast(oId.openObject());
+            if (poEntity.isNull())
+                continue;
+            /* -------------------------------------------------------------------- */
+            /*      Check AcDbAttributeDefinition then create and insert attribute  */
+            /* -------------------------------------------------------------------- */
+            OdRxClass* poClass = poEntity->isA();
+            const OdString osName = poClass->name();
+            const char* pszEntityClassName =  osName;
+            if (EQUAL(pszEntityClassName, "AcDbAttributeDefinition"))
+            {
+                OdDbAttributeDefinitionPtr poAttributeDefinition = OdDbAttributeDefinition::cast(poEntity);
+                if (bAllAttributes || !poAttributeDefinition->isInvisible()) {
+                    const char* tagName = poAttributeDefinition->tag();
+                    attName = new CPLString(tagName);
+                    if (attributeFields.count(*attName) == 0) {
+                        attributeFields.insert(*attName);
+                    }
+                }
+
+            }
+        }
+    }
+}
 /************************************************************************/
 /*                        ReadLayerDefinitions()                        */
 /************************************************************************/

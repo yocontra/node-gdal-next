@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: dgnread.cpp 248de76b8e0054cb7512e40676533fa9a009565c 2021-08-28 12:54:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: dgnread.cpp  $")
 
 static DGNElemCore *DGNParseTCB( DGNInfo * );
 static DGNElemCore *DGNParseColorTable( DGNInfo * );

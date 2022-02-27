@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: vicarkeywordhandler.cpp b1a1f43837d9cd3c75322bbd9ebee0463b232c60 2021-08-10 16:01:47 +0200 Even Rouault $")
+CPL_CVSID("$Id: vicarkeywordhandler.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */

@@ -40,7 +40,7 @@
 #include "cpl_vsi.h"
 #include "ogrsqlitevfs.h"
 
-CPL_CVSID("$Id: ogrsqlitevfs.cpp 0b9fb262654e49df9fbd344f3b2397322ff8d74e 2021-08-15 12:04:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitevfs.cpp  $")
 
 #ifdef DEBUG_IO
 # define DEBUG_ONLY

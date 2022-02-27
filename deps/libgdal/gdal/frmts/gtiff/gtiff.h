@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gtiff.h 9381354a483fa662e43f9611dc5d4dd98dcfda29 2021-11-19 21:36:00 +0100 Even Rouault $
+ * $Id: gtiff.h  $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  GDAL GeoTIFF support.

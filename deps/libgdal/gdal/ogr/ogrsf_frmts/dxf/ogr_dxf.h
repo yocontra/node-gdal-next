@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dxf.h 96ac99f1f87bf75edc2fcbf39ea1196e58f00a0f 2021-08-13 10:26:38 +0200 Even Rouault $
+ * $Id: ogr_dxf.h  $
  *
  * Project:  DXF Translator
  * Purpose:  Definition of classes for OGR .dxf driver.

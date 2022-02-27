@@ -29,6 +29,7 @@
  ****************************************************************************/
 
 #include "cpl_port.h"
+
 #include "gt_overview.h"
 
 #include <cstdlib>
@@ -50,7 +51,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: gt_overview.cpp f7164f2eb4e74f42497b83f85815850db6ea3e0d 2021-12-06 21:43:56 +0100 Even Rouault $")
+CPL_CVSID("$Id: gt_overview.cpp  $")
 
 // TODO(schwehr): Explain why 128 and not 127.
 constexpr int knMaxOverviews = 128;
@@ -1105,10 +1106,20 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
 
     CPLErr eErr = CE_None;
 
+    // If we have an alpha band, we want it to be generated before downsampling
+    // other bands
+    bool bHasAlphaBand = false;
+    for( int iBand = 0; iBand < nBands; iBand++ )
+    {
+        if( papoBandList[iBand]->GetColorInterpretation() == GCI_AlphaBand )
+            bHasAlphaBand = true;
+    }
+
     const auto poColorTable = papoBandList[0]->GetColorTable();
-    if(  ((bSourceIsPixelInterleaved && bSourceIsJPEG2000) ||
-          (nCompression != COMPRESSION_NONE)) &&
-         nPlanarConfig == PLANARCONFIG_CONTIG &&
+    if(  ((((bSourceIsPixelInterleaved && bSourceIsJPEG2000) ||
+            (nCompression != COMPRESSION_NONE)) &&
+           nPlanarConfig == PLANARCONFIG_CONTIG) ||
+          bHasAlphaBand) &&
          !GDALDataTypeIsComplex(papoBandList[0]->GetRasterDataType()) &&
           (poColorTable == nullptr ||
            STARTS_WITH_CI(pszResampling, "NEAR") ||

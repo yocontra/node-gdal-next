@@ -50,7 +50,7 @@
 #include "sqlite3.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrsqliteselectlayer.cpp 8dc0a101c5e4667fc8dfddf2a96ff54209bf0bfe 2021-09-05 18:19:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqliteselectlayer.cpp  $")
 
 /************************************************************************/
 /*                   OGRSQLiteSelectLayerCommonBehaviour()              */
@@ -288,8 +288,12 @@ GIntBig OGRSQLiteSelectLayerCommonBehaviour::GetFeatureCount( int bForce )
         m_osSQLCurrent.ifind(" EXCEPT ") == std::string::npos )
         return 1;
 
-    if( m_poLayer->GetFeatureQuery() != nullptr || (m_poLayer->GetFilterGeom() != nullptr && !m_bSpatialFilterInSQL) )
+    if( m_poLayer->GetFeatureQuery() != nullptr ||
+        (m_poLayer->GetFilterGeom() != nullptr && !m_bSpatialFilterInSQL) ||
+        STARTS_WITH_CI(m_osSQLCurrent.c_str(), "PRAGMA table_info(") )
+    {
         return m_poLayer->BaseGetFeatureCount(bForce);
+    }
 
     CPLString osFeatureCountSQL("SELECT COUNT(*) FROM (");
     osFeatureCountSQL += m_osSQLCurrent;

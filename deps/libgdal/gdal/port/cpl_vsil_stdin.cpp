@@ -52,7 +52,7 @@
 #include <fcntl.h>
 #endif
 
-CPL_CVSID("$Id: cpl_vsil_stdin.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_stdin.cpp  $")
 
 // We buffer the first 1MB of standard input to enable drivers
 // to autodetect data. In the first MB, backward and forward seeking
@@ -409,16 +409,20 @@ int VSIStdinFilesystemHandler::Stat( const char * pszFilename,
 /*                       VSIInstallStdinHandler()                       */
 /************************************************************************/
 
-/**
- * \brief Install /vsistdin/ file system handler
- *
- * A special file handler is installed that allows reading from the standard
- * input stream.
- *
- * The file operations available are of course limited to Read() and
- * forward Seek() (full seek in the first MB of a file).
- *
- * @since GDAL 1.8.0
+/*!
+ \brief Install /vsistdin/ file system handler
+
+ A special file handler is installed that allows reading from the standard
+ input stream.
+
+ The file operations available are of course limited to Read() and
+ forward Seek() (full seek in the first MB of a file).
+
+ \verbatim embed:rst
+ See :ref:`/vsistdin/ documentation <vsistdin>`
+ \endverbatim
+
+ @since GDAL 1.8.0
  */
 void VSIInstallStdinHandler()
 

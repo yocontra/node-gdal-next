@@ -1,4 +1,4 @@
-/* $Id: cpl_minizip_unzip.h b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $ */
+/* $Id: cpl_minizip_unzip.h  $ */
 /* Modified version by Even Rouault. :
      - Addition of cpl_unzGetCurrentFileZStreamPos
      - Decoration of symbol names unz* -> cpl_unz*
@@ -64,7 +64,7 @@ extern "C" {
 #endif
 
 #ifndef _ZLIB_H
-#include <zlib.h>
+#include "cpl_zlib_header.h" // to avoid warnings when including zlib.h
 #endif
 
 #ifndef CPL_MINIZIP_IOAPI_H_INCLUDED

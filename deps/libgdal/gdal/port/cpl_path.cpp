@@ -49,7 +49,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_path.cpp 9481870d652348aa5ecfce924c13dda64501bae6 2020-12-09 21:21:53 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_path.cpp  $")
 
 // Should be size of larged possible filename.
 constexpr int CPL_PATH_BUF_SIZE = 2048;
@@ -392,12 +392,24 @@ const char *CPLGetExtension( const char *pszFullFilename )
  * If HAVE_GETCWD macro is not defined, the function returns NULL.
  **/
 
-#ifdef HAVE_GETCWD
+#ifdef _WIN32
 char *CPLGetCurrentDir()
 {
-#ifdef _MAX_PATH
     const size_t nPathMax = _MAX_PATH;
-#elif PATH_MAX
+    wchar_t* pwszDirPath = static_cast<wchar_t *>( VSI_MALLOC_VERBOSE( nPathMax * sizeof(wchar_t) ) );
+    char* pszRet = nullptr;
+    if( pwszDirPath != nullptr &&
+        _wgetcwd(pwszDirPath, nPathMax) != nullptr )
+    {
+        pszRet = CPLRecodeFromWChar(pwszDirPath,CPL_ENC_UCS2,CPL_ENC_UTF8);
+    }
+    CPLFree(pwszDirPath);
+    return pszRet;
+}
+#elif defined(HAVE_GETCWD)
+char *CPLGetCurrentDir()
+{
+#if PATH_MAX
     const size_t nPathMax = PATH_MAX;
 #else
     const size_t nPathMax = 8192;
@@ -938,8 +950,8 @@ const char *CPLExtractRelativePath( const char *pszBaseDir,
  * <pre>
  * CPLCleanTrailingSlash( "abc/def/" ) == "abc/def"
  * CPLCleanTrailingSlash( "abc/def" ) == "abc/def"
- * CPLCleanTrailingSlash( "c:\abc\def\" ) == "c:\abc\def"
- * CPLCleanTrailingSlash( "c:\abc\def" ) == "c:\abc\def"
+ * CPLCleanTrailingSlash( "c:\\abc\\def\\" ) == "c:\\abc\\def"
+ * CPLCleanTrailingSlash( "c:\\abc\\def" ) == "c:\\abc\\def"
  * CPLCleanTrailingSlash( "abc" ) == "abc"
  * </pre>
  *

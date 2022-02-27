@@ -32,7 +32,7 @@
 #include "gdal_priv.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdaladdo.cpp e984e8fba5b45396cfe0e8872911a2d894ca7429 2020-12-04 20:15:54 +0100 GOACOLOU Manuel $")
+CPL_CVSID("$Id: gdaladdo.cpp  $")
 
 /************************************************************************/
 /*                               Usage()                                */

@@ -32,7 +32,7 @@
 #include "cpl_string.h"
 #include "ogr_mysql.h"
 
-CPL_CVSID("$Id: ogrmysqltablelayer.cpp 980581525ac7edce204f844b7ea48e7cb2ecb0e4 2021-08-12 22:57:39 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmysqltablelayer.cpp  $")
 
 /************************************************************************/
 /*                         OGRMySQLTableLayer()                         */

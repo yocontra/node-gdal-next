@@ -29,7 +29,7 @@
 #include "atlsci_spheroid.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: atlsci_spheroid.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: atlsci_spheroid.cpp  $")
 
 /**********************************************************************/
 /* ================================================================== */

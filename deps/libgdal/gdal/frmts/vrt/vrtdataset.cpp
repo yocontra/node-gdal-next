@@ -41,7 +41,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: vrtdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtdataset.cpp  $")
 
 #define VRT_PROTOCOL_PREFIX "vrt://"
 
@@ -158,13 +158,13 @@ template<class T> void VRTFlushCacheStruct<T>::FlushCache(T& obj, bool bAtClosin
     if( !obj.m_bNeedsFlush || !obj.m_bWritable )
         return;
 
-    obj.m_bNeedsFlush = false;
-
     // We don't write to disk if there is no filename.  This is a
     // memory only dataset.
     if( strlen(obj.GetDescription()) == 0
         || STARTS_WITH_CI(obj.GetDescription(), "<VRTDataset") )
         return;
+
+    obj.m_bNeedsFlush = false;
 
     /* -------------------------------------------------------------------- */
     /*      Create the output file.                                         */

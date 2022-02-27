@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogr_srsnode.cpp 91f1bf6b6dfcb470fd768940c3aa9b5b25e71a1a 2021-06-02 12:39:07 -0400 Ian Lilley $")
+CPL_CVSID("$Id: ogr_srsnode.cpp  $")
 
 /************************************************************************/
 /*                            OGR_SRSNode()                             */

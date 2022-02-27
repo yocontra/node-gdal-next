@@ -50,7 +50,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: sentinel2dataset.cpp f65bdf39c23541266f3edd4e72a90301e433d30d 2021-07-21 20:30:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: sentinel2dataset.cpp  $")
 
 CPL_C_START
 // TODO: Leave this declaration while Sentinel2 folks use this as a

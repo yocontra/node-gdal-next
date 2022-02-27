@@ -48,7 +48,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrmemlayer.cpp ee96623c61ea9a3a712e3bd6876be0ca6d7e4c73 2019-08-15 21:24:45 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrmemlayer.cpp  $")
 
 /************************************************************************/
 /*                      IOGRMemLayerFeatureIterator                     */

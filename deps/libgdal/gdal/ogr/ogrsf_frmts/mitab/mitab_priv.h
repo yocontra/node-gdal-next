@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab_priv.h b4f8e2941b9293c66cb4646cea332d5fb132405a 2021-11-02 19:25:58 +0100 Even Rouault $
+ * $Id: mitab_priv.h  $
  *
  * Name:     mitab_priv.h
  * Project:  MapInfo TAB Read/Write library
@@ -1882,6 +1882,7 @@ class MIDDATAFile
 
      const char *GetLine();
      const char *GetLastLine();
+     char** GetTokenizedNextLine();
      int Rewind();
      void SaveLine(const char *pszLine);
      const char *GetSavedLine();

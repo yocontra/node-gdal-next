@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfimage.c 5e2a80b58c701de57548788ed4067da8203a7773 2021-11-30 14:04:02 +0100 Even Rouault $
+ * $Id: nitfimage.c  $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Module responsible for implementation of most NITFImage
@@ -36,7 +36,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: nitfimage.c 5e2a80b58c701de57548788ed4067da8203a7773 2021-11-30 14:04:02 +0100 Even Rouault $")
+CPL_CVSID("$Id: nitfimage.c  $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 

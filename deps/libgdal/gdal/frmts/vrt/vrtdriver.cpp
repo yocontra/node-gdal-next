@@ -34,7 +34,7 @@
 #include "gdal_alg_priv.h"
 #include "gdal_frmts.h"
 
-CPL_CVSID("$Id: vrtdriver.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: vrtdriver.cpp  $")
 
 /*! @cond Doxygen_Suppress */
 
@@ -403,12 +403,15 @@ VRTCreateCopy( const char * pszFilename,
         poVRTDS->SetMaskBand( poVRTMaskBand );
     }
 
-    CPLErrorReset();
-    poVRTDS->FlushCache(true);
-    if( CPLGetLastErrorType() != CE_None )
+    if( strcmp(pszFilename, "") != 0 )
     {
-        delete poVRTDS;
-        poVRTDS = nullptr;
+        CPLErrorReset();
+        poVRTDS->FlushCache(true);
+        if( CPLGetLastErrorType() != CE_None )
+        {
+            delete poVRTDS;
+            poVRTDS = nullptr;
+        }
     }
 
     return poVRTDS;

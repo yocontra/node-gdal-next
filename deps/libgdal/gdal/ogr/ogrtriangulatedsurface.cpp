@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrtriangulatedsurface.cpp 464e5bd63b59963407c8adc30fcbd5899731eddc 2021-03-16 15:06:30 +0100 Even Rouault $
+ * $Id: ogrtriangulatedsurface.cpp  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  The OGRTriangulatedSurface geometry class.
@@ -32,7 +32,7 @@
 #include "ogr_p.h"
 #include "ogr_api.h"
 
-CPL_CVSID("$Id: ogrtriangulatedsurface.cpp 464e5bd63b59963407c8adc30fcbd5899731eddc 2021-03-16 15:06:30 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrtriangulatedsurface.cpp  $")
 
 /************************************************************************/
 /*                        OGRTriangulatedSurface()                      */

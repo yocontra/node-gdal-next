@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: cpl_aws_win32.cpp f3f6c7bc5289c916ba239ab8ca7b52f137343629 2020-10-06 12:40:34 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_aws_win32.cpp  $")
 
 static CPLString osWindowsProductUUID;
 

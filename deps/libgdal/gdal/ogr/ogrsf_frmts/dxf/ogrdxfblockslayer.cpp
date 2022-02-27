@@ -29,7 +29,7 @@
 #include "ogr_dxf.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdxfblockslayer.cpp 1dd8a744bbfec8b849371abec5cd44f729eecb03 2018-05-06 21:11:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdxfblockslayer.cpp  $")
 
 /************************************************************************/
 /*                         OGRDXFBlocksLayer()                          */

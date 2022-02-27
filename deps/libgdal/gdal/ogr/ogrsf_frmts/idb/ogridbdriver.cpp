@@ -30,7 +30,7 @@
 #include "ogr_idb.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogridbdriver.cpp 417b66cdf50174fe8d59833c93710813f205d9ba 2020-08-30 12:18:19 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogridbdriver.cpp  $")
 
 /************************************************************************/
 /*                            ~OGRIDBDriver()                            */

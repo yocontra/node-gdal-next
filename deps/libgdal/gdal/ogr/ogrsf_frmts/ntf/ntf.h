@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ntf.h 842d122d2f23aaebb28362e083b52d6bc7dbcde2 2019-08-11 17:42:34 +0200 Even Rouault $
+ * $Id: ntf.h  $
  *
  * Project:  NTF Translator
  * Purpose:  Main declarations for NTF translator.

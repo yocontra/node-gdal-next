@@ -30,17 +30,18 @@
 #include "cpl_conv.h"
 #include "ogr_odbc.h"
 
-CPL_CVSID("$Id: ogrodbctablelayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrodbctablelayer.cpp  $")
 /************************************************************************/
 /*                          OGRODBCTableLayer()                         */
 /************************************************************************/
 
-OGRODBCTableLayer::OGRODBCTableLayer( OGRODBCDataSource *poDSIn ) :
+OGRODBCTableLayer::OGRODBCTableLayer(OGRODBCDataSource *poDSIn, int nODBCStatementFlags ) :
     pszQuery(nullptr),
     bHaveSpatialExtents(FALSE),
     pszTableName(nullptr),
     pszSchemaName(nullptr)
 {
+    m_nStatementFlags = nODBCStatementFlags;
     poDS = poDSIn;
     iNextShapeId = 0;
 
@@ -247,7 +248,7 @@ OGRErr OGRODBCTableLayer::ResetStatement()
 
     iNextShapeId = 0;
 
-    poStmt = new CPLODBCStatement( poDS->GetSession() );
+    poStmt = new CPLODBCStatement( poDS->GetSession(), m_nStatementFlags );
     poStmt->Append( "SELECT * FROM " );
     poStmt->Append( EscapeAndQuoteIdentifier(poFeatureDefn->GetName()) );
 
@@ -305,7 +306,7 @@ OGRFeature *OGRODBCTableLayer::GetFeature( GIntBig nFeatureId )
 
     iNextShapeId = nFeatureId;
 
-    poStmt = new CPLODBCStatement( poDS->GetSession() );
+    poStmt = new CPLODBCStatement( poDS->GetSession(), m_nStatementFlags );
     poStmt->Append( "SELECT * FROM " );
     poStmt->Append( EscapeAndQuoteIdentifier(poFeatureDefn->GetName()) );
     poStmt->Appendf( " WHERE %s = " CPL_FRMT_GIB,

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrmutexeddatasource.h 5a8ccc891da4f76e423dec56c6babdc61425c02f 2021-10-15 18:58:04 +0200 Even Rouault $
+ * $Id: ogrmutexeddatasource.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLMutexedDataSource class
@@ -114,10 +114,16 @@ class CPL_DLL OGRMutexedDataSource : public OGRDataSource
                                          const char * pszValue,
                                          const char * pszDomain = "" ) override;
 
+    virtual std::vector<std::string> GetFieldDomainNames(CSLConstList papszOptions = nullptr) const override;
     virtual const OGRFieldDomain* GetFieldDomain(const std::string& name) const override;
 
     virtual bool        AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
                                        std::string& failureReason) override;
+    virtual bool        DeleteFieldDomain(const std::string& name,
+                                          std::string& failureReason) override;
+    virtual bool        UpdateFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                          std::string& failureReason) override;
+
 
     virtual std::shared_ptr<GDALGroup> GetRootGroup() const override;
 

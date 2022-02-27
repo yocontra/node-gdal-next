@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cplkeywordparser.h 07af6d281da30d52b00966db492e795d9e3ad1cd 2021-10-24 03:26:52 +0200 Even Rouault $
+ * $Id: cplkeywordparser.h  $
  *
  * Project:  Common Portability Library
  * Purpose:  Implementation of CPLKeywordParser - a class for parsing

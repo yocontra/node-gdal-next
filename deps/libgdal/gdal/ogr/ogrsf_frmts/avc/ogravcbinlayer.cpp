@@ -33,7 +33,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: ogravcbinlayer.cpp 3a621d7b7c98d62dac36562b1c25a4257b1e47a6 2021-10-11 15:43:00 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogravcbinlayer.cpp  $")
 
 constexpr int SERIAL_ACCESS_FID = INT_MIN;
 

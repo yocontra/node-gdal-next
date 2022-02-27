@@ -52,7 +52,7 @@
 #include "ogr_expat.h"
 #endif
 
-CPL_CVSID("$Id: osm_parser.cpp bb58ee954c3df6e67c13cf059d7ceec95d3696a8 2021-10-23 13:21:31 +0200 Even Rouault $")
+CPL_CVSID("$Id: osm_parser.cpp  $")
 
 // The buffer that are passed to GPB decoding are extended with 0's
 // to be sure that we will be able to read a single 64bit value without
@@ -2107,16 +2107,7 @@ static const char* OSM_AddString(OSMContext* psCtxt, const char* pszStr)
 
 static GIntBig OSM_Atoi64( const char *pszString )
 {
-
-#if defined(__MSVCRT__) || (defined(WIN32) && defined(_MSC_VER))
-    const GIntBig iValue = (GIntBig)_atoi64( pszString );
-# elif HAVE_ATOLL
-    const GIntBig iValue = atoll( pszString );
-#else
-    const GIntBig iValue = atol( pszString );
-#endif
-
-    return iValue;
+    return atoll( pszString );
 }
 
 /************************************************************************/

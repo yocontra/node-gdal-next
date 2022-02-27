@@ -56,7 +56,7 @@
 #include "ogrgeojsonreader.h"
 #include <vector>
 
-CPL_CVSID("$Id: nasakeywordhandler.cpp 6ce7e2cb1ebc48d2131d5444a9bfd3928c84393b 2021-09-22 00:47:57 +0200 Even Rouault $")
+CPL_CVSID("$Id: nasakeywordhandler.cpp  $")
 
 //! @cond Doxygen_Suppress
 

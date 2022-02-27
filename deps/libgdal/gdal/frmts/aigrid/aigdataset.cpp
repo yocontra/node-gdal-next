@@ -37,7 +37,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: aigdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: aigdataset.cpp  $")
 
 static CPLString OSR_GDS( char **papszNV, const char * pszField,
                           const char *pszDefaultValue );

@@ -41,7 +41,7 @@
 #include "cpl_sha256.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: cpl_sha256.cpp 8ca42e1b9c2e54b75d35e49885df9789a2643aa4 2020-05-17 21:43:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_sha256.cpp  $")
 
 #define ROTL(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 #define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
@@ -496,6 +496,14 @@ void CPL_HMAC_SHA256( const void *pKey, size_t nKeyLen,
 #pragma warning( disable : 4244 )
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
 #ifdef USE_ONLY_CRYPTODLL_ALG
 #include "cryptopp/dll.h"
 #else
@@ -513,6 +521,10 @@ typedef CryptoPP::byte cryptopp_byte;
 typedef byte cryptopp_byte;
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
@@ -520,9 +532,21 @@ typedef byte cryptopp_byte;
 #endif // HAVE_CRYPTOPP
 
 #ifdef HAVE_OPENSSL_CRYPTO
+
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 #endif
 
 
@@ -531,7 +555,6 @@ typedef byte cryptopp_byte;
 /************************************************************************/
 
 #if defined(HAVE_OPENSSL_CRYPTO)
-
 static int CPLOpenSSLNullPassphraseCallback(char * /*buf*/,
                                             int /*size*/,
                                             int /*rwflag*/, void * /*u*/)

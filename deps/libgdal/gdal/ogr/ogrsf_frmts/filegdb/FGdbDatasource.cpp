@@ -38,7 +38,7 @@
 
 #include "filegdb_fielddomain.h"
 
-CPL_CVSID("$Id: FGdbDatasource.cpp 86c46158b8249d2d66814b03cd1785ce6d3a9d0f 2021-10-21 16:30:53 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: FGdbDatasource.cpp  $")
 
 using std::vector;
 using std::wstring;
@@ -871,4 +871,28 @@ const OGRFieldDomain* FGdbDataSource::GetFieldDomain(const std::string& name) co
     const auto domainName = poDomain->GetName();
     m_oMapFieldDomains[domainName] = std::move(poDomain);
     return GDALDataset::GetFieldDomain(name);
+}
+
+
+/************************************************************************/
+/*                        GetFieldDomainNames()                         */
+/************************************************************************/
+
+std::vector<std::string> FGdbDataSource::GetFieldDomainNames(CSLConstList) const
+{
+    std::vector<std::wstring> oDomainNamesWList;
+    const auto hr = m_pGeodatabase->GetDomains(oDomainNamesWList);
+    if (FAILED(hr))
+    {
+        GDBErr(hr, "Failed in GetDomains()");
+        return std::vector<std::string>();
+    }
+
+    std::vector<std::string> oDomainNamesList;
+    oDomainNamesList.reserve(oDomainNamesWList.size());
+    for ( const auto& osNameW : oDomainNamesWList )
+    {
+        oDomainNamesList.emplace_back(WStringToString(osNameW));
+    }
+    return oDomainNamesList;
 }

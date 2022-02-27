@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include <cassert>
 
-CPL_CVSID("$Id: ogrwaspdriver.cpp 498a80077f2504ce756950b02fccc7144c28e163 2021-08-13 10:52:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrwaspdriver.cpp  $")
 
 /************************************************************************/
 /*                                Open()                                */

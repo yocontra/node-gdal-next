@@ -56,7 +56,7 @@
 #include "ogr_srs_api.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdal_grid_lib.cpp 23ec9277c8238a42d82701ef2512270b2d0a86af 2021-10-19 08:38:45 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: gdal_grid_lib.cpp  $")
 
 /************************************************************************/
 /*                          GDALGridOptions                             */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pgdump.h 379fc8667418dc54e864d828ea35be513e69abc9 2021-04-03 21:58:21 +0200 Even Rouault $
+ * $Id: ogr_pgdump.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL dump driver.

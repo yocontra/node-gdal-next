@@ -28,7 +28,7 @@
 
 #include "dgnlibp.h"
 
-CPL_CVSID("$Id: dgnhelp.cpp 248de76b8e0054cb7512e40676533fa9a009565c 2021-08-28 12:54:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: dgnhelp.cpp  $")
 
 static const unsigned char abyDefaultPCT[256][3] =
 {

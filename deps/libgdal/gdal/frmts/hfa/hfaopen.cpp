@@ -63,7 +63,7 @@
 #include "ogr_proj_p.h"
 #include "proj.h"
 
-CPL_CVSID("$Id: hfaopen.cpp 103cca9e043935bf3548fdf419ff34346ff448ee 2021-10-06 17:32:54 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfaopen.cpp  $")
 
 constexpr double R2D = 180.0 / M_PI;
 
@@ -3964,6 +3964,7 @@ static const char *const apszDatumMap[] = {
     "WGS 84", "WGS_1984",
     "WGS 1972", "WGS_1972",
     "GDA94", "Geocentric_Datum_of_Australia_1994",
+    "Pulkovo 1942", "Pulkovo_1942",
     nullptr, nullptr
 };
 

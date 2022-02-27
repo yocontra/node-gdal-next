@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "ogr_pgeo.h"
 
-CPL_CVSID("$Id: ogrpgeoselectlayer.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpgeoselectlayer.cpp  $")
 
 /************************************************************************/
 /*                          OGRPGeoSelectLayer()                        */
@@ -117,7 +117,7 @@ OGRErr OGRPGeoSelectLayer::ResetStatement()
     iNextShapeId = 0;
 
     CPLDebug( "ODBC", "Recreating statement." );
-    poStmt = new CPLODBCStatement( poDS->GetSession() );
+    poStmt = new CPLODBCStatement( poDS->GetSession(), m_nStatementFlags );
     poStmt->Append( pszBaseStatement );
 
     if( poStmt->ExecuteSQL() )

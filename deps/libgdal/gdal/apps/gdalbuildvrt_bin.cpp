@@ -32,7 +32,7 @@
 #include "gdal_version.h"
 #include "gdal_utils_priv.h"
 
-CPL_CVSID("$Id: gdalbuildvrt_bin.cpp 8c8864a6008b3f523a8e96017e87482904fa665b 2020-12-18 18:51:04 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalbuildvrt_bin.cpp  $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -55,7 +55,9 @@ static void Usage(const char* pszErrorMsg)
             "                    [-a_srs srs_def]\n"
             "                    [-r {nearest,bilinear,cubic,cubicspline,lanczos,average,mode}]\n"
             "                    [-oo NAME=VALUE]*\n"
-            "                    [-input_file_list my_list.txt] [-overwrite] output.vrt [gdalfile]*\n"
+            "                    [-input_file_list my_list.txt] [-overwrite]\n"
+            "                    [-strict | -non_strict]\n"
+            "                    output.vrt [gdalfile]*\n"
             "\n"
             "e.g.\n"
             "  % gdalbuildvrt doq_index.vrt doq/*.tif\n"

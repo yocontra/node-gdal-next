@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_utils_priv.h f8d287e54f1e12adba6f163309d69b75fc539236 2021-08-25 12:19:06 +0200 Even Rouault $
+ * $Id: gdal_utils_priv.h  $
  *
  * Project:  GDAL Utilities
  * Purpose:  GDAL Utilities Private Declarations.

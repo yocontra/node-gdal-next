@@ -50,7 +50,11 @@
 #include "cpl_multiproc.h"
 #include "cpl_string.h"
 #include "cpl_vsi.h"
+#ifdef GDAL_CMAKE_BUILD
+#include "gdal_version_full/gdal_version.h"
+#else
 #include "gdal_version.h"
+#endif
 #include "gdal.h"
 #include "gdal_mdreader.h"
 #include "gdal_priv.h"
@@ -58,7 +62,9 @@
 #include "ogr_spatialref.h"
 #include "ogr_geos.h"
 
-CPL_CVSID("$Id: gdal_misc.cpp 65f193bbadc58b93509e024ce5edeb527fa072ac 2021-09-13 22:30:54 +0200 Even Rouault $")
+#include "proj.h"
+
+CPL_CVSID("$Id: gdal_misc.cpp  $")
 
 static int GetMinBitsForPair(
     const bool pabSigned[], const bool pabFloating[], const int panBits[])
@@ -673,7 +679,7 @@ template<class T> static inline void ClampAndRound(
 /**
  * \brief Adjust a value to the output data type
  *
- * Adjustment consist in clamping to minimum/maxmimum values of the data type
+ * Adjustment consist in clamping to minimum/maximum values of the data type
  * and rounding for integral types.
  *
  * @param eDT target data type.
@@ -2209,6 +2215,13 @@ const char * CPL_STDCALL GDALVersionInfo( const char *pszRequest )
         osBuildInfo += CPLString("GEOS_VERSION=") + GEOS_CAPI_VERSION + "\n";
 #endif
 #endif
+        osBuildInfo += CPLSPrintf("PROJ_BUILD_VERSION=%d.%d.%d\n",
+                                  PROJ_VERSION_MAJOR,
+                                  PROJ_VERSION_MINOR,
+                                  PROJ_VERSION_PATCH);
+        osBuildInfo += CPLSPrintf("PROJ_RUNTIME_VERSION=%s\n",
+                                  proj_info().version);
+
         CPLFree(CPLGetTLS(CTLS_VERSIONINFO));
         CPLSetTLS(CTLS_VERSIONINFO, CPLStrdup(osBuildInfo), TRUE );
         return static_cast<char *>( CPLGetTLS(CTLS_VERSIONINFO) );
@@ -2257,7 +2270,7 @@ const char * CPL_STDCALL GDALVersionInfo( const char *pszRequest )
         if (!pszResultLicence)
         {
             pszResultLicence = CPLStrdup(
-                     "GDAL/OGR is released under the MIT/X license.\n"
+                     "GDAL/OGR is released under the MIT license.\n"
                      "The LICENSE.TXT distributed with GDAL/OGR should\n"
                      "contain additional details.\n" );
         }
@@ -3251,6 +3264,11 @@ GDALGeneralCmdLineProcessor( int nArgc, char ***ppapszArgv, int nOptions )
                 printf( "  Supports: Coordinate epoch.\n" );/*ok*/
             if( CPLFetchBool( papszMD, GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, false ) )
                 printf( "  Supports: Multiple vector layers.\n" );/*ok*/
+            if( CPLFetchBool( papszMD, GDAL_DCAP_FIELD_DOMAINS, false ) )
+                printf( "  Supports: Reading field domains.\n" );/*ok*/
+            if( CSLFetchNameValue( papszMD, GDAL_DMD_CREATION_FIELD_DOMAIN_TYPES ) )
+              printf( "  Creation field domain types: %s\n",/*ok*/
+                      CSLFetchNameValue( papszMD, GDAL_DMD_CREATION_FIELD_DOMAIN_TYPES ) );
 
             for( const char* key: { GDAL_DMD_CREATIONOPTIONLIST,
                                     GDAL_DMD_MULTIDIM_DATASET_CREATIONOPTIONLIST,
@@ -3323,6 +3341,7 @@ GDALGeneralCmdLineProcessor( int nArgc, char ***ppapszArgv, int nOptions )
         {
             printf( "Generic GDAL utility command options:\n" );/*ok*/
             printf( "  --version: report version of GDAL in use.\n" );/*ok*/
+            printf( "  --build: report detailed information about GDAL in use.\n" );/*ok*/
             printf( "  --license: report GDAL license info.\n" );/*ok*/
             printf( "  --formats: report all configured format drivers.\n" );/*ok*/
             printf( "  --format [format]: details of one format.\n" );/*ok*/

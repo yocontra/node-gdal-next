@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ddfsubfielddefn.cpp 32450164707ff447612c67262b7e2829168bfbb2 2019-12-13 00:10:13 +0100 Even Rouault $")
+CPL_CVSID("$Id: ddfsubfielddefn.cpp  $")
 
 /************************************************************************/
 /*                          DDFSubfieldDefn()                           */

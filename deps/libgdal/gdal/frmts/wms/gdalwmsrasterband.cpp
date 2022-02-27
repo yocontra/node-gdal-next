@@ -31,7 +31,7 @@
 
 #include "wmsdriver.h"
 
-CPL_CVSID("$Id: gdalwmsrasterband.cpp 19e29337e630fe4f8ec036f6bf0b5a753672bec5 2021-01-14 01:32:03 -0800 Lucian Plesea $")
+CPL_CVSID("$Id: gdalwmsrasterband.cpp  $")
 
 GDALWMSRasterBand::GDALWMSRasterBand(GDALWMSDataset *parent_dataset, int band,
                                         double scale):

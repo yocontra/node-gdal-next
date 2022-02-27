@@ -41,7 +41,7 @@
 
 #include "cpl_google_cloud.h"
 
-CPL_CVSID("$Id: cpl_vsil_gs.cpp 7930624ea8fb161357da54ca71479b51ffdc8ede 2021-08-25 12:19:08 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gs.cpp  $")
 
 #ifndef HAVE_CURL
 
@@ -56,6 +56,8 @@ void VSIInstallGSFileHandler( void )
 #ifndef DOXYGEN_SKIP
 
 #define ENABLE_DEBUG 0
+
+#define unchecked_curl_easy_setopt(handle,opt,param) CPL_IGNORE_RET_VAL(curl_easy_setopt(handle,opt,param))
 
 namespace cpl {
 
@@ -78,6 +80,8 @@ class VSIGSFSHandler final : public IVSIS3LikeFSHandler
         const char* pszURI, bool bAllowNoObject) override;
 
     void ClearCache() override;
+
+    bool IsAllowedHeaderForObjectCreation( const char* pszHeaderName ) override { return STARTS_WITH(pszHeaderName, "x-goog-"); }
 
   public:
     VSIGSFSHandler() = default;
@@ -462,8 +466,8 @@ bool VSIGSFSHandler::SetFileMetadata( const char * pszFilename,
         bRetry = false;
         CURL* hCurlHandle = curl_easy_init();
         poHandleHelper->AddQueryParameter("acl", "");
-        curl_easy_setopt(hCurlHandle, CURLOPT_CUSTOMREQUEST, "PUT");
-        curl_easy_setopt(hCurlHandle, CURLOPT_POSTFIELDS, pszXML );
+        unchecked_curl_easy_setopt(hCurlHandle, CURLOPT_CUSTOMREQUEST, "PUT");
+        unchecked_curl_easy_setopt(hCurlHandle, CURLOPT_POSTFIELDS, pszXML );
 
         struct curl_slist* headers = static_cast<struct curl_slist*>(
             CPLHTTPSetOptions(hCurlHandle,
@@ -644,8 +648,8 @@ int* VSIGSFSHandler::UnlinkBatch( CSLConstList papszFiles )
                 bRetry = false;
                 CURL* hCurlHandle = curl_easy_init();
 
-                curl_easy_setopt(hCurlHandle, CURLOPT_CUSTOMREQUEST, "POST");
-                curl_easy_setopt(hCurlHandle, CURLOPT_POSTFIELDS, osPOSTContent.c_str() );
+                unchecked_curl_easy_setopt(hCurlHandle, CURLOPT_CUSTOMREQUEST, "POST");
+                unchecked_curl_easy_setopt(hCurlHandle, CURLOPT_POSTFIELDS, osPOSTContent.c_str() );
 
                 struct curl_slist* headers = static_cast<struct curl_slist*>(
                     CPLHTTPSetOptions(hCurlHandle,
@@ -795,13 +799,15 @@ struct curl_slist* VSIGSHandle::GetCurlHeaders( const CPLString& osVerb,
 /*                      VSIInstallGSFileHandler()                       */
 /************************************************************************/
 
-/**
- * \brief Install /vsigs/ Google Cloud Storage file system handler
- * (requires libcurl)
- *
- * @see <a href="gdal_virtual_file_systems.html#gdal_virtual_file_systems_vsigs">/vsigs/ documentation</a>
- *
- * @since GDAL 2.2
+/*!
+ \brief Install /vsigs/ Google Cloud Storage file system handler
+ (requires libcurl)
+
+ \verbatim embed:rst
+ See :ref:`/vsigs/ documentation <vsigs>`
+ \endverbatim
+
+ @since GDAL 2.2
  */
 
 void VSIInstallGSFileHandler( void )

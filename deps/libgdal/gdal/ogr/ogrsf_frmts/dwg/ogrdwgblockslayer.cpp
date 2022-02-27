@@ -29,7 +29,7 @@
 #include "ogr_dwg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdwgblockslayer.cpp b636987ee8a02c1292896e269d556699594ff0bc 2019-07-07 23:23:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdwgblockslayer.cpp  $")
 
 /************************************************************************/
 /*                         OGRDWGBlocksLayer()                          */

@@ -28,7 +28,7 @@
 
 #include "aoutils.h"
 
-CPL_CVSID("$Id: aoutils.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: aoutils.cpp  $")
 
 bool AOErr(HRESULT hr, std::string desc)
 {

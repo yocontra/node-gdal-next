@@ -38,7 +38,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gsbgdataset.cpp 4be4f4da7ab3eaf3e1e1dd662b9f6814e8db5747 2021-10-16 16:47:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: gsbgdataset.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */

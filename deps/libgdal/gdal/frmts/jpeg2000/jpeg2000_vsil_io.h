@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: jpeg2000_vsil_io.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: jpeg2000_vsil_io.h  $
  *
  * Project:  JPEG-2000
  * Purpose:  Return a stream for a VSIL file

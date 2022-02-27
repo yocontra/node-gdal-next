@@ -31,7 +31,7 @@
 
 #include <map>
 
-CPL_CVSID("$Id: ogreditablelayer.cpp 59137dac442baebe7feaef45175bf529101242cf 2021-08-29 17:05:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogreditablelayer.cpp  $")
 
 //! @cond Doxygen_Suppress
 

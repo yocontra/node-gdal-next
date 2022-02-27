@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ntf_codelist.cpp 00d44500f517366650cb62cb7781ba24661e0454 2019-08-23 15:02:17 +0200 Even Rouault $")
+CPL_CVSID("$Id: ntf_codelist.cpp  $")
 
 /************************************************************************/
 /*                             NTFCodeList                              */

@@ -29,7 +29,7 @@
 #include "sigdemdataset.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: sigdemdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: sigdemdataset.cpp  $")
 
 #ifdef CPL_IS_LSB
 #define SWAP_SIGDEM_HEADER(abyHeader) { \

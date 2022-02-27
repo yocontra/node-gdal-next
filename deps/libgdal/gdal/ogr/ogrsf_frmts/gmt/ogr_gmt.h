@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gmt.h bc3d9f5351962c422f3e57a9ab1a251d91659192 2020-05-09 21:07:14 +0200 Even Rouault $
+ * $Id: ogr_gmt.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the OGR GMT driver.
@@ -40,7 +40,7 @@
 
 class OGRGmtLayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGRGmtLayer>
 {
-    OGRSpatialReference *poSRS;
+    OGRSpatialReference *m_poSRS = nullptr;
     OGRFeatureDefn     *poFeatureDefn;
 
     int                 iNextFID;
@@ -52,7 +52,7 @@ class OGRGmtLayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGR
     OGREnvelope         sRegion;
     vsi_l_offset        nRegionOffset;
 
-    VSILFILE           *fp;
+    VSILFILE           *m_fp = nullptr;
 
     bool                ReadLine();
     CPLString           osLine;
@@ -69,7 +69,10 @@ class OGRGmtLayer final: public OGRLayer, public OGRGetNextFeatureThroughRaw<OGR
   public:
     bool                bValidFile;
 
-                        OGRGmtLayer( const char *pszFilename, int bUpdate );
+                        OGRGmtLayer( const char *pszFilename,
+                                     VSILFILE* fp,
+                                     const OGRSpatialReference* poSRS,
+                                     int bUpdate );
                         virtual ~OGRGmtLayer();
 
     void                ResetReading() override;
@@ -106,7 +109,10 @@ class OGRGmtDataSource final: public OGRDataSource
                         OGRGmtDataSource();
                         virtual ~OGRGmtDataSource();
 
-    int                 Open( const char *pszFilename, int bUpdate );
+    int                 Open( const char *pszFilename,
+                              VSILFILE* fp,
+                              const OGRSpatialReference* poSRS,
+                              int bUpdate );
     int                 Create( const char *pszFilename, char **papszOptions );
 
     const char          *GetName() override { return pszName; }

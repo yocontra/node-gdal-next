@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vfkreaderp.h 6a2e8bc23a5e72753f7222b6e59c081cc2f076a0 2018-05-22 13:22:29 +0200 Martin Landa $
+ * $Id: vfkreaderp.h  $
  *
  * Project:  VFK Reader
  * Purpose:  Private Declarations for OGR free VFK Reader code.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_core.h baf6754741beb24089c3895bdb6de8f9493000e8 2021-09-18 14:06:41 +0200 Even Rouault $
+ * $Id: ogr_core.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define some core portability services for cross-platform OGR code.
@@ -33,7 +33,7 @@
 
 #include "cpl_port.h"
 #if defined(GDAL_COMPILATION)
-#define DO_NOT_DEFINE_GDAL_RELEASE_DATE_AND_GDAL_RELEASE_NAME
+#define DO_NOT_DEFINE_GDAL_DATE_NAME
 #endif
 #include "gdal_version.h"
 
@@ -150,6 +150,29 @@ class CPL_DLL OGREnvelope
     {
         return MinX <= other.MinX && MinY <= other.MinY &&
                MaxX >= other.MaxX && MaxY >= other.MaxY;
+    }
+
+    /** Return whether the current rectangle is equal to the other rectangle */
+    bool operator== (const OGREnvelope& other) const
+    {
+#ifdef HAVE_GCC_DIAGNOSTIC_PUSH
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
+        return MinX == other.MinX &&
+               MinY == other.MinY &&
+               MaxX == other.MaxX &&
+               MaxY == other.MaxY;
+
+#ifdef HAVE_GCC_DIAGNOSTIC_PUSH
+#pragma GCC diagnostic pop
+#endif
+    }
+
+    /** Return whether the current rectangle is not equal to the other rectangle */
+    bool operator!= (const OGREnvelope& other) const
+    {
+        return !(*this == other);
     }
 };
 
@@ -833,7 +856,9 @@ int CPL_DLL OGRParseDate( const char *pszInput, OGRField *psOutput,
 #define ODsCRandomLayerRead     "RandomLayerRead"   /**< Dataset capability for GetNextFeature() returning features from random layers */
 /* Note the unfortunate trailing space at the end of the string */
 #define ODsCRandomLayerWrite    "RandomLayerWrite " /**< Dataset capability for supporting CreateFeature on layer in random order */
-#define ODsCAddFieldDomain     "AddFieldDomain"    /**< Dataset capability for supporting AddFieldDomain() (at least partially) */
+#define ODsCAddFieldDomain     "AddFieldDomain"     /**< Dataset capability for supporting AddFieldDomain() (at least partially) */
+#define ODsCDeleteFieldDomain  "DeleteFieldDomain"  /**< Dataset capability for supporting DeleteFieldDomain()*/
+#define ODsCUpdateFieldDomain  "UpdateFieldDomain"  /**< Dataset capability for supporting UpdateFieldDomain()*/
 
 #define ODrCCreateDataSource   "CreateDataSource"   /**< Driver capability for datasource creation */
 #define ODrCDeleteDataSource   "DeleteDataSource"   /**< Driver capability for datasource deletion */

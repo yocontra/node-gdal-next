@@ -44,7 +44,7 @@
 #include <fcntl.h>
 #endif
 
-CPL_CVSID("$Id: cpl_vsil_stdout.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_stdout.cpp  $")
 
 static VSIWriteFunction pWriteFunction = fwrite;
 static FILE* pWriteStream = stdout;
@@ -430,19 +430,23 @@ int VSIStdoutRedirectFilesystemHandler::Stat( const char * /* pszFilename */,
 /*                       VSIInstallStdoutHandler()                      */
 /************************************************************************/
 
-/**
- * \brief Install /vsistdout/ file system handler
- *
- * A special file handler is installed that allows writing to the standard
- * output stream.
- *
- * The file operations available are of course limited to Write().
- *
- * A variation of this file system exists as the /vsistdout_redirect/ file
- * system handler, where the output function can be defined with
- * VSIStdoutSetRedirection().
- *
- * @since GDAL 1.8.0
+/*!
+ \brief Install /vsistdout/ file system handler
+
+ A special file handler is installed that allows writing to the standard
+ output stream.
+
+ The file operations available are of course limited to Write().
+
+ A variation of this file system exists as the /vsistdout_redirect/ file
+ system handler, where the output function can be defined with
+ VSIStdoutSetRedirection().
+
+ \verbatim embed:rst
+ See :ref:`/vsistdout/ documentation <vsistdout>`
+ \endverbatim
+
+ @since GDAL 1.8.0
  */
 
 void VSIInstallStdoutHandler()

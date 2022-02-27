@@ -39,7 +39,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_quad_tree.cpp 79536ea3fcf18af9a8437aa30640e9d46d027787 2021-07-25 20:04:54 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_quad_tree.cpp  $")
 
 constexpr int MAX_DEFAULT_TREE_DEPTH = 12;
 constexpr int MAX_SUBNODES = 4;

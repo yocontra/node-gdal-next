@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: wmsmetadataset.h 9848e3975ae5de16d14d395c847731f5493edd82 2021-03-01 09:58:23 -0800 Lucian Plesea $
+ * $Id: wmsmetadataset.h  $
  *
  * Project:  WMS Client Driver
  * Purpose:  Declaration of GDALWMSMetaDataset class

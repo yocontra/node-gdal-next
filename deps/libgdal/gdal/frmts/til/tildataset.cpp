@@ -36,7 +36,7 @@
 #include "ogr_spatialref.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: tildataset.cpp 0c2caa56db87473dfe74bd84a5f815449ddd01a3 2021-07-21 20:30:02 +0200 Even Rouault $")
+CPL_CVSID("$Id: tildataset.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */

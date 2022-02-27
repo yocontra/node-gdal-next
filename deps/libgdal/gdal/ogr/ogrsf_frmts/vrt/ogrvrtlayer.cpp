@@ -54,7 +54,7 @@
 #include "ogrsf_frmts/ogrsf_frmts.h"
 #include "ogrsf_frmts/vrt/ogr_vrt.h"
 
-CPL_CVSID("$Id: ogrvrtlayer.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtlayer.cpp  $")
 
 #define UNSUPPORTED_OP_READ_ONLY \
     "%s : unsupported operation on a read-only datasource."
@@ -1151,24 +1151,23 @@ bool OGRVRTLayer::ResetSourceReading()
 
             const char *pszXField = poXField->GetNameRef();
             const char *pszYField = poYField->GetNameRef();
-            if( apoGeomFieldProps[i]->bUseSpatialSubquery )
+
+            OGRFieldType xType = poXField->GetType();
+            OGRFieldType yType = poYField->GetType();
+            if( !((xType == OFTReal || xType == OFTInteger ||
+                   xType == OFTInteger64) &&
+                  (yType == OFTReal || yType == OFTInteger ||
+                   yType == OFTInteger64)) )
             {
-                OGRFieldType xType = poXField->GetType();
-                OGRFieldType yType = poYField->GetType();
-                if( !((xType == OFTReal || xType == OFTInteger ||
-                       xType == OFTInteger64) &&
-                      (yType == OFTReal || yType == OFTInteger ||
-                       yType == OFTInteger64)) )
-                {
-                    CPLError(CE_Warning, CPLE_AppDefined,
-                             "The '%s' and/or '%s' fields of the source layer "
-                             "are not declared as numeric fields, "
-                             "so the spatial filter cannot be turned into an "
-                             "attribute filter on them",
-                             pszXField, pszYField);
-                    apoGeomFieldProps[i]->bUseSpatialSubquery = false;
-                }
+                CPLError(CE_Warning, CPLE_AppDefined,
+                         "The '%s' and/or '%s' fields of the source layer "
+                         "are not declared as numeric fields, "
+                         "so the spatial filter cannot be turned into an "
+                         "attribute filter on them",
+                         pszXField, pszYField);
+                apoGeomFieldProps[i]->bUseSpatialSubquery = false;
             }
+
             if( apoGeomFieldProps[i]->bUseSpatialSubquery )
             {
                 OGREnvelope sEnvelope;

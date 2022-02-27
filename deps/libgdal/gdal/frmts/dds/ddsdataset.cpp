@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ddsdataset.cpp ac2c77cd845c1d7a43c86106717ec6d08b407cc7 2021-03-15 14:55:45 +0100 Even Rouault $")
+CPL_CVSID("$Id: ddsdataset.cpp  $")
 
 using namespace crnlib;
 

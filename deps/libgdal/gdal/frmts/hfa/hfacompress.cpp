@@ -37,7 +37,7 @@
 #include "cpl_vsi.h"
 #include "hfa.h"
 
-CPL_CVSID("$Id: hfacompress.cpp 0d3fc0a10e1ccec8161b82a7506bfbb4ed964959 2020-01-06 22:17:34 +0100 Even Rouault $")
+CPL_CVSID("$Id: hfacompress.cpp  $")
 
 HFACompress::HFACompress( void *pData, GUInt32 nBlockSize, EPTType eDataType ) :
     m_pData(pData),
@@ -145,7 +145,7 @@ GUInt32 HFACompress::valueAsUInt32( GUInt32 iPixel )
 }
 
 // Finds the minimum value in a type specific fashion. This value is
-// subtracted from each value in the compressed dataset. The maxmimum
+// subtracted from each value in the compressed dataset. The maximum
 // value is also found and the number of bits that the range can be stored
 // is also returned.
 //

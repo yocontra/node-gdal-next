@@ -28,7 +28,7 @@
 
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlspatiallayer.cpp 9be722d4162edd5087a9c2d57ccf3ab310e1c282 2021-12-14 12:23:32 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmssqlspatiallayer.cpp  $")
 /************************************************************************/
 /*                        OGRMSSQLSpatialLayer()                        */
 /************************************************************************/

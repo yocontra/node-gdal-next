@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
+ * $Id: ogr_geopackage.h  $
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -268,6 +268,7 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
                                          char **papszOptions ) override;
         int                 TestCapability( const char * ) override;
 
+        std::vector<std::string> GetFieldDomainNames(CSLConstList papszOptions = nullptr) const override;
         const OGRFieldDomain* GetFieldDomain(const std::string& name) const override;
         bool                AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
                                            std::string& failureReason) override;
@@ -326,7 +327,6 @@ class GDALGeoPackageDataset final : public OGRSQLiteBaseDataSource, public GDALG
 
     private:
 
-        OGRErr              PragmaCheck(const char * pszPragma, const char * pszExpected, int nRowsExpected);
         OGRErr              SetApplicationAndUserVersionId();
         bool                ReOpenDB();
         bool                OpenOrCreateDB( int flags );

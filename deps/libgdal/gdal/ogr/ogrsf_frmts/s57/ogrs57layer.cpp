@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_s57.h"
 
-CPL_CVSID("$Id: ogrs57layer.cpp 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrs57layer.cpp  $")
 
 /************************************************************************/
 /*                            OGRS57Layer()                             */

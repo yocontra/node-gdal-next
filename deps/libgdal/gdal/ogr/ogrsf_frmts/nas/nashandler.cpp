@@ -33,7 +33,7 @@
 #include "cpl_string.h"
 #include "ogr_xerces.h"
 
-CPL_CVSID("$Id: nashandler.cpp 6b45c44413aa670d70f39ad9419d2eb01b3bfb16 2020-07-22 09:17:34 +0200 Juergen E. Fischer $")
+CPL_CVSID("$Id: nashandler.cpp  $")
 
 /*
   Update modes:
@@ -843,18 +843,11 @@ void NASHandler::characters( const XMLCh *const chars,
         transcode( chars + nSkipped, m_osCharacters,
                    static_cast<int>(length) - nSkipped );
 
-        if( m_pszCurField == nullptr )
-        {
-            m_pszCurField = CPLStrdup(m_osCharacters);
-        }
-        else
-        {
-            m_pszCurField = static_cast<char *>(
-                CPLRealloc( m_pszCurField,
-                            nCurFieldLength+m_osCharacters.size()+1 ) );
-            memcpy( m_pszCurField + nCurFieldLength, m_osCharacters.c_str(),
-                    m_osCharacters.size() + 1 );
-        }
+        m_pszCurField = static_cast<char *>(
+            CPLRealloc( m_pszCurField,
+                        nCurFieldLength+m_osCharacters.size()+1 ) );
+        memcpy( m_pszCurField + nCurFieldLength, m_osCharacters.c_str(),
+                m_osCharacters.size() + 1 );
     }
     else if( m_pszGeometry != nullptr )
     {

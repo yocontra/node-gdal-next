@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrlayerpool.h a359854ac0e46a42e814a11320308fa4428124ce 2021-10-24 04:24:03 +0200 Even Rouault $
+ * $Id: ogrlayerpool.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLayerPool and OGRProxiedLayer class

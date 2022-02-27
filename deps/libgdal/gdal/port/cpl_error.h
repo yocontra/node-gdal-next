@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_error.h 065bfd22aef8960c05d9ec0e1e72a1e3f4e36b82 2020-02-27 14:12:04 +0100 Even Rouault $
+ * $Id: cpl_error.h  $
  *
  * Name:     cpl_error.h
  * Project:  CPL - Common Portability Library
@@ -222,6 +222,8 @@ CPL_C_END
 
 extern "C++"
 {
+template<class T> T* CPLAssertNotNull(T* x) CPL_RETURNS_NONNULL;
+template<class T> T* CPLAssertNotNull(T* x) { CPLAssert(x); return x; }
 
 #include <string>
 

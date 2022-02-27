@@ -31,7 +31,7 @@
 #include "ogrgeojsonreader.h"
 #include <sstream>
 
-CPL_CVSID("$Id: ogramigoclouddatasource.cpp 18767e3250cfdb60bb8ce468a1819c0686cf0bf1 2021-03-11 11:23:57 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogramigoclouddatasource.cpp  $")
 
 CPLString OGRAMIGOCLOUDGetOptionValue(const char* pszFilename, const char* pszOptionName);
 

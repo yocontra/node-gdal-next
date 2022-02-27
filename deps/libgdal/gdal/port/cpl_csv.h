@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_csv.h 7d6fac2a7dd6f5deed06d3ab591ba52f6bde7a70 2019-05-18 15:30:03 -0500 Even Rouault $
+ * $Id: cpl_csv.h  $
  *
  * Project:  Common Portability Library
  * Purpose:  Functions for reading and scanning CSV (comma separated,
@@ -36,6 +36,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 #include "cpl_vsi.h"
+#include <stdbool.h>
 
 CPL_C_START
 
@@ -55,12 +56,21 @@ char CPL_DLL  **CSVReadParseLine2( FILE *fp, char chDelimiter );
 char CPL_DLL  **CSVReadParseLineL( VSILFILE *fp);
 char CPL_DLL  **CSVReadParseLine2L( VSILFILE *fp, char chDelimiter );
 
+char CPL_DLL **CSVReadParseLine3L( VSILFILE *fp,
+                                   size_t nMaxLineSize,
+                                   const char* pszDelimiter,
+                                   bool bHonourStrings,
+                                   bool bKeepLeadingAndClosingQuotes,
+                                   bool bMergeDelimiter,
+                                   bool bSkipBOM );
+
 char CPL_DLL **CSVScanLines( FILE *, int, const char *, CSVCompareCriteria );
 char CPL_DLL **CSVScanLinesL( VSILFILE *, int, const char *, CSVCompareCriteria );
 char CPL_DLL **CSVScanFile( const char *, int, const char *,
                             CSVCompareCriteria );
 char CPL_DLL **CSVScanFileByName( const char *, const char *, const char *,
                                   CSVCompareCriteria );
+void CPL_DLL CSVRewind( const char * );
 char CPL_DLL **CSVGetNextLine( const char * );
 int CPL_DLL CSVGetFieldId( FILE *, const char * );
 int CPL_DLL CSVGetFieldIdL( VSILFILE *, const char * );

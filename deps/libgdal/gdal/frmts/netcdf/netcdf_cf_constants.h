@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: netcdf_cf_constants.h 681a087c9c1797c1a1a111713be205d229686615 2021-10-08 18:15:23 +0200 Even Rouault $
+ * $Id: netcdf_cf_constants.h  $
  *
  * Project:  netCDF read/write Driver
  * Purpose:  GDAL bindings over netCDF library.

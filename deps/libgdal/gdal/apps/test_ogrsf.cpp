@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: test_ogrsf.cpp c28947cb3d1cb434f75fa131dd505fbf12b430a7 2021-05-20 19:22:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: test_ogrsf.cpp  $")
 
 bool bReadOnly = false;
 bool bVerbose = true;

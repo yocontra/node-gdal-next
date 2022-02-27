@@ -36,7 +36,7 @@
 
 #include "cpl_safemaths.hpp"
 
-CPL_CVSID("$Id: rmfdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: rmfdataset.cpp  $")
 
 constexpr int RMF_DEFAULT_BLOCKXSIZE = 256;
 constexpr int RMF_DEFAULT_BLOCKYSIZE = 256;

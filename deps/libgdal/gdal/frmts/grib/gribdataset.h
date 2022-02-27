@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gribdataset.h 1c9c664885ec51fc9471a452b165e02d6ddf4789 2021-09-24 16:24:26 +0200 Momtchil Momtchev $
+ * $Id: gribdataset.h  $
  *
  * Project:  GRIB Driver
  * Purpose:  GDALDataset driver for GRIB translator for read support

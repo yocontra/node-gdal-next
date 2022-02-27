@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_openfilegdb.h a17ada94cb308964339f2ac5e2719fa855c22e69 2021-10-14 12:26:22 +1000 Nyall Dawson $
+* $Id: ogr_openfilegdb.h  $
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Implements Open FileGDB OGR driver.

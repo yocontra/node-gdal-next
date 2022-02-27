@@ -35,7 +35,7 @@
 #include "ogr_api.h"
 #include "ogrpgeogeometry.h"
 
-CPL_CVSID("$Id: FGdbUtils.cpp 7819e495986c82c51d7023358b14ecb2b0fd4d98 2021-04-01 20:02:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: FGdbUtils.cpp  $")
 
 using std::string;
 
@@ -67,7 +67,7 @@ std::string WStringToString(const std::wstring& utf16string)
 /*                                GDBErr()                               */
 /*************************************************************************/
 
-bool GDBErr(long int hr, std::string desc, CPLErr errType, const char* pszAddMsg)
+bool GDBErr(long int hr, const std::string& desc, CPLErr errType, const char* pszAddMsg)
 {
     std::wstring fgdb_error_desc_w;
     fgdbError er;
@@ -94,7 +94,7 @@ bool GDBErr(long int hr, std::string desc, CPLErr errType, const char* pszAddMsg
 /*                            GDBDebug()                                 */
 /*************************************************************************/
 
-bool GDBDebug(long int hr, std::string desc)
+bool GDBDebug(long int hr, const std::string& desc)
 {
     std::wstring fgdb_error_desc_w;
     fgdbError er;
@@ -119,7 +119,7 @@ bool GDBDebug(long int hr, std::string desc)
 /*                            GDBToOGRGeometry()                         */
 /*************************************************************************/
 
-bool GDBToOGRGeometry(string geoType, bool hasZ, bool hasM, OGRwkbGeometryType* pOut)
+bool GDBToOGRGeometry(const std::string& geoType, bool hasZ, bool hasM, OGRwkbGeometryType* pOut)
 {
     if (geoType == "esriGeometryPoint")
     {
@@ -266,7 +266,7 @@ bool OGRToGDBFieldType(OGRFieldType ogrType, OGRFieldSubType eSubType, std::stri
 /*                       GDBFieldTypeToWidthPrecision()                  */
 /*************************************************************************/
 
-bool GDBFieldTypeToWidthPrecision(std::string &gdbType, int *width, int *precision)
+bool GDBFieldTypeToWidthPrecision(const std::string &gdbType, int *width, int *precision)
 {
     *precision = 0;
 
@@ -516,8 +516,7 @@ std::string FGDBEscapeUnsupportedPrefixes(const std::string& className)
 std::string FGDBEscapeReservedKeywords(const std::string& name)
 {
     std::string newName = name;
-    std::string upperName = name;
-    std::transform(upperName.begin(), upperName.end(), upperName.begin(), ::toupper);
+    std::string upperName = CPLString(name).toupper();
 
     // From ESRI docs
     static const char* const RESERVED_WORDS[] = {FGDB_OID_NAME, "ADD", "ALTER", "AND", "AS", "ASC", "BETWEEN",

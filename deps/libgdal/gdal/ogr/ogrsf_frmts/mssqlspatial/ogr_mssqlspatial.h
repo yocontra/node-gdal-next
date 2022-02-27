@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mssqlspatial.h 3f43e75e42f950a2a864d3d46ae1544cf5adb738 2021-12-11 12:39:35 +0100 Even Rouault $
+ * $Id: ogr_mssqlspatial.h  $
  *
  * Project:  MSSQL Spatial driver
  * Purpose:  Definition of classes for OGR MSSQL Spatial driver.
@@ -38,7 +38,7 @@
 #include <sqlncli.h>
 #endif
 #ifdef MSODBCSQL_VERSION
-#include <msodbcsql.h>
+#include "include_msodbcsql.h"
 #endif
 
 class OGRMSSQLSpatialDataSource;

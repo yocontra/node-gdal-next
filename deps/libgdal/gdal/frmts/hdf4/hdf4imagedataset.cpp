@@ -28,7 +28,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(NOMINMAX)
 // min/max are defined here on Windows, so block them.
 // TODO: Move this to someplace more appropriate.
 #  define NOMINMAX
@@ -55,7 +55,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hdf4imagedataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: hdf4imagedataset.cpp  $")
 
 constexpr int HDF4_SDS_MAXNAMELEN = 65;
 
@@ -3557,7 +3557,7 @@ GDALDataset *HDF4ImageDataset::Open( GDALOpenInfo * poOpenInfo )
         poDS->hGR = GRstart( poDS->hHDF4 );
         if( poDS->hGR == -1 )
         {
-            // Release mutex otherwise wel deadlock with GDALDataset own mutex.
+            // Release mutex otherwise we deadlock with GDALDataset own mutex.
             CPLReleaseMutex(hHDF4Mutex);
             delete poDS;
             CPLAcquireMutex(hHDF4Mutex, 1000.0);

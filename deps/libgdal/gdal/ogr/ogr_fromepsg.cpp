@@ -56,7 +56,7 @@
 
 #include "proj.h"
 
-CPL_CVSID("$Id: ogr_fromepsg.cpp bcfd7d18eb57db454ccf91d6fd86029240c12b9c 2020-10-26 17:26:58 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogr_fromepsg.cpp  $")
 
 extern void OGRsnPrintDouble( char * pszStrBuf, size_t size, double dfValue );
 

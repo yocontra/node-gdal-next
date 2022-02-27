@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg.h 9b04a6ce329ade6272643ab59d0ffaabd313955c 2021-10-11 23:32:03 +0200 Even Rouault $
+ * $Id: gdal_alg.h  $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes, and definitions for various GDAL based algorithms.
@@ -682,11 +682,6 @@ int CPL_DLL GDALTriangulationFindFacetDirected( const GDALTriangulation* psDT,
                                                 double dfY,
                                                 int* panOutputFacetIdx );
 void CPL_DLL GDALTriangulationFree(GDALTriangulation* psDT);
-
-/*! @cond Doxygen_Suppress */
-// GDAL internal use only
-void GDALTriangulationTerminate(void);
-/*! @endcond */
 
 /*! @cond Doxygen_Suppress */
 #ifndef CPL_WARN_DEPRECATED_GDALOpenVerticalShiftGrid

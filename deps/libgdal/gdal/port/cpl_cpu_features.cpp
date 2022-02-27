@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "cpl_cpu_features.h"
 
-CPL_CVSID("$Id: cpl_cpu_features.cpp 044a11ee4d018f526644c342c3f483ddd1e6d688 2020-12-15 20:56:11 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_cpu_features.cpp  $")
 
 //! @cond Doxygen_Suppress
 

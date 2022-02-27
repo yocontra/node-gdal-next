@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: EnvisatFile.h 930aad0b9faed99e277da3cd649d4bef0b13f3c8 2021-08-12 14:52:44 +0200 Even Rouault $
+ * $Id: EnvisatFile.h  $
  *
  * Project:  APP ENVISAT Support
  * Purpose:  Low Level Envisat file access (read/write) API.

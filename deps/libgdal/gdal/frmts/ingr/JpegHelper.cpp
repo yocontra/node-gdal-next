@@ -29,7 +29,7 @@
 
 #include "JpegHelper.h"
 
-CPL_CVSID("$Id: JpegHelper.cpp 01037e400d90e8bc4a74f8d886ea5a27ecce02c5 2018-01-12 23:49:31Z Kurt Schwehr $")
+CPL_CVSID("$Id: JpegHelper.cpp  $")
 
 constexpr GByte JPGHLP_1DC_Codes[] = {
     0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,

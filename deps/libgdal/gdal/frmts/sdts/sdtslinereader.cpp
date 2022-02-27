@@ -28,7 +28,7 @@
 
 #include "sdts_al.h"
 
-CPL_CVSID("$Id: sdtslinereader.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: sdtslinereader.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -310,15 +310,15 @@ void SDTSLineReader::AttachToPolygons( SDTSTransfer * poTransfer,
 /* -------------------------------------------------------------------- */
         if( poPolyReader == nullptr )
         {
-            int         iPolyLayer = -1;
+            int         iPolyLayer;
 
             if( poLine->oLeftPoly.nRecord != -1 )
             {
                 iPolyLayer = poTransfer->FindLayer(poLine->oLeftPoly.szModule);
             }
-            else if( poLine->oRightPoly.nRecord != -1 )
+            else /* if( poLine->oRightPoly.nRecord != -1 ) */
             {
-               iPolyLayer = poTransfer->FindLayer(poLine->oRightPoly.szModule);
+                iPolyLayer = poTransfer->FindLayer(poLine->oRightPoly.szModule);
             }
 
             if( iPolyLayer == -1 )

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hdf4dataset.h 7efbb574f409465c908e5d83877fa36a501d434d 2020-10-14 11:56:55 +0200 Even Rouault $
+ * $Id: hdf4dataset.h  $
  *
  * Project:  Hierarchical Data Format Release 4 (HDF4)
  * Purpose:  Header file for HDF4 datasets reader.

@@ -46,7 +46,7 @@
 #include <set>
 #include <vector>
 
-CPL_CVSID("$Id: fitsdataset.cpp f523ba1e00b467564b83fea05bf997f1bcbed29a 2021-10-18 19:47:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: fitsdataset.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */

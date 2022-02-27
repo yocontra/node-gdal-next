@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: fit.h 05ec2ff9cd43cabf721a161bbc295f6c827eaedd 2016-10-24 06:23:09Z Kurt Schwehr $
+ * $Id: fit.h  $
  *
  * Project:  FIT Driver
  * Purpose:  Implement FIT Support - not using the SGI iflFIT library.

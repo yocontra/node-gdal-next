@@ -47,7 +47,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdaldefaultoverviews.cpp 55217f601926b441b75aa5104b7d95bbe488c174 2021-11-04 15:21:09 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdaldefaultoverviews.cpp  $")
 
 //! @cond Doxygen_Suppress
 /************************************************************************/

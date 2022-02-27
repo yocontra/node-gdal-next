@@ -29,7 +29,7 @@
 #include "ogrwalk.h"
 #include <vector>
 
-CPL_CVSID("$Id: ogrwalkdatasource.cpp 4b61c42c85ba2d57cac8e850a08b568a38711473 2021-08-26 14:14:22 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrwalkdatasource.cpp  $")
 
 /************************************************************************/
 /*                         OGRWalkDataSource()                          */

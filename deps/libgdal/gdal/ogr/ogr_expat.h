@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_expat.h 960e631de2d440c518307009ab6ac3cd599fd709 2020-06-02 11:51:16 +0200 Yorick de Wid $
+ * $Id: ogr_expat.h  $
  *
  * Project:  OGR
  * Purpose:  Convenience function for parsing with Expat library

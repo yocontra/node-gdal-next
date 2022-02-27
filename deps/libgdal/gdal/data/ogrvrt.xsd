@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id: ogrvrt.xsd ca74100efca7e6715fc97a5a0174ebfc439db0d3 2021-02-27 13:45:16 -0500 luzpaz $
+ * $Id: ogrvrt.xsd  $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for OGR VRT files.

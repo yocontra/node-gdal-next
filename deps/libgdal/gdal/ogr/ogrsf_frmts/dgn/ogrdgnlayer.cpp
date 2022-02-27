@@ -35,7 +35,7 @@
 #include <cmath>
 #include <list>
 
-CPL_CVSID("$Id: ogrdgnlayer.cpp f18916aee1d945d5aa0b3d698852ac9c26d3efa2 2021-08-12 15:29:12 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrdgnlayer.cpp  $")
 
 /************************************************************************/
 /*                           OGRDGNLayer()                              */

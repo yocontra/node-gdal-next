@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrdgnv8datasource.cpp 085c49965ea304ffa8fbd4c8adcb00fad389b72e 2021-11-04 12:51:07 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdgnv8datasource.cpp  $")
 
 /************************************************************************/
 /*                        OGRDGNV8DataSource()                          */

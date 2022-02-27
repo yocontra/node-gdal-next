@@ -29,7 +29,7 @@
 
 #include "oci_wrapper.h"
 
-CPL_CVSID("$Id: oci_wrapper.cpp 59a31bdb51484a42c79267eecf20a0089a7ba1cf 2021-09-10 04:49:36 -0400 fechen123 $")
+CPL_CVSID("$Id: oci_wrapper.cpp  $")
 
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},
@@ -1464,7 +1464,7 @@ unsigned long OWStatement::GetBlobLength( OCILobLocator* phLocator )
         return 0;
     }
 
-    return nSize;
+    return static_cast<unsigned long>(nSize);
 }
                                          
 unsigned long OWStatement::ReadBlob( OCILobLocator* phLocator,
@@ -1536,7 +1536,7 @@ unsigned long OWStatement::WriteBlob( OCILobLocator* phLocator,
         return (unsigned long) 0;
     }
 
-    return nAmont;
+    return static_cast<unsigned long>(nAmont);
 }
 
 char* OWStatement::ReadCLob( OCILobLocator* phLocator )
@@ -1856,7 +1856,7 @@ void OWUpperIfNoQuotes( char* pszText )
 
     for( size_t i = 0; i < nSize; i++ )
     {
-        pszText[i] = toupper( pszText[i] );
+        pszText[i] = static_cast<char>(toupper( pszText[i] ));
     }
 }
 

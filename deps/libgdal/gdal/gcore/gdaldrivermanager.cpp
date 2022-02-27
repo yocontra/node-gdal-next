@@ -30,8 +30,10 @@
 #include "cpl_port.h"
 #include "gdal_priv.h"
 
+#include <algorithm>
 #include <cstring>
 #include <map>
+#include <set>
 
 #include "cpl_conv.h"
 #include "cpl_error.h"
@@ -45,7 +47,11 @@
 #include "gdal_alg_priv.h"
 #include "gdal.h"
 #include "gdal_pam.h"
+#ifdef GDAL_CMAKE_BUILD
+#include "gdal_version_full/gdal_version.h"
+#else
 #include "gdal_version.h"
+#endif
 #include "gdal_thread_pool.h"
 #include "ogr_srs_api.h"
 #include "ograpispy.h"
@@ -63,7 +69,7 @@
 // FIXME: Disabled following code as it crashed on OSX CI test.
 // #include <mutex>
 
-CPL_CVSID("$Id: gdaldrivermanager.cpp 9fd53989b94f9d2cdab20515361b1be5045acaf5 2021-08-20 14:14:20 +0800 Tim Lander $")
+CPL_CVSID("$Id: gdaldrivermanager.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -310,11 +316,6 @@ GDALDriverManager::~GDALDriverManager()
 /*      Cleanup CPLsetlocale mutex.                                     */
 /* -------------------------------------------------------------------- */
     CPLCleanupSetlocaleMutex();
-
-/* -------------------------------------------------------------------- */
-/*      Cleanup QHull mutex.                                            */
-/* -------------------------------------------------------------------- */
-    GDALTriangulationTerminate();
 
 /* -------------------------------------------------------------------- */
 /*      Cleanup curl related stuff.                                     */
@@ -608,7 +609,7 @@ GDALDriver * GDALDriverManager::GetDriverByName( const char * pszName )
     if( EQUAL(pszName, "CartoDB") )
         pszName = "Carto";
 
-    return oMapNameToDrivers[CPLString(pszName).toupper()];
+    return GetDriverByName_unlocked(pszName);
 }
 
 /************************************************************************/
@@ -715,7 +716,10 @@ char** GDALDriverManager::GetSearchPaths(const char* pszGDAL_DRIVER_PATH)
     }
     else
     {
-#ifdef GDAL_PREFIX
+#ifdef INSTALL_PLUGIN_FULL_DIR
+        // CMake way
+        papszSearchPaths = CSLAddString( papszSearchPaths, INSTALL_PLUGIN_FULL_DIR);
+#elif defined(GDAL_PREFIX)
         papszSearchPaths = CSLAddString( papszSearchPaths,
     #ifdef MACOSX_FRAMEWORK
                                         GDAL_PREFIX "/PlugIns");
@@ -814,6 +818,7 @@ void GDALDriverManager::AutoLoadDrivers()
 /*      Scan each directory looking for files starting with gdal_       */
 /* -------------------------------------------------------------------- */
     const int nSearchPaths = CSLCount(papszSearchPaths);
+    bool bFoundOnePlugin = false;
     for( int iDir = 0; iDir < nSearchPaths; ++iDir )
     {
         CPLString osABISpecificDir =
@@ -833,7 +838,14 @@ void GDALDriverManager::AutoLoadDrivers()
             if( !EQUAL(pszExtension,"dll")
                 && !EQUAL(pszExtension,"so")
                 && !EQUAL(pszExtension,"dylib") )
+            {
+                if( strcmp(papszFiles[iFile], "drivers.ini") == 0 )
+                {
+                    m_osDriversIniPath = CPLFormFilename( osABISpecificDir,
+                                               papszFiles[iFile], nullptr );
+                }
                 continue;
+            }
 
             CPLString osFuncName;
             if( STARTS_WITH_CI(papszFiles[iFile], "gdal_") )
@@ -872,6 +884,7 @@ void GDALDriverManager::AutoLoadDrivers()
 
             if( pRegister != nullptr )
             {
+                bFoundOnePlugin = true;
                 CPLDebug( "GDAL", "Auto register %s using %s.",
                           pszFilename, osFuncName.c_str() );
 
@@ -884,7 +897,129 @@ void GDALDriverManager::AutoLoadDrivers()
 
     CSLDestroy( papszSearchPaths );
 
+    // No need to reorder drivers if there are no plugins
+    if( !bFoundOnePlugin )
+        m_osDriversIniPath.clear();
+
 #endif  // GDAL_NO_AUTOLOAD
+}
+
+/************************************************************************/
+/*                           ReorderDrivers()                           */
+/************************************************************************/
+
+/**
+ * \brief Reorder drivers according to the order of the drivers.ini file.
+ *
+ * This function is called by GDALAllRegister(), at the end of driver loading,
+ * in particular after plugin loading.
+ * It will load the drivers.ini configuration file located next to plugins and
+ * will use it to reorder the registration order of drivers. This can be
+ * important in some situations where multiple drivers could open the same dataset.
+ */
+
+void GDALDriverManager::ReorderDrivers()
+{
+#ifndef GDAL_NO_AUTOLOAD
+    if( m_osDriversIniPath.empty() )
+        return;
+
+    CPLMutexHolderD( &hDMMutex );
+
+    CPLAssert(static_cast<int>(oMapNameToDrivers.size()) == nDrivers);
+
+    VSILFILE* fp = VSIFOpenL(m_osDriversIniPath.c_str(), "rb");
+    if( fp == nullptr )
+        return;
+
+    // Parse drivers.ini
+    bool bInOrderSection = false;
+    std::vector<std::string> aosOrderedDrivers;
+    std::set<std::string> oSetOrderedDrivers;
+    while( const char* pszLine = CPLReadLine2L(fp, 1024, nullptr) )
+    {
+        if( pszLine[0] == '#' )
+            continue;
+        int i = 0;
+        while( pszLine[i] != 0 && isspace(pszLine[i]) )
+            i++;
+        if( pszLine[i] == 0 )
+            continue;
+        if( strcmp(pszLine, "[order]") == 0 )
+        {
+            bInOrderSection = true;
+        }
+        else if( pszLine[0] == '[' )
+        {
+            bInOrderSection = false;
+        }
+        else if( bInOrderSection )
+        {
+            CPLString osUCDriverName(pszLine);
+            osUCDriverName.toupper();
+            if( oSetOrderedDrivers.find(osUCDriverName) !=
+                                                oSetOrderedDrivers.end() )
+            {
+                CPLError(CE_Warning, CPLE_AppDefined,
+                         "Duplicated name %s in [order] section",
+                         pszLine);
+            }
+            else if( oMapNameToDrivers.find(osUCDriverName)
+                                                != oMapNameToDrivers.end() )
+            {
+                aosOrderedDrivers.emplace_back(pszLine);
+                oSetOrderedDrivers.insert(osUCDriverName);
+            }
+#ifdef DEBUG_VERBOSE
+            else
+            {
+                // Completely expected situation for "non-maximal" builds,
+                // but can help diagnose bad entries in drivers.ini
+                CPLDebug("GDAL",
+                         "Driver %s is listed in %s but not registered.",
+                         pszLine, m_osDriversIniPath.c_str());
+            }
+#endif
+        }
+    }
+    VSIFCloseL(fp);
+
+    // Find potential registered drivers not in drivers.ini, and put them in
+    // their registration order in aosUnorderedDrivers
+    std::vector<std::string> aosUnorderedDrivers;
+    for( int i = 0; i < nDrivers; ++i )
+    {
+        const char* pszName = papoDrivers[i]->GetDescription();
+        if( oSetOrderedDrivers.find(CPLString(pszName).toupper()) ==
+                                                    oSetOrderedDrivers.end() )
+        {
+            // Could happen for a private plugin
+            CPLDebug("GDAL", "Driver %s is registered but not listed in %s. "
+                     "It will be registered before other drivers.",
+                     pszName, m_osDriversIniPath.c_str());
+            aosUnorderedDrivers.emplace_back(pszName);
+        }
+    }
+
+    // Put aosUnorderedDrivers in front of existing aosOrderedDrivers
+    if( !aosUnorderedDrivers.empty() )
+    {
+        aosUnorderedDrivers.insert(aosUnorderedDrivers.end(),
+                                   aosOrderedDrivers.begin(),
+                                   aosOrderedDrivers.end());
+        std::swap(aosOrderedDrivers, aosUnorderedDrivers);
+    }
+
+    // Update papoDrivers[] to reflect aosOrderedDrivers order.
+    CPLAssert(static_cast<int>(aosOrderedDrivers.size()) == nDrivers);
+    for( int i = 0; i < nDrivers; ++i )
+    {
+        const auto oIter = oMapNameToDrivers.find(
+                            CPLString(aosOrderedDrivers[i]).toupper());
+        CPLAssert(oIter != oMapNameToDrivers.end());
+        papoDrivers[i] = oIter->second;
+    }
+#endif
 }
 
 /************************************************************************/

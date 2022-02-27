@@ -29,7 +29,7 @@
 
 #include "ogrwalk.h"
 
-CPL_CVSID("$Id: ogrwalkdriver.cpp 658d4f6254f467214d228ee9513838e9b1f878f9 2021-08-27 15:00:59 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrwalkdriver.cpp  $")
 
 
 /************************************************************************/

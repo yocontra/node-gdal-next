@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrunionlayer.h 0a777cd8217f21db135ac880615c2dd9d3ff590d 2021-10-24 04:52:17 +0200 Even Rouault $
+ * $Id: ogrunionlayer.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRUnionLayer class

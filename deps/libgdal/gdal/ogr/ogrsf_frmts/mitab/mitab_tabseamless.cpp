@@ -47,7 +47,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: mitab_tabseamless.cpp 7506db93e683abe039fb754a3977ab029235a1ed 2019-08-15 21:29:31 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_tabseamless.cpp  $")
 
 /*=====================================================================
  *                      class TABSeamless

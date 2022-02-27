@@ -47,7 +47,7 @@
 #include "cpl_vsi.h"
 #include "mitab_priv.h"
 
-CPL_CVSID("$Id: mitab_rawbinblock.cpp 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_rawbinblock.cpp  $")
 
 /*=====================================================================
  *                      class TABRawBinBlock
@@ -567,7 +567,7 @@ int     TABRawBinBlock::GotoByteInFile(int nOffset,
                 if ( !(nOffset < m_nFileOffset ||
                        nOffset >= m_nFileOffset+m_nBlockSize) )
                 {
-                    if ( (nOffset<m_nFileOffset || nOffset>=m_nFileOffset+m_nSizeUsed) &&
+                    if ( (nOffset>=m_nFileOffset+m_nSizeUsed) &&
                          (CommitToFile() != 0 ||
                           ReadFromFile(m_fp, nNewBlockPtr, m_nBlockSize) != 0) )
                     {

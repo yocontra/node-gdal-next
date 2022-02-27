@@ -48,7 +48,7 @@
 #include "cpl_error.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: cpl_virtualmem.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_virtualmem.cpp  $")
 
 #ifdef NDEBUG
 // Non NDEBUG: Ignore the result.
@@ -201,6 +201,7 @@ typedef struct
     int              pipefd_wait_thread[2];
     CPLJoinableThread *hHelperThread;
 
+    // Using sigaction without testing HAVE_SIGACTION since we are in a Linux specific code path
     struct sigaction oldact;
 } CPLVirtualMemManager;
 

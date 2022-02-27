@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_xml_validate.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_xml_validate.cpp  $")
 
 #ifdef HAVE_LIBXML2
 #include <libxml/xmlversion.h>
@@ -56,18 +56,26 @@ CPL_CVSID("$Id: cpl_xml_validate.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 20
 #ifdef HAVE_RECENT_LIBXML2
 #include <string.h>
 
-#ifdef __clang__
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wdocumentation"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 
 #include <libxml/xmlschemas.h>
 #include <libxml/parserInternals.h>
 #include <libxml/catalog.h>
 
-#ifdef __clang__
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif
 
 #include "cpl_string.h"

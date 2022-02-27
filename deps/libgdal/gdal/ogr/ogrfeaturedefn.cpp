@@ -42,7 +42,7 @@
 #include "ogr_p.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrfeaturedefn.cpp 1e4510d0d88bbf73885b7f18b79f50d5a6696131 2021-08-21 19:26:01 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrfeaturedefn.cpp  $")
 
 /************************************************************************/
 /*                           OGRFeatureDefn()                           */
@@ -1543,8 +1543,12 @@ std::vector<int> OGRFeatureDefn::ComputeMapForSetFrom( const OGRFeatureDefn* poS
     const int nFieldCount = GetFieldCount();
     for( int i = 0; i < nFieldCount; i++ )
     {
+#ifdef __MINGW64__
         const OGRFieldDefn* poFldDefn = GetFieldDefn(i);
-        assert(poFldDefn); /* Make GCC-8 -Wnull-dereference happy */
+        if( poFldDefn == nullptr ) continue;
+#else
+        const OGRFieldDefn* poFldDefn = CPLAssertNotNull(GetFieldDefn(i)); /* Make GCC-8 -Wnull-dereference happy */
+#endif
         const char* pszName = poFldDefn->GetNameRef();
 
         // In the insane case where there are several matches, arbitrarily
@@ -1560,8 +1564,12 @@ std::vector<int> OGRFeatureDefn::ComputeMapForSetFrom( const OGRFeatureDefn* poS
     aoMapSrcToTargetIdx.resize(nSrcFieldCount);
     for( int i = 0; i < nSrcFieldCount; i++ )
     {
+#ifdef __MINGW64__
         const OGRFieldDefn* poSrcFldDefn = poSrcFDefn->GetFieldDefn(i);
-        assert(poSrcFldDefn); /* Make GCC-8 -Wnull-dereference happy */
+        if( poSrcFldDefn == nullptr ) continue;
+#else
+        const OGRFieldDefn* poSrcFldDefn = CPLAssertNotNull(poSrcFDefn->GetFieldDefn(i)); /* Make GCC-8 -Wnull-dereference happy */
+#endif
         const char* pszSrcName = poSrcFldDefn->GetNameRef();
 
         auto oIter = oMapNameToTargetFieldIndex.find(pszSrcName);
@@ -1572,8 +1580,12 @@ std::vector<int> OGRFeatureDefn::ComputeMapForSetFrom( const OGRFeatureDefn* poS
             {
                 for( int j = 0; j < nFieldCount; j++ )
                 {
+#ifdef __MINGW64__
                     const OGRFieldDefn* poFldDefn = GetFieldDefn(j);
-                    assert(poFldDefn); /* Make GCC-8 -Wnull-dereference happy */
+                    if( poFldDefn == nullptr ) continue;
+#else
+                    const OGRFieldDefn* poFldDefn = CPLAssertNotNull(GetFieldDefn(j)); /* Make GCC-8 -Wnull-dereference happy */
+#endif
                     oMapNameToTargetFieldIndexUC[
                         CPLString(poFldDefn->GetNameRef()).toupper()] = j;
                 }

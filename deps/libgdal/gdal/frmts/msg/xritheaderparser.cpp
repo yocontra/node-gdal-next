@@ -32,7 +32,7 @@
 #include <cstdlib> // malloc, free
 #include <cstring> // memcpy
 
-CPL_CVSID("$Id: xritheaderparser.cpp 73a8764b2d7a65a29eb93c84c5d1f2b9dcdc8158 2019-03-23 14:27:02 +0100 Even Rouault $")
+CPL_CVSID("$Id: xritheaderparser.cpp  $")
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -72,7 +72,7 @@ XRITHeaderParser::XRITHeaderParser(std::ifstream & ifile)
 
   if (!m_isValid) // seek back to original position
   {
-    ifile.seekg(-probeSize, std::ios_base::cur);
+    ifile.seekg(-static_cast<int>(probeSize), std::ios_base::cur);
   }
 }
 

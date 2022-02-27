@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: jpipkakdataset.h 296bc6be23bb948976d5913a411444bb05465228 2021-08-28 12:21:16 +0200 Even Rouault $
+ * $Id: jpipkakdataset.h  $
  *
  * Project:  jpip read driver
  * Purpose:  GDAL bindings for JPIP.

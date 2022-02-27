@@ -41,7 +41,7 @@
 
 #include "gdal_alg.h"
 
-CPL_CVSID("$Id: llrasterize.cpp d34c7cb7580adaa339e545a380740e07cdff0d3c 2020-04-03 16:01:05 +0200 Even Rouault $")
+CPL_CVSID("$Id: llrasterize.cpp  $")
 
 /************************************************************************/
 /*                       dllImageFilledPolygon()                        */
@@ -70,7 +70,7 @@ CPL_CVSID("$Id: llrasterize.cpp d34c7cb7580adaa339e545a380740e07cdff0d3c 2020-04
  * http://www.boutell.com/gd/
  *
  * It was later adapted for direct inclusion in GDAL and relicensed under
- * the GDAL MIT/X license (pulled from the OpenEV distribution).
+ * the GDAL MIT license (pulled from the OpenEV distribution).
  */
 
 void GDALdllImageFilledPolygon(int nRasterXSize, int nRasterYSize,

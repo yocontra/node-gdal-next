@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: avc_mbyte.h 3d704e3dd0aad44ff466e20c7f200a9593994e88 2016-10-24 12:09:43Z Kurt Schwehr $
+ * $Id: avc_mbyte.h  $
  *
  * Name:     avc.h
  * Project:  Arc/Info Vector coverage (AVC) BIN<->E00 conversion library

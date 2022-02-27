@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "io_selafin.h"
 
-CPL_CVSID("$Id: ogrselafindriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrselafindriver.cpp  $")
 
 /************************************************************************/
 /*                     OGRSelafinDriverIdentify()                       */
@@ -38,7 +38,7 @@ CPL_CVSID("$Id: ogrselafindriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 20
 
 static int OGRSelafinDriverIdentify( GDALOpenInfo* poOpenInfo )
 {
-    if( poOpenInfo->fpL != nullptr )
+    if( poOpenInfo->pabyHeader != nullptr )
     {
         if( poOpenInfo->nHeaderBytes < 84 + 8 )
             return FALSE;
@@ -54,6 +54,7 @@ static int OGRSelafinDriverIdentify( GDALOpenInfo* poOpenInfo )
 
         return TRUE;
     }
+
     return -1;
 }
 

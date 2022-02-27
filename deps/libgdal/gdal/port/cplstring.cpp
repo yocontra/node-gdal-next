@@ -43,7 +43,7 @@
 #define va_copy __va_copy
 #endif
 
-CPL_CVSID("$Id: cplstring.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cplstring.cpp  $")
 
 /*
  * The CPLString class is derived from std::string, so the vast majority
@@ -398,7 +398,7 @@ CPLString &CPLString::replaceAll( char chBefore,
 /**
  * Returns whether the string ends with another string
  * @param osStr other string.
- * @return true if the string ends wit osStr.
+ * @return true if the string ends with osStr.
  */
 bool CPLString::endsWith( const std::string& osStr ) const
 {

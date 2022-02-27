@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <string>
 
-CPL_CVSID("$Id: s57reader.cpp 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: s57reader.cpp  $")
 
 /**
 * Recode the given string from a source encoding to UTF-8 encoding.  The source

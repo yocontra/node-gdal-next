@@ -59,7 +59,7 @@
 static const char UNSUPPORTED_OP_READ_ONLY[] =
   "%s : unsupported operation on a read-only datasource.";
 
-CPL_CVSID("$Id: ogrsqlitetablelayer.cpp 8dc0a101c5e4667fc8dfddf2a96ff54209bf0bfe 2021-09-05 18:19:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsqlitetablelayer.cpp  $")
 
 /************************************************************************/
 /*                        OGRSQLiteTableLayer()                         */
@@ -323,13 +323,16 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
 /* -------------------------------------------------------------------- */
     bool bHasRowId = m_bIsTable;
 
-    const char *pszSQL =
-        CPLSPrintf("SELECT %s* FROM '%s' LIMIT 1",
+    // SELECT .. FROM ... LIMIT ... is broken on VirtualShape tables with spatialite 5.0.1 and sqlite 3.38.0
+    const char *pszSQLConst =
+        CPLSPrintf(m_bIsVirtualShape ?
+                        "SELECT %s* FROM '%s'" :
+                        "SELECT %s* FROM '%s' LIMIT 1",
                    m_bIsTable ? "_rowid_, " : "",
                    m_pszEscapedTableName);
 
     sqlite3_stmt *hColStmt = nullptr;
-    int rc = sqlite3_prepare_v2( hDB, pszSQL, -1, &hColStmt, nullptr );
+    int rc = sqlite3_prepare_v2( hDB, pszSQLConst, -1, &hColStmt, nullptr );
     if( rc != SQLITE_OK )
     {
         const char* pszErrMsg = sqlite3_errmsg(hDB);
@@ -339,9 +342,9 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
             bHasRowId = false;
             sqlite3_finalize( hColStmt );
             hColStmt = nullptr;
-            pszSQL = CPLSPrintf(
+            pszSQLConst = CPLSPrintf(
                 "SELECT * FROM '%s' LIMIT 1", m_pszEscapedTableName);
-            rc = sqlite3_prepare_v2( hDB, pszSQL, -1, &hColStmt, nullptr );
+            rc = sqlite3_prepare_v2( hDB, pszSQLConst, -1, &hColStmt, nullptr );
         }
         if( rc != SQLITE_OK )
         {
@@ -358,7 +361,7 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
     {
         CPLError( CE_Failure, CPLE_AppDefined,
                   "In Initialize(): sqlite3_step(%s):\n  %s",
-                  pszSQL, sqlite3_errmsg(hDB) );
+                  pszSQLConst, sqlite3_errmsg(hDB) );
         sqlite3_finalize( hColStmt );
         return CE_Failure;
     }
@@ -412,20 +415,20 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
         {
             if( m_poDS->HasSpatialite4Layout() )
             {
-                pszSQL = CPLSPrintf("SELECT srid, geometry_type, coord_dimension, spatial_index_enabled FROM geometry_columns WHERE lower(f_table_name) = lower('%s') AND lower(f_geometry_column) = lower('%s')",
+                pszSQLConst = CPLSPrintf("SELECT srid, geometry_type, coord_dimension, spatial_index_enabled FROM geometry_columns WHERE lower(f_table_name) = lower('%s') AND lower(f_geometry_column) = lower('%s')",
                                     m_pszEscapedTableName,
                                     SQLEscapeLiteral(poGeomFieldDefn->GetNameRef()).c_str());
             }
             else
             {
-                pszSQL = CPLSPrintf("SELECT srid, type, coord_dimension, spatial_index_enabled FROM geometry_columns WHERE lower(f_table_name) = lower('%s') AND lower(f_geometry_column) = lower('%s')",
+                pszSQLConst = CPLSPrintf("SELECT srid, type, coord_dimension, spatial_index_enabled FROM geometry_columns WHERE lower(f_table_name) = lower('%s') AND lower(f_geometry_column) = lower('%s')",
                                     m_pszEscapedTableName,
                                     SQLEscapeLiteral(poGeomFieldDefn->GetNameRef()).c_str());
             }
         }
         else
         {
-            pszSQL = CPLSPrintf("SELECT srid, geometry_type, coord_dimension, geometry_format FROM geometry_columns WHERE lower(f_table_name) = lower('%s') AND lower(f_geometry_column) = lower('%s')",
+            pszSQLConst = CPLSPrintf("SELECT srid, geometry_type, coord_dimension, geometry_format FROM geometry_columns WHERE lower(f_table_name) = lower('%s') AND lower(f_geometry_column) = lower('%s')",
                                 m_pszEscapedTableName,
                                 SQLEscapeLiteral(poGeomFieldDefn->GetNameRef()).c_str());
         }
@@ -433,7 +436,7 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
         int nRowCount = 0, nColCount = 0;
         char** papszResult = nullptr;
         rc = sqlite3_get_table( hDB,
-                                pszSQL,
+                                pszSQLConst,
                                 &papszResult, &nRowCount,
                                 &nColCount, &pszErrMsg );
         OGRwkbGeometryType eGeomType = wkbUnknown;
@@ -506,13 +509,13 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
     {
         // we need to test version required by Spatialite TRIGGERs
         // hColStmt = NULL;
-        pszSQL = CPLSPrintf( "SELECT sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = '%s' AND sql LIKE '%%RTreeAlign%%'",
+        pszSQLConst = CPLSPrintf( "SELECT sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = '%s' AND sql LIKE '%%RTreeAlign%%'",
             m_pszEscapedTableName );
 
         int nRowTriggerCount, nColTriggerCount;
         char **papszTriggerResult, *pszErrMsg;
 
-        /* rc = */ sqlite3_get_table( hDB, pszSQL, &papszTriggerResult,
+        /* rc = */ sqlite3_get_table( hDB, pszSQLConst, &papszTriggerResult,
             &nRowTriggerCount, &nColTriggerCount, &pszErrMsg );
         if( nRowTriggerCount >= 1 )
         {
@@ -533,10 +536,10 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
     int nColCount = 0;
     char *pszErrMsg = nullptr;
     /*  #|name|type|notnull|default|pk */
-    char* pszSQL3 = sqlite3_mprintf("PRAGMA table_info('%q')", m_pszTableName);
-    rc = sqlite3_get_table( hDB, pszSQL3, &papszResult, &nRowCount,
+    char* pszSQL = sqlite3_mprintf("PRAGMA table_info('%q')", m_pszTableName);
+    rc = sqlite3_get_table( hDB, pszSQL, &papszResult, &nRowCount,
                             &nColCount, &pszErrMsg );
-    sqlite3_free( pszSQL3 );
+    sqlite3_free( pszSQL );
     if( rc != SQLITE_OK )
     {
         sqlite3_free( pszErrMsg );
@@ -612,6 +615,81 @@ CPLErr OGRSQLiteTableLayer::EstablishFeatureDefn(const char* pszGeomCol)
         }
         sqlite3_free_table(papszResult);
     }
+
+    nRowCount = 0;
+    nColCount = 0;
+    papszResult = nullptr;
+
+    pszSQL = sqlite3_mprintf("SELECT sql FROM sqlite_master WHERE type='table' AND name='%q'", m_pszTableName);
+    rc = sqlite3_get_table( hDB, pszSQL, &papszResult, &nRowCount,
+                            &nColCount, nullptr );
+    sqlite3_free( pszSQL );
+    if( rc == SQLITE_OK && nRowCount == 1 && nColCount == 1 )
+    {
+        const char* pszCreateTableSQL = papszResult[1];
+        const char* pszLastParenthesis = strrchr(pszCreateTableSQL, ')');
+        if( pszLastParenthesis )
+        {
+            m_bStrict = CPLString(pszLastParenthesis+1).ifind("STRICT") != std::string::npos;
+#ifdef DEBUG_VERBOSE
+            if( m_bStrict )
+                CPLDebug("SQLite", "Table %s has STRICT mode", m_pszTableName);
+#endif
+        }
+
+        const int nFieldCount = m_poFeatureDefn->GetFieldCount();
+        for( int i = 0; i < nFieldCount; ++i )
+        {
+            auto poFieldDefn = m_poFeatureDefn->GetFieldDefn(i);
+            if( poFieldDefn->GetType() == OFTInteger )
+            {
+                // In strict mode, the number of allowed types is severely
+                // restricted, so interpret INTEGER as Int64 by default, unless
+                // a check constraint makes it clear it is Int32
+                if( m_bStrict )
+                    poFieldDefn->SetType(OFTInteger64);
+                if( strstr(pszCreateTableSQL,
+                        ("CHECK (\"" +
+                         CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                         "\" BETWEEN -2147483648 AND 2147483647)").c_str()) )
+                {
+                    poFieldDefn->SetType(OFTInteger);
+                }
+                else if( strstr(pszCreateTableSQL,
+                        ("CHECK (\"" +
+                         CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                         "\" BETWEEN -9223372036854775808 AND 9223372036854775807)").c_str()) )
+                {
+                    poFieldDefn->SetType(OFTInteger64);
+                }
+            }
+            else if( poFieldDefn->GetType() == OFTString )
+            {
+                if( strstr(pszCreateTableSQL,
+                        ("CHECK (\"" +
+                         CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                         "\" LIKE '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]*')").c_str()) )
+                {
+                    poFieldDefn->SetType(OFTDateTime);
+                }
+                else if( strstr(pszCreateTableSQL,
+                        ("CHECK (\"" +
+                         CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                         "\" LIKE '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T')").c_str()) )
+                {
+                    poFieldDefn->SetType(OFTDate);
+                }
+                else if( strstr(pszCreateTableSQL,
+                        ("CHECK (\"" +
+                         CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                         "\" LIKE '[0-2][0-9]:[0-5][0-9]:[0-6][0-9]*')").c_str()) )
+                {
+                    poFieldDefn->SetType(OFTTime);
+                }
+            }
+        }
+    }
+    sqlite3_free_table(papszResult);
 
     return CE_None;
 }
@@ -1253,8 +1331,42 @@ OGRErr OGRSQLiteTableLayer::GetExtent(int iGeomField, OGREnvelope *psExtent, int
 /************************************************************************/
 
 CPLString OGRSQLiteFieldDefnToSQliteFieldDefn( OGRFieldDefn* poFieldDefn,
-                                               bool bSQLiteDialectInternalUse )
+                                               bool bSQLiteDialectInternalUse,
+                                               bool bStrict )
 {
+    if( bStrict )
+    {
+        switch( poFieldDefn->GetType() )
+        {
+            case OFTInteger:
+                return "INTEGER CHECK (\"" +
+                        CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                        "\" BETWEEN -2147483648 AND 2147483647)";
+            case OFTInteger64:
+                return "INTEGER CHECK (\"" +
+                        CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                        "\" BETWEEN -9223372036854775808 AND 9223372036854775807)";
+            case OFTReal:
+                return "REAL";
+            case OFTBinary :
+                return "BLOB";
+            case OFTDateTime:
+                return "TEXT CHECK (\"" +
+                        CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                        "\" LIKE '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]*')";
+            case OFTDate:
+                return "TEXT CHECK (\"" +
+                        CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                        "\" LIKE '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T')";
+            case OFTTime:
+                return "TEXT CHECK (\"" +
+                        CPLString(poFieldDefn->GetNameRef()).replaceAll('"', "\"\"") +
+                        "\" LIKE '[0-2][0-9]:[0-5][0-9]:[0-6][0-9]*')";
+            default:
+                return "TEXT";
+        }
+    }
+
     switch( poFieldDefn->GetType() )
     {
         case OFTInteger:
@@ -1307,8 +1419,8 @@ CPLString OGRSQLiteFieldDefnToSQliteFieldDefn( OGRFieldDefn* poFieldDefn,
 
 CPLString OGRSQLiteTableLayer::FieldDefnToSQliteFieldDefn( OGRFieldDefn* poFieldDefn )
 {
-    CPLString osRet = OGRSQLiteFieldDefnToSQliteFieldDefn(poFieldDefn, false);
-    if( poFieldDefn->GetType() == OFTString &&
+    CPLString osRet = OGRSQLiteFieldDefnToSQliteFieldDefn(poFieldDefn, false, m_bStrict);
+    if( !m_bStrict && poFieldDefn->GetType() == OFTString &&
         CSLFindString(m_papszCompressedColumns, poFieldDefn->GetNameRef()) >= 0 )
         osRet += "_deflate";
 
@@ -1765,8 +1877,9 @@ OGRErr OGRSQLiteTableLayer::RecreateTable(const char* pszFieldListForSelect,
 
     if( rc == SQLITE_OK )
         rc = sqlite3_exec( hDB,
-                       CPLSPrintf( "CREATE TABLE t1_back(%s)",
-                                   pszNewFieldList ),
+                       CPLSPrintf( "CREATE TABLE t1_back(%s)%s",
+                                   pszNewFieldList,
+                                   m_bStrict ? " STRICT": "" ),
                        nullptr, nullptr, &pszErrMsg );
 
     if( rc == SQLITE_OK )
@@ -1868,6 +1981,19 @@ OGRErr OGRSQLiteTableLayer::DeleteField( int iFieldToDelete )
 
     ResetReading();
 
+    if( m_poDS->SoftStartTransaction() != OGRERR_NONE )
+        return OGRERR_FAILURE;
+
+    // ALTER TABLE ... DROP COLUMN ... was first implemented in 3.35.0 but
+    // there was bug fixes related to it until 3.35.5
+#if SQLITE_VERSION_NUMBER >= 3035005L
+    const char* pszFieldName =
+        m_poFeatureDefn->GetFieldDefn(iFieldToDelete)->GetNameRef();
+    OGRErr eErr = SQLCommand( m_poDS->GetDB(),
+                       CPLString().Printf("ALTER TABLE \"%s\" DROP COLUMN \"%s\"",
+                          SQLEscapeName(m_pszTableName).c_str(),
+                          SQLEscapeName(pszFieldName).c_str()).c_str() );
+#else
 /* -------------------------------------------------------------------- */
 /*      Build list of old fields, and the list of new fields.           */
 /* -------------------------------------------------------------------- */
@@ -1905,16 +2031,39 @@ OGRErr OGRSQLiteTableLayer::DeleteField( int iFieldToDelete )
 
     CPLFree( pszFieldListForSelect );
     CPLFree( pszNewFieldList );
+#endif
 
-    if (eErr != OGRERR_NONE)
-        return eErr;
+/* -------------------------------------------------------------------- */
+/*      Check foreign key integrity if enforcement of foreign keys      */
+/*      constraint is enabled.                                          */
+/* -------------------------------------------------------------------- */
+    if( eErr == OGRERR_NONE &&
+        SQLGetInteger(m_poDS->GetDB(), "PRAGMA foreign_keys", nullptr) )
+    {
+        CPLDebug("SQLite", "Running PRAGMA foreign_key_check");
+        eErr = m_poDS->PragmaCheck("foreign_key_check", "", 0);
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Finish                                                          */
 /* -------------------------------------------------------------------- */
-    eErr = m_poFeatureDefn->DeleteFieldDefn( iFieldToDelete );
 
-    RecomputeOrdinals();
+    if( eErr == OGRERR_NONE)
+    {
+        eErr = m_poDS->SoftCommitTransaction();
+        if( eErr == OGRERR_NONE)
+        {
+            eErr = m_poFeatureDefn->DeleteFieldDefn( iFieldToDelete );
+
+            RecomputeOrdinals();
+
+            ResetReading();
+        }
+    }
+    else
+    {
+        m_poDS->SoftRollbackTransaction();
+    }
 
     return eErr;
 }
@@ -1947,104 +2096,171 @@ OGRErr OGRSQLiteTableLayer::AlterFieldDefn( int iFieldToAlter, OGRFieldDefn* poN
     ResetReading();
 
 /* -------------------------------------------------------------------- */
-/*      Build list of old fields, and the list of new fields.           */
+/*      Check that the new column name is not a duplicate.              */
 /* -------------------------------------------------------------------- */
-    char *pszNewFieldList = nullptr;
-    char *pszFieldListForSelect = nullptr;
-    size_t nBufLen = 0;
 
-    InitFieldListForRecrerate(pszNewFieldList, pszFieldListForSelect,
-                              nBufLen,
-                              static_cast<int>(strlen(poNewFieldDefn->GetNameRef())) +
-                              50 +
-                              (poNewFieldDefn->GetDefault() ? static_cast<int>(strlen(poNewFieldDefn->GetDefault())) : 0)
-                              );
+    OGRFieldDefn* poFieldDefnToAlter = m_poFeatureDefn->GetFieldDefn(iFieldToAlter);
+    const CPLString osOldColName( poFieldDefnToAlter->GetNameRef() );
+    const CPLString osNewColName( (nFlagsIn & ALTER_NAME_FLAG) ?
+                                  CPLString(poNewFieldDefn->GetNameRef()) :
+                                  osOldColName );
 
-    for( int iField = 0; iField < m_poFeatureDefn->GetFieldCount(); iField++ )
+    const bool bRenameCol = osOldColName != osNewColName;
+    if( bRenameCol )
     {
-        OGRFieldDefn *poFldDefn = m_poFeatureDefn->GetFieldDefn(iField);
-
-        snprintf( pszFieldListForSelect+strlen(pszFieldListForSelect),
-                 nBufLen-strlen(pszFieldListForSelect),
-                 ", \"%s\"", SQLEscapeName(poFldDefn->GetNameRef()).c_str() );
-
-        if (iField == iFieldToAlter)
+        if( (m_pszFIDColumn &&
+             strcmp(poNewFieldDefn->GetNameRef(), m_pszFIDColumn) == 0) ||
+            (GetGeomType() != wkbNone &&
+             strcmp(poNewFieldDefn->GetNameRef(),
+                    m_poFeatureDefn->GetGeomFieldDefn(0)->GetNameRef()) == 0) ||
+            m_poFeatureDefn->GetFieldIndex(poNewFieldDefn->GetNameRef()) >= 0 )
         {
-            OGRFieldDefn oTmpFieldDefn(poFldDefn);
-            if( (nFlagsIn & ALTER_NAME_FLAG) )
-                oTmpFieldDefn.SetName(poNewFieldDefn->GetNameRef());
-            if( (nFlagsIn & ALTER_TYPE_FLAG) )
-            {
-                oTmpFieldDefn.SetSubType(OFSTNone);
-                oTmpFieldDefn.SetType(poNewFieldDefn->GetType());
-                oTmpFieldDefn.SetSubType(poNewFieldDefn->GetSubType());
-            }
-            if (nFlagsIn & ALTER_WIDTH_PRECISION_FLAG)
-            {
-                oTmpFieldDefn.SetWidth(poNewFieldDefn->GetWidth());
-                oTmpFieldDefn.SetPrecision(poNewFieldDefn->GetPrecision());
-            }
-            if( (nFlagsIn & ALTER_NULLABLE_FLAG) )
-            {
-                oTmpFieldDefn.SetNullable(poNewFieldDefn->IsNullable());
-            }
-            if( (nFlagsIn & ALTER_UNIQUE_FLAG) )
-            {
-                oTmpFieldDefn.SetUnique(poNewFieldDefn->IsUnique());
-            }
-            if( (nFlagsIn & ALTER_DEFAULT_FLAG) )
-            {
-                oTmpFieldDefn.SetDefault(poNewFieldDefn->GetDefault());
-            }
-
-            snprintf( pszNewFieldList+strlen(pszNewFieldList),
-                      nBufLen-strlen(pszNewFieldList),
-                    ", '%s' %s",
-                    SQLEscapeLiteral(oTmpFieldDefn.GetNameRef()).c_str(),
-                    FieldDefnToSQliteFieldDefn(&oTmpFieldDefn).c_str() );
-            if ( (nFlagsIn & ALTER_NAME_FLAG) &&
-                 oTmpFieldDefn.GetType() == OFTString &&
-                 CSLFindString(m_papszCompressedColumns, poFldDefn->GetNameRef()) >= 0 )
-            {
-                snprintf( pszNewFieldList+strlen(pszNewFieldList),
-                         nBufLen-strlen(pszNewFieldList), "_deflate");
-            }
-            if( !oTmpFieldDefn.IsNullable() )
-                snprintf( pszNewFieldList+strlen(pszNewFieldList),
-                          nBufLen-strlen(pszNewFieldList)," NOT NULL" );
-            if( oTmpFieldDefn.IsUnique() )
-                snprintf( pszNewFieldList+strlen(pszNewFieldList),
-                          nBufLen-strlen(pszNewFieldList)," UNIQUE" );
-            if( oTmpFieldDefn.GetDefault() )
-            {
-                snprintf( pszNewFieldList+strlen(pszNewFieldList),
-                         nBufLen-strlen(pszNewFieldList)," DEFAULT %s",
-                         oTmpFieldDefn.GetDefault());
-            }
-        }
-        else
-        {
-            AddColumnDef(pszNewFieldList, nBufLen, poFldDefn);
+            CPLError(CE_Failure, CPLE_AppDefined,
+                     "Field name %s is already used for another field",
+                      poNewFieldDefn->GetNameRef());
+            return OGRERR_FAILURE;
         }
     }
 
 /* -------------------------------------------------------------------- */
+/*      Build the modified field definition from the flags.             */
+/* -------------------------------------------------------------------- */
+    OGRFieldDefn oTmpFieldDefn(poFieldDefnToAlter);
+    int nActualFlags = 0;
+    if( bRenameCol )
+    {
+        nActualFlags |= ALTER_NAME_FLAG;
+        oTmpFieldDefn.SetName(poNewFieldDefn->GetNameRef());
+    }
+    if( (nFlagsIn & ALTER_TYPE_FLAG) != 0 &&
+        (poFieldDefnToAlter->GetType() != poNewFieldDefn->GetType() ||
+         poFieldDefnToAlter->GetSubType() != poNewFieldDefn->GetSubType()) )
+    {
+        nActualFlags |= ALTER_TYPE_FLAG;
+        oTmpFieldDefn.SetSubType(OFSTNone);
+        oTmpFieldDefn.SetType(poNewFieldDefn->GetType());
+        oTmpFieldDefn.SetSubType(poNewFieldDefn->GetSubType());
+    }
+    if ( (nFlagsIn & ALTER_WIDTH_PRECISION_FLAG) != 0 &&
+         (poFieldDefnToAlter->GetWidth() != poNewFieldDefn->GetWidth() ||
+          poFieldDefnToAlter->GetPrecision() != poNewFieldDefn->GetPrecision()) )
+    {
+        nActualFlags |= ALTER_WIDTH_PRECISION_FLAG;
+        oTmpFieldDefn.SetWidth(poNewFieldDefn->GetWidth());
+        oTmpFieldDefn.SetPrecision(poNewFieldDefn->GetPrecision());
+    }
+    if( (nFlagsIn & ALTER_NULLABLE_FLAG) != 0 &&
+        poFieldDefnToAlter->IsNullable() != poNewFieldDefn->IsNullable() )
+    {
+        nActualFlags |= ALTER_NULLABLE_FLAG;
+        oTmpFieldDefn.SetNullable(poNewFieldDefn->IsNullable());
+    }
+    if( (nFlagsIn & ALTER_DEFAULT_FLAG) != 0 &&
+        !( (poFieldDefnToAlter->GetDefault() == nullptr && poNewFieldDefn->GetDefault() == nullptr) ||
+           (poFieldDefnToAlter->GetDefault() != nullptr && poNewFieldDefn->GetDefault() != nullptr &&
+            strcmp(poFieldDefnToAlter->GetDefault(), poNewFieldDefn->GetDefault()) == 0) ) )
+    {
+        nActualFlags |= ALTER_DEFAULT_FLAG;
+        oTmpFieldDefn.SetDefault(poNewFieldDefn->GetDefault());
+    }
+    if( (nFlagsIn & ALTER_UNIQUE_FLAG) != 0 &&
+        poFieldDefnToAlter->IsUnique() != poNewFieldDefn->IsUnique() )
+    {
+        nActualFlags |= ALTER_UNIQUE_FLAG;
+        oTmpFieldDefn.SetUnique( poNewFieldDefn->IsUnique());
+    }
+
+    // ALTER TABLE ... RENAME COLUMN ... was first implemented in 3.25.0 but
+    // 3.26.0 was required so that foreign key constraints are updated as well
+#if SQLITE_VERSION_NUMBER >= 3026000L
+    if( nActualFlags == ALTER_NAME_FLAG )
+    {
+        CPLDebug("SQLite", "Running ALTER TABLE RENAME COLUMN");
+        OGRErr eErr = SQLCommand( m_poDS->GetDB(),
+                   CPLString().Printf("ALTER TABLE \"%s\" RENAME COLUMN \"%s\" TO \"%s\"",
+                      SQLEscapeName(m_pszTableName).c_str(),
+                      SQLEscapeName(osOldColName).c_str(),
+                      SQLEscapeName(osNewColName).c_str()).c_str() );
+
+        if (eErr != OGRERR_NONE)
+            return eErr;
+    }
+    else
+#endif
+    {
+/* -------------------------------------------------------------------- */
+/*      Build list of old fields, and the list of new fields.           */
+/* -------------------------------------------------------------------- */
+        char *pszNewFieldList = nullptr;
+        char *pszFieldListForSelect = nullptr;
+        size_t nBufLen = 0;
+
+        InitFieldListForRecrerate(pszNewFieldList, pszFieldListForSelect,
+                                  nBufLen,
+                                  static_cast<int>(strlen(poNewFieldDefn->GetNameRef())) +
+                                  50 +
+                                  (poNewFieldDefn->GetDefault() ? static_cast<int>(strlen(poNewFieldDefn->GetDefault())) : 0)
+                                  );
+
+        for( int iField = 0; iField < m_poFeatureDefn->GetFieldCount(); iField++ )
+        {
+            OGRFieldDefn *poFldDefn = m_poFeatureDefn->GetFieldDefn(iField);
+
+            snprintf( pszFieldListForSelect+strlen(pszFieldListForSelect),
+                     nBufLen-strlen(pszFieldListForSelect),
+                     ", \"%s\"", SQLEscapeName(poFldDefn->GetNameRef()).c_str() );
+
+            if (iField == iFieldToAlter)
+            {
+                snprintf( pszNewFieldList+strlen(pszNewFieldList),
+                          nBufLen-strlen(pszNewFieldList),
+                        ", '%s' %s",
+                        SQLEscapeLiteral(oTmpFieldDefn.GetNameRef()).c_str(),
+                        FieldDefnToSQliteFieldDefn(&oTmpFieldDefn).c_str() );
+                if ( (nFlagsIn & ALTER_NAME_FLAG) &&
+                     oTmpFieldDefn.GetType() == OFTString &&
+                     CSLFindString(m_papszCompressedColumns, poFldDefn->GetNameRef()) >= 0 )
+                {
+                    snprintf( pszNewFieldList+strlen(pszNewFieldList),
+                             nBufLen-strlen(pszNewFieldList), "_deflate");
+                }
+                if( !oTmpFieldDefn.IsNullable() )
+                    snprintf( pszNewFieldList+strlen(pszNewFieldList),
+                              nBufLen-strlen(pszNewFieldList)," NOT NULL" );
+                if( oTmpFieldDefn.IsUnique() )
+                    snprintf( pszNewFieldList+strlen(pszNewFieldList),
+                              nBufLen-strlen(pszNewFieldList)," UNIQUE" );
+                if( oTmpFieldDefn.GetDefault() )
+                {
+                    snprintf( pszNewFieldList+strlen(pszNewFieldList),
+                             nBufLen-strlen(pszNewFieldList)," DEFAULT %s",
+                             oTmpFieldDefn.GetDefault());
+                }
+            }
+            else
+            {
+                AddColumnDef(pszNewFieldList, nBufLen, poFldDefn);
+            }
+        }
+
+/* -------------------------------------------------------------------- */
 /*      Recreate table.                                                 */
 /* -------------------------------------------------------------------- */
-    CPLString osErrorMsg;
-    osErrorMsg.Printf("Failed to alter field %s from table %s",
-                  m_poFeatureDefn->GetFieldDefn(iFieldToAlter)->GetNameRef(),
-                  m_poFeatureDefn->GetName());
+        CPLString osErrorMsg;
+        osErrorMsg.Printf("Failed to alter field %s from table %s",
+                      m_poFeatureDefn->GetFieldDefn(iFieldToAlter)->GetNameRef(),
+                      m_poFeatureDefn->GetName());
 
-    OGRErr eErr = RecreateTable(pszFieldListForSelect,
-                                pszNewFieldList,
-                                osErrorMsg.c_str());
+        OGRErr eErr = RecreateTable(pszFieldListForSelect,
+                                    pszNewFieldList,
+                                    osErrorMsg.c_str());
 
-    CPLFree( pszFieldListForSelect );
-    CPLFree( pszNewFieldList );
+        CPLFree( pszFieldListForSelect );
+        CPLFree( pszNewFieldList );
 
-    if (eErr != OGRERR_NONE)
-        return eErr;
+        if (eErr != OGRERR_NONE)
+            return eErr;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Finish                                                          */
@@ -2052,7 +2268,7 @@ OGRErr OGRSQLiteTableLayer::AlterFieldDefn( int iFieldToAlter, OGRFieldDefn* poN
 
     OGRFieldDefn* poFieldDefn = m_poFeatureDefn->GetFieldDefn(iFieldToAlter);
 
-    if (nFlagsIn & ALTER_TYPE_FLAG)
+    if (nActualFlags & ALTER_TYPE_FLAG)
     {
         int iIdx = 0;
         if( poNewFieldDefn->GetType() != OFTString &&
@@ -2066,7 +2282,7 @@ OGRErr OGRSQLiteTableLayer::AlterFieldDefn( int iFieldToAlter, OGRFieldDefn* poN
         poFieldDefn->SetType(poNewFieldDefn->GetType());
         poFieldDefn->SetSubType(poNewFieldDefn->GetSubType());
     }
-    if (nFlagsIn & ALTER_NAME_FLAG)
+    if (nActualFlags & ALTER_NAME_FLAG)
     {
         const int iIdx = CSLFindString(m_papszCompressedColumns,
                                        poFieldDefn->GetNameRef());
@@ -2078,14 +2294,14 @@ OGRErr OGRSQLiteTableLayer::AlterFieldDefn( int iFieldToAlter, OGRFieldDefn* poN
         }
         poFieldDefn->SetName(poNewFieldDefn->GetNameRef());
     }
-    if (nFlagsIn & ALTER_WIDTH_PRECISION_FLAG)
+    if (nActualFlags & ALTER_WIDTH_PRECISION_FLAG)
     {
         poFieldDefn->SetWidth(poNewFieldDefn->GetWidth());
         poFieldDefn->SetPrecision(poNewFieldDefn->GetPrecision());
     }
-    if (nFlagsIn & ALTER_NULLABLE_FLAG)
+    if (nActualFlags & ALTER_NULLABLE_FLAG)
         poFieldDefn->SetNullable(poNewFieldDefn->IsNullable());
-    if (nFlagsIn & ALTER_DEFAULT_FLAG)
+    if (nActualFlags & ALTER_DEFAULT_FLAG)
         poFieldDefn->SetDefault(poNewFieldDefn->GetDefault());
 
     return OGRERR_NONE;
@@ -3163,6 +3379,8 @@ OGRErr OGRSQLiteTableLayer::RunDeferredCreationIfNecessary()
         }
     }
     osCommand += ")";
+    if( m_bStrict )
+        osCommand += " STRICT";
 
 #ifdef DEBUG
     CPLDebug( "OGR_SQLITE", "exec(%s)", osCommand.c_str() );

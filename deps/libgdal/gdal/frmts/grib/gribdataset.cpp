@@ -70,7 +70,7 @@ CPL_C_END
 #include "ogr_spatialref.h"
 #include "memdataset.h"
 
-CPL_CVSID("$Id: gribdataset.cpp 9c1a477986c00dc3a779236e4622b38f2119a772 2021-12-08 16:04:20 +0100 Even Rouault $")
+CPL_CVSID("$Id: gribdataset.cpp  $")
 
 static CPLMutex *hGRIBMutex = nullptr;
 
@@ -981,7 +981,7 @@ CPLErr GRIBRasterBand::IReadBlock( int /* nBlockXOff */,
            (nCopyWords - nSplitAndSwapColumn) * sizeof(double));
 
     if (nSplitAndSwapColumn > 0)
-        memcpy(reinterpret_cast<void*>(reinterpret_cast<double*>(pImage) + nSplitAndSwapColumn),
+        memcpy(reinterpret_cast<void*>(reinterpret_cast<double*>(pImage) + nCopyWords - nSplitAndSwapColumn),
             m_Grib_Data + static_cast<size_t>(nGribDataXSize) * (nGribDataYSize - nBlockYOff - 1),
             nSplitAndSwapColumn * sizeof(double));
 
@@ -2235,27 +2235,11 @@ GDALDataset *GRIBDataset::OpenMultiDim( GDALOpenInfo *poOpenInfo )
         }
         psInv->start += nOffsetFirstMessage;
 
-        bool bNewArray = false;
-        if( osElement.empty() )
-        {
-            bNewArray = true;
-        }
-        else
-        {
-            if( osElement != psInv->element ||
-                osShortFstLevel != psInv->shortFstLevel ||
-                !((dfRefTime == psInv->refTime && dfForecastTime != psInv->foreSec) ||
-                  (dfRefTime != psInv->refTime && dfForecastTime == psInv->foreSec)) )
-            {
-                bNewArray = true;
-            }
-            else
-            {
-                poArray->ExtendTimeDim(psInv->start, psInv->subgNum, psInv->validTime);
-            }
-        }
-
-        if (bNewArray)
+        if( poArray == nullptr ||
+            osElement != psInv->element ||
+            osShortFstLevel != psInv->shortFstLevel ||
+            !((dfRefTime == psInv->refTime && dfForecastTime != psInv->foreSec) ||
+              (dfRefTime != psInv->refTime && dfForecastTime == psInv->foreSec)) )
         {
             if( poArray)
             {
@@ -2292,6 +2276,7 @@ GDALDataset *GRIBDataset::OpenMultiDim( GDALOpenInfo *poOpenInfo )
             // the first GRIB band.
             poDS->SetGribMetaData(metaData);
 
+            // coverity[tainted_data]
             GRIBRasterBand gribBand(poDS, bandNr, psInv);
             if( psInv->GribVersion == 2 )
                 gribBand.FindPDSTemplate();
@@ -2315,6 +2300,10 @@ GDALDataset *GRIBDataset::OpenMultiDim( GDALOpenInfo *poOpenInfo )
 
             MetaFree(metaData);
             delete metaData;
+        }
+        else
+        {
+            poArray->ExtendTimeDim(psInv->start, psInv->subgNum, psInv->validTime);
         }
     }
 

@@ -48,7 +48,7 @@
 #include "ogr_core.h"
 #include "filegdbtable.h"
 
-CPL_CVSID("$Id: filegdbindex.cpp df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: filegdbindex.cpp  $")
 
 namespace OpenFileGDB
 {
@@ -1370,6 +1370,7 @@ int FileGDBIndexIteratorBase::LoadNextFeaturePage()
             int key;
             m_oCacheFeaturePage.getOldestEntry(key, cachedPage);
             m_oCacheFeaturePage.remove(key);
+            CPLAssert(cachedPage);
             cachedPage->clear();
         }
         else
@@ -2190,6 +2191,7 @@ bool FileGDBSpatialIndexIteratorImpl::FindPages(int iLevel, int nPage)
             int key;
             m_oCachePage[iLevel].getOldestEntry(key, cachedPage);
             m_oCachePage[iLevel].remove(key);
+            CPLAssert(cachedPage);
             cachedPage->clear();
         }
         else

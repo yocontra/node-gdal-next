@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpcidsklayer.cpp 3b89063b95a18cfefb8dcf527a472987c52e6e3c 2020-05-27 19:53:42 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrpcidsklayer.cpp  $")
 
 /************************************************************************/
 /*                           OGRPCIDSKLayer()                           */

@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: usgsdemdataset.cpp 14cd5449ff8c51f2212a04fb6ad1fbce4ce7a972 2021-12-22 22:38:33 +0100 Even Rouault $")
+CPL_CVSID("$Id: usgsdemdataset.cpp  $")
 
 typedef struct {
     double      x;

@@ -35,7 +35,7 @@
 #include <map>
 #include <vector>
 
-CPL_CVSID("$Id: ogrili1layer.cpp c8b3cd82984cc58928c70643558edabf3d571016 2021-03-16 15:07:53 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrili1layer.cpp  $")
 
 /************************************************************************/
 /*                           OGRILI1Layer()                              */

@@ -49,7 +49,7 @@
 #include "ogrwarpedlayer.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrvrtdatasource.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrvrtdatasource.cpp  $")
 
 /************************************************************************/
 /*                       OGRVRTGetGeometryType()                        */
@@ -489,8 +489,7 @@ OGRLayer *OGRVRTDataSource::InstantiateUnionLayer(
             papoFields[nFields] = new OGRFieldDefn(&oFieldDefn);
             nFields++;
         }
-        else if( psSubNode->eType == CXT_Element &&
-                 EQUAL(psSubNode->pszValue, "GeometryField") )
+        else if( EQUAL(psSubNode->pszValue, "GeometryField") )
         {
             const char *l_pszName = CPLGetXMLValue(psSubNode, "name", nullptr);
             if( l_pszName == nullptr )

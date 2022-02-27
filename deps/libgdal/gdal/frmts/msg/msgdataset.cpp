@@ -45,7 +45,7 @@
 #include <stdio.h>
 #endif
 
-CPL_CVSID("$Id: msgdataset.cpp 4dd19a2b96712950a8b0af78dfbe4178e180f12f 2021-08-12 14:55:50 +0200 Even Rouault $")
+CPL_CVSID("$Id: msgdataset.cpp  $")
 
 const double MSGDataset::rCentralWvl[12] = {0.635, 0.810, 1.640, 3.900, 6.250, 7.350, 8.701, 9.660, 10.800, 12.000, 13.400, 0.750};
 const double MSGDataset::rVc[12] = {-1, -1, -1, 2569.094, 1598.566, 1362.142, 1149.083, 1034.345, 930.659, 839.661, 752.381, -1};
@@ -516,9 +516,9 @@ CPLErr MSGRasterBand::IReadBlock( int /*nBlockXOff*/, int nBlockYOff,
         if (xhp.isValid())
         {
           std::vector <short> QualityInfo;
-          unsigned short chunk_height = xhp.nrRows();
-          unsigned short chunk_bpp = xhp.nrBitsPerPixel();
-          unsigned short chunk_width = xhp.nrColumns();
+          unsigned short chunk_height = static_cast<unsigned short>(xhp.nrRows());
+          unsigned short chunk_bpp = static_cast<unsigned short>(xhp.nrBitsPerPixel());
+          unsigned short chunk_width = static_cast<unsigned short>(xhp.nrColumns());
           unsigned __int8 NR = (unsigned __int8)chunk_bpp;
           unsigned int nb_ibytes = static_cast<unsigned int>(xhp.dataSize());
           int iShift = 0;
@@ -597,12 +597,12 @@ CPLErr MSGRasterBand::IReadBlock( int /*nBlockXOff*/, int nBlockYOff,
               if (poGDS->command.cDataConversion == 'B')
               {
                 for( int i = 0; i < nBlockSize; ++i )
-                    ((GByte *)pImage)[i] = cimg.Get()[y+=iStep] / 4;
+                    ((GByte *)pImage)[i] = static_cast<GByte>(cimg.Get()[y+=iStep] / 4);
               }
               else
               {
                 for( int i = 0; i < nBlockSize; ++i )
-                    ((GByte *)pImage)[i] = cimg.Get()[y+=iStep];
+                    ((GByte *)pImage)[i] = static_cast<GByte>(cimg.Get()[y+=iStep]);
               }
             }
             else
@@ -618,7 +618,7 @@ CPLErr MSGRasterBand::IReadBlock( int /*nBlockXOff*/, int nBlockYOff,
                   if (fSplitStrip && (j >= iSplitRow)) // In splitstrip, below splitline, thus do not shift!!
                     iXOffset -= iShift;
                   for (int i = 0; i < chunk_width; ++i)
-                    ((GByte *)pImage)[++iXOffset] = cimg.Get()[y+=iStep] / 4;
+                    ((GByte *)pImage)[++iXOffset] = static_cast<GByte>(cimg.Get()[y+=iStep] / 4);
                 }
               }
               else
@@ -630,7 +630,7 @@ CPLErr MSGRasterBand::IReadBlock( int /*nBlockXOff*/, int nBlockYOff,
                   if (fSplitStrip && (j >= iSplitRow)) // In splitstrip, below splitline, thus do not shift!!
                     iXOffset -= iShift;
                   for (int i = 0; i < chunk_width; ++i)
-                    ((GByte *)pImage)[++iXOffset] = cimg.Get()[y+=iStep];
+                    ((GByte *)pImage)[++iXOffset] = static_cast<GByte>(cimg.Get()[y+=iStep]);
                 }
               }
             }

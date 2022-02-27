@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: org_sxf_defs.h 5112c658224b15f39f273fc70a7206df16155405 2016-10-24 15:03:26Z Kurt Schwehr $
+ * $Id: org_sxf_defs.h  $
  *
  * Project:  SXF Translator
  * Purpose:  Include file defining Records Structures for file reading and

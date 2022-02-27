@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: doq1dataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: doq1dataset.cpp  $")
 
 static const char UTM_FORMAT[] =
     "PROJCS[\"%s / UTM zone %dN\",GEOGCS[%s,PRIMEM[\"Greenwich\",0],"
@@ -270,7 +270,7 @@ GDALDataset *DOQ1Dataset::Open( GDALOpenInfo * poOpenInfo )
 
     if( nBandTypes < 5 )
         nBytesPerPixel = 1;
-    else if( nBandTypes == 5 )
+    else /* if( nBandTypes == 5 ) */
         nBytesPerPixel = 3;
 
     const int nBytesPerLine = nBytesPerPixel * nWidth;

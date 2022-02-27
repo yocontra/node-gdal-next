@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sqlite.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
+ * $Id: ogr_sqlite.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/SQLite driver.
@@ -280,6 +280,7 @@ class OGRSQLiteTableLayer final: public OGRSQLiteLayer
 
     bool                m_bLaunderColumnNames = true;
     bool                m_bSpatialite2D = false;
+    bool                m_bStrict = false;
 
     CPLString           m_osWHERE{};
     CPLString           m_osQuery{};
@@ -393,6 +394,7 @@ class OGRSQLiteTableLayer final: public OGRSQLiteLayer
     void                SetDeferredSpatialIndexCreation( bool bFlag )
                                 { m_bDeferredSpatialIndexCreation = bFlag; }
     void                SetCompressedColumns( const char* pszCompressedColumns );
+    void                SetStrictFlag( bool bFlag ) { m_bStrict = bFlag; }
 
     int                 CreateSpatialIndex(int iGeomCol);
 
@@ -729,7 +731,8 @@ class RL2RasterBand final: public GDALPamRasterBand
 #endif // HAVE_RASTERLITE2
 
 CPLString OGRSQLiteFieldDefnToSQliteFieldDefn( OGRFieldDefn* poFieldDefn,
-                                               bool bSQLiteDialectInternalUse );
+                                               bool bSQLiteDialectInternalUse,
+                                               bool bStrict );
 
 void OGRSQLiteRegisterInflateDeflate(sqlite3* hDB);
 

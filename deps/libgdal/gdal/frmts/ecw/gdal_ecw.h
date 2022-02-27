@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_ecw.h 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $
+ * $Id: gdal_ecw.h  $
  *
  * Project:  GDAL
  * Purpose:  ECW (ERDAS Wavelet Compression Format) Driver Definitions
@@ -697,6 +697,10 @@ class ECWRasterBand final: public GDALPamRasterBand
                                   double *pdfMean, double *padfStdDev ) override;
     virtual CPLErr SetStatistics( double dfMin, double dfMax,
                                   double dfMean, double dfStdDev ) override;
+
+    virtual CPLErr SetMetadataItem( const char * pszName,
+                                 const char * pszValue,
+                                 const char * pszDomain = "" ) override;
 #endif
 
 };

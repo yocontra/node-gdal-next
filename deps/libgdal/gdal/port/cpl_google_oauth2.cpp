@@ -39,7 +39,7 @@
 #include "cpl_string.h"
 
 
-CPL_CVSID("$Id: cpl_google_oauth2.cpp d63c528d656727081659f7ba10a765e32b852bcd 2020-10-25 12:07:53 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_google_oauth2.cpp  $")
 
 /* ==================================================================== */
 /*      Values related to OAuth2 authorization to use fusion            */

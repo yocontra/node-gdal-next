@@ -57,7 +57,7 @@
 #include "shapefil.h"
 #include "shp_vsi.h"
 
-CPL_CVSID("$Id: ogrshapelayer.cpp 3a597eac3ef6d6d246655d0430d6eefe7a5eb612 2021-11-29 15:31:29 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrshapelayer.cpp  $")
 
 /************************************************************************/
 /*                           OGRShapeLayer()                            */

@@ -32,7 +32,7 @@
 #include "ntf.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ntf_estlayers.cpp 85aade48c21538ba123f385aaa62eb7728038cb1 2019-08-24 11:14:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: ntf_estlayers.cpp  $")
 
 constexpr int MAX_LINK = 5000;
 

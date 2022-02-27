@@ -45,7 +45,7 @@
 #include "cpl_vsi.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: rasterfill.cpp 9aecbf344bcaf55e1ef26aa89f0732f60a644ff4 2021-08-11 11:10:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: rasterfill.cpp  $")
 
 /************************************************************************/
 /*                           GDALFilterLine()                           */

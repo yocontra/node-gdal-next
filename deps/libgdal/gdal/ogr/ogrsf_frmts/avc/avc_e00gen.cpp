@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: avc_e00gen.cpp 8257eed38341fc286c5ecd94b7a142d5850d4b12 2018-03-01 20:46:13Z Even Rouault $
+ * $Id: avc_e00gen.cpp  $
  *
  * Name:     avc_e00gen.c
  * Project:  Arc/Info vector coverage (AVC)  BIN->E00 conversion library

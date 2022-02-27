@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pgeo.h c62ee35e511f27eb73a8668006d6f2dc9c4edbc4 2021-08-29 09:01:23 +1000 Nyall Dawson $
+ * $Id: ogr_pgeo.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Personal Geodatabase driver.
@@ -47,6 +47,8 @@ class OGRPGeoLayer CPL_NON_FINAL: public OGRLayer
 {
   protected:
     OGRFeatureDefn     *poFeatureDefn;
+
+    int                 m_nStatementFlags = 0;
 
     CPLODBCStatement   *poStmt;
 
@@ -108,7 +110,7 @@ class OGRPGeoTableLayer final: public OGRPGeoLayer
     std::string         m_osDocumentation;
 
   public:
-    explicit            OGRPGeoTableLayer( OGRPGeoDataSource * );
+    explicit            OGRPGeoTableLayer( OGRPGeoDataSource *,int );
                         virtual ~OGRPGeoTableLayer();
 
     CPLErr              Initialize( const char *pszTableName,
@@ -185,6 +187,9 @@ class OGRPGeoDataSource final: public OGRDataSource
     mutable bool        m_COUNT_STAR_state_known = false;
     mutable bool        m_COUNT_STAR_working = false;
 #endif
+
+    int                 m_nStatementFlags = 0;
+
     static bool         IsPrivateLayerName( const CPLString& osName );
   public:
                         OGRPGeoDataSource();

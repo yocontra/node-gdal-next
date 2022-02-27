@@ -63,7 +63,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: hfadataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfadataset.cpp  $")
 
 constexpr double D2R = M_PI / 180.0;
 
@@ -3238,6 +3238,8 @@ CPLErr HFADataset::WriteProjection()
             sDatum.datumname = const_cast<char *>("NAD83");
         if( nGCS == 4283 )
             sDatum.datumname = const_cast<char *>("GDA94");
+        if( nGCS == 6284 )
+            sDatum.datumname = const_cast<char *>("Pulkovo 1942");
 
         if( poGeogSRS->GetTOWGS84(sDatum.params) == OGRERR_NONE )
         {

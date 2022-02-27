@@ -43,7 +43,7 @@
 
 extern "C" void GDALRegister_STACTA();
 
-CPL_CVSID("$Id: stactadataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: stactadataset.cpp  $")
 
 // Implements a driver for
 // https://github.com/stac-extensions/tiled-assets
@@ -435,9 +435,9 @@ CPLErr STACTARawDataset::IRasterIO( GDALRWFlag eRWFlag,
         int nBufXOff = 0;
         for( int iX = nMinBlockX; iX <= nMaxBlockX; iX++ )
         {
-            const auto osURL = CPLString(m_osURLTemplate)
-                .replaceAll("{TileRow}", CPLSPrintf("%d", iY + m_nMinMetaTileRow))
-                .replaceAll("{TileCol}", CPLSPrintf("%d", iX + m_nMinMetaTileCol));
+            CPLString osURL(m_osURLTemplate);
+            osURL.replaceAll("{TileRow}", CPLSPrintf("%d", iY + m_nMinMetaTileRow));
+            osURL.replaceAll("{TileCol}", CPLSPrintf("%d", iX + m_nMinMetaTileCol));
 
             const int nTileXOff = std::max(0, nXOff - iX * m_nMetaTileWidth);
             const int nTileXSize =

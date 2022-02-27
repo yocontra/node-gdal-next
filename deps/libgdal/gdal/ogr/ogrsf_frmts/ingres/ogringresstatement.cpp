@@ -29,7 +29,7 @@
 #include "ogr_ingres.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogringresstatement.cpp d14a537a4324399712f4b822656d374341773cd3 2018-07-29 23:14:54 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogringresstatement.cpp  $")
 
 /************************************************************************/
 /*                         OGRIngresStatement()                         */

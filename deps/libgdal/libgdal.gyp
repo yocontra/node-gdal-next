@@ -105,9 +105,9 @@
 
 				# "./gdal/port/vsipreload.cpp",
 				# "./gdal/port/cpl_vsil_simple.cpp",
-				"./gdal/port/xmlreformat.cpp",
 				"./gdal/port/cplstringlist.cpp",
 				"./gdal/port/cplstring.cpp",
+				"./gdal/port/cpl_float.cpp",
 				"./gdal/port/cplkeywordparser.cpp",
 				"./gdal/port/cplgetsymbol.cpp",
 				"./gdal/port/cpl_xml_validate.cpp",

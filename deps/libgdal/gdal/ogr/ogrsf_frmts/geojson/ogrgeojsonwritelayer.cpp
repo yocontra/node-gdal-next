@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgeojsonwritelayer.cpp 88e44609e1a6ccc902c0aa197add671a79681267 2020-11-11 21:26:07 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonwritelayer.cpp  $")
 
 /************************************************************************/
 /*                         OGRGeoJSONWriteLayer()                       */

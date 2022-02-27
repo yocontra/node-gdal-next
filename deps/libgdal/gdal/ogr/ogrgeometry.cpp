@@ -58,7 +58,7 @@
 #define UNUSED_IF_NO_GEOS
 #endif
 
-CPL_CVSID("$Id: ogrgeometry.cpp f64a00905414e76a0024f06451a48681db752f11 2021-05-04 22:52:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeometry.cpp  $")
 
 //! @cond Doxygen_Suppress
 int OGRGeometry::bGenerate_DB2_V72_BYTE_ORDER = FALSE;
@@ -2199,6 +2199,14 @@ OGRGeometry::IsValid() const
         if( hThisGeosGeom != nullptr  )
         {
             bResult = GEOSisValid_r( hGEOSCtxt, hThisGeosGeom );
+#ifdef DEBUG_VERBOSE
+            if( !bResult )
+            {
+                char* pszReason = GEOSisValidReason_r( hGEOSCtxt, hThisGeosGeom );
+                CPLDebug("OGR", "%s", pszReason);
+                GEOSFree(pszReason);
+            }
+#endif
             GEOSGeom_destroy_r( hGEOSCtxt, hThisGeosGeom );
         }
         freeGEOSContext( hGEOSCtxt );

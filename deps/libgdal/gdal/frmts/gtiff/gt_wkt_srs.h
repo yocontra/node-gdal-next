@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_wkt_srs.h 02501e858470529cbe79c7fe1f0154e0cdaae288 2021-05-08 15:51:06 +0200 Even Rouault $
+ * $Id: gt_wkt_srs.h  $
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implements translation between GeoTIFF normalized projection

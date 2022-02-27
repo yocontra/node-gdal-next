@@ -29,7 +29,7 @@
 #include "ogr_tiger.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrtigerdriver.cpp 8d7fe3d02ab9d6410b7603e029a589b7be2a12a1 2021-10-07 14:35:38 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrtigerdriver.cpp  $")
 
 /************************************************************************/
 /*                                Open()                                */

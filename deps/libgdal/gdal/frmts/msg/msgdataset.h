@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: msgdataset.h 4dd19a2b96712950a8b0af78dfbe4178e180f12f 2021-08-12 14:55:50 +0200 Even Rouault $
+ * $Id: msgdataset.h  $
  *
  * Project:  MSG Driver
  * Purpose:  GDALDataset driver for MSG translator for read support.

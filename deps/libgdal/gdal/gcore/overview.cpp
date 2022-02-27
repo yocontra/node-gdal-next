@@ -70,7 +70,7 @@
 
 #endif
 
-CPL_CVSID("$Id: overview.cpp a52e59ceeaf2526250d1aab947c5cf914104db22 2021-12-06 15:41:59 +0100 Even Rouault $")
+CPL_CVSID("$Id: overview.cpp  $")
 
 /************************************************************************/
 /*                     GDALResampleChunk32R_Near()                      */
@@ -2035,9 +2035,9 @@ GDALResampleChunk32R_Gauss( double dfXRatioDstToSrc, double dfYRatioDstToSrc,
                         if( colorEntries[idx].c4 )
                         {
                             const int nWeight = panLineWeight[i];
-                            nTotalR += colorEntries[idx].c1 * nWeight;
-                            nTotalG += colorEntries[idx].c2 * nWeight;
-                            nTotalB += colorEntries[idx].c3 * nWeight;
+                            nTotalR += static_cast<GInt64>(colorEntries[idx].c1 * nWeight);
+                            nTotalG += static_cast<GInt64>(colorEntries[idx].c2 * nWeight);
+                            nTotalB += static_cast<GInt64>(colorEntries[idx].c3 * nWeight);
                             nTotalWeight += nWeight;
                         }
                     }
@@ -3512,7 +3512,10 @@ static CPLErr GDALResampleChunk32R_Convolution(
     if( EQUAL(pszResampling, "BILINEAR") )
         eResample = GRA_Bilinear;
     else if( EQUAL(pszResampling, "CUBIC") )
+    {
         eResample = GRA_Cubic;
+        bKernelWithNegativeWeights = true;
+    }
     else if( EQUAL(pszResampling, "CUBICSPLINE") )
         eResample = GRA_CubicSpline;
     else if( EQUAL(pszResampling, "LANCZOS") )

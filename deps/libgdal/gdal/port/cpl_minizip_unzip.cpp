@@ -65,7 +65,7 @@ woven in by Terry Thorsen 1/2003.
 #   include <errno.h>
 #endif
 
-CPL_CVSID("$Id: cpl_minizip_unzip.cpp f7598b073b8e1d8db5d2c4f7dd98a23783ebaa3a 2021-03-11 11:59:15 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_minizip_unzip.cpp  $")
 
 #ifndef CASESENSITIVITYDEFAULT_NO
 #  if !defined(unix) && !defined(CASESENSITIVITYDEFAULT_YES)

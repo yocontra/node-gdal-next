@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: parsexsd.cpp ee7d33b2b9929bdfd7f3a285c3777761b2a59ef2 2021-05-09 13:45:35 +0200 Even Rouault $")
+CPL_CVSID("$Id: parsexsd.cpp  $")
 
 /************************************************************************/
 /*                              StripNS()                               */

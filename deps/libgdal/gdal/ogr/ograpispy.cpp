@@ -41,7 +41,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ograpispy.cpp 428c6a6a0a81364b703d448b3baa74bb17ae2cbd 2020-10-21 15:43:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: ograpispy.cpp  $")
 
 #ifdef OGRAPISPY_ENABLED
 
@@ -50,7 +50,6 @@ static CPLMutex* hMutex = nullptr;
 static CPLString osSnapshotPath;
 static CPLString osSpyFile;
 static FILE* fpSpyFile = nullptr;
-extern "C" int CPL_DLL GDALIsInGlobalDestructor(void);
 
 // Keep in sync with cpl_conv.cpp
 void OGRAPISPYCPLSetConfigOption(const char*, const char*);
@@ -130,7 +129,6 @@ void FeatureDefnDescription::Free()
 
 DatasetDescription::~DatasetDescription()
 {
-    if( !GDALIsInGlobalDestructor() )
     {
         std::map<OGRLayerH, LayerDescription>::iterator oIter =
             oMapLayer.begin();
@@ -610,7 +608,6 @@ void OGRAPISpyPreClose( GDALDatasetH hDS )
 
 void OGRAPISpyPostClose()
 {
-    if( !GDALIsInGlobalDestructor() )
     {
         if( !OGRAPISpyEnabled() ) return;
         CPLMutexHolderD(&hMutex);

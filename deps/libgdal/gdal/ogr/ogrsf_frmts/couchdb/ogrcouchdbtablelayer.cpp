@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrcouchdbtablelayer.cpp c590b0d14bea43032fcac1bd2cff79519a0fb16d 2021-08-12 15:26:20 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcouchdbtablelayer.cpp  $")
 
 /************************************************************************/
 /*                       OGRCouchDBTableLayer()                         */
@@ -1052,7 +1052,7 @@ int OGRCouchDBTableLayer::GetTotalFeatureCount()
     }
 
     if (nTotalRows >= static_cast<int>(nSpecialRows))
-        nTotalRows -= nSpecialRows;
+        nTotalRows -= static_cast<int>(nSpecialRows);
 
     json_object_put(poAnswerObj);
 

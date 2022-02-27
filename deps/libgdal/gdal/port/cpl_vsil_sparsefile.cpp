@@ -51,7 +51,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_virtual.h"
 
-CPL_CVSID("$Id: cpl_vsil_sparsefile.cpp a044c83f8091becdd11e27be6e9c08d0d3478126 2021-02-24 11:38:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_sparsefile.cpp  $")
 
 class SFRegion {
 public:
@@ -540,10 +540,12 @@ char **VSISparseFileFilesystemHandler::ReadDir( const char * /* pszPath */ )
 /*                 VSIInstallSparseFileFilesystemHandler()              */
 /************************************************************************/
 
-/**
- * Install /vsisparse/ virtual file handler.
- *
- * @see <a href="gdal_virtual_file_systems.html#gdal_virtual_file_systems_vsisparse">/vsisparse/ documentation</a>
+/*!
+ \brief Install /vsisparse/ virtual file handler.
+
+ \verbatim embed:rst
+ See :ref:`/vsisparse/ documentation <vsisparse>`
+ \endverbatim
  */
 
 void VSIInstallSparseFileHandler()

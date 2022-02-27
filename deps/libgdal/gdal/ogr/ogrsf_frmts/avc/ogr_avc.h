@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_avc.h 3a621d7b7c98d62dac36562b1c25a4257b1e47a6 2021-10-11 15:43:00 +1000 Nyall Dawson $
+ * $Id: ogr_avc.h  $
  *
  * Project:  Arc/Info Coverage (E00 & Binary) Reader
  * Purpose:  Declarations for OGR wrapper classes for coverage access.

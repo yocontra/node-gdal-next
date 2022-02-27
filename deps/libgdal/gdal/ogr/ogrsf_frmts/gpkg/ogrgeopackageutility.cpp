@@ -29,7 +29,7 @@
 #include "ogrgeopackageutility.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrgeopackageutility.cpp d3e6dd3f97d6cab122f5d8a42fe05267326af746 2021-04-03 04:38:18 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeopackageutility.cpp  $")
 
 /* Requirement 20: A GeoPackage SHALL store feature table geometries */
 /* with the basic simple feature geometry types (Geometry, Point, */

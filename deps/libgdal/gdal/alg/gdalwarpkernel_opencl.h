@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarpkernel_opencl.h 81cf50eb5388867c88b73e923d9e9264653b5fec 2021-04-24 00:34:42 +0200 Even Rouault $
+ * $Id: gdalwarpkernel_opencl.h  $
  *
  * Project:  OpenCL Image Reprojector
  * Purpose:  Implementation of the GDALWarpKernel reprojector in OpenCL.

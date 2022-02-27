@@ -37,7 +37,7 @@
 
 #define PQexec this_is_an_error
 
-CPL_CVSID("$Id: ogrpgdatasource.cpp 2d22aad19ebe25e398030436d2c91ca61b5145db 2021-12-09 21:29:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrpgdatasource.cpp  $")
 
 static void OGRPGNoticeProcessor( void *arg, const char * pszMessage );
 
@@ -103,13 +103,22 @@ OGRPGDataSource::~OGRPGDataSource()
 /*                              FlushCache()                            */
 /************************************************************************/
 
-void OGRPGDataSource::FlushCache(bool /* bAtClosing */)
+OGRErr OGRPGDataSource::FlushCacheWithRet(bool /* bAtClosing */)
 {
-    EndCopy();
-    for( int iLayer = 0; iLayer < nLayers; iLayer++ )
+    OGRErr eErr = EndCopy();
+    if( eErr == OGRERR_NONE )
     {
-        papoLayers[iLayer]->RunDeferredCreationIfNecessary();
+        for( int iLayer = 0; iLayer < nLayers; iLayer++ )
+        {
+            papoLayers[iLayer]->RunDeferredCreationIfNecessary();
+        }
     }
+    return eErr;
+}
+
+void OGRPGDataSource::FlushCache(bool bAtClosing)
+{
+    FlushCacheWithRet(bAtClosing);
 }
 
 /************************************************************************/
@@ -1808,6 +1817,38 @@ OGRPGDataSource::ICreateLayer( const char * pszLayerName,
     if( poSRS != nullptr )
         nSRSId = FetchSRSId( poSRS );
 
+    if( eType != wkbNone && EQUAL(pszGeomType, "geography") )
+    {
+        if( poSRS != nullptr && !poSRS->IsGeographic() )
+        {
+            CPLError(CE_Failure, CPLE_NotSupported,
+                     "geography type only supports geographic SRS");
+
+            CPLFree( pszTableName );
+            CPLFree( pszSchemaName );
+            return nullptr;
+        }
+
+        if( !(sPostGISVersion.nMajor >= 3 ||
+              (sPostGISVersion.nMajor == 2 && sPostGISVersion.nMinor >= 2)) &&
+            nSRSId != nUndefinedSRID && nSRSId != 4326 )
+        {
+            CPLError(CE_Failure, CPLE_NotSupported,
+                     "geography type in PostGIS < 2.2 only supports SRS = EPSG:4326");
+
+            CPLFree( pszTableName );
+            CPLFree( pszSchemaName );
+            return nullptr;
+        }
+
+        if( nSRSId == nUndefinedSRID )
+        {
+            CPLError(CE_Warning, CPLE_AppDefined,
+                     "Assuming EPSG:4326 for geographic type (but no implicit reprojection to it will be done)");
+            nSRSId = 4326;
+        }
+    }
+
     const char *pszGeometryType = OGRToOGCGeomType(eType);
 
     int bDeferredCreation = CPLTestBool(CPLGetConfigOption( "OGR_PG_DEFERRED_CREATION", "YES" ));
@@ -2587,12 +2628,16 @@ OGRErr OGRPGDataSource::CommitTransaction()
     /*CPLDebug("PG", "poDS=%p CommitTransaction() nSoftTransactionLevel=%d",
              this, nSoftTransactionLevel);*/
 
-    FlushCache(false);
+    OGRErr eErr = FlushCacheWithRet(false);
+    if( eErr != OGRERR_NONE )
+    {
+        RollbackTransaction();
+        return eErr;
+    }
 
     nSoftTransactionLevel--;
     bUserTransactionActive = FALSE;
 
-    OGRErr eErr;
     if( bSavePointActive )
     {
         CPLAssert(nSoftTransactionLevel > 0);
@@ -2770,14 +2815,9 @@ OGRErr OGRPGDataSource::FlushSoftTransaction()
 
     bSavePointActive = FALSE;
 
-    OGRErr eErr = OGRERR_NONE;
-    if( nSoftTransactionLevel > 0 )
-    {
-        CPLAssert(nSoftTransactionLevel == 1 );
-        nSoftTransactionLevel = 0;
-        eErr = DoTransactionCommand("COMMIT");
-    }
-    return eErr;
+    CPLAssert(nSoftTransactionLevel == 1 );
+    nSoftTransactionLevel = 0;
+    return DoTransactionCommand("COMMIT");
 }
 
 /************************************************************************/

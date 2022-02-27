@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrtriangle.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $
+ * $Id: ogrtriangle.cpp  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  The OGRTriangle geometry class.
@@ -32,7 +32,7 @@
 #include "ogr_api.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: ogrtriangle.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrtriangle.cpp  $")
 
 /************************************************************************/
 /*                             OGRTriangle()                            */

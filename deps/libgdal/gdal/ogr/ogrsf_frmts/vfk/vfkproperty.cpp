@@ -34,7 +34,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: vfkproperty.cpp 1c1263aa7ccb49bf14d8031c79f80b33d330a7a2 2019-08-15 22:19:23 +0200 Even Rouault $")
+CPL_CVSID("$Id: vfkproperty.cpp  $")
 
 /*!
   \brief Set VFK property (null)

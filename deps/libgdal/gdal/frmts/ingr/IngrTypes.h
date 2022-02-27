@@ -1,5 +1,5 @@
 /*****************************************************************************
- * $Id: IngrTypes.h df398e80769422a4bbd5d4a295f4ede443c9fec6 2021-04-04 00:17:15 +0200 Even Rouault $
+ * $Id: IngrTypes.h  $
  *
  * Project:  Intergraph Raster Format support
  * Purpose:  Types, constants and functions definition

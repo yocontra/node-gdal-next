@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab_geometry.h 1b6ddf05f3ceee1fde40bbd56f44a2d462af0856 2017-02-09 14:29:57Z Kurt Schwehr $
+ * $Id: mitab_geometry.h  $
  *
  * Name:     mitab_geometry.cpp
  * Project:  MapInfo TAB Read/Write library

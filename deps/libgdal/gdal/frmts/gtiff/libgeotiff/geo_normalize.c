@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geo_normalize.c 6240bef04d4ee087587e50fb0ff83a04e4f09c1e 2021-03-06 17:04:20 +0100 Even Rouault $
+ * $Id: geo_normalize.c  $
  *
  * Project:  libgeotiff
  * Purpose:  Code to normalize PCS and other composite codes in a GeoTIFF file.
@@ -2990,8 +2990,11 @@ void GTIFPrintDefnEx( GTIF *psGTIF, GTIFDefn * psDefn, FILE * fp )
 void GTIFPrintDefn( GTIFDefn * psDefn, FILE * fp )
 {
     GTIF *psGTIF = GTIFNew(NULL);
-    GTIFPrintDefnEx(psGTIF, psDefn, fp);
-    GTIFFree(psGTIF);
+    if( psGTIF )
+    {
+        GTIFPrintDefnEx(psGTIF, psDefn, fp);
+        GTIFFree(psGTIF);
+    }
 }
 
 /************************************************************************/

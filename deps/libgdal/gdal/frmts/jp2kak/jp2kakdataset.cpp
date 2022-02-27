@@ -53,7 +53,7 @@
 #include <cmath>
 #include <vector>
 
-CPL_CVSID("$Id: jp2kakdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: jp2kakdataset.cpp  $")
 
 // Before v7.5 Kakadu does not advertise its version well
 // After v7.5 Kakadu has KDU_{MAJOR,MINOR,PATCH}_VERSION defines so it is easier
@@ -115,6 +115,12 @@ JP2KAKRasterBand::JP2KAKRasterBand( int nBandIn, int nDiscardLevelsIn,
              oCodeStream.get_bit_depth(nBand - 1) <= 16 &&
              !oCodeStream.get_signed(nBand - 1) )
         eDataType = GDT_UInt16;
+    else if( oCodeStream.get_bit_depth(nBand - 1) > 16 &&
+        oCodeStream.get_signed(nBand - 1) )
+        eDataType = GDT_Int32;
+    else if( oCodeStream.get_bit_depth(nBand - 1) > 16 &&
+             !oCodeStream.get_signed(nBand - 1) )
+        eDataType = GDT_UInt32;
     else
         eDataType = GDT_Byte;
 
@@ -1271,8 +1277,11 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
                                GDALRasterIOExtraArg* psExtraArg)
 
 {
-    CPLAssert(eBufType == GDT_Byte || eBufType == GDT_Int16 ||
-              eBufType == GDT_UInt16);
+    CPLAssert(eBufType == GDT_Byte ||
+              eBufType == GDT_Int16 ||
+              eBufType == GDT_UInt16 ||
+              eBufType == GDT_Int32 ||
+              eBufType == GDT_UInt32);
 
     kdu_codestream *poCodeStream = &oCodeStream;
     const char *pszPersistency = "";
@@ -1399,8 +1408,9 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
 
         // Special case where the data is being requested exactly at
         // this resolution.  Avoid any extra sampling pass.
+        const int nBufDTSize = GDALGetDataTypeSizeBytes(eBufType);
         if( nBufXSize == l_dims.size.x && nBufYSize == l_dims.size.y &&
-            (nBandCount - 1) * nBandSpace / GDALGetDataTypeSizeBytes(eBufType) < INT_MAX )
+            (nBandCount - 1) * nBandSpace / nBufDTSize < INT_MAX )
         {
             kdu_stripe_decompressor decompressor;
             decompressor.start(*poCodeStream, false, false, poThreadEnv);
@@ -1414,34 +1424,10 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
             {
                 stripe_heights[i] = l_dims.size.y;
                 precisions[i] = poCodeStream->get_bit_depth(i);
-                if( eBufType == GDT_Byte )
-                {
-                    is_signed[i] = false;
-                    sample_offsets[i] = static_cast<int>(i * nBandSpace);
-                    sample_gaps[i] = static_cast<int>(nPixelSpace);
-                    row_gaps[i] = static_cast<int>(nLineSpace);
-                }
-                else if( eBufType == GDT_Int16 )
-                {
-                    is_signed[i] = true;
-                    sample_offsets[i] = static_cast<int>(i * nBandSpace / 2);
-                    sample_gaps[i] = static_cast<int>(nPixelSpace / 2);
-                    row_gaps[i] = static_cast<int>(nLineSpace / 2);
-                }
-                else if( eBufType == GDT_UInt16 )
-                {
-                    is_signed[i] = false;
-                    sample_offsets[i] = static_cast<int>(i * nBandSpace / 2);
-                    sample_gaps[i] = static_cast<int>(nPixelSpace / 2);
-                    row_gaps[i] = static_cast<int>(nLineSpace / 2);
-                    /* Introduced in r25136 with an unrelated commit message.
-                    Reverted per ticket #5328
-                    if( precisions[i] == 12 )
-                    {
-                      CPLDebug( "JP2KAK", "16bit extend 12 bit data." );
-                      precisions[i] = 16;
-                    }*/
-                }
+                is_signed[i] = GDALDataTypeIsSigned(eBufType) == TRUE;
+                sample_offsets[i] = static_cast<int>(i * nBandSpace / nBufDTSize);
+                sample_gaps[i] = static_cast<int>(nPixelSpace / nBufDTSize);
+                row_gaps[i] = static_cast<int>(nLineSpace) / nBufDTSize;
             }
 
             if( eBufType == GDT_Byte )
@@ -1449,9 +1435,14 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
                     static_cast<kdu_byte *>(pData), &stripe_heights[0],
                     &sample_offsets[0], &sample_gaps[0], &row_gaps[0],
                     &precisions[0]);
-            else
+            else if( nBufDTSize == 2 )
                 decompressor.pull_stripe(
                     static_cast<kdu_int16 *>(pData), &stripe_heights[0],
+                    &sample_offsets[0], &sample_gaps[0], &row_gaps[0],
+                    &precisions[0], &is_signed[0]);
+            else
+                decompressor.pull_stripe(
+                    static_cast<kdu_int32 *>(pData), &stripe_heights[0],
                     &sample_offsets[0], &sample_gaps[0], &row_gaps[0],
                     &precisions[0], &is_signed[0]);
             decompressor.finish();
@@ -1491,12 +1482,16 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
                 decompressor.pull_stripe(
                     reinterpret_cast<kdu_byte *>(pabyIntermediate),
                     &stripe_heights[0], nullptr, nullptr, nullptr, &precisions[0]);
-            else
+            else if( nBufDTSize == 2 )
                 decompressor.pull_stripe(
                     reinterpret_cast<kdu_int16 *>(pabyIntermediate),
                     &stripe_heights[0], nullptr, nullptr, nullptr, &precisions[0],
                     &is_signed[0]);
-
+            else
+                decompressor.pull_stripe(
+                    reinterpret_cast<kdu_int32 *>(pabyIntermediate),
+                    &stripe_heights[0], nullptr, nullptr, nullptr, &precisions[0],
+                    &is_signed[0]);
             decompressor.finish();
 
             if( psExtraArg->eResampleAlg == GRIORA_NearestNeighbour )
@@ -1536,6 +1531,15 @@ JP2KAKDataset::DirectRasterIO( GDALRWFlag /* eRWFlag */,
                                                 + iY*nLineSpace/2
                                                 + i*nBandSpace/2] =
                                     ((GUInt16 *)pabyIntermediate)[
+                                        iSrcX*nBandCount
+                                        + static_cast<GPtrDiff_t>(iSrcY)*l_dims.size.x*nBandCount
+                                        + i];
+                            else if( eBufType == GDT_Int32
+                                    || eBufType == GDT_UInt32 )
+                                ((GUInt32 *) pData)[iX*nPixelSpace/4
+                                                + iY*nLineSpace/4
+                                                + i*nBandSpace/4] =
+                                    ((GUInt32 *)pabyIntermediate)[
                                         iSrcX*nBandCount
                                         + static_cast<GPtrDiff_t>(iSrcY)*l_dims.size.x*nBandCount
                                         + i];
@@ -1655,7 +1659,9 @@ JP2KAKDataset::TestUseBlockIO( int nXOff, int nYOff, int nXSize, int nYSize,
     if( eDataType != GetRasterBand(1)->GetRasterDataType()
         || ( eDataType != GDT_Byte
              && eDataType != GDT_Int16
-             && eDataType != GDT_UInt16 ) )
+             && eDataType != GDT_UInt16
+             && eDataType != GDT_Int32
+             && eDataType != GDT_UInt32) )
         return true;
 
     for( int i = 0; i < nBandCount; i++ )
@@ -1790,10 +1796,7 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
 
     // Ticket #4050 patch: Use a 32 bits kdu_line_buf for GDT_UInt16 reversible
     // compression.
-    // TODO: Test for GDT_UInt16?
-    bool bUseShorts = bReversible;
-    if( eType == GDT_UInt16 && bReversible )
-        bUseShorts = false;
+    const bool bUseShorts = bReversible && (eType == GDT_Byte || eType == GDT_Int16 );
 
     for( int c = 0; c < num_components; c++ )
     {
@@ -1873,7 +1876,16 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
                     const kdu_int16 nOffset = 1 << (nBits - 1);
 
                     for( int n = nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp > (1 << nBits) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
                         dest->ival = ((kdu_int16)(*sp)) - nOffset;
+                    }
                 }
                 else if( bReversible && eType == GDT_Int16 )
                 {
@@ -1881,7 +1893,16 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
                     GInt16 *sp = reinterpret_cast<GInt16 *>(pabyBuffer);
 
                     for( int n = nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp < -(1 << (nBits-1)) || *sp > (1 << (nBits-1)) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
                         dest->ival = *sp;
+                    }
                 }
                 else if( bReversible && eType == GDT_UInt16 )
                 {
@@ -1892,7 +1913,51 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
                     const kdu_int32 nOffset = 1 << (nBits - 1);
 
                     for( int n=nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp > (1 << nBits) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
                         dest->ival = static_cast<kdu_int32>(*sp) - nOffset;
+                    }
+                }
+                else if( bReversible && eType == GDT_Int32 )
+                {
+                    kdu_sample32 *dest = lines[c].get_buf32();
+                    GInt32 *sp = reinterpret_cast<GInt32 *>(pabyBuffer);
+
+                    for( int n = nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp < -(1 << (nBits-1)) || *sp > (1 << (nBits-1)) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
+                        dest->ival = *sp;
+                    }
+                }
+                else if( bReversible && eType == GDT_UInt32 )
+                {
+                    kdu_sample32 *dest = lines[c].get_buf32();
+                    GUInt32 *sp = reinterpret_cast<GUInt32 *>(pabyBuffer);
+                    const kdu_int32 nOffset = 1 << (nBits - 1);
+
+                    for( int n=nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp > static_cast<GUInt32>((1 << nBits) - 1) )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
+                        dest->ival = static_cast<kdu_int32>(*sp) - nOffset;
+                    }
                 }
                 else if( eType == GDT_Byte )
                 {
@@ -1902,8 +1967,17 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
                     const float fScale = 1.0f / (1 << nBits);
 
                     for (int n = nXSize; n > 0; n--, dest++, sp++)
+                    {
+                        if( *sp > (1 << nBits) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
                         dest->fval =
                             (static_cast<kdu_int16>(*sp) - nOffset) * fScale;
+                    }
                 }
                 else if( eType == GDT_Int16 )
                 {
@@ -1912,7 +1986,16 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
                     const float fScale = 1.0f / (1 << nBits);
 
                     for( int n = nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp < -(1 << (nBits-1)) || *sp > (1 << (nBits-1)) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
                         dest->fval = static_cast<kdu_int16>(*sp) * fScale;
+                    }
                 }
                 else if( eType == GDT_UInt16 )
                 {
@@ -1922,7 +2005,53 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
                     const float fScale = 1.0f / (1 << nBits);
 
                     for( int n = nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp > (1 << nBits) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
                         dest->fval = (static_cast<int>(*sp) - nOffset) * fScale;
+                    }
+                }
+                else if( eType == GDT_Int32 )
+                {
+                    kdu_sample32 *dest = lines[c].get_buf32();
+                    GInt32 *sp = reinterpret_cast<GInt32 *>(pabyBuffer);
+                    const float fScale = 1.0f / (1 << nBits);
+
+                    for( int n = nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp < -(1 << (nBits-1)) || *sp > (1 << (nBits-1)) - 1 )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
+                        dest->fval = static_cast<kdu_int32>(*sp) * fScale;
+                    }
+                }
+                else if( eType == GDT_UInt32 )
+                {
+                    kdu_sample32 *dest = lines[c].get_buf32();
+                    GUInt32 *sp = reinterpret_cast<GUInt32 *>(pabyBuffer);
+                    const int nOffset = 1 << (nBits - 1);
+                    const float fScale = 1.0f / (1 << nBits);
+
+                    for( int n = nXSize; n > 0; n--, dest++, sp++ )
+                    {
+                        if( *sp > static_cast<GUInt32>((1 << nBits) - 1) )
+                        {
+                            CPLError(CE_Failure, CPLE_AppDefined,
+                                     "Value outside of domain allowed by NBITS value");
+                            bRet = false;
+                            break;
+                        }
+                        dest->fval = (static_cast<int>(*sp) - nOffset) * fScale;
+                    }
                 }
                 else if( eType == GDT_Float32 )
                 {
@@ -1933,11 +2062,23 @@ JP2KAKCreateCopy_WriteTile( GDALDataset *poSrcDS, kdu_tile &oTile,
                         dest->fval = *sp;  // Scale it?
                 }
 
+                if( bRet == false )
+                    break;
+
+                try
+                {
 #if KDU_MAJOR_VERSION >= 7
-                engines[c].push(lines[c]);
+                    engines[c].push(lines[c]);
 #else
-                engines[c].push(lines[c], true);
+                    engines[c].push(lines[c], true);
 #endif
+                }
+                catch(...)
+                {
+                    bRet = false;
+                    break;
+                }
+
                 iLinesWritten++;
 
                 if( !pfnProgress(iLinesWritten / static_cast<double>(
@@ -2022,7 +2163,9 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
     GDALRasterBand *poPrototypeBand = poSrcDS->GetRasterBand(1);
 
     GDALDataType eType = poPrototypeBand->GetRasterDataType();
-    if( eType != GDT_Byte && eType != GDT_Int16 && eType != GDT_UInt16 &&
+    if( eType != GDT_Byte &&
+        eType != GDT_Int16 && eType != GDT_UInt16 &&
+        eType != GDT_Int32 && eType != GDT_UInt32 &&
         eType != GDT_Float32 )
     {
         if( bStrict )
@@ -2072,25 +2215,123 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
         return nullptr;
     }
 
+    const bool bReversible =
+            CSLFetchNameValue(papszOptions,"Creversible") != nullptr
+            ? CPLFetchBool( papszOptions, "Creversible", false )
+            : (dfQuality >= 99.5);
+
     std::vector<kdu_long> layer_bytes;
-    layer_bytes.resize(layer_count);
 
     const int nXSize = poSrcDS->GetRasterXSize();
     const int nYSize = poSrcDS->GetRasterYSize();
+    const double dfPixelsTotal = nXSize * static_cast<double>(nYSize);
 
-    bool bReversible = false;
+    // Override Quality parameter if RATE option is used
+    // TODO: highest quality that can
+    //       be achieved with a quality factor of QUALITY and
+    //       also introducing some visual weighting to the rate-distortion
+    //       optimization objective associated with all N quality layers.
+    //       That means: combines both QUALITY and RATE
+    const char* pszRate = CSLFetchNameValue(papszOptions,"RATE") ;
+    if( pszRate != nullptr ) {
+        // Use RATE option.
+        CPLStringList aosRate(CSLTokenizeStringComplex(
+                CSLFetchNameValue(papszOptions,"RATE"),",", FALSE, FALSE ));
 
-    if( dfQuality < 99.5 )
-    {
+        int rate_count = CSLCount( aosRate );
+        if(rate_count <= 0) {
+            CPLError(CE_Failure, CPLE_IllegalArg,
+                     "RATE argument must be followed by a string identifying one or more bit-rates, separated by commas.");
+            return nullptr;
+        } else  {
+            bool bValid = true;
+            // compare NUMBER of layers defined by LAYERS or CLayers and the number of layers defined by RATE
+            // and is not 1 or 2
+            //  1) the number of rates specified here is identical to the specified number of layers;
+            // E.g RATE=1,3 LAYERS=1 => not valid
+            // E.g RATE=1,3 LAYERS=2 => valid
+            // E.g RATE=1,3 LAYERS=6 => valid
+            // The number of layers must be 2 or more and intervening  layers will be assigned roughly logarithmically
+            // spaced bit-rates. When only one rate is specified, an internal heuristic determines  a lower bound and
+            // logarithmically spaces the layer rates over the rang
+            if((rate_count > layer_count) || layer_count == 0) {
+                bValid = false;
+            }
+
+            // E.g RATE=1,3,4,5 LAYERS=3 => not valid
+            if(rate_count > 2 && rate_count != layer_count) {
+                bValid = false;
+            }
+
+            if(!bValid) {
+                CPLError(CE_Failure, CPLE_IllegalArg,
+                         "The relationship between the number of bit-rates "
+                         "specified by the \"RATE\" argument and the number of quality layers "
+                         "explicitly specified via \"Layers\" does not conform to the rules "
+                         "supplied in the description of the \"RATE\" argument");
+                return nullptr;
+            }
+        }
+
+        layer_bytes.resize(layer_count);
+
+        int i, j = 0;
+        double currentBitRate;
+        bool bDash = false;
+
+        if (strcmp(aosRate[0], "-") == 0) {
+            bDash = true;
+            j = 1;
+            // shift array to the left and force last element to 0 to assign all remaining bits
+        }
+
+        const int nb_elements = rate_count-j;
+        CPLDebug("JP2KAK", "dfPixelTotal = %g\n",dfPixelsTotal);
+        for (i = 0; i < nb_elements; i++, j++) {
+            currentBitRate = CPLAtof(aosRate[j]);
+            if( currentBitRate < 0.0 || currentBitRate > 100.0 )
+            {
+                CPLError(CE_Failure, CPLE_IllegalArg,
+                         "One of the bit-rate is not a legal value in the range 0.0-100.");
+                return nullptr;
+            }
+
+            layer_bytes[i] = static_cast<kdu_long>(floor(dfPixelsTotal * currentBitRate * 0.125F));
+        }
+
+        // re-arrange order
+        // e.g with f(x) = floor(dfPixelsTotal * x * 0.125F)
+        // RATE=1,3 CLAYERS=3 => r = f(1),0,f(3)
+        // RATE=1,3 CLAYERS=5 => r = f(1),0,0,0,f(3)
+        // RATE=1 CLAYERS=5 => r = 0,0,0,0,f(1)
+        if(rate_count == 1) {
+            // swap to end
+            layer_bytes[layer_count-1] = layer_bytes[0];
+            layer_bytes[0] = 0;
+        } else if(rate_count == 2 && layer_count > 2){
+            // 2 elements
+            layer_bytes[layer_count-1] = layer_bytes[rate_count-1];
+            layer_bytes[rate_count-1] = 0;
+        }
+
+        if(bDash) {
+            // force assign all remaining compressed bits
+            layer_bytes[layer_count-1] = 0;
+        }
+
+        for(uint32_t k = 0; k < layer_bytes.size();k++) {
+            CPLDebug("JP2KAK", "layer_bytes[%d] = %g\n", k, static_cast<double>(layer_bytes[k]));
+        }
+    } else if( !bReversible ) {
+        layer_bytes.resize(layer_count);
         double dfLayerBytes =
-            (nXSize * static_cast<double>(nYSize) * dfQuality / 100.0)
-            * GDALGetDataTypeSizeBytes(eType)
-            * GDALGetRasterCount(poSrcDS);
+                (nXSize * static_cast<double>(nYSize) * dfQuality / 100.0)
+                * GDALGetDataTypeSizeBytes(eType)
+                * GDALGetRasterCount(poSrcDS);
 
-        if( dfLayerBytes > 2000000000.0 && sizeof(kdu_long) == 4 )
-        {
+        if (dfLayerBytes > 2000000000.0 && sizeof(kdu_long) == 4) {
             CPLError(CE_Warning, CPLE_AppDefined,
-                     "Trimmming maximum size of file 2GB from %.1fGB\n"
+                     "Trimming maximum size of file 2GB from %.1fGB\n"
                      "to avoid overflow of kdu_long layer size.",
                      dfLayerBytes / 1000000000.0);
             dfLayerBytes = 2000000000.0;
@@ -2100,10 +2341,6 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
 
         CPLDebug("JP2KAK", "layer_bytes[] = %g\n",
                  static_cast<double>(layer_bytes[layer_count - 1]));
-    }
-    else
-    {
-        bReversible = true;
     }
 
     // Do we want to use more than one tile?
@@ -2168,7 +2405,13 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
         nBits =
             atoi(poPrototypeBand->GetMetadataItem("NBITS", "IMAGE_STRUCTURE"));
     else
+    {
         nBits = GDALGetDataTypeSize(eType);
+        // Otherwise: we get a "Insufficient implementation precision available for true reversible compression!" error
+        // or the data is not actually reversible (on autotest/gcore/data/int32.tif / uint32.tif)
+        if( bReversible && nBits == 32 )
+            nBits = 27;
+    }
 
     // Establish the general image parameters.
     siz_params oSizeParams;
@@ -2177,10 +2420,10 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
     oSizeParams.set(Sdims, 0, 0, nYSize);
     oSizeParams.set(Sdims, 0, 1, nXSize);
     oSizeParams.set(Sprecision, 0, 0, nBits);
-    if( eType == GDT_UInt16 || eType == GDT_Byte )
-        oSizeParams.set(Ssigned, 0, 0, false);
-    else
+    if( GDALDataTypeIsSigned(eType) )
         oSizeParams.set(Ssigned, 0, 0, true);
+    else
+        oSizeParams.set(Ssigned, 0, 0, false);
 
     if( nTileXSize != nXSize || nTileYSize != nYSize )
     {
@@ -2284,7 +2527,9 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
         CPLString().Printf("Clayers=%d", layer_count).c_str());
     oCodeStream.access_siz()->parse_string("Cycc=no");
     if( eType == GDT_Int16 || eType == GDT_UInt16 )
-        oCodeStream.access_siz()->parse_string("Qstep=0.0000152588");
+        oCodeStream.access_siz()->parse_string("Qstep=0.0000152588"); // 1. / (1 << 16)
+    // else if( eType == GDT_Int32 || eType == GDT_UInt32 )
+    //     oCodeStream.access_siz()->parse_string("Qstep=0.00000000023883064"); // 1. / (1 << 32)
 
     if( bReversible )
         oCodeStream.access_siz()->parse_string("Creversible=yes");
@@ -2573,7 +2818,6 @@ JP2KAKCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
     // Create one big tile, and a compressing engine, and line
     // buffer for each component.
     double dfPixelsDone = 0.0;
-    const double dfPixelsTotal = nXSize * static_cast<double>(nYSize);
     const bool bFlushEnabled = CPLFetchBool(papszOptions, "FLUSH", true);
 
     for( int iTileYOff = 0; iTileYOff < nYSize; iTileYOff += nTileYSize )
@@ -2678,7 +2922,7 @@ void GDALRegister_JP2KAK()
     poDriver->SetMetadataItem(
         GDAL_DMD_LONGNAME, "JPEG-2000 (based on Kakadu " KDU_CORE_VERSION ")");
     poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/jp2kak.html");
-    poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES, "Byte Int16 UInt16");
+    poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES, "Byte Int16 UInt16 Int32 UInt32");
     poDriver->SetMetadataItem(GDAL_DMD_MIMETYPE, "image/jp2");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "jp2 j2k");
     poDriver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");
@@ -2718,6 +2962,8 @@ void GDALRegister_JP2KAK()
 "   <Option name='FLUSH' type='boolean' />"
 "   <Option name='NBITS' type='int' description="
 "'BITS (precision) for sub-byte files (1-7), sub-uint16 (9-15)'/>"
+"   <Option name='RATE' type='string' description='bit-rates separated by commas'/>"
+"   <Option name='Creversible' type='boolean'/>"
 "   <Option name='Corder' type='string'/>"
 "   <Option name='Cprecincts' type='string'/>"
 "   <Option name='Cmodes' type='string'/>"

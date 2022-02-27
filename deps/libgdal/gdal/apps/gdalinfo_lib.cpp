@@ -61,7 +61,7 @@
 
 using std::vector;
 
-CPL_CVSID("$Id: gdalinfo_lib.cpp 3af75355638e2e3fe41e7e2a9c2d5f4694d9fa9d 2021-05-07 14:32:46 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalinfo_lib.cpp  $")
 
 /*! output format */
 typedef enum {

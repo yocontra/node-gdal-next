@@ -29,6 +29,7 @@
  ****************************************************************************/
 
 #include "cpl_port.h"
+
 #include "gt_citation.h"
 
 #include <cstddef>
@@ -45,7 +46,7 @@
 #include "gt_wkt_srs_priv.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: gt_citation.cpp 02501e858470529cbe79c7fe1f0154e0cdaae288 2021-05-08 15:51:06 +0200 Even Rouault $")
+CPL_CVSID("$Id: gt_citation.cpp  $")
 
 static const char * const apszUnitMap[] = {
     "meters", "1.0",

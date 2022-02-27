@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_alibaba_oss.h 5e20a8bb8da9ffbe2b8c850a885b29f9bff6d70c 2019-11-28 15:35:44 +0100 Even Rouault $
+ * $Id: cpl_alibaba_oss.h  $
  *
  * Name:     cpl_alibaba_oss.h
  * Project:  CPL - Common Portability Library

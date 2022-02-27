@@ -7,7 +7,7 @@
  *
  * Author:       David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisrasterrasterband.cpp e12a0fc61edef91a039e13c7baff2ce58288a552 2018-08-10 00:53:29 +0200 Juergen E. Fischer $
+ * Last changes: $Id: postgisrasterrasterband.cpp  $
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -35,7 +35,7 @@
  **********************************************************************/
 #include "postgisraster.h"
 
-CPL_CVSID("$Id: postgisrasterrasterband.cpp e12a0fc61edef91a039e13c7baff2ce58288a552 2018-08-10 00:53:29 +0200 Juergen E. Fischer $")
+CPL_CVSID("$Id: postgisrasterrasterband.cpp  $")
 
 /**
  * \brief Constructor.
@@ -741,8 +741,9 @@ CPLErr PostGISRasterRasterBand::ComputeRasterMinMax( int bApproxOK, double* adfM
     int nOverviewCount = GetOverviewCount();
     for(int i = 0; i < nOverviewCount; i++)
     {
-        if( GetOverview(i)->GetXSize() < 1024 && GetOverview(i)->GetYSize() < 1024 )
-            return GetOverview(i)->ComputeRasterMinMax(bApproxOK, adfMinMax);
+        auto poOverview = GetOverview(i);
+        if( poOverview->GetXSize() < 1024 && poOverview->GetYSize() < 1024 )
+            return poOverview->ComputeRasterMinMax(bApproxOK, adfMinMax);
     }
 
     return CE_Failure;

@@ -49,7 +49,7 @@
 #include <utility>
 #include <set>
 
-CPL_CVSID("$Id: bagdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: bagdataset.cpp  $")
 
 struct BAGRefinementGrid
 {
@@ -774,7 +774,7 @@ CPLErr BAGRasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
 
     if( nRasterYSize - (nBlockYOff + 1) * nBlockYSize < 0 )
     {
-        count[0] += (nRasterYSize - (nBlockYOff + 1) * nBlockYSize);
+        count[0] += (nRasterYSize - static_cast<hsize_t>(nBlockYOff + 1) * nBlockYSize);
     }
 
     // Select block from file space.
@@ -861,7 +861,7 @@ CPLErr BAGRasterBand::IWriteBlock( int nBlockXOff, int nBlockYOff,
 
     if( nRasterYSize - (nBlockYOff + 1) * nBlockYSize < 0 )
     {
-        count[0] += (nRasterYSize - (nBlockYOff + 1) * nBlockYSize);
+        count[0] += (nRasterYSize - static_cast<hsize_t>(nBlockYOff + 1) * nBlockYSize);
     }
 
     // Select block from file space.

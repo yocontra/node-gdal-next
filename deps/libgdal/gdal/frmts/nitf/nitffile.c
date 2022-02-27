@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitffile.c 5e2a80b58c701de57548788ed4067da8203a7773 2021-11-30 14:04:02 +0100 Even Rouault $
+ * $Id: nitffile.c  $
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Module responsible for opening NITF file, populating NITFFile
@@ -35,7 +35,7 @@
 #include "cpl_string.h"
 #include <stdbool.h>
 
-CPL_CVSID("$Id: nitffile.c 5e2a80b58c701de57548788ed4067da8203a7773 2021-11-30 14:04:02 +0100 Even Rouault $")
+CPL_CVSID("$Id: nitffile.c  $")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 

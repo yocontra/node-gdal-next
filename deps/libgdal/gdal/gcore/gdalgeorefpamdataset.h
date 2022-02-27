@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalgeorefpamdataset.h 315b6d277cdfd763148999530b3741862819261a 2021-05-08 19:57:32 +0200 Even Rouault $
+ * $Id: gdalgeorefpamdataset.h  $
  *
  * Project:  GDAL
  * Purpose:  GDALPamDataset with internal storage for georeferencing, with

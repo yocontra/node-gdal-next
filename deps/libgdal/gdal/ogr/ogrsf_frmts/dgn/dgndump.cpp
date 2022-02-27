@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dgndump.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: dgndump.cpp  $
  *
  * Project:  Microstation DGN Access Library
  * Purpose:  Temporary low level DGN dumper application.
@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: dgndump.cpp 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $")
+CPL_CVSID("$Id: dgndump.cpp  $")
 
 static void DGNDumpRawElement( DGNHandle hDGN, DGNElemCore *psCore,
                                FILE *fpOut );

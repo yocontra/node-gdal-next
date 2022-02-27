@@ -30,7 +30,7 @@
 #include "hfa_p.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: hfatest.cpp 103cca9e043935bf3548fdf419ff34346ff448ee 2021-10-06 17:32:54 +0200 Even Rouault $")
+CPL_CVSID("$Id: hfatest.cpp  $")
 
 /************************************************************************/
 /*                               Usage()                                */
@@ -225,10 +225,6 @@ int main( int argc, char ** argv )
 
     VSICleanupFileManager();
     CPLCleanupTLS();
-
-#ifdef DBMALLOC
-    malloc_dump(1);
-#endif
 
     exit( 0 );
 }

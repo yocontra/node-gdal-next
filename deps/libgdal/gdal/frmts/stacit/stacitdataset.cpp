@@ -35,7 +35,7 @@
 #include <map>
 #include <string>
 
-CPL_CVSID("$Id: stacitdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: stacitdataset.cpp  $")
 
 namespace {
 

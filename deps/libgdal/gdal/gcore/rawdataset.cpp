@@ -54,7 +54,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: rawdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: rawdataset.cpp  $")
 
 /************************************************************************/
 /*                           RawRasterBand()                            */
@@ -1052,7 +1052,7 @@ CPLErr RawRasterBand::IRasterIO( GDALRWFlag eRWFlag,
         {
             vsi_l_offset nOffset = nImgOffset;
             if( nLineOffset >= 0 )
-                nOffset += nYOff * nLineOffset;
+                nOffset += nYOff * static_cast<vsi_l_offset>(nLineOffset);
             else
                 nOffset -= nYOff * static_cast<vsi_l_offset>(-nLineOffset);
 
@@ -1220,11 +1220,11 @@ CPLErr RawRasterBand::IRasterIO( GDALRWFlag eRWFlag,
                       static_cast<vsi_l_offset>(iLine * dfSrcYInc);
                 vsi_l_offset nOffset = nImgOffset;
                 if( nLineOffset >= 0 )
-                    nOffset += nLine * nLineOffset;
+                    nOffset += nLine * static_cast<vsi_l_offset>(nLineOffset);
                 else
                     nOffset -= nLine * static_cast<vsi_l_offset>(-nLineOffset);
                 if( nPixelOffset >= 0 )
-                    nOffset += nXOff * nPixelOffset;
+                    nOffset += nXOff * static_cast<vsi_l_offset>(nPixelOffset);
                 else
                     nOffset -= nXOff * static_cast<vsi_l_offset>(-nPixelOffset);
 

@@ -72,6 +72,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if GDAL_HAVE_XLOCALE_H
+#include <xlocale.h> // for LC_NUMERIC_MASK on MacOS
+#endif
 
 #ifdef DEBUG_CONFIG_OPTIONS
 #include <set>
@@ -96,7 +99,7 @@ void OGRAPISPYCPLSetThreadLocalConfigOption(const char*, const char*);
 // Uncomment to get list of options that have been fetched and set.
 // #define DEBUG_CONFIG_OPTIONS
 
-CPL_CVSID("$Id: cpl_conv.cpp e3f27085d5a0960ce7058d9dcbea803fe4792957 2021-10-30 15:07:06 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_conv.cpp  $")
 
 static CPLMutex *hConfigMutex = nullptr;
 static volatile char **g_papszConfigOptions = nullptr;
@@ -977,15 +980,7 @@ GUIntBig CPLScanUIntBig( const char *pszString, int nMaxLength )
 /* -------------------------------------------------------------------- */
 /*      Fetch out the result                                            */
 /* -------------------------------------------------------------------- */
-#if defined(__MSVCRT__) || (defined(WIN32) && defined(_MSC_VER))
-    return static_cast<GUIntBig>(_atoi64(osValue.c_str()));
-#elif HAVE_STRTOULL
     return strtoull(osValue.c_str(), nullptr, 10);
-#elif HAVE_ATOLL
-    return atoll(osValue.c_str());
-#else
-    return atol(osValue.c_str());
-#endif
 }
 
 /************************************************************************/
@@ -1002,13 +997,7 @@ GUIntBig CPLScanUIntBig( const char *pszString, int nMaxLength )
 
 GIntBig CPLAtoGIntBig( const char *pszString )
 {
-#if defined(__MSVCRT__) || (defined(WIN32) && defined(_MSC_VER))
-    return _atoi64(pszString);
-#elif HAVE_ATOLL
     return atoll(pszString);
-#else
-    return atol(pszString);
-#endif
 }
 
 #if defined(__MINGW32__) || defined(__sun__)
@@ -1055,15 +1044,7 @@ static int CPLAtoGIntBigExHasOverflow(const char* pszString, GIntBig nVal)
 GIntBig CPLAtoGIntBigEx( const char* pszString, int bWarn, int *pbOverflow )
 {
     errno = 0;
-#if defined(__MSVCRT__) || (defined(WIN32) && defined(_MSC_VER))
-    GIntBig nVal = _atoi64(pszString);
-#elif HAVE_STRTOLL
     GIntBig nVal = strtoll(pszString, nullptr, 10);
-#elif HAVE_ATOLL
-    GIntBig nVal = atoll(pszString);
-#else
-    GIntBig nVal = atol(pszString);
-#endif
     if( errno == ERANGE
 #if defined(__MINGW32__) || defined(__sun__)
         || CPLAtoGIntBigExHasOverflow(pszString, nVal)
@@ -1375,10 +1356,8 @@ int CPLPrintUIntBig( char *pszBuffer, GUIntBig iValue, int nMaxLen )
 #ifdef HAVE_GCC_DIAGNOSTIC_PUSH
 #pragma GCC diagnostic pop
 #endif
-#elif HAVE_LONG_LONG
-    snprintf(szTemp, sizeof(szTemp), "%*llu", nMaxLen, iValue);
 #else
-    snprintf(szTemp, sizeof(szTemp), "%*lu", nMaxLen, iValue);
+    snprintf(szTemp, sizeof(szTemp), "%*llu", nMaxLen, iValue);
 #endif
 
     return CPLPrintString(pszBuffer, szTemp, nMaxLen);

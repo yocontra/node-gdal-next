@@ -38,7 +38,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrcompoundcurve.cpp c582d6fc82b66f8fddeb7a4bfbaf707bf7b57c59 2021-08-04 15:27:39 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcompoundcurve.cpp  $")
 
 /************************************************************************/
 /*                         OGRCompoundCurve()                           */

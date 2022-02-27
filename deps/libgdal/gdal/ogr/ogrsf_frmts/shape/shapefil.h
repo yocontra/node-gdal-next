@@ -2,7 +2,7 @@
 #define SHAPEFILE_H_INCLUDED
 
 /******************************************************************************
- * $Id: shapefil.h 88e27ffd9f44b53e6ded32072365c2bce6d45ddd 2021-02-27 03:20:57 -0800 Kurt Schwehr $
+ * $Id: shapefil.h  $
  *
  * Project:  Shapelib
  * Purpose:  Primary include file for Shapelib.
@@ -40,10 +40,6 @@
  */
 
 #include <stdio.h>
-
-#ifdef USE_DBMALLOC
-#include <dbmalloc.h>
-#endif
 
 #ifdef USE_CPL
 #include "cpl_conv.h"

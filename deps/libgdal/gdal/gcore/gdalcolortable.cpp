@@ -38,7 +38,7 @@
 #include "cpl_error.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalcolortable.cpp a52e59ceeaf2526250d1aab947c5cf914104db22 2021-12-06 15:41:59 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalcolortable.cpp  $")
 
 /************************************************************************/
 /*                           GDALColorTable()                           */

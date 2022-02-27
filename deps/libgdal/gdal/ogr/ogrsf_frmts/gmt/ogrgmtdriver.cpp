@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrgmtdriver.cpp 1761acd90777d5bcc49eddbc13c193098f0ed40b 2020-10-01 12:12:00 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmtdriver.cpp  $")
 
 /************************************************************************/
 /*                    OGRGMTDriverIdentify()                            */
@@ -61,7 +61,8 @@ static GDALDataset *OGRGMTDriverOpen( GDALOpenInfo* poOpenInfo )
 
     OGRGmtDataSource *poDS = new OGRGmtDataSource();
 
-    if( !poDS->Open( poOpenInfo->pszFilename, poOpenInfo->eAccess == GA_Update ) )
+    if( !poDS->Open( poOpenInfo->pszFilename, nullptr, nullptr,
+                     poOpenInfo->eAccess == GA_Update ) )
     {
         delete poDS;
         return nullptr;

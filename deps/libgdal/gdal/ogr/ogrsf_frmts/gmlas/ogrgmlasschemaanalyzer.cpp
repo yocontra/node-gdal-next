@@ -43,7 +43,7 @@ static XSModel* getGrammarPool(XMLGrammarPool* pool)
 
 #include <list>
 
-CPL_CVSID("$Id: ogrgmlasschemaanalyzer.cpp facf18202df149cfa6670dda40e5053d6322b796 2021-10-11 15:50:43 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasschemaanalyzer.cpp  $")
 
 static OGRwkbGeometryType GetOGRGeometryType( XSTypeDefinition* poTypeDef );
 

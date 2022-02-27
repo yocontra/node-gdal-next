@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: plmosaicdataset.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: plmosaicdataset.cpp  $")
 
 #define SPHERICAL_RADIUS        6378137.0
 #define GM_ORIGIN  -20037508.340
@@ -736,9 +736,9 @@ void PLMosaicDataset::CreateMosaicCachePathIfNecessary()
         if( VSIStatL(osMosaicPath, &sStatBuf) != 0 )
         {
             CPLPushErrorHandler(CPLQuietErrorHandler);
-            VSIMkdir(osCachePathRoot, 0755);
-            VSIMkdir(osCachePath, 0755);
-            VSIMkdir(osMosaicPath, 0755);
+            CPL_IGNORE_RET_VAL(VSIMkdir(osCachePathRoot, 0755));
+            CPL_IGNORE_RET_VAL(VSIMkdir(osCachePath, 0755));
+            CPL_IGNORE_RET_VAL(VSIMkdir(osMosaicPath, 0755));
             CPLPopErrorHandler();
         }
     }

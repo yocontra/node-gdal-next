@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dwg.h db7b8a03d90637c2f6ba5cbdb087e2819d8ec8dd 2018-05-12 22:34:30 +0200 Even Rouault $
+ * $Id: ogr_dwg.h  $
  *
  * Project:  DWG Translator
  * Purpose:  Definition of classes for OGR .dwg driver.
@@ -124,6 +124,7 @@ class OGRDWGLayer final: public OGRLayer
     OGRFeature *        TranslateHATCH( OdDbEntityPtr poEntity );
     OGRFeature *        TranslateTEXT( OdDbEntityPtr poEntity );
     OGRFeature *        TranslateINSERT( OdDbEntityPtr poEntity );
+    OGRFeature *        Translate3DFACE(OdDbEntityPtr poEntity);
 
     void                FormatDimension( CPLString &osText, double dfValue );
 
@@ -161,6 +162,8 @@ class OGRDWGDataSource final: public OGRDataSource
     CPLString           m_osName;
     std::vector<OGRLayer*> apoLayers;
 
+    std::set<CPLString> attributeFields;
+
     int                 iEntitiesSectionOffset;
 
     std::map<CPLString,DWGBlockDefinition> oBlockMap;
@@ -175,6 +178,8 @@ class OGRDWGDataSource final: public OGRDataSource
     std::map<CPLString,CPLString> oLineTypeTable;
 
     int                 bInlineBlocks;
+    int                 bAttributes;
+    int                 bAllAttributes;
 
     OGRDWGServices     *poServices;
     OdDbDatabasePtr     poDb;
@@ -198,14 +203,18 @@ class OGRDWGDataSource final: public OGRDataSource
     // The following is only used by OGRDWGLayer
 
     int                 InlineBlocks() { return bInlineBlocks; }
+    int                 Attributes() { return bAttributes; }
+    int                 AllAttributes() { return bAllAttributes; }
     void                AddStandardFields( OGRFeatureDefn *poDef );
 
     // Implemented in ogrdxf_blockmap.cpp
     void                ReadBlocksSection();
+    void                ReadAttDefinitions();
     OGRGeometry        *SimplifyBlockGeometry( OGRGeometryCollection * );
     DWGBlockDefinition *LookupBlock( const char *pszName );
     std::map<CPLString,DWGBlockDefinition> &GetBlockMap() { return oBlockMap; }
 
+    std::set<CPLString>& GetAttributes() { return attributeFields; }
     // Layer and other Table Handling (ogrdatasource.cpp)
     void                ReadLayerDefinitions();
     void                ReadLineTypeDefinitions();

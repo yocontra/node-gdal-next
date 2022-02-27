@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vfkreader.h 724b809239deccfbdeb1c7eb80d57d91d37d53bd 2021-03-15 00:42:44 +0100 Even Rouault $
+ * $Id: vfkreader.h  $
  *
  * Project:  VFK Reader
  * Purpose:  Public Declarations for OGR free VFK Reader code.

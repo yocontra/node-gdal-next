@@ -38,7 +38,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrwfsdatasource.cpp 18a6887e37793b65da4771507139fec5f7e417f9 2021-11-29 15:31:40 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrwfsdatasource.cpp  $")
 
 constexpr int DEFAULT_BASE_START_INDEX = 0;
 constexpr int DEFAULT_PAGE_SIZE = 100;

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab.h fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $
+ * $Id: mitab.h  $
  *
  * Name:     mitab.h
  * Project:  MapInfo TAB Read/Write library
@@ -672,7 +672,6 @@ class MIFFile final : public IMapInfoFile
     void        PreParseFile();
     int         AddFields(const char *pszLine);
     int         GotoFeature(int nFeatureId);
-    int         NextFeature();
 
     ///////////////
     // Private Write access specific stuff

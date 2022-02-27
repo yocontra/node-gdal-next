@@ -37,7 +37,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlasreader.cpp c01a4cf2f0e4eaecbb3c6686b0e0d10165a51e45 2021-10-24 14:25:58 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgmlasreader.cpp  $")
 
 /************************************************************************/
 /*                        GMLASBinInputStream                           */
@@ -2400,9 +2400,7 @@ void GMLASReader::endElement(
     if( m_nCurFieldIdx >= 0 && m_nLevel == m_nCurFieldLevel - 1 )
     {
         const OGRFieldType eType(
-            m_nCurFieldIdx >= 0 ?
-                m_oCurCtxt.m_poFeature->GetFieldDefnRef(m_nCurFieldIdx)->GetType() :
-            OFTString );
+            m_oCurCtxt.m_poFeature->GetFieldDefnRef(m_nCurFieldIdx)->GetType());
 
         // Assign XML content to field value
         if( IsArrayType(eType) )

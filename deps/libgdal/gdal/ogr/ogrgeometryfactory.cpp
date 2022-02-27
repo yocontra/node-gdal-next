@@ -65,7 +65,7 @@
 #define UNUSED_IF_NO_GEOS
 #endif
 
-CPL_CVSID("$Id: ogrgeometryfactory.cpp 9f57a8d3c5f327cb02bb78ef23479c4b74143220 2021-05-22 00:41:26 +0200 Momtchil Momtchev $")
+CPL_CVSID("$Id: ogrgeometryfactory.cpp  $")
 
 /************************************************************************/
 /*                           createFromWkb()                            */
@@ -1246,8 +1246,7 @@ OGRGeometry *OGRGeometryFactory::forceToMultiLineString( OGRGeometry *poGeom )
 /* -------------------------------------------------------------------- */
     if( OGR_GT_IsSubClassOf(eGeomType, wkbPolyhedralSurface) )
     {
-        poGeom = forceToMultiPolygon(poGeom);
-        assert(poGeom);
+        poGeom = CPLAssertNotNull(forceToMultiPolygon(poGeom));
         eGeomType = wkbMultiPolygon;
     }
 
@@ -1264,10 +1263,9 @@ OGRGeometry *OGRGeometryFactory::forceToMultiLineString( OGRGeometry *poGeom )
         {
             poMPoly = poGeom->getLinearGeometry()->toMultiPolygon();
             delete poGeom;
-            poGeom = poMPoly;
+            poGeom = CPLAssertNotNull(poMPoly);
         }
 
-        assert(poGeom);
         poMP->assignSpatialReference(poGeom->getSpatialReference());
 
         for( auto&& poPoly: poMPoly )

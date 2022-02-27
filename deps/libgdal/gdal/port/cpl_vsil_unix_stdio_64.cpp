@@ -88,7 +88,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi_error.h"
 
-CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp de72a2315d30725440fd660a49de2e0232992149 2021-10-29 19:25:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_unix_stdio_64.cpp  $")
 
 #if defined(UNIX_STDIO_64)
 

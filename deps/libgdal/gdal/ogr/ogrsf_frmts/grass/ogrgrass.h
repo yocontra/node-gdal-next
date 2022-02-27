@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgrass.h a832da5b936bac8438f9c50e7c20e563fd94c9ff 2020-09-22 13:06:27 +0200 Markus Neteler $
+ * $Id: ogrgrass.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/GRASS driver.

@@ -35,7 +35,7 @@
    #include "gnm_frmts.h"
 #endif
 
-CPL_CVSID("$Id: gdalallregister.cpp ea49437af39fa2738de924701b87ad701d6530c2 2021-07-25 18:25:48 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalallregister.cpp  $")
 
 #ifdef notdef
 // we may have a use for this some day
@@ -62,8 +62,12 @@ static char *szConfiguredFormats = "GDAL_FORMATS";
 void CPL_STDCALL GDALAllRegister()
 
 {
+    auto poDriverManager = GetGDALDriverManager();
     // AutoLoadDrivers is a no-op if compiled with GDAL_NO_AUTOLOAD defined.
-    GetGDALDriverManager()->AutoLoadDrivers();
+    poDriverManager->AutoLoadDrivers();
+
+    // NOTE: frmts/drivers.ini in the same directory should be kept in same
+    // order as this file
 
 #ifdef FRMT_vrt
     GDALRegister_VRT();
@@ -349,10 +353,6 @@ void CPL_STDCALL GDALAllRegister()
     GDALRegister_COASP();
 #endif
 
-#ifdef FRMT_tms
-    GDALRegister_TMS();
-#endif
-
 #ifdef FRMT_r
     GDALRegister_R();
 #endif
@@ -547,10 +547,6 @@ void CPL_STDCALL GDALAllRegister()
     GDALRegister_PRF();
 #endif
 
-#ifdef FRMT_rda
-    GDALRegister_RDA();
-#endif
-
 #ifdef FRMT_eeda
     GDALRegister_EEDAI();
     GDALRegister_EEDA();
@@ -592,7 +588,10 @@ void CPL_STDCALL GDALAllRegister()
     GDALRegister_STACIT();
 #endif
 
-    // NOTE: you need to generally your own driver before that line.
+    // NOTE: you need to generally insert your own driver before that line.
+
+    // NOTE: frmts/drivers.ini in the same directory should be kept in same
+    // order as this file
 
 /* -------------------------------------------------------------------- */
 /*     GNM and OGR drivers                                              */
@@ -623,15 +622,17 @@ void CPL_STDCALL GDALAllRegister()
 /*      Register GDAL HTTP last, to let a chance to other drivers       */
 /*      accepting URL to handle them before.                            */
 /* -------------------------------------------------------------------- */
-#ifdef FRMT_wcs
+#if (!defined(GDAL_CMAKE_BUILD) && defined(FRMT_wcs)) || (defined(GDAL_CMAKE_BUILD) && defined(FRMT_http))
     GDALRegister_HTTP();
 #endif
 
-    GetGDALDriverManager()->AutoLoadPythonDrivers();
+    poDriverManager->AutoLoadPythonDrivers();
 
 /* -------------------------------------------------------------------- */
 /*      Deregister any drivers explicitly marked as suppressed by the   */
 /*      GDAL_SKIP environment variable.                                 */
 /* -------------------------------------------------------------------- */
-    GetGDALDriverManager()->AutoSkipDrivers();
+    poDriverManager->AutoSkipDrivers();
+
+    poDriverManager->ReorderDrivers();
 }

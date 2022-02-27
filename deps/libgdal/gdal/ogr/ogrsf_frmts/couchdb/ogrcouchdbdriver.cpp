@@ -30,7 +30,7 @@
 
 // g++ -g -Wall -fPIC -shared -o ogr_CouchDB.so -Iport -Igcore -Iogr -Iogr/ogrsf_frmts -Iogr/ogrsf_frmts/couchdb ogr/ogrsf_frmts/couchdb/*.c* -L. -lgdal -Iogr/ogrsf_frmts/geojson/jsonc
 
-CPL_CVSID("$Id: ogrcouchdbdriver.cpp e1927ded7bbafb1f7bd13f25e12d2b16130ab4e6 2021-10-06 20:27:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrcouchdbdriver.cpp  $")
 
 extern "C" void RegisterOGRCouchDB();
 

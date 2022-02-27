@@ -55,7 +55,6 @@
 				"../gdal/frmts/gtiff/gt_citation.cpp",
 				"../gdal/frmts/gtiff/gt_jpeg_copy.cpp",
 				"../gdal/frmts/gtiff/gt_overview.cpp",
-				"../gdal/frmts/gtiff/tif_float.c",
 				"../gdal/frmts/gtiff/libgeotiff/geo_tiffp.c",
 				"../gdal/frmts/gtiff/libgeotiff/geo_write.c",
 				"../gdal/frmts/gtiff/libgeotiff/geo_names.c",

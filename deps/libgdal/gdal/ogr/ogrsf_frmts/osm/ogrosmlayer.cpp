@@ -26,6 +26,8 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include "cpl_port.h"
+
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -40,7 +42,6 @@
 
 #include "cpl_conv.h"
 #include "cpl_error.h"
-#include "cpl_port.h"
 #include "cpl_progress.h"
 #include "cpl_string.h"
 #include "cpl_time.h"
@@ -55,7 +56,7 @@
 #include "osm_parser.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrosmlayer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrosmlayer.cpp  $")
 
 constexpr int SWITCH_THRESHOLD = 10000;
 constexpr int MAX_THRESHOLD = 100000;
@@ -298,6 +299,7 @@ OGRFeature *OGROSMLayer::MyGetNextFeature( OGROSMLayer** ppoNewCurLayer,
             while( true )
             {
                 int bRet = poDS->ParseNextChunk(nIdxLayer, nullptr, nullptr);
+                // cppcheck-suppress knownConditionTrueFalse
                 if( nFeatureArraySize != 0 )
                     break;
                 if( bRet == FALSE )

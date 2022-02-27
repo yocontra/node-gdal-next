@@ -557,10 +557,14 @@ JXLPostEncode(TIFF* tif)
                 return 0;
             }
         }
+#ifdef HAVE_JxlEncoderFrameSettingsSetOption
+        if( JxlEncoderFrameSettingsSetOption(opts, JXL_ENC_FRAME_SETTING_EFFORT, sp->effort) != JXL_ENC_SUCCESS )
+#else
         if( JxlEncoderOptionsSetEffort(opts, sp->effort) != JXL_ENC_SUCCESS )
+#endif
         {
             TIFFErrorExt(tif->tif_clientdata, module,
-                         "JxlEncoderOptionsSetEffort() failed");
+                         "JxlEncoderFrameSettingsSetOption() failed");
             JxlEncoderDestroy(enc);
             return 0;
         }
@@ -738,6 +742,7 @@ int TIFFInitJXL(TIFF* tif, int scheme)
         static const char module[] = "TIFFInitJXL";
         JXLState* sp;
 
+        (void)scheme;
         assert( scheme == COMPRESSION_JXL );
 
         /*

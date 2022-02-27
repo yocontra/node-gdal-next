@@ -37,7 +37,7 @@
 #include "gdal_priv.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdaldem_bin.cpp 8b28df9af2074d6be4a77d5ee87aa32ff980c433 2020-12-30 15:33:55 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdaldem_bin.cpp  $")
 
 /************************************************************************/
 /*                               Usage()                                */

@@ -50,7 +50,7 @@ constexpr double DEG_TO_RAD = M_PI / 180.0;
 constexpr double RAD_TO_DEG = 180.0 / M_PI;
 constexpr double CONTIGUITY_TOLERANCE = 1e10; // Arbitrary high value
 
-CPL_CVSID("$Id: ogrdgnv8layer.cpp fa752ad6eabafaf630a704e1892a9d837d683cb3 2021-03-06 17:04:38 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrdgnv8layer.cpp  $")
 
 static CPLString ToUTF8(const OdString& str)
 {

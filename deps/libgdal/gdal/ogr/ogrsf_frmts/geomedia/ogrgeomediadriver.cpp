@@ -30,7 +30,7 @@
 #include "ogr_geomedia.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrgeomediadriver.cpp 5967868e07a87cc7de1fb5b0f8197db25af43c7f 2021-08-30 08:06:39 +1000 Nyall Dawson $")
+CPL_CVSID("$Id: ogrgeomediadriver.cpp  $")
 
 /************************************************************************/
 /*                                Open()                                */

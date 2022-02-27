@@ -47,7 +47,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gdalpamdataset.cpp c6cd0c925b6b3e838e01ab730a793e2aa818110e 2021-12-10 11:37:30 +0100 Even Rouault $")
+CPL_CVSID("$Id: gdalpamdataset.cpp  $")
 
 /************************************************************************/
 /*                           GDALPamDataset()                           */

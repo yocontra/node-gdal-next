@@ -30,7 +30,7 @@
 #include "cpl_port.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: ogr_geo_utils.cpp 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_geo_utils.cpp  $")
 
 constexpr double RAD2METER = (180.0 / M_PI) * 60.0 * 1852.0;
 constexpr double METER2RAD = 1.0 / RAD2METER;

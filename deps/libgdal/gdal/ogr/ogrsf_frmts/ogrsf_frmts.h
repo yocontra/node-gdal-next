@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsf_frmts.h decf0d0bdf8ba9b4efa471cd15c968080e656298 2021-02-27 22:56:48 +0100 Even Rouault $
+ * $Id: ogrsf_frmts.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes related to format registration, and file opening.

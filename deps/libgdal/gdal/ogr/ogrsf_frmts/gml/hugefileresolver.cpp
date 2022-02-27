@@ -55,7 +55,7 @@
 
 #endif
 
-CPL_CVSID("$Id: hugefileresolver.cpp 1388337fc9b2302672125dd7cc4940b52ed50565 2020-06-01 16:12:38 +0200 Even Rouault $")
+CPL_CVSID("$Id: hugefileresolver.cpp  $")
 
 /****************************************************/
 /*      SQLite is absolutely required in order to   */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_minizip_zip.h 105d437a91a1a110bdeaba3bab046cd235701173 2018-07-02 12:01:26 +0200 Even Rouault $
+ * $Id: cpl_minizip_zip.h  $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -71,7 +71,7 @@ extern "C" {
 #endif
 
 #ifndef _ZLIB_H
-#include "zlib.h"
+#include "cpl_zlib_header.h" // to avoid warnings when including zlib.h
 #endif
 
 #ifndef CPL_MINIZIP_IOAPI_H_INCLUDED

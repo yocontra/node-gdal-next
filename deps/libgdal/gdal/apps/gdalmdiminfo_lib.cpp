@@ -36,7 +36,7 @@
 #include <limits>
 #include <set>
 
-CPL_CVSID("$Id: gdalmdiminfo_lib.cpp 4f7b484e8e0844d6f65a71af32d922efc76a844b 2021-08-25 12:19:10 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalmdiminfo_lib.cpp  $")
 
 /************************************************************************/
 /*                       GDALMultiDimInfoOptions                        */
@@ -1080,13 +1080,14 @@ char *GDALMultiDimInfo( GDALDatasetH hDataset,
                 psOptions->osArrayName.c_str(), "/", 0));
             for( int i = 0; i < aosTokens.size() - 1; i++ )
             {
-                curGroup = curGroup->OpenGroup(aosTokens[i]);
-                if( !curGroup )
+                auto curGroupNew = curGroup->OpenGroup(aosTokens[i]);
+                if( !curGroupNew )
                 {
                     CPLError(CE_Failure, CPLE_AppDefined,
                              "Cannot find group %s", aosTokens[i]);
                     return nullptr;
                 }
+                curGroup = curGroupNew;
             }
             const char* pszArrayName = aosTokens[aosTokens.size()-1];
             auto array(curGroup->OpenMDArray(pszArrayName));

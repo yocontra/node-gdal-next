@@ -31,7 +31,7 @@
 
 #include "ogr_gpsbabel.h"
 
-CPL_CVSID("$Id: ogrgpsbabeldriver.cpp 5c24ffa26207fc5b8ca9b2975f5c197a2b50757a 2021-10-24 12:28:29 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgpsbabeldriver.cpp  $")
 
 /************************************************************************/
 /*                         OGRGPSBabelDriverIdentify()                  */
@@ -58,6 +58,8 @@ static bool OGRGPSBabelDriverIdentifyInternal(
             return false;
         pszGPSBabelDriverName = "osm";
     }
+    else if (strstr(reinterpret_cast<const char*>(poOpenInfo->pabyHeader), "<TrainingCenterDatabase") != nullptr)
+        pszGPSBabelDriverName = "gtrnctr";
     else if (strstr(reinterpret_cast<const char*>(poOpenInfo->pabyHeader), "$GPGSA") != nullptr ||
                 strstr(reinterpret_cast<const char*>(poOpenInfo->pabyHeader), "$GPGGA") != nullptr)
         pszGPSBabelDriverName = "nmea";
@@ -191,6 +193,7 @@ void RegisterOGRGPSBabel()
     poDriver->SetMetadataItem( GDAL_DCAP_VECTOR, "YES" );
     poDriver->SetMetadataItem( GDAL_DMD_LONGNAME, "GPSBabel" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/vector/gpsbabel.html" );
+    poDriver->SetMetadataItem( GDAL_DMD_EXTENSIONS, "mps gdb osm tcx igc" );
 
     poDriver->SetMetadataItem( GDAL_DMD_CONNECTION_PREFIX, "GPSBABEL:" );
 

@@ -49,7 +49,7 @@
 #include "proj.h"
 #include "proj_experimental.h"
 
-CPL_CVSID("$Id: ogrct.cpp 245553df85775d83fdcd81dfcaba6e4d062af655 2021-11-24 12:14:17 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrct.cpp  $")
 
 #ifdef DEBUG_PERF
 static double g_dfTotalTimeCRStoCRS = 0;
@@ -1080,7 +1080,6 @@ OGRProjCT::OGRProjCT()
 /*                  OGRProjCT(const OGRProjCT& other)                   */
 /************************************************************************/
 
-//! @cond Doxygen_Suppress
 OGRProjCT::OGRProjCT(const OGRProjCT& other) :
     poSRSSource((other.poSRSSource != nullptr) ? (other.poSRSSource->Clone()) : (nullptr)),
     bSourceLatLong(other.bSourceLatLong),

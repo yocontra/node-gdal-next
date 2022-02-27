@@ -32,7 +32,7 @@
 #include "ogrgeoconceptdatasource.h"
 #include "ogrgeoconceptdriver.h"
 
-CPL_CVSID("$Id: ogrgeoconceptdriver.cpp bdf444aab854c4cb6e716df978b5b1225f7b5ee0 2018-03-31 14:26:52 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeoconceptdriver.cpp  $")
 
 /************************************************************************/
 /*                          ~OGRGeoconceptDriver()                      */

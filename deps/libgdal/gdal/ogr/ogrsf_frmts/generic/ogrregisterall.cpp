@@ -29,7 +29,7 @@
 
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrregisterall.cpp decf0d0bdf8ba9b4efa471cd15c968080e656298 2021-02-27 22:56:48 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrregisterall.cpp  $")
 
 /************************************************************************/
 /*                           OGRRegisterAll()                           */
@@ -42,6 +42,9 @@ void OGRRegisterAll()
 
 void OGRRegisterAllInternal()
 {
+    // NOTE: frmts/drivers.ini in the same directory should be kept in same
+    // order as this file
+
 #ifdef DB2_ENABLED
     RegisterOGRDB2();
 #endif
@@ -290,6 +293,11 @@ void OGRRegisterAllInternal()
 #ifdef MAPML_ENABLED
     RegisterOGRMapML();
 #endif
+
+    // NOTE: you need to generally insert your own driver before that line.
+
+    // NOTE: frmts/drivers.ini in the same directory should be kept in same
+    // order as this file
 
 /* Put TIGER and AVCBIN at end since they need poOpenInfo->GetSiblingFiles() */
 #ifdef TIGER_ENABLED

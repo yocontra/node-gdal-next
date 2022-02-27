@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi.h b0c2cc25f0802273e1c16958f04d0f59e1986a90 2021-08-30 14:36:08 +0200 Even Rouault $
+ * $Id: cpl_vsi.h  $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com

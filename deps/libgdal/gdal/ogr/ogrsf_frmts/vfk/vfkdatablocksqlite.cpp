@@ -40,7 +40,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: vfkdatablocksqlite.cpp 3798cbe48457b7127606931896549f26507469db 2021-04-09 15:04:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: vfkdatablocksqlite.cpp  $")
 
 /*!
   \brief VFKDataBlockSQLite constructor
@@ -199,7 +199,7 @@ bool VFKDataBlockSQLite::SetGeometryLineString(VFKFeatureSQLite *poLine, OGRLine
     /* store also geometry in DB */
     CPLAssert( !rowIdFeat.empty() );
     if( bValid && poReader->IsSpatial() &&
-        SaveGeometryToDB(bValid ? poLine->GetGeometry() : nullptr,
+        SaveGeometryToDB(poLine->GetGeometry(),
                          rowIdFeat[0]) != OGRERR_FAILURE )
     {
         nGeometries++;

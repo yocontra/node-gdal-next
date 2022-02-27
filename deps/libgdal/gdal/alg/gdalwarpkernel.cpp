@@ -73,7 +73,7 @@
 
 #endif
 
-CPL_CVSID("$Id: gdalwarpkernel.cpp 831355f692b610e0562802d39c65c015e68467d5 2021-10-28 11:30:49 +0200 Even Rouault $")
+CPL_CVSID("$Id: gdalwarpkernel.cpp  $")
 
 constexpr double BAND_DENSITY_THRESHOLD = 0.0000000001;
 constexpr float SRC_DENSITY_THRESHOLD =  0.000000001f;

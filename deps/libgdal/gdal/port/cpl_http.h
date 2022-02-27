@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_http.h 0aaf941e652f4950616aff612169985b6fd66cdd 2021-10-24 14:24:39 +0200 Even Rouault $
+ * $Id: cpl_http.h  $
  *
  * Project:  Common Portability Library
  * Purpose:  Function wrapper for libcurl HTTP access.

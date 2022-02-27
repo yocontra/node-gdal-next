@@ -1,7 +1,7 @@
 #include <map>
 #include "ogr_sosi.h"
 
-CPL_CVSID("$Id: ogrsosidatatypes.cpp 1a8cd1b07a75b672150242ef8a59b1821e82a137 2018-05-12 22:35:40 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrsosidatatypes.cpp  $")
 
 C2F* poTypes = nullptr;
 

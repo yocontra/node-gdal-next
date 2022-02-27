@@ -36,9 +36,11 @@
 #include "cpl_error.h"
 #include "cpl_minixml.h"
 #include "cpl_string.h"
+#include "cpl_time.h"
+
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: reader_digital_globe.cpp d8114610ec3abbffbfce3dfbd353ea53ac81c013 2021-03-04 05:38:17 -0500 John Papadakis $")
+CPL_CVSID("$Id: reader_digital_globe.cpp  $")
 
 /**
  * GDALMDReaderDigitalGlobe()
@@ -191,9 +193,10 @@ void GDALMDReaderDigitalGlobe::LoadMetadata()
                                        "IMAGE.FIRSTLINETIME");
     if(nullptr != pszDateTime)
     {
-        time_t timeStart = GetAcquisitionTimeFromString(pszDateTime);
+        GIntBig timeStart = GetAcquisitionTimeFromString(pszDateTime);
         char szMidDateTime[80];
-        strftime (szMidDateTime, 80, MD_DATETIMEFORMAT, localtime(&timeStart));
+        struct tm tmBuf;
+        strftime (szMidDateTime, 80, MD_DATETIMEFORMAT, CPLUnixTimeToYMDHMS(timeStart, &tmBuf));
 
         m_papszIMAGERYMD = CSLAddNameValue(m_papszIMAGERYMD,
                                            MD_NAME_ACQDATETIME,
@@ -204,9 +207,10 @@ void GDALMDReaderDigitalGlobe::LoadMetadata()
         pszDateTime = CSLFetchNameValue(m_papszIMDMD, "IMAGE_1.firstLineTime");
         if(nullptr != pszDateTime)
         {
-            time_t timeStart = GetAcquisitionTimeFromString(pszDateTime);
+            GIntBig timeStart = GetAcquisitionTimeFromString(pszDateTime);
             char szMidDateTime[80];
-            strftime (szMidDateTime, 80, MD_DATETIMEFORMAT, localtime(&timeStart));
+            struct tm tmBuf;
+            strftime (szMidDateTime, 80, MD_DATETIMEFORMAT, CPLUnixTimeToYMDHMS(timeStart, &tmBuf));
 
             m_papszIMAGERYMD = CSLAddNameValue(m_papszIMAGERYMD,
                                                MD_NAME_ACQDATETIME,

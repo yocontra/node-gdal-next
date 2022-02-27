@@ -42,7 +42,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: georaster_dataset.cpp 6833747591ce456fb5c056f450676629e1790d77 2021-10-17 18:49:56 +0200 Jürgen Fischer $")
+CPL_CVSID("$Id: georaster_dataset.cpp  $")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterDataset()
@@ -760,8 +760,8 @@ boolean GeoRasterDataset::JPEG_CopyDirect( const char* pszJPGFilename,
 
             const auto nWrite = poStmt->WriteBlob( poLocator,
                                         (void*) pBuffer,
-                                        (nCurOff + 1),
-                                        nSize );
+                                        static_cast<unsigned long>(nCurOff + 1),
+                                        static_cast<unsigned long>(nSize) );
 
             nCurOff += nWrite;
             nCount  += nSize;

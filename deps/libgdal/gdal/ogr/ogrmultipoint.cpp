@@ -41,7 +41,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrmultipoint.cpp 464e5bd63b59963407c8adc30fcbd5899731eddc 2021-03-16 15:06:30 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogrmultipoint.cpp  $")
 
 /************************************************************************/
 /*                           OGRMultiPoint()                            */

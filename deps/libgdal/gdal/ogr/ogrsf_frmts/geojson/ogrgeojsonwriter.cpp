@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <cstdint>
 
-CPL_CVSID("$Id: ogrgeojsonwriter.cpp 2fb3ccde7c0ba97e0156088ef8f8c393644d41c5 2021-07-10 11:17:39 +0200 Thomas Bonfort $")
+CPL_CVSID("$Id: ogrgeojsonwriter.cpp  $")
 
 static json_object *
 json_object_new_float_with_significant_figures( float fVal,
@@ -890,7 +890,8 @@ json_object* OGRGeoJSONWriteAttributes( OGRFeature* poFeature,
             const char* pszStr = poFeature->GetFieldAsString(nField);
             const size_t nLen = strlen(pszStr);
             poObjProp = nullptr;
-            if( (pszStr[0] == '{' && pszStr[nLen-1] == '}') ||
+            if( eSubType == OFSTJSON ||
+                (pszStr[0] == '{' && pszStr[nLen-1] == '}') ||
                 (pszStr[0] == '[' && pszStr[nLen-1] == ']') )
             {
                 OGRJSonParse(pszStr, &poObjProp, false);

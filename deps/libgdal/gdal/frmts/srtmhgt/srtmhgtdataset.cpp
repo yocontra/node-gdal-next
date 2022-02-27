@@ -40,7 +40,7 @@
 
 constexpr GInt16 SRTMHG_NODATA_VALUE = -32768;
 
-CPL_CVSID("$Id: srtmhgtdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: srtmhgtdataset.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */

@@ -30,7 +30,7 @@
 #include "shapefil.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: sdts2shp.cpp 33cf0e31a992be112b3091f012368d15605ed51d 2021-03-16 17:51:59 -0500 ben $")
+CPL_CVSID("$Id: sdts2shp.cpp  $")
 
 static int  bVerbose = FALSE;
 
@@ -198,9 +198,6 @@ int main( int nArgc, char ** papszArgv )
 
     CPLFree( pszShapefile );
 }
-#ifdef DBMALLOC
-    malloc_dump(1);
-#endif
 }
 
 /* **********************************************************************/

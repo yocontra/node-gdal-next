@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ili2readerp.h 2c3d60220a2d6b41496ded571e231b96435bffa0 2016-11-25 14:09:24Z Even Rouault $
+ * $Id: ili2readerp.h  $
  *
  * Project:  Interlis 2 Reader
  * Purpose:  Private Declarations for Reader code.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqlite3ext.h 355b41831cd2685c85d1aabe5b95665a2c6e99b7 2019-06-19 17:07:04 +0200 Even Rouault $
+ * $Id: ogrsqlite3ext.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Custom version of sqlite3ext.h to workaround issues with Spatialite amalgamation
@@ -248,7 +248,7 @@ typedef struct sqlite3_backup ogr_sqlite3_backup;
 // Commented out to avoid reimporting the #define sqlite3_xxx macros
 //#include "sqlite3.h"
 
-typedef struct sqlite3_api_routines sqlite3_api_routines;
+//typedef struct sqlite3_api_routines sqlite3_api_routines;
 
 /*
 ** The following structure holds pointers to all of the SQLite API
@@ -670,7 +670,7 @@ struct sqlite3_api_routines {
 #define sqlite3_vtab_on_conflict       sqlite3_api->vtab_on_conflict
 #endif /* SQLITE_CORE */
 
-#define SQLITE_EXTENSION_INIT1     const sqlite3_api_routines *sqlite3_api = nullptr;
+#define SQLITE_EXTENSION_INIT1     const struct sqlite3_api_routines *sqlite3_api = nullptr;
 #define SQLITE_EXTENSION_INIT2(v)  sqlite3_api = v;
 
 #endif /* SQLITE3EXT_H_ */

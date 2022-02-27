@@ -52,7 +52,7 @@
 #include "filegdbtable.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogropenfilegdblayer.cpp fba4fe318e223b8a5d27a90ed3944ceb2306d724 2021-11-23 14:25:00 +0100 Even Rouault $")
+CPL_CVSID("$Id: ogropenfilegdblayer.cpp  $")
 
 /************************************************************************/
 /*                      OGROpenFileGDBGeomFieldDefn                     */

@@ -46,7 +46,7 @@
 #include "mitab_priv.h"
 #include "ogr_feature.h"
 
-CPL_CVSID("$Id: mitab_mapfile.cpp 498a80077f2504ce756950b02fccc7144c28e163 2021-08-13 10:52:53 +0200 Even Rouault $")
+CPL_CVSID("$Id: mitab_mapfile.cpp  $")
 
 /*=====================================================================
  *                      class TABMAPFile
@@ -1627,8 +1627,8 @@ int   TABMAPFile::PrepareNewObjViaSpatialIndex(TABMAPObjHdr *poObjHdr)
          * everything to disk and will update m_poCurCoordBlock to point to
          * the last coord block in the chain, ready to accept new data
          *------------------------------------------------------------*/
-        TABMAPObjectBlock *poNewObjBlock
-            = SplitObjBlock(poObjHdr, nObjSize);
+        auto poNewObjBlock = std::unique_ptr<TABMAPObjectBlock>(
+                                            SplitObjBlock(poObjHdr, nObjSize));
 
         if (poNewObjBlock == nullptr)
             return -1;  /* Split failed, error already reported. */
@@ -1671,10 +1671,9 @@ int   TABMAPFile::PrepareNewObjViaSpatialIndex(TABMAPObjHdr *poObjHdr)
             std::max(static_cast<int>(m_poHeader->m_nMaxSpIndexDepth), nNextDepth));
 
         /*-------------------------------------------------------------
-         * Delete second object block, no need to commit to file first since
+         * Implicitly delete second object block, no need to commit to file first since
          * it is already been committed to disk by Split()
          *------------------------------------------------------------*/
-        delete poNewObjBlock;
     }
 
     return 0;

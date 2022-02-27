@@ -41,7 +41,7 @@
 #include "../../ogr/ogrsf_frmts/mitab/mitab.h"
 #endif
 
-CPL_CVSID("$Id: grddataset.cpp 6833747591ce456fb5c056f450676629e1790d77 2021-10-17 18:49:56 +0200 Jürgen Fischer $")
+CPL_CVSID("$Id: grddataset.cpp  $")
 
 constexpr float NODATA = -1.e37f;
 constexpr double SCALE16BIT = 65534.0;

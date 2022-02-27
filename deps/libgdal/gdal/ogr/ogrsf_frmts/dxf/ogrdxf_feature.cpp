@@ -29,7 +29,7 @@
 #include "ogr_dxf.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrdxf_feature.cpp 871c6d255b2f2181e9322d5b68f427e777dd3b90 2021-07-22 18:35:29 +1000 Alan Thomas $")
+CPL_CVSID("$Id: ogrdxf_feature.cpp  $")
 
 /************************************************************************/
 /*                            OGRDXFFeature()                           */

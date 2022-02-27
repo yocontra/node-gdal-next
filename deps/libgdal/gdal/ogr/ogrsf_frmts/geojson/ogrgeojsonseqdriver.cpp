@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: ogrgeojsonseqdriver.cpp f28f5e8137ffeb479da480dc99e4dedbeec895ab 2021-09-26 20:02:01 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgeojsonseqdriver.cpp  $")
 
 constexpr char RS = '\x1e';
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: s57tables.h ee26c44a5bff4460ea1731ab06059a0d375b1f85 2015-12-25 01:14:58Z Kurt Schwehr $
+ * $Id: s57tables.h  $
  *
  * Project:  S-57 Translator
  * Purpose:  Inline tables.

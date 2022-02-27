@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_error_internal.h eec9443f62fa2493c49130b8d21527739153ca6e 2019-08-14 13:08:30 +0200 Even Rouault $
+ * $Id: cpl_error_internal.h  $
  *
  * Name:     cpl_error_internal.h
  * Project:  CPL - Common Portability Library

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # [3.5.0] WIP
+ - GDAL 3.5.0-git
  - PROJ 8.2.1
  - API documentation now uses `documentation.js` with `documentation-polyglot`
  - `gdal.calcAsync` can now convert input data to the output type before applying the user function

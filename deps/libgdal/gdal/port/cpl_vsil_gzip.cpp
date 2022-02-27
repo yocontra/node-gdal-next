@@ -91,7 +91,7 @@
 #if HAVE_SYS_STAT_H
 #  include <sys/stat.h>
 #endif
-#include <zlib.h>
+#include "cpl_zlib_header.h" // to avoid warnings when including zlib.h
 
 #ifdef HAVE_LIBDEFLATE
 #include "libdeflate.h"
@@ -115,7 +115,7 @@
 #include "cpl_vsi_virtual.h"
 #include "cpl_worker_thread_pool.h"
 
-CPL_CVSID("$Id: cpl_vsil_gzip.cpp be255935dc8ed9cadd624afa55a84f43faf4b52e 2021-12-24 17:35:07 +0100 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsil_gzip.cpp  $")
 
 constexpr int Z_BUFSIZE = 65536;  // Original size is 16384
 constexpr int gz_magic[2] = {0x1f, 0x8b};  // gzip magic header
@@ -814,11 +814,6 @@ bool VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
 
         int read_size =
             static_cast<int>(Read(outbuf, 1, static_cast<uInt>(size)));
-        if( read_size == 0 )
-        {
-            // CPL_VSIL_GZ_RETURN(FALSE);
-            return false;
-        }
         if( original_nWhence == SEEK_END )
         {
             if( size != read_size )
@@ -826,6 +821,11 @@ bool VSIGZipHandle::gzseek( vsi_l_offset offset, int whence )
                 z_err = Z_STREAM_END;
                 break;
             }
+        }
+        else if( read_size == 0 )
+        {
+            // CPL_VSIL_GZ_RETURN(FALSE);
+            return false;
         }
         offset -= read_size;
     }
@@ -2439,19 +2439,20 @@ const char* VSIGZipFilesystemHandler::GetOptions()
 /*                   VSIInstallGZipFileHandler()                        */
 /************************************************************************/
 
-/**
- * \brief Install GZip file system handler.
- *
- * A special file handler is installed that allows reading on-the-fly and
- * writing in GZip (.gz) files.
- *
- * All portions of the file system underneath the base
- * path "/vsigzip/" will be handled by this driver.
- *
- * Additional documentation is to be found at:
- * http://trac.osgeo.org/gdal/wiki/UserDocs/ReadInZip
- *
- * @since GDAL 1.6.0
+/*!
+ \brief Install GZip file system handler.
+
+ A special file handler is installed that allows reading on-the-fly and
+ writing in GZip (.gz) files.
+
+ All portions of the file system underneath the base
+ path "/vsigzip/" will be handled by this driver.
+
+ \verbatim embed:rst
+ See :ref:`/vsigzip/ documentation <vsigzip>`
+ \endverbatim
+
+ @since GDAL 1.6.0
  */
 
 void VSIInstallGZipFileHandler()
@@ -3293,46 +3294,20 @@ void VSIZipWriteHandle::StartNewFile( VSIZipWriteHandle* poSubFile )
 /*                    VSIInstallZipFileHandler()                        */
 /************************************************************************/
 
-/**
- * \brief Install ZIP file system handler.
- *
- * A special file handler is installed that allows reading on-the-fly in ZIP
- * (.zip) archives.
- *
- * All portions of the file system underneath the base path "/vsizip/" will be
- * handled by this driver.
- *
- * The syntax to open a file inside a zip file is
- * /vsizip/path/to/the/file.zip/path/inside/the/zip/file where
- * path/to/the/file.zip is relative or absolute and path/inside/the/zip/file is
- * the relative path to the file inside the archive.
- *
- * Starting with GDAL 2.2, an alternate syntax is available so as to enable
- * chaining and not being dependent on .zip extension :
- * /vsizip/{/path/to/the/archive}/path/inside/the/zip/file.
- * Note that /path/to/the/archive may also itself use this alternate syntax.
- *
- * If the path is absolute, it should begin with a / on a Unix-like OS (or C:\
- * on Windows), so the line looks like /vsizip//home/gdal/...  For example
- * gdalinfo /vsizip/myarchive.zip/subdir1/file1.tif
- *
- * Syntactic sugar : if the .zip file contains only one file located at its
- * root, just mentioning "/vsizip/path/to/the/file.zip" will work
- *
- * VSIStatL() will return the uncompressed size in st_size member and file
- * nature- file or directory - in st_mode member.
- *
- * Directory listing is available through VSIReadDir().
- *
- * Since GDAL 1.8.0, write capabilities are available. They allow creating
- * a new zip file and adding new files to an already existing (or just created)
- * zip file. Read and write operations cannot be interleaved : the new zip must
- * be closed before being re-opened for read.
- *
- * Additional documentation is to be found at
- * http://trac.osgeo.org/gdal/wiki/UserDocs/ReadInZip
- *
- * @since GDAL 1.6.0
+/*!
+ \brief Install ZIP file system handler.
+
+ A special file handler is installed that allows reading on-the-fly in ZIP
+ (.zip) archives.
+
+ All portions of the file system underneath the base path "/vsizip/" will be
+ handled by this driver.
+
+ \verbatim embed:rst
+ See :ref:`/vsizip/ documentation <vsizip>`
+ \endverbatim
+
+ @since GDAL 1.6.0
  */
 
 void VSIInstallZipFileHandler()

@@ -48,7 +48,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrgpxlayer.cpp d07e4b070cbabdfba2522d14d712dee2a8775c7f 2021-08-12 21:42:07 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogrgpxlayer.cpp  $")
 
 constexpr int FLD_TRACK_FID = 0;
 constexpr int FLD_TRACK_SEG_ID = 1;

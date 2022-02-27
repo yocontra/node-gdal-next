@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geomedia.h 5214e0d8bbeab9cc5eb9834575ec8eb1b5eb9a02 2021-08-27 14:44:27 +1000 Nyall Dawson $
+ * $Id: ogr_geomedia.h  $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Geomedia MDB driver.

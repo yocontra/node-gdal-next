@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm.h 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $
+ * $Id: gnm.h  $
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM general public declarations.
@@ -701,9 +701,9 @@ protected:
     CPLString m_soSrcLayerName;
     CPLString m_soTgtLayerName;
     CPLString m_soConnLayerName;
-    bool m_bAllow;
-    bool m_bValid;
-    bool m_bAny;
+    bool m_bAllow = false;
+    bool m_bValid = false;
+    bool m_bAny = false;
     CPLString m_soRuleString;
 //! @endcond
 };

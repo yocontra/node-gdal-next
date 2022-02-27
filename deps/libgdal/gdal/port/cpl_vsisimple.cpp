@@ -92,7 +92,7 @@
 extern "C" GIntBig CPL_DLL CPL_STDCALL GDALGetCacheUsed64(void);
 #endif
 
-CPL_CVSID("$Id: cpl_vsisimple.cpp b1c9c12ad373e40b955162b45d704070d4ebf7b0 2019-06-19 16:50:15 +0200 Even Rouault $")
+CPL_CVSID("$Id: cpl_vsisimple.cpp  $")
 
 /* Unix or Windows NT/2000/XP */
 #if !defined(WIN32)

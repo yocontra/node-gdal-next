@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 
 
-CPL_CVSID("$Id: ogr_expat.cpp 148115fcc40f1651a5d15fa34c9a8c528e7147bb 2019-08-04 21:00:33 +0200 Even Rouault $")
+CPL_CVSID("$Id: ogr_expat.cpp  $")
 
 constexpr size_t OGR_EXPAT_MAX_ALLOWED_ALLOC = 10000000;
 

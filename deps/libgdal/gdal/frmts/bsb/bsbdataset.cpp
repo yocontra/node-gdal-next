@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-CPL_CVSID("$Id: bsbdataset.cpp 4b46f534fed80d31c3e15c1517169f40694a4a3e 2021-10-14 19:17:37 +0200 Even Rouault $")
+CPL_CVSID("$Id: bsbdataset.cpp  $")
 
 //Disabled as people may worry about the BSB patent
 //#define BSB_CREATE
@@ -1219,6 +1219,7 @@ void GDALRegister_BSB()
                                "Maptech BSB Nautical Charts" );
     poDriver->SetMetadataItem( GDAL_DMD_HELPTOPIC, "drivers/raster/bsb.html" );
     poDriver->SetMetadataItem( GDAL_DCAP_VIRTUALIO, "YES" );
+    poDriver->SetMetadataItem( GDAL_DMD_EXTENSION, "kap" );
 #ifdef BSB_CREATE
     poDriver->SetMetadataItem( GDAL_DMD_CREATIONDATATYPES, "Byte" );
 #endif

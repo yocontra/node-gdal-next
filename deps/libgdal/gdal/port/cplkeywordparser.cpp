@@ -42,7 +42,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cplkeywordparser.cpp bd4729925ca43d7b70d1deae1f5090253e721fc3 2021-07-01 16:32:30 +0200 Even Rouault $")
+CPL_CVSID("$Id: cplkeywordparser.cpp  $")
 
 /************************************************************************/
 /* ==================================================================== */
