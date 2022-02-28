@@ -38,7 +38,7 @@ docker build \
 COMMON_ARGS="--user `id -u`:`id -g` --env MOCHA_TEST_NETWORK -v `pwd`:/src:ro"
 
 echo "Checking for ccache"
-if which ccache; then
+if which ccache && test "${OP}" != "publish"; then
   CCACHE_DIR=`ccache --get-config=cache_dir`
   if [ ! -w ${CCACHE_DIR} ]; then
     echo "${CCACHE_DIR} not available, creating it"
@@ -59,7 +59,7 @@ case ${OP} in
     ;;
   publish)
     echo -e "${SEP}Publishing in ${CONTAINER}${SEP}"
-    docker run ${COMMON_ARGS} --env NODE_PRE_GYP_GITHUB_TOKEN PUBLISH ${CONTAINER} || exit 1
+    docker run ${COMMON_ARGS} --env NODE_PRE_GYP_GITHUB_TOKEN ${CONTAINER} PUBLISH || exit 1
     ;;
   shell)
     echo -e "${SEP}Testing in ${CONTAINER} and running a shell${SEP}"
