@@ -28,7 +28,7 @@ void Utils::Initialize(Local<Object> target) {
  */
 
 /**
- * Library version of gdal_translate
+ * Library version of gdal_translate.
  *
  * @example
  * const ds = gdal.open('input.tif')
@@ -46,8 +46,8 @@ void Utils::Initialize(Local<Object> target) {
  */
 
 /**
- * Library version of gdal_translate
- * @async
+ * Library version of gdal_translate.
+ * {{{async}}}
  *
  * @example
  * const ds = gdal.open('input.tif')
@@ -106,7 +106,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
 }
 
 /**
- * Library version of ogr2ogr
+ * Library version of ogr2ogr.
  *
  * @example
  * const ds = gdal.open('input.geojson')
@@ -124,8 +124,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  */
 
 /**
- * Library version of ogr2ogr
- * @async
+ * Library version of ogr2ogr.
+ * {{{async}}}
  *
  * @example
  * const ds = gdal.open('input.geojson')
@@ -208,7 +208,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
 }
 
 /**
- * Library version of gdalinfo
+ * Library version of gdalinfo.
  *
  * @example
  * const ds = gdal.open('input.tif')
@@ -223,8 +223,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::vectorTranslate) {
  */
 
 /**
- * Library version of gdalinfo
- * @async
+ * Library version of gdalinfo.
+ * {{{async}}}
  *
  * @example
  * const ds = gdal.open('input.tif')
@@ -271,7 +271,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
 }
 
 /**
- * Library version of gdalwarp
+ * Library version of gdalwarp.
  *
  * @example
  * const ds = gdal.open('input.tif')
@@ -290,8 +290,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::info) {
  */
 
 /**
- * Library version of gdalwarp
- * @async
+ * Library version of gdalwarp.
+ * {{{async}}}
  *
  * @example
  * const ds = await gdal.openAsync('input.tif')
@@ -384,7 +384,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::warp) {
 }
 
 /**
- * Library version of gdalbuildvrt
+ * Library version of gdalbuildvrt.
  *
  * @example
  * const ds1 = gdal.buildVRT('/vsimem/target.tiff',
@@ -407,8 +407,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::warp) {
  */
 
 /**
- * Library version of gdalbuildvrt
- * @async
+ * Library version of gdalbuildvrt.
+ * {{{async}}}
  *
  * @example
  * const ds1 = await gdal.buildVRTAsync('/vsimem/target.tiff',
@@ -510,7 +510,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::buildvrt) {
 }
 
 /**
- * Library version of gdal_rasterize
+ * Library version of gdal_rasterize.
  *
  * @example
  * const ds1 = gdal.rasterize('/vsimem/target.tiff',
@@ -533,8 +533,8 @@ GDAL_ASYNCABLE_DEFINE(Utils::buildvrt) {
  */
 
 /**
- * Library version of gdal_rasterize
- * @async
+ * Library version of gdal_rasterize.
+ * {{{async}}}
  *
  * @example
  * const ds1 = await gdal.rasterizeAsync('/vsimem/target.tiff',

@@ -431,4 +431,19 @@ describe('gdal', () => {
       assert.isAbove(calls, 0)
     })
   })
+  describe('addPixelFunc()', () => {
+    it('should throw with invalid arguments', () => {
+      assert.throws(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gdal.addPixelFunc as any)(1, 2)
+      }, /name must be a string/)
+      assert.throws(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (gdal.addPixelFunc as any)('func', 2)
+      }, /pixelFn must be an object/)
+      assert.throws(() => {
+        gdal.addPixelFunc('func', new Uint8Array(48))
+      }, /pixelFn must be a native code pixel function/)
+    })
+  })
 })

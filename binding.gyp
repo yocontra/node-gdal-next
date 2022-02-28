@@ -109,6 +109,7 @@
 			"product_extension": "node",
 			"sources": [ "<@(sources_node_gdal)" ],
 			"include_dirs": [
+        "include",
 				"<!(node -e \"require('nan')\")"
 			],
 			"defines": [

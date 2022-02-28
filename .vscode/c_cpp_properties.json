@@ -1,6 +1,7 @@
 {
     "env": {
         "projectIncludePaths": [
+            "${workspaceFolder}/include",
             "${workspaceFolder}/deps/libgdal/gdal/port",
             "${workspaceFolder}/deps/libgdal/gdal/gcore",
             "${workspaceFolder}/deps/libgdal/gdal/ogr",

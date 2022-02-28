@@ -5,6 +5,8 @@
 #include "gdal_rasterband.hpp"
 #include "utils/number_list.hpp"
 
+#include "node_gdal.h"
+
 namespace node_gdal {
 
 void Algorithms::Initialize(Local<Object> target) {
@@ -13,6 +15,7 @@ void Algorithms::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "sieveFilter", sieveFilter);
   Nan__SetAsyncableMethod(target, "checksumImage", checksumImage);
   Nan__SetAsyncableMethod(target, "polygonize", polygonize);
+  Nan__SetAsyncableMethod(target, "addPixelFunc", addPixelFunc);
   Nan__SetAsyncableMethod(target, "_acquireLocks", _acquireLocks);
 }
 
@@ -537,6 +540,50 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::_acquireLocks) {
   };
   job.rval = [](int, const GetFromPersistentFunc &) { return Nan::Undefined().As<Value>(); };
   job.run(info, async, 3);
+}
+
+/**
+ * @typedef {Uint8Array} PixelFunction
+ */
+
+/**
+ * Register a new compiled pixel function for derived virtual datasets.
+ *
+ * This method is not meant to be used directly by the end user,
+ * it is an entry point for plugins implementing pixel functions.
+ *
+ * You can check the `gdal-exprtk` plugin for an implementation
+ * which uses ExprTk expressions.
+ *
+ * @throws Error
+ * @method addPixelFunc
+ * @static
+ * @param {string} name
+ * @param {PixelFunction} pixelFn
+ */
+GDAL_ASYNCABLE_DEFINE(Algorithms::addPixelFunc) {
+  std::string name;
+  NODE_ARG_STR(0, "name", name);
+
+  Local<Object> arg;
+  NODE_ARG_OBJECT(1, "pixelFn", arg);
+
+  Nan::TypedArrayContents<uint64_t> magic(arg);
+
+  if (magic.length() < 1 || **magic != NODE_GDAL_CAPI_MAGIC) {
+    Nan::ThrowTypeError("pixelFn must be a native code pixel function");
+    return;
+  }
+
+  Nan::TypedArrayContents<uint8_t> data(arg);
+
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 5)
+  pixel_func *desc = reinterpret_cast<pixel_func *>(*data);
+  CPLErr err = GDALAddDerivedBandPixelFuncWithArgs(name.c_str(), desc->fn, desc->metadata);
+  if (err != CE_None) { NODE_THROW_LAST_CPLERR; }
+#else
+  Nan::ThrowError("Custom pixel functions require GDAL >= 3.5");
+#endif
 }
 
 } // namespace node_gdal
