@@ -5,6 +5,10 @@ import { assert } from 'chai'
 describe('Open', () => {
   afterEach(global.gc)
 
+  before(() => {
+    gdal.config.set('GDAL_PAM_ENABLED', 'NO')
+  })
+
   describe('TIFF', () => {
     let filename, ds: gdal.Dataset
 
