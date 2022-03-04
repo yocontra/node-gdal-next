@@ -33,7 +33,7 @@ GDAL_ASYNCABLE_GLOBAL(contourGenerate);
 GDAL_ASYNCABLE_GLOBAL(sieveFilter);
 GDAL_ASYNCABLE_GLOBAL(checksumImage);
 GDAL_ASYNCABLE_GLOBAL(polygonize);
-GDAL_ASYNCABLE_GLOBAL(addPixelFunc);
+NAN_METHOD(addPixelFunc);
 GDAL_ASYNCABLE_GLOBAL(_acquireLocks);
 } // namespace Algorithms
 } // namespace node_gdal

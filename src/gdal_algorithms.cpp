@@ -15,7 +15,7 @@ void Algorithms::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "sieveFilter", sieveFilter);
   Nan__SetAsyncableMethod(target, "checksumImage", checksumImage);
   Nan__SetAsyncableMethod(target, "polygonize", polygonize);
-  Nan__SetAsyncableMethod(target, "addPixelFunc", addPixelFunc);
+  Nan::SetMethod(target, "addPixelFunc", addPixelFunc);
   Nan__SetAsyncableMethod(target, "_acquireLocks", _acquireLocks);
 }
 
@@ -561,7 +561,7 @@ GDAL_ASYNCABLE_DEFINE(Algorithms::_acquireLocks) {
  * @param {string} name
  * @param {PixelFunction} pixelFn
  */
-GDAL_ASYNCABLE_DEFINE(Algorithms::addPixelFunc) {
+NAN_METHOD(Algorithms::addPixelFunc) {
   std::string name;
   NODE_ARG_STR(0, "name", name);
 
