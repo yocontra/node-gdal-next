@@ -9,6 +9,10 @@ describe('Open', () => {
     gdal.config.set('GDAL_PAM_ENABLED', 'NO')
   })
 
+  after(() => {
+    gdal.config.set('GDAL_PAM_ENABLED', 'YES')
+  })
+
   describe('TIFF', () => {
     let filename, ds: gdal.Dataset
 
