@@ -13,3 +13,5 @@ coverage:
         paths:
           - "src"
           - "lib"
+    patch:
+      default: 80%
