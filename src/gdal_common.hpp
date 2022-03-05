@@ -3,6 +3,7 @@
 
 #include <cpl_error.h>
 #include <gdal_version.h>
+#include <thread>
 #include <stdio.h>
 
 // nan

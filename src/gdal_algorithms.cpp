@@ -4,6 +4,7 @@
 #include "gdal_layer.hpp"
 #include "gdal_rasterband.hpp"
 #include "utils/number_list.hpp"
+#include "utils/typed_array.hpp"
 
 #include "node_gdal.h"
 
@@ -16,6 +17,7 @@ void Algorithms::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "checksumImage", checksumImage);
   Nan__SetAsyncableMethod(target, "polygonize", polygonize);
   Nan::SetMethod(target, "addPixelFunc", addPixelFunc);
+  Nan::SetMethod(target, "toPixelFunc", toPixelFunc);
   Nan__SetAsyncableMethod(target, "_acquireLocks", _acquireLocks);
 }
 
@@ -581,6 +583,203 @@ NAN_METHOD(Algorithms::addPixelFunc) {
   pixel_func *desc = reinterpret_cast<pixel_func *>(*data);
   CPLErr err = GDALAddDerivedBandPixelFuncWithArgs(name.c_str(), desc->fn, desc->metadata);
   if (err != CE_None) { NODE_THROW_LAST_CPLERR; }
+#else
+  Nan::ThrowError("Custom pixel functions require GDAL >= 3.5");
+#endif
+}
+
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 5)
+// This is the arguments of one call of the pixel function
+struct pixelFnCall {
+  void **sources;
+  size_t num;
+  void *destination;
+  int width, height;
+  GDALDataType inType;
+  GDALDataType outType;
+  Nan::Utf8String *err;
+};
+
+// This is the pixel function descriptor
+// The queue can be modified both by the main thread and the worker threads
+struct pixelFn {
+  Nan::Callback *fn;
+  pixelFnCall call;
+  uv_mutex_t callJS;
+  uv_sem_t returnJS;
+};
+
+// Only the main thread can modify this and only by adding new elements
+// No need to lock
+std::vector<pixelFn> pixelFuncs;
+
+const char metadataTemplate[] =
+  "<PixelFunctionArgumentsList>\n"
+  "   <Argument name ='node_gdal_pfn_id' type='constant' value='%x' />\n"
+  "</PixelFunctionArgumentsList>";
+
+// This is the final step before calling the JS function
+// This function is called by libuv on the main thread
+// The async_send in the function below is what triggers this call
+static void callJSpfn(uv_async_t *async) {
+  // Here V8 is accessible
+  Nan::HandleScope scope;
+
+  pixelFn *fn = reinterpret_cast<pixelFn *>(async->data);
+  Local<Array> sources = Nan::New<Array>(fn->call.num);
+  size_t len = fn->call.width * fn->call.height;
+  for (size_t i = 0; i < fn->call.num; i++) {
+    Nan::Set(sources, i, TypedArray::New(fn->call.inType, fn->call.sources[i], len));
+  }
+  Local<Value> destination = TypedArray::New(fn->call.outType, fn->call.destination, len);
+  Local<Number> width = Nan::New<Number>(fn->call.width);
+  Local<Number> height = Nan::New<Number>(fn->call.height);
+  Local<Value> args[] = {sources, destination, width, height};
+
+  fn->call.err = nullptr;
+  Nan::TryCatch try_catch;
+  // async_hooks do not make any sense for pixel functions
+  Nan::Call(*fn->fn, 4, args);
+  if (try_catch.HasCaught()) fn->call.err = new Nan::Utf8String(try_catch.Message()->Get());
+
+  // unlock the worker thread (the function below)
+  uv_sem_post(&fn->returnJS);
+}
+
+// This is the GDAL pixel function trampoline that calls the JS callback
+// It is called on one of the libuv async worker threads
+// It throws when called on the main thread to avoid deadlocking
+static CPLErr pixelFunc(
+  void **papoSources,
+  int nSources,
+  void *pData,
+  int nBufXSize,
+  int nBufYSize,
+  GDALDataType eSrcType,
+  GDALDataType eBufType,
+  int nPixelSpace,
+  int nLineSpace,
+  CSLConstList papszFunctionArgs) {
+  // Here V8 is (potentially) off-limits
+
+  const char *szid = CSLFetchNameValue(papszFunctionArgs, "node_gdal_pfn_id");
+  if (szid == nullptr) {
+    CPLError(CE_Failure, CPLE_AppDefined, "gdal-async Internal error, pixelFuncs inconsistency, id=NULL");
+    return CE_Failure;
+  }
+  char *end;
+  size_t id = std::strtoul(szid, &end, 16);
+  if (end == szid || id > pixelFuncs.size()) {
+    CPLError(CE_Failure, CPLE_AppDefined, "gdal-async Internal error, pixelFuncs inconsistency");
+    return CE_Failure;
+  }
+
+  size_t size = GDALGetDataTypeSizeBytes(eBufType);
+  if (
+    size != static_cast<size_t>(nPixelSpace) ||
+    size * static_cast<size_t>(nBufXSize) != static_cast<size_t>(nLineSpace)) {
+    CPLError(CE_Failure, CPLE_AppDefined, "gdal-async still does not support irregular buffer strides");
+    return CE_Failure;
+  }
+
+  uv_async_t *async = new uv_async_t;
+  async->data = &pixelFuncs[id];
+
+  if (std::this_thread::get_id() == mainV8ThreadId) {
+    // Here we are abusing an uninitialized uv_async_t as a data holder
+    pixelFuncs[id].call = {
+      papoSources, static_cast<size_t>(nSources), pData, nBufXSize, nBufYSize, eSrcType, eBufType, nullptr};
+    callJSpfn(async);
+    delete async;
+  } else {
+    uv_async_init(uv_default_loop(), async, callJSpfn);
+
+    uv_mutex_lock(&pixelFuncs[id].callJS);
+    pixelFuncs[id].call = {
+      papoSources, static_cast<size_t>(nSources), pData, nBufXSize, nBufYSize, eSrcType, eBufType, nullptr};
+    uv_async_send(async);
+    uv_sem_wait(&pixelFuncs[id].returnJS);
+    uv_mutex_unlock(&pixelFuncs[id].callJS);
+
+    uv_close(reinterpret_cast<uv_handle_t *>(async), [](uv_handle_t *handle) {
+      uv_async_t *async = reinterpret_cast<uv_async_t *>(handle);
+      delete async;
+    });
+  }
+
+  if (pixelFuncs[id].call.err != nullptr) {
+    CPLError(CE_Failure, CPLE_AppDefined, "Pixel function error: %s", **pixelFuncs[id].call.err);
+    delete pixelFuncs[id].call.err;
+    pixelFuncs[id].call.err = nullptr;
+    return CE_Failure;
+  }
+
+  return CE_None;
+}
+#endif
+
+/**
+ * Create a GDAL pixel function from a JS function.
+ *
+ * As V8, and JS in general, can only have a single active JS context per isolate,
+ * even when using async I/O, the pixel function will be called on the main thread.
+ * This can lead to increased latency when serving network requests.
+ *
+ * You can check the `gdal-exprtk` plugin for an alternative
+ * which uses ExprTk expressions and does not suffer from this problem.
+ *
+ * As GDAL does not allow unregistering a previously registered pixel functions,
+ * each call of this method will produce a permanently registered pixel function.
+ *
+ * The function signature should match the GDAL pixel function signature.
+ * You can check `createPixelFunc` for a higher-level method that can be used
+ * to construct a GDAL pixel function from a JavaScript expression for a single pixel.
+ *
+ * @example
+ * // This example will register a new GDAL pixel function called sum2
+ * // that requires a VRT dataset with 2 values per pixel
+ * const sum2 = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
+ *   for (let i = 0; i < buffer.length; i++) {
+ *     buffer[i] = sources[0][i] + sources[1][i]
+ *   }
+ * };
+ * gdal.addPixelFunc('sum2', gdal.toPixelFunc(sum2));
+ *
+ * @throws Error
+ * @method toPixelFunc
+ * @static
+ * @param {(sources: TypedArray[], buffer: TypedArray, width: number, height: number) => void} pixelFn JavaScript pixel function
+ * @returns {PixelFunction}
+ */
+NAN_METHOD(Algorithms::toPixelFunc) {
+#if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 5)
+  Nan::Callback *pfn;
+  NODE_ARG_CB(0, "pixelFn", pfn);
+
+  size_t uid = pixelFuncs.size();
+  pixelFuncs.push_back({pfn, {}, {}, {}});
+  uv_mutex_init(&pixelFuncs[uid].callJS);
+  uv_sem_init(&pixelFuncs[uid].returnJS, 0);
+
+  std::string metadata;
+  metadata.reserve(strlen(metadataTemplate) + 32);
+  snprintf(&metadata[0], metadata.capacity(), metadataTemplate, static_cast<unsigned>(uid));
+
+  Local<Value> r = node_gdal::TypedArray::New(GDT_Byte, sizeof(node_gdal::pixel_func) + strlen(metadata.c_str()) + 1);
+  if (r.IsEmpty() || !r->IsObject()) {
+    Nan::ThrowError("Failed creating TypedArray");
+    return;
+  }
+  Nan::TypedArrayContents<GByte> contents(r);
+  node_gdal::pixel_func *desc = reinterpret_cast<node_gdal::pixel_func *>(*contents);
+
+  desc->magic = NODE_GDAL_CAPI_MAGIC;
+  desc->fn = pixelFunc;
+  char *md = reinterpret_cast<char *>(desc) + sizeof(node_gdal::pixel_func);
+  memcpy(md, metadata.data(), strlen(metadata.c_str()));
+  desc->metadata = md;
+
+  info.GetReturnValue().Set(r);
 #else
   Nan::ThrowError("Custom pixel functions require GDAL >= 3.5");
 #endif

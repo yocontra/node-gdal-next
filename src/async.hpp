@@ -1,12 +1,16 @@
 #ifndef __NODE_GDAL_ASYNC_WORKER_H__
 #define __NODE_GDAL_ASYNC_WORKER_H__
 
+#include <thread>
 #include <functional>
 #include <chrono>
 #include "nan-wrapper.h"
 #include "gdal_common.hpp"
 
 namespace node_gdal {
+
+// The id of the main V8 thread
+extern std::thread::id mainV8ThreadId;
 
 // This generates method definitions for 2 methods: sync and async version and a hidden common block
 #define GDAL_ASYNCABLE_DEFINE(method)                                                                                  \

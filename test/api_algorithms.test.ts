@@ -1,5 +1,6 @@
 import * as gdal from '..'
 import * as chai from 'chai'
+import * as semver from 'semver'
 const assert = chai.assert
 import * as chaiAsPromised from 'chai-as-promised'
 chai.use(chaiAsPromised)
@@ -444,6 +445,135 @@ describe('gdal', () => {
       assert.throws(() => {
         gdal.addPixelFunc('func', new Uint8Array(48))
       }, /pixelFn must be a native code pixel function/)
+    })
+  })
+
+  describe('toPixelFunc()', () => {
+    it('should produce a binary pixel function from a JS function', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+      const sum2 = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
+        for (let i = 0; i < buffer.length; i++) {
+          buffer[i] = sources[0][i] + sources[1][i]
+        }
+      }
+      gdal.addPixelFunc('sum2', gdal.toPixelFunc(sum2))
+
+      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
+  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
+    <Description>CustomPixelFn</Description>
+    <PixelFunctionType>sum2</PixelFunctionType>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
+`
+      const ds = gdal.open(vrt)
+      assert.equal(ds.bands.count(), 1)
+      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const q = ds.bands.get(1).pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y).then((result) => {
+        for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
+          assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
+        }
+      })
+      return assert.isFulfilled(q)
+    })
+
+    it('should propagate exceptions to the calling code', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+      const fail = () => {
+        throw new Error('pixel function failed')
+      }
+      gdal.addPixelFunc('fail', gdal.toPixelFunc(fail))
+
+      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
+  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
+    <Description>CustomPixelFn</Description>
+    <PixelFunctionType>fail</PixelFunctionType>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
+`
+      const ds = gdal.open(vrt)
+      return assert.isRejected(ds.bands.get(1).pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y),
+        /pixel function failed/)
+    })
+
+    it('should support being called synchronously', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+      const sync = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
+        for (let i = 0; i < buffer.length; i++) {
+          buffer[i] = sources[0][i] + sources[1][i]
+        }
+      }
+      gdal.addPixelFunc('sync', gdal.toPixelFunc(sync))
+
+      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
+  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
+    <Description>CustomPixelFn</Description>
+    <PixelFunctionType>sync</PixelFunctionType>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
+`
+      const ds = gdal.open(vrt)
+      assert.equal(ds.bands.count(), 1)
+      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
+        assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
+      }
+    })
+  })
+
+  describe('createPixelFunc()', () => {
+    it('should create a pixel function from a JS function for a single pixel', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+
+      gdal.addPixelFunc('createPxFn', gdal.createPixelFunc((a, b) => a + b))
+
+      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
+  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
+    <Description>CustomPixelFn</Description>
+    <PixelFunctionType>createPxFn</PixelFunctionType>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
+`
+      const ds = gdal.open(vrt)
+      assert.equal(ds.bands.count(), 1)
+      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
+        assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
+      }
     })
   })
 })

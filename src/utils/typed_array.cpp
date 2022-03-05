@@ -63,6 +63,51 @@ Local<Value> TypedArray::New(GDALDataType type, unsigned int length) {
   return scope.Escape(array);
 }
 
+// Create a new TypedArray view over an existing memory buffer
+// This function throws because it is meant to be used inside a pixel function
+Local<Value> TypedArray::New(GDALDataType type, void *data, unsigned int length) {
+  Nan::EscapableHandleScope scope;
+
+  Local<Object> global = Nan::GetCurrentContext()->Global();
+
+  const char *name;
+  switch (type) {
+    case GDT_Byte: name = "Uint8Array"; break;
+    case GDT_Int16: name = "Int16Array"; break;
+    case GDT_UInt16: name = "Uint16Array"; break;
+    case GDT_Int32: name = "Int32Array"; break;
+    case GDT_UInt32: name = "Uint32Array"; break;
+    case GDT_Float32: name = "Float32Array"; break;
+    case GDT_Float64: name = "Float64Array"; break;
+    default: throw "Unsupported array type";
+  }
+
+  size_t size = GDALGetDataTypeSizeBytes(type);
+
+  // make ArrayBuffer with external storage by creating a Node.js Buffer w/ an empty free callback
+  Local<Object> buffer = Nan::NewBuffer(
+                           reinterpret_cast<char *>(data), length * size, [](char *, void *) {}, nullptr)
+                           .ToLocalChecked();
+
+  if (buffer.IsEmpty() || !buffer->IsObject()) { throw "Error getting creating Node.js Buffer"; }
+
+  // get the underlying ArrayBuffer
+  Local<Value> underlyingAB = Nan::Get(buffer, Nan::New("buffer").ToLocalChecked()).ToLocalChecked();
+
+  // make TypedArray
+  Local<Value> val = Nan::Get(global, Nan::New(name).ToLocalChecked()).ToLocalChecked();
+  if (val.IsEmpty() || !val->IsFunction()) { throw "Error getting typed array constructor"; }
+  Local<Function> constructor = val.As<Function>();
+
+  Local<Object> array = Nan::NewInstance(constructor, 1, &underlyingAB).ToLocalChecked();
+
+  if (array.IsEmpty() || !array->IsObject()) { throw "Error creating TypedArray"; }
+
+  Nan::Set(array, Nan::New("_gdal_type").ToLocalChecked(), Nan::New(type));
+
+  return scope.Escape(array);
+}
+
 GDALDataType TypedArray::Identify(Local<Object> obj) {
   Nan::HandleScope scope;
 

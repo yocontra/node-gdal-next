@@ -34,6 +34,7 @@ GDAL_ASYNCABLE_GLOBAL(sieveFilter);
 GDAL_ASYNCABLE_GLOBAL(checksumImage);
 GDAL_ASYNCABLE_GLOBAL(polygonize);
 NAN_METHOD(addPixelFunc);
+NAN_METHOD(toPixelFunc);
 GDAL_ASYNCABLE_GLOBAL(_acquireLocks);
 } // namespace Algorithms
 } // namespace node_gdal

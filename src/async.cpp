@@ -2,6 +2,8 @@
 
 namespace node_gdal {
 
+std::thread::id mainV8ThreadId;
+
 // *message coming from GDAL points to a statically allocated buffer
 GDALProgressInfo::GDALProgressInfo(double complete, const char *message) : complete(complete), message(message) {
 }

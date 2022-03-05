@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - PROJ 8.2.1
  - API documentation now uses `documentation.js` with `documentation-polyglot`
  - Add `gdal.addPixelFunc` for registering a native code pixel function
+ - Add `gdal.toPixelFunc` and `gdal.createPixelFunc` allowing to use a JavaScript function as a pixel function
  - `gdal.calcAsync` can now convert input data to the output type before applying the user function
  - `gdal.calcAsync` can now call a progress callback
  - Add `gdal.buildVRT` and `gdal.rasterize`, library versions of the GDAL CLI tools

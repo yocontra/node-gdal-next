@@ -338,6 +338,7 @@ static void Init(Local<Object> target, Local<v8::Value>, void *) {
     return;
   }
   initialized = true;
+  mainV8ThreadId = std::this_thread::get_id();
 
   Nan__SetAsyncableMethod(target, "open", gdal_open);
   Nan::SetMethod(target, "setConfigOption", setConfigOption);
