@@ -452,6 +452,10 @@ describe('gdal', () => {
     it('should produce a binary pixel function from a JS function', function () {
       if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
       const sum2 = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
+        assert.equal(sources.length, 2)
+        assert.instanceOf(sources[0], Float64Array)
+        assert.instanceOf(sources[1], Float64Array)
+        assert.instanceOf(buffer, Float64Array)
         for (let i = 0; i < buffer.length; i++) {
           buffer[i] = sources[0][i] + sources[1][i]
         }
@@ -542,6 +546,47 @@ describe('gdal', () => {
       for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
         assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
       }
+    })
+
+    it('should support converting the data type', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+      const sum2 = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
+        assert.equal(sources.length, 2)
+        assert.instanceOf(sources[0], Float32Array)
+        assert.instanceOf(sources[1], Float32Array)
+        assert.instanceOf(buffer, Int32Array)
+        for (let i = 0; i < buffer.length; i++) {
+          buffer[i] = sources[0][i] + sources[1][i]
+        }
+      }
+      gdal.addPixelFunc('sum2', gdal.toPixelFunc(sum2))
+
+      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
+  <VRTRasterBand dataType="Int32" band="1" subClass="VRTDerivedRasterBand">
+    <Description>CustomPixelFn</Description>
+    <PixelFunctionType>sum2</PixelFunctionType>
+    <SourceTransferType>Float32</SourceTransferType>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
+`
+      const ds = gdal.open(vrt)
+      assert.equal(ds.bands.count(), 1)
+      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const q = ds.bands.get(1).pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y).then((result) => {
+        for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
+          assert.closeTo(result[i], input1[i] + input2[i], 1)
+        }
+      })
+      return assert.isFulfilled(q)
     })
   })
 
