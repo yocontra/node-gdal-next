@@ -5,6 +5,10 @@ import * as semver from 'semver'
 const assert = chai.assert
 
 describe('gdal.wrapVRT()', () => {
+  const sample = path.resolve(__dirname, 'data', 'sample.tif')
+  const multiband = path.resolve(__dirname, 'data', 'multiband.tif')
+  const arome_t2m = path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')
+  const arome_d2m = path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')
 
   it('should produce identical Dataset by default', function () {
     if (!semver.gte(gdal.version, '3.4.0')) {
@@ -18,13 +22,13 @@ describe('gdal.wrapVRT()', () => {
   </Metadata>
   <VRTRasterBand dataType="Byte" band="1">
     <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/sample.tif</SourceFilename>
+      <SourceFilename relativeToVRT="0">${sample}</SourceFilename>
       <SourceBand>1</SourceBand>
     </SimpleSource>
   </VRTRasterBand>
 </VRTDataset>`
     assert.equal(gdal.wrapVRT({ bands: [
-      { sources: [ gdal.open(path.join('test', 'data', 'sample.tif')).bands.get(1) ] } ]
+      { sources: [ gdal.open(sample).bands.get(1) ] } ]
     }), expected)
   })
 
@@ -43,7 +47,7 @@ describe('gdal.wrapVRT()', () => {
     <PixelFunctionArguments k="3"/>
     <SourceTransferType>Float32</SourceTransferType>
     <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/sample.tif</SourceFilename>
+      <SourceFilename relativeToVRT="0">${sample}</SourceFilename>
       <SourceBand>1</SourceBand>
     </SimpleSource>
   </VRTRasterBand>
@@ -52,7 +56,7 @@ describe('gdal.wrapVRT()', () => {
     assert.equal(gdal.wrapVRT({
       bands: [
         {
-          sources: [ gdal.open(path.join('test', 'data', 'sample.tif')).bands.get(1) ],
+          sources: [ gdal.open(sample).bands.get(1) ],
           pixelFunc: 'inv',
           pixelFuncArgs: { k: 3 },
           dataType: gdal.GDT_Int16,
@@ -78,26 +82,26 @@ describe('gdal.wrapVRT()', () => {
   </Metadata>
   <VRTRasterBand dataType="Byte" band="1">
     <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/multiband.tif</SourceFilename>
+      <SourceFilename relativeToVRT="0">${multiband}</SourceFilename>
       <SourceBand>1</SourceBand>
     </SimpleSource>
   </VRTRasterBand>
   <VRTRasterBand dataType="Byte" band="2">
     <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/multiband.tif</SourceFilename>
+      <SourceFilename relativeToVRT="0">${multiband}</SourceFilename>
       <SourceBand>2</SourceBand>
     </SimpleSource>
   </VRTRasterBand>
   <VRTRasterBand dataType="Byte" band="3">
     <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/multiband.tif</SourceFilename>
+      <SourceFilename relativeToVRT="0">${multiband}</SourceFilename>
       <SourceBand>3</SourceBand>
     </SimpleSource>
   </VRTRasterBand>
 </VRTDataset>`
 
     assert.equal(gdal.wrapVRT({
-      bands: gdal.open(path.join('test', 'data', 'multiband.tif')).bands.map((b) => ({ sources: [ b ] })) }),
+      bands: gdal.open(multiband).bands.map((b) => ({ sources: [ b ] })) }),
     expected)
   })
 
@@ -124,11 +128,11 @@ describe('gdal.wrapVRT()', () => {
       <MDI key="GRIB_VALID_TIME">1600509600 sec UTC</MDI>
     </Metadata>
     <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+      <SourceFilename relativeToVRT="0">${arome_t2m}</SourceFilename>
       <SourceBand>1</SourceBand>
     </SimpleSource>
     <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+      <SourceFilename relativeToVRT="0">${arome_d2m}</SourceFilename>
       <SourceBand>1</SourceBand>
     </SimpleSource>
   </VRTRasterBand>
@@ -138,8 +142,8 @@ describe('gdal.wrapVRT()', () => {
       bands: [
         {
           sources: [
-            gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1),
-            gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+            gdal.open(arome_t2m).bands.get(1),
+            gdal.open(arome_d2m).bands.get(1)
           ],
           pixelFunc: 'espy'
         }
