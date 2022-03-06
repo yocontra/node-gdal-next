@@ -559,12 +559,12 @@ describe('gdal', () => {
           buffer[i] = sources[0][i] + sources[1][i]
         }
       }
-      gdal.addPixelFunc('sum2', gdal.toPixelFunc(sum2))
+      gdal.addPixelFunc('sum2int', gdal.toPixelFunc(sum2))
 
       const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
   <VRTRasterBand dataType="Int32" band="1" subClass="VRTDerivedRasterBand">
     <Description>CustomPixelFn</Description>
-    <PixelFunctionType>sum2</PixelFunctionType>
+    <PixelFunctionType>sum2int</PixelFunctionType>
     <SourceTransferType>Float32</SourceTransferType>
     <SimpleSource>
       <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
@@ -577,11 +577,13 @@ describe('gdal', () => {
 `
       const ds = gdal.open(vrt)
       assert.equal(ds.bands.count(), 1)
+      assert.equal(ds.bands.get(1).dataType, gdal.GDT_Int32)
       const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
         .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
         .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       const q = ds.bands.get(1).pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y).then((result) => {
+        assert.instanceOf(result, Int32Array)
         for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
           assert.closeTo(result[i], input1[i] + input2[i], 1)
         }
@@ -618,6 +620,39 @@ describe('gdal', () => {
       const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
         assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
+      }
+    })
+
+    it('should support converting the data type', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+
+      gdal.addPixelFunc('createPxFnInt', gdal.createPixelFunc((a, b) => Math.round(a + b)))
+
+      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
+  <VRTRasterBand dataType="Int32" band="1" subClass="VRTDerivedRasterBand">
+    <Description>CustomPixelFnInt</Description>
+    <SourceTransferType>Float32</SourceTransferType>
+    <PixelFunctionType>createPxFnInt</PixelFunctionType>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
+`
+      const ds = gdal.open(vrt)
+      assert.equal(ds.bands.count(), 1)
+      assert.equal(ds.bands.get(1).dataType, gdal.GDT_Int32)
+      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
+        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
+        assert.instanceOf(result, Int32Array)
+        assert.closeTo(result[i], input1[i] + input2[i], 0.5, `${input1[i]} + ${input2[i]}`)
       }
     })
   })
