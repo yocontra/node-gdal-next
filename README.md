@@ -27,6 +27,8 @@ It adds a number of features:
 - **Library versions of GDAL's command-line utilities `gdalinfo`, `gdal_translate`, `ogr2ogr` and `gdalwarp`** (since 3.4)
 - **Node.js Streams API for raster datasets** (since 3.4)
 - **An alternative `gdal_calc.py` implementation supporting JS functions** (since 3.4)
+- **`ExprTk.js` integration for truly multi-threaded async computing** (since 3.5)
+- **VRT pixel functions support - both with JS functions and ExprTk expressions** (since 3.5)
 - Support for curve geometries (since 3.1)
 - Progress callbacks (since 3.2)
 - Built-in support for HDF5, NetCDF, GRIB, WMS, WMTS, WCS and FlatGeobuf (since 3.3)
@@ -210,6 +212,10 @@ SSL on Linux uses OpenSSL through Node.js' own support. It uses the curl trusted
 ### With `ndarray` from `scijs`
 
 A separate plugin [ndarray-gdal](https://github.com/mmomtchev/ndarray-gdal) allows zero-copy I/O, with GDAL-backed interleaving in C++ using SIMD instructions, for all possible strides both for 2D raster data and N-dimensional `MDArray` data. The plugin requires at least `gdal-async@3.3`.
+
+### With `ExprTk.js`
+
+A separate plugin [gdal-exprtk](https://github.com/mmomtchev/gdal-exprtk) adds seamless integration with [ExprTk.js](https://github.com/mmomtchev/ExprTk.js) allowing for truly multi-threaded and asynchronous computing with raster datasets. The plugin requires at least `gdal-async@3.5`.
 
 ### Pruning the source tree
 
