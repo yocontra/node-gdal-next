@@ -637,25 +637,23 @@ static void callJSpfn(uv_async_t *async) {
   Local<Value> destination = TypedArray::New(fn->call.outType, fn->call.destination, len);
   Local<Number> width = Nan::New<Number>(fn->call.width);
   Local<Number> height = Nan::New<Number>(fn->call.height);
-  size_t pfNumArgs = CSLCount(fn->call.args);
+
+  std::map<string, string> pfArgsMap;
+  ParseCSLConstList(fn->call.args, pfArgsMap);
   Local<Object> pfArgs = Nan::New<Object>();
-  if (pfNumArgs > 1) {
-    for (size_t i = 0; i < pfNumArgs; i++) {
-      const char *field = CSLGetField(fn->call.args, i);
-      if (strlen(field) == 0) continue;
-      char *key = nullptr;
-      const char *value = CPLParseNameValue(field, &key);
-      if (strcmp(key, PFN_ID_FIELD)) {
+  if (pfArgsMap.size() > 1) {
+    for (auto const &el : pfArgsMap) {
+      if (el.first != PFN_ID_FIELD) {
         char *end;
-        double dval = std::strtod(value, &end);
+        double dval = std::strtod(el.second.c_str(), &end);
         if (*end == 0)
-          Nan::Set(pfArgs, Nan::New(key).ToLocalChecked(), Nan::New(dval));
+          Nan::Set(pfArgs, Nan::New(el.first).ToLocalChecked(), Nan::New(dval));
         else
-          Nan::Set(pfArgs, Nan::New(key).ToLocalChecked(), Nan::New(value).ToLocalChecked());
+          Nan::Set(pfArgs, Nan::New(el.first).ToLocalChecked(), Nan::New(el.second).ToLocalChecked());
       }
-      CPLFree(key);
     }
   }
+
   Local<Value> args[] = {sources, destination, pfArgs, width, height};
 
   fn->call.err = nullptr;

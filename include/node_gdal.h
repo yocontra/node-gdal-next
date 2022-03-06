@@ -4,6 +4,8 @@
 #define NODE_GDAL_CAPI_MAGIC 0xC0DEDF0BEEF
 
 #include <gdal_priv.h>
+#include <string>
+#include <map>
 
 #ifdef __cplusplus
 namespace node_gdal {
@@ -11,17 +13,17 @@ extern "C" {
 #endif
 
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 5)
-inline const char *GDALFetchNameValue(CSLConstList papszStrList, const char *pszName) {
-  if (papszStrList == nullptr || pszName == nullptr) return nullptr;
-
-  const size_t nLen = strlen(pszName);
-  while (*papszStrList != nullptr) {
-    if (EQUALN(*papszStrList, pszName, nLen) && ((*papszStrList)[nLen] == '=' || (*papszStrList)[nLen] == ':')) {
-      return (*papszStrList) + nLen + 1;
-    }
-    ++papszStrList;
+inline void ParseCSLConstList(CSLConstList constList, std::map<string, string> &dict) {
+  if (constList == nullptr) return;
+  const char *const *item = constList;
+  while (*item != nullptr) {
+    const char *sep = strchr(*item, '=');
+    if (*item == nullptr) sep = strchr(*item, ':');
+    std::string key = sep != nullptr ? std::string(*item, sep - *item) : *item;
+    std::string value = sep != nullptr ? std::string(sep + 1) : "";
+    dict.emplace(std::move(key), std::move(value));
+    item++;
   }
-  return nullptr;
 }
 
 struct pixel_func {
