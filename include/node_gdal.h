@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #if GDAL_VERSION_MAJOR > 3 || (GDAL_VERSION_MAJOR == 3 && GDAL_VERSION_MINOR >= 5)
-inline void ParseCSLConstList(CSLConstList constList, std::map<string, string> &dict) {
+inline void ParseCSLConstList(CSLConstList constList, std::map<std::string, std::string> &dict) {
   if (constList == nullptr) return;
   const char *const *item = constList;
   while (*item != nullptr) {

@@ -597,7 +597,7 @@ struct pixelFnCall {
   int width, height;
   GDALDataType inType;
   GDALDataType outType;
-  CSLConstList args;
+  std::map<std::string, std::string> args;
   Nan::Utf8String *err;
 };
 
@@ -638,19 +638,15 @@ static void callJSpfn(uv_async_t *async) {
   Local<Number> width = Nan::New<Number>(fn->call.width);
   Local<Number> height = Nan::New<Number>(fn->call.height);
 
-  std::map<string, string> pfArgsMap;
-  ParseCSLConstList(fn->call.args, pfArgsMap);
   Local<Object> pfArgs = Nan::New<Object>();
-  if (pfArgsMap.size() > 1) {
-    for (auto const &el : pfArgsMap) {
-      if (el.first != PFN_ID_FIELD) {
-        char *end;
-        double dval = std::strtod(el.second.c_str(), &end);
-        if (*end == 0)
-          Nan::Set(pfArgs, Nan::New(el.first).ToLocalChecked(), Nan::New(dval));
-        else
-          Nan::Set(pfArgs, Nan::New(el.first).ToLocalChecked(), Nan::New(el.second).ToLocalChecked());
-      }
+  if (fn->call.args.size() > 0) {
+    for (auto const &el : fn->call.args) {
+      char *end;
+      double dval = std::strtod(el.second.c_str(), &end);
+      if (*end == 0)
+        Nan::Set(pfArgs, Nan::New(el.first).ToLocalChecked(), Nan::New(dval));
+      else
+        Nan::Set(pfArgs, Nan::New(el.first).ToLocalChecked(), Nan::New(el.second).ToLocalChecked());
     }
   }
 
@@ -682,17 +678,21 @@ static CPLErr pixelFunc(
   CSLConstList papszFunctionArgs) {
   // Here V8 is (potentially) off-limits
 
-  const char *szid = CSLFetchNameValue(papszFunctionArgs, PFN_ID_FIELD);
-  if (szid == nullptr) {
+  std::map<std::string, std::string> pfArgsMap;
+  ParseCSLConstList(papszFunctionArgs, pfArgsMap);
+
+  auto uid = pfArgsMap.find(PFN_ID_FIELD);
+  if (uid == pfArgsMap.end()) {
     CPLError(CE_Failure, CPLE_AppDefined, "gdal-async Internal error, pixelFuncs inconsistency, id=NULL");
     return CE_Failure;
   }
   char *end;
-  size_t id = std::strtoul(szid, &end, 16);
-  if (end == szid || id > pixelFuncs.size()) {
+  size_t id = std::strtoul(uid->second.c_str(), &end, 16);
+  if (end == uid->second.c_str() || id >= pixelFuncs.size()) {
     CPLError(CE_Failure, CPLE_AppDefined, "gdal-async Internal error, pixelFuncs inconsistency");
     return CE_Failure;
   }
+  pfArgsMap.erase(PFN_ID_FIELD);
 
   size_t size = GDALGetDataTypeSizeBytes(eBufType);
   if (
@@ -714,7 +714,7 @@ static CPLErr pixelFunc(
     nBufYSize,
     eSrcType,
     eBufType,
-    papszFunctionArgs,
+    std::move(pfArgsMap),
     nullptr};
   if (std::this_thread::get_id() == mainV8ThreadId) {
     // Main thread = sync mode
