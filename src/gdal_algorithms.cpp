@@ -597,6 +597,7 @@ struct pixelFnCall {
   int width, height;
   GDALDataType inType;
   GDALDataType outType;
+  CSLConstList args;
   Nan::Utf8String *err;
 };
 
@@ -613,9 +614,11 @@ struct pixelFn {
 // No need to lock
 std::vector<pixelFn> pixelFuncs;
 
+#define PFN_ID_FIELD "node_gdal_pfn_id"
 const char metadataTemplate[] =
   "<PixelFunctionArgumentsList>\n"
-  "   <Argument name ='node_gdal_pfn_id' type='constant' value='%x' />\n"
+  "   <Argument name ='" PFN_ID_FIELD
+  "' type='constant' value='%x' />\n"
   "</PixelFunctionArgumentsList>";
 
 // This is the final step before calling the JS function
@@ -634,12 +637,31 @@ static void callJSpfn(uv_async_t *async) {
   Local<Value> destination = TypedArray::New(fn->call.outType, fn->call.destination, len);
   Local<Number> width = Nan::New<Number>(fn->call.width);
   Local<Number> height = Nan::New<Number>(fn->call.height);
-  Local<Value> args[] = {sources, destination, width, height};
+  size_t pfNumArgs = CSLCount(fn->call.args);
+  Local<Object> pfArgs = Nan::New<Object>();
+  if (pfNumArgs > 1) {
+    for (size_t i = 0; i < pfNumArgs; i++) {
+      const char *field = CSLGetField(fn->call.args, i);
+      if (strlen(field) == 0) continue;
+      char *key = nullptr;
+      const char *value = CPLParseNameValue(field, &key);
+      if (strcmp(key, PFN_ID_FIELD)) {
+        char *end;
+        double dval = std::strtod(value, &end);
+        if (*end == 0)
+          Nan::Set(pfArgs, Nan::New(key).ToLocalChecked(), Nan::New(dval));
+        else
+          Nan::Set(pfArgs, Nan::New(key).ToLocalChecked(), Nan::New(value).ToLocalChecked());
+      }
+      CPLFree(key);
+    }
+  }
+  Local<Value> args[] = {sources, destination, pfArgs, width, height};
 
   fn->call.err = nullptr;
   Nan::TryCatch try_catch;
   // async_hooks do not make any sense for pixel functions
-  Nan::Call(*fn->fn, 4, args);
+  Nan::Call(*fn->fn, 5, args);
   if (try_catch.HasCaught()) fn->call.err = new Nan::Utf8String(try_catch.Message()->Get());
 
   // unlock the worker thread (the function below)
@@ -662,7 +684,7 @@ static CPLErr pixelFunc(
   CSLConstList papszFunctionArgs) {
   // Here V8 is (potentially) off-limits
 
-  const char *szid = CSLFetchNameValue(papszFunctionArgs, "node_gdal_pfn_id");
+  const char *szid = CSLFetchNameValue(papszFunctionArgs, PFN_ID_FIELD);
   if (szid == nullptr) {
     CPLError(CE_Failure, CPLE_AppDefined, "gdal-async Internal error, pixelFuncs inconsistency, id=NULL");
     return CE_Failure;
@@ -685,27 +707,35 @@ static CPLErr pixelFunc(
   uv_async_t *async = new uv_async_t;
   async->data = &pixelFuncs[id];
 
+  uv_mutex_lock(&pixelFuncs[id].callJS);
+  pixelFuncs[id].call = {
+    papoSources,
+    static_cast<size_t>(nSources),
+    pData,
+    nBufXSize,
+    nBufYSize,
+    eSrcType,
+    eBufType,
+    papszFunctionArgs,
+    nullptr};
   if (std::this_thread::get_id() == mainV8ThreadId) {
+    // Main thread = sync mode
     // Here we are abusing an uninitialized uv_async_t as a data holder
-    pixelFuncs[id].call = {
-      papoSources, static_cast<size_t>(nSources), pData, nBufXSize, nBufYSize, eSrcType, eBufType, nullptr};
     callJSpfn(async);
     delete async;
   } else {
+    // Worker thread = async mode
     uv_async_init(uv_default_loop(), async, callJSpfn);
 
-    uv_mutex_lock(&pixelFuncs[id].callJS);
-    pixelFuncs[id].call = {
-      papoSources, static_cast<size_t>(nSources), pData, nBufXSize, nBufYSize, eSrcType, eBufType, nullptr};
     uv_async_send(async);
     uv_sem_wait(&pixelFuncs[id].returnJS);
-    uv_mutex_unlock(&pixelFuncs[id].callJS);
 
     uv_close(reinterpret_cast<uv_handle_t *>(async), [](uv_handle_t *handle) {
       uv_async_t *async = reinterpret_cast<uv_async_t *>(handle);
       delete async;
     });
   }
+  uv_mutex_unlock(&pixelFuncs[id].callJS);
 
   if (pixelFuncs[id].call.err != nullptr) {
     CPLError(CE_Failure, CPLE_AppDefined, "Pixel function error: %s", **pixelFuncs[id].call.err);
@@ -748,7 +778,7 @@ static CPLErr pixelFunc(
  * @throws Error
  * @method toPixelFunc
  * @static
- * @param {(sources: TypedArray[], buffer: TypedArray, width: number, height: number) => void} pixelFn JavaScript pixel function
+ * @param {(sources: TypedArray[], buffer: TypedArray, args: Record<string, string|number>, width: number, height: number) => void} pixelFn JavaScript pixel function
  * @returns {PixelFunction}
  */
 NAN_METHOD(Algorithms::toPixelFunc) {

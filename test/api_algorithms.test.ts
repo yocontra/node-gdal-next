@@ -433,6 +433,7 @@ describe('gdal', () => {
       assert.isAbove(calls, 0)
     })
   })
+
   describe('addPixelFunc()', () => {
     it('should throw with invalid arguments', () => {
       assert.throws(() => {
@@ -458,11 +459,12 @@ describe('gdal', () => {
 
     it('should produce a binary pixel function from a JS function', function () {
       if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
-      const sum2 = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
+      const sum2 = (sources: gdal.TypedArray[], buffer: gdal.TypedArray, args: Record<string, string|number>) => {
         assert.equal(sources.length, 2)
         assert.instanceOf(sources[0], Float64Array)
         assert.instanceOf(sources[1], Float64Array)
         assert.instanceOf(buffer, Float64Array)
+        assert.isEmpty(args)
         for (let i = 0; i < buffer.length; i++) {
           buffer[i] = sources[0][i] + sources[1][i] + 1
         }
@@ -576,6 +578,40 @@ describe('gdal', () => {
       })
       return assert.isFulfilled(q)
     })
+
+    it('should pass any additional arguments', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+      const withArgs = (sources: gdal.TypedArray[], buffer: gdal.TypedArray, args: Record<string, string|number>) => {
+        assert.deepEqual(args, { s: 'stringArg', k: 20, t: 15, pi: 3.14 })
+        assert.isString(args.s)
+        assert.isNumber(args.k)
+        assert.isNumber(args.t)
+        assert.isNumber(args.pi)
+        for (let i = 0; i < buffer.length; i++) {
+          buffer[i] = +args.k + sources[0][i] + sources[1][i]
+        }
+      }
+      gdal.addPixelFunc('withArgs', gdal.toPixelFunc(withArgs))
+
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'withArgs',
+            pixelFuncArgs: { s: 'stringArg', k: 20, t: '15', pi: '3.14' }
+          }
+        ]
+      })
+      const ds = gdal.open(vrt)
+
+      assert.equal(ds.bands.count(), 1)
+      const input1 = band1.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = band2.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
+        assert.closeTo(result[i], input1[i] + input2[i] + 20, 1e-6)
+      }
+    })
   })
 
   describe('createPixelFunc()', () => {
@@ -634,6 +670,40 @@ describe('gdal', () => {
       for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
         assert.instanceOf(result, Int32Array)
         assert.closeTo(result[i], input1[i] + input2[i] + 5, 0.5, `${input1[i]} + ${input2[i]}`)
+      }
+    })
+  })
+
+  describe('createPixelFuncWithArgs()', () => {
+    let band1: gdal.RasterBand, band2: gdal.RasterBand
+    before(() => {
+      band1 = gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1)
+      band2 = gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+    })
+
+    it('should create a pixel function with arguments from a JS function for a single pixel', function () {
+      if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
+
+      const k = 42
+      gdal.addPixelFunc('createPxFn', gdal.createPixelFuncWithArgs((args, a, b) => a + b + +args.k))
+
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'createPxFn',
+            pixelFuncArgs: { k }
+          }
+        ]
+      })
+      const ds = gdal.open(vrt)
+
+      assert.equal(ds.bands.count(), 1)
+      const input1 = band1.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = band2.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
+        assert.closeTo(result[i], input1[i] + input2[i] + k, 1e-6)
       }
     })
   })
