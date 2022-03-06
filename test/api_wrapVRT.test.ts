@@ -1,9 +1,10 @@
 import * as gdal from '..'
 import * as chai from 'chai'
+import * as path from 'path'
 import * as semver from 'semver'
 const assert = chai.assert
 
-describe('gdal.wrapVRT', () => {
+describe('gdal.wrapVRT()', () => {
 
   it('should produce identical Dataset by default', function () {
     if (!semver.gte(gdal.version, '3.4.0')) {
@@ -22,8 +23,9 @@ describe('gdal.wrapVRT', () => {
     </SimpleSource>
   </VRTRasterBand>
 </VRTDataset>`
-    assert.equal(gdal.wrapVRT(gdal.open('test/data/sample.tif')),
-      expected)
+    assert.equal(gdal.wrapVRT({ bands: [
+      { sources: [ gdal.open(path.join('test', 'data', 'sample.tif')).bands.get(1) ] } ]
+    }), expected)
   })
 
   it('should apply a pixel function when specified', function () {
@@ -47,12 +49,13 @@ describe('gdal.wrapVRT', () => {
   </VRTRasterBand>
 </VRTDataset>`
 
-    assert.equal(gdal.wrapVRT(gdal.open('test/data/sample.tif'), {
+    assert.equal(gdal.wrapVRT({
       bands: [
         {
+          sources: [ gdal.open(path.join('test', 'data', 'sample.tif')).bands.get(1) ],
           pixelFunc: 'inv',
           pixelFuncArgs: { k: 3 },
-          type: gdal.GDT_Int16,
+          dataType: gdal.GDT_Int16,
           sourceTransferType: gdal.GDT_Float32
         }
       ]
@@ -93,7 +96,78 @@ describe('gdal.wrapVRT', () => {
   </VRTRasterBand>
 </VRTDataset>`
 
-    assert.equal(gdal.wrapVRT(gdal.open('test/data/multiband.tif')),
-      expected)
+    assert.equal(gdal.wrapVRT({
+      bands: gdal.open(path.join('test', 'data', 'multiband.tif')).bands.map((b) => ({ sources: [ b ] })) }),
+    expected)
+  })
+
+  it('should support combining files', function () {
+    if (!semver.gte(gdal.version, '3.4.0')) {
+      this.skip()
+    }
+    const expected = `<VRTDataset rasterXSize="801" rasterYSize="601">
+  <SRS>GEOGCS["Coordinate System imported from GRIB file",DATUM["unknown",SPHEROID["Sphere",6367470,0]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST]]</SRS>
+  <GeoTransform>-8.0125, 0.025, 0, 53.0125, 0, -0.025</GeoTransform>
+  <Metadata>
+    <MDI key="AREA_OR_POINT">Point</MDI>
+  </Metadata>
+  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
+    <Description>10[m] HTGL="Specified height level above ground"</Description>
+    <PixelFunctionType>espy</PixelFunctionType>
+    <Metadata>
+      <MDI key="GRIB_COMMENT">Temperature [C]</MDI>
+      <MDI key="GRIB_ELEMENT">TMP</MDI>
+      <MDI key="GRIB_FORECAST_SECONDS">36000 sec</MDI>
+      <MDI key="GRIB_REF_TIME">1600473600 sec UTC</MDI>
+      <MDI key="GRIB_SHORT_NAME">10-HTGL</MDI>
+      <MDI key="GRIB_UNIT">[C]</MDI>
+      <MDI key="GRIB_VALID_TIME">1600509600 sec UTC</MDI>
+    </Metadata>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>`
+
+    assert.equal(gdal.wrapVRT({
+      bands: [
+        {
+          sources: [
+            gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1),
+            gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+          ],
+          pixelFunc: 'espy'
+        }
+      ] }),
+    expected)
+  })
+
+  it('should throw with invalid arguments', function () {
+    if (!semver.gte(gdal.version, '3.4.0')) {
+      this.skip()
+    }
+    assert.throws(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (gdal.wrapVRT as any)()
+    }, /Dataset must have at least one RasterBand/)
+
+    assert.throws(() => {
+      gdal.wrapVRT({ bands: [] })
+    }, /Dataset must have at least one RasterBand/)
+
+    assert.throws(() => {
+      gdal.wrapVRT({
+        bands: [ { sources: [] } ] })
+    }, /Dataset must have at least one RasterBand/)
+
+    assert.throws(() => {
+      gdal.wrapVRT({
+        bands: [ { sources: [ {} as gdal.RasterBand ] } ] })
+    }, /Dataset must have at least one RasterBand/)
   })
 })

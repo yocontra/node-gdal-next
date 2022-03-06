@@ -1,5 +1,6 @@
 import * as gdal from '..'
 import * as chai from 'chai'
+import * as path from 'path'
 import * as semver from 'semver'
 const assert = chai.assert
 import * as chaiAsPromised from 'chai-as-promised'
@@ -449,6 +450,12 @@ describe('gdal', () => {
   })
 
   describe('toPixelFunc()', () => {
+    let band1: gdal.RasterBand, band2: gdal.RasterBand
+    before(() => {
+      band1 = gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1)
+      band2 = gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+    })
+
     it('should produce a binary pixel function from a JS function', function () {
       if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
       const sum2 = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
@@ -457,33 +464,27 @@ describe('gdal', () => {
         assert.instanceOf(sources[1], Float64Array)
         assert.instanceOf(buffer, Float64Array)
         for (let i = 0; i < buffer.length; i++) {
-          buffer[i] = sources[0][i] + sources[1][i]
+          buffer[i] = sources[0][i] + sources[1][i] + 1
         }
       }
       gdal.addPixelFunc('sum2', gdal.toPixelFunc(sum2))
 
-      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
-  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
-    <Description>CustomPixelFn</Description>
-    <PixelFunctionType>sum2</PixelFunctionType>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
-    </SimpleSource>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
-    </SimpleSource>
-  </VRTRasterBand>
-</VRTDataset>
-`
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'sum2'
+          }
+        ]
+      })
       const ds = gdal.open(vrt)
+
       assert.equal(ds.bands.count(), 1)
-      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
-      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input1 = band1.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = band2.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       const q = ds.bands.get(1).pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y).then((result) => {
         for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
-          assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
+          assert.closeTo(result[i], input1[i] + input2[i] + 1, 1e-6)
         }
       })
       return assert.isFulfilled(q)
@@ -496,20 +497,16 @@ describe('gdal', () => {
       }
       gdal.addPixelFunc('fail', gdal.toPixelFunc(fail))
 
-      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
-  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
-    <Description>CustomPixelFn</Description>
-    <PixelFunctionType>fail</PixelFunctionType>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
-    </SimpleSource>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
-    </SimpleSource>
-  </VRTRasterBand>
-</VRTDataset>
-`
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'fail'
+          }
+        ]
+      })
       const ds = gdal.open(vrt)
+
       return assert.isRejected(ds.bands.get(1).pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y),
         /pixel function failed/)
     })
@@ -518,33 +515,27 @@ describe('gdal', () => {
       if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
       const sync = (sources: gdal.TypedArray[], buffer: gdal.TypedArray) => {
         for (let i = 0; i < buffer.length; i++) {
-          buffer[i] = sources[0][i] + sources[1][i]
+          buffer[i] = sources[0][i] + sources[1][i] + 2
         }
       }
       gdal.addPixelFunc('sync', gdal.toPixelFunc(sync))
 
-      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
-  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
-    <Description>CustomPixelFn</Description>
-    <PixelFunctionType>sync</PixelFunctionType>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
-    </SimpleSource>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
-    </SimpleSource>
-  </VRTRasterBand>
-</VRTDataset>
-`
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'sync'
+          }
+        ]
+      })
       const ds = gdal.open(vrt)
+
       assert.equal(ds.bands.count(), 1)
-      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
-      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input1 = band1.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = band2.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
-        assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
+        assert.closeTo(result[i], input1[i] + input2[i] + 2, 1e-6)
       }
     })
 
@@ -556,36 +547,31 @@ describe('gdal', () => {
         assert.instanceOf(sources[1], Float32Array)
         assert.instanceOf(buffer, Int32Array)
         for (let i = 0; i < buffer.length; i++) {
-          buffer[i] = sources[0][i] + sources[1][i]
+          buffer[i] = sources[0][i] + sources[1][i] + 3
         }
       }
       gdal.addPixelFunc('sum2int', gdal.toPixelFunc(sum2))
 
-      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
-  <VRTRasterBand dataType="Int32" band="1" subClass="VRTDerivedRasterBand">
-    <Description>CustomPixelFn</Description>
-    <PixelFunctionType>sum2int</PixelFunctionType>
-    <SourceTransferType>Float32</SourceTransferType>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
-    </SimpleSource>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
-    </SimpleSource>
-  </VRTRasterBand>
-</VRTDataset>
-`
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'sum2int',
+            dataType: gdal.GDT_Int32,
+            sourceTransferType: gdal.GDT_Float32
+          }
+        ]
+      })
       const ds = gdal.open(vrt)
+
       assert.equal(ds.bands.count(), 1)
       assert.equal(ds.bands.get(1).dataType, gdal.GDT_Int32)
-      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
-      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input1 = band1.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = band2.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       const q = ds.bands.get(1).pixels.readAsync(0, 0, ds.rasterSize.x, ds.rasterSize.y).then((result) => {
         assert.instanceOf(result, Int32Array)
         for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
-          assert.closeTo(result[i], input1[i] + input2[i], 1)
+          assert.closeTo(result[i], input1[i] + input2[i] + 3, 1)
         }
       })
       return assert.isFulfilled(q)
@@ -593,66 +579,61 @@ describe('gdal', () => {
   })
 
   describe('createPixelFunc()', () => {
+    let band1: gdal.RasterBand, band2: gdal.RasterBand
+    before(() => {
+      band1 = gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1)
+      band2 = gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+    })
+
     it('should create a pixel function from a JS function for a single pixel', function () {
       if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
 
-      gdal.addPixelFunc('createPxFn', gdal.createPixelFunc((a, b) => a + b))
+      gdal.addPixelFunc('createPxFn', gdal.createPixelFunc((a, b) => a + b + 4))
 
-      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
-  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
-    <Description>CustomPixelFn</Description>
-    <PixelFunctionType>createPxFn</PixelFunctionType>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
-    </SimpleSource>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
-    </SimpleSource>
-  </VRTRasterBand>
-</VRTDataset>
-`
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'createPxFn'
+          }
+        ]
+      })
       const ds = gdal.open(vrt)
+
       assert.equal(ds.bands.count(), 1)
-      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
-      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input1 = band1.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = band2.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
-        assert.closeTo(result[i], input1[i] + input2[i], 1e-6)
+        assert.closeTo(result[i], input1[i] + input2[i] + 4, 1e-6)
       }
     })
 
     it('should support converting the data type', function () {
       if (!semver.gte(gdal.version, '3.5.0-git')) this.skip()
 
-      gdal.addPixelFunc('createPxFnInt', gdal.createPixelFunc((a, b) => Math.round(a + b)))
+      gdal.addPixelFunc('createPxFnInt', gdal.createPixelFunc((a, b) => Math.round(a + b + 5)))
 
-      const vrt = `<VRTDataset rasterXSize="20" rasterYSize="20">
-  <VRTRasterBand dataType="Int32" band="1" subClass="VRTDerivedRasterBand">
-    <Description>CustomPixelFnInt</Description>
-    <SourceTransferType>Float32</SourceTransferType>
-    <PixelFunctionType>createPxFnInt</PixelFunctionType>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_T2m_10.tiff</SourceFilename>
-    </SimpleSource>
-    <SimpleSource>
-      <SourceFilename relativeToVRT="0">test/data/AROME_D2m_10.tiff</SourceFilename>
-    </SimpleSource>
-  </VRTRasterBand>
-</VRTDataset>
-`
+      const vrt = gdal.wrapVRT({
+        bands: [
+          {
+            sources: [ band1, band2 ],
+            pixelFunc: 'createPxFnInt',
+            dataType: gdal.GDT_Int32,
+            sourceTransferType: gdal.GDT_Float32
+          }
+        ]
+      })
       const ds = gdal.open(vrt)
+
       assert.equal(ds.bands.count(), 1)
       assert.equal(ds.bands.get(1).dataType, gdal.GDT_Int32)
-      const input1 = gdal.open('test/data/AROME_T2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
-      const input2 = gdal.open('test/data/AROME_D2m_10.tiff')
-        .bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input1 = band1.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
+      const input2 = band2.pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       const result = ds.bands.get(1).pixels.read(0, 0, ds.rasterSize.x, ds.rasterSize.y)
       for (let i = 0; i < ds.rasterSize.x * ds.rasterSize.y; i += 256) {
         assert.instanceOf(result, Int32Array)
-        assert.closeTo(result[i], input1[i] + input2[i], 0.5, `${input1[i]} + ${input2[i]}`)
+        assert.closeTo(result[i], input1[i] + input2[i] + 5, 0.5, `${input1[i]} + ${input2[i]}`)
       }
     })
   })
