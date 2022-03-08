@@ -1,4 +1,4 @@
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 import { assert } from 'chai'
 
 describe('gdal.LineString', () => {

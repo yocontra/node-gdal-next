@@ -1,6 +1,6 @@
 /* eslint no-new: 0 */
 import { assert } from 'chai'
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 
 describe('gdal.Envelope', () => {
   afterEach(global.gc)

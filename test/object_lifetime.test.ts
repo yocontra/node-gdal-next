@@ -1,6 +1,6 @@
 // These objects are not public
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 import { assert } from 'chai'
 import * as path from 'path'
 

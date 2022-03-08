@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import * as path from 'path'
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 
 describe('gdal.Polygon', () => {
   afterEach(global.gc)

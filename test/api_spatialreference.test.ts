@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 import * as chaiAsPromised from 'chai-as-promised'
 import * as chai from 'chai'
 const assert = chai.assert

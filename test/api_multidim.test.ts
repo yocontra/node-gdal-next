@@ -2,7 +2,7 @@ import * as chaiAsPromised from 'chai-as-promised'
 import * as chai from 'chai'
 const assert = chai.assert
 import * as path from 'path'
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 import * as semver from 'semver'
 
 chai.use(chaiAsPromised)

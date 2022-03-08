@@ -1,4 +1,4 @@
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
 import * as fs from 'fs'

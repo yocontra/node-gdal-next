@@ -1,4 +1,4 @@
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 import { Transform, finished as _finished } from 'stream'
 import { promisify } from 'util'
 import * as chai from 'chai'

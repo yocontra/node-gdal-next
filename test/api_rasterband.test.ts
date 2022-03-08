@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import * as gdal from '..'
+import * as gdal from 'gdal-async'
 import * as fileUtils from './utils/file'
 
 describe('gdal.RasterBand', () => {

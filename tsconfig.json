@@ -2,6 +2,12 @@
   "compilerOptions": {
     "downlevelIteration": true,
     "strict": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "baseUrl": "./",
+    "paths": {
+      "gdal-async": [
+        "."
+      ]
+    }
   }
 }
