@@ -1,6 +1,7 @@
 import * as gdal from 'gdal-async'
 import { assert } from 'chai'
 import * as path from 'path'
+import * as fs from 'fs'
 import * as cp from 'child_process'
 
 if (process.env.GDAL_DATA !== undefined) {
@@ -68,7 +69,10 @@ describe('gdal', () => {
       })
     })
     describe('GDAL_DATA behavior', () => {
-      const data_path = path.resolve(__dirname, '../deps/libgdal/gdal/data')
+      const data_path = fs.existsSync('./lib/gdal.js') ?
+        path.resolve(__dirname, '..', 'deps', 'libgdal', 'gdal', 'data') :
+        path.resolve(__dirname, '..', 'node_modules', 'gdal-async', 'deps', 'libgdal', 'gdal', 'data')
+
       if (gdal.bundled) {
         it('should set GDAL_DATA config option to locally bundled path', () => {
           assert.equal(gdal.config.get('GDAL_DATA'), data_path)
@@ -77,10 +81,11 @@ describe('gdal', () => {
       it('should respect GDAL_DATA environment over locally bundled path', (done) => {
         const env = Object.assign({}, process.env)
         env.GDAL_DATA = 'bogus'
+        const gdalJS = fs.existsSync('./lib/gdal.js') ? './lib/gdal.js' : 'gdal-async'
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         // The manual delete/global.gc() allows for error-free unit testing of the ASAN build
         const command =
-          "\"const gdal = require('./lib/gdal.js'); console.log(gdal.config.get('GDAL_DATA')); delete gdal.drivers; global.gc();\""
+          `"const gdal = require('${gdalJS}'); console.log(gdal.config.get('GDAL_DATA')); delete gdal.drivers; global.gc();"`
         let execPath = process.execPath
         if (process.platform === 'win32') {
           // quotes to avoid errors like ''C:\Program' is not recognized as an internal or external command'

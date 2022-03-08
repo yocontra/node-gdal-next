@@ -1,7 +1,8 @@
-const gdal = require('../lib/gdal.js')
-const os = require('os')
+import * as gdal from 'gdal-async'
+import * as os from 'os'
 
-let noFailNet = function () {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let noFailNet = function (this: any) {
   let test = this.currentTest
   while (test) {
     if (test.title.match(/w\/Net/)) {
@@ -11,7 +12,7 @@ let noFailNet = function () {
   }
 }
 
-if (!process.env.MOCHA_TEST_NETWORK || process.env.MOCHA_TEST_NETWORK == 0) {
+if (!process.env.MOCHA_TEST_NETWORK || +process.env.MOCHA_TEST_NETWORK === 0) {
   noFailNet = function () {
     let test = this.currentTest
     while (test) {
@@ -24,7 +25,8 @@ if (!process.env.MOCHA_TEST_NETWORK || process.env.MOCHA_TEST_NETWORK == 0) {
   }
 }
 
-const platformSkip = function () {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const platformSkip = function (this: any) {
   let test = this.currentTest
   while (test) {
     if (test.title.match(/^on Linux/) && os.platform() != 'linux') {
@@ -36,12 +38,13 @@ const platformSkip = function () {
 }
 
 const cleanup = () => {
-  delete gdal.drivers
-  gc()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  delete (gdal as any).drivers
+  global.gc()
 }
 
 exports.mochaHooks = {
-  beforeEach: function (done) {
+  beforeEach: function (done: () => void) {
     platformSkip.call(this)
     noFailNet.call(this)
     done()

@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as gdal from '../..'
+import * as gdal from 'gdal-async'
 
 export function copyRecursiveSync (src: string, dest: string) {
   const exists = fs.existsSync(src)

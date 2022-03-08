@@ -1,0 +1,62 @@
+name: Test npm package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version to test'
+        required: true
+
+jobs:
+  test_npm_binaries:
+
+    runs-on: ${{ matrix.platforms }}
+
+    strategy:
+      matrix:
+        platforms: [ ubuntu-latest, windows-2019, macos-10.15 ]
+
+    steps:
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - name: Set up the unit tests
+      run: |
+        curl https://codeload.github.com/mmomtchev/node-gdal-async/zip/refs/tags/v${{ github.event.inputs.version }} --output repo.zip
+        unzip repo.zip node-gdal-async/${{ github.event.inputs.version }}/package.json node-gdal-async-${{ github.event.inputs.version }}/test/*
+        mv node-gdal-async-${{ github.event.inputs.version }}/* .
+        npm install
+    - name: Install from npm
+      run:  npm install gdal-async@${{ github.event.inputs.version }}
+    - name: Run the unit tests
+      run: |
+        cd test
+        mocha --reporter=tap --timeout 0 -r ts-node/register -r _common.ts -r _hooks.ts --timeout 20000 --v8-expose-gc *.test.ts
+
+
+  test_npm_rebuild:
+
+    runs-on: ${{ matrix.platforms }}
+
+    strategy:
+      matrix:
+        platforms: [ ubuntu-latest, windows-2019, macos-10.15 ]
+
+    steps:
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - name: Set up the unit tests
+      run: |
+        curl https://codeload.github.com/mmomtchev/node-gdal-async/zip/refs/tags/v${{ github.event.inputs.version }} --output repo.zip
+        unzip repo.zip node-gdal-async/${{ github.event.inputs.version }}/package.json node-gdal-async-${{ github.event.inputs.version }}/test/*
+        mv node-gdal-async-${{ github.event.inputs.version }}/* .
+        npm install
+    - name: Rebuild with npm
+      run: npm install gdal-async@${{ github.event.inputs.version }} --build-from-source
+    - name: Run the unit tests
+      run: |
+        cd test
+        mocha --reporter=tap --timeout 0 -r ts-node/register -r _common.ts -r _hooks.ts --timeout 20000 --v8-expose-gc *.test.ts

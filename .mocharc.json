@@ -3,8 +3,8 @@
   "require": [
     "ts-node/register",
     "tsconfig-paths/register",
-    "test/_common.js",
-    "test/_hooks.js"
+    "test/_common.ts",
+    "test/_hooks.ts"
   ],
   "reporter": "tap",
   "timeout": 20000,
