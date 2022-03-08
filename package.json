@@ -80,7 +80,8 @@
     "test:shared": "npm run test:u18 && npm run test:u20 && npm run test:c8",
     "test:clean": "npx rimraf test/data/*.tmp* test/data/temp/*",
     "test:stress": "node test/stress",
-    "prune": "npx rimraf 'deps/@(libgdal|libproj)/*/!(data)' && npx rimraf 'deps/libcurl/!(cacert.pem)'  && npx rimraf 'deps/!(libgdal|libproj|libcurl)'"
+    "prune": "npx rimraf 'deps/@(libgdal|libproj)/*/!(data)' && npx rimraf 'deps/libcurl/!(cacert.pem)'  && npx rimraf 'deps/!(libgdal|libproj|libcurl)'",
+    "postpublish": "gh run list --workflow=test-npm.yml"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.8",

@@ -4,7 +4,8 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![npm version](https://img.shields.io/npm/v/gdal-async)](https://www.npmjs.com/package/gdal-async)
-[![NPM package unit testing](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-release.yml/badge.svg?branch=master)](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-release.yml)
+[![Test release](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-release.yml/badge.svg)](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-release.yml)
+[![Test npm package](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-npm.yml/badge.svg)](https://github.com/mmomtchev/node-gdal-async/actions/workflows/test-npm.yml)
 ![Node.js CI](https://github.com/mmomtchev/node-gdal-async/workflows/Node.js%20CI/badge.svg)
 [![codecov](https://codecov.io/gh/mmomtchev/node-gdal-async/branch/master/graph/badge.svg?token=FE9IJUZ07D)](https://codecov.io/gh/mmomtchev/node-gdal-async)
 [![downloads](https://img.shields.io/npm/dt/gdal-async)](https://www.npmjs.com/package/gdal-async)
