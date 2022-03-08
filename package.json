@@ -83,7 +83,7 @@
     "prune": "npx rimraf 'deps/@(libgdal|libproj)/*/!(data)' && npx rimraf 'deps/libcurl/!(cacert.pem)'  && npx rimraf 'deps/!(libgdal|libproj|libcurl)'"
   },
   "dependencies": {
-    "@mapbox/node-pre-gyp": "^1.0.3",
+    "@mapbox/node-pre-gyp": "^1.0.8",
     "nan": "^2.14.0",
     "xmlbuilder2": "^3.0.2"
   },
