@@ -24,7 +24,7 @@ jobs:
     - name: Set up the unit tests
       run: |
         curl https://codeload.github.com/mmomtchev/node-gdal-async/zip/refs/tags/v${{ github.event.inputs.version }} --output repo.zip
-        unzip repo.zip node-gdal-async/${{ github.event.inputs.version }}/package.json node-gdal-async-${{ github.event.inputs.version }}/test/*
+        unzip repo.zip node-gdal-async-${{ github.event.inputs.version }}/package.json node-gdal-async-${{ github.event.inputs.version }}/test/*
         mv node-gdal-async-${{ github.event.inputs.version }}/* .
         npm install
     - name: Install from npm
@@ -51,7 +51,7 @@ jobs:
     - name: Set up the unit tests
       run: |
         curl https://codeload.github.com/mmomtchev/node-gdal-async/zip/refs/tags/v${{ github.event.inputs.version }} --output repo.zip
-        unzip repo.zip node-gdal-async/${{ github.event.inputs.version }}/package.json node-gdal-async-${{ github.event.inputs.version }}/test/*
+        unzip repo.zip node-gdal-async-${{ github.event.inputs.version }}/package.json node-gdal-async-${{ github.event.inputs.version }}/test/*
         mv node-gdal-async-${{ github.event.inputs.version }}/* .
         npm install
     - name: Rebuild with npm
