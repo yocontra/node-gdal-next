@@ -32,7 +32,7 @@ jobs:
     - name: Run the unit tests
       run: |
         cd test
-        mocha --reporter=tap --timeout 0 -r ts-node/register -r _common.ts -r _hooks.ts --timeout 20000 --v8-expose-gc *.test.ts
+        npx mocha --reporter=tap --timeout 0 -r ts-node/register -r _common.ts -r _hooks.ts --timeout 20000 --v8-expose-gc *.test.ts
 
 
   test_npm_rebuild:
@@ -59,4 +59,4 @@ jobs:
     - name: Run the unit tests
       run: |
         cd test
-        mocha --reporter=tap --timeout 0 -r ts-node/register -r _common.ts -r _hooks.ts --timeout 20000 --v8-expose-gc *.test.ts
+        npx mocha --reporter=tap --timeout 0 -r ts-node/register -r _common.ts -r _hooks.ts --timeout 20000 --v8-expose-gc *.test.ts
