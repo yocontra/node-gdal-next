@@ -453,8 +453,8 @@ describe('gdal', () => {
   describe('toPixelFunc()', () => {
     let band1: gdal.RasterBand, band2: gdal.RasterBand
     before(() => {
-      band1 = gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1)
-      band2 = gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+      band1 = gdal.open(path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')).bands.get(1)
+      band2 = gdal.open(path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')).bands.get(1)
     })
 
     it('should produce a binary pixel function from a JS function', function () {
@@ -617,8 +617,8 @@ describe('gdal', () => {
   describe('createPixelFunc()', () => {
     let band1: gdal.RasterBand, band2: gdal.RasterBand
     before(() => {
-      band1 = gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1)
-      band2 = gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+      band1 = gdal.open(path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')).bands.get(1)
+      band2 = gdal.open(path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')).bands.get(1)
     })
 
     it('should create a pixel function from a JS function for a single pixel', function () {
@@ -677,8 +677,8 @@ describe('gdal', () => {
   describe('createPixelFuncWithArgs()', () => {
     let band1: gdal.RasterBand, band2: gdal.RasterBand
     before(() => {
-      band1 = gdal.open(path.join('test', 'data', 'AROME_T2m_10.tiff')).bands.get(1)
-      band2 = gdal.open(path.join('test', 'data', 'AROME_D2m_10.tiff')).bands.get(1)
+      band1 = gdal.open(path.resolve(__dirname, 'data', 'AROME_T2m_10.tiff')).bands.get(1)
+      band2 = gdal.open(path.resolve(__dirname, 'data', 'AROME_D2m_10.tiff')).bands.get(1)
     })
 
     it('should create a pixel function with arguments from a JS function for a single pixel', function () {
