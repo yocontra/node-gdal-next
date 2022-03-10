@@ -144,7 +144,6 @@
 								"deps/libgdal/gdal/port",
 								"deps/libgdal/gdal/bridge",
 								"deps/libgdal/gdal/frmts",
-								"deps/libgdal/gdal/frmts/zlib",
 								"deps/libgdal/gdal/ogr",
 								"deps/libgdal/gdal/ogr/ogrsf_frmts",
 								"deps/libgdal/gdal/ogr/ogrsf_frmts/mem"
