@@ -29,7 +29,6 @@ jobs:
         mv node-gdal-async-${{ github.event.inputs.version }}/package.json .
         mv node-gdal-async-${{ github.event.inputs.version }}/test .
         npm install
-        npm install node-gyp@latest
     - name: Install from npm
       run:  npm install --force gdal-async@${{ github.event.inputs.version }}
     - name: Run the unit tests
@@ -61,9 +60,8 @@ jobs:
         mv node-gdal-async-${{ github.event.inputs.version }}/package.json .
         mv node-gdal-async-${{ github.event.inputs.version }}/test .
         npm install
-        npm install node-gyp@latest
     - name: Rebuild with npm
-      run: npm install --force gdal-async@${{ github.event.inputs.version }} --build-from-source
+      run: npm install --verbose --force gdal-async@${{ github.event.inputs.version }} --build-from-source
     - name: Run the unit tests
       run: |
         cd test
