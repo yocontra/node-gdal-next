@@ -54,6 +54,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install --ignore-scripts
+    - run: npm install node-gyp
     - run: npx @mapbox/node-pre-gyp install
     - run: npx yatag
     - run: npm test
