@@ -37,7 +37,8 @@
     "url": "https://github.com/mmomtchev/node-gdal-async.git"
   },
   "funding": {
-    "url": "https://github.com/sponsors/mmomtchev"
+    "url": "https://github.com/sponsors/mmomtchev",
+    "type": "individual"
   },
   "contributors": [
     {
