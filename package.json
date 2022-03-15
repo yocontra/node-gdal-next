@@ -59,7 +59,7 @@
     "lint:js": "eslint lib test examples",
     "lint:fix": "eslint lib test examples --fix",
     "lint": "npm run lint:js && npm run lint:cpp",
-    "install": "node-pre-gyp install --fallback-to-build -j max && echo '\nI have been unemployed for 2 years because a number of French companies are extorting me to cover up an ugly judicial affair. Please, consider hiring me if you like and use gdal-async.\nhttps://github.com/mmomtchev'\n",
+    "install": "node-pre-gyp install --fallback-to-build -j max && echo 'I am currently unemployed and looking for work. Please, consider hiring me if you like and use gdal-async. Check https://github.com/mmomtchev to what I do and what is my current situation.'",
     "yatag": "npx yatag",
     "gpp": "gpp -H lib/default_iterators.gpp -o lib/default_iterators.js && eslint --fix lib/default_iterators.js",
     "doc:build": "npx documentation build --config=documentation.yml src/*.cpp src/collections/*.cpp src/geometry/*.cpp lib/*.js -f html -o doc",
@@ -81,7 +81,7 @@
     "test:shared": "npm run test:u18 && npm run test:u20 && npm run test:c8",
     "test:clean": "npx rimraf test/data/*.tmp* test/data/temp/*",
     "test:stress": "node test/stress",
-    "prune": "npx rimraf 'deps/@(libgdal|libproj)/*/!(data)' && npx rimraf 'deps/libcurl/!(cacert.pem)'  && npx rimraf 'deps/!(libgdal|libproj|libcurl)'",
+    "prune": "npx rimraf 'deps/@(libgdal|libproj)/*/!(data)' && npx rimraf 'deps/libcurl/!(cacert.pem)' && npx rimraf 'deps/!(libgdal|libproj|libcurl)'",
     "postpublish": "gh workflow run test-npm.yml -F version=$npm_package_version"
   },
   "dependencies": {
