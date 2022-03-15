@@ -275,6 +275,8 @@ Release binaries with pre-built bundled GDAL are tested against the full matrix 
 
 On Ubuntu 16.04, Amazon Linux, Windows and macOS only the bundled GDAL version is officially supported. On all other platforms both the bundled and the system-installed versions are supported.
 
+Node.js 17 on ArchLinux is not ABI compatible with the NodeSource binaries and requires rebuilding from source.
+
 Development versions are unit tested for the following targets:
 
 ---
@@ -288,8 +290,8 @@ Development versions are unit tested for the following targets:
 | Node.js 14.x | Fedora 33 | system-installed GDAL 3.1.4
 | Node.js 14.x | Fedora 34 | system-installed GDAL 3.2.2
 | Node.js 14.x | Fedora 34 | bundled GDAL
-| Node.js 16.x | Arch Linux current | system installed GDAL 3.2.3
-| Node.js 16.x | Arch Linux current | bundled GDAL
+| Node.js 17.x | Arch Linux current | system installed GDAL 3.2.3
+| Node.js 17.x | Arch Linux current | bundled GDAL (*requires rebuilding*)
 | Node.js 14.x | Ubuntu 16.04 | bundled GDAL (*glibc target platform*)
 | Node.js 14.x | Ubuntu 18.04 | system-installed GDAL 2.2.3
 | Node.js 14.x | Ubuntu 18.04 | bundled GDAL

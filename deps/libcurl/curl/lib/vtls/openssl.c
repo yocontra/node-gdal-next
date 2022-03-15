@@ -3052,7 +3052,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     }
   }
 
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && NEVERDEFINED
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
   /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
   {
     if(ssl_cafile) {
