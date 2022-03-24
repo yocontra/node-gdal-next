@@ -9,6 +9,7 @@
             "${workspaceFolder}/deps/libgdal/gdal/alg",
             "${workspaceFolder}/deps/libgdal/gdal/apps",
             "${workspaceFolder}/deps/libgdal/arch/unix",
+            "${workspaceFolder}/deps/libproj/proj/src",
             "${workspaceFolder}/node_modules/nan"
         ]
     },
