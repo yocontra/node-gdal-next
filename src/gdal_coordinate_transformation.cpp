@@ -1,8 +1,11 @@
-
+#include <string>
 #include "gdal_coordinate_transformation.hpp"
 #include "gdal_common.hpp"
 #include "gdal_dataset.hpp"
 #include "gdal_spatial_reference.hpp"
+#ifdef BUNDLED_GDAL
+#include "proj.h"
+#endif
 
 namespace node_gdal {
 
@@ -201,10 +204,20 @@ NAN_METHOD(CoordinateTransformation::transformPoint) {
     NODE_ARG_DOUBLE_OPT(2, "z", z);
   }
 
+#ifdef BUNDLED_GDAL
+  int proj_error_code = 0;
+  int r = transform->this_->TransformWithErrorCodes(1, &x, &y, &z, nullptr, &proj_error_code);
+  if (!r || proj_error_code != 0) {
+    Nan::ThrowError(
+      ("Error transforming point: " + std::string(proj_context_errno_string(nullptr, proj_error_code))).c_str());
+    return;
+  }
+#else
   if (!transform->this_->Transform(1, &x, &y, &z)) {
     Nan::ThrowError("Error transforming point");
     return;
   }
+#endif
 
   Local<Object> result = Nan::New<Object>();
   Nan::Set(result, Nan::New("x").ToLocalChecked(), Nan::New<Number>(x));
