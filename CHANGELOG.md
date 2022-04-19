@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - `gdal.calcAsync` can now call a progress callback
  - Add `gdal.buildVRT` and `gdal.rasterize`, library versions of the GDAL CLI tools
  - Add `gdal.wrapVRT` allowing wrapping a regular Dataset inside a VRT Dataset
+ - Support using driver-specific open options in `gdal.Driver.open`
 
 ## [3.4.2] WIP
  - Fix #27, rebuilding by `npm --build-from-source` fails

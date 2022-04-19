@@ -160,7 +160,7 @@ auto DatasetRval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return D
  * @param {number} [band_count=0]
  * @param {number} [data_type=GDT_Byte] pixel data type (ignored for
  * vector datasets) (see {@link GDT|data types}
- * @param {string[]|object} [creation_options] An array or object containing
+ * @param {string[]|Record<string, string|number>} [creation_options] An array or object containing
  * driver-specific dataset creation options
  * @throws
  * @return {Dataset}
@@ -181,7 +181,7 @@ auto DatasetRval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return D
  * @param {number} [band_count=0]
  * @param {number} [data_type=GDT_Byte] pixel data type (ignored for
  * vector datasets) (see {@link GDT|data types}
- * @param {string[]|object} [creation_options] An array or object containing
+ * @param {string[]|Record<string, string|number>} [creation_options] An array or object containing
  * driver-specific dataset creation options
  * @param {callback<Dataset>} [callback=undefined]
  * @throws
@@ -246,7 +246,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @memberof Driver
  * @param {string} filename
  * @param {Dataset} src
- * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
+ * @param {string[]|Record<string, string|number>} [options=null] An array or object containing driver-specific dataset creation options
  * @param {boolean} [strict=false] strict mode
  * @param {CreateOptions} [jsoptions] additional options
  * @param {ProgressCb} [jsoptions.progress_cb]
@@ -262,7 +262,7 @@ GDAL_ASYNCABLE_DEFINE(Driver::create) {
  * @memberof Driver
  * @param {string} filename
  * @param {Dataset} src
- * @param {string[]|object} [options=null] An array or object containing driver-specific dataset creation options
+ * @param {string[]|Record<string, string|number>} [options=null] An array or object containing driver-specific dataset creation options
  * @param {boolean} [strict=false] strict mode
  * @param {CreateOptions} [jsoptions] additional options
  * @param {ProgressCb} [jsoptions.progress_cb]
@@ -414,6 +414,7 @@ NAN_METHOD(Driver::getMetadata) {
  * @param {string} path
  * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
+ * @param {string[]|Record<string, string|number>} [options] Driver-specific open options
  * @return {Dataset}
  */
 
@@ -427,6 +428,7 @@ NAN_METHOD(Driver::getMetadata) {
  * @param {string} path
  * @param {string} [mode="r"] The mode to use to open the file: `"r"` or
  * `"r+"`
+ * @param {string[]|Record<string, string|number>} [options] Driver-specific open options
  * @param {callback<Dataset>} [callback=undefined]
  * @return {Promise<Dataset>}
  */
@@ -447,14 +449,20 @@ GDAL_ASYNCABLE_DEFINE(Driver::open) {
     return;
   }
 
+  StringList *options = new StringList;
+  if (info.Length() > 2 && options->parse(info[2])) {
+    return; // error parsing string list
+  }
+
   GDALDriver *raw = driver->getGDALDriver();
 
   GDALAsyncableJob<GDALDataset *> job(0);
   job.persist(driver->handle());
-  job.main = [raw, path, access](const GDALExecutionProgress &) {
+  job.main = [raw, path, access, options](const GDALExecutionProgress &) {
+    std::unique_ptr<StringList> options_ptr(options);
     const char *driver_list[2] = {raw->GetDescription(), nullptr};
     CPLErrorReset();
-    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, NULL, NULL);
+    GDALDataset *ds = (GDALDataset *)GDALOpenEx(path.c_str(), access, driver_list, options->get(), NULL);
     if (!ds) throw CPLGetLastErrorMsg();
     return ds;
   };

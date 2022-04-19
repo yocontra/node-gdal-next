@@ -160,7 +160,33 @@ describe('gdal.drivers', () => {
     })
   })
 
-  describe('createCopy', () => {
+  describe('open()', () => {
+    it('should operate normally', () => {
+      const driver = gdal.drivers.get('GTiff')
+      const ds = driver.open(`${__dirname}/data/sample.tif`)
+      assert.instanceOf(ds, gdal.Dataset)
+      assert.isNotNull(ds.srs)
+      assert.isNotNull(ds.geoTransform)
+      assert.strictEqual(ds.driver, driver)
+    })
+
+    it('should support passing driver-specific open options', () => {
+      const driver = gdal.drivers.get('GTiff')
+      const ds1 = driver.open(`${__dirname}/data/sample.tif`, 'r', { GEOREF_SOURCES: 'NONE' })
+      assert.instanceOf(ds1, gdal.Dataset)
+      assert.isNull(ds1.srs)
+      assert.isNull(ds1.geoTransform)
+      assert.strictEqual(ds1.driver, driver)
+
+      const ds2 = driver.open(`${__dirname}/data/sample.tif`, 'r', [ 'GEOREF_SOURCES=NONE' ])
+      assert.instanceOf(ds2, gdal.Dataset)
+      assert.isNull(ds2.srs)
+      assert.isNull(ds2.geoTransform)
+      assert.strictEqual(ds2.driver, driver)
+    })
+  })
+
+  describe('createCopy()', () => {
     it('should operate normally', () => {
       const driver = gdal.drivers.get('MEM')
       const outputFilename = '' // __dirname + '/data/12_791_1476.tif';
