@@ -298,7 +298,7 @@ NCJlex(NCJparser* parser)
 		if(c == '\0' || strchr(WORD,c) == NULL) break; /* end of word */
 	    }
 	    /* Pushback c if not whitespace */
-	    if(c > ' ' && c != '\177') parser->pos--;
+	    parser->pos--;
 	    count = ((parser->pos) - start);
 	    if(NCJyytext(parser,start,count)) goto done;
 	    /* Discriminate the word string to get the proper sort */
@@ -318,7 +318,7 @@ NCJlex(NCJparser* parser)
 	    start = parser->pos;
 	    for(;;) {
 		c = *parser->pos++;
-		if(c == NCJ_ESCAPE) c++;
+		if(c == NCJ_ESCAPE) parser->pos++;
 		else if(c == NCJ_QUOTE || c == '\0') break;
 	    }
 	    if(c == '\0') {
@@ -588,6 +588,27 @@ NCJinsert(NCjson* object, char* key, NCjson* value)
     return NC_NOERR;
 }
 
+/* Remove a key-value pair from a dict object.
+*/
+int
+NCJremove(NCjson* dict, char* key, NCjson** keyp, NCjson** valuep)
+{
+    int i;
+    if(dict == NULL || dict->sort != NCJ_DICT)
+	return NC_ENCZARR;
+    for(i=0;i<nclistlength(dict->contents);i+=2) {
+	NCjson* tmp = (NCjson*)nclistget(dict->contents,i);
+	if(strcmp(tmp->value,key)==0) {
+            if(keyp) *keyp = tmp;
+            if(valuep) *valuep = (NCjson*)nclistget(dict->contents,i+1);
+	    nclistremove(dict->contents,i+1);
+    	    nclistremove(dict->contents,i);
+	    break;
+	}
+    }
+    return NC_NOERR;
+}
+
 int
 NCJaddstring(NCjson* dictarray, int sort, const char* value)
 {
@@ -610,7 +631,7 @@ done:
 }
 
 int
-NCJdictith(NCjson* object, size_t i, const char** keyp, NCjson** valuep)
+NCJdictith(NCjson* object, size_t i, NCjson** keyp, NCjson** valuep)
 {
     if(object == NULL || object->sort != NCJ_DICT)
 	return NC_EINTERNAL;
@@ -662,7 +683,7 @@ NCJappend(NCjson* object, NCjson* value)
 int
 NCJarrayith(NCjson* object, size_t i, NCjson** valuep)
 {
-    if(object == NULL || object->sort != NCJ_DICT)
+    if(object == NULL || object->sort != NCJ_ARRAY)
 	return NC_EINTERNAL;
     if(valuep) *valuep = nclistget(object->contents,i);
     return NC_NOERR;

@@ -260,7 +260,8 @@ ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
-AM_CPPFLAGS = -I$(top_srcdir)/include $(am__append_1)
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
+	$(am__append_1)
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 
 # Put Together AM_CPPFLAGS and AM_LDFLAGS
@@ -340,7 +341,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISCMAKE = @ISCMAKE@
+ISCYGWIN = @ISCYGWIN@
 ISMSVC = @ISMSVC@
+ISOSX = @ISOSX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -472,6 +475,8 @@ top_srcdir = @top_srcdir@
 valgrind_enabled_tools = @valgrind_enabled_tools@
 valgrind_tools = @valgrind_tools@
 AM_TESTS_ENVIRONMENT = export TOPSRCDIR=${abs_top_srcdir}; export TOPBUILDDIR=${abs_top_builddir};
+
+# BZIP2 version 1.0.8 (https://sourceware.org/bzip2/)
 BZIP2HDRS = bzlib.h bzlib_private.h
 BZIP2SRC = blocksort.c huffman.c crctable.c randtable.c compress.c decompress.c bzlib.c
 PLUGINSRC = H5Zbzip2.c
@@ -494,6 +499,9 @@ HDF5PLUGINSRC = ${PLUGINSRC} ${BZIP2SRC} ${PLUGINHDRS} ${BZIP2HDRS}
 @ENABLE_FILTER_TESTING_TRUE@libnoop1_la_SOURCES = H5Znoop1.c H5Zutil.c h5noop.h
 BUILT_SOURCES = H5Znoop1.c
 DISTCLEANFILES = H5Znoop1.c
+
+# For reference: updating bzip2 
+BZIP2DIR = /cygdrive/d/bzip2-1.0.8
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -914,6 +922,8 @@ uninstall-am: uninstall-libLTLIBRARIES
 H5Znoop1.c: Makefile H5Znoop.c
 	echo '#define NOOP_INSTANCE 1' > $@
 	cat ${srcdir}/H5Znoop.c >> $@
+updatebzip2:
+	for b in ${BZIP2HDRS} ${BZIP2SRC} ; do cp -f ${BZIP2DIR}/$${b} . ; done
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

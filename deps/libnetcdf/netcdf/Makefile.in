@@ -113,7 +113,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = test_common.sh nc-config netcdf.pc \
-	libnetcdf.settings postinstall.sh
+	libnetcdf.settings postinstall.sh \
+	dap4_test/baselinethredds/GOES16_CONUS_20170821_020218_0.47_1km_33.3N_91.4W.nc4.thredds
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -213,8 +214,9 @@ DIST_SUBDIRS = include h5_test libdispatch libsrc libsrc4 libsrcp \
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(srcdir)/libnetcdf.settings.in $(srcdir)/nc-config.in \
 	$(srcdir)/netcdf.pc.in $(srcdir)/postinstall.sh.in \
-	$(srcdir)/test_common.in compile config.guess config.sub \
-	install-sh ltmain.sh missing
+	$(srcdir)/test_common.in \
+	$(top_srcdir)/dap4_test/baselinethredds/GOES16_TEST1.nc4.thredds \
+	compile config.guess config.sub install-sh ltmain.sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -338,7 +340,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISCMAKE = @ISCMAKE@
+ISCYGWIN = @ISCYGWIN@
 ISMSVC = @ISMSVC@
+ISOSX = @ISOSX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@

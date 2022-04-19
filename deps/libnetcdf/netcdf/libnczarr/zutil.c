@@ -18,7 +18,8 @@
 /* Static zarr type name table */
 
 static const char* znames_little[NUM_ATOMIC_TYPES] = {
-NULL,  /*NC_NAT*/ "<i1", /*NC_BYTE*/ "<U1", /*NC_CHAR*/ "<i2", /*NC_SHORT*/
+NULL,  /*NC_NAT*/
+"<i1", /*NC_BYTE*/ "<U1", /*NC_CHAR*/ "<i2", /*NC_SHORT*/
 "<i4", /*NC_INT*/ "<f4", /*NC_FLOAT*/ "<f8", /*NC_DOUBLE*/ "<u1", /*NC_UBYTE*/
 "<u2", /*NC_USHORT*/ "<u4", /*NC_UINT*/ "<i8", /*NC_INT64*/ "<u8", /*NC_UINT64*/
 NULL,  /*NC_STRING*/
@@ -451,7 +452,7 @@ is an object in the map.
 Note: need to test with "/", "", and with and without trailing "/".
 */
 int
-NCZ_subobjects(NCZMAP* map, const char* prefix, const char* tag, NClist* objlist)
+NCZ_subobjects(NCZMAP* map, const char* prefix, const char* tag, char dimsep, NClist* objlist)
 {
     int i,stat=NC_NOERR;
     NClist* matches = nclistnew();
@@ -460,7 +461,6 @@ NCZ_subobjects(NCZMAP* map, const char* prefix, const char* tag, NClist* objlist
     /* Get the list of names just below prefix */
     if((stat = nczmap_search(map,prefix,matches))) goto done;
     for(i=0;i<nclistlength(matches);i++) {
-	const char* p;
 	const char* name = nclistget(matches,i);
 	size_t namelen= strlen(name);	
 	/* Ignore keys that start with .z or .nc or a potential chunk name */
@@ -468,10 +468,8 @@ NCZ_subobjects(NCZMAP* map, const char* prefix, const char* tag, NClist* objlist
 	    continue;
 	if(namelen >= 2 && name[0] == '.' && name[1] == 'z')
 	    continue;
-	for(p=name;*p;p++) {
-	    if(*p != '.' && strchr("0123456789",*p) == NULL) break;
-	}
-	if(*p == '\0') continue; /* looks like a chunk name */
+	if(NCZ_ischunkname(name,dimsep))
+	    continue;
 	/* Create <prefix>/<name>/<tag> and see if it exists */
 	ncbytesclear(path);
 	ncbytescat(path,prefix);
@@ -487,6 +485,15 @@ done:
     nclistfreeall(matches);
     ncbytesfree(path);
     return stat;
+}
+
+int
+ncz_nctype2typeinfo(const char* snctype, nc_type* nctypep)
+{
+    unsigned nctype = 0;
+    if(sscanf(snctype,"%u",&nctype)!=1) return NC_EINVAL;
+    if(nctypep) *nctypep = nctype;
+    return NC_NOERR;
 }
 
 int
@@ -507,6 +514,7 @@ ncz_dtype2typeinfo(const char* dtype, nc_type* nctypep, int* endianp)
     switch (dtype[0]) {
     case '<': endianness = NC_ENDIAN_LITTLE; break;
     case '>': endianness = NC_ENDIAN_BIG; break;
+    case '|': endianness = NC_ENDIAN_NATIVE; break;
     default: goto zerr;
     }
     /* Decode the type length */
@@ -878,3 +886,30 @@ endswith(const char* s, const char* suffix)
     return 1;
 }
 
+int
+NCZ_ischunkname(const char* name,char dimsep)
+{
+    int stat = NC_NOERR;
+    const char* p;
+    if(strchr("0123456789",name[0])== NULL)
+        stat = NC_ENCZARR;
+    else for(p=name;*p;p++) {
+        if(*p != dimsep && strchr("0123456789",*p) == NULL) /* approximate */
+	    {stat = NC_ENCZARR; break;}
+    }
+    return stat;
+}
+
+char*
+NCZ_chunkpath(struct ChunkKey key,char dimsep)
+{
+    size_t plen = nulllen(key.varkey)+1+nulllen(key.chunkkey);
+    char* path = (char*)malloc(plen+1);
+    
+    if(path == NULL) return NULL;
+    path[0] = '\0';
+    strlcat(path,key.varkey,plen+1);
+    strlcat(path,"/",plen+1);
+    strlcat(path,key.chunkkey,plen+1);
+    return path;    
+}

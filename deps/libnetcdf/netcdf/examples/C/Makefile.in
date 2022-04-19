@@ -510,8 +510,9 @@ AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
 
 # Put together AM_CPPFLAGS and AM_LDFLAGS.
-AM_CPPFLAGS = -I$(top_srcdir)/include $(am__append_1) \
-	-I$(top_srcdir)/include -I$(top_builddir)/liblib
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
+	$(am__append_1) -I$(top_srcdir)/include \
+	-I$(top_builddir)/liblib
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_LDFLAGS = $(am__append_2) ${top_builddir}/liblib/libnetcdf.la -lm
 AR = @AR@
@@ -588,7 +589,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISCMAKE = @ISCMAKE@
+ISCYGWIN = @ISCYGWIN@
 ISMSVC = @ISMSVC@
+ISOSX = @ISOSX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@

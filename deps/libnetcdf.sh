@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libnetcdf"
 
-NETCDF_VERSION=4.8.0
+NETCDF_VERSION=4.8.1
 dir_netcdf=./netcdf
 
 #

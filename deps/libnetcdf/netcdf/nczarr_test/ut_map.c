@@ -52,16 +52,28 @@ int
 main(int argc, char** argv)
 {
     int stat = NC_NOERR;
+    char* tmp = NULL;
 
     if((stat = ut_init(argc, argv, &utoptions))) goto done;
+    if(utoptions.file == NULL && utoptions.output == NULL) { stat = NC_EINVAL; goto done; }
     if(utoptions.file == NULL && utoptions.output != NULL) utoptions.file = strdup(utoptions.output);
     if(utoptions.output == NULL && utoptions.file != NULL)utoptions.output = strdup(utoptions.file);
+
+    /* Canonicalize */
+    if((stat = NCpathcanonical(utoptions.file,&tmp))) goto done;
+    free(utoptions.file);
+    utoptions.file = tmp;
+    if((stat = NCpathcanonical(utoptions.output,&tmp))) goto done;
+    free(utoptions.output);
+    utoptions.output = tmp;
+
     impl = kind2impl(utoptions.kind);
     url = makeurl(utoptions.file,impl);
 
     if((stat = runtests((const char**)utoptions.cmds,tests))) goto done;
     
 done:
+    nullfree(tmp);
     if(stat) usage(stat);
     return 0;
 }
@@ -140,7 +152,7 @@ writemeta2(void)
     if((stat = nczmap_open(impl,url,NC_WRITE,0,NULL,&map)))
 	goto done;
 
-    if((stat=nczm_concat(META2,NCZVAR,&path)))
+    if((stat=nczm_concat(META2,NCZARRAY,&path)))
 	goto done;
     if((stat = nczmap_write(map, path, 0, strlen(metadata2), metadata2)))
 	goto done;
@@ -210,7 +222,7 @@ readmeta2(void)
     if((stat = nczmap_open(impl,url,0,0,NULL,&map)))
 	goto done;
 
-    if((stat = readkey(map,META2,NCZVAR)))
+    if((stat = readkey(map,META2,NCZARRAY)))
         goto done;
 
 done:
@@ -228,7 +240,7 @@ writedata(void)
     int i;
     size64_t totallen;
     char* data1p = (char*)&data1[0]; /* byte level version of data1 */
-    NCZM_PROPERTIES props;
+    NCZM_FEATURES features;
 
     /* Create the data */
     for(i=0;i<DATA1LEN;i++) data1[i] = i;
@@ -241,8 +253,8 @@ writedata(void)
     if((stat=nczm_concat(DATA1,"0",&path)))
 	goto done;
 
-    props = nczmap_properties(impl);
-    if((NCZM_ZEROSTART & props) || (NCZM_WRITEONCE & props)) {
+    features = nczmap_features(impl);
+    if((NCZM_ZEROSTART & features) || (NCZM_WRITEONCE & features)) {
 	if((stat = nczmap_write(map, path, 0, totallen, data1p)))
 	    goto done;
     } else {
@@ -339,7 +351,7 @@ searchR(NCZMAP* map, int depth, const char* prefix0, NClist* objects)
     /* get next level object keys **below** the prefix: should have form: <name> */
     switch (stat = nczmap_search(map, prefix, matches)) {
     case NC_NOERR: break;
-    case NC_ENOTFOUND: stat = NC_NOERR; break;/* prefix is not a dir */
+    case NC_ENOOBJECT: stat = NC_NOERR; break;/* prefix is not an object */
     default: goto done;
     }
     /* recurse */

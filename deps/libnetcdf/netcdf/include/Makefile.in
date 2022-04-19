@@ -133,7 +133,8 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__include_HEADERS_DIST = netcdf.h netcdf_meta.h netcdf_mem.h \
-	netcdf_aux.h netcdf_filter.h netcdf_dispatch.h netcdf_par.h
+	netcdf_aux.h netcdf_filter.h netcdf_filter_build.h \
+	netcdf_dispatch.h netcdf_par.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -170,7 +171,7 @@ am__noinst_HEADERS_DIST = nc_logging.h nc_tests.h fbits.h nc.h \
 	nc4dispatch.h nc3dispatch.h ncexternl.h ncpathmgr.h ncindex.h \
 	hdf4dispatch.h hdf5internal.h nc_provenance.h hdf5dispatch.h \
 	ncmodel.h isnan.h nccrc.h ncexhash.h ncxcache.h ncfilter.h \
-	ncdap.h nchttp.h
+	ncjson.h ncdap.h nchttp.h
 HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 am__extra_recursive_targets = check-valgrind-recursive \
 	check-valgrind-memcheck-recursive \
@@ -279,7 +280,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISCMAKE = @ISCMAKE@
+ISCYGWIN = @ISCYGWIN@
 ISMSVC = @ISMSVC@
+ISOSX = @ISOSX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -411,7 +414,8 @@ top_srcdir = @top_srcdir@
 valgrind_enabled_tools = @valgrind_enabled_tools@
 valgrind_tools = @valgrind_tools@
 include_HEADERS = netcdf.h netcdf_meta.h netcdf_mem.h netcdf_aux.h \
-	netcdf_filter.h netcdf_dispatch.h $(am__append_1)
+	netcdf_filter.h netcdf_filter_build.h netcdf_dispatch.h \
+	$(am__append_1)
 noinst_HEADERS = nc_logging.h nc_tests.h fbits.h nc.h nclist.h ncuri.h \
 	ncutf8.h ncdispatch.h ncdimscale.h netcdf_f.h err_macros.h \
 	ncbytes.h nchashmap.h ceconstraints.h rnd.h nclog.h \
@@ -419,7 +423,7 @@ noinst_HEADERS = nc_logging.h nc_tests.h fbits.h nc.h nclist.h ncuri.h \
 	ncrc.h ncauth.h ncoffsets.h nctestserver.h nc4dispatch.h \
 	nc3dispatch.h ncexternl.h ncpathmgr.h ncindex.h hdf4dispatch.h \
 	hdf5internal.h nc_provenance.h hdf5dispatch.h ncmodel.h \
-	isnan.h nccrc.h ncexhash.h ncxcache.h ncfilter.h \
+	isnan.h nccrc.h ncexhash.h ncxcache.h ncfilter.h ncjson.h \
 	$(am__append_2) $(am__append_3)
 EXTRA_DIST = CMakeLists.txt XGetopt.h netcdf_meta.h.in netcdf_dispatch.h.in
 all: all-am

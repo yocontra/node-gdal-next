@@ -127,11 +127,11 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libnczarr_la_DEPENDENCIES =
 am__libnczarr_la_SOURCES_DIST = zarr.c zattr.c zxcache.c zchunking.c \
 	zclose.c zcreate.c zcvt.c zdim.c zdispatch.c zfile.c zfilter.c \
-	zgrp.c zinternal.c zjson.c zmap.c zmap_file.c zodom.c zopen.c \
-	zprov.c zsync.c ztype.c zutil.c zvar.c zwalk.c zdebug.c zarr.h \
+	zgrp.c zinternal.c zmap.c zmap_file.c zodom.c zopen.c zprov.c \
+	zsync.c ztype.c zutil.c zvar.c zwalk.c zdebug.c zarr.h \
 	zcache.h zchunking.h zdispatch.h ztracedispatch.h zincludes.h \
-	zinternal.h zjson.h zmap.h zodom.h zprovenance.h zdebug.h \
-	zmap_zip.c zmap_s3sdk.c zs3sdk.cpp awsincludes.h zs3sdk.h
+	zinternal.h zmap.h zodom.h zprovenance.h zdebug.h zmap_zip.c \
+	zmap_s3sdk.c zs3sdk.cpp awsincludes.h zs3sdk.h
 @ENABLE_NCZARR_ZIP_TRUE@am__objects_1 = libnczarr_la-zmap_zip.lo
 @ENABLE_S3_SDK_TRUE@am__objects_2 = libnczarr_la-zmap_s3sdk.lo \
 @ENABLE_S3_SDK_TRUE@	libnczarr_la-zs3sdk.lo
@@ -141,13 +141,13 @@ am_libnczarr_la_OBJECTS = libnczarr_la-zarr.lo libnczarr_la-zattr.lo \
 	libnczarr_la-zcvt.lo libnczarr_la-zdim.lo \
 	libnczarr_la-zdispatch.lo libnczarr_la-zfile.lo \
 	libnczarr_la-zfilter.lo libnczarr_la-zgrp.lo \
-	libnczarr_la-zinternal.lo libnczarr_la-zjson.lo \
-	libnczarr_la-zmap.lo libnczarr_la-zmap_file.lo \
-	libnczarr_la-zodom.lo libnczarr_la-zopen.lo \
-	libnczarr_la-zprov.lo libnczarr_la-zsync.lo \
-	libnczarr_la-ztype.lo libnczarr_la-zutil.lo \
-	libnczarr_la-zvar.lo libnczarr_la-zwalk.lo \
-	libnczarr_la-zdebug.lo $(am__objects_1) $(am__objects_2)
+	libnczarr_la-zinternal.lo libnczarr_la-zmap.lo \
+	libnczarr_la-zmap_file.lo libnczarr_la-zodom.lo \
+	libnczarr_la-zopen.lo libnczarr_la-zprov.lo \
+	libnczarr_la-zsync.lo libnczarr_la-ztype.lo \
+	libnczarr_la-zutil.lo libnczarr_la-zvar.lo \
+	libnczarr_la-zwalk.lo libnczarr_la-zdebug.lo $(am__objects_1) \
+	$(am__objects_2)
 libnczarr_la_OBJECTS = $(am_libnczarr_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -184,7 +184,6 @@ am__depfiles_remade = ./$(DEPDIR)/libnczarr_la-zarr.Plo \
 	./$(DEPDIR)/libnczarr_la-zfilter.Plo \
 	./$(DEPDIR)/libnczarr_la-zgrp.Plo \
 	./$(DEPDIR)/libnczarr_la-zinternal.Plo \
-	./$(DEPDIR)/libnczarr_la-zjson.Plo \
 	./$(DEPDIR)/libnczarr_la-zmap.Plo \
 	./$(DEPDIR)/libnczarr_la-zmap_file.Plo \
 	./$(DEPDIR)/libnczarr_la-zmap_s3sdk.Plo \
@@ -275,8 +274,8 @@ AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
 
 # Get AM_CPPFLAGS and AM_LDFLAGS
-AM_CPPFLAGS = -I$(top_srcdir)/include $(am__append_1) \
-	-D_LARGEFILE_SOURCE -I$(top_srcdir)/libsrc4 \
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
+	$(am__append_1) -D_LARGEFILE_SOURCE -I$(top_srcdir)/libsrc4 \
 	-I$(top_srcdir)/libdap4
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_LDFLAGS = $(am__append_2)
@@ -354,7 +353,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISCMAKE = @ISCMAKE@
+ISCYGWIN = @ISCYGWIN@
 ISMSVC = @ISMSVC@
+ISOSX = @ISOSX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -508,10 +509,10 @@ noinst_LTLIBRARIES = libnczarr.la
 # The source files.
 libnczarr_la_SOURCES = zarr.c zattr.c zxcache.c zchunking.c zclose.c \
 	zcreate.c zcvt.c zdim.c zdispatch.c zfile.c zfilter.c zgrp.c \
-	zinternal.c zjson.c zmap.c zmap_file.c zodom.c zopen.c zprov.c \
-	zsync.c ztype.c zutil.c zvar.c zwalk.c zdebug.c zarr.h \
-	zcache.h zchunking.h zdispatch.h ztracedispatch.h zincludes.h \
-	zinternal.h zjson.h zmap.h zodom.h zprovenance.h zdebug.h \
+	zinternal.c zmap.c zmap_file.c zodom.c zopen.c zprov.c zsync.c \
+	ztype.c zutil.c zvar.c zwalk.c zdebug.c zarr.h zcache.h \
+	zchunking.h zdispatch.h ztracedispatch.h zincludes.h \
+	zinternal.h zmap.h zodom.h zprovenance.h zdebug.h \
 	$(am__append_3) $(am__append_4)
 
 # For now, ignore these
@@ -584,7 +585,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libnczarr_la-zfilter.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libnczarr_la-zgrp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libnczarr_la-zinternal.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libnczarr_la-zjson.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libnczarr_la-zmap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libnczarr_la-zmap_file.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libnczarr_la-zmap_s3sdk.Plo@am__quote@ # am--include-marker
@@ -720,13 +720,6 @@ libnczarr_la-zinternal.lo: zinternal.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='zinternal.c' object='libnczarr_la-zinternal.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnczarr_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libnczarr_la-zinternal.lo `test -f 'zinternal.c' || echo '$(srcdir)/'`zinternal.c
-
-libnczarr_la-zjson.lo: zjson.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnczarr_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libnczarr_la-zjson.lo -MD -MP -MF $(DEPDIR)/libnczarr_la-zjson.Tpo -c -o libnczarr_la-zjson.lo `test -f 'zjson.c' || echo '$(srcdir)/'`zjson.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libnczarr_la-zjson.Tpo $(DEPDIR)/libnczarr_la-zjson.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='zjson.c' object='libnczarr_la-zjson.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnczarr_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libnczarr_la-zjson.lo `test -f 'zjson.c' || echo '$(srcdir)/'`zjson.c
 
 libnczarr_la-zmap.lo: zmap.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnczarr_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libnczarr_la-zmap.lo -MD -MP -MF $(DEPDIR)/libnczarr_la-zmap.Tpo -c -o libnczarr_la-zmap.lo `test -f 'zmap.c' || echo '$(srcdir)/'`zmap.c
@@ -1022,7 +1015,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/libnczarr_la-zfilter.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zgrp.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zinternal.Plo
-	-rm -f ./$(DEPDIR)/libnczarr_la-zjson.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zmap.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zmap_file.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zmap_s3sdk.Plo
@@ -1095,7 +1087,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/libnczarr_la-zfilter.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zgrp.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zinternal.Plo
-	-rm -f ./$(DEPDIR)/libnczarr_la-zjson.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zmap.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zmap_file.Plo
 	-rm -f ./$(DEPDIR)/libnczarr_la-zmap_s3sdk.Plo

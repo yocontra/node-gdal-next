@@ -4,12 +4,12 @@
 #define PACKAGE "netcdf-c"
 #define PACKAGE_BUGREPORT "support-netcdf@unidata.ucar.edu"
 #define PACKAGE_NAME "netCDF"
-#define PACKAGE_STRING "netCDF 4.8.0"
+#define PACKAGE_STRING "netCDF 4.8.1"
 #define PACKAGE_TARNAME "netcdf-c"
 #define PACKAGE_URL ""
-#define PACKAGE_VERSION "4.8.0"
+#define PACKAGE_VERSION "4.8.1"
 #define REMOTETESTSERVERS "remotetest.unidata.ucar.edu"
-#define VERSION "4.8.0"
+#define VERSION "4.8.1"
 
 #ifdef LINUX
 #define CHUNK_CACHE_NELEMS 4133

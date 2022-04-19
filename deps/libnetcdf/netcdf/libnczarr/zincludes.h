@@ -26,7 +26,7 @@
 #include <unistd.h>
 #endif
 #endif
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <malloc.h>
 #endif
 
@@ -45,6 +45,7 @@ extern "C" {
 #include "nclog.h"
 #include "ncrc.h"
 #include "ncindex.h"
+#include "ncjson.h"
 
 #include "zmap.h"
 #include "zinternal.h"
@@ -53,7 +54,6 @@ extern "C" {
 #include "zodom.h"
 #include "zchunking.h"
 #include "zcache.h"
-#include "zjson.h"
 #include "zarr.h"
 #include "zdebug.h"
 

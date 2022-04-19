@@ -10,7 +10,7 @@
 AC_PREREQ([2.59])
 
 # Initialize with name, version, and support email address.
-AC_INIT([netCDF], [4.8.0], [support-netcdf@unidata.ucar.edu], [netcdf-c])
+AC_INIT([netCDF], [4.8.1], [support-netcdf@unidata.ucar.edu], [netcdf-c])
 
 ##
 # Prefer an empty CFLAGS variable instead of the default -g -O2.
@@ -21,7 +21,7 @@ AC_INIT([netCDF], [4.8.0], [support-netcdf@unidata.ucar.edu], [netcdf-c])
 
 AC_SUBST([NC_VERSION_MAJOR]) NC_VERSION_MAJOR=4
 AC_SUBST([NC_VERSION_MINOR]) NC_VERSION_MINOR=8
-AC_SUBST([NC_VERSION_PATCH]) NC_VERSION_PATCH=0
+AC_SUBST([NC_VERSION_PATCH]) NC_VERSION_PATCH=1
 AC_SUBST([NC_VERSION_NOTE]) NC_VERSION_NOTE=""
 
 #####
@@ -54,6 +54,25 @@ AC_CANONICAL_TARGET
 
 AC_CONFIG_HEADERS([config.h])
 
+
+##
+# Check to see if the compiler supports -fno-strict-aliasing and, if so,
+# add that to the C compiler flags.  This is in support of https://github.com/Unidata/netcdf-c/issues/1983.
+##
+SAVE_CFLAGS="${CFLAGS}"
+AC_LANG_PUSH([C])
+CFLAGS="${CFLAGS} -fno-strict-aliasing"
+
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+        [int i = 0;]])],
+        [have_no_strict_aliasing=yes],
+        [have_no_strict_aliasing=no])
+AC_MSG_CHECKING([whether compiler supports -fno-strict-aliasing])
+AC_MSG_RESULT([$have_no_strict_aliasing])
+AC_LANG_POP([C])
+if test $have_no_strict_aliasing = no; then
+   CFLAGS=$SAVE_CFLAGS
+fi
 ##
 # Some files need to exist in build directories
 # that do not correspond to their source directory, or
@@ -68,7 +87,7 @@ AC_CONFIG_LINKS([nc_test4/ref_hdf5_compat3.nc:nc_test4/ref_hdf5_compat3.nc])
 
 AC_CONFIG_LINKS([hdf4_test/ref_chunked.hdf4:hdf4_test/ref_chunked.hdf4])
 AC_CONFIG_LINKS([hdf4_test/ref_contiguous.hdf4:hdf4_test/ref_contiguous.hdf4])
-
+AC_CONFIG_LINKS([dap4_test/baselinethredds/GOES16_CONUS_20170821_020218_0.47_1km_33.3N_91.4W.nc4.thredds:dap4_test/baselinethredds/GOES16_TEST1.nc4.thredds])
 AM_INIT_AUTOMAKE([foreign dist-zip subdir-objects])
 AM_MAINTAINER_MODE()
 
@@ -123,6 +142,12 @@ AC_ARG_ENABLE([pnetcdf], [AS_HELP_STRING([--enable-pnetcdf],
 test "x$enable_pnetcdf" = xyes || enable_pnetcdf=no
 AC_MSG_RESULT($enable_pnetcdf)
 
+# We need curl for remote operations
+AC_CHECK_LIB([curl],[curl_easy_setopt],[found_curl=yes],[found_curl=no])
+if test "x$found_curl" = "xyes" ; then
+   AC_SEARCH_LIBS([curl_easy_setopt],[curl curl.dll cygcurl.dll], [],[])
+fi
+
 ## Capture the state of the --enable-dap flag => enable dap2+dap4
 AC_MSG_CHECKING([whether DAP client(s) are to be built])
 AC_ARG_ENABLE([dap],
@@ -131,11 +156,16 @@ AC_ARG_ENABLE([dap],
 test "x$enable_dap" = xno || enable_dap=yes
 AC_MSG_RESULT($enable_dap)
 
-AC_MSG_CHECKING([whether netcdf zarr storage format should be enabled])
+if test "x$enable_dap" = xyes & test "x$found_curl" = xno ; then
+  AC_MSG_WARN([curl required for dap access. DAP support disabled.])
+  enable_dap=no
+fi
+
+AC_MSG_CHECKING([whether netcdf zarr storage format should be disabled])
 AC_ARG_ENABLE([nczarr],
-              [AS_HELP_STRING([--enable-nczarr],
-                              [enable netcdf zarr storage support; requires netCDF-4 and libcurl])])
-test "x$enable_nczarr" = xyes || enable_nczarr=no
+              [AS_HELP_STRING([--disable-nczarr],
+                              [disable netcdf zarr storage support])])
+test "x$enable_nczarr" = xno || enable_nczarr=yes
 AC_MSG_RESULT($enable_nczarr)
 
 # HDF5 | HDF4 | NCZarr => netcdf-4
@@ -396,12 +426,6 @@ if test "x$enable_set_log_level_func" = xyes -a "x$enable_netcdf_4" = xyes; then
 fi
 AC_MSG_RESULT($enable_set_log_level_func)
 
-# We need curl for DAP and byterange
-AC_CHECK_LIB([curl],[curl_easy_setopt],[found_curl=yes],[found_curl=no])
-if test "x$found_curl" = "xyes" ; then
-   AC_SEARCH_LIBS([curl_easy_setopt],[curl curl.dll cygcurl.dll], [],
-      [AC_MSG_ERROR([curl required for remote access. Install curl or disable relevant options.])])
-fi
 
 # CURLOPT_USERNAME is not defined until curl version 7.19.1
 # CURLOPT_PASSWORD is not defined until curl version 7.19.1
@@ -499,10 +523,10 @@ CFLAGS="$SAVECFLAGS"
 # --enable-dap => enable-dap4
 enable_dap4=$enable_dap
 # Default is to do the short remote tests.
-AC_MSG_CHECKING([whether dap remote testing should be enabled (default off)])
+AC_MSG_CHECKING([whether dap remote testing should be enabled])
 AC_ARG_ENABLE([dap-remote-tests],
-              [AS_HELP_STRING([--enable-dap-remote-tests],
-                                 [enable dap remote tests])])
+              [AS_HELP_STRING([--disable-dap-remote-tests],
+                                 [disable dap remote tests])])
 test "x$enable_dap_remote_tests" = xno || enable_dap_remote_tests=yes
 if test "x$enable_dap" = "xno" ; then
   enable_dap_remote_tests=no
@@ -561,16 +585,39 @@ AC_MSG_RESULT([$enable_dap_long_tests])
 
 # Control zarr storage
 if test "x$enable_nczarr" = xyes ; then
-if test "x$enable_netcdf_4" = xno ; then
-AC_MSG_ERROR([netCDF-4 disabled, so you must not enable nczarr])
-enable_nczarr=no
+  if test "x$enable_netcdf_4" = xno ; then
+    AC_MSG_WARN([netCDF-4 disabled, so you must not enable nczarr])
+    enable_nczarr=no
+  fi
 fi
-fi
+
 if test "x$enable_nczarr" = xyes; then
    AC_DEFINE([ENABLE_NCZARR], [1], [if true, build NCZarr Client])
    AC_SUBST(ENABLE_NCZARR)
 fi
 AM_CONDITIONAL(ENABLE_NCZARR, [test x$enable_nczarr = xyes])
+
+# See if we have libzip
+AC_CHECK_LIB([zip],[zip_open],[have_zip=yes],[have_zip=no])
+if test "x$have_zip" = "xyes" ; then
+   AC_SEARCH_LIBS([zip_open],[zip zip.dll cygzip.dll], [], [])
+fi
+AC_MSG_CHECKING([whether libzip library is available])
+AC_MSG_RESULT([${have_zip}])
+
+enable_nczarr_zip=${have_zip} # alias
+
+if test "x$enable_nczarr" = xno ; then
+enable_nczarr_zip=no
+fi
+
+AC_MSG_CHECKING([whether nczarr zip support is enabled])
+AC_MSG_RESULT([${enable_nczarr_zip}])
+
+if test "x$enable_nczarr_zip" = xyes ; then
+AC_DEFINE([ENABLE_NCZARR_ZIP], [1], [If true, then libzip found])
+fi
+AM_CONDITIONAL(ENABLE_NCZARR_ZIP, [test "x$enable_nczarr_zip" = xyes])
 
 # Check for enabling of S3 support
 AC_MSG_CHECKING([whether netcdf zarr S3 support should be enabled])
@@ -578,7 +625,33 @@ AC_ARG_ENABLE([nczarr-s3],
               [AS_HELP_STRING([--enable-nczarr-s3],
                               [enable netcdf zarr S3 support; make sure to set LDFLAGS])])
 test "x$enable_nczarr_s3" = xyes || enable_nczarr_s3=no
+if test "x$enable_nczarr" = xno ; then
+enable_nczarr_s3=no
+fi
 AC_MSG_RESULT($enable_nczarr_s3)
+
+# Note we check for the library after checking for enable_nczarr_s3
+# because for some reason this screws up if we unconditionally test for sdk
+# and it is not available. Fix someday
+have_aws=no
+if test "x$enable_nczarr_s3" = xyes ; then
+# See if we have the s3 aws library
+# Check for the AWS S3 SDK library
+AC_LANG_PUSH([C++])
+AC_SEARCH_LIBS([aws_allocator_is_valid],[aws-c-common aws-cpp-sdk-s3 aws-cpp-sdk-core], [have_aws=yes],[have_aws=no])
+AC_LANG_POP
+fi
+
+AC_MSG_CHECKING([whether AWS S3 SDK library is available])
+AC_MSG_RESULT([$have_aws])
+
+if test "x$have_aws" = xno ; then
+AC_MSG_WARN([AWS SDK not found; disabling S3 support])
+enable_nczarr_s3=no
+else
+AC_DEFINE([ENABLE_S3_SDK], [1], [If true, then S3 sdk was found])
+fi
+AM_CONDITIONAL(ENABLE_S3_SDK, [test "x$have_aws" = xyes])
 
 # Check for enabling S3 testing
 AC_MSG_CHECKING([whether netcdf zarr S3 testing should be enabled])
@@ -590,34 +663,8 @@ AC_MSG_RESULT($enable_nczarr_s3_tests)
 
 # Disable S3 tests if S3 support is disabled
 if test "x$enable_nczarr_s3" = xno && test "x$enable_nczarr_s3_tests" = xyes ; then
-    AC_MSG_ERROR([NCZarr S3 support is disabled; please specify option --disable-nczarr-s3-tests])
+    AC_MSG_ERROR([NCZarr S3 support is disabled; please remove option --enable-nczarr-s3-tests])
     enable_nczarr_s3_tests=no
-fi
-
-# Set default
-have_aws=no
-
-if test "x$enable_nczarr_s3" = xyes ; then
-# See if we have the s3 aws library
-# Check for the AWS S3 SDK library
-AC_LANG_PUSH([C++])
-AC_SEARCH_LIBS([aws_allocator_is_valid],[aws-c-common aws-cpp-sdk-s3 aws-cpp-sdk-core], [have_aws=yes],[have_aws=no])
-AC_LANG_POP
-AC_MSG_CHECKING([whether AWS S3 SDK library is available])
-AC_MSG_RESULT([$have_aws])
-
-if test "x$have_aws" = xyes ; then
-AC_DEFINE([ENABLE_S3_SDK], [1], [If true, then S3 sdk was found])
-fi
-fi
-AM_CONDITIONAL(ENABLE_S3_SDK, [test "x$have_aws" = xyes])
-
-if test "x$have_aws" = xno ; then
-  if test "x$enable_nczarr_s3" = xyes || test "x$enable_nczarr_s3_tests" = xyes ; then
-    AC_MSG_ERROR([AWS S3 libraries not found; please specify options --disable-nczarr-s3 and --disable-nczarr-s3-tests])
-    enable_nczarr_s3_tests=no
-    enable_nczarr_s3=no
-  fi
 fi
 
 if test "x$enable_nczarr_s3" = xyes ; then
@@ -635,22 +682,6 @@ if test "x$enable_nczarr_s3_tests" = xyes ; then
 fi
 
 # Set default
-# See if we have libzip
-AC_CHECK_LIB([zip],[zip_open],[have_zip=yes],[have_zip=no])
-if test "x$have_zip" = "xyes" ; then
-   AC_SEARCH_LIBS([zip_open],[zip zip.dll cygzip.dll], [],
-      [AC_MSG_ERROR([libzip search failed.])])
-fi
-AC_MSG_CHECKING([whether libzip library is available])
-AC_MSG_RESULT([${have_zip}])
-
-enable_nczarr_zip=${have_zip} # alias
-
-if test "x$enable_nczarr_zip" = xyes ; then
-AC_DEFINE([ENABLE_NCZARR_ZIP], [1], [If true, then libzip found])
-fi
-AM_CONDITIONAL(ENABLE_NCZARR_ZIP, [test "x$enable_nczarr_zip" = xyes])
-
 # Did the user specify a default cache size for NCZarr?
 AC_MSG_CHECKING([whether a default file cache size for NCZarr was specified])
 AC_ARG_WITH([chunk-cache-size-nczarr],
@@ -1084,10 +1115,16 @@ AC_C_BIGENDIAN
 # Figure out platforms of special interest
 case "`uname`" in
   CYGWIN*) ISCYGWIN=yes;;
+  Darwin*) ISOSX=yes;;
   WIN*) ISMSVC=yes;;
 esac
 AM_CONDITIONAL(ISCYGWIN, [test "x$ISCYGWIN" = xyes])
 AM_CONDITIONAL(ISMSVC, [test "x$ISMSVC" = xyes])
+AM_CONDITIONAL(ISOSX, [test "x$ISOSX" = xyes])
+
+AC_SUBST([ISMSVC], [${ISMSVC}])
+AC_SUBST([ISCYGWIN], [${ISCYGWIN}])
+AC_SUBST([ISOSX], [${ISOSX}])
 
 ###
 # Crude hack to work around an issue
@@ -1219,18 +1256,6 @@ if test "x$enable_hdf5" = xyes; then
    # Use H5Pset_fapl_mpio and H5Pget_fapl_mpio, instead.
 
    AC_CHECK_FUNCS([H5Pget_fapl_mpio H5Pset_deflate H5Z_SZIP H5free_memory H5resize_memory H5allocate_memory H5Pset_all_coll_metadata_ops H5Literate])
-
-   # Check to see if HDF5 library has H5Literate (HDF5 1.8.x, 1.10.x)
-   if test "x$ac_cv_func_H5Literate" = xno; then
-      AC_MSG_CHECKING([for H5Literate macro])
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include "H5public.h"],
-      [[#if !(H5Literate_vers == 1)
-      # error
-      #endif]
-      ])], [], [AC_MSG_RESULT(no); AC_MSG_ERROR([HDF5 was not built with API compatibility version v18. Please recompile your libhdf5 install using '--with-default-api-version=v18'.])])
-      AC_MSG_RESULT(yes)
-   fi
-
 
    # Check to see if HDF5 library has collective metadata APIs, (HDF5 >= 1.10.0)
    if test "x$ac_cv_func_H5Pset_all_coll_metadata_ops" = xyes; then
@@ -1711,8 +1736,6 @@ AC_DEFINE_UNQUOTED([NC_DISPATCH_VERSION], [${NC_DISPATCH_VERSION}], [Dispatch ta
 # End netcdf_meta.h definitions.
 #####
 
-# This would be true for a visual studio build.
-AC_SUBST([ISMSVC], [${ISMSVC}])
 # This would be true for a cmake build.
 AC_SUBST([ISCMAKE], [])
 

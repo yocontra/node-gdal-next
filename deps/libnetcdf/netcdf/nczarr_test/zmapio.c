@@ -13,7 +13,8 @@
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
-#ifdef _WIN32
+
+#if defined(_WIN32) && !defined(__MINGW32__)
 #include "XGetopt.h"
 #endif
 
@@ -36,7 +37,8 @@ typedef enum OBJKIND {
 OK_NONE=0,
 OK_META=1,
 OK_CHUNK=2,
-OK_GROUP=3
+OK_GROUP=3,
+OK_IGNORE=4
 } OBJKIND;
 
 static struct Mops {
@@ -70,11 +72,14 @@ static struct Type {
 /* Command line options */
 struct Dumpptions {
     int debug;
+    int meta_only;
     Mapop mop;
     char infile[4096];
     NCZM_IMPL impl;    
     char* rootpath;
     const struct Type* nctype;
+    int xflags;
+#	define XNOZMETADATA 1	
 } dumpoptions;
 
 /* Forward */
@@ -129,13 +134,17 @@ main(int argc, char** argv)
 {
     int stat = NC_NOERR;
     int c;
+    char* p;
 
     memset((void*)&dumpoptions,0,sizeof(dumpoptions));
 
-    while ((c = getopt(argc, argv, "dvx:t:T:")) != EOF) {
+    while ((c = getopt(argc, argv, "dhvx:t:T:X:")) != EOF) {
 	switch(c) {
 	case 'd': 
 	    dumpoptions.debug = 1;	    
+	    break;
+	case 'h': 
+	    dumpoptions.meta_only = 1;	    
 	    break;
 	case 'v': 
 	    zmapusage();
@@ -150,6 +159,14 @@ main(int argc, char** argv)
 	    break;
 	case 'T':
 	    nctracelevel(atoi(optarg));
+	    break;
+	case 'X':
+	    for(p=optarg;*p;p++) {
+		switch (*p) {
+		case 'm': dumpoptions.xflags |= XNOZMETADATA; break;
+	        default: fprintf(stderr,"Unknown -X argument: %c",*p); break;
+		}
+	    };
 	    break;
 	case '?':
 	   fprintf(stderr,"unknown option\n");
@@ -177,7 +194,7 @@ main(int argc, char** argv)
     }
 
     {
-        char* p = NC_backslashUnescape(argv[0]);
+        char* p = NC_shellUnescape(argv[0]);
         strcpy(dumpoptions.infile,filenamefor(p));
 	if(p) free(p);
     }
@@ -310,7 +327,8 @@ objdump(void)
 	}
 	if(!hascontent) goto next; /* ignore it */
 	if(len > 0) {
-	    content = malloc(len+1);
+	    size_t padlen = (len+dumpoptions.nctype->typesize);
+	    content = calloc(1,padlen+1);
   	    if((stat=nczmap_read(map,obj,0,len,content))) goto done;
 	    content[len] = '\0';
         } else {
@@ -318,12 +336,27 @@ objdump(void)
 	}
 	if(hascontent) {
 	    if(len > 0) {
-	        assert(content != NULL);
-		if(kind == OK_CHUNK) len /= dumpoptions.nctype->typesize;
+                assert(content != NULL);
+		if(kind == OK_CHUNK) {
+		    len = ceildiv(len,dumpoptions.nctype->typesize);
+		}
                 printf("[%d] %s : (%llu)",depth,obj,len);
-                if(kind == OK_CHUNK) printf(" (%s)",dumpoptions.nctype->typename);
+		if(kind == OK_CHUNK)
+                    printf(" (%s)",dumpoptions.nctype->typename);
                 printf(" |");
-	        printcontent(len,content,kind);
+                switch(kind) {
+		case OK_GROUP:
+		case OK_META:
+	            printcontent(len,content,kind);
+		    break;
+		case OK_CHUNK:
+	    	    if(dumpoptions.meta_only)
+			printf("...");
+		    else
+	                printcontent(len,content,kind);
+		    break;
+		default: break;
+		}
 	        printf("|\n");
 	    } else {
 	        printf("[%d] %s : (%llu) ||\n",depth,obj,len);
@@ -445,9 +478,12 @@ keykind(const char* key)
 	if(suffix) {
             if(suffix[0] != '/')
 		kind = OK_NONE;
-	    else if(suffix[1] == '.')
-	        kind = OK_META;
-            else if(suffix[strlen(suffix)-1] == '/')
+	    else if(suffix[1] == '.') {
+		if(strcmp(&suffix[1],".zmetadata")==0 && (dumpoptions.xflags & XNOZMETADATA))
+		    kind = OK_IGNORE;
+		else
+	            kind = OK_META;
+            } else if(suffix[strlen(suffix)-1] == '/')
 		kind = OK_GROUP;
 	    else {
 		char* p = suffix+1;

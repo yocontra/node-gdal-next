@@ -23,7 +23,7 @@ struct ZCVT {
 };
 
 int
-NCZ_convert1(NCjson* jsrc, nc_type dsttype, char* memory)
+NCZ_convert1(NCjson* jsrc, nc_type dsttype, unsigned char* memory)
 {
     int stat = NC_NOERR;
     nc_type srctype;
@@ -33,35 +33,36 @@ NCZ_convert1(NCjson* jsrc, nc_type dsttype, char* memory)
     /* Convert the incoming jsrc string to a restricted set of values */
     switch (jsrc->sort) {
     case NCJ_INT: /* convert to (u)int64 */
-	if(jsrc->value[0] == '-') {
-	    if(sscanf(jsrc->value,"%lld",&zcvt.int64v) != 1)
+	if(NCJstring(jsrc)[0] == '-') {
+	    if(sscanf(NCJstring(jsrc),"%lld",&zcvt.int64v) != 1)
 		{stat = NC_EINVAL; goto done;}
 	    srctype = NC_INT64;
 	} else {
-	    if(sscanf(jsrc->value,"%llu",&zcvt.uint64v) != 1)
+	    if(sscanf(NCJstring(jsrc),"%llu",&zcvt.uint64v) != 1)
 		{stat = NC_EINVAL; goto done;}
 	    srctype = NC_UINT64;
 	}
 	break;
+    case NCJ_STRING:
     case NCJ_DOUBLE:
 	/* Capture nan and infinity values */
-	if(strcasecmp(jsrc->value,"nan")==0)
+	if(strcasecmp(NCJstring(jsrc),"nan")==0)
 	    zcvt.float64v = NAN;
-	else if(strcasecmp(jsrc->value,"-nan")==0)
+	else if(strcasecmp(NCJstring(jsrc),"-nan")==0)
 	    zcvt.float64v = - NAN;
-	else if(strcasecmp(jsrc->value,"infinity")==0)
+	else if(strcasecmp(NCJstring(jsrc),"infinity")==0)
 	    zcvt.float64v = INFINITY;
-	else if(strcasecmp(jsrc->value,"-infinity")==0)
+	else if(strcasecmp(NCJstring(jsrc),"-infinity")==0)
 	    zcvt.float64v = (- INFINITY);
 	else {
-	    if(sscanf(jsrc->value,"%lg",&zcvt.float64v) != 1)
+	    if(sscanf(NCJstring(jsrc),"%lg",&zcvt.float64v) != 1)
 	        {stat = NC_EINVAL; goto done;}
 	}
 	srctype = NC_DOUBLE;
 	break;
     case NCJ_BOOLEAN:
 	srctype = NC_UINT64;
-	if(strcasecmp(jsrc->value,"false")==0)
+	if(strcasecmp(NCJstring(jsrc),"false")==0)
 	    zcvt.uint64v = 0;
 	else
 	    zcvt.uint64v = 1;
@@ -234,14 +235,14 @@ done:
 }
 
 int
-NCZ_stringconvert1(nc_type srctype, char* src, char** strp)
+NCZ_stringconvert1(nc_type srctype, unsigned char* src, char** strp)
 {
     int stat = NC_NOERR;
     struct ZCVT zcvt;
     nc_type dsttype = NC_NAT;
     char s[1024];
 
-    assert(srctype >= NC_NAT && srctype != NC_CHAR && srctype < NC_STRING);
+    assert(srctype >= NC_NAT && srctype != NC_CHAR && srctype < NC_STRING);    
     /* Convert to a restricted set of values */
     switch (srctype) {
     case NC_BYTE: {
@@ -324,8 +325,12 @@ NCZ_stringconvert(nc_type typeid, size_t len, void* data0, NCjson** jdatap)
 	/* Create a string valued json object */
 	if((stat = NCJnewstringn(NCJ_STRING,len,src,&jdata)))
 	    goto done;
-    } else { /* for all other values, create an array of values */
-	if((stat = NCJnew(NCJ_ARRAY,&jdata))) goto done;
+    } else { /* all other cases */
+	if(len == 0) {stat = NC_EINVAL; goto done;}
+	if(len > 1) {
+	    if((stat = NCJnew(NCJ_ARRAY,&jdata))) goto done;
+        } else /* return a singletone */
+   	    jdata = NULL;
 	for(i=0;i<len;i++) {
   	    char* special = NULL;
 	    double d;
@@ -369,9 +374,12 @@ NCZ_stringconvert(nc_type typeid, size_t len, void* data0, NCjson** jdatap)
 	    default: stat = NC_EINTERNAL; goto done;
 	    }
 	    if(special) {nullfree(str); str = strdup(special);}
-	    jvalue->value = str;
+	    NCJstring(jvalue) = str;
 	    str = NULL;
-	    nclistpush(jdata->contents,jvalue);
+	    if(len == 1)
+		jdata = jvalue;
+	    else
+	        NCJappend(jdata,jvalue);
 	    jvalue = NULL;
 	    src += typelen;
 	}

@@ -78,18 +78,28 @@ IF(ENABLE_TESTS)
     add_sh_test(nczarr_test run_ut_misc)
     add_sh_test(nczarr_test run_ut_chunk)
     IF(USE_HDF5)
-    add_sh_test(nczarr_test run_nccopyz)
+#    add_sh_test(nczarr_test run_nccopyz)
     add_sh_test(nczarr_test run_fillonlyz)
     ENDIF()
     add_sh_test(nczarr_test run_ncgen4)
 
-      BUILD_BIN_TEST(tst_chunkcases ${TSTCOMMONSRC})
-      TARGET_INCLUDE_DIRECTORIES(tst_chunkcases PUBLIC ../libnczarr)
-      add_sh_test(nczarr_test run_chunkcases)
+    BUILD_BIN_TEST(tst_chunkcases ${TSTCOMMONSRC})
+    TARGET_INCLUDE_DIRECTORIES(tst_chunkcases PUBLIC ../libnczarr)
+    add_sh_test(nczarr_test run_chunkcases)
+
+    add_sh_test(nczarr_test run_purezarr)
+    add_sh_test(nczarr_test run_interop)
+    add_sh_test(nczarr_test run_misc)
+    add_sh_test(nczarr_test run_nczarr_fill)
 
     if(ENABLE_NCZARR_S3)
 	add_sh_test(nczarr_test run_s3_cleanup)
     ENDIF()
+
+    if(ENABLE_NCZARR_ZIP)
+        add_sh_test(nczarr_test run_newformat)
+    endif()
+
   ENDIF(BUILD_UTILITIES)
 
 ENDIF(ENABLE_TESTS)

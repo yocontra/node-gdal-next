@@ -268,9 +268,10 @@ ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
-AM_CPPFLAGS = -I$(top_srcdir)/include $(am__append_1) $(am__append_4) \
-	$(am__append_6) $(am__append_8) $(am__append_10) \
-	$(am__append_12) $(am__append_14) $(am__append_16)
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
+	$(am__append_1) $(am__append_4) $(am__append_6) \
+	$(am__append_8) $(am__append_10) $(am__append_12) \
+	$(am__append_14) $(am__append_16)
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_LDFLAGS = $(am__append_2) $(am__append_19)
 AR = @AR@
@@ -347,7 +348,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISCMAKE = @ISCMAKE@
+ISCYGWIN = @ISCYGWIN@
 ISMSVC = @ISMSVC@
+ISOSX = @ISOSX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -488,7 +491,7 @@ lib_LTLIBRARIES = libnetcdf.la
 # These linker flags specify libtool version info.
 # See http://www.gnu.org/software/libtool/manual/libtool.html#Libtool-versioning
 # for information regarding incrementing `-version-info`.
-libnetcdf_la_LDFLAGS = -version-info 19:0:0
+libnetcdf_la_LDFLAGS = -version-info 19:1:0
 libnetcdf_la_CPPFLAGS = ${AM_CPPFLAGS}
 
 # The output library will always include netcdf3 and dispatch

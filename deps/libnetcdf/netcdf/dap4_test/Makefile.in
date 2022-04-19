@@ -106,7 +106,7 @@ target_triplet = @target@
 check_PROGRAMS = test_parse$(EXEEXT) test_meta$(EXEEXT) \
 	test_data$(EXEEXT)
 noinst_PROGRAMS = findtestserver4$(EXEEXT) pingurl4$(EXEEXT)
-@BUILD_UTILITIES_TRUE@@ENABLE_DAP_REMOTE_TESTS_TRUE@am__append_3 = test_hyrax.sh
+@BUILD_UTILITIES_TRUE@@ENABLE_DAP_REMOTE_TESTS_TRUE@am__append_3 = test_hyrax.sh test_thredds.sh
 @AX_IGNORE_TRUE@@BUILD_UTILITIES_TRUE@@ENABLE_DAP_REMOTE_TESTS_TRUE@am__append_4 = test_remote.sh
 subdir = dap4_test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -424,8 +424,8 @@ ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
-AM_CPPFLAGS = -I$(top_srcdir)/include $(am__append_1) \
-	-I$(top_srcdir)/liblib -I$(top_srcdir)/libdap4 \
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
+	$(am__append_1) -I$(top_srcdir)/liblib -I$(top_srcdir)/libdap4 \
 	-DTOPSRCDIR=${abs_top_srcdir} -DTOPBINDIR=${abs_top_bindir}
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_LDFLAGS = $(am__append_2)
@@ -503,7 +503,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISCMAKE = @ISCMAKE@
+ISCYGWIN = @ISCYGWIN@
 ISMSVC = @ISMSVC@
+ISOSX = @ISOSX@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -651,10 +653,10 @@ TESTS = test_parse.sh test_meta.sh test_data.sh test_fillmismatch.sh \
 findtestserver4_SOURCES = findtestserver4.c
 pingurl4_SOURCES = pingurl4.c
 EXTRA_DIST = test_parse.sh test_meta.sh test_data.sh \
-             test_raw.sh test_remote.sh test_hyrax.sh test_fillmismatch.sh \
+             test_raw.sh test_remote.sh test_hyrax.sh test_thredds.sh test_fillmismatch.sh \
              tst_curlopt.sh d4test_common.sh \
 	     daptestfiles dmrtestfiles cdltestfiles nctestfiles misctestfiles \
-	     baseline baselineraw baselineremote baselinehyrax CMakeLists.txt test_common.h
+	     baseline baselineraw baselineremote baselinehyrax baselinethredds CMakeLists.txt test_common.h
 
 # This should only be left behind if using parallel io
 CLEANFILES = *.exe tmp_*
@@ -1213,8 +1215,7 @@ clean-local: clean-local-check
 .PHONY: clean-local-check
 
 clean-local-check:
-	-rm -rf results results_test_parse results_test_data \
-                results_test_hyrax results_test_meta results_test_raw
+	-rm -rf results results_test_*
 	-rm -f .dodsrc .daprc
 
 # The shell file maketests.sh is used to build the testdata

@@ -75,10 +75,12 @@ mapstillexists() {
 
 fileargs() {
   f="$1"
+  frag="$2"
+  if test "x$frag" = x ; then frag="mode=nczarr,$zext" ; fi
   case "$zext" in
   s3)
     S3PATH="${NCZARR_S3_TEST_URL}/netcdf-c"
-    fileurl="${S3PATH}/${f}#mode=nczarr,$zext"
+    fileurl="${S3PATH}/${f}#${frag}"
     file=$fileurl
     S3HOST=`${execdir}/zs3parse -h $S3PATH`
     S3BUCKET=`${execdir}/zs3parse -b $S3PATH`
@@ -86,7 +88,7 @@ fileargs() {
     ;;
   *)
     file="${f}.$zext"
-    fileurl="file://${f}.$zext#mode=nczarr,$zext"
+    fileurl="file://${f}.$zext#${frag}"
     ;;
   esac
 }
@@ -123,3 +125,35 @@ for t in ${TESTS} ; do
    fi
 done
 }
+
+# Function to remove selected -s attributes from file;
+# These attributes might be platform dependent
+sclean() {
+    cat $1 \
+ 	| sed -e '/:_IsNetcdf4/d' \
+	| sed -e '/:_Endianness/d' \
+	| sed -e '/_NCProperties/d' \
+	| sed -e '/_SuperblockVersion/d' \
+	| cat > $2
+}
+
+# Make sure execdir and srcdir absolute paths are available
+WD=`pwd`
+cd $srcdir ; abs_srcdir=`pwd` ; cd $WD
+cd $execdir ; abs_execdir=`pwd` ; cd $WD
+
+# Clear out any existing .rc files
+WD=`pwd`
+if test "x$NCAUTH_HOMETEST" != x ; then RCHOME=1; fi
+
+resetrc() {
+  if test "x$RCHOME" = x1 ; then
+      rm -f ${HOME}/.dodsrc ${HOME}/.daprc ${HOME}/.ncrc
+  fi
+  rm -f ${WD}/.dodsrc ${WD}/.daprc ${WD}/.ncrc
+  unset NCRCENV_IGNORE
+  unset NCRCENV_RC
+  unset DAPRCFILE
+}
+
+resetrc
