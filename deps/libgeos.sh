@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libgeos"
 
-GEOS_VERSION=3.10.0
+GEOS_VERSION=3.10.2
 dir_geos=./geos
 
 #
@@ -20,10 +20,16 @@ tar -jxf geos-${GEOS_VERSION}.tar.bz2
 mv ./geos-${GEOS_VERSION} $dir_geos
 
 #
+# add generated files
+#
+cp include/version.h $dir_geos/include/geos
+
+#
 # apply patches
 #
 
 for PATCH in patches/*.diff; do
+  if [ ! -r ${PATCH} ]; then continue; fi
   echo "Applying ${PATCH}"
   patch -p1 < $PATCH
 done

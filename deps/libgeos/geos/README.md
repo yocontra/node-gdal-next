@@ -1,31 +1,32 @@
 GEOS -- Geometry Engine, Open Source
 ====================================
 
-GEOS is a C++11 library for performing operations on two-dimensional vector
+GEOS is a C++ library for performing operations on two-dimensional vector
 geometries. It is primarily a port of the [JTS Topology
 Suite](https://github.com/locationtech/jts) Java library.  It provides many of
 the algorithms used by [PostGIS](http://www.postgis.net/), the
 [Shapely](https://pypi.org/project/Shapely/) package for Python, the
 [sf](https://github.com/r-spatial/sf) package for R, and others.
 
-More information is available the [project homepage](https://trac.osgeo.org/geos).
+More information is available the [project homepage](https://libgeos.org).
 
-The official Git repository is at [OSGEO Gitea](https://git.osgeo.org/gitea/geos).
+The official Git repository is at [GitHub](https://github.com/libgeos/geos).
 
 ## Build status
 
-| CI | Main | 3.9 | 3.8 | 3.7 |
-| :---: | :--- | :--- | :--- | :--- |
-| GitHub | [![github](https://github.com/libgeos/geos/workflows/CI/badge.svg?branchmain)](https://github.com/libgeos/geos/actions?query=workflow%3ACI)  | [![github](https://github.com/libgeos/geos/workflows/CI/badge.svg?branch=3.9)](https://github.com/libgeos/geos/actions?query=workflow%3ACI) | [![github](https://github.com/libgeos/geos/workflows/CI/badge.svg?branch=3.8)](https://github.com/libgeos/geos/actions?query=workflow%3ACI) | [![github](https://github.com/libgeos/geos/workflows/CI/badge.svg?branch=3.7)](https://github.com/libgeos/geos/actions?query=workflow%3ACI) |
-| GitLab CI | [![gitlab-ci](https://gitlab.com/geos/libgeos/badges/main/pipeline.svg)](https://gitlab.com/geos/libgeos/commits/master) | [![gitlab-ci](https://gitlab.com/geos/libgeos/badges/3.9/pipeline.svg)](https://gitlab.com/geos/libgeos/commits/3.9) | [![gitlab-ci](https://gitlab.com/geos/libgeos/badges/3.8/pipeline.svg)](https://gitlab.com/geos/libgeos/commits/3.8) | [![gitlab-ci](https://gitlab.com/geos/libgeos/badges/3.7/pipeline.svg)](https://gitlab.com/geos/libgeos/commits/3.7) |
-| Debbie | [![debbie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Master)](https://debbie.postgis.net/view/GEOS/job/GEOS_Master/) | [![debbie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Branch_3.9)](https://debbie.postgis.net/view/GEOS/job/GEOS_Branch_3.9/) | [![debbie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Branch_3.8)](https://debbie.postgis.net/view/GEOS/job/GEOS_Branch_3.8/) | [![debbie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Branch_3.7)](https://debbie.postgis.net/view/GEOS/job/GEOS_Branch_3.7/) |
-| Winnie | [![winnie](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Master/badge/icon)](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Master/) | [![winnie](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.9/badge/icon)](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.9/) | [![winnie](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.8/badge/icon)](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.8/) | [![winnie](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.7/badge/icon)](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.7/) |
-| Dronie | [![dronie](https://dronie.osgeo.org/api/badges/geos/geos/status.svg?branch=main)](https://dronie.osgeo.org/geos/geos?branch=master) | [![dronie](https://dronie.osgeo.org/api/badges/geos/geos/status.svg?branch=3.9)](https://dronie.osgeo.org/geos/geos?branch=3.9) | [![dronie](https://dronie.osgeo.org/api/badges/geos/geos/status.svg?branch=3.8)](https://dronie.osgeo.org/geos/geos?branch=3.8) | [![dronie](https://dronie.osgeo.org/api/badges/geos/geos/status.svg?branch=3.7)](https://dronie.osgeo.org/geos/geos?branch=3.7) |
-| AppVeyor | [![appveyor](https://ci.appveyor.com/api/projects/status/62aplwst722b89au/branch/main?svg=true)](https://ci.appveyor.com/project/dbaston/geos/branch/master) | [![appveyor](https://ci.appveyor.com/api/projects/status/62aplwst722b89au/branch/3.9?svg=true)](https://ci.appveyor.com/project/dbaston/geos/branch/3.9) | [![appveyor](https://ci.appveyor.com/api/projects/status/62aplwst722b89au/branch/3.8?svg=true)](https://ci.appveyor.com/project/dbaston/geos/branch/3.8) | [![appveyor](https://ci.appveyor.com/api/projects/status/62aplwst722b89au/branch/3.7?svg=true)](https://ci.appveyor.com/project/dbaston/geos/branch/3.7) |
-| Bessie | [![bessie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie&build=last:${params.reference=refs/heads/main})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie) | [![bessie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie&build=last:${params.reference=refs/heads/3.9})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie) | [![bessie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie&build=last:${params.reference=refs/heads/3.8})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie) | [![bessie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie&build=last:${params.reference=refs/heads/3.7})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie) |
-| Bessie32  | [![bessie32](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie32&build=last:${params.reference=refs/heads/main})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie32) |[![bessie32](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie32&build=last:${params.reference=refs/heads/3.9})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie32)| [![bessie32](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie32&build=last:${params.reference=refs/heads/3.8})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie32) | [![bessie32](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie32&build=last:${params.reference=refs/heads/3.7})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie32) |
-| Berrie64 | [![berrie64](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie64&build=last:${params.reference=refs/heads/main})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie64) | [![berrie64](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie64&build=last:${params.reference=refs/heads/3.9})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie64) |  [![berrie64](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie64&build=last:${params.reference=refs/heads/3.8})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie64) ||
-| Berrie | [![berrie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie&build=last:${params.reference=refs/heads/main})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie) |[![berrie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie&build=last:${params.reference=refs/heads/3.9})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie)|[![berrie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie&build=last:${params.reference=refs/heads/3.8})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie)||
+| CI | 3.10 |
+| :---: | :--- |
+| GitHub | [![github](https://github.com/libgeos/geos/workflows/CI/badge.svg?branch=3.10)](https://github.com/libgeos/geos/actions?query=workflow%3ACI) |
+| Azure | [![Build Status](https://dev.azure.com/libgeos/geos/_apis/build/status/libgeos.geos?branchName=3.10)](https://dev.azure.com/libgeos/geos/_build/latest?definitionId=2&branchName=3.10) |
+| GitLab CI | [![gitlab-ci](https://gitlab.com/geos/libgeos/badges/3.10/pipeline.svg)](https://gitlab.com/geos/libgeos/commits/3.10) |
+| Debbie | [![debbie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Branch_3.10)](https://debbie.postgis.net/view/GEOS/job/GEOS_Branch_3.10/) |
+| Winnie | [![winnie](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.10/badge/icon)](https://winnie.postgis.net:444/view/GEOS/job/GEOS_Branch_3.10/) |
+| Dronie | [![dronie](https://dronie.osgeo.org/api/badges/geos/geos/status.svg?branch=3.10)](https://dronie.osgeo.org/geos/geos?branch=3.10) |
+| AppVeyor | [![appveyor](https://ci.appveyor.com/api/projects/status/62aplwst722b89au/branch/3.10?svg=true)](https://ci.appveyor.com/project/dbaston/geos/branch/3.10) |
+| Bessie | [![bessie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie&build=last:${params.reference=refs/heads/3.10})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie) |
+| Bessie32  | [![bessie32](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=bessie32&build=last:${params.reference=refs/heads/3.10})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=bessie32)
+| Berrie64 | [![berrie64](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie64&build=last:${params.reference=refs/heads/3.10})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie64) |
+| Berrie | [![berrie](https://debbie.postgis.net/buildStatus/icon?job=GEOS_Worker_Run/label=berrie&build=last:${params.reference=refs/heads/3.10})](https://debbie.postgis.net/view/GEOS/job/GEOS_Worker_Run/label=berrie) |
 
 
 ## Build/install

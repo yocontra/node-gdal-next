@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - GDAL 3.5.0-git
  - PROJ 9.0.0
  - NetCDF 4.8.1
+ - GEOS 3.10.2
  - API documentation now uses `documentation.js` with `documentation-polyglot`
  - Add `gdal.addPixelFunc` for registering a native code pixel function
  - Add `gdal.toPixelFunc` and `gdal.createPixelFunc` allowing to use a JavaScript function as a pixel function
