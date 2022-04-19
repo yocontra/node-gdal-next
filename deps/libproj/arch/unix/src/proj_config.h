@@ -17,13 +17,13 @@
 #define PACKAGE_NAME "PROJ"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PROJ 8.2.1"
+#define PACKAGE_STRING "PROJ 9.0.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "proj"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "8.2.1"
+#define PACKAGE_VERSION "9.0.0"
 
 /* Version number of package */
 /* #undef VERSION */

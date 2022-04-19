@@ -561,6 +561,10 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
 
+    {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_3D,
+     EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_3D, "Transverse_Mercator", "tmerc",
+     nullptr, paramsNatOriginScaleK},
+
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
      EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
      "Transverse_Mercator_South_Orientated", "tmerc", "axis=wsu",
@@ -788,6 +792,12 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {PROJ_WKT2_NAME_METHOD_ROBINSON, 0, "Robinson", "robin", nullptr,
      paramsLonNatOriginLongitudeCentre},
+
+    {PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_SQUARE, 0, nullptr, "peirce_q",
+     "shape=square", paramsNatOriginScale},
+
+    {PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_DIAMOND, 0, nullptr, "peirce_q",
+     "shape=diamond", paramsNatOriginScale},
 
     {PROJ_WKT2_NAME_METHOD_SINUSOIDAL, 0, "Sinusoidal", "sinu", nullptr,
      paramsLonNatOriginLongitudeCentre},

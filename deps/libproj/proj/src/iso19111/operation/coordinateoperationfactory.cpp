@@ -3829,13 +3829,10 @@ void CoordinateOperationFactory::Private::
         [&res, &context](const crs::GeographicCRS *geogSrcIn,
                          const crs::VerticalCRS *vertDstIn,
                          const crs::CRSNNPtr &targetCRSIn) {
-            if (res.empty() && geogSrcIn && vertDstIn &&
+            const auto &authFactory = context.context->getAuthorityFactory();
+            if (res.empty() && geogSrcIn && vertDstIn && authFactory &&
                 geogSrcIn->coordinateSystem()->axisList().size() == 3) {
-                const auto &authFactory =
-                    context.context->getAuthorityFactory();
-                const auto dbContext =
-                    authFactory ? authFactory->databaseContext().as_nullable()
-                                : nullptr;
+                const auto &dbContext = authFactory->databaseContext();
                 const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
                     authFactory, geogSrcIn,
                     geogSrcIn->datumNonNull(dbContext).get()));
@@ -5645,6 +5642,9 @@ namespace crs {
 crs::CRSNNPtr CRS::getResolvedCRS(const crs::CRSNNPtr &crs,
                                   const io::AuthorityFactoryPtr &authFactory,
                                   metadata::ExtentPtr &extentOut) {
+    if (crs->hasOver()) {
+        return crs;
+    }
     const auto &ids = crs->identifiers();
     const auto &name = crs->nameStr();
 

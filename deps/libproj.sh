@@ -5,7 +5,7 @@ set -eu
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR/libproj"
 
-PROJ_VERSION=8.2.1
+PROJ_VERSION=9.0.0
 dir_proj=./proj
 
 #
@@ -19,6 +19,17 @@ fi
 tar -xzf proj-${PROJ_VERSION}.tar.gz
 mv proj-${PROJ_VERSION} $dir_proj
 
+# build proj.db
+(
+  cd $dir_proj
+  mkdir build
+  cd build
+  cmake ..
+  cmake --build . --target generate_proj_db
+  mv data/proj.db ../data
+)
+rm -rf $dir_proj/build
+
 # Fix for error:
 # static library deps/libproj/libproj.gyp:libproj#target has several files with the same basename:
 #   geocent: proj/src/geocent.cpp proj/src/conversions/geocent.cpp
@@ -29,8 +40,3 @@ mv proj-${PROJ_VERSION} $dir_proj
 mv $dir_proj/src/apps/utils.cpp $dir_proj/src/apps/utils_apps.cpp
 mv $dir_proj/src/conversions/geocent.cpp $dir_proj/src/conversions/geocent_conversions.cpp
 mv $dir_proj/src/iso19111/internal.cpp $dir_proj/src/iso19111/internal_iso19111.cpp
-
-# build proj.db
-cd $dir_proj/data
-../configure
-make proj.db

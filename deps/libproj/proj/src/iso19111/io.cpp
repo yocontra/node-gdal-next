@@ -866,6 +866,8 @@ void WKTFormatter::stopInversion() {
 bool WKTFormatter::isInverted() const { return d->inversionStack_.back(); }
 #endif
 
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
@@ -1411,6 +1413,7 @@ struct WKTParser::Private {
     ConcatenatedOperationNNPtr
     buildConcatenatedOperation(const WKTNodeNNPtr &node);
 };
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -4069,7 +4072,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS North (E,N)");
         } else if (projCRSName == "UPS_South") {
             props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS South (E,N)");
-        } else {
+        } else if (cartesianCS) {
             std::string outTableName;
             std::string authNameFromAlias;
             std::string codeFromAlias;
@@ -7671,6 +7674,13 @@ const std::string &PROJStringFormatter::toString() const {
             continue;
         }
 
+        // axisswap order=1,2,-3 is its own inverse
+        if (step.name == "axisswap" && paramCount == 1 &&
+            step.paramValues[0].equals("order", "1,2,-3")) {
+            step.inverted = false;
+            continue;
+        }
+
         // handle unitconvert inverse
         if (step.name == "unitconvert" && paramCount == 2 &&
             step.paramValues[0].keyEquals("xy_in") &&
@@ -8289,58 +8299,43 @@ static void
 PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                        std::vector<Step::KeyValue> &globalParamValues,
                        std::string &title) {
-    const char *c_str = projString.c_str();
     std::vector<std::string> tokens;
 
     bool hasProj = false;
     bool hasInit = false;
     bool hasPipeline = false;
-    {
-        size_t i = 0;
-        while (true) {
-            for (; isspace(static_cast<unsigned char>(c_str[i])); i++) {
-            }
-            std::string token;
-            bool in_string = false;
-            for (; c_str[i]; i++) {
-                if (in_string) {
-                    if (c_str[i] == '"' && c_str[i + 1] == '"') {
-                        i++;
-                    } else if (c_str[i] == '"') {
-                        in_string = false;
-                        continue;
-                    }
-                } else if (c_str[i] == '=' && c_str[i + 1] == '"') {
-                    in_string = true;
-                    token += c_str[i];
-                    i++;
-                    continue;
-                } else if (isspace(static_cast<unsigned char>(c_str[i]))) {
-                    break;
-                }
-                token += c_str[i];
-            }
-            if (in_string) {
-                throw ParsingException("Unbalanced double quote");
-            }
-            if (token.empty()) {
-                break;
-            }
-            if (!hasPipeline &&
-                (token == "proj=pipeline" || token == "+proj=pipeline")) {
-                hasPipeline = true;
-            } else if (!hasProj && (starts_with(token, "proj=") ||
-                                    starts_with(token, "+proj="))) {
-                hasProj = true;
-            } else if (!hasInit && (starts_with(token, "init=") ||
-                                    starts_with(token, "+init="))) {
-                hasInit = true;
-            }
-            tokens.emplace_back(token);
+
+    std::string projStringModified(projString);
+
+    // Special case for "+title=several words +foo=bar"
+    if (starts_with(projStringModified, "+title=") &&
+        projStringModified.size() > 7 && projStringModified[7] != '"') {
+        const auto plusPos = projStringModified.find(" +", 1);
+        const auto spacePos = projStringModified.find(' ');
+        if (plusPos != std::string::npos && spacePos != std::string::npos &&
+            spacePos < plusPos) {
+            std::string tmp("+title=");
+            tmp += pj_double_quote_string_param_if_needed(
+                projStringModified.substr(7, plusPos - 7));
+            tmp += projStringModified.substr(plusPos);
+            projStringModified = std::move(tmp);
         }
     }
 
-    bool prevWasTitle = false;
+    size_t argc = pj_trim_argc(&projStringModified[0]);
+    char **argv = pj_trim_argv(argc, &projStringModified[0]);
+    for (size_t i = 0; i < argc; i++) {
+        std::string token(argv[i]);
+        if (!hasPipeline && token == "proj=pipeline") {
+            hasPipeline = true;
+        } else if (!hasProj && starts_with(token, "proj=")) {
+            hasProj = true;
+        } else if (!hasInit && starts_with(token, "init=")) {
+            hasInit = true;
+        }
+        tokens.emplace_back(token);
+    }
+    free(argv);
 
     if (!hasPipeline) {
         if (hasProj || hasInit) {
@@ -8348,16 +8343,8 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
         }
 
         for (auto &word : tokens) {
-            if (word[0] == '+') {
-                word = word.substr(1);
-            } else if (prevWasTitle && word.find('=') == std::string::npos) {
-                title += " ";
-                title += word;
-                continue;
-            }
-
-            prevWasTitle = false;
-            if (starts_with(word, "proj=") && !hasInit) {
+            if (starts_with(word, "proj=") && !hasInit &&
+                steps.back().name.empty()) {
                 assert(hasProj);
                 auto stepName = word.substr(strlen("proj="));
                 steps.back().name = stepName;
@@ -8372,7 +8359,6 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 }
             } else if (starts_with(word, "title=")) {
                 title = word.substr(strlen("title="));
-                prevWasTitle = true;
             } else if (word != "step") {
                 const auto pos = word.find('=');
                 auto key = word.substr(0, pos);
@@ -8393,15 +8379,6 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
     bool inPipeline = false;
     bool invGlobal = false;
     for (auto &word : tokens) {
-        if (word[0] == '+') {
-            word = word.substr(1);
-        } else if (prevWasTitle && word.find('=') == std::string::npos) {
-            title += " ";
-            title += word;
-            continue;
-        }
-
-        prevWasTitle = false;
         if (word == "proj=pipeline") {
             if (inPipeline) {
                 throw ParsingException("nested pipeline not supported");
@@ -8429,7 +8406,6 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             steps.back().isInit = true;
         } else if (!inPipeline && starts_with(word, "title=")) {
             title = word.substr(strlen("title="));
-            prevWasTitle = true;
         } else {
             const auto pos = word.find('=');
             auto key = word.substr(0, pos);
@@ -8900,6 +8876,8 @@ struct PROJStringParser::Private {
     SphericalCSNNPtr buildSphericalCS(int iStep, int iUnitConvert,
                                       int iAxisSwap, bool ignorePROJAxis);
 };
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -9929,10 +9907,16 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
 
     if (mappings.size() >= 2) {
         // To distinguish for example +ortho from +ortho +f=0
+        bool allMappingsHaveAuxParam = true;
+        bool foundStrictlyMatchingMapping = false;
         for (const auto *mappingIter : mappings) {
+            if (mappingIter->proj_name_aux == nullptr) {
+                allMappingsHaveAuxParam = false;
+            }
             if (mappingIter->proj_name_aux != nullptr &&
                 strchr(mappingIter->proj_name_aux, '=') == nullptr &&
                 hasParamValue(step, mappingIter->proj_name_aux)) {
+                foundStrictlyMatchingMapping = true;
                 mapping = mappingIter;
                 break;
             } else if (mappingIter->proj_name_aux != nullptr &&
@@ -9940,10 +9924,14 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 const auto tokens = split(mappingIter->proj_name_aux, '=');
                 if (tokens.size() == 2 &&
                     getParamValue(step, tokens[0]) == tokens[1]) {
+                    foundStrictlyMatchingMapping = true;
                     mapping = mappingIter;
                     break;
                 }
             }
+        }
+        if (allMappingsHaveAuxParam && !foundStrictlyMatchingMapping) {
+            mapping = nullptr;
         }
     }
 
@@ -10238,6 +10226,8 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 }
             } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
                 value = 1;
+            } else if (step.name == "peirce_q" && proj_name == "lat_0") {
+                value = 90;
             }
 
             PropertyMap propertiesParameter;
@@ -10509,9 +10499,12 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 auto crs = dynamic_cast<CRS *>(obj.get());
 
                 bool hasSignificantParamValues = false;
+                bool hasOver = false;
                 for (const auto &kv : d->steps_[0].paramValues) {
-                    if (!((kv.key == "type" && kv.value == "crs") ||
-                          kv.key == "wktext" || kv.key == "no_defs")) {
+                    if (kv.key == "over") {
+                        hasOver = true;
+                    } else if (!((kv.key == "type" && kv.value == "crs") ||
+                                 kv.key == "wktext" || kv.key == "no_defs")) {
                         hasSignificantParamValues = true;
                         break;
                     }
@@ -10522,6 +10515,9 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     properties.set(IdentifiedObject::NAME_KEY,
                                    d->title_.empty() ? crs->nameStr()
                                                      : d->title_);
+                    if (hasOver) {
+                        properties.set("OVER", true);
+                    }
                     const auto &extent = getExtent(crs);
                     if (extent) {
                         properties.set(
@@ -10559,7 +10555,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     std::string expanded;
                     if (!d->title_.empty()) {
                         expanded = "title=";
-                        expanded += d->title_;
+                        expanded +=
+                            pj_double_quote_string_param_if_needed(d->title_);
                     }
                     for (const auto &pair : d->steps_[0].paramValues) {
                         if (!expanded.empty())
@@ -10568,7 +10565,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         expanded += pair.key;
                         if (!pair.value.empty()) {
                             expanded += '=';
-                            expanded += pair.value;
+                            expanded += pj_double_quote_string_param_if_needed(
+                                pair.value);
                         }
                     }
                     expanded += ' ';
@@ -10598,7 +10596,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
         std::string expanded;
         if (!d->title_.empty()) {
-            expanded = "title=" + d->title_;
+            expanded =
+                "title=" + pj_double_quote_string_param_if_needed(d->title_);
         }
         bool first = true;
         bool has_init_term = false;
@@ -10624,7 +10623,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             expanded += pair.key;
             if (!pair.value.empty()) {
                 expanded += '=';
-                expanded += pair.value;
+                expanded += pj_double_quote_string_param_if_needed(pair.value);
             }
         }
 

@@ -4,13 +4,9 @@ message(STATUS "Configuring proj library:")
 ### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
 ##############################################
 
-# default config is shared, except static on Windows
-set(BUILD_SHARED_LIBS_DEFAULT ON)
-if(WIN32)
-  set(BUILD_SHARED_LIBS_DEFAULT OFF)
-endif()
+# default config is shared
 option(BUILD_SHARED_LIBS
-  "Build PROJ library shared." ${BUILD_SHARED_LIBS_DEFAULT})
+  "Build PROJ library shared." ON)
 
 option(USE_THREAD "Build libproj with thread/mutex support " ON)
 if(NOT USE_THREAD)
@@ -374,11 +370,6 @@ add_library(proj
 )
 add_library(PROJ::proj ALIAS proj)
 
-target_compile_options(proj
-  PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
-  PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
-)
-
 if(MSVC OR MINGW)
     target_compile_definitions(proj PRIVATE -DNOMINMAX)
 endif()
@@ -411,21 +402,21 @@ target_include_directories(proj INTERFACE
 if(WIN32)
   set_target_properties(proj
     PROPERTIES
-    VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
+    VERSION "${PROJ_VERSION}"
     OUTPUT_NAME "${PROJ_CORE_TARGET_OUTPUT_NAME}"
     ARCHIVE_OUTPUT_NAME proj
     CLEAN_DIRECT_OUTPUT 1)
 elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
   set_target_properties(proj
     PROPERTIES
-    VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
+    VERSION "${PROJ_VERSION}"
     INSTALL_NAME_DIR ${PROJ_INSTALL_NAME_DIR}
     CLEAN_DIRECT_OUTPUT 1)
 else()
   set_target_properties(proj
     PROPERTIES
-    VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
-    SOVERSION "${${PROJECT_NAME}_API_VERSION}"
+    VERSION "${PROJ_BUILD_VERSION}"
+    SOVERSION "${PROJ_SOVERSION}"
     CLEAN_DIRECT_OUTPUT 1)
 endif()
 

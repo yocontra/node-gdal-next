@@ -34,6 +34,9 @@
 #define EPSG_NAME_METHOD_TRANSVERSE_MERCATOR "Transverse Mercator"
 #define EPSG_CODE_METHOD_TRANSVERSE_MERCATOR 9807
 
+#define EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_3D "Transverse Mercator (3D)"
+#define EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_3D 1111
+
 #define EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED \
     "Transverse Mercator (South Orientated)"
 #define EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED 9808
@@ -244,6 +247,9 @@
 
 #define EPSG_CODE_METHOD_COLOMBIA_URBAN 1052
 #define EPSG_NAME_METHOD_COLOMBIA_URBAN "Colombia Urban"
+
+#define PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_SQUARE "Peirce Quincuncial (Square)"
+#define PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_DIAMOND "Peirce Quincuncial (Diamond)"
 
 /* ------------------------------------------------------------------------ */
 

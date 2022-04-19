@@ -1843,6 +1843,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     const char* authority = nullptr;
     double accuracy = -1;
     bool allowBallparkTransformations = true;
+    bool forceOver = false;
     for (auto iter = options; iter && iter[0]; ++iter) {
         const char *value;
         if ((value = getOptionValue(*iter, "AUTHORITY="))) {
@@ -1859,7 +1860,13 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                             "Invalid value for ALLOW_BALLPARK option.");
                 return nullptr;
             }
-        } else {
+        }
+        else if ((value = getOptionValue(*iter, "FORCE_OVER="))) {
+            if (ci_equal(value, "yes")) {
+                forceOver = true;
+            }
+        }
+        else {
             std::string msg("Unknown option :");
             msg += *iter;
             ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
@@ -1913,6 +1920,8 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         return nullptr;
     }
 
+    ctx->forceOver = forceOver;
+
     PJ* P = proj_list_get(ctx, op_list, 0);
     assert(P);
 
@@ -1920,11 +1929,14 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);
+        ctx->forceOver = false;
         return P;
     }
 
     auto preparedOpList = pj_create_prepared_operations(ctx, source_crs, target_crs,
                                                    op_list);
+
+    ctx->forceOver = false;
     proj_list_destroy(op_list);
 
     if( preparedOpList.empty() )
@@ -2264,24 +2276,25 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
         strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
 
         /* full path of grid */
-        pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
+        if( pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1) )
+        {
+            /* grid format */
+            strncpy (grinfo.format, format.c_str(), sizeof(grinfo.format) - 1);
 
-        /* grid format */
-        strncpy (grinfo.format, format.c_str(), sizeof(grinfo.format) - 1);
+            /* grid size */
+            grinfo.n_lon = grid.width();
+            grinfo.n_lat = grid.height();
 
-        /* grid size */
-        grinfo.n_lon = grid.width();
-        grinfo.n_lat = grid.height();
+            /* cell size */
+            grinfo.cs_lon = extent.resX;
+            grinfo.cs_lat = extent.resY;
 
-        /* cell size */
-        grinfo.cs_lon = extent.resX;
-        grinfo.cs_lat = extent.resY;
-
-        /* bounds of grid */
-        grinfo.lowerleft.lam  = extent.west;
-        grinfo.lowerleft.phi  = extent.south;
-        grinfo.upperright.lam = extent.east;
-        grinfo.upperright.phi = extent.north;
+            /* bounds of grid */
+            grinfo.lowerleft.lam  = extent.west;
+            grinfo.lowerleft.phi  = extent.south;
+            grinfo.upperright.lam = extent.east;
+            grinfo.upperright.phi = extent.north;
+        }
     };
 
     {

@@ -381,7 +381,7 @@ SQLResultSet SQLiteHandle::run(sqlite3_stmt *stmt, const std::string &sql,
                                bool useMaxFloatPrecision) {
     int nBindField = 1;
     for (const auto &param : parameters) {
-        const auto paramType = param.type();
+        const auto &paramType = param.type();
         if (paramType == SQLValues::Type::STRING) {
             auto strValue = param.stringValue();
             sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
@@ -3272,7 +3272,9 @@ bool DatabaseContext::lookForGridInfo(
                "grid_alternatives.open_license, "
                "grid_packages.open_license AS package_open_license, "
                "grid_alternatives.direct_download, "
-               "grid_packages.direct_download AS package_direct_download "
+               "grid_packages.direct_download AS package_direct_download, "
+               "grid_alternatives.proj_grid_name, "
+               "grid_alternatives.old_proj_grid_name "
                "FROM grid_alternatives "
                "LEFT JOIN grid_packages ON "
                "grid_alternatives.package_name = grid_packages.package_name "
@@ -3285,6 +3287,28 @@ bool DatabaseContext::lookForGridInfo(
         url = row[1].empty() ? std::move(row[2]) : std::move(row[1]);
         openLicense = (row[3].empty() ? row[4] : row[3]) == "1";
         directDownload = (row[5].empty() ? row[6] : row[5]) == "1";
+
+        const auto &proj_grid_name = row[7];
+        const auto &old_proj_grid_name = row[8];
+        if (proj_grid_name != old_proj_grid_name &&
+            old_proj_grid_name == projFilename) {
+            std::string fullFilenameNewName;
+            fullFilenameNewName.resize(2048);
+            if (d->pjCtxt() == nullptr) {
+                d->setPjCtxt(pj_get_default_ctx());
+            }
+            int errno_before = proj_context_errno(d->pjCtxt());
+            bool gridAvailableWithNewName =
+                pj_find_file(d->pjCtxt(), proj_grid_name.c_str(),
+                             &fullFilenameNewName[0],
+                             fullFilenameNewName.size() - 1) != 0;
+            proj_context_errno_set(d->pjCtxt(), errno_before);
+            fullFilenameNewName.resize(strlen(fullFilenameNewName.c_str()));
+            if (gridAvailableWithNewName) {
+                gridAvailable = true;
+                fullFilename = fullFilenameNewName;
+            }
+        }
 
         if (considerKnownGridsAsAvailable &&
             (!packageName.empty() || (!url.empty() && openLicense))) {
@@ -7969,6 +7993,8 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
             info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS;
         } else if (type == GEOCENTRIC) {
             info.type = AuthorityFactory::ObjectType::GEOCENTRIC_CRS;
+        } else if (type == OTHER) {
+            info.type = AuthorityFactory::ObjectType::GEODETIC_CRS;
         } else if (type == PROJECTED) {
             info.type = AuthorityFactory::ObjectType::PROJECTED_CRS;
         } else if (type == VERTICAL) {
@@ -8797,6 +8823,7 @@ std::list<datum::EllipsoidNNPtr> AuthorityFactory::createEllipsoidFromExisting(
     }
     return res;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -9308,7 +9335,6 @@ AuthorityFactory::createCompoundCRSFromExisting(
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
 std::vector<operation::CoordinateOperationNNPtr>
 AuthorityFactory::getTransformationsForGeoid(
     const std::string &geoidName, bool usePROJAlternativeGridNames) const {

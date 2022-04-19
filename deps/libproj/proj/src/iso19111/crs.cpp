@@ -98,20 +98,36 @@ struct CRS::Private {
     BoundCRSPtr canonicalBoundCRS_{};
     std::string extensionProj4_{};
     bool implicitCS_ = false;
+    bool over_ = false;
 
     bool allowNonConformantWKT1Export_ = false;
     // for what was initially a COMPD_CS with a VERT_CS with a datum type ==
     // ellipsoidal height / 2002
     CompoundCRSPtr originalCompoundCRS_{};
 
-    void setImplicitCS(const util::PropertyMap &properties) {
-        const auto pVal = properties.get("IMPLICIT_CS");
-        if (pVal) {
-            if (const auto genVal =
-                    dynamic_cast<const util::BoxedValue *>(pVal->get())) {
-                if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
-                    genVal->booleanValue()) {
-                    implicitCS_ = true;
+    void setNonStandardProperties(const util::PropertyMap &properties) {
+        {
+            const auto pVal = properties.get("IMPLICIT_CS");
+            if (pVal) {
+                if (const auto genVal =
+                        dynamic_cast<const util::BoxedValue *>(pVal->get())) {
+                    if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
+                        genVal->booleanValue()) {
+                        implicitCS_ = true;
+                    }
+                }
+            }
+        }
+
+        {
+            const auto pVal = properties.get("OVER");
+            if (pVal) {
+                if (const auto genVal =
+                        dynamic_cast<const util::BoxedValue *>(pVal->get())) {
+                    if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
+                        genVal->booleanValue()) {
+                        over_ = true;
+                    }
                 }
             }
         }
@@ -141,6 +157,9 @@ CRS::~CRS() = default;
 /** \brief Return whether the CRS has an implicit coordinate system
  * (e.g from ESRI WKT) */
 bool CRS::hasImplicitCS() const { return d->implicitCS_; }
+
+/** \brief Return whether the CRS has a +over flag */
+bool CRS::hasOver() const { return d->over_; }
 
 //! @endcond
 
@@ -2854,7 +2873,7 @@ GeographicCRS::create(const util::PropertyMap &properties,
         GeographicCRS::nn_make_shared<GeographicCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
-    crs->CRS::getPrivate()->setImplicitCS(properties);
+    crs->CRS::getPrivate()->setNonStandardProperties(properties);
     return crs;
 }
 
@@ -3121,6 +3140,9 @@ void GeographicCRS::_exportToPROJString(
     }
     if (!formatter->getCRSExport()) {
         addAngularUnitConvertAndAxisSwap(formatter);
+    }
+    if (hasOver()) {
+        formatter->addParam("over");
     }
 }
 //! @endcond
@@ -4037,50 +4059,50 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             if (found)
                 l_esri_name = l_name;
         }
-    }
 
-    if (!isWKT2 && formatter->useESRIDialect() && !l_identifiers.empty() &&
-        *(l_identifiers[0]->codeSpace()) == "ESRI" && dbContext) {
-        try {
-            const auto definition = dbContext->getTextDefinition(
-                "projected_crs", "ESRI", l_identifiers[0]->code());
-            if (starts_with(definition, "PROJCS")) {
-                auto crsFromFromDef = io::WKTParser()
-                                          .attachDatabaseContext(dbContext)
-                                          .createFromWKT(definition);
-                if (_isEquivalentTo(
-                        dynamic_cast<IComparable *>(crsFromFromDef.get()),
-                        util::IComparable::Criterion::EQUIVALENT)) {
-                    formatter->ingestWKTNode(
-                        io::WKTNode::createFrom(definition));
-                    return;
-                }
-            }
-        } catch (const std::exception &) {
-        }
-    } else if (!isWKT2 && formatter->useESRIDialect() && !l_esri_name.empty()) {
-        try {
-            auto res =
-                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI")
-                    ->createObjectsFromName(
-                        l_esri_name,
-                        {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
-                        false);
-            if (res.size() == 1) {
+        if (!isWKT2 && !l_identifiers.empty() &&
+            *(l_identifiers[0]->codeSpace()) == "ESRI") {
+            try {
                 const auto definition = dbContext->getTextDefinition(
-                    "projected_crs", "ESRI",
-                    res.front()->identifiers()[0]->code());
+                    "projected_crs", "ESRI", l_identifiers[0]->code());
                 if (starts_with(definition, "PROJCS")) {
+                    auto crsFromFromDef = io::WKTParser()
+                                              .attachDatabaseContext(dbContext)
+                                              .createFromWKT(definition);
                     if (_isEquivalentTo(
-                            dynamic_cast<IComparable *>(res.front().get()),
+                            dynamic_cast<IComparable *>(crsFromFromDef.get()),
                             util::IComparable::Criterion::EQUIVALENT)) {
                         formatter->ingestWKTNode(
                             io::WKTNode::createFrom(definition));
                         return;
                     }
                 }
+            } catch (const std::exception &) {
             }
-        } catch (const std::exception &) {
+        } else if (!isWKT2 && !l_esri_name.empty()) {
+            try {
+                auto res =
+                    io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI")
+                        ->createObjectsFromName(
+                            l_esri_name,
+                            {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
+                            false);
+                if (res.size() == 1) {
+                    const auto definition = dbContext->getTextDefinition(
+                        "projected_crs", "ESRI",
+                        res.front()->identifiers()[0]->code());
+                    if (starts_with(definition, "PROJCS")) {
+                        if (_isEquivalentTo(
+                                dynamic_cast<IComparable *>(res.front().get()),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            formatter->ingestWKTNode(
+                                io::WKTNode::createFrom(definition));
+                            return;
+                        }
+                    }
+                }
+            } catch (const std::exception &) {
+            }
         }
     }
 
@@ -4298,7 +4320,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
-    crs->CRS::getPrivate()->setImplicitCS(properties);
+    crs->CRS::getPrivate()->setNonStandardProperties(properties);
     return crs;
 }
 
@@ -5879,6 +5901,7 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     }
     return !resMatchOfTransfToWGS84.empty() ? resMatchOfTransfToWGS84 : res;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

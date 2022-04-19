@@ -37,13 +37,6 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 message(STATUS "Requiring C${CMAKE_C_STANDARD} - done")
 
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-if(APPLE)
-    set(MACOSX_RPATH ON)
-endif()
-
 # Set global -fvisibility=hidden
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -117,18 +110,15 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 8 MINOR 2 PATCH 1)
-# Use libtool convention to build the CMake's VERSION and SOVERSION
-# See https://github.com/pvanhoof/dir-examples#cmake-in-the-cmake-example
-set(PROJ_LIBTOOL_CURRENT    24)
-set(PROJ_LIBTOOL_REVISION   1)
-set(PROJ_LIBTOOL_AGE        2)
-math(EXPR PROJ_API_VERSION "${PROJ_LIBTOOL_CURRENT} - ${PROJ_LIBTOOL_AGE}")
-set(PROJ_BUILD_VERSION "${PROJ_API_VERSION}.${PROJ_LIBTOOL_AGE}.${PROJ_LIBTOOL_REVISION}")
+proj_version(MAJOR 9 MINOR 0 PATCH 0)
+set(PROJ_SOVERSION 25)
+set(PROJ_BUILD_VERSION "${PROJ_SOVERSION}.${PROJ_VERSION}")
 
 ################################################################################
 # Build features and variants
 ################################################################################
+
+include(Ccache)
 include(ProjConfig)
 include(ProjMac)
 include(policies)
@@ -336,13 +326,11 @@ install(FILES ${docfiles}
 ################################################################################
 # pkg-config support
 ################################################################################
-if(UNIX OR MINGW)
-  configure_proj_pc()
+configure_proj_pc()
 
-  install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif()
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 ################################################################################
 # "make dist" workalike
