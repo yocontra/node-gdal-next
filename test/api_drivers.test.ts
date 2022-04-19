@@ -184,6 +184,14 @@ describe('gdal.drivers', () => {
       assert.isNull(ds2.geoTransform)
       assert.strictEqual(ds2.driver, driver)
     })
+
+    it('should throw if the driver-specific options are invalid', () => {
+      assert.throws(() => {
+        const driver = gdal.drivers.get('GTiff')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        driver.open(`${__dirname}/data/sample.tif`, 'r', 'GEOREF_SOURCES=NONE' as any)
+      }, /Failed parsing options/)
+    })
   })
 
   describe('createCopy()', () => {
@@ -223,6 +231,19 @@ describe('gdal.drivers', () => {
           gdal.open(`${__dirname}/data/12_791_1476.jpg`)
         )
       }, /No such file/)
+    })
+
+    it('should throw on invalid options', () => {
+      const driver = gdal.drivers.get('GTiff')
+      const outputFilename = '' // __dirname + '/data/12_791_1476.tif';
+      assert.throws(() => {
+        driver.createCopy(
+          outputFilename,
+          gdal.open(`${__dirname}/data/12_791_1476.jpg`),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          'option=invalid' as any
+        )
+      }, /Failed parsing options/)
     })
   })
 

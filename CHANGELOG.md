@@ -16,8 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add `gdal.buildVRT` and `gdal.rasterize`, library versions of the GDAL CLI tools
  - Add `gdal.wrapVRT` allowing wrapping a regular Dataset inside a VRT Dataset
  - Support using driver-specific open options in `gdal.Driver.open`
+ - All `gdal.Driver` methods now throw an exception if the parsing of the driver-specific options fails
 
-## [3.4.2] WIP
+## [3.4.2] 2021-03-15
  - Fix #27, rebuilding by `npm --build-from-source` fails
  - Fix #25, always close open Datasets when the process exits
  - `gdal.calcAsync` now correctly returns a rejected Promise instead of triggering an uncatchable error when handling an exception in the user-supplied transformation function

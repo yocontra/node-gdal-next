@@ -267,6 +267,10 @@ static NAN_METHOD(getConfigOption) {
 }
 
 /**
+ * @typedef {string[]|Record<string, string|number|(string|number)[]>} StringOptions
+ */
+
+/**
  * Convert decimal degrees to degrees, minutes, and seconds string
  *
  * @static
@@ -277,7 +281,6 @@ static NAN_METHOD(getConfigOption) {
  * @return {string} A string nndnn'nn.nn'"L where n is a number and L is either
  * N or E
  */
-
 static NAN_METHOD(decToDMS) {
 
   double angle;
