@@ -277,6 +277,8 @@ On Ubuntu 16.04, Amazon Linux, Windows and macOS only the bundled GDAL version i
 
 Node.js 17 on ArchLinux is not ABI compatible with the NodeSource binaries and requires rebuilding from source.
 
+On Linux, Node.js 18 requires glibc 2.28.
+
 Development versions are unit tested for the following targets:
 
 ---

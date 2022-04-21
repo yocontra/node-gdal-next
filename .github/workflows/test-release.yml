@@ -8,7 +8,7 @@ on:
 
 
 jobs:
-  test_linux:
+  test_linux_glibc223:
 
     runs-on: ubuntu-latest
 
@@ -25,7 +25,32 @@ jobs:
         - fedora:34
         - centos:stream8
         - amazonlinux:latest
-        node-version: [ 12, 14, 16, 17, 18 ]
+        node-version: [ 12, 14, 16, 17 ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - run: npm run container release ${{ matrix.linux-version }} ${{ matrix.node-version }}
+      env:
+        MOCHA_TEST_NETWORK: 1
+
+
+  test_linux_glibc228:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        linux-version:
+        - ubuntu:20.04
+        - ubuntu:21.10
+        - debian:bullseye
+        - fedora:34
+        - centos:stream8
+        node-version: [ 18 ]
 
     steps:
     - uses: actions/checkout@v2
