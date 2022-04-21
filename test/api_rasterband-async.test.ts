@@ -692,7 +692,7 @@ describe('gdal.RasterBandAsync', () => {
           if (semver.gt(gdal.version, '3.4.999')) {
             return assert.eventually.isNull(band.offsetAsync)
           }
-          return assert.eventually.equal(band.offsetAsync, 1)
+          return assert.eventually.equal(band.offsetAsync, 0)
         })
         it('should throw error if dataset already closed', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
