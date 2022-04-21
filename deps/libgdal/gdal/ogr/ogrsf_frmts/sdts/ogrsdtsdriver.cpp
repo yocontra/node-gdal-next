@@ -29,7 +29,7 @@
 #include "ogr_sdts.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrsdtsdriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                                Open()                                */

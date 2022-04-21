@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rasterlitedataset.h  $
+ * $Id$
  *
  * Project:  GDAL Rasterlite driver
  * Purpose:  Implement GDAL Rasterlite support using OGR SQLite driver

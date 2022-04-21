@@ -33,7 +33,7 @@
 #include <map>
 #include <string>
 
-CPL_CVSID("$Id: 8211createfromxml.cpp  $")
+CPL_CVSID("$Id$")
 
 int main(int nArgc, char* papszArgv[])
 {

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqliteutility.h  $
+ * $Id$
  *
  * Project:  GeoPackage Translator
  * Purpose:  Utility header for OGR GeoPackage driver.

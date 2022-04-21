@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: mitab_geometry.h  $
+ * $Id$
  *
  * Name:     mitab_geometry.cpp
  * Project:  MapInfo TAB Read/Write library

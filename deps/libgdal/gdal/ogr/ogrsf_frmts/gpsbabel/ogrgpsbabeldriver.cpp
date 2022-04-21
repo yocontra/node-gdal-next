@@ -31,7 +31,7 @@
 
 #include "ogr_gpsbabel.h"
 
-CPL_CVSID("$Id: ogrgpsbabeldriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRGPSBabelDriverIdentify()                  */

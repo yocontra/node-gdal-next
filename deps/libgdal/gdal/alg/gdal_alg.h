@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg.h  $
+ * $Id$
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes, and definitions for various GDAL based algorithms.
@@ -41,6 +41,7 @@
 #include "gdal.h"
 #include "cpl_minixml.h"
 #include "ogr_api.h"
+#include <stdint.h>
 #endif
 
 CPL_C_START
@@ -399,14 +400,26 @@ GDALViewshedGenerate(GDALRasterBandH hBand,
 
 CPLErr CPL_DLL
 GDALRasterizeGeometries( GDALDatasetH hDS,
-                         int nBandCount, int *panBandList,
-                         int nGeomCount, OGRGeometryH *pahGeometries,
+                         int nBandCount, const int *panBandList,
+                         int nGeomCount, const OGRGeometryH *pahGeometries,
                          GDALTransformerFunc pfnTransformer,
                          void *pTransformArg,
-                         double *padfGeomBurnValue,
-                         char **papszOptions,
+                         const double *padfGeomBurnValues,
+                         CSLConstList papszOptions,
                          GDALProgressFunc pfnProgress,
                          void * pProgressArg );
+
+CPLErr CPL_DLL
+GDALRasterizeGeometriesInt64( GDALDatasetH hDS,
+                         int nBandCount, const int *panBandList,
+                         int nGeomCount, const OGRGeometryH *pahGeometries,
+                         GDALTransformerFunc pfnTransformer,
+                         void *pTransformArg,
+                         const int64_t *panGeomBurnValues,
+                         CSLConstList papszOptions,
+                         GDALProgressFunc pfnProgress,
+                         void * pProgressArg );
+
 CPLErr CPL_DLL
 GDALRasterizeLayers( GDALDatasetH hDS,
                      int nBandCount, int *panBandList,

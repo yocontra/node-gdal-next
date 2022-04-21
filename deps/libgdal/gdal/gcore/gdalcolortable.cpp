@@ -38,7 +38,7 @@
 #include "cpl_error.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalcolortable.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           GDALColorTable()                           */

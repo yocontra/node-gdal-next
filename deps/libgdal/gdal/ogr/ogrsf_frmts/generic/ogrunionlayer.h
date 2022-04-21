@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrunionlayer.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRUnionLayer class

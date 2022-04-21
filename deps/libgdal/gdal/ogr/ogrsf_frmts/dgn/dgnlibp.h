@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dgnlibp.h  $
+ * $Id$
  *
  * Project:  Microstation DGN Access Library
  * Purpose:  Internal (privatE) datastructures, and prototypes for DGN Access

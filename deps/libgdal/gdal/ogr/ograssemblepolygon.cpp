@@ -40,7 +40,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: ograssemblepolygon.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            CheckPoints()                             */

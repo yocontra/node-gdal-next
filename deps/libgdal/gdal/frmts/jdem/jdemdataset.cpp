@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: jdemdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            JDEMGetField()                            */

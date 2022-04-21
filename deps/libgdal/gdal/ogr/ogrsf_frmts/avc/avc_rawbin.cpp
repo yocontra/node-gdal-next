@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: avc_rawbin.cpp  $
+ * $Id$
  *
  * Name:     avc_rawbin.c
  * Project:  Arc/Info vector coverage (AVC)  BIN->E00 conversion library

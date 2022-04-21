@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceostest.c  $
+ * $Id$
  *
  * Project:  CEOS Translator
  * Purpose:  Test mainline.

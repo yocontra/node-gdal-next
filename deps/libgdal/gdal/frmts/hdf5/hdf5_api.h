@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hdf5_api.h  $
+ * $Id$
  *
  * Project:  Hierarchical Data Format Release 5 (HDF5)
  * Purpose:  Import HDF5 public API

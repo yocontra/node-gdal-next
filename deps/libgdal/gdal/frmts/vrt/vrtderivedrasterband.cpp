@@ -41,7 +41,7 @@
 
 /*! @cond Doxygen_Suppress */
 
-CPL_CVSID("$Id: vrtderivedrasterband.cpp  $")
+CPL_CVSID("$Id$")
 
 using namespace GDALPy;
 
@@ -370,6 +370,7 @@ VRTDerivedRasterBand::GetPixelFunction( const char *pszFuncNameIn )
  */
 void VRTDerivedRasterBand::SetPixelFunctionName( const char *pszFuncNameIn )
 {
+    CPLFree(pszFuncName);
     pszFuncName = CPLStrdup( pszFuncNameIn );
 }
 

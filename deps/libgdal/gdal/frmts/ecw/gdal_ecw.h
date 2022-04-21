@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_ecw.h  $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  ECW (ERDAS Wavelet Compression Format) Driver Definitions

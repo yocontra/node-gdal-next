@@ -39,7 +39,7 @@
 #include "ogrgeojsonutils.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrtopojsondriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       OGRTopoJSONDriverIdentify()                    */

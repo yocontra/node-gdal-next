@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: minidriver_iip.h  $
+ * $Id$
  *
  * Project:  WMS Client Driver
  * Purpose:  Mini driver for Internet Imaging Protocol (IIP)

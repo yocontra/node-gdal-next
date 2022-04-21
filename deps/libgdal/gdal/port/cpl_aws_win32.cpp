@@ -28,7 +28,7 @@
 
 #include "cpl_port.h"
 
-#if defined(WIN32) && defined(_MSC_VER)
+#if defined(HAVE_ATLBASE_H)
 
 #define _WIN32_DCOM
 #include <iostream>
@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: cpl_aws_win32.cpp  $")
+CPL_CVSID("$Id$")
 
 static CPLString osWindowsProductUUID;
 
@@ -140,4 +140,4 @@ bool CPLFetchWindowsProductUUID(CPLString &osStr)
     return !osWindowsProductUUID.empty();
 }
 
-#endif /* defined(WIN32) && defined(_MSC_VER) */
+#endif /* defined(HAVE_ATLBASE_H) */

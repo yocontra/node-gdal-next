@@ -32,7 +32,7 @@
 #include "gdal_priv.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdaladdo.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

@@ -1,4 +1,4 @@
-/* $Id: cpl_config_extras.h  $ */
+/* $Id$ */
 
 #ifndef INCLUDED_CPL_CONFIG_EXTRAS
 #define INCLUDED_CPL_CONFIG_EXTRAS

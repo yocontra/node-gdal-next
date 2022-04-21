@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrlayerdecorator.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLayerDecorator class
@@ -111,6 +111,7 @@ class CPL_DLL OGRLayerDecorator : public OGRLayer
     virtual CPLErr      SetMetadataItem( const char * pszName,
                                          const char * pszValue,
                                          const char * pszDomain = "" ) override;
+    virtual OGRErr      Rename(const char* pszNewName) override;
 
     OGRLayer* GetBaseLayer() const { return m_poDecoratedLayer; }
 };

@@ -29,7 +29,7 @@
 #include "cpl_port.h"
 #include "cpl_vax.h"
 
-CPL_CVSID("$Id: cpl_vax.cpp  $")
+CPL_CVSID("$Id$")
 
 namespace {
 typedef struct dbl {

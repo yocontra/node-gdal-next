@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_vdv.h  $
+ * $Id$
  *
  * Project:  VDV Translator
  * Purpose:  Implements OGRVDVDriver.

@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: mitab_utils.cpp  $")
+CPL_CVSID("$Id$")
 
 /**********************************************************************
  *                       TABGenerateArc()

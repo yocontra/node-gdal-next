@@ -39,7 +39,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrlinearring.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRLinearRing()                            */

@@ -43,7 +43,7 @@
 #include "ogr_sfcgal.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrpolygon.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             OGRPolygon()                             */
@@ -293,6 +293,25 @@ int OGRPolygon::checkRing( OGRCurve * poNewRing ) const
         CPLError(CE_Failure, CPLE_AppDefined,
                  "Wrong curve type. Expected LINEARRING.");
         return FALSE;
+    }
+
+    if( !poNewRing->IsEmpty() && !poNewRing->get_IsClosed() )
+    {
+        // This configuration option name must be the same as in OGRCurvePolygon::checkRing()
+        const char* pszEnvVar = CPLGetConfigOption("OGR_GEOMETRY_ACCEPT_UNCLOSED_RING", nullptr);
+        if( pszEnvVar != nullptr && !CPLTestBool(pszEnvVar) )
+        {
+            CPLError(CE_Failure, CPLE_AppDefined, "Non closed ring detected.");
+            return FALSE;
+        }
+        else
+        {
+            CPLError(CE_Warning, CPLE_AppDefined, "Non closed ring detected.%s",
+                     pszEnvVar == nullptr ?
+                         " To avoid accepting it, set the "
+                         "OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration "
+                         "option to NO" : "");
+        }
     }
 
     return TRUE;

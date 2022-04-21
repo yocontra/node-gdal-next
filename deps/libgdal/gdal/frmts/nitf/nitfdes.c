@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfdes.c  $
+ * $Id$
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Module responsible for implementation of DE segments.
@@ -33,7 +33,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: nitfdes.c  $")
+CPL_CVSID("$Id$")
 
 CPL_INLINE static void CPL_IGNORE_RET_VAL_INT(CPL_UNUSED int unused) {}
 

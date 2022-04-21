@@ -38,7 +38,7 @@
 #include "ogr_p.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: ogrcompoundcurve.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRCompoundCurve()                           */
@@ -512,7 +512,7 @@ OGRCurve* OGRCompoundCurve::stealCurve( int iCurve )
  * (for example if curves are not contiguous)
  */
 
-OGRErr OGRCompoundCurve::addCurve( OGRCurve* poCurve, double dfToleranceEps )
+OGRErr OGRCompoundCurve::addCurve( const OGRCurve* poCurve, double dfToleranceEps )
 {
     OGRCurve* poClonedCurve = poCurve->clone();
     const OGRErr eErr = addCurveDirectly( poClonedCurve, dfToleranceEps );

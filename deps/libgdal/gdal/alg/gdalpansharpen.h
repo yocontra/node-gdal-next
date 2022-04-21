@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalpansharpen.h  $
+ * $Id$
  *
  * Project:  GDAL Pansharpening module
  * Purpose:  Prototypes, and definitions for pansharpening related work.

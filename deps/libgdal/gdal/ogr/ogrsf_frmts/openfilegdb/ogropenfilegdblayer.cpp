@@ -52,7 +52,7 @@
 #include "filegdbtable.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogropenfilegdblayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                      OGROpenFileGDBGeomFieldDefn                     */
@@ -1832,11 +1832,14 @@ OGRErr OGROpenFileGDBLayer::GetExtent( OGREnvelope *psExtent, int /* bForce */)
     {
         FileGDBGeomField* poGDBGeomField = reinterpret_cast<FileGDBGeomField *>(
             m_poLyrTable->GetField(m_iGeomFieldIdx));
-        psExtent->MinX = poGDBGeomField->GetXMin();
-        psExtent->MinY = poGDBGeomField->GetYMin();
-        psExtent->MaxX = poGDBGeomField->GetXMax();
-        psExtent->MaxY = poGDBGeomField->GetYMax();
-        return OGRERR_NONE;
+        if( !std::isnan(poGDBGeomField->GetXMin()) )
+        {
+            psExtent->MinX = poGDBGeomField->GetXMin();
+            psExtent->MinY = poGDBGeomField->GetYMin();
+            psExtent->MaxX = poGDBGeomField->GetXMax();
+            psExtent->MaxY = poGDBGeomField->GetYMax();
+            return OGRERR_NONE;
+        }
     }
 
     return OGRERR_FAILURE;

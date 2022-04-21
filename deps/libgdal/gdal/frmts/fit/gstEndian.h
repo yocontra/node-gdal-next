@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gstEndian.h  $
+ * $Id$
  *
  * Project:  FIT Driver
  * Purpose:  Implement FIT Support - not using the SGI iflFIT library.

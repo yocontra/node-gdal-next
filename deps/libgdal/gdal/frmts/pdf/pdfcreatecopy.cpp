@@ -43,7 +43,7 @@
 #include <utility>
 #include <vector>
 
-CPL_CVSID("$Id: pdfcreatecopy.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        GDALPDFBaseWriter()                           */
@@ -4136,11 +4136,6 @@ GDALPDFObjectNum GDALPDFBaseWriter::WriteBlock(GDALDataset* poSrcDS,
                     papszOptions = CSLAddString(papszOptions, "GeoJP2=OFF");
                     papszOptions = CSLAddString(papszOptions, "GMLJP2=OFF");
                 }
-            }
-            if (poJPEGDriver == nullptr)
-            {
-                if (pszJPEG2000_DRIVER == nullptr || EQUAL(pszJPEG2000_DRIVER, "JPEG2000"))
-                    poJPEGDriver = (GDALDriver*) GDALGetDriverByName("JPEG2000");
             }
             snprintf(szTmp, sizeof(szTmp), "/vsimem/pdftemp/%p.jp2", this);
         }

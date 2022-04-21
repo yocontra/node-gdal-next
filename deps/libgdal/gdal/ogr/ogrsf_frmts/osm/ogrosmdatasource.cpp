@@ -165,7 +165,7 @@ size_t GetMaxTotalAllocs();
 
 static void WriteVarSInt64(GIntBig nSVal, GByte** ppabyData);
 
-CPL_CVSID("$Id: ogrosmdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 class DSToBeOpened
 {
@@ -1675,7 +1675,7 @@ void OGROSMDataSource::ProcessWaysBatch()
     {
         WayFeaturePair* psWayFeaturePairs = &pasWayFeaturePairs[iPair];
 
-        const EMULATED_BOOL bIsArea = psWayFeaturePairs->bIsArea;
+        const bool bIsArea = psWayFeaturePairs->bIsArea;
         m_asLonLatCache.clear();
 
 #ifdef ENABLE_NODE_LOOKUP_BY_HASHING

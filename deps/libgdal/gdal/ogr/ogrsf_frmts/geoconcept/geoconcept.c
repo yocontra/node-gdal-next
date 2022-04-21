@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: geoconcept.c  $
+ * $Id$
  *
  * Name:     geoconcept.c
  * Project:  OpenGIS Simple Features Reference Implementation
@@ -36,7 +36,7 @@
 #include "cpl_string.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: geoconcept.c  $")
+CPL_CVSID("$Id$")
 
 #define kItemSize_GCIO      256
 #define kExtraSize_GCIO    4096

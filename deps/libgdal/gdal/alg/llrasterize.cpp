@@ -41,7 +41,7 @@
 
 #include "gdal_alg.h"
 
-CPL_CVSID("$Id: llrasterize.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       dllImageFilledPolygon()                        */

@@ -38,7 +38,7 @@
 
 #include "cpl_config.h"
 
-CPL_CVSID("$Id: cpl_strtod.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            CPLAtofDelim()                            */

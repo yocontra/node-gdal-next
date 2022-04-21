@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitflib.h  $
+ * $Id$
  *
  * Project:  NITF Read/Write Library
  * Purpose:  Main GDAL independent include file for NITF support.

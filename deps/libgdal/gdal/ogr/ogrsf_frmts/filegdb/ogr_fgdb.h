@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_fgdb.h  $
+* $Id$
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Standard includes and class definitions ArcObjects OGR driver.
@@ -30,10 +30,6 @@
 
 #ifndef OGR_FGDB_H_INCLUDED
 #define OGR_FGDB_H_INCLUDED
-
-#ifdef DEBUG_BOOL
-#define DO_NOT_USE_DEBUG_BOOL
-#endif
 
 #include <vector>
 #include <set>
@@ -222,6 +218,8 @@ public:
 
   virtual const char* GetMetadataItem(const char* pszName, const char* pszDomain) override;
 
+  virtual OGRErr      Rename(const char* pszNewName) override;
+
 protected:
 
   bool GDBToOGRFields(CPLXMLNode* psFields);
@@ -317,6 +315,15 @@ public:
 
   const OGRFieldDomain* GetFieldDomain(const std::string& name) const override;
   std::vector<std::string> GetFieldDomainNames(CSLConstList papszOptions = nullptr) const override;
+
+  bool        AddFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                             std::string& failureReason) override;
+
+  bool        DeleteFieldDomain(const std::string& name,
+                                std::string& failureReason) override;
+
+  bool        UpdateFieldDomain(std::unique_ptr<OGRFieldDomain>&& domain,
+                                std::string& failureReason) override;
 
   std::shared_ptr<GDALGroup> GetRootGroup() const override { return m_poRootGroup; }
 

@@ -31,7 +31,7 @@
 #include "cpl_time.h"
 #include <map>
 
-CPL_CVSID("$Id: ogrvdvdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifndef STARTS_WITH_CI
 #define STARTS_WITH(a,b)               (strncmp(a,b,strlen(b)) == 0)

@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "ogr_odbc.h"
 
-CPL_CVSID("$Id: ogrodbcselectlayer.cpp  $")
+CPL_CVSID("$Id$")
 /************************************************************************/
 /*                          OGRODBCSelectLayer()                         */
 /************************************************************************/

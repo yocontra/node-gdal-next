@@ -38,7 +38,7 @@
 #include "cpl_vsi_error.h"
 
 
-CPL_CVSID("$Id: ogrdxfwriterds.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRDXFWriterDS()                          */

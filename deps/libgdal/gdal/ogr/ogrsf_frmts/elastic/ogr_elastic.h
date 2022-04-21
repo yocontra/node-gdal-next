@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_elastic.h  $
+ * $Id$
  *
  * Project:  Elasticsearch Translator
  * Purpose:

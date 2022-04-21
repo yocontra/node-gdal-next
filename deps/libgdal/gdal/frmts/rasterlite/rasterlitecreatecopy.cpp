@@ -32,7 +32,7 @@
 
 #include "rasterlitedataset.h"
 
-CPL_CVSID("$Id: rasterlitecreatecopy.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                  RasterliteGetTileDriverOptions ()                   */

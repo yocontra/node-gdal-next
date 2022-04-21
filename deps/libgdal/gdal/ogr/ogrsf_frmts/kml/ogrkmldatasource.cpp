@@ -47,7 +47,7 @@
 #include "kmlvector.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrkmldatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRKMLDataSource()                           */

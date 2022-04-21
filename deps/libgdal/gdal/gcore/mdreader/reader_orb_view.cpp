@@ -39,7 +39,7 @@
 
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: reader_orb_view.cpp  $")
+CPL_CVSID("$Id$")
 
 /**
  * GDALMDReaderOrbView()

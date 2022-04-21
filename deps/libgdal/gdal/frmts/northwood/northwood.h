@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: northwood.h  $
+ * $Id$
  *
  * Project:  GRC/GRD Reader
  * Purpose:  Northwood Technologies Grid format declarations

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: generate_test_files.c  $
+ * $Id$
  *
  * Project:
  * Purpose:  Generate sample .VCT files

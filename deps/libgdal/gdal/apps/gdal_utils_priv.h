@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_utils_priv.h  $
+ * $Id$
  *
  * Project:  GDAL Utilities
  * Purpose:  GDAL Utilities Private Declarations.

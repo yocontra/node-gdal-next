@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_error_internal.h  $
+ * $Id$
  *
  * Name:     cpl_error_internal.h
  * Project:  CPL - Common Portability Library

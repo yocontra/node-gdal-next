@@ -31,7 +31,7 @@
 #include "cpl_multiproc.h"
 #include "gmlreaderp.h"
 
-CPL_CVSID("$Id: ogrgmldriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRGMLDriverIdentify()                       */

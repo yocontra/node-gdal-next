@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrpgdumplayer.cpp  $")
+CPL_CVSID("$Id$")
 //
 static CPLString OGRPGDumpEscapeStringList(
     char** papszItems, bool bForInsertOrUpdate,

@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <set>
 
-CPL_CVSID("$Id: ogrs57datasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRS57DataSource()                          */

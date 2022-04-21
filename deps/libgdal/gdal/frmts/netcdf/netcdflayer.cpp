@@ -32,7 +32,7 @@
 #include "netcdflayersg.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: netcdflayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            netCDFLayer()                             */

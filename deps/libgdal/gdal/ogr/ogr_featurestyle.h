@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_featurestyle.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define of Feature Representation

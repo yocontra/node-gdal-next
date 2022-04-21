@@ -30,7 +30,7 @@
 #include "hfa_p.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: hfatest.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

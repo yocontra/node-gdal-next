@@ -39,7 +39,7 @@
 
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: reader_rdk1.cpp  $")
+CPL_CVSID("$Id$")
 
 /**
  * GDALMDReaderResursDK1()

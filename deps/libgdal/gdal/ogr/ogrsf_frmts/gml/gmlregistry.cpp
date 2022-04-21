@@ -33,7 +33,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: gmlregistry.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           Parse()                                    */

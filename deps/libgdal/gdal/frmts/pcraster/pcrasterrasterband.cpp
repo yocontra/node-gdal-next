@@ -32,7 +32,7 @@
 #include "pcrasterrasterband.h"
 #include "pcrasterutil.h"
 
-CPL_CVSID("$Id: pcrasterrasterband.cpp  $")
+CPL_CVSID("$Id$")
 
 /*!
   \file

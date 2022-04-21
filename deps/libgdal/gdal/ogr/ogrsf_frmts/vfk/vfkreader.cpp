@@ -40,7 +40,7 @@
 
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vfkreader.cpp  $")
+CPL_CVSID("$Id$")
 
 static char *GetDataBlockName(const char *);
 

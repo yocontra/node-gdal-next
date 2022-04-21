@@ -43,7 +43,7 @@
 #include "mitab_priv.h"
 #include "mitab_utils.h"
 
-CPL_CVSID("$Id: mitab_idfile.cpp  $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class TABIDFile

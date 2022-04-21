@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: kmlutility.h  $
+ * $Id$
  *
  * Project:  KML Driver
  * Purpose:  KML driver utilities

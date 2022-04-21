@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: commonutils.h  $
+ * $Id$
  *
  * Project:  GDAL Utilities
  * Purpose:  Common utility routines

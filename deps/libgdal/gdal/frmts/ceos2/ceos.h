@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceos.h  $
+ * $Id$
  *
  * Project:  ASI CEOS Translator
  * Purpose:  CEOS library prototypes

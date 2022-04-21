@@ -41,9 +41,7 @@
 #  include <cassert>
 #endif
 #include <cerrno>
-#ifndef DEBUG_BOOL
 #include <cmath>
-#endif
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -57,7 +55,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_multiproc.cpp  $")
+CPL_CVSID("$Id$")
 
 #if defined(CPL_MULTIPROC_STUB) && !defined(DEBUG)
 #  define MUTEX_NONE

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_atomic_ops.h  $
+ * $Id$
  *
  * Name:     cpl_atomic_ops.h
  * Project:  CPL - Common Portability Library

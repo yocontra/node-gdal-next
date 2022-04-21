@@ -1,4 +1,4 @@
-/* $Id: gvgcpfit.h  $ */
+/* $Id$ */
 
 #ifndef GVGCPFIT_H_INCLUDED
 #define GVGCPFIT_H_INCLUDED

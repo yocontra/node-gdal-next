@@ -35,7 +35,7 @@
 #include <map>
 #include <sstream>
 
-CPL_CVSID("$Id: ogrwasplayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRWAsPLayer()                             */

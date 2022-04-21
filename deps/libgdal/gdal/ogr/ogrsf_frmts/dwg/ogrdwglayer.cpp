@@ -31,7 +31,7 @@
 
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdwglayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRDWGLayer()                             */

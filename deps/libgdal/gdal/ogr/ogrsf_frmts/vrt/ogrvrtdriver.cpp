@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: ogrvrtdriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRVRTErrorHandler()                       */

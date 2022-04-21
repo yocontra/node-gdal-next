@@ -37,7 +37,7 @@
 #include <cmath>
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_hatch.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           TranslateHATCH()                           */

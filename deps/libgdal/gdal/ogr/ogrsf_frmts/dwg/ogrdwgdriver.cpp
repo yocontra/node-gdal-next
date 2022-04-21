@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "ogrteigha.h"
 
-CPL_CVSID("$Id: ogrdwgdriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRDWGDriver()                            */

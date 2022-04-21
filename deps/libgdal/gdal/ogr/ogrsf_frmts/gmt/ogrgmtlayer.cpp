@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmtlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRGmtLayer()                             */

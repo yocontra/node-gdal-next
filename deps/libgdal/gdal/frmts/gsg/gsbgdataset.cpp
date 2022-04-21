@@ -38,7 +38,7 @@
 #include "gdal_frmts.h"
 #include "gdal_pam.h"
 
-CPL_CVSID("$Id: gsbgdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -823,7 +823,7 @@ CPLErr GSBGDataset::WriteHeader( VSILFILE *fp, GInt16 nXSize, GInt16 nYSize,
 GDALDataset *GSBGDataset::Create( const char * pszFilename,
                                   int nXSize,
                                   int nYSize,
-                                  CPL_UNUSED int nBands,
+                                  int /* nBands */,
                                   GDALDataType eType,
                                   CPL_UNUSED char **papszParamList )
 {

@@ -35,7 +35,7 @@
 #include <vector>
 #include <algorithm>
 
-CPL_CVSID("$Id: imdreader.cpp  $")
+CPL_CVSID("$Id$")
 
 typedef std::map<CPLString,CPLXMLNode*> StrNodeMap;
 typedef std::vector<CPLXMLNode*> NodeVector;

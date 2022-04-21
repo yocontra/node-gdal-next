@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shp_vsi.c  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  IO Redirection via VSI services for shp/dbf io.
@@ -34,7 +34,7 @@
 #include "cpl_vsi_error.h"
 #include <limits.h>
 
-CPL_CVSID("$Id: shp_vsi.c  $")
+CPL_CVSID("$Id$")
 
 typedef struct
 {

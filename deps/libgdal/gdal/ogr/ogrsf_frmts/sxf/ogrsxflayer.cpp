@@ -37,7 +37,7 @@
 #include "ogr_srs_api.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrsxflayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        OGRSXFLayer()                                 */

@@ -1,4 +1,5 @@
 import { assert } from 'chai'
+import * as semver from 'semver'
 import * as gdal from 'gdal-async'
 import * as fileUtils from './utils/file'
 
@@ -418,7 +419,11 @@ describe('gdal.RasterBand', () => {
         it('should return number', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
-          assert.equal(band.offset, 0)
+          if (semver.gt(gdal.version, '3.4.999')) {
+            assert.isNull(band.offset)
+          } else {
+            assert.equal(band.offset, 0)
+          }
         })
         it('should throw error if dataset already closed', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
@@ -451,7 +456,11 @@ describe('gdal.RasterBand', () => {
         it('should return number', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
-          assert.equal(band.scale, 1)
+          if (semver.gt(gdal.version, '3.4.999')) {
+            assert.isNull(band.scale)
+          } else {
+            assert.equal(band.scale, 1)
+          }
         })
         it('should throw error if dataset already closed', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)

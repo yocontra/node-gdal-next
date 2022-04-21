@@ -49,7 +49,7 @@
 #include "ogrwarpedlayer.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrvrtdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       OGRVRTGetGeometryType()                        */

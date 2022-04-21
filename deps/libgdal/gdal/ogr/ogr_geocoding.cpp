@@ -86,7 +86,7 @@ int OGR_gettimeofday( struct timeval *tv, struct timezone * /* tzIgnored */ )
 #include <sys/time.h>
 #endif  // WIN32
 
-CPL_CVSID("$Id: ogr_geocoding.cpp  $")
+CPL_CVSID("$Id$")
 
 struct _OGRGeocodingSessionHS
 {

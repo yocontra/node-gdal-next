@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: sdtstransfer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            SDTSTransfer()                            */

@@ -40,7 +40,7 @@
 #include "cpl_vsi.h"
 #include "ogrsqlitevfs.h"
 
-CPL_CVSID("$Id: ogrsqlitevfs.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef DEBUG_IO
 # define DEBUG_ONLY

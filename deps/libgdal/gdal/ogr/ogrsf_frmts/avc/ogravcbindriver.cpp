@@ -28,7 +28,7 @@
 
 #include "ogr_avc.h"
 
-CPL_CVSID("$Id: ogravcbindriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                                Open()                                */

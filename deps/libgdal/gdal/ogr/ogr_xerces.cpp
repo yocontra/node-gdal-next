@@ -32,7 +32,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// Must be first for DEBUG_BOOL case
 #include "ogr_xerces.h"
 
 #include "cpl_port.h"
@@ -44,7 +43,7 @@
 #include <limits>
 #include <map>
 
-CPL_CVSID("$Id: ogr_xerces.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_XERCES
 

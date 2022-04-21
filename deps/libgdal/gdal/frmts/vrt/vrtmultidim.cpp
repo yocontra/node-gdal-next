@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vrtmultidim.cpp  $
+ * $Id$
  *
  * Name:     vrtmultidim.cpp
  * Purpose:  Implementation of VRTDriver

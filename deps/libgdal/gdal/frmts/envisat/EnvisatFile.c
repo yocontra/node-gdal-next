@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: EnvisatFile.c  $
+ * $Id$
  *
  * Project:  APP ENVISAT Support
  * Purpose:  Low Level Envisat file access (read/write) API.
@@ -35,7 +35,7 @@
 #  include "cpl_conv.h"
 #  include "EnvisatFile.h"
 
-CPL_CVSID("$Id: EnvisatFile.c  $")
+CPL_CVSID("$Id$")
 
 #else
 #  include "APP/app.h"

@@ -35,7 +35,7 @@
 #include "ogrgeojsonreader.h"
 #include "ogr_swq.h"
 
-CPL_CVSID("$Id: ogrelasticdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        OGRElasticDataSource()                        */

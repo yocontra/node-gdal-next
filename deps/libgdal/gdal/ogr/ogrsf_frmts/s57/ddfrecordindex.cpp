@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "s57.h"
 
-CPL_CVSID("$Id: ddfrecordindex.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           DDFRecordIndex()                           */

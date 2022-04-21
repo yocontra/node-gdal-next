@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: dgnwrite.cpp  $")
+CPL_CVSID("$Id$")
 
 static void DGNPointToInt( DGNInfo *psDGN, DGNPoint *psPoint,
                            unsigned char *pabyTarget );

@@ -28,8 +28,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#define DO_NOT_USE_DEBUG_BOOL
-
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -44,7 +42,7 @@
 
 using namespace libdap;
 
-CPL_CVSID("$Id: dodsdataset2.cpp  $")
+CPL_CVSID("$Id$")
 
 /** Attribute names used to encode geo-referencing information. Note that
     these are not C++ objects to avoid problems with static global

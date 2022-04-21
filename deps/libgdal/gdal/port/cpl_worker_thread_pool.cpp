@@ -37,7 +37,7 @@
 #include "cpl_vsi.h"
 
 
-CPL_CVSID("$Id: cpl_worker_thread_pool.cpp  $")
+CPL_CVSID("$Id$")
 
 struct CPLWorkerThreadJob
 {

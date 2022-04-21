@@ -69,7 +69,7 @@
 // FIXME: Disabled following code as it crashed on OSX CI test.
 // #include <mutex>
 
-CPL_CVSID("$Id: gdaldrivermanager.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /* ==================================================================== */
@@ -779,6 +779,10 @@ char** GDALDriverManager::GetSearchPaths(const char* pszGDAL_DRIVER_PATH)
  *
  * Auto loading can be completely disabled by setting the GDAL_DRIVER_PATH
  * config option to "disable".
+ * 
+ * Starting with gdal 3.5, the default search path $(prefix)/lib/gdalplugins
+ * can be overridden at compile time by passing -DINSTALL_PLUGIN_DIR=/another/path
+ * to cmake.
  */
 
 void GDALDriverManager::AutoLoadDrivers()

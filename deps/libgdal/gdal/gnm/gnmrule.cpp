@@ -30,7 +30,7 @@
 #include "gnm.h"
 #include "gnm_priv.h"
 
-CPL_CVSID("$Id: gnmrule.cpp  $")
+CPL_CVSID("$Id$")
 
 /*! @cond Doxygen_Suppress */
 GNMRule::GNMRule() = default;

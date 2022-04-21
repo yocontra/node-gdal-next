@@ -29,7 +29,7 @@
 #include "ogr_dods.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdodslayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRDODSLayer()                            */

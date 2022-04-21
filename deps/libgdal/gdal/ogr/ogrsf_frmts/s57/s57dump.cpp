@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "s57.h"
 
-CPL_CVSID("$Id: s57dump.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                                main()                                */

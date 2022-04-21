@@ -28,7 +28,7 @@
 
 #include "gh5_convenience.h"
 
-CPL_CVSID("$Id: gh5_convenience.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                    GH5_FetchAttribute(CPLString)                     */

@@ -55,7 +55,7 @@
 
 #endif
 
-CPL_CVSID("$Id: hugefileresolver.cpp  $")
+CPL_CVSID("$Id$")
 
 /****************************************************/
 /*      SQLite is absolutely required in order to   */

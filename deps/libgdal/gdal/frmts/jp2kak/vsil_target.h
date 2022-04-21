@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: vsil_target.h  $
+ * $Id$
  *
  * Project:  JPEG-2000
  * Purpose:  Implements VSI*L based writer.

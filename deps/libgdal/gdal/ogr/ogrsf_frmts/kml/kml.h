@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: kml.h  $
+ * $Id$
  *
  * Project:  KML Driver
  * Purpose:  Class for reading, parsing and handling a kmlfile.

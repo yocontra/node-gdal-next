@@ -58,7 +58,7 @@
 #define UNUSED_IF_NO_GEOS
 #endif
 
-CPL_CVSID("$Id: ogrgeometry.cpp  $")
+CPL_CVSID("$Id$")
 
 //! @cond Doxygen_Suppress
 int OGRGeometry::bGenerate_DB2_V72_BYTE_ORDER = FALSE;
@@ -434,12 +434,13 @@ void OGR_G_DumpReadable( OGRGeometryH hGeom, FILE *fp, const char *pszPrefix )
 void OGRGeometry::assignSpatialReference( OGRSpatialReference * poSR )
 
 {
+    // Do in that order to properly handle poSR == poSRS
+    if( poSR != nullptr )
+        poSR->Reference();
     if( poSRS != nullptr )
         poSRS->Release();
 
     poSRS = poSR;
-    if( poSRS != nullptr )
-        poSRS->Reference();
 }
 
 /************************************************************************/

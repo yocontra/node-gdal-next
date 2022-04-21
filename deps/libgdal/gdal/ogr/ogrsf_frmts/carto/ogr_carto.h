@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_carto.h  $
+ * $Id$
  *
  * Project:  CARTO Translator
  * Purpose:  Definition of classes for OGR Carto driver.

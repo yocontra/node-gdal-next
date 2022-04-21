@@ -61,7 +61,7 @@
 
 //#define DEBUG_IO
 
-CPL_CVSID("$Id: openjpegdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                  JP2OpenJPEGDataset_ErrorCallback()                  */
@@ -515,7 +515,7 @@ public:
     volatile int        nCurPair;
     int                 nBandCount;
     int                *panBandMap;
-    VOLATILE_BOOL       bSuccess;
+    volatile bool       bSuccess;
 };
 
 void JP2OpenJPEGDataset::JP2OpenJPEGReadBlockInThread(void* userdata)

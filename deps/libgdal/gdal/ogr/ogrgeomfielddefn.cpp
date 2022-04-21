@@ -40,7 +40,7 @@
 #include "ogr_srs_api.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrgeomfielddefn.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRGeomFieldDefn()                           */

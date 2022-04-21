@@ -28,14 +28,13 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// Must be first for DEBUG_BOOL case
 #include "ogr_gmlas.h"
 
 #include "cpl_http.h"
 
 #include <time.h>
 
-CPL_CVSID("$Id: ogrgmlasxlinkresolver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         GMLASXLinkResolver()                         */

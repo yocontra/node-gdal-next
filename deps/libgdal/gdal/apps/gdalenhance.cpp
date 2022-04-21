@@ -37,7 +37,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: gdalenhance.cpp  $")
+CPL_CVSID("$Id$")
 
 static int
 ComputeEqualizationLUTs( GDALDatasetH hDataset,  int nLUTBins,

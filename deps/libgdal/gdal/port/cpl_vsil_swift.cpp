@@ -42,7 +42,7 @@
 
 #include "cpl_swift.h"
 
-CPL_CVSID("$Id: cpl_vsil_swift.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifndef HAVE_CURL
 
@@ -275,7 +275,7 @@ class VSISwiftHandle final : public IVSIS3LikeHandle
     struct curl_slist* GetCurlHeaders(
         const CPLString& osVerb,
         const struct curl_slist* psExistingHeaders ) override;
-    virtual bool Authenticate() override;
+    virtual bool Authenticate(const char* pszFilename) override;
 
   public:
     VSISwiftHandle( VSISwiftFSHandler* poFS,
@@ -747,9 +747,9 @@ struct curl_slist* VSISwiftHandle::GetCurlHeaders( const CPLString& osVerb,
 /*                           Authenticate()                             */
 /************************************************************************/
 
-bool VSISwiftHandle::Authenticate()
+bool VSISwiftHandle::Authenticate(const char* pszFilename)
 {
-    return m_poHandleHelper->Authenticate();
+    return m_poHandleHelper->Authenticate(pszFilename);
 }
 
 

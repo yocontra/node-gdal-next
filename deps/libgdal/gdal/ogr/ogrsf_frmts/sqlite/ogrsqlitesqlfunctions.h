@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqlitesqlfunctions.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Extension SQL functions

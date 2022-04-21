@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geocoding.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Client of geocoding service.

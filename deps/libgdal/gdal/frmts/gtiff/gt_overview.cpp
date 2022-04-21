@@ -51,7 +51,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: gt_overview.cpp  $")
+CPL_CVSID("$Id$")
 
 // TODO(schwehr): Explain why 128 and not 127.
 constexpr int knMaxOverviews = 128;
@@ -375,6 +375,16 @@ GTIFFBuildOverviewsEx( const char * pszFilename,
 
           case GDT_Int32:
             nBandBits = 32;
+            nBandFormat = SAMPLEFORMAT_INT;
+            break;
+
+          case GDT_UInt64:
+            nBandBits = 64;
+            nBandFormat = SAMPLEFORMAT_UINT;
+            break;
+
+          case GDT_Int64:
+            nBandBits = 64;
             nBandFormat = SAMPLEFORMAT_INT;
             break;
 

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_minixml.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Declarations for MiniXML Handler.

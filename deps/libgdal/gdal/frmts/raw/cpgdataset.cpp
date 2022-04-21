@@ -34,7 +34,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: cpgdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 enum Interleave { BSQ, BIL, BIP };
 

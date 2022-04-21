@@ -30,7 +30,7 @@
 #include "ogr_autocad_services.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogr_autocad_services.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           ACTextUnescape()                           */

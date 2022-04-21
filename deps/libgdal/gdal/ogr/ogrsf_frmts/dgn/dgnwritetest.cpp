@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dgnwritetest.cpp  $
+ * $Id$
  *
  * Project:  Microstation DGN Access Library
  * Purpose:  Test program for use of write api.
@@ -29,7 +29,7 @@
 
 #include "dgnlib.h"
 
-CPL_CVSID("$Id: dgnwritetest.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                                main()                                */

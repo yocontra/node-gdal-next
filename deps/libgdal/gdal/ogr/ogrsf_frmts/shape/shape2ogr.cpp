@@ -49,7 +49,7 @@
 #include "ogrshape.h"
 #include "shapefil.h"
 
-CPL_CVSID("$Id: shape2ogr.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        RingStartEnd                                  */

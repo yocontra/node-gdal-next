@@ -35,7 +35,7 @@
 #include <cstring>
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgpsbabeldatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                      OGRGPSBabelDataSource()                         */

@@ -37,7 +37,7 @@
 #include "cpl_string.h"
 #include "gdal.h"
 
-CPL_CVSID("$Id: gdalmajorobject.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          GDALMajorObject()                           */

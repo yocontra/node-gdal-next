@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gifabstractdataset.h  $
+ * $Id$
  *
  * Project:  GIF Driver
  * Purpose:  GIF Abstract Dataset

@@ -38,7 +38,7 @@ CPL_C_END
 
 #include <cmath>
 
-CPL_CVSID("$Id: adsrange.cpp  $")
+CPL_CVSID("$Id$")
 
 /* -------------------------------------------------------------------- */
 /*

@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpcidsklayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRPCIDSKLayer()                           */

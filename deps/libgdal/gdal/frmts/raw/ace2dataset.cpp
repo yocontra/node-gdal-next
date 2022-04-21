@@ -31,7 +31,7 @@
 #include "ogr_spatialref.h"
 #include "rawdataset.h"
 
-CPL_CVSID("$Id: ace2dataset.cpp  $")
+CPL_CVSID("$Id$")
 
 static const char * const apszCategorySource[] =
 {

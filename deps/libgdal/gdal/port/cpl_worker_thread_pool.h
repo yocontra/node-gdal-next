@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_worker_thread_pool.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL worker thread pool
@@ -84,7 +84,7 @@ class CPL_DLL CPLWorkerThreadPool
         std::condition_variable m_cv{};
         volatile CPLWorkerThreadState eState = CPLWTS_OK;
         CPLList* psJobQueue = nullptr;
-        volatile int nPendingJobs = 0;
+        int nPendingJobs = 0;
 
         CPLList* psWaitingWorkerThreadsList = nullptr;
         int nWaitingWorkerThreads = 0;

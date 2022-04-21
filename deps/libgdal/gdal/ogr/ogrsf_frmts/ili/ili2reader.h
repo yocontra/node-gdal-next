@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ili2reader.h  $
+ * $Id$
  *
  * Project:  Interlis 2 Reader
  * Purpose:  Public Declarations for Reader code.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_plscenes.h  $
+ * $Id$
  *
  * Project:  PlanetLabs scene driver
  * Purpose:  PLScenes driver interface

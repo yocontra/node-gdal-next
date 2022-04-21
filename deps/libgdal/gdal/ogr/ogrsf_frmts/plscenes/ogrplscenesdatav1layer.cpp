@@ -30,7 +30,7 @@
 #include "ogrgeojsonreader.h"
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrplscenesdatav1layer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           GetFieldCount()                            */

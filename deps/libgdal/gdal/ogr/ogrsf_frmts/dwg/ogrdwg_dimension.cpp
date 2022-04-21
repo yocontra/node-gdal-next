@@ -30,7 +30,7 @@
 #include "ogr_dwg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdwg_dimension.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         TranslateDIMENSION()                         */

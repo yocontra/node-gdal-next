@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gctp_wrap.c  $
+ * $Id$
  *
  * Project:  Hierarchical Data Format Release 4 (HDF4)
  * Purpose:  This is the wrapper code to use OGR Coordinate Transformation

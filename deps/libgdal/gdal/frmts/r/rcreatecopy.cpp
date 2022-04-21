@@ -42,7 +42,7 @@
 #include "gdal_pam.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: rcreatecopy.cpp  $")
+CPL_CVSID("$Id$")
 
 GDALDataset *
 RCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,

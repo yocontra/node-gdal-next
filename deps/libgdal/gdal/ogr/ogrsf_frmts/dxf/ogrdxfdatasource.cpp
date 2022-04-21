@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxfdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRDXFDataSource()                          */

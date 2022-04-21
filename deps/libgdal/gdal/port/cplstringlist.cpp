@@ -41,7 +41,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cplstringlist.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           CPLStringList()                            */

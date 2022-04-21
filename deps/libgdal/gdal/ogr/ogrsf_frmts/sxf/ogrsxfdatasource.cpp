@@ -40,7 +40,7 @@
 #include <map>
 #include <string>
 
-CPL_CVSID("$Id: ogrsxfdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 // EPSG code range http://gis.stackexchange.com/a/18676/9904
 constexpr int MIN_EPSG = 1000;

@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ddsdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 using namespace crnlib;
 

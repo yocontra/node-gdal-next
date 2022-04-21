@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: mgrs.c  $
+ * $Id$
  *
  * Project:  MGRS Converter
  * Purpose:  Geotrans code for MGRS translation (slightly adapted)

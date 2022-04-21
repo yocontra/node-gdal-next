@@ -35,7 +35,7 @@
 
 #include <xercesc/sax2/Attributes.hpp>
 
-CPL_CVSID("$Id: ili2handler.cpp  $")
+CPL_CVSID("$Id$")
 
 //
 // constants

@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogr_srsnode.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGR_SRSNode()                             */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_s57.h  $
+ * $Id$
  *
  * Project:  S-57 Translator
  * Purpose:  Declarations for classes binding S57 support onto OGRLayer,

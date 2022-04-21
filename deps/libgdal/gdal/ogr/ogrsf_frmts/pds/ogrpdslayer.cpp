@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpdslayer.cpp  $")
+CPL_CVSID("$Id$")
 
 namespace OGRPDS {
 

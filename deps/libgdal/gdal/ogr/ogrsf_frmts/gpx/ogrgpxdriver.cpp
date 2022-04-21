@@ -38,7 +38,7 @@
 #include "gdal_priv.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: ogrgpxdriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                                Open()                                */

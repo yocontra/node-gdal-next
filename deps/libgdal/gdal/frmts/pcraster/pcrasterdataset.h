@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcrasterdataset.h  $
+ * $Id$
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster CSF 2.0 raster file driver declarations.

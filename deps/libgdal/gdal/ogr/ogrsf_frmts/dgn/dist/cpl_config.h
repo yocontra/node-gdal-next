@@ -25,6 +25,9 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
 
+/* Define to 1 if you have the <strings.h> header file. */
+#define HAVE_STRINGS_H 1
+
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
@@ -51,3 +54,4 @@
 
 /* The size of a `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
+

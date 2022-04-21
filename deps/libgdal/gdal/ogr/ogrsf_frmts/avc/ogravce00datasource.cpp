@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogravce00datasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        OGRAVCE00DataSource()                         */

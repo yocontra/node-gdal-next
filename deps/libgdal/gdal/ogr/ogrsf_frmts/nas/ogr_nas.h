@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_nas.h  $
+ * $Id$
  *
  * Project:  NAS Reader
  * Purpose:  Declarations for OGR wrapper classes for NAS, and NAS<->OGR

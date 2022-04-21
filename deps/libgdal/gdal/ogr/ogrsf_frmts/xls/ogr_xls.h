@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_xls.h  $
+ * $Id$
  *
  * Project:  XLS Translator
  * Purpose:  Definition of classes for OGR .xls driver.

@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: minidriver_mrf.cpp  $
+* $Id$
 *
 * Project:  WMS Client Mini Driver
 * Purpose:  Implementation of Dataset and RasterBand classes for WMS
@@ -33,7 +33,7 @@
 #include "wmsdriver.h"
 #include "minidriver_mrf.h"
 
-CPL_CVSID("$Id: minidriver_mrf.cpp  $")
+CPL_CVSID("$Id$")
 
 using namespace WMSMiniDriver_MRF_ns;
 

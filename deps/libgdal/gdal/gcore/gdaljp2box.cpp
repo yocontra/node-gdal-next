@@ -44,7 +44,7 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: gdaljp2box.cpp  $")
+CPL_CVSID("$Id$")
 
 /*! @cond Doxygen_Suppress */
 
@@ -54,12 +54,7 @@ CPL_CVSID("$Id: gdaljp2box.cpp  $")
 
 // GDALJP2Box does *not* take ownership of fpIn
 GDALJP2Box::GDALJP2Box( VSILFILE *fpIn ) :
-    fpVSIL(fpIn),
-    szBoxType{'\0', '\0', '\0', '\0', '\0'},
-    nBoxOffset(-1),
-    nBoxLength(0),
-    nDataOffset(-1),
-    pabyData(nullptr)
+    fpVSIL(fpIn)
 {
 }
 

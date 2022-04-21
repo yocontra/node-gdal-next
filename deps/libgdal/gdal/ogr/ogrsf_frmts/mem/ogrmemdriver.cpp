@@ -35,7 +35,7 @@
 #include "ogr_core.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrmemdriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          ~OGRMemDriver()                             */

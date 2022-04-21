@@ -51,7 +51,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: mitab_miffile.cpp  $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class MIFFile

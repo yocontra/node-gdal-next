@@ -40,7 +40,7 @@
 
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: reader_digital_globe.cpp  $")
+CPL_CVSID("$Id$")
 
 /**
  * GDALMDReaderDigitalGlobe()

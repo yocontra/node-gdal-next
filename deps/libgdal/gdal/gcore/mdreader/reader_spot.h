@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_spot.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from Spot imagery.

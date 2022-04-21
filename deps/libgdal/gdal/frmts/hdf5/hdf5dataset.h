@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: hdf5dataset.h  $
+ * $Id$
  *
  * Project:  Hierarchical Data Format Release 5 (HDF5)
  * Purpose:  Header file for HDF5 datasets reader.

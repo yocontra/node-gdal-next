@@ -40,7 +40,7 @@
 #include "cpl_error.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ddfsubfielddefn.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          DDFSubfieldDefn()                           */

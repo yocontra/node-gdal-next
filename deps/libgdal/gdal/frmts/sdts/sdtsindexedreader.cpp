@@ -31,7 +31,7 @@
 
 #include "sdts_al.h"
 
-CPL_CVSID("$Id: sdtsindexedreader.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         SDTSIndexedReader()                          */

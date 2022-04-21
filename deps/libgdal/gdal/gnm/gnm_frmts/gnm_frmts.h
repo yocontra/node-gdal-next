@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm_frmts.h  $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  Classes related to format registration, and file opening.

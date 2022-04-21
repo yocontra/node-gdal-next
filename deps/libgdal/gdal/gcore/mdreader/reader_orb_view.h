@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_orb_view.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from OrbView imagery.

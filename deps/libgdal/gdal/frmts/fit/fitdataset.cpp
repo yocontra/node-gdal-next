@@ -36,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: fitdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr size_t FIT_PAGE_SIZE = 128;
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: armadillo_headers.h  $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  Includes armadillo header

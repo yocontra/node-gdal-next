@@ -28,7 +28,7 @@
 
 #include "ogr_tiger.h"
 
-CPL_CVSID("$Id: ogrtigerlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRTigerLayer()                            */

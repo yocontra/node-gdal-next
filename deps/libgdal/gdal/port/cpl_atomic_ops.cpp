@@ -33,7 +33,7 @@
 
 // TODO: If C++11, use #include <atomic>.
 
-CPL_CVSID("$Id: cpl_atomic_ops.cpp  $")
+CPL_CVSID("$Id$")
 
 #if defined(_MSC_VER)
 

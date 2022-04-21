@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_idrisi.h  $
+ * $Id$
  *
  * Project:  Idrisi Translator
  * Purpose:  Definition of classes for OGR Idrisi driver.

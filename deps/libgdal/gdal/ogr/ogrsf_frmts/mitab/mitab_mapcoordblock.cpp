@@ -43,7 +43,7 @@
 #include "cpl_error.h"
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: mitab_mapcoordblock.cpp  $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class TABMAPCoordBlock

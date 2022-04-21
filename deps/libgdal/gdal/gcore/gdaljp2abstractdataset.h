@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdaljp2abstractdataset.h  $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  GDALGeorefPamDataset with helper to read georeferencing and other

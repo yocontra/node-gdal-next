@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalwarper.h  $
+ * $Id$
  *
  * Project:  GDAL High Performance Warper
  * Purpose:  Prototypes, and definitions for warping related work.

@@ -34,7 +34,7 @@
 
 #include <stdexcept>
 
-CPL_CVSID("$Id: ogrdxf_dimension.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             PointDist()                              */

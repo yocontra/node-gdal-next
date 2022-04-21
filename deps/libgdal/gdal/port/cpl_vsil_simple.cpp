@@ -31,7 +31,7 @@
 
 #include "cpl_vsi.h"
 
-CPL_CVSID("$Id: cpl_vsil_simple.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef WIN32
 #  include <sys/stat.h>

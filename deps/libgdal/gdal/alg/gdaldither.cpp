@@ -77,7 +77,7 @@
 #define CAST_PCT(x) x
 #endif
 
-CPL_CVSID("$Id: gdaldither.cpp  $")
+CPL_CVSID("$Id$")
 
 static int MAKE_COLOR_CODE( int r, int g, int b )
 {

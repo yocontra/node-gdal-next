@@ -53,7 +53,7 @@
 
 #include "filegdb_fielddomain.h"
 
-CPL_CVSID("$Id: ogropenfilegdbdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 
 /***********************************************************************/

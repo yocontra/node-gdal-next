@@ -32,7 +32,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ntf_codelist.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             NTFCodeList                              */

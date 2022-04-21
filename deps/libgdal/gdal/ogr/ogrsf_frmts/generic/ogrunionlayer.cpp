@@ -32,7 +32,7 @@
 #include "ogrwarpedlayer.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrunionlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                      OGRUnionLayerGeomFieldDefn()                    */

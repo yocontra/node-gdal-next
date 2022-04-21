@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: osm2osm.cpp  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Author:   Even Rouault, <even dot rouault at spatialys.com>

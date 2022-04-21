@@ -45,7 +45,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-SHP_CVSID("$Id: shpopen.c  $")
+SHP_CVSID("$Id$")
 
 typedef unsigned char uchar;
 

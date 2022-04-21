@@ -46,7 +46,7 @@
 #include "ogr_core.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: gdaldriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             GDALDriver()                             */
@@ -798,9 +798,7 @@ GDALDataset *GDALDriver::DefaultCreateCopy( const char * pszFilename,
         if( bSuccess && dfValue != 1.0 )
             poDstBand->SetScale( dfValue );
 
-        dfValue = poSrcBand->GetNoDataValue( &bSuccess );
-        if( bSuccess )
-            poDstBand->SetNoDataValue( dfValue );
+        GDALCopyNoDataValue(poDstBand, poSrcBand);
 
         if( poSrcBand->GetColorInterpretation() != GCI_Undefined
             && poSrcBand->GetColorInterpretation()

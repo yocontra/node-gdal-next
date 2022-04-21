@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gmlregistry.h  $
+ * $Id$
  *
  * Project:  GML registry
  * Purpose:  GML reader

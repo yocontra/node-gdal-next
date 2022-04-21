@@ -32,7 +32,7 @@
 #include "cpl_string.h"
 #include "cpl_csv.h"
 
-CPL_CVSID("$Id: ogrdxfreader.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRDXFReader()                            */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dxf.h  $
+ * $Id$
  *
  * Project:  DXF Translator
  * Purpose:  Definition of classes for OGR .dxf driver.

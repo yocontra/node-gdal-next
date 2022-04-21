@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ograpispy.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  OGR C API "Spy"

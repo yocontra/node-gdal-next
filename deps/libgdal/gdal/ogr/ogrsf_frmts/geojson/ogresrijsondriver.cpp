@@ -39,7 +39,7 @@
 #include "ogrgeojsonutils.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogresrijsondriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       OGRESRIJSONDriverIdentify()                    */

@@ -45,7 +45,7 @@
 #include "gmlutils.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: gmlreader.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            ~IGMLReader()                             */

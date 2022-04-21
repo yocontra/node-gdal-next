@@ -31,7 +31,7 @@
 
 #include <map>
 
-CPL_CVSID("$Id: ogreditablelayer.cpp  $")
+CPL_CVSID("$Id$")
 
 //! @cond Doxygen_Suppress
 

@@ -56,7 +56,7 @@
 
 #include "proj.h"
 
-CPL_CVSID("$Id: ogr_fromepsg.cpp  $")
+CPL_CVSID("$Id$")
 
 extern void OGRsnPrintDouble( char * pszStrBuf, size_t size, double dfValue );
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nitfdataset.h  $
+ * $Id$
  *
  * Project:  NITF Read/Write Translator
  * Purpose:  GDALDataset/GDALRasterBand declarations.

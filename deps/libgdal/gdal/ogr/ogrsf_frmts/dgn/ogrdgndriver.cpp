@@ -29,7 +29,7 @@
 #include "ogr_dgn.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrdgndriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                                Open()                                */

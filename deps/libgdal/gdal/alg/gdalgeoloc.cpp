@@ -50,7 +50,7 @@
 #include "gdal_priv.h"
 #include "memdataset.h"
 
-CPL_CVSID("$Id: gdalgeoloc.cpp  $")
+CPL_CVSID("$Id$")
 
 CPL_C_START
 CPLXMLNode *GDALSerializeGeoLocTransformer( void *pTransformArg );

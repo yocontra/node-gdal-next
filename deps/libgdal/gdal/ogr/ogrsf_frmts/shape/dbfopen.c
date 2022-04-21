@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dbfopen.c  $
+ * $Id$
  *
  * Project:  Shapelib
  * Purpose:  Implementation of .dbf access API documented in dbf_api.html.
@@ -69,7 +69,7 @@
 #define CPLsnprintf snprintf
 #endif
 
-SHP_CVSID("$Id: dbfopen.c  $")
+SHP_CVSID("$Id$")
 
 #ifndef FALSE
 #  define FALSE		0

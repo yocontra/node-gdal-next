@@ -45,7 +45,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrgeorssdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRGeoRSSDataSource()                          */

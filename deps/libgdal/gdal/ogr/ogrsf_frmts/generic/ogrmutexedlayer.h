@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrmutexedlayer.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLMutexedLayer class
@@ -119,6 +119,7 @@ class CPL_DLL OGRMutexedLayer : public OGRLayerDecorator
     virtual CPLErr      SetMetadataItem( const char * pszName,
                                          const char * pszValue,
                                          const char * pszDomain = "" ) override;
+    virtual OGRErr      Rename(const char* pszNewName) override;
 };
 
 #endif /* #ifndef DOXYGEN_SKIP */

@@ -37,7 +37,7 @@
 #include "cpl_string.h"
 
 
-CPL_CVSID("$Id: cpl_getexecpath.cpp  $")
+CPL_CVSID("$Id$")
 
 #if defined(WIN32)
 

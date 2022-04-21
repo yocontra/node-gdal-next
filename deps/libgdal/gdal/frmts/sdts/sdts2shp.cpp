@@ -30,7 +30,7 @@
 #include "shapefil.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: sdts2shp.cpp  $")
+CPL_CVSID("$Id$")
 
 static int  bVerbose = FALSE;
 

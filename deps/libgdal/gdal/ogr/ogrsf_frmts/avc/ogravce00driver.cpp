@@ -28,7 +28,7 @@
 
 #include "ogr_avc.h"
 
-CPL_CVSID("$Id: ogravce00driver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             Identify()                               */

@@ -1,5 +1,5 @@
 /*
- * $Id: keamaskband.h  $
+ * $Id$
  *  keamaskband.h
  *
  *  Created by Pete Bunting on 01/08/2012.
@@ -44,6 +44,8 @@ class KEAMaskBand final: public GDALRasterBand
 public:
     KEAMaskBand(GDALRasterBand *pParent, kealib::KEAImageIO *pImageIO, LockedRefCount *pRefCount );
     ~KEAMaskBand();
+
+    virtual bool            IsMaskBand() const override { return true; }
 
 protected:
     // we just override these functions from GDALRasterBand

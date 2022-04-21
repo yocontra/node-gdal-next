@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqliteexecutesql.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Run SQL requests with SQLite SQL engine

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: envidataset.h  $
+ * $Id$
  *
  * Project:  ENVI .hdr Driver
  * Purpose:  Implementation of ENVI .hdr labelled raw raster support.

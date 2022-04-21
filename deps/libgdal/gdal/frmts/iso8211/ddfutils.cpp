@@ -34,7 +34,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ddfutils.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             DDFScanInt()                             */

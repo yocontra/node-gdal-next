@@ -53,7 +53,7 @@
 #include "ogrsf_frmts.h"
 
 
-CPL_CVSID("$Id: ogrinfo.cpp  $")
+CPL_CVSID("$Id$")
 
 bool bVerbose = true;
 bool bSuperQuiet = false;

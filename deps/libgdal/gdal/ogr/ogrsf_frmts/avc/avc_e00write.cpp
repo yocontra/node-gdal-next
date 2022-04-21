@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: avc_e00write.cpp  $
+ * $Id$
  *
  * Name:     avc_e00write.c
  * Project:  Arc/Info vector coverage (AVC)  E00->BIN conversion library

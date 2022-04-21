@@ -31,7 +31,7 @@
 #include "memdataset.h"
 #include "pdfcreatefromcomposition.h"
 
-CPL_CVSID("$Id: pdfwritabledataset.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                      PDFWritableVectorDataset()                      */
@@ -65,11 +65,11 @@ PDFWritableVectorDataset::~PDFWritableVectorDataset()
 GDALDataset* PDFWritableVectorDataset::Create( const char * pszName,
                                                int nXSize,
                                                int nYSize,
-                                               int nBands,
+                                               int nBandsIn,
                                                GDALDataType eType,
                                                char ** papszOptions )
 {
-    if( nBands == 0 && nXSize == 0 && nYSize == 0 && eType == GDT_Unknown )
+    if( nBandsIn == 0 && nXSize == 0 && nYSize == 0 && eType == GDT_Unknown )
     {
         const char* pszFilename = CSLFetchNameValue(papszOptions, "COMPOSITION_FILE");
         if( pszFilename )
@@ -83,7 +83,7 @@ GDALDataset* PDFWritableVectorDataset::Create( const char * pszName,
         }
     }
 
-    if( nBands != 0 )
+    if( nBandsIn != 0 )
     {
         CPLError(CE_Failure, CPLE_AppDefined,
                  "PDFWritableVectorDataset::Create() can only be called with "

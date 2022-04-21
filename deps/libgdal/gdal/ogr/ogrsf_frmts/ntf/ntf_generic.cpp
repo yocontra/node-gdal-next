@@ -30,7 +30,7 @@
 #include "ntf.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ntf_generic.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr int MAX_LINK = 5000;
 

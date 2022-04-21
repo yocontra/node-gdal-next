@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_autocad_services.h  $
+ * $Id$
  *
  * Project:  DXF and DWG Translators
  * Purpose:  Declarations for shared AutoCAD format services.

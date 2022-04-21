@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pgeo.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for Personal Geodatabase driver.

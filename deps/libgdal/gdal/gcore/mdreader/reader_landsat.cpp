@@ -39,7 +39,7 @@
 #include "cpl_string.h"
 #include "cpl_time.h"
 
-CPL_CVSID("$Id: reader_landsat.cpp  $")
+CPL_CVSID("$Id$")
 
 /**
  * GDALMDReaderLandsat()

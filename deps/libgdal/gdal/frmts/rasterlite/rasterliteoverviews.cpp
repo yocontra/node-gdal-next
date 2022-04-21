@@ -32,7 +32,7 @@
 
 #include "rasterlitedataset.h"
 
-CPL_CVSID("$Id: rasterliteoverviews.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         ReloadOverviews()                            */

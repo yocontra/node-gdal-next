@@ -36,7 +36,7 @@
 
 #define MAX_GCPS 5000    //this should be more than enough ground control points
 
-CPL_CVSID("$Id: tsxdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 namespace {
 enum ePolarization {

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_dgn.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  OGR Driver for DGN Reader.

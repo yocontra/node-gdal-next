@@ -39,7 +39,7 @@
 #include "gdal_frmts.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: coasp_dataset.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr int TYPE_GENERIC = 0;
 constexpr int TYPE_GEOREF = 1;

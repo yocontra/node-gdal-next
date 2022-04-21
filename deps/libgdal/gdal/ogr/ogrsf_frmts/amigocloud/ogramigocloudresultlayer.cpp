@@ -28,7 +28,7 @@
 
 #include "ogr_amigocloud.h"
 
-CPL_CVSID("$Id: ogramigocloudresultlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRAmigoCloudResultLayer()                     */

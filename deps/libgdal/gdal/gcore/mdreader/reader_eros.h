@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_eros.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from EROS imagery.

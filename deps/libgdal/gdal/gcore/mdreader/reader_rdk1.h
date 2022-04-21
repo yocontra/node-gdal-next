@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_rdk1.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from Resurs-DK1 imagery.

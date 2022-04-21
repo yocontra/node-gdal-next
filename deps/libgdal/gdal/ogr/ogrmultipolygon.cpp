@@ -34,7 +34,7 @@
 #include "ogr_core.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrmultipolygon.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRMultiPolygon()                           */

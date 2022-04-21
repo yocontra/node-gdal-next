@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm.h  $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM general public declarations.

@@ -59,7 +59,7 @@
 
 #define DIGIT_ZERO '0'
 
-CPL_CVSID("$Id: ogrcsvlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRCSVLayer()                             */
@@ -289,8 +289,6 @@ void OGRCSVLayer::BuildFeatureDefn( const char *pszNfdcGeomField,
 
     int nMaxFieldCount = atoi(
         CPLGetConfigOption("OGR_CSV_MAX_FIELD_COUNT", "2000"));
-    if( nMaxFieldCount > 100000 )
-        nMaxFieldCount = 100000; // to please coverity
     if( nFieldCount > nMaxFieldCount )
     {
         CPLError(CE_Warning, CPLE_AppDefined,
@@ -301,6 +299,8 @@ void OGRCSVLayer::BuildFeatureDefn( const char *pszNfdcGeomField,
                  nMaxFieldCount);
         nFieldCount = nMaxFieldCount;
     }
+    if( nFieldCount > 100000 )
+        nFieldCount = 100000; // to please coverity
 
     nCSVFieldCount = nFieldCount;
 

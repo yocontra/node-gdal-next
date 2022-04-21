@@ -32,7 +32,7 @@
 
 #include <cassert>
 
-CPL_CVSID("$Id: gdaltorture.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

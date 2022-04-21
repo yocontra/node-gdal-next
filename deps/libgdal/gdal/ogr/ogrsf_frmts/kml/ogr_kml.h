@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_kml.h  $
+ * $Id$
  *
  * Project:  KML Driver
  * Purpose:  Declarations for OGR wrapper classes for KML, and OGR->KML

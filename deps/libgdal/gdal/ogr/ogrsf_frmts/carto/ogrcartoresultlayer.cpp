@@ -28,7 +28,7 @@
 
 #include "ogr_carto.h"
 
-CPL_CVSID("$Id: ogrcartoresultlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRCARTOResultLayer()                     */

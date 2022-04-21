@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: minidriver_arcgis_server.cpp  $")
+CPL_CVSID("$Id$")
 
 WMSMiniDriver_AGS::WMSMiniDriver_AGS() {}
 

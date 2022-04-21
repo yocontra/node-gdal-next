@@ -37,7 +37,7 @@
 #include "ogr_srs_api.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdal_contour.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */

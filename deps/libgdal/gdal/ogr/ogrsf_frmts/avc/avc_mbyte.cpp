@@ -1,4 +1,4 @@
-/* $Id: avc_mbyte.cpp  $
+/* $Id$
  *
  * Name:     avc_mbyte.c
  * Project:  Arc/Info vector coverage (AVC)  E00->BIN conversion library

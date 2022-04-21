@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gmt.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the OGR GMT driver.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqliteapiroutines.c  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Static registration of sqlite3 entry points

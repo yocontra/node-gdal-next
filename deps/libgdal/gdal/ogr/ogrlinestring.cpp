@@ -37,7 +37,7 @@
 #include <limits>
 #include <new>
 
-CPL_CVSID("$Id: ogrlinestring.cpp  $")
+CPL_CVSID("$Id$")
 
 namespace {
 

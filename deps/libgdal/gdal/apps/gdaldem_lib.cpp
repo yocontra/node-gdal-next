@@ -65,7 +65,7 @@
  * For terrestrial use cases, implements
  * Riley, S.J., De Gloria, S.D., Elliot, R. (1999): A Terrain Ruggedness
  * that Quantifies Topographic Heterogeneity. Intermountain Journal of Science, Vol.5, No.1-4, pp.23-27
- * 
+ *
  *
  * TPI - Topographic Position Index follows the description in
  * Wilson et al. (2007), following Weiss (2001).  The radius is fixed
@@ -123,7 +123,7 @@
 #include "emmintrin.h"
 #endif
 
-CPL_CVSID("$Id: gdaldem_lib.cpp  $")
+CPL_CVSID("$Id$")
 
 static const double kdfDegreesToRadians = M_PI / 180.0;
 static const double kdfRadiansToDegrees = 180.0 / M_PI;
@@ -2847,7 +2847,7 @@ class GDALGeneric3x3RasterBand : public GDALRasterBand
     void                    InitWithNoData( void* pImage );
 
   public:
-                 GDALGeneric3x3RasterBand( GDALGeneric3x3Dataset<T> *poDS,
+                 GDALGeneric3x3RasterBand( GDALGeneric3x3Dataset<T> *poDSIn,
                                            GDALDataType eDstDataType );
 
     virtual CPLErr          IReadBlock( int, int, void * ) override;

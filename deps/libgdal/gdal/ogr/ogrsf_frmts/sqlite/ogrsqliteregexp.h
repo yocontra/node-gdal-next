@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqliteregexp.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  SQLite REGEXP function

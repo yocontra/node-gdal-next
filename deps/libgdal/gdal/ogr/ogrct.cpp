@@ -49,7 +49,7 @@
 #include "proj.h"
 #include "proj_experimental.h"
 
-CPL_CVSID("$Id: ogrct.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef DEBUG_PERF
 static double g_dfTotalTimeCRStoCRS = 0;
@@ -1085,10 +1085,14 @@ OGRProjCT::OGRProjCT(const OGRProjCT& other) :
     bSourceLatLong(other.bSourceLatLong),
     bSourceWrap(other.bSourceWrap),
     dfSourceWrapLong(other.dfSourceWrapLong),
+    bSourceIsDynamicCRS(other.bSourceIsDynamicCRS),
+    dfSourceCoordinateEpoch(other.dfSourceCoordinateEpoch),
     poSRSTarget((other.poSRSTarget != nullptr) ? (other.poSRSTarget->Clone()) : (nullptr)),
     bTargetLatLong(other.bTargetLatLong),
     bTargetWrap(other.bTargetWrap),
     dfTargetWrapLong(other.dfTargetWrapLong),
+    bTargetIsDynamicCRS(other.bTargetIsDynamicCRS),
+    dfTargetCoordinateEpoch(other.dfTargetCoordinateEpoch),
     bWebMercatorToWGS84LongLat(other.bWebMercatorToWGS84LongLat),
     nErrorCount(other.nErrorCount),
     dfThreshold(other.dfThreshold),

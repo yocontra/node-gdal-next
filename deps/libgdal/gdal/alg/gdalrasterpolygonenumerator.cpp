@@ -35,7 +35,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: gdalrasterpolygonenumerator.cpp  $")
+CPL_CVSID("$Id$")
 
 /*! @cond Doxygen_Suppress */
 
@@ -299,7 +299,7 @@ void GDALRasterPolygonEnumeratorT<DataType, EqualityTest>::ProcessLine(
     }
 }
 
-template class GDALRasterPolygonEnumeratorT<GInt32, IntEqualityTest>;
+template class GDALRasterPolygonEnumeratorT<std::int64_t, IntEqualityTest>;
 
 template class GDALRasterPolygonEnumeratorT<float, FloatEqualityTest>;
 

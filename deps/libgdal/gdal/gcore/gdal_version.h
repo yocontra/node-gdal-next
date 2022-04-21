@@ -27,6 +27,6 @@
 #  define GDAL_RELEASE_DATE     20229999
 #endif
 #ifndef GDAL_RELEASE_NAME
-#  define GDAL_RELEASE_NAME     "3.5.0-git"
+#  define GDAL_RELEASE_NAME     "3.5.0-git1"
 #endif
 #endif

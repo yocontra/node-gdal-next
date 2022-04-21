@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geopackage.h  $
+ * $Id$
  *
  * Project:  GeoPackage Translator
  * Purpose:  Definition of classes for OGR GeoPackage driver.
@@ -567,7 +567,7 @@ class OGRGeoPackageTableLayer final : public OGRGeoPackageLayer
                                             const char * pszValue,
                                             const char * pszDomain = "" ) override;
 
-    void                RenameTo(const char* pszDstTableName);
+    virtual OGRErr       Rename(const char* pszDstTableName) override;
 
     virtual bool         HasFastSpatialFilter(int iGeomCol) override;
     virtual CPLString    GetSpatialWhere(int iGeomCol,

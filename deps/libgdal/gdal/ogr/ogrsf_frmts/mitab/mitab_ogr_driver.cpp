@@ -32,7 +32,7 @@
 
 #include "mitab_ogr_driver.h"
 
-CPL_CVSID("$Id: mitab_ogr_driver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                  OGRTABDriverIdentify()                              */

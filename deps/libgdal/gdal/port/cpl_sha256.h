@@ -1,4 +1,4 @@
-/* $Id: cpl_sha256.h  $ */
+/* $Id$ */
 
 /* The MIT License
 

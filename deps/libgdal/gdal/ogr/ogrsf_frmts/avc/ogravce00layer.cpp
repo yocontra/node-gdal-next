@@ -35,7 +35,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: ogravce00layer.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr int SERIAL_ACCESS_FID = INT_MIN;
 

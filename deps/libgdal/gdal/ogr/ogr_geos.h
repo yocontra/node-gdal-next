@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geos.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions related to support for use of GEOS in OGR.

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_auto_close.h  $
+ * $Id$
  *
  * Name:     cpl_auto_close.h
  * Project:  CPL - Common Portability Library

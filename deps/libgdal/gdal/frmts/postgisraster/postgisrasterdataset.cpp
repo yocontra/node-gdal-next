@@ -7,7 +7,7 @@
  *
  * Author:       David Zwarg, dzwarg@azavea.com
  *
- * Last changes: $Id: postgisrasterdataset.cpp  $
+ * Last changes: $Id$
  *
  ***********************************************************************
  * Copyright (c) 2009 - 2013, Jorge Arevalo, David Zwarg
@@ -41,7 +41,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: postgisrasterdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef _WIN32
 #define rint(x) floor((x) + 0.5)

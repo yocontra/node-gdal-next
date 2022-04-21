@@ -1,5 +1,5 @@
 /******************************************************************************
-* $Id: ogr_openfilegdb.h  $
+* $Id$
 *
 * Project:  OpenGIS Simple Features Reference Implementation
 * Purpose:  Implements Open FileGDB OGR driver.

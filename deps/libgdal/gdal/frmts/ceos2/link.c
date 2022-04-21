@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: link.c  $
+ * $Id$
  *
  * Project:  ASI CEOS Translator
  * Purpose:  Link list function replacements.
@@ -29,7 +29,7 @@
 
 #include "ceos.h"
 
-CPL_CVSID("$Id: link.c  $")
+CPL_CVSID("$Id$")
 
 
 /************************************************************************/

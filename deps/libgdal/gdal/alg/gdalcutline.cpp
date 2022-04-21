@@ -45,7 +45,7 @@
 #include "ogr_geometry.h"
 #include "ogr_geos.h"
 
-CPL_CVSID("$Id: gdalcutline.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         BlendMaskGenerator()                         */

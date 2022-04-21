@@ -7,7 +7,6 @@
 			"target_name": "libgdal_netcdf_frmt",
 			"type": "static_library",
 			"sources": [
-				"../gdal/frmts/netcdf/gmtdataset.cpp",
 				"../gdal/frmts/netcdf/netcdflayersg.cpp",
 				"../gdal/frmts/netcdf/netcdfsg.cpp",
 				"../gdal/frmts/netcdf/netcdfsgwriterutil.cpp",

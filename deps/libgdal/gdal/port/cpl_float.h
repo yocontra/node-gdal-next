@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_float.h  $
+ * $Id$
  *
  * Project:  CPL
  * Purpose:  Floating point conversion functions. Convert 16- and 24-bit

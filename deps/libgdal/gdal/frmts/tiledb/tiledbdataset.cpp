@@ -35,7 +35,7 @@
 
 #include "tiledb_headers.h"
 
-CPL_CVSID("$Id: tiledbdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef _MSC_VER
 #pragma warning( push )

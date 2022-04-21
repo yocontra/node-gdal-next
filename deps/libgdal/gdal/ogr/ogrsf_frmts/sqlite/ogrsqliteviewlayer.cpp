@@ -43,7 +43,7 @@
 #include "ogr_geometry.h"
 #include "sqlite3.h"
 
-CPL_CVSID("$Id: ogrsqliteviewlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        OGRSQLiteViewLayer()                         */

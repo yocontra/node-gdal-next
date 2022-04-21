@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnmfile.h  $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM file based generic driver.

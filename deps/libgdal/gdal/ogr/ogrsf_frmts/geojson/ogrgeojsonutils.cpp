@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <memory>
 
-CPL_CVSID("$Id: ogrgeojsonutils.cpp  $")
+CPL_CVSID("$Id$")
 
 const char szESRIJSonPotentialStart1[] =
     "{\"features\":[{\"geometry\":{\"rings\":[";

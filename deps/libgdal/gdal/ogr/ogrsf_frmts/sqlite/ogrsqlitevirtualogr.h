@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqlitevirtualogr.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  SQLite Virtual Table module using OGR layers

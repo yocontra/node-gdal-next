@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gmlreaderp.h  $
+ * $Id$
  *
  * Project:  GML Reader
  * Purpose:  Private Declarations for OGR free GML Reader code.
@@ -33,7 +33,6 @@
 
 #if defined(HAVE_XERCES)
 
-// Must be first for DEBUG_BOOL case
 #include "xercesc_headers.h"
 #include "ogr_xerces.h"
 

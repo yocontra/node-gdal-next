@@ -33,7 +33,7 @@
 #include "gdal_priv.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: gdalasyncread.cpp  $")
+CPL_CVSID("$Id$")
 
 /* ******************************************************************** */
 /*                               Usage()                                */

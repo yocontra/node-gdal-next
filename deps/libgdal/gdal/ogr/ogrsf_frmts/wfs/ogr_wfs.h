@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_wfs.h  $
+ * $Id$
  *
  * Project:  WFS Translator
  * Purpose:  Definition of classes for OGR WFS driver.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_wkt_srs_for_gdal.h  $
+ * $Id$
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Read/Write in-memory GeoTIFF file

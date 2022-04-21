@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geotiff_proj4.c  $
+ * $Id$
  *
  * Project:  libgeotiff
  * Purpose:  Code to convert a normalized GeoTIFF definition into a PROJ.4

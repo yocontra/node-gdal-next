@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalgrid.h  $
+ * $Id$
  *
  * Project:  GDAL Gridding API.
  * Purpose:  Prototypes, and definitions for of GDAL scattered data gridder.

@@ -28,7 +28,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// Must be first for DEBUG_BOOL case
 #include "ogr_gmlas.h"
 #include "ogr_p.h"
 #include "ogrgeojsonreader.h"
@@ -36,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlaswriter.cpp  $")
+CPL_CVSID("$Id$")
 
 namespace GMLAS
 {

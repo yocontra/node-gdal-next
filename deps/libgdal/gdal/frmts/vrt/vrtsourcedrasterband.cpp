@@ -52,7 +52,7 @@
 #include "gdal_priv.h"
 #include "ogr_geometry.h"
 
-CPL_CVSID("$Id: vrtsourcedrasterband.cpp  $")
+CPL_CVSID("$Id$")
 
 /*! @cond Doxygen_Suppress */
 

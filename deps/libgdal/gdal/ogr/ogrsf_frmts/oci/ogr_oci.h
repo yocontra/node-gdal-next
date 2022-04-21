@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_oci.h  $
+ * $Id$
  *
  * Project:  Oracle Spatial Driver
  * Purpose:  Oracle Spatial OGR Driver Declarations.

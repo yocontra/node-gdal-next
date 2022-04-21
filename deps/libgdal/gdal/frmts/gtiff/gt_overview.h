@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_overview.h  $
+ * $Id$
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Code to build overviews of external databases as a TIFF file.

@@ -28,7 +28,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// Must be first for DEBUG_BOOL case
 #include "ogr_gmlas.h"
 
 #define CONSTANT_DEFINITION
@@ -39,7 +38,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlasconf.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          GMLASConfiguration()                        */

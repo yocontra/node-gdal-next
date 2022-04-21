@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_mysql.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Declarations for MySQL OGR Driver Classes.

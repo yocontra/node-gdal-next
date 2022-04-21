@@ -2,7 +2,7 @@
   #define MGRS_H
 
 /***************************************************************************
- * $Id: mgrs.h  $
+ * $Id$
  *
  * Project:  MGRS Converter
  * Purpose:  Geotrans declarations for MGRS translation (slightly adapted)

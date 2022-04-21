@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "cpl_cpu_features.h"
 
-CPL_CVSID("$Id: cpl_cpu_features.cpp  $")
+CPL_CVSID("$Id$")
 
 //! @cond Doxygen_Suppress
 

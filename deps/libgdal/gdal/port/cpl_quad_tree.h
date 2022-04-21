@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_quad_tree.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implementation of quadtree building and searching functions.

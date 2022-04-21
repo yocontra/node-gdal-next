@@ -39,7 +39,7 @@
 #include "gdal.h"
 
 
-CPL_CVSID("$Id: gdalchecksum.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         GDALChecksumImage()                          */

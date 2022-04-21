@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: osm_parser.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Author:   Even Rouault, <even dot rouault at spatialys.com>

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_rapid_eye.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from RapidEye imagery.

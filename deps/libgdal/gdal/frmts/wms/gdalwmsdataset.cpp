@@ -46,7 +46,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: gdalwmsdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           GDALWMSDataset()                           */

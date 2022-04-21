@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ili1readerp.h  $
+ * $Id$
  *
  * Project:  Interlis 1 Reader
  * Purpose:  Private Declarations for Reader code.

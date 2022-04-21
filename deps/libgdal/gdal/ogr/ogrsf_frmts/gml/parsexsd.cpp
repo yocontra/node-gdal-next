@@ -43,7 +43,7 @@
 #include "cpl_string.h"
 #include "ogr_core.h"
 
-CPL_CVSID("$Id: parsexsd.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                              StripNS()                               */

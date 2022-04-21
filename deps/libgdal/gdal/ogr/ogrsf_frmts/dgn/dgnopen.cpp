@@ -28,7 +28,7 @@
 
 #include "dgnlibp.h"
 
-CPL_CVSID("$Id: dgnopen.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            DGNTestOpen()                             */

@@ -52,7 +52,7 @@
 #include "gdal_pam.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: rdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 // constexpr int R_NILSXP = 0;
 constexpr int R_LISTSXP = 2;

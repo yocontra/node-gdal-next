@@ -65,7 +65,7 @@ woven in by Terry Thorsen 1/2003.
 #   include <errno.h>
 #endif
 
-CPL_CVSID("$Id: cpl_minizip_unzip.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifndef CASESENSITIVITYDEFAULT_NO
 #  if !defined(unix) && !defined(CASESENSITIVITYDEFAULT_YES)

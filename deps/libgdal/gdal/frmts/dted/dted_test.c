@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dted_test.c  $
+ * $Id$
  *
  * Project:  DTED Translator
  * Purpose:  Test mainline for DTED writer.

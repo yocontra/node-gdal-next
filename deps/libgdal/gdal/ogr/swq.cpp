@@ -40,7 +40,7 @@
 #include "cpl_time.h"
 #include "swq_parser.hpp"
 
-CPL_CVSID("$Id: swq.cpp  $")
+CPL_CVSID("$Id$")
 
 #define YYSTYPE swq_expr_node *
 

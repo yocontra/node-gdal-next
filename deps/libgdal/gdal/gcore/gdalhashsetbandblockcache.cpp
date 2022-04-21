@@ -39,7 +39,7 @@
 #include "cpl_error.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: gdalhashsetbandblockcache.cpp  $")
+CPL_CVSID("$Id$")
 
 //! @cond Doxygen_Suppress
 

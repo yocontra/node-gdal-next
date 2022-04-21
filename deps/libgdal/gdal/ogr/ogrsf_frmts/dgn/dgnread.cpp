@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: dgnread.cpp  $")
+CPL_CVSID("$Id$")
 
 static DGNElemCore *DGNParseTCB( DGNInfo * );
 static DGNElemCore *DGNParseColorTable( DGNInfo * );

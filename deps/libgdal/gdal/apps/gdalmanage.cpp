@@ -34,7 +34,7 @@
 #include "gdal.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: gdalmanage.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

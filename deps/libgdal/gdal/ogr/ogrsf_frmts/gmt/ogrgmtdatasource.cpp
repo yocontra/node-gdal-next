@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "ogr_gmt.h"
 
-CPL_CVSID("$Id: ogrgmtdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRGmtDataSource()                          */

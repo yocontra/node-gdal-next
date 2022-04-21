@@ -29,7 +29,7 @@
 #include "ogr_pg.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrpgdriver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                              Identify()                              */
@@ -173,6 +173,7 @@ void RegisterOGRPG()
     poDriver->SetMetadataItem( GDAL_DCAP_UNIQUE_FIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_NOTNULL_GEOMFIELDS, "YES" );
     poDriver->SetMetadataItem( GDAL_DCAP_MULTIPLE_VECTOR_LAYERS, "YES" );
+    poDriver->SetMetadataItem( GDAL_DCAP_RENAME_LAYERS, "YES" );
 
     poDriver->pfnOpen = OGRPGDriverOpen;
     poDriver->pfnIdentify = OGRPGDriverIdentify;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnmgraph.h  $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM graph implementation.

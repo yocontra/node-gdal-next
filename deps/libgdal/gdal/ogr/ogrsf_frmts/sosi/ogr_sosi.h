@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sosi.h  $
+ * $Id$
  *
  * Project:  SOSI Translator
  * Purpose:  Implements OGRSOSIDriver.

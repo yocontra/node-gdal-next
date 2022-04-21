@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <cstdint>
 
-CPL_CVSID("$Id: ogrgeojsonwriter.cpp  $")
+CPL_CVSID("$Id$")
 
 static json_object *
 json_object_new_float_with_significant_figures( float fVal,

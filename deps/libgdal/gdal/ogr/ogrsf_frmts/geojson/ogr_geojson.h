@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geojson.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions of OGR OGRGeoJSON driver types.

@@ -40,7 +40,7 @@
 #include "ogr_core.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: iso19115_srs.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                     OGR_SRS_ImportFromISO19115()                     */

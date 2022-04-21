@@ -53,7 +53,7 @@
 
 using std::vector;
 
-CPL_CVSID("$Id: gdalexif.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr int MAXSTRINGLENGTH = 65535;
 constexpr int EXIFOFFSETTAG = 0x8769;

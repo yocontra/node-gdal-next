@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqlite3ext.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Custom version of sqlite3ext.h to workaround issues with Spatialite amalgamation

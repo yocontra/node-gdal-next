@@ -33,7 +33,7 @@
 
 #include <set>
 
-CPL_CVSID("$Id: sdtslib.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            SDTSFeature()                             */

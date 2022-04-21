@@ -35,7 +35,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: ogrdxfwriterlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRDXFWriterLayer()                          */

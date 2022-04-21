@@ -36,7 +36,7 @@
 
 using namespace std;
 
-CPL_CVSID("$Id: ili2reader.cpp  $")
+CPL_CVSID("$Id$")
 
 //
 // constants

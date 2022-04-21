@@ -62,7 +62,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-CPL_CVSID("$Id: gdal_crs.cpp  $")
+CPL_CVSID("$Id$")
 
 #define MAXORDER 3
 

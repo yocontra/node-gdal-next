@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: internal_qhull_headers.h  $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  Includes internal qhull headers

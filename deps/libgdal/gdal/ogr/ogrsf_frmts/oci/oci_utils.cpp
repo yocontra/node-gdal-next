@@ -28,4 +28,4 @@
 
 #include "ogr_oci.h"
 
-CPL_CVSID("$Id: oci_utils.cpp  $")
+CPL_CVSID("$Id$")

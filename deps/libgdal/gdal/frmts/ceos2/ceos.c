@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ceos.c  $
+ * $Id$
  *
  * Project:  ASI CEOS Translator
  * Purpose:  Core CEOS functions.
@@ -29,7 +29,7 @@
 
 #include "ceos.h"
 
-CPL_CVSID("$Id: ceos.c  $")
+CPL_CVSID("$Id$")
 
 /* Function implementations of functions described in ceos.h */
 

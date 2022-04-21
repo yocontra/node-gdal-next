@@ -33,7 +33,7 @@
 #include <sstream>
 #include <iomanip>
 
-CPL_CVSID("$Id: ogramigocloudtablelayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                    OGRAMIGOCLOUDEscapeIdentifier( )                     */

@@ -33,7 +33,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxf_leader.cpp  $")
+CPL_CVSID("$Id$")
 
 static void InterpolateSpline( OGRLineString* const poLine,
     const DXFTriple& oEndTangentDirection );

@@ -26,10 +26,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifdef DEBUG_BOOL
-#define DO_NOT_USE_DEBUG_BOOL
-#endif
-
 #include "cpl_port.h"
 #include "cpl_vsi_virtual.h"
 
@@ -44,7 +40,7 @@ void CPL_DLL VSIInstallCryptFileHandler();
 void CPL_DLL VSISetCryptKey( const GByte* pabyKey, int nKeySize );
 CPL_C_END
 
-CPL_CVSID("$Id: cpl_vsil_crypt.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr char VSICRYPT_PREFIX[] = "/vsicrypt/";
 

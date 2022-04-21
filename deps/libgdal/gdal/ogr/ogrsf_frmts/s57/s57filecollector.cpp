@@ -32,7 +32,7 @@
 #include "cpl_string.h"
 #include "s57.h"
 
-CPL_CVSID("$Id: s57filecollector.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          S57FileCollector()                          */

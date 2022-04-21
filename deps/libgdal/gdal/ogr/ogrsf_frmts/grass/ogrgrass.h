@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgrass.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/GRASS driver.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm_priv.h  $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM private and internal declarations.

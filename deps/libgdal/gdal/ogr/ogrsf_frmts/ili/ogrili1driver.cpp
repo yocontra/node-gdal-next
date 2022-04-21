@@ -30,7 +30,7 @@
 #include "ogr_ili1.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ogrili1driver.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                                Open()                                */

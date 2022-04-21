@@ -41,7 +41,7 @@
 #include <unistd.h>
 #endif
 
-CPL_CVSID("$Id: gdallocationinfo.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

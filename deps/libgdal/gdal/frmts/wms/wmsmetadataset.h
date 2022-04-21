@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: wmsmetadataset.h  $
+ * $Id$
  *
  * Project:  WMS Client Driver
  * Purpose:  Declaration of GDALWMSMetaDataset class

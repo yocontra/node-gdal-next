@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsil_curl_priv.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Private API for VSICurl

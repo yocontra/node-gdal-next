@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdaljp2metadatagenerator.h  $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  GDALJP2Metadata: metadata generator

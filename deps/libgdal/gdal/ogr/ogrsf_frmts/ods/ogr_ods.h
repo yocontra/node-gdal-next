@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_ods.h  $
+ * $Id$
  *
  * Project:  ODS Translator
  * Purpose:  Definition of classes for OGR OpenOfficeSpreadsheet .ods driver.
@@ -137,7 +137,7 @@ class OGRODSDataSource final: public GDALDataset
     VSILFILE*           fpSettings;
     std::string         osCurrentConfigTableName;
     std::string         osConfigName;
-    int                 nFlags;
+    int                 nVerticalSplitFlags;
     std::set<std::string> osSetLayerHasSplitter;
     void                AnalyseSettings();
 

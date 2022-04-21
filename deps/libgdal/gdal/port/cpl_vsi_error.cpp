@@ -52,7 +52,7 @@
 #define TIMESTAMP_DEBUG
 // #define MEMORY_DEBUG
 
-CPL_CVSID("$Id: cpl_vsi_error.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr int DEFAULT_LAST_ERR_MSG_SIZE =
 #if !defined(HAVE_VSNPRINTF)

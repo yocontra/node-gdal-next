@@ -40,7 +40,7 @@
 #include "ogrsf_frmts.h"
 #include "commonutils.h"
 
-CPL_CVSID("$Id: ogrtindex.cpp  $")
+CPL_CVSID("$Id$")
 
 typedef enum
 {

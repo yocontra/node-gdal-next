@@ -31,7 +31,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogridbdatasource.cpp  $")
+CPL_CVSID("$Id$")
 /************************************************************************/
 /*                         OGRIDBDataSource()                          */
 /************************************************************************/

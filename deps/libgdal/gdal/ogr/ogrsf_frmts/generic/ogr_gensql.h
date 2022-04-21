@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_gensql.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes related to generic implementation of ExecuteSQL().

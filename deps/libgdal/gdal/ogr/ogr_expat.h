@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_expat.h  $
+ * $Id$
  *
  * Project:  OGR
  * Purpose:  Convenience function for parsing with Expat library

@@ -1,5 +1,5 @@
 /*****************************************************************************
-* $Id: idrisi.h  $
+* $Id$
 *
 * Project:  Idrisi Raster Image File Driver
 * Purpose:  Read/write Idrisi Raster Image Format RST

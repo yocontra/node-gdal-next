@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: plmosaicdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 #define SPHERICAL_RADIUS        6378137.0
 #define GM_ORIGIN  -20037508.340

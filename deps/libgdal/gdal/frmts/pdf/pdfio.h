@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pdfio.h  $
+ * $Id$
  *
  * Project:  PDF driver
  * Purpose:  GDALDataset driver for PDF dataset.

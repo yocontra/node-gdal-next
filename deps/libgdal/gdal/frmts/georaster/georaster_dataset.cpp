@@ -42,7 +42,7 @@
 
 #include <memory>
 
-CPL_CVSID("$Id: georaster_dataset.cpp  $")
+CPL_CVSID("$Id$")
 
 //  ---------------------------------------------------------------------------
 //                                                           GeoRasterDataset()

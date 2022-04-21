@@ -32,7 +32,7 @@
 #include "ogr_api.h"
 #include "s57.h"
 
-CPL_CVSID("$Id: s57writer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             S57Writer()                              */

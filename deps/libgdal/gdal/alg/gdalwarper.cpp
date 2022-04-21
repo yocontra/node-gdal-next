@@ -51,7 +51,7 @@
 #include <emmintrin.h>
 #endif
 
-CPL_CVSID("$Id: gdalwarper.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         GDALReprojectImage()                         */

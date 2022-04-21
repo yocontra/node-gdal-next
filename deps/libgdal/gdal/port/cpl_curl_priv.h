@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_curl_priv.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Author:   Andrew Sudorgin (drons [a] list dot ru)

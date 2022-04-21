@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: bsb_read.h  $
+ * $Id$
  *
  * Project:  BSB Reader
  * Purpose:  non-GDAL BSB API Declarations

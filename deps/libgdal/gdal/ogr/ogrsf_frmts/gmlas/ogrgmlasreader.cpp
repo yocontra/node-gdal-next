@@ -28,7 +28,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// Must be first for DEBUG_BOOL case
 #include "ogr_gmlas.h"
 
 #include "ogr_p.h"
@@ -37,7 +36,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrgmlasreader.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        GMLASBinInputStream                           */

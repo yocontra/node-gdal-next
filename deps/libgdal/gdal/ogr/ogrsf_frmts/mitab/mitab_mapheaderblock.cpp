@@ -41,7 +41,7 @@
 #include "cpl_vsi.h"
 #include "mitab_priv.h"
 
-CPL_CVSID("$Id: mitab_mapheaderblock.cpp  $")
+CPL_CVSID("$Id$")
 
 /*---------------------------------------------------------------------
  * Set various constants used in generating the header block.

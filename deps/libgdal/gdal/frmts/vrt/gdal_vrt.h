@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_vrt.h  $
+ * $Id$
  *
  * Project:  Virtual GDAL Datasets
  * Purpose:  C/Public declarations of virtual GDAL dataset objects.

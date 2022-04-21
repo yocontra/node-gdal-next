@@ -30,7 +30,7 @@
 #include "wmsdriver.h"
 #include "minidriver_worldwind.h"
 
-CPL_CVSID("$Id: minidriver_worldwind.cpp  $")
+CPL_CVSID("$Id$")
 
 WMSMiniDriver_WorldWind::WMSMiniDriver_WorldWind() {}
 

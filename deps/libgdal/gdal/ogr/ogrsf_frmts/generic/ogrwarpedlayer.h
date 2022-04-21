@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrwarpedlayer.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRWarpedLayer class

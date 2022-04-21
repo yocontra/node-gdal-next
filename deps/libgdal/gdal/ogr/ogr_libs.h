@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_libs.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions related to support for use of SFCGAL and GEOS in OGR.

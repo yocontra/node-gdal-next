@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcrasterrasterband.h  $
+ * $Id$
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster raster band declaration.

@@ -58,7 +58,7 @@
 #include "ogr_srs_api.h"
 #include "ogr_geo_utils.h"
 
-CPL_CVSID("$Id: gml2ogrgeometry.cpp  $")
+CPL_CVSID("$Id$")
 
 constexpr double kdfD2R = M_PI / 180.0;
 constexpr double kdf2PI = 2.0 * M_PI;
@@ -326,6 +326,13 @@ static bool ParseGMLCoordinates( const CPLXMLNode *psGeomNode,
         {
             poGeometry->empty();
             return true;
+        }
+
+        // Skip leading whitespace. See https://github.com/OSGeo/gdal/issues/5494
+        while( *pszCoordString != '\0' &&
+               isspace(static_cast<unsigned char>(*pszCoordString)) )
+        {
+            pszCoordString++;
         }
 
         int iCoord = 0;

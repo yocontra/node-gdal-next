@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrshape.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions within the Shapefile driver to implement
@@ -97,6 +97,7 @@ class OGRShapeGeomFieldDefn final: public OGRGeomFieldDefn
         OGRSpatialReference* GetSpatialRef() const override;
 
         const CPLString& GetPrjFilename() const { return osPrjFile; }
+        void SetPrjFilename(const std::string& osFilename) { osPrjFile = osFilename; }
 };
 
 /************************************************************************/
@@ -252,6 +253,8 @@ class OGRShapeLayer final: public OGRAbstractProxiedLayer
                 { OGRLayer::SetSpatialFilter(iGeomField, poGeom); }
 
     OGRErr              SetAttributeFilter( const char * ) override;
+
+    OGRErr              Rename(const char* pszNewName) override;
 
     void                AddToFileList( CPLStringList& oFileList );
     void                CreateSpatialIndexAtClose( int bFlag )

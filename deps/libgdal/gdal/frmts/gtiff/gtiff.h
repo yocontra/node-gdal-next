@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gtiff.h  $
+ * $Id$
  *
  * Project:  GeoTIFF Driver
  * Purpose:  GDAL GeoTIFF support.

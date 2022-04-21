@@ -32,7 +32,7 @@
 #include "math.h"
 #include "ogrdxf_polyline_smooth.h"
 
-CPL_CVSID("$Id: ogrdxf_polyline_smooth.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                Local helper functions                                */

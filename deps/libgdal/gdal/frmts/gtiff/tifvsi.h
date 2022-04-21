@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: tifvsi.h  $
+ * $Id$
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implement system hook functions for libtiff on top of CPL/VSI,

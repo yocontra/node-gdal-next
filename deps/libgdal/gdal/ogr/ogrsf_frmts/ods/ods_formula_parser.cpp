@@ -104,7 +104,7 @@
 #include "cpl_string.h"
 #include "ods_formula.h"
 
-CPL_CVSID("$Id: ods_formula_parser.cpp  $")
+CPL_CVSID("$Id$")
 
 #define YYSTYPE  ods_formula_node*
 

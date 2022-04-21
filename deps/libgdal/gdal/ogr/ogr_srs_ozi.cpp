@@ -41,7 +41,7 @@
 #include "ogr_core.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: ogr_srs_ozi.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OSRImportFromOzi()                          */

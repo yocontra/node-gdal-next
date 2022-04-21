@@ -40,7 +40,7 @@
 #include "mitab_priv.h"
 #include "mitab_utils.h"
 
-CPL_CVSID("$Id: mitab_tooldef.cpp  $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class TABToolDefTable

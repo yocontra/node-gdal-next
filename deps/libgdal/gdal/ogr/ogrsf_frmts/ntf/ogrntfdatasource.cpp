@@ -30,7 +30,7 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: ogrntfdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRNTFDataSource()                          */
@@ -526,7 +526,7 @@ void OGRNTFDataSource::EnsureTileNameUnique( NTFFileReader *poNewReader )
 {
     int iSequenceNumber = -1;
     bool bIsUnique = false;
-    char szCandidateName[11] = {};
+    char szCandidateName[12] = {};
 
     do
     {

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_digital_globe.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from DigitalGlobe imagery.

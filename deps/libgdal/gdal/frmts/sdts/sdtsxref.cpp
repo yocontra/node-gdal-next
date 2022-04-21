@@ -28,7 +28,7 @@
 
 #include "sdts_al.h"
 
-CPL_CVSID("$Id: sdtsxref.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                             SDTS_XREF()                              */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_landsat.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from Landsat imagery.

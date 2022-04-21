@@ -39,7 +39,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: hdf5imagedataset.cpp  $")
+CPL_CVSID("$Id$")
 
 class HDF5ImageDataset final: public HDF5Dataset
 {

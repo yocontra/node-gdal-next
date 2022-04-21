@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gt_wkt_srs.h  $
+ * $Id$
  *
  * Project:  GeoTIFF Driver
  * Purpose:  Implements translation between GeoTIFF normalized projection

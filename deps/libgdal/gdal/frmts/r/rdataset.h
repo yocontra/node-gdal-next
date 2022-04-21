@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: rdataset.h  $
+ * $Id$
  *
  * Project:  R Format Driver
  * Purpose:  Read/write R stats package object format.

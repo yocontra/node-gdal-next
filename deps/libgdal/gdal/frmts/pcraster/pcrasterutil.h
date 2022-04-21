@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcrasterutil.h  $
+ * $Id$
  *
  * Project:  PCRaster Integration
  * Purpose:  PCRaster driver support declarations.

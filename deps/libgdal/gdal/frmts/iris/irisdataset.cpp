@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <sstream>
 
-CPL_CVSID("$Id: irisdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 static double DEG2RAD = M_PI / 180.0;
 static double RAD2DEG = 180.0 / M_PI;

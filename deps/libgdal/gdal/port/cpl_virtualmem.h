@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_virtualmem.h  $
+ * $Id$
  *
  * Name:     cpl_virtualmem.h
  * Project:  CPL - Common Portability Library

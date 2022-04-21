@@ -29,7 +29,7 @@
 #include "cpl_conv.h"
 #include "ogr_mssqlspatial.h"
 
-CPL_CVSID("$Id: ogrmssqlgeometrywriter.cpp  $")
+CPL_CVSID("$Id$")
 
 /*   SqlGeometry/SqlGeography serialization format
 

@@ -52,7 +52,7 @@
 #include "ogr_p.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: ogr_srs_esri.cpp  $")
+CPL_CVSID("$Id$")
 
 /* -------------------------------------------------------------------- */
 /*      Table relating USGS and ESRI state plane zones.                 */

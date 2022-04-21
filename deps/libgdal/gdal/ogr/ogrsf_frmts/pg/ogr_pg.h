@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_pg.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/PostgreSQL driver.
@@ -386,6 +386,8 @@ public:
     virtual const char *GetMetadataItem(const char* pszName, const char* pszDomain = "") override;
     virtual CPLErr      SetMetadata(char** papszMD, const char* pszDomain = "") override;
     virtual CPLErr      SetMetadataItem(const char* pszName, const char* pszValue, const char* pszDomain = "") override;
+
+    virtual OGRErr      Rename(const char* pszNewName) override;
 
     // follow methods are not base class overrides
     void                SetLaunderFlag( int bFlag )

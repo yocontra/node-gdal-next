@@ -48,7 +48,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsil_abstract_archive.cpp  $")
+CPL_CVSID("$Id$")
 
 static bool IsEitherSlash( char c )
 {

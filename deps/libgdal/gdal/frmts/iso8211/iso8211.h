@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: iso8211.h  $
+ * $Id$
  *
  * Project:  ISO 8211 Access
  * Purpose:  Main declarations for ISO 8211.

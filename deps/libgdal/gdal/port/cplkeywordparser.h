@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cplkeywordparser.h  $
+ * $Id$
  *
  * Project:  Common Portability Library
  * Purpose:  Implementation of CPLKeywordParser - a class for parsing

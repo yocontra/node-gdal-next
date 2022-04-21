@@ -37,7 +37,7 @@
 // #include "kmlnode.h"
 #include "kmlutility.h"
 
-CPL_CVSID("$Id: kmlvector.cpp  $")
+CPL_CVSID("$Id$")
 
 KMLVector::~KMLVector() {}
 

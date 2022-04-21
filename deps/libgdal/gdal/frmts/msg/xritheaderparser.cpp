@@ -32,7 +32,7 @@
 #include <cstdlib> // malloc, free
 #include <cstring> // memcpy
 
-CPL_CVSID("$Id: xritheaderparser.cpp  $")
+CPL_CVSID("$Id$")
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: parsexsd.h  $
+ * $Id$
  *
  * Project:  GML Reader
  * Purpose:  Implementation of GMLParseXSD()

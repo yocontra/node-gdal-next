@@ -44,7 +44,7 @@
 #include "mitab_priv.h"
 #include "ogr_spatialref.h"
 
-CPL_CVSID("$Id: mitab_coordsys.cpp  $")
+CPL_CVSID("$Id$")
 
 extern const MapInfoDatumInfo asDatumInfoList[];
 extern const MapInfoSpheroidInfo asSpheroidInfoList[];

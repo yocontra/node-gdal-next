@@ -28,12 +28,11 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// Must be first for DEBUG_BOOL case
 #include "ogr_gmlas.h"
 
 #include "cpl_sha256.h"
 
-CPL_CVSID("$Id: ogrgmlasxsdcache.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         GMLASResourceCache()                         */

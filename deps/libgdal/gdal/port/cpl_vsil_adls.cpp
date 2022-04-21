@@ -42,7 +42,7 @@
 
 #include "cpl_azure.h"
 
-CPL_CVSID("$Id: cpl_vsil_adls.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifndef HAVE_CURL
 
@@ -1140,6 +1140,9 @@ bool VSIADLSWriteHandle::Send(bool bIsLastBlock)
     // If we are the last block, send the flush event
     if( bIsLastBlock && !SendInternal(VSIADLSFSHandler::Event::FLUSH, nullptr) )
         return false;
+
+    InvalidateParentDirectory();
+
     return true;
 }
 

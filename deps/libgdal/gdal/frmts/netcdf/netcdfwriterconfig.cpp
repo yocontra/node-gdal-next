@@ -28,7 +28,7 @@
 
 #include "netcdfdataset.h"
 
-CPL_CVSID("$Id: netcdfwriterconfig.cpp  $")
+CPL_CVSID("$Id$")
 
 bool netCDFWriterConfiguration::SetNameValue(
     CPLXMLNode *psNode, std::map<CPLString, CPLString> &oMap)

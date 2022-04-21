@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalgeorefpamdataset.h  $
+ * $Id$
  *
  * Project:  GDAL
  * Purpose:  GDALPamDataset with internal storage for georeferencing, with

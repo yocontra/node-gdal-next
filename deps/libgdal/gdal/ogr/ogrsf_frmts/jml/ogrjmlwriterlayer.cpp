@@ -31,7 +31,7 @@
 
 #include <cstdlib>
 
-CPL_CVSID("$Id: ogrjmlwriterlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRJMLWriterLayer()                        */

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_spawn.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement CPLSystem().

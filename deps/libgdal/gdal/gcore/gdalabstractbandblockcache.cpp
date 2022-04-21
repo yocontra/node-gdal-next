@@ -39,7 +39,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: gdalabstractbandblockcache.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef DEBUG_VERBOSE_ABBC
 static int nAllBandsKeptAlivedBlocks = 0;

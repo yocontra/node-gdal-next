@@ -30,7 +30,7 @@
 #include "cpl_string.h"
 #include "ogr_pds.h"
 
-CPL_CVSID("$Id: ogrpdsdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 using namespace OGRPDS;
 

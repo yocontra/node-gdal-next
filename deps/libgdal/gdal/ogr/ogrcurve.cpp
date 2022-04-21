@@ -29,7 +29,7 @@
 #include "ogr_geometry.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrcurve.cpp  $")
+CPL_CVSID("$Id$")
 
 //! @cond Doxygen_Suppress
 

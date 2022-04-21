@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gnm_api.h  $
+ * $Id$
  *
  * Project:  GDAL/OGR Geography Network support (Geographic Network Model)
  * Purpose:  GNM C API.

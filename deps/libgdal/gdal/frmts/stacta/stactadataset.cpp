@@ -43,7 +43,7 @@
 
 extern "C" void GDALRegister_STACTA();
 
-CPL_CVSID("$Id: stactadataset.cpp  $")
+CPL_CVSID("$Id$")
 
 // Implements a driver for
 // https://github.com/stac-extensions/tiled-assets

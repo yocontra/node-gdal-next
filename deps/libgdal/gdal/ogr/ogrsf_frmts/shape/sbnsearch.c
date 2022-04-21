@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-SHP_CVSID("$Id: sbnsearch.c  $")
+SHP_CVSID("$Id$")
 
 #ifndef USE_CPL
 #if defined(_MSC_VER)

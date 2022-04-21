@@ -37,7 +37,7 @@
 #include "cpl_conv.h"
 #include "cpl_error.h"
 
-CPL_CVSID("$Id: cpl_recode_stub.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef CPL_RECODE_STUB
 

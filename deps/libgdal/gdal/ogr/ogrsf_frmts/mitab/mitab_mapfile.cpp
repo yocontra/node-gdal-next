@@ -46,7 +46,7 @@
 #include "mitab_priv.h"
 #include "ogr_feature.h"
 
-CPL_CVSID("$Id: mitab_mapfile.cpp  $")
+CPL_CVSID("$Id$")
 
 /*=====================================================================
  *                      class TABMAPFile

@@ -27,11 +27,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// $Id: jp2kakdataset.h  $
-
-#ifdef DEBUG_BOOL
-#define DO_NOT_USE_DEBUG_BOOL
-#endif
+// $Id$
 
 #include <cstring>
 #include <algorithm>

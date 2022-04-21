@@ -2,6 +2,7 @@ import * as chaiAsPromised from 'chai-as-promised'
 import * as chai from 'chai'
 const assert = chai.assert
 import * as gdal from 'gdal-async'
+import * as semver from 'semver'
 
 chai.use(chaiAsPromised)
 
@@ -688,7 +689,10 @@ describe('gdal.RasterBandAsync', () => {
         it('should return number', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
-          return assert.eventually.equal(band.offsetAsync, 0)
+          if (semver.gt(gdal.version, '3.4.999')) {
+            return assert.eventually.isNull(band.offsetAsync)
+          }
+          return assert.eventually.equal(band.offsetAsync, 1)
         })
         it('should throw error if dataset already closed', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
@@ -703,6 +707,9 @@ describe('gdal.RasterBandAsync', () => {
         it('should return number', () => {
           const ds = gdal.open('temp', 'w', 'MEM', 256, 256, 1, gdal.GDT_Byte)
           const band = ds.bands.get(1)
+          if (semver.gt(gdal.version, '3.4.999')) {
+            return assert.eventually.isNull(band.scaleAsync)
+          }
           return assert.eventually.equal(band.scaleAsync, 1)
         })
         it('should throw error if dataset already closed', () => {

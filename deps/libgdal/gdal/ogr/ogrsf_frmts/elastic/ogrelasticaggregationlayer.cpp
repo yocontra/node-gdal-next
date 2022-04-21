@@ -32,7 +32,7 @@
 
 #include <set>
 
-CPL_CVSID("$Id: ogrelasticaggregationlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                       OGRElasticAggregationLayer()                   */

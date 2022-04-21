@@ -32,7 +32,7 @@
 #include "cpl_md5.h"
 #include "wmsdriver.h"
 
-CPL_CVSID("$Id: gdalwmscache.cpp  $")
+CPL_CVSID("$Id$")
 
 
 static void CleanCacheThread( void *pData )

@@ -27,10 +27,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifdef DEBUG_BOOL
-#define DO_NOT_USE_DEBUG_BOOL
-#endif
-
 #define NO_DELETE
 
 #include "cpl_string.h"
@@ -43,7 +39,7 @@
 #include <geo_normalize.h>
 #include <geovalues.h>
 
-CPL_CVSID("$Id: mrsiddataset.cpp  $")
+CPL_CVSID("$Id$")
 
 CPL_C_START
 double GTIFAngleToDD( double dfAngle, int nUOMAngle );

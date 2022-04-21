@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: s57tables.h  $
+ * $Id$
  *
  * Project:  S-57 Translator
  * Purpose:  Inline tables.

@@ -41,7 +41,7 @@
 #include "ogr_spatialref.h"
 #include "ogrsf_frmts.h"
 
-CPL_CVSID("$Id: ograpispy.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef OGRAPISPY_ENABLED
 

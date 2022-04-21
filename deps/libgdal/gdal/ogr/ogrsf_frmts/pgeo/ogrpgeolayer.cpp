@@ -35,7 +35,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrpgeolayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRPGeoLayer()                            */

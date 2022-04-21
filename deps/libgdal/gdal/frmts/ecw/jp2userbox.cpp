@@ -31,7 +31,7 @@
 
 #include "gdal_ecw.h"
 
-CPL_CVSID("$Id: jp2userbox.cpp  $")
+CPL_CVSID("$Id$")
 
 #if defined(HAVE_COMPRESS)
 

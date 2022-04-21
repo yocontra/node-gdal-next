@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_idb.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements OGRIDBTableLayer class, access to an existing table

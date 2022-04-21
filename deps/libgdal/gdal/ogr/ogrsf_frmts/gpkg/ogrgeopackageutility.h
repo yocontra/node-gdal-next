@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrgeopackageutility.h  $
+ * $Id$
  *
  * Project:  GeoPackage Translator
  * Purpose:  Utility header for OGR GeoPackage driver.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dted_api.h  $
+ * $Id$
  *
  * Project:  DTED Translator
  * Purpose:  Public (C callable) interface for DTED/CDED reading.

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_conv.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Convenience functions declarations.

@@ -36,7 +36,7 @@
 
 #include <vector>
 
-CPL_CVSID("$Id: gdalwarp_bin.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               GDALExit()                             */

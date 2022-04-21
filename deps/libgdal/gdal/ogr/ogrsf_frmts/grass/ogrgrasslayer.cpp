@@ -31,7 +31,7 @@
 #include "ogrgrass.h"
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: ogrgrasslayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                           OGRGRASSLayer()                            */

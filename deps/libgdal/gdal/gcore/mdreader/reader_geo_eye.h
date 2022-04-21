@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_geo_eye.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from GeoEye imagery.

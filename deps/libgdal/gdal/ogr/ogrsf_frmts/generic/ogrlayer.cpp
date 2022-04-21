@@ -34,7 +34,7 @@
 #include "ogr_swq.h"
 #include "ograpispy.h"
 
-CPL_CVSID("$Id: ogrlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 struct OGRLayer::Private
 {
@@ -1854,6 +1854,66 @@ OGRErr OGR_L_SetIgnoredFields( OGRLayerH hLayer, const char **papszFields )
 #endif
 
     return OGRLayer::FromHandle(hLayer)->SetIgnoredFields( papszFields );
+}
+
+/************************************************************************/
+/*                             Rename()                                 */
+/************************************************************************/
+
+/** Rename layer.
+ *
+ * This operation is implemented only by layers that expose the OLCRename capability,
+ * and drivers that expose the GDAL_DCAP_RENAME_LAYERS capability
+ *
+ * This operation will fail if a layer with the new name already exists.
+ *
+ * On success, GetDescription() and GetLayerDefn()->GetName() will return
+ * pszNewName.
+ *
+ * Renaming the layer may interrupt current feature iteration.
+ *
+ * @param pszNewName New layer name. Must not be NULL.
+ * @return OGRERR_NONE in case of success
+ *
+ * @since GDAL 3.5
+ */
+OGRErr OGRLayer::Rename( CPL_UNUSED const char* pszNewName )
+{
+    CPLError(CE_Failure, CPLE_NotSupported,
+             "Rename() not supported by this layer.");
+
+    return OGRERR_UNSUPPORTED_OPERATION;
+}
+
+/************************************************************************/
+/*                           OGR_L_Rename()                             */
+/************************************************************************/
+
+/** Rename layer.
+ *
+ * This operation is implemented only by layers that expose the OLCRename capability,
+ * and drivers that expose the GDAL_DCAP_RENAME_LAYERS capability
+ *
+ * This operation will fail if a layer with the new name already exists.
+ *
+ * On success, GetDescription() and GetLayerDefn()->GetName() will return
+ * pszNewName.
+ *
+ * Renaming the layer may interrupt current feature iteration.
+ *
+ * @param hLayer     Layer to rename.
+ * @param pszNewName New layer name. Must not be NULL.
+ * @return OGRERR_NONE in case of success
+ *
+ * @since GDAL 3.5
+ */
+OGRErr OGR_L_Rename( OGRLayerH hLayer, const char* pszNewName )
+
+{
+    VALIDATE_POINTER1( hLayer, "OGR_L_Rename", OGRERR_INVALID_HANDLE );
+    VALIDATE_POINTER1( pszNewName, "OGR_L_Rename", OGRERR_FAILURE );
+
+    return OGRLayer::FromHandle(hLayer)->Rename( pszNewName );
 }
 
 /************************************************************************/

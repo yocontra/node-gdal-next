@@ -32,7 +32,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-CPL_CVSID("$Id: msgcommand.cpp  $")
+CPL_CVSID("$Id$")
 
 using namespace std;
 

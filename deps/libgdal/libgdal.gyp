@@ -48,7 +48,6 @@
 				"./gdal/ogr/ogrgeometryfactory.cpp",
 				"./gdal/ogr/ogrgeometrycollection.cpp",
 				"./gdal/ogr/ogrgeometry.cpp",
-				"./gdal/ogr/ogrgeomediageometry.cpp",
 				"./gdal/ogr/ogrfielddefn.cpp",
 				"./gdal/ogr/ogrfeaturestyle.cpp",
 				"./gdal/ogr/ogrfeaturequery.cpp",

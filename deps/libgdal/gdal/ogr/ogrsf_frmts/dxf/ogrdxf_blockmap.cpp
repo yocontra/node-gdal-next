@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrdxf_blockmap.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          ReadBlockSection()                          */

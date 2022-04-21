@@ -52,7 +52,7 @@
 #include <unistd.h>
 #endif
 
-CPL_CVSID("$Id: gdaltransform.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

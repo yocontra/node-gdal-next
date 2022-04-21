@@ -33,7 +33,7 @@
 #include "geoconcept_syscoord.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: geoconcept_syscoord.c  $")
+CPL_CVSID("$Id$")
 
 /* -------------------------------------------------------------------- */
 /*      GCSRS globals                                                   */

@@ -43,7 +43,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: ogrgeopackagedatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 // Keep in sync prototype of those 2 functions between gdalopeninfo.cpp,
 // ogrsqlitedatasource.cpp and ogrgeopackagedatasource.cpp
@@ -5951,7 +5951,7 @@ OGRLayer * GDALGeoPackageDataset::ExecuteSQL( const char *pszSQLCommand,
                         SQLUnescape(pszSrcTableName)));
             if( poSrcLayer )
             {
-                poSrcLayer->RenameTo( SQLUnescape(pszDstTableName) );
+                poSrcLayer->Rename( SQLUnescape(pszDstTableName) );
                 CSLDestroy(papszTokens);
                 return nullptr;
             }

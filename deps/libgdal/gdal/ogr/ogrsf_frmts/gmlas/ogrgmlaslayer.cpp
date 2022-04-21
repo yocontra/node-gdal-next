@@ -28,12 +28,11 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-// Must be first for DEBUG_BOOL case
 #include "ogr_gmlas.h"
 #include "ogr_pgdump.h"
 #include "cpl_minixml.h"
 
-CPL_CVSID("$Id: ogrgmlaslayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRGMLASLayer()                           */

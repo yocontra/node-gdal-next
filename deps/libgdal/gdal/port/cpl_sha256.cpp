@@ -31,17 +31,13 @@
  *  Allan Saddi
  */
 
-#ifdef HAVE_CRYPTOPP
-#define DO_NOT_USE_DEBUG_BOOL
-#endif
-
 #include <string.h>
 #include "cpl_conv.h"
 #include "cpl_error.h"
 #include "cpl_sha256.h"
 #include "cpl_string.h"
 
-CPL_CVSID("$Id: cpl_sha256.cpp  $")
+CPL_CVSID("$Id$")
 
 #define ROTL(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 #define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))

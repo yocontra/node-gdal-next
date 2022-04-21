@@ -1,5 +1,5 @@
 /*
- * $Id: keacopy.h  $
+ * $Id$
  *  keacopy.h
  *
  *  Created by Pete Bunting on 01/08/2012.

@@ -31,7 +31,7 @@
 #include "cpl_string.h"
 #include "ogr_idb.h"
 
-CPL_CVSID("$Id: ogridbtablelayer.cpp  $")
+CPL_CVSID("$Id$")
 /************************************************************************/
 /*                          OGRIDBTableLayer()                         */
 /************************************************************************/

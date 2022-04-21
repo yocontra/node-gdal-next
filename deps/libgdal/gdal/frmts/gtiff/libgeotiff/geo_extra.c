@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: geo_extra.c  $
+ * $Id$
  *
  * Project:  libgeotiff
  * Purpose:  Code to normalize a few common PCS values

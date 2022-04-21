@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrmutexeddatasource.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLMutexedDataSource class

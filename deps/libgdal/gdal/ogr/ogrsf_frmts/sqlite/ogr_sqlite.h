@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_sqlite.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/SQLite driver.

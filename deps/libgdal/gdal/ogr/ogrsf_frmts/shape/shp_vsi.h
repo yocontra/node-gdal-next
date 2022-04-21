@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: shp_vsi.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  IO Redirection via VSI services for shp/dbf io.

@@ -30,7 +30,7 @@
 #include "ogr_p.h"
 #include "ogrgeojsonreader.h"
 
-CPL_CVSID("$Id: ogrcartolayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         OGRCARTOLayer()                            */

@@ -39,7 +39,7 @@
 #include "gdal_mdreader.h"
 #include "gdal_proxy.h"
 
-CPL_CVSID("$Id: gdaloverviewdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 /** In GDAL, GDALRasterBand::GetOverview() returns a stand-alone band, that may
     have no parent dataset. This can be inconvenient in certain contexts, where
@@ -115,7 +115,7 @@ class GDALOverviewBand final: public GDALProxyRasterBand
     friend class GDALOverviewDataset;
 
     GDALRasterBand*         poUnderlyingBand = nullptr;
-    GDALRasterBand* RefUnderlyingRasterBand() override;
+    GDALRasterBand* RefUnderlyingRasterBand() const override;
 
     CPLErr IRasterIO( GDALRWFlag, int, int, int, int,
                       void *, int, int, GDALDataType,
@@ -621,7 +621,7 @@ CPLErr GDALOverviewBand::FlushCache(bool bAtClosing)
 /*                        RefUnderlyingRasterBand()                     */
 /************************************************************************/
 
-GDALRasterBand* GDALOverviewBand::RefUnderlyingRasterBand()
+GDALRasterBand* GDALOverviewBand::RefUnderlyingRasterBand() const
 {
     if( poUnderlyingBand )
         return poUnderlyingBand;

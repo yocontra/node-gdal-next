@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi.h  $
+ * $Id$
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -238,6 +238,12 @@ int CPL_DLL VSISetFileMetadata( const char * pszFilename,
                                 CSLConstList papszMetadata,
                                 const char* pszDomain,
                                 CSLConstList papszOptions );
+
+void CPL_DLL VSISetCredential( const char* pszPathPrefix, const char* pszKey,
+                               const char* pszValue );
+void CPL_DLL VSIClearCredentials(const char* pszPathPrefix );
+const char CPL_DLL* VSIGetCredential( const char* pszPath, const char* pszKey,
+                                      const char* pszDefault );
 
 /* ==================================================================== */
 /*      Memory allocation                                               */

@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_alibaba_oss.h  $
+ * $Id$
  *
  * Name:     cpl_alibaba_oss.h
  * Project:  CPL - Common Portability Library
@@ -58,7 +58,8 @@ class VSIOSSHandleHelper final: public IVSIS3LikeHandleHelper
 
         void RebuildURL() override;
 
-        static bool GetConfiguration(CSLConstList papszOptions,
+        static bool GetConfiguration(const std::string& osPathForOption,
+                                     CSLConstList papszOptions,
                                      CPLString& osSecretAccessKey,
                                      CPLString& osAccessKeyId);
 

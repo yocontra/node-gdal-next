@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: reader_alos.h  $
+ * $Id$
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata from Alos imagery.

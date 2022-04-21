@@ -50,7 +50,7 @@
 #include <memory>
 #include <vector>
 
-CPL_CVSID("$Id: mbtilesdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 static const char * const apszAllowedDrivers[] = {"JPEG", "PNG", nullptr};
 

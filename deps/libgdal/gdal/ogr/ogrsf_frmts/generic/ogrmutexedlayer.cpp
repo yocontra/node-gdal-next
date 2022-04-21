@@ -31,7 +31,7 @@
 #include "ogrmutexedlayer.h"
 #include "cpl_multiproc.h"
 
-CPL_CVSID("$Id: ogrmutexedlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 OGRMutexedLayer::OGRMutexedLayer( OGRLayer* poDecoratedLayer,
                                   int bTakeOwnership,
@@ -282,6 +282,12 @@ CPLErr      OGRMutexedLayer::SetMetadataItem( const char * pszName,
 {
     CPLMutexHolderOptionalLockD(m_hMutex);
     return OGRLayerDecorator::SetMetadataItem(pszName, pszValue, pszDomain);
+}
+
+OGRErr OGRMutexedLayer::Rename(const char* pszNewName)
+{
+    CPLMutexHolderOptionalLockD(m_hMutex);
+    return OGRLayerDecorator::Rename(pszNewName);
 }
 
 #if defined(WIN32) && defined(_MSC_VER)

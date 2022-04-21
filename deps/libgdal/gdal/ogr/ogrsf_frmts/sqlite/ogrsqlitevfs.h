@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrsqlitevfs.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Creation of a SQLite3 VFS

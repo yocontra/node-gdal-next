@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrlayerpool.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Defines OGRLayerPool and OGRProxiedLayer class
@@ -165,6 +165,8 @@ class OGRProxiedLayer : public OGRAbstractProxiedLayer
     virtual const char *GetGeometryColumn() override;
 
     virtual OGRErr      SetIgnoredFields( const char **papszFields ) override;
+
+    virtual OGRErr      Rename(const char* pszNewName) override;
 };
 
 #endif /* #ifndef DOXYGEN_SKIP */

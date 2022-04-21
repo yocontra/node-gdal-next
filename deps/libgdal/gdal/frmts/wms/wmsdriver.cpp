@@ -50,7 +50,7 @@
 #include <utility>
 #include <algorithm>
 
-CPL_CVSID("$Id: wmsdriver.cpp  $")
+CPL_CVSID("$Id$")
 
 //
 // A static map holding seen server GetTileService responses, per process

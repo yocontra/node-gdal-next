@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_list.h  $
+ * $Id$
  *
  * Name:     cpl_list.h
  * Project:  CPL - Common Portability Library

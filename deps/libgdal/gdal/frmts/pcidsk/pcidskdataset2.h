@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pcidskdataset2.h  $
+ * $Id$
  *
  * Project:  PCIDSK Database File
  * Purpose:  Read/write PCIDSK Database File used by the PCI software, using

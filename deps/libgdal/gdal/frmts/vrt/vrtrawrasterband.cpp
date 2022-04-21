@@ -45,7 +45,7 @@
 #include "gdal.h"
 #include "gdal_priv.h"
 
-CPL_CVSID("$Id: vrtrawrasterband.cpp  $")
+CPL_CVSID("$Id$")
 
 /*! @cond Doxygen_Suppress */
 

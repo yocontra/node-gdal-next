@@ -38,7 +38,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: gdaltindex.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                               Usage()                                */

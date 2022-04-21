@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: ogrxlsxdatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 namespace OGRXLSX {
 

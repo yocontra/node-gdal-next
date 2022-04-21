@@ -33,7 +33,7 @@
 
 #include <cmath>
 
-CPL_CVSID("$Id: ogrdodssequencelayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                        OGRDODSSequenceLayer()                        */

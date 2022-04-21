@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: imdreader.h  $
+ * $Id$
  *
  * Project:  Interlis 1/2 Translator
  * Purpose:  IlisMeta model reader.

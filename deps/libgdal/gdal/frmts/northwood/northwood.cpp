@@ -35,7 +35,7 @@
 #include <limits>
 #include <string>
 
-CPL_CVSID("$Id: northwood.cpp  $")
+CPL_CVSID("$Id$")
 
 int nwt_ParseHeader( NWT_GRID * pGrd, const unsigned char *nwtHeader )
 {

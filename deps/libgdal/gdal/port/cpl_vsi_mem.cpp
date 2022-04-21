@@ -56,7 +56,7 @@
 
 //! @cond Doxygen_Suppress
 
-CPL_CVSID("$Id: cpl_vsi_mem.cpp  $")
+CPL_CVSID("$Id$")
 
 /*
 ** Notes on Multithreading:
@@ -266,6 +266,10 @@ bool VSIMemFile::SetLength( vsi_l_offset nNewLength )
 
         pabyData = pabyNewData;
         nAllocLength = nNewAlloc;
+    }
+    else if( nNewLength < nLength )
+    {
+        memset(pabyData + nNewLength, 0, static_cast<size_t>(nLength - nNewLength));
     }
 
     nLength = nNewLength;

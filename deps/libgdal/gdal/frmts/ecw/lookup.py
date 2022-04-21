@@ -1,5 +1,5 @@
 # ******************************************************************************
-#  $Id: lookup.py  $
+#  $Id$
 #
 #  Project:  GDAL ECW Driver
 #  Purpose:  Script to lookup ECW (GDT) coordinate systems and translate

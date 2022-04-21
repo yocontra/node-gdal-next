@@ -35,7 +35,7 @@
 
 #include "cpl_conv.h"
 
-CPL_CVSID("$Id: cpl_progress.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                         GDALDummyProgress()                          */

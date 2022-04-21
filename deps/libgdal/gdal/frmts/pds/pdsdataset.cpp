@@ -49,7 +49,7 @@ constexpr double NULL3 = -3.4028226550889044521e+38;
 #include "cpl_safemaths.hpp"
 #include "vicardataset.h"
 
-CPL_CVSID("$Id: pdsdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 enum PDSLayout
 {
@@ -1218,7 +1218,7 @@ class PDSWrapperRasterBand final: public GDALProxyRasterBand
   GDALRasterBand* poBaseBand;
 
   protected:
-    virtual GDALRasterBand* RefUnderlyingRasterBand() override { return poBaseBand; }
+    virtual GDALRasterBand* RefUnderlyingRasterBand() const override { return poBaseBand; }
 
   public:
     explicit PDSWrapperRasterBand( GDALRasterBand* poBaseBandIn )

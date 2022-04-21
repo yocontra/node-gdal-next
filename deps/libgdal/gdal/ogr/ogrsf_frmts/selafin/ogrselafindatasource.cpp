@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <ctime>
 
-CPL_CVSID("$Id: ogrselafindatasource.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          Range                                       */

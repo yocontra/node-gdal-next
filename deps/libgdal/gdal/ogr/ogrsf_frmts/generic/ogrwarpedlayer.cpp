@@ -30,7 +30,7 @@
 
 #include "ogrwarpedlayer.h"
 
-CPL_CVSID("$Id: ogrwarpedlayer.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          OGRWarpedLayer()                            */

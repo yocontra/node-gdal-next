@@ -29,7 +29,7 @@
 #include "ogr_jml.h"
 #include "ogr_p.h"
 
-CPL_CVSID("$Id: ogrjmllayer.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_EXPAT
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_vrt.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Private definitions for OGR/VRT driver.

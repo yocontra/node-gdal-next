@@ -62,7 +62,7 @@
 #   include <errno.h>
 #endif
 
-CPL_CVSID("$Id: cpl_minizip_zip.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifndef VERSIONMADEBY
 # define VERSIONMADEBY   (0x0) /* platform dependent */

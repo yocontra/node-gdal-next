@@ -31,7 +31,7 @@
 
 #include <cstddef>
 
-CPL_CVSID("$Id: gdaljp2metadatagenerator.cpp  $")
+CPL_CVSID("$Id$")
 
 #ifdef HAVE_LIBXML2
 

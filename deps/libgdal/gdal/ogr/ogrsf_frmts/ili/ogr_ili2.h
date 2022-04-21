@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_ili2.h  $
+ * $Id$
  *
  * Project:  Interlis 2 Translator
  * Purpose:   Definition of classes for OGR Interlis 2 driver.

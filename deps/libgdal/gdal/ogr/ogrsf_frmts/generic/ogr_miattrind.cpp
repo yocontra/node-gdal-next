@@ -32,7 +32,7 @@
 #include "mitab/mitab_priv.h"
 #include "cpl_minixml.h"
 
-CPL_CVSID("$Id: ogr_miattrind.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                            OGRMIAttrIndex                            */

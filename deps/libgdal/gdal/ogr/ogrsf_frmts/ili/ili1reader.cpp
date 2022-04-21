@@ -48,7 +48,7 @@
 #  endif
 #endif
 
-CPL_CVSID("$Id: ili1reader.cpp  $")
+CPL_CVSID("$Id$")
 
 //
 // ILI1Reader

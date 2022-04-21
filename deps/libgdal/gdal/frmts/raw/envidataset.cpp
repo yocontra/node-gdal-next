@@ -55,7 +55,7 @@
 #include "ogr_spatialref.h"
 #include "ogr_srs_api.h"
 
-CPL_CVSID("$Id: envidataset.cpp  $")
+CPL_CVSID("$Id$")
 
 // TODO(schwehr): This really should be defined in port/somewhere.h.
 constexpr double kdfDegToRad = M_PI / 180.0;
@@ -2682,7 +2682,7 @@ int ENVIDataset::GetEnviType(GDALDataType eType)
 /************************************************************************/
 
 GDALDataset *ENVIDataset::Create( const char *pszFilename,
-                                  int nXSize, int nYSize, int nBands,
+                                  int nXSize, int nYSize, int nBandsIn,
                                   GDALDataType eType,
                                   char **papszOptions )
 
@@ -2738,7 +2738,7 @@ GDALDataset *ENVIDataset::Create( const char *pszFilename,
 
     bool bRet = VSIFPrintfL(fp, "ENVI\n") > 0;
     bRet &= VSIFPrintfL(fp, "samples = %d\nlines   = %d\nbands   = %d\n",
-                        nXSize, nYSize, nBands) > 0;
+                        nXSize, nYSize, nBandsIn) > 0;
     bRet &=
         VSIFPrintfL(fp, "header offset = 0\nfile type = ENVI Standard\n") > 0;
     bRet &= VSIFPrintfL(fp, "data type = %d\n", iENVIType) > 0;

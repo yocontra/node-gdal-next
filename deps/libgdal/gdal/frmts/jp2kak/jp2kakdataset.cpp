@@ -27,10 +27,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifdef DEBUG_BOOL
-#define DO_NOT_USE_DEBUG_BOOL
-#endif
-
 #include "cpl_port.h"
 #include "jp2kakdataset.h"
 
@@ -53,7 +49,7 @@
 #include <cmath>
 #include <vector>
 
-CPL_CVSID("$Id: jp2kakdataset.cpp  $")
+CPL_CVSID("$Id$")
 
 // Before v7.5 Kakadu does not advertise its version well
 // After v7.5 Kakadu has KDU_{MAJOR,MINOR,PATCH}_VERSION defines so it is easier

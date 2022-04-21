@@ -30,7 +30,7 @@
 
 #include "ogrlayerpool.h"
 
-CPL_CVSID("$Id: ogrlayerpool.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                      OGRAbstractProxiedLayer()                       */
@@ -577,6 +577,16 @@ OGRErr      OGRProxiedLayer::SetIgnoredFields( const char **papszFields )
 {
     if( poUnderlyingLayer == nullptr && !OpenUnderlyingLayer() ) return OGRERR_FAILURE;
     return poUnderlyingLayer->SetIgnoredFields(papszFields);
+}
+
+/************************************************************************/
+/*                              Rename()                                */
+/************************************************************************/
+
+OGRErr      OGRProxiedLayer::Rename(const char* pszNewName)
+{
+    if( poUnderlyingLayer == nullptr && !OpenUnderlyingLayer() ) return OGRERR_FAILURE;
+    return poUnderlyingLayer->Rename(pszNewName);
 }
 
 #endif /* #ifndef DOXYGEN_SKIP */

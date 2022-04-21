@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: filegdbtable_priv.h  $
+ * $Id$
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements reading of FileGDB tables

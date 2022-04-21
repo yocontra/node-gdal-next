@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <limits>
 
-CPL_CVSID("$Id: gdalgeopackagerasterband.cpp  $")
+CPL_CVSID("$Id$")
 
 #if !defined(DEBUG_VERBOSE) && defined(DEBUG_VERBOSE_GPKG)
 #define DEBUG_VERBOSE
@@ -143,14 +143,16 @@ void GDALGPKGMBTilesLikePseudoDataset::SetGlobalOffsetScale(double dfOffset,
 /*                      GDALGPKGMBTilesLikeRasterBand()                 */
 /************************************************************************/
 
-#ifdef __MINGW64__
+// Recent GCC versions complain about null dereference of m_poTPD in
+// the constructor body
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnull-dereference"
 #endif
 
 GDALGPKGMBTilesLikeRasterBand::GDALGPKGMBTilesLikeRasterBand(
     GDALGPKGMBTilesLikePseudoDataset* poTPD, int nTileWidth, int nTileHeight) :
-    m_poTPD(CPLAssertNotNull(poTPD)), // make GCC 7 -Wnull-dereference happy in -O2
+    m_poTPD(poTPD),
     m_bHasNoData(false),
     m_dfNoDataValue(0.0)
 {
@@ -160,7 +162,7 @@ GDALGPKGMBTilesLikeRasterBand::GDALGPKGMBTilesLikeRasterBand(
     nBlockYSize = nTileHeight;
 }
 
-#ifdef __MINGW64__
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
 

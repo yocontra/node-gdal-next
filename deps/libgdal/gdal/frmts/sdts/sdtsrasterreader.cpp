@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-CPL_CVSID("$Id: sdtsrasterreader.cpp  $")
+CPL_CVSID("$Id$")
 
 /************************************************************************/
 /*                          SDTSRasterReader()                          */

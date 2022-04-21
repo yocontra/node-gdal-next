@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_svg.h  $
+ * $Id$
  *
  * Project:  SVG Translator
  * Purpose:  Definition of classes for OGR .svg driver.
