@@ -36,7 +36,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
-    - run: npm run container publish ubuntu:20.04 ${{ matrix.node-version }}
+    - run: npm run container publish debian:buster ${{ matrix.node-version }}
       env:
         NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
