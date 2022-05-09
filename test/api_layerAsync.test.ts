@@ -7,7 +7,8 @@ import * as fileUtils from './utils/file'
 chai.use(chaiAsPromised)
 
 describe('gdal.LayerAsync', () => {
-  afterEach(global.gc)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  afterEach(global.gc!)
 
   describe('instance', () => {
     const cleanupWrite = (ds: gdal.Dataset, file: string) => {

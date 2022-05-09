@@ -3,7 +3,8 @@ import * as path from 'path'
 import { assert } from 'chai'
 
 describe('Open', () => {
-  afterEach(global.gc)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  afterEach(global.gc!)
 
   describe('NetCDF', () => {
     let filename, ds: gdal.Dataset

@@ -11,7 +11,8 @@ if (process.env.GDAL_DATA !== undefined) {
 }
 
 describe('gdal', () => {
-  afterEach(global.gc)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  afterEach(global.gc!)
 
   describe('"lastError" property', () => {
     describe('get()', () => {

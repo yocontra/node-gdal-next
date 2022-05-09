@@ -7,7 +7,8 @@ import * as semver from 'semver'
 chai.use(chaiAsPromised)
 
 describe('gdal.RasterBandAsync', () => {
-  afterEach(global.gc)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  afterEach(global.gc!)
 
   it('should not be instantiable', () => {
     assert.throws(() => {

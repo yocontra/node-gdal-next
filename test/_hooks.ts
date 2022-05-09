@@ -49,7 +49,8 @@ const bundledSkip = function (this: Mocha.Context) {
 const cleanup = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (gdal as any).drivers
-  global.gc()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  global.gc!()
 }
 
 exports.mochaHooks = {

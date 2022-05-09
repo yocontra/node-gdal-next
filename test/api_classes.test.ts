@@ -58,7 +58,8 @@ const create31 = {
 }
 
 describe('Class semantics', () => {
-  afterEach(global.gc)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  afterEach(global.gc!)
 
   const klasses = create
   if (semver.gte(gdal.version, '3.1.0')) {

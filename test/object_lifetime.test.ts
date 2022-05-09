@@ -15,7 +15,8 @@ describe('object cache', () => {
       assert.equal(band1, band2)
       assert.equal(band1.size.x, 4)
       assert.equal(band2.size.x, 4)
-      global.gc()
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      global.gc!()
     }
   })
 })
@@ -28,13 +29,15 @@ describe('object lifetimes', () => {
     const band_uid = (band as any)._uid
 
     ds = null
-    global.gc()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    global.gc!()
 
     assert.isTrue((gdal as any)._isAlive(ds_uid))
     assert.isTrue((gdal as any)._isAlive(band_uid))
 
     band = null
-    global.gc()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    global.gc!()
 
     assert.isFalse((gdal as any)._isAlive(ds_uid))
     assert.isFalse((gdal as any)._isAlive(band_uid))
@@ -47,7 +50,8 @@ describe('object lifetimes', () => {
     const band_uid = band._uid
 
     band = null
-    global.gc()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    global.gc!()
 
     assert.isTrue((gdal as any)._isAlive(ds_uid))
     assert.isFalse((gdal as any)._isAlive(band_uid))
@@ -60,13 +64,15 @@ describe('object lifetimes', () => {
     const layer_uid = (layer as any)._uid
 
     ds = null
-    global.gc()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    global.gc!()
 
     assert.isTrue((gdal as any)._isAlive(ds_uid))
     assert.isTrue((gdal as any)._isAlive(layer_uid))
 
     layer = null
-    global.gc()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    global.gc!()
 
     assert.isFalse((gdal as any)._isAlive(ds_uid))
     assert.isFalse((gdal as any)._isAlive(layer_uid))
@@ -79,7 +85,8 @@ describe('object lifetimes', () => {
     const layer_uid = (layer as any)._uid
 
     layer = null
-    global.gc()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    global.gc!()
 
     assert.isTrue((gdal as any)._isAlive(ds_uid))
     assert.isFalse((gdal as any)._isAlive(layer_uid))

@@ -7,7 +7,8 @@ describe('Open', () => {
   if (!semver.gte(gdal.version, '2.3.0')) {
     return
   }
-  afterEach(global.gc)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  afterEach(global.gc!)
 
   describe('GRIB', () => {
     let filename, ds: gdal.Dataset

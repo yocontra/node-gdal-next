@@ -7,7 +7,8 @@ import * as path from 'path'
 import * as semver from 'semver'
 
 describe('gdal_utils', () => {
-  afterEach(global.gc)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  afterEach(global.gc!)
 
   describe('translate', () => {
     it('should be equivalent to gdal_translate', () => {
