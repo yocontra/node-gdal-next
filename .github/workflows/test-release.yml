@@ -18,7 +18,7 @@ jobs:
         - ubuntu:16.04
         - ubuntu:18.04
         - ubuntu:20.04
-        - ubuntu:21.10
+        - ubuntu:22.04
         - debian:buster
         - debian:bullseye
         - fedora:33
@@ -46,7 +46,7 @@ jobs:
       matrix:
         linux-version:
         - ubuntu:20.04
-        - ubuntu:21.10
+        - ubuntu:22.04
         - debian:bullseye
         - fedora:34
         - centos:stream8
