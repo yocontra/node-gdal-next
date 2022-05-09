@@ -108,7 +108,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 12, 14, 16, 17, 18 ]
+        node-version: [ 12, 14, 16, 17 ]
         gdal-version: [ 'shared', 'bundled' ]
 
     steps:
@@ -153,7 +153,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 12.x, 14.x, 16.x, 17.x, 18.x ]
+        node-version: [ 12.x, 14.x, 16.x, 17.x ]
 
     steps:
     - uses: actions/checkout@v2
@@ -217,7 +217,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 12.x, 14.x, 16.x, 17.x, 18.x ]
+        node-version: [ 12.x, 14.x, 16.x, 17.x ]
 
     steps:
     - uses: actions/checkout@v2
