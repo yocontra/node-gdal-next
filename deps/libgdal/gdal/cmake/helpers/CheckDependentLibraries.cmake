@@ -415,6 +415,8 @@ set(GDAL_USE_LIBCSF_INTERNAL ON)
 gdal_check_package(LERC "Enable LERC (external)" CAN_DISABLE RECOMMENDED)
 gdal_internal_library(LERC)
 
+gdal_check_package(BRUNSLI "Enable BRUNSLI for JPEG packing in MRF" CAN_DISABLE RECOMMENDED)
+
 # Disable by default the use of external shapelib, as currently the SAOffset member that holds file offsets in it is a
 # 'unsigned long', hence 32 bit on 32 bit platforms, whereas we can handle DBFs file > 4 GB. Internal shapelib has not
 # this issue
@@ -506,7 +508,6 @@ define_find_package2(GTA gta/gta.h gta PKGCONFIG_NAME gta)
 gdal_check_package(GTA "Enable GTA driver" CAN_DISABLE)
 
 gdal_check_package(MRSID "MrSID raster SDK" CAN_DISABLE)
-gdal_check_package(DAP "Data Access Protocol library for server and client." CAN_DISABLE)
 gdal_check_package(Armadillo "C++ library for linear algebra (used for TPS transformation)" CAN_DISABLE)
 if (ARMADILLO_FOUND)
   # On Conda, the armadillo package has no dependency on lapack, but the later is required for successful linking. So
@@ -580,7 +581,7 @@ gdal_check_package(KEA "Enable KEA driver" CAN_DISABLE)
 
 gdal_check_package(ECW "Enable ECW driver" CAN_DISABLE)
 gdal_check_package(NetCDF "Enable netCDF driver" CAN_DISABLE
-  # NAMES netCDF # Cf. https://github.com/OSGeo/gdal/pull/5453
+  NAMES netCDF
   TARGETS netCDF::netcdf NETCDF::netCDF)
 gdal_check_package(OGDI "Enable ogr_OGDI driver" CAN_DISABLE)
 # OpenCL warping gives different results than the ones expected by autotest, so disable it by default even if found.
@@ -624,41 +625,6 @@ endif ()
 cmake_dependent_option(GDAL_USE_OPENJPEG "Set ON to use openjpeg" ON OPENJPEG_FOUND OFF)
 if (GDAL_USE_OPENJPEG)
   string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(OpenJPEG MODULE)\n")
-endif ()
-
-# FIXME: we should probably ultimately move the GRASS driver to an
-# external repository, due to GRASS depending on GDAL, hence the GRASS driver
-# can only be built as a plugin. Or at the very least we should only allow building
-# it as a plugin, and have a GDAL_USE_GRASS variable to control if libgrass should
-# be used (and change frmts/CMakeLists.txt and ogr/ogrsf_frmts/CMakeLists.txt
-# to use it instead of HAVE_GRASS)
-if( ALLOW_GRASS_DRIVER )
-# Only GRASS 7 is currently supported but we keep dual version support in cmake for possible future switch to GRASS 8.
-set(TMP_GRASS OFF)
-foreach (GRASS_SEARCH_VERSION 7)
-  # Cached variables: GRASS7_FOUND, GRASS_PREFIX7, GRASS_INCLUDE_DIR7 HAVE_GRASS: TRUE if at least one version of GRASS
-  # was found
-  set(GRASS_CACHE_VERSION ${GRASS_SEARCH_VERSION})
-  if (WITH_GRASS${GRASS_CACHE_VERSION})
-    find_package(GRASS ${GRASS_SEARCH_VERSION} MODULE)
-    if (${GRASS${GRASS_CACHE_VERSION}_FOUND})
-      set(GRASS_PREFIX${GRASS_CACHE_VERSION}
-          ${GRASS_PREFIX${GRASS_SEARCH_VERSION}}
-          CACHE PATH "Path to GRASS ${GRASS_SEARCH_VERSION} base directory")
-      set(TMP_GRASS ON)
-    endif ()
-  endif ()
-endforeach ()
-if (TMP_GRASS)
-  set(HAVE_GRASS
-      ON
-      CACHE INTERNAL "HAVE_GRASS")
-else ()
-  set(HAVE_GRASS
-      OFF
-      CACHE INTERNAL "HAVE_GRASS")
-endif ()
-unset(TMP_GRASS)
 endif ()
 
 gdal_check_package(HDFS "Enable Hadoop File System through native library" CAN_DISABLE)

@@ -6,10 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # [3.5.0] WIP
- - GDAL 3.5.0-git
+ - GDAL 3.5.0-rc1
  - PROJ 9.0.0
  - NetCDF 4.8.1
- - GEOS 3.10.
+ - GEOS 3.10.2
  - Node 18 support
  - API documentation now uses `documentation.js` with `documentation-polyglot`
  - Add `gdal.addPixelFunc` for registering a native code pixel function

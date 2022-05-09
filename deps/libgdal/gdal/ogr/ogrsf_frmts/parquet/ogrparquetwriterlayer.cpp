@@ -104,6 +104,10 @@ bool OGRParquetWriterLayer::SetOptions(CSLConstList papszOptions,
         }
     }
 
+    m_bForceCounterClockwiseOrientation =
+        EQUAL(CSLFetchNameValueDef(papszOptions, "POLYGON_ORIENTATION", "COUNTERCLOCKWISE"),
+              "COUNTERCLOCKWISE");
+
     if( eGType != wkbNone )
     {
         if( !IsSupportedGeometryType(eGType) )
@@ -178,6 +182,9 @@ bool OGRParquetWriterLayer::SetOptions(CSLConstList papszOptions,
         }
     }
 
+    m_bEdgesSpherical = EQUAL(
+        CSLFetchNameValueDef(papszOptions, "EDGES", "PLANAR"), "SPHERICAL");
+
     m_bInitializationOK = true;
     return true;
 }
@@ -208,7 +215,7 @@ void OGRParquetWriterLayer::PerformStepsBeforeFinalFlushGroup()
         CPLTestBool(CPLGetConfigOption("OGR_PARQUET_WRITE_GEO", "YES")) )
     {
         CPLJSONObject oRoot;
-        oRoot.Add("version", "0.2.0");
+        oRoot.Add("version", "0.3.0");
         oRoot.Add("primary_column",
                   m_poFeatureDefn->GetGeomFieldDefn(0)->GetNameRef());
         CPLJSONObject oColumns;
@@ -221,20 +228,47 @@ void OGRParquetWriterLayer::PerformStepsBeforeFinalFlushGroup()
             oColumn.Add("encoding",
                         GetGeomEncodingAsString(m_aeGeomEncoding[i]));
 
-            const auto poSRS = poGeomFieldDefn->GetSpatialRef();
-            if( poSRS )
+            if( CPLTestBool(CPLGetConfigOption(
+                    "OGR_PARQUET_WRITE_CRS", "YES")) )
             {
-                const char* const apszOptions[] = {
-                    "FORMAT=WKT2_2019", "MULTILINE=NO", nullptr };
-                char* pszWKT = nullptr;
-                poSRS->exportToWkt(&pszWKT, apszOptions);
-                if( pszWKT )
-                    oColumn.Add("crs", pszWKT);
-                CPLFree(pszWKT);
+                const auto poSRS = poGeomFieldDefn->GetSpatialRef();
+                if( poSRS )
+                {
+                    if( EQUAL(CPLGetConfigOption(
+                        "OGR_PARQUET_CRS_ENCODING", "WKT"), "PROJJSON") )
+                    {
+                        // CRS encoded as PROJJSON (extension)
+                        char* pszPROJJSON = nullptr;
+                        poSRS->exportToPROJJSON(&pszPROJJSON, nullptr);
+                        CPLJSONDocument oDoc;
+                        oDoc.LoadMemory(pszPROJJSON);
+                        CPLFree(pszPROJJSON);
+                        oColumn.Add("crs", oDoc.GetRoot());
+                    }
+                    else
+                    {
+                        const char* const apszOptions[] = {
+                            "FORMAT=WKT2_2019", "MULTILINE=NO", nullptr };
+                        char* pszWKT = nullptr;
+                        poSRS->exportToWkt(&pszWKT, apszOptions);
+                        if( pszWKT )
+                            oColumn.Add("crs", pszWKT);
+                        CPLFree(pszWKT);
+                    }
 
-                const double dfCoordEpoch = poSRS->GetCoordinateEpoch();
-                if( dfCoordEpoch > 0 )
-                    oColumn.Add("epoch", dfCoordEpoch);
+                    const double dfCoordEpoch = poSRS->GetCoordinateEpoch();
+                    if( dfCoordEpoch > 0 )
+                        oColumn.Add("epoch", dfCoordEpoch);
+                }
+                else
+                {
+                    oColumn.AddNull("crs");
+                }
+            }
+
+            if( m_bEdgesSpherical )
+            {
+                oColumn.Add("edges", "spherical");
             }
 
             if( m_aoEnvelopes[i].IsInit() &&
@@ -280,6 +314,9 @@ void OGRParquetWriterLayer::PerformStepsBeforeFinalFlushGroup()
                 }
                 return osType;
             };
+
+            if( m_bForceCounterClockwiseOrientation )
+                oColumn.Add("orientation", "counterclockwise");
 
             if( m_oSetWrittenGeometryTypes[i].empty() )
             {
@@ -457,6 +494,9 @@ bool OGRParquetWriterLayer::FlushGroup()
 
 void OGRParquetWriterLayer::FixupGeometryBeforeWriting(OGRGeometry* poGeom)
 {
+    if( !m_bForceCounterClockwiseOrientation )
+        return;
+
     const auto eFlattenType = wkbFlatten(poGeom->getGeometryType());
     // Polygon rings MUST follow the right-hand rule for orientation
     // (counterclockwise external rings, clockwise internal rings)

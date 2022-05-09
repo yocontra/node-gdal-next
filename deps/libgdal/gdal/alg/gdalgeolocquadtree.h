@@ -1,11 +1,12 @@
 /******************************************************************************
  *
  * Project:  GDAL
- * Purpose:  Includes libdap headers
- * Author:   Even Rouault <even dot rouault at spatialys dot com>
+ * Purpose:  Implements Geolocation array based transformer, using a quadtree
+ *           for inverse
+ * Author:   Even Rouault, <even.rouault at spatialys.com>
  *
  ******************************************************************************
- * Copyright (c) 2016, Even Rouault <even dot rouault at spatialys dot com>
+ * Copyright (c) 2022, Planet Labs
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -24,44 +25,20 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- *****************************************************************************/
+ ****************************************************************************/
 
-#ifndef LIBDAP_HEADERS_H
-#define LIBDAP_HEADERS_H
+#ifndef GDALGEOLOCQUADTREE_H
+#define GDALGEOLOCQUADTREE_H
 
-#include "cpl_port.h"
+#include "gdal_alg_priv.h"
 
-#ifdef HAVE_GCC_SYSTEM_HEADER
-#pragma GCC system_header
-#endif
+bool GDALGeoLocBuildQuadTree( GDALGeoLocTransformInfo *psTransform );
 
-#include <BaseType.h>  // DODS
-#include <Byte.h>
-#include <Int16.h>
-#include <UInt16.h>
-#include <Int32.h>
-#include <UInt32.h>
-#include <Float32.h>
-#include <Float64.h>
-#include <Str.h>
-#include <Url.h>
-#include <Array.h>
-#include <Structure.h>
-#include <Sequence.h>
-#include <Grid.h>
-
-#ifdef LIBDAP_310
-/* AISConnect.h/AISConnect class was renamed to Connect.h/Connect in libdap 3.10 */
-#include <Connect.h>
-#define AISConnect Connect
-#else
-#include <AISConnect.h>
-#endif
-
-#include <DDS.h>
-#include <DAS.h>
-#include <BaseTypeFactory.h>
-#include <Error.h>
-#include <escaping.h>
+void GDALGeoLocInverseTransformQuadtree(
+                    const GDALGeoLocTransformInfo *psTransform,
+                    int nPointCount,
+                    double *padfX,
+                    double *padfY,
+                    int *panSuccess );
 
 #endif
