@@ -284,19 +284,19 @@ Development versions are unit tested for the following targets:
 ---
 | Node | OS | GDAL |
 | --- | --- | --- |
-| Node.js 14.x | CentOS 8 Stream | system-installed GDAL 3.0.4
-| Node.js 14.x | CentOS 8 Stream | bundled GDAL
-| Node.js 14.x | Debian 10 buster | system-installed GDAL 2.1.2 (*earliest unit-tested GDAL*)
-| Node.js 14.x | Debian 11 bullseye | system-installed GDAL 3.2.2
-| Node.js 14.x | Debian 11 bullseye | bundled GDAL
-| Node.js 14.x | Fedora 33 | system-installed GDAL 3.1.4
-| Node.js 14.x | Fedora 34 | system-installed GDAL 3.2.2
-| Node.js 14.x | Fedora 34 | bundled GDAL
+| Node.js 16.x | CentOS 8 Stream | system-installed GDAL 3.0.4
+| Node.js 16.x | CentOS 8 Stream | bundled GDAL
+| Node.js 16.x | Debian 10 buster | system-installed GDAL 2.1.2 (*earliest unit-tested GDAL*)
+| Node.js 16.x | Debian 11 bullseye | system-installed GDAL 3.2.2
+| Node.js 16.x | Debian 11 bullseye | bundled GDAL
+| Node.js 16.x | Fedora 33 | system-installed GDAL 3.1.4
+| Node.js 16.x | Fedora 34 | system-installed GDAL 3.2.2
+| Node.js 16.x | Fedora 34 | bundled GDAL
 | Node.js 18.x | Arch Linux current | system installed GDAL 3.2.3
 | Node.js 18.x | Arch Linux current | bundled GDAL (*requires rebuilding*)
-| Node.js 14.x | Ubuntu 16.04 | bundled GDAL (*glibc target platform*)
-| Node.js 14.x | Ubuntu 18.04 | system-installed GDAL 2.2.3
-| Node.js 14.x | Ubuntu 18.04 | bundled GDAL
+| Node.js 16.x | Ubuntu 16.04 | bundled GDAL (*glibc target platform*)
+| Node.js 16.x | Ubuntu 18.04 | system-installed GDAL 2.2.3
+| Node.js 16.x | Ubuntu 18.04 | bundled GDAL
 | Node.js 12.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
 | Node.js 14.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
 | Node.js 16.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
