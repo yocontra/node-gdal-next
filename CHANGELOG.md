@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # [3.5.0] WIP
+
+### Added
  - GDAL 3.5.0-rc1
  - PROJ 9.0.0
  - NetCDF 4.8.1
@@ -19,9 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add `gdal.buildVRT` and `gdal.rasterize`, library versions of the GDAL CLI tools
  - Add `gdal.wrapVRT` allowing wrapping a regular Dataset inside a VRT Dataset
  - Support using driver-specific open options in `gdal.Driver.open`
+
+### Changed
  - All `gdal.Driver` methods now throw an exception if the parsing of the driver-specific options fails
 
+## [3.4.3] 2021-05-04
+
+### Added
+ - Bundled GDAL 3.4.3
+
 ## [3.4.2] 2021-03-15
+
+### Added
+ - Bundled GDAL 3.4.2
+
+### Changed
  - Fix #27, rebuilding by `npm --build-from-source` fails
  - Fix #25, always close open Datasets when the process exits
  - `gdal.calcAsync` now correctly returns a rejected Promise instead of triggering an uncatchable error when handling an exception in the user-supplied transformation function
