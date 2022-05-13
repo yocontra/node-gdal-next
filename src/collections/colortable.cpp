@@ -118,7 +118,7 @@ Local<Value> ColorTable::New(GDALColorTable *raw, Local<Value> parent) {
 }
 
 /*
- * Create a standalone color table
+ * Create a standalone color table.
  */
 Local<Value> ColorTable::New(GDALColorTable *raw) {
   Nan::EscapableHandleScope scope;
@@ -163,13 +163,13 @@ NAN_METHOD(ColorTable::clone) {
 }
 
 /**
- * Compares two ColorTable objects for equality
+ * Compares two ColorTable objects for equality.
  *
  * @method isSame
  * @instance
  * @memberof ColorTable
  * @param {ColorTable} other
- * @throws Error
+ * @throws {Error}
  * @return {boolean}
  */
 NAN_METHOD(ColorTable::isSame) {
@@ -192,7 +192,7 @@ NAN_METHOD(ColorTable::isSame) {
  * @instance
  * @memberof ColorTable
  * @param {number} index
- * @throws Error
+ * @throws {Error}
  * @return {Color}
  */
 NAN_METHOD(ColorTable::get) {
@@ -236,7 +236,7 @@ NAN_METHOD(ColorTable::get) {
  * @method set
  * @instance
  * @memberof ColorTable
- * @throws Error
+ * @throws {Error}
  * @param {number} index
  * @param {Color} color
  * @return {void}
@@ -272,7 +272,7 @@ NAN_METHOD(ColorTable::set) {
  * @method ramp
  * @instance
  * @memberof ColorTable
- * @throws Error
+ * @throws {Error}
  * @param {number} start_index
  * @param {Color} start_color
  * @param {number} end_index
@@ -340,7 +340,7 @@ NAN_METHOD(ColorTable::count) {
 }
 
 /**
- * Color interpretation of the palette
+ * Color interpretation of the palette.
  *
  * @readonly
  * @kind member
@@ -374,7 +374,7 @@ NAN_GETTER(ColorTable::interpretationGetter) {
 }
 
 /**
- * Parent band
+ * Returns the parent band.
  *
  * @readonly
  * @kind member

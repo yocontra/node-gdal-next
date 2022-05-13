@@ -206,7 +206,7 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  */
 
 /**
- * Read data from the MDArray
+ * Read data from the MDArray.
  *
  * This will extract the context of a (hyper-)rectangle from the array into a buffer.
  * If the buffer can be passed as an argument or it can be allocated by the function.
@@ -217,13 +217,13 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  * @method read
  * @instance
  * @memberof MDArray
- * @throws Error
+ * @throws {Error}
  * @param {MDArrayOptions} options
  * @param {number[]} options.origin An array of the starting indices
  * @param {number[]} options.span An array specifying the number of elements to read in each dimension
  * @param {number[]} [options.stride] An array of strides for the output array, mandatory if the array is specified
  * @param {string} [options.data_type] See {@link GDT|GDT constants}
- * @param {TypedArray} [options.data] The TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
+ * @param {TypedArray} [options.data] The `TypedArray` to put the data in. A new array is created if not given.
  * @return {TypedArray}
  */
 
@@ -240,16 +240,16 @@ findHighest(int dimensions, std::shared_ptr<size_t> span, std::shared_ptr<GPtrDi
  * @method readAsync
  * @instance
  * @memberof MDArray
- * @throws Error
+ * @throws {Error}
  * @param {MDArrayOptions} options
  * @param {number[]} options.origin An array of the starting indices
  * @param {number[]} options.span An array specifying the number of elements to read in each dimension
  * @param {number[]} [options.stride] An array of strides for the output array, mandatory if the array is specified
  * @param {string} [options.data_type] See {@link GDT|GDT constants}
- * @param {TypedArray} [options.data] The TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) to put the data in. A new array is created if not given.
+ * @param {TypedArray} [options.data] The `TypedArray` to put the data in. A new array is created if not given.
  * @param {ProgressCb} [options.progress_cb]
  * @param {callback<TypedArray>} [callback=undefined]
- * @return {Promise<TypedArray>} A TypedArray (https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView#Typed_array_subclasses) of values.
+ * @return {Promise<TypedArray>} A `TypedArray` of values.
  */
 GDAL_ASYNCABLE_DEFINE(MDArray::read) {
 
@@ -355,14 +355,14 @@ GDAL_ASYNCABLE_DEFINE(MDArray::read) {
 }
 
 /**
- * Get a partial view of the MDArray
+ * Get a partial view of the MDArray.
  *
  * The slice expression uses the same syntax as NumPy basic slicing and indexing. See (https://www.numpy.org/devdocs/reference/arrays.indexing.html#basic-slicing-and-indexing). Or it can use field access by name. See (https://www.numpy.org/devdocs/reference/arrays.indexing.html#field-access).
  *
  * @method getView
  * @instance
  * @memberof MDArray
- * @throws Error
+ * @throws {Error}
  * @param {string} view
  * @return {MDArray}
  */
@@ -393,7 +393,7 @@ NAN_METHOD(MDArray::getView) {
  * @method getMask
  * @instance
  * @memberof MDArray
- * @throws Error
+ * @throws {Error}
  * @return {MDArray}
  */
 NAN_METHOD(MDArray::getMask) {
@@ -421,7 +421,7 @@ NAN_METHOD(MDArray::getMask) {
  * @memberof MDArray
  * @param {number|string} x dimension to be used as X axis
  * @param {number|string} y dimension to be used as Y axis
- * @throws Error
+ * @throws {Error}
  * @return {Dataset}
  */
 NAN_METHOD(MDArray::asDataset) {
@@ -447,9 +447,9 @@ NAN_METHOD(MDArray::asDataset) {
 }
 
 /**
- * Spatial reference associated with MDArray
+ * Spatial reference associated with MDArray.
  *
- * @throws Error
+ * @throws {Error}
  * @kind member
  * @name srs
  * @instance
@@ -616,7 +616,7 @@ NAN_GETTER(MDArray::descriptionGetter) {
 }
 
 /**
- * The flattened length of the array
+ * The flattened length of the array.
  *
  * @readonly
  * @kind member
