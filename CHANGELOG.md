@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # [3.5.0] WIP
 
 ### Added
- - GDAL 3.5.0-rc1
+ - GDAL 3.5.0
  - PROJ 9.0.0
  - NetCDF 4.8.1
  - GEOS 3.10.2
