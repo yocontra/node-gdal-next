@@ -69,7 +69,7 @@
     "lcov": "npx c8 report --reporter=text-lcov > coverage/tests.lcov",
     "codecov": "cd coverage && curl -s https://codecov.io/bash | bash",
     "version": "git add package.json",
-    "postversion": "git push && git push --tags && node ./scripts/publish-packages.js && npm run publish-yuidoc",
+    "postversion": "git push && git push --tags && node ./scripts/publish-packages.js && npm run doc:publish",
     "container": "bash scripts/container.sh",
     "test:u18": "npm run container dev ubuntu:18.04 12 shared",
     "test:u20": "npm run container dev ubuntu:20.04 14 shared",
