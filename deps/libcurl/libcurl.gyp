@@ -52,7 +52,6 @@
 				"HAVE_IOCTL_FIONBIO=1",
 				"HAVE_IOCTL_SIOCGIFADDR=1",
 				"HAVE_LIBGEN_H=1",
-				"HAVE_LIBZ=1",
 				"HAVE_LL=1",
 				"HAVE_LOCALE_H=1",
 				"HAVE_LOCALTIME_R=1",
@@ -162,9 +161,6 @@
 			],
 			"defines": [
 				"BUILDING_LIBCURL=1",
-        "OPENSSL_API_COMPAT=0x10100001L",
-        "OPENSSL_CONFIGURED_API=10100",
-        "OPENSSL_MIN_API=10100",
 				"CURL_DISABLE_GOPHER=1",
 				"CURL_DISABLE_IMAP=1",
 				"CURL_DISABLE_LDAP=1",
@@ -174,9 +170,31 @@
 				"CURL_DISABLE_RTSP=1",
 				"CURL_DISABLE_SMB=1",
 				"ENABLE_IPV6=1",
-				"HAVE_ZLIB_H=1"
+        "HAVE_ZLIB_H=1"
 			],
 			"conditions": [
+        ["runtime == 'electron'", {
+          "include_dirs": [
+    			  "../libgdal/gdal/frmts/zlib"
+          ]
+        }],
+        ["runtime == 'node' and OS == 'linux'", {
+          "defines": [
+						"HAVE_LIBSSL=1",
+            "OPENSSL_API_COMPAT=0x10100001L",
+            "OPENSSL_CONFIGURED_API=10100",
+            "OPENSSL_MIN_API=10100",
+						"HAVE_OPENSSL_CRYPTO_H=1",
+						"HAVE_OPENSSL_ERR_H=1",
+						"HAVE_OPENSSL_PEM_H=1",
+						"HAVE_OPENSSL_RSA_H=1",
+						"HAVE_OPENSSL_SRP=1",
+						"HAVE_OPENSSL_SSL_H=1",
+						"HAVE_OPENSSL_VERSION=1",
+						"HAVE_OPENSSL_X509_H=1",
+						"USE_OPENSSL=1",
+          ]
+        }],
 				["OS == 'win'", {
 					"defines": [
 						"USE_WINDOWS_SSPI=1",
@@ -195,18 +213,9 @@
 						"HAVE_GETHOSTBYNAME_R=1",
 						"HAVE_GETHOSTBYNAME_R_6=1",
 						"HAVE_GETSERVBYPORT_R=1",
-						"HAVE_LIBSSL=1",
 						"HAVE_LINUX_TCP_H=1",
 						"HAVE_MALLOC_H=1",
 						"HAVE_MSG_NOSIGNAL=1",
-						"HAVE_OPENSSL_CRYPTO_H=1",
-						"HAVE_OPENSSL_ERR_H=1",
-						"HAVE_OPENSSL_PEM_H=1",
-						"HAVE_OPENSSL_RSA_H=1",
-						"HAVE_OPENSSL_SRP=1",
-						"HAVE_OPENSSL_SSL_H=1",
-						"HAVE_OPENSSL_VERSION=1",
-						"HAVE_OPENSSL_X509_H=1",
 						"HAVE_POLL=1",
 						"HAVE_POLL_FINE=1",
 						"HAVE_STRNCASECMP=1",
@@ -214,7 +223,6 @@
 						"HAVE_TIME_H=1",
 						"RETSIGTYPE=void",
 						"TIME_WITH_SYS_TIME=1",
-						"USE_OPENSSL=1",
 						"USE_TLS_SRP=1",
 						 "<@(UNIX_defines)"
 					]

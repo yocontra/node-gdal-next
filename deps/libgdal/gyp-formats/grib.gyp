@@ -64,7 +64,6 @@
 				"../gdal/frmts/degrib/degrib",
 				"../gdal/frmts/mem",
 				"../gdal/frmts/png/libpng",
-				"../gdal/frmts/zlib",
 				"../gdal/frmts/degrib/g2clib",
 				"../gdal/frmts/degrib/g2clib"
 			]

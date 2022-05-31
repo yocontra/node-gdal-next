@@ -42,6 +42,7 @@ GDAL_FORMATS="gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm
 	coasp tsx terragen blx til r northwood saga xyz hf2
 	kmlsuperoverlay ctg zmap ngsgeoid iris map
 	jpeg openjpeg png mbtiles wms wmts hdf5 grib netcdf wcs
+  zlib
 	${OPT_GDAL_FORMATS:-}"
 
 OGR_FORMATS="shape vrt avc geojson mem mitab kml gpx

@@ -1,5 +1,6 @@
 {
 	"variables": {
+    "runtime%": "node",
 		"deps_dir": "./deps"
 	},
 	"target_defaults": {
@@ -14,7 +15,7 @@
 		},
 		"defines": [
 			"NOGDI=1",
-			"HAVE_LIBZ"
+      "HAVE_LIBZ=1"
 		],
 		"xcode_settings": {
 			"GCC_ENABLE_CPP_RTTI": "YES",
@@ -46,6 +47,10 @@
       }
     },
 		"conditions": [
+        ["runtime == 'node'", {
+          "defines": [
+          ]
+        }],
 			["OS == 'win'", {
 				"defines": [
           "NOMINMAX",

@@ -200,5 +200,14 @@
 			"FLATGEOBUF_ENABLED=1",
 			"CARTO_ENABLED=1"
 		]
-	}
+	},
+  "conditions": [
+    ["runtime == 'electron'", {
+      "variables": {
+        "gdal_format_gyps": [
+          "./gyp-formats/zlib.gyp:libgdal_zlib_frmt"
+        ]
+      }
+    }]
+  ]
 }

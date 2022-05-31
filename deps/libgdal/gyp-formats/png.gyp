@@ -27,7 +27,6 @@
 			"include_dirs": [
 				"../gdal/frmts/png",
 				"../gdal/frmts/png/libpng",
-				"../gdal/frmts/zlib"
 			]
 		}
 	]
