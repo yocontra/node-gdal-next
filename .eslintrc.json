@@ -201,6 +201,14 @@
       "parserOptions": {
         "ecmaVersion": 2018
       }
+    },
+    {
+      "files": [
+        "examples/electron/*"
+      ],
+      "env": {
+        "browser": true
+      }
     }
   ]
 }
