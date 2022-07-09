@@ -75,8 +75,12 @@
 
 #define ROTATED_POLE_VAR_NAME "rotated_pole"
 
-// Detect netCDF 4.8
-#ifdef NC_ENCZARR
+// netCDF 4.8 switched to expecting filenames in UTF-8 on Windows
+// But with netCDF 4.9 and https://github.com/Unidata/netcdf-c/pull/2277/,
+// this is apparently back to expecting filenames in current codepage...
+// Detect netCDF 4.8 with NC_ENCZARR
+// Detect netCDF 4.9 with NC_NOATTCREORD
+#if defined(NC_ENCZARR) && !defined(NC_NOATTCREORD)
 #define NETCDF_USES_UTF8
 #endif
 
@@ -4610,7 +4614,7 @@ void netCDFDataset::SetProjectionFromVar( int nGroupId, int nVarId,
     // Process geolocation arrays from CF "coordinates" attribute.
     if( ProcessCFGeolocation(nGroupId, nVarId) )
     {
-        if( !oSRS.IsProjected() && !bSwitchedXY )
+        if( !oSRS.IsGeographic() && !oSRS.IsProjected() && !bSwitchedXY )
         {
             bGotCfGT = false;
         }
@@ -5764,14 +5768,22 @@ CPLErr netCDFDataset::AddProjectionVars( bool bDefsOnly,
             else
             {
                 CPLAssert(bHasGeoloc);
-                vcdf.nc_put_vatt_text(nVarXID, CF_AXIS, CF_SG_X_AXIS);
-                vcdf.nc_put_vatt_text(nVarXID, CF_LNG_NAME, "x-coordinate in Cartesian system");
-                vcdf.nc_put_vatt_text(nVarXID, CF_UNITS, "m");
-                vcdf.nc_put_vatt_text(nVarYID, CF_AXIS, CF_SG_Y_AXIS);
-                vcdf.nc_put_vatt_text(nVarYID, CF_LNG_NAME, "y-coordinate in Cartesian system");
-                vcdf.nc_put_vatt_text(nVarYID, CF_UNITS, "m");
+                try
+                {
+                    vcdf.nc_put_vatt_text(nVarXID, CF_AXIS, CF_SG_X_AXIS);
+                    vcdf.nc_put_vatt_text(nVarXID, CF_LNG_NAME, "x-coordinate in Cartesian system");
+                    vcdf.nc_put_vatt_text(nVarXID, CF_UNITS, "m");
+                    vcdf.nc_put_vatt_text(nVarYID, CF_AXIS, CF_SG_Y_AXIS);
+                    vcdf.nc_put_vatt_text(nVarYID, CF_LNG_NAME, "y-coordinate in Cartesian system");
+                    vcdf.nc_put_vatt_text(nVarYID, CF_UNITS, "m");
 
-                pszCFCoordinates = NCDF_LONLAT;
+                    pszCFCoordinates = NCDF_LONLAT;
+                }
+                catch(nccfdriver::SG_Exception& e)
+                {
+                    CPLError(CE_Failure, CPLE_FileIO, "%s", e.get_err_msg());
+                    return CE_Failure;
+                }
             }
         }
 
@@ -9401,6 +9413,25 @@ netCDFDataset::CreateLL( const char *pszFilename,
         char* pszTemp = CPLRecode( osFilenameForNCCreate, CPL_ENC_UTF8, "CP_ACP" );
         osFilenameForNCCreate = pszTemp;
         CPLFree(pszTemp);
+    }
+#endif
+
+#if defined(WIN32)
+    {
+        // Works around bug of msys2 netCDF 4.9.0 package where nc_create() crashes
+        VSIStatBuf sStat;
+        const char* pszDir = CPLGetDirname(osFilenameForNCCreate.c_str());
+        if( VSIStat(pszDir, &sStat) != 0 )
+        {
+            CPLError(CE_Failure, CPLE_OpenFailed,
+                     "Unable to create netCDF file %s: non existing output directory",
+                     pszFilename);
+            CPLReleaseMutex(hNCMutex);  // Release mutex otherwise we'll deadlock
+                                        // with GDALDataset own mutex.
+            delete poDS;
+            CPLAcquireMutex(hNCMutex, 1000.0);
+            return nullptr;
+        }
     }
 #endif
 

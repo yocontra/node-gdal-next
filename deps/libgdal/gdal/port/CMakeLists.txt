@@ -68,6 +68,7 @@ set(CPL_SOURCES
     cpl_vsil_tar.cpp
     cpl_vsil_stdin.cpp
     cpl_vsil_buffered_reader.cpp
+    cpl_vsil_plugin.cpp
     cpl_base64.cpp
     cpl_vsil_curl.cpp
     cpl_vsil_curl_streaming.cpp
@@ -135,6 +136,11 @@ if (WIN32)
   target_sources(cpl PRIVATE cpl_vsil_win32.cpp)
 else ()
   target_sources(cpl PRIVATE cpl_vsil_unix_stdio_64.cpp)
+  set(BUILD_WITHOUT_64BIT_OFFSET OFF CACHE BOOL "Build GDAL without > 4GB file support. If file API does not seem to support 64-bit offset.")
+  mark_as_advanced(BUILD_WITHOUT_64BIT_OFFSET)
+  if(BUILD_WITHOUT_64BIT_OFFSET)
+      target_compile_definitions(cpl PRIVATE -DBUILD_WITHOUT_64BIT_OFFSET)
+  endif()
 endif ()
 
 if (HAVE_SSSE3_AT_COMPILE_TIME)

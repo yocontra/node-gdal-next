@@ -81,7 +81,10 @@ void OGRParquetLayer::LoadGeoMetadata()
             {
                 auto oRoot = oDoc.GetRoot();
                 const auto osVersion = oRoot.GetString("version");
-                if( osVersion != "0.1.0" )
+                if( osVersion != "0.1.0" &&
+                    osVersion != "0.2.0" &&
+                    osVersion != "0.3.0" &&
+                    osVersion != "0.4.0" )
                 {
                     CPLDebug("PARQUET",
                              "version = %s not explicitly handled by the driver",
@@ -134,7 +137,7 @@ void OGRParquetLayer::EstablishFeatureDefn()
         std::string osExtensionName;
         if( field_kv_metadata )
         {
-            auto extension_name = kv_metadata->Get("ARROW:extension:name");
+            auto extension_name = field_kv_metadata->Get("ARROW:extension:name");
             if( extension_name.ok() )
             {
                 osExtensionName = *extension_name;
@@ -435,13 +438,14 @@ void OGRParquetLayer::CreateFieldFromSchema(
                                     path, oMapFieldNameToGDALSchemaFieldDefn);
         if( bTypeOK )
         {
+            m_apoArrowDataTypes.push_back(type);
             m_anMapFieldIndexToParquetColumn.push_back(bParquetColValid ? iParquetCol : -1);
         }
     }
 
     if( bParquetColValid )
         iParquetCol += nParquetColIncrement;
-};
+}
 
 /************************************************************************/
 /*                          BuildDomain()                               */
@@ -460,8 +464,8 @@ std::unique_ptr<OGRFieldDomain> OGRParquetLayer::BuildDomain(const std::string& 
     std::shared_ptr<arrow::RecordBatchReader> poRecordBatchReader;
     const auto oldBatchSize = m_poArrowReader->properties().batch_size();
     m_poArrowReader->set_batch_size(1);
-    m_poArrowReader->GetRecordBatchReader({0}, {iParquetCol},
-                                          &poRecordBatchReader);
+    CPL_IGNORE_RET_VAL(m_poArrowReader->GetRecordBatchReader({0}, {iParquetCol},
+                                          &poRecordBatchReader));
     if( poRecordBatchReader != nullptr )
     {
         std::shared_ptr<arrow::RecordBatch> poBatch;
@@ -500,8 +504,9 @@ OGRwkbGeometryType OGRParquetLayer::ComputeGeometryColumnType(int iGeomCol,
     anRowGroups.reserve(nNumGroups);
     for( int i = 0; i < nNumGroups; ++i )
         anRowGroups.push_back(i);
-    m_poArrowReader->GetRecordBatchReader(anRowGroups, {iParquetCol},
-                                          &poRecordBatchReader);
+    CPL_IGNORE_RET_VAL(
+        m_poArrowReader->GetRecordBatchReader(anRowGroups, {iParquetCol},
+                                              &poRecordBatchReader));
     if( poRecordBatchReader != nullptr )
     {
         std::shared_ptr<arrow::RecordBatch> poBatch;
@@ -543,14 +548,16 @@ OGRFeature* OGRParquetLayer::GetFeatureExplicitFID(GIntBig nFID)
         anRowGroups.push_back(i);
     if( m_bIgnoredFields )
     {
-        m_poArrowReader->GetRecordBatchReader(anRowGroups,
+        CPL_IGNORE_RET_VAL(
+            m_poArrowReader->GetRecordBatchReader(anRowGroups,
                                               m_anRequestedParquetColumns,
-                                              &poRecordBatchReader);
+                                              &poRecordBatchReader));
     }
     else
     {
-        m_poArrowReader->GetRecordBatchReader(anRowGroups,
-                                              &poRecordBatchReader);
+        CPL_IGNORE_RET_VAL(
+            m_poArrowReader->GetRecordBatchReader(anRowGroups,
+                                              &poRecordBatchReader));
     }
     if( poRecordBatchReader != nullptr )
     {
@@ -1018,6 +1025,10 @@ const char* OGRParquetLayer::GetMetadataItem( const char* pszName,
         if( EQUAL(pszName, "NUM_ROW_GROUPS") )
         {
             return CPLSPrintf("%d", m_poArrowReader->num_row_groups());
+        }
+        if( EQUAL(pszName, "CREATOR") )
+        {
+            return CPLSPrintf("%s", m_poArrowReader->parquet_reader()->metadata()->created_by().c_str());
         }
         else if( sscanf(pszName, "ROW_GROUPS[%d]", &nRowGroupIdx) == 1 &&
                  strstr(pszName, ".NUM_ROWS") )

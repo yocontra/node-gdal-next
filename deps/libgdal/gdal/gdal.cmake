@@ -192,12 +192,43 @@ endif ()
 
 # message(STATUS "GDAL_C_WARNING_FLAGS: ${GDAL_C_WARNING_FLAGS}") message(STATUS "GDAL_CXX_WARNING_FLAGS: ${GDAL_CXX_WARNING_FLAGS}")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   check_cxx_compiler_flag(-fno-finite-math-only HAVE_FLAG_NO_FINITE_MATH_ONLY)
   if (HAVE_FLAG_NO_FINITE_MATH_ONLY)
     # Intel CXX compiler based on clang defaults to -ffinite-math-only, which breaks std::isinf(), std::isnan(), etc.
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-finite-math-only)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-finite-math-only")
   endif ()
+
+  set(TEST_LINK_STDCPP_SOURCE_CODE
+      "#include <string>
+    int main(){
+      std::string s;
+      s += \"x\";
+      return 0;
+    }")
+  check_cxx_source_compiles("${TEST_LINK_STDCPP_SOURCE_CODE}" _TEST_LINK_STDCPP)
+  if( NOT _TEST_LINK_STDCPP )
+      message(WARNING "Cannot link code using standard C++ library. Automatically adding -lstdc++ to CMAKE_EXE_LINKER_FLAGS")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lstdc++")
+
+      check_cxx_source_compiles("${TEST_LINK_STDCPP_SOURCE_CODE}" _TEST_LINK_STDCPP_AGAIN)
+      if( NOT _TEST_LINK_STDCPP_AGAIN )
+          message(FATAL_ERROR "Cannot link C++ program")
+      endif()
+  endif()
+
+  check_c_compiler_flag(-wd188 HAVE_WD188) # enumerated type mixed with another type
+  if( HAVE_WD188 )
+    set(GDAL_C_WARNING_FLAGS ${GDAL_C_WARNING_FLAGS} -wd188)
+  endif()
+  check_c_compiler_flag(-wd2259 HAVE_WD2259) # non-pointer conversion from ... may lose significant bits
+  if( HAVE_WD2259 )
+    set(GDAL_C_WARNING_FLAGS ${GDAL_C_WARNING_FLAGS} -wd2259)
+  endif()
+  check_c_compiler_flag(-wd2312 HAVE_WD2312) # pointer cast involving 64-bit pointed-to type
+  if( HAVE_WD2259 )
+    set(GDAL_C_WARNING_FLAGS ${GDAL_C_WARNING_FLAGS} -wd2312)
+  endif()
 endif ()
 
 # ######################################################################################################################
@@ -301,6 +332,10 @@ if (MSVC)
       CACHE STRING "Postfix to add to the GDAL dll name for debug builds")
   set_target_properties(${GDAL_LIB_TARGET_NAME} PROPERTIES DEBUG_POSTFIX "${GDAL_DEBUG_POSTFIX}")
 endif ()
+if (MINGW AND BUILD_SHARED_LIBS)
+    set_target_properties(${GDAL_LIB_TARGET_NAME} PROPERTIES SUFFIX "-${GDAL_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif ()
+
 
 if (MSVC AND NOT BUILD_SHARED_LIBS)
   target_compile_definitions(${GDAL_LIB_TARGET_NAME} PUBLIC CPL_DISABLE_DLL=)
@@ -454,6 +489,16 @@ cmake_dependent_option(OGR_ENABLE_DRIVER_SQLITE "Set ON to build OGR SQLite driv
                        "GDAL_USE_SQLITE3" OFF)
 cmake_dependent_option(OGR_ENABLE_DRIVER_GPKG "Set ON to build OGR GPKG driver" ${OGR_BUILD_OPTIONAL_DRIVERS}
                        "GDAL_USE_SQLITE3;OGR_ENABLE_DRIVER_SQLITE" OFF)
+
+# Build frmts/iso8211 conditionally to drivers requiring it
+if ((GDAL_BUILD_OPTIONAL_DRIVERS AND NOT DEFINED GDAL_ENABLE_DRIVER_ADRG AND NOT DEFINED GDAL_ENABLE_DRIVER_SDTS) OR
+    GDAL_ENABLE_DRIVER_ADRG OR
+    GDAL_ENABLE_DRIVER_SDTS OR
+    (OGR_BUILD_OPTIONAL_DRIVERS AND NOT DEFINED OGR_ENABLE_DRIVER_S57 AND NOT DEFINED OGR_ENABLE_DRIVER_SDTS) OR
+    OGR_ENABLE_DRIVER_S57 OR
+    OGR_ENABLE_DRIVER_SDTS)
+  add_subdirectory(frmts/iso8211)
+endif()
 
 add_subdirectory(frmts)
 add_subdirectory(ogr/ogrsf_frmts)

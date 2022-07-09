@@ -266,11 +266,6 @@ gdal_check_package(Iconv "Character set recoding (used in GDAL portability libra
 if (Iconv_FOUND)
   set(CMAKE_REQUIRED_INCLUDES ${Iconv_INCLUDE_DIR})
   set(CMAKE_REQUIRED_LIBRARIES ${Iconv_LIBRARY})
-  if (MSVC)
-    set(CMAKE_REQUIRED_FLAGS "/WX")
-  else ()
-    set(CMAKE_REQUIRED_FLAGS "-Werror")
-  endif ()
 
   set(ICONV_CONST_TEST_CODE
       "#include <stdlib.h>
@@ -576,7 +571,7 @@ gdal_check_package(GEOS "Geometry Engine - Open Source (GDAL core dependency)" R
 )
 gdal_check_package(HDF4 "Enable HDF4 driver" CAN_DISABLE)
 
-define_find_package2(KEA libkea/KEACommon.h kea)
+define_find_package2(KEA libkea/KEACommon.h kea;libkea)
 gdal_check_package(KEA "Enable KEA driver" CAN_DISABLE)
 
 gdal_check_package(ECW "Enable ECW driver" CAN_DISABLE)
@@ -629,20 +624,14 @@ endif ()
 
 gdal_check_package(HDFS "Enable Hadoop File System through native library" CAN_DISABLE)
 
-# PDF library: one of them enables PDF driver
+# PDF library: one of them enables the read side of the PDF driver
 gdal_check_package(Poppler "Enable PDF driver with Poppler (read side)" CAN_DISABLE)
 
 define_find_package2(PDFIUM public/fpdfview.h pdfium FIND_PATH_SUFFIX pdfium)
 gdal_check_package(PDFIUM "Enable PDF driver with Pdfium (read side)" CAN_DISABLE)
 
 gdal_check_package(Podofo "Enable PDF driver with Podofo (read side)" CAN_DISABLE)
-if (GDAL_USE_POPPLER
-    OR GDAL_USE_PDFIUM
-    OR GDAL_USE_PODOFO)
-  set(HAVE_PDFLIB ON)
-else ()
-  set(HAVE_PDFLIB OFF)
-endif ()
+
 
 set(Oracle_CAN_USE_CLNTSH_AS_MAIN_LIBRARY ON)
 gdal_check_package(Oracle "Enable Oracle OCI driver" CAN_DISABLE)

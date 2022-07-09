@@ -1,11 +1,11 @@
 /******************************************************************************
  *
- * Project:  Parquet Translator
- * Purpose:  Implements OGRParquetDriver.
- * Author:   Even Rouault, <even.rouault at spatialys.com>
+ * Project:  GDAL Core
+ * Purpose:  SSSE3 specializations
+ * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
- * Copyright (c) 2022, Planet Labs
+ * Copyright (c) 2016, Even Rouault <even dot rouault at spatialys dot com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -26,37 +26,17 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef OGR_INCLUDE_PARQUET_H
-#define OGR_INCLUDE_PARQUET_H
+#ifndef RASTERIO_SSSE3_H_INCLUDED
+#define RASTERIO_SSSE3_H_INCLUDED
 
-#if defined(__GNUC__) && !defined(_MSC_VER)
-#pragma GCC system_header
-#endif
+#include "cpl_port.h"
 
-#ifdef _MSC_VER
-#pragma warning( push )
-#pragma warning( disable : 4244 )  /*  warning 4244: 'initializing': conversion from 'int32_t' to 'int16_t', possible loss of data */
-#pragma warning( disable : 4458 )  /*  warning 4458: declaration of 'type_id' hides class member */
-#endif
+#if defined(HAVE_SSSE3_AT_COMPILE_TIME) && ( defined(__x86_64) || defined(_M_X64) )
 
-#include "arrow/builder.h"
-#include "arrow/memory_pool.h"
-#include "arrow/array/array_dict.h"
-#include "arrow/io/file.h"
-#include "arrow/ipc/writer.h"
-#include "arrow/util/base64.h"
-#include "arrow/util/compression.h"
-#include "arrow/util/decimal.h"
-#include "arrow/util/key_value_metadata.h"
-#include "parquet/file_writer.h"
-#include "parquet/schema.h"
-#include "parquet/statistics.h"
-#include "parquet/arrow/reader.h"
-#include "parquet/arrow/writer.h"
-#include "parquet/arrow/schema.h"
-
-#ifdef _MSC_VER
-#pragma warning( pop )
-#endif
+void GDALUnrolledCopy_GByte_3_1_SSSE3( GByte* CPL_RESTRICT pDest,
+                                       const GByte* CPL_RESTRICT pSrc,
+                                       GPtrDiff_t nIters );
 
 #endif
+
+#endif /* RASTERIO_SSSE3_H_INCLUDED */
