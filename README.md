@@ -14,6 +14,12 @@ Read and write raster and vector geospatial datasets straight from [Node.js](htt
 
 When in doubt on how to use a method, check also the [unit tests](https://github.com/mmomtchev/node-gdal-async/tree/master/test).
 
+---
+
+**I am looking for a company willing to cover the costs of renting a remote Apple M1 host in order to provide support for the new Apple Macbooks. If paying by the hour, you should expect about 1 or 2 days of uptime per month. Contact me via a message on [mmomtchev/node-gdal-async#30](https://github.com/mmomtchev/node-gdal-async/issues/30).**
+
+---
+
 ## Fork notes
 
 This project is a fork of <https://github.com/contra/node-gdal-next> which is a fork of <https://github.com/naturalatlas/node-gdal>.
