@@ -236,6 +236,33 @@ Amazon Linux will be supported starting from `gdal-async@3.3.4`. There is no sha
 
 Refer to the provided example in `examples/electron`. Prepare for some very rough edge on Windows due to [#29893](https://github.com/electron/electron/issues/29893). Also `https` is not supported when running in Electron.
 
+### Bundling with `rollup`
+
+If you are bundling your application for production deployment, `gdal-async` can be bundled with `rollup` through `rollup-plugin-natives` since [`rollup-plugin-natives#13`](https://github.com/danielgindi/rollup-plugin-natives/pull/13). Here is a an example configuration:
+
+```js
+plugins: [
+  native({
+    copyTo: 'build/prod/lib',
+    destDir: './lib'
+  }),
+  copy({
+    targets: [
+      {
+        src: 'node_modules/gdal-async/deps/libgdal/gdal/data',
+        dest: 'build/deps/libgdal/gdal'
+      },
+      {
+        src: 'node_modules/gdal-async/deps/libproj/proj/data',
+        dest: 'build/deps/libproj/proj'
+      }
+    ]
+  })
+]
+```
+
+You can check [XC-DB](https://github.com/mmomtchev/xc-db) for a working project that uses `gdal-async` with `Express` and is bundled for production with `rollup`.
+
 ## Known issues
 
 * [#2](https://github.com/mmomtchev/node-gdal-async/issues/2) When running multiple parallel async operations per `Dataset` and on multiple `Dataset`s, thread starvation is possible as explained in [`ASYNCIO.md`](https://github.com/mmomtchev/node-gdal-async/blob/master/ASYNCIO.md)
