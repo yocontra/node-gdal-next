@@ -84,7 +84,7 @@ jobs:
 
     strategy:
       matrix:
-        linux-version: [ 'ubuntu:16.04', 'amazonlinux:latest' ]
+        linux-version: [ 'amazonlinux:latest' ]
 
     steps:
     - uses: actions/checkout@v3
