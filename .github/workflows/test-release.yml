@@ -24,7 +24,7 @@ jobs:
         - fedora:34
         - centos:stream8
         - amazonlinux:latest
-        node-version: [ 12, 14, 16, 17 ]
+        node-version: [ 14, 16 ]
 
     steps:
     - uses: actions/checkout@v3
@@ -49,7 +49,7 @@ jobs:
         - debian:bullseye
         - fedora:34
         - centos:stream8
-        node-version: [ 18 ]
+        node-version: [ 18, 19 ]
 
     steps:
     - uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
     strategy:
       matrix:
         platforms: [ windows-2019, macos-10.15 ]
-        node-version: [ 12.x, 14.x, 16.x, 17.x, 18.x ]
+        node-version: [ 14.x, 16.x, 18.x, 19.x ]
 
     steps:
     - uses: actions/checkout@v3
