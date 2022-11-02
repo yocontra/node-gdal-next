@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.5.3] WIP
+## [3.5.3] 2022-11-02
+### Added
+ - GDAL 3.5.3
+
+### Changed
  - Fix #43, wrong TypeScript type for `data_type` in `gdal.Driver.create`
 
 ## [3.5.2] 2022-09-23

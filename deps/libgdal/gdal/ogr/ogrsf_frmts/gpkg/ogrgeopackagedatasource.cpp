@@ -857,7 +857,7 @@ int GDALGeoPackageDataset::GetSrsId(const OGRSpatialReference& oSRS)
                 "INSERT INTO gpkg_spatial_ref_sys "
                 "(srs_name,srs_id,organization,organization_coordsys_id,"
                 "definition, definition_12_063%s) VALUES "
-                "('%q', %d, upper('%q'), %d, '%q', '%q')",
+                "('%q', %d, upper('%q'), %d, '%q', '%q'%s)",
                 osEpochColumn.c_str(),
                 GetSrsName(*poSRS), nSRSId, "NONE", nSRSId,
                 pszWKT1 ? pszWKT1.get() : "undefined",
@@ -1258,15 +1258,15 @@ int GDALGeoPackageDataset::Open( GDALOpenInfo* poOpenInfo )
     const GByte* pabyHeader = poOpenInfo->pabyHeader;
     if( STARTS_WITH_CI(poOpenInfo->pszFilename, "GPKG:") )
     {
-        char** papszTokens = CSLTokenizeString2(poOpenInfo->pszFilename, ":", 0);
+        char** papszTokens = CSLTokenizeString2(poOpenInfo->pszFilename, ":", CSLT_HONOURSTRINGS);
         int nCount = CSLCount(papszTokens);
-        if( nCount < 3 )
+        if( nCount < 2 )
         {
             CSLDestroy(papszTokens);
             return FALSE;
         }
 
-        if( nCount == 3 )
+        if( nCount <= 3 )
         {
             osFilename = papszTokens[1];
         }
@@ -1288,7 +1288,8 @@ int GDALGeoPackageDataset::Open( GDALOpenInfo* poOpenInfo )
                 osFilename += papszTokens[i];
             }
         }
-        osSubdatasetTableName = papszTokens[nCount-1];
+        if( nCount >= 3 )
+            osSubdatasetTableName = papszTokens[nCount-1];
 
         CSLDestroy(papszTokens);
         VSILFILE *fp = VSIFOpenL(osFilename, "rb");
@@ -5203,6 +5204,17 @@ GDALDataset* GDALGeoPackageDataset::CreateCopy( const char *pszFilename,
         return nullptr;
     }
 
+    // Assign nodata values before the SetGeoTransform call.
+    // SetGeoTransform will trigger creation of the overview datasets for each zoom level
+    // and at that point the nodata value needs to be known.
+    int bHasNoData = FALSE;
+    double dfNoDataValue =
+            poSrcDS->GetRasterBand(1)->GetNoDataValue(&bHasNoData);
+    if( eDT != GDT_Byte && bHasNoData )
+    {
+        poDS->GetRasterBand(1)->SetNoDataValue(dfNoDataValue);
+    }
+
     poDS->SetGeoTransform(adfGeoTransform);
     poDS->SetProjection(pszWKT);
     CPLFree(pszWKT);
@@ -5210,14 +5222,6 @@ GDALDataset* GDALGeoPackageDataset::CreateCopy( const char *pszFilename,
     if( nTargetBands == 1 && nBands == 1 && poSrcDS->GetRasterBand(1)->GetColorTable() != nullptr )
     {
         poDS->GetRasterBand(1)->SetColorTable( poSrcDS->GetRasterBand(1)->GetColorTable() );
-    }
-
-    int bHasNoData = FALSE;
-    double dfNoDataValue =
-            poSrcDS->GetRasterBand(1)->GetNoDataValue(&bHasNoData);
-    if( eDT != GDT_Byte && bHasNoData )
-    {
-        poDS->GetRasterBand(1)->SetNoDataValue(dfNoDataValue);
     }
 
     hTransformArg =
