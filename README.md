@@ -43,6 +43,10 @@ It adds a number of features:
 
 Support for `worker_threads` is planned but it is not a priority project
 
+## Long term support of this project
+
+The birth of this project is related to a huge extortion in the geography community linked to a sexual harassment affair, linked to a penis-size problem, and covered up with corruption in the French Judiciary. It is maintained as a free service to the geography community so that it can remain as a constant remainder to [OSGeo](https://www.osgeo.org/) - who chose to back the extortion. I have been working on it while living on social welfare. You can safely use this framework in your projects, be assured that it will be maintained very well and for many years to come. It's companion project on the client-side is [`rlayers`](https://github.com/mmomtchev/rlayers).
+
 ## Installation
 
 Pre-built binaries are provided for most recent Linux distributions, Windows 64 bit and OS X 10.15:
