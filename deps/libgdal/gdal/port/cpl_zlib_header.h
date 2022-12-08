@@ -35,4 +35,9 @@
 
 #include "zlib.h"
 
+#include "node_version.h"
+#if NODE_MODULE_VERSION >= 111
+#define crc32_combine crc32_combine64
+#endif
+
 #endif
