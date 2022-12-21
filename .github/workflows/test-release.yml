@@ -23,7 +23,7 @@ jobs:
         - fedora:34
         - centos:stream8
         - amazonlinux:2022
-        node-version: [ 18, 19 ]
+        node-version: [ 14, 16, 18, 19 ]
         exclude:
           - linux-version: fedora:33
             node-version: 19
