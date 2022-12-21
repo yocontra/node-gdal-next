@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.6.0] 201-12-10
+## [3.6.0] 201-12-21
 ### Added
  - GDAL 3.6.0
+ - Node.js 19.x
+ - Drop support for glibc < 2.28 distributions (not supported by recent Node.js versions)
+ - Drop support for all Amazon Linux 2, replacing it with Amazon Linux 2022
+ - Drop support for Ubuntu 16.04 and 18.04
+ - Ubuntu 22.04
 
 ## [3.5.3] 2022-11-02
 ### Added

@@ -7,7 +7,6 @@ ENV GDAL=${GDAL}
 
 RUN \
   yum install -y gcc-c++ make && \
-  curl -sL https://rpm.nodesource.com/setup_${NODEJS}.x | bash - && \
   yum install -y nodejs && \
   yum install -y git rsync python3 byacc && \
   alternatives --install /usr/bin/python python /usr/bin/python3 60 && \
