@@ -24,6 +24,9 @@ jobs:
         - centos:stream8
         - amazonlinux:2022
         node-version: [ 18, 19 ]
+        exclude:
+          - linux-version: fedora:33
+            node-version: 19
 
     steps:
     - uses: actions/checkout@v3
