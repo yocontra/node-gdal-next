@@ -143,7 +143,7 @@ function generate_formats() {
 }
 
 mkdir -p gdal/gcore/gdal_version_full
-ln -s ../gdal_version.h gdal/gcore/gdal_version_full/
+cp gdal/gcore/gdal_version.h gdal/gcore/gdal_version_full/
 
 generate_formats "$GDAL_FORMATS" "${dir_gdal}/frmts"
 generate_formats "$OGR_FORMATS" "${dir_gdal}/ogr/ogrsf_frmts" "ogr_"
