@@ -20,6 +20,7 @@ void Utils::Initialize(Local<Object> target) {
   Nan__SetAsyncableMethod(target, "warp", warp);
   Nan__SetAsyncableMethod(target, "buildVRT", buildvrt);
   Nan__SetAsyncableMethod(target, "rasterize", rasterize);
+  Nan__SetAsyncableMethod(target, "dem", dem);
 }
 
 /**
@@ -614,6 +615,101 @@ GDAL_ASYNCABLE_DEFINE(Utils::rasterize) {
   job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
 
   job.run(info, async, 4);
+}
+
+/**
+ * Library version of gdaldem.
+ *
+ * @example
+ * const ds = gdal.open('input.tif')
+ * const output = gdal.dem('/vsimem/output.tiff', ds, 'hillshade',  [ '-z', '2' ])
+ *
+ * @throws {Error}
+ * @method dem
+ * @static
+ * @param {string} dst_path destination path
+ * @param {Dataset} src_ds source dataset
+ * @param {'hillshade'|'slope'|'aspect'|'color-relief'|'TRI'|'TPI'|'Roughness'} mode processing mode
+ * @param {string[]} [args] array of CLI options for gdaldem
+ * @param {string} [colorFile] optional color filename, see https://gdal.org/programs/gdaldem.html for more details
+ * @param {UtilOptions} [options] additional options
+ * @param {ProgressCb} [options.progress_cb]
+ * @return {Dataset}
+ */
+
+/**
+ * Library version of gdaldem.
+ * @async
+ *
+ * @example
+ * const ds = await gdal.openAsync('input.tif')
+ * const output = await gdal.demAsync('/vsimem/output.tiff', ds, 'hillshade', [ '-z', '2' ])
+ *
+ * @throws {Error}
+ * @method demAsync
+ * @static
+ * @param {string} dst_path destination path
+ * @param {Dataset} src_ds source dataset
+ * @param {'hillshade'|'slope'|'aspect'|'color-relief'|'TRI'|'TPI'|'Roughness'} mode processing mode
+ * @param {string[]} [args] array of CLI options for gdaldem
+ * @param {string} [colorFile] optional color filename, see https://gdal.org/programs/gdaldem.html for more details
+ * @param {UtilOptions} [options] additional options
+ * @param {ProgressCb} [options.progress_cb]
+ * @param {callback<Dataset>} [callback=undefined]
+ * @return {Promise<Dataset>}
+ */
+GDAL_ASYNCABLE_DEFINE(Utils::dem) {
+  auto aosOptions = std::make_shared<CPLStringList>();
+
+  std::string dst_path;
+  NODE_ARG_STR(0, "dst_path", dst_path);
+
+  Local<Object> src;
+  NODE_ARG_OBJECT(1, "src", src);
+  NODE_UNWRAP_CHECK(Dataset, src, ds);
+  GDAL_RAW_CHECK(GDALDataset *, ds, raw);
+
+  std::string mode;
+  NODE_ARG_STR(2, "mode", mode);
+
+  Local<Array> args;
+  NODE_ARG_ARRAY_OPT(3, "args", args);
+  if (!args.IsEmpty()) {
+    for (unsigned i = 0; i < args->Length(); ++i) {
+      aosOptions->AddString(*Nan::Utf8String(Nan::Get(args, i).ToLocalChecked()));
+    }
+  }
+
+  std::string colorFilename = "";
+  NODE_ARG_OPT_STR(4, "colorFilename", colorFilename);
+
+  Local<Object> options;
+  Nan::Callback *progress_cb = nullptr;
+  NODE_ARG_OBJECT_OPT(5, "options", options);
+  if (!options.IsEmpty()) NODE_CB_FROM_OBJ_OPT(options, "progress_cb", progress_cb);
+
+  GDALAsyncableJob<GDALDataset *> job(ds->uid);
+  job.progress = progress_cb;
+  job.main = [dst_path, mode, raw, colorFilename, aosOptions, progress_cb](const GDALExecutionProgress &progress) {
+    CPLErrorReset();
+    auto psOptions = GDALDEMProcessingOptionsNew(aosOptions->List(), nullptr);
+    if (psOptions == nullptr) throw CPLGetLastErrorMsg();
+    if (progress_cb) GDALDEMProcessingOptionsSetProgress(psOptions, ProgressTrampoline, (void *)&progress);
+    GDALDataset *r = GDALDatasetFromHandle(GDALDEMProcessing(
+      dst_path.c_str(),
+      GDALDatasetToHandle(raw),
+      mode.c_str(),
+      colorFilename.size() > 0 ? colorFilename.c_str() : nullptr,
+      psOptions,
+      nullptr));
+
+    GDALDEMProcessingOptionsFree(psOptions);
+    if (r == nullptr) throw CPLGetLastErrorMsg();
+    return GDALDatasetFromHandle(r);
+  };
+  job.rval = [](GDALDataset *ds, const GetFromPersistentFunc &) { return Dataset::New(ds); };
+
+  job.run(info, async, 6);
 }
 
 } // namespace node_gdal

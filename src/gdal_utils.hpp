@@ -35,6 +35,7 @@ GDAL_ASYNCABLE_GLOBAL(vectorTranslate);
 GDAL_ASYNCABLE_GLOBAL(warp);
 GDAL_ASYNCABLE_GLOBAL(buildvrt);
 GDAL_ASYNCABLE_GLOBAL(rasterize);
+GDAL_ASYNCABLE_GLOBAL(dem);
 
 } // namespace Utils
 } // namespace node_gdal
