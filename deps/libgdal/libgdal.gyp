@@ -15,6 +15,7 @@
         "./gdal/apps/gdal_rasterize_lib.cpp",
         "./gdal/apps/gdalinfo_lib.cpp",
         "./gdal/apps/gdalwarp_lib.cpp",
+        "./gdal/apps/gdaldem_lib.cpp",
 				"./gdal/apps/commonutils.cpp",
 				"./gdal/frmts/gdalallregister.cpp",
 				"./gdal/frmts/derived/deriveddataset.cpp",

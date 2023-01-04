@@ -534,6 +534,128 @@ describe('gdal_utils', () => {
     })
   })
 
+  describe('dem', () => {
+    it('should be equivalent to gdaldem', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      const out = gdal.dem(tmpFile, ds, 'hillshade', [ '-z', '2' ])
+      assert.instanceOf(out, gdal.Dataset)
+      assert.equal(out.bands.count(), 1)
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should be callable w/o options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      const out = gdal.dem(tmpFile, ds, 'hillshade')
+      assert.instanceOf(out, gdal.Dataset)
+      assert.equal(out.bands.count(), 1)
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should accept a color file', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      const out = gdal.dem(tmpFile, ds, 'color-relief', [], path.resolve(__dirname, 'data', 'color-file.txt'))
+      assert.instanceOf(out, gdal.Dataset)
+      assert.equal(out.bands.count(), 3)
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should support progress callbacks', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      let calls = 0
+      const out = gdal.dem(tmpFile, ds, 'hillshade', [], undefined, { progress_cb: () => calls++ })
+      assert.instanceOf(out, gdal.Dataset)
+      assert.isAbove(calls, 0)
+      out.close()
+      gdal.vsimem.release(tmpFile)
+    })
+    it('should throw on unrecognized options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      ds.close()
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      assert.throws(() => {
+        gdal.dem(tmpFile, ds, 'hillshade', [ '-nosuchoption' ])
+      })
+    })
+    it('should throw if the Dataset is closed', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      ds.close()
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      assert.throws(() => {
+        gdal.dem(tmpFile, ds, 'hillshade')
+      })
+    })
+    it('should throw if the Dataset object is of wrong type', () => {
+      assert.throws(() => {
+        gdal.dem('a', {} as gdal.Dataset, 'hillshade')
+      })
+    })
+  })
+
+  describe('demAsync', () => {
+    it('should be equivalent to gdaldem', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      const q = gdal.demAsync(tmpFile, ds, 'hillshade', [ '-z', '2' ])
+      return assert.isFulfilled(q.then((out) => {
+        assert.instanceOf(out, gdal.Dataset)
+        assert.equal(out.bands.count(), 1)
+        out.close()
+        gdal.vsimem.release(tmpFile)
+      }))
+    })
+    it('should be callable w/o options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      const q = gdal.demAsync(tmpFile, ds, 'hillshade')
+      return assert.isFulfilled(q.then((out) => {
+        assert.instanceOf(out, gdal.Dataset)
+        assert.equal(out.bands.count(), 1)
+        out.close()
+        gdal.vsimem.release(tmpFile)
+      }))
+    })
+    it('should accept a color file', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      const q = gdal.demAsync(tmpFile, ds, 'color-relief', [], path.resolve(__dirname, 'data', 'color-file.txt'))
+      return assert.isFulfilled(q.then((out) => {
+        assert.instanceOf(out, gdal.Dataset)
+        assert.equal(out.bands.count(), 3)
+        out.close()
+        gdal.vsimem.release(tmpFile)
+      }))
+    })
+    it('should support progress callbacks', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      let calls = 0
+      const q = gdal.demAsync(tmpFile, ds, 'hillshade', [], undefined, { progress_cb: () => calls++ })
+      return assert.isFulfilled(q.then((out) => {
+        assert.instanceOf(out, gdal.Dataset)
+        assert.isAbove(calls, 0)
+        out.close()
+        gdal.vsimem.release(tmpFile)
+      }))
+    })
+    it('should throw on unrecognized options', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'sample.tif'))
+      ds.close()
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      assert.isRejected(gdal.demAsync(tmpFile, ds, 'hillshade', [ '-nosuchoption' ]))
+    })
+    it('should throw if the Dataset is closed', () => {
+      const ds = gdal.open(path.resolve(__dirname, 'data', 'multiband.tif'))
+      ds.close()
+      const tmpFile = `/vsimem/${String(Math.random()).substring(2)}.tif`
+      return assert.isRejected(gdal.demAsync(tmpFile, ds, 'hillshade'))
+    })
+    it('should throw if the Dataset object is of wrong type', () => assert.isRejected(gdal.demAsync('a', {} as gdal.Dataset, 'hillshade')))
+  })
+
   describe('calcAsync', () => {
     it('should perform the given calculation', async () => {
       const tempFile = `/vsimem/cloudbase_${String(Math.random()).substring(2)}.tiff`
