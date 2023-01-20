@@ -111,7 +111,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  *
  * @example
  * const ds = gdal.open('input.geojson')
- * const out = gdal.vectorTranslate('/vsimem/temp.gpkg', [ '-of', 'GPKG' ], ds)
+ * const out = gdal.vectorTranslate('/vsimem/temp.gpkg', ds, [ '-of', 'GPKG' ])
  *
  * @throws {Error}
  * @method vectorTranslate
@@ -130,7 +130,7 @@ GDAL_ASYNCABLE_DEFINE(Utils::translate) {
  *
  * @example
  * const ds = gdal.open('input.geojson')
- * const out = gdal.vectorTranslate('/vsimem/temp.gpkg', [ '-of', 'GPKG' ], ds)
+ * const out = gdal.vectorTranslate('/vsimem/temp.gpkg', ds, [ '-of', 'GPKG' ])
  * @throws {Error}
  *
  * @method vectorTranslateAsync
