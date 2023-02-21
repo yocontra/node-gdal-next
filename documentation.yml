@@ -26,6 +26,8 @@ toc:
   - name: Major Objects
     description: Classes for GDAL Major Objects
     children:
+      - open
+      - openAsync
       - Dataset
       - DatasetBands
       - Driver
@@ -329,13 +331,13 @@ toc:
       - createPixelFunc
       - createPixelFuncWithArgs
       - decToDMS
+      - dem
+      - demAsync
       - fillNodata
       - fillNodataAsync
       - fromDataType
       - info
       - infoAsync
-      - open
-      - openAsync
       - polygonize
       - polygonizeAsync
       - quiet
