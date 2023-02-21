@@ -31,8 +31,8 @@ gdal.openAsync(datasetFile).then((ds) => {
           case 'WGS84':
             {
               const coords = xform.transformPoint(+params[2], +params[3])
-              x = Math.round(coords.x)
-              y = Math.round(coords.y)
+              x = Math.floor(coords.x)
+              y = Math.floor(coords.y)
             }
             break
           default:
