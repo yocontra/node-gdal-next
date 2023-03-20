@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - Fix [#66](https://github.com/mmomtchev/node-gdal-async/issues/66), include `yatag` as a production dependency
+ - Fix [#36](https://github.com/mmomtchev/node-gdal-async/issues/36), find a way around `jest` *resetting* modules between tests
 
 ## [3.6.2] 2023-01-09
 
