@@ -331,9 +331,9 @@ Development versions are unit tested for the following targets:
 | Node.js 16.x | Debian 10 buster | system-installed GDAL 2.1.2 (*earliest unit-tested GDAL*) (*earliest supported glibc*)
 | Node.js 16.x | Debian 11 bullseye | system-installed GDAL 3.2.2
 | Node.js 16.x | Debian 11 bullseye | bundled GDAL
-| Node.js 16.x | Fedora 36| system-installed GDAL 3.4.3
-| Node.js 16.x | Fedora 37 | system-installed GDAL 3.5.2
-| Node.js 16.x | Fedora 37 | bundled GDAL
+| Node.js 18.x | Fedora 36| system-installed GDAL 3.4.3
+| Node.js 18.x | Fedora 37 | system-installed GDAL 3.5.2
+| Node.js 18.x | Fedora 37 | bundled GDAL
 | Node.js 14.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
 | Node.js 16.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
 | Node.js 17.x | Ubuntu 20.04 | system-installed GDAL 3.0.4
