@@ -19,10 +19,17 @@ if len(sys.argv) < 2:
   print('no argument')
   sys.exit(1)
 
+if len(sys.argv) > 2:
+  exclude = glob.glob(sys.argv[2])
+else:
+  exclude = []
+
 for f in glob.glob(sys.argv[1]):
   # gyp needs either double backslashes (\\) or forward slashes (/) as path separator
   # go with forward slashes to be platform independent
   # as "print" outputs just single backslashes (\) on Windows
   f = f.replace('\\', '/')
+  if f in exclude:
+    continue
   # use line feed as delimiter between file names to prevent problems with whitespaces in file names
   print(f)
