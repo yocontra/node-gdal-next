@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - GDAL 3.6.1
  - Fix [#53](https://github.com/mmomtchev/node-gdal-async/issues/53), rebuilding from source fails
 
-# [3.6.0] 201-12-21
+# [3.6.0] 2022-12-21
 ### Added
  - GDAL 3.6.0
  - Node.js 19.x
