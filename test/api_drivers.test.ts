@@ -204,6 +204,16 @@ describe('gdal.drivers', () => {
       ds.close()
       assert.equal(gdal.open('/vsimem/gdal_driver_create.tiff').rasterSize.x, 50)
     })
+
+    it('should support setting the datatype', () => {
+      const driver = gdal.drivers.get('GTiff')
+      const outputFilename = '/vsimem/gdal_driver_create.tiff'
+      const ds = driver.create(outputFilename, 50, 50, 1, gdal.GDT_Int32)
+      assert.equal(ds.driver.description, 'GTiff')
+      assert.equal(ds.bands.get(1).dataType, gdal.GDT_Int32)
+      ds.close()
+      assert.equal(gdal.open('/vsimem/gdal_driver_create.tiff').rasterSize.x, 50)
+    })
   })
 
   describe('createCopy()', () => {
