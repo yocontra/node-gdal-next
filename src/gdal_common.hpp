@@ -11,8 +11,8 @@
 
 #include "utils/ptr_manager.hpp"
 
-#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 1)
-#error gdal-async now requires GDAL >= 2.1, downgrade to gdal-async@3.2.x for earlier versions
+#if GDAL_VERSION_MAJOR < 2 || (GDAL_VERSION_MAJOR == 2 && GDAL_VERSION_MINOR < 2)
+#error gdal-async now requires GDAL >= 2.2, downgrade to gdal-async@3.6.x for earlier versions
 #endif
 
 namespace node_gdal {
