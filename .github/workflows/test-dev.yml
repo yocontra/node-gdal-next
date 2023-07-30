@@ -13,7 +13,7 @@ on:
       testNetwork:
         description: 'Run tests that require network connectivity'
         required: false
-        default: 0
+        default: '0'
 
 jobs:
   bundled_gdal_coverage:
