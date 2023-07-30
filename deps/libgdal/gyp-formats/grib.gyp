@@ -6,6 +6,7 @@
 		{
 			"target_name": "libgdal_grib_frmt",
 			"type": "static_library",
+      "defines": [ "USE_PNG" ],
 			"sources": [
 				"../gdal/frmts/grib/degrib/g2clib/pngunpack.c",
 				"../gdal/frmts/grib/degrib/g2clib/dec_png.c",
