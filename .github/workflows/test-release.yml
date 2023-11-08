@@ -54,6 +54,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
     - run: npm install --ignore-scripts
     - run: npm install node-gyp
     - run: npx @mapbox/node-pre-gyp install

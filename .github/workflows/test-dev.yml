@@ -161,6 +161,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
@@ -191,6 +194,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
