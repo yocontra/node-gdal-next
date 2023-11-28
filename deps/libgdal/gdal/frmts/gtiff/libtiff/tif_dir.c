@@ -192,11 +192,11 @@ static int setExtraSamples(TIFF *tif, va_list ap, uint32_t *v)
 static uint16_t countInkNamesString(TIFF *tif, uint32_t slen, const char *s)
 {
     uint16_t i = 0;
-    const char *ep = s + slen;
-    const char *cp = s;
 
     if (slen > 0)
     {
+        const char *ep = s + slen;
+        const char *cp = s;
         do
         {
             for (; cp < ep && *cp != '\0'; cp++)
@@ -1621,7 +1621,7 @@ void TIFFFreeDirectory(TIFF *tif)
     TIFFDirectory *td = &tif->tif_dir;
     int i;
 
-    _TIFFmemset(td->td_fieldsset, 0, FIELD_SETLONGS);
+    _TIFFmemset(td->td_fieldsset, 0, sizeof(td->td_fieldsset));
     CleanupField(td_sminsamplevalue);
     CleanupField(td_smaxsamplevalue);
     CleanupField(td_colormap[0]);
@@ -2151,17 +2151,21 @@ int TIFFSetSubDirectory(TIFF *tif, uint64_t diroff)
         else
             tif->tif_curdir++;
     }
-    if (retval && probablySubIFD)
+    if (probablySubIFD)
     {
-        /* Reset IFD list to start new one for SubIFD chain and also start
-         * SubIFD chain with tif_curdir=0. */
-        _TIFFCleanupIFDOffsetAndNumberMaps(tif); /* invalidate IFD loop lists */
-        tif->tif_curdir = 0; /* first directory of new chain */
-        /* add this offset to new IFD list */
-        _TIFFCheckDirNumberAndOffset(tif, tif->tif_curdir, diroff);
+        if (retval)
+        {
+            /* Reset IFD list to start new one for SubIFD chain and also start
+            * SubIFD chain with tif_curdir=0. */
+            _TIFFCleanupIFDOffsetAndNumberMaps(tif); /* invalidate IFD loop lists */
+            tif->tif_curdir = 0; /* first directory of new chain */
+            /* add this offset to new IFD list */
+            _TIFFCheckDirNumberAndOffset(tif, tif->tif_curdir, diroff);
+        }
         /* To be able to return from SubIFD or custom-IFD to main-IFD */
         tif->tif_setdirectory_force_absolute = TRUE;
     }
+    
     return (retval);
 }
 

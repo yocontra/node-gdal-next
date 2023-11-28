@@ -1055,7 +1055,8 @@ int OGRGenSQLResultsLayer::PrepareSummary()
                 {
                     if (psColDef->field_type == SWQ_DATE ||
                         psColDef->field_type == SWQ_TIME ||
-                        psColDef->field_type == SWQ_TIMESTAMP)
+                        psColDef->field_type == SWQ_TIMESTAMP ||
+                        psColDef->field_type == SWQ_STRING)
                         poSummaryFeature->SetField(iField,
                                                    oSummary.osMin.c_str());
                     else
@@ -1065,7 +1066,8 @@ int OGRGenSQLResultsLayer::PrepareSummary()
                 {
                     if (psColDef->field_type == SWQ_DATE ||
                         psColDef->field_type == SWQ_TIME ||
-                        psColDef->field_type == SWQ_TIMESTAMP)
+                        psColDef->field_type == SWQ_TIMESTAMP ||
+                        psColDef->field_type == SWQ_STRING)
                         poSummaryFeature->SetField(iField,
                                                    oSummary.osMax.c_str());
                     else
@@ -1960,8 +1962,7 @@ void OGRGenSQLResultsLayer::CreateOrderByIndex()
     swq_select *psSelectInfo = static_cast<swq_select *>(pSelectInfo);
     const int nOrderItems = psSelectInfo->order_specs;
 
-    if (!(psSelectInfo->order_specs > 0 &&
-          psSelectInfo->query_mode == SWQM_RECORDSET && nOrderItems != 0))
+    if (!(nOrderItems > 0 && psSelectInfo->query_mode == SWQM_RECORDSET))
         return;
 
     if (bOrderByValid)

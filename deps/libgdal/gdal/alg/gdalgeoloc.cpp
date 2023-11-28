@@ -173,7 +173,7 @@ inline double Clamp(double v, double minV, double maxV)
 /*! @cond Doxygen_Suppress */
 
 template <class Accessors>
-bool GDALGeoLoc<Accessors>::LoadGeolocFinish(
+void GDALGeoLoc<Accessors>::LoadGeolocFinish(
     GDALGeoLocTransformInfo *psTransform)
 {
     auto pAccessors = static_cast<Accessors *>(psTransform->pAccessors);
@@ -377,8 +377,6 @@ bool GDALGeoLoc<Accessors>::LoadGeolocFinish(
             UpdateMinMax(psTransform, dfGeoLocX, dfGeoLocY);
         }
     }
-
-    return true;
 }
 
 /************************************************************************/
@@ -1972,6 +1970,22 @@ void *GDALCreateGeoLocTransformerEx(GDALDatasetH hBaseDS,
 
     psTransform->nGeoLocXSize = nXSize;
     psTransform->nGeoLocYSize = nYSize;
+
+    if (hBaseDS && psTransform->dfPIXEL_OFFSET == 0 &&
+        psTransform->dfLINE_OFFSET == 0 && psTransform->dfPIXEL_STEP == 1 &&
+        psTransform->dfLINE_STEP == 1)
+    {
+        if (GDALGetRasterXSize(hBaseDS) > nXSize ||
+            GDALGetRasterYSize(hBaseDS) > nYSize)
+        {
+            CPLError(CE_Warning, CPLE_AppDefined,
+                     "Geolocation array is %d x %d large, "
+                     "whereas dataset is %d x %d large. Result might be "
+                     "incorrect due to lack of values in geolocation array.",
+                     nXSize, nYSize, GDALGetRasterXSize(hBaseDS),
+                     GDALGetRasterYSize(hBaseDS));
+        }
+    }
 
     /* -------------------------------------------------------------------- */
     /*      Load the geolocation array.                                     */

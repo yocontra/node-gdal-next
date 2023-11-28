@@ -68,8 +68,8 @@ OGRFeatherLayer::OGRFeatherLayer(
     const arrow::ipc::IpcReadOptions &oOptions,
     std::shared_ptr<arrow::ipc::RecordBatchStreamReader>
         &poRecordBatchStreamReader)
-    : OGRArrowLayer(poDS, pszLayerName), m_poDS(poDS), m_poFile(poFile),
-      m_bSeekable(bSeekable), m_oOptions(oOptions),
+    : OGRArrowLayer(poDS, pszLayerName), m_poDS(poDS),
+      m_poFile(std::move(poFile)), m_bSeekable(bSeekable), m_oOptions(oOptions),
       m_poRecordBatchReader(poRecordBatchStreamReader)
 {
     EstablishFeatureDefn();
@@ -584,6 +584,31 @@ void OGRFeatherLayer::TryToCacheFirstTwoBatches()
 }
 
 /************************************************************************/
+/*                          CanPostFilterArrowArray()                   */
+/************************************************************************/
+
+bool OGRFeatherLayer::CanPostFilterArrowArray(
+    const struct ArrowSchema *schema) const
+{
+    if (m_poRecordBatchReader)
+        return false;
+    return OGRArrowLayer::CanPostFilterArrowArray(schema);
+}
+
+/************************************************************************/
+/*                     InvalidateCachedBatches()                        */
+/************************************************************************/
+
+void OGRFeatherLayer::InvalidateCachedBatches()
+{
+    if (m_poRecordBatchFileReader)
+    {
+        m_iRecordBatch = -1;
+        ResetReading();
+    }
+}
+
+/************************************************************************/
 /*                        GetFeatureCount()                             */
 /************************************************************************/
 
@@ -663,26 +688,6 @@ int OGRFeatherLayer::TestCapability(const char *pszCap)
     {
         return m_bSeekable && m_poAttrQuery == nullptr &&
                m_poFilterGeom == nullptr;
-    }
-
-    if (EQUAL(pszCap, OLCFastGetExtent))
-    {
-        for (int i = 0; i < m_poFeatureDefn->GetGeomFieldCount(); i++)
-        {
-            auto oIter = m_oMapGeometryColumns.find(
-                m_poFeatureDefn->GetGeomFieldDefn(i)->GetNameRef());
-            if (oIter == m_oMapGeometryColumns.end())
-            {
-                return false;
-            }
-            const auto &oJSONDef = oIter->second;
-            const auto oBBox = oJSONDef.GetArray("bbox");
-            if (!(oBBox.IsValid() && (oBBox.Size() == 4 || oBBox.Size() == 6)))
-            {
-                return false;
-            }
-        }
-        return true;
     }
 
     if (EQUAL(pszCap, OLCMeasuredGeometries))

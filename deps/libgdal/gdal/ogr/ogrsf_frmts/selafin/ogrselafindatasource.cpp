@@ -304,9 +304,6 @@ OGRSelafinDataSource::OGRSelafinDataSource()
 
 OGRSelafinDataSource::~OGRSelafinDataSource()
 {
-#ifdef DEBUG_VERBOSE
-    CPLDebug("Selafin", "~OGRSelafinDataSource(%s)", pszName);
-#endif
     for (int i = 0; i < nLayers; i++)
         delete papoLayers[i];
     CPLFree(papoLayers);
@@ -590,10 +587,9 @@ int OGRSelafinDataSource::OpenTable(const char *pszFilename)
 /*                           ICreateLayer()                             */
 /************************************************************************/
 
-OGRLayer *OGRSelafinDataSource::ICreateLayer(const char *pszLayerName,
-                                             OGRSpatialReference *poSpatialRefP,
-                                             OGRwkbGeometryType eGType,
-                                             char **papszOptions)
+OGRLayer *OGRSelafinDataSource::ICreateLayer(
+    const char *pszLayerName, const OGRSpatialReference *poSpatialRefP,
+    OGRwkbGeometryType eGType, char **papszOptions)
 {
     CPLDebug("Selafin", "CreateLayer(%s,%s)", pszLayerName,
              (eGType == wkbPoint) ? "wkbPoint" : "wkbPolygon");
@@ -621,8 +617,7 @@ OGRLayer *OGRSelafinDataSource::ICreateLayer(const char *pszLayerName,
     // Set the SRS of the datasource if this is the first layer
     if (nLayers == 0 && poSpatialRefP != nullptr)
     {
-        poSpatialRef = poSpatialRefP;
-        poSpatialRef->Reference();
+        poSpatialRef = poSpatialRefP->Clone();
         const char *szEpsg = poSpatialRef->GetAttrValue("GEOGCS|AUTHORITY", 1);
         int nEpsg = 0;
         if (szEpsg != nullptr)

@@ -164,7 +164,7 @@ OGRErr OSRImportFromPCI(OGRSpatialReferenceH hSRS, const char *pszProj,
  *
  * @param pszProj NULL terminated string containing the definition. Looks
  * like "pppppppppppp Ennn" or "pppppppppppp Dnnn", where "pppppppppppp" is
- * a projection code, "Ennn" is an ellipsoid code, "Dnnn" --- a datum code.
+ * a projection code, "Ennn" is an ellipsoid code, "Dnnn" a datum code.
  *
  * @param pszUnits Grid units code ("DEGREE" or "METRE"). If NULL "METRE" will
  * be used.
@@ -198,7 +198,7 @@ OGRErr OSRImportFromPCI(OGRSpatialReferenceH hSRS, const char *pszProj,
 
 OGRErr OGRSpatialReference::importFromPCI(const char *pszProj,
                                           const char *pszUnits,
-                                          double *padfPrjParams)
+                                          const double *padfPrjParams)
 
 {
     Clear();
@@ -214,16 +214,10 @@ OGRErr OGRSpatialReference::importFromPCI(const char *pszProj,
     /* -------------------------------------------------------------------- */
     /*      Use safe defaults if projection parameters are not supplied.    */
     /* -------------------------------------------------------------------- */
-    bool bProjAllocated = false;
-
+    static const double adfZeroedPrjParams[17] = {0};
     if (padfPrjParams == nullptr)
     {
-        padfPrjParams = static_cast<double *>(CPLMalloc(17 * sizeof(double)));
-        if (!padfPrjParams)
-            return OGRERR_NOT_ENOUGH_MEMORY;
-        for (int i = 0; i < 17; i++)
-            padfPrjParams[i] = 0.0;
-        bProjAllocated = true;
+        padfPrjParams = adfZeroedPrjParams;
     }
 
     /* -------------------------------------------------------------------- */
@@ -701,9 +695,6 @@ OGRErr OGRSpatialReference::importFromPCI(const char *pszProj,
         else
             SetLinearUnits(SRS_UL_METER, 1.0);
     }
-
-    if (bProjAllocated && padfPrjParams)
-        CPLFree(padfPrjParams);
 
     return OGRERR_NONE;
 }

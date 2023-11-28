@@ -518,6 +518,12 @@ typedef struct GDALDimensionHS *GDALDimensionH;
  */
 #define GDAL_DCAP_CREATECOPY "DCAP_CREATECOPY"
 
+/** Capability set by a driver that implements the VectorTranslateFrom() API.
+ *
+ * @since GDAL 3.8
+ */
+#define GDAL_DCAP_VECTOR_TRANSLATE_FROM "DCAP_VECTOR_TRANSLATE_FROM"
+
 /** Capability set by a driver that implements the CreateCopy() API, but with
  * multidimensional raster as input and output.
  *
@@ -731,6 +737,13 @@ typedef struct GDALDimensionHS *GDALDimensionH;
  */
 #define GDAL_DCAP_UPDATE_RELATIONSHIP "DCAP_UPDATE_RELATIONSHIP"
 
+/** Capability set by drivers whose FlushCache() implementation returns a
+ * dataset that can be opened afterwards and seen in a consistent state, without
+ * requiring the dataset on which FlushCache() has been called to be closed.
+ * @since GDAL 3.8
+ */
+#define GDAL_DCAP_FLUSHCACHE_CONSISTENT_STATE "DCAP_FLUSHCACHE_CONSISTENT_STATE"
+
 /** List of (space separated) flags indicating the features of relationships are
  * supported by the driver.
  *
@@ -864,6 +877,8 @@ typedef struct GDALDimensionHS *GDALDimensionH;
                             UpdateRelationship()*/
 
 void CPL_DLL CPL_STDCALL GDALAllRegister(void);
+void CPL_DLL GDALRegisterPlugins(void);
+CPLErr CPL_DLL GDALRegisterPlugin(const char *name);
 
 GDALDatasetH CPL_DLL CPL_STDCALL
 GDALCreate(GDALDriverH hDriver, const char *, int, int, int, GDALDataType,
@@ -1283,6 +1298,71 @@ typedef void (*GDALQueryLoggerFunc)(const char *pszSQL, const char *pszError,
 bool CPL_DLL GDALDatasetSetQueryLoggerFunc(
     GDALDatasetH hDS, GDALQueryLoggerFunc pfnQueryLoggerFunc,
     void *poQueryLoggerArg);
+
+/* ==================================================================== */
+/*      Informational utilities about subdatasets in file names         */
+/* ==================================================================== */
+
+/**
+ *  Opaque type used for the C bindings of the C++ GDALSubdatasetInfo class
+ *  @since GDAL 3.8
+*/
+typedef struct GDALSubdatasetInfo *GDALSubdatasetInfoH;
+
+/**
+ * @brief Returns a new GDALSubdatasetInfo object with methods to extract
+ *        and manipulate subdataset information.
+ *        If the pszFileName argument is not recognized by any driver as
+ *        a subdataset descriptor, NULL is returned.
+ *        The returned object must be freed with GDALDestroySubdatasetInfo().
+ * @param pszFileName           File name with subdataset information
+ * @note                        This method does not check if the subdataset actually exists.
+ * @return                      Opaque pointer to a GDALSubdatasetInfo object or NULL if no drivers accepted the file name.
+ * @since                       GDAL 3.8
+ */
+GDALSubdatasetInfoH CPL_DLL GDALGetSubdatasetInfo(const char *pszFileName);
+
+/**
+ * @brief Returns the file path component of a
+ *        subdataset descriptor effectively stripping the information about the subdataset
+ *        and returning the "parent" dataset descriptor.
+ *        The returned string must be freed with CPLFree().
+ * @param hInfo                 Pointer to GDALSubdatasetInfo object
+ * @note                        This method does not check if the subdataset actually exists.
+ * @return                      The original string with the subdataset information removed.
+ * @since                       GDAL 3.8
+ */
+char CPL_DLL *GDALSubdatasetInfoGetPathComponent(GDALSubdatasetInfoH hInfo);
+
+/**
+ * @brief Returns the subdataset component of a subdataset descriptor descriptor.
+ *        The returned string must be freed with CPLFree().
+ * @param hInfo                 Pointer to GDALSubdatasetInfo object
+ * @note                        This method does not check if the subdataset actually exists.
+ * @return                      The subdataset name.
+ * @since                       GDAL 3.8
+ */
+char CPL_DLL *
+GDALSubdatasetInfoGetSubdatasetComponent(GDALSubdatasetInfoH hInfo);
+
+/**
+ * @brief Replaces the path component of a subdataset descriptor.
+ *        The returned string must be freed with CPLFree().
+ * @param hInfo                 Pointer to GDALSubdatasetInfo object
+ * @param pszNewPath            New path.
+ * @note                        This method does not check if the subdataset actually exists.
+ * @return                      The original subdataset descriptor with the old path component replaced by newPath.
+ * @since                       GDAL 3.8
+ */
+char CPL_DLL *GDALSubdatasetInfoModifyPathComponent(GDALSubdatasetInfoH hInfo,
+                                                    const char *pszNewPath);
+
+/**
+ * @brief Destroys a GDALSubdatasetInfo object.
+ * @param hInfo                 Pointer to GDALSubdatasetInfo object
+ * @since                       GDAL 3.8
+ */
+void CPL_DLL GDALDestroySubdatasetInfo(GDALSubdatasetInfoH hInfo);
 
 /* ==================================================================== */
 /*      GDALRasterBand ... one band/channel in a dataset.               */
@@ -2120,6 +2200,8 @@ CSLConstList CPL_DLL GDALGroupGetStructuralInfo(GDALGroupH hGroup);
 GDALGroupH CPL_DLL
 GDALGroupCreateGroup(GDALGroupH hGroup, const char *pszSubGroupName,
                      CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
+bool CPL_DLL GDALGroupDeleteGroup(GDALGroupH hGroup, const char *pszName,
+                                  CSLConstList papszOptions);
 GDALDimensionH CPL_DLL GDALGroupCreateDimension(
     GDALGroupH hGroup, const char *pszName, const char *pszType,
     const char *pszDirection, GUInt64 nSize,
@@ -2128,10 +2210,17 @@ GDALMDArrayH CPL_DLL GDALGroupCreateMDArray(
     GDALGroupH hGroup, const char *pszName, size_t nDimensions,
     GDALDimensionH *pahDimensions, GDALExtendedDataTypeH hEDT,
     CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
+bool CPL_DLL GDALGroupDeleteMDArray(GDALGroupH hGroup, const char *pszName,
+                                    CSLConstList papszOptions);
 GDALAttributeH CPL_DLL GDALGroupCreateAttribute(
     GDALGroupH hGroup, const char *pszName, size_t nDimensions,
     const GUInt64 *panDimensions, GDALExtendedDataTypeH hEDT,
     CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
+bool CPL_DLL GDALGroupDeleteAttribute(GDALGroupH hGroup, const char *pszName,
+                                      CSLConstList papszOptions);
+bool CPL_DLL GDALGroupRename(GDALGroupH hGroup, const char *pszNewName);
+GDALGroupH CPL_DLL GDALGroupSubsetDimensionFromSelection(
+    GDALGroupH hGroup, const char *pszSelection, CSLConstList papszOptions);
 
 void CPL_DLL GDALMDArrayRelease(GDALMDArrayH hMDArray);
 const char CPL_DLL *GDALMDArrayGetName(GDALMDArrayH hArray);
@@ -2172,6 +2261,9 @@ GDALAttributeH CPL_DLL GDALMDArrayCreateAttribute(
     GDALMDArrayH hArray, const char *pszName, size_t nDimensions,
     const GUInt64 *panDimensions, GDALExtendedDataTypeH hEDT,
     CSLConstList papszOptions) CPL_WARN_UNUSED_RESULT;
+bool CPL_DLL GDALMDArrayDeleteAttribute(GDALMDArrayH hArray,
+                                        const char *pszName,
+                                        CSLConstList papszOptions);
 bool CPL_DLL GDALMDArrayResize(GDALMDArrayH hArray,
                                const GUInt64 *panNewDimSizes,
                                CSLConstList papszOptions);
@@ -2220,6 +2312,10 @@ GDALMDArrayH CPL_DLL GDALMDArrayGetMask(GDALMDArrayH hArray,
                                         CSLConstList papszOptions);
 GDALDatasetH CPL_DLL GDALMDArrayAsClassicDataset(GDALMDArrayH hArray,
                                                  size_t iXDim, size_t iYDim);
+GDALDatasetH CPL_DLL GDALMDArrayAsClassicDatasetEx(GDALMDArrayH hArray,
+                                                   size_t iXDim, size_t iYDim,
+                                                   GDALGroupH hRootGroup,
+                                                   CSLConstList papszOptions);
 CPLErr CPL_DLL GDALMDArrayGetStatistics(
     GDALMDArrayH hArray, GDALDatasetH, int bApproxOK, int bForce,
     double *pdfMin, double *pdfMax, double *pdfMean, double *pdfStdDev,
@@ -2230,6 +2326,10 @@ int CPL_DLL GDALMDArrayComputeStatistics(GDALMDArrayH hArray, GDALDatasetH,
                                          double *pdfStdDev,
                                          GUInt64 *pnValidCount,
                                          GDALProgressFunc, void *pProgressData);
+int CPL_DLL GDALMDArrayComputeStatisticsEx(
+    GDALMDArrayH hArray, GDALDatasetH, int bApproxOK, double *pdfMin,
+    double *pdfMax, double *pdfMean, double *pdfStdDev, GUInt64 *pnValidCount,
+    GDALProgressFunc, void *pProgressData, CSLConstList papszOptions);
 GDALMDArrayH CPL_DLL GDALMDArrayGetResampled(GDALMDArrayH hArray,
                                              size_t nNewDimCount,
                                              const GDALDimensionH *pahNewDims,
@@ -2245,6 +2345,7 @@ GDALMDArrayGetCoordinateVariables(GDALMDArrayH hArray,
                                   size_t *pnCount) CPL_WARN_UNUSED_RESULT;
 void CPL_DLL GDALReleaseArrays(GDALMDArrayH *arrays, size_t nCount);
 int CPL_DLL GDALMDArrayCache(GDALMDArrayH hArray, CSLConstList papszOptions);
+bool CPL_DLL GDALMDArrayRename(GDALMDArrayH hArray, const char *pszNewName);
 
 void CPL_DLL GDALAttributeRelease(GDALAttributeH hAttr);
 void CPL_DLL GDALReleaseAttributes(GDALAttributeH *attributes, size_t nCount);
@@ -2278,6 +2379,7 @@ int CPL_DLL GDALAttributeWriteInt(GDALAttributeH hAttr, int);
 int CPL_DLL GDALAttributeWriteDouble(GDALAttributeH hAttr, double);
 int CPL_DLL GDALAttributeWriteDoubleArray(GDALAttributeH hAttr, const double *,
                                           size_t);
+bool CPL_DLL GDALAttributeRename(GDALAttributeH hAttr, const char *pszNewName);
 
 void CPL_DLL GDALDimensionRelease(GDALDimensionH hDim);
 void CPL_DLL GDALReleaseDimensions(GDALDimensionH *dims, size_t nCount);
@@ -2290,6 +2392,7 @@ GDALMDArrayH CPL_DLL GDALDimensionGetIndexingVariable(GDALDimensionH hDim)
     CPL_WARN_UNUSED_RESULT;
 int CPL_DLL GDALDimensionSetIndexingVariable(GDALDimensionH hDim,
                                              GDALMDArrayH hArray);
+bool CPL_DLL GDALDimensionRename(GDALDimensionH hDim, const char *pszNewName);
 
 CPL_C_END
 

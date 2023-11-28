@@ -45,6 +45,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 
 static json_object *
 json_object_new_float_with_significant_figures(float fVal,
@@ -445,7 +446,7 @@ static void OGRGeoJSONPatchGeometry(json_object *poJSonGeometry,
 /*                           OGRGeoJSONGetBBox                          */
 /************************************************************************/
 
-OGREnvelope3D OGRGeoJSONGetBBox(OGRGeometry *poGeometry,
+OGREnvelope3D OGRGeoJSONGetBBox(const OGRGeometry *poGeometry,
                                 const OGRGeoJSONWriteOptions &oOptions)
 {
     OGREnvelope3D sEnvelope;
@@ -458,17 +459,20 @@ OGREnvelope3D OGRGeoJSONGetBBox(OGRGeometry *poGeometry,
         const double EPS = 1e-7;
         const OGRwkbGeometryType eType =
             wkbFlatten(poGeometry->getGeometryType());
-        if (OGR_GT_IsSubClassOf(eType, wkbGeometryCollection) &&
-            poGeometry->toGeometryCollection()->getNumGeometries() >= 2 &&
-            fabs(sEnvelope.MinX - (-180.0)) < EPS &&
+        const bool bMultiPart =
+            OGR_GT_IsSubClassOf(eType, wkbGeometryCollection) &&
+            poGeometry->toGeometryCollection()->getNumGeometries() >= 2;
+        if (bMultiPart && fabs(sEnvelope.MinX - (-180.0)) < EPS &&
             fabs(sEnvelope.MaxX - 180.0) < EPS)
         {
-            OGRGeometryCollection *poGC = poGeometry->toGeometryCollection();
+            // First heuristics (quite safe) when the geometry looks to
+            // have been really split at the dateline.
+            const auto *poGC = poGeometry->toGeometryCollection();
             double dfWestLimit = -180.0;
             double dfEastLimit = 180.0;
             bool bWestLimitIsInit = false;
             bool bEastLimitIsInit = false;
-            for (auto &&poMember : poGC)
+            for (const auto *poMember : poGC)
             {
                 OGREnvelope sEnvelopePart;
                 if (poMember->IsEmpty())
@@ -513,6 +517,44 @@ OGREnvelope3D OGRGeoJSONGetBBox(OGRGeometry *poGeometry,
             }
             sEnvelope.MinX = dfWestLimit;
             sEnvelope.MaxX = dfEastLimit;
+        }
+        else if (bMultiPart && sEnvelope.MaxX - sEnvelope.MinX > 180 &&
+                 sEnvelope.MinX >= -180 && sEnvelope.MaxX <= 180)
+        {
+            // More fragile heuristics for a geometry like Alaska
+            // (https://github.com/qgis/QGIS/issues/42827) which spans over
+            // the antimeridian but does not touch it.
+            const auto *poGC = poGeometry->toGeometryCollection();
+            double dfWestLimit = std::numeric_limits<double>::infinity();
+            double dfEastLimit = -std::numeric_limits<double>::infinity();
+            for (const auto *poMember : poGC)
+            {
+                OGREnvelope sEnvelopePart;
+                if (poMember->IsEmpty())
+                    continue;
+                poMember->getEnvelope(&sEnvelopePart);
+                if (sEnvelopePart.MinX > -120 && sEnvelopePart.MaxX < 120)
+                {
+                    dfWestLimit = std::numeric_limits<double>::infinity();
+                    dfEastLimit = -std::numeric_limits<double>::infinity();
+                    break;
+                }
+                if (sEnvelopePart.MinX > 0)
+                {
+                    dfWestLimit = std::min(dfWestLimit, sEnvelopePart.MinX);
+                }
+                else
+                {
+                    CPLAssert(sEnvelopePart.MaxX < 0);
+                    dfEastLimit = std::max(dfEastLimit, sEnvelopePart.MaxX);
+                }
+            }
+            if (dfWestLimit != std::numeric_limits<double>::infinity() &&
+                dfEastLimit + 360 - dfWestLimit < 180)
+            {
+                sEnvelope.MinX = dfWestLimit;
+                sEnvelope.MaxX = dfEastLimit;
+            }
         }
     }
 
@@ -663,46 +705,7 @@ json_object *OGRGeoJSONWriteFeature(OGRFeature *poFeature,
     /* -------------------------------------------------------------------- */
     /*      Write FID if available                                          */
     /* -------------------------------------------------------------------- */
-    if (!oOptions.osIDField.empty())
-    {
-        int nIdx = poFeature->GetDefnRef()->GetFieldIndexCaseSensitive(
-            oOptions.osIDField);
-        if (nIdx >= 0)
-        {
-            if ((oOptions.bForceIDFieldType &&
-                 oOptions.eForcedIDFieldType == OFTInteger64) ||
-                (!oOptions.bForceIDFieldType &&
-                 (poFeature->GetFieldDefnRef(nIdx)->GetType() == OFTInteger ||
-                  poFeature->GetFieldDefnRef(nIdx)->GetType() == OFTInteger64)))
-            {
-                json_object_object_add(
-                    poObj, "id",
-                    json_object_new_int64(
-                        poFeature->GetFieldAsInteger64(nIdx)));
-            }
-            else
-            {
-                json_object_object_add(
-                    poObj, "id",
-                    json_object_new_string(poFeature->GetFieldAsString(nIdx)));
-            }
-        }
-    }
-    else if (poFeature->GetFID() != OGRNullFID && !bIdAlreadyWritten)
-    {
-        if (oOptions.bForceIDFieldType &&
-            oOptions.eForcedIDFieldType == OFTString)
-        {
-            json_object_object_add(poObj, "id",
-                                   json_object_new_string(CPLSPrintf(
-                                       CPL_FRMT_GIB, poFeature->GetFID())));
-        }
-        else
-        {
-            json_object_object_add(poObj, "id",
-                                   json_object_new_int64(poFeature->GetFID()));
-        }
-    }
+    OGRGeoJSONWriteId(poFeature, poObj, bIdAlreadyWritten, oOptions);
 
     /* -------------------------------------------------------------------- */
     /*      Write feature attributes to GeoJSON "properties" object.        */
@@ -765,6 +768,56 @@ json_object *OGRGeoJSONWriteFeature(OGRFeature *poFeature,
         json_object_put(poNativeGeom);
 
     return poObj;
+}
+
+/************************************************************************/
+/*                        OGRGeoJSONWriteId                            */
+/************************************************************************/
+
+void OGRGeoJSONWriteId(const OGRFeature *poFeature, json_object *poObj,
+                       bool bIdAlreadyWritten,
+                       const OGRGeoJSONWriteOptions &oOptions)
+{
+    if (!oOptions.osIDField.empty())
+    {
+        int nIdx = poFeature->GetDefnRef()->GetFieldIndexCaseSensitive(
+            oOptions.osIDField);
+        if (nIdx >= 0)
+        {
+            if ((oOptions.bForceIDFieldType &&
+                 oOptions.eForcedIDFieldType == OFTInteger64) ||
+                (!oOptions.bForceIDFieldType &&
+                 (poFeature->GetFieldDefnRef(nIdx)->GetType() == OFTInteger ||
+                  poFeature->GetFieldDefnRef(nIdx)->GetType() == OFTInteger64)))
+            {
+                json_object_object_add(
+                    poObj, "id",
+                    json_object_new_int64(
+                        poFeature->GetFieldAsInteger64(nIdx)));
+            }
+            else
+            {
+                json_object_object_add(
+                    poObj, "id",
+                    json_object_new_string(poFeature->GetFieldAsString(nIdx)));
+            }
+        }
+    }
+    else if (poFeature->GetFID() != OGRNullFID && !bIdAlreadyWritten)
+    {
+        if (oOptions.bForceIDFieldType &&
+            oOptions.eForcedIDFieldType == OFTString)
+        {
+            json_object_object_add(poObj, "id",
+                                   json_object_new_string(CPLSPrintf(
+                                       CPL_FRMT_GIB, poFeature->GetFID())));
+        }
+        else
+        {
+            json_object_object_add(poObj, "id",
+                                   json_object_new_int64(poFeature->GetFID()));
+        }
+    }
 }
 
 /************************************************************************/
@@ -900,8 +953,9 @@ json_object *OGRGeoJSONWriteAttributes(OGRFeature *poFeature,
             const size_t nLen = strlen(pszStr);
 
             if (eSubType == OFSTJSON ||
-                ((pszStr[0] == '{' && pszStr[nLen - 1] == '}') ||
-                 (pszStr[0] == '[' && pszStr[nLen - 1] == ']')))
+                (oOptions.bAutodetectJsonStrings &&
+                 ((pszStr[0] == '{' && pszStr[nLen - 1] == '}') ||
+                  (pszStr[0] == '[' && pszStr[nLen - 1] == ']'))))
             {
                 if (bUseNativeMedia)
                 {

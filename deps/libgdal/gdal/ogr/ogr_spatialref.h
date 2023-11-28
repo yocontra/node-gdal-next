@@ -235,7 +235,7 @@ class CPL_DLL OGRSpatialReference
     OGRErr importFromEPSGA(int);
     OGRErr importFromESRI(char **);
     OGRErr importFromPCI(const char *, const char * = nullptr,
-                         double * = nullptr);
+                         const double * = nullptr);
 
 #define USGS_ANGLE_DECIMALDEGREES 0 /**< Angle is in decimal degrees. */
 #define USGS_ANGLE_PACKEDDMS                                                   \
@@ -299,6 +299,7 @@ class CPL_DLL OGRSpatialReference
     const char *GetAttrValue(const char *, int = 0) const;
 
     OGRErr SetNode(const char *, const char *);
+    // cppcheck-suppress functionStatic
     OGRErr SetNode(const char *, double);
 
     OGRErr
@@ -374,6 +375,10 @@ class CPL_DLL OGRSpatialReference
     int IsProjected() const;
     int IsGeocentric() const;
     bool IsDynamic() const;
+
+    // cppcheck-suppress functionStatic
+    bool HasPointMotionOperation() const;
+
     int IsLocal() const;
     int IsVertical() const;
     int IsCompound() const;
@@ -981,6 +986,7 @@ struct CPL_DLL OGRCoordinateTransformationOptions
                            double dfNorthLatitudeDeg);
     bool SetDesiredAccuracy(double dfAccuracy);
     bool SetBallparkAllowed(bool bAllowBallpark);
+    bool SetOnlyBest(bool bOnlyBest);
 
     bool SetCoordinateOperation(const char *pszCT, bool bReverseCT);
     /*! @cond Doxygen_Suppress */

@@ -247,6 +247,82 @@ static int OGRGeoPackageDriverIdentify(GDALOpenInfo *poOpenInfo)
 }
 
 /************************************************************************/
+/*                    OGRGeoPackageDriverGetSubdatasetInfo()            */
+/************************************************************************/
+
+struct OGRGeoPackageDriverSubdatasetInfo : public GDALSubdatasetInfo
+{
+  public:
+    explicit OGRGeoPackageDriverSubdatasetInfo(const std::string &fileName)
+        : GDALSubdatasetInfo(fileName)
+    {
+    }
+
+    // GDALSubdatasetInfo interface
+  private:
+    void parseFileName() override
+    {
+        if (!STARTS_WITH_CI(m_fileName.c_str(), "GPKG:"))
+        {
+            return;
+        }
+
+        CPLStringList aosParts{CSLTokenizeString2(m_fileName.c_str(), ":", 0)};
+        const int iPartsCount{CSLCount(aosParts)};
+
+        if (iPartsCount == 3 || iPartsCount == 4)
+        {
+
+            m_driverPrefixComponent = aosParts[0];
+
+            int subdatasetIndex{2};
+            const bool hasDriveLetter{strlen(aosParts[1]) == 1 &&
+                                      std::isalpha(aosParts[1][0])};
+
+            // Check for drive letter
+            if (iPartsCount == 4)
+            {
+                // Invalid
+                if (!hasDriveLetter)
+                {
+                    return;
+                }
+                m_pathComponent = aosParts[1];
+                m_pathComponent.append(":");
+                m_pathComponent.append(aosParts[2]);
+                subdatasetIndex++;
+            }
+            else  // count is 3
+            {
+                if (hasDriveLetter)
+                {
+                    return;
+                }
+                m_pathComponent = aosParts[1];
+            }
+
+            m_subdatasetComponent = aosParts[subdatasetIndex];
+        }
+    }
+};
+
+static GDALSubdatasetInfo *
+OGRGeoPackageDriverGetSubdatasetInfo(const char *pszFileName)
+{
+    if (STARTS_WITH_CI(pszFileName, "GPKG:"))
+    {
+        std::unique_ptr<GDALSubdatasetInfo> info =
+            cpl::make_unique<OGRGeoPackageDriverSubdatasetInfo>(pszFileName);
+        if (!info->GetSubdatasetComponent().empty() &&
+            !info->GetPathComponent().empty())
+        {
+            return info.release();
+        }
+    }
+    return nullptr;
+}
+
+/************************************************************************/
 /*                                Open()                                */
 /************************************************************************/
 
@@ -471,6 +547,11 @@ void GDALGPKGDriver::InitializeCreationOptionList()
         "description='Whether to add a gpkg_ogr_contents table to keep feature "
         "count' default='YES'/>"
 #endif
+        "  <Option name='CRS_WKT_EXTENSION' type='boolean' "
+        "description='Whether to create the database with the crs_wkt "
+        "extension'/>"
+        "  <Option name='METADATA_TABLES' type='boolean' "
+        "description='Whether to create the metadata related system tables'/>"
         "</CreationOptionList>";
 
     std::string osOptions(pszCOBegin);
@@ -596,6 +677,14 @@ void RegisterOGRGeoPackage()
         "     <Value>GPKG_ATTRIBUTES</Value>"
         "     <Value>NOT_REGISTERED</Value>"
         "  </Option>"
+        "  <Option name='DATETIME_PRECISION' type='string-select' "
+        "description='Number of components of datetime fields' "
+        "default='AUTO'>"
+        "     <Value>AUTO</Value>"
+        "     <Value>MILLISECOND</Value>"
+        "     <Value>SECOND</Value>"
+        "     <Value>MINUTE</Value>"
+        "  </Option>"
         "</LayerCreationOptionList>");
 
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONFIELDDATATYPES,
@@ -621,6 +710,8 @@ void RegisterOGRGeoPackage()
     poDriver->SetMetadataItem(GDAL_DCAP_CREATE_RELATIONSHIP, "YES");
     poDriver->SetMetadataItem(GDAL_DCAP_DELETE_RELATIONSHIP, "YES");
     poDriver->SetMetadataItem(GDAL_DCAP_UPDATE_RELATIONSHIP, "YES");
+    poDriver->SetMetadataItem(GDAL_DCAP_FLUSHCACHE_CONSISTENT_STATE, "YES");
+
     poDriver->SetMetadataItem(GDAL_DMD_RELATIONSHIP_FLAGS,
                               "ManyToMany Association");
 
@@ -647,6 +738,7 @@ void RegisterOGRGeoPackage()
     poDriver->pfnCreate = OGRGeoPackageDriverCreate;
     poDriver->pfnCreateCopy = GDALGeoPackageDataset::CreateCopy;
     poDriver->pfnDelete = OGRGeoPackageDriverDelete;
+    poDriver->pfnGetSubdatasetInfoFunc = OGRGeoPackageDriverGetSubdatasetInfo;
 
     poDriver->SetMetadataItem(GDAL_DCAP_VIRTUALIO, "YES");
 

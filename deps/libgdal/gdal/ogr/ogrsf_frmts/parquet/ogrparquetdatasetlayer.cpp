@@ -45,10 +45,12 @@
 OGRParquetDatasetLayer::OGRParquetDatasetLayer(
     OGRParquetDataset *poDS, const char *pszLayerName,
     const std::shared_ptr<arrow::dataset::Scanner> &scanner,
-    const std::shared_ptr<arrow::Schema> &schema)
-    : OGRParquetLayerBase(poDS, pszLayerName), m_poScanner(scanner)
+    const std::shared_ptr<arrow::Schema> &schema, CSLConstList papszOpenOptions)
+    : OGRParquetLayerBase(poDS, pszLayerName, papszOpenOptions),
+      m_poScanner(scanner)
 {
-    EstablishFeatureDefn(schema);
+    m_poSchema = schema;
+    EstablishFeatureDefn();
     CPLAssert(static_cast<int>(m_aeGeomEncoding.size()) ==
               m_poFeatureDefn->GetGeomFieldCount());
 }
@@ -57,17 +59,16 @@ OGRParquetDatasetLayer::OGRParquetDatasetLayer(
 /*                        EstablishFeatureDefn()                        */
 /************************************************************************/
 
-void OGRParquetDatasetLayer::EstablishFeatureDefn(
-    const std::shared_ptr<arrow::Schema> &schema)
+void OGRParquetDatasetLayer::EstablishFeatureDefn()
 {
-    const auto &kv_metadata = schema->metadata();
+    const auto &kv_metadata = m_poSchema->metadata();
 
     LoadGeoMetadata(kv_metadata);
     const auto oMapFieldNameToGDALSchemaFieldDefn =
         LoadGDALMetadata(kv_metadata.get());
 
-    const auto fields = schema->fields();
-    for (int i = 0; i < schema->num_fields(); ++i)
+    const auto fields = m_poSchema->fields();
+    for (int i = 0; i < m_poSchema->num_fields(); ++i)
     {
         const auto &field = fields[i];
 
@@ -151,6 +152,15 @@ bool OGRParquetDatasetLayer::ReadNextBatch()
 }
 
 /************************************************************************/
+/*                     InvalidateCachedBatches()                        */
+/************************************************************************/
+
+void OGRParquetDatasetLayer::InvalidateCachedBatches()
+{
+    ResetReading();
+}
+
+/************************************************************************/
 /*                        GetFeatureCount()                             */
 /************************************************************************/
 
@@ -175,10 +185,10 @@ OGRErr OGRParquetDatasetLayer::GetExtent(OGREnvelope *psExtent, int bForce)
 }
 
 /************************************************************************/
-/*                         GetFastExtent()                              */
+/*                         FastGetExtent()                              */
 /************************************************************************/
 
-bool OGRParquetDatasetLayer::GetFastExtent(int iGeomField,
+bool OGRParquetDatasetLayer::FastGetExtent(int iGeomField,
                                            OGREnvelope *psExtent) const
 {
     const auto oIter = m_oMapExtents.find(iGeomField);
@@ -208,7 +218,7 @@ OGRErr OGRParquetDatasetLayer::GetExtent(int iGeomField, OGREnvelope *psExtent,
         return OGRERR_FAILURE;
     }
 
-    if (GetFastExtent(iGeomField, psExtent))
+    if (FastGetExtent(iGeomField, psExtent))
     {
         return OGRERR_NONE;
     }

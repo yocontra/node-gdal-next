@@ -1592,9 +1592,9 @@ void CPLVerifyConfiguration()
 
 #ifdef DEBUG_CONFIG_OPTIONS
 
-static void *hRegisterConfigurationOptionMutex = 0;
-static std::set<CPLString> *paoGetKeys = NULL;
-static std::set<CPLString> *paoSetKeys = NULL;
+static CPLMutex *hRegisterConfigurationOptionMutex = nullptr;
+static std::set<CPLString> *paoGetKeys = nullptr;
+static std::set<CPLString> *paoSetKeys = nullptr;
 
 /************************************************************************/
 /*                      CPLShowAccessedOptions()                        */
@@ -1624,8 +1624,8 @@ static void CPLShowAccessedOptions()
 
     delete paoGetKeys;
     delete paoSetKeys;
-    paoGetKeys = NULL;
-    paoSetKeys = NULL;
+    paoGetKeys = nullptr;
+    paoSetKeys = nullptr;
 }
 
 /************************************************************************/
@@ -1635,7 +1635,7 @@ static void CPLShowAccessedOptions()
 static void CPLAccessConfigOption(const char *pszKey, bool bGet)
 {
     CPLMutexHolderD(&hRegisterConfigurationOptionMutex);
-    if (paoGetKeys == NULL)
+    if (paoGetKeys == nullptr)
     {
         paoGetKeys = new std::set<CPLString>;
         paoSetKeys = new std::set<CPLString>;
@@ -1689,24 +1689,11 @@ const char *CPL_STDCALL CPLGetConfigOption(const char *pszKey,
                                            const char *pszDefault)
 
 {
-#ifdef DEBUG_CONFIG_OPTIONS
-    CPLAccessConfigOption(pszKey, TRUE);
-#endif
-
-    const char *pszResult = nullptr;
-
-    int bMemoryError = FALSE;
-    char **papszTLConfigOptions = reinterpret_cast<char **>(
-        CPLGetTLSEx(CTLS_CONFIGOPTIONS, &bMemoryError));
-    if (papszTLConfigOptions != nullptr)
-        pszResult = CSLFetchNameValue(papszTLConfigOptions, pszKey);
+    const char *pszResult = CPLGetThreadLocalConfigOption(pszKey, nullptr);
 
     if (pszResult == nullptr)
     {
-        CPLMutexHolderD(&hConfigMutex);
-
-        pszResult = CSLFetchNameValue(const_cast<char **>(g_papszConfigOptions),
-                                      pszKey);
+        pszResult = CPLGetGlobalConfigOption(pszKey, nullptr);
     }
 
     if (gbIgnoreEnvVariables)
@@ -1801,6 +1788,33 @@ const char *CPL_STDCALL CPLGetThreadLocalConfigOption(const char *pszKey,
         CPLGetTLSEx(CTLS_CONFIGOPTIONS, &bMemoryError));
     if (papszTLConfigOptions != nullptr)
         pszResult = CSLFetchNameValue(papszTLConfigOptions, pszKey);
+
+    if (pszResult == nullptr)
+        return pszDefault;
+
+    return pszResult;
+}
+
+/************************************************************************/
+/*                   CPLGetGlobalConfigOption()                         */
+/************************************************************************/
+
+/** Same as CPLGetConfigOption() but excludes environment variables and
+ *  options set with CPLSetThreadLocalConfigOption().
+ *  This function should generally not be used by applications, which should
+ *  use CPLGetConfigOption() instead.
+ *  @since 3.8 */
+const char *CPL_STDCALL CPLGetGlobalConfigOption(const char *pszKey,
+                                                 const char *pszDefault)
+{
+#ifdef DEBUG_CONFIG_OPTIONS
+    CPLAccessConfigOption(pszKey, TRUE);
+#endif
+
+    CPLMutexHolderD(&hConfigMutex);
+
+    const char *pszResult =
+        CSLFetchNameValue(const_cast<char **>(g_papszConfigOptions), pszKey);
 
     if (pszResult == nullptr)
         return pszDefault;
@@ -3008,7 +3022,8 @@ int CPLUnlinkTree(const char *pszPath)
 int CPLCopyFile(const char *pszNewPath, const char *pszOldPath)
 
 {
-    return VSICopyFile(pszOldPath, pszNewPath, nullptr, 0, nullptr, nullptr,
+    return VSICopyFile(pszOldPath, pszNewPath, nullptr,
+                       static_cast<vsi_l_offset>(-1), nullptr, nullptr,
                        nullptr);
 }
 

@@ -41,26 +41,62 @@ std::shared_ptr<GDALMDArray> CPL_DLL MEMGroupCreateMDArray(
     CSLConstList papszOptions);
 
 /************************************************************************/
+/*                        MEMAttributeHolder                            */
+/************************************************************************/
+
+class CPL_DLL MEMAttributeHolder CPL_NON_FINAL
+{
+  protected:
+    std::map<CPLString, std::shared_ptr<GDALAttribute>> m_oMapAttributes{};
+
+  public:
+    virtual ~MEMAttributeHolder();
+
+    bool RenameAttribute(const std::string &osOldName,
+                         const std::string &osNewName);
+};
+
+/************************************************************************/
 /*                               MEMGroup                               */
 /************************************************************************/
 
-class CPL_DLL MEMGroup CPL_NON_FINAL : public GDALGroup
+class CPL_DLL MEMGroup CPL_NON_FINAL : public GDALGroup,
+                                       public MEMAttributeHolder
 {
+    friend class MEMMDArray;
+
     std::map<CPLString, std::shared_ptr<GDALGroup>> m_oMapGroups{};
     std::map<CPLString, std::shared_ptr<GDALMDArray>> m_oMapMDArrays{};
-    std::map<CPLString, std::shared_ptr<GDALAttribute>> m_oMapAttributes{};
     std::map<CPLString, std::shared_ptr<GDALDimension>> m_oMapDimensions{};
-    std::weak_ptr<MEMGroup> m_pSelf{};
+    std::weak_ptr<MEMGroup> m_pParent{};
+    std::weak_ptr<GDALGroup> m_poRootGroupWeak{};
 
-  public:
+  protected:
+    friend class MEMDimension;
+    bool RenameDimension(const std::string &osOldName,
+                         const std::string &osNewName);
+
+    bool RenameArray(const std::string &osOldName,
+                     const std::string &osNewName);
+
+    void NotifyChildrenOfRenaming() override;
+
+    void NotifyChildrenOfDeletion() override;
+
     MEMGroup(const std::string &osParentName, const char *pszName)
         : GDALGroup(osParentName, pszName ? pszName : "")
     {
+        if (!osParentName.empty() && !pszName)
+            m_osFullName = osParentName;
     }
 
-    void SetSelf(std::weak_ptr<MEMGroup> self)
+  public:
+    static std::shared_ptr<MEMGroup> Create(const std::string &osParentName,
+                                            const char *pszName);
+
+    void SetFullName(const std::string &osFullName)
     {
-        m_pSelf = self;
+        m_osFullName = osFullName;
     }
 
     std::vector<std::string>
@@ -77,6 +113,9 @@ class CPL_DLL MEMGroup CPL_NON_FINAL : public GDALGroup
 
     std::shared_ptr<GDALGroup> CreateGroup(const std::string &osName,
                                            CSLConstList papszOptions) override;
+
+    bool DeleteGroup(const std::string &osName,
+                     CSLConstList papszOptions) override;
 
     std::shared_ptr<GDALDimension>
     CreateDimension(const std::string &, const std::string &,
@@ -95,6 +134,9 @@ class CPL_DLL MEMGroup CPL_NON_FINAL : public GDALGroup
         const GDALExtendedDataType &oDataType, void *pData,
         CSLConstList papszOptions);
 
+    bool DeleteMDArray(const std::string &osName,
+                       CSLConstList papszOptions) override;
+
     std::shared_ptr<GDALAttribute>
     GetAttribute(const std::string &osName) const override;
 
@@ -109,6 +151,11 @@ class CPL_DLL MEMGroup CPL_NON_FINAL : public GDALGroup
                     const std::vector<GUInt64> &anDimensions,
                     const GDALExtendedDataType &oDataType,
                     CSLConstList papszOptions) override;
+
+    bool DeleteAttribute(const std::string &osName,
+                         CSLConstList papszOptions) override;
+
+    bool Rename(const std::string &osNewName) override;
 };
 
 /************************************************************************/
@@ -138,7 +185,6 @@ class CPL_DLL MEMAbstractMDArray : virtual public GDALAbstractMDArray
 
   protected:
     bool m_bOwnArray = false;
-    bool m_bValid = true;
     bool m_bWritable = true;
     bool m_bModified = false;
     GDALExtendedDataType m_oType;
@@ -213,9 +259,10 @@ class CPL_DLL MEMAbstractMDArray : virtual public GDALAbstractMDArray
 #pragma warning(disable : 4250)
 #endif  //_MSC_VER
 
-class MEMMDArray CPL_NON_FINAL : public MEMAbstractMDArray, public GDALMDArray
+class CPL_DLL MEMMDArray CPL_NON_FINAL : public MEMAbstractMDArray,
+                                         public GDALMDArray,
+                                         public MEMAttributeHolder
 {
-    std::map<CPLString, std::shared_ptr<GDALAttribute>> m_oMapAttributes{};
     std::string m_osUnit{};
     std::shared_ptr<OGRSpatialReference> m_poSRS{};
     GByte *m_pabyNoData = nullptr;
@@ -227,12 +274,17 @@ class MEMMDArray CPL_NON_FINAL : public MEMAbstractMDArray, public GDALMDArray
     GDALDataType m_eScaleStorageType = GDT_Unknown;
     std::string m_osFilename{};
     std::weak_ptr<GDALGroup> m_poGroupWeak{};
+    std::weak_ptr<GDALGroup> m_poRootGroupWeak{};
 
     MEMMDArray(const MEMMDArray &) = delete;
     MEMMDArray &operator=(const MEMMDArray &) = delete;
 
     bool Resize(const std::vector<GUInt64> &anNewDimSizes,
                 bool bResizeOtherArrays);
+
+    void NotifyChildrenOfRenaming() override;
+
+    void NotifyChildrenOfDeletion() override;
 
   protected:
     MEMMDArray(const std::string &osParentName, const std::string &osName,
@@ -268,7 +320,7 @@ class MEMMDArray CPL_NON_FINAL : public MEMAbstractMDArray, public GDALMDArray
         return m_osFilename;
     }
 
-    void RegisterGroup(std::weak_ptr<GDALGroup> group)
+    void RegisterGroup(const std::weak_ptr<GDALGroup> &group)
     {
         m_poGroupWeak = group;
     }
@@ -284,6 +336,9 @@ class MEMMDArray CPL_NON_FINAL : public MEMAbstractMDArray, public GDALMDArray
                     const std::vector<GUInt64> &anDimensions,
                     const GDALExtendedDataType &oDataType,
                     CSLConstList papszOptions) override;
+
+    bool DeleteAttribute(const std::string &osName,
+                         CSLConstList papszOptions) override;
 
     const std::string &GetUnit() const override
     {
@@ -352,15 +407,24 @@ class MEMMDArray CPL_NON_FINAL : public MEMAbstractMDArray, public GDALMDArray
 
     bool Resize(const std::vector<GUInt64> &anNewDimSizes,
                 CSLConstList) override;
+
+    bool Rename(const std::string &osNewName) override;
+
+    std::shared_ptr<GDALGroup> GetRootGroup() const override
+    {
+        return m_poRootGroupWeak.lock();
+    }
 };
 
 /************************************************************************/
 /*                               MEMAttribute                           */
 /************************************************************************/
 
-class MEMAttribute CPL_NON_FINAL : public MEMAbstractMDArray,
-                                   public GDALAttribute
+class CPL_DLL MEMAttribute CPL_NON_FINAL : public MEMAbstractMDArray,
+                                           public GDALAttribute
 {
+    std::weak_ptr<MEMAttributeHolder> m_poParent;
+
   protected:
     MEMAttribute(const std::string &osParentName, const std::string &osName,
                  const std::vector<GUInt64> &anDimensions,
@@ -373,6 +437,18 @@ class MEMAttribute CPL_NON_FINAL : public MEMAbstractMDArray,
     Create(const std::string &osParentName, const std::string &osName,
            const std::vector<GUInt64> &anDimensions,
            const GDALExtendedDataType &oType);
+
+    static std::shared_ptr<MEMAttribute>
+    Create(const std::shared_ptr<MEMGroup> &poParentGroup,
+           const std::string &osName, const std::vector<GUInt64> &anDimensions,
+           const GDALExtendedDataType &oType);
+
+    static std::shared_ptr<MEMAttribute>
+    Create(const std::shared_ptr<MEMMDArray> &poParentArray,
+           const std::string &osName, const std::vector<GUInt64> &anDimensions,
+           const GDALExtendedDataType &oType);
+
+    bool Rename(const std::string &osNewName) override;
 };
 
 #ifdef _MSC_VER
@@ -386,11 +462,17 @@ class MEMAttribute CPL_NON_FINAL : public MEMAbstractMDArray,
 class MEMDimension CPL_NON_FINAL : public GDALDimensionWeakIndexingVar
 {
     std::set<MEMMDArray *> m_oSetArrays{};
+    std::weak_ptr<MEMGroup> m_poParentGroup;
 
   public:
     MEMDimension(const std::string &osParentName, const std::string &osName,
                  const std::string &osType, const std::string &osDirection,
                  GUInt64 nSize);
+
+    static std::shared_ptr<MEMDimension>
+    Create(const std::shared_ptr<MEMGroup> &poParentGroupy,
+           const std::string &osName, const std::string &osType,
+           const std::string &osDirection, GUInt64 nSize);
 
     void RegisterUsingArray(MEMMDArray *poArray);
     void UnRegisterUsingArray(MEMMDArray *poArray);
@@ -398,6 +480,8 @@ class MEMDimension CPL_NON_FINAL : public GDALDimensionWeakIndexingVar
     {
         return m_oSetArrays;
     }
+
+    bool Rename(const std::string &osNewName) override;
 };
 
 #endif  //  MEMMULTIDIM_H

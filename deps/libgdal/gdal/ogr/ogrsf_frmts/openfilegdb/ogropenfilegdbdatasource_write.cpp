@@ -91,6 +91,7 @@ static int CPLGettimeofday(struct CPLTimeVal *tp, void * /* timezonep*/)
 
 // Probably not the best UUID generator ever. One issue is that mt19937
 // uses only a 32-bit seed.
+CPL_NOSANITIZE_UNSIGNED_INT_OVERFLOW
 std::string OFGDBGenerateUUID()
 {
     struct CPLTimeVal tv;
@@ -1345,10 +1346,9 @@ bool OGROpenFileGDBDataSource::Create(const char *pszName)
 /*                             ICreateLayer()                           */
 /************************************************************************/
 
-OGRLayer *OGROpenFileGDBDataSource::ICreateLayer(const char *pszLayerName,
-                                                 OGRSpatialReference *poSRS,
-                                                 OGRwkbGeometryType eType,
-                                                 char **papszOptions)
+OGRLayer *OGROpenFileGDBDataSource::ICreateLayer(
+    const char *pszLayerName, const OGRSpatialReference *poSRS,
+    OGRwkbGeometryType eType, char **papszOptions)
 {
     if (eAccess != GA_Update)
         return nullptr;

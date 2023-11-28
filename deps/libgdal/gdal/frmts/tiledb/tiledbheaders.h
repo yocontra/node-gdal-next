@@ -76,6 +76,11 @@
 #endif
 
 #if TILEDB_VERSION_MAJOR > 2 ||                                                \
+    (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 15)
+#define HAS_TILEDB_DIMENSION_LABEL
+#endif
+
+#if TILEDB_VERSION_MAJOR > 2 ||                                                \
     (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 17)
 struct gdal_tiledb_vector_of_bool
 {
@@ -161,6 +166,10 @@ struct gdal_tiledb_vector_of_bool
 #define VECTOR_OF_BOOL std::vector<uint8_t>
 #endif
 
+#ifdef HAS_TILEDB_DIMENSION_LABEL
+#define HAS_TILEDB_MULTIDIM
+#endif
+
 typedef enum
 {
     BAND = 0,
@@ -172,7 +181,9 @@ typedef enum
 
 #define DEFAULT_BATCH_SIZE 500000
 
-const CPLString TILEDB_VALUES("TDB_VALUES");
+constexpr const char *TILEDB_VALUES = "TDB_VALUES";
+
+constexpr const char *GDAL_ATTRIBUTE_NAME = "_gdal";
 
 /************************************************************************/
 /* ==================================================================== */
@@ -210,6 +221,13 @@ class TileDBDataset : public GDALPamDataset
                                    char **papszOptions,
                                    GDALProgressFunc pfnProgress,
                                    void *pProgressData);
+#ifdef HAS_TILEDB_MULTIDIM
+    static GDALDataset *OpenMultiDimensional(GDALOpenInfo *);
+    static GDALDataset *
+    CreateMultiDimensional(const char *pszFilename,
+                           CSLConstList papszRootGroupOptions,
+                           CSLConstList papszOptions);
+#endif
 };
 
 /************************************************************************/
@@ -236,7 +254,7 @@ class TileDBRasterDataset final : public TileDBDataset
     int nBlockYSize = -1;
     int nBlocksX = 0;
     int nBlocksY = 0;
-    int nBandStart = 1;
+    uint64_t nBandStart = 1;
     bool bHasSubDatasets = false;
     int nSubDataCount = 0;
     char **papszSubDatasets = nullptr;
@@ -253,8 +271,8 @@ class TileDBRasterDataset final : public TileDBDataset
     CPLErr CreateAttribute(GDALDataType eType, const CPLString &osAttrName,
                            const int nSubRasterCount = 1);
 
-    CPLErr AddDimensions(tiledb::Domain &domain, tiledb::Dimension &y,
-                         tiledb::Dimension &x,
+    CPLErr AddDimensions(tiledb::Domain &domain, const char *pszAttrName,
+                         tiledb::Dimension &y, tiledb::Dimension &x,
                          tiledb::Dimension *poBands = nullptr);
 
   public:
@@ -336,7 +354,7 @@ class OGRTileDBLayer final : public OGRLayer,
     bool m_bInitialized = false;
     OGRFeatureDefn *m_poFeatureDefn = nullptr;
     std::string m_osFIDColumn{};
-    GIntBig m_nNextFID = -1;
+    GIntBig m_nNextFID = 1;
     int64_t m_nTotalFeatureCount = -1;
     bool m_bStats = false;
     bool m_bQueryComplete = false;
@@ -417,6 +435,7 @@ class OGRTileDBLayer final : public OGRLayer,
     const char *GetDatabaseGeomColName();
     void InitializeSchemaAndArray();
     void FlushArrays();
+    void AllocateNewBuffers();
     void ResetBuffers();
     void SwitchToReadingMode();
     void SwitchToWritingMode();
@@ -519,7 +538,7 @@ class OGRTileDBDataset final : public TileDBDataset
     }
     int TestCapability(const char *) override;
     OGRLayer *ICreateLayer(const char *pszName,
-                           OGRSpatialReference *poSpatialRef = nullptr,
+                           const OGRSpatialReference *poSpatialRef = nullptr,
                            OGRwkbGeometryType eGType = wkbUnknown,
                            char **papszOptions = nullptr) override;
     static GDALDataset *Open(GDALOpenInfo *, tiledb::Object::Type objectType);

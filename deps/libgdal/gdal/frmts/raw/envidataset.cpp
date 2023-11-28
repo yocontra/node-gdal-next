@@ -2227,7 +2227,13 @@ ENVIDataset *ENVIDataset::Open(GDALOpenInfo *poOpenInfo, bool bFileSizeCheck)
                 eType = GDT_UInt32;
                 break;
 
-                // 14=Int64, 15=UInt64
+            case 14:
+                eType = GDT_Int64;
+                break;
+
+            case 15:
+                eType = GDT_UInt64;
+                break;
 
             default:
                 CPLError(CE_Failure, CPLE_AppDefined,
@@ -2686,9 +2692,12 @@ int ENVIDataset::GetEnviType(GDALDataType eType)
         case GDT_UInt32:
             iENVIType = 13;
             break;
-
-            // 14=Int64, 15=UInt64
-
+        case GDT_Int64:
+            iENVIType = 14;
+            break;
+        case GDT_UInt64:
+            iENVIType = 15;
+            break;
         default:
             CPLError(CE_Failure, CPLE_AppDefined,
                      "Attempt to create ENVI .hdr labelled dataset with an "
@@ -2841,6 +2850,25 @@ CPLErr ENVIRasterBand::SetCategoryNames(char **papszCategoryNamesIn)
 CPLErr ENVIRasterBand::SetNoDataValue(double dfNoDataValue)
 {
     cpl::down_cast<ENVIDataset *>(poDS)->bHeaderDirty = true;
+
+    if (poDS->GetRasterCount() > 1)
+    {
+        int bOtherBandHasNoData = false;
+        const int nOtherBand = nBand > 1 ? 1 : 2;
+        double dfOtherBandNoData = poDS->GetRasterBand(nOtherBand)
+                                       ->GetNoDataValue(&bOtherBandHasNoData);
+        if (bOtherBandHasNoData &&
+            !(std::isnan(dfOtherBandNoData) && std::isnan(dfNoDataValue)) &&
+            dfOtherBandNoData != dfNoDataValue)
+        {
+            CPLError(CE_Warning, CPLE_AppDefined,
+                     "Nodata value of band %d (%.18g) is different from nodata "
+                     "value from band %d (%.18g). Only the later will be "
+                     "written in the ENVI header as the \"data ignore value\"",
+                     nBand, dfNoDataValue, nOtherBand, dfOtherBandNoData);
+        }
+    }
+
     return RawRasterBand::SetNoDataValue(dfNoDataValue);
 }
 
@@ -2891,7 +2919,7 @@ void GDALRegister_ENVI()
     poDriver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "drivers/raster/envi.html");
     poDriver->SetMetadataItem(GDAL_DMD_EXTENSION, "");
     poDriver->SetMetadataItem(GDAL_DMD_CREATIONDATATYPES,
-                              "Byte Int16 UInt16 Int32 UInt32 "
+                              "Byte Int16 UInt16 Int32 UInt32 Int64 UInt64 "
                               "Float32 Float64 CFloat32 CFloat64");
     poDriver->SetMetadataItem(
         GDAL_DMD_CREATIONOPTIONLIST,

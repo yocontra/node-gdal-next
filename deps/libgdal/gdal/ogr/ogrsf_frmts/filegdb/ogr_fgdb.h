@@ -165,11 +165,11 @@ class FGdbLayer final : public FGdbBaseLayer
                     const std::wstring &wstrTablePath,
                     const std::wstring &wstrType);
     bool Create(FGdbDataSource *pParentDataSource, const char *pszLayerName,
-                OGRSpatialReference *poSRS, OGRwkbGeometryType eType,
+                const OGRSpatialReference *poSRS, OGRwkbGeometryType eType,
                 char **papszOptions);
     static bool CreateFeatureDataset(FGdbDataSource *pParentDataSource,
                                      const std::string &feature_dataset_name,
-                                     OGRSpatialReference *poSRS,
+                                     const OGRSpatialReference *poSRS,
                                      char **papszOptions);
 
     // virtual const char *GetName();
@@ -346,7 +346,7 @@ class FGdbDataSource final : public OGRDataSource
     OGRLayer *GetLayer(int) override;
 
     virtual OGRLayer *ICreateLayer(const char *,
-                                   OGRSpatialReference * = nullptr,
+                                   const OGRSpatialReference * = nullptr,
                                    OGRwkbGeometryType = wkbUnknown,
                                    char ** = nullptr) override;
 
@@ -443,13 +443,13 @@ class FGdbDataSource final : public OGRDataSource
 class FGdbDatabaseConnection
 {
   public:
-    FGdbDatabaseConnection(CPLString osName, Geodatabase *pGeodatabase)
+    FGdbDatabaseConnection(const std::string &osName, Geodatabase *pGeodatabase)
         : m_osName(osName), m_pGeodatabase(pGeodatabase), m_nRefCount(1),
           m_bLocked(FALSE), m_bFIDHackInProgress(FALSE)
     {
     }
 
-    CPLString m_osName;
+    std::string m_osName;
     Geodatabase *m_pGeodatabase;
     int m_nRefCount;
     int m_bLocked;

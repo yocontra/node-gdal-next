@@ -817,6 +817,13 @@ class netCDFDataset final : public GDALPamDataset
     int nCreateMode;
     bool bSignedData;
 
+    // IDs of the dimensions of the variables
+    std::vector<int> m_anDimIds{};
+
+    // Extra dimension info (size of those arrays is m_anDimIds.size() - 2)
+    std::vector<int> m_anExtraDimVarIds{};
+    std::vector<int> m_anExtraDimGroupIds{};
+
     std::vector<std::shared_ptr<OGRLayer>> papoLayers;
 
     netCDFWriterConfiguration oWriterConfig;
@@ -894,11 +901,14 @@ class netCDFDataset final : public GDALPamDataset
 
     void SetProjectionFromVar(int nGroupId, int nVarId, bool bReadSRSOnly,
                               const char *pszGivenGM, std::string *,
-                              nccfdriver::SGeometry_Reader *);
+                              nccfdriver::SGeometry_Reader *,
+                              std::vector<std::string> *paosRemovedMDItems);
     void SetProjectionFromVar(int nGroupId, int nVarId, bool bReadSRSOnly);
 
 #ifdef NETCDF_HAS_NC4
     bool ProcessNASAL2OceanGeoLocation(int nGroupId, int nVarId);
+
+    bool ProcessNASAEMITGeoLocation(int nGroupId, int nVarId);
 #endif
 
     int ProcessCFGeolocation(int nGroupId, int nVarId,
@@ -928,8 +938,8 @@ class netCDFDataset final : public GDALPamDataset
                std::map<std::array<int, 3>, std::vector<std::pair<int, int>>>
                    &oMap2DDimsToGroupAndVar);
     CPLErr CreateGrpVectorLayers(int nCdfId, CPLString osFeatureType,
-                                 std::vector<int> anPotentialVectorVarID,
-                                 std::map<int, int> oMapDimIdToCount,
+                                 const std::vector<int> &anPotentialVectorVarID,
+                                 const std::map<int, int> &oMapDimIdToCount,
                                  int nVarXId, int nVarYId, int nVarZId,
                                  int nProfileDimId, int nParentIndexVarID,
                                  bool bKeepRasters);
@@ -949,7 +959,7 @@ class netCDFDataset final : public GDALPamDataset
     CPLXMLNode *SerializeToXML(const char *pszVRTPath) override;
 
     virtual OGRLayer *ICreateLayer(const char *pszName,
-                                   OGRSpatialReference *poSpatialRef,
+                                   const OGRSpatialReference *poSpatialRef,
                                    OGRwkbGeometryType eGType,
                                    char **papszOptions) override;
 

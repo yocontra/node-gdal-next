@@ -236,6 +236,8 @@ class OGRShapeLayer final : public OGRAbstractProxiedLayer
                   char **papszCreateOptions = nullptr);
     virtual ~OGRShapeLayer();
 
+    GDALDataset *GetDataset() override;
+
     void ResetReading() override;
     OGRFeature *GetNextFeature() override;
     OGRErr SetNextByIndex(GIntBig nIndex) override;
@@ -348,7 +350,7 @@ class OGRShapeDataSource final : public OGRDataSource
     OGRLayer *GetLayer(int) override;
     OGRLayer *GetLayerByName(const char *) override;
 
-    OGRLayer *ICreateLayer(const char *, OGRSpatialReference * = nullptr,
+    OGRLayer *ICreateLayer(const char *, const OGRSpatialReference * = nullptr,
                            OGRwkbGeometryType = wkbUnknown,
                            char ** = nullptr) override;
 

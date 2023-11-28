@@ -393,6 +393,11 @@ class OGRDXFFeature final : public OGRFeature
     // Additional data for ATTRIB and ATTDEF entities
     CPLString osAttributeTag;
 
+    // Store ATTRIB entities associated with an INSERT, for use when
+    // DXF_INLINE_BLOCKS is true and a block with attributes is INSERTed
+    // in another block
+    std::vector<std::unique_ptr<OGRDXFFeature>> apoAttribFeatures;
+
   public:
     explicit OGRDXFFeature(OGRFeatureDefn *poFeatureDefn);
 
@@ -425,6 +430,10 @@ class OGRDXFFeature final : public OGRFeature
     CPLString GetAttributeTag() const
     {
         return osAttributeTag;
+    }
+    const std::vector<std::unique_ptr<OGRDXFFeature>> &GetAttribFeatures() const
+    {
+        return apoAttribFeatures;
     }
 
     void SetInsertOCSCoords(const DXFTriple &oTriple)
@@ -934,7 +943,7 @@ class OGRDXFWriterDS final : public OGRDataSource
     int TestCapability(const char *) override;
 
     OGRLayer *ICreateLayer(const char *pszName,
-                           OGRSpatialReference *poSpatialRef = nullptr,
+                           const OGRSpatialReference *poSpatialRef = nullptr,
                            OGRwkbGeometryType eGType = wkbUnknown,
                            char **papszOptions = nullptr) override;
 

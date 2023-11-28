@@ -139,10 +139,10 @@ void VSICurlAuthParametersChanged()
 namespace cpl
 {
 
-// Do not access those 2 variables directly !
+// Do not access those variables directly !
 // Use VSICURLGetDownloadChunkSize() and GetMaxRegions()
-static int N_MAX_REGIONS_DO_NOT_USE_DIRECTLY = 1000;
-static int DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY = 16384;
+static int N_MAX_REGIONS_DO_NOT_USE_DIRECTLY = 0;
+static int DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY = 0;
 
 /************************************************************************/
 /*                    VSICURLReadGlobalEnvVariables()                   */
@@ -154,18 +154,47 @@ static void VSICURLReadGlobalEnvVariables()
     {
         Initializer()
         {
-            DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY =
-                atoi(CPLGetConfigOption("CPL_VSIL_CURL_CHUNK_SIZE", "16384"));
-            if (DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY < 1024 ||
-                DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY > 10 * 1024 * 1024)
-                DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY = 16384;
+            constexpr int DOWNLOAD_CHUNK_SIZE_DEFAULT = 16384;
 
-            GIntBig nCacheSize = CPLAtoGIntBig(
-                CPLGetConfigOption("CPL_VSIL_CURL_CACHE_SIZE", "16384000"));
-            if (nCacheSize < DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY ||
-                nCacheSize / DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY > INT_MAX)
+            DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY = atoi(CPLGetConfigOption(
+                "CPL_VSIL_CURL_CHUNK_SIZE",
+                CPLSPrintf("%d", DOWNLOAD_CHUNK_SIZE_DEFAULT)));
+            constexpr int MIN_CHUNK_SIZE = 1024;
+            constexpr int MAX_CHUNK_SIZE = 10 * 1024 * 1024;
+            if (DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY < MIN_CHUNK_SIZE ||
+                DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY > MAX_CHUNK_SIZE)
             {
-                nCacheSize = 16384000;
+                DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY =
+                    DOWNLOAD_CHUNK_SIZE_DEFAULT;
+                CPLError(CE_Warning, CPLE_AppDefined,
+                         "Invalid value for CPL_VSIL_CURL_CHUNK_SIZE. "
+                         "Allowed range is [%d, %d]. "
+                         "Using CPL_VSIL_CURL_CHUNK_SIZE=%d instead",
+                         MIN_CHUNK_SIZE, MAX_CHUNK_SIZE,
+                         DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY);
+            }
+
+            constexpr int N_MAX_REGIONS_DEFAULT = 1000;
+            constexpr int CACHE_SIZE_DEFAULT =
+                N_MAX_REGIONS_DEFAULT * DOWNLOAD_CHUNK_SIZE_DEFAULT;
+            GIntBig nCacheSize = CPLAtoGIntBig(
+                CPLGetConfigOption("CPL_VSIL_CURL_CACHE_SIZE",
+                                   CPLSPrintf("%d", CACHE_SIZE_DEFAULT)));
+            const auto nMaxRAM = CPLGetUsablePhysicalRAM();
+            const auto nMinVal = DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY;
+            auto nMaxVal = static_cast<GIntBig>(INT_MAX) *
+                           DOWNLOAD_CHUNK_SIZE_DO_NOT_USE_DIRECTLY;
+            if (nMaxRAM > 0 && nMaxVal > nMaxRAM)
+                nMaxVal = nMaxRAM;
+            if (nCacheSize < nMinVal || nCacheSize > nMaxVal)
+            {
+                nCacheSize = nCacheSize < nMinVal ? nMinVal : nMaxVal;
+                CPLError(CE_Warning, CPLE_AppDefined,
+                         "Invalid value for CPL_VSIL_CURL_CACHE_SIZE. "
+                         "Allowed range is [%d, " CPL_FRMT_GIB "]. "
+                         "Using CPL_VSIL_CURL_CACHE_SIZE=" CPL_FRMT_GIB
+                         " instead",
+                         nMinVal, nMaxVal, nCacheSize);
             }
             N_MAX_REGIONS_DO_NOT_USE_DIRECTLY = std::max(
                 1, static_cast<int>(nCacheSize /
@@ -1602,6 +1631,132 @@ CPLString VSICurlHandle::GetRedirectURLIfValid(bool &bHasExpired) const
 }
 
 /************************************************************************/
+/*                          CurrentDownload                             */
+/************************************************************************/
+
+namespace
+{
+struct CurrentDownload
+{
+    VSICurlFilesystemHandlerBase *m_poFS = nullptr;
+    std::string m_osURL{};
+    vsi_l_offset m_nStartOffset = 0;
+    int m_nBlocks = 0;
+    std::string m_osData{};
+    bool m_bDone = false;
+
+    CurrentDownload(VSICurlFilesystemHandlerBase *poFS, const char *pszURL,
+                    vsi_l_offset startOffset, int nBlocks)
+        : m_poFS(poFS), m_osURL(pszURL), m_nStartOffset(startOffset),
+          m_nBlocks(nBlocks)
+    {
+        m_osData = m_poFS->NotifyStartDownloadRegion(m_osURL, m_nStartOffset,
+                                                     m_nBlocks);
+        m_bDone = !m_osData.empty();
+    }
+
+    const std::string &GetAlreadyDownloadedData() const
+    {
+        return m_osData;
+    }
+
+    void SetData(const std::string &osData)
+    {
+        CPLAssert(!m_bDone);
+        m_bDone = true;
+        m_poFS->NotifyStopDownloadRegion(m_osURL, m_nStartOffset, m_nBlocks,
+                                         osData);
+    }
+
+    ~CurrentDownload()
+    {
+        if (!m_bDone)
+            m_poFS->NotifyStopDownloadRegion(m_osURL, m_nStartOffset, m_nBlocks,
+                                             std::string());
+    }
+
+    CurrentDownload(const CurrentDownload &) = delete;
+    CurrentDownload &operator=(const CurrentDownload &) = delete;
+};
+}  // namespace
+
+/************************************************************************/
+/*                      NotifyStartDownloadRegion()                     */
+/************************************************************************/
+
+std::string VSICurlFilesystemHandlerBase::NotifyStartDownloadRegion(
+    const std::string &osURL, vsi_l_offset startOffset, int nBlocks)
+{
+    std::string osId(osURL);
+    osId += '_';
+    osId += std::to_string(startOffset);
+    osId += '_';
+    osId += std::to_string(nBlocks);
+
+    m_oMutex.lock();
+    auto oIter = m_oMapRegionInDownload.find(osId);
+    if (oIter != m_oMapRegionInDownload.end())
+    {
+        auto &region = *(oIter->second);
+        std::unique_lock<std::mutex> oRegionLock(region.oMutex);
+        m_oMutex.unlock();
+        region.nWaiters++;
+        while (region.bDownloadInProgress)
+        {
+            region.oCond.wait(oRegionLock);
+        }
+        std::string osRet = region.osData;
+        region.nWaiters--;
+        region.oCond.notify_one();
+        return osRet;
+    }
+    else
+    {
+        auto poRegionInDownload = cpl::make_unique<RegionInDownload>();
+        poRegionInDownload->bDownloadInProgress = true;
+        m_oMapRegionInDownload[osId] = std::move(poRegionInDownload);
+        m_oMutex.unlock();
+        return std::string();
+    }
+}
+
+/************************************************************************/
+/*                      NotifyStopDownloadRegion()                      */
+/************************************************************************/
+
+void VSICurlFilesystemHandlerBase::NotifyStopDownloadRegion(
+    const std::string &osURL, vsi_l_offset startOffset, int nBlocks,
+    const std::string &osData)
+{
+    std::string osId(osURL);
+    osId += '_';
+    osId += std::to_string(startOffset);
+    osId += '_';
+    osId += std::to_string(nBlocks);
+
+    m_oMutex.lock();
+    auto oIter = m_oMapRegionInDownload.find(osId);
+    CPLAssert(oIter != m_oMapRegionInDownload.end());
+    auto &region = *(oIter->second);
+    {
+        std::unique_lock<std::mutex> oRegionLock(region.oMutex);
+        if (region.nWaiters)
+        {
+            region.osData = osData;
+            region.bDownloadInProgress = false;
+            region.oCond.notify_all();
+
+            while (region.nWaiters)
+            {
+                region.oCond.wait(oRegionLock);
+            }
+        }
+    }
+    m_oMapRegionInDownload.erase(oIter);
+    m_oMutex.unlock();
+}
+
+/************************************************************************/
 /*                          DownloadRegion()                            */
 /************************************************************************/
 
@@ -1614,6 +1769,15 @@ std::string VSICurlHandle::DownloadRegion(const vsi_l_offset startOffset,
     if (oFileProp.eExists == EXIST_NO)
         return std::string();
 
+    // Check if there is not a download of the same region in progress in
+    // another thread, and if so wait for it to be completed
+    CurrentDownload currentDownload(poFS, m_pszURL, startOffset, nBlocks);
+    const std::string &osAlreadyDownloadedData =
+        currentDownload.GetAlreadyDownloadedData();
+    if (!osAlreadyDownloadedData.empty())
+        return osAlreadyDownloadedData;
+
+begin:
     CURLM *hCurlMultiHandle = poFS->GetCurlMultiHandleFor(m_pszURL);
 
     ManagePlanetaryComputerSigning();
@@ -1778,7 +1942,7 @@ retry:
             CPLFree(sWriteFuncData.pBuffer);
             CPLFree(sWriteFuncHeaderData.pBuffer);
             curl_easy_cleanup(hCurlHandle);
-            return DownloadRegion(startOffset, nBlocks);
+            goto begin;
         }
 
         // Look if we should attempt a retry
@@ -1892,6 +2056,9 @@ retry:
 
     std::string osRet;
     osRet.assign(sWriteFuncData.pBuffer, sWriteFuncData.nSize);
+
+    // Notify that the download of the current region is finished
+    currentDownload.SetData(osRet);
 
     CPLFree(sWriteFuncData.pBuffer);
     CPLFree(sWriteFuncHeaderData.pBuffer);
@@ -2049,7 +2216,8 @@ size_t VSICurlHandle::Read(void *const pBufferIn, size_t const nSize,
                 // heuristic that we will read the file sequentially, so
                 // we double the requested size to decrease the number of
                 // client/server roundtrips.
-                if (nBlocksToDownload < 100)
+                constexpr int MAX_CHUNK_SIZE_INCREASE_FACTOR = 128;
+                if (nBlocksToDownload < MAX_CHUNK_SIZE_INCREASE_FACTOR)
                     nBlocksToDownload *= 2;
             }
             else
@@ -2084,6 +2252,9 @@ size_t VSICurlHandle::Read(void *const pBufferIn, size_t const nSize,
                 }
             }
 
+            // We can't download more than knMAX_REGIONS chunks at a time,
+            // otherwise the cache will not be big enough to store them and
+            // copy their content to the target buffer.
             if (nBlocksToDownload > knMAX_REGIONS)
                 nBlocksToDownload = knMAX_REGIONS;
 
@@ -2979,7 +3150,7 @@ void VSICurlHandle::AdviseRead(int nRanges, const vsi_l_offset *panOffsets,
     ManagePlanetaryComputerSigning();
 
     bool bHasExpired = false;
-    CPLString osURL(GetRedirectURLIfValid(bHasExpired));
+    const std::string l_osURL(GetRedirectURLIfValid(bHasExpired));
     if (bHasExpired)
     {
         return;
@@ -3046,7 +3217,7 @@ void VSICurlHandle::AdviseRead(int nRanges, const vsi_l_offset *panOffsets,
              static_cast<unsigned>(m_aoAdviseReadRanges.size()));
 #endif
 
-    const auto task = [this, osURL]()
+    const auto task = [this](const std::string &osURL)
     {
         CURLM *hMultiHandle = curl_multi_init();
 
@@ -3093,8 +3264,8 @@ void VSICurlHandle::AdviseRead(int nRanges, const vsi_l_offset *panOffsets,
             // need to wait as we already know if pipelining is possible
             // unchecked_curl_easy_setopt(hCurlHandle, CURLOPT_PIPEWAIT, 1);
 
-            struct curl_slist *headers =
-                VSICurlSetOptions(hCurlHandle, osURL, m_papszHTTPOptions);
+            struct curl_slist *headers = VSICurlSetOptions(
+                hCurlHandle, osURL.c_str(), m_papszHTTPOptions);
 
             VSICURLInitWriteFuncStruct(&asWriteFuncData[i], this, pfnReadCbk,
                                        pReadCbkUserData);
@@ -3266,7 +3437,7 @@ void VSICurlHandle::AdviseRead(int nRanges, const vsi_l_offset *panOffsets,
 
         curl_multi_cleanup(hMultiHandle);
     };
-    m_oThreadAdviseRead = std::thread(task);
+    m_oThreadAdviseRead = std::thread(task, l_osURL);
 }
 
 /************************************************************************/
@@ -3892,8 +4063,13 @@ VSIVirtualHandle *VSICurlFilesystemHandlerBase::Open(const char *pszFilename,
         }
         return nullptr;
     }
-    if (!IsAllowedFilename(pszFilename))
-        return nullptr;
+    if (!papszOptions ||
+        !CPLTestBool(CSLFetchNameValueDef(
+            papszOptions, "IGNORE_FILENAME_RESTRICTIONS", "NO")))
+    {
+        if (!IsAllowedFilename(pszFilename))
+            return nullptr;
+    }
 
     bool bListDir = true;
     bool bEmptyDir = false;

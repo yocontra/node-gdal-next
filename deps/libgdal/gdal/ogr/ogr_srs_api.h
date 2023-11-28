@@ -31,6 +31,8 @@
 #ifndef OGR_SRS_API_H_INCLUDED
 #define OGR_SRS_API_H_INCLUDED
 
+#include <stdbool.h>
+
 #ifndef SWIG
 #include "ogr_core.h"
 
@@ -549,6 +551,7 @@ int CPL_DLL OSRIsCompound(OGRSpatialReferenceH);
 int CPL_DLL OSRIsGeocentric(OGRSpatialReferenceH);
 int CPL_DLL OSRIsVertical(OGRSpatialReferenceH);
 int CPL_DLL OSRIsDynamic(OGRSpatialReferenceH);
+int CPL_DLL OSRHasPointMotionOperation(OGRSpatialReferenceH);
 int CPL_DLL OSRIsSameGeogCS(OGRSpatialReferenceH, OGRSpatialReferenceH);
 int CPL_DLL OSRIsSameVertCS(OGRSpatialReferenceH, OGRSpatialReferenceH);
 int CPL_DLL OSRIsSame(OGRSpatialReferenceH, OGRSpatialReferenceH);
@@ -1036,6 +1039,9 @@ int CPL_DLL OCTCoordinateTransformationOptionsSetDesiredAccuracy(
 
 int CPL_DLL OCTCoordinateTransformationOptionsSetBallparkAllowed(
     OGRCoordinateTransformationOptionsH hOptions, int bAllowBallpark);
+
+int CPL_DLL OCTCoordinateTransformationOptionsSetOnlyBest(
+    OGRCoordinateTransformationOptionsH hOptions, bool bOnlyBest);
 
 void CPL_DLL OCTDestroyCoordinateTransformationOptions(
     OGRCoordinateTransformationOptionsH);

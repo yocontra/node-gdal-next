@@ -75,6 +75,10 @@ class netCDFSharedResources
     {
         return m_bReadOnly;
     }
+    inline bool IsNC4() const
+    {
+        return m_bIsNC4;
+    }
     bool SetDefineMode(bool bNewDefineMode);
     int GetBelongingGroupOfDim(int startgid, int dimid);
     inline bool GetImappIsInElements() const
@@ -196,14 +200,38 @@ bool netCDFSharedResources::SetDefineMode(bool bNewDefineMode)
 }
 
 /************************************************************************/
+/*                        netCDFAttributeHolder                         */
+/************************************************************************/
+
+class netCDFAttributeHolder CPL_NON_FINAL
+{
+  protected:
+    std::map<std::string, GDALAttribute *> m_oMapAttributes{};
+
+  public:
+    void RegisterAttribute(GDALAttribute *poAttr)
+    {
+        m_oMapAttributes[poAttr->GetName()] = poAttr;
+    }
+    void UnRegisterAttribute(GDALAttribute *poAttr)
+    {
+        m_oMapAttributes.erase(poAttr->GetName());
+    }
+};
+
+/************************************************************************/
 /*                           netCDFGroup                                */
 /************************************************************************/
 
-class netCDFGroup final : public GDALGroup
+class netCDFGroup final : public GDALGroup, public netCDFAttributeHolder
 {
     std::shared_ptr<netCDFSharedResources> m_poShared;
     int m_gid = 0;
     CPLStringList m_aosStructuralInfo{};
+    std::weak_ptr<netCDFGroup> m_poParent{};
+    std::set<GDALGroup *> m_oSetGroups{};
+    std::set<GDALDimension *> m_oSetDimensions{};
+    std::set<GDALMDArray *> m_oSetArrays{};
 
     static std::string retrieveName(int gid)
     {
@@ -213,9 +241,50 @@ class netCDFGroup final : public GDALGroup
         return szName;
     }
 
-  public:
+    void RegisterSubGroup(GDALGroup *poSubGroup)
+    {
+        m_oSetGroups.insert(poSubGroup);
+    }
+    void UnRegisterSubGroup(GDALGroup *poSubGroup)
+    {
+        m_oSetGroups.erase(poSubGroup);
+    }
+
+  protected:
+    friend class netCDFDimension;
+    void RegisterDimension(GDALDimension *poDim)
+    {
+        m_oSetDimensions.insert(poDim);
+    }
+    void UnRegisterDimension(GDALDimension *poDim)
+    {
+        m_oSetDimensions.erase(poDim);
+    }
+
+    friend class netCDFVariable;
+    void RegisterArray(GDALMDArray *poArray)
+    {
+        m_oSetArrays.insert(poArray);
+    }
+    void UnRegisterArray(GDALMDArray *poArray)
+    {
+        m_oSetArrays.erase(poArray);
+    }
+
+    void NotifyChildrenOfRenaming() override;
+
     netCDFGroup(const std::shared_ptr<netCDFSharedResources> &poShared,
                 int gid);
+
+  public:
+    ~netCDFGroup();
+
+    static std::shared_ptr<netCDFGroup>
+    Create(const std::shared_ptr<netCDFSharedResources> &poShared, int cdfid);
+
+    static std::shared_ptr<netCDFGroup>
+    Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+           const std::shared_ptr<netCDFGroup> &poParent, int nSubGroupId);
 
     std::vector<std::string>
     GetGroupNames(CSLConstList papszOptions) const override;
@@ -258,9 +327,14 @@ class netCDFGroup final : public GDALGroup
                     const GDALExtendedDataType &oDataType,
                     CSLConstList papszOptions) override;
 
+    bool DeleteAttribute(const std::string &osName,
+                         CSLConstList papszOptions) override;
+
     CSLConstList GetStructuralInfo() const override;
 
     void ClearStatistics() override;
+
+    bool Rename(const std::string &osNewName) override;
 };
 
 /************************************************************************/
@@ -273,10 +347,15 @@ class netCDFVirtualGroupBySameDimension final : public GDALGroup
     std::shared_ptr<netCDFGroup> m_poGroup;
     std::string m_osDimName{};
 
-  public:
+  protected:
     netCDFVirtualGroupBySameDimension(
         const std::shared_ptr<netCDFGroup> &poGroup,
         const std::string &osDimName);
+
+  public:
+    static std::shared_ptr<netCDFVirtualGroupBySameDimension>
+    Create(const std::shared_ptr<netCDFGroup> &poGroup,
+           const std::string &osDimName);
 
     std::vector<std::string>
     GetMDArrayNames(CSLConstList papszOptions) const override;
@@ -294,6 +373,7 @@ class netCDFDimension final : public GDALDimension
     std::shared_ptr<netCDFSharedResources> m_poShared;
     int m_gid = 0;
     int m_dimid = 0;
+    std::weak_ptr<netCDFGroup> m_poParent{};
 
     static std::string retrieveName(int cfid, int dimid)
     {
@@ -316,6 +396,13 @@ class netCDFDimension final : public GDALDimension
                     int cfid, int dimid, size_t nForcedSize,
                     const std::string &osType);
 
+    ~netCDFDimension();
+
+    static std::shared_ptr<netCDFDimension>
+    Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+           const std::shared_ptr<netCDFGroup> &poParent, int cfid, int dimid,
+           size_t nForcedSize, const std::string &osType);
+
     std::shared_ptr<GDALMDArray> GetIndexingVariable() const override;
 
     int GetId() const
@@ -332,15 +419,20 @@ class netCDFDimension final : public GDALDimension
     {
         m_nSize = nNewSize;
     }
+
+    bool Rename(const std::string &osNewName) override;
 };
 
 /************************************************************************/
 /*                         netCDFAttribute                              */
 /************************************************************************/
 
+class netCDFVariable;
+
 class netCDFAttribute final : public GDALAttribute
 {
     std::shared_ptr<netCDFSharedResources> m_poShared;
+    std::weak_ptr<netCDFAttributeHolder> m_poParent;
     int m_gid = 0;
     int m_varid = 0;
     size_t m_nTextLength = 0;
@@ -376,12 +468,16 @@ class netCDFAttribute final : public GDALAttribute
            const void *pSrcBuffer) override;
 
   public:
+    ~netCDFAttribute() override;
+
     static std::shared_ptr<netCDFAttribute>
-    Create(const std::shared_ptr<netCDFSharedResources> &poShared, int gid,
+    Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+           const std::shared_ptr<netCDFAttributeHolder> &poParent, int gid,
            int varid, const std::string &name);
 
     static std::shared_ptr<netCDFAttribute>
-    Create(const std::shared_ptr<netCDFSharedResources> &poShared, int gid,
+    Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+           const std::shared_ptr<netCDFAttributeHolder> &poParent, int gid,
            int varid, const std::string &osName,
            const std::vector<GUInt64> &anDimensions,
            const GDALExtendedDataType &oDataType, CSLConstList papszOptions);
@@ -393,15 +489,18 @@ class netCDFAttribute final : public GDALAttribute
     }
 
     const GDALExtendedDataType &GetDataType() const override;
+
+    bool Rename(const std::string &osNewName) override;
 };
 
 /************************************************************************/
 /*                         netCDFVariable                               */
 /************************************************************************/
 
-class netCDFVariable final : public GDALPamMDArray
+class netCDFVariable final : public GDALPamMDArray, public netCDFAttributeHolder
 {
     std::shared_ptr<netCDFSharedResources> m_poShared;
+    std::weak_ptr<netCDFGroup> m_poParent{};
     int m_gid = 0;
     int m_varid = 0;
     int m_nDims = 0;
@@ -480,15 +579,25 @@ class netCDFVariable final : public GDALPamMDArray
     bool IAdviseRead(const GUInt64 *arrayStartIdx, const size_t *count,
                      CSLConstList papszOptions) const override;
 
+    void NotifyChildrenOfRenaming() override;
+
+    bool SetStatistics(bool bApproxStats, double dfMin, double dfMax,
+                       double dfMean, double dfStdDev, GUInt64 nValidCount,
+                       CSLConstList papszOptions) override;
+
   public:
     static std::shared_ptr<netCDFVariable>
-    Create(const std::shared_ptr<netCDFSharedResources> &poShared, int gid,
-           int varid, const std::vector<std::shared_ptr<GDALDimension>> &dims,
+    Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+           const std::shared_ptr<netCDFGroup> &poParent, int gid, int varid,
+           const std::vector<std::shared_ptr<GDALDimension>> &dims,
            CSLConstList papszOptions, bool bCreate)
     {
         auto var(std::shared_ptr<netCDFVariable>(
             new netCDFVariable(poShared, gid, varid, dims, papszOptions)));
         var->SetSelf(var);
+        var->m_poParent = poParent;
+        if (poParent)
+            poParent->RegisterArray(var.get());
         var->m_bHasWrittenData = !bCreate;
         return var;
     }
@@ -526,6 +635,9 @@ class netCDFVariable final : public GDALPamMDArray
                     const std::vector<GUInt64> &anDimensions,
                     const GDALExtendedDataType &oDataType,
                     CSLConstList papszOptions) override;
+
+    bool DeleteAttribute(const std::string &osName,
+                         CSLConstList papszOptions) override;
 
     const void *GetRawNoDataValue() const override;
 
@@ -577,6 +689,13 @@ class netCDFVariable final : public GDALPamMDArray
         char szName[NC_MAX_NAME + 1] = {};
         NCDF_ERR(nc_inq_varname(gid, varid, szName));
         return szName;
+    }
+
+    bool Rename(const std::string &osNewName) override;
+
+    std::shared_ptr<GDALGroup> GetRootGroup() const override
+    {
+        return netCDFGroup::Create(m_poShared, nullptr, m_gid);
     }
 };
 
@@ -666,6 +785,49 @@ netCDFGroup::netCDFGroup(const std::shared_ptr<netCDFSharedResources> &poShared,
 }
 
 /************************************************************************/
+/*                            ~netCDFGroup()                            */
+/************************************************************************/
+
+netCDFGroup::~netCDFGroup()
+{
+    auto poParent = m_poParent.lock();
+    if (poParent)
+        poParent->UnRegisterSubGroup(this);
+}
+
+/************************************************************************/
+/*                              Create()                                */
+/************************************************************************/
+
+/* static */
+std::shared_ptr<netCDFGroup>
+netCDFGroup::Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+                    int cdfid)
+{
+    auto poGroup =
+        std::shared_ptr<netCDFGroup>(new netCDFGroup(poShared, cdfid));
+    poGroup->SetSelf(poGroup);
+    return poGroup;
+}
+
+/************************************************************************/
+/*                              Create()                                */
+/************************************************************************/
+
+/* static */
+std::shared_ptr<netCDFGroup>
+netCDFGroup::Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+                    const std::shared_ptr<netCDFGroup> &poParent,
+                    int nSubGroupId)
+{
+    auto poSubGroup = netCDFGroup::Create(poShared, nSubGroupId);
+    poSubGroup->m_poParent = poParent;
+    if (poParent)
+        poParent->RegisterSubGroup(poSubGroup.get());
+    return poSubGroup;
+}
+
+/************************************************************************/
 /*                             CreateGroup()                            */
 /************************************************************************/
 
@@ -686,7 +848,9 @@ netCDFGroup::CreateGroup(const std::string &osName,
     NCDF_ERR(ret);
     if (ret != NC_NOERR)
         return nullptr;
-    return std::make_shared<netCDFGroup>(m_poShared, nSubGroupId);
+    return netCDFGroup::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+        nSubGroupId);
 }
 
 /************************************************************************/
@@ -712,8 +876,9 @@ netCDFGroup::CreateDimension(const std::string &osName,
                         static_cast<size_t>(bUnlimited ? 0 : nSize), &nDimId));
     if (nDimId < 0)
         return nullptr;
-    return std::make_shared<netCDFDimension>(
-        m_poShared, m_gid, nDimId, static_cast<size_t>(nSize), osType);
+    return netCDFDimension::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+        m_gid, nDimId, static_cast<size_t>(nSize), osType);
 }
 
 /************************************************************************/
@@ -891,8 +1056,10 @@ std::shared_ptr<GDALMDArray> netCDFGroup::CreateMDArray(
             if (nc_inq_dimid(m_gid, dim->GetName().c_str(), &nDimId) ==
                 NC_NOERR)
             {
-                netCDFDim = std::make_shared<netCDFDimension>(
-                    m_poShared, m_gid, nDimId, 0, dim->GetType());
+                netCDFDim = netCDFDimension::Create(
+                    m_poShared,
+                    std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+                    m_gid, nDimId, 0, dim->GetType());
                 if (netCDFDim->GetSize() != dim->GetSize())
                 {
                     CPLError(CE_Warning, CPLE_AppDefined,
@@ -1038,8 +1205,9 @@ std::shared_ptr<GDALMDArray> netCDFGroup::CreateMDArray(
             return nullptr;
     }
 
-    return netCDFVariable::Create(m_poShared, m_gid, nVarId, dims, papszOptions,
-                                  true);
+    return netCDFVariable::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+        m_gid, nVarId, dims, papszOptions, true);
 }
 
 /************************************************************************/
@@ -1050,8 +1218,34 @@ std::shared_ptr<GDALAttribute> netCDFGroup::CreateAttribute(
     const std::string &osName, const std::vector<GUInt64> &anDimensions,
     const GDALExtendedDataType &oDataType, CSLConstList papszOptions)
 {
-    return netCDFAttribute::Create(m_poShared, m_gid, NC_GLOBAL, osName,
-                                   anDimensions, oDataType, papszOptions);
+    return netCDFAttribute::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+        m_gid, NC_GLOBAL, osName, anDimensions, oDataType, papszOptions);
+}
+
+/************************************************************************/
+/*                         DeleteAttribute()                            */
+/************************************************************************/
+
+bool netCDFGroup::DeleteAttribute(const std::string &osName,
+                                  CSLConstList /*papszOptions*/)
+{
+    CPLMutexHolderD(&hNCMutex);
+    m_poShared->SetDefineMode(true);
+
+    int ret = nc_del_att(m_gid, NC_GLOBAL, osName.c_str());
+    NCDF_ERR(ret);
+    if (ret != NC_NOERR)
+        return false;
+
+    auto it = m_oMapAttributes.find(osName);
+    if (it != m_oMapAttributes.end())
+    {
+        it->second->Deleted();
+        m_oMapAttributes.erase(it);
+    }
+
+    return true;
 }
 
 /************************************************************************/
@@ -1130,9 +1324,8 @@ netCDFGroup::OpenGroup(const std::string &osName,
             {
                 if (osCandidateGroupName == osName)
                 {
-                    auto poThisGroup =
-                        std::make_shared<netCDFGroup>(m_poShared, m_gid);
-                    return std::make_shared<netCDFVirtualGroupBySameDimension>(
+                    auto poThisGroup = netCDFGroup::Create(m_poShared, m_gid);
+                    return netCDFVirtualGroupBySameDimension::Create(
                         poThisGroup, osName);
                 }
             }
@@ -1143,7 +1336,9 @@ netCDFGroup::OpenGroup(const std::string &osName,
     if (nc_inq_grp_ncid(m_gid, osName.c_str(), &nSubGroupId) != NC_NOERR ||
         nSubGroupId <= 0)
         return nullptr;
-    return std::make_shared<netCDFGroup>(m_poShared, nSubGroupId);
+    return netCDFGroup::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+        nSubGroupId);
 }
 
 /************************************************************************/
@@ -1260,6 +1455,61 @@ netCDFGroup::GetMDArrayNames(CSLConstList papszOptions) const
 }
 
 /************************************************************************/
+/*                              Rename()                                */
+/************************************************************************/
+
+bool netCDFGroup::Rename(const std::string &osNewName)
+{
+    if (m_poShared->IsReadOnly())
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Rename() not supported on read-only file");
+        return false;
+    }
+    if (osNewName.empty())
+    {
+        CPLError(CE_Failure, CPLE_NotSupported, "Empty name not supported");
+        return false;
+    }
+    if (m_osName == "/")
+    {
+        CPLError(CE_Failure, CPLE_NotSupported, "Cannot rename root group");
+        return false;
+    }
+
+    CPLMutexHolderD(&hNCMutex);
+    m_poShared->SetDefineMode(true);
+
+    int ret = nc_rename_grp(m_gid, osNewName.c_str());
+    NCDF_ERR(ret);
+    if (ret != NC_NOERR)
+        return false;
+
+    BaseRename(osNewName);
+
+    return true;
+}
+
+/************************************************************************/
+/*                       NotifyChildrenOfRenaming()                     */
+/************************************************************************/
+
+void netCDFGroup::NotifyChildrenOfRenaming()
+{
+    for (const auto poSubGroup : m_oSetGroups)
+        poSubGroup->ParentRenamed(m_osFullName);
+
+    for (const auto poDim : m_oSetDimensions)
+        poDim->ParentRenamed(m_osFullName);
+
+    for (const auto poArray : m_oSetArrays)
+        poArray->ParentRenamed(m_osFullName);
+
+    for (const auto &iter : m_oMapAttributes)
+        iter.second->ParentRenamed(m_osFullName);
+}
+
+/************************************************************************/
 /*                           OpenMDArray()                              */
 /************************************************************************/
 
@@ -1272,8 +1522,9 @@ netCDFGroup::OpenMDArray(const std::string &osName,
     if (nc_inq_varid(m_gid, osName.c_str(), &nVarId) != NC_NOERR)
         return nullptr;
     auto poVar = netCDFVariable::Create(
-        m_poShared, m_gid, nVarId,
-        std::vector<std::shared_ptr<GDALDimension>>(), nullptr, false);
+        m_poShared, std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+        m_gid, nVarId, std::vector<std::shared_ptr<GDALDimension>>(), nullptr,
+        false);
     if (poVar)
     {
         poVar->SetUseDefaultFillAsNoData(CPLTestBool(CSLFetchNameValueDef(
@@ -1302,8 +1553,10 @@ netCDFGroup::GetDimensions(CSLConstList) const
         auto poCachedDim = m_poShared->GetCachedDimension(dimids[i]);
         if (poCachedDim == nullptr)
         {
-            poCachedDim = std::make_shared<netCDFDimension>(
-                m_poShared, m_gid, dimids[i], 0, std::string());
+            poCachedDim = netCDFDimension::Create(
+                m_poShared,
+                std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()), m_gid,
+                dimids[i], 0, std::string());
             m_poShared->CacheDimension(dimids[i], poCachedDim);
         }
         res.emplace_back(poCachedDim);
@@ -1352,7 +1605,9 @@ netCDFGroup::GetAttribute(const std::string &osName) const
         }
         return nullptr;
     }
-    return netCDFAttribute::Create(m_poShared, m_gid, NC_GLOBAL, osName);
+    return netCDFAttribute::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()),
+        m_gid, NC_GLOBAL, osName);
 }
 
 /************************************************************************/
@@ -1374,8 +1629,10 @@ netCDFGroup::GetAttributes(CSLConstList) const
         NCDF_ERR(nc_inq_attname(m_gid, NC_GLOBAL, i, szAttrName));
         if (!EQUAL(szAttrName, "_NCProperties"))
         {
-            res.emplace_back(netCDFAttribute::Create(m_poShared, m_gid,
-                                                     NC_GLOBAL, szAttrName));
+            res.emplace_back(netCDFAttribute::Create(
+                m_poShared,
+                std::dynamic_pointer_cast<netCDFGroup>(m_pSelf.lock()), m_gid,
+                NC_GLOBAL, szAttrName));
         }
     }
 
@@ -1429,6 +1686,20 @@ netCDFVirtualGroupBySameDimension::netCDFVirtualGroupBySameDimension(
     : GDALGroup(poGroup->GetName(), osDimName), m_poGroup(poGroup),
       m_osDimName(osDimName)
 {
+}
+
+/************************************************************************/
+/*                              Create()                                */
+/************************************************************************/
+
+/* static */ std::shared_ptr<netCDFVirtualGroupBySameDimension>
+netCDFVirtualGroupBySameDimension::Create(
+    const std::shared_ptr<netCDFGroup> &poGroup, const std::string &osDimName)
+{
+    auto poNewGroup = std::shared_ptr<netCDFVirtualGroupBySameDimension>(
+        new netCDFVirtualGroupBySameDimension(poGroup, osDimName));
+    poNewGroup->SetSelf(poNewGroup);
+    return poNewGroup;
 }
 
 /************************************************************************/
@@ -1552,6 +1823,36 @@ netCDFDimension::netCDFDimension(
 }
 
 /************************************************************************/
+/*                          ~netCDFDimension()                          */
+/************************************************************************/
+
+netCDFDimension::~netCDFDimension()
+{
+    auto poParent = m_poParent.lock();
+    if (poParent)
+        poParent->UnRegisterDimension(this);
+}
+
+/************************************************************************/
+/*                             Create()                                 */
+/************************************************************************/
+
+/* static */
+std::shared_ptr<netCDFDimension>
+netCDFDimension::Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+                        const std::shared_ptr<netCDFGroup> &poParent, int cfid,
+                        int dimid, size_t nForcedSize,
+                        const std::string &osType)
+{
+    auto poDim(std::make_shared<netCDFDimension>(poShared, cfid, dimid,
+                                                 nForcedSize, osType));
+    poDim->m_poParent = poParent;
+    if (poParent)
+        poParent->RegisterDimension(poDim.get());
+    return poDim;
+}
+
+/************************************************************************/
 /*                         GetIndexingVariable()                        */
 /************************************************************************/
 
@@ -1611,7 +1912,7 @@ std::shared_ptr<GDALMDArray> netCDFDimension::GetIndexingVariable() const
                 }
 
                 return netCDFVariable::Create(
-                    m_poShared, m_gid, nVarId,
+                    m_poShared, m_poParent.lock(), m_gid, nVarId,
                     std::vector<std::shared_ptr<GDALDimension>>(), nullptr,
                     false);
             }
@@ -1717,7 +2018,8 @@ std::shared_ptr<GDALMDArray> netCDFDimension::GetIndexingVariable() const
                     &nIndexingVarGroupId, &nIndexingVarId, false) == CE_None)
             {
                 return netCDFVariable::Create(
-                    m_poShared, nIndexingVarGroupId, nIndexingVarId,
+                    m_poShared, m_poParent.lock(), nIndexingVarGroupId,
+                    nIndexingVarId,
                     std::vector<std::shared_ptr<GDALDimension>>(), nullptr,
                     false);
             }
@@ -1725,6 +2027,36 @@ std::shared_ptr<GDALMDArray> netCDFDimension::GetIndexingVariable() const
     }
 
     return candidateIndexingVariable;
+}
+
+/************************************************************************/
+/*                              Rename()                                */
+/************************************************************************/
+
+bool netCDFDimension::Rename(const std::string &osNewName)
+{
+    if (m_poShared->IsReadOnly())
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Rename() not supported on read-only file");
+        return false;
+    }
+    if (osNewName.empty())
+    {
+        CPLError(CE_Failure, CPLE_NotSupported, "Empty name not supported");
+        return false;
+    }
+    CPLMutexHolderD(&hNCMutex);
+    m_poShared->SetDefineMode(true);
+
+    int ret = nc_rename_dim(m_gid, m_dimid, osNewName.c_str());
+    NCDF_ERR(ret);
+    if (ret != NC_NOERR)
+        return false;
+
+    BaseRename(osNewName);
+
+    return true;
 }
 
 /************************************************************************/
@@ -1786,6 +2118,10 @@ netCDFVariable::netCDFVariable(
 
 netCDFVariable::~netCDFVariable()
 {
+    auto poParent = m_poParent.lock();
+    if (poParent)
+        poParent->UnRegisterArray(this);
+
     if (!m_poShared->IsReadOnly() && !m_dims.empty())
     {
         bool bNeedToWriteDummy = false;
@@ -1846,8 +2182,9 @@ netCDFVariable::GetDimensions() const
         {
             const int groupDim =
                 m_poShared->GetBelongingGroupOfDim(m_gid, dimid);
-            poCachedDim = std::make_shared<netCDFDimension>(
-                m_poShared, groupDim, dimid, 0, std::string());
+            poCachedDim =
+                netCDFDimension::Create(m_poShared, m_poParent.lock(), groupDim,
+                                        dimid, 0, std::string());
             m_poShared->CacheDimension(dimid, poCachedDim);
         }
         m_dims.emplace_back(poCachedDim);
@@ -2428,6 +2765,39 @@ bool netCDFVariable::SetSpatialRef(const OGRSpatialReference *poSRS)
 }
 
 /************************************************************************/
+/*                           SetStatistics()                            */
+/************************************************************************/
+
+bool netCDFVariable::SetStatistics(bool bApproxStats, double dfMin,
+                                   double dfMax, double dfMean, double dfStdDev,
+                                   GUInt64 nValidCount,
+                                   CSLConstList papszOptions)
+{
+    if (!bApproxStats && !m_poShared->IsReadOnly() &&
+        CPLTestBool(
+            CSLFetchNameValueDef(papszOptions, "UPDATE_METADATA", "NO")))
+    {
+        auto poAttr = GetAttribute("actual_range");
+        if (!poAttr)
+        {
+            poAttr =
+                CreateAttribute("actual_range", {2}, GetDataType(), nullptr);
+        }
+        if (poAttr)
+        {
+            std::vector<GUInt64> startIdx = {0};
+            std::vector<size_t> count = {2};
+            std::vector<double> values = {dfMin, dfMax};
+            poAttr->Write(startIdx.data(), count.data(), nullptr, nullptr,
+                          GDALExtendedDataType::Create(GDT_Float64),
+                          values.data(), nullptr, 0);
+        }
+    }
+    return GDALPamMDArray::SetStatistics(bApproxStats, dfMin, dfMax, dfMean,
+                                         dfStdDev, nValidCount, papszOptions);
+}
+
+/************************************************************************/
 /*                             GetNCTypeSize()                          */
 /************************************************************************/
 
@@ -2887,7 +3257,10 @@ bool netCDFVariable::IReadWrite(
         int ret =
             NCGetPutVaraFunc(m_gid, m_varid, startp.data(), count, buffer);
         if (ret != NC_NOERR)
+        {
+            NCDF_ERR(ret);
             return false;
+        }
         if (bIsRead &&
             (!m_bPerfectDataTypeMatch ||
              bufferDataType.GetNumericDataType() != eDT.GetNumericDataType()))
@@ -3601,7 +3974,9 @@ netCDFVariable::GetAttribute(const std::string &osName) const
     int nAttId = -1;
     if (nc_inq_attid(m_gid, m_varid, osName.c_str(), &nAttId) != NC_NOERR)
         return nullptr;
-    return netCDFAttribute::Create(m_poShared, m_gid, m_varid, osName);
+    return netCDFAttribute::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFVariable>(m_pSelf.lock()),
+        m_gid, m_varid, osName);
 }
 
 /************************************************************************/
@@ -3632,8 +4007,10 @@ netCDFVariable::GetAttributes(CSLConstList papszOptions) const
                          !(EQUAL(szAttrName, "_Unsigned") &&
                            (m_nVarType == NC_BYTE || m_nVarType == NC_SHORT))))
         {
-            res.emplace_back(netCDFAttribute::Create(m_poShared, m_gid, m_varid,
-                                                     szAttrName));
+            res.emplace_back(netCDFAttribute::Create(
+                m_poShared,
+                std::dynamic_pointer_cast<netCDFVariable>(m_pSelf.lock()),
+                m_gid, m_varid, szAttrName));
         }
     }
     return res;
@@ -3647,8 +4024,34 @@ std::shared_ptr<GDALAttribute> netCDFVariable::CreateAttribute(
     const std::string &osName, const std::vector<GUInt64> &anDimensions,
     const GDALExtendedDataType &oDataType, CSLConstList papszOptions)
 {
-    return netCDFAttribute::Create(m_poShared, m_gid, m_varid, osName,
-                                   anDimensions, oDataType, papszOptions);
+    return netCDFAttribute::Create(
+        m_poShared, std::dynamic_pointer_cast<netCDFVariable>(m_pSelf.lock()),
+        m_gid, m_varid, osName, anDimensions, oDataType, papszOptions);
+}
+
+/************************************************************************/
+/*                         DeleteAttribute()                            */
+/************************************************************************/
+
+bool netCDFVariable::DeleteAttribute(const std::string &osName,
+                                     CSLConstList /*papszOptions*/)
+{
+    CPLMutexHolderD(&hNCMutex);
+    m_poShared->SetDefineMode(true);
+
+    int ret = nc_del_att(m_gid, m_varid, osName.c_str());
+    NCDF_ERR(ret);
+    if (ret != NC_NOERR)
+        return false;
+
+    auto it = m_oMapAttributes.find(osName);
+    if (it != m_oMapAttributes.end())
+    {
+        it->second->Deleted();
+        m_oMapAttributes.erase(it);
+    }
+
+    return true;
 }
 
 /************************************************************************/
@@ -3677,7 +4080,7 @@ netCDFVariable::GetCoordinateVariables() const
                 if (nc_inq_varid(m_gid, aosNames[i], &nVarId) == NC_NOERR)
                 {
                     ret.emplace_back(netCDFVariable::Create(
-                        m_poShared, m_gid, nVarId,
+                        m_poShared, m_poParent.lock(), m_gid, nVarId,
                         std::vector<std::shared_ptr<GDALDimension>>(), nullptr,
                         false));
                 }
@@ -3687,6 +4090,30 @@ netCDFVariable::GetCoordinateVariables() const
                         CE_Warning, CPLE_AppDefined,
                         "Cannot find variable corresponding to coordinate %s",
                         aosNames[i]);
+                }
+            }
+        }
+    }
+
+    // Special case for NASA EMIT datasets
+    auto apoDims = GetDimensions();
+    if ((apoDims.size() == 3 && apoDims[0]->GetName() == "downtrack" &&
+         apoDims[1]->GetName() == "crosstrack" &&
+         apoDims[2]->GetName() == "bands") ||
+        (apoDims.size() == 2 && apoDims[0]->GetName() == "downtrack" &&
+         apoDims[1]->GetName() == "crosstrack"))
+    {
+        auto poRootGroup = netCDFGroup::Create(m_poShared, nullptr, m_gid);
+        if (poRootGroup)
+        {
+            auto poLocationGroup = poRootGroup->OpenGroup("location");
+            if (poLocationGroup)
+            {
+                auto poLon = poLocationGroup->OpenMDArray("lon");
+                auto poLat = poLocationGroup->OpenMDArray("lat");
+                if (poLon && poLat)
+                {
+                    return {poLon, poLat};
                 }
             }
         }
@@ -3801,6 +4228,47 @@ bool netCDFVariable::Resize(const std::vector<GUInt64> &anNewDimSizes,
 }
 
 /************************************************************************/
+/*                              Rename()                                */
+/************************************************************************/
+
+bool netCDFVariable::Rename(const std::string &osNewName)
+{
+    if (m_poShared->IsReadOnly())
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Rename() not supported on read-only file");
+        return false;
+    }
+    if (osNewName.empty())
+    {
+        CPLError(CE_Failure, CPLE_NotSupported, "Empty name not supported");
+        return false;
+    }
+
+    CPLMutexHolderD(&hNCMutex);
+    m_poShared->SetDefineMode(true);
+
+    int ret = nc_rename_var(m_gid, m_varid, osNewName.c_str());
+    NCDF_ERR(ret);
+    if (ret != NC_NOERR)
+        return false;
+
+    BaseRename(osNewName);
+
+    return true;
+}
+
+/************************************************************************/
+/*                       NotifyChildrenOfRenaming()                     */
+/************************************************************************/
+
+void netCDFVariable::NotifyChildrenOfRenaming()
+{
+    for (const auto &iter : m_oMapAttributes)
+        iter.second->ParentRenamed(m_osFullName);
+}
+
+/************************************************************************/
 /*                    retrieveAttributeParentName()                     */
 /************************************************************************/
 
@@ -3872,6 +4340,12 @@ netCDFAttribute::netCDFAttribute(
     {
         m_nAttType = NC_CHAR;
     }
+    else if (oDataType.GetNumericDataType() == GDT_Byte &&
+             EQUAL(CSLFetchNameValueDef(papszOptions, "NC_TYPE", ""),
+                   "NC_BYTE"))
+    {
+        m_nAttType = NC_BYTE;
+    }
     else if (oDataType.GetNumericDataType() == GDT_Int16 &&
              EQUAL(CSLFetchNameValueDef(papszOptions, "NC_TYPE", ""),
                    "NC_BYTE"))
@@ -3895,21 +4369,39 @@ netCDFAttribute::netCDFAttribute(
 }
 
 /************************************************************************/
+/*                         ~netCDFAttribute()                           */
+/************************************************************************/
+
+netCDFAttribute::~netCDFAttribute()
+{
+    if (m_bValid)
+    {
+        if (auto poParent = m_poParent.lock())
+            poParent->UnRegisterAttribute(this);
+    }
+}
+
+/************************************************************************/
 /*                              Create()                                */
 /************************************************************************/
 
 std::shared_ptr<netCDFAttribute>
 netCDFAttribute::Create(const std::shared_ptr<netCDFSharedResources> &poShared,
+                        const std::shared_ptr<netCDFAttributeHolder> &poParent,
                         int gid, int varid, const std::string &name)
 {
     auto attr(std::shared_ptr<netCDFAttribute>(
         new netCDFAttribute(poShared, gid, varid, name)));
     attr->SetSelf(attr);
+    attr->m_poParent = poParent;
+    if (poParent)
+        poParent->RegisterAttribute(attr.get());
     return attr;
 }
 
 std::shared_ptr<netCDFAttribute> netCDFAttribute::Create(
-    const std::shared_ptr<netCDFSharedResources> &poShared, int gid, int varid,
+    const std::shared_ptr<netCDFSharedResources> &poShared,
+    const std::shared_ptr<netCDFAttributeHolder> &poParent, int gid, int varid,
     const std::string &osName, const std::vector<GUInt64> &anDimensions,
     const GDALExtendedDataType &oDataType, CSLConstList papszOptions)
 {
@@ -3925,11 +4417,25 @@ std::shared_ptr<netCDFAttribute> netCDFAttribute::Create(
                  "Only 0 or 1-dimensional attribute are supported");
         return nullptr;
     }
+
+    const char *apszOptions[2] = {nullptr, nullptr};
+    if (!poShared->IsNC4() && oDataType.GetClass() == GEDTC_NUMERIC &&
+        oDataType.GetNumericDataType() == GDT_Byte && !papszOptions)
+    {
+        // GDT_Byte would map to a NC_UBYTE datatype, which is not available in
+        // NC3 datasets
+        apszOptions[0] = "NC_TYPE=NC_BYTE";
+        papszOptions = apszOptions;
+    }
+
     auto attr(std::shared_ptr<netCDFAttribute>(new netCDFAttribute(
         poShared, gid, varid, osName, anDimensions, oDataType, papszOptions)));
     if (attr->m_nAttType == NC_NAT)
         return nullptr;
     attr->SetSelf(attr);
+    attr->m_poParent = poParent;
+    if (poParent)
+        poParent->RegisterAttribute(attr.get());
     return attr;
 }
 
@@ -3969,6 +4475,8 @@ bool netCDFAttribute::IRead(const GUInt64 *arrayStartIdx, const size_t *count,
                             const GDALExtendedDataType &bufferDataType,
                             void *pDstBuffer) const
 {
+    if (!CheckValidAndErrorOutIfNot())
+        return false;
     CPLMutexHolderD(&hNCMutex);
 
     if (m_nAttType == NC_STRING)
@@ -4136,6 +4644,8 @@ bool netCDFAttribute::IWrite(const GUInt64 *arrayStartIdx, const size_t *count,
                              const GDALExtendedDataType &bufferDataType,
                              const void *pSrcBuffer)
 {
+    if (!CheckValidAndErrorOutIfNot())
+        return false;
     CPLMutexHolderD(&hNCMutex);
 
     if (m_dims.size() == 1 &&
@@ -4311,6 +4821,39 @@ bool netCDFAttribute::IWrite(const GUInt64 *arrayStartIdx, const size_t *count,
                          m_dims.empty() ? 1 : count[0], &abyBuffer[0]);
     NCDF_ERR(ret);
     return ret == NC_NOERR;
+}
+
+/************************************************************************/
+/*                              Rename()                                */
+/************************************************************************/
+
+bool netCDFAttribute::Rename(const std::string &osNewName)
+{
+    if (!CheckValidAndErrorOutIfNot())
+        return false;
+    if (m_poShared->IsReadOnly())
+    {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                 "Rename() not supported on read-only file");
+        return false;
+    }
+    if (osNewName.empty())
+    {
+        CPLError(CE_Failure, CPLE_NotSupported, "Empty name not supported");
+        return false;
+    }
+    CPLMutexHolderD(&hNCMutex);
+    m_poShared->SetDefineMode(true);
+
+    int ret =
+        nc_rename_att(m_gid, m_varid, m_osName.c_str(), osNewName.c_str());
+    NCDF_ERR(ret);
+    if (ret != NC_NOERR)
+        return false;
+
+    BaseRename(osNewName);
+
+    return true;
 }
 
 /************************************************************************/
@@ -4497,7 +5040,7 @@ GDALDataset *netCDFDataset::OpenMultiDim(GDALOpenInfo *poOpenInfo)
         return nullptr;
     }
 
-    poDS->m_poRootGroup.reset(new netCDFGroup(poSharedResources, cdfid));
+    poDS->m_poRootGroup = netCDFGroup::Create(poSharedResources, cdfid);
 
     poDS->TryLoadXML();
 
@@ -4572,7 +5115,8 @@ netCDFDataset::CreateMultiDimensional(const char *pszFilename,
     poSharedResources->m_bDefineMode = true;
     poSharedResources->m_bIsNC4 =
         poDS->eFormat == NCDF_FORMAT_NC4 || poDS->eFormat == NCDF_FORMAT_NC4C;
-    poDS->m_poRootGroup.reset(new netCDFGroup(poSharedResources, cdfid));
+    poDS->m_poRootGroup =
+        netCDFGroup::Create(poSharedResources, nullptr, cdfid);
     const char *pszConventions = CSLFetchNameValueDef(
         papszOptions, "CONVENTIONS", NCDF_CONVENTIONS_CF_V1_6);
     if (!EQUAL(pszConventions, ""))

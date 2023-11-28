@@ -135,7 +135,23 @@ GDALRasterBand::~GDALRasterBand()
  * format.
  *
  * Some formats may efficiently implement decimation into a buffer by
- * reading from lower resolution overview images.
+ * reading from lower resolution overview images. The logic of the default
+ * implementation in the base class GDALRasterBand is the following one. It
+ * computes a target_downscaling_factor from the window of interest and buffer
+ * size which is min(nXSize/nBufXSize, nYSize/nBufYSize).
+ * It then walks through overviews and will select the first one whose
+ * downscaling factor is greater than target_downscaling_factor / 1.2.
+ *
+ * Let's assume we have overviews at downscaling factors 2, 4 and 8.
+ * The relationship between target_downscaling_factor and the select overview
+ * level is the following one:
+ *
+ * target_downscaling_factor  | selected_overview
+ * -------------------------  | -----------------
+ * ]0,       2 / 1.2]         | full resolution band
+ * ]2 / 1.2, 4 / 1.2]         | 2x downsampled band
+ * ]4 / 1.2, 8 / 1.2]         | 4x downsampled band
+ * ]8 / 1.2, infinity[        | 8x downsampled band
  *
  * For highest performance full resolution data access, read and write
  * on "block boundaries" as returned by GetBlockSize(), or use the
@@ -207,7 +223,23 @@ GDALRasterBand::~GDALRasterBand()
  * format.
  *
  * Some formats may efficiently implement decimation into a buffer by
- * reading from lower resolution overview images.
+ * reading from lower resolution overview images. The logic of the default
+ * implementation in the base class GDALRasterBand is the following one. It
+ * computes a target_downscaling_factor from the window of interest and buffer
+ * size which is min(nXSize/nBufXSize, nYSize/nBufYSize).
+ * It then walks through overviews and will select the first one whose
+ * downscaling factor is greater than target_downscaling_factor / 1.2.
+ *
+ * Let's assume we have overviews at downscaling factors 2, 4 and 8.
+ * The relationship between target_downscaling_factor and the select overview
+ * level is the following one:
+ *
+ * target_downscaling_factor  | selected_overview
+ * -------------------------  | -----------------
+ * ]0,       2 / 1.2]         | full resolution band
+ * ]2 / 1.2, 4 / 1.2]         | 2x downsampled band
+ * ]4 / 1.2, 8 / 1.2]         | 4x downsampled band
+ * ]8 / 1.2, infinity[        | 8x downsampled band
  *
  * For highest performance full resolution data access, read and write
  * on "block boundaries" as returned by GetBlockSize(), or use the
@@ -1015,7 +1047,7 @@ int GDALRasterBand::InitBlockInfo()
     const char *pszBlockStrategy =
         CPLGetConfigOption("GDAL_BAND_BLOCK_CACHE", nullptr);
     bool bUseArray = true;
-    if (pszBlockStrategy == nullptr)
+    if (pszBlockStrategy == nullptr || EQUAL(pszBlockStrategy, "AUTO"))
     {
         if (poDS == nullptr || (poDS->nOpenFlags & GDAL_OF_BLOCK_ACCESS_MASK) ==
                                    GDAL_OF_DEFAULT_BLOCK_ACCESS)
@@ -1034,6 +1066,10 @@ int GDALRasterBand::InitBlockInfo()
     }
     else if (EQUAL(pszBlockStrategy, "HASHSET"))
         bUseArray = false;
+    else if (!EQUAL(pszBlockStrategy, "ARRAY"))
+        CPLError(CE_Warning, CPLE_AppDefined, "Unknown block cache method: %s",
+                 pszBlockStrategy);
+
     if (bUseArray)
         poBandBlockCache = GDALArrayBandBlockCacheCreate(this);
     else
@@ -5013,10 +5049,8 @@ struct ComputeStatisticsInternal<GByte, COMPUTE_OTHER_STATS>
             GDALm256i ymm_max = ymm_neutral;
             const auto ymm_mask_8bits = GDALmm256_set1_epi16(0xFF);
 
-            const GUInt32 nMinThreshold =
-                (bHasNoData && nNoDataValue == 0) ? 1 : 0;
-            const GUInt32 nMaxThreshold =
-                (bHasNoData && nNoDataValue == 255) ? 254 : 255;
+            const GUInt32 nMinThreshold = (nNoDataValue == 0) ? 1 : 0;
+            const GUInt32 nMaxThreshold = (nNoDataValue == 255) ? 254 : 255;
             const bool bComputeMinMax =
                 nMin > nMinThreshold || nMax < nMaxThreshold;
 
@@ -7061,11 +7095,11 @@ GDALRasterBand *GDALRasterBand::GetMaskBand()
                 int bHaveNoDataRaw = FALSE;
                 bool bIsSame = false;
                 if (eDataType == GDT_Int64)
-                    bIsSame = poNoDataMaskBand->nNoDataValueInt64 ==
+                    bIsSame = poNoDataMaskBand->m_nNoDataValueInt64 ==
                                   GetNoDataValueAsInt64(&bHaveNoDataRaw) &&
                               bHaveNoDataRaw;
                 else if (eDataType == GDT_UInt64)
-                    bIsSame = poNoDataMaskBand->nNoDataValueUInt64 ==
+                    bIsSame = poNoDataMaskBand->m_nNoDataValueUInt64 ==
                                   GetNoDataValueAsUInt64(&bHaveNoDataRaw) &&
                               bHaveNoDataRaw;
                 else
@@ -7076,8 +7110,8 @@ GDALRasterBand *GDALRasterBand::GetMaskBand()
                     {
                         bIsSame =
                             std::isnan(dfNoDataValue)
-                                ? std::isnan(poNoDataMaskBand->dfNoDataValue)
-                                : poNoDataMaskBand->dfNoDataValue ==
+                                ? std::isnan(poNoDataMaskBand->m_dfNoDataValue)
+                                : poNoDataMaskBand->m_dfNoDataValue ==
                                       dfNoDataValue;
                     }
                 }

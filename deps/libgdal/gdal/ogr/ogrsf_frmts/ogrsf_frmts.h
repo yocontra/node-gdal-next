@@ -37,6 +37,7 @@
 #include "gdal_priv.h"
 
 #include <memory>
+#include <deque>
 
 /**
  * \file ogrsf_frmts.h
@@ -130,7 +131,11 @@ class CPL_DLL OGRLayer : public GDALMajorObject
     struct ArrowArrayStreamPrivateData
     {
         bool m_bArrowArrayStreamInProgress = false;
+        bool m_bEOF = false;
         OGRLayer *m_poLayer = nullptr;
+        std::vector<GIntBig> m_anQueriedFIDs{};
+        size_t m_iQueriedFIDS = 0;
+        std::deque<std::unique_ptr<OGRFeature>> m_oFeatureQueue{};
     };
     std::shared_ptr<ArrowArrayStreamPrivateData>
         m_poSharedArrowArrayStreamPrivateData{};
@@ -153,6 +158,23 @@ class CPL_DLL OGRLayer : public GDALMajorObject
     static int StaticGetNextArrowArray(struct ArrowArrayStream *,
                                        struct ArrowArray *out_array);
     static const char *GetLastErrorArrowArrayStream(struct ArrowArrayStream *);
+
+    static struct ArrowSchema *
+    CreateSchemaForWKBGeometryColumn(const OGRGeomFieldDefn *poFieldDefn,
+                                     const char *pszArrowFormat,
+                                     const char *pszExtensionName);
+
+    virtual bool
+    CanPostFilterArrowArray(const struct ArrowSchema *schema) const;
+    void PostFilterArrowArray(const struct ArrowSchema *schema,
+                              struct ArrowArray *array,
+                              CSLConstList papszOptions) const;
+
+    //! @cond Doxygen_Suppress
+    bool CreateFieldFromArrowSchemaInternal(const struct ArrowSchema *schema,
+                                            const std::string &osFieldPrefix,
+                                            CSLConstList papszOptions);
+    //! @endcond
 
   public:
     OGRLayer();
@@ -193,6 +215,15 @@ class CPL_DLL OGRLayer : public GDALMajorObject
     virtual GDALDataset *GetDataset();
     virtual bool GetArrowStream(struct ArrowArrayStream *out_stream,
                                 CSLConstList papszOptions = nullptr);
+    virtual bool IsArrowSchemaSupported(const struct ArrowSchema *schema,
+                                        CSLConstList papszOptions,
+                                        std::string &osErrorMsg) const;
+    virtual bool
+    CreateFieldFromArrowSchema(const struct ArrowSchema *schema,
+                               CSLConstList papszOptions = nullptr);
+    virtual bool WriteArrowBatch(const struct ArrowSchema *schema,
+                                 struct ArrowArray *array,
+                                 CSLConstList papszOptions = nullptr);
 
     OGRErr SetFeature(OGRFeature *poFeature) CPL_WARN_UNUSED_RESULT;
     OGRErr CreateFeature(OGRFeature *poFeature) CPL_WARN_UNUSED_RESULT;
@@ -336,6 +367,22 @@ class CPL_DLL OGRLayer : public GDALMajorObject
     {
         return reinterpret_cast<OGRLayer *>(hLayer);
     }
+
+    //! @cond Doxygen_Suppress
+    bool FilterWKBGeometry(const GByte *pabyWKB, size_t nWKBSize,
+                           bool bEnvelopeAlreadySet,
+                           OGREnvelope &sEnvelope) const;
+    //! @endcond
+
+    /** Field name used by GetArrowSchema() for a FID column when
+     * GetFIDColumn() is not set.
+     */
+    static constexpr const char *DEFAULT_ARROW_FID_NAME = "OGC_FID";
+
+    /** Field name used by GetArrowSchema() for the name of the (single)
+     * geometry column (returned by GetGeometryColumn()) is not set.
+     */
+    static constexpr const char *DEFAULT_ARROW_GEOMETRY_NAME = "wkb_geometry";
 
   protected:
     //! @cond Doxygen_Suppress
@@ -653,6 +700,8 @@ void CPL_DLL RegisterOGRHANA();
 void CPL_DLL RegisterOGRParquet();
 void CPL_DLL RegisterOGRArrow();
 void CPL_DLL RegisterOGRGTFS();
+void CPL_DLL RegisterOGRPMTiles();
+void CPL_DLL RegisterOGRJSONFG();
 // @endcond
 
 CPL_C_END

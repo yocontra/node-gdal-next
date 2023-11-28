@@ -329,10 +329,7 @@ static int LZWPreDecode(TIFF *tif, uint16_t s)
 #ifdef WORDS_BIGENDIAN
 #define GetNextData(nextdata, bp) memcpy(&nextdata, bp, sizeof(nextdata))
 #elif SIZEOF_WORDTYPE == 8
-#if defined(__GNUC__) && defined(__x86_64__)
-#define GetNextData(nextdata, bp)                                              \
-    nextdata = __builtin_bswap64(*(uint64_t *)(bp))
-#elif defined(_M_X64)
+#if defined(_M_X64)
 #define GetNextData(nextdata, bp) nextdata = _byteswap_uint64(*(uint64_t *)(bp))
 #elif defined(__GNUC__)
 #define GetNextData(nextdata, bp)                                              \
@@ -346,10 +343,7 @@ static int LZWPreDecode(TIFF *tif, uint16_t s)
                (((uint64_t)bp[6]) << 8) | (((uint64_t)bp[7]))
 #endif
 #elif SIZEOF_WORDTYPE == 4
-#if defined(__GNUC__) && defined(__i386__)
-#define GetNextData(nextdata, bp)                                              \
-    nextdata = __builtin_bswap32(*(uint32_t *)(bp))
-#elif defined(_M_X86)
+#if defined(_M_X86)
 #define GetNextData(nextdata, bp)                                              \
     nextdata = _byteswap_ulong(*(unsigned long *)(bp))
 #elif defined(__GNUC__)
@@ -423,6 +417,10 @@ static int LZWDecode(TIFF *tif, uint8_t *op0, tmsize_t occ0, uint16_t s)
 
     if (sp->read_error)
     {
+        TIFFErrorExtR(tif, module,
+                      "LZWDecode: Scanline %" PRIu32 " cannot be read due to "
+                      "previous error",
+                      tif->tif_row);
         return 0;
     }
 
@@ -742,6 +740,7 @@ after_loop:
     return (1);
 
 no_eoi:
+    sp->read_error = 1;
     TIFFErrorExtR(tif, module,
                   "LZWDecode: Strip %" PRIu32 " not terminated with EOI code",
                   tif->tif_curstrip);

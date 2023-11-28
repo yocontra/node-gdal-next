@@ -263,6 +263,12 @@ typedef struct
     TIFFInitMethod init;
 } TIFFCodec;
 
+typedef struct
+{
+    uint32_t uNum;
+    uint32_t uDenom;
+} TIFFRational_t;
+
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -271,7 +277,7 @@ typedef struct
 #define LOGLUV_PUBLIC 1
 #endif
 
-#if defined(__GNUC__) || defined(__attribute__)
+#if defined(__GNUC__) || defined(__clang__) || defined(__attribute__)
 #define TIFF_ATTRIBUTE(x) __attribute__(x)
 #else
 #define TIFF_ATTRIBUTE(x) /*nothing*/

@@ -822,6 +822,14 @@ bool FileGDBIndexIteratorBase::ReadTrailer(const std::string &osFilename)
     /* nValueCountInIdx is 11 which is not the number of non-null values */
     else if (nValueCountInIdx < nMaxPerPages && nIndexDepth > 1)
     {
+        if (nValueCountInIdx > 0 && poParent->IsFileGDBV9() &&
+            strstr(osFilename.c_str(), "blk_key_index.atx"))
+        {
+            // nValueCountInIdx not reliable in FileGDB v9 .blk_key_index.atx
+            // but index seems to be OK
+            return true;
+        }
+
         CPLDebugOnly("OpenFileGDB",
                      "nValueCountInIdx=%u < nMaxPerPages=%u, nIndexDepth=%u",
                      nValueCountInIdx, nMaxPerPages, nIndexDepth);
@@ -1263,7 +1271,6 @@ bool FileGDBIndexIterator::FindPages(int iLevel, int nPage)
             case FGFT_STRING:
             {
                 GUInt16 *pasMax;
-#if defined(CPL_MSB) || defined(CPL_CPU_REQUIRES_ALIGNED_ACCESS)
                 GUInt16 asMax[MAX_CAR_COUNT_INDEXED_STR];
                 pasMax = asMax;
                 memcpy(asMax,
@@ -1272,11 +1279,6 @@ bool FileGDBIndexIterator::FindPages(int iLevel, int nPage)
                        nStrLen * sizeof(GUInt16));
                 for (int j = 0; j < nStrLen; j++)
                     CPL_LSBPTR16(&asMax[j]);
-#else
-                pasMax = reinterpret_cast<GUInt16 *>(
-                    abyPage[iLevel] + nOffsetFirstValInPage +
-                    nStrLen * sizeof(GUInt16) * i);
-#endif
 #ifdef DEBUG_INDEX_CONSISTENCY
                 returnErrorIf(i > 0 && FileGDBUTF16StrCompare(pasMax, asLastMax,
                                                               nStrLen) < 0);
@@ -1621,7 +1623,6 @@ int FileGDBIndexIterator::GetNextRow()
 
                 case FGFT_STRING:
                 {
-#if defined(CPL_MSB) || defined(CPL_CPU_REQUIRES_ALIGNED_ACCESS)
                     GUInt16 asVal[MAX_CAR_COUNT_INDEXED_STR];
                     memcpy(asVal,
                            abyPageFeature + nOffsetFirstValInPage +
@@ -1630,14 +1631,6 @@ int FileGDBIndexIterator::GetNextRow()
                     for (int j = 0; j < nStrLen; j++)
                         CPL_LSBPTR16(&asVal[j]);
                     nComp = FileGDBUTF16StrCompare(asUTF16Str, asVal, nStrLen);
-#else
-                    nComp = FileGDBUTF16StrCompare(
-                        asUTF16Str,
-                        reinterpret_cast<GUInt16 *>(
-                            abyPageFeature + nOffsetFirstValInPage +
-                            nStrLen * 2 * iCurFeatureInPage),
-                        nStrLen);
-#endif
                     break;
                 }
 
