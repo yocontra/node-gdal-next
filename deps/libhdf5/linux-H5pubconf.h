@@ -326,7 +326,7 @@
 #define H5_HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <szlib.h> header file. */
-#define H5_HAVE_SZLIB_H 1
+/* #undef H5_HAVE_SZLIB_H */
 
 /* Define if we have thread safe support */
 #define H5_HAVE_THREADSAFE 1
