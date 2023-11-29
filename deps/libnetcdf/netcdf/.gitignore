@@ -1,4 +1,5 @@
 ### 'Normal' gitignore files.
+.vscode
 nug.tag
 netcdf-c.tag
 autom4te.cache
@@ -18,6 +19,7 @@ CMakeLists.txt.user
 scan-build
 .deps
 .libs
+.idea
 Makefile
 .DS_Store
 build-par

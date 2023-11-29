@@ -102,12 +102,12 @@ set_curlflag(NCD4INFO* state, int flag)
     case CURLOPT_ERRORBUFFER:
 	SETCURLOPT(state, CURLOPT_ERRORBUFFER, state->curl->errdata.errorbuf);
 	break;
-    case CURLOPT_ENCODING:
-#ifdef CURLOPT_ENCODING
-	if(state->auth->curlflags.compress) {
-	    SETCURLOPT(state, CURLOPT_ENCODING,"deflate, gzip");
+    case CURLOPT_ACCEPT_ENCODING:
+	if(state->auth->curlflags.encode) {
+	    SETCURLOPT(state, CURLOPT_ACCEPT_ENCODING, "" ); /* Accept all available encodings */
+	} else {
+    	    SETCURLOPT(state, CURLOPT_ACCEPT_ENCODING, NULL);
         }
-#endif
 	break;
     case CURLOPT_PROXY:
 	if(state->auth->proxy.host != NULL) {
@@ -192,7 +192,7 @@ NCD4_set_flags_perlink(NCD4INFO* state)
 {
     int ret = NC_NOERR;
     /* Following are always set */
-    if(ret == NC_NOERR) ret = set_curlflag(state,CURLOPT_ENCODING);
+    if(ret == NC_NOERR) ret = set_curlflag(state,CURLOPT_ACCEPT_ENCODING);
     if(ret == NC_NOERR) ret = set_curlflag(state,CURLOPT_NETRC);
     if(ret == NC_NOERR) ret = set_curlflag(state,CURLOPT_VERBOSE);
     if(ret == NC_NOERR) ret = set_curlflag(state,CURLOPT_TIMEOUT);
@@ -319,7 +319,7 @@ NCD4_get_rcproperties(NCD4INFO* state)
     ncerror err = NC_NOERR;
     char* option = NULL;
 #ifdef HAVE_CURLOPT_BUFFERSIZE
-    option = NC_rclookup(D4BUFFERSIZE,state->uri->uri);
+    option = NC_rclookup(D4BUFFERSIZE,state->uri->uri,NULL);
     if(option != NULL && strlen(option) != 0) {
 	long bufsize;
 	if(strcasecmp(option,"max")==0)
@@ -330,7 +330,7 @@ NCD4_get_rcproperties(NCD4INFO* state)
     }
 #endif
 #ifdef HAVE_CURLOPT_KEEPALIVE
-    option = NC_rclookup(D4KEEPALIVE,state->uri->uri);
+    option = NC_rclookup(D4KEEPALIVE,state->uri->uri,NULL);
     if(option != NULL && strlen(option) != 0) {
 	/* The keepalive value is of the form 0 or n/m,
            where n is the idle time and m is the interval time;
@@ -396,7 +396,7 @@ NCD4_set_curlstate(NCD4INFO* state, int flag, void* value)
     case CURLOPT_ERRORBUFFER:
 	/* no need to store; will always be set */
 	break;
-    case CURLOPT_ENCODING:
+    case CURLOPT_ACCEPT_ENCODING:
 	/* no need to store; will always be set to fixed value */
 	break;
     case CURLOPT_PROXY:

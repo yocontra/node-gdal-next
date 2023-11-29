@@ -105,12 +105,12 @@ ocset_curlflag(OCstate* state, int flag)
 	SETCURLOPT(state, CURLOPT_ERRORBUFFER, state->error.curlerrorbuf);
 	break;
 
-    case CURLOPT_ENCODING:
-#ifdef CURLOPT_ENCODING
-	if(state->auth->curlflags.compress) {
-	    SETCURLOPT(state, CURLOPT_ENCODING,"deflate, gzip");
+    case CURLOPT_ACCEPT_ENCODING:
+	if(state->auth->curlflags.encode) {
+	    SETCURLOPT(state, CURLOPT_ACCEPT_ENCODING, "" ); /* Accept all available encodings */
+	} else {
+    	    SETCURLOPT(state, CURLOPT_ACCEPT_ENCODING, NULL);
         }
-#endif
 	break;
 
     case CURLOPT_PROXY:
@@ -200,7 +200,7 @@ ocset_flags_perlink(OCstate* state)
     OCerror stat = OC_NOERR;
 
     /* Following are always set */
-    if(stat == OC_NOERR) stat = ocset_curlflag(state,CURLOPT_ENCODING);
+    if(stat == OC_NOERR) stat = ocset_curlflag(state,CURLOPT_ACCEPT_ENCODING);
     if(stat == OC_NOERR) stat = ocset_curlflag(state,CURLOPT_NETRC);
     if(stat == OC_NOERR) stat = ocset_curlflag(state,CURLOPT_VERBOSE);
     if(stat == OC_NOERR) stat = ocset_curlflag(state,CURLOPT_TIMEOUT);
@@ -240,7 +240,7 @@ oc_curl_debug(OCstate* state)
 int
 ocrc_netrc_required(OCstate* state)
 {
-    char* netrcfile = NC_rclookup(NETRCFILETAG,state->uri->uri);
+    char* netrcfile = NC_rclookup(NETRCFILETAG,state->uri->uri,NULL);
     return (netrcfile != NULL || state->auth->curlflags.netrc != NULL ? 0 : 1);
 }
 

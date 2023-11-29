@@ -22,9 +22,6 @@
 #define NCZ_CHUNKSIZE_FACTOR (10)
 #define NCZ_MIN_CHUNK_SIZE (2)
 
-/* An attribute in the ZARR root group of this name means that the
- * file must follow strict netCDF classic format rules. */
-#define NCZ_NC3_STRICT_ATT_NAME "_nc3_strict"
 
 /**************************************************/
 /* Constants */
@@ -56,47 +53,64 @@
 #define ZATTRS ".zattrs"
 #define ZARRAY ".zarray"
 
+/* Pure Zarr pseudo names */
+#define ZDIMANON "_zdim"
+
 /* V2 Reserved Attributes */
 /*
 Inserted into /.zgroup
-_NCZARR_SUPERBLOCK: {"version": "2.0.0"}
+_nczarr_superblock: {"version": "2.0.0"}
 Inserted into any .zgroup
-"_NCZARR_GROUP": "{
+"_nczarr_group": "{
 \"dimensions\": {\"d1\": \"1\", \"d2\": \"1\",...}
 \"variables\": [\"v1\", \"v2\", ...]
 \"groups\": [\"g1\", \"g2\", ...]
 }"
 Inserted into any .zarray
-"_NCZARR_ARRAY": "{
+"_nczarr_array": "{
 \"dimensions\": [\"/g1/g2/d1\", \"/d2\",...]
 \"storage\": \"scalar\"|\"contiguous\"|\"compact\"|\"chunked\"
 }"
 Inserted into any .zattrs ? or should it go into the container?
-"_NCZARR_ATTRS": "{
+"_nczarr_attrs": "{
 \"types\": {\"attr1\": \"<i4\", \"attr2\": \"<i1\",...}
 }
++
++Note: _nczarr_attrs type include non-standard use of a zarr type "|U1" => NC_CHAR.
++
 */
 
-#define NCZ_V2_SUPERBLOCK "_NCZARR_SUPERBLOCK"
-#define NCZ_V2_GROUP   "_NCZARR_GROUP"
-#define NCZ_V2_ARRAY   "_NCZARR_ARRAY"
+#define NCZ_V2_SUPERBLOCK "_nczarr_superblock"
+#define NCZ_V2_GROUP   "_nczarr_group"
+#define NCZ_V2_ARRAY   "_nczarr_array"
 #define NCZ_V2_ATTR    NC_NCZARR_ATTR
 
+#define NCZ_V2_SUPERBLOCK_UC "_NCZARR_SUPERBLOCK"
+#define NCZ_V2_GROUP_UC   "_NCZARR_GROUP"
+#define NCZ_V2_ARRAY_UC   "_NCZARR_ARRAY"
+#define NCZ_V2_ATTR_UC    NC_NCZARR_ATTR_UC
+
+#define NCZARRCONTROL "nczarr"
 #define PUREZARRCONTROL "zarr"
 #define XARRAYCONTROL "xarray"
 #define NOXARRAYCONTROL "noxarray"
+#define XARRAYSCALAR "_scalar_"
 
 #define LEGAL_DIM_SEPARATORS "./"
 #define DFALT_DIM_SEPARATOR '.'
 
+/* Default max string length for fixed length strings */
+#define NCZ_MAXSTR_DEFAULT 128
+
 #define islegaldimsep(c) ((c) != '\0' && strchr(LEGAL_DIM_SEPARATORS,(c)) != NULL)
 
-
 /* Mnemonics */
-#define ZCLOSE    1 /* this is closeorabort as opposed to enddef */
+#define ZCLEAR	0 /* For NCZ_copy_data */
+#define ZCLOSE	1 /* this is closeorabort as opposed to enddef */
 
-/* Mnemonics */
-#define ZCLOSE    1 /* this is closeorabort as opposed to enddef */
+/* Useful macro */
+#define ncidforx(file,grpid) ((file)->controller->ext_ncid | (grpid))
+#define ncidfor(var) ncidforx((var)->container->nc4_info,(var)->container->hdr.id)
 
 /**************************************************/
 /* Forward */
@@ -140,6 +154,7 @@ typedef struct NCZ_FILE_INFO {
 #		define FLAG_NCZARR_V1   16
 	NCZM_IMPL mapimpl;
     } controls;
+    int default_maxstrlen; /* default max str size for variables of type string */
 } NCZ_FILE_INFO_T;
 
 /* This is a struct to handle the dim metadata. */
@@ -179,6 +194,8 @@ typedef struct NCZ_VAR_INFO {
     struct NCZChunkCache* cache;
     struct NClist* xarray; /* names from _ARRAY_DIMENSIONS */
     char dimension_separator; /* '.' | '/' */
+    NClist* incompletefilters;
+    int maxstrlen; /* max length of strings for this variable */
 } NCZ_VAR_INFO_T;
 
 /* Struct to hold ZARR-specific info for a field. */
@@ -219,12 +236,12 @@ int NCZ_initialize(void);
 int NCZ_finalize(void);
 int NCZ_initialize_internal(void);
 int NCZ_finalize_internal(void);
-int ncz_get_fill_value(NC_FILE_INFO_T* file, NC_VAR_INFO_T* var, void **fillp);
+int NCZ_ensure_fill_value(NC_VAR_INFO_T* var);
 int ncz_find_grp_var_att(int ncid, int varid, const char *name, int attnum,
                               int use_name, char *norm_name, NC_FILE_INFO_T** file,
                               NC_GRP_INFO_T** grp, NC_VAR_INFO_T** var,
                               NC_ATT_INFO_T** att);
-int NCZ_set_log_level();
+int NCZ_set_log_level(void);
 
 /* zcache.c */
 int ncz_adjust_var_cache(NC_GRP_INFO_T* grp, NC_VAR_INFO_T* var);
@@ -245,23 +262,7 @@ int ncz_makeattr(NC_OBJ*, NCindex* attlist, const char* name, nc_type typid, siz
 /* zvar.c */
 int ncz_gettype(NC_FILE_INFO_T*, NC_GRP_INFO_T*, int xtype, NC_TYPE_INFO_T** typep);
 int ncz_find_default_chunksizes2(NC_GRP_INFO_T *grp, NC_VAR_INFO_T *var);
-
-/* zfilter.c */
-/* Dispatch functions are also in zfilter.c */
-/* Filterlist management */
-
-/* The NC_VAR_INFO_T->filters field is an NClist of this struct */
-struct NCZ_Filter {
-    int flags;             /**< Flags describing state of this filter. */
-#define NCZ_FILTER_MISSING 1 /* Signal filter implementation is not available */
-    unsigned int filterid; /**< ID for arbitrary filter. */
-    size_t nparams;        /**< nparams for arbitrary filter. */
-    unsigned int* params;  /**< Params for arbitrary filter. */
-};
-
-int NCZ_filter_lookup(NC_VAR_INFO_T* var, unsigned int id, struct NCZ_Filter** specp);
-int NCZ_addfilter(NC_VAR_INFO_T* var, unsigned int id, size_t nparams, const unsigned int* params);
-int NCZ_filter_freelist(NC_VAR_INFO_T* var);
+int NCZ_ensure_quantizer(int ncid, NC_VAR_INFO_T* var);
 
 /* Undefined */
 /* Find var, doing lazy var metadata read if needed. */

@@ -4,6 +4,7 @@
  *********************************************************************/
 
 #include "zincludes.h"
+#include "zfilter.h"
 
 /* Forward */
 static int zclose_group(NC_GRP_INFO_T*);
@@ -163,16 +164,18 @@ zclose_vars(NC_GRP_INFO_T* grp)
 	    nullfree(zatt);
 	    att->format_att_info = NULL; /* avoid memory errors */
         }
+#ifdef ENABLE_NCZARR_FILTERS
 	/* Reclaim filters */
 	if(var->filters != NULL) {
-	    (void)NCZ_filter_freelist(var);
+	    (void)NCZ_filter_freelists(var);
 	}
 	var->filters = NULL;
+#endif
 	/* Reclaim the type */
-	(void)zclose_type(var->type_info);
-        NCZ_free_chunk_cache(zvar->cache);
+	if(var->type_info) (void)zclose_type(var->type_info);
+        if(zvar->cache) NCZ_free_chunk_cache(zvar->cache);
 	/* reclaim xarray */
-	nclistfreeall(zvar->xarray);
+	if(zvar->xarray) nclistfreeall(zvar->xarray);
 	nullfree(zvar);
 	var->format_var_info = NULL; /* avoid memory errors */
     }
@@ -220,13 +223,9 @@ static int
 zclose_type(NC_TYPE_INFO_T* type)
 {
     int stat = NC_NOERR;
-    NCZ_TYPE_INFO_T* ztype;
 
     assert(type && type->format_type_info != NULL);
-    /* Get Zarr-specific type info. */
-    ztype = type->format_type_info;
-    nullfree(ztype);
-    type->format_type_info = NULL; /* avoid memory errors */
+    nullfree(type->format_type_info);
     return stat;
 }
 

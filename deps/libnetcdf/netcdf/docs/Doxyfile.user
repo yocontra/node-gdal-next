@@ -748,9 +748,10 @@ INPUT = \
     ./docs/windows-binaries.md \
     ./docs/attribute_conventions.md \
     ./docs/file_format_specifications.md \
-    ./docs/byterange.dox \
+    ./docs/byterange.md \
     ./docs/inmemory.md \
     ./docs/auth.md \
+    ./docs/filters.md \
     ./docs/notes.md \
     ./docs/all-error-codes.md \
     ./docs/building-with-cmake.md \
@@ -2059,7 +2060,7 @@ SKIP_FUNCTION_MACROS   = YES
 
 # TAGFILES               = html/guide.tag=./html_guide "html/tutorial.tag = ./html_tutorial"
 #TAGFILES = ../../NUG/html/nug.tag=../../../NUG/html
-#TAGFILES = ../../NUG/html/nug.tag=https://www.unidata.ucar.edu/software/netcdf/documentation/NUG
+#TAGFILES = ../../NUG/html/nug.tag=https://docs.unidata.ucar.edu/nug
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create a
 # tag file that is based on the input files it reads. See section "Linking to

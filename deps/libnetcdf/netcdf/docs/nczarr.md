@@ -13,41 +13,49 @@ This extension provides a mapping from a subset of the full netCDF Enhanced (aka
 The NetCDF version of this storage format is called NCZarr <a href="#ref_nczarr">[4]</a>.
 
 A note on terminology in this document.
-
 1. The term "dataset" is used to refer to all of the Zarr objects constituting
    the meta-data and data. 
+
+There are some important "caveats" of which to be aware when using this software.
+1. NCZarr currently is not thread-safe. So any attempt to use it with parallelism, including MPIO, is likely to fail.
 
 # The NCZarr Data Model {#nczarr_data_model}
 
 NCZarr uses a data model <a href="#ref_nczarr">[4]</a> that, by design, extends the Zarr Version 2 Specification <a href="#ref_zarrv2">[6]</a> to add support for the NetCDF-4 data model.
 
-__Note Carefully__: a legal _Zarr_ dataset is also a legal _NCZarr_ dataset with a specific assumption. This assumption is that within Zarr meta-data objects, like __.zarray__, unrecognized dictionary keys are ignored.
+__Note Carefully__: a legal _NCZarr_ dataset is also a legal _Zarr_ dataset under a specific assumption. This assumption is that within Zarr meta-data objects, like ''.zarray'', unrecognized dictionary keys are ignored.
 If this assumption is true of an implementation, then the _NCZarr_ dataset is a legal _Zarr_ dataset and should be readable by that _Zarr_ implementation.
+The inverse is true also. A legal _Zarr_ dataset is also a legal _NCZarr_
+dataset, where "legal" means it conforms to the Zarr version 2 specification.
+In addition, certain non-Zarr features are allowed and used.
+Specifically the XArray ''\_ARRAY\_DIMENSIONS'' attribute is one such.
 
 There are two other, secondary assumption:
 
 1. The actual storage format in which the dataset is stored -- a zip file, for example -- can be read by the _Zarr_ implementation.
-2. The filters used by the dataset can be encoded/decoded by the implementation.
+2. The compressors (aka filters) used by the dataset can be encoded/decoded by the implementation. NCZarr uses HDF5-style filters, so ensuring access to such filters is somewhat complicated. See [the companion document on
+filters](./md_filters.html "filters") for details.
 
-Briefly, the data model supported by NCZarr is netcdf-4 minus the user-defined types and the String type.
-As with netcdf-4 chunking is supported.
-Filters and compression are supported, but the companion document on filters
-should be consulted for the details.
+Briefly, the data model supported by NCZarr is netcdf-4 minus
+the user-defined types. However, a restricted form of String type
+is supported (see Appendix H).
+As with netcdf-4 chunking is supported.  Filters and compression
+are also [supported](./md_filters.html "filters").
 
 Specifically, the model supports the following.
-- "Atomic" types: char, byte, ubyte, short, ushort, int, uint, int64, uint64.
+- "Atomic" types: char, byte, ubyte, short, ushort, int, uint, int64, uint64, string.
 - Shared (named) dimensions
 - Attributes with specified types -- both global and per-variable
 - Chunking
 - Fill values
 - Groups
 - N-Dimensional variables
+- Scalar variables
 - Per-variable endianness (big or little)
 - Filters (including compression)
 
 With respect to full netCDF-4, the following concepts are
 currently unsupported.
-- String type
 - User-defined types (enum, opaque, VLEN, and Compound)
 - Unlimited dimensions
 - Contiguous or compact storage
@@ -56,6 +64,15 @@ Note that contiguous and compact are not actually supported
 because they are HDF5 specific.
 When specified, they are treated as chunked where the file consists of only one chunk.
 This means that testing for contiguous or compact is not possible; the _nc_inq_var_chunking_ function will always return NC_CHUNKED and the chunksizes will be the same as the dimension sizes of the variable's dimensions.
+
+Additionally, it should be noted that NCZarr supports scalar variables,
+but Zarr does not; Zarr only supports dimensioned variables.
+In order to support interoperability, NCZarr does the following.
+1. A scalar variable is recorded in the Zarr metadata as if it has a shape of **[1]**.
+2. A note is stored in the NCZarr metadata that this is actually a netCDF scalar variable.
+
+These actions allow NCZarr to properly show scalars in its API while still
+maintaining compatibility with Zarr.
 
 # Enabling NCZarr Support {#nczarr_enable}
 
@@ -84,12 +101,15 @@ There are some details that are important.
   to "https" plus setting "mode=nczarr,s3" (see below).
   Specifying "file" is mostly used for testing, but is used to support
   directory tree or zipfile format storage.
-- Host: Amazon S3 defines two forms: _Virtual_ and _Path_.
+- Host: Amazon S3 defines three forms: _Virtual_, _Path_, and _S3_
   + _Virtual_: the host includes the bucket name as in
     __bucket.s3.&lt;region&gt;.amazonaws.com__
   + _Path_: the host does not include the bucket name, but
     rather the bucket name is the first segment of the path.
     For example __s3.&lt;region&gt;.amazonaws.com/bucket__
+  + _S3_: the protocol is "s3:" and if the host is a single name,
+    then it is interpreted as the bucket. The region is determined
+    using the algorithm in Appendix E.
   + _Other_: It is possible to use other non-Amazon cloud storage, but
     that is cloud library dependent.
 - Query: currently not used.
@@ -124,16 +144,18 @@ Note that It should be the case that zipping a _file_
 format directory tree will produce a file readable by the
 _zip_ storage format, and vice-versa.
 
-By default, _mode=zarr_ also supports the XArray _\_ARRAY\_DIMENSIONS_ convention. The _noxarray_ mode tells the library to disable the XArray support.
+By default, the XArray convention is supported and used for
+both NCZarr files and pure Zarr files. This
+means that every variable in the root group whose named dimensions
+are also in the root group will have an attribute called
+*\_ARRAY\_DIMENSIONS* that stores those dimension names.
+The _noxarray_ mode tells the library to disable the XArray support.
 
 The netcdf-c library is capable of inferring additional mode flags based on the flags it finds. Currently we have the following inferences.
-
-- _xarray_ => _zarr_
-- _noxarray_ => _zarr_
 - _zarr_ => _nczarr_
 
-So for example: ````...#mode=noxarray,zip```` is equivalent to this.
-````...#mode=nczarr,zarr,noxarray,zip
+So for example: ````...#mode=zarr,zip```` is equivalent to this.
+````...#mode=nczarr,zarr,zip
 ````
 <!--
 - log=&lt;output-stream&gt;: this control turns on logging output,
@@ -178,7 +200,7 @@ be a prefix of any other key.
 There several other concepts of note.
 1. __Dataset__ - a dataset is the complete tree contained by the key defining
 the root of the dataset.
-Technically, the root of the tree is the key <dataset>/.zgroup, where .zgroup can be considered the _superblock_ of the dataset.
+Technically, the root of the tree is the key \<dataset\>/.zgroup, where .zgroup can be considered the _superblock_ of the dataset.
 2. __Object__ - equivalent of the S3 object; Each object has a unique key
 and "contains" data in the form of an arbitrary sequence of 8-bit bytes.
 
@@ -244,7 +266,7 @@ The primary zmap implementation is _s3_ (i.e. _mode=nczarr,s3_) and indicates th
 Another storage format uses a file system tree of directories and files (_mode=nczarr,file_).
 A third storage format uses a zip file (_mode=nczarr,zip_).
 The latter two are used mostly for debugging and testing.
-However, the _file_ and _zip_ formats are important because they is intended to match corresponding storage formats used by the Python Zarr implementation.
+However, the _file_ and _zip_ formats are important because they are intended to match corresponding storage formats used by the Python Zarr implementation.
 Hence it should serve to provide interoperability between NCZarr and the Python Zarr, although this interoperability has not been tested.
 
 Examples of the typical URL form for _file_ and _zip_ are as follows.
@@ -262,9 +284,10 @@ As with other URLS (e.g. DAP), these kind of URLS can be passed as the path argu
 
 # NCZarr versus Pure Zarr. {#nczarr_purezarr}
 
-The NCZARR format extends the pure Zarr format by adding extra keys such as _\_NCZARR\_ARRAY_ inside the _.zarray_ object.
+The NCZARR format extends the pure Zarr format by adding extra keys such as ''\_NCZARR\_ARRAY'' inside the ''.zarray'' object.
 It is possible to suppress the use of these extensions so that the netcdf library can read and write a pure zarr formatted file.
-This is controlled by using _mode=nczarr,zarr_ combination.
+This is controlled by using ''mode=zarr'', which is an alias for the
+''mode=nczarr,zarr'' combination.
 The primary effects of using pure zarr are described in the [Translation Section](@ref nczarr_translation).
 
 There are some constraints on the reading of Zarr datasets using the NCZarr implementation.
@@ -272,10 +295,12 @@ There are some constraints on the reading of Zarr datasets using the NCZarr impl
 1. Zarr allows some primitive types not recognized by NCZarr.
 Over time, the set of unrecognized types is expected to diminish.
 Examples of currently unsupported types are as follows:
-* "c" -- complex floating point
-* "m" -- timedelta
-* "M" -- datetime
+  * "c" -- complex floating point
+  * "m" -- timedelta
+  * "M" -- datetime
 2. The Zarr dataset may reference filters and compressors unrecognized by NCZarr.
+3. The Zarr dataset may store data in column-major order instead of row-major order. The effect of encountering such a dataset is to output the data in the wrong order.
+
 Again, this list should diminish over time.
 
 # Notes on Debugging NCZarr Access {#nczarr_debug}
@@ -295,7 +320,7 @@ Note that this is different from zlib.
 
 The Amazon AWS S3 storage driver currently uses the Amazon AWS S3 Software Development Kit for C++ (aws-s3-sdk-cpp).
 In order to use it, the client must provide some configuration information.
-Specifically, the `~/.aws/config` file should contain something like this.
+Specifically, the ''~/.aws/config'' file should contain something like this.
 
 ```
 [default]
@@ -303,6 +328,7 @@ output = json
 aws_access_key_id=XXXX...
 aws_secret_access_key=YYYY...
 ```
+See Appendix E for additional information.
 
 ## Addressing Style
 
@@ -312,12 +338,12 @@ Amazon S3 accepts two forms for specifying the endpoint for accessing the data.
 1. Virtual -- the virtual addressing style places the bucket in the host part of a URL.
 For example:
 ```
-https://<bucketname>.s2.<region>.amazonaws.com/
+https://<bucketname>.s2.&lt;region&gt.amazonaws.com/
 ```
 2. Path -- the path addressing style places the bucket in at the front of the path part of a URL.
 For example:
 ```
-https://s2.<region>.amazonaws.com/<bucketname>/
+https://s2.&lt;region&gt.amazonaws.com/<bucketname>/
 ```
 
 The NCZarr code will accept either form, although internally, it is standardized on path style.
@@ -359,14 +385,14 @@ of NCZarr specific information.
 
 These keys are as follows:
 
-_\_NCZARR_SUPERBLOCK\__ -- this is in the top level group -- key _/.zarr_.
+_\_nczarr_superblock\__ -- this is in the top level group -- key _/.zarr_.
 It is in effect the "superblock" for the dataset and contains
 any netcdf specific dataset level information.
 It is also used to verify that a given key is the root of a dataset.
 Currently it contains the following key(s):
 * "version" -- the NCZarr version defining the format of the dataset.
 
-_\_NCZARR_GROUP\__ -- this key appears in every _.zgroup_ object.
+_\_nczarr_group\__ -- this key appears in every _.zgroup_ object.
 It contains any netcdf specific group information.
 Specifically it contains the following keys:
 * "dims" -- the name and size of shared dimensions defined in this group.
@@ -374,13 +400,13 @@ Specifically it contains the following keys:
 * "groups" -- the name of sub-groups defined in this group.
 These lists allow walking the NCZarr dataset without having to use the potentially costly search operation.
 
-_\_NCZARR_ARRAY\__ -- this key appears in every _.zarray_ object.
+_\_nczarr_array\__ -- this key appears in every _.zarray_ object.
 It contains netcdf specific array information.
 Specifically it contains the following keys:
 * dimrefs -- the names of the shared dimensions referenced by the variable.
 * storage -- indicates if the variable is chunked vs contiguous in the netcdf sense.
 
-_\_NCZARR_ATTR\__ -- this key appears in every _.zattr_ object.
+_\_nczarr_attr\__ -- this key appears in every _.zattr_ object.
 This means that technically, it is attribute, but one for which access
 is normally surpressed .
 Specifically it contains the following keys:
@@ -393,17 +419,17 @@ The latter case, zarr reading nczarr is possible if the zarr library is willing 
 
 The former case, nczarr reading zarr is also possible if the nczarr can simulate or infer the contents of the missing _\_NCZARR\_XXX_ objects.
 As a rule this can be done as follows.
-1. _\_NCZARR_GROUP\__ -- The list of contained variables and sub-groups can be computed using the search API to list the keys "contained" in the key for a group.
+1. _\_nczarr_group\__ -- The list of contained variables and sub-groups can be computed using the search API to list the keys "contained" in the key for a group.
 The search looks for occurrences of _.zgroup_, _.zattr_, _.zarray_ to infer the keys for the contained groups, attribute sets, and arrays (variables).
 Constructing the set of "shared dimensions" is carried out
 by walking all the variables in the whole dataset and collecting
 the set of unique integer shapes for the variables.
 For each such dimension length, a top level dimension is created
 named  ".zdim_<len>" where len is the integer length.
-2. _\_NCZARR_ARRAY\__ -- The dimrefs are inferred by using the shape
+2. _\_nczarr_array\__ -- The dimrefs are inferred by using the shape
 in _.zarray_ and creating references to the simulated shared dimension.
 netcdf specific information.
-3. _\_NCZARR_ATTR\__ -- The type of each attribute is inferred by trying to parse the first attribute value string.
+3. _\_nczarr_attr\__ -- The type of each attribute is inferred by trying to parse the first attribute value string.
 
 # Compatibility {#nczarr_compatibility}
 
@@ -415,12 +441,15 @@ The Xarray <a href="#ref_xarray">[7]</a> Zarr implementation uses its own mechan
 It uses a special attribute named ''_ARRAY_DIMENSIONS''.
 The value of this attribute is a list of dimension names (strings).
 An example might be ````["time", "lon", "lat"]````.
-It is essentially equivalent to the ````_NCZARR_ARRAY "dimrefs" list````, except that the latter uses fully qualified names so the referenced dimensions can be anywhere in the dataset.
+It is essentially equivalent to the ````_nczarr_array "dimrefs" list````, except that the latter uses fully qualified names so the referenced dimensions can be anywhere in the dataset.
 
-As of _netcdf-c_ version 4.8.1, The Xarray ''_ARRAY_DIMENSIONS'' attribute is supported.
-This attribute will be read/written by default, but can be suppressed if the mode value "noxarray" is specified.
+As of _netcdf-c_ version 4.8.2, The Xarray ''_ARRAY_DIMENSIONS'' attribute is supported for both NCZarr and pure Zarr.
+If possible, this attribute will be read/written by default,
+but can be suppressed if the mode value "noxarray" is specified.
 If detected, then these dimension names are used to define shared dimensions.
-Note that "noxarray" or "xarray" implies pure zarr format.
+The following conditions will cause ''_ARRAY_DIMENSIONS'' to not be written.
+* The variable is not in the root group,
+* Any dimension referenced by the variable is not in the root group.
 
 # Examples {#nczarr_examples}
 
@@ -442,6 +471,15 @@ Here are a couple of examples using the _ncgen_ and _ncdump_ utilities.
     ```
     ncgen -4 -lb -o "s3://s3.uswest-1.amazonaws.com/datasetbucket#mode=zarr" dataset.cdl
     ```
+5. Create an nczarr file using the s3 protocol with a specific profile
+    ```
+    ncgen -4 -lb -o "s3://datasetbucket/rootkey#mode=nczarr,awsprofile=unidata" dataset.cdl
+    ```
+    Note that the URLis internally translated to this
+    ````
+    https://s2.&lt;region&gt.amazonaws.com/datasetbucket/rootkey#mode=nczarr,awsprofile=unidata" dataset.cdl
+    ````
+    The region is from the algorithm described in Appendix E1.
 
 # References {#nczarr_bib}
 
@@ -453,9 +491,11 @@ Here are a couple of examples using the _ncgen_ and _ncdump_ utilities.
 collections — High-performance dataset datatypes](https://docs.python.org/2/library/collections.html)<br>
 <a name="ref_zarrv2">[6]</a> [Zarr Version 2 Specification](https://zarr.readthedocs.io/en/stable/spec/v2.html)<br>
 <a name="ref_xarray">[7]</a> [XArray Zarr Encoding Specification](http://xarray.pydata.org/en/latest/internals.html#zarr-encoding-specification)<br>
-<a name="ref_xarray">[8]</a> [Dynamic Filter Loading](https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf)<br>
-<a name="ref_xarray">[9]</a> [Officially Registered Custom HDF5 Filters](https://portal.hdfgroup.org/display/support/Registered+Filter+Plugins)<br>
-<a name="ref_xarray">[10]</a> [C-Blosc Compressor Implementation](https://github.com/Blosc/c-blosc)
+<a name="dynamic_filter_loading">[8]</a> [Dynamic Filter Loading](https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf)<br>
+<a name="official_hdf5_filters">[9]</a> [Officially Registered Custom HDF5 Filters](https://portal.hdfgroup.org/display/support/Registered+Filter+Plugins)<br>
+<a name="blosc-c-impl">[10]</a> [C-Blosc Compressor Implementation](https://github.com/Blosc/c-blosc)<br>
+<a name="ref_awssdk_conda">[11]</a> [Conda-forge / packages / aws-sdk-cpp](https://anaconda.org/conda-forge/aws-sdk-cpp)<br>
+<a name="ref_gdal">[12]</a> [GDAL Zarr](https://gdal.org/drivers/raster/zarr.html)<br>
 
 # Appendix A. Building NCZarr Support {#nczarr_build}
 
@@ -473,7 +513,7 @@ Currently the following build cases are known to work.
 
 Note: S3 support includes both compiling the S3 support code as well as running the S3 tests.
 
-# Automake
+## Automake
 
 There are several options relevant to NCZarr support and to Amazon S3 support.
 These are as follows.
@@ -492,12 +532,11 @@ The above assumes that these libraries were installed in '/usr/local/lib', so th
 
 Note also that if S3 support is enabled, then you need to have a C++ compiler installed because part of the S3 support code is written in C++.
 
-# CMake {#nczarr_cmake}
+## CMake {#nczarr_cmake}
 
 The necessary CMake flags are as follows (with defaults)
 
-1.
--DENABLE_NCZARR=off -- equivalent to the Automake _--disable-nczarr_ option.
+1. -DENABLE_NCZARR=off -- equivalent to the Automake _--disable-nczarr_ option.
 2. -DENABLE_NCZARR_S3=off -- equivalent to the Automake _--enable-nczarr-s3_ option.
 3. -DENABLE_NCZARR_S3_TESTS=off -- equivalent to the Automake _--enable-nczarr-s3-tests_ option.
 
@@ -524,41 +563,125 @@ This can be useful if blanks in path names cause problems in your build environm
 
 The relevant tests for S3 support are in the _nczarr_test_ directory.
 Currently, by default, testing of S3 with NCZarr is supported only for Unidata members of the NetCDF Development Group.
-This is because it uses a specific bucket on a specific internal S3 appliance that is inaccessible to the general user.
-
-However, an untested mechanism exists by which others may be able to run the S3 specific tests.
- If someone else wants to attempt these tests, then they need to define the following environment variables:
-* NCZARR_S3_TEST_HOST=\<host\>
-* NCZARR_S3_TEST_BUCKET=\<bucket-name\>
-
-This assumes a Path Style address (see above) where
-* host -- the complete host part of the url
-* bucket -- a bucket in which testing can occur without fear of damaging anything.
-
-_Example:_
-
-````
-NCZARR_S3_TEST_HOST=s3.us-west-1.amazonaws.com
-NCZARR_S3_TEST_BUCKET=testbucket
-````
-If anyone tries to use this mechanism, it would be appreciated
-it any difficulties were reported to Unidata as a Github issue.
+This is because it uses a Unidata-specific bucket is inaccessible to the general user.
 
 # Appendix B. Building aws-sdk-cpp {#nczarr_s3sdk}
 
 In order to use the S3 storage driver, it is necessary to install the Amazon [aws-sdk-cpp library](https://github.com/aws/aws-sdk-cpp.git).
 
-As a starting point, here are the CMake options used by Unidata to build that library.
-It assumes that it is being executed in a build directory, `build` say, and that `build/../CMakeLists.txt exists`.
-```
-cmake -DBUILD_ONLY=s3
-```
-The expected set of installed libraries are as follows:
-* aws-cpp-sdk-s3
-* aws-cpp-sdk-core
+Building this package from scratch has proven to be a formidable task.
+This appears to be due to dependencies on very specific versions of,
+for example, openssl.
 
-This library depends on libcurl, so you may need to install that
-before building the sdk library.
+## *\*nix\** Build
+
+For linux, the following context works. Of course your mileage may vary.
+* OS: ubuntu 21
+* aws-sdk-cpp version 1.9.96 (or later?)
+* Required installed libraries: openssl, libcurl, cmake, ninja (ninja-build in apt)
+
+### AWS-SDK-CPP Build Recipe
+
+````
+git clone --recurse-submodules https://www.github.com/aws/aws-sdk-cpp
+pushd aws-sdk-cpp
+mkdir build
+cd build
+PREFIX=/usr/local
+FLAGS="-DCMAKE_INSTALL_PREFIX=${PREFIX} \
+       -DCMAKE_INSTALL_LIBDIR=lib \
+       -DCMAKE_MODULE_PATH=${PREFIX}/lib/cmake \
+       -DCMAKE_POLICY_DEFAULT_CMP0075=NEW \
+       -DBUILD_ONLY=s3 \
+       -DENABLE_UNITY_BUILD=ON \
+       -DENABLE_TESTING=OFF \
+       -DCMAKE_BUILD_TYPE=$CFG \
+       -DSIMPLE_INSTALL=ON"
+cmake -GNinja $FLAGS ..
+ninja all
+ninja install
+cd ..
+popd
+````
+
+### NetCDF Build
+
+In order to build netcdf-c with S3 sdk support,
+the following options must be specified for ./configure.
+````
+--enable-nczarr-s3
+````
+If you have access to the Unidata bucket on Amazon, then you can
+also test S3 support with this option.
+````
+--enable-nczarr-s3-tests
+````
+
+## Windows build
+It is possible to build and install aws-sdk-cpp. It is also possible
+to build netcdf-c using cmake. Unfortunately, testing currently fails.
+
+For Windows, the following context work. Of course your mileage may vary.
+* OS: Windows 10 64-bit with Visual Studio community edition 2019.
+* aws-sdk-cpp version 1.9.96 (or later?)
+* Required installed libraries: openssl, libcurl, cmake
+
+### AWS-SDK-CPP Build Recipe
+
+This command-line build assumes one is using Cygwin or Mingw to provide
+tools such as bash.
+
+````
+git clone --recurse-submodules https://www.github.com/aws/aws-sdk-cpp
+pushd aws-sdk-cpp
+mkdir build
+cd build
+CFG="Release"
+PREFIX="c:/tools/aws-sdk-cpp"
+
+FLAGS="-DCMAKE_INSTALL_PREFIX=${PREFIX} \
+       -DCMAKE_INSTALL_LIBDIR=lib" \
+       -DCMAKE_MODULE_PATH=${PREFIX}/cmake \
+       -DCMAKE_POLICY_DEFAULT_CMP0075=NEW \
+       -DBUILD_ONLY=s3 \
+       -DENABLE_UNITY_BUILD=ON \
+       -DCMAKE_BUILD_TYPE=$CFG \
+       -DSIMPLE_INSTALL=ON"
+
+rm -fr build
+mkdir -p build
+cd build
+cmake -DCMAKE_BUILD_TYPE=${CFG} $FLAGS ..
+cmake --build . --config ${CFG}
+cmake --install . --config ${CFG}
+cd ..
+popd
+````
+Notice that the sdk is being installed in the directory "c:\tools\aws-sdk-cpp"
+rather than the default location "c:\Program Files (x86)/aws-sdk-cpp-all"
+This is because when using a command line, an install path that contains
+blanks may not work.
+
+### NetCDF CMake Build
+
+Enabling S3 support is controlled by these two cmake options:
+````
+-DENABLE_NCZARR_S3=ON
+-DENABLE_NCZARR_S3_TESTS=OFF
+````
+
+However, to find the aws sdk libraries,
+the following environment variables must be set:
+````
+AWSSDK_ROOT_DIR="c:/tools/aws-sdk-cpp"
+AWSSDKBIN="/cygdrive/c/tools/aws-sdk-cpp/bin"
+PATH="$PATH:${AWSSDKBIN}"
+````
+Then the following options must be specified for cmake.
+````
+-DAWSSDK_ROOT_DIR=${AWSSDK_ROOT_DIR}
+-DAWSSDK_DIR=${AWSSDK_ROOT_DIR}/lib/cmake/AWSSDK"
+````
 
 # Appendix C. Amazon S3 Imposed Limits {#nczarr_s3limits}
 
@@ -570,7 +693,7 @@ Some of the relevant limits are as follows:
 Note that the limit is defined in terms of bytes and not (Unicode) characters.
 This affects the depth to which groups can be nested because the key encodes the full path name of a group.
 
-# Appendix D. Alternative Mechanisms for Accessing Remote Datasets
+# Appendix D. Alternative Mechanisms for Accessing Remote Datasets {#nczarr_altremote}
 
 The NetCDF-C library contains an alternate mechanism for accessing traditional netcdf-4 files stored in Amazon S3: The byte-range mechanism.
 The idea is to treat the remote data as if it was a big file.
@@ -587,28 +710,72 @@ https://s3.us-east-1.amazonaws.com/noaa-goes16/ABI-L1b-RadC/2017/059/03/OR_ABI-L
 ````
 Note that for S3 access, it is expected that the URL is in what is called "path" format where the bucket, _noaa-goes16_ in this case, is part of the URL path instead of the host.
 
-The _#mode=byterange_ mechanism generalizes to work with most servers that support byte-range access.
+The _#mode=bytes_ mechanism generalizes to work with most servers that support byte-range access.
  
 Specifically, Thredds servers support such access using the HttpServer access method as can be seen from this URL taken from the above test program.
 ````
 https://thredds-test.unidata.ucar.edu/thredds/fileServer/irma/metar/files/METAR_20170910_0000.nc#bytes
 ````
 
-## Byte-Range Authorization
+# Appendix E. AWS Selection Algorithms. {#nczarr_awsselect}
 
-If using byte-range access, it may be necessary to tell the netcdf-c
-library about the so-called secretid and accessid values.
-These are usually stored in the file ````~/.aws/config````
-and/or  ````~/.aws/credentials````.
-In the latter file, this
-might look like this.
+If byterange support is enabled, the netcdf-c library will parse the files
 ````
-    [default]
+${HOME}/.aws/config
+and
+${HOME}/.aws/credentials
+````
+to extract profile names plus a list
+of key=value pairs. This example is typical.
+````
+[default]
     aws_access_key_id=XXXXXXXXXXXXXXXXXXXX
     aws_secret_access_key=YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+    aws_region=ZZZZZZZZZ
 ````
+The keys in the profile will be used to set various parameters in the library
 
-# Appendix E. NCZarr Version 1 Meta-Data Representation
+## Profile Selection
+
+The algorithm for choosing the active profile to use is as follows:
+
+1. If the "aws.profile" fragment flag is defined in the URL, then it is used. For example, see this URL.
+````
+https://...#mode=nczarr,s3&aws.profile=xxx
+````
+2. If the "AWS.PROFILE" entry in the .rc file (i.e. .netrc or .dodsrc) is set, then it is used.
+3. Otherwise the profile "default" is used.
+
+The profile named "none" is a special profile that the netcdf-c library automatically defines.
+It should not be defined anywhere else. It signals to the library that no credentialas are to used.
+It is equivalent to the "--no-sign-request" option in the AWS CLI.
+Also, it must be explicitly specified by name. Otherwise "default" will be used.
+
+## Region Selection
+
+If the specified URL is of the form
+````
+s3://<bucket>/key
+````
+Then this is rebuilt to this form:
+````
+s3://s2.&lt;region&gt.amazonaws.com>/key
+````
+However this requires figuring out the region to use.
+The algorithm for picking an region is as follows.
+
+1. If the "aws.region" fragment flag is defined in the URL, then it is used.
+2. The active profile is searched for the "aws_region" key.
+3. If the "AWS.REGION" entry in the .rc file (i.e. .netrc or .dodsrc) is set, then it is used.
+4. Otherwise use "us-east-1" region.
+
+## Authorization Selection
+
+Picking an access-key/secret-key pair is always determined
+by the current active profile. To choose to not use keys
+requires that the active profile must be "none".
+
+# Appendix F. NCZarr Version 1 Meta-Data Representation. {#nczarr_version1}
 
 In NCZarr Version 1, the NCZarr specific metadata was represented using new objects rather than as keys in existing Zarr objects.
 Due to conflicts with the Zarr specification, that format is deprecated in favor of the one described above.
@@ -618,14 +785,168 @@ The version 1 format defines three specific objects: _.nczgroup_, _.nczarray_,_.
 These are stored in parallel with the corresponding Zarr objects. So if there is a key of the form "/x/y/.zarray", then there is also a key "/x/y/.nczarray".
 The content of these objects is the same as the contents of the corresponding keys. So the value of the ''_NCZARR_ARRAY'' key is the same as the content of the ''.nczarray'' object. The list of connections is as follows:
 
-* ''.nczarr'' <=> ''_NCZARR_SUPERBLOCK_''
-* ''.nczgroup <=> ''_NCZARR_GROUP_''
-* ''.nczarray <=> ''_NCZARR_ARRAY_''
-* ''.nczattr <=> ''_NCZARR_ATTR_''
+* ''.nczarr'' <=> ''_nczarr_superblock_''
+* ''.nczgroup <=> ''_nczarr_group_''
+* ''.nczarray <=> ''_nczarr_array_''
+* ''.nczattr <=> ''_nczarr_attr_''
+
+# Appendix G. JSON Attribute Convention. {#nczarr_json}
+
+The Zarr V2 specification is somewhat vague on what is a legal
+value for an attribute. The examples all show one of two cases:
+1. A simple JSON scalar atomic values (e.g. int, float, char, etc), or
+2. A JSON array  of such values.
+
+However, the Zarr specification can be read to infer that the value
+can in fact be any legal JSON expression.
+This "convention" is currently used routinely to help support various
+attributes created by other packages where the attribute is a
+complex JSON expression.  An example is the GDAL Driver
+convention <a href="#ref_gdal">[12]</a>, where the value is a complex
+JSON dictionary.
+
+In order for NCZarr to be as consistent as possible with Zarr Version 2,
+it is desirable to support this convention  for attribute values.
+This means that there must be some way to handle an attribute
+whose value is not either of the two cases above. That is, its value
+is some more complex JSON expression. Ideally both reading and writing
+of such attributes should be supported.
+
+One more point. NCZarr attempts to record the associated netcdf
+attribute type (encoded in the form of a NumPy "dtype") for each
+attribute. This information is stored as NCZarr-specific
+metadata. Note that pure Zarr makes no attempt to record such
+type information.
+
+The current algorithm to support JSON valued attributes
+operates as follows.
+
+## Writing an attribute:
+There are mutiple cases to consider.
+
+1. The netcdf attribute **is not** of type NC_CHAR and its value is a single atomic value.
+    * Convert to an equivalent JSON atomic value and write that JSON expression.
+    * Compute the Zarr equivalent dtype and store in the NCZarr metadata.
+
+2. The netcdf attribute **is not** of type NC_CHAR and its value is a vector of atomic values.
+    * Convert to an equivalent JSON array of atomic values and write that JSON expression.
+    * Compute the Zarr equivalent dtype and store in the NCZarr metadata.
+
+3. The netcdf attribute **is** of type NC_CHAR and its value &ndash; taken as a single sequence of characters &ndash;
+**is** parseable as a legal JSON expression.
+    * Parse to produce a JSON expression and write that expression.
+    * Use "|U1" as the dtype and store in the NCZarr metadata.
+
+4. The netcdf attribute **is** of type NC_CHAR and its value &ndash; taken as a single sequence of characters &ndash;
+**is not** parseable as a legal JSON expression.
+    * Convert to a JSON string and write that expression
+    * Use "|U1" as the dtype and store in the NCZarr metadata.
+
+## Reading an attribute:
+
+The process of reading and interpreting an attribute value requires two
+pieces of information.
+* The value of the attribute as a JSON expression, and
+* The optional associated dtype of the attribute; note that this may not exist
+if, for example, the file is pure zarr.
+
+Given these two pieces of information, the read process is as follows.
+
+1. The JSON expression is a simple JSON atomic value.
+    * If the dtype is defined, then convert the JSON to that type of data,
+and then store it as the equivalent netcdf vector of size one.
+    * If the dtype is not defined, then infer the dtype based on the the JSON value,
+and then store it as the equivalent netcdf vector of size one.
+
+2. The JSON expression is an array of simple JSON atomic values.
+    * If the dtype is defined, then convert each JSON value in the array to that type of data,
+and then store it as the equivalent netcdf vector.
+    * If the dtype is not defined, then infer the dtype based on the first JSON value in the array,
+and then store it as the equivalent netcdf vector.
+
+3. The JSON expression is an array some of whose values are dictionaries or (sub-)arrays.
+    * Un-parse the expression to an equivalent sequence of characters, and then store it as of type NC_CHAR.
+
+3. The JSON expression is a dictionary.
+    * Un-parse the expression to an equivalent sequence of characters, and then store it as of type NC_CHAR.
+
+## Notes
+
+1. If a  character valued attributes's value can be parsed as a legal JSON expression, then it will be stored as such.
+2. Reading and writing are *almost* idempotent in that the sequence of
+actions "read-write-read" is equivalent to a single "read" and "write-read-write" is equivalent to a single "write".
+The "almost" caveat is necessary because (1) whitespace may be added or lost during the sequence of operations,
+and (2) numeric precision may change.
+
+# Appendix H. Support for string types
+
+Zarr supports a string type, but it is restricted to
+fixed size strings. NCZarr also supports such strings,
+but there are some differences in order to interoperate
+with the netcdf-4/HDF5 variable length strings.
+
+The primary issue to be addressed is to provide a way for user
+to specify the maximum size of the fixed length strings. This is
+handled by providing the following new attributes:
+1. **_nczarr_default_maxstrlen** &mdash;
+This is an attribute of the root group. It specifies the default
+maximum string length for string types. If not specified, then
+it has the value of 128 characters.
+2. **_nczarr_maxstrlen** &mdash;
+This is a per-variable attribute. It specifies the maximum
+string length for the string type associated with the variable.
+If not specified, then it is assigned the value of
+**_nczarr_default_maxstrlen**.
+
+Note that when accessing a string through the netCDF API, the
+fixed length strings appear as variable length strings.  This
+means that they are stored as pointers to the string
+(i.e. **char\***) and with a trailing nul character.
+One consequence is that if the user writes a variable length
+string through the netCDF API, and the length of that string
+is greater than the maximum string length for a variable,
+then the string is silently truncated.
+Another consequence is that the user must reclaim the string storage.
+
+Adding strings also requires some hacking to handle the existing
+netcdf-c NC_CHAR type, which does not exist in Zarr. The goal
+was to choose NumPY types for both the netcdf-c NC_STRING type
+and the netcdf-c NC_CHAR type such that if a pure zarr
+implementation reads them, it will still work.
+
+For writing variables and NCZarr attributes, the type mapping is as follows:
+* ">S1" for NC_CHAR.
+* "|S1" for NC_STRING && MAXSTRLEN==1
+* "|Sn" for NC_STRING && MAXSTRLEN==n
+
+Admittedly, this encoding is a bit of a hack.
+
+So when reading data with a pure zarr implementaion
+the above types should always appear as strings,
+and the type that signals NC_CHAR (in NCZarr)
+would be handled by Zarr as a string of length 1.
+
+# Change Log {#nczarr_changelog}
+
+Note, this log was only started as of 8/11/2022 and is not
+intended to be a detailed chronology. Rather, it provides highlights
+that will be of interest to NCZarr users. In order to see exact changes,
+It is necessary to use the 'git diff' command.
+
+## 8/29/2022
+1. Zarr fixed-size string types are now supported.
+
+## 8/11/2022
+1. The NCZarr specific keys have been converted to lower-case
+(e.g. "_nczarr_attr" instead of "_NCZARR_ATTR"). Upper case is
+accepted for back compatibility.
+
+2. The legal values of an attribute has been extended to
+include arbitrary JSON expressions; see Appendix G for more details.
 
 # Point of Contact {#nczarr_poc}
 
 __Author__: Dennis Heimbigner<br>
 __Email__: dmh at ucar dot edu<br>
 __Initial Version__: 4/10/2020<br>
-__Last Revised__: 7/16/2021
+__Last Revised__: 8/27/2022

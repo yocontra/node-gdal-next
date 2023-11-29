@@ -99,7 +99,10 @@ genc_netcdf(void)
             if(special->flags & _CHUNKSIZES_FLAG) {
                 int i;
                 size_t* chunks = special->_ChunkSizes;
-                if(special->nchunks == 0 || chunks == NULL) continue;
+                if(special->nchunks == 0 || chunks == NULL) {
+                    bbFree(tmp);
+                    continue;
+                }
                 bbClear(tmp);
                 for(i=0;i<special->nchunks;i++) {
                     bbprintf(tmp,"%s%ld",
@@ -538,6 +541,22 @@ genc_definespecialattributes(Symbol* vsym)
 	    codeline(");");
             codelined(1,"CHECK_ERR(stat);");
 	}
+    }
+    if(special->flags & (_QUANTIZEBG_FLAG | _QUANTIZEGBR_FLAG)) {
+    	const char* alg = NULL;
+	switch(special->_Quantizer) {
+	case NC_QUANTIZE_BITGROOM: alg = "NC_QUANTIZE_BITGROOM";
+	case NC_QUANTIZE_GRANULARBR: alg = "NC_QUANTIZE_GRANULARBR";
+	default: alg = "NC_NOQUANTIZE";
+	}
+        bbprintf0(stmt,
+                "    stat = nc_def_var_quantize(%s, %s, %s, %d);\n",
+                groupncid(vsym->container),
+                varncid(vsym),
+		alg, special->_NSD
+                );
+        codedump(stmt);
+        codelined(1,"CHECK_ERR(stat);");
     }
 }
 #endif /*USE_NETCDF4*/
