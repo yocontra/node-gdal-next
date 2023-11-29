@@ -66,7 +66,8 @@
 					"crypt32.lib",
 					"ws2_32.lib",
 					"advapi32.lib",
-					"wbemuuid.lib"
+					"wbemuuid.lib",
+          "Shlwapi.lib"
 				],
 			}],
 			["OS == 'mac'", {
