@@ -116,7 +116,7 @@ ConcatenatedOperation::operations() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static bool compareStepCRS(const crs::CRS *a, const crs::CRS *b) {
+static bool areCRSMoreOrLessEquivalent(const crs::CRS *a, const crs::CRS *b) {
     const auto &aIds = a->identifiers();
     const auto &bIds = b->identifiers();
     if (aIds.size() == 1 && bIds.size() == 1 &&
@@ -124,7 +124,23 @@ static bool compareStepCRS(const crs::CRS *a, const crs::CRS *b) {
         *aIds[0]->codeSpace() == *bIds[0]->codeSpace()) {
         return true;
     }
-    return a->_isEquivalentTo(b, util::IComparable::Criterion::EQUIVALENT);
+    if (a->_isEquivalentTo(b, util::IComparable::Criterion::EQUIVALENT)) {
+        return true;
+    }
+    // This is for example for EPSG:10146 which is EPSG:9471
+    // (INAGeoid2020 v1 height)
+    // to EPSG:20036 (INAGeoid2020 v2 height), but chains
+    // EPSG:9629 (SRGI2013 to SRGI2013 + INAGeoid2020 v1 height (1))
+    // with EPSG:10145 (SRGI2013 to SRGI2013 + INAGeoid2020 v2 height (1))
+    const auto compoundA = dynamic_cast<const crs::CompoundCRS *>(a);
+    const auto compoundB = dynamic_cast<const crs::CompoundCRS *>(b);
+    if (compoundA && !compoundB)
+        return areCRSMoreOrLessEquivalent(
+            compoundA->componentReferenceSystems()[1].get(), b);
+    else if (!compoundA && compoundB)
+        return areCRSMoreOrLessEquivalent(
+            a, compoundB->componentReferenceSystems()[1].get());
+    return false;
 }
 //! @endcond
 
@@ -176,7 +192,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                                    "source and/or target CRS");
         }
         if (i >= 1) {
-            if (!compareStepCRS(l_sourceCRS.get(), lastTargetCRS.get())) {
+            if (!areCRSMoreOrLessEquivalent(l_sourceCRS.get(),
+                                            lastTargetCRS.get())) {
 #ifdef DEBUG_CONCATENATED_OPERATION
                 std::cerr << "Step " << i - 1 << ": "
                           << operationsIn[i - 1]->nameStr() << std::endl;
@@ -203,13 +220,30 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         }
         lastTargetCRS = l_targetCRS;
     }
+
+    // When chaining VerticalCRS -> GeographicCRS -> VerticalCRS, use
+    // GeographicCRS as the interpolationCRS
+    const auto l_sourceCRS = NN_NO_CHECK(operationsIn[0]->sourceCRS());
+    const auto l_targetCRS = NN_NO_CHECK(operationsIn.back()->targetCRS());
+    if (operationsIn.size() == 2 && interpolationCRS == nullptr &&
+        dynamic_cast<const crs::VerticalCRS *>(l_sourceCRS.get()) != nullptr &&
+        dynamic_cast<const crs::VerticalCRS *>(l_targetCRS.get()) != nullptr) {
+        const auto geog1 = dynamic_cast<crs::GeographicCRS *>(
+            operationsIn[0]->targetCRS().get());
+        const auto geog2 = dynamic_cast<crs::GeographicCRS *>(
+            operationsIn[1]->sourceCRS().get());
+        if (geog1 != nullptr && geog2 != nullptr &&
+            geog1->_isEquivalentTo(geog2,
+                                   util::IComparable::Criterion::EQUIVALENT)) {
+            interpolationCRS = operationsIn[0]->targetCRS();
+        }
+    }
+
     auto op = ConcatenatedOperation::nn_make_shared<ConcatenatedOperation>(
         operationsIn);
     op->assignSelf(op);
     op->setProperties(properties);
-    op->setCRSs(NN_NO_CHECK(operationsIn[0]->sourceCRS()),
-                NN_NO_CHECK(operationsIn.back()->targetCRS()),
-                interpolationCRS);
+    op->setCRSs(l_sourceCRS, l_targetCRS, interpolationCRS);
     op->setAccuracies(accuracies);
 #ifdef DEBUG_CONCATENATED_OPERATION
     {
@@ -231,7 +265,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 void ConcatenatedOperation::fixStepsDirection(
     const crs::CRSNNPtr &concatOpSourceCRS,
     const crs::CRSNNPtr &concatOpTargetCRS,
-    std::vector<CoordinateOperationNNPtr> &operationsInOut) {
+    std::vector<CoordinateOperationNNPtr> &operationsInOut,
+    const io::DatabaseContextPtr & /*dbContext*/) {
 
     // Set of heuristics to assign CRS to steps, and possibly reverse them.
 
@@ -240,10 +275,8 @@ void ConcatenatedOperation::fixStepsDirection(
     };
 
     const auto isGeocentric = [](const crs::CRS *crs) -> bool {
-        auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
-        if (geodCRS && geodCRS->coordinateSystem()->axisList().size() == 3)
-            return true;
-        return false;
+        const auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
+        return (geodCRS && geodCRS->isGeocentric());
     };
 
     // Apply axis order reversal operation on first operation if needed
@@ -276,24 +309,38 @@ void ConcatenatedOperation::fixStepsDirection(
         }
     }
 
+    const auto extractDerivedCRS =
+        [](const crs::CRS *crs) -> const crs::DerivedCRS * {
+        auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(crs);
+        if (derivedCRS)
+            return derivedCRS;
+        auto compoundCRS = dynamic_cast<const crs::CompoundCRS *>(crs);
+        if (compoundCRS) {
+            derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
+                compoundCRS->componentReferenceSystems().front().get());
+            if (derivedCRS)
+                return derivedCRS;
+        }
+        return nullptr;
+    };
+
     for (size_t i = 0; i < operationsInOut.size(); ++i) {
         auto &op = operationsInOut[i];
         auto l_sourceCRS = op->sourceCRS();
         auto l_targetCRS = op->targetCRS();
         auto conv = dynamic_cast<const Conversion *>(op.get());
         if (conv && i == 0 && !l_sourceCRS && !l_targetCRS) {
-            if (auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
-                    concatOpSourceCRS.get())) {
+            if (auto derivedCRS = extractDerivedCRS(concatOpSourceCRS.get())) {
                 if (i + 1 < operationsInOut.size()) {
                     // use the sourceCRS of the next operation as our target CRS
                     l_targetCRS = operationsInOut[i + 1]->sourceCRS();
                     // except if it looks like the next operation should
                     // actually be reversed !!!
                     if (l_targetCRS &&
-                        !compareStepCRS(l_targetCRS.get(),
-                                        derivedCRS->baseCRS().get()) &&
+                        !areCRSMoreOrLessEquivalent(
+                            l_targetCRS.get(), derivedCRS->baseCRS().get()) &&
                         operationsInOut[i + 1]->targetCRS() &&
-                        compareStepCRS(
+                        areCRSMoreOrLessEquivalent(
                             operationsInOut[i + 1]->targetCRS().get(),
                             derivedCRS->baseCRS().get())) {
                         l_targetCRS = operationsInOut[i + 1]->targetCRS();
@@ -323,23 +370,24 @@ void ConcatenatedOperation::fixStepsDirection(
             }
         } else if (conv && i + 1 == operationsInOut.size() && !l_sourceCRS &&
                    !l_targetCRS) {
-            auto derivedCRS =
-                dynamic_cast<const crs::DerivedCRS *>(concatOpTargetCRS.get());
+            auto derivedCRS = extractDerivedCRS(concatOpTargetCRS.get());
             if (derivedCRS) {
                 if (i >= 1) {
-                    // use the sourceCRS of the previous operation as our source
+                    // use the targetCRS of the previous operation as our source
                     // CRS
                     l_sourceCRS = operationsInOut[i - 1]->targetCRS();
                     // except if it looks like the previous operation should
                     // actually be reversed !!!
                     if (l_sourceCRS &&
-                        !compareStepCRS(l_sourceCRS.get(),
-                                        derivedCRS->baseCRS().get()) &&
+                        !areCRSMoreOrLessEquivalent(
+                            l_sourceCRS.get(), derivedCRS->baseCRS().get()) &&
                         operationsInOut[i - 1]->sourceCRS() &&
-                        compareStepCRS(
+                        areCRSMoreOrLessEquivalent(
                             operationsInOut[i - 1]->sourceCRS().get(),
                             derivedCRS->baseCRS().get())) {
-                        l_targetCRS = operationsInOut[i - 1]->sourceCRS();
+                        l_sourceCRS = operationsInOut[i - 1]->sourceCRS();
+                        operationsInOut[i - 1] =
+                            operationsInOut[i - 1]->inverse();
                     }
                 }
                 if (!l_sourceCRS) {
@@ -350,8 +398,7 @@ void ConcatenatedOperation::fixStepsDirection(
             } else if (i >= 1) {
                 l_sourceCRS = operationsInOut[i - 1]->targetCRS();
                 if (l_sourceCRS) {
-                    derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
-                        l_sourceCRS.get());
+                    derivedCRS = extractDerivedCRS(l_sourceCRS.get());
                     if (derivedCRS &&
                         conv->isEquivalentTo(
                             derivedCRS->derivingConversion().get(),
@@ -428,9 +475,11 @@ void ConcatenatedOperation::fixStepsDirection(
                     "Cannot determine targetCRS of operation at step " +
                     toString(static_cast<int>(i)));
             }
-            if (compareStepCRS(l_sourceCRS.get(), prevOpTarget.get())) {
+            if (areCRSMoreOrLessEquivalent(l_sourceCRS.get(),
+                                           prevOpTarget.get())) {
                 // do nothing
-            } else if (compareStepCRS(l_targetCRS.get(), prevOpTarget.get())) {
+            } else if (areCRSMoreOrLessEquivalent(l_targetCRS.get(),
+                                                  prevOpTarget.get())) {
                 op = op->inverse();
             }
             // Below is needed for EPSG:9103 which chains NAD83(2011) geographic
@@ -451,14 +500,55 @@ void ConcatenatedOperation::fixStepsDirection(
                 auto newOp(Conversion::createGeographicGeocentric(
                     NN_NO_CHECK(prevOpTarget), NN_NO_CHECK(l_targetCRS)));
                 operationsInOut.insert(operationsInOut.begin() + i, newOp);
+                // Particular case for https://github.com/OSGeo/PROJ/issues/3819
+                // where the antepenultimate transformation goes to A
+                // (geographic 3D) // and the last transformation is a NADCON 3D
+                // but between A (geographic 2D) to B (geographic 2D), and the
+                // concatenated transformation target CRS is B (geographic 3D)
+                // This is due to an oddity of the EPSG database that registers
+                // the NADCON 3D transformation between the 2D geographic CRS
+                // and not the 3D ones.
+            } else if (i + 1 == operationsInOut.size() &&
+                       l_sourceCRS->nameStr() == prevOpTarget->nameStr() &&
+                       l_targetCRS->nameStr() == concatOpTargetCRS->nameStr() &&
+                       isGeographic(l_targetCRS.get()) &&
+                       isGeographic(concatOpTargetCRS.get()) &&
+                       isGeographic(l_sourceCRS.get()) &&
+                       isGeographic(prevOpTarget.get()) &&
+                       dynamic_cast<const crs::GeographicCRS *>(
+                           prevOpTarget.get())
+                               ->coordinateSystem()
+                               ->axisList()
+                               .size() == 3 &&
+                       dynamic_cast<const crs::GeographicCRS *>(
+                           l_sourceCRS.get())
+                               ->coordinateSystem()
+                               ->axisList()
+                               .size() == 2 &&
+                       dynamic_cast<const crs::GeographicCRS *>(
+                           l_targetCRS.get())
+                               ->coordinateSystem()
+                               ->axisList()
+                               .size() == 2) {
+                const auto transf =
+                    dynamic_cast<const Transformation *>(op.get());
+                if (transf &&
+                    (transf->method()->getEPSGCode() ==
+                         EPSG_CODE_METHOD_NADCON5_3D ||
+                     transf->parameterValue(
+                         PROJ_WKT2_PARAMETER_LATITUDE_LONGITUDE_ELLIPOISDAL_HEIGHT_DIFFERENCE_FILE,
+                         0))) {
+                    op->setCRSs(NN_NO_CHECK(prevOpTarget), concatOpTargetCRS,
+                                nullptr);
+                }
             }
         }
     }
 
     if (!operationsInOut.empty()) {
         auto l_sourceCRS = operationsInOut.front()->sourceCRS();
-        if (l_sourceCRS &&
-            !compareStepCRS(l_sourceCRS.get(), concatOpSourceCRS.get())) {
+        if (l_sourceCRS && !areCRSMoreOrLessEquivalent(
+                               l_sourceCRS.get(), concatOpSourceCRS.get())) {
             throw InvalidOperation("The source CRS of the first step of "
                                    "concatenated operation is not the same "
                                    "as the source CRS of the concatenated "
@@ -466,8 +556,8 @@ void ConcatenatedOperation::fixStepsDirection(
         }
 
         auto l_targetCRS = operationsInOut.back()->targetCRS();
-        if (l_targetCRS &&
-            !compareStepCRS(l_targetCRS.get(), concatOpTargetCRS.get())) {
+        if (l_targetCRS && !areCRSMoreOrLessEquivalent(
+                               l_targetCRS.get(), concatOpTargetCRS.get())) {
             if (l_targetCRS->nameStr() == concatOpTargetCRS->nameStr() &&
                 ((isGeographic(l_targetCRS.get()) &&
                   isGeocentric(concatOpTargetCRS.get())) ||
@@ -670,6 +760,12 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->popDisableUsage();
     }
 
+    if (!coordinateOperationAccuracies().empty()) {
+        formatter->startNode(io::WKTConstants::OPERATIONACCURACY, false);
+        formatter->add(coordinateOperationAccuracies()[0]->value());
+        formatter->endNode();
+    }
+
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
@@ -708,6 +804,11 @@ void ConcatenatedOperation::_exportToJSON(
             formatter->setAllowIDInImmediateChild();
             operation->_exportToJSON(formatter);
         }
+    }
+
+    if (!coordinateOperationAccuracies().empty()) {
+        writer->AddObjKey("accuracy");
+        writer->Add(coordinateOperationAccuracies()[0]->value());
     }
 
     ObjectUsage::baseExportToJSON(formatter);

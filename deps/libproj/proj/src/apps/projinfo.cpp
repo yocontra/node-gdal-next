@@ -41,6 +41,7 @@
 
 #include <proj/common.hpp>
 #include <proj/coordinateoperation.hpp>
+#include <proj/coordinates.hpp>
 #include <proj/crs.hpp>
 #include <proj/io.hpp>
 #include <proj/metadata.hpp>
@@ -49,6 +50,7 @@
 #include "proj/internal/internal.hpp" // for split
 
 using namespace NS_PROJ::common;
+using namespace NS_PROJ::coordinates;
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
@@ -83,7 +85,7 @@ struct OutputOptions {
 
 // ---------------------------------------------------------------------------
 
-static void usage() {
+[[noreturn]] static void usage() {
     std::cerr
         << "usage: projinfo [-o formats] "
            "[-k crs|operation|datum|ensemble|ellipsoid] "
@@ -804,6 +806,20 @@ static void outputOperationSummary(
 
 // ---------------------------------------------------------------------------
 
+static bool is3DCRS(const CRSPtr &crs) {
+    if (dynamic_cast<CompoundCRS *>(crs.get()))
+        return true;
+    auto geodCRS = dynamic_cast<GeodeticCRS *>(crs.get());
+    if (geodCRS)
+        return geodCRS->coordinateSystem()->axisList().size() == 3U;
+    auto projCRS = dynamic_cast<ProjectedCRS *>(crs.get());
+    if (projCRS)
+        return projCRS->coordinateSystem()->axisList().size() == 3U;
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
 static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
@@ -821,22 +837,76 @@ static void outputOperations(
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
                     promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
+    CoordinateMetadataPtr sourceCoordinateMetadata;
     if (!sourceCRS) {
-        std::cerr << "source CRS string is not a CRS" << std::endl;
-        std::exit(1);
+        sourceCoordinateMetadata =
+            nn_dynamic_pointer_cast<CoordinateMetadata>(sourceObj);
+        if (!sourceCoordinateMetadata) {
+            std::cerr
+                << "source CRS string is not a CRS or a CoordinateMetadata"
+                << std::endl;
+            std::exit(1);
+        }
+        if (!sourceCoordinateMetadata->coordinateEpoch().has_value()) {
+            sourceCRS = sourceCoordinateMetadata->crs().as_nullable();
+            sourceCoordinateMetadata.reset();
+        }
     }
-    auto nnSourceCRS = NN_NO_CHECK(sourceCRS);
 
     auto targetObj =
         buildObject(dbContext, targetCRSStr, "crs", "target CRS", false,
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
                     promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
+    CoordinateMetadataPtr targetCoordinateMetadata;
     if (!targetCRS) {
-        std::cerr << "target CRS string is not a CRS" << std::endl;
+        targetCoordinateMetadata =
+            nn_dynamic_pointer_cast<CoordinateMetadata>(targetObj);
+        if (!targetCoordinateMetadata) {
+            std::cerr
+                << "target CRS string is not a CRS or a CoordinateMetadata"
+                << std::endl;
+            std::exit(1);
+        }
+        if (!targetCoordinateMetadata->coordinateEpoch().has_value()) {
+            targetCRS = targetCoordinateMetadata->crs().as_nullable();
+            targetCoordinateMetadata.reset();
+        }
+    }
+
+    if (sourceCoordinateMetadata != nullptr &&
+        targetCoordinateMetadata != nullptr) {
+        std::cerr << "CoordinateMetadata with epoch to CoordinateMetadata "
+                     "with epoch not supported currently."
+                  << std::endl;
         std::exit(1);
     }
-    auto nnTargetCRS = NN_NO_CHECK(targetCRS);
+
+    // TODO: handle promotion of CoordinateMetadata
+    if (sourceCRS && targetCRS && dbContext && !promoteTo3D) {
+        // Auto-promote source/target CRS if it is specified by its name,
+        // if it has a known 3D version of it and that the other CRS is 3D.
+        // e.g projinfo -s "WGS 84 + EGM96 height" -t "WGS 84"
+        if (is3DCRS(targetCRS) && !is3DCRS(sourceCRS) &&
+            !sourceCRS->identifiers().empty() &&
+            Identifier::isEquivalentName(sourceCRSStr.c_str(),
+                                         sourceCRS->nameStr().c_str())) {
+            auto promoted =
+                sourceCRS->promoteTo3D(std::string(), dbContext).as_nullable();
+            if (!promoted->identifiers().empty()) {
+                sourceCRS = promoted;
+            }
+        } else if (is3DCRS(sourceCRS) && !is3DCRS(targetCRS) &&
+                   !targetCRS->identifiers().empty() &&
+                   Identifier::isEquivalentName(targetCRSStr.c_str(),
+                                                targetCRS->nameStr().c_str())) {
+            auto promoted =
+                targetCRS->promoteTo3D(std::string(), dbContext).as_nullable();
+            if (!promoted->identifiers().empty()) {
+                targetCRS = promoted;
+            }
+        }
+    }
 
     std::vector<CoordinateOperationNNPtr> list;
     size_t spatialCriterionPartialIntersectionResultCount = 0;
@@ -849,6 +919,22 @@ static void outputOperations(
                 : nullptr;
         auto ctxt =
             CoordinateOperationContext::create(authFactory, bboxFilter, 0);
+
+        const auto createOperations = [&]() {
+            if (sourceCoordinateMetadata) {
+                return CoordinateOperationFactory::create()->createOperations(
+                    NN_NO_CHECK(sourceCoordinateMetadata),
+                    NN_NO_CHECK(targetCRS), ctxt);
+            } else if (targetCoordinateMetadata) {
+                return CoordinateOperationFactory::create()->createOperations(
+                    NN_NO_CHECK(sourceCRS),
+                    NN_NO_CHECK(targetCoordinateMetadata), ctxt);
+            } else {
+                return CoordinateOperationFactory::create()->createOperations(
+                    NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
+            }
+        };
+
         ctxt->setSpatialCriterion(spatialCriterion);
         ctxt->setSourceAndTargetCRSExtentUse(crsExtentUse);
         ctxt->setGridAvailabilityUse(gridAvailabilityUse);
@@ -860,8 +946,7 @@ static void outputOperations(
         if (minimumAccuracy >= 0) {
             ctxt->setDesiredAccuracy(minimumAccuracy);
         }
-        list = CoordinateOperationFactory::create()->createOperations(
-            nnSourceCRS, nnTargetCRS, ctxt);
+        list = createOperations();
         if (!spatialCriterionExplicitlySpecified &&
             spatialCriterion == CoordinateOperationContext::SpatialCriterion::
                                     STRICT_CONTAINMENT) {
@@ -869,9 +954,7 @@ static void outputOperations(
                 ctxt->setSpatialCriterion(
                     CoordinateOperationContext::SpatialCriterion::
                         PARTIAL_INTERSECTION);
-                auto list2 =
-                    CoordinateOperationFactory::create()->createOperations(
-                        nnSourceCRS, nnTargetCRS, ctxt);
+                auto list2 = createOperations();
                 spatialCriterionPartialIntersectionResultCount = list2.size();
                 if (spatialCriterionPartialIntersectionResultCount == 1 &&
                     list.size() == 1 &&
@@ -927,6 +1010,8 @@ static void outputOperations(
 
 int main(int argc, char **argv) {
 
+    pj_stderr_proj_lib_deprecation_warning();
+
     if (argc == 1) {
         std::cerr << pj_get_release() << std::endl;
         usage();
@@ -976,8 +1061,8 @@ int main(int argc, char **argv) {
         if (arg == "-o" && i + 1 < argc) {
             outputSwitchSpecified = true;
             i++;
-            auto formats(split(argv[i], ','));
-            for (auto format : formats) {
+            const auto formats(split(argv[i], ','));
+            for (const auto &format : formats) {
                 if (ci_equal(format, "all")) {
                     outputAll = true;
                     outputOpt.PROJ5 = true;
@@ -1105,7 +1190,7 @@ int main(int argc, char **argv) {
                           << std::endl;
                 usage();
             }
-        } else if ((arg == "-s" || arg == "--ssource-crs") && i + 1 < argc) {
+        } else if ((arg == "-s" || arg == "--source-crs") && i + 1 < argc) {
             i++;
             sourceCRSStr = argv[i];
         } else if ((arg == "-t" || arg == "--target-crs") && i + 1 < argc) {
@@ -1328,7 +1413,7 @@ int main(int argc, char **argv) {
             DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
     } catch (const std::exception &e) {
         if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty() ||
-            dumpDbStructure) {
+            dumpDbStructure || listCRSSpecified) {
             std::cerr << "ERROR: Cannot create database connection: "
                       << e.what() << std::endl;
             std::exit(1);
@@ -1352,6 +1437,7 @@ int main(int argc, char **argv) {
     }
 
     if (listCRSSpecified) {
+        assert(dbContext);
         bool allow_deprecated = false;
         std::set<AuthorityFactory::ObjectType> types;
         auto tokens = split(listCRSFilter, ',');

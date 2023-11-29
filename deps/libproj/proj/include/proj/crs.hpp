@@ -96,6 +96,7 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     // Non-standard
 
+    PROJ_DLL bool isDynamic(bool considerWGS84AsDynamic = false) const;
     PROJ_DLL GeodeticCRSPtr extractGeodeticCRS() const;
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
     PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;
@@ -349,6 +350,10 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
     PROJ_INTERNAL static GeodeticCRSNNPtr createEPSG_4978();
 
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL void _exportToJSONInternal(
+        io::JSONFormatter *formatter,
+        const char *objectName) const; // throw(FormattingException)
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
@@ -656,6 +661,10 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
         PROJ_INTERNAL void
         addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                                   bool axisSpecFound) const;
+
+    PROJ_INTERNAL static void addUnitConvertAndAxisSwap(
+        const std::vector<cs::CoordinateSystemAxisNNPtr> &axisListIn,
+        io::PROJStringFormatter *formatter, bool axisSpecFound);
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
@@ -1056,7 +1065,9 @@ class PROJ_GCC_DLL BoundCRS final : public CRS,
     PROJ_INTERNAL BoundCRSNNPtr shallowCloneAsBoundCRS() const;
     PROJ_INTERNAL bool isTOWGS84Compatible() const;
     PROJ_INTERNAL std::string getHDatumPROJ4GRIDS() const;
-    PROJ_INTERNAL std::string getVDatumPROJ4GRIDS() const;
+    PROJ_INTERNAL std::string
+    getVDatumPROJ4GRIDS(const crs::GeographicCRS *geogCRSOfCompoundCRS,
+                        const char **outGeoidCRSValue) const;
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
@@ -1263,10 +1274,17 @@ class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS {
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::CoordinateSystemNNPtr &csIn);
 
+    PROJ_DLL DerivedProjectedCRSNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
+
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-                        //! @endcond
+
+    PROJ_INTERNAL void
+    addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter) const;
+    //! @endcond
 
   protected:
     PROJ_INTERNAL

@@ -1,13 +1,12 @@
-#define PJ_LIB__
-#include <errno.h>
+#define PJ_LIB_
 #include "proj.h"
 #include "proj_internal.h"
+#include <errno.h>
 #include <math.h>
 
-
 PROJ_HEAD(bonne, "Bonne (Werner lat_1=90)")
-    "\n\tConic Sph&Ell\n\tlat_1=";
-#define EPS10   1e-10
+"\n\tConic Sph&Ell\n\tlat_1=";
+#define EPS10 1e-10
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -19,10 +18,9 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-
-static PJ_XY bonne_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY bonne_e_forward(PJ_LP lp, PJ *P) { /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double rh, E, c;
 
     E = sin(lp.phi);
@@ -39,10 +37,9 @@ static PJ_XY bonne_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
     return xy;
 }
 
-
-static PJ_XY bonne_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
-    PJ_XY xy = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+static PJ_XY bonne_s_forward(PJ_LP lp, PJ *P) { /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
     double E, rh;
 
     rh = Q->cphi1 + Q->phi1 - lp.phi;
@@ -55,40 +52,48 @@ static PJ_XY bonne_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     return xy;
 }
 
-
-static PJ_LP bonne_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
-    PJ_LP lp = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double rh;
+static PJ_LP bonne_s_inverse(PJ_XY xy, PJ *P) { /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     xy.y = Q->cphi1 - xy.y;
-    rh = hypot(xy.x, xy.y);
+    const double rh = copysign(hypot(xy.x, xy.y), Q->phi1);
     lp.phi = Q->cphi1 + Q->phi1 - rh;
-    if (fabs(lp.phi) > M_HALFPI) {
+    const double abs_phi = fabs(lp.phi);
+    if (abs_phi > M_HALFPI) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
+    if (M_HALFPI - abs_phi <= EPS10)
         lp.lam = 0.;
-    else
-        lp.lam = rh * atan2(xy.x, xy.y) / cos(lp.phi);
+    else {
+        const double lm = rh / cos(lp.phi);
+        if (Q->phi1 > 0) {
+            lp.lam = lm * atan2(xy.x, xy.y);
+        } else {
+            lp.lam = lm * atan2(-xy.x, -xy.y);
+        }
+    }
     return lp;
 }
 
-
-static PJ_LP bonne_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    PJ_LP lp = {0.0,0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double s, rh;
+static PJ_LP bonne_e_inverse(PJ_XY xy, PJ *P) { /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque *>(P->opaque);
 
     xy.y = Q->am1 - xy.y;
-    rh = hypot(xy.x, xy.y);
-    lp.phi = pj_inv_mlfn(P->ctx, Q->am1 + Q->m1 - rh, P->es, Q->en);
-    if ((s = fabs(lp.phi)) < M_HALFPI) {
-        s = sin(lp.phi);
-        lp.lam = rh * atan2(xy.x, xy.y) *
-           sqrt(1. - P->es * s * s) / cos(lp.phi);
-    } else if (fabs(s - M_HALFPI) <= EPS10)
+    const double rh = copysign(hypot(xy.x, xy.y), Q->phi1);
+    lp.phi = pj_inv_mlfn(Q->am1 + Q->m1 - rh, Q->en);
+    const double abs_phi = fabs(lp.phi);
+    if (abs_phi < M_HALFPI) {
+        const double sinphi = sin(lp.phi);
+        const double lm = rh * sqrt(1. - P->es * sinphi * sinphi) / cos(lp.phi);
+        if (Q->phi1 > 0) {
+            lp.lam = lm * atan2(xy.x, xy.y);
+        } else {
+            lp.lam = lm * atan2(-xy.x, -xy.y);
+        }
+    } else if (abs_phi - M_HALFPI <= EPS10)
         lp.lam = 0.;
     else {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
@@ -97,38 +102,35 @@ static PJ_LP bonne_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
     return lp;
 }
 
-
-
-static PJ *destructor (PJ *P, int errlev) {                        /* Destructor */
-    if (nullptr==P)
+static PJ *destructor(PJ *P, int errlev) { /* Destructor */
+    if (nullptr == P)
         return nullptr;
 
-    if (nullptr==P->opaque)
-        return pj_default_destructor (P, errlev);
+    if (nullptr == P->opaque)
+        return pj_default_destructor(P, errlev);
 
-    free (static_cast<struct pj_opaque*>(P->opaque)->en);
-    return pj_default_destructor (P, errlev);
+    free(static_cast<struct pj_opaque *>(P->opaque)->en);
+    return pj_default_destructor(P, errlev);
 }
-
 
 PJ *PROJECTION(bonne) {
     double c;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    struct pj_opaque *Q =
+        static_cast<struct pj_opaque *>(calloc(1, sizeof(struct pj_opaque)));
+    if (nullptr == Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
-    if (fabs(Q->phi1) < EPS10)
-    {
+    if (fabs(Q->phi1) < EPS10) {
         proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be > 0"));
         return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     if (P->es != 0.0) {
-        Q->en = pj_enfn(P->es);
-        if (nullptr==Q->en)
+        Q->en = pj_enfn(P->n);
+        if (nullptr == Q->en)
             return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->am1 = sin(Q->phi1);
         c = cos(Q->phi1);
@@ -146,5 +148,3 @@ PJ *PROJECTION(bonne) {
     }
     return P;
 }
-
-

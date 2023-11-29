@@ -77,10 +77,11 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
         PARAMETRIC,
     };
 
-    PROJ_DLL UnitOfMeasure(const std::string &nameIn = std::string(),
-                           double toSIIn = 1.0, Type typeIn = Type::UNKNOWN,
-                           const std::string &codeSpaceIn = std::string(),
-                           const std::string &codeIn = std::string());
+    PROJ_DLL explicit UnitOfMeasure(
+        const std::string &nameIn = std::string(), double toSIIn = 1.0,
+        Type typeIn = Type::UNKNOWN,
+        const std::string &codeSpaceIn = std::string(),
+        const std::string &codeIn = std::string());
 
     //! @cond Doxygen_Suppress
     PROJ_DLL UnitOfMeasure(const UnitOfMeasure &other);
@@ -147,12 +148,13 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
 /** \brief Numeric value associated with a UnitOfMeasure. */
 class Measure : public util::BaseObject {
   public:
+    // cppcheck-suppress noExplicitConstructor
     PROJ_DLL Measure(double valueIn = 0.0,
                      const UnitOfMeasure &unitIn = UnitOfMeasure());
 
     //! @cond Doxygen_Suppress
     PROJ_DLL Measure(const Measure &other);
-    PROJ_DLL ~Measure();
+    PROJ_DLL ~Measure() override;
     //! @endcond
 
     PROJ_DLL const UnitOfMeasure &unit() PROJ_PURE_DECL;

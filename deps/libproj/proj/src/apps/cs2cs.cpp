@@ -77,8 +77,11 @@ static char oform_buffer[16]; /* buffer for oform when using -d */
 static const char *oterr = "*\t*"; /* output line for unprojectable input */
 static const char *usage =
     "%s\nusage: %s [-dDeEfIlrstvwW [args]]\n"
-    "              [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]\n"
-    "              [--authority {name}] [--accuracy {accuracy}] [--no-ballpark]\n"
+    "              [[--area name_or_code] | [--bbox "
+    "west_long,south_lat,east_long,north_lat]]\n"
+    "              [--authority {name}] [--3d]\n"
+    "              [--accuracy {accuracy}] [--only-best[=yes|=no]] "
+    "[--no-ballpark]\n"
     "              [+opt[=arg] ...] [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
@@ -99,13 +102,23 @@ static void process(FILE *fid)
 {
     char line[MAX_LINE + 3], *s, pline[40];
     PJ_UV data;
+    int nLineNumber = 0;
 
-    for (;;) {
+    while (true) {
         double z;
-
+        ++nLineNumber;
         ++emess_dat.File_line;
         if (!(s = fgets(line, MAX_LINE, fid)))
             break;
+
+        if (nLineNumber == 1 && static_cast<uint8_t>(s[0]) == 0xEF &&
+            static_cast<uint8_t>(s[1]) == 0xBB &&
+            static_cast<uint8_t>(s[2]) == 0xBF) {
+            // Skip UTF-8 Byte Order Marker (BOM)
+            s += 3;
+        }
+        const char *pszLineAfterBOM = s;
+
         if (!strchr(s, '\n')) { /* overlong line */
             int c;
             (void)strcat(s, "\n");
@@ -137,7 +150,7 @@ static void process(FILE *fid)
         /* is forward verbatim from the input.                               */
         char *before_time = s;
         double t = strtod(s, &s);
-        if( s == before_time )
+        if (s == before_time)
             t = HUGE_VAL;
         s = before_time;
 
@@ -151,7 +164,7 @@ static void process(FILE *fid)
             char temp;
             temp = *s;
             *s = '\0';
-            (void)fputs(line, stdout);
+            (void)fputs(pszLineAfterBOM, stdout);
             *s = temp;
             putchar('\t');
         }
@@ -187,22 +200,26 @@ static void process(FILE *fid)
 
             if (destIsLatLong) {
                 if (reverseout) {
-                    fputs(rtodms(pline, data.v, 'E', 'W'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.v, 'E', 'W'),
+                          stdout);
                     putchar('\t');
-                    fputs(rtodms(pline, data.u, 'N', 'S'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.u, 'N', 'S'),
+                          stdout);
                 } else {
-                    fputs(rtodms(pline, data.u, 'N', 'S'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.u, 'N', 'S'),
+                          stdout);
                     putchar('\t');
-                    fputs(rtodms(pline, data.v, 'E', 'W'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.v, 'E', 'W'),
+                          stdout);
                 }
             } else if (reverseout) {
-                fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.v, 'N', 'S'), stdout);
                 putchar('\t');
-                fputs(rtodms(pline, data.u, 'E', 'W'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.u, 'E', 'W'), stdout);
             } else {
-                fputs(rtodms(pline, data.u, 'E', 'W'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.u, 'E', 'W'), stdout);
                 putchar('\t');
-                fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.v, 'N', 'S'), stdout);
             }
 
         } else { /* x-y or decimal degree ascii output */
@@ -238,11 +255,10 @@ static void process(FILE *fid)
 /*                          instantiate_crs()                           */
 /************************************************************************/
 
-static PJ *instantiate_crs(const std::string &definition,
-                               bool &isLongLatCS, double &toRadians,
-                               bool &isLatFirst) {
-    PJ *crs = proj_create(nullptr,
-                          pj_add_type_crs_if_needed(definition).c_str());
+static PJ *instantiate_crs(const std::string &definition, bool &isLongLatCS,
+                           double &toRadians, bool &isLatFirst) {
+    PJ *crs =
+        proj_create(nullptr, pj_add_type_crs_if_needed(definition).c_str());
     if (!crs) {
         return nullptr;
     }
@@ -259,27 +275,26 @@ static PJ *instantiate_crs(const std::string &definition,
         type = proj_get_type(crs);
     }
     if (type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
-        type == PJ_TYPE_GEOGRAPHIC_3D_CRS ||
-        type == PJ_TYPE_GEODETIC_CRS) {
+        type == PJ_TYPE_GEOGRAPHIC_3D_CRS || type == PJ_TYPE_GEODETIC_CRS) {
         auto cs = proj_crs_get_coordinate_system(nullptr, crs);
         assert(cs);
 
         const char *axisName = "";
         proj_cs_get_axis_info(nullptr, cs, 0,
-                                  &axisName, // name,
-                                  nullptr,   // abbrev
-                                  nullptr,   // direction
-                                  &toRadians,
-                                  nullptr, // unit name
-                                  nullptr, // unit authority
-                                  nullptr  // unit code
-                                  );
+                              &axisName, // name,
+                              nullptr,   // abbrev
+                              nullptr,   // direction
+                              &toRadians,
+                              nullptr, // unit name
+                              nullptr, // unit authority
+                              nullptr  // unit code
+        );
         isLatFirst =
             NS_PROJ::internal::ci_find(std::string(axisName), "latitude") !=
             std::string::npos;
-        isLongLatCS = isLatFirst ||
-            NS_PROJ::internal::ci_find(std::string(axisName), "longitude") !=
-            std::string::npos;
+        isLongLatCS = isLatFirst || NS_PROJ::internal::ci_find(
+                                        std::string(axisName), "longitude") !=
+                                        std::string::npos;
 
         proj_destroy(cs);
     }
@@ -313,14 +328,14 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
 
     const char *axisName = "";
     proj_cs_get_axis_info(nullptr, cs, 0,
-                              &axisName, // name,
-                              nullptr,   // abbrev
-                              nullptr,   // direction
-                              &toRadians,
-                              nullptr, // unit name
-                              nullptr, // unit authority
-                              nullptr  // unit code
-                              );
+                          &axisName, // name,
+                          nullptr,   // abbrev
+                          nullptr,   // direction
+                          &toRadians,
+                          nullptr, // unit name
+                          nullptr, // unit authority
+                          nullptr  // unit code
+    );
     isLatFirst = NS_PROJ::internal::ci_find(std::string(axisName),
                                             "latitude") != std::string::npos;
 
@@ -330,6 +345,25 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
     std::string ret(retCStr ? retCStr : "");
     proj_destroy(base);
     return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+static bool is3DCRS(const PJ *crs) {
+    auto type = proj_get_type(crs);
+    if (type == PJ_TYPE_COMPOUND_CRS)
+        return true;
+    if (type == PJ_TYPE_GEOGRAPHIC_3D_CRS)
+        return true;
+    if (type == PJ_TYPE_GEODETIC_CRS || type == PJ_TYPE_PROJECTED_CRS ||
+        type == PJ_TYPE_DERIVED_PROJECTED_CRS) {
+        auto cs = proj_crs_get_coordinate_system(nullptr, crs);
+        assert(cs);
+        const bool ret = proj_cs_get_axis_count(nullptr, cs) == 3;
+        proj_destroy(cs);
+        return ret;
+    }
+    return false;
 }
 
 /************************************************************************/
@@ -346,7 +380,9 @@ int main(int argc, char **argv) {
     int have_to_flag = 0, inverse = 0;
     int use_env_locale = 0;
 
-    if( argc == 0 ) {
+    pj_stderr_proj_lib_deprecation_warning();
+
+    if (argc == 0) {
         exit(1);
     }
 
@@ -370,7 +406,8 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
-    // First pass to check if we have "cs2cs [-bla]* <SRC> <DEST> [<filename>]" syntax
+    // First pass to check if we have "cs2cs [-bla]* <SRC> <DEST> [<filename>]"
+    // syntax
     bool isProj4StyleSyntax = false;
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '+') {
@@ -381,26 +418,28 @@ int main(int argc, char **argv) {
 
     ExtentPtr bboxFilter;
     std::string area;
-    const char* authority = nullptr;
+    const char *authority = nullptr;
     double accuracy = -1;
     bool allowBallpark = true;
+    bool onlyBestSet = false;
+    bool errorIfBestTransformationNotAvailable = false;
+    bool promoteTo3D = false;
 
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
         ++argv;
-        if (strcmp(*argv, "--area") == 0 ) {
+        if (strcmp(*argv, "--area") == 0) {
             ++argv;
             --argc;
-            if( argc == 0 ) {
+            if (argc == 0) {
                 emess(1, "missing argument for --area");
                 std::exit(1);
             }
             area = *argv;
-        }
-        else if (strcmp(*argv, "--bbox") == 0) {
+        } else if (strcmp(*argv, "--bbox") == 0) {
             ++argv;
             --argc;
-            if( argc == 0 ) {
+            if (argc == 0) {
                 emess(1, "missing argument for --bbox");
                 std::exit(1);
             }
@@ -421,35 +460,40 @@ int main(int argc, char **argv) {
                           << ", " << e.what() << std::endl;
                 std::exit(1);
             }
-        }
-        else if (strcmp(*argv, "--accuracy") == 0 ) {
+        } else if (strcmp(*argv, "--accuracy") == 0) {
             ++argv;
             --argc;
-            if( argc == 0 ) {
+            if (argc == 0) {
                 emess(1, "missing argument for --accuracy");
                 std::exit(1);
             }
             try {
                 accuracy = c_locale_stod(*argv);
             } catch (const std::exception &e) {
-                std::cerr << "Invalid value for option --accuracy: "
-                          << e.what() << std::endl;
+                std::cerr << "Invalid value for option --accuracy: " << e.what()
+                          << std::endl;
                 std::exit(1);
             }
-        }
-        else if (strcmp(*argv, "--authority") == 0 ) {
+        } else if (strcmp(*argv, "--authority") == 0) {
             ++argv;
             --argc;
-            if( argc == 0 ) {
+            if (argc == 0) {
                 emess(1, "missing argument for --authority");
                 std::exit(1);
             }
             authority = *argv;
-        }
-        else if (strcmp(*argv, "--no-ballpark") == 0 ) {
+        } else if (strcmp(*argv, "--no-ballpark") == 0) {
             allowBallpark = false;
-        }
-        else if (**argv == '-') {
+        } else if (strcmp(*argv, "--only-best") == 0 ||
+                   strcmp(*argv, "--only-best=yes") == 0) {
+            onlyBestSet = true;
+            errorIfBestTransformationNotAvailable = true;
+        } else if (strcmp(*argv, "--only-best=no") == 0) {
+            onlyBestSet = true;
+            errorIfBestTransformationNotAvailable = false;
+        } else if (strcmp(*argv, "--3d") == 0) {
+            promoteTo3D = true;
+        } else if (**argv == '-') {
             for (arg = *argv;;) {
                 switch (*++arg) {
                 case '\0': /* position of "stdin" */
@@ -505,15 +549,14 @@ int main(int argc, char **argv) {
                             (void)printf("%9s %-16s %-16s %s\n", le->id,
                                          le->major, le->ell, le->name);
                     } else if (arg[1] == 'u') { /* list units */
-                        auto units = proj_get_units_from_database(nullptr, nullptr, "linear", false, nullptr);
-                        for( int i = 0; units && units[i]; i++ )
-                        {
-                            if( units[i]->proj_short_name )
-                            {
+                        auto units = proj_get_units_from_database(
+                            nullptr, nullptr, "linear", false, nullptr);
+                        for (int i = 0; units && units[i]; i++) {
+                            if (units[i]->proj_short_name) {
                                 (void)printf("%12s %-20.15g %s\n",
-                                                units[i]->proj_short_name,
-                                                units[i]->conv_factor,
-                                                units[i]->name);
+                                             units[i]->proj_short_name,
+                                             units[i]->conv_factor,
+                                             units[i]->name);
                             }
                         }
                         proj_unit_list_destroy(units);
@@ -530,18 +573,20 @@ int main(int argc, char **argv) {
                 case 'e':     /* error line alternative */
                     if (--argc <= 0)
                     noargument:
-                    emess(1, "missing argument for -%c", *arg);
+                        emess(1, "missing argument for -%c", *arg);
                     oterr = *++argv;
                     continue;
                 case 'W': /* specify seconds precision */
                 case 'w': /* -W for constant field width */
                 {
                     char c = arg[1];
-                    if (c != 0 && isdigit(c)) {
+                    // Check that the value is in the [0, 8] range
+                    if (c >= '0' && c <= '8' &&
+                        ((arg[2] == 0 || !(arg[2] >= '0' && arg[2] <= '9')))) {
                         set_rtodms(c - '0', *arg == 'W');
                         ++arg;
                     } else
-                        emess(1, "-W argument missing or non-digit");
+                        emess(1, "-W argument missing or not in range [0,8]");
                     continue;
                 }
                 case 'f': /* alternate output format degrees or xy */
@@ -576,7 +621,8 @@ int main(int argc, char **argv) {
                 case 'd':
                     if (--argc <= 0)
                         goto noargument;
-                    sprintf(oform_buffer, "%%.%df", atoi(*++argv));
+                    snprintf(oform_buffer, sizeof(oform_buffer), "%%.%df",
+                             atoi(*++argv));
                     oform = oform_buffer;
                     break;
                 default:
@@ -588,10 +634,10 @@ int main(int argc, char **argv) {
         } else if (!isProj4StyleSyntax) {
             if (fromStr.empty())
                 fromStr = *argv;
-            else if( toStr.empty() )
+            else if (toStr.empty())
                 toStr = *argv;
             else {
-                 /* assumed to be input file name(s) */
+                /* assumed to be input file name(s) */
                 eargv[eargc++] = *argv;
             }
         } else if (strcmp(*argv, "+to") == 0) {
@@ -617,8 +663,8 @@ int main(int argc, char **argv) {
     if (eargc == 0) /* if no specific files force sysin */
         eargv[eargc++] = const_cast<char *>("-");
 
-    if( oform ) {
-        if( !validate_form_string_for_numbers(oform) ) {
+    if (oform) {
+        if (!validate_form_string_for_numbers(oform)) {
             emess(3, "invalid format string");
             exit(0);
         }
@@ -629,16 +675,15 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
-    PJ_AREA* pj_area = nullptr;
+    PJ_AREA *pj_area = nullptr;
     if (!area.empty()) {
 
         DatabaseContextPtr dbContext;
         try {
-            dbContext =
-                DatabaseContext::create().as_nullable();
+            dbContext = DatabaseContext::create().as_nullable();
         } catch (const std::exception &e) {
             std::cerr << "ERROR: Cannot create database connection: "
-                    << e.what() << std::endl;
+                      << e.what() << std::endl;
             std::exit(1);
         }
 
@@ -651,9 +696,9 @@ int main(int argc, char **argv) {
                     const std::string &areaAuth = tokens[0];
                     const std::string &areaCode = tokens[1];
                     bboxFilter = AuthorityFactory::create(
-                                        NN_NO_CHECK(dbContext), areaAuth)
-                                        ->createExtent(areaCode)
-                                        .as_nullable();
+                                     NN_NO_CHECK(dbContext), areaAuth)
+                                     ->createExtent(areaCode)
+                                     .as_nullable();
                 }
             }
             if (!bboxFilter) {
@@ -661,35 +706,34 @@ int main(int argc, char **argv) {
                     NN_NO_CHECK(dbContext), std::string());
                 auto res = authFactory->listAreaOfUseFromName(area, false);
                 if (res.size() == 1) {
-                    bboxFilter =
-                        AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                    res.front().first)
-                            ->createExtent(res.front().second)
-                            .as_nullable();
+                    bboxFilter = AuthorityFactory::create(
+                                     NN_NO_CHECK(dbContext), res.front().first)
+                                     ->createExtent(res.front().second)
+                                     .as_nullable();
                 } else {
                     res = authFactory->listAreaOfUseFromName(area, true);
                     if (res.size() == 1) {
                         bboxFilter =
                             AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                        res.front().first)
+                                                     res.front().first)
                                 ->createExtent(res.front().second)
                                 .as_nullable();
                     } else if (res.empty()) {
                         std::cerr << "No area of use matching provided name"
-                                    << std::endl;
+                                  << std::endl;
                         std::exit(1);
                     } else {
                         std::cerr << "Several candidates area of use "
-                                        "matching provided name :"
-                                    << std::endl;
+                                     "matching provided name :"
+                                  << std::endl;
                         for (const auto &candidate : res) {
                             auto obj =
-                                AuthorityFactory::create(
-                                    NN_NO_CHECK(dbContext), candidate.first)
+                                AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                         candidate.first)
                                     ->createExtent(candidate.second);
                             std::cerr << "  " << candidate.first << ":"
-                                        << candidate.second << " : "
-                                        << *obj->description() << std::endl;
+                                      << candidate.second << " : "
+                                      << *obj->description() << std::endl;
                         }
                         std::exit(1);
                     }
@@ -697,25 +741,26 @@ int main(int argc, char **argv) {
             }
         } catch (const std::exception &e) {
             std::cerr << "Area of use retrieval failed: " << e.what()
-                        << std::endl;
+                      << std::endl;
             std::exit(1);
         }
     }
 
     if (bboxFilter) {
         auto geogElts = bboxFilter->geographicElements();
-        if (geogElts.size() == 1)
-        {
+        if (geogElts.size() == 1) {
             auto bbox = std::dynamic_pointer_cast<GeographicBoundingBox>(
                 geogElts[0].as_nullable());
-            if (bbox)
-            {
+            if (bbox) {
                 pj_area = proj_area_create();
-                proj_area_set_bbox(pj_area,
-                                   bbox->westBoundLongitude(),
+                proj_area_set_bbox(pj_area, bbox->westBoundLongitude(),
                                    bbox->southBoundLatitude(),
                                    bbox->eastBoundLongitude(),
                                    bbox->northBoundLatitude());
+                if (bboxFilter->description().has_value()) {
+                    proj_area_set_name(pj_area,
+                                       bboxFilter->description()->c_str());
+                }
             }
         }
     }
@@ -737,14 +782,13 @@ int main(int argc, char **argv) {
         emess(3, "missing source and target coordinate systems");
     }
 
-    proj_context_use_proj4_init_rules(nullptr,
-        proj_context_get_use_proj4_init_rules(nullptr, TRUE));
+    proj_context_use_proj4_init_rules(
+        nullptr, proj_context_get_use_proj4_init_rules(nullptr, TRUE));
 
     PJ *src = nullptr;
     if (!fromStr.empty()) {
         bool ignored;
-        src = instantiate_crs(fromStr, srcIsLongLat,
-                              srcToRadians, ignored);
+        src = instantiate_crs(fromStr, srcIsLongLat, srcToRadians, ignored);
         if (!src) {
             emess(3, "cannot instantiate source coordinate system");
         }
@@ -752,8 +796,8 @@ int main(int argc, char **argv) {
 
     PJ *dst = nullptr;
     if (!toStr.empty()) {
-        dst = instantiate_crs(toStr, destIsLongLat,
-                              destToRadians, destIsLatLong);
+        dst =
+            instantiate_crs(toStr, destIsLongLat, destToRadians, destIsLatLong);
         if (!dst) {
             emess(3, "cannot instantiate target coordinate system");
         }
@@ -785,40 +829,76 @@ int main(int argc, char **argv) {
     src = proj_create(nullptr, pj_add_type_crs_if_needed(fromStr).c_str());
     dst = proj_create(nullptr, pj_add_type_crs_if_needed(toStr).c_str());
 
-    if( proj_get_type(src) == PJ_TYPE_COMPOUND_CRS ||
-        proj_get_type(dst) == PJ_TYPE_COMPOUND_CRS ) {
+    if (promoteTo3D) {
         auto src3D = proj_crs_promote_to_3D(nullptr, nullptr, src);
-        if( src3D ) {
+        if (src3D) {
             proj_destroy(src);
             src = src3D;
         }
 
         auto dst3D = proj_crs_promote_to_3D(nullptr, nullptr, dst);
-        if( dst3D ) {
+        if (dst3D) {
             proj_destroy(dst);
             dst = dst3D;
+        }
+    } else {
+        // Auto-promote source/target CRS if it is specified by its name,
+        // if it has a known 3D version of it and that the other CRS is 3D.
+        // e.g cs2cs "WGS 84 + EGM96 height" "WGS 84"
+        if (is3DCRS(dst) && !is3DCRS(src) &&
+            proj_get_id_code(src, 0) != nullptr &&
+            Identifier::isEquivalentName(fromStr.c_str(), proj_get_name(src))) {
+            auto promoted = proj_crs_promote_to_3D(nullptr, nullptr, src);
+            if (promoted) {
+                if (proj_get_id_code(promoted, 0) != nullptr) {
+                    proj_destroy(src);
+                    src = promoted;
+                } else {
+                    proj_destroy(promoted);
+                }
+            }
+        } else if (is3DCRS(src) && !is3DCRS(dst) &&
+                   proj_get_id_code(dst, 0) != nullptr &&
+                   Identifier::isEquivalentName(toStr.c_str(),
+                                                proj_get_name(dst))) {
+            auto promoted = proj_crs_promote_to_3D(nullptr, nullptr, dst);
+            if (promoted) {
+                if (proj_get_id_code(promoted, 0) != nullptr) {
+                    proj_destroy(dst);
+                    dst = promoted;
+                } else {
+                    proj_destroy(promoted);
+                }
+            }
         }
     }
 
     std::string authorityOption; /* keep this variable in this outer scope ! */
-    std::string accuracyOption; /* keep this variable in this outer scope ! */
-    std::vector<const char*> options;
-    if( authority ) {
+    std::string accuracyOption;  /* keep this variable in this outer scope ! */
+    std::vector<const char *> options;
+    if (authority) {
         authorityOption = "AUTHORITY=";
         authorityOption += authority;
         options.push_back(authorityOption.data());
     }
-    if( accuracy >= 0 ) {
+    if (accuracy >= 0) {
         accuracyOption = "ACCURACY=";
         accuracyOption += toString(accuracy);
         options.push_back(accuracyOption.data());
     }
-    if( !allowBallpark ) {
+    if (!allowBallpark) {
         options.push_back("ALLOW_BALLPARK=NO");
     }
+    if (onlyBestSet) {
+        if (errorIfBestTransformationNotAvailable) {
+            options.push_back("ONLY_BEST=YES");
+        } else {
+            options.push_back("ONLY_BEST=NO");
+        }
+    }
     options.push_back(nullptr);
-    transformation = proj_create_crs_to_crs_from_pj(nullptr, src, dst,
-                                                    pj_area, options.data());
+    transformation = proj_create_crs_to_crs_from_pj(nullptr, src, dst, pj_area,
+                                                    options.data());
 
     proj_destroy(src);
     proj_destroy(dst);

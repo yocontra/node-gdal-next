@@ -1,11 +1,11 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  std::mutex emulation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
- * Copyright (c) 2021, Even Rouault <even dot rouault at spatialys dot com>
+ * Copyright (c) 2023, Even Rouault <even dot rouault at spatialys dot com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -26,36 +26,13 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "proj/util.hpp"
-#include "proj_internal.h"
-
-#ifndef __MINGW32__
-#include <mutex>
+#ifndef FROM_PROJ_CPP
+#error This file should only be included from a PROJ cpp file
 #endif
 
-NS_PROJ_START
+#ifndef DATUM_INTERNAL_HH_INCLUDED
+#define DATUM_INTERNAL_HH_INCLUDED
 
-#ifdef __MINGW32__
-// mingw32-win32 doesn't implement std::mutex
-class mutex {
-  public:
-    // cppcheck-suppress functionStatic
-    void lock() { pj_acquire_lock(); }
-    // cppcheck-suppress functionStatic
-    void unlock() { pj_release_lock(); }
-};
+#define UNKNOWN_ENGINEERING_DATUM "Unknown engineering datum"
 
-template <class Lock> struct lock_guard {
-    Lock &lock_;
-    lock_guard(Lock &lock) : lock_(lock) { lock_.lock(); }
-    ~lock_guard() { lock_.unlock(); }
-};
-
-#else
-
-typedef std::mutex mutex;
-template <class Mutex> using lock_guard = std::lock_guard<Mutex>;
-
-#endif
-
-NS_PROJ_END
+#endif // DATUM_INTERNAL_HH_INCLUDED

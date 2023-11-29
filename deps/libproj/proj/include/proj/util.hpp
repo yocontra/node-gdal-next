@@ -33,7 +33,7 @@
 #error Must have C++11 or newer.
 #endif
 
-// windows.h can confict with Criterion::STRICT
+// windows.h can conflict with Criterion::STRICT
 #ifdef STRICT
 #undef STRICT
 #endif
@@ -130,11 +130,11 @@ namespace proj {}
 // to be able to call make_shared on a protected/private constructor
 #define INLINED_MAKE_SHARED                                                    \
     template <typename T, typename... Args>                                    \
-    static std::shared_ptr<T> make_shared(Args &&... args) {                   \
+    static std::shared_ptr<T> make_shared(Args &&...args) {                    \
         return std::shared_ptr<T>(new T(std::forward<Args>(args)...));         \
     }                                                                          \
     template <typename T, typename... Args>                                    \
-    static util::nn_shared_ptr<T> nn_make_shared(Args &&... args) {            \
+    static util::nn_shared_ptr<T> nn_make_shared(Args &&...args) {             \
         return util::nn_shared_ptr<T>(                                         \
             util::i_promise_i_checked_for_null,                                \
             std::shared_ptr<T>(new T(std::forward<Args>(args)...)));           \
@@ -144,7 +144,7 @@ namespace proj {}
 // to be able to call make_unique on a protected/private constructor
 #define INLINED_MAKE_UNIQUE                                                    \
     template <typename T, typename... Args>                                    \
-    static std::unique_ptr<T> make_unique(Args &&... args) {                   \
+    static std::unique_ptr<T> make_unique(Args &&...args) {                    \
         return std::unique_ptr<T>(new T(std::forward<Args>(args)...));         \
     }
 
@@ -556,8 +556,8 @@ using GenericNameNNPtr = util::nn<GenericNamePtr>;
 /** \brief A sequence of identifiers rooted within the context of a namespace.
  *
  * \remark Simplified version of [GenericName]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/GenericName.html) from
- * \ref GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/GenericName.html)
+ * from \ref GeoAPI
  */
 class GenericName : public BaseObject {
   public:
@@ -591,8 +591,8 @@ class GenericName : public BaseObject {
 /** \brief A domain in which names given by strings are defined.
  *
  * \remark Simplified version of [NameSpace]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/NameSpace.html) from \ref
- * GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/NameSpace.html)
+ * from \ref GeoAPI
  */
 class NameSpace {
   public:
@@ -628,8 +628,8 @@ class NameSpace {
  * NameSpace within which they are local, indicated by the scope.
  *
  * \remark Simplified version of [LocalName]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/LocalName.html) from \ref
- * GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/LocalName.html)
+ * from \ref GeoAPI
  */
 class LocalName : public GenericName {
   public:
@@ -659,8 +659,8 @@ class LocalName : public GenericName {
 /** \brief Factory for generic names.
  *
  * \remark Simplified version of [NameFactory]
- * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/NameFactory.html) from
- * \ref GeoAPI
+ * (http://www.geoapi.org/3.0/javadoc/org.opengis.geoapi/org/opengis/util/NameFactory.html)
+ * from \ref GeoAPI
  */
 class NameFactory {
   public:

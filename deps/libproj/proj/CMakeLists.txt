@@ -73,6 +73,11 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     /wd4706  # Suppress warning about assignment within conditional expression
     /wd4996  # Suppress warning about sprintf, etc., being unsafe
   )
+  if("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "arm64")
+    # Suppress an inaccurate warning when compiling for an MSVC/ARM64 platform
+    # It incorrectly assumes a division by zero is possible despite a check
+    set(PROJ_C_WARN_FLAGS ${PROJ_C_WARN_FLAGS} /wd4723)
+  endif()
   set(PROJ_CXX_WARN_FLAGS /EHsc ${PROJ_C_WARN_FLAGS})
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
   if(MSVC)
@@ -110,7 +115,7 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 9 MINOR 0 PATCH 0)
+proj_version(MAJOR 9 MINOR 3 PATCH 0)
 set(PROJ_SOVERSION 25)
 set(PROJ_BUILD_VERSION "${PROJ_SOVERSION}.${PROJ_VERSION}")
 
@@ -213,6 +218,16 @@ if(ENABLE_CURL)
   find_package(CURL REQUIRED)
   if(CURL_FOUND)
     set(CURL_ENABLED TRUE)
+
+    # Target CURL::libcurl only defined since CMake 3.12
+    # TODO: remove this when CMake >= 3.12 required
+    if(NOT TARGET CURL::libcurl)
+      add_library(CURL::libcurl INTERFACE IMPORTED)
+      set_target_properties(CURL::libcurl PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES      "${CURL_LIBRARIES}"
+      )
+    endif()
   else()
     message(SEND_ERROR "curl dependency not found!")
   endif()
@@ -220,9 +235,14 @@ endif()
 
 ################################################################################
 
-option(PROJ_LIB_ENV_VAR_TRIED_LAST "Whether the PROJ_LIB environment variable should be tried after the hardcoded location" OFF)
-if(PROJ_LIB_ENV_VAR_TRIED_LAST)
-    add_definitions(-DPROJ_LIB_ENV_VAR_TRIED_LAST)
+if(DEFINED PROJ_LIB_ENV_VAR_TRIED_LAST)
+  set(PROJ_DATA_ENV_VAR_TRIED_LAST ${PROJ_LIB_ENV_VAR_TRIED_LAST})
+  message(WARNING "PROJ_LIB_ENV_VAR_TRIED_LAST option has been renamed to PROJ_DATA_ENV_VAR_TRIED_LAST. PROJ_LIB_ENV_VAR_TRIED_LAST is still working for now, but may be completely replaced by PROJ_DATA_ENV_VAR_TRIED_LAST in a future release")
+else()
+  option(PROJ_DATA_ENV_VAR_TRIED_LAST "Whether the PROJ_DATA environment variable should be tried after the hardcoded location" OFF)
+endif()
+if(PROJ_DATA_ENV_VAR_TRIED_LAST)
+    add_definitions(-DPROJ_DATA_ENV_VAR_TRIED_LAST)
 endif()
 
 ################################################################################
@@ -230,6 +250,10 @@ endif()
 ################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads)
+if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+  set(CMAKE_REQUIRED_LIBRARIES
+    "${CMAKE_REQUIRED_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT}")
+endif()
 
 include(CheckCSourceCompiles)
 if(MSVC)
@@ -237,23 +261,6 @@ if(MSVC)
 else()
   set(CMAKE_REQUIRED_LIBRARIES m)
   set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall")
-endif()
-
-if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
-  set(CMAKE_REQUIRED_LIBRARIES
-    "${CMAKE_REQUIRED_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT}")
-  check_c_source_compiles("
-#include <pthread.h>
-
-int main(int argc, char* argv[]) {
-  (void)PTHREAD_MUTEX_RECURSIVE;
-  (void)argv;
-  return argc;
-}
-  " HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
-  if(HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
-    add_definitions(-DHAVE_PTHREAD_MUTEX_RECURSIVE=1)
-  endif()
 endif()
 
 # Set a default build type for single-configuration cmake generators if
@@ -281,18 +288,21 @@ link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 # Installation
 ################################################################################
 include(ProjInstallPath)
-set(BINDIR "${DEFAULT_BINDIR}"
-  CACHE PATH "The directory to install binaries into.")
-set(LIBDIR "${DEFAULT_LIBDIR}"
-  CACHE PATH "The directory to install libraries into.")
-set(DATADIR "${DEFAULT_DATADIR}"
-  CACHE PATH "The directory to install data files into.")
-set(DOCDIR "${DEFAULT_DOCDIR}"
-  CACHE PATH "The directory to install doc files into.")
-set(INCLUDEDIR "${DEFAULT_INCLUDEDIR}"
-  CACHE PATH "The directory to install includes into.")
-set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}"
-  CACHE PATH "Parent of the directory to install cmake config files into.")
+
+# By default GNUInstallDirs will use the upper case project name
+# for CMAKE_INSTALL_DOCDIR, resulting in something like share/doc/PROJ
+# instead of share/doc/proj which historically have been the path used
+# by the project.
+# Here force the use of a lower case project name and reset after
+# GNUInstallDirs has done its thing
+set(PROJECT_NAME_ORIGINAL "${PROJECT_NAME}")
+string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME)
+
+include(GNUInstallDirs)
+
+set(PROJECT_NAME "${PROJECT_NAME_ORIGINAL}")
+
+set(PROJ_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}/proj")
 
 ################################################################################
 # Tests
@@ -319,9 +329,14 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
+option(BUILD_EXAMPLES "Whether to build example programs" OFF)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+
 set(docfiles COPYING NEWS AUTHORS)
 install(FILES ${docfiles}
-        DESTINATION "${DOCDIR}")
+        DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
 ################################################################################
 # pkg-config support
@@ -330,7 +345,7 @@ configure_proj_pc()
 
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 ################################################################################
 # "make dist" workalike
@@ -354,10 +369,10 @@ set(CPACK_SOURCE_IGNORE_FILES
   /autom4te\\.cache
   /CODE_OF_CONDUCT.md
   /CONTRIBUTING.md
+  /disabled_workflows/
   /Dockerfile
   /docs/
   /Doxyfile
-  /examples/
   /HOWTO-RELEASE
   /m4/lt*
   /m4/libtool*
@@ -388,3 +403,6 @@ if(NOT _is_multi_config_generator)
   )
   message(STATUS "PROJ: Configured 'dist' target")
 endif()
+
+configure_file(cmake/uninstall.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/proj_uninstall.cmake @ONLY)
+add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/proj_uninstall.cmake)

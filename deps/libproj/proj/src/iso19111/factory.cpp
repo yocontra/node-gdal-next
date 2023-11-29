@@ -42,12 +42,12 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
-#include "proj/internal/mutex.hpp"
 #include "proj/internal/tracing.hpp"
 
 #include "operation/coordinateoperation_internal.hpp"
 #include "operation/parammappings.hpp"
 
+#include "filemanager.hpp"
 #include "sqlite3_utils.hpp"
 
 #include <algorithm>
@@ -60,6 +60,7 @@
 #include <locale>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <sstream> // std::ostringstream
 #include <stdexcept>
 #include <string>
@@ -78,8 +79,8 @@
 // parallel. This is slightly faster
 #define ENABLE_CUSTOM_LOCKLESS_VFS
 
-#if defined(_WIN32) && defined(MUTEX_pthread)
-#undef MUTEX_pthread
+#if defined(_WIN32) && defined(PROJ_HAS_PTHREADS)
+#undef PROJ_HAS_PTHREADS
 #endif
 
 /* SQLite3 might use seak()+read() or pread[64]() to read data */
@@ -87,7 +88,7 @@
 /* children of a parent process, while the former doesn't. */
 /* So we use pthread_atfork() to set a flag in forked children, to ask them */
 /* to close and reopen their database handle. */
-#if defined(MUTEX_pthread) && !defined(SQLITE_USE_PREAD)
+#if defined(PROJ_HAS_PTHREADS) && !defined(SQLITE_USE_PREAD)
 #include <pthread.h>
 #define REOPEN_SQLITE_DB_AFTER_FORK
 #endif
@@ -252,7 +253,7 @@ class SQLiteHandle {
     }
 
     // cppcheck-suppress functionStatic
-    void registerFunctions();
+    void initialize();
 
     SQLResultSet run(const std::string &sql,
                      const ListOfParams &parameters = ListOfParams(),
@@ -344,7 +345,7 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     handle->vfs_ = std::move(vfs);
 #endif
-    handle->registerFunctions();
+    handle->initialize();
     handle->checkDatabaseLayout(path, path, std::string());
     return handle;
 }
@@ -359,7 +360,7 @@ SQLiteHandle::initFromExisting(sqlite3 *sqlite_handle, bool close_handle,
         new SQLiteHandle(sqlite_handle, close_handle));
     handle->nLayoutVersionMajor_ = nLayoutVersionMajor;
     handle->nLayoutVersionMinor_ = nLayoutVersionMinor;
-    handle->registerFunctions();
+    handle->initialize();
     return handle;
 }
 
@@ -370,7 +371,7 @@ SQLiteHandle::initFromExistingUniquePtr(sqlite3 *sqlite_handle,
                                         bool close_handle) {
     auto handle = std::unique_ptr<SQLiteHandle>(
         new SQLiteHandle(sqlite_handle, close_handle));
-    handle->registerFunctions();
+    handle->initialize();
     return handle;
 }
 
@@ -547,7 +548,18 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
 #define SQLITE_DETERMINISTIC 0
 #endif
 
-void SQLiteHandle::registerFunctions() {
+void SQLiteHandle::initialize() {
+
+    // There is a bug in sqlite 3.38.0 with some complex queries.
+    // Cf https://github.com/OSGeo/PROJ/issues/3077
+    // Disabling Bloom-filter pull-down optimization as suggested in
+    // https://sqlite.org/forum/forumpost/7d3a75438c
+    const int sqlite3VersionNumber = sqlite3_libversion_number();
+    if (sqlite3VersionNumber == 3 * 1000000 + 38 * 1000) {
+        sqlite3_test_control(SQLITE_TESTCTRL_OPTIMIZATIONS, sqlite_handle_,
+                             0x100000);
+    }
+
     sqlite3_create_function(sqlite_handle_, "pseudo_area_from_swne", 4,
                             SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
                             PROJ_SQLITE_pseudo_area_from_swne, nullptr,
@@ -565,7 +577,7 @@ class SQLiteHandleCache {
     bool firstTime_ = true;
 #endif
 
-    NS_PROJ::mutex sMutex_{};
+    std::mutex sMutex_{};
 
     // Map dbname to SQLiteHandle
     lru11::Cache<std::string, std::shared_ptr<SQLiteHandle>> cache_{};
@@ -594,7 +606,7 @@ SQLiteHandleCache &SQLiteHandleCache::get() {
 // ---------------------------------------------------------------------------
 
 void SQLiteHandleCache::clear() {
-    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    std::lock_guard<std::mutex> lock(sMutex_);
     cache_.clear();
 }
 
@@ -602,7 +614,7 @@ void SQLiteHandleCache::clear() {
 
 std::shared_ptr<SQLiteHandle>
 SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
-    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    std::lock_guard<std::mutex> lock(sMutex_);
 
 #ifdef REOPEN_SQLITE_DB_AFTER_FORK
     if (firstTime_) {
@@ -625,7 +637,7 @@ SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
 // ---------------------------------------------------------------------------
 
 void SQLiteHandleCache::invalidateHandles() {
-    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    std::lock_guard<std::mutex> lock(sMutex_);
     const auto lambda =
         [](const lru11::KeyValuePair<std::string, std::shared_ptr<SQLiteHandle>>
                &kvp) { kvp.value->invalidate(); };
@@ -1792,11 +1804,11 @@ void DatabaseContext::Private::identify(const DatabaseContextNNPtr &dbContext,
                     return;
                 }
                 if (authName == metadata::Identifier::EPSG && code == "6422") {
-                    // preferred coordinate system for geographic lat, lon
+                    // preferred coordinate system for geographic lat, long
                     return;
                 }
                 if (authName == metadata::Identifier::EPSG && code == "6423") {
-                    // preferred coordinate system for geographic lat, lon, h
+                    // preferred coordinate system for geographic lat, long, h
                     return;
                 }
             }
@@ -1919,7 +1931,10 @@ void DatabaseContext::Private::identifyOrInsertUsages(
                 scopeCode = row[1];
             } else {
                 scopeAuthName = authName;
-                scopeCode = "SCOPE_" + tableName + "_" + code;
+                scopeCode = "SCOPE_";
+                scopeCode += tableName;
+                scopeCode += '_';
+                scopeCode += code;
                 const auto sqlToInsert = formatStatement(
                     "INSERT INTO scope VALUES('%q','%q','%q',0);",
                     scopeAuthName.c_str(), scopeCode.c_str(), scope->c_str());
@@ -1960,7 +1975,10 @@ void DatabaseContext::Private::identifyOrInsertUsages(
                         extentCode = row[1];
                     } else {
                         extentAuthName = authName;
-                        extentCode = "EXTENT_" + tableName + "_" + code;
+                        extentCode = "EXTENT_";
+                        extentCode += tableName;
+                        extentCode += '_';
+                        extentCode += code;
                         std::string description(*(extent->description()));
                         if (description.empty()) {
                             description = "unknown";
@@ -3231,8 +3249,27 @@ bool DatabaseContext::lookForGridInfo(
     std::string &fullFilename, std::string &packageName, std::string &url,
     bool &directDownload, bool &openLicense, bool &gridAvailable) const {
     Private::GridInfoCache info;
-    const std::string key(projFilename +
-                          (considerKnownGridsAsAvailable ? "true" : "false"));
+
+    if (projFilename == "null") {
+        // Special case for implicit "null" grid.
+        fullFilename.clear();
+        packageName.clear();
+        url.clear();
+        directDownload = false;
+        openLicense = true;
+        gridAvailable = true;
+        return true;
+    }
+
+    auto ctxt = d->pjCtxt();
+    if (ctxt == nullptr) {
+        ctxt = pj_get_default_ctx();
+        d->setPjCtxt(ctxt);
+    }
+
+    std::string key(projFilename);
+    key += proj_context_is_network_enabled(ctxt) ? "true" : "false";
+    key += considerKnownGridsAsAvailable ? "true" : "false";
     if (d->getGridInfoFromCache(key, info)) {
         fullFilename = info.fullFilename;
         packageName = info.packageName;
@@ -3249,20 +3286,13 @@ bool DatabaseContext::lookForGridInfo(
     openLicense = false;
     directDownload = false;
 
-    if (considerKnownGridsAsAvailable) {
-        fullFilename = projFilename;
-    } else {
-        fullFilename.resize(2048);
-        if (d->pjCtxt() == nullptr) {
-            d->setPjCtxt(pj_get_default_ctx());
-        }
-        int errno_before = proj_context_errno(d->pjCtxt());
-        gridAvailable =
-            pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
-                         fullFilename.size() - 1) != 0;
-        proj_context_errno_set(d->pjCtxt(), errno_before);
-        fullFilename.resize(strlen(fullFilename.c_str()));
-    }
+    fullFilename.resize(2048);
+    int errno_before = proj_context_errno(ctxt);
+    gridAvailable = NS_PROJ::FileManager::open_resource_file(
+                        ctxt, projFilename.c_str(), &fullFilename[0],
+                        fullFilename.size() - 1) != nullptr;
+    proj_context_errno_set(ctxt, errno_before);
+    fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
         d->run("SELECT "
@@ -3294,15 +3324,12 @@ bool DatabaseContext::lookForGridInfo(
             old_proj_grid_name == projFilename) {
             std::string fullFilenameNewName;
             fullFilenameNewName.resize(2048);
-            if (d->pjCtxt() == nullptr) {
-                d->setPjCtxt(pj_get_default_ctx());
-            }
-            int errno_before = proj_context_errno(d->pjCtxt());
+            errno_before = proj_context_errno(ctxt);
             bool gridAvailableWithNewName =
-                pj_find_file(d->pjCtxt(), proj_grid_name.c_str(),
+                pj_find_file(ctxt, proj_grid_name.c_str(),
                              &fullFilenameNewName[0],
                              fullFilenameNewName.size() - 1) != 0;
-            proj_context_errno_set(d->pjCtxt(), errno_before);
+            proj_context_errno_set(ctxt, errno_before);
             fullFilenameNewName.resize(strlen(fullFilenameNewName.c_str()));
             if (gridAvailableWithNewName) {
                 gridAvailable = true;
@@ -3315,12 +3342,26 @@ bool DatabaseContext::lookForGridInfo(
             gridAvailable = true;
         }
 
-        info.fullFilename = fullFilename;
         info.packageName = packageName;
-        info.url = url;
+        std::string endpoint(proj_context_get_url_endpoint(d->pjCtxt()));
+        if (!endpoint.empty() && starts_with(url, "https://cdn.proj.org/")) {
+            if (endpoint.back() != '/') {
+                endpoint += '/';
+            }
+            url = endpoint + url.substr(strlen("https://cdn.proj.org/"));
+        }
         info.directDownload = directDownload;
         info.openLicense = openLicense;
+    } else {
+        if (starts_with(fullFilename, "http://") ||
+            starts_with(fullFilename, "https://")) {
+            url = fullFilename;
+            fullFilename.clear();
+        }
     }
+
+    info.fullFilename = fullFilename;
+    info.url = url;
     info.gridAvailable = gridAvailable;
     info.found = ret;
     d->cache(key, info);
@@ -3363,10 +3404,32 @@ std::string DatabaseContext::getOldProjGridName(const std::string &gridName) {
 
 // ---------------------------------------------------------------------------
 
+// scripts/build_db_from_esri.py adds a second alias for
+// names that have '[' in them. See get_old_esri_name()
+// in scripts/build_db_from_esri.py
+// So if we only have two aliases detect that situation to get the official
+// new name
+static std::string getUniqueEsriAlias(const std::list<std::string> &l) {
+    std::string first = l.front();
+    std::string second = *(std::next(l.begin()));
+    if (second.find('[') != std::string::npos)
+        std::swap(first, second);
+    if (replaceAll(replaceAll(replaceAll(first, "[", ""), "]", ""), "-", "_") ==
+        second) {
+        return first;
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Gets the alias name from an official name.
  *
  * @param officialName Official name. Mandatory
- * @param tableName Table name/category. Mandatory
+ * @param tableName Table name/category. Mandatory.
+ *                  "geographic_2D_crs" and "geographic_3D_crs" are also
+ *                  accepted as special names to add a constraint on the "type"
+ *                  column of the "geodetic_crs" table.
  * @param source Source of the alias. Mandatory
  * @return Alias name (or empty if not found).
  * @throw FactoryException
@@ -3376,29 +3439,50 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
                                           const std::string &tableName,
                                           const std::string &source) const {
     std::string sql("SELECT auth_name, code FROM \"");
-    sql += replaceAll(tableName, "\"", "\"\"");
+    const auto genuineTableName =
+        tableName == "geographic_2D_crs" || tableName == "geographic_3D_crs"
+            ? "geodetic_crs"
+            : tableName;
+    sql += replaceAll(genuineTableName, "\"", "\"\"");
     sql += "\" WHERE name = ?";
-    if (tableName == "geodetic_crs") {
+    if (tableName == "geodetic_crs" || tableName == "geographic_2D_crs") {
         sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
+    } else if (tableName == "geographic_3D_crs") {
+        sql += " AND type = " GEOG_3D_SINGLE_QUOTED;
     }
+    sql += " ORDER BY deprecated";
     auto res = d->run(sql, {officialName});
-    if (res.empty()) {
+    // Sorry for the hack excluding NAD83 + geographic_3D_crs, but otherwise
+    // EPSG has a weird alias from NAD83 to EPSG:4152 which happens to be
+    // NAD83(HARN), and that's definitely not desirable.
+    if (res.empty() &&
+        !(officialName == "NAD83" && tableName == "geographic_3D_crs")) {
         res = d->run(
             "SELECT auth_name, code FROM alias_name WHERE table_name = ? AND "
             "alt_name = ? AND source IN ('EPSG', 'PROJ')",
-            {tableName, officialName});
+            {genuineTableName, officialName});
         if (res.size() != 1) {
             return std::string();
         }
     }
-    const auto &row = res.front();
-    res = d->run("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
-                 "auth_name = ? AND code = ? AND source = ?",
-                 {tableName, row[0], row[1], source});
-    if (res.empty()) {
-        return std::string();
+    for (const auto &row : res) {
+        auto res2 =
+            d->run("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
+                   "auth_name = ? AND code = ? AND source = ?",
+                   {genuineTableName, row[0], row[1], source});
+        if (!res2.empty()) {
+            if (res2.size() == 2 && source == "ESRI") {
+                std::list<std::string> l;
+                l.emplace_back(res2.front()[0]);
+                l.emplace_back((*(std::next(res2.begin())))[0]);
+                const auto uniqueEsriAlias = getUniqueEsriAlias(l);
+                if (!uniqueEsriAlias.empty())
+                    return uniqueEsriAlias;
+            }
+            return res2.front()[0];
+        }
     }
-    return res.front()[0];
+    return std::string();
 }
 
 // ---------------------------------------------------------------------------
@@ -3410,7 +3494,10 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
  * @param authName Authority.
  * @param code Code.
  * @param officialName Official name.
- * @param tableName Table name/category. Mandatory
+ * @param tableName Table name/category. Mandatory.
+ *                  "geographic_2D_crs" and "geographic_3D_crs" are also
+ *                  accepted as special names to add a constraint on the "type"
+ *                  column of the "geodetic_crs" table.
  * @param source Source of the alias. May be empty.
  * @return Aliases
  */
@@ -3427,19 +3514,26 @@ std::list<std::string> DatabaseContext::getAliases(
 
     std::string resolvedAuthName(authName);
     std::string resolvedCode(code);
+    const auto genuineTableName =
+        tableName == "geographic_2D_crs" || tableName == "geographic_3D_crs"
+            ? "geodetic_crs"
+            : tableName;
     if (authName.empty() || code.empty()) {
         std::string sql("SELECT auth_name, code FROM \"");
-        sql += replaceAll(tableName, "\"", "\"\"");
+        sql += replaceAll(genuineTableName, "\"", "\"\"");
         sql += "\" WHERE name = ?";
-        if (tableName == "geodetic_crs") {
+        if (tableName == "geodetic_crs" || tableName == "geographic_2D_crs") {
             sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
+        } else if (tableName == "geographic_3D_crs") {
+            sql += " AND type = " GEOG_3D_SINGLE_QUOTED;
         }
+        sql += " ORDER BY deprecated";
         auto resSql = d->run(sql, {officialName});
         if (resSql.empty()) {
             resSql = d->run("SELECT auth_name, code FROM alias_name WHERE "
                             "table_name = ? AND "
                             "alt_name = ? AND source IN ('EPSG', 'PROJ')",
-                            {tableName, officialName});
+                            {genuineTableName, officialName});
             if (resSql.size() != 1) {
                 d->cacheAliasNames_.insert(key, res);
                 return res;
@@ -3451,7 +3545,7 @@ std::list<std::string> DatabaseContext::getAliases(
     }
     std::string sql("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
                     "auth_name = ? AND code = ?");
-    ListOfParams params{tableName, resolvedAuthName, resolvedCode};
+    ListOfParams params{genuineTableName, resolvedAuthName, resolvedCode};
     if (!source.empty()) {
         sql += " AND source = ?";
         params.emplace_back(source);
@@ -3460,6 +3554,15 @@ std::list<std::string> DatabaseContext::getAliases(
     for (const auto &row : resSql) {
         res.emplace_back(row[0]);
     }
+
+    if (res.size() == 2 && source == "ESRI") {
+        const auto uniqueEsriAlias = getUniqueEsriAlias(res);
+        if (!uniqueEsriAlias.empty()) {
+            res.clear();
+            res.emplace_back(uniqueEsriAlias);
+        }
+    }
+
     d->cacheAliasNames_.insert(key, res);
     return res;
 }
@@ -3824,26 +3927,40 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
     const std::string &table_name, const std::string &code,
     const std::string &name, bool deprecated) {
 
-    const std::string sql(
-        "SELECT extent.description, extent.south_lat, "
-        "extent.north_lat, extent.west_lon, extent.east_lon, "
-        "scope.scope, "
-        "(CASE WHEN scope.scope LIKE '%large scale%' THEN 0 ELSE 1 END) "
-        "AS score "
-        "FROM usage "
-        "JOIN extent ON usage.extent_auth_name = extent.auth_name AND "
-        "usage.extent_code = extent.code "
-        "JOIN scope ON usage.scope_auth_name = scope.auth_name AND "
-        "usage.scope_code = scope.code "
-        "WHERE object_table_name = ? AND object_auth_name = ? AND "
-        "object_code = ? AND "
-        // We voluntary exclude extent and scope with a specific code
-        "NOT (usage.extent_auth_name = 'PROJ' AND "
-        "usage.extent_code = 'EXTENT_UNKNOWN') AND "
-        "NOT (usage.scope_auth_name = 'PROJ' AND "
-        "usage.scope_code = 'SCOPE_UNKNOWN') "
-        "ORDER BY score, usage.auth_name, usage.code");
-    auto res = run(sql, {table_name, authority(), code});
+    SQLResultSet res;
+    if (table_name == "geodetic_crs" && code == "4326" &&
+        authority() == "EPSG") {
+        // EPSG v10.077 has changed the extent from 1262 to 2830, whose
+        // description is super verbose.
+        // Cf https://epsg.org/closed-change-request/browse/id/2022.086
+        // To avoid churn in our WKT2 output, hot patch to the usage of
+        // 10.076 and earlier
+        res = run("SELECT extent.description, extent.south_lat, "
+                  "extent.north_lat, extent.west_lon, extent.east_lon, "
+                  "scope.scope, 0 AS score FROM extent, scope WHERE "
+                  "extent.code = 1262 and scope.code = 1183");
+    } else {
+        const std::string sql(
+            "SELECT extent.description, extent.south_lat, "
+            "extent.north_lat, extent.west_lon, extent.east_lon, "
+            "scope.scope, "
+            "(CASE WHEN scope.scope LIKE '%large scale%' THEN 0 ELSE 1 END) "
+            "AS score "
+            "FROM usage "
+            "JOIN extent ON usage.extent_auth_name = extent.auth_name AND "
+            "usage.extent_code = extent.code "
+            "JOIN scope ON usage.scope_auth_name = scope.auth_name AND "
+            "usage.scope_code = scope.code "
+            "WHERE object_table_name = ? AND object_auth_name = ? AND "
+            "object_code = ? AND "
+            // We voluntary exclude extent and scope with a specific code
+            "NOT (usage.extent_auth_name = 'PROJ' AND "
+            "usage.extent_code = 'EXTENT_UNKNOWN') AND "
+            "NOT (usage.scope_auth_name = 'PROJ' AND "
+            "usage.scope_code = 'SCOPE_UNKNOWN') "
+            "ORDER BY score, usage.auth_name, usage.code");
+        res = run(sql, {table_name, authority(), code});
+    }
     std::vector<ObjectDomainNNPtr> usages;
     for (const auto &row : res) {
         try {
@@ -3905,8 +4022,38 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
 bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
     const operation::CoordinateOperationNNPtr &op,
     bool considerKnownGridsAsAvailable) {
+
+    struct DisableNetwork {
+        const DatabaseContextNNPtr &m_dbContext;
+        bool m_old_network_enabled;
+
+        explicit DisableNetwork(const DatabaseContextNNPtr &l_context)
+            : m_dbContext(l_context) {
+            auto ctxt = m_dbContext->d->pjCtxt();
+            if (ctxt == nullptr) {
+                ctxt = pj_get_default_ctx();
+                m_dbContext->d->setPjCtxt(ctxt);
+            }
+            m_old_network_enabled =
+                proj_context_is_network_enabled(ctxt) != FALSE;
+            if (m_old_network_enabled)
+                proj_context_set_enable_network(ctxt, false);
+        }
+
+        ~DisableNetwork() {
+            if (m_old_network_enabled) {
+                auto ctxt = m_dbContext->d->pjCtxt();
+                proj_context_set_enable_network(ctxt, true);
+            }
+        }
+    };
+
+    auto &l_context = context();
+    // Temporarily disable networking as we are only interested in known grids
+    DisableNetwork disabler(l_context);
+
     for (const auto &gridDesc :
-         op->gridsNeeded(context(), considerKnownGridsAsAvailable)) {
+         op->gridsNeeded(l_context, considerKnownGridsAsAvailable)) {
         if (!gridDesc.available) {
             return true;
         }
@@ -4089,10 +4236,11 @@ AuthorityFactory::createObject(const std::string &code) const {
 
 //! @cond Doxygen_Suppress
 static FactoryException buildFactoryException(const char *type,
+                                              const std::string &authName,
                                               const std::string &code,
                                               const std::exception &ex) {
-    return FactoryException(std::string("cannot build ") + type + " " + code +
-                            ": " + ex.what());
+    return FactoryException(std::string("cannot build ") + type + " " +
+                            authName + ":" + code + ": " + ex.what());
 }
 //! @endcond
 
@@ -4147,7 +4295,7 @@ AuthorityFactory::createExtent(const std::string &code) const {
         return extent;
 
     } catch (const std::exception &ex) {
-        throw buildFactoryException("extent", code, ex);
+        throw buildFactoryException("extent", d->authority(), code, ex);
     }
 }
 
@@ -4212,7 +4360,8 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
         d->context()->d->cache(cacheKey, uom);
         return uom;
     } catch (const std::exception &ex) {
-        throw buildFactoryException("unit of measure", code, ex);
+        throw buildFactoryException("unit of measure", d->authority(), code,
+                                    ex);
     }
 }
 
@@ -4299,7 +4448,7 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
         d->context()->d->cache(cacheKey, pm);
         return pm;
     } catch (const std::exception &ex) {
-        throw buildFactoryException("prime meridian", code, ex);
+        throw buildFactoryException("prime meridian", d->authority(), code, ex);
     }
 }
 
@@ -4398,7 +4547,7 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
             return ellps;
         }
     } catch (const std::exception &ex) {
-        throw buildFactoryException("ellipsoid", code, ex);
+        throw buildFactoryException("ellipsoid", d->authority(), code, ex);
     }
 }
 
@@ -4523,7 +4672,8 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
             outDatum = datum.as_nullable();
         }
     } catch (const std::exception &ex) {
-        throw buildFactoryException("geodetic reference frame", code, ex);
+        throw buildFactoryException("geodetic reference frame", d->authority(),
+                                    code, ex);
     }
 }
 
@@ -4616,7 +4766,8 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
             }
         }
     } catch (const std::exception &ex) {
-        throw buildFactoryException("vertical reference frame", code, ex);
+        throw buildFactoryException("vertical reference frame", d->authority(),
+                                    code, ex);
     }
 }
 
@@ -5020,7 +5171,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
                                type + ", " + cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
-        throw buildFactoryException("geodeticCRS", code, ex);
+        throw buildFactoryException("geodeticCRS", d->authority(), code, ex);
     }
 }
 
@@ -5085,7 +5236,7 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
         throw FactoryException("unsupported CS type for verticalCRS: " +
                                cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
-        throw buildFactoryException("verticalCRS", code, ex);
+        throw buildFactoryException("verticalCRS", d->authority(), code, ex);
     }
 }
 
@@ -5201,7 +5352,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
         return operation::Conversion::create(propConversion, propMethod,
                                              parameters, values);
     } catch (const std::exception &ex) {
-        throw buildFactoryException("conversion", code, ex);
+        throw buildFactoryException("conversion", d->authority(), code, ex);
     }
 }
 
@@ -5339,7 +5490,7 @@ AuthorityFactory::Private::createProjectedCRSEnd(const std::string &code,
         throw FactoryException("unsupported CS type for projectedCRS: " +
                                cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
-        throw buildFactoryException("projectedCRS", code, ex);
+        throw buildFactoryException("projectedCRS", authority(), code, ex);
     }
 }
 //! @endcond
@@ -5386,7 +5537,7 @@ AuthorityFactory::createCompoundCRS(const std::string &code) const {
         return crs::CompoundCRS::create(
             props, std::vector<crs::CRSNNPtr>{horizCRS, vertCRS});
     } catch (const std::exception &ex) {
-        throw buildFactoryException("compoundCRS", code, ex);
+        throw buildFactoryException("compoundCRS", d->authority(), code, ex);
     }
 }
 
@@ -5824,7 +5975,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 values, accuracies);
 
         } catch (const std::exception &ex) {
-            throw buildFactoryException("transformation", code, ex);
+            throw buildFactoryException("transformation", d->authority(), code,
+                                        ex);
         }
     }
 
@@ -5939,7 +6091,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             return transf;
 
         } catch (const std::exception &ex) {
-            throw buildFactoryException("transformation", code, ex);
+            throw buildFactoryException("transformation", d->authority(), code,
+                                        ex);
         }
     }
 
@@ -6091,7 +6244,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 parameters, values, accuracies);
 
         } catch (const std::exception &ex) {
-            throw buildFactoryException("transformation", code, ex);
+            throw buildFactoryException("transformation", d->authority(), code,
+                                        ex);
         }
     }
 
@@ -6146,7 +6300,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     ->createCoordinateReferenceSystem(source_crs_code),
                 d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code),
-                operations);
+                operations, d->context());
 
             auto props = d->createPropertiesSearchUsages(
                 type, code, name, deprecated, description);
@@ -6195,7 +6349,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                                                             accuracies);
 
         } catch (const std::exception &ex) {
-            throw buildFactoryException("transformation", code, ex);
+            throw buildFactoryException("transformation", d->authority(), code,
+                                        ex);
         }
     }
 
@@ -6661,19 +6816,30 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         const auto &auth_name = row[4];
         const auto &code = row[5];
         const auto &table_name = row[6];
-        auto op = d->createFactory(auth_name)->createCoordinateOperation(
-            code, true, usePROJAlternativeGridNames, table_name);
-        if (tryReverseOrder &&
-            (!sourceCRSAuthName.empty()
-                 ? (source_crs_auth_name != sourceCRSAuthName ||
-                    source_crs_code != sourceCRSCode)
-                 : (target_crs_auth_name != targetCRSAuthName ||
-                    target_crs_code != targetCRSCode))) {
-            op = op->inverse();
-        }
-        if (!discardIfMissingGrid ||
-            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
-            list.emplace_back(op);
+        try {
+            auto op = d->createFactory(auth_name)->createCoordinateOperation(
+                code, true, usePROJAlternativeGridNames, table_name);
+            if (tryReverseOrder &&
+                (!sourceCRSAuthName.empty()
+                     ? (source_crs_auth_name != sourceCRSAuthName ||
+                        source_crs_code != sourceCRSCode)
+                     : (target_crs_auth_name != targetCRSAuthName ||
+                        target_crs_code != targetCRSCode))) {
+                op = op->inverse();
+            }
+            if (!discardIfMissingGrid ||
+                !d->rejectOpDueToMissingGrid(op,
+                                             considerKnownGridsAsAvailable)) {
+                list.emplace_back(op);
+            }
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
         }
     }
     d->context()->d->cache(cacheKey, list);
@@ -7073,24 +7239,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata({op1, op2},
-                                                                    false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1, op2}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     // Case (source->intermediate) and (target->intermediate)
@@ -7117,24 +7295,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata(
-                {op1, op2->inverse()}, false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1, op2->inverse()}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     // Case (intermediate->source) and (intermediate->target)
@@ -7182,24 +7372,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata(
-                {op1->inverse(), op2}, false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1->inverse(), op2}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     // Case (intermediate->source) and (target->intermediate)
@@ -7226,24 +7428,36 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         const auto &auth_name2 = row[5];
         const auto &code2 = row[6];
         // const auto &accuracy2 = row[7];
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        try {
+            auto op1 =
+                d->createFactory(auth_name1)
+                    ->createCoordinateOperation(
+                        code1, true, usePROJAlternativeGridNames, table1);
+            if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
+            auto op2 =
+                d->createFactory(auth_name2)
+                    ->createCoordinateOperation(
+                        code2, true, usePROJAlternativeGridNames, table2);
+            if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                                   targetCRSAuthName, targetCRSCode)) {
+                continue;
+            }
 
-        listTmp.emplace_back(
-            operation::ConcatenatedOperation::createComputeMetadata(
-                {op1->inverse(), op2->inverse()}, false));
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(
+                    {op1->inverse(), op2->inverse()}, false));
+        } catch (const std::exception &e) {
+            // Mostly for debugging purposes when using an inconsistent
+            // database
+            if (getenv("PROJ_IGNORE_INSTANTIATION_ERRORS")) {
+                fprintf(stderr, "Ignoring invalid operation: %s\n", e.what());
+            } else {
+                throw;
+            }
+        }
     }
 
     std::vector<operation::CoordinateOperationNNPtr> list;
@@ -7455,7 +7669,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
             trfm.south = c_locale_stod(row[8]);
             trfm.east = c_locale_stod(row[9]);
             trfm.north = c_locale_stod(row[10]);
-            const std::string key = datum_auth_name + ':' + datum_code;
+            const std::string key =
+                std::string(datum_auth_name).append(":").append(datum_code);
             if (trfm.situation == "src_is_tgt" ||
                 trfm.situation == "src_is_src")
                 mapIntermDatumOfSource[key].emplace_back(std::move(trfm));
@@ -7901,26 +8116,26 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
 std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
 
     const auto getSqlArea = [](const char *table_name) {
-        std::string sql("JOIN usage u ON u.object_table_name = '");
+        std::string sql("LEFT JOIN usage u ON u.object_table_name = '");
         sql += table_name;
         sql += "' AND "
                "u.object_auth_name = c.auth_name AND "
                "u.object_code = c.code "
-               "JOIN extent a "
+               "LEFT JOIN extent a "
                "ON a.auth_name = u.extent_auth_name AND "
                "a.code = u.extent_code ";
         return sql;
     };
 
     const auto getJoinCelestialBody = [](const char *crs_alias) {
-        std::string sql("JOIN geodetic_datum gd ON gd.auth_name = ");
+        std::string sql("LEFT JOIN geodetic_datum gd ON gd.auth_name = ");
         sql += crs_alias;
         sql += ".datum_auth_name AND gd.code = ";
         sql += crs_alias;
         sql += ".datum_code "
-               "JOIN ellipsoid e ON e.auth_name = gd.ellipsoid_auth_name "
+               "LEFT JOIN ellipsoid e ON e.auth_name = gd.ellipsoid_auth_name "
                "AND e.code = gd.ellipsoid_code "
-               "JOIN celestial_body cb ON "
+               "LEFT JOIN celestial_body cb ON "
                "cb.auth_name = e.celestial_body_auth_name "
                "AND cb.code = e.celestial_body_code ";
         return sql;
@@ -7949,7 +8164,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
            "LEFT JOIN conversion_method cm ON "
            "conv.method_auth_name = cm.auth_name AND "
            "conv.method_code = cm.code "
-           "JOIN geodetic_crs gcrs ON "
+           "LEFT JOIN geodetic_crs gcrs ON "
            "gcrs.auth_name = c.geodetic_crs_auth_name "
            "AND gcrs.code = c.geodetic_crs_code ";
     sql += getSqlArea("projected_crs");
@@ -7968,7 +8183,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
-    // FIXME: we can't handle non-EARTH vertical CRS for now
+    // FIXME: we can't handle non-EARTH compound CRS for now
     sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'compound', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
@@ -9051,7 +9266,7 @@ AuthorityFactory::createProjectedCRSFromExisting(
         const auto &measure = parameterValue->value();
         const auto &unit = measure.unit();
         if (unit == common::UnitOfMeasure::DEGREE &&
-            geogCRS->coordinateSystem()->axisList()[0]->unit() == unit) {
+            baseCRS->coordinateSystem()->axisList()[0]->unit() == unit) {
             if (methodEPSGCode ==
                 EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
                 // Special case for standard parallels of LCC_2SP. See below

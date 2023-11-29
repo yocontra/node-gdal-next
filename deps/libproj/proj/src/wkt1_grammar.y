@@ -50,6 +50,7 @@
 %token T_SPHEROID               "SPHEROID"
 %token T_PRIMEM                 "PRIMEM"
 %token T_UNIT                   "UNIT"
+%token T_LINUNIT                "LINUNIT"
 %token T_GEOCCS                 "GEOCCS"
 %token T_AUTHORITY              "AUTHORITY"
 %token T_VERT_CS                "VERT_CS"
@@ -166,7 +167,17 @@ projection:
 
 geographic_cs:
     T_GEOGCS begin_node_name',' datum ',' prime_meridian ','
-                    angular_unit opt_twin_axis_extension_authority end_node
+                    angular_unit opt_linunit_or_twin_axis_extension_authority end_node
+
+/* ESRI extension for geographic 3D CRS */
+linunit:
+    T_LINUNIT begin_node_name',' conversion_factor opt_authority end_node
+
+opt_linunit_or_twin_axis_extension_authority:
+    | ',' linunit opt_authority
+    | ',' twin_axis opt_extension_authority
+    | ',' extension opt_authority
+    | ',' authority
 
 datum:
     T_DATUM begin_node_name ',' spheroid opt_towgs84_authority_extension end_node
@@ -183,8 +194,12 @@ spheroid:
 semi_major_axis:
     T_NUMBER
 
+// Some WKT in the wild use "inf". Cf SPHEROID["unnamed",6370997,"inf"]
+// in https://zenodo.org/record/3878979#.Y_P4g4CZNH4,
+// https://zenodo.org/record/5831940#.Y_P4i4CZNH5
+// or https://grasswiki.osgeo.org/wiki/Marine_Science
 inverse_flattening:
-    T_NUMBER
+    T_NUMBER | T_STRING
 
 prime_meridian:
     T_PRIMEM begin_node_name ',' longitude opt_authority end_node
