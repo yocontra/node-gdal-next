@@ -13,14 +13,13 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_PREP_SEGMENTINTERSECTIONDETECTOR_H
-#define GEOS_GEOM_PREP_SEGMENTINTERSECTIONDETECTOR_H
+#pragma once
 
 #include <cstddef>
 #include <geos/noding/SegmentIntersector.h>
 #include <geos/algorithm/LineIntersector.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
+#include <geos/geom/CoordinateSequence.h>
 #include <geos/noding/SegmentString.h>
 
 namespace geos {
@@ -51,7 +50,7 @@ private:
     bool _hasNonProperIntersection;
 
     const geom::Coordinate* intPt;
-    geom::CoordinateArraySequence* intSegments;
+    geom::CoordinateSequence* intSegments;
 
 protected:
 public:
@@ -176,4 +175,3 @@ public:
 } // namespace geos::noding
 } // namespace geos
 
-#endif // GEOS_GEOM_PREP_SEGMENTINTERSECTIONDETECTOR_H

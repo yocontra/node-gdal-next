@@ -38,14 +38,14 @@ namespace algorithm {
 // public:
 //
 /*static*/ geom::Location
-RayCrossingCounter::locatePointInRing(const geom::Coordinate& point,
+RayCrossingCounter::locatePointInRing(const geom::CoordinateXY& point,
                                       const geom::CoordinateSequence& ring)
 {
     RayCrossingCounter rcc(point);
 
     for(std::size_t i = 1, ni = ring.size(); i < ni; i++) {
-        const geom::Coordinate& p1 = ring[ i - 1 ];
-        const geom::Coordinate& p2 = ring[ i ];
+        const geom::CoordinateXY& p1 = ring.getAt<geom::CoordinateXY>(i-1);;
+        const geom::CoordinateXY& p2 = ring.getAt<geom::CoordinateXY>(i);
 
         rcc.countSegment(p1, p2);
 
@@ -57,7 +57,7 @@ RayCrossingCounter::locatePointInRing(const geom::Coordinate& point,
 }
 
 /*static*/ geom::Location
-RayCrossingCounter::locatePointInRing(const geom::Coordinate& point,
+RayCrossingCounter::locatePointInRing(const geom::CoordinateXY& point,
                                       const std::vector<const geom::Coordinate*>& ring)
 {
     RayCrossingCounter rcc(point);
@@ -76,8 +76,8 @@ RayCrossingCounter::locatePointInRing(const geom::Coordinate& point,
 }
 
 void
-RayCrossingCounter::countSegment(const geom::Coordinate& p1,
-                                 const geom::Coordinate& p2)
+RayCrossingCounter::countSegment(const geom::CoordinateXY& p1,
+                                 const geom::CoordinateXY& p2)
 {
     // For each segment, check if it crosses
     // a horizontal ray running from the test point in

@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_UTIL_LINEARCOMPONENTEXTRACTER_H
-#define GEOS_GEOM_UTIL_LINEARCOMPONENTEXTRACTER_H
+#pragma once
 
 
 #include <geos/export.h>
@@ -56,8 +55,6 @@ public:
      */
     LinearComponentExtracter(std::vector<const LineString*>& newComps);
 
-    void filter_rw(Geometry* geom) override;
-
     void filter_ro(const Geometry* geom) override;
 
 };
@@ -66,4 +63,3 @@ public:
 } // namespace geos.geom
 } // namespace geos
 
-#endif

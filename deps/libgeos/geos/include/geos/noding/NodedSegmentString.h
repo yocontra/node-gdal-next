@@ -20,18 +20,18 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_NODING_NODEDSEGMENTSTRING_H
-#define GEOS_NODING_NODEDSEGMENTSTRING_H
+#pragma once
 
-#include <geos/inline.h>
 #include <geos/export.h>
-#include <geos/noding/NodableSegmentString.h> // for inheritance
-#include <geos/geom/CoordinateSequence.h> // for inlines
 #include <geos/algorithm/LineIntersector.h>
+#include <geos/geom/Coordinate.h>
+#include <geos/geom/CoordinateSequence.h> // for inlines
+#include <geos/noding/NodedSegmentString.h>
+#include <geos/noding/NodableSegmentString.h> // for inheritance
 #include <geos/noding/SegmentNode.h>
 #include <geos/noding/SegmentNodeList.h>
 #include <geos/noding/SegmentString.h>
-#include <geos/geom/Coordinate.h>
+#include <geos/util/IllegalArgumentException.h>
 
 #include <cstddef>
 
@@ -86,60 +86,45 @@ public:
     static SegmentString::NonConstVect* getNodedSubstrings(
         const SegmentString::NonConstVect& segStrings);
 
-    std::vector<geom::Coordinate> getNodedCoordinates();
+    std::unique_ptr<geom::CoordinateSequence> getNodedCoordinates();
 
+    bool hasNodes() const
+    {
+        return nodeList.size() > 0;
+    }
 
     /** \brief
      * Creates a new segment string from a list of vertices.
      *
      * @param newPts CoordinateSequence representing the string,
      *               ownership transferred.
-     *
+     * @param constructZ should newly-constructed coordinates store Z values?
+     * @param constructM should newly-constructed coordinates store M values?
      * @param newContext the user-defined data of this segment string
      *                   (may be null)
      */
-    NodedSegmentString(geom::CoordinateSequence* newPts, const void* newContext)
-        : NodableSegmentString(newContext)
-        , nodeList(this)
-        , pts(newPts)
+    NodedSegmentString(geom::CoordinateSequence* newPts, bool constructZ, bool constructM, const void* newContext)
+        : NodableSegmentString(newContext, newPts)
+        , nodeList(*this, constructZ, constructM)
     {}
 
-    NodedSegmentString(SegmentString* ss)
-        : NodableSegmentString(ss->getData())
-        , nodeList(this)
-        , pts(ss->getCoordinates()->clone())
+    NodedSegmentString(SegmentString* ss, bool constructZ, bool constructM)
+        : NodableSegmentString(ss->getData(), ss->getCoordinates()->clone().release())
+        , nodeList(*this, constructZ, constructM)
     {}
 
-    ~NodedSegmentString() override = default;
+    ~NodedSegmentString() override {
+        delete seq;
+    }
 
     SegmentNodeList& getNodeList();
 
     const SegmentNodeList& getNodeList() const;
 
-    size_t
-    size() const override
-    {
-        return pts->size();
-    }
-
-    const geom::Coordinate& getCoordinate(std::size_t i) const override;
-
-    geom::CoordinateSequence* getCoordinates() const override;
-    geom::CoordinateSequence* releaseCoordinates();
-
-    bool isClosed() const override;
+    std::unique_ptr<geom::CoordinateSequence> releaseCoordinates();
 
     std::ostream& print(std::ostream& os) const override;
 
-
-    /** \brief
-     * Gets the octant of the segment starting at vertex index.
-     *
-     * @param index the index of the vertex starting the segment.
-     *              Must not be the last index in the vertex list
-     * @return the octant of the segment at the vertex
-     */
-    int getSegmentOctant(std::size_t index) const;
 
     /** \brief
      * Add {@link SegmentNode}s for one or both
@@ -147,7 +132,12 @@ public:
      * intersection list.
      */
     void addIntersections(algorithm::LineIntersector* li,
-                          std::size_t segmentIndex, std::size_t geomIndex);
+        std::size_t segmentIndex, std::size_t geomIndex)
+    {
+        for (std::size_t i = 0, n = li->getIntersectionNum(); i < n; ++i) {
+            addIntersection(li, segmentIndex, geomIndex, i);
+        }
+    };
 
     /** \brief
      * Add an SegmentNode for intersection intIndex.
@@ -157,8 +147,14 @@ public:
      * to use the higher of the two possible segmentIndexes
      */
     void addIntersection(algorithm::LineIntersector* li,
-                         std::size_t segmentIndex,
-                         std::size_t geomIndex, std::size_t intIndex);
+        std::size_t segmentIndex,
+        std::size_t geomIndex, std::size_t intIndex)
+    {
+        ::geos::ignore_unused_variable_warning(geomIndex);
+
+        const auto& intPt = li->getIntersection(intIndex);
+        addIntersection(intPt, segmentIndex);
+    };
 
     /** \brief
      * Add an SegmentNode for intersection intIndex.
@@ -167,17 +163,39 @@ public:
      * edge is normalized
      * to use the higher of the two possible segmentIndexes
      */
-    void addIntersection(const geom::Coordinate& intPt,
-                         std::size_t segmentIndex);
+    template<typename CoordType>
+    void addIntersection(const CoordType& intPt,
+        std::size_t segmentIndex)
+    {
+        std::size_t normalizedSegmentIndex = segmentIndex;
 
+        if (segmentIndex > size() - 2) {
+            throw util::IllegalArgumentException("SegmentString::addIntersection: SegmentIndex out of range");
+        }
+
+        // normalize the intersection point location
+        auto nextSegIndex = normalizedSegmentIndex + 1;
+        if (nextSegIndex < size()) {
+            const auto& nextPt = getCoordinate<geom::CoordinateXY>(nextSegIndex);
+
+            // Normalize segment index if intPt falls on vertex
+            // The check for point equality is 2D only -
+            // Z values are ignored
+            if(intPt.equals2D(nextPt)) {
+                normalizedSegmentIndex = nextSegIndex;
+            }
+        }
+
+        /*
+         * Add the intersection point to edge intersection list
+         * (unless the node is already known)
+         */
+        nodeList.add(intPt, normalizedSegmentIndex);
+    }
 
 private:
 
     SegmentNodeList nodeList;
-
-    std::unique_ptr<geom::CoordinateSequence> pts;
-
-    static int safeOctant(const geom::Coordinate& p0, const geom::Coordinate& p1);
 
 };
 
@@ -188,8 +206,13 @@ private:
 #pragma warning(pop)
 #endif
 
-#ifdef GEOS_INLINE
-#include "geos/noding/NodedSegmentString.inl"
-#endif
 
-#endif // GEOS_NODING_NODEDSEGMENTSTRING_H
+
+
+
+
+
+
+
+
+

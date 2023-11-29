@@ -24,20 +24,12 @@
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
 
-#ifndef GEOS_INLINE
-# include <geos/geomgraph/index/SegmentIntersector.inl>
-#endif
-
 
 #ifndef GEOS_DEBUG
 #define GEOS_DEBUG 0
 #endif
 
-#ifndef DEBUG_INTERSECT
-#define DEBUG_INTERSECT 0
-#endif
-
-#if GEOS_DEBUG || DEBUG_INTERSECT
+#if GEOS_DEBUG
 #include <iostream>
 #endif
 
@@ -124,27 +116,26 @@ SegmentIntersector::addIntersections(Edge* e0, std::size_t segIndex0, Edge* e1, 
         if(!isTrivialIntersection(e0, segIndex0, e1, segIndex1)) {
 #if GEOS_DEBUG
             std::cerr << "SegmentIntersector::addIntersections(): has !TrivialIntersection" << std::endl;
-#endif // DEBUG_INTERSECT
+#endif
             hasIntersectionVar = true;
-            if(includeProper || !li->isProper()) {
+            bool isBdyPt = isBoundaryPoint(li, bdyNodes);
+            bool isNonProper = isBdyPt || !li->isProper();
+            if(includeProper || isNonProper) {
                 //Debug.println(li);
                 e0->addIntersections(li, segIndex0, 0);
                 e1->addIntersections(li, segIndex1, 1);
 #if GEOS_DEBUG
                 std::cerr << "SegmentIntersector::addIntersections(): includeProper || !li->isProper()" << std::endl;
-#endif // DEBUG_INTERSECT
+#endif
             }
             if(li->isProper()) {
                 properIntersectionPoint = li->getIntersection(0);
 #if GEOS_DEBUG
                 std::cerr << "SegmentIntersector::addIntersections(): properIntersectionPoint: " << properIntersectionPoint.toString() <<
                      std::endl;
-#endif // DEBUG_INTERSECT
+#endif
                 hasProper = true;
-                if(isDoneWhenProperInt) {
-                    isDone = true;
-                }
-                if(!isBoundaryPoint(li, bdyNodes)) {
+                if (! isBdyPt) {
                     hasProperInterior = true;
                 }
             }

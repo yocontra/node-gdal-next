@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_TRIANGULATE_INCREMENTALDELAUNAYTRIANGULATOR_H
-#define GEOS_TRIANGULATE_INCREMENTALDELAUNAYTRIANGULATOR_H
+#pragma once
 
 #include <list>
 
@@ -43,6 +42,7 @@ class GEOS_DLL IncrementalDelaunayTriangulator {
 private:
     quadedge::QuadEdgeSubdivision* subdiv;
     bool isUsingTolerance;
+    bool m_isForceConvex;
 
 public:
     /**
@@ -55,6 +55,19 @@ public:
     IncrementalDelaunayTriangulator(quadedge::QuadEdgeSubdivision* subdiv);
 
     typedef std::vector<quadedge::Vertex> VertexList;
+
+    /**
+     * Sets whether the triangulation is forced to have a convex boundary. Because
+     * of the use of a finite-size frame, this condition requires special logic to
+     * enforce. The default is true, since this is a requirement for some uses of
+     * Delaunay Triangulations (such as Concave Hull generation). However, forcing
+     * the triangulation boundary to be convex may cause the overall frame
+     * triangulation to be non-Delaunay. This can cause a problem for Voronoi
+     * generation, so the logic can be disabled via this method.
+     * 
+     * @param isForceConvex true if the triangulation boundary is forced to be convex
+     */
+    void forceConvex(bool isForceConvex);
 
     /**
      * Inserts all sites in a collection. The inserted vertices <b>MUST</b> be
@@ -78,10 +91,16 @@ public:
      * @return a quadedge containing the inserted vertex
      */
     quadedge::QuadEdge& insertSite(const quadedge::Vertex& v);
+
+private:
+
+    bool isConcaveBoundary(const quadedge::QuadEdge& e) const;
+
+    bool isConcaveAtOrigin(const quadedge::QuadEdge& e) const;
+
+    bool isBetweenFrameAndInserted(const quadedge::QuadEdge& e, const quadedge::Vertex& vInsert) const;
 };
 
 } //namespace geos.triangulate
 } //namespace goes
-
-#endif //GEOS_TRIANGULATE_QUADEDGE_INCREMENTALDELAUNAYTRIANGULATOR_H
 

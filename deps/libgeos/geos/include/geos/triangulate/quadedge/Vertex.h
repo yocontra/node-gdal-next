@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_TRIANGULATE_QUADEDGE_VERTEX_H
-#define GEOS_TRIANGULATE_QUADEDGE_VERTEX_H
+#pragma once
 
 #include <cmath>
 #include <memory>
@@ -181,7 +180,7 @@ public:
     inline double
     magn() const
     {
-        return (sqrt(p.x * p.x + p.y * p.y));
+        return (std::sqrt(p.x * p.x + p.y * p.y));
     }
 
     /* returns k X v (cross product). this is a vector perpendicular to v */
@@ -310,6 +309,4 @@ operator<(const Vertex& v1, const Vertex& v2)
 } //namespace geos.triangulate.quadedge
 } //namespace geos.triangulate
 } //namespace geos
-
-#endif //GEOS_TRIANGULATE_QUADEDGE_VERTEX_H
 

@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_PLANARGRAPH_NODEMAP_H
-#define GEOS_PLANARGRAPH_NODEMAP_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Coordinate.h> // for use in container
@@ -47,7 +46,7 @@ namespace planargraph { // geos.planargraph
  */
 class GEOS_DLL NodeMap {
 public:
-    typedef std::map<geom::Coordinate, Node*, geom::CoordinateLessThen> container;
+    typedef std::map<geom::Coordinate, Node*, geom::CoordinateLessThan> container;
 private:
     container nodeMap;
 public:
@@ -134,4 +133,3 @@ public:
 #pragma warning(pop)
 #endif
 
-#endif // GEOS_PLANARGRAPH_NODEMAP_H

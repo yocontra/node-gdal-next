@@ -13,20 +13,21 @@
  *
  **********************************************************************/
 
+#include <geos/algorithm/PolygonNodeTopology.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/noding/SegmentString.h>
 #include <geos/operation/valid/PolygonIntersectionAnalyzer.h>
-#include <geos/operation/valid/PolygonNode.h>
 #include <geos/operation/valid/PolygonRing.h>
 #include <geos/operation/valid/TopologyValidationError.h>
 #include <geos/util/IllegalStateException.h>
 
+using geos::geom::Coordinate;
+using geos::noding::SegmentString;
+
+
 namespace geos {      // geos
 namespace operation { // geos.operation
 namespace valid {     // geos.operation.valid
-
-using namespace geos::geom;
-
 
 /* public */
 void
@@ -57,10 +58,10 @@ PolygonIntersectionAnalyzer::findInvalidIntersection(
     const SegmentString* ss0, std::size_t segIndex0,
     const SegmentString* ss1, std::size_t segIndex1)
 {
-    const Coordinate& p00 = ss0->getCoordinate(segIndex0);
-    const Coordinate& p01 = ss0->getCoordinate(segIndex0 + 1);
-    const Coordinate& p10 = ss1->getCoordinate(segIndex1);
-    const Coordinate& p11 = ss1->getCoordinate(segIndex1 + 1);
+    const CoordinateXY& p00 = ss0->getCoordinate<CoordinateXY>(segIndex0);
+    const CoordinateXY& p01 = ss0->getCoordinate<CoordinateXY>(segIndex0 + 1);
+    const CoordinateXY& p10 = ss1->getCoordinate<CoordinateXY>(segIndex1);
+    const CoordinateXY& p11 = ss1->getCoordinate<CoordinateXY>(segIndex1 + 1);
 
     li.computeIntersection(p00, p01, p10, p11);
 
@@ -116,19 +117,19 @@ PolygonIntersectionAnalyzer::findInvalidIntersection(
      * Check topology of a vertex intersection.
      * The ring(s) must not cross.
      */
-    const Coordinate* e00 = &p00;
-    const Coordinate* e01 = &p01;
+    const CoordinateXY* e00 = &p00;
+    const CoordinateXY* e01 = &p01;
     if (intPt.equals2D(p00)) {
         e00 = &(prevCoordinateInRing(ss0, segIndex0));
         e01 = &p01;
     }
-    const Coordinate* e10 = &p10;
-    const Coordinate* e11 = &p11;
+    const CoordinateXY* e10 = &p10;
+    const CoordinateXY* e11 = &p11;
     if (intPt.equals2D(p10)) {
         e10 = &(prevCoordinateInRing(ss1, segIndex1));
         e11 = &p11;
     }
-    bool hasCrossing = PolygonNode::isCrossing(&intPt, e00, e01, e10, e11);
+    bool hasCrossing = algorithm::PolygonNodeTopology::isCrossing(&intPt, e00, e01, e10, e11);
     if (hasCrossing) {
         return TopologyValidationError::eSelfIntersection;
     }
@@ -163,7 +164,7 @@ PolygonIntersectionAnalyzer::findInvalidIntersection(
 bool
 PolygonIntersectionAnalyzer::addDoubleTouch(
     const SegmentString* ss0, const SegmentString* ss1,
-    const Coordinate& intPt)
+    const CoordinateXY& intPt)
 {
     return PolygonRing::addTouch(
         const_cast<PolygonRing*>(static_cast<const PolygonRing*>(ss0->getData())),
@@ -174,9 +175,9 @@ PolygonIntersectionAnalyzer::addDoubleTouch(
 /* private */
 void
 PolygonIntersectionAnalyzer::addSelfTouch(
-    const SegmentString* ss, const Coordinate& intPt,
-    const Coordinate* e00, const Coordinate* e01,
-    const Coordinate* e10, const Coordinate* e11)
+    const SegmentString* ss, const CoordinateXY& intPt,
+    const CoordinateXY* e00, const CoordinateXY* e01,
+    const CoordinateXY* e10, const CoordinateXY* e11)
 {
     const PolygonRing* constPolyRing = static_cast<const PolygonRing*>(ss->getData());
     PolygonRing* polyRing = const_cast<PolygonRing*>(constPolyRing);
@@ -187,7 +188,7 @@ PolygonIntersectionAnalyzer::addSelfTouch(
 }
 
 /* private */
-const Coordinate&
+const CoordinateXY&
 PolygonIntersectionAnalyzer::prevCoordinateInRing(
     const SegmentString* ringSS, std::size_t segIndex) const
 {
@@ -198,7 +199,7 @@ PolygonIntersectionAnalyzer::prevCoordinateInRing(
     else {
         prevIndex = segIndex - 1;
     }
-    return ringSS->getCoordinate(prevIndex);
+    return ringSS->getCoordinate<CoordinateXY>(prevIndex);
 }
 
 /* private */

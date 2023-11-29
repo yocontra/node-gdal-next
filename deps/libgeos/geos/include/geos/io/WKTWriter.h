@@ -18,13 +18,14 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_IO_WKTWRITER_H
-#define GEOS_IO_WKTWRITER_H
+#pragma once
 
 #include <geos/export.h>
+#include <geos/io/OrdinateSet.h>
 
 #include <string>
 #include <cctype>
+#include <cstdint>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -35,6 +36,8 @@
 namespace geos {
 namespace geom {
 class Coordinate;
+class CoordinateXY;
+class CoordinateXYZM;
 class CoordinateSequence;
 class Geometry;
 class GeometryCollection;
@@ -88,6 +91,8 @@ public:
     /// Returns WKT string for the given Geometry
     std::string write(const geom::Geometry* geometry);
 
+    std::string write(const geom::Geometry& geometry);
+
     // Send Geometry's WKT to the given Writer
     void write(const geom::Geometry* geometry, Writer* writer);
 
@@ -122,6 +127,7 @@ public:
      * @return the WKT
      */
     static std::string toPoint(const geom::Coordinate& p0);
+    static std::string toPoint(const geom::CoordinateXY& p0);
 
     /**
      * Sets the rounding precision when writing the WKT
@@ -141,9 +147,21 @@ public:
     void setTrim(bool p0);
 
     /**
+     * Enables/disables removal of Z/M dimensions that have
+     * no non-NaN values in a geometry.
+     *
+     * @brief setRemoveEmptyDimensions
+     * @param remove
+     */
+    void setRemoveEmptyDimensions(bool remove)
+    {
+        removeEmptyDimensions = remove;
+    }
+
+    /**
      * Enable old style 3D/4D WKT generation.
      *
-     * By default the WKBWriter produces new style 3D/4D WKT
+     * By default the WKTWriter produces new style 3D/4D WKT
      * (ie. "POINT Z (10 20 30)") but if this method is used
      * to turn on old style WKT production then the WKT will
      * be formatted in the style "POINT (10 20 30)".
@@ -159,7 +177,7 @@ public:
     /*
      * \brief
      * Returns the output dimension used by the
-     * <code>WKBWriter</code>.
+     * <code>WKTWriter</code>.
      */
     int
     getOutputDimension() const
@@ -168,11 +186,12 @@ public:
     }
 
     /*
-     * Sets the output dimension used by the <code>WKBWriter</code>.
+     * Sets the output dimension used by the <code>WKTWriter</code>.
      *
-     * @param newOutputDimension Supported values are 2 or 3.
+     * @param newOutputDimension Supported values are 2, 3 or 4.
+     *        Default since GEOS 3.12 is 4.
      *        Note that 3 indicates up to 3 dimensions will be
-     *        written but 2D WKB is still produced for 2D geometries.
+     *        written but 2D WKT is still produced for 2D geometries.
      */
     void setOutputDimension(uint8_t newOutputDimension);
 
@@ -180,71 +199,96 @@ protected:
 
     int decimalPlaces;
 
-    void appendGeometryTaggedText(const geom::Geometry* geometry, int level, Writer* writer);
+    void appendGeometryTaggedText(
+            const geom::Geometry& geometry,
+            OrdinateSet outputOrdinates,
+            int level,
+            Writer& writer) const;
 
     void appendPointTaggedText(
-        const geom::Coordinate* coordinate,
-        int level, Writer* writer);
+        const geom::Point& point,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendLineStringTaggedText(
-        const geom::LineString* lineString,
-        int level, Writer* writer);
+        const geom::LineString& lineString,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendLinearRingTaggedText(
-        const geom::LinearRing* lineString,
-        int level, Writer* writer);
+        const geom::LinearRing& lineString,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendPolygonTaggedText(
-        const geom::Polygon* polygon,
-        int level, Writer* writer);
+        const geom::Polygon& polygon,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendMultiPointTaggedText(
-        const geom::MultiPoint* multipoint,
-        int level, Writer* writer);
+        const geom::MultiPoint& multipoint,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendMultiLineStringTaggedText(
-        const geom::MultiLineString* multiLineString,
-        int level, Writer* writer);
+        const geom::MultiLineString& multiLineString,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendMultiPolygonTaggedText(
-        const geom::MultiPolygon* multiPolygon,
-        int level, Writer* writer);
+        const geom::MultiPolygon& multiPolygon,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendGeometryCollectionTaggedText(
-        const geom::GeometryCollection* geometryCollection,
-        int level, Writer* writer);
+        const geom::GeometryCollection& geometryCollection,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
-    void appendPointText(const geom::Coordinate* coordinate, int level,
-                         Writer* writer);
+    void appendOrdinateText(OrdinateSet outputOrdinates,
+                            Writer& writer) const;
 
-    void appendCoordinate(const geom::Coordinate* coordinate,
-                          Writer* writer);
+    void appendSequenceText(const geom::CoordinateSequence& seq,
+                            OrdinateSet outputOrdinates,
+                            int level,
+                            bool doIntent,
+                            Writer& writer) const;
+
+    void appendCoordinate(const geom::CoordinateXYZM& coordinate,
+                          OrdinateSet outputOrdinates,
+                          Writer& writer) const;
 
     std::string writeNumber(double d) const;
 
     void appendLineStringText(
-        const geom::LineString* lineString,
-        int level, bool doIndent, Writer* writer);
+        const geom::LineString& lineString,
+        OrdinateSet outputOrdinates,
+        int level, bool doIndent, Writer& writer) const;
 
     void appendPolygonText(
-        const geom::Polygon* polygon,
-        int level, bool indentFirst, Writer* writer);
+        const geom::Polygon& polygon,
+        OrdinateSet outputOrdinates,
+        int level, bool indentFirst, Writer& writer) const;
 
     void appendMultiPointText(
-        const geom::MultiPoint* multiPoint,
-        int level, Writer* writer);
+        const geom::MultiPoint& multiPoint,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendMultiLineStringText(
-        const geom::MultiLineString* multiLineString,
-        int level, bool indentFirst, Writer* writer);
+        const geom::MultiLineString& multiLineString,
+        OrdinateSet outputOrdinates,
+        int level, bool indentFirst, Writer& writer) const;
 
     void appendMultiPolygonText(
-        const geom::MultiPolygon* multiPolygon,
-        int level, Writer* writer);
+        const geom::MultiPolygon& multiPolygon,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
     void appendGeometryCollectionText(
-        const geom::GeometryCollection* geometryCollection,
-        int level, Writer* writer);
+        const geom::GeometryCollection& geometryCollection,
+        OrdinateSet outputOrdinates,
+        int level, Writer& writer) const;
 
 private:
 
@@ -260,10 +304,13 @@ private:
 
     bool trim;
 
+    bool removeEmptyDimensions = false;
+
     int level;
 
+    static constexpr int coordsPerLine = 10;
+
     uint8_t defaultOutputDimension;
-    uint8_t outputDimension;
     bool old3D;
 
     void writeFormatted(
@@ -280,4 +327,3 @@ private:
 #pragma warning(pop)
 #endif
 
-#endif // #ifndef GEOS_IO_WKTWRITER_H

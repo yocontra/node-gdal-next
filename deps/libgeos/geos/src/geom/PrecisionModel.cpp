@@ -27,10 +27,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
-
-#ifndef GEOS_INLINE
-# include <geos/geom/PrecisionModel.inl>
-#endif
+#include <iomanip> 
 
 #ifndef GEOS_DEBUG
 #define GEOS_DEBUG 0
@@ -39,6 +36,11 @@
 namespace geos {
 namespace geom { // geos::geom
 
+/**
+*  The maximum precise value representable in a double. Since IEE754
+*  double-precision numbers allow 53 bits of mantissa, the value is equal to
+*  2^53 - 1.  This provides <i>almost</i> 16 decimal digits of precision.
+*/
 const double PrecisionModel::maximumPreciseValue = 9007199254740992.0;
 
 /*public*/
@@ -54,9 +56,19 @@ PrecisionModel::makePrecise(double val) const
         return static_cast<double>(floatSingleVal);
     }
     if(modelType == FIXED) {
-        // Use whatever happens to be the default rounding method
-        const double ret = util::round(val * scale) / scale;
-        return ret;
+        //-- make arithmetic robust by using integral value if available
+        if (gridSize > 1) {
+//double v2 = util::round(val / gridSize) * gridSize;
+//std::cout << std::setprecision(16) << "GS[" << gridSize << "] " << val << " -> "  << v2 << std::endl;
+            return util::round(val / gridSize) * gridSize;
+        }
+        //-- since grid size is <= 1, scale must be >= 1 OR 0
+        //-- if scale == 0, this is a no-op (should never happen)
+        else if (scale != 0.0) {
+//double v2 = util::round(val * scale) / scale;
+//std::cout << std::setprecision(16) << "SC[" << scale << "] " << val << " -> " << "SC " << v2 << std::endl;
+            return util::round(val * scale) / scale;
+        }
     }
     // modelType == FLOATING - no rounding necessary
     return val;
@@ -66,7 +78,8 @@ PrecisionModel::makePrecise(double val) const
 PrecisionModel::PrecisionModel()
     :
     modelType(FLOATING),
-    scale(0.0)
+    scale(0.0),
+    gridSize(0.0)
 {
 #if GEOS_DEBUG
     std::cerr << "PrecisionModel[" << this << "] ctor()" << std::endl;
@@ -79,7 +92,8 @@ PrecisionModel::PrecisionModel()
 PrecisionModel::PrecisionModel(Type nModelType)
     :
     modelType(nModelType),
-    scale(1.0)
+    scale(1.0),
+    gridSize(1.0)
 {
 #if GEOS_DEBUG
     std::cerr << "PrecisionModel[" << this << "] ctor(Type)" << std::endl;
@@ -92,7 +106,6 @@ PrecisionModel::PrecisionModel(Type nModelType)
 
 /*public (deprecated) */
 PrecisionModel::PrecisionModel(double newScale, double newOffsetX, double newOffsetY)
-//throw(IllegalArgumentException *)
     :
     modelType(FIXED)
 {
@@ -109,7 +122,6 @@ PrecisionModel::PrecisionModel(double newScale, double newOffsetX, double newOff
 
 /*public*/
 PrecisionModel::PrecisionModel(double newScale)
-//throw (IllegalArgumentException *)
     :
     modelType(FIXED)
 {
@@ -149,16 +161,48 @@ PrecisionModel::getMaximumSignificantDigits() const
     return maxSigDigits;
 }
 
+//-- this value is not critical, since most common usage should be VERY close to integral
+const double GRIDSIZE_INTEGER_TOLERANCE = 1e-5;
 
 /*private*/
 void
 PrecisionModel::setScale(double newScale)
-// throw IllegalArgumentException
 {
-    if(newScale <= 0) {
-        throw util::IllegalArgumentException("PrecisionModel scale cannot be 0");
+    //-- should never happen, but make this a no-op in case
+    if (newScale == 0) {
+        scale = 0.0;
+        gridSize = 0.0;
     }
-    scale = std::fabs(newScale);
+    /**
+    * A negative scale indicates the grid size is being set.
+    * The scale is set as well, as the reciprocal.
+    * NOTE: may not need to support negative grid size now due to robust arithmetic
+    */
+    if (newScale < 0) {
+        scale = 1.0 / std::fabs(newScale);
+    }
+    else {
+        scale = newScale;
+    }
+    //-- snap nearly integral scale or gridsize to exact integer
+    //-- this handles the most common case of fractional powers of ten
+    if (scale < 1) {
+        gridSize = snapToInt(1.0 / scale, GRIDSIZE_INTEGER_TOLERANCE);
+    }
+    else {
+        scale = snapToInt( scale, GRIDSIZE_INTEGER_TOLERANCE);
+        gridSize = 1.0 / scale;
+    }
+}
+
+/*private*/ 
+double
+PrecisionModel::snapToInt(double val, double tolerance) {
+    double valInt = std::round(val);
+    if (std::abs(val - valInt) < tolerance) {
+        return valInt;
+    }
+    return val;
 }
 
 /*public*/

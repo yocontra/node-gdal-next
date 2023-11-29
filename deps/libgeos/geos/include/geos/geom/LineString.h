@@ -18,8 +18,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOS_LINESTRING_H
-#define GEOS_GEOS_LINESTRING_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Geometry.h> // for inheritance
@@ -31,7 +30,6 @@
 #include <vector>
 #include <memory> // for unique_ptr
 
-#include <geos/inline.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -41,7 +39,6 @@
 namespace geos {
 namespace geom {
 class Coordinate;
-class CoordinateArraySequence;
 class CoordinateSequenceFilter;
 }
 }
@@ -117,6 +114,10 @@ public:
     /// Returns coordinate dimension.
     uint8_t getCoordinateDimension() const override;
 
+    bool hasM() const override;
+
+    bool hasZ() const override;
+
     /**
      * \brief
      * Returns a MultiPoint.
@@ -155,6 +156,8 @@ public:
     bool equalsExact(const Geometry* other, double tolerance = 0)
     const override;
 
+    bool equalsIdentical(const Geometry* other) const override;
+
     void apply_rw(const CoordinateFilter* filter) override;
 
     void apply_ro(CoordinateFilter* filter) const override;
@@ -183,7 +186,7 @@ public:
     //was protected
     int compareToSameClass(const Geometry* ls) const override;
 
-    const Coordinate* getCoordinate() const override;
+    const CoordinateXY* getCoordinate() const override;
 
     double getLength() const override;
 
@@ -195,6 +198,10 @@ public:
      */
     std::unique_ptr<LineString> reverse() const { return std::unique_ptr<LineString>(reverseImpl()); }
 
+    const Envelope* getEnvelopeInternal() const override {
+        return &envelope;
+    }
+
 protected:
 
     LineString(const LineString& ls);
@@ -202,9 +209,6 @@ protected:
     /// \brief
     /// Constructs a LineString taking ownership the
     /// given CoordinateSequence.
-    LineString(CoordinateSequence* pts, const GeometryFactory* newFactory);
-
-    /// Hopefully cleaner version of the above
     LineString(CoordinateSequence::Ptr && pts,
                const GeometryFactory& newFactory);
 
@@ -212,15 +216,21 @@ protected:
 
     LineString* reverseImpl() const override;
 
-    Envelope::Ptr computeEnvelopeInternal() const override;
+    Envelope computeEnvelopeInternal() const;
 
     CoordinateSequence::Ptr points;
+
+    mutable Envelope envelope;
 
     int
     getSortIndex() const override
     {
         return SORTINDEX_LINESTRING;
     };
+
+    void geometryChangedAction() override {
+        envelope = computeEnvelopeInternal();
+    }
 
 private:
 
@@ -245,4 +255,3 @@ struct GEOS_DLL  LineStringLT {
 #pragma warning(pop)
 #endif
 
-#endif // ndef GEOS_GEOS_LINESTRING_H

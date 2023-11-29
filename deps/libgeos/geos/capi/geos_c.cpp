@@ -267,6 +267,12 @@ extern "C" {
         return GEOSEqualsExact_r(handle, g1, g2, tolerance);
     }
 
+    char
+    GEOSEqualsIdentical(const Geometry* g1, const Geometry* g2)
+    {
+        return GEOSEqualsIdentical_r(handle, g1, g2);
+    }
+
     int
     GEOSDistance(const Geometry* g1, const Geometry* g2, double* dist)
     {
@@ -469,6 +475,51 @@ extern "C" {
     }
 
     Geometry*
+    GEOSConcaveHull(const Geometry* g,
+                    double ratio,
+                    unsigned int allowHoles)
+
+    {
+        return GEOSConcaveHull_r(handle, g, ratio, allowHoles);
+    }
+
+    Geometry*
+    GEOSConcaveHullByLength(const Geometry* g,
+                    double length,
+                    unsigned int allowHoles)
+
+    {
+        return GEOSConcaveHullByLength_r(handle, g, length, allowHoles);
+    }
+
+    Geometry*
+    GEOSPolygonHullSimplify(const Geometry* g,
+                            unsigned int isOuter,
+                            double vertexNumFraction)
+    {
+        return GEOSPolygonHullSimplify_r(handle, g, isOuter, vertexNumFraction);
+    }
+
+    Geometry*
+    GEOSPolygonHullSimplifyMode(const Geometry* g,
+                            unsigned int isOuter,
+                            unsigned int parameterMode,
+                            double parameter)
+    {
+        return GEOSPolygonHullSimplifyMode_r(handle, g, isOuter, parameterMode, parameter);
+    }
+
+    Geometry*
+    GEOSConcaveHullOfPolygons(const Geometry* g,
+        double lengthRatio,
+        unsigned int isTight,
+        unsigned int isHolesAllowed)
+    {
+        return GEOSConcaveHullOfPolygons_r(handle,
+            g, lengthRatio, isTight, isHolesAllowed);
+    }
+
+    Geometry*
     GEOSMinimumRotatedRectangle(const Geometry* g)
     {
         return GEOSMinimumRotatedRectangle_r(handle, g);
@@ -565,6 +616,12 @@ extern "C" {
     }
 
     Geometry*
+    GEOSDisjointSubsetUnion(const Geometry* g)
+    {
+        return GEOSDisjointSubsetUnion_r(handle, g);
+    }
+
+    Geometry*
     GEOSNode(const Geometry* g)
     {
         return GEOSNode_r(handle, g);
@@ -589,6 +646,11 @@ extern "C" {
         return GEOSClipByRect_r(handle, g, xmin, ymin, xmax, ymax);
     }
 
+
+    Geometry*
+    GEOSGeom_transformXY(const GEOSGeometry* g, GEOSTransformXYCallback callback, void* userdata) {
+        return GEOSGeom_transformXY_r(handle, g, callback, userdata);
+    }
 
 
 //-------------------------------------------------------------------
@@ -617,6 +679,12 @@ extern "C" {
     GEOSNormalize(Geometry* g)
     {
         return GEOSNormalize_r(handle, g);
+    }
+
+    int
+    GEOSOrientPolygons(Geometry* g, int exteriorCW)
+    {
+        return GEOSOrientPolygons_r(handle, g, exteriorCW);
     }
 
     int
@@ -733,6 +801,16 @@ extern "C" {
     }
 
     /*
+     * For POINT
+     * returns 0 on exception, otherwise 1
+     */
+    int
+    GEOSGeomGetM(const Geometry* g1, double* m)
+    {
+        return GEOSGeomGetM_r(handle, g1, m);
+    }
+
+    /*
      * Call only on polygon
      * Return a copy of the internal Geometry.
      */
@@ -758,6 +836,13 @@ extern "C" {
         return GEOSGetCentroid_r(handle, g);
     }
 
+    int
+    GEOSHilbertCode(const GEOSGeometry *geom, const GEOSGeometry* extent,
+                unsigned int level, unsigned int *code)
+    {
+        return GEOSHilbertCode_r(handle, geom, extent, level, code);
+    }
+
     Geometry*
     GEOSMinimumBoundingCircle(const Geometry* g, double* radius, Geometry** center)
     {
@@ -768,6 +853,12 @@ extern "C" {
     GEOSGeom_createCollection(int type, Geometry** geoms, unsigned int ngeoms)
     {
         return GEOSGeom_createCollection_r(handle, type, geoms, ngeoms);
+    }
+
+    Geometry**
+    GEOSGeom_releaseCollection(Geometry* collection, unsigned int * ngeoms)
+    {
+        return GEOSGeom_releaseCollection_r(handle, collection, ngeoms);
     }
 
     Geometry*
@@ -844,9 +935,29 @@ extern "C" {
     }
 
     Geometry*
+    GEOSRemoveRepeatedPoints(
+        const Geometry* g,
+        double tolerance)
+    {
+        return GEOSRemoveRepeatedPoints_r(handle, g, tolerance);
+    }
+
+    Geometry*
     GEOSLineMerge(const Geometry* g)
     {
         return GEOSLineMerge_r(handle, g);
+    }
+
+    Geometry*
+    GEOSLineMergeDirected(const Geometry* g)
+    {
+        return GEOSLineMergeDirected_r(handle, g);
+    }
+
+    Geometry*
+    GEOSLineSubstring(const Geometry* g, double start_fraction, double end_fraction)
+    {
+        return GEOSLineSubstring_r(handle, g, start_fraction, end_fraction);
     }
 
     Geometry*
@@ -883,6 +994,12 @@ extern "C" {
     GEOSHasZ(const Geometry* g)
     {
         return GEOSHasZ_r(handle, g);
+    }
+
+    char
+    GEOSHasM(const Geometry* g)
+    {
+        return GEOSHasM_r(handle, g);
     }
 
     int
@@ -1127,6 +1244,11 @@ extern "C" {
         return GEOSGeom_getYMax_r(handle, g, value);
     }
 
+    int GEOS_DLL GEOSGeom_getExtent(const GEOSGeometry* g, double* xmin, double* ymin, double* xmax, double* ymax)
+    {
+        return GEOSGeom_getExtent_r(handle, g, xmin, ymin, xmax, ymax);
+    }
+
     Geometry*
     GEOSSimplify(const Geometry* g, double tolerance)
     {
@@ -1153,6 +1275,11 @@ extern "C" {
         GEOSWKTReader_destroy_r(handle, reader);
     }
 
+    void
+    GEOSWKTReader_setFixStructure(WKTReader* reader, char doFix)
+    {
+        GEOSWKTReader_setFixStructure_r(handle, reader, doFix);
+    }
 
     Geometry*
     GEOSWKTReader_read(WKTReader* reader, const char* wkt)
@@ -1222,6 +1349,11 @@ extern "C" {
         GEOSWKBReader_destroy_r(handle, reader);
     }
 
+    void
+    GEOSWKBReader_setFixStructure(WKBReader* reader, char doFix)
+    {
+        GEOSWKBReader_setFixStructure_r(handle, reader, doFix);
+    }
 
     Geometry*
     GEOSWKBReader_read(WKBReader* reader, const unsigned char* wkb, std::size_t size)
@@ -1373,6 +1505,12 @@ extern "C" {
     }
 
     char
+    GEOSPreparedContainsXY(const geos::geom::prep::PreparedGeometry* pg1, double x, double y)
+    {
+        return GEOSPreparedContainsXY_r(handle, pg1, x, y);
+    }
+
+    char
     GEOSPreparedContainsProperly(const geos::geom::prep::PreparedGeometry* pg1, const Geometry* g2)
     {
         return GEOSPreparedContainsProperly_r(handle, pg1, g2);
@@ -1406,6 +1544,12 @@ extern "C" {
     GEOSPreparedIntersects(const geos::geom::prep::PreparedGeometry* pg1, const Geometry* g2)
     {
         return GEOSPreparedIntersects_r(handle, pg1, g2);
+    }
+
+    char
+    GEOSPreparedIntersectsXY(const geos::geom::prep::PreparedGeometry* pg1, double x, double y)
+    {
+        return GEOSPreparedIntersectsXY_r(handle, pg1, x, y);
     }
 
     char
@@ -1448,6 +1592,12 @@ extern "C" {
     GEOSSTRtree_create(std::size_t nodeCapacity)
     {
         return GEOSSTRtree_create_r(handle, nodeCapacity);
+    }
+
+    int
+    GEOSSTRtree_build(GEOSSTRtree* tree)
+    {
+        return GEOSSTRtree_build_r(handle, tree);
     }
 
     void
@@ -1563,6 +1713,13 @@ extern "C" {
         return GEOSGeom_createEmptyPolygon_r(handle);
     }
 
+    geos::geom::Geometry*
+    GEOSGeom_createRectangle(double xmin, double ymin, double xmax,
+                            double ymax)
+    {
+        return GEOSGeom_createRectangle_r(handle, xmin, ymin, xmax, ymax);
+    }
+
     int
     GEOSOrientationIndex(double Ax, double Ay, double Bx, double By,
                          double Px, double Py)
@@ -1643,9 +1800,9 @@ extern "C" {
     }
 
     Geometry*
-    GEOSVoronoiDiagram(const Geometry* g, const Geometry* env, double tolerance, int onlyEdges)
+    GEOSVoronoiDiagram(const Geometry* g, const Geometry* env, double tolerance, int flags)
     {
-        return GEOSVoronoiDiagram_r(handle, g, env, tolerance, onlyEdges);
+        return GEOSVoronoiDiagram_r(handle, g, env, tolerance, flags);
     }
 
     int
@@ -1658,5 +1815,21 @@ extern "C" {
                                          bx0, by0, bx1, by1,
                                          cx, cy);
     }
+
+    int
+    GEOSCoverageIsValid(
+        const Geometry* input,
+        double gapWidth,
+        Geometry** invalidEdges)
+    {
+        return GEOSCoverageIsValid_r(handle, input, gapWidth, invalidEdges);
+    }
+
+    Geometry*
+    GEOSCoverageSimplifyVW(const Geometry* input, double tolerance, int preserveBoundary)
+    {
+        return GEOSCoverageSimplifyVW_r(handle, input, tolerance, preserveBoundary);
+    }
+
 
 } /* extern "C" */

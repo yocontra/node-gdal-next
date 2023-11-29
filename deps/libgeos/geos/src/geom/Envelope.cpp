@@ -24,9 +24,6 @@
 #include <sstream>
 #include <cmath>
 
-#ifndef GEOS_INLINE
-# include <geos/geom/Envelope.inl>
-#endif
 
 #ifndef GEOS_DEBUG
 #define GEOS_DEBUG 0
@@ -41,8 +38,8 @@ namespace geom { // geos::geom
 
 /*public*/
 bool
-Envelope::intersects(const Coordinate& p1, const Coordinate& p2,
-                     const Coordinate& q)
+Envelope::intersects(const CoordinateXY& p1, const CoordinateXY& p2,
+                     const CoordinateXY& q)
 {
     //OptimizeIt shows that Math#min and Math#max here are a bottleneck.
     //Replace with direct comparisons. [Jon Aquino]
@@ -55,28 +52,28 @@ Envelope::intersects(const Coordinate& p1, const Coordinate& p2,
 
 /*public*/
 bool
-Envelope::intersects(const Coordinate& a, const Coordinate& b) const
+Envelope::intersects(const CoordinateXY& a, const CoordinateXY& b) const
 {
     // These comparisons look redundant, but an alternative using
     // std::minmax performs no better and compiles down to more
     // instructions.
     double envminx = (a.x < b.x) ? a.x : b.x;
-    if(!(maxx >= envminx)) { // awkward comparison catches cases where this->isNull()
+    if(!std::isgreaterequal(maxx, envminx)) { // awkward comparison catches cases where this->isNull()
         return false;
     }
 
     double envmaxx = (a.x > b.x) ? a.x : b.x;
-    if(envmaxx < minx) {
+    if(std::isless(envmaxx, minx)) {
         return false;
     }
 
     double envminy = (a.y < b.y) ? a.y : b.y;
-    if(envminy > maxy) {
+    if(std::isgreater(envminy, maxy)) {
         return false;
     }
 
     double envmaxy = (a.y > b.y) ? a.y : b.y;
-    if(envmaxy < miny) {
+    if(std::isless(envmaxy, miny)) {
         return false;
     }
 
@@ -103,27 +100,15 @@ Envelope::Envelope(const std::string& str)
          strtod(values[3].c_str(), nullptr));
 }
 
-
-/*public*/
-bool
-Envelope::covers(double x, double y) const
-{
-    return x >= minx &&
-           x <= maxx &&
-           y >= miny &&
-           y <= maxy;
-}
-
-
 /*public*/
 bool
 Envelope::covers(const Envelope& other) const
 {
     return
-        other.minx >= minx &&
-        other.maxx <= maxx &&
-        other.miny >= miny &&
-        other.maxy <= maxy;
+        std::isgreaterequal(other.minx,  minx) &&
+        std::islessequal(other.maxx,  maxx) &&
+        std::isgreaterequal(other.miny, miny) &&
+        std::islessequal(other.maxy,  maxy);
 }
 
 /*public*/
@@ -137,6 +122,13 @@ Envelope::equals(const Envelope* other) const
             other->maxx == maxx &&
             other->miny == miny &&
             other->maxy == maxy;
+}
+
+bool
+Envelope::isfinite() const
+{
+    return std::isfinite(minx) && std::isfinite(maxx) &&
+           std::isfinite(miny) && std::isfinite(maxy);
 }
 
 /* public */
@@ -156,62 +148,6 @@ Envelope::toString() const
     std::ostringstream s;
     s << *this;
     return s.str();
-}
-
-/*public*/
-bool
-operator==(const Envelope& a, const Envelope& b)
-{
-    return a.equals(&b);
-}
-
-bool
-operator< (const Envelope& a, const Envelope& b)
-{
-    /*
-    * Compares two envelopes using lexicographic ordering.
-    * The ordering comparison is based on the usual numerical
-    * comparison between the sequence of ordinates.
-    * Null envelopes are less than all non-null envelopes.
-    */
-    if (a.isNull()) {
-        // null == null
-        if (b.isNull())
-            return false;
-        // null < notnull
-        else
-            return true;
-    }
-    // notnull > null
-    if (b.isNull())
-        return false;
-
-    // compare based on numerical ordering of ordinates
-    if (a.getMinX() < b.getMinX()) return true;
-    if (a.getMinX() > b.getMinX()) return false;
-    if (a.getMinY() < b.getMinY()) return true;
-    if (a.getMinY() > b.getMinY()) return false;
-    if (a.getMaxX() < b.getMaxX()) return true;
-    if (a.getMaxX() > b.getMaxX()) return false;
-    if (a.getMaxY() < b.getMaxY()) return true;
-    if (a.getMaxY() > b.getMaxY()) return false;
-    return false; // == is not strictly <
-}
-
-
-/*public*/
-size_t
-Envelope::hashCode() const
-{
-    auto hash = std::hash<double>{};
-
-    //Algorithm from Effective Java by Joshua Bloch [Jon Aquino]
-    std::size_t result = 17;
-    result = 37 * result + hash(minx);
-    result = 37 * result + hash(maxx);
-    result = 37 * result + hash(miny);
-    result = 37 * result + hash(maxy);
-    return result;
 }
 
 /*public static*/
@@ -240,7 +176,7 @@ Envelope::split(const std::string& str, const std::string& delimiters)
 
 /*public*/
 bool
-Envelope::centre(Coordinate& p_centre) const
+Envelope::centre(CoordinateXY& p_centre) const
 {
     if(isNull()) {
         return false;
@@ -288,9 +224,43 @@ Envelope::expandBy(double deltaX, double deltaY)
     maxy += deltaY;
 
     // check for envelope disappearing
-    if(minx > maxx || miny > maxy) {
+    if(std::isgreater(minx, maxx) || std::isgreater(miny, maxy)) {
         setToNull();
     }
+}
+
+
+bool
+operator< (const Envelope& a, const Envelope& b)
+{
+    /*
+    * Compares two envelopes using lexicographic ordering.
+    * The ordering comparison is based on the usual numerical
+    * comparison between the sequence of ordinates.
+    * Null envelopes are less than all non-null envelopes.
+    */
+    if (a.isNull()) {
+        // null == null
+        if (b.isNull())
+            return false;
+        // null < notnull
+        else
+            return true;
+    }
+    // notnull > null
+    if (b.isNull())
+        return false;
+
+    // compare based on numerical ordering of ordinates
+    if (a.getMinX() < b.getMinX()) return true;
+    if (a.getMinX() > b.getMinX()) return false;
+    if (a.getMinY() < b.getMinY()) return true;
+    if (a.getMinY() > b.getMinY()) return false;
+    if (a.getMaxX() < b.getMaxX()) return true;
+    if (a.getMaxX() > b.getMaxX()) return false;
+    if (a.getMaxY() < b.getMaxY()) return true;
+    if (a.getMaxY() > b.getMaxY()) return false;
+    return false; // == is not strictly <
 }
 
 

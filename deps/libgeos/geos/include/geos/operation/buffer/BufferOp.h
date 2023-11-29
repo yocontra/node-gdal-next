@@ -18,8 +18,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_BUFFER_BUFFEROP_H
-#define GEOS_OP_BUFFER_BUFFEROP_H
+#pragma once
 
 #include <memory> // for unique_ptr
 #include <vector> // for vector
@@ -171,6 +170,11 @@ public:
         int quadrantSegments = BufferParameters::DEFAULT_QUADRANT_SEGMENTS,
         int endCapStyle = BufferParameters::CAP_ROUND);
 
+    static std::unique_ptr<geom::Geometry> bufferOp(
+        const geom::Geometry* g,
+        double distance,
+        BufferParameters& bufParms);
+
     /** \brief
      * Initializes a buffer computation for the given geometry.
      *
@@ -299,6 +303,4 @@ BufferOp::setSingleSided(bool isSingleSided)
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#endif // ndef GEOS_OP_BUFFER_BUFFEROP_H
 

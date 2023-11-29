@@ -12,8 +12,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_INTERSECTION_H
-#define GEOS_ALGORITHM_INTERSECTION_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Coordinate.h>
@@ -47,8 +46,8 @@ class GEOS_DLL Intersection {
 
 public:
 
-static geom::Coordinate intersection(const geom::Coordinate& p1, const geom::Coordinate& p2,
-                                     const geom::Coordinate& q1, const geom::Coordinate& q2);
+static geom::CoordinateXY intersection(const geom::CoordinateXY& p1, const geom::CoordinateXY& p2,
+                                       const geom::CoordinateXY& q1, const geom::CoordinateXY& q2);
 
 };
 
@@ -56,5 +55,3 @@ static geom::Coordinate intersection(const geom::Coordinate& p1, const geom::Coo
 } // namespace geos::algorithm
 } // namespace geos
 
-
-#endif // GEOS_ALGORITHM_INTERSECTION_H

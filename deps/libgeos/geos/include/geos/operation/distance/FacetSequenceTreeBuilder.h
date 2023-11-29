@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OPERATION_DISTANCE_FACETSEQUENCETREEBUILDER_H
-#define GEOS_OPERATION_DISTANCE_FACETSEQUENCETREEBUILDER_H
+#pragma once
 
 #include <geos/index/ItemVisitor.h>
 #include <geos/index/strtree/TemplateSTRtree.h>
@@ -31,10 +30,10 @@ namespace distance {
 class GEOS_DLL FacetSequenceTreeBuilder {
 private:
     // 6 seems to be a good facet sequence size
-    static const int FACET_SEQUENCE_SIZE = 6;
+    static const std::size_t FACET_SEQUENCE_SIZE = 6;
 
     // Seems to be better to use a minimum node capacity
-    static const int STR_TREE_NODE_CAPACITY = 4;
+    static const std::size_t STR_TREE_NODE_CAPACITY = 4;
 
     static void addFacetSequences(const geom::Geometry* geom,
                                   const geom::CoordinateSequence* pts,
@@ -68,4 +67,3 @@ public:
 }
 }
 
-#endif //GEOS_FACETSEQUENCETREEBUILDER_H

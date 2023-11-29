@@ -22,9 +22,7 @@
 #include <geos/operation/linemerge/LineMergeEdge.h>
 #include <geos/operation/linemerge/LineMergeDirectedEdge.h>
 #include <geos/geom/GeometryFactory.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/LineString.h>
 #include <geos/util.h>
 
@@ -44,8 +42,7 @@ namespace linemerge { // geos.operation.linemerge
  */
 EdgeString::EdgeString(const GeometryFactory* newFactory):
     factory(newFactory),
-    directedEdges(),
-    coordinates(nullptr)
+    directedEdges()
 {
 }
 
@@ -58,31 +55,29 @@ EdgeString::add(LineMergeDirectedEdge* directedEdge)
     directedEdges.push_back(directedEdge);
 }
 
-CoordinateSequence*
-EdgeString::getCoordinates()
+std::unique_ptr<CoordinateSequence>
+EdgeString::getCoordinates() const
 {
-    if(coordinates == nullptr) {
-        int forwardDirectedEdges = 0;
-        int reverseDirectedEdges = 0;
-        coordinates = new CoordinateArraySequence();
-        for(std::size_t i = 0, e = directedEdges.size(); i < e; ++i) {
-            LineMergeDirectedEdge* directedEdge = directedEdges[i];
-            if(directedEdge->getEdgeDirection()) {
-                forwardDirectedEdges++;
-            }
-            else {
-                reverseDirectedEdges++;
-            }
-
-            LineMergeEdge* lme = detail::down_cast<LineMergeEdge*>(directedEdge->getEdge());
-
-            coordinates->add(lme->getLine()->getCoordinatesRO(),
-                             false,
-                             directedEdge->getEdgeDirection());
+    int forwardDirectedEdges = 0;
+    int reverseDirectedEdges = 0;
+    auto coordinates = detail::make_unique<CoordinateSequence>();
+    for(std::size_t i = 0, e = directedEdges.size(); i < e; ++i) {
+        LineMergeDirectedEdge* directedEdge = directedEdges[i];
+        if(directedEdge->getEdgeDirection()) {
+            forwardDirectedEdges++;
         }
-        if(reverseDirectedEdges > forwardDirectedEdges) {
-            CoordinateSequence::reverse(coordinates);
+        else {
+            reverseDirectedEdges++;
         }
+
+        LineMergeEdge* lme = detail::down_cast<LineMergeEdge*>(directedEdge->getEdge());
+
+        coordinates->add(*lme->getLine()->getCoordinatesRO(),
+                         false,
+                         directedEdge->getEdgeDirection());
+    }
+    if(reverseDirectedEdges > forwardDirectedEdges) {
+        coordinates->reverse();
     }
     return coordinates;
 }
@@ -90,8 +85,8 @@ EdgeString::getCoordinates()
 /*
  * Converts this EdgeString into a new LineString.
  */
-LineString*
-EdgeString::toLineString()
+std::unique_ptr<LineString>
+EdgeString::toLineString() const
 {
     return factory->createLineString(getCoordinates());
 }

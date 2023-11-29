@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_NODING_NODABLESEGMENTSTRING_H
-#define GEOS_NODING_NODABLESEGMENTSTRING_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/noding/SegmentString.h> // for inheritance
@@ -38,9 +37,9 @@ class GEOS_DLL NodableSegmentString : public SegmentString {
 private:
 protected:
 public:
-    NodableSegmentString(const void* newContext)
+    NodableSegmentString(const void* newContext, geom::CoordinateSequence* newSeq)
         :
-        SegmentString(newContext)
+        SegmentString(newContext, newSeq)
     { }
 
     /**
@@ -55,4 +54,3 @@ public:
 } // namespace geos::noding
 } // namespace geos
 
-#endif // GEOS_NODING_NODABLESEGMENTSTRING_H

@@ -20,13 +20,11 @@
 #include <geos/operation/polygonize/EdgeRing.h>
 #include <geos/operation/polygonize/PolygonizeEdge.h>
 #include <geos/planargraph/DirectedEdge.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/LinearRing.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Envelope.h>
 #include <geos/geom/GeometryFactory.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/algorithm/PointLocation.h>
 #include <geos/algorithm/Orientation.h>
 #include <geos/util/IllegalArgumentException.h>
@@ -199,12 +197,21 @@ EdgeRing::getPolygon()
 
 /*public*/
 bool
-EdgeRing::isValid()
+EdgeRing::isValid() const
 {
-    if(! getRingInternal()) {
-        return false;    // computes cached ring
+    return is_valid;
+}
+
+void
+EdgeRing::computeValid()
+{
+    getCoordinates();
+    if (ringPts->size() <= 3) {
+        is_valid = false;
+        return;
     }
-    return ring->isValid();
+    getRingInternal();
+    is_valid = ring->isValid();
 }
 
 /*private*/
@@ -212,7 +219,7 @@ const CoordinateSequence*
 EdgeRing::getCoordinates()
 {
     if(ringPts == nullptr) {
-        ringPts = detail::make_unique<CoordinateArraySequence>(0u, 0u);
+        ringPts = detail::make_unique<CoordinateSequence>(0u, 0u);
         for(const auto& de : deList) {
             auto edge = dynamic_cast<PolygonizeEdge*>(de->getEdge());
             addEdge(edge->getLine()->getCoordinatesRO(),
@@ -240,7 +247,7 @@ EdgeRing::getRingInternal()
 
     getCoordinates();
     try {
-        ring.reset(factory->createLinearRing(*ringPts));
+        ring = factory->createLinearRing(*ringPts);
     }
     catch(const geos::util::IllegalArgumentException& e) {
 #if GEOS_DEBUG
@@ -265,7 +272,7 @@ EdgeRing::getRingOwnership()
 /*private*/
 void
 EdgeRing::addEdge(const CoordinateSequence* coords, bool isForward,
-                  CoordinateArraySequence* coordList)
+                  CoordinateSequence* coordList)
 {
     const std::size_t npts = coords->getSize();
     if(isForward) {

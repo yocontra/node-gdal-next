@@ -32,6 +32,7 @@
 #include <geos/noding/MCIndexNoder.h>
 #include <geos/noding/SegmentIntersector.h>
 #include <geos/noding/SegmentString.h>
+#include <geos/operation/valid/RepeatedPointRemover.h>
 
 #include <unordered_set>
 
@@ -39,7 +40,6 @@ using namespace geos::algorithm;
 using namespace geos::noding;
 using namespace geos::geom;
 using namespace geos::geom::util;
-
 
 namespace geos {
 namespace operation {
@@ -55,7 +55,7 @@ IsSimpleOp::isSimple(const Geometry& geom)
 }
 
 /* public static */
-Coordinate
+CoordinateXY
 IsSimpleOp::getNonSimpleLocation(const Geometry& geom)
 {
     IsSimpleOp op(geom);
@@ -78,21 +78,21 @@ IsSimpleOp::isSimple()
 }
 
 /* public */
-Coordinate
+CoordinateXY
 IsSimpleOp::getNonSimpleLocation()
 {
     compute();
     if (nonSimplePts.size() == 0) {
-        Coordinate c;
+        CoordinateXY c;
         c.setNull();
         return c;
     }
-    return nonSimplePts.at(0);
+    return nonSimplePts[0];
 }
 
 
 /* public */
-const std::vector<Coordinate>&
+const std::vector<CoordinateXY>&
 IsSimpleOp::getNonSimpleLocations()
 {
     compute();
@@ -141,11 +141,11 @@ IsSimpleOp::isSimpleMultiPoint(const MultiPoint& mp)
 {
     if (mp.isEmpty()) return true;
     bool bIsSimple = true;
-    std::unordered_set<Coordinate, Coordinate::HashCode> points;
+    std::unordered_set<CoordinateXY, Coordinate::HashCode> points;
 
     for (std::size_t i = 0; i < mp.getNumGeometries(); i++) {
         const Point* pt = mp.getGeometryN(i);
-        const Coordinate* p = pt->getCoordinate();
+        const CoordinateXY* p = pt->getCoordinate();
         if (points.find(*p) != points.end()) {
             nonSimplePts.push_back(*p);
             bIsSimple = false;
@@ -203,7 +203,8 @@ IsSimpleOp::isSimpleLinearGeometry(const Geometry& geom)
         return true;
 
     std::vector<SegmentString*> segStringsBare;
-    auto segStrings = extractSegmentStrings(geom);
+    auto noRepeatedPtSeqs = removeRepeatedPts(geom);
+    auto segStrings = createSegmentStrings(noRepeatedPtSeqs);
     for (auto& ss: segStrings) {
         segStringsBare.push_back(ss.get());
     }
@@ -218,22 +219,33 @@ IsSimpleOp::isSimpleLinearGeometry(const Geometry& geom)
 }
 
 /* private static */
-std::vector<std::unique_ptr<SegmentString>>
-IsSimpleOp::extractSegmentStrings(const Geometry& geom)
+std::vector<std::unique_ptr<CoordinateSequence>>
+IsSimpleOp::removeRepeatedPts(const Geometry& geom)
 {
-    std::vector<std::unique_ptr<SegmentString>> segStrings;
+    std::vector<std::unique_ptr<CoordinateSequence>> coordseqs;
     for (std::size_t i = 0, sz = geom.getNumGeometries(); i < sz; i++) {
         const LineString* line = dynamic_cast<const LineString*>(geom.getGeometryN(i));
         if (line) {
-            BasicSegmentString* bss = new BasicSegmentString(
-                const_cast<CoordinateSequence*>(line->getCoordinatesRO()),
-                nullptr);
-            segStrings.emplace_back(static_cast<SegmentString*>(bss));
+            auto ptsNoRepeat = RepeatedPointRemover::removeRepeatedPoints(line->getCoordinatesRO());
+            coordseqs.emplace_back(ptsNoRepeat.release());
         }
+    }
+    return coordseqs;
+}
+
+/* private static */
+std::vector<std::unique_ptr<SegmentString>>
+IsSimpleOp::createSegmentStrings(std::vector<std::unique_ptr<CoordinateSequence>>& seqs)
+{
+    std::vector<std::unique_ptr<SegmentString>> segStrings;
+    for (auto& seq : seqs) {
+        BasicSegmentString* bss = new BasicSegmentString(
+            seq.get(),
+            nullptr);
+        segStrings.emplace_back(static_cast<SegmentString*>(bss));
     }
     return segStrings;
 }
-
 
 // --------------------------------------------------------------------------------
 
@@ -257,10 +269,10 @@ IsSimpleOp::NonSimpleIntersectionFinder::processIntersections(
     if (isSameSegment)
         return;
 
-    const Coordinate& p00 = ss0->getCoordinate(segIndex0);
-    const Coordinate& p01 = ss0->getCoordinate(segIndex0 + 1);
-    const Coordinate& p10 = ss1->getCoordinate(segIndex1);
-    const Coordinate& p11 = ss1->getCoordinate(segIndex1 + 1);
+    const CoordinateXY& p00 = ss0->getCoordinate<CoordinateXY>(segIndex0);
+    const CoordinateXY& p01 = ss0->getCoordinate<CoordinateXY>(segIndex0 + 1);
+    const CoordinateXY& p10 = ss1->getCoordinate<CoordinateXY>(segIndex1);
+    const CoordinateXY& p11 = ss1->getCoordinate<CoordinateXY>(segIndex1 + 1);
 
     bool hasInt = findIntersection(
         ss0, segIndex0, ss1, segIndex1,
@@ -268,7 +280,7 @@ IsSimpleOp::NonSimpleIntersectionFinder::processIntersections(
 
     // found an intersection!
     if (hasInt) {
-        const Coordinate& intPt = li.getIntersection(0);
+        const CoordinateXY& intPt = li.getIntersection(0);
         // don't save dupes
         for (auto& pt: intersectionPts) {
             if (intPt.equals2D(pt))
@@ -284,8 +296,8 @@ bool
 IsSimpleOp::NonSimpleIntersectionFinder::findIntersection(
     SegmentString* ss0, std::size_t segIndex0,
     SegmentString* ss1, std::size_t segIndex1,
-    const Coordinate& p00, const Coordinate& p01,
-    const Coordinate& p10, const Coordinate& p11)
+    const CoordinateXY& p00, const CoordinateXY& p01,
+    const CoordinateXY& p10, const CoordinateXY& p11)
 {
 
     li.computeIntersection(p00, p01, p10, p11);
@@ -367,8 +379,8 @@ IsSimpleOp::NonSimpleIntersectionFinder::intersectionVertexIndex(
     const LineIntersector& lineInter,
     std::size_t segmentIndex) const
 {
-    const Coordinate& intPt = lineInter.getIntersection(0);
-    const Coordinate* endPt0 = lineInter.getEndpoint(segmentIndex, 0);
+    const CoordinateXY& intPt = lineInter.getIntersection(0);
+    const CoordinateXY* endPt0 = lineInter.getEndpoint(segmentIndex, 0);
     return intPt.equals2D(*endPt0) ? 0 : 1;
 }
 

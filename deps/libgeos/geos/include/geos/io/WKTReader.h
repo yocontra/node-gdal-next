@@ -17,15 +17,15 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_IO_WKTREADER_H
-#define GEOS_IO_WKTREADER_H
+#pragma once
 
 #include <geos/export.h>
 
 #include <geos/geom/GeometryFactory.h>
-#include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Geometry.h>
 #include <geos/io/ParseException.h>
+#include <geos/io/OrdinateSet.h>
+
 #include <string>
 
 // Forward declarations
@@ -34,8 +34,8 @@ namespace io {
 class StringTokenizer;
 }
 namespace geom {
-
 class Coordinate;
+class CoordinateSequence;
 class GeometryCollection;
 class Point;
 class LineString;
@@ -58,7 +58,6 @@ namespace io {
  */
 class GEOS_DLL WKTReader {
 public:
-    //WKTReader();
 
     /**
      * \brief Initialize parser with given GeometryFactory.
@@ -68,18 +67,35 @@ public:
      * so be sure you'll keep the factory alive for the
      * whole WKTReader and created Geometry life.
      */
-    explicit WKTReader(const geom::GeometryFactory& gf);
+    explicit WKTReader(const geom::GeometryFactory& gf)
+        : geometryFactory(&gf)
+        , precisionModel(gf.getPrecisionModel())
+        , fixStructure(false)
+        {};
 
-    /** @deprecated in 3.4.0 */
-    explicit WKTReader(const geom::GeometryFactory* gf);
+        /** @deprecated in 3.4.0 */
+    explicit WKTReader(const geom::GeometryFactory* gf)
+        : geometryFactory(gf)
+        , precisionModel(gf->getPrecisionModel())
+        , fixStructure(false)
+        {};
 
     /**
      * \brief Initialize parser with default GeometryFactory.
      *
      */
-    WKTReader();
+    WKTReader()
+        : geometryFactory(geom::GeometryFactory::getDefaultInstance())
+        , precisionModel(geometryFactory->getPrecisionModel())
+        , fixStructure(false)
+        {};
 
-    ~WKTReader();
+    ~WKTReader() {};
+
+    void
+    setFixStructure(bool doFixStructure) {
+        fixStructure = doFixStructure;
+    }
 
     /// Parse a WKT string returning a Geometry
     template<typename T>
@@ -95,38 +111,38 @@ public:
 
     std::unique_ptr<geom::Geometry> read(const std::string& wellKnownText) const;
 
-//	Geometry* read(Reader& reader);	//Not implemented yet
-
 protected:
-    std::unique_ptr<geom::CoordinateSequence> getCoordinates(io::StringTokenizer* tokenizer) const;
+    std::unique_ptr<geom::CoordinateSequence> getCoordinates(io::StringTokenizer* tokenizer, OrdinateSet& ordinates) const;
     static double getNextNumber(io::StringTokenizer* tokenizer);
-    static std::string getNextEmptyOrOpener(io::StringTokenizer* tokenizer, std::size_t& dim);
+    static std::string getNextEmptyOrOpener(io::StringTokenizer* tokenizer, OrdinateSet& dim);
     static std::string getNextCloserOrComma(io::StringTokenizer* tokenizer);
     static std::string getNextCloser(io::StringTokenizer* tokenizer);
     static std::string getNextWord(io::StringTokenizer* tokenizer);
-    std::unique_ptr<geom::Geometry> readGeometryTaggedText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::Point> readPointText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::LineString> readLineStringText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::LinearRing> readLinearRingText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::MultiPoint> readMultiPointText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::Polygon> readPolygonText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::MultiLineString> readMultiLineStringText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::MultiPolygon> readMultiPolygonText(io::StringTokenizer* tokenizer) const;
-    std::unique_ptr<geom::GeometryCollection> readGeometryCollectionText(io::StringTokenizer* tokenizer) const;
+    std::unique_ptr<geom::Geometry> readGeometryTaggedText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::Point> readPointText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::LineString> readLineStringText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::LinearRing> readLinearRingText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::MultiPoint> readMultiPointText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::Polygon> readPolygonText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::MultiLineString> readMultiLineStringText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::MultiPolygon> readMultiPolygonText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
+    std::unique_ptr<geom::GeometryCollection> readGeometryCollectionText(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags) const;
 private:
     const geom::GeometryFactory* geometryFactory;
     const geom::PrecisionModel* precisionModel;
+    bool fixStructure;
 
-    void getPreciseCoordinate(io::StringTokenizer* tokenizer, geom::Coordinate&, std::size_t& dim) const;
+    void getPreciseCoordinate(io::StringTokenizer* tokenizer, OrdinateSet& ordinateFlags, geom::CoordinateXYZM&) const;
 
     static bool isNumberNext(io::StringTokenizer* tokenizer);
+    static bool isOpenerNext(io::StringTokenizer* tokenizer);
+
+    static void readOrdinateFlags(const std::string & s, OrdinateSet& ordinateFlags);
+    static bool isTypeName(const std::string & type, const std::string & typeName);
 };
 
 } // namespace io
 } // namespace geos
 
-#ifdef GEOS_INLINE
-# include <geos/io/WKTReader.inl>
-#endif
 
-#endif // #ifndef GEOS_IO_WKTREADER_H
+

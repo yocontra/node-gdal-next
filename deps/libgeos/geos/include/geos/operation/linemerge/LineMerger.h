@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_LINEMERGE_LINEMERGER_H
-#define GEOS_OP_LINEMERGE_LINEMERGER_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/LineString.h>
@@ -79,6 +78,8 @@ private:
 
     LineMergeGraph graph;
 
+    bool isDirected;
+
     std::vector<std::unique_ptr<geom::LineString>> mergedLineStrings;
 
     std::vector<EdgeString*> edgeStrings;
@@ -100,7 +101,7 @@ private:
     EdgeString* buildEdgeStringStartingWith(LineMergeDirectedEdge* start);
 
 public:
-    LineMerger();
+    LineMerger(bool directed = false);
     ~LineMerger();
 
     /**
@@ -146,4 +147,3 @@ public:
 #pragma warning(pop)
 #endif
 
-#endif // GEOS_OP_LINEMERGE_LINEMERGER_H

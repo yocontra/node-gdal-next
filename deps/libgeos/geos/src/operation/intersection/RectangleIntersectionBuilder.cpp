@@ -15,7 +15,6 @@
 #include <geos/operation/intersection/Rectangle.h>
 #include <geos/operation/intersection/RectangleIntersectionBuilder.h>
 #include <geos/operation/valid/RepeatedPointRemover.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/GeometryCollection.h>
 #include <geos/geom/Polygon.h>
@@ -24,6 +23,8 @@
 #include <geos/geom/LinearRing.h>
 #include <geos/algorithm/PointLocation.h>
 #include <geos/util/IllegalArgumentException.h>
+#include <geos/util.h>
+#include <sstream>
 
 #include <cmath> // for fabs()
 
@@ -74,16 +75,16 @@ RectangleIntersectionBuilder::reconnect()
 
     // Merge the two linestrings
     auto ncs = valid::RepeatedPointRemover::removeRepeatedPoints(&cs2);
-    ncs->add(&cs1, false, true);
+    ncs->add(cs1, false, true);
 
     delete line1;
     delete line2;
 
-    LineString* nline = _gf.createLineString(ncs.release());
+    auto nline = _gf.createLineString(std::move(ncs));
     lines.pop_front();
     lines.pop_back();
 
-    lines.push_front(nline);
+    lines.push_front(nline.release());
 }
 
 
@@ -168,27 +169,26 @@ RectangleIntersectionBuilder::build()
         return std::unique_ptr<Geometry>(_gf.createGeometryCollection());
     }
 
-    std::vector<Geometry*>* geoms = new std::vector<Geometry*>;
-    geoms->reserve(n);
+    std::vector<std::unique_ptr<Geometry>> geoms;
+    geoms.reserve(n);
 
     for(std::list<geom::Polygon*>::iterator i = polygons.begin(), e = polygons.end(); i != e; ++i) {
-        geoms->push_back(*i);
+        geoms.emplace_back(*i);
     }
     polygons.clear();
 
     for(std::list<geom::LineString*>::iterator i = lines.begin(), e = lines.end(); i != e; ++i) {
-        geoms->push_back(*i);
+        geoms.emplace_back(*i);
     }
     lines.clear();
 
     for(std::list<geom::Point*>::iterator i = points.begin(), e = points.end(); i != e; ++i) {
-        geoms->push_back(*i);
+        geoms.emplace_back(*i);
     }
     points.clear();
 
-    return std::unique_ptr<Geometry>(
-               (*geoms)[0]->getFactory()->buildGeometry(geoms)
-           );
+    const auto* factory = geoms[0]->getFactory();
+    return factory->buildGeometry(std::move(geoms));
 }
 
 /**
@@ -250,7 +250,7 @@ distance(const Rectangle& rect,
 
 double
 distance(const Rectangle& rect,
-         const std::vector<Coordinate>& ring,
+         const CoordinateSequence& ring,
          const geom::LineString* line)
 {
     auto nr = ring.size();
@@ -264,7 +264,7 @@ distance(const Rectangle& rect,
 
 double
 distance(const Rectangle& rect,
-         const std::vector<Coordinate>& ring)
+         const CoordinateSequence& ring)
 {
     auto nr = ring.size();
     const Coordinate& c1 = ring[nr - 1]; // TODO: ring.back() ?
@@ -276,7 +276,7 @@ distance(const Rectangle& rect,
  * \brief Reverse given segment in a coordinate vector
  */
 void
-reverse_points(std::vector<Coordinate>& v, std::size_t start, std::size_t end)
+reverse_points(CoordinateSequence& v, std::size_t start, std::size_t end)
 {
     geom::Coordinate p1;
     geom::Coordinate p2;
@@ -294,9 +294,9 @@ reverse_points(std::vector<Coordinate>& v, std::size_t start, std::size_t end)
  * \brief Normalize a ring into lexicographic order
  */
 void
-normalize_ring(std::vector<Coordinate>& ring)
+normalize_ring(CoordinateSequence& ring)
 {
-    if(ring.empty()) {
+    if(ring.isEmpty()) {
         return;
     }
 
@@ -338,7 +338,7 @@ normalize_ring(std::vector<Coordinate>& ring)
 void
 RectangleIntersectionBuilder::close_boundary(
     const Rectangle& rect,
-    std::vector<Coordinate>* ring,
+    CoordinateSequence* ring,
     double x1, double y1,
     double x2, double y2)
 {
@@ -356,7 +356,7 @@ RectangleIntersectionBuilder::close_boundary(
                     (y1 == rect.ymin() && x2 <= x1))
           ) {
             if(x1 != x2 || y1 != y2) {	// the polygon may have started at a corner
-                ring->push_back(Coordinate(x2, y2));
+                ring->add(Coordinate(x2, y2));
             }
             break;
         }
@@ -375,14 +375,14 @@ RectangleIntersectionBuilder::close_boundary(
             y1 = rect.ymin();
         }
 
-        ring->push_back(Coordinate(x1, y1));
+        ring->add(Coordinate(x1, y1));
 
     }
 }
 
 void
 RectangleIntersectionBuilder::close_ring(const Rectangle& rect,
-        std::vector<Coordinate>* ring)
+        CoordinateSequence* ring)
 {
     auto nr = ring->size();
     Coordinate& c2 = (*ring)[0];
@@ -402,33 +402,31 @@ RectangleIntersectionBuilder::reconnectPolygons(const Rectangle& rect)
 {
     // Build the exterior rings first
 
-    typedef std::vector< geom::LinearRing*> LinearRingVect;
-    typedef std::pair< geom::LinearRing*, LinearRingVect* > ShellAndHoles;
+    typedef std::vector< std::unique_ptr<geom::LinearRing>> LinearRingVect;
+    typedef std::pair< std::unique_ptr<geom::LinearRing>, LinearRingVect > ShellAndHoles;
     typedef std::list< ShellAndHoles > ShellAndHolesList;
 
     ShellAndHolesList exterior;
-
-    const CoordinateSequenceFactory& _csf = *_gf.getCoordinateSequenceFactory();
 
     // If there are no lines, the rectangle must have been
     // inside the exterior ring.
 
     if(lines.empty()) {
-        geom::LinearRing* ring = rect.toLinearRing(_gf);
-        exterior.push_back(make_pair(ring, new LinearRingVect()));
+        auto ring = rect.toLinearRing(_gf);
+        exterior.push_back(make_pair(std::move(ring), LinearRingVect()));
     }
     else {
         // Reconnect all lines into one or more linearrings
         // using box boundaries if necessary
 
-        std::vector<Coordinate>* ring = nullptr;
+        std::unique_ptr<CoordinateSequence> ring;
 
         while(!lines.empty() || ring != nullptr) {
             if(ring == nullptr) {
-                ring = new std::vector<Coordinate>();
+                ring = detail::make_unique<CoordinateSequence>();
                 LineString* line = lines.front();
                 lines.pop_front();
-                line->getCoordinatesRO()->toVector(*ring);
+                ring->add(*line->getCoordinatesRO());
                 delete line;
             }
 
@@ -449,36 +447,35 @@ RectangleIntersectionBuilder::reconnectPolygons(const Rectangle& rect)
 
             // If own end point is closest, close the ring and continue
             if(best_distance < 0 || own_distance < best_distance) {
-                close_ring(rect, ring);
+                close_ring(rect, ring.get());
                 normalize_ring(*ring);
-                auto shell_cs = _csf.create(ring);
                 // This apes the behaviour that existed back when
                 // it was impossible to create a LinearRing with < 4
                 // points. In order to maintain compatibility
                 // with prior behaviour for rectangle intersection
                 // we are pulling that check back here.
-                if (shell_cs->size() < 4) {
+                if (ring->size() < 4) {
                     std::ostringstream os;
                     os << "Invalid number of points in LinearRing found "
-                       << shell_cs->size() << " - must be 0 or >= 4";
+                       << ring->size() << " - must be 0 or >= 4";
                     throw util::IllegalArgumentException(os.str());
                 }
-                geom::LinearRing* shell = _gf.createLinearRing(shell_cs.release());
-                exterior.push_back(make_pair(shell, new LinearRingVect()));
+                auto shell = _gf.createLinearRing(std::move(ring));
+                exterior.push_back(make_pair(std::move(shell), LinearRingVect()));
                 ring = nullptr;
             }
             else {
                 LineString* line = *best_pos;
                 auto nr = ring->size();
                 const CoordinateSequence& cs = *line->getCoordinatesRO();
-                close_boundary(rect, ring,
+                close_boundary(rect, ring.get(),
                                (*ring)[nr - 1].x,
                                (*ring)[nr - 1].y,
                                cs[0].x,
                                cs[0].y);
                 // above function adds the 1st point
                 for(std::size_t i = 1; i < cs.size(); ++i) {
-                    ring->push_back(cs[i]);
+                    ring->add(cs[i]);
                 }
                 //ring->addSubLineString(line,1);
                 delete line;
@@ -494,7 +491,7 @@ RectangleIntersectionBuilder::reconnectPolygons(const Rectangle& rect)
         const geom::LinearRing* hole = poly->getExteriorRing();
 
         if(exterior.size() == 1) {
-            exterior.front().second->push_back(new LinearRing(*hole));
+            exterior.front().second.push_back(hole->clone());
         }
         else {
             using geos::algorithm::PointLocation;
@@ -504,7 +501,7 @@ RectangleIntersectionBuilder::reconnectPolygons(const Rectangle& rect)
                 const CoordinateSequence* shell_cs = p.first->getCoordinatesRO();
                 if(PointLocation::isInRing(c, shell_cs)) {
                     // add hole to shell
-                    p.second->push_back(new LinearRing(*hole));
+                    p.second.push_back(hole->clone());
                     break;
                 }
             }
@@ -518,8 +515,8 @@ RectangleIntersectionBuilder::reconnectPolygons(const Rectangle& rect)
     std::list<geom::Polygon*> new_polygons;
     for(ShellAndHolesList::iterator i = exterior.begin(), e = exterior.end(); i != e; ++i) {
         ShellAndHoles& p = *i;
-        geom::Polygon* poly = _gf.createPolygon(p.first, p.second);
-        new_polygons.push_back(poly);
+        auto poly = _gf.createPolygon(std::move(p.first), std::move(p.second));
+        new_polygons.push_back(poly.release());
     }
 
     clear();

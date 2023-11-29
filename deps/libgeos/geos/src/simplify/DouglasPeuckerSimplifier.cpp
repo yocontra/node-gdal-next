@@ -23,7 +23,6 @@
 #include <geos/geom/MultiPolygon.h>
 #include <geos/geom/CoordinateSequence.h> // for Ptr typedefs
 #include <geos/geom/GeometryFactory.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/util/GeometryTransformer.h> // for DPTransformer inheritance
 #include <geos/util/IllegalArgumentException.h>
 #include <geos/util.h>
@@ -35,7 +34,7 @@
 #define GEOS_DEBUG 0
 #endif
 
-#ifdef GEOS_DEBUG
+#if GEOS_DEBUG
 #include <iostream>
 #endif
 
@@ -113,16 +112,9 @@ DPTransformer::transformCoordinates(
 {
     ::geos::ignore_unused_variable_warning(parent);
 
-    Coordinate::Vect inputPts;
-    coords->toVector(inputPts);
+    bool preserveRingEndpoint = parent->getGeometryTypeId() != GEOS_LINEARRING;
 
-    std::unique_ptr<Coordinate::Vect> newPts =
-        DouglasPeuckerLineSimplifier::simplify(inputPts, distanceTolerance);
-
-    return CoordinateSequence::Ptr(
-               factory->getCoordinateSequenceFactory()->create(
-                   newPts.release()
-               ));
+    return DouglasPeuckerLineSimplifier::simplify(*coords, distanceTolerance, preserveRingEndpoint);
 }
 
 Geometry::Ptr

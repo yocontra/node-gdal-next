@@ -23,7 +23,6 @@
 #include <geos/algorithm/BoundaryNodeRule.h>
 #include <geos/noding/SegmentIntersector.h>
 
-
 // Forward declarations
 namespace geos {
 namespace noding {
@@ -100,7 +99,7 @@ private:
     bool isClosedEndpointsInInterior = true;
     bool isFindAllLocations = false;
     bool isSimpleResult = false;
-    std::vector<geom::Coordinate> nonSimplePts;
+    std::vector<geom::CoordinateXY> nonSimplePts;
     bool computed = false;
 
     void compute();
@@ -130,9 +129,11 @@ private:
 
     bool isSimpleLinearGeometry(const geom::Geometry& geom);
 
-    static std::vector<std::unique_ptr<noding::SegmentString>>
-        extractSegmentStrings(const geom::Geometry& geom);
+    static std::vector<std::unique_ptr<geos::geom::CoordinateSequence>>
+        removeRepeatedPts(const geom::Geometry& geom);
 
+    static std::vector<std::unique_ptr<noding::SegmentString>>
+        createSegmentStrings(std::vector<std::unique_ptr<geos::geom::CoordinateSequence>>& seqs);
 
     class NonSimpleIntersectionFinder : public noding::SegmentIntersector
     {
@@ -142,7 +143,7 @@ private:
         bool isClosedEndpointsInInterior;
         bool isFindAll = false;
 
-        std::vector<geom::Coordinate>& intersectionPts;
+        std::vector<geom::CoordinateXY>& intersectionPts;
         algorithm::LineIntersector li;
 
         // bool hasInteriorInt;
@@ -153,8 +154,8 @@ private:
         bool findIntersection(
             noding::SegmentString* ss0, std::size_t segIndex0,
             noding::SegmentString* ss1, std::size_t segIndex1,
-            const geom::Coordinate& p00, const geom::Coordinate& p01,
-            const geom::Coordinate& p10, const geom::Coordinate& p11);
+            const geom::CoordinateXY& p00, const geom::CoordinateXY& p01,
+            const geom::CoordinateXY& p10, const geom::CoordinateXY& p11);
 
         /**
         * Tests whether an intersection vertex is an endpoint of a segment string.
@@ -185,7 +186,7 @@ private:
         NonSimpleIntersectionFinder(
             bool p_isClosedEndpointsInInterior,
             bool p_isFindAll,
-            std::vector<geom::Coordinate>& p_intersectionPts)
+            std::vector<geom::CoordinateXY>& p_intersectionPts)
         : isClosedEndpointsInInterior(p_isClosedEndpointsInInterior)
         , isFindAll(p_isFindAll)
         , intersectionPts(p_intersectionPts)
@@ -254,7 +255,7 @@ public:
     * @param geom the input geometry
     * @return a non-simple location, or null if the geometry is simple
     */
-    geom::Coordinate getNonSimpleLocation(const geom::Geometry& geom);
+    geom::CoordinateXY getNonSimpleLocation(const geom::Geometry& geom);
 
     /**
     * Sets whether all non-simple intersection points
@@ -279,14 +280,14 @@ public:
     * @return a coordinate for the location of the non-boundary self-intersection
     * or null if the geometry is simple
     */
-    geom::Coordinate getNonSimpleLocation();
+    geom::CoordinateXY getNonSimpleLocation();
 
     /**
     * Gets all non-simple intersection locations.
     *
     * @return a list of the coordinates of non-simple locations
     */
-    const std::vector<geom::Coordinate>& getNonSimpleLocations();
+    const std::vector<geom::CoordinateXY>& getNonSimpleLocations();
 
 
 

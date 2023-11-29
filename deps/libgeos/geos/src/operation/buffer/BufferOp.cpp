@@ -87,20 +87,33 @@ BufferOp::precisionScaleFactor(const Geometry* g,
 
 /*public static*/
 std::unique_ptr<Geometry>
-BufferOp::bufferOp(const Geometry* g, double distance,
+BufferOp::bufferOp(const Geometry* g, double dist,
                    int quadrantSegments,
                    int nEndCapStyle)
 {
     BufferOp bufOp(g);
     bufOp.setQuadrantSegments(quadrantSegments);
     bufOp.setEndCapStyle(nEndCapStyle);
-    return bufOp.getResultGeometry(distance);
+    return bufOp.getResultGeometry(dist);
 }
+
+/*public static*/
+std::unique_ptr<geom::Geometry>
+BufferOp::bufferOp(const geom::Geometry* g, double dist,
+        BufferParameters& bufParms)
+{
+    BufferOp bufOp(g, bufParms);
+    return bufOp.getResultGeometry(dist);
+}
+
 
 /*public*/
 std::unique_ptr<Geometry>
 BufferOp::getResultGeometry(double nDistance)
 {
+    if (!std::isfinite(nDistance)) {
+        throw util::IllegalArgumentException("BufferOp::getResultGeometry distance must be a finite value");
+    }
     distance = nDistance;
     computeGeometry();
     return std::unique_ptr<Geometry>(resultGeometry.release());

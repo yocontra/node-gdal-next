@@ -19,11 +19,10 @@
 #include <vector>
 #include <memory>
 
-#include <geos/inline.h>
-
 #include <geos/noding/Noder.h> // for inheritance
 #include <geos/algorithm/LineIntersector.h> // for composition
 #include <geos/geom/Coordinate.h> // for use in vector
+#include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/PrecisionModel.h> // for inlines (should drop)
 #include <geos/noding/SegmentIntersector.h>
 
@@ -65,14 +64,9 @@ namespace snapround { // geos::noding::snapround
 class GEOS_DLL SnapRoundingIntersectionAdder: public SegmentIntersector { // implements SegmentIntersector
 
 private:
-    /**
-    * The division factor used to determine
-    * nearness distance tolerance for interior intersection detection.
-    */
-    static constexpr int NEARNESS_FACTOR = 100;
 
     algorithm::LineIntersector li;
-    std::unique_ptr<std::vector<geom::Coordinate>> intersections;
+    geom::CoordinateSequence intersections;
     // const geom::PrecisionModel* pm;
     double nearnessTol;
 
@@ -89,15 +83,23 @@ private:
     * result in the snapped segment A crossing segment B
     * without a node being introduced.
     */
-    void processNearVertex(const geom::Coordinate& p, SegmentString* edge, std::size_t segIndex,
-                           const geom::Coordinate& p0, const geom::Coordinate& p1);
+    void processNearVertex(const geom::CoordinateSequence& seq0,
+                           std::size_t ptIndex,
+                           const geom::CoordinateSequence& seq1,
+                           std::size_t segIndex,
+                           SegmentString* edge);
 
+    bool isNearSegmentInterior(const geom::CoordinateXY& p, const geom::CoordinateXY& p0, const geom::CoordinateXY& p1) const;
 
 public:
 
-    SnapRoundingIntersectionAdder(const geom::PrecisionModel* newPm);
+    SnapRoundingIntersectionAdder(double p_nearnessTol)
+        : SegmentIntersector()
+        , intersections(geom::CoordinateSequence::XYZM(0))
+        , nearnessTol(p_nearnessTol)
+    {}
 
-    std::unique_ptr<std::vector<geom::Coordinate>> getIntersections() { return std::move(intersections); };
+    geom::CoordinateSequence getIntersections() { return std::move(intersections); };
 
     /**
     * This method is called by clients
@@ -121,8 +123,4 @@ public:
 } // namespace geos::noding::snapround
 } // namespace geos::noding
 } // namespace geos
-
-
-
-
 

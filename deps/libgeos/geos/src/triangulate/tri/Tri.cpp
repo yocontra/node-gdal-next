@@ -15,17 +15,20 @@
 #include <geos/algorithm/Orientation.h>
 #include <geos/algorithm/LineIntersector.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/LinearRing.h>
 #include <geos/geom/Polygon.h>
+#include <geos/geom/Triangle.h>
 #include <geos/triangulate/tri/Tri.h>
 #include <geos/util/IllegalArgumentException.h>
+#include <geos/util/IllegalStateException.h>
+#include <geos/util.h>
 
 
 using geos::util::IllegalArgumentException;
 using geos::algorithm::Orientation;
+using geos::geom::Triangle;
 
 namespace geos {        // geos
 namespace triangulate { // geos.triangulate
@@ -43,6 +46,15 @@ Tri::setAdjacent(Tri* p_tri0, Tri* p_tri1, Tri* p_tri2)
 
 /* public */
 void
+Tri::setAdjacent(const Coordinate& pt, Tri* tri)
+{
+    TriIndex index = getIndex(pt);
+    setTri(index, tri);
+    // TODO: validate that tri is adjacent at the edge specified
+}
+
+/* public */
+void
 Tri::setTri(TriIndex edgeIndex, Tri* tri)
 {
     switch (edgeIndex) {
@@ -50,7 +62,7 @@ Tri::setTri(TriIndex edgeIndex, Tri* tri)
         case 1: tri1 = tri; return;
         case 2: tri2 = tri; return;
     }
-    assert(false); // never reach here
+    throw util::IllegalArgumentException("Tri::setTri - invalid index");
 }
 
 /* private */
@@ -60,36 +72,6 @@ Tri::setCoordinates(const Coordinate& np0, const Coordinate& np1, const Coordina
     p0 = np0;
     p1 = np1;
     p2 = np2;
-}
-
-/* public */
-void
-Tri::setAdjacent(const Coordinate& pt, Tri* tri)
-{
-    TriIndex index = getIndex(pt);
-    setTri(index, tri);
-    // TODO: validate that tri is adjacent at the edge specified
-}
-
-/**
-* Replace triOld with triNew
-*
-* @param triOld
-* @param triNew
-*/
-/* private */
-void
-Tri::replace(Tri* triOld, Tri* triNew)
-{
-    if ( tri0 != nullptr && tri0 == triOld ) {
-        tri0 = triNew;
-    }
-    else if ( tri1 != nullptr && tri1 == triOld ) {
-        tri1 = triNew;
-    }
-    else if ( tri2 != nullptr && tri2 == triOld ) {
-        tri2 = triNew;
-    }
 }
 
 /* public */
@@ -137,6 +119,56 @@ Tri::flip(Tri* tri, TriIndex index0, TriIndex index1,
     //validate();
     //tri.validate();
 }
+
+/**
+* Replace triOld with triNew
+*
+* @param triOld
+* @param triNew
+*/
+/* private */
+void
+Tri::replace(Tri* triOld, Tri* triNew)
+{
+    if ( tri0 != nullptr && tri0 == triOld ) {
+        tri0 = triNew;
+    }
+    else if ( tri1 != nullptr && tri1 == triOld ) {
+        tri1 = triNew;
+    }
+    else if ( tri2 != nullptr && tri2 == triOld ) {
+        tri2 = triNew;
+    }
+}
+
+
+/* public */
+void
+Tri::remove(TriList<Tri>& triList)
+{
+    remove();
+    triList.remove(this);
+}
+
+/* public */
+void
+Tri::remove()
+{
+    remove(0);
+    remove(1);
+    remove(2);
+}
+
+/* private */
+void
+Tri::remove(TriIndex index)
+{
+    Tri* adj = getAdjacent(index);
+    if (adj == nullptr) return;
+    adj->setTri(adj->getIndex(this), nullptr);
+    setTri(index, nullptr);
+}
+
 
 /**
 *
@@ -252,13 +284,12 @@ Tri::hasCoordinate(const Coordinate& v) const
 const Coordinate&
 Tri::getCoordinate(TriIndex i) const
 {
-    if ( i == 0 ) {
-        return p0;
+    switch(i) {
+    case 0: return p0;
+    case 1: return p1;
+    case 2: return p2;
     }
-    if ( i == 1 ) {
-        return p1;
-    }
-    return p2;
+    throw util::IllegalArgumentException("Tri::getCoordinate - invalid index");
 }
 
 /* public */
@@ -276,7 +307,7 @@ Tri::getIndex(const Coordinate& p) const
 
 /* public */
 TriIndex
-Tri::getIndex(Tri* tri) const
+Tri::getIndex(const Tri* tri) const
 {
     if ( tri0 == tri )
         return 0;
@@ -296,8 +327,14 @@ Tri::getAdjacent(TriIndex i) const
     case 1: return tri1;
     case 2: return tri2;
     }
-    assert(false); // Never get here
-    return nullptr;
+    throw util::IllegalArgumentException("Tri::getAdjacent - invalid index");
+}
+
+/* public */
+bool
+Tri::hasAdjacent() const
+{
+    return hasAdjacent(0) || hasAdjacent(1) || hasAdjacent(2);
 }
 
 /* public */
@@ -306,6 +343,7 @@ Tri::hasAdjacent(TriIndex i) const
 {
     return nullptr != getAdjacent(i);
 }
+
 
 /* public */
 bool
@@ -326,6 +364,40 @@ Tri::numAdjacent() const
     if ( tri2 != nullptr )
       num++;
     return num;
+}
+
+/* public */
+bool
+Tri::isInteriorVertex(TriIndex index) const
+{
+    const Tri* curr = this;
+    TriIndex currIndex = index;
+    do {
+        const Tri* adj = curr->getAdjacent(currIndex);
+        if (adj == nullptr) return false;
+        TriIndex adjIndex = adj->getIndex(curr);
+        if (adjIndex < 0) {
+            throw util::IllegalStateException("Inconsistent adjacency - invalid triangulation");
+        }
+        curr = adj;
+        currIndex = Tri::next(adjIndex);
+    }
+    while (curr != this);
+    return true;
+}
+
+/* public */
+bool
+Tri::isBorder() const
+{
+    return isBoundary(0) || isBoundary(1) || isBoundary(2);
+}
+
+/* public */
+bool
+Tri::isBoundary(TriIndex index) const
+{
+    return ! hasAdjacent(index);
 }
 
 /* public static */
@@ -366,6 +438,7 @@ Tri::oppEdge(TriIndex vertexIndex)
     return next(vertexIndex);
 }
 
+
 /* public */
 Coordinate
 Tri::midpoint(TriIndex edgeIndex) const
@@ -378,15 +451,51 @@ Tri::midpoint(TriIndex edgeIndex) const
 }
 
 /* public */
+double
+Tri::getArea() const
+{
+    return Triangle::area(p0, p1, p2);
+}
+
+/* public */
+double
+Tri::getLength() const
+{
+    return Triangle::length(p0, p1, p2);
+}
+
+/* public */
+double
+Tri::getLength(TriIndex i) const
+{
+    return getCoordinate(i).distance(getCoordinate(next(i)));
+}
+
+/* public */
 std::unique_ptr<geom::Polygon>
 Tri::toPolygon(const geom::GeometryFactory* gf) const
 {
-    std::vector<Coordinate> coords(4);
-    coords[0] = p0; coords[1] = p1;
-    coords[2] = p2; coords[3] = p0;
+    auto coords = detail::make_unique<geom::CoordinateSequence>(4u);
+    (*coords)[0] = p0;
+    (*coords)[1] = p1;
+    (*coords)[2] = p2;
+    (*coords)[3] = p0;
 
-    return gf->createPolygon(std::move(coords));
+    return gf->createPolygon(gf->createLinearRing(std::move(coords)));
 }
+
+/* public static */
+std::unique_ptr<geom::Geometry>
+Tri::toGeometry(std::set<Tri*>& tris, const geom::GeometryFactory* gf)
+{
+    std::vector<std::unique_ptr<geom::Polygon>> polys;
+    for (Tri* tri: tris) {
+        std::unique_ptr<geom::Polygon> poly = tri->toPolygon(gf);
+        polys.emplace_back(poly.release());
+    }
+    return gf->createGeometryCollection(std::move(polys));
+}
+
 
 std::ostream&
 operator<<(std::ostream& os, const Tri& tri)
@@ -403,4 +512,3 @@ operator<<(std::ostream& os, const Tri& tri)
 } // namespace geos.triangulate.tri
 } // namespace geos.triangulate
 } // namespace geos
-

@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_INDEXEDFACETDISTANCE_H
-#define GEOS_INDEXEDFACETDISTANCE_H
+#pragma once
 
 #include <geos/operation/distance/FacetSequenceTreeBuilder.h>
 
@@ -39,7 +38,7 @@ namespace distance {
 ///   an repeated query situation.
 ///
 /// Using this technique is usually much more performant than using the
-/// brute-force \ref geom::Geometry::distance(const Geometry* g) const when one
+/// brute-force geom::Geometry::distance() when one
 /// or both input geometries are large, or when evaluating many distance
 /// computations against a single geometry.
 ///
@@ -59,7 +58,8 @@ public:
     ///
     /// \param g a Geometry, which may be of any type.
     IndexedFacetDistance(const geom::Geometry* g) :
-        cachedTree(FacetSequenceTreeBuilder::build(g))
+        cachedTree(FacetSequenceTreeBuilder::build(g)),
+        baseGeometry(*g)
     {}
 
     /// \brief Computes the distance between facets of two geometries.
@@ -77,7 +77,7 @@ public:
     /// \param g1 a geometry
     /// \param g2 a geometry
     /// \return the nearest points on the facets of the geometries
-    static std::vector<geom::Coordinate> nearestPoints(const geom::Geometry* g1, const geom::Geometry* g2);
+    static std::unique_ptr<geom::CoordinateSequence> nearestPoints(const geom::Geometry* g1, const geom::Geometry* g2);
 
     /// \brief Computes the distance from the base geometry to the given geometry.
     ///
@@ -85,6 +85,14 @@ public:
     ///
     /// \return the computed distance
     double distance(const geom::Geometry* g) const;
+
+    /// \brief Tests whether the base geometry lies within a specified distance of the given geometry.
+    ///
+    /// \param g the geometry to test
+    /// \param maxDistance the maximum distance to test
+    ///
+    /// \return true of the geometry lies within the specified distance
+    bool isWithinDistance(const geom::Geometry* g, double maxDistance) const;
 
     /// \brief Computes the nearest locations on the base geometry and the given geometry.
     ///
@@ -96,14 +104,21 @@ public:
     ///
     /// \param g the geometry to compute the nearest point to
     /// \return the nearest points
-    std::vector<geom::Coordinate> nearestPoints(const geom::Geometry* g) const;
+    std::unique_ptr<geom::CoordinateSequence> nearestPoints(const geom::Geometry* g) const;
 
 private:
+    struct FacetDistance {
+        double operator()(const FacetSequence* a, const FacetSequence* b) const
+        {
+            return a->distance(*b);
+        }
+    };
+
     std::unique_ptr<geos::index::strtree::TemplateSTRtree<const FacetSequence*>> cachedTree;
+    const geom::Geometry& baseGeometry;
 
 };
 }
 }
 }
 
-#endif //GEOS_INDEXEDFACETDISTANCE_H

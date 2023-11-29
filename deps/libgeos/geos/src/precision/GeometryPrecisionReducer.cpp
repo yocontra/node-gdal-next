@@ -23,7 +23,6 @@
 #include <geos/geom/util/NoOpGeometryOperation.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/PrecisionModel.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/LineString.h>
@@ -52,6 +51,15 @@ GeometryPrecisionReducer::reduce(const Geometry& geom)
     }
     else {
         reduced = PrecisionReducerTransformer::reduce(geom, targetPM, removeCollapsed);
+    }
+
+    // Match the collection level of the output to the input
+    // if necessary
+    if (geom.isCollection()
+        && ! reduced->isCollection()
+        && (geom.getCoordinateDimension() == reduced->getCoordinateDimension()))
+    {
+        reduced = geom.getFactory()->createMulti(std::move(reduced));
     }
 
     // TODO: incorporate this in the Transformer above
@@ -88,6 +96,15 @@ GeometryPrecisionReducer::reducePointwise(const Geometry& g, const geom::Precisi
     return reducer.reduce(g);
 }
 
+/* public static */
+std::unique_ptr<Geometry>
+GeometryPrecisionReducer::reduceKeepCollapsed(const Geometry& g, const geom::PrecisionModel& precModel)
+{
+    GeometryPrecisionReducer reducer(precModel);
+    reducer.setRemoveCollapsedComponents(false);
+    return reducer.reduce(g);
+}
+
 
 /* public static */
 std::unique_ptr<geom::Geometry>
@@ -113,7 +130,7 @@ GeometryPrecisionReducer::fixPolygonalTopology(const Geometry& geom)
 
     if(! newFactory) {
         tmpFactory = createFactory(*geom.getFactory(), targetPM);
-        tmp.reset(tmpFactory->createGeometry(&geom));
+        tmp = tmpFactory->createGeometry(&geom);
         geomToBuffer = tmp.get();
     }
 
@@ -121,7 +138,7 @@ GeometryPrecisionReducer::fixPolygonalTopology(const Geometry& geom)
 
     if(! newFactory) {
         // a slick way to copy the geometry with the original precision factory
-        bufGeom.reset(geom.getFactory()->createGeometry(bufGeom.get()));
+        bufGeom = geom.getFactory()->createGeometry(bufGeom.get());
     }
 
     return bufGeom;
@@ -134,8 +151,7 @@ GeometryPrecisionReducer::createFactory(const GeometryFactory& oldGF,
 {
     GeometryFactory::Ptr p_newFactory(
         GeometryFactory::create(&newPM,
-                                oldGF.getSRID(),
-                                const_cast<CoordinateSequenceFactory*>(oldGF.getCoordinateSequenceFactory()))
+                                oldGF.getSRID())
     );
     return p_newFactory;
 }
@@ -144,4 +160,3 @@ GeometryPrecisionReducer::createFactory(const GeometryFactory& oldGF,
 
 } // namespace geos.precision
 } // namespace geos
-

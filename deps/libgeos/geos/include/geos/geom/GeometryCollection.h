@@ -17,15 +17,12 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOS_GEOMETRYCOLLECTION_H
-#define GEOS_GEOS_GEOMETRYCOLLECTION_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Geometry.h> // for inheritance
 #include <geos/geom/Envelope.h> // for proper use of unique_ptr<>
 #include <geos/geom/Dimension.h> // for Dimension::DimensionType
-
-#include <geos/inline.h>
 
 #include <string>
 #include <vector>
@@ -35,7 +32,6 @@
 namespace geos {
 namespace geom { // geos::geom
 class Coordinate;
-class CoordinateArraySequence;
 class CoordinateSequenceFilter;
 }
 }
@@ -61,9 +57,15 @@ public:
 
     typedef std::vector<std::unique_ptr<Geometry>>::iterator iterator;
 
-    const_iterator begin() const;
+    const_iterator begin() const
+    {
+        return geometries.begin();
+    };
 
-    const_iterator end() const;
+    const_iterator end() const
+    {
+        return geometries.end();
+    };
 
     /**
      * Creates and returns a full copy of this GeometryCollection object.
@@ -106,10 +108,16 @@ public:
      */
     Dimension::DimensionType getDimension() const override;
 
+    bool hasDimension(Dimension::DimensionType d) const override;
+
     bool isDimensionStrict(Dimension::DimensionType d) const override;
 
     /// Returns coordinate dimension.
     uint8_t getCoordinateDimension() const override;
+
+    bool hasM() const override;
+
+    bool hasZ() const override;
 
     std::unique_ptr<Geometry> getBoundary() const override;
 
@@ -129,6 +137,8 @@ public:
     bool equalsExact(const Geometry* other,
                      double tolerance = 0) const override;
 
+    bool equalsIdentical(const Geometry* other) const override;
+
     void apply_ro(CoordinateFilter* filter) const override;
 
     void apply_rw(const CoordinateFilter* filter) override;
@@ -147,7 +157,7 @@ public:
 
     void normalize() override;
 
-    const Coordinate* getCoordinate() const override;
+    const CoordinateXY* getCoordinate() const override;
 
     /// Returns the total area of this collection
     double getArea() const override;
@@ -179,9 +189,17 @@ public:
      */
     std::unique_ptr<GeometryCollection> reverse() const { return std::unique_ptr<GeometryCollection>(reverseImpl()); }
 
+    const Envelope* getEnvelopeInternal() const override {
+        if (envelope.isNull()) {
+            envelope = computeEnvelopeInternal();
+        }
+        return &envelope;
+    }
+
 protected:
 
     GeometryCollection(const GeometryCollection& gc);
+    GeometryCollection& operator=(const GeometryCollection& gc);
 
     /** \brief
      * Construct a GeometryCollection with the given GeometryFactory.
@@ -198,17 +216,8 @@ protected:
      *	Elements may be empty <code>Geometry</code>s,
      *	but not <code>null</code>s.
      *
-     *	If construction succeed the created object will take
-     *	ownership of newGeoms vector and elements.
-     *
-     *	If construction	fails "IllegalArgumentException *"
-     *	is thrown and it is your responsibility to delete newGeoms
-     *	vector and content.
-     *
      * @param newFactory the GeometryFactory used to create this geometry
      */
-    GeometryCollection(std::vector<Geometry*>* newGeoms, const GeometryFactory* newFactory);
-
     GeometryCollection(std::vector<std::unique_ptr<Geometry>> && newGeoms, const GeometryFactory& newFactory);
 
     /// Convenience constructor to build a GeometryCollection from vector of Geometry subclass pointers
@@ -227,8 +236,13 @@ protected:
     };
 
     std::vector<std::unique_ptr<Geometry>> geometries;
+    mutable Envelope envelope;
 
-    Envelope::Ptr computeEnvelopeInternal() const override;
+    Envelope computeEnvelopeInternal() const;
+
+    void geometryChangedAction() override {
+        envelope.setToNull();
+    }
 
     int compareToSameClass(const Geometry* gc) const override;
 
@@ -237,8 +251,3 @@ protected:
 } // namespace geos::geom
 } // namespace geos
 
-#ifdef GEOS_INLINE
-# include "geos/geom/GeometryCollection.inl"
-#endif
-
-#endif // ndef GEOS_GEOS_GEOMETRYCOLLECTION_H

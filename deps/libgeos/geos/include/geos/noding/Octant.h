@@ -12,18 +12,16 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_NODING_OCTANT_H
-#define GEOS_NODING_OCTANT_H
+#pragma once
 
 #include <geos/export.h>
 
-#include <geos/inline.h>
 #include <geos/util.h>
 
 // Forward declarations
 namespace geos {
 namespace geom {
-class Coordinate;
+class CoordinateXY;
 }
 }
 
@@ -60,10 +58,10 @@ public:
     /**
      * Returns the octant of a directed line segment from p0 to p1.
      */
-    static int octant(const geom::Coordinate& p0, const geom::Coordinate& p1);
+    static int octant(const geom::CoordinateXY& p0, const geom::CoordinateXY& p1);
 
     static int
-    octant(const geom::Coordinate* p0, const geom::Coordinate* p1)
+    octant(const geom::CoordinateXY* p0, const geom::CoordinateXY* p1)
     {
         ::geos::ignore_unused_variable_warning(p0);
         return octant(*p0, *p1);
@@ -73,5 +71,3 @@ public:
 
 } // namespace geos.noding
 } // namespace geos
-
-#endif

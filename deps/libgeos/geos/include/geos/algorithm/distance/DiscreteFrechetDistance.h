@@ -19,8 +19,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_DISTANCE_DISCRETEFRECHETDISTANCE_H
-#define GEOS_ALGORITHM_DISTANCE_DISCRETEFRECHETDISTANCE_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/algorithm/distance/PointPairDistance.h> // for composition
@@ -138,7 +137,7 @@ public:
         return ptDist.getDistance();
     }
 
-    const std::array<geom::Coordinate, 2>
+    const std::array<geom::CoordinateXY, 2>
     getCoordinates() const
     {
         return ptDist.getCoordinates();
@@ -147,7 +146,7 @@ public:
 private:
     geom::Coordinate getSegmentAt(const geom::CoordinateSequence& seq, std::size_t index);
 
-    PointPairDistance& getFrecheDistance(std::vector< std::vector<PointPairDistance> >& ca, std::size_t i, std::size_t j,
+    PointPairDistance& getFrechetDistance(std::vector< std::vector<PointPairDistance> >& ca, std::size_t i, std::size_t j,
                                          const geom::CoordinateSequence& p, const geom::CoordinateSequence& q);
 
     void compute(const geom::Geometry& discreteGeom, const geom::Geometry& geom);
@@ -174,4 +173,3 @@ private:
 #pragma warning(pop)
 #endif
 
-#endif // GEOS_ALGORITHM_DISTANCE_DISCRETEFRECHETDISTANCE_H

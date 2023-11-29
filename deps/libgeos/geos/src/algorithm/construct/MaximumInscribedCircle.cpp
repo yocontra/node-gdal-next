@@ -20,7 +20,6 @@
 #include <geos/algorithm/construct/MaximumInscribedCircle.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/Envelope.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
@@ -29,6 +28,7 @@
 #include <geos/geom/MultiPolygon.h>
 #include <geos/algorithm/locate/IndexedPointInAreaLocator.h>
 #include <geos/operation/distance/IndexedFacetDistance.h>
+#include <geos/util/Interrupt.h>
 
 #include <typeinfo> // for dynamic_cast
 #include <cassert>
@@ -78,13 +78,24 @@ MaximumInscribedCircle::getRadiusLine(const Geometry* polygonal, double toleranc
     return mic.getRadiusLine();
 }
 
+/* public static */
+std::size_t
+MaximumInscribedCircle::computeMaximumIterations(const Geometry* geom, double toleranceDist)
+{
+    double diam = geom->getEnvelopeInternal()->getDiameter();
+    double ncells = diam / toleranceDist;
+    //-- Using log of ncells allows control over number of iterations
+    std::size_t factor = (std::size_t) std::log(ncells);
+    if (factor < 1) factor = 1;
+    return 2000 + 2000 * factor;
+}
+
 /* public */
 std::unique_ptr<Point>
 MaximumInscribedCircle::getCenter()
 {
     compute();
-    auto pt = factory->createPoint(centerPt);
-    return std::unique_ptr<Point>(pt);
+    return factory->createPoint(centerPt);
 }
 
 /* public */
@@ -92,8 +103,7 @@ std::unique_ptr<Point>
 MaximumInscribedCircle::getRadiusPoint()
 {
     compute();
-    auto pt = factory->createPoint(radiusPt);
-    return std::unique_ptr<Point>(pt);
+    return factory->createPoint(radiusPt);
 }
 
 /* public */
@@ -102,35 +112,32 @@ MaximumInscribedCircle::getRadiusLine()
 {
     compute();
 
-    auto cl = factory->getCoordinateSequenceFactory()->create(2);
+    auto cl = detail::make_unique<CoordinateSequence>(2u);
     cl->setAt(centerPt, 0);
     cl->setAt(radiusPt, 1);
     return factory->createLineString(std::move(cl));
 }
 
+int INITIAL_GRID_SIDE = 25;
+
 /* private */
 void
-MaximumInscribedCircle::createInitialGrid(const Envelope* env, std::priority_queue<Cell>& cellQueue)
+MaximumInscribedCircle::createInitialGrid(const Envelope* env, Cell::CellQueue& cellQueue)
 {
-    double minX = env->getMinX();
-    double maxX = env->getMaxX();
-    double minY = env->getMinY();
-    double maxY = env->getMaxY();
-    double width = env->getWidth();
-    double height = env->getHeight();
-    double cellSize = std::min(width, height);
-    double hSize = cellSize / 2.0;
+    if (!env->isFinite()) {
+        throw util::GEOSException("Non-finite envelope encountered.");
+    }
+
+    double cellSize = std::max(env->getWidth(), env->getHeight());
+    double hSide = cellSize / 2.0;
 
     // Collapsed geometries just end up using the centroid
     // as the answer and skip all the other machinery
     if (cellSize == 0) return;
 
-    // compute initial grid of cells to cover area
-    for (double x = minX; x < maxX; x += cellSize) {
-        for (double y = minY; y < maxY; y += cellSize) {
-            cellQueue.emplace(x+hSize, y+hSize, hSize, distanceToBoundary(x+hSize, y+hSize));
-        }
-    }
+    CoordinateXY c;
+    env->centre(c);
+    cellQueue.emplace(c.x, c.y, hSide, distanceToBoundary(c.x, c.y));
 }
 
 /* private */
@@ -155,11 +162,11 @@ MaximumInscribedCircle::distanceToBoundary(double x, double y)
 
 /* private */
 MaximumInscribedCircle::Cell
-MaximumInscribedCircle::createCentroidCell(const Geometry* geom)
+MaximumInscribedCircle::createInteriorPointCell(const Geometry* geom)
 {
     Coordinate c;
-    geom->getCentroid(c);
-    Cell cell(c.x, c.y, 0, distanceToBoundary(c));
+    std::unique_ptr<Point> p = geom->getInteriorPoint();
+    Cell cell(p->getX(), p->getY(), 0, distanceToBoundary(c));
     return cell;
 }
 
@@ -172,23 +179,32 @@ MaximumInscribedCircle::compute()
     if (done) return;
 
     // Priority queue of cells, ordered by maximum distance from boundary
-    std::priority_queue<Cell> cellQueue;
+    Cell::CellQueue cellQueue;
 
     createInitialGrid(inputGeom->getEnvelopeInternal(), cellQueue);
 
     // use the area centroid as the initial candidate center point
-    Cell farthestCell = createCentroidCell(inputGeom);
+    Cell farthestCell = createInteriorPointCell(inputGeom);
 
     /**
      * Carry out the branch-and-bound search
      * of the cell space
      */
-    while (!cellQueue.empty()) {
+    std::size_t maxIter = computeMaximumIterations(inputGeom, tolerance);
+    std::size_t iterationCount = 0;
+    while (!cellQueue.empty() && iterationCount < maxIter) {
         // pick the most promising cell from the queue
         Cell cell = cellQueue.top();
         cellQueue.pop();
+//    std::cout << iterationCount << "] Dist: " << cell.getDistance() << "  size: " << cell.getHSize() << std::endl;
 
-        // std::cout << i << ": (" << cell.getX() << ", " << cell.getY() << ") " << cell.getHSize() << " dist = " << cell.getDistance() << std::endl;
+        if ((iterationCount++ % 1000) == 0) {
+            GEOS_CHECK_FOR_INTERRUPTS();
+        }
+
+        //-- if cell must be closer than furthest, terminate since all remaining cells in queue are even closer.
+        if (cell.getMaxDistance() < farthestCell.getDistance())
+            break;
 
         // update the center cell if the candidate is further from the boundary
         if (cell.getDistance() > farthestCell.getDistance()) {
@@ -211,7 +227,6 @@ MaximumInscribedCircle::compute()
             cellQueue.emplace(cell.getX()+h2, cell.getY()+h2, h2, distanceToBoundary(cell.getX()+h2, cell.getY()+h2));
         }
     }
-    // std::cout << "number of iterations: " << i << std::endl;
 
     // the farthest cell is the best approximation to the MIC center
     Cell centerCell = farthestCell;
@@ -220,8 +235,8 @@ MaximumInscribedCircle::compute()
 
     // compute radius point
     std::unique_ptr<Point> centerPoint(factory->createPoint(centerPt));
-    std::vector<geom::Coordinate> nearestPts = indexedDistance.nearestPoints(centerPoint.get());
-    radiusPt = nearestPts[0];
+    const auto& nearestPts = indexedDistance.nearestPoints(centerPoint.get());
+    radiusPt = nearestPts->getAt(0);
 
     // flag computation
     done = true;
@@ -233,4 +248,3 @@ MaximumInscribedCircle::compute()
 } // namespace geos.algorithm.construct
 } // namespace geos.algorithm
 } // namespace geos
-

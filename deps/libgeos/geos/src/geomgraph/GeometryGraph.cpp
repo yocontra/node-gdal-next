@@ -34,7 +34,6 @@
 #include <geos/geomgraph/index/SegmentIntersector.h>
 #include <geos/geomgraph/index/EdgeSetIntersector.h>
 
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Location.h>
 #include <geos/geom/Point.h>
@@ -50,8 +49,6 @@
 
 #include <geos/operation/valid/RepeatedPointRemover.h>
 
-#include <geos/inline.h>
-
 #include <vector>
 #include <memory> // std::unique_ptr
 #include <cassert>
@@ -61,9 +58,6 @@
 #define GEOS_DEBUG 0
 #endif
 
-#ifndef GEOS_INLINE
-# include "geos/geomgraph/GeometryGraph.inl"
-#endif
 
 using namespace geos::geomgraph::index;
 using namespace geos::algorithm;
@@ -132,7 +126,7 @@ GeometryGraph::getBoundaryPoints()
     if(! boundaryPoints.get()) {
         // Collection will be destroyed by GeometryGraph dtor
         std::vector<Node*>* coll = getBoundaryNodes();
-        boundaryPoints.reset(new CoordinateArraySequence(coll->size()));
+        boundaryPoints.reset(new CoordinateSequence(coll->size()));
         std::size_t i = 0;
         for(std::vector<Node*>::iterator it = coll->begin(), endIt = coll->end();
                 it != endIt; ++it) {
@@ -225,7 +219,7 @@ GeometryGraph::addCollection(const GeometryCollection* gc)
 void
 GeometryGraph::addPoint(const Point* p)
 {
-    const Coordinate& coord = *(p->getCoordinate());
+    const Coordinate& coord = p->getCoordinatesRO()->getAt(0);
     insertPoint(argIndex, coord, Location::INTERIOR);
 }
 
@@ -355,15 +349,7 @@ std::unique_ptr<SegmentIntersector>
 GeometryGraph::computeSelfNodes(LineIntersector& li,
                                 bool computeRingSelfNodes, const Envelope* env)
 {
-    return computeSelfNodes(li, computeRingSelfNodes, false, env);
-}
-
-std::unique_ptr<SegmentIntersector>
-GeometryGraph::computeSelfNodes(LineIntersector& li,
-                                bool computeRingSelfNodes, bool isDoneIfProperInt, const Envelope* env)
-{
     auto si = detail::make_unique<SegmentIntersector>(&li, true, false);
-    si->setIsDoneIfProperInt(isDoneIfProperInt);
     std::unique_ptr<EdgeSetIntersector> esi(createEdgeSetIntersector());
 
     typedef std::vector<Edge*> EC;
@@ -479,7 +465,7 @@ GeometryGraph::addSelfIntersectionNodes(uint8_t p_argIndex)
 {
     for(Edge* e : *edges) {
         Location eLoc = e->getLabel().getLocation(p_argIndex);
-        EdgeIntersectionList& eiL = e->eiList;
+        const EdgeIntersectionList& eiL = e->eiList;
         for(const EdgeIntersection& ei : eiL) {
             addSelfIntersectionNode(p_argIndex, ei.coord, eLoc);
             GEOS_CHECK_FOR_INTERRUPTS();
@@ -565,4 +551,3 @@ GeometryGraph::determineBoundary(
 
 } // namespace geos.geomgraph
 } // namespace geos
-

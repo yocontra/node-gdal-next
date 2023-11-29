@@ -17,9 +17,10 @@
 #include <geos/noding/SegmentIntersector.h>
 #include <geos/algorithm/LineIntersector.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
+#include <geos/geom/CoordinateSequence.h>
 #include <geos/noding/SegmentString.h>
 
+using geos::geom::CoordinateXY;
 
 namespace geos {
 namespace noding { // geos::noding
@@ -37,10 +38,10 @@ processIntersections(
         return;
     }
 
-    const geom::Coordinate& p00 = (*e0->getCoordinates())[ segIndex0 ];
-    const geom::Coordinate& p01 = (*e0->getCoordinates())[ segIndex0 + 1 ];
-    const geom::Coordinate& p10 = (*e1->getCoordinates())[ segIndex1 ];
-    const geom::Coordinate& p11 = (*e1->getCoordinates())[ segIndex1 + 1 ];
+    const CoordinateXY& p00 = e0->getCoordinate<CoordinateXY>( segIndex0 );
+    const CoordinateXY& p01 = e0->getCoordinate<CoordinateXY>( segIndex0 + 1 );
+    const CoordinateXY& p10 = e1->getCoordinate<CoordinateXY>( segIndex1 );
+    const CoordinateXY& p11 = e1->getCoordinate<CoordinateXY>( segIndex1 + 1 );
 
     li->computeIntersection(p00, p01, p10, p11);
 
@@ -73,7 +74,7 @@ processIntersections(
             delete intSegments;
 
             // record intersecting segments
-            intSegments = new geom::CoordinateArraySequence();
+            intSegments = new geom::CoordinateSequence();
             intSegments->add(p00, true);
             intSegments->add(p01, true);
             intSegments->add(p10, true);

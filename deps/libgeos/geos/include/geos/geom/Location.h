@@ -12,13 +12,11 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_LOCATION_H
-#define GEOS_GEOM_LOCATION_H
+#pragma once
 
 #include <geos/export.h>
 #include <iostream> // for ostream
 
-#include <geos/inline.h>
 
 namespace geos {
 namespace geom { // geos::geom
@@ -31,7 +29,7 @@ namespace geom { // geos::geom
  * [OpenGIS Simple Features Specification for SQL](http://www.opengis.org/techno/specs.htm").
  */
 
-enum class GEOS_DLL Location : char {
+enum class Location : char {
     /**
      *  Used for uninitialized location values.
      */
@@ -63,6 +61,4 @@ GEOS_DLL std::ostream& operator<<(std::ostream& os, const Location& loc);
 
 } // namespace geos::geom
 } // namespace geos
-
-#endif // ndef GEOS_GEOM_LOCATION_H
 

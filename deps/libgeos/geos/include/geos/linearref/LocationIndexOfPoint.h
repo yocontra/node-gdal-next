@@ -18,8 +18,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_LINEARREF_LOCATIONINDEXOFPOINT_H
-#define GEOS_LINEARREF_LOCATIONINDEXOFPOINT_H
+#pragma once
 
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Geometry.h>
@@ -40,12 +39,12 @@ class LocationIndexOfPoint {
 private:
     const geom::Geometry* linearGeom;
 
-    LinearLocation indexOfFromStart(const geom::Coordinate& inputPt, const LinearLocation* minIndex) const;
+    LinearLocation indexOfFromStart(const geom::CoordinateXY& inputPt, const LinearLocation* minIndex) const;
 
 public:
-    static LinearLocation indexOf(const geom::Geometry* linearGeom, const geom::Coordinate& inputPt);
+    static LinearLocation indexOf(const geom::Geometry* linearGeom, const geom::CoordinateXY& inputPt);
 
-    static LinearLocation indexOfAfter(const geom::Geometry* linearGeom, const geom::Coordinate& inputPt,
+    static LinearLocation indexOfAfter(const geom::Geometry* linearGeom, const geom::CoordinateXY& inputPt,
                                        const LinearLocation* minIndex);
 
     LocationIndexOfPoint(const geom::Geometry* linearGeom);
@@ -57,7 +56,7 @@ public:
      * @param inputPt the coordinate to locate
      * @return the location of the nearest point
      */
-    LinearLocation indexOf(const geom::Coordinate& inputPt) const;
+    LinearLocation indexOf(const geom::CoordinateXY& inputPt) const;
 
     /** \brief
      * Find the nearest LinearLocation along the linear [Geometry](@ref geom::Geometry)
@@ -72,8 +71,7 @@ public:
      * @param minIndex the minimum location for the point location
      * @return the location of the nearest point
      */
-    LinearLocation indexOfAfter(const geom::Coordinate& inputPt, const LinearLocation* minIndex) const;
+    LinearLocation indexOfAfter(const geom::CoordinateXY& inputPt, const LinearLocation* minIndex) const;
 };
 }
 }
-#endif

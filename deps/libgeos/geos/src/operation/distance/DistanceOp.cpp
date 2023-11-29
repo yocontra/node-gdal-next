@@ -22,11 +22,9 @@
 #include <geos/operation/distance/DistanceOp.h>
 #include <geos/operation/distance/GeometryLocation.h>
 #include <geos/operation/distance/ConnectedElementLocationFilter.h>
-#include <geos/algorithm/PointLocator.h>
 #include <geos/algorithm/Distance.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/LineString.h>
 #include <geos/geom/Point.h>
 #include <geos/geom/Polygon.h>
@@ -36,6 +34,7 @@
 #include <geos/geom/util/LinearComponentExtracter.h>
 #include <geos/geom/util/PointExtracter.h>
 #include <geos/util/IllegalArgumentException.h>
+#include <geos/util.h>
 
 #include <vector>
 #include <iostream>
@@ -46,14 +45,11 @@
 
 
 using namespace geos::geom;
-//using namespace geos::algorithm;
 
 namespace geos {
 namespace operation { // geos.operation
 namespace distance { // geos.operation.distance
 
-using namespace geom;
-//using namespace geom::util;
 
 /*public static (deprecated)*/
 double
@@ -135,11 +131,11 @@ DistanceOp::nearestPoints()
         return nullptr;
     }
 
-    std::unique_ptr<std::vector<Coordinate>> nearestPts(new std::vector<Coordinate>(2));
-    (*nearestPts)[0] = locs[0]->getCoordinate();
-    (*nearestPts)[1] = locs[1]->getCoordinate();
+    auto nearestPts = detail::make_unique<CoordinateSequence>(2u);
+    nearestPts->setAt(locs[0]->getCoordinate(), 0);
+    nearestPts->setAt(locs[1]->getCoordinate(), 1);
 
-    return std::unique_ptr<CoordinateSequence>(new CoordinateArraySequence(nearestPts.release()));
+    return nearestPts;
 }
 
 void
@@ -147,10 +143,10 @@ DistanceOp::updateMinDistance(std::array<std::unique_ptr<GeometryLocation>, 2> &
 {
     // if not set then don't update
     if(locGeom[0] == nullptr) {
-#if GEOS_DEBUG
-        std::cerr << "updateMinDistance called with loc[0] == null and loc[1] == " << locGeom[1] << std::endl;
-#endif
         assert(locGeom[1] == nullptr);
+#if GEOS_DEBUG
+        std::cerr << "updateMinDistance called with loc[0] == null and loc[1] == null" << std::endl;
+#endif
         return;
     }
 
@@ -260,7 +256,7 @@ DistanceOp::computeInside(std::vector<std::unique_ptr<GeometryLocation>> & locs,
 {
     for(auto& loc : locs) {
         for(const auto& poly : polys) {
-			const Coordinate& pt = loc->getCoordinate();
+            const auto& pt = loc->getCoordinate();
 
 			if (Location::EXTERIOR != ptLocator.locate(pt, static_cast<const Geometry*>(poly))) {
 				minDistance = 0.0;
@@ -362,6 +358,10 @@ DistanceOp::computeMinDistanceLines(
 {
     for(const LineString* line0 : lines0) {
         for(const LineString* line1 : lines1) {
+
+            if (line0->isEmpty() || line1->isEmpty())
+                continue;
+
             computeMinDistance(line0, line1, locGeom);
             if(minDistance <= terminateDistance) {
                 return;
@@ -379,6 +379,10 @@ DistanceOp::computeMinDistancePoints(
 {
     for(const Point* pt0 : points0) {
         for(const Point* pt1 : points1) {
+
+            if (pt1->isEmpty() || pt0->isEmpty())
+                continue;
+
             double dist = pt0->getCoordinate()->distance(*(pt1->getCoordinate()));
 
 #if GEOS_DEBUG
@@ -412,6 +416,10 @@ DistanceOp::computeMinDistanceLinesPoints(
 {
     for(const LineString* line : lines) {
         for(const Point* pt : points) {
+
+            if (line->isEmpty() || pt->isEmpty())
+                continue;
+
             computeMinDistance(line, pt, locGeom);
             if(minDistance <= terminateDistance) {
                 return;
@@ -442,8 +450,8 @@ DistanceOp::computeMinDistance(
 
     // brute force approach!
     for(std::size_t i = 0; i < npts0 - 1; ++i) {
-        const Coordinate& p00 = coord0->getAt(i);
-        const Coordinate& p01 = coord0->getAt(i+1);
+        const CoordinateXY& p00 = coord0->getAt<CoordinateXY>(i);
+        const CoordinateXY& p01 = coord0->getAt<CoordinateXY>(i+1);
 
         Envelope segEnv0(p00, p01);
 
@@ -452,8 +460,8 @@ DistanceOp::computeMinDistance(
         }
 
         for(std::size_t j = 0; j < npts1 - 1; ++j) {
-            const Coordinate& p10 = coord1->getAt(j);
-            const Coordinate& p11 = coord1->getAt(j+1);
+            const CoordinateXY& p10 = coord1->getAt<CoordinateXY>(j);
+            const CoordinateXY& p11 = coord1->getAt<CoordinateXY>(j+1);
 
             Envelope segEnv1(p10, p11);
 
@@ -468,8 +476,8 @@ DistanceOp::computeMinDistance(
                 // TODO avoid copy from constructing segs, maybe
                 // by making a static closestPoints that takes four
                 // coordinate references
-                LineSegment seg0(p00, p01);
-                LineSegment seg1(p10, p11);
+                LineSegment seg0{Coordinate(p00), Coordinate(p01)};
+                LineSegment seg1{Coordinate(p10), Coordinate(p11)};
                 auto closestPt = seg0.closestPoints(seg1);
 
                 locGeom[0].reset(new GeometryLocation(line0, i, closestPt[0]));
@@ -496,19 +504,19 @@ DistanceOp::computeMinDistance(const LineString* line,
         return;
     }
     const CoordinateSequence* coord0 = line->getCoordinatesRO();
-    const Coordinate* coord = pt->getCoordinate();
+    const CoordinateXY* coord = pt->getCoordinate();
 
     // brute force approach!
     std::size_t npts0 = coord0->getSize();
     for(std::size_t i = 0; i < npts0 - 1; ++i) {
-        double dist = Distance::pointToSegment(*coord, coord0->getAt(i), coord0->getAt(i + 1));
+        double dist = Distance::pointToSegment(*coord, coord0->getAt<CoordinateXY>(i), coord0->getAt<CoordinateXY>(i + 1));
         if(dist < minDistance) {
             minDistance = dist;
 
             // TODO avoid copy from constructing segs, maybe
             // by making a static closestPoints that takes three
             // coordinate references
-            LineSegment seg(coord0->getAt(i), coord0->getAt(i + 1));
+            LineSegment seg{Coordinate(coord0->getAt<CoordinateXY>(i)), Coordinate(coord0->getAt<CoordinateXY>(i + 1))};
             Coordinate segClosestPoint;
             seg.closestPoint(*coord, segClosestPoint);
 

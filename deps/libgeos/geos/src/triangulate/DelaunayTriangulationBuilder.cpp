@@ -22,7 +22,6 @@
 
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequenceFactory.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/operation/valid/RepeatedPointRemover.h>
 #include <geos/triangulate/IncrementalDelaunayTriangulator.h>
@@ -45,15 +44,10 @@ DelaunayTriangulationBuilder::extractUniqueCoordinates(
 }
 
 std::unique_ptr<CoordinateSequence>
-DelaunayTriangulationBuilder::unique(const CoordinateSequence* seq) {
-    auto seqFactory = CoordinateArraySequenceFactory::instance();
-    auto dim = seq->getDimension();
-
-    std::vector<Coordinate> coords;
-    seq->toVector(coords);
-    std::sort(coords.begin(), coords.end(), geos::geom::CoordinateLessThen());
-
-    std::unique_ptr<CoordinateSequence> sortedSeq(seqFactory->create(std::move(coords), dim));
+DelaunayTriangulationBuilder::unique(const CoordinateSequence* seq)
+{
+    auto sortedSeq = detail::make_unique<CoordinateSequence>(*seq);
+    std::sort(sortedSeq->items<Coordinate>().begin(), sortedSeq->items<Coordinate>().end(), geos::geom::CoordinateLessThan());
 
     operation::valid::RepeatedPointTester rpt;
     if (rpt.hasRepeatedPoint(sortedSeq.get())) {
@@ -91,7 +85,7 @@ void
 DelaunayTriangulationBuilder::setSites(const CoordinateSequence& coords)
 {
     // remove any duplicate points (they will cause the triangulation to fail)
-    siteCoords = operation::valid::RepeatedPointRemover::removeRepeatedPoints(&coords);
+    siteCoords = unique(&coords);
 }
 
 void

@@ -18,17 +18,13 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOS_POINT_H
-#define GEOS_GEOS_POINT_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Geometry.h> // for inheritance
 #include <geos/geom/CoordinateSequence.h> // for proper use of unique_ptr<>
-#include <geos/geom/FixedSizeCoordinateSequence.h>
 #include <geos/geom/Envelope.h> // for proper use of unique_ptr<>
 #include <geos/geom/Dimension.h> // for Dimension::DimensionType
-
-#include <geos/inline.h>
 
 #include <string>
 #include <vector>
@@ -43,7 +39,6 @@
 namespace geos {
 namespace geom { // geos::geom
 class Coordinate;
-class CoordinateArraySequence;
 class CoordinateFilter;
 class CoordinateSequenceFilter;
 class GeometryComponentFilter;
@@ -99,6 +94,10 @@ public:
     /// Returns coordinate dimension.
     uint8_t getCoordinateDimension() const override;
 
+    bool hasM() const override;
+
+    bool hasZ() const override;
+
     /// Returns Dimension::False (Point has no boundary)
     int getBoundaryDimension() const override;
 
@@ -112,10 +111,26 @@ public:
      */
     std::unique_ptr<Geometry> getBoundary() const override;
 
+    void setXY(double x, double y) {
+        if (isEmpty()) {
+            coordinates.add(x, y);
+        } else {
+            CoordinateXY& prev = coordinates.front<CoordinateXY>();
+            prev.x = x;
+            prev.y = y;
+        }
+        geometryChangedAction();
+    }
+
+    const CoordinateXY* getCoordinate() const override {
+        return isEmpty() ? nullptr : &coordinates.getAt<CoordinateXY>(0);
+    }
+
     double getX() const;
     double getY() const;
     double getZ() const;
-    const Coordinate* getCoordinate() const override;
+    double getM() const;
+
     std::string getGeometryType() const override;
     GeometryTypeId getGeometryTypeId() const override;
     void apply_ro(CoordinateFilter* filter) const override;
@@ -129,6 +144,8 @@ public:
 
     bool equalsExact(const Geometry* other, double tolerance = 0) const override;
 
+    bool equalsIdentical(const Geometry* other) const override;
+
     void
     normalize(void) override
     {
@@ -138,6 +155,10 @@ public:
     std::unique_ptr<Point> reverse() const
     {
         return std::unique_ptr<Point>(reverseImpl());
+    }
+
+    const Envelope* getEnvelopeInternal() const override {
+        return &envelope;
     }
 
 protected:
@@ -154,9 +175,15 @@ protected:
      *
      * @param newFactory the GeometryFactory used to create this geometry
      */
-    Point(CoordinateSequence* newCoords, const GeometryFactory* newFactory);
+    Point(CoordinateSequence&& newCoords, const GeometryFactory* newFactory);
 
     Point(const Coordinate& c, const GeometryFactory* newFactory);
+
+    Point(const CoordinateXY& c, const GeometryFactory* newFactory);
+
+    Point(const CoordinateXYM& c, const GeometryFactory* newFactory);
+
+    Point(const CoordinateXYZM& c, const GeometryFactory* newFactory);
 
     Point(const Point& p);
 
@@ -164,7 +191,7 @@ protected:
 
     Point* reverseImpl() const override { return new Point(*this); }
 
-    Envelope::Ptr computeEnvelopeInternal() const override;
+    Envelope computeEnvelopeInternal() const;
 
     int compareToSameClass(const Geometry* p) const override;
 
@@ -174,27 +201,21 @@ protected:
         return SORTINDEX_POINT;
     };
 
+    void geometryChangedAction() override {
+        envelope = computeEnvelopeInternal();
+    }
+
 private:
 
-    /**
-     *  The <code>Coordinate</code> wrapped by this <code>Point</code>.
-     */
-    FixedSizeCoordinateSequence<1> coordinates;
-
-    bool empty2d;
-    bool empty3d;
+    CoordinateSequence coordinates;
+    Envelope envelope;
 };
 
 } // namespace geos::geom
 } // namespace geos
 
-//#ifdef GEOS_INLINE
-//# include "geos/geom/Point.inl"
-//#endif
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#endif // ndef GEOS_GEOS_POINT_H
 

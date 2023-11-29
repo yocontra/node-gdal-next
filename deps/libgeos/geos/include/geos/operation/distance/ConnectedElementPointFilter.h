@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_DISTANCE_CONNECTEDELEMENTPOINTFILTER_H
-#define GEOS_OP_DISTANCE_CONNECTEDELEMENTPOINTFILTER_H
+#pragma once
 
 #include <geos/export.h>
 
@@ -28,7 +27,7 @@
 // Forward declarations
 namespace geos {
 namespace geom {
-class Coordinate;
+class CoordinateXY;
 class Geometry;
 }
 }
@@ -47,7 +46,7 @@ namespace distance { // geos::operation::distance
 class GEOS_DLL ConnectedElementPointFilter: public geom::GeometryFilter {
 
 private:
-    std::vector<const geom::Coordinate*>* pts;
+    std::vector<const geom::CoordinateXY*>* pts;
 
 public:
     /**
@@ -55,9 +54,9 @@ public:
      * found inside the specified geometry. Thus, if the specified geometry is
      * not a GeometryCollection, an empty list will be returned.
      */
-    static std::vector<const geom::Coordinate*>* getCoordinates(const geom::Geometry* geom);
+    static std::vector<const geom::CoordinateXY*>* getCoordinates(const geom::Geometry* geom);
 
-    ConnectedElementPointFilter(std::vector<const geom::Coordinate*>* newPts)
+    ConnectedElementPointFilter(std::vector<const geom::CoordinateXY*>* newPts)
         :
         pts(newPts)
     {}
@@ -71,6 +70,4 @@ public:
 } // namespace geos::operation::distance
 } // namespace geos::operation
 } // namespace geos
-
-#endif // GEOS_OP_DISTANCE_CONNECTEDELEMENTPOINTFILTER_H
 

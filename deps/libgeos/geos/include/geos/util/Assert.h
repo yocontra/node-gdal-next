@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_UTIL_ASSERT_H
-#define GEOS_UTIL_ASSERT_H
+#pragma once
 
 #include <geos/export.h>
 #include <string>
@@ -22,7 +21,7 @@
 // Forward declarations
 namespace geos {
 namespace geom {
-class Coordinate;
+class CoordinateXY;
 }
 }
 
@@ -41,13 +40,13 @@ public:
     }
 
 
-    static void equals(const geom::Coordinate& expectedValue,
-                       const geom::Coordinate& actualValue,
+    static void equals(const geom::CoordinateXY& expectedValue,
+                       const geom::CoordinateXY& actualValue,
                        const std::string& message);
 
     static void
-    equals(const geom::Coordinate& expectedValue,
-           const geom::Coordinate& actualValue)
+    equals(const geom::CoordinateXY& expectedValue,
+           const geom::CoordinateXY& actualValue)
     {
         equals(expectedValue, actualValue, std::string());
     }
@@ -65,5 +64,3 @@ public:
 } // namespace geos.util
 } // namespace geos
 
-
-#endif // GEOS_UTIL_ASSERT_H

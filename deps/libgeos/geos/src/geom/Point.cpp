@@ -27,11 +27,11 @@
 #include <geos/geom/CoordinateFilter.h>
 #include <geos/geom/GeometryFilter.h>
 #include <geos/geom/GeometryComponentFilter.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Envelope.h>
 #include <geos/geom/GeometryCollection.h>
 #include <geos/geom/GeometryFactory.h>
+#include <geos/util.h>
 
 #include <string>
 #include <memory>
@@ -39,38 +39,46 @@
 namespace geos {
 namespace geom { // geos::geom
 
-const static FixedSizeCoordinateSequence<0> emptyCoords2d(2);
-const static FixedSizeCoordinateSequence<0> emptyCoords3d(3);
 
 
 /*protected*/
-Point::Point(CoordinateSequence* newCoords, const GeometryFactory* factory)
+Point::Point(CoordinateSequence&& newCoords, const GeometryFactory* factory)
     : Geometry(factory)
-    , empty2d(false)
-    , empty3d(false)
+    , coordinates(newCoords)
+    , envelope(computeEnvelopeInternal())
 {
-    std::unique_ptr<CoordinateSequence> coords(newCoords);
-
-    if(coords == nullptr) {
-        empty2d = true;
-        return;
-    }
-
-    if (coords->getSize() == 1) {
-        coordinates.setAt(coords->getAt(0), 0);
-    } else if (coords->getSize() > 1) {
+    if (coordinates.getSize() > 1) {
         throw util::IllegalArgumentException("Point coordinate list must contain a single element");
-    } else if (coords->getDimension() == 3) {
-        empty3d = true;
-    } else {
-        empty2d = true;
     }
 }
 
 Point::Point(const Coordinate & c, const GeometryFactory* factory)
     : Geometry(factory)
-    , empty2d(false)
-    , empty3d(false)
+    , coordinates{c}
+    , envelope(c)
+{
+}
+
+Point::Point(const CoordinateXY & c, const GeometryFactory* factory)
+    : Geometry(factory)
+    , coordinates{c}
+    , envelope(c)
+{
+}
+
+Point::Point(const CoordinateXYM & c, const GeometryFactory* factory)
+    : Geometry(factory)
+    , coordinates{c}
+    , envelope(c)
+{
+}
+
+Point::Point(const CoordinateXYZM & c, const GeometryFactory* factory)
+    : Geometry(factory)
+      // check Z and M values because we may be constructing this from
+      // an XYM coordinate that was stored as XYZM
+    , coordinates{1u, !std::isnan(c.z), !std::isnan(c.m), false}
+    , envelope(c)
 {
     coordinates.setAt(c, 0);
 }
@@ -79,8 +87,7 @@ Point::Point(const Coordinate & c, const GeometryFactory* factory)
 Point::Point(const Point& p)
     : Geometry(p)
     , coordinates(p.coordinates)
-    , empty2d(p.empty2d)
-    , empty3d(p.empty3d)
+    , envelope(p.envelope)
 {}
 
 std::unique_ptr<CoordinateSequence>
@@ -92,18 +99,13 @@ Point::getCoordinates() const
 std::size_t
 Point::getNumPoints() const
 {
-    return isEmpty() ? 0 : 1;
+    return coordinates.size();
 }
 
 bool
 Point::isEmpty() const
 {
-    if (empty2d || empty3d) return true;
-    const Coordinate& c = coordinates.getAt(0);
-    if (std::isnan(c.x) && std::isnan(c.y))
-        return true;
-    else
-        return false;
+    return coordinates.isEmpty();
 }
 
 bool
@@ -122,6 +124,18 @@ uint8_t
 Point::getCoordinateDimension() const
 {
     return (uint8_t) getCoordinatesRO()->getDimension();
+}
+
+bool
+Point::hasM() const
+{
+    return getCoordinatesRO()->hasM();
+}
+
+bool
+Point::hasZ() const
+{
+    return getCoordinatesRO()->hasZ();
 }
 
 int
@@ -154,13 +168,16 @@ Point::getZ() const
     if(isEmpty()) {
         throw util::UnsupportedOperationException("getZ called on empty Point\n");
     }
-    return getCoordinate()->z;
+    return coordinates.getOrdinate(0, CoordinateSequence::Z);
 }
 
-const Coordinate*
-Point::getCoordinate() const
+double
+Point::getM() const
 {
-    return isEmpty() ? nullptr : &coordinates[0];
+    if(isEmpty()) {
+        throw util::UnsupportedOperationException("getM called on empty Point\n");
+    }
+    return coordinates.getOrdinate(0, CoordinateSequence::M);
 }
 
 std::string
@@ -175,33 +192,25 @@ Point::getBoundary() const
     return getFactory()->createGeometryCollection();
 }
 
-Envelope::Ptr
+Envelope
 Point::computeEnvelopeInternal() const
 {
     if(isEmpty()) {
-        return Envelope::Ptr(new Envelope());
+        return Envelope();
     }
 
-    return Envelope::Ptr(new Envelope(getCoordinate()->x,
-                                      getCoordinate()->x, getCoordinate()->y,
-                                      getCoordinate()->y));
+    return Envelope(*getCoordinate());
 }
 
 void
 Point::apply_ro(CoordinateFilter* filter) const
 {
-    if(isEmpty()) {
-        return;
-    }
-    filter->filter_ro(getCoordinate());
+    coordinates.apply_ro(filter);
 }
 
 void
 Point::apply_rw(const CoordinateFilter* filter)
 {
-    if (isEmpty()) {
-        return;
-    }
     coordinates.apply_rw(filter);
 }
 
@@ -248,7 +257,6 @@ Point::apply_ro(CoordinateSequenceFilter& filter) const
         return;
     }
     filter.filter_ro(coordinates, 0);
-    //if (filter.isGeometryChanged()) geometryChanged();
 }
 
 bool
@@ -269,13 +277,24 @@ Point::equalsExact(const Geometry* other, double tolerance) const
         return false;
     }
 
-    const Coordinate* this_coord = getCoordinate();
-    const Coordinate* other_coord = other->getCoordinate();
+    const CoordinateXY* this_coord = getCoordinate();
+    const CoordinateXY* other_coord = other->getCoordinate();
 
     // assume the isEmpty checks above worked :)
     assert(this_coord && other_coord);
 
     return equal(*this_coord, *other_coord, tolerance);
+}
+
+bool
+Point::equalsIdentical(const Geometry* other) const
+{
+    if(!isEquivalentClass(other)) {
+        return false;
+    }
+
+    return getCoordinatesRO()->equalsIdentical(
+                *static_cast<const Point*>(other)->getCoordinatesRO());
 }
 
 int
@@ -295,11 +314,6 @@ Point::getGeometryTypeId() const
 const CoordinateSequence*
 Point::getCoordinatesRO() const
 {
-    if (empty2d) {
-        return &emptyCoords2d;
-    } else if (empty3d) {
-        return &emptyCoords3d;
-    }
     return &coordinates;
 }
 

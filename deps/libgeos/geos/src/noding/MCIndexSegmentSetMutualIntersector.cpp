@@ -10,10 +10,6 @@
  * by the Free Software Foundation.
  * See the COPYING file for more information.
  *
- **********************************************************************
- *
- * Last port: noding/MCIndexSegmentSetMutualIntersector.java r388 (JTS-1.12)
- *
  **********************************************************************/
 
 #include <geos/noding/MCIndexSegmentSetMutualIntersector.h>
@@ -25,6 +21,7 @@
 #include <geos/index/chain/MonotoneChainBuilder.h>
 #include <geos/index/chain/MonotoneChainOverlapAction.h>
 #include <geos/index/strtree/SimpleSTRtree.h>
+
 // std
 #include <cstddef>
 
@@ -48,9 +45,10 @@ MCIndexSegmentSetMutualIntersector::addToIndex(SegmentString* segStr)
 void
 MCIndexSegmentSetMutualIntersector::addToMonoChains(SegmentString* segStr)
 {
+    if (segStr->size() == 0)
+        return;
     MonotoneChainBuilder::getChains(segStr->getCoordinates(),
                                     segStr, monoChains);
-
 }
 
 
@@ -61,8 +59,8 @@ MCIndexSegmentSetMutualIntersector::intersectChains()
     MCIndexSegmentSetMutualIntersector::SegmentOverlapAction overlapAction(*segInt);
 
     for(auto& queryChain : monoChains) {
-        index.query(queryChain.getEnvelope(), [&queryChain, &overlapAction, this](const MonotoneChain* testChain) {
-            queryChain.computeOverlaps(testChain, &overlapAction);
+        index.query(queryChain.getEnvelope(overlapTolerance), [&queryChain, &overlapAction, this](const MonotoneChain* testChain) -> bool {
+            queryChain.computeOverlaps(testChain, overlapTolerance, &overlapAction);
             nOverlaps++;
 
             return !segInt->isDone(); // abort early if segInt->isDone()
@@ -78,6 +76,8 @@ MCIndexSegmentSetMutualIntersector::setBaseSegments(SegmentString::ConstVect* se
     // NOTE - mloskot: const qualifier is removed silently, dirty.
 
     for(const SegmentString* css: *segStrings) {
+        if (css->size() == 0)
+            continue;
         SegmentString* ss = const_cast<SegmentString*>(css);
         addToIndex(ss);
     }
@@ -89,7 +89,7 @@ MCIndexSegmentSetMutualIntersector::process(SegmentString::ConstVect* segStrings
 {
     if (!indexBuilt) {
         for (auto& mc: indexChains) {
-            index.insert(&(mc.getEnvelope()), &mc);
+            index.insert(&(mc.getEnvelope(overlapTolerance)), &mc);
         }
         indexBuilt = true;
     }
@@ -112,12 +112,11 @@ void
 MCIndexSegmentSetMutualIntersector::SegmentOverlapAction::overlap(
     const MonotoneChain& mc1, std::size_t start1, const MonotoneChain& mc2, std::size_t start2)
 {
-    SegmentString* ss1 = (SegmentString*)(mc1.getContext());
-    SegmentString* ss2 = (SegmentString*)(mc2.getContext());
+    SegmentString* ss1 = static_cast<SegmentString*>(mc1.getContext());
+    SegmentString* ss2 = static_cast<SegmentString*>(mc2.getContext());
 
     si.processIntersections(ss1, start1, ss2, start2);
 }
 
 } // geos::noding
 } // geos
-

@@ -48,8 +48,12 @@ namespace {
  */
 class SegmentStringExtractor: public geom::GeometryComponentFilter {
 public:
-    SegmentStringExtractor(SegmentString::NonConstVect& to)
+    SegmentStringExtractor(SegmentString::NonConstVect& to,
+                           bool constructZ,
+                           bool constructM)
         : _to(to)
+        , _constructZ(constructZ)
+        , _constructM(constructM)
     {}
 
     void
@@ -59,12 +63,14 @@ public:
         if(ls) {
             auto coord = ls->getCoordinates();
             // coord ownership transferred to SegmentString
-            SegmentString* ss = new NodedSegmentString(coord.release(), nullptr);
+            SegmentString* ss = new NodedSegmentString(coord.release(), _constructZ, _constructM, nullptr);
             _to.push_back(ss);
         }
     }
 private:
     SegmentString::NonConstVect& _to;
+    bool _constructZ;
+    bool _constructM;
 
     SegmentStringExtractor(SegmentStringExtractor const&); /*= delete*/
     SegmentStringExtractor& operator=(SegmentStringExtractor const&); /*= delete*/
@@ -117,6 +123,9 @@ std::unique_ptr<geom::Geometry>
 GeometryNoder::getNoded()
 {
     SegmentString::NonConstVect p_lineList;
+    if (argGeom.isEmpty())
+        return argGeom.clone();
+
     extractSegmentStrings(argGeom, p_lineList);
 
     Noder& p_noder = getNoder();
@@ -135,12 +144,12 @@ GeometryNoder::getNoded()
 
     std::unique_ptr<geom::Geometry> noded = toGeometry(*nodedEdges);
 
-    for(auto& elem : (*nodedEdges)) {
+    for(auto* elem : (*nodedEdges)) {
         delete elem;
     }
     delete nodedEdges;
 
-    for(auto& elem : p_lineList) {
+    for(auto* elem : p_lineList) {
         delete elem;
     }
 
@@ -152,7 +161,7 @@ void
 GeometryNoder::extractSegmentStrings(const geom::Geometry& g,
                                      SegmentString::NonConstVect& to)
 {
-    SegmentStringExtractor ex(to);
+    SegmentStringExtractor ex(to, g.hasZ(), g.hasM());
     g.apply_ro(&ex);
 }
 

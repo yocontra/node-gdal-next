@@ -17,8 +17,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_TRIANGULATE_QUADEDGE_QUADEDGESUBDIVISION_H
-#define GEOS_TRIANGULATE_QUADEDGE_QUADEDGESUBDIVISION_H
+#pragma once
 
 #include <memory>
 #include <list>
@@ -50,8 +49,6 @@ namespace triangulate { //geos.triangulate
 namespace quadedge { //geos.triangulate.quadedge
 
 class TriangleVisitor;
-
-const double EDGE_COINCIDENCE_TOL_FACTOR = 1000;
 
 /** \brief
  * A class that contains the [QuadEdges](@ref QuadEdge) representing a planar
@@ -515,5 +512,3 @@ public:
 } //namespace geos.triangulate.quadedge
 } //namespace geos.triangulate
 } //namespace goes
-
-#endif //GEOS_TRIANGULATE_QUADEDGE_QUADEDGESUBDIVISION_H

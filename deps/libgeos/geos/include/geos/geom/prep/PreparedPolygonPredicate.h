@@ -18,8 +18,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_PREP_PREPAREDPOLYGONPREDICATE_H
-#define GEOS_GEOM_PREP_PREPAREDPOLYGONPREDICATE_H
+#pragma once
 
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Location.h>
@@ -118,7 +117,7 @@ protected:
      * @return true if any component intersects the areal test geometry
      */
     bool isAnyTargetComponentInAreaTest(const geom::Geometry* testGeom,
-                                        const geom::Coordinate::ConstVect* targetRepPts) const;
+                                        const std::vector<const geom::CoordinateXY*>* targetRepPts) const;
 
 public:
     /** \brief
@@ -139,6 +138,4 @@ public:
 } // namespace geos::geom::prep
 } // namespace geos::geom
 } // namespace geos
-
-#endif // GEOS_GEOM_PREP_PREPAREDPOLYGONPREDICATE_H
 

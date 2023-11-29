@@ -17,8 +17,9 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_PREP_PREPAREDPOLYGONDISTANCE_H
-#define GEOS_GEOM_PREP_PREPAREDPOLYGONDISTANCE_H
+#pragma once
+
+#include <geos/geom/prep/PreparedPolygonPredicate.h>
 
 // Forward declarations
 namespace geos {
@@ -36,7 +37,7 @@ namespace prep { // geos::geom::prep
 
 class PreparedPolygon;
 
-class PreparedPolygonDistance {
+class PreparedPolygonDistance : public PreparedPolygonPredicate {
 public:
 
     static double distance(const PreparedPolygon& prep, const geom::Geometry* geom)
@@ -46,14 +47,14 @@ public:
     }
 
     PreparedPolygonDistance(const PreparedPolygon& prep)
-        : prepPoly(prep)
+        : PreparedPolygonPredicate(&prep)
     { }
 
     double distance(const geom::Geometry* g) const;
 
-protected:
+    bool isWithinDistance(const geom::Geometry* g, double d) const;
 
-    const PreparedPolygon& prepPoly;
+protected:
 
     // Declare type as noncopyable
     PreparedPolygonDistance(const PreparedPolygonDistance& other) = delete;
@@ -64,4 +65,3 @@ protected:
 } // namespace geos::geom
 } // namespace geos
 
-#endif // GEOS_GEOM_PREP_PREPAREDPOLYGONDISTANCE_H

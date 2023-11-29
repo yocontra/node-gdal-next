@@ -64,27 +64,25 @@ private:
     const GeometryFactory* geometryFactory;
     std::vector<std::unique_ptr<Point>> resultList;
 
+    using PointMap = std::map<CoordinateXY, std::unique_ptr<Point>>;
+
     // Methods
     void
-    computeIntersection(std::map<Coordinate, std::unique_ptr<Point>>& map0,
-                        std::map<Coordinate, std::unique_ptr<Point>>& map1,
+    computeIntersection(PointMap& map0,
+                        PointMap& map1,
                         std::vector<std::unique_ptr<Point>>& resultList);
 
     void
-    computeDifference(std::map<Coordinate, std::unique_ptr<Point>>& map0,
-                      std::map<Coordinate, std::unique_ptr<Point>>& map1,
+    computeDifference(PointMap& map0,
+                      PointMap& map1,
                       std::vector<std::unique_ptr<Point>>& resultList);
 
     void
-    computeUnion(std::map<Coordinate, std::unique_ptr<Point>>& map0,
-                 std::map<Coordinate, std::unique_ptr<Point>>& map1,
+    computeUnion(PointMap& map0,
+                 PointMap& map1,
                  std::vector<std::unique_ptr<Point>>& resultList);
 
-    std::map<Coordinate, std::unique_ptr<Point>> buildPointMap(const Geometry* geom);
-
-    Coordinate roundCoord(const Point* pt, const PrecisionModel* pm) const;
-
-
+    PointMap buildPointMap(const Geometry* geom);
 
 public:
 
@@ -120,4 +118,3 @@ public:
 } // namespace geos.operation.overlayng
 } // namespace geos.operation
 } // namespace geos
-

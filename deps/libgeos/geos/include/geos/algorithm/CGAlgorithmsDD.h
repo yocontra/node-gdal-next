@@ -19,13 +19,12 @@
 #pragma once
 
 #include <geos/export.h>
-#include <geos/inline.h>
 #include <geos/math/DD.h>
 
 // Forward declarations
 namespace geos {
 namespace geom {
-class Coordinate;
+class CoordinateXY;
 class CoordinateSequence;
 }
 }
@@ -65,9 +64,9 @@ public:
      * @return -1 if q is clockwise (right) from p1-p2
      * @return 0 if q is collinear with p1-p2
      */
-    static int orientationIndex(const geom::Coordinate& p1,
-                                const geom::Coordinate& p2,
-                                const geom::Coordinate& q);
+    static int orientationIndex(const geom::CoordinateXY& p1,
+                                const geom::CoordinateXY& p2,
+                                const geom::CoordinateXY& q);
 
 
     static int orientationIndex(double p1x, double p1y,
@@ -88,10 +87,48 @@ public:
      *
      * Uses an approach due to Jonathan Shewchuk, which is in the public domain.
      */
-    static int orientationIndexFilter(double pax, double pay,
-                                      double pbx, double pby,
-                                      double pcx, double pcy);
+    static int orientationIndexFilter(
+        double pax, double pay,
+        double pbx, double pby,
+        double pcx, double pcy)
+    {
+        /**
+         * A value which is safely greater than the relative round-off
+         * error in double-precision numbers
+         */
+        double constexpr DP_SAFE_EPSILON =  1e-15;
 
+        double detsum;
+        double const detleft = (pax - pcx) * (pby - pcy);
+        double const detright = (pay - pcy) * (pbx - pcx);
+        double const det = detleft - detright;
+
+        if(detleft > 0.0) {
+            if(detright <= 0.0) {
+                return orientation(det);
+            }
+            else {
+                detsum = detleft + detright;
+            }
+        }
+        else if(detleft < 0.0) {
+            if(detright >= 0.0) {
+                return orientation(det);
+            }
+            else {
+                detsum = -detleft - detright;
+            }
+        }
+        else {
+            return orientation(det);
+        }
+
+        double const errbound = DP_SAFE_EPSILON * detsum;
+        if((det >= errbound) || (-det >= errbound)) {
+            return orientation(det);
+        }
+        return CGAlgorithmsDD::FAILURE;
+    };
 
     static int
     orientation(double x)
@@ -103,7 +140,7 @@ public:
             return CGAlgorithmsDD::LEFT;
         }
         return CGAlgorithmsDD::STRAIGHT;
-    }
+    };
 
     /**
      * If the lines are parallel (either identical
@@ -114,8 +151,8 @@ public:
      * @param q2 an endpoint of line segment 2
      * @return an intersection point if one exists, or null if the lines are parallel
      */
-    static geom::Coordinate intersection(const geom::Coordinate& p1, const geom::Coordinate& p2,
-                             const geom::Coordinate& q1, const geom::Coordinate& q2);
+    static geom::CoordinateXY intersection(const geom::CoordinateXY& p1, const geom::CoordinateXY& p2,
+                                           const geom::CoordinateXY& q1, const geom::CoordinateXY& q2);
 
     static int signOfDet2x2(double dx1, double dy1, double dx2, double dy2);
 
@@ -134,18 +171,14 @@ public:
      * the circumcentre of an obtuse isosceles triangle lies outside the triangle.
      *
      * This method uses @ref geos::math::DD extended-precision arithmetic to provide more accurate
-     * results than [circumcentre(Coordinate, Coordinate, Coordinate)]
-     * (@ref geos::geom::Triangle::circumcentre(const Coordinate& p0, const Coordinate& p1, const Coordinate& p2)).
+     * results than geos::geom::Triangle::circumcentre.
      *
-     * @param a
-     *          a vertex of the triangle
-     * @param b
-     *          a vertex of the triangle
-     * @param c
-     *          a vertex of the triangle
+     * @param a a vertex of the triangle
+     * @param b a vertex of the triangle
+     * @param c a vertex of the triangle
      * @return the circumcentre of the triangle
      */
-    static geom::Coordinate circumcentreDD(const geom::Coordinate& a, const geom::Coordinate& b, const geom::Coordinate& c);
+    static geom::CoordinateXY circumcentreDD(const geom::CoordinateXY& a, const geom::CoordinateXY& b, const geom::CoordinateXY& c);
 
 protected:
 
@@ -156,7 +189,5 @@ protected:
 } // namespace geos::algorithm
 } // namespace geos
 
-#ifdef GEOS_INLINE
-# include "geos/algorithm/CGAlgorithmsDD.inl"
-#endif
+
 

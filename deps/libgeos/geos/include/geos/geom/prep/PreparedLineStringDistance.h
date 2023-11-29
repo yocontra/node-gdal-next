@@ -17,8 +17,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_PREP_PREPAREDLINESTRINGDISTANCE_H
-#define GEOS_GEOM_PREP_PREPAREDLINESTRINGDISTANCE_H
+#pragma once
 
 namespace geos {
 namespace geom { // geos::geom
@@ -41,6 +40,8 @@ public:
 
     double distance(const geom::Geometry* g) const;
 
+    bool isWithinDistance(const geom::Geometry* g, double d) const;
+
 protected:
 
     const PreparedLineString& prepLine;
@@ -54,4 +55,3 @@ protected:
 } // namespace geos::geom
 } // namespace geos
 
-#endif // GEOS_GEOM_PREP_PREPAREDLINESTRINGDISTANCE_H

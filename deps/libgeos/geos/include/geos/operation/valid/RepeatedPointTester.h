@@ -17,8 +17,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_REPEATEDPOINTTESTER_H
-#define GEOS_OP_REPEATEDPOINTTESTER_H
+#pragma once
 
 #include <geos/export.h>
 
@@ -49,11 +48,11 @@ namespace valid { // geos::operation::valid
 class GEOS_DLL RepeatedPointTester {
 public:
     RepeatedPointTester() {}
-    geom::Coordinate& getCoordinate();
+    geom::CoordinateXY& getCoordinate();
     bool hasRepeatedPoint(const geom::Geometry* g);
     bool hasRepeatedPoint(const geom::CoordinateSequence* coord);
 private:
-    geom::Coordinate repeatedCoord;
+    geom::CoordinateXY repeatedCoord;
     bool hasRepeatedPoint(const geom::Polygon* p);
     bool hasRepeatedPoint(const geom::GeometryCollection* gc);
     bool hasRepeatedPoint(const geom::MultiPolygon* gc);
@@ -65,4 +64,3 @@ private:
 } // namespace geos.operation
 } // namespace geos
 
-#endif // GEOS_OP_REPEATEDPOINTTESTER_H

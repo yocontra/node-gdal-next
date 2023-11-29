@@ -19,7 +19,6 @@
 
 #include <geos/geom/util/GeometryTransformer.h>
 #include <geos/geom/GeometryFactory.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/MultiPoint.h>
 #include <geos/geom/MultiPolygon.h>
@@ -40,7 +39,7 @@
 #define GEOS_DEBUG 0
 #endif
 
-#ifdef GEOS_DEBUG
+#if GEOS_DEBUG
 #include <iostream>
 #endif
 
@@ -109,16 +108,6 @@ GeometryTransformer::transform(const Geometry* nInputGeom)
 }
 
 std::unique_ptr<CoordinateSequence>
-GeometryTransformer::createCoordinateSequence(
-    std::unique_ptr< std::vector<Coordinate> > coords)
-{
-    return std::unique_ptr<CoordinateSequence>(
-               factory->getCoordinateSequenceFactory()->create(
-                   coords.release())
-           );
-}
-
-std::unique_ptr<CoordinateSequence>
 GeometryTransformer::transformCoordinates(
     const CoordinateSequence* coords,
     const Geometry* parent)
@@ -147,7 +136,7 @@ GeometryTransformer::transformPoint(
     CoordinateSequence::Ptr cs(transformCoordinates(
                                    geom->getCoordinatesRO(), geom));
 
-    return Geometry::Ptr(factory->createPoint(cs.release()));
+    return factory->createPoint(std::move(cs));
 }
 
 Geometry::Ptr

@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_ORIENTATION_H
-#define GEOS_ALGORITHM_ORIENTATION_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Coordinate.h>
@@ -65,8 +64,8 @@ public:
      * ( `Orientation::COUNTERCLOCKWISE`,
      * `Orientation::CLOCKWISE`, or `Orientation::STRAIGHT` )
      */
-    static int index(const geom::Coordinate& p1, const geom::Coordinate& p2,
-                     const geom::Coordinate& q);
+    static int index(const geom::CoordinateXY& p1, const geom::CoordinateXY& p2,
+                     const geom::CoordinateXY& q);
 
     /**
     * Computes whether a ring defined by a geom::CoordinateSequence is
@@ -121,5 +120,3 @@ public:
 } // namespace geos::algorithm
 } // namespace geos
 
-
-#endif // GEOS_ALGORITHM_ORIENTATION_H

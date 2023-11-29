@@ -22,8 +22,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_SIMPLIFY_TAGGEDLINESTRING_H
-#define GEOS_SIMPLIFY_TAGGEDLINESTRING_H
+#pragma once
 
 #include <geos/export.h>
 #include <vector>
@@ -68,11 +67,14 @@ public:
     typedef std::unique_ptr<geom::CoordinateSequence> CoordSeqPtr;
 
     TaggedLineString(const geom::LineString* nParentLine,
-                     std::size_t minimumSize = 2);
+                     std::size_t minimumSize,
+                     bool preserveEndpoint);
 
     ~TaggedLineString();
 
     std::size_t getMinimumSize() const;
+
+    bool getPreserveEndpoint() const;
 
     const geom::LineString* getParent() const;
 
@@ -90,7 +92,11 @@ public:
 
     const std::vector<TaggedLineSegment*>& getSegments() const;
 
+    const std::vector<TaggedLineSegment*>& getResultSegments() const;
+
     void addToResult(std::unique_ptr<TaggedLineSegment> seg);
+
+    void removeRingEndpoint();
 
     std::unique_ptr<geom::Geometry> asLineString() const;
 
@@ -108,9 +114,11 @@ private:
 
     std::size_t minimumSize;
 
+    bool preserveEndpoint;
+
     void init();
 
-    static CoordVectPtr extractCoordinates(
+    static std::unique_ptr<geom::CoordinateSequence> extractCoordinates(
         const std::vector<TaggedLineSegment*>& segs);
 
     // Copying is turned off
@@ -126,4 +134,3 @@ private:
 #pragma warning(pop)
 #endif
 
-#endif // GEOS_SIMPLIFY_TAGGEDLINESTRING_H

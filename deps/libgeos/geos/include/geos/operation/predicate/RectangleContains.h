@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_PREDICATE_RECTANGLECONTAINS_H
-#define GEOS_OP_PREDICATE_RECTANGLECONTAINS_H
+#pragma once
 
 #include <geos/export.h>
 
@@ -65,7 +64,7 @@ private:
      * @param pt the point to test
      * @return true if the point is contained in the boundary
      */
-    bool isPointContainedInBoundary(const geom::Coordinate& pt);
+    bool isPointContainedInBoundary(const geom::CoordinateXY& pt);
 
     /** \brief
      * Tests if a linestring is completely contained in the boundary
@@ -118,5 +117,3 @@ public:
 } // namespace geos::operation::predicate
 } // namespace geos::operation
 } // namespace geos
-
-#endif // ifndef GEOS_OP_PREDICATE_RECTANGLECONTAINS_H

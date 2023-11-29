@@ -12,8 +12,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_PRECISION_COMMONBITSREMOVER_H
-#define GEOS_PRECISION_COMMONBITSREMOVER_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Coordinate.h> // for composition
@@ -91,4 +90,3 @@ public:
 } // namespace geos.precision
 } // namespace geos
 
-#endif // GEOS_PRECISION_COMMONBITSREMOVER_H

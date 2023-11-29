@@ -19,33 +19,22 @@
  **********************************************************************/
 
 #include <geos/geomgraph/GeometryGraph.h>
-#include <geos/geom/MultiLineString.h>
-#include <geos/geom/LineString.h>
 #include <geos/geom/GeometryFactory.h>
-#include <geos/geom/Dimension.h>
+#include <geos/geom/MultiLineString.h>
+#include <geos/operation/BoundaryOp.h>
+#include <geos/util.h>
 
 #include <vector>
 #include <cassert>
 
-#ifndef GEOS_INLINE
-# include "geos/geom/MultiLineString.inl"
-#endif
-
-using namespace geos::algorithm;
-//using namespace geos::operation;
-using namespace geos::geomgraph;
+using geos::geom::GeometryFactory;
+using geos::geom::MultiLineString;
+using geos::geomgraph::GeometryGraph;
 
 namespace geos {
 namespace geom { // geos::geom
 
 /*protected*/
-MultiLineString::MultiLineString(std::vector<Geometry*>* newLines,
-                                 const GeometryFactory* factory)
-    :
-    GeometryCollection(newLines, factory)
-{
-}
-
 MultiLineString::MultiLineString(std::vector<std::unique_ptr<LineString>> && newLines,
         const GeometryFactory& factory)
         : GeometryCollection(std::move(newLines), factory)
@@ -95,13 +84,8 @@ MultiLineString::isClosed() const
 std::unique_ptr<Geometry>
 MultiLineString::getBoundary() const
 {
-    if(isEmpty()) {
-        return getFactory()->createGeometryCollection();
-    }
-
-    GeometryGraph gg(0, this);
-    CoordinateSequence* pts = gg.getBoundaryPoints();
-    return std::unique_ptr<Geometry>(getFactory()->createMultiPoint(*pts));
+    operation::BoundaryOp bop(*this);
+    return bop.getBoundary();
 }
 
 GeometryTypeId

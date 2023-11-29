@@ -17,8 +17,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_OVERLAY_SNAP_LINESTRINGSNAPPER_H
-#define GEOS_OP_OVERLAY_SNAP_LINESTRINGSNAPPER_H
+#pragma once
 
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
@@ -59,7 +58,7 @@ public:
      * @param nSrcPts the points to snap
      * @param nSnapTol the snap tolerance to use
      */
-    LineStringSnapper(const geom::Coordinate::Vect& nSrcPts,
+    LineStringSnapper(const geom::CoordinateSequence& nSrcPts,
                       double nSnapTol)
         :
         srcPts(nSrcPts),
@@ -71,7 +70,7 @@ public:
     }
 
     // Snap points are assumed to be all distinct points (a set would be better, uh ?)
-    std::unique_ptr<geom::Coordinate::Vect> snapTo(const geom::Coordinate::ConstVect& snapPts);
+    std::unique_ptr<geom::CoordinateSequence> snapTo(const geom::Coordinate::ConstVect& snapPts);
 
     void
     setAllowSnappingToSourceVertices(bool allow)
@@ -81,7 +80,7 @@ public:
 
 private:
 
-    const geom::Coordinate::Vect& srcPts;
+    const geom::CoordinateSequence& srcPts;
 
     double snapTolerance;
 
@@ -163,6 +162,4 @@ private:
 } // namespace geos::operation::overlay
 } // namespace geos::operation
 } // namespace geos
-
-#endif // GEOS_OP_OVERLAY_SNAP_LINESTRINGSNAPPER_H
 

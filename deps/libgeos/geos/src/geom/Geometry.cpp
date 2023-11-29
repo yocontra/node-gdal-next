@@ -39,18 +39,19 @@
 #include <geos/algorithm/InteriorPointLine.h>
 #include <geos/algorithm/InteriorPointArea.h>
 #include <geos/algorithm/ConvexHull.h>
+#include <geos/geom/prep/PreparedGeometryFactory.h>
 #include <geos/operation/intersection/Rectangle.h>
 #include <geos/operation/intersection/RectangleIntersection.h>
 #include <geos/operation/predicate/RectangleContains.h>
 #include <geos/operation/predicate/RectangleIntersects.h>
 #include <geos/operation/relate/RelateOp.h>
 #include <geos/operation/valid/IsValidOp.h>
-#include <geos/operation/overlay/OverlayOp.h>
 #include <geos/operation/union/UnaryUnionOp.h>
 #include <geos/operation/buffer/BufferOp.h>
 #include <geos/operation/distance/DistanceOp.h>
 #include <geos/operation/valid/IsSimpleOp.h>
 #include <geos/operation/overlayng/OverlayNGRobust.h>
+#include <geos/operation/overlayng/OverlayUtil.h>
 #include <geos/io/WKBWriter.h>
 #include <geos/io/WKTWriter.h>
 #include <geos/version.h>
@@ -75,9 +76,10 @@ using namespace geos::algorithm;
 using namespace geos::operation::valid;
 using namespace geos::operation::relate;
 using namespace geos::operation::buffer;
-using namespace geos::operation::overlay;
 using namespace geos::operation::distance;
 using namespace geos::operation;
+using geos::operation::overlayng::OverlayNG;
+
 
 namespace geos {
 namespace geom { // geos::geom
@@ -106,7 +108,6 @@ Geometry::GeometryChangedFilter Geometry::geometryChangedFilter;
 
 Geometry::Geometry(const GeometryFactory* newFactory)
     :
-    envelope(nullptr),
     _factory(newFactory),
     _userData(nullptr)
 {
@@ -123,13 +124,6 @@ Geometry::Geometry(const Geometry& geom)
     _factory(geom._factory),
     _userData(nullptr)
 {
-    if(geom.envelope.get()) {
-        envelope.reset(new Envelope(*(geom.envelope)));
-    }
-    //factory=geom.factory;
-    //envelope(new Envelope(*(geom.envelope.get())));
-    //SRID=geom.getSRID();
-    //_userData=NULL;
     _factory->addRef();
 }
 
@@ -166,9 +160,37 @@ Geometry::getCentroid() const
     return std::unique_ptr<Point>(getFactory()->createPoint(centPt));
 }
 
+/* public */
+bool
+Geometry::isMixedDimension() const
+{
+    Dimension::DimensionType baseDim = Dimension::DONTCARE;
+    return isMixedDimension(&baseDim);
+}
+
+/* public */
+bool
+Geometry::isMixedDimension(Dimension::DimensionType* baseDim) const
+{
+    if (isCollection()) {
+        for (std::size_t i = 0; i < getNumGeometries(); i++) {
+            if (getGeometryN(i)->isMixedDimension(baseDim))
+                return true;
+        }
+        return false;
+    }
+    else {
+        if (*baseDim == Dimension::DONTCARE) {
+            *baseDim = getDimension();
+            return false;
+        }
+        return *baseDim != getDimension();
+    }
+}
+
 /*public*/
 bool
-Geometry::getCentroid(Coordinate& ret) const
+Geometry::getCentroid(CoordinateXY& ret) const
 {
     if(isEmpty()) {
         return false;
@@ -218,18 +240,6 @@ Geometry::geometryChanged()
     apply_rw(&geometryChangedFilter);
 }
 
-/**
- * Notifies this Geometry that its Coordinates have been changed by an external
- * party. When geometryChanged is called, this method will be called for
- * this Geometry and its component Geometries.
- * @see apply(GeometryComponentFilter *)
- */
-void
-Geometry::geometryChangedAction()
-{
-    envelope.reset(nullptr);
-}
-
 bool
 Geometry::isValid() const
 {
@@ -242,27 +252,10 @@ Geometry::getEnvelope() const
     return std::unique_ptr<Geometry>(getFactory()->toGeometry(getEnvelopeInternal()));
 }
 
-const Envelope*
-Geometry::getEnvelopeInternal() const
-{
-    if(!envelope.get()) {
-        envelope = computeEnvelopeInternal();
-    }
-    return envelope.get();
-}
-
 bool
 Geometry::disjoint(const Geometry* g) const
 {
-#ifdef SHORTCIRCUIT_PREDICATES
-    // short-circuit test
-    if(! getEnvelopeInternal()->intersects(g->getEnvelopeInternal())) {
-        return true;
-    }
-#endif
-    std::unique_ptr<IntersectionMatrix> im(relate(g));
-    bool res = im->isDisjoint();
-    return res;
+    return !intersects(g);
 }
 
 bool
@@ -315,9 +308,13 @@ Geometry::intersects(const Geometry* g) const
         return predicate::RectangleIntersects::intersects(*p, *this);
     }
 
-    std::unique_ptr<IntersectionMatrix> im(relate(g));
-    bool res = im->isIntersects();
-    return res;
+    if (getGeometryTypeId() == GEOS_GEOMETRYCOLLECTION) {
+        auto im = relate(g);
+        bool res = im->isIntersects();
+        return res;
+    } else {
+        return prep::PreparedGeometryFactory::prepare(this)->intersects(g);
+    }
 }
 
 /*public*/
@@ -461,6 +458,12 @@ Geometry::relate(const Geometry* other) const
     return RelateOp::relate(this, other);
 }
 
+std::unique_ptr<IntersectionMatrix>
+Geometry::relate(const Geometry& other) const
+{
+    return relate(&other);
+}
+
 std::string
 Geometry::toString() const
 {
@@ -479,6 +482,9 @@ std::string
 Geometry::toText() const
 {
     io::WKTWriter writer;
+    // To enable "GEOS<3.12" outputs, uncomment the following:
+    // writer.setTrim(false);
+    // writer.setOutputDimension(2);
     return writer.write(this);
 }
 
@@ -513,11 +519,6 @@ Geometry::intersection(const Geometry* other) const
      * TODO: MD - add optimization for P-A case using Point-In-Polygon
      */
 
-    // special case: if one input is empty ==> empty
-    if(isEmpty() || other->isEmpty()) {
-        return OverlayOp::createEmptyResult(OverlayOp::opINTERSECTION, this, other, getFactory());
-    }
-
 #ifdef USE_RECTANGLE_INTERSECTION
     // optimization for rectangle arguments
     using operation::intersection::Rectangle;
@@ -536,22 +537,12 @@ Geometry::intersection(const Geometry* other) const
     }
 #endif
 
-    return HeuristicOverlay(this, other, OverlayOp::opINTERSECTION);
+    return HeuristicOverlay(this, other, OverlayNG::INTERSECTION);
 }
 
 std::unique_ptr<Geometry>
 Geometry::Union(const Geometry* other) const
 {
-    // handle empty geometry cases
-    if(isEmpty() || other->isEmpty() ) {
-      if(isEmpty() && other->isEmpty() ) {
-        return OverlayOp::createEmptyResult(OverlayOp::opUNION, this, other, getFactory());
-      }
-      // special case: if one input is empty ==> other input
-      if(isEmpty()) return other->clone();
-      if(other->isEmpty()) return clone();
-    }
-
 #ifdef SHORTCIRCUIT_PREDICATES
     // if envelopes are disjoint return a MULTI geom or
     // a geometrycollection
@@ -563,34 +554,33 @@ Geometry::Union(const Geometry* other) const
         std::size_t ngeomsOther = other->getNumGeometries();
 
         // Allocated for ownership transfer
-        std::vector<Geometry*>* v = new std::vector<Geometry*>();
-        v->reserve(ngeomsThis + ngeomsOther);
+        std::vector<std::unique_ptr<Geometry>> v;
+        v.reserve(ngeomsThis + ngeomsOther);
 
 
         if(nullptr != (coll = dynamic_cast<const GeometryCollection*>(this))) {
             for(std::size_t i = 0; i < ngeomsThis; ++i) {
-                v->push_back(coll->getGeometryN(i)->clone().release());
+                v.push_back(coll->getGeometryN(i)->clone());
             }
         }
         else {
-            v->push_back(this->clone().release());
+            v.push_back(this->clone());
         }
 
         if(nullptr != (coll = dynamic_cast<const GeometryCollection*>(other))) {
             for(std::size_t i = 0; i < ngeomsOther; ++i) {
-                v->push_back(coll->getGeometryN(i)->clone().release());
+                v.push_back(coll->getGeometryN(i)->clone());
             }
         }
         else {
-            v->push_back(other->clone().release());
+            v.push_back(other->clone());
         }
 
-        std::unique_ptr<Geometry>out(_factory->buildGeometry(v));
-        return out;
+        return _factory->buildGeometry(std::move(v));
     }
 #endif
 
-    return HeuristicOverlay(this, other, OverlayOp::opUNION);
+    return HeuristicOverlay(this, other, OverlayNG::UNION);
 }
 
 /* public */
@@ -598,77 +588,53 @@ Geometry::Ptr
 Geometry::Union() const
 {
     using geos::operation::geounion::UnaryUnionOp;
-#ifdef DISABLE_OVERLAYNG
     return UnaryUnionOp::Union(*this);
-#else
-    return operation::overlayng::OverlayNGRobust::Union(this);
-#endif
 }
 
 std::unique_ptr<Geometry>
 Geometry::difference(const Geometry* other) const
-//throw(IllegalArgumentException *)
 {
-    // special case: if A.isEmpty ==> empty; if B.isEmpty ==> A
-    if(isEmpty()) {
-        return OverlayOp::createEmptyResult(OverlayOp::opDIFFERENCE, this, other, getFactory());
-    }
-    if(other->isEmpty()) {
-        return clone();
-    }
-
-    return HeuristicOverlay(this, other, OverlayOp::opDIFFERENCE);
+    return HeuristicOverlay(this, other, OverlayNG::DIFFERENCE);
 }
 
 std::unique_ptr<Geometry>
 Geometry::symDifference(const Geometry* other) const
 {
-    // handle empty geometry cases
-    if(isEmpty() || other->isEmpty() ) {
-      if(isEmpty() && other->isEmpty() ) {
-        return OverlayOp::createEmptyResult(OverlayOp::opSYMDIFFERENCE, this, other, getFactory());
-      }
-      // special case: if either input is empty ==> other input
-      if(isEmpty()) return other->clone();
-      if(other->isEmpty()) return clone();
-    }
-
     // if envelopes are disjoint return a MULTI geom or
     // a geometrycollection
-    if(! getEnvelopeInternal()->intersects(other->getEnvelopeInternal())) {
+    if(! getEnvelopeInternal()->intersects(other->getEnvelopeInternal()) && !(isEmpty() && other->isEmpty())) {
         const GeometryCollection* coll;
 
         std::size_t ngeomsThis = getNumGeometries();
         std::size_t ngeomsOther = other->getNumGeometries();
 
         // Allocated for ownership transfer
-        std::vector<Geometry*>* v = new std::vector<Geometry*>();
-        v->reserve(ngeomsThis + ngeomsOther);
+        std::vector<std::unique_ptr<Geometry>> v;
+        v.reserve(ngeomsThis + ngeomsOther);
 
 
         if(nullptr != (coll = dynamic_cast<const GeometryCollection*>(this))) {
             for(std::size_t i = 0; i < ngeomsThis; ++i) {
-                v->push_back(coll->getGeometryN(i)->clone().release());
+                v.push_back(coll->getGeometryN(i)->clone());
             }
         }
         else {
-            v->push_back(this->clone().release());
+            v.push_back(this->clone());
         }
 
         if(nullptr != (coll = dynamic_cast<const GeometryCollection*>(other))) {
             for(std::size_t i = 0; i < ngeomsOther; ++i) {
-                v->push_back(coll->getGeometryN(i)->clone().release());
+                v.push_back(coll->getGeometryN(i)->clone());
             }
         }
         else {
-            v->push_back(other->clone().release());
+            v.push_back(other->clone());
         }
 
-        return std::unique_ptr<Geometry>(_factory->buildGeometry(v));
+        return _factory->buildGeometry(std::move(v));
     }
 
-    return HeuristicOverlay(this, other, OverlayOp::opSYMDIFFERENCE);
-
+    return HeuristicOverlay(this, other, OverlayNG::SYMDIFFERENCE);
 }
 
 int
@@ -854,7 +820,7 @@ GeometryGreaterThen::operator()(const Geometry* first, const Geometry* second)
 }
 
 bool
-Geometry::equal(const Coordinate& a, const Coordinate& b,
+Geometry::equal(const CoordinateXY& a, const CoordinateXY& b,
                 double tolerance) const
 {
     if(tolerance == 0) {

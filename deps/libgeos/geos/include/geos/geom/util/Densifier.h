@@ -18,8 +18,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_DENSIFIER_H
-#define GEOS_DENSIFIER_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Geometry.h>
@@ -66,7 +65,7 @@ public:
 private:
     double distanceTolerance;
     const Geometry* inputGeom;
-    static std::unique_ptr<Coordinate::Vect> densifyPoints(const Coordinate::Vect pts, double distanceTolerance,
+    static std::unique_ptr<CoordinateSequence> densifyPoints(const CoordinateSequence& pts, double distanceTolerance,
             const PrecisionModel* precModel);
 
     class GEOS_DLL DensifyTransformer: public GeometryTransformer {
@@ -89,4 +88,3 @@ private:
 #pragma warning(pop)
 #endif
 
-#endif // GEOS_DENSIFIER_H

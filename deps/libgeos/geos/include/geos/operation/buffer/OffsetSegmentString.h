@@ -17,12 +17,10 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_BUFFER_OFFSETSEGMENTSTRING_H
-#define GEOS_OP_BUFFER_OFFSETSEGMENTSTRING_H
+#pragma once
 
 #include <geos/geom/Coordinate.h> // for inlines
 #include <geos/geom/CoordinateSequence.h> // for inlines
-#include <geos/geom/CoordinateArraySequence.h> // for composition
 #include <geos/geom/PrecisionModel.h> // for inlines
 
 #include <vector>
@@ -44,7 +42,7 @@ class OffsetSegmentString {
 
 private:
 
-    geom::CoordinateArraySequence* ptList;
+    geom::CoordinateSequence* ptList;
 
     const geom::PrecisionModel* precisionModel;
 
@@ -86,7 +84,7 @@ public:
 
     OffsetSegmentString()
         :
-        ptList(new geom::CoordinateArraySequence()),
+        ptList(new geom::CoordinateSequence()),
         precisionModel(nullptr),
         minimumVertexDistance(0.0)
     {
@@ -104,7 +102,7 @@ public:
             ptList->clear();
         }
         else {
-            ptList = new geom::CoordinateArraySequence();
+            ptList = new geom::CoordinateSequence();
         }
 
         precisionModel = nullptr;
@@ -214,7 +212,4 @@ operator<< (std::ostream& os,
 } // namespace geos.operation.buffer
 } // namespace geos.operation
 } // namespace geos
-
-
-#endif // ndef GEOS_OP_BUFFER_OFFSETSEGMENTSTRING_H
 

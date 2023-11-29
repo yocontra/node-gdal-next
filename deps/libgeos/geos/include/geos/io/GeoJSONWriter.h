@@ -12,8 +12,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_IO_GEOJSONWRITER_H
-#define GEOS_IO_GEOJSONWRITER_H
+#pragma once
 
 #include <geos/export.h>
 
@@ -77,7 +76,7 @@ public:
 
 private:
 
-    std::pair<double, double> convertCoordinate(const geom::Coordinate* c);
+    std::pair<double, double> convertCoordinate(const geom::CoordinateXY* c);
 
     std::vector<std::pair<double, double>> convertCoordinateSequence(const geom::CoordinateSequence* c);
 
@@ -116,4 +115,3 @@ private:
 #pragma warning(pop)
 #endif
 
-#endif // #ifndef GEOS_IO_GEOJSONWRITER_H

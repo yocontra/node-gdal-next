@@ -47,7 +47,8 @@ std::vector<OverlayEdge*>
 OverlayGraph::getNodeEdges()
 {
     std::vector<OverlayEdge*> nodeEdges;
-    for (auto nodeMapPair : nodeMap) {
+    nodeEdges.reserve(nodeMap.size());
+    for (const auto& nodeMapPair : nodeMap) {
         nodeEdges.push_back(nodeMapPair.second);
     }
     return nodeEdges;
@@ -57,7 +58,7 @@ OverlayGraph::getNodeEdges()
 OverlayEdge*
 OverlayGraph::getNodeEdge(const Coordinate& nodePt) const
 {
-    auto it = nodeMap.find(nodePt);
+    const auto& it = nodeMap.find(nodePt);
     if (it == nodeMap.end()) {
         return nullptr;
     }
@@ -107,17 +108,18 @@ OverlayGraph::createEdgePair(const CoordinateSequence *pts, OverlayLabel *lbl)
 OverlayEdge*
 OverlayGraph::createOverlayEdge(const CoordinateSequence* pts, OverlayLabel* lbl, bool direction)
 {
-    Coordinate origin;
-    Coordinate dirPt;
+    CoordinateXYZM origin;
+    CoordinateXYZM dirPt;
+
     if (direction) {
-        origin = pts->getAt(0);
-        dirPt = pts->getAt(1);
+        pts->getAt(0, origin);
+        pts->getAt(1, dirPt);
     }
     else {
         assert(pts->size() > 0);
         std::size_t ilast = pts->size() - 1;
-        origin = pts->getAt(ilast);
-        dirPt = pts->getAt(ilast-1);
+        pts->getAt(ilast, origin);
+        pts->getAt(ilast-1, dirPt);
     }
     ovEdgeQue.emplace_back(origin, dirPt, direction, lbl, pts);
     OverlayEdge& ove = ovEdgeQue.back();
@@ -149,7 +151,7 @@ OverlayGraph::insert(OverlayEdge* e)
      * insert the edge into the star of edges around the node.
      * Otherwise, add a new node for the origin.
      */
-    auto it = nodeMap.find(e->orig());
+    const auto& it = nodeMap.find(e->orig());
     if (it != nodeMap.end()) {
         // found in map
         OverlayEdge* nodeEdge = it->second;
@@ -166,7 +168,7 @@ operator<<(std::ostream& os, const OverlayGraph& og)
 {
     os << "OGRPH " << std::endl << "NODEMAP [" << og.nodeMap.size() << "]";
     // pair<Coordinate, OverlayEdge&>
-    for (auto& pr: og.nodeMap) {
+    for (const auto& pr: og.nodeMap) {
         os << std::endl << " ";
         os << pr.first << " ";
         os << *(pr.second);
@@ -174,7 +176,7 @@ operator<<(std::ostream& os, const OverlayGraph& og)
     os << std::endl;
     os << "EDGES [" << og.edges.size() << "]";
     // pair<Coordinate, OverlayEdge&>
-    for (auto& e: og.edges) {
+    for (const auto& e: og.edges) {
         os << std::endl << " ";
         os << *e << " ";
     }

@@ -33,7 +33,7 @@ class GeometryFactory;
 class PrecisionModel;
 class Geometry;
 class Coordinate;
-class CoordinateArraySequence;
+class CoordinateSequence;
 }
 namespace algorithm {
 namespace locate {
@@ -98,23 +98,23 @@ private:
 
     std::unique_ptr<Geometry> prepareNonPoint(const Geometry* geomInput);
 
-    std::unique_ptr<Geometry> computeIntersection(const CoordinateArraySequence* coords) const;
+    std::unique_ptr<Geometry> computeIntersection(const CoordinateSequence* coords) const;
 
-    std::unique_ptr<Geometry> computeUnion(const CoordinateArraySequence* coords);
+    std::unique_ptr<Geometry> computeUnion(const CoordinateSequence* coords);
 
-    std::unique_ptr<Geometry> computeDifference(const CoordinateArraySequence* coords);
+    std::unique_ptr<Geometry> computeDifference(const CoordinateSequence* coords);
 
     std::unique_ptr<Geometry> createPointResult(std::vector<std::unique_ptr<Point>>& points) const;
 
-    std::vector<std::unique_ptr<Point>> findPoints(bool isCovered, const CoordinateArraySequence* coords) const;
+    std::vector<std::unique_ptr<Point>> findPoints(bool isCovered, const CoordinateSequence* coords) const;
 
-    std::vector<std::unique_ptr<Point>> createPoints(std::set<Coordinate>& coords) const;
+    std::vector<std::unique_ptr<Point>> createPoints(const CoordinateSequence& coords) const;
 
-    bool hasLocation(bool isCovered, const Coordinate& coord) const;
+    bool hasLocation(bool isCovered, const CoordinateXY& coord) const;
 
     std::unique_ptr<Geometry> copyNonPoint() const;
 
-    std::unique_ptr<CoordinateArraySequence> extractCoordinates(const Geometry* points, const PrecisionModel* pm) const;
+    std::unique_ptr<CoordinateSequence> extractCoordinates(const Geometry* points, const PrecisionModel* pm) const;
 
     std::vector<std::unique_ptr<Polygon>> extractPolygons(const Geometry* geom) const;
 

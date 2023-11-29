@@ -10,15 +10,9 @@
  * by the Free Software Foundation.
  * See the COPYING file for more information.
  *
- *
- **********************************************************************
- *
- * Last port: noding/MCIndexSegmentSetMutualIntersector.java r388 (JTS-1.12)
- *
  **********************************************************************/
 
-#ifndef GEOS_NODING_MCINDEXSEGMENTSETMUTUALINTERSECTOR_H
-#define GEOS_NODING_MCINDEXSEGMENTSETMUTUALINTERSECTOR_H
+#pragma once
 
 #include <geos/noding/SegmentSetMutualIntersector.h> // inherited
 #include <geos/index/chain/MonotoneChainOverlapAction.h> // inherited
@@ -28,12 +22,6 @@
 namespace geos {
 namespace index {
 class SpatialIndex;
-
-namespace chain {
-}
-namespace strtree {
-//class STRtree;
-}
 }
 namespace noding {
 class SegmentString;
@@ -56,12 +44,17 @@ namespace noding { // geos::noding
 class MCIndexSegmentSetMutualIntersector : public SegmentSetMutualIntersector {
 public:
 
-    MCIndexSegmentSetMutualIntersector()
+    MCIndexSegmentSetMutualIntersector(double p_tolerance)
         : monoChains()
         , indexCounter(0)
         , processCounter(0)
         , nOverlaps(0)
+        , overlapTolerance(p_tolerance)
         , indexBuilt(false)
+    {}
+
+    MCIndexSegmentSetMutualIntersector()
+        : MCIndexSegmentSetMutualIntersector(0.0)
     {}
 
     ~MCIndexSegmentSetMutualIntersector() override
@@ -117,6 +110,7 @@ private:
     int processCounter;
     // statistics
     int nOverlaps;
+    double overlapTolerance;
 
     /* memory management helper, holds MonotoneChain objects used
      * in the SpatialIndex. It's cleared when the SpatialIndex is
@@ -135,4 +129,3 @@ private:
 } // namespace geos::noding
 } // namespace geos
 
-#endif // GEOS_NODING_MCINDEXSEGMENTSETMUTUALINTERSECTOR_H

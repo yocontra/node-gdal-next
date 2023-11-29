@@ -42,10 +42,14 @@ uint32_t
 HilbertEncoder::encode(const geom::Envelope* env)
 {
     double midx = env->getWidth()/2 + env->getMinX();
-    uint32_t x = (uint32_t) ((midx - minx) / strideX);
+    uint32_t x = 0;
+    if (midx > minx && strideX != 0)
+        x = (uint32_t) ((midx - minx) / strideX);
 
     double midy = env->getHeight()/2 + env->getMinY();
-    uint32_t y = (uint32_t) ((midy - miny) / strideY);
+    uint32_t y = 0;
+    if (midy > miny && strideY != 0)
+        y = (uint32_t) ((midy - miny) / strideY);
 
     return HilbertCode::encode(level, x, y);
 }
@@ -55,34 +59,7 @@ HilbertEncoder::encode(const geom::Envelope* env)
 void
 HilbertEncoder::sort(std::vector<geom::Geometry*>& geoms)
 {
-    struct HilbertComparator {
-
-        HilbertEncoder& enc;
-
-        HilbertComparator(HilbertEncoder& e)
-            : enc(e) {};
-
-        bool
-        operator()(const geom::Geometry* a, const geom::Geometry* b)
-        {
-            return enc.encode(a->getEnvelopeInternal()) > enc.encode(b->getEnvelopeInternal());
-        }
-    };
-
-    geom::Envelope extent;
-    for (const geom::Geometry* geom: geoms)
-    {
-        if (extent.isNull())
-            extent = *(geom->getEnvelopeInternal());
-        else
-            extent.expandToInclude(*(geom->getEnvelopeInternal()));
-    }
-    if (extent.isNull()) return;
-
-    HilbertEncoder encoder(12, extent);
-    HilbertComparator hilbertCompare(encoder);
-    std::sort(geoms.begin(), geoms.end(), hilbertCompare);
-    return;
+    sort(geoms.begin(), geoms.end());
 }
 
 

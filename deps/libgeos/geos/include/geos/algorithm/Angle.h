@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_ANGLE_H
-#define GEOS_ALGORITHM_ANGLE_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/algorithm/Orientation.h> // for constants
@@ -75,8 +74,8 @@ public:
     /// @return the normalized angle (in radians) that p0-p1 makes
     ///         with the positive x-axis.
     ///
-    static double angle(const geom::Coordinate& p0,
-                        const geom::Coordinate& p1);
+    static double angle(const geom::CoordinateXY& p0,
+                        const geom::CoordinateXY& p1);
 
     /// \brief
     /// Returns the angle that the vector from (0,0) to p,
@@ -87,7 +86,7 @@ public:
     /// @return the normalized angle (in radians) that p makes
     ///          with the positive x-axis.
     ///
-    static double angle(const geom::Coordinate& p);
+    static double angle(const geom::CoordinateXY& p);
 
     /// Tests whether the angle between p0-p1-p2 is acute.
     ///
@@ -100,9 +99,9 @@ public:
     /// @param p1 the base of the angle
     /// @param p2 the other endpoint of the angle
     ///
-    static bool isAcute(const geom::Coordinate& p0,
-                        const geom::Coordinate& p1,
-                        const geom::Coordinate& p2);
+    static bool isAcute(const geom::CoordinateXY& p0,
+                        const geom::CoordinateXY& p1,
+                        const geom::CoordinateXY& p2);
 
     /// Tests whether the angle between p0-p1-p2 is obtuse.
     ///
@@ -115,9 +114,9 @@ public:
     /// @param p1 the base of the angle
     /// @param p2 the other endpoint of the angle
     ///
-    static bool isObtuse(const geom::Coordinate& p0,
-                         const geom::Coordinate& p1,
-                         const geom::Coordinate& p2);
+    static bool isObtuse(const geom::CoordinateXY& p0,
+                         const geom::CoordinateXY& p1,
+                         const geom::CoordinateXY& p2);
 
     /// Returns the unoriented smallest angle between two vectors.
     ///
@@ -128,9 +127,9 @@ public:
     /// @param tip2 the tip of the other vector
     /// @return the angle between tail-tip1 and tail-tip2
     ///
-    static double angleBetween(const geom::Coordinate& tip1,
-                               const geom::Coordinate& tail,
-                               const geom::Coordinate& tip2);
+    static double angleBetween(const geom::CoordinateXY& tip1,
+                               const geom::CoordinateXY& tail,
+                               const geom::CoordinateXY& tip2);
 
     /// Returns the oriented smallest angle between two vectors.
     ///
@@ -144,9 +143,9 @@ public:
     /// @param tip2 the tip of v2
     /// @return the angle between v1 and v2, relative to v1
     ///
-    static double angleBetweenOriented(const geom::Coordinate& tip1,
-                                       const geom::Coordinate& tail,
-                                       const geom::Coordinate& tip2);
+    static double angleBetweenOriented(const geom::CoordinateXY& tip1,
+                                       const geom::CoordinateXY& tail,
+                                       const geom::CoordinateXY& tip2);
 
     /// Computes the interior angle between two segments of a ring.
     ///
@@ -161,9 +160,9 @@ public:
     ///          the next point of the ring
     /// @return the interior angle based at <code>p1</code>
     ///
-    static double interiorAngle(const geom::Coordinate& p0,
-                                const geom::Coordinate& p1,
-                                const geom::Coordinate& p2);
+    static double interiorAngle(const geom::CoordinateXY& p0,
+                                const geom::CoordinateXY& p1,
+                                const geom::CoordinateXY& p2);
 
     /// \brief
     /// Returns whether an angle must turn clockwise or counterclockwise
@@ -224,4 +223,3 @@ public:
 } // namespace geos
 
 
-#endif // GEOS_ALGORITHM_ANGLE_H

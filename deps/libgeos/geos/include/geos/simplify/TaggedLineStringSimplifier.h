@@ -21,8 +21,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_SIMPLIFY_TAGGEDLINESTRINGSIMPLIFIER_H
-#define GEOS_SIMPLIFY_TAGGEDLINESTRINGSIMPLIFIER_H
+#pragma once
 
 #include <geos/export.h>
 #include <cstddef>
@@ -106,18 +105,20 @@ private:
     void simplifySection(std::size_t i, std::size_t j,
                          std::size_t depth);
 
+    void simplifyRingEndpoint();
+
     static std::size_t findFurthestPoint(
         const geom::CoordinateSequence* pts,
         std::size_t i, std::size_t j,
         double& maxDistance);
 
     bool hasBadIntersection(const TaggedLineString* parentLine,
-                            const std::pair<std::size_t, std::size_t>& sectionIndex,
+                            const size_t excludeStart, const size_t excludeEnd,
                             const geom::LineSegment& candidateSeg);
 
     bool hasBadInputIntersection(const TaggedLineString* parentLine,
-                                 const std::pair<std::size_t, std::size_t>& sectionIndex,
-                                 const geom::LineSegment& candidateSeg);
+                                const size_t excludeStart, const size_t excludeEnd,
+                                const geom::LineSegment& candidateSeg);
 
     bool hasBadOutputIntersection(const geom::LineSegment& candidateSeg);
 
@@ -128,16 +129,20 @@ private:
         std::size_t start, std::size_t end);
 
     /** \brief
-     * Tests whether a segment is in a section of a TaggedLineString
+     * Tests whether a segment is in a section of a TaggedLineString.
+     * Sections may wrap around the endpoint of the line, 
+     * to support ring endpoint simplification.
+     * This is indicated by excludedStart > excludedEnd
      *
-     * @param parentLine
-     * @param sectionIndex
-     * @param seg
-     * @return
+     * @param line line to be checked for the presence of `seg`
+     * @param excludeStart  the index of the first segment in the excluded section  
+     * @param excludeEnd the index of the last segment in the excluded section
+     * @param seg segment to look for in `line`
+     * @return true if the test segment intersects some segment in the line not in the excluded section
      */
     static bool isInLineSection(
-        const TaggedLineString* parentLine,
-        const std::pair<std::size_t, std::size_t>& sectionIndex,
+        const TaggedLineString* line,
+        const size_t excludeStart, const size_t excludeEnd,
         const TaggedLineSegment* seg);
 
     /** \brief
@@ -165,6 +170,3 @@ TaggedLineStringSimplifier::setDistanceTolerance(double d)
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#endif // GEOS_SIMPLIFY_TAGGEDLINESTRINGSIMPLIFIER_H
-

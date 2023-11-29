@@ -17,8 +17,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_POINTLOCATOR_H
-#define GEOS_ALGORITHM_POINTLOCATOR_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Location.h> // for inlines
@@ -26,7 +25,7 @@
 // Forward declarations
 namespace geos {
 namespace geom {
-class Coordinate;
+class CoordinateXY;
 class Geometry;
 class LinearRing;
 class LineString;
@@ -67,7 +66,7 @@ public:
      *
      * @return the Location of the point relative to the input Geometry
      */
-    geom::Location locate(const geom::Coordinate& p, const geom::Geometry* geom);
+    geom::Location locate(const geom::CoordinateXY& p, const geom::Geometry* geom);
 
     /**
      * Convenience method to test a point for intersection with
@@ -78,7 +77,7 @@ public:
      * @return <code>true</code> if the point is in the interior or boundary of the Geometry
      */
     bool
-    intersects(const geom::Coordinate& p, const geom::Geometry* geom)
+    intersects(const geom::CoordinateXY& p, const geom::Geometry* geom)
     {
         return locate(p, geom) != geom::Location::EXTERIOR;
     }
@@ -89,23 +88,21 @@ private:
 
     int numBoundaries;    // the number of sub-elements whose boundaries the point lies in
 
-    void computeLocation(const geom::Coordinate& p, const geom::Geometry* geom);
+    void computeLocation(const geom::CoordinateXY& p, const geom::Geometry* geom);
 
     void updateLocationInfo(geom::Location loc);
 
-    geom::Location locate(const geom::Coordinate& p, const geom::Point* pt);
+    geom::Location locate(const geom::CoordinateXY& p, const geom::Point* pt);
 
-    geom::Location locate(const geom::Coordinate& p, const geom::LineString* l);
+    geom::Location locate(const geom::CoordinateXY& p, const geom::LineString* l);
 
-    geom::Location locateInPolygonRing(const geom::Coordinate& p, const geom::LinearRing* ring);
+    geom::Location locateInPolygonRing(const geom::CoordinateXY& p, const geom::LinearRing* ring);
 
-    geom::Location locate(const geom::Coordinate& p, const geom::Polygon* poly);
+    geom::Location locate(const geom::CoordinateXY& p, const geom::Polygon* poly);
 
 };
 
 } // namespace geos::algorithm
 } // namespace geos
 
-
-#endif // GEOS_ALGORITHM_POINTLOCATOR_H
 

@@ -17,21 +17,18 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOS_LINEARRING_H
-#define GEOS_GEOS_LINEARRING_H
+#pragma once
 
 #include <geos/export.h>
 #include <string>
 #include <vector>
 #include <geos/geom/LineString.h>
 
-#include <geos/inline.h>
 
 // Forward declarations
 namespace geos {
 namespace geom { // geos::geom
 class Coordinate;
-class CoordinateArraySequence;
 }
 }
 
@@ -78,10 +75,6 @@ public:
      * @param newFactory the GeometryFactory used to create this geometry
      *
      */
-    LinearRing(CoordinateSequence* points,
-               const GeometryFactory* newFactory);
-
-    /// Hopefully cleaner version of the above
     LinearRing(CoordinateSequence::Ptr && points,
             const GeometryFactory& newFactory);
 
@@ -110,6 +103,8 @@ public:
 
     std::unique_ptr<LinearRing> reverse() const { return std::unique_ptr<LinearRing>(reverseImpl()); }
 
+    void orient(bool isCW);
+
 protected:
 
     int
@@ -131,4 +126,3 @@ private:
 } // namespace geos::geom
 } // namespace geos
 
-#endif // ndef GEOS_GEOS_LINEARRING_H

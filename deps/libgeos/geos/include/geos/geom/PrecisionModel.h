@@ -17,13 +17,12 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_PRECISIONMODEL_H
-#define GEOS_GEOM_PRECISIONMODEL_H
+#pragma once
 
+#include <geos/geom/Coordinate.h>
 #include <geos/export.h>
-#include <geos/inline.h>
 
-
+#include <cassert>
 #include <string>
 
 // Forward declarations
@@ -44,24 +43,23 @@ namespace geom { // geos::geom
  *
  * \brief Specifies the precision model of the Coordinate in a Geometry.
  *
- * In other words, specifies the grid of allowable
- * points for all <code>Geometry</code>s.
+ * In other words, specifies the grid of allowable points for a <code>Geometry</code>.
+ * A precision model may be <b>floating</b> (PrecisionModel::Type::FLOATING or
+ * PrecisionModel::Type::FLOATING_SINGLE), in which case normal floating-point value semantics apply.
  *
- * The makePrecise method allows rounding a coordinate to
- * a "precise" value; that is, one whose
- * precision is known exactly.
+ * For a PrecisionModel::Type::FIXED precision model the
+ * makePrecise(geom::Coordinate) method allows rounding a coordinate to
+ * a "precise" value; that is, one whose precision is known exactly.
  *
  * Coordinates are assumed to be precise in geometries.
  * That is, the coordinates are assumed to be rounded to the
  * precision model given for the geometry.
- * JTS input routines automatically round coordinates to the precision model
- * before creating Geometries.
  * All internal operations
  * assume that coordinates are rounded to the precision model.
  * Constructive methods (such as boolean operations) always round computed
  * coordinates to the appropriate precision model.
  *
- * Currently three types of precision model are supported:
+ * Three types of precision model are supported:
  * - FLOATING - represents full double precision floating point.
  *   This is the default precision model used in JTS
  * - FLOATING_SINGLE - represents single precision floating point.
@@ -77,12 +75,15 @@ namespace geom { // geos::geom
  * of 1000. To specify -3 decimal places of precision (i.e. rounding to
  * the nearest 1000), use a scale factor of 0.001.
  *
+ * It is also supported to specify a precise grid size
+ * by providing it as a negative scale factor.
+ * For example, to specify rounding to the nearest 1000 use a scale factor of -1000.
+ *
  * Coordinates are represented internally as Java double-precision values.
- * Since Java uses the IEEE-394 floating point standard, this
+ * Java uses the IEEE-394 floating point standard, which
  * provides 53 bits of precision. (Thus the maximum precisely representable
  * integer is 9,007,199,254,740,992).
  *
- * JTS methods currently do not handle inputs with different precision models.
  */
 class GEOS_DLL PrecisionModel {
     friend class io::Unload;
@@ -151,9 +152,11 @@ public:
      * Fixed-precision coordinates are represented as precise
      * internal coordinates which are rounded to the grid defined
      * by the scale factor.
+     * The provided scale may be negative, to specify an exact grid size.
+     * The scale is then computed as the reciprocal.
      *
      * @param newScale amount by which to multiply a coordinate
-     * after subtracting the offset, to obtain a precise coordinate
+     * after subtracting the offset, to obtain a precise coordinate. Must be non-zero.
      */
     PrecisionModel(double newScale);
 
@@ -178,9 +181,22 @@ public:
     double makePrecise(double val) const;
 
     /// Rounds the given Coordinate to the PrecisionModel grid.
-    void makePrecise(Coordinate& coord) const;
+    void makePrecise(CoordinateXY& coord) const
+    {
+        // optimization for full precision
+        if(modelType == FLOATING) {
+            return;
+        }
 
-    void makePrecise(Coordinate* coord) const;
+        coord.x = makePrecise(coord.x);
+        coord.y = makePrecise(coord.y);
+    };
+
+    void makePrecise(CoordinateXY* coord) const
+    {
+        assert(coord);
+        return makePrecise(*coord);
+    };
 
     /// Tests whether the precision model supports floating point
     ///
@@ -205,10 +221,36 @@ public:
     ///
     /// @return the type of this PrecisionModel
     ///
-    Type getType() const;
+    Type getType() const
+    {
+        return modelType;
+    };
 
     /// Returns the multiplying factor used to obtain a precise coordinate.
-    double getScale() const;
+    double getScale() const
+    {
+        assert(!(scale < 0));
+        return scale;
+    };
+
+    /**
+    * Computes the grid size for a fixed precision model.
+    * This is equal to the reciprocal of the scale factor.
+    * If the grid size has been set explicity (via a negative scale factor)
+    * it will be returned.
+    *
+    * @return the grid size at a fixed precision scale.
+    */
+    double getGridSize() const
+    {
+        if (isFloating())
+           return DoubleNotANumber;
+
+        if (gridSize != 0)
+            return gridSize;
+
+        return 1.0 / scale;
+    };
 
     /// Returns the x-offset used to obtain a precise coordinate.
     ///
@@ -304,9 +346,24 @@ private:
     void setScale(double newScale);
     // throw IllegalArgumentException
 
+    /** \brief
+     * Snaps a value to nearest integer, if within tolerance.
+     */
+    static double snapToInt(double val, double tolerance);
+
     Type modelType;
 
+    /**
+    * The scale factor which determines the number of decimal places in fixed precision.
+    */
     double scale;
+
+    /**
+    * If non-zero, the precise grid size specified.
+    * In this case, the scale is also valid and is computed from the grid size.
+    * If zero, the scale is used to compute the grid size where needed.
+    */
+    double gridSize = 0.0;
 
 };
 
@@ -315,9 +372,3 @@ private:
 
 } // namespace geos::geom
 } // namespace geos
-
-#ifdef GEOS_INLINE
-# include "geos/geom/PrecisionModel.inl"
-#endif
-
-#endif // ndef GEOS_GEOM_PRECISIONMODEL_H

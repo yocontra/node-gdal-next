@@ -17,8 +17,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_UTIL_GEOMETRYTRANSFORMER_H
-#define GEOS_GEOM_UTIL_GEOMETRYTRANSFORMER_H
+#pragma once
 
 
 #include <geos/export.h>
@@ -102,18 +101,6 @@ protected:
 
     const GeometryFactory* factory;
 
-    /** \brief
-     * Convenience method which provides standard way of
-     * creating a CoordinateSequence.
-     *
-     * @param coords the coordinate array to copy
-     * @return a coordinate sequence for the array
-     *
-     * [final]
-     */
-    CoordinateSequence::Ptr createCoordinateSequence(
-        std::unique_ptr< std::vector<Coordinate> > coords);
-
     virtual CoordinateSequence::Ptr transformCoordinates(
         const CoordinateSequence* coords,
         const Geometry* parent);
@@ -192,4 +179,3 @@ private:
 } // namespace geos.geom
 } // namespace geos
 
-#endif // GEOS_GEOM_UTIL_GEOMETRYTRANSFORMER_H

@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_DISTANCE_DISCRETEHAUSDORFFDISTANCE_H
-#define GEOS_ALGORITHM_DISTANCE_DISCRETEHAUSDORFFDISTANCE_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/algorithm/distance/PointPairDistance.h> // for composition
@@ -139,7 +138,7 @@ public:
         return ptDist.getDistance();
     }
 
-    const std::array<geom::Coordinate, 2>
+    const std::array<geom::CoordinateXY, 2>
     getCoordinates() const
     {
         return ptDist.getCoordinates();
@@ -153,7 +152,7 @@ public:
         {}
 
         void
-        filter_ro(const geom::Coordinate* pt) override
+        filter_ro(const geom::CoordinateXY* pt) override
         {
             minPtDist.initialize();
             DistanceToPoint::computeDistance(geom, *pt,
@@ -258,6 +257,4 @@ private:
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#endif // GEOS_ALGORITHM_DISTANCE_DISCRETEHAUSDORFFDISTANCE_H
 

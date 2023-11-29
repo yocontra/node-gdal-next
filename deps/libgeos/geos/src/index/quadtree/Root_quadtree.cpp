@@ -22,6 +22,7 @@
 #include <geos/index/quadtree/IntervalSize.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Envelope.h>
+#include <geos/util/IllegalArgumentException.h>
 
 #include <cassert>
 
@@ -29,7 +30,7 @@
 #define GEOS_DEBUG 0
 #endif
 
-#ifdef GEOS_DEBUG
+#if GEOS_DEBUG
 #include <iostream>
 #endif
 
@@ -51,6 +52,9 @@ Root::insert(const Envelope* itemEnv, void* item)
 #if GEOS_DEBUG
     std::cerr << "Root(" << this << ")::insert(" << itemEnv->toString() << ", " << item << ") called" << std::endl;
 #endif
+    if (!itemEnv->isfinite()) {
+        throw util::IllegalArgumentException("Non-finite envelope bounds passed to index insert");
+    }
     int index = getSubnodeIndex(itemEnv, origin);
     // if index is -1, itemEnv must cross the X or Y axis.
     if(index == -1) {
@@ -94,7 +98,7 @@ Root::insert(const Envelope* itemEnv, void* item)
     }
 
 #if GEOS_DEBUG
-    std::cerr << "(" << this << ") calling insertContained with subnode " << subnode[index] << std::endl;
+    std::cerr << "(" << this << ") calling insertContained with subnode " << subnodes[index] << std::endl;
 #endif
     /*
      * At this point we have a subquad which exists and must contain
@@ -103,7 +107,7 @@ Root::insert(const Envelope* itemEnv, void* item)
     insertContained(subnodes[static_cast<std::size_t>(index)], itemEnv, item);
 
 #if GEOS_DEBUG
-    std::cerr << "(" << this << ") done calling insertContained with subnode " << subnode[index] << std::endl;
+    std::cerr << "(" << this << ") done calling insertContained with subnode " << subnodes[index] << std::endl;
 #endif
 
     //System.out.println("depth = " + root.depth() + " size = " + root.size());

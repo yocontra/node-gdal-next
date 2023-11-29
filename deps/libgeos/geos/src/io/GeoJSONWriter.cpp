@@ -23,7 +23,6 @@
 #include <geos/geom/MultiLineString.h>
 #include <geos/geom/MultiPolygon.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/PrecisionModel.h>
 
 #include <algorithm>
@@ -284,7 +283,7 @@ void GeoJSONWriter::encodeGeometryCollection(const geom::GeometryCollection* g, 
     j["geometries"] = geometryArray;
 }
 
-std::pair<double, double> GeoJSONWriter::convertCoordinate(const Coordinate* c)
+std::pair<double, double> GeoJSONWriter::convertCoordinate(const CoordinateXY* c)
 {
     return std::make_pair(c->x, c->y);
 }

@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_RELATE_RELATENODEGRAPH_H
-#define GEOS_OP_RELATE_RELATENODEGRAPH_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geomgraph/NodeMap.h>
@@ -29,7 +28,7 @@
 namespace geos {
 namespace geom {
 class Coordinate;
-struct CoordinateLessThen;
+struct CoordinateLessThan;
 }
 namespace geomgraph {
 //class EdgeEndStar;
@@ -82,7 +81,7 @@ public:
 
     void copyNodesAndLabels(geomgraph::GeometryGraph* geomGraph, uint8_t argIndex);
 
-    void insertEdgeEnds(std::vector<geomgraph::EdgeEnd*>* ee);
+    void insertEdgeEnds(std::vector<std::unique_ptr<geomgraph::EdgeEnd>>& ee);
 
 private:
 
@@ -97,5 +96,3 @@ private:
 } // namespace geos:operation:relate
 } // namespace geos:operation
 } // namespace geos
-
-#endif // GEOS_OP_RELATE_RELATENODEGRAPH_H

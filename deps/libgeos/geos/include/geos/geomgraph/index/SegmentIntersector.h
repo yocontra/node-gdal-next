@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOMGRAPH_INDEX_SEGMENTINTERSECTOR_H
-#define GEOS_GEOMGRAPH_INDEX_SEGMENTINTERSECTOR_H
+#pragma once
 
 #include <geos/export.h>
 #include <array>
@@ -58,11 +57,7 @@ private:
 
     bool hasProperInterior;
 
-    bool isDone;
-
-    bool isDoneWhenProperInt;
-
-    // the proper intersection point found
+    /// the proper intersection point found
     geom::Coordinate properIntersectionPoint;
 
     algorithm::LineIntersector* li;
@@ -71,10 +66,6 @@ private:
 
     bool recordIsolated;
 
-    //bool isSelfIntersection;
-
-    //bool intersectionFound;
-
     int numIntersections;
 
     /// Elements are externally owned
@@ -82,15 +73,21 @@ private:
 
     bool isTrivialIntersection(Edge* e0, std::size_t segIndex0, Edge* e1, std::size_t segIndex1);
 
-    bool isBoundaryPoint(algorithm::LineIntersector* li,
-                         std::array<std::vector<Node*>*, 2>& tstBdyNodes);
+    bool isBoundaryPoint(algorithm::LineIntersector* p_li,
+                         std::array<std::vector<Node*>*, 2>& tstBdyNodes)
+    {
+        return isBoundaryPoint(p_li, tstBdyNodes[0]) || isBoundaryPoint(p_li, tstBdyNodes[1]);
+    };
 
     bool isBoundaryPoint(algorithm::LineIntersector* li,
                          std::vector<Node*>* tstBdyNodes);
 
 public:
 
-    static bool isAdjacentSegments(std::size_t i1, std::size_t i2);
+    static bool isAdjacentSegments(std::size_t i1, size_t i2)
+    {
+        return (i1 > i2 ? i1 - i2 : i2 - i1) == 1;
+    };
 
     // testing only
     int numTests;
@@ -106,8 +103,6 @@ public:
         hasIntersectionVar(false),
         hasProper(false),
         hasProperInterior(false),
-        isDone(false),
-        isDoneWhenProperInt(false),
         li(newLi),
         includeProper(newIncludeProper),
         recordIsolated(newRecordIsolated),
@@ -120,21 +115,54 @@ public:
     /// Parameters are externally owned.
     /// Make sure they live for the whole lifetime of this object
     void setBoundaryNodes(std::vector<Node*>* bdyNodes0,
-                          std::vector<Node*>* bdyNodes1);
+                          std::vector<Node*>* bdyNodes1)
+    {
+        bdyNodes[0] = bdyNodes0;
+        bdyNodes[1] = bdyNodes1;
+    };
 
-    geom::Coordinate& getProperIntersectionPoint();
+    /*
+    * @return the proper intersection point, or <code>null</code>
+    * if none was found
+    */
+    geom::Coordinate& getProperIntersectionPoint()
+    {
+        return properIntersectionPoint;
+    };
 
-    bool hasIntersection();
+    bool hasIntersection() const
+    {
+        return hasIntersectionVar;
+    };
 
-    bool hasProperIntersection();
+    /**
+     * A proper intersection is an intersection which is interior to at least two
+     * line segments.  Note that a proper intersection is not necessarily
+     * in the interior of the entire Geometry, since another edge may have
+     * an endpoint equal to the intersection, which according to SFS semantics
+     * can result in the point being on the Boundary of the Geometry.
+     */
+    bool hasProperIntersection() const
+    {
+        return hasProper;
+    };
 
-    bool hasProperInteriorIntersection();
+    /**
+     * A proper interior intersection is a proper intersection which is <b>not</b>
+     * contained in the set of boundary nodes set for this SegmentIntersector.
+     */
+    bool hasProperInteriorIntersection() const
+    {
+        return hasProperInterior;
+    };
 
     void addIntersections(Edge* e0, std::size_t segIndex0, Edge* e1, std::size_t segIndex1);
 
-    void setIsDoneIfProperInt(bool isDoneWhenProperInt);
+    bool getIsDone() const
+    {
+        return false;
+    };
 
-    bool getIsDone();
 
 };
 
@@ -142,13 +170,7 @@ public:
 } // namespace geos.geomgraph
 } // namespace geos
 
-#ifdef GEOS_INLINE
-#include <geos/geomgraph/index/SegmentIntersector.inl>
-#endif
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#endif
-

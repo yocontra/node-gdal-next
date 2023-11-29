@@ -23,9 +23,7 @@
 #include <geos/simplify/TaggedLineSegment.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/LineString.h>
-//#include <geos/geom/Geometry.h> // for std::unique_ptr destructor
-//#include <geos/geom/GeometryFactory.h>
-//#include <geos/geom/CoordinateSequenceFactory.h>
+#include <geos/util.h>
 
 #include <algorithm>
 #include <cassert>
@@ -35,12 +33,11 @@
 #define GEOS_DEBUG 0
 #endif
 
-#ifdef GEOS_DEBUG
+#if GEOS_DEBUG
 #include <iostream>
 #endif
 
 using namespace geos::geom;
-using std::pair;
 using std::unique_ptr;
 using std::vector;
 
@@ -83,8 +80,10 @@ TaggedLineStringSimplifier::simplify(TaggedLineString* nLine)
     }
     simplifySection(0, linePts->size() - 1, 0);
 
+    if(!line->getPreserveEndpoint() && linePts->isRing()) {
+        simplifyRingEndpoint();
+    }
 }
-
 
 /*private*/
 void
@@ -149,7 +148,7 @@ TaggedLineStringSimplifier::simplifySection(std::size_t i,
     // test if flattened section would cause intersection
     LineSegment candidateSeg(linePts->getAt(i), linePts->getAt(j));
 
-    if(hasBadIntersection(line, std::make_pair(i, j), candidateSeg)) {
+    if(hasBadIntersection(line, i, j, candidateSeg)) {
         isValidToSimplify = false;
     }
 
@@ -170,9 +169,24 @@ TaggedLineStringSimplifier::simplifySection(std::size_t i,
 
     simplifySection(i, furthestPtIndex, depth);
     simplifySection(furthestPtIndex, j, depth);
-
 }
 
+/*private*/
+void
+TaggedLineStringSimplifier::simplifyRingEndpoint()
+{
+    if (line->getResultSize() > line->getMinimumSize()) {
+        const auto* firstSeg = line->getResultSegments().front();
+        const auto* lastSeg = line->getResultSegments().back();
+
+        LineSegment candidateSeg(lastSeg->p0, firstSeg->p1);
+        if (candidateSeg.distance(firstSeg->p0) <= distanceTolerance &&
+                ! hasBadIntersection(line, line->getSegments().size() - 2, 0, candidateSeg)) {
+            //auto newSeg = detail::make_unique<TaggedLineSegment>(candidateSeg.p0, candidateSeg.p1);
+            line->removeRingEndpoint();
+        }
+    }
+}
 
 /*private*/
 std::unique_ptr<TaggedLineSegment>
@@ -192,14 +206,14 @@ TaggedLineStringSimplifier::flatten(std::size_t start, std::size_t end)
 bool
 TaggedLineStringSimplifier::hasBadIntersection(
     const TaggedLineString* parentLine,
-    const pair<size_t, size_t>& sectionIndex,
+    const size_t excludeStart, const size_t excludeEnd,
     const LineSegment& candidateSeg)
 {
     if(hasBadOutputIntersection(candidateSeg)) {
         return true;
     }
 
-    if(hasBadInputIntersection(parentLine, sectionIndex, candidateSeg)) {
+    if(hasBadInputIntersection(parentLine, excludeStart, excludeEnd, candidateSeg)) {
         return true;
     }
 
@@ -237,17 +251,15 @@ TaggedLineStringSimplifier::hasInteriorIntersection(
 bool
 TaggedLineStringSimplifier::hasBadInputIntersection(
     const TaggedLineString* parentLine,
-    const pair<std::size_t, std::size_t>& sectionIndex,
+    const size_t excludeStart, const size_t excludeEnd,
     const LineSegment& candidateSeg)
 {
-    std::unique_ptr< std::vector<LineSegment*> > querySegs =
-        inputIndex->query(&candidateSeg);
+    const auto& foundSegs = inputIndex->query(&candidateSeg);
 
-    for(const LineSegment* ls : *querySegs) {
-        const TaggedLineSegment* querySeg = static_cast<const TaggedLineSegment*>(ls);
+    for(const LineSegment* ls : *foundSegs) {
+        const TaggedLineSegment* foundSeg = static_cast<const TaggedLineSegment*>(ls);
 
-        if(!isInLineSection(parentLine, sectionIndex, querySeg) && hasInteriorIntersection(*querySeg, candidateSeg)) {
-
+        if(!isInLineSection(parentLine, excludeStart, excludeEnd, foundSeg) && hasInteriorIntersection(*foundSeg, candidateSeg)) {
             return true;
         }
     }
@@ -259,7 +271,7 @@ TaggedLineStringSimplifier::hasBadInputIntersection(
 bool
 TaggedLineStringSimplifier::isInLineSection(
     const TaggedLineString* line,
-    const pair<size_t, size_t>& sectionIndex,
+    const size_t excludeStart, const size_t excludeEnd,
     const TaggedLineSegment* seg)
 {
     // not in this line
@@ -268,10 +280,16 @@ TaggedLineStringSimplifier::isInLineSection(
     }
 
     std::size_t segIndex = seg->getIndex();
-    if(segIndex >= sectionIndex.first && segIndex < sectionIndex.second) {
+    if (excludeStart <= excludeEnd) {
+      //-- section is contiguous
+      if (segIndex >= excludeStart && segIndex < excludeEnd)
         return true;
     }
-
+    else {
+      //-- section wraps around the end of a ring
+      if (segIndex >= excludeStart || segIndex <= excludeEnd)
+      return true;
+    }
     return false;
 }
 

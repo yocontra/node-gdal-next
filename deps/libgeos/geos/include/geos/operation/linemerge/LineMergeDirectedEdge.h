@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_LINEMERGE_LINEMERGEDIRECTEDEDGE_H
-#define GEOS_OP_LINEMERGE_LINEMERGEDIRECTEDEDGE_H
+#pragma once
 
 #include <geos/export.h>
 
@@ -66,14 +65,14 @@ public:
     /**  \brief
      * Returns the directed edge that starts at this directed edge's end point, or null
      * if there are zero or multiple directed edges starting there.
+     * @param checkDirection only consider directed edges with same direction as parent edge
      * @return the directed edge
      * @return `null` if there are zero or multiple directed edges starting there
      */
-    LineMergeDirectedEdge* getNext();
+    LineMergeDirectedEdge* getNext(bool checkDirection = false);
 };
 
 } // namespace geos::operation::linemerge
 } // namespace geos::operation
 } // namespace geos
 
-#endif // GEOS_OP_LINEMERGE_LINEMERGEDIRECTEDEDGE_H

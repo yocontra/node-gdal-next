@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_H
-#define GEOS_GEOM_H
+#pragma once
 
 /** \mainpage GEOS - Geometry Engine Open Source
  *
@@ -116,11 +115,8 @@ namespace geom { // geos::geom
 } // namespace geos
 
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
-#include <geos/geom/CoordinateArraySequenceFactory.h>
 #include <geos/geom/CoordinateFilter.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Envelope.h>
 #include <geos/geom/Geometry.h>
@@ -147,7 +143,4 @@ namespace geom { // geos::geom
 
 using namespace geos::geom;
 
-
-
-#endif // ndef GEOS_GEOM_H
 

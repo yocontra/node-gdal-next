@@ -17,6 +17,8 @@
  *
  **********************************************************************/
 
+#include <geos/algorithm/Orientation.h>
+
 #include <geos/geom/LinearRing.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/CoordinateSequence.h>
@@ -35,22 +37,12 @@ namespace geom { // geos::geom
 LinearRing::LinearRing(const LinearRing& lr): LineString(lr) {}
 
 /*public*/
-LinearRing::LinearRing(CoordinateSequence* newCoords,
-                       const GeometryFactory* newFactory)
-    :
-    LineString(newCoords, newFactory)
-{
-    validateConstruction();
-}
-
-/*public*/
 LinearRing::LinearRing(CoordinateSequence::Ptr && newCoords,
                        const GeometryFactory& newFactory)
         : LineString(std::move(newCoords), newFactory)
 {
     validateConstruction();
 }
-
 
 void
 LinearRing::validateConstruction()
@@ -69,7 +61,7 @@ LinearRing::validateConstruction()
     if(points->getSize() < MINIMUM_VALID_SIZE) {
         std::ostringstream os;
         os << "Invalid number of points in LinearRing found "
-           << points->getSize() << " - must be 0 or >= 4";
+           << points->getSize() << " - must be 0 or >= " << MINIMUM_VALID_SIZE;
         throw util::IllegalArgumentException(os.str());
     }
 }
@@ -108,6 +100,19 @@ LinearRing::getGeometryTypeId() const
     return GEOS_LINEARRING;
 }
 
+void
+LinearRing::orient(bool isCW)
+{
+    if (isEmpty()) {
+        return;
+    }
+
+    if (algorithm::Orientation::isCCW(points.get()) == isCW) {
+        points->reverse();
+    }
+
+}
+
 LinearRing*
 LinearRing::reverseImpl() const
 {
@@ -117,7 +122,7 @@ LinearRing::reverseImpl() const
 
     assert(points.get());
     auto seq = points->clone();
-    CoordinateSequence::reverse(seq.get());
+    seq->reverse();
     assert(getFactory());
     return getFactory()->createLinearRing(std::move(seq)).release();
 }

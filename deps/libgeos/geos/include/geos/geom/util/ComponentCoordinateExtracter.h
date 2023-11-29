@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_GEOM_UTIL_COMPONENTCOORDINATEEXTRACTER_H
-#define GEOS_GEOM_UTIL_COMPONENTCOORDINATEEXTRACTER_H
+#pragma once
 
 #include <vector>
 
@@ -43,13 +42,13 @@ public:
      * efficient to create a single ComponentCoordinateFilter instance
      * and pass it to multiple geometries.
      */
-    static void getCoordinates(const Geometry& geom, std::vector<const Coordinate*>& ret);
+    static void getCoordinates(const Geometry& geom, std::vector<const CoordinateXY*>& ret);
 
     /**
      * Constructs a ComponentCoordinateFilter with a list in which
      * to store Coordinates found.
      */
-    ComponentCoordinateExtracter(std::vector<const Coordinate*>& newComps);
+    ComponentCoordinateExtracter(std::vector<const CoordinateXY*>& newComps);
 
     void filter_rw(Geometry* geom) override;
 
@@ -57,7 +56,7 @@ public:
 
 private:
 
-    Coordinate::ConstVect& comps;
+    std::vector<const CoordinateXY*>& comps;
 
     // Declare type as noncopyable
     ComponentCoordinateExtracter(const ComponentCoordinateExtracter& other) = delete;
@@ -68,4 +67,3 @@ private:
 } // namespace geos.geom
 } // namespace geos
 
-#endif //GEOS_GEOM_UTIL_COMPONENTCOORDINATEEXTRACTER_H

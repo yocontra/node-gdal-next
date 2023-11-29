@@ -36,6 +36,7 @@
 #include <geos/geom/Location.h>
 #include <geos/geom/Geometry.h>
 #include <geos/util/Interrupt.h>
+#include <geos/util/TopologyException.h>
 
 #include <algorithm>
 
@@ -141,6 +142,7 @@ OverlayNG::geomunion(const Geometry* geom, const PrecisionModel* pm, noding::Nod
 {
     OverlayNG ov(geom, pm);
     ov.setNoder(noder);
+    ov.setStrictMode(true);
     return ov.getResult();
 }
 
@@ -182,10 +184,8 @@ OverlayNG::getResult()
 
 #if GEOS_DEBUG
     io::WKTWriter w;
-    w.setOutputDimension(3);
-    w.setTrim(true);
 
-    std::cout << "Before populatingZ: " << w.write(result.get()) << std::endl;
+    std::cerr << "Before populatingZ: " << w.write(result.get()) << std::endl;
 #endif
 
     /**
@@ -195,7 +195,7 @@ OverlayNG::getResult()
     elevModel->populateZ(*result);
 
 #if GEOS_DEBUG
-    std::cout << " After populatingZ: " << w.write(result.get()) << std::endl;
+    std::cerr << " After populatingZ: " << w.write(result.get()) << std::endl;
 #endif
 
     return result;
@@ -247,8 +247,8 @@ OverlayNG::computeEdgeOverlay()
     // std::sort(edges.begin(), edges.end(), EdgeComparator);
     OverlayGraph graph;
     for (Edge* e : edges) {
-        // Write out edge graph as hex for examination
-        // std::cout << *e << std::endl;
+        // Write out edge coordinates
+        // std::cout << *e->getCoordinatesRO() << std::endl;
         graph.addEdge(e);
     }
 
@@ -266,7 +266,22 @@ OverlayNG::computeEdgeOverlay()
     }
 
     GEOS_CHECK_FOR_INTERRUPTS();
-    return extractResult(opCode, &graph);
+    std::unique_ptr<Geometry> result = extractResult(opCode, &graph);
+
+    /**
+     * Heuristic check on result area.
+     * Catches cases where noding causes vertex to move
+     * and make topology graph area "invert".
+     */
+    if (OverlayUtil::isFloating(pm)) {
+        bool isAreaConsistent = OverlayUtil::isResultAreaConsistent(
+            inputGeom.getGeometry(0),
+            inputGeom.getGeometry(1),
+            opCode, result.get());
+        if (! isAreaConsistent)
+            throw util::TopologyException("Result area inconsistent with overlay operation");
+    }
+    return result;
 }
 
 /*private*/

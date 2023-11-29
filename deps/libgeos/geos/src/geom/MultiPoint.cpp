@@ -29,12 +29,6 @@ namespace geos {
 namespace geom { // geos::geom
 
 /*protected*/
-MultiPoint::MultiPoint(std::vector<Geometry*>* newPoints, const GeometryFactory* factory)
-    :
-    GeometryCollection(newPoints, factory)
-{
-}
-
 MultiPoint::MultiPoint(std::vector<std::unique_ptr<Point>> && newPoints, const GeometryFactory& factory)
     :
     GeometryCollection(std::move(newPoints), factory)
@@ -73,7 +67,7 @@ MultiPoint::getBoundary() const
     return std::unique_ptr<Geometry>(getFactory()->createGeometryCollection());
 }
 
-const Coordinate*
+const CoordinateXY*
 MultiPoint::getCoordinateN(std::size_t n) const
 {
     return geometries[n]->getCoordinate();

@@ -28,11 +28,10 @@
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Envelope.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequenceFilter.h>
 #include <geos/geom/GeometryFilter.h>
 #include <geos/geom/GeometryComponentFilter.h>
+#include <geos/util.h>
 
 #include <vector>
 #include <cmath> // for fabs
@@ -58,32 +57,6 @@ Polygon::Polygon(const Polygon& p)
 {
     for(std::size_t i = 0; i < holes.size(); ++i) {
         holes[i] = detail::make_unique<LinearRing>(*p.holes[i]);
-    }
-}
-
-/*protected*/
-Polygon::Polygon(LinearRing* newShell, std::vector<LinearRing*>* newHoles,
-                 const GeometryFactory* newFactory):
-    Geometry(newFactory)
-{
-    if(newShell == nullptr) {
-        shell = getFactory()->createLinearRing();
-    }
-    else {
-        if(newHoles != nullptr && newShell->isEmpty() && hasNonEmptyElements(newHoles)) {
-            throw util::IllegalArgumentException("shell is empty but holes are not");
-        }
-        shell.reset(newShell);
-    }
-
-    if(newHoles != nullptr) {
-        if(hasNullElements(newHoles)) {
-            throw util::IllegalArgumentException("holes must not contain null elements");
-        }
-        for (const auto& hole : *newHoles) {
-            holes.emplace_back(hole);
-        }
-        delete newHoles;
     }
 }
 
@@ -122,23 +95,21 @@ std::unique_ptr<CoordinateSequence>
 Polygon::getCoordinates() const
 {
     if(isEmpty()) {
-        return getFactory()->getCoordinateSequenceFactory()->create();
+        return detail::make_unique<CoordinateSequence>(0u, hasZ(), hasM());
     }
 
-    std::vector<Coordinate> cl;
-    cl.reserve(getNumPoints());
+    auto cl = detail::make_unique<CoordinateSequence>(0u, hasZ(), hasM());
+    cl->reserve(getNumPoints());
 
     // Add shell points
-    const CoordinateSequence* shellCoords = shell->getCoordinatesRO();
-    shellCoords->toVector(cl);
+    cl->add(*shell->getCoordinatesRO());
 
     // Add holes points
     for(const auto& hole : holes) {
-        const CoordinateSequence* childCoords = hole->getCoordinatesRO();
-        childCoords->toVector(cl);
+        cl->add(*hole->getCoordinatesRO());
     }
 
-    return getFactory()->getCoordinateSequenceFactory()->create(std::move(cl));
+    return cl;
 }
 
 size_t
@@ -173,6 +144,36 @@ Polygon::getCoordinateDimension() const
     return dimension;
 }
 
+bool
+Polygon::hasM() const {
+    if (shell->getCoordinatesRO()->hasM()) {
+        return true;
+    }
+
+    for (const auto& hole : holes) {
+        if (hole->getCoordinatesRO()->hasM()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+Polygon::hasZ() const {
+    if (shell->getCoordinatesRO()->hasZ()) {
+        return true;
+    }
+
+    for (const auto& hole : holes) {
+        if (hole->getCoordinatesRO()->hasZ()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int
 Polygon::getBoundaryDimension() const
 {
@@ -194,7 +195,6 @@ Polygon::getExteriorRing() const
 std::unique_ptr<LinearRing>
 Polygon::releaseExteriorRing()
 {
-    envelope.reset();
     return std::move(shell);
 }
 
@@ -255,12 +255,6 @@ Polygon::getBoundary() const
     return getFactory()->createMultiLineString(std::move(rings));
 }
 
-Envelope::Ptr
-Polygon::computeEnvelopeInternal() const
-{
-    return detail::make_unique<Envelope>(*(shell->getEnvelopeInternal()));
-}
-
 bool
 Polygon::equalsExact(const Geometry* other, double tolerance) const
 {
@@ -287,6 +281,32 @@ Polygon::equalsExact(const Geometry* other, double tolerance) const
         const LinearRing* hole = holes[i].get();
         const LinearRing* otherhole = otherPolygon->holes[i].get();
         if(!hole->equalsExact(otherhole, tolerance)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool
+Polygon::equalsIdentical(const Geometry* other_g) const
+{
+    if(!isEquivalentClass(other_g)) {
+        return false;
+    }
+
+    const auto& other = static_cast<const Polygon&>(*other_g);
+
+    if (getNumInteriorRing() != other.getNumInteriorRing()) {
+        return false;
+    }
+
+    if (!getExteriorRing()->equalsIdentical(other.getExteriorRing())) {
+            return false;
+    }
+
+    for (std::size_t i = 0; i < getNumInteriorRing(); i++) {
+        if (!getInteriorRingN(i)->equalsIdentical(other.getInteriorRingN(i))) {
             return false;
         }
     }
@@ -343,6 +363,15 @@ Polygon::normalize()
     });
 }
 
+void
+Polygon::orientRings(bool exteriorCW)
+{
+    shell->orient(exteriorCW);
+    for (auto& hole : holes) {
+        hole->orient(!exteriorCW);
+    }
+}
+
 int
 Polygon::compareToSameClass(const Geometry* g) const
 {
@@ -383,23 +412,25 @@ Polygon::normalize(LinearRing* ring, bool clockwise)
         return;
     }
 
-    auto coords = detail::make_unique<std::vector<Coordinate>>();
-    ring->getCoordinatesRO()->toVector(*coords);
-    coords->erase(coords->end() - 1); // remove last point (repeated)
+    const auto& ringCoords = ring->getCoordinatesRO();
+    CoordinateSequence coords(0u, ringCoords->hasZ(), ringCoords->hasM());
+    coords.reserve(ringCoords->size());
 
-    auto uniqueCoordinates = detail::make_unique<CoordinateArraySequence>(coords.release());
+    // exclude last point (repeated)
+    coords.add(*ringCoords, 0, ringCoords->size() - 2);
 
-    const Coordinate* minCoordinate = uniqueCoordinates->minCoordinate();
+    const CoordinateXY* minCoordinate = coords.minCoordinate();
 
-    CoordinateSequence::scroll(uniqueCoordinates.get(), minCoordinate);
-    uniqueCoordinates->add(uniqueCoordinates->getAt(0));
-    if(algorithm::Orientation::isCCW(uniqueCoordinates.get()) == clockwise) {
-        CoordinateSequence::reverse(uniqueCoordinates.get());
+    CoordinateSequence::scroll(&coords, minCoordinate);
+    coords.closeRing();
+
+    if(algorithm::Orientation::isCCW(&coords) == clockwise) {
+        coords.reverse();
     }
-    ring->setPoints(uniqueCoordinates.get());
+    ring->setPoints(&coords);
 }
 
-const Coordinate*
+const CoordinateXY*
 Polygon::getCoordinate() const
 {
     return shell->getCoordinate();

@@ -18,13 +18,17 @@
 #include <geos/operation/overlayng/OverlayEdgeRing.h>
 #include <geos/geom/Location.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
+#include <geos/geom/CoordinateSequence.h>
+
+
+using geos::geom::CoordinateSequence;
+using geos::geom::Coordinate;
+using geos::geom::Location;
+
 
 namespace geos {      // geos
 namespace operation { // geos.operation
 namespace overlayng { // geos.operation.overlayng
-
-using namespace geos::geom;
 
 /*public*/
 std::unique_ptr<CoordinateSequence>
@@ -34,7 +38,7 @@ OverlayEdge::getCoordinatesOriented()
         return pts->clone();
     }
     std::unique_ptr<CoordinateSequence> ptsCopy = pts->clone();
-    CoordinateSequence::reverse(ptsCopy.get());
+    ptsCopy->reverse();
     return ptsCopy;
 }
 
@@ -49,7 +53,7 @@ OverlayEdge::getCoordinatesOriented()
 */
 /*public*/
 void
-OverlayEdge::addCoordinates(CoordinateArraySequence* coords) const
+OverlayEdge::addCoordinates(CoordinateSequence* coords) const
 {
     bool isFirstEdge = coords->size() > 0;
     if (direction) {
@@ -57,9 +61,7 @@ OverlayEdge::addCoordinates(CoordinateArraySequence* coords) const
         if (isFirstEdge) {
             startIndex = 0;
         }
-        for (std::size_t i = startIndex, sz = pts->size(); i < sz; i++) {
-            coords->add(pts->getAt(i), false);
-        }
+        coords->add(*pts, startIndex, pts->size() - 1, false);
     }
     else { // is backward
         int startIndex = (int)(pts->size()) - 2;
@@ -67,7 +69,7 @@ OverlayEdge::addCoordinates(CoordinateArraySequence* coords) const
             startIndex = (int)(pts->size()) - 1;
         }
         for (int i = startIndex; i >= 0; i--) {
-            coords->add(pts->getAt(static_cast<std::size_t>(i)), false);
+            coords->add(*pts, static_cast<std::size_t>(i), static_cast<std::size_t>(i), false);
         }
     }
 }
@@ -103,6 +105,4 @@ OverlayEdge::resultSymbol() const
 } // namespace geos.operation
 } // namespace geos
 
-#ifndef GEOS_INLINE
-#include "geos/operation/overlayng/OverlayEdge.inl"
-#endif
+

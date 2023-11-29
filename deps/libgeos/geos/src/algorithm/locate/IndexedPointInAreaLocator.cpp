@@ -32,6 +32,8 @@
 #include <algorithm>
 #include <typeinfo>
 
+using geos::geom::CoordinateXY;
+
 namespace geos {
 namespace algorithm {
 namespace locate {
@@ -52,11 +54,19 @@ IndexedPointInAreaLocator::IntervalIndexedGeometry::init(const geom::Geometry& g
     // pre-compute size of segment vector
     std::size_t nsegs = 0;
     for(const geom::LineString* line : lines) {
+        //-- only include rings of Polygons or LinearRings
+        if (! line->isClosed())
+          continue;
+
         nsegs += line->getCoordinatesRO()->size() - 1;
     }
     index = decltype(index)(10, nsegs);
 
     for(const geom::LineString* line : lines) {
+        //-- only include rings of Polygons or LinearRings
+        if (! line->isClosed())
+          continue;
+
         addLine(line->getCoordinatesRO());
     }
 }
@@ -65,7 +75,7 @@ void
 IndexedPointInAreaLocator::IntervalIndexedGeometry::addLine(const geom::CoordinateSequence* pts)
 {
     for(std::size_t i = 1, ni = pts->size(); i < ni; i++) {
-        SegmentView seg(&pts->getAt(i-1), &pts->getAt(i));
+        SegmentView seg(&pts->getAt<CoordinateXY>(i-1), &pts->getAt<CoordinateXY>(i));
         auto r = std::minmax(seg.p0().y, seg.p1().y);
 
         index.insert(index::strtree::Interval(r.first, r.second), seg);
@@ -90,16 +100,10 @@ IndexedPointInAreaLocator::buildIndex(const geom::Geometry& g)
 IndexedPointInAreaLocator::IndexedPointInAreaLocator(const geom::Geometry& g)
     :	areaGeom(g)
 {
-    const std::type_info& areaGeomId = typeid(areaGeom);
-    if(areaGeomId != typeid(geom::Polygon)
-            &&	areaGeomId != typeid(geom::MultiPolygon)
-            &&	areaGeomId != typeid(geom::LinearRing)) {
-        throw util::IllegalArgumentException("Argument must be Polygonal or LinearRing");
-    }
 }
 
 geom::Location
-IndexedPointInAreaLocator::locate(const geom::Coordinate* /*const*/ p)
+IndexedPointInAreaLocator::locate(const geom::CoordinateXY* /*const*/ p)
 {
     if (index == nullptr) {
         buildIndex(areaGeom);

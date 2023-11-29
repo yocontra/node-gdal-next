@@ -13,8 +13,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_INTERIORPOINTPOINT_H
-#define GEOS_ALGORITHM_INTERIORPOINTPOINT_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Coordinate.h>
@@ -43,7 +42,7 @@ private:
 
     bool hasInterior;
 
-    geom::Coordinate centroid;
+    geom::CoordinateXY centroid;
 
     double minDistance;
 
@@ -56,7 +55,7 @@ private:
      */
     void add(const geom::Geometry* geom);
 
-    void add(const geom::Coordinate* point);
+    void add(const geom::CoordinateXY* point);
 
 public:
 
@@ -64,13 +63,11 @@ public:
 
     ~InteriorPointPoint() {}
 
-    bool getInteriorPoint(geom::Coordinate& ret) const;
+    bool getInteriorPoint(geom::CoordinateXY& ret) const;
 
 };
 
 } // namespace geos::algorithm
 } // namespace geos
 
-
-#endif // GEOS_ALGORITHM_INTERIORPOINTPOINT_H
 

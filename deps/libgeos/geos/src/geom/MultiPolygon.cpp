@@ -30,18 +30,11 @@
 #include <vector>
 #include <algorithm>
 
-#ifndef GEOS_INLINE
-# include "geos/geom/MultiPolygon.inl"
-#endif
 
 namespace geos {
 namespace geom { // geos::geom
 
 /*protected*/
-MultiPolygon::MultiPolygon(std::vector<Geometry*>* newPolys, const GeometryFactory* factory)
-      : GeometryCollection(newPolys, factory)
-{}
-
 MultiPolygon::MultiPolygon(std::vector<std::unique_ptr<Polygon>> && newPolys, const GeometryFactory& factory)
       : GeometryCollection(std::move(newPolys), factory)
 {}

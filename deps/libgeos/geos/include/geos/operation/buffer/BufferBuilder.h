@@ -14,12 +14,11 @@
  *
  **********************************************************************
  *
- * Last port: operation/buffer/BufferBuilder.java r378 (JTS-1.12)
+ * Last port: operation/buffer/BufferBuilder.java 149b38907 (JTS-1.12)
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_BUFFER_BUFFERBUILDER_H
-#define GEOS_OP_BUFFER_BUFFERBUILDER_H
+#pragma once
 
 #include <geos/export.h>
 
@@ -269,4 +268,3 @@ private:
 #pragma warning(pop)
 #endif
 
-#endif // ndef GEOS_OP_BUFFER_BUFFERBUILDER_H

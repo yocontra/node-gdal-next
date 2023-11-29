@@ -21,17 +21,11 @@
 #include <geos/util/IllegalArgumentException.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/CoordinateSequenceFilter.h>
-#include <geos/geom/CoordinateArraySequenceFactory.h>
-#include <geos/geom/Dimension.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/GeometryFilter.h>
 #include <geos/geom/GeometryComponentFilter.h>
-#include <geos/geom/Envelope.h>
 #include <geos/util.h>
 
-#ifndef GEOS_INLINE
-# include <geos/geom/GeometryCollection.inl>
-#endif
 
 #include <algorithm>
 #include <vector>
@@ -44,35 +38,31 @@ namespace geom { // geos::geom
 GeometryCollection::GeometryCollection(const GeometryCollection& gc)
     :
     Geometry(gc),
-    geometries(gc.geometries.size())
+    geometries(gc.geometries.size()),
+    envelope(gc.envelope)
 {
     for(std::size_t i = 0; i < geometries.size(); ++i) {
         geometries[i] = gc.geometries[i]->clone();
     }
 }
 
-/*protected*/
-GeometryCollection::GeometryCollection(std::vector<Geometry*>* newGeoms, const GeometryFactory* factory):
-    Geometry(factory)
+GeometryCollection&
+GeometryCollection::operator=(const GeometryCollection& gc)
 {
-    if(newGeoms == nullptr) {
-        return;
-    }
-    if(hasNullElements(newGeoms)) {
-        throw  util::IllegalArgumentException("geometries must not contain null elements\n");
-    }
-    for (const auto& geom : *newGeoms) {
-        geometries.emplace_back(geom);
-    }
-    delete newGeoms;
+    geometries.resize(gc.geometries.size());
+    envelope = gc.envelope;
 
-    // Set SRID for inner geoms
-    setSRID(getSRID());
+    for (std::size_t i = 0; i < geometries.size(); i++) {
+        geometries[i] = gc.geometries[i]->clone();
+    }
+
+    return *this;
 }
 
 GeometryCollection::GeometryCollection(std::vector<std::unique_ptr<Geometry>> && newGeoms, const GeometryFactory& factory) :
     Geometry(&factory),
-    geometries(std::move(newGeoms)) {
+    geometries(std::move(newGeoms)),
+    envelope(computeEnvelopeInternal()) {
 
     if (hasNullElements(&geometries)) {
         throw util::IllegalArgumentException("geometries must not contain null elements\n");
@@ -99,18 +89,18 @@ GeometryCollection::setSRID(int newSRID)
 std::unique_ptr<CoordinateSequence>
 GeometryCollection::getCoordinates() const
 {
-    std::vector<Coordinate> coordinates(getNumPoints());
+    auto coordinates = detail::make_unique<CoordinateSequence>(getNumPoints());
 
     std::size_t k = 0;
     for(const auto& g : geometries) {
         auto childCoordinates = g->getCoordinates(); // TODO avoid this copy where getCoordinateRO() exists
         std::size_t npts = childCoordinates->getSize();
         for(std::size_t j = 0; j < npts; ++j) {
-            coordinates[k] = childCoordinates->getAt(j);
+            coordinates->setAt(childCoordinates->getAt(j), k);
             k++;
         }
     }
-    return CoordinateArraySequenceFactory::instance()->create(std::move(coordinates));
+    return coordinates;
 }
 
 bool
@@ -142,6 +132,15 @@ GeometryCollection::isDimensionStrict(Dimension::DimensionType d) const {
             });
 }
 
+bool
+GeometryCollection::hasDimension(Dimension::DimensionType d) const {
+    return std::any_of(geometries.begin(),
+                       geometries.end(),
+                       [&d](const std::unique_ptr<Geometry>& g) {
+        return g->hasDimension(d);
+    });
+}
+
 int
 GeometryCollection::getBoundaryDimension() const
 {
@@ -161,6 +160,28 @@ GeometryCollection::getCoordinateDimension() const
         dimension = std::max(dimension, g->getCoordinateDimension());
     }
     return dimension;
+}
+
+bool
+GeometryCollection::hasM() const
+{
+    for (const auto& g : geometries) {
+        if (g->hasM()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
+GeometryCollection::hasZ() const
+{
+    for (const auto& g : geometries) {
+        if (g->hasZ()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 size_t
@@ -224,6 +245,31 @@ GeometryCollection::equalsExact(const Geometry* other, double tolerance) const
     return true;
 }
 
+bool
+GeometryCollection::equalsIdentical(const Geometry* other_g) const
+{
+    if(!isEquivalentClass(other_g)) {
+        return false;
+    }
+
+    const auto& other = static_cast<const GeometryCollection&>(*other_g);
+    if(getNumGeometries() != other.getNumGeometries()) {
+        return false;
+    }
+
+    if (envelope != other.envelope) {
+        return false;
+    }
+
+    for(std::size_t i = 0; i < getNumGeometries(); i++) {
+        if(!(getGeometryN(i)->equalsIdentical(other.getGeometryN(i)))) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void
 GeometryCollection::apply_rw(const CoordinateFilter* filter)
 {
@@ -269,13 +315,13 @@ GeometryCollection::normalize()
     });
 }
 
-Envelope::Ptr
+Envelope
 GeometryCollection::computeEnvelopeInternal() const
 {
-    Envelope::Ptr p_envelope(new Envelope());
+    Envelope p_envelope;
     for(const auto& g : geometries) {
         const Envelope* env = g->getEnvelopeInternal();
-        p_envelope->expandToInclude(env);
+        p_envelope.expandToInclude(env);
     }
     return p_envelope;
 }
@@ -287,7 +333,7 @@ GeometryCollection::compareToSameClass(const Geometry* g) const
     return compare(geometries, gc->geometries);
 }
 
-const Coordinate*
+const CoordinateXY*
 GeometryCollection::getCoordinate() const
 {
     for(const auto& g : geometries) {

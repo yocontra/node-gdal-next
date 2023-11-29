@@ -37,16 +37,24 @@ namespace distance { // geos.algorithm.distance
 /* public static */
 void
 DistanceToPoint::computeDistance(const geom::Geometry& geom,
-                                 const geom::Coordinate& pt,
+                                 const geom::CoordinateXY& pt,
                                  PointPairDistance& ptDist)
 {
-    if(const LineString* ls = dynamic_cast<const LineString*>(&geom)) {
+    if (geom.isEmpty()) {
+        ptDist.initialize();
+        return;
+    }
+
+    if(geom.getGeometryTypeId() == GEOS_LINESTRING) {
+        const LineString* ls = static_cast<const LineString*>(&geom);
         computeDistance(*ls, pt, ptDist);
     }
-    else if(const Polygon* pl = dynamic_cast<const Polygon*>(&geom)) {
+    else if(geom.getGeometryTypeId() == GEOS_POLYGON) {
+        const Polygon* pl = static_cast<const Polygon*>(&geom);
         computeDistance(*pl, pt, ptDist);
     }
-    else if(const GeometryCollection* gc = dynamic_cast<const GeometryCollection*>(&geom)) {
+    else if(geom.isCollection()) {
+        const GeometryCollection* gc = static_cast<const GeometryCollection*>(&geom);
         for(std::size_t i = 0; i < gc->getNumGeometries(); i++) {
             const Geometry* g = gc->getGeometryN(i);
             computeDistance(*g, pt, ptDist);
@@ -61,7 +69,7 @@ DistanceToPoint::computeDistance(const geom::Geometry& geom,
 /* public static */
 void
 DistanceToPoint::computeDistance(const geom::LineString& line,
-                                 const geom::Coordinate& pt,
+                                 const geom::CoordinateXY& pt,
                                  PointPairDistance& ptDist)
 {
     const CoordinateSequence* coordsRO = line.getCoordinatesRO();
@@ -89,7 +97,7 @@ DistanceToPoint::computeDistance(const geom::LineString& line,
 /* public static */
 void
 DistanceToPoint::computeDistance(const geom::LineSegment& segment,
-                                 const geom::Coordinate& pt,
+                                 const geom::CoordinateXY& pt,
                                  PointPairDistance& ptDist)
 {
     Coordinate closestPt;
@@ -100,7 +108,7 @@ DistanceToPoint::computeDistance(const geom::LineSegment& segment,
 /* public static */
 void
 DistanceToPoint::computeDistance(const geom::Polygon& poly,
-                                 const geom::Coordinate& pt,
+                                 const geom::CoordinateXY& pt,
                                  PointPairDistance& ptDist)
 {
     computeDistance(*(poly.getExteriorRing()), pt, ptDist);

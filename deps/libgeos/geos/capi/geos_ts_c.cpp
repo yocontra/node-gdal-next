@@ -17,72 +17,79 @@
  *
  ***********************************************************************/
 
-#include <geos/geom/Coordinate.h>
-#include <geos/geom/Geometry.h>
-#include <geos/geom/prep/PreparedGeometry.h>
-#include <geos/geom/prep/PreparedGeometryFactory.h>
-#include <geos/geom/GeometryCollection.h>
-#include <geos/geom/Polygon.h>
-#include <geos/geom/Point.h>
-#include <geos/geom/MultiPoint.h>
-#include <geos/geom/MultiLineString.h>
-#include <geos/geom/MultiPolygon.h>
-#include <geos/geom/LinearRing.h>
-#include <geos/geom/LineSegment.h>
-#include <geos/geom/LineString.h>
-#include <geos/geom/PrecisionModel.h>
-#include <geos/geom/GeometryFactory.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
-#include <geos/geom/FixedSizeCoordinateSequence.h>
-#include <geos/geom/Coordinate.h>
-#include <geos/geom/IntersectionMatrix.h>
-#include <geos/geom/Envelope.h>
-#include <geos/geom/util/Densifier.h>
-#include <geos/geom/util/GeometryFixer.h>
-#include <geos/index/strtree/TemplateSTRtree.h>
-#include <geos/index/ItemVisitor.h>
-#include <geos/io/WKTReader.h>
-#include <geos/io/WKBReader.h>
-#include <geos/io/WKTWriter.h>
-#include <geos/io/WKBWriter.h>
-#include <geos/io/GeoJSONReader.h>
-#include <geos/io/GeoJSONWriter.h>
 #include <geos/algorithm/BoundaryNodeRule.h>
 #include <geos/algorithm/MinimumBoundingCircle.h>
 #include <geos/algorithm/MinimumDiameter.h>
+#include <geos/algorithm/MinimumAreaRectangle.h>
 #include <geos/algorithm/Orientation.h>
 #include <geos/algorithm/construct/MaximumInscribedCircle.h>
 #include <geos/algorithm/construct/LargestEmptyCircle.h>
 #include <geos/algorithm/distance/DiscreteHausdorffDistance.h>
 #include <geos/algorithm/distance/DiscreteFrechetDistance.h>
-#include <geos/simplify/DouglasPeuckerSimplifier.h>
-#include <geos/simplify/TopologyPreservingSimplifier.h>
+#include <geos/algorithm/hull/ConcaveHull.h>
+#include <geos/algorithm/hull/ConcaveHullOfPolygons.h>
+#include <geos/coverage/CoverageValidator.h>
+#include <geos/coverage/CoverageSimplifier.h>
+#include <geos/coverage/CoverageUnion.h>
+#include <geos/geom/Coordinate.h>
+#include <geos/geom/CoordinateSequence.h>
+#include <geos/geom/Envelope.h>
+#include <geos/geom/Geometry.h>
+#include <geos/geom/GeometryCollection.h>
+#include <geos/geom/GeometryFactory.h>
+#include <geos/geom/IntersectionMatrix.h>
+#include <geos/geom/LinearRing.h>
+#include <geos/geom/LineSegment.h>
+#include <geos/geom/LineString.h>
+#include <geos/geom/MultiLineString.h>
+#include <geos/geom/MultiPoint.h>
+#include <geos/geom/MultiPolygon.h>
+#include <geos/geom/Point.h>
+#include <geos/geom/Polygon.h>
+#include <geos/geom/PrecisionModel.h>
+#include <geos/geom/prep/PreparedGeometry.h>
+#include <geos/geom/prep/PreparedGeometryFactory.h>
+#include <geos/geom/util/Densifier.h>
+#include <geos/geom/util/GeometryFixer.h>
+#include <geos/index/ItemVisitor.h>
+#include <geos/index/strtree/TemplateSTRtree.h>
+#include <geos/io/WKBReader.h>
+#include <geos/io/WKBWriter.h>
+#include <geos/io/WKTReader.h>
+#include <geos/io/WKTWriter.h>
+#include <geos/io/GeoJSONReader.h>
+#include <geos/io/GeoJSONWriter.h>
+#include <geos/linearref/LengthIndexedLine.h>
 #include <geos/noding/GeometryNoder.h>
 #include <geos/noding/Noder.h>
 #include <geos/operation/buffer/BufferBuilder.h>
 #include <geos/operation/buffer/BufferOp.h>
 #include <geos/operation/buffer/BufferParameters.h>
+#include <geos/operation/buffer/OffsetCurve.h>
 #include <geos/operation/distance/DistanceOp.h>
 #include <geos/operation/distance/IndexedFacetDistance.h>
 #include <geos/operation/linemerge/LineMerger.h>
-#include <geos/operation/overlay/OverlayOp.h>
+#include <geos/operation/intersection/Rectangle.h>
+#include <geos/operation/intersection/RectangleIntersection.h>
 #include <geos/operation/overlay/snap/GeometrySnapper.h>
 #include <geos/operation/overlayng/PrecisionReducer.h>
 #include <geos/operation/overlayng/OverlayNG.h>
 #include <geos/operation/overlayng/OverlayNGRobust.h>
 #include <geos/operation/overlayng/UnaryUnionNG.h>
-#include <geos/operation/intersection/Rectangle.h>
-#include <geos/operation/intersection/RectangleIntersection.h>
 #include <geos/operation/polygonize/Polygonizer.h>
 #include <geos/operation/polygonize/BuildArea.h>
 #include <geos/operation/relate/RelateOp.h>
 #include <geos/operation/sharedpaths/SharedPathsOp.h>
 #include <geos/operation/union/CascadedPolygonUnion.h>
-#include <geos/operation/union/CoverageUnion.h>
+#include <geos/operation/union/DisjointSubsetUnion.h>
 #include <geos/operation/valid/IsValidOp.h>
 #include <geos/operation/valid/MakeValid.h>
+#include <geos/operation/valid/RepeatedPointRemover.h>
 #include <geos/precision/GeometryPrecisionReducer.h>
-#include <geos/linearref/LengthIndexedLine.h>
+#include <geos/shape/fractal/HilbertEncoder.h>
+#include <geos/simplify/DouglasPeuckerSimplifier.h>
+#include <geos/simplify/PolygonHullSimplifier.h>
+#include <geos/simplify/TopologyPreservingSimplifier.h>
 #include <geos/triangulate/DelaunayTriangulationBuilder.h>
 #include <geos/triangulate/VoronoiDiagramBuilder.h>
 #include <geos/triangulate/polygon/ConstrainedDelaunayTriangulator.h>
@@ -147,16 +154,22 @@ using namespace std;
 
 
 // import the most frequently used definitions globally
+using geos::geom::Coordinate;
+using geos::geom::CoordinateXY;
+using geos::geom::CoordinateXYM;
+using geos::geom::CoordinateXYZM;
+using geos::geom::CoordinateSequence;
+using geos::geom::Envelope;
 using geos::geom::Geometry;
+using geos::geom::GeometryCollection;
+using geos::geom::GeometryFactory;
 using geos::geom::LineString;
 using geos::geom::LinearRing;
 using geos::geom::MultiLineString;
 using geos::geom::MultiPolygon;
+using geos::geom::Point;
 using geos::geom::Polygon;
 using geos::geom::PrecisionModel;
-using geos::geom::CoordinateSequence;
-using geos::geom::GeometryCollection;
-using geos::geom::GeometryFactory;
 
 using geos::io::WKTReader;
 using geos::io::WKTWriter;
@@ -167,9 +180,12 @@ using geos::io::GeoJSONWriter;
 
 using geos::algorithm::distance::DiscreteFrechetDistance;
 using geos::algorithm::distance::DiscreteHausdorffDistance;
+using geos::algorithm::hull::ConcaveHull;
+using geos::algorithm::hull::ConcaveHullOfPolygons;
 
 using geos::operation::buffer::BufferBuilder;
 using geos::operation::buffer::BufferParameters;
+using geos::operation::buffer::OffsetCurve;
 using geos::operation::distance::IndexedFacetDistance;
 using geos::operation::geounion::CascadedPolygonUnion;
 using geos::operation::overlayng::OverlayNG;
@@ -179,9 +195,9 @@ using geos::operation::valid::TopologyValidationError;
 
 using geos::precision::GeometryPrecisionReducer;
 
-using geos::util::IllegalArgumentException;
+using geos::simplify::PolygonHullSimplifier;
 
-typedef std::unique_ptr<Geometry> GeomPtr;
+using geos::util::IllegalArgumentException;
 
 typedef struct GEOSContextHandle_HS {
     const GeometryFactory* geomFactory;
@@ -195,6 +211,7 @@ typedef struct GEOSContextHandle_HS {
     uint8_t WKBOutputDims;
     int WKBByteOrder;
     int initialized;
+    std::unique_ptr<Point> point2d;
 
     GEOSContextHandle_HS()
         :
@@ -204,10 +221,12 @@ typedef struct GEOSContextHandle_HS {
         noticeData(nullptr),
         errorMessageOld(nullptr),
         errorMessageNew(nullptr),
-        errorData(nullptr)
+        errorData(nullptr),
+        point2d(nullptr)
     {
         memset(msgBuffer, 0, sizeof(msgBuffer));
         geomFactory = GeometryFactory::getDefaultInstance();
+        point2d = geomFactory->createPoint(CoordinateXY{0, 0});
         WKBOutputDims = 2;
         WKBByteOrder = getMachineByteOrder();
         setNoticeHandler(nullptr);
@@ -372,7 +391,7 @@ inline auto execute(
                                   decltype(std::declval<F>()())>::type errval,
         F&& f) -> decltype(errval) {
     if (extHandle == nullptr) {
-        return errval;
+        throw std::runtime_error("GEOS context handle is uninitialized, call initGEOS");
     }
 
     GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
@@ -396,7 +415,7 @@ inline auto execute(
 template<typename F, typename std::enable_if<!std::is_void<decltype(std::declval<F>()())>::value, std::nullptr_t>::type = nullptr>
 inline auto execute(GEOSContextHandle_t extHandle, F&& f) -> decltype(f()) {
     if (extHandle == nullptr) {
-        return nullptr;
+        throw std::runtime_error("context handle is uninitialized, call initGEOS");
     }
 
     GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
@@ -756,7 +775,7 @@ extern "C" {
             const TopologyValidationError* err = ivo.getValidationError();
             if(err != nullptr) {
                 if(location) {
-                    *location = g->getFactory()->createPoint(err->getCoordinate());
+                    *location = g->getFactory()->createPoint(err->getCoordinate()).release();
                 }
                 if(reason) {
                     std::string errmsg(err->getMessage());
@@ -793,6 +812,14 @@ extern "C" {
     {
         return execute(extHandle, 2, [&]() {
             return g1->equalsExact(g2, tolerance);
+        });
+    }
+
+    char
+    GEOSEqualsIdentical_r(GEOSContextHandle_t extHandle, const Geometry* g1, const Geometry* g2)
+    {
+        return execute(extHandle, 2, [&]() {
+            return g1->equalsIdentical(g2);
         });
     }
 
@@ -908,7 +935,11 @@ extern "C" {
     GEOSGeomToWKT_r(GEOSContextHandle_t extHandle, const Geometry* g1)
     {
         return execute(extHandle, [&]() {
-            char* result = gstrdup(g1->toString());
+            // Deprecated, show untrimmed 2D output
+            geos::io::WKTWriter writer;
+            writer.setTrim(false);
+            writer.setOutputDimension(2);
+            char* result = gstrdup(writer.write(g1));
             return result;
         });
     }
@@ -1074,8 +1105,6 @@ extern "C" {
     GEOSIntersectionPrec_r(GEOSContextHandle_t extHandle, const Geometry* g1, const Geometry* g2, double gridSize)
     {
         return execute(extHandle, [&]() {
-            using geos::geom::PrecisionModel;
-
             std::unique_ptr<PrecisionModel> pm;
             if(gridSize != 0) {
                 pm.reset(new PrecisionModel(1.0 / gridSize));
@@ -1155,7 +1184,7 @@ extern "C" {
     {
         return execute(extHandle, [&]() {
             BufferParameters bp;
-            bp.setEndCapStyle(BufferParameters::CAP_FLAT);
+            //-- use default cap style ROUND 
             bp.setQuadrantSegments(quadsegs);
 
             if(joinStyle > BufferParameters::JOIN_BEVEL) {
@@ -1166,13 +1195,8 @@ extern "C" {
             );
             bp.setMitreLimit(mitreLimit);
 
-            bool isLeftSide = true;
-            if(width < 0) {
-                isLeftSide = false;
-                width = -width;
-            }
-            BufferBuilder bufBuilder(bp);
-            std::unique_ptr<Geometry> g3 = bufBuilder.bufferLineSingleSided(g1, width, isLeftSide);
+            OffsetCurve oc(*g1, width, bp);
+            std::unique_ptr<Geometry> g3 = oc.getCurve();
             g3->setSRID(g1->getSRID());
             return g3.release();
         });
@@ -1214,13 +1238,100 @@ extern "C" {
         });
     }
 
+    Geometry*
+    GEOSConcaveHull_r(GEOSContextHandle_t extHandle,
+        const Geometry* g1,
+        double ratio,
+        unsigned int allowHoles)
+    {
+        return execute(extHandle, [&]() {
+            ConcaveHull hull(g1);
+            hull.setMaximumEdgeLengthRatio(ratio);
+            hull.setHolesAllowed(allowHoles);
+            std::unique_ptr<Geometry> g3 = hull.getHull();
+            g3->setSRID(g1->getSRID());
+            return g3.release();
+        });
+    }
+
+    Geometry*
+    GEOSConcaveHullByLength_r(GEOSContextHandle_t extHandle,
+        const Geometry* g1,
+        double length,
+        unsigned int allowHoles)
+    {
+        return execute(extHandle, [&]() {
+            ConcaveHull hull(g1);
+            hull.setMaximumEdgeLength(length);
+            hull.setHolesAllowed(allowHoles);
+            std::unique_ptr<Geometry> g3 = hull.getHull();
+            g3->setSRID(g1->getSRID());
+            return g3.release();
+        });
+    }
+
+    Geometry*
+    GEOSPolygonHullSimplify_r(GEOSContextHandle_t extHandle,
+        const Geometry* g1,
+        unsigned int isOuter,
+        double vertexNumFraction)
+    {
+        return execute(extHandle, [&]() {
+            std::unique_ptr<Geometry> g3 = PolygonHullSimplifier::hull(g1, isOuter, vertexNumFraction);
+            g3->setSRID(g1->getSRID());
+            return g3.release();
+        });
+    }
+
+    Geometry*
+    GEOSPolygonHullSimplifyMode_r(GEOSContextHandle_t extHandle,
+        const Geometry* g1,
+        unsigned int isOuter,
+        unsigned int parameterMode,
+        double parameter)
+    {
+        return execute(extHandle, [&]() {
+            if (parameterMode == GEOSHULL_PARAM_AREA_RATIO) {
+                std::unique_ptr<Geometry> g3 = PolygonHullSimplifier::hullByAreaDelta(g1, isOuter, parameter);
+                g3->setSRID(g1->getSRID());
+                return g3.release();
+            }
+            else if (parameterMode == GEOSHULL_PARAM_VERTEX_RATIO) {
+                std::unique_ptr<Geometry> g3 = PolygonHullSimplifier::hull(g1, isOuter, parameter);
+                g3->setSRID(g1->getSRID());
+                return g3.release();
+            }
+            else {
+                throw IllegalArgumentException("GEOSPolygonHullSimplifyMode_r: Unknown parameterMode");
+            }
+        });
+    }
+
+    Geometry*
+    GEOSConcaveHullOfPolygons_r(GEOSContextHandle_t extHandle,
+        const Geometry* g1,
+        double lengthRatio,
+        unsigned int isTight,
+        unsigned int isHolesAllowed)
+    {
+        return execute(extHandle, [&]() {
+            std::unique_ptr<Geometry> g3 =
+                ConcaveHullOfPolygons::concaveHullByLengthRatio(
+                    g1, lengthRatio,
+                    isTight > 0,
+                    isHolesAllowed > 0);
+            g3->setSRID(g1->getSRID());
+            return g3.release();
+        });
+    }
 
     Geometry*
     GEOSMinimumRotatedRectangle_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
+        using geos::algorithm::MinimumAreaRectangle;
+
         return execute(extHandle, [&]() {
-            geos::algorithm::MinimumDiameter m(g);
-            auto g3 = m.getMinimumRectangle();
+            auto g3 = MinimumAreaRectangle::getMinimumRectangle(g);
             g3->setSRID(g->getSRID());
             return g3.release();
         });
@@ -1389,7 +1500,17 @@ extern "C" {
     GEOSCoverageUnion_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
         return execute(extHandle, [&]() {
-            auto g3 = geos::operation::geounion::CoverageUnion::Union(g);
+            auto g3 = geos::coverage::CoverageUnion::Union(g);
+            g3->setSRID(g->getSRID());
+            return g3.release();
+        });
+    }
+
+    Geometry*
+    GEOSDisjointSubsetUnion_r(GEOSContextHandle_t extHandle, const Geometry* g)
+    {
+        return execute(extHandle, [&]() {
+            auto g3 = geos::operation::geounion::DisjointSubsetUnion::Union(g);
             g3->setSRID(g->getSRID());
             return g3.release();
         });
@@ -1399,7 +1520,7 @@ extern "C" {
     GEOSUnaryUnion_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
         return execute(extHandle, [&]() {
-            GeomPtr g3(g->Union());
+            std::unique_ptr<Geometry> g3(g->Union());
             g3->setSRID(g->getSRID());
             return g3.release();
         });
@@ -1443,7 +1564,7 @@ extern "C" {
             // CascadedUnion is the same as UnaryUnion, except that
             // CascadedUnion only works on MultiPolygon, so we just delegate
             // now and retain a check on MultiPolygon type.
-            const geos::geom::MultiPolygon *p = dynamic_cast<const geos::geom::MultiPolygon *>(g1);
+            const MultiPolygon *p = dynamic_cast<const MultiPolygon *>(g1);
             if (!p) {
                 throw IllegalArgumentException("Invalid argument (must be a MultiPolygon)");
             }
@@ -1456,11 +1577,6 @@ extern "C" {
     {
         return execute(extHandle, [&]() {
             auto ret = g1->getInteriorPoint();
-            if(ret == nullptr) {
-                const GeometryFactory* gf = g1->getFactory();
-                // return an empty point
-                ret = gf->createPoint();
-            }
             ret->setSRID(g1->getSRID());
             return ret.release();
         });
@@ -1478,6 +1594,35 @@ extern "C" {
             return g3.release();
         });
     }
+
+    Geometry*
+    GEOSGeom_transformXY_r(GEOSContextHandle_t handle, const GEOSGeometry* g, GEOSTransformXYCallback callback, void* userdata) {
+
+        struct TransformFilter : public geos::geom::CoordinateFilter {
+            TransformFilter(GEOSTransformXYCallback p_callback,
+                            void* p_userdata) :
+                            m_callback(p_callback),
+                            m_userdata(p_userdata) {}
+
+            void filter_rw(CoordinateXY* c) const final {
+                if (!m_callback(&(c->x), &(c->y), m_userdata)) {
+                    throw std::runtime_error(std::string("Failed to transform coordinates."));
+                }
+            }
+
+            GEOSTransformXYCallback m_callback;
+            void* m_userdata;
+        };
+
+        return execute(handle, [&]() {
+            TransformFilter filter(callback, userdata);
+            auto ret = g->clone();
+            ret->apply_rw(&filter);
+            ret->geometryChanged();
+            return ret.release();
+        });
+    }
+
 
 //-------------------------------------------------------------------
 // memory management functions
@@ -1533,6 +1678,32 @@ extern "C" {
     }
 
     int
+    GEOSOrientPolygons_r(GEOSContextHandle_t extHandle, Geometry* g, int exteriorCW)
+    {
+        return execute(extHandle, -1, [&]() {
+            class OrientPolygons : public geos::geom::GeometryComponentFilter {
+            public:
+                OrientPolygons(bool isExteriorCW) : exteriorCW(isExteriorCW) {}
+
+                void filter_rw(Geometry* g) override {
+                    if (g->getGeometryTypeId() == geos::geom::GeometryTypeId::GEOS_POLYGON) {
+                        auto p = geos::detail::down_cast<Polygon*>(g);
+                        p->orientRings(exteriorCW);
+                    }
+                }
+
+            private:
+                bool exteriorCW;
+            };
+
+            OrientPolygons op(exteriorCW);
+            g->apply_rw(&op);
+
+            return 0;
+        });
+    }
+
+    int
     GEOSGetNumInteriorRings_r(GEOSContextHandle_t extHandle, const Geometry* g1)
     {
         return execute(extHandle, -1, [&]() {
@@ -1577,8 +1748,6 @@ extern "C" {
     Geometry*
     GEOSGeomGetPointN_r(GEOSContextHandle_t extHandle, const Geometry* g1, int n)
     {
-        using geos::geom::LineString;
-
         return execute(extHandle, [&]() {
             const LineString* ls = dynamic_cast<const LineString*>(g1);
             if(!ls) {
@@ -1597,8 +1766,6 @@ extern "C" {
     Geometry*
     GEOSGeomGetStartPoint_r(GEOSContextHandle_t extHandle, const Geometry* g1)
     {
-        using geos::geom::LineString;
-
         return execute(extHandle, [&]() {
             const LineString* ls = dynamic_cast<const LineString*>(g1);
             if(!ls) {
@@ -1615,8 +1782,6 @@ extern "C" {
     Geometry*
     GEOSGeomGetEndPoint_r(GEOSContextHandle_t extHandle, const Geometry* g1)
     {
-        using geos::geom::LineString;
-
         return execute(extHandle, [&]() {
             const LineString* ls = dynamic_cast<const LineString*>(g1);
             if(!ls) {
@@ -1633,9 +1798,6 @@ extern "C" {
     char
     GEOSisClosed_r(GEOSContextHandle_t extHandle, const Geometry* g1)
     {
-        using geos::geom::LineString;
-        using geos::geom::MultiLineString;
-
         return execute(extHandle, 2, [&]() {
             const LineString* ls = dynamic_cast<const LineString*>(g1);
             if(ls) {
@@ -1658,8 +1820,6 @@ extern "C" {
     int
     GEOSGeomGetLength_r(GEOSContextHandle_t extHandle, const Geometry* g1, double* length)
     {
-        using geos::geom::LineString;
-
         return execute(extHandle, 0, [&]() {
             const LineString* ls = dynamic_cast<const LineString*>(g1);
             if(!ls) {
@@ -1676,8 +1836,6 @@ extern "C" {
     int
     GEOSGeomGetNumPoints_r(GEOSContextHandle_t extHandle, const Geometry* g1)
     {
-        using geos::geom::LineString;
-
         return execute(extHandle, -1, [&]() {
             const LineString* ls = dynamic_cast<const LineString*>(g1);
             if(!ls) {
@@ -1694,8 +1852,6 @@ extern "C" {
     int
     GEOSGeomGetX_r(GEOSContextHandle_t extHandle, const Geometry* g1, double* x)
     {
-        using geos::geom::Point;
-
         return execute(extHandle, 0, [&]() {
             const Point* po = dynamic_cast<const Point*>(g1);
             if(!po) {
@@ -1713,8 +1869,6 @@ extern "C" {
     int
     GEOSGeomGetY_r(GEOSContextHandle_t extHandle, const Geometry* g1, double* y)
     {
-        using geos::geom::Point;
-
         return execute(extHandle, 0, [&]() {
             const Point* po = dynamic_cast<const Point*>(g1);
             if(!po) {
@@ -1732,6 +1886,23 @@ extern "C" {
     int
     GEOSGeomGetZ_r(GEOSContextHandle_t extHandle, const Geometry* g1, double* z)
     {
+        return execute(extHandle, 0, [&]() {
+            const Point* po = dynamic_cast<const Point*>(g1);
+            if(!po) {
+                throw IllegalArgumentException("Argument is not a Point");
+            }
+            *z = po->getZ();
+            return 1;
+        });
+    }
+
+    /*
+     * For POINT
+     * returns 0 on exception, otherwise 1
+     */
+    int
+    GEOSGeomGetM_r(GEOSContextHandle_t extHandle, const Geometry* g1, double* m)
+    {
         using geos::geom::Point;
 
         return execute(extHandle, 0, [&]() {
@@ -1739,7 +1910,7 @@ extern "C" {
             if(!po) {
                 throw IllegalArgumentException("Argument is not a Point");
             }
-            *z = po->getZ();
+            *m = po->getM();
             return 1;
         });
     }
@@ -1784,14 +1955,23 @@ extern "C" {
     {
         return execute(extHandle, [&]() -> Geometry* {
             auto ret = g->getCentroid();
-
-            if(ret == nullptr) {
-                // TODO check if getCentroid() can really return null
-                const GeometryFactory* gf = g->getFactory();
-                ret =  gf->createPoint();
-            }
             ret->setSRID(g->getSRID());
             return ret.release();
+        });
+    }
+
+    int
+    GEOSHilbertCode_r(GEOSContextHandle_t extHandle, const GEOSGeometry *geom,
+                const GEOSGeometry* extent, unsigned int level,
+                unsigned int *code)
+    {
+        using geos::shape::fractal::HilbertEncoder;
+
+        return execute(extHandle, 0, [&]() {
+            Envelope e = *extent->getEnvelopeInternal();
+            HilbertEncoder encoder(level, e);
+            *code = encoder.encode(geom->getEnvelopeInternal());
+            return 1;
         });
     }
 
@@ -1805,12 +1985,7 @@ extern "C" {
             geos::algorithm::MinimumBoundingCircle mc(g);
             std::unique_ptr<Geometry> ret = mc.getCircle();
             const GeometryFactory* gf = handle->geomFactory;
-            if(!ret) {
-                if (center) *center = NULL;
-                if (radius) *radius = 0.0;
-                return gf->createPolygon().release();
-            }
-            if (center) *center = static_cast<Geometry*>(gf->createPoint(mc.getCentre()));
+            if (center) *center = gf->createPoint(mc.getCentre()).release();
             if (radius) *radius = mc.getRadius();
             ret->setSRID(g->getSRID());
             return ret.release();
@@ -1874,10 +2049,42 @@ extern "C" {
                 g = gf->createMultiPolygon(std::move(vgeoms));
                 break;
             default:
-                handle->ERROR_MESSAGE("Unsupported type request for PostGIS2GEOS_collection");
+                handle->ERROR_MESSAGE("Unsupported type request for GEOSGeom_createCollection_r");
             }
 
             return g.release();
+        });
+    }
+
+    Geometry**
+    GEOSGeom_releaseCollection_r(GEOSContextHandle_t extHandle, Geometry* collection, unsigned int * ngeoms)
+    {
+        return execute(extHandle, [&]() {
+            GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
+
+            if (ngeoms == nullptr) {
+                handle->ERROR_MESSAGE("Parameter ngeoms of GEOSGeom_releaseCollection_r must not be null");
+            }
+
+            GeometryCollection *col = dynamic_cast<GeometryCollection*>(collection);
+            if (!col) {
+                handle->ERROR_MESSAGE("Parameter collection of GEOSGeom_releaseCollection_r must not be a collection");
+            }
+
+            // Early exit on empty/null input
+            *ngeoms = static_cast<unsigned int>(col->getNumGeometries());
+            if (!col || *ngeoms == 0) {
+                return static_cast<Geometry**>(nullptr);
+            }
+
+            std::vector<std::unique_ptr<Geometry>> subgeoms = col->releaseGeometries();
+
+            Geometry** subgeomArray = static_cast<Geometry**>(malloc(sizeof(Geometry*) * subgeoms.size()));
+            for (std::size_t i = 0; i < subgeoms.size(); i++) {
+                subgeomArray[i] = subgeoms[i].release();
+            }
+
+            return subgeomArray;
         });
     }
 
@@ -2025,6 +2232,21 @@ extern "C" {
     }
 
     Geometry*
+    GEOSRemoveRepeatedPoints_r(
+        GEOSContextHandle_t extHandle,
+        const Geometry* g,
+        double tolerance)
+    {
+        using geos::operation::valid::RepeatedPointRemover;
+
+        return execute(extHandle, [&]() {
+            auto out = RepeatedPointRemover::removeRepeatedPoints(g, tolerance);
+            out->setSRID(g->getSRID());
+            return out.release();
+        });
+    }
+
+    Geometry*
     GEOSPolygonizer_getCutEdges_r(GEOSContextHandle_t extHandle, const Geometry* const* g, unsigned int ngeoms)
     {
         using geos::operation::polygonize::Polygonizer;
@@ -2032,7 +2254,6 @@ extern "C" {
         return execute(extHandle, [&]() {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             const GeometryFactory* gf = handle->geomFactory;
-            Geometry* out;
 
             // Polygonize
             Polygonizer plgnzr;
@@ -2050,20 +2271,16 @@ extern "C" {
             // (it's just a waste of processor and memory, btw)
             // XXX mloskot: See comment for GEOSPolygonize_r
 
-            // TODO avoid "new" here
-            std::vector<Geometry*>* linevec = new std::vector<Geometry*>(lines.size());
+            std::vector<std::unique_ptr<Geometry>> linevec(lines.size());
 
             for(std::size_t i = 0, n = lines.size(); i < n; ++i) {
-                (*linevec)[i] = lines[i]->clone().release();
+                linevec[i] = lines[i]->clone();
             }
 
-            // The below takes ownership of the passed vector,
-            // so we must *not* delete it
-
-            out = gf->createGeometryCollection(linevec);
+            auto out = gf->createGeometryCollection(std::move(linevec));
             out->setSRID(srid);
 
-            return out;
+            return out.release();
         });
     }
 
@@ -2140,6 +2357,50 @@ extern "C" {
     }
 
     Geometry*
+    GEOSLineMergeDirected_r(GEOSContextHandle_t extHandle, const Geometry* g)
+    {
+        using geos::operation::linemerge::LineMerger;
+
+        return execute(extHandle, [&]() {
+            GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
+            const GeometryFactory* gf = handle->geomFactory;
+            LineMerger lmrgr(true);
+            lmrgr.add(g);
+
+            auto lines = lmrgr.getMergedLineStrings();
+
+            auto out = gf->buildGeometry(std::move(lines));
+            out->setSRID(g->getSRID());
+
+            return out.release();
+        });
+    }
+
+    Geometry*
+    GEOSLineSubstring_r(GEOSContextHandle_t extHandle, const Geometry* g, double start_fraction, double end_fraction)
+    {
+        using geos::linearref::LengthIndexedLine;
+
+        return execute(extHandle, [&]() {
+            if (start_fraction < 0 || end_fraction < 0) {
+                throw IllegalArgumentException("start fraction must be >= 0");
+            }
+            if (start_fraction > 1 || end_fraction > 1) {
+                throw IllegalArgumentException("end fraction must be <= 1");
+            }
+
+            LengthIndexedLine lil(g);
+
+            auto length = g->getLength();
+
+            auto out = lil.extractLine(start_fraction * length, end_fraction * length);
+            out->setSRID(g->getSRID());
+
+            return out.release();
+        });
+    }
+
+    Geometry*
     GEOSReverse_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
         return execute(extHandle, [&]() {
@@ -2168,7 +2429,7 @@ extern "C" {
     const char* GEOSversion()
     {
         static char version[256];
-        sprintf(version, "%s", GEOS_CAPI_VERSION);
+        snprintf(version, 256, "%s", GEOS_CAPI_VERSION);
         return version;
     }
 
@@ -2180,14 +2441,16 @@ extern "C" {
     char
     GEOSHasZ_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
-        return execute(extHandle, -1, [&]() {
-            if(g->isEmpty()) {
-                return false;
-            }
+        return execute(extHandle, 2, [&]() {
+            return g->hasZ();
+        });
+    }
 
-            double az = g->getCoordinate()->z;
-
-            return std::isfinite(az);
+    char
+    GEOSHasM_r(GEOSContextHandle_t extHandle, const Geometry* g)
+    {
+        return execute(extHandle, 2, [&]() {
+            return g->hasM();
         });
     }
 
@@ -2206,8 +2469,8 @@ extern "C" {
         return execute(extHandle, -1, [&]() {
             GEOSContextHandleInternal_t *handle = reinterpret_cast<GEOSContextHandleInternal_t *>(extHandle);
 
-            if (newdims < 2 || newdims > 3) {
-                handle->ERROR_MESSAGE("WKB output dimensions out of range 2..3");
+            if (newdims < 2 || newdims > 4) {
+                handle->ERROR_MESSAGE("WKB output dimensions out of range 2..4");
             }
 
             const int olddims = handle->WKBOutputDims;
@@ -2243,18 +2506,7 @@ extern "C" {
     GEOSCoordSeq_create_r(GEOSContextHandle_t extHandle, unsigned int size, unsigned int dims)
     {
         return execute(extHandle, [&]() {
-            GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
-
-            switch (size) {
-                case 1:
-                    return static_cast<CoordinateSequence*>(new geos::geom::FixedSizeCoordinateSequence<1>(dims));
-                case 2:
-                    return static_cast<CoordinateSequence*>(new geos::geom::FixedSizeCoordinateSequence<2>(dims));
-                default: {
-                    const GeometryFactory *gf = handle->geomFactory;
-                    return gf->getCoordinateSequenceFactory()->create(size, dims).release();
-                }
-            }
+            return new CoordinateSequence(size, dims);
         });
     }
 
@@ -2262,53 +2514,62 @@ extern "C" {
     GEOSCoordSeq_copyFromBuffer_r(GEOSContextHandle_t extHandle, const double* buf, unsigned int size, int hasZ, int hasM)
     {
         return execute(extHandle, [&]() {
-            GEOSContextHandleInternal_t *handle = reinterpret_cast<GEOSContextHandleInternal_t *>(extHandle);
-            const GeometryFactory *gf = handle->geomFactory;
-
-            std::vector<geos::geom::Coordinate> coords(size);
             std::ptrdiff_t stride = 2 + hasZ + hasM;
-
+            auto coords = geos::detail::make_unique<CoordinateSequence>(size, hasZ, hasM, false);
             if (hasZ) {
-                if (stride == 3) {
-                    // special case, just memcpy the whole block
-                    static_assert(sizeof(geos::geom::Coordinate) == 3 * sizeof(double), "Coordinate is 3D");
-                    std::memcpy((double*) coords.data(), buf, size * sizeof(geos::geom::Coordinate));
+                if (hasM) {
+                    // XYZM
+                    assert(coords->getCoordinateType() == geos::geom::CoordinateType::XYZM);
+                    std::memcpy(coords->data(), buf, size * sizeof(CoordinateXYZM));
                 } else {
+                    // XYZ
+                    assert(coords->getCoordinateType() == geos::geom::CoordinateType::XYZ);
+                    std::memcpy(coords->data(), buf, size * sizeof(Coordinate));
+                }
+            } else {
+                if (hasM) {
+                    // XYM
                     for (std::size_t i = 0; i < size; i++) {
-                        coords[i] = { *buf, *(buf + 1), *(buf + 2) };
+                        coords->setAt(CoordinateXYM{ *buf, *(buf + 1), *(buf + 2)}, i);
+                        buf += stride;
+                    }
+                } else {
+                    // XY
+                    for (std::size_t i = 0; i < size; i++) {
+                        coords->setAt(Coordinate{ *buf, *(buf + 1) }, i);
                         buf += stride;
                     }
                 }
-            }  else {
-                for (std::size_t i = 0; i < size; i++) {
-                    coords[i] = { *buf, *(buf + 1) };
-                    buf += stride;
-                }
             }
 
-            return gf->getCoordinateSequenceFactory()->create(std::move(coords)).release();
+            return coords.release();
         });
     }
 
     CoordinateSequence*
     GEOSCoordSeq_copyFromArrays_r(GEOSContextHandle_t extHandle, const double* x, const double* y, const double* z, const double* m, unsigned int size)
     {
-        (void) m;
-
         return execute(extHandle, [&]() {
-            GEOSContextHandleInternal_t *handle = reinterpret_cast<GEOSContextHandleInternal_t *>(extHandle);
-            const GeometryFactory *gf = handle->geomFactory;
+            bool hasZ = z != nullptr;
+            bool hasM = m != nullptr;
 
-            std::vector<geos::geom::Coordinate> coords(size);
+            auto coords = geos::detail::make_unique<geos::geom::CoordinateSequence>(size, hasZ, hasM, false);
+
+            CoordinateXYZM c;
             for (std::size_t i = 0; i < size; i++) {
+                c.x = x[i];
+                c.y = y[i];
                 if (z) {
-                    coords[i] = { x[i], y[i], z[i] };
-                } else {
-                    coords[i] = { x[i], y[i] };
+                    c.z = z[i];
                 }
+                if (m) {
+                    c.m = m[i];
+                }
+
+                coords->setAt(c, i);
             }
 
-            return gf->getCoordinateSequenceFactory()->create(std::move(coords)).release();
+            return coords.release();
         });
     }
 
@@ -2317,32 +2578,17 @@ extern "C" {
                                 double* x, double* y, double* z, double* m)
     {
         return execute(extHandle, 0, [&]() {
-
-            class CoordinateArrayCopier : public geos::geom::CoordinateFilter {
-            public:
-                CoordinateArrayCopier(double* p_x, double* p_y, double* p_z) : i(0), x(p_x), y(p_y), z(p_z) {}
-
-                void filter_ro(const geos::geom::Coordinate* c) override {
-                    x[i] = c->x;
-                    y[i] = c->y;
-                    if (z) {
-                        z[i] = c->z;
-                    }
-                    i++;
+            CoordinateXYZM c;
+            for (std::size_t i = 0; i < cs->size(); i++) {
+                cs->getAt(i, c);
+                x[i] = c.x;
+                y[i] = c.y;
+                if (z) {
+                    z[i] = c.z;
                 }
-
-            private:
-                size_t i;
-                double* x;
-                double* y;
-                double* z;
-            };
-
-            CoordinateArrayCopier cop(x, y, z);
-            cs->apply_ro(&cop);
-
-            if (m) {
-                std::fill(m, m + cs->getSize(), std::numeric_limits<double>::quiet_NaN());
+                if (m) {
+                    m[i] = c.m;
+                }
             }
 
             return 1;
@@ -2353,30 +2599,64 @@ extern "C" {
     GEOSCoordSeq_copyToBuffer_r(GEOSContextHandle_t extHandle, const CoordinateSequence* cs,
                                 double* buf, int hasZ, int hasM)
     {
+        using geos::geom::CoordinateType;
+
         return execute(extHandle, 0, [&]() {
+            CoordinateType srcType = cs->getCoordinateType();
+            CoordinateType dstType;
+            std::size_t stride;
+            if (hasZ) {
+                if (hasM) {
+                    dstType = CoordinateType::XYZM;
+                    stride = 4;
+                } else {
+                    dstType = CoordinateType::XYZ;
+                    stride = 3;
+                }
+            } else {
+                if (hasM) {
+                    dstType = CoordinateType::XYM;
+                    stride = 3;
+                } else {
+                    dstType = CoordinateType::XY;
+                    stride = 2;
+                }
+            }
 
-            class CoordinateBufferCopier : public geos::geom::CoordinateFilter {
-            public:
-                CoordinateBufferCopier(double* p_buf, bool p_hasZ, bool p_hasM) : buf(p_buf), m(p_hasM), dim(2 + p_hasZ) {}
-
-                void filter_ro(const geos::geom::Coordinate* c) override {
-                    std::memcpy(buf, c, dim * sizeof(double));
-                    buf += dim;
-
-                    if (m) {
-                        *buf = std::numeric_limits<double>::quiet_NaN();
-                        buf++;
+            if (srcType == dstType) {
+                std::memcpy(buf, cs->data(), cs->size() * stride * sizeof(double));
+            } else {
+                switch(dstType) {
+                    case CoordinateType::XY: {
+                        for (std::size_t i = 0; i < cs->size(); i++) {
+                            CoordinateXY* c = reinterpret_cast<CoordinateXY*>(buf + i*stride);
+                            cs->getAt(i, *c);
+                        }
+                        break;
+                    }
+                    case CoordinateType::XYZ: {
+                        for (std::size_t i = 0; i < cs->size(); i++) {
+                            Coordinate* c = reinterpret_cast<Coordinate*>(buf + i*stride);
+                            cs->getAt(i, *c);
+                        }
+                        break;
+                    }
+                    case CoordinateType::XYM: {
+                        for (std::size_t i = 0; i < cs->size(); i++) {
+                            CoordinateXYM* c = reinterpret_cast<CoordinateXYM*>(buf + i*stride);
+                            cs->getAt(i, *c);
+                        }
+                        break;
+                    }
+                    case CoordinateType::XYZM: {
+                        for (std::size_t i = 0; i < cs->size(); i++) {
+                            CoordinateXYZM* c = reinterpret_cast<CoordinateXYZM*>(buf + i*stride);
+                            cs->getAt(i, *c);
+                        }
+                        break;
                     }
                 }
-
-            private:
-                double* buf;
-                bool m;
-                size_t dim;
-            };
-
-            CoordinateBufferCopier cop(buf, hasZ, hasM);
-            cs->apply_ro(&cop);
+            }
 
             return 1;
         });
@@ -2414,7 +2694,7 @@ extern "C" {
     GEOSCoordSeq_setXY_r(GEOSContextHandle_t extHandle, CoordinateSequence* cs, unsigned int idx, double x, double y)
     {
         return execute(extHandle, 0, [&]() {
-            cs->setAt({x, y}, idx);
+            cs->setAt(CoordinateXY{x, y}, idx);
             return 1;
         });
     }
@@ -2423,7 +2703,7 @@ extern "C" {
     GEOSCoordSeq_setXYZ_r(GEOSContextHandle_t extHandle, CoordinateSequence* cs, unsigned int idx, double x, double y, double z)
     {
         return execute(extHandle, 0, [&]() {
-            cs->setAt({x, y, z}, idx);
+            cs->setAt(Coordinate{x, y, z}, idx);
             return 1;
         });
     }
@@ -2468,7 +2748,7 @@ extern "C" {
     GEOSCoordSeq_getXY_r(GEOSContextHandle_t extHandle, const CoordinateSequence* cs, unsigned int idx, double* x, double* y)
     {
         return execute(extHandle, 0, [&]() {
-            auto& c = cs->getAt(idx);
+            auto& c = cs->getAt<CoordinateXY>(idx);
             *x = c.x;
             *y = c.y;
             return 1;
@@ -2528,8 +2808,6 @@ extern "C" {
     const CoordinateSequence*
     GEOSGeom_getCoordSeq_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
-        using geos::geom::Point;
-
         return execute(extHandle, [&]() {
             const LineString* ls = dynamic_cast<const LineString*>(g);
             if(ls) {
@@ -2562,7 +2840,7 @@ extern "C" {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             const GeometryFactory* gf = handle->geomFactory;
 
-            return gf->createPoint(cs);
+            return gf->createPoint(std::unique_ptr<CoordinateSequence>(cs)).release();
         });
     }
 
@@ -2573,8 +2851,8 @@ extern "C" {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             const GeometryFactory* gf = handle->geomFactory;
 
-            geos::geom::Coordinate c(x, y);
-            return gf->createPoint(c);
+            CoordinateXY c(x, y);
+            return gf->createPoint(c).release();
         });
     }
 
@@ -2585,7 +2863,7 @@ extern "C" {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             const GeometryFactory* gf = handle->geomFactory;
 
-            return gf->createLinearRing(cs);
+            return gf->createLinearRing(std::unique_ptr<CoordinateSequence>(cs)).release();
         });
     }
 
@@ -2607,7 +2885,7 @@ extern "C" {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             const GeometryFactory* gf = handle->geomFactory;
 
-            return gf->createLineString(cs);
+            return gf->createLineString(std::unique_ptr<CoordinateSequence>(cs)).release();
         });
     }
 
@@ -2624,8 +2902,6 @@ extern "C" {
     Geometry*
     GEOSGeom_createPolygon_r(GEOSContextHandle_t extHandle, Geometry* shell, Geometry** holes, unsigned int nholes)
     {
-        using geos::geom::LinearRing;
-
         return execute(extHandle, [&]() {
             GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
             const GeometryFactory* gf = handle->geomFactory;
@@ -2672,6 +2948,19 @@ extern "C" {
     }
 
     Geometry*
+    GEOSGeom_createRectangle_r(GEOSContextHandle_t extHandle,
+                            double xmin, double ymin,
+                            double xmax, double ymax)
+    {
+        return execute(extHandle, [&]() {
+            GEOSContextHandleInternal_t* handle = reinterpret_cast<GEOSContextHandleInternal_t*>(extHandle);
+            const GeometryFactory* gf = handle->geomFactory;
+            Envelope env(xmin, xmax, ymin, ymax);
+            return (gf->toGeometry(&env)).release();
+        });
+    }
+
+    Geometry*
     GEOSGeom_clone_r(GEOSContextHandle_t extHandle, const Geometry* g)
     {
         return execute(extHandle, [&]() {
@@ -2686,31 +2975,31 @@ extern "C" {
         using namespace geos::geom;
 
         return execute(extHandle, [&]() {
+            PrecisionModel newpm;
+            if(gridSize != 0) {
+                // Convert gridSize to scale factor
+                double scale = 1.0 / std::abs(gridSize);
+                newpm = PrecisionModel(scale);
+            }
+
             const PrecisionModel* pm = g->getPrecisionModel();
             double cursize = pm->isFloating() ? 0 : 1.0 / pm->getScale();
-            std::unique_ptr<PrecisionModel> newpm;
-            if(gridSize != 0) {
-                newpm.reset(new PrecisionModel(1.0 / std::abs(gridSize)));
-            }
-            else {
-                newpm.reset(new PrecisionModel());
-            }
-            Geometry* ret;
+            std::unique_ptr<Geometry> ret;
             GeometryFactory::Ptr gf =
-                GeometryFactory::create(newpm.get(), g->getSRID());
+                GeometryFactory::create(&newpm, g->getSRID());
             if(gridSize != 0 && cursize != gridSize) {
                 GeometryPrecisionReducer reducer(*gf);
                 reducer.setChangePrecisionModel(true);
                 reducer.setUseAreaReducer(!(flags & GEOS_PREC_NO_TOPO));
                 reducer.setPointwise(flags & GEOS_PREC_NO_TOPO);
                 reducer.setRemoveCollapsedComponents(!(flags & GEOS_PREC_KEEP_COLLAPSED));
-                ret = reducer.reduce(*g).release();
+                ret = reducer.reduce(*g);
             }
             else {
                 // No need or willing to snap, just change the factory
                 ret = gf->createGeometry(g);
             }
-            return ret;
+            return ret.release();
         });
     }
 
@@ -2794,6 +3083,22 @@ extern "C" {
         });
     }
 
+    int
+    GEOSGeom_getExtent_r(GEOSContextHandle_t extHandle, const Geometry* g, double* xmin, double* ymin, double* xmax, double* ymax)
+    {
+        return execute(extHandle, 0, [&]() {
+            if(g->isEmpty()) {
+                return 0;
+            }
+            const Envelope* extent = g->getEnvelopeInternal();
+            *xmin = extent->getMinX();
+            *ymin = extent->getMinY();
+            *xmax = extent->getMaxX();
+            *ymax = extent->getMaxY();
+            return 1;
+        });
+    }
+
     Geometry*
     GEOSSimplify_r(GEOSContextHandle_t extHandle, const Geometry* g1, double tolerance)
     {
@@ -2823,8 +3128,6 @@ extern "C" {
     WKTReader*
     GEOSWKTReader_create_r(GEOSContextHandle_t extHandle)
     {
-        using geos::io::WKTReader;
-
         return execute(extHandle, [&]() {
             GEOSContextHandleInternal_t *handle = reinterpret_cast<GEOSContextHandleInternal_t *>(extHandle);
             return new WKTReader((GeometryFactory *) handle->geomFactory);
@@ -2836,6 +3139,14 @@ extern "C" {
     {
         return execute(extHandle, [&]() {
             delete reader;
+        });
+    }
+
+    void
+    GEOSWKTReader_setFixStructure_r(GEOSContextHandle_t extHandle, WKTReader* reader, char doFix)
+    {
+        return execute(extHandle, [&]() {
+            return reader->setFixStructure(doFix);
         });
     }
 
@@ -2935,6 +3246,14 @@ extern "C" {
     {
         execute(extHandle, [&]() {
             delete reader;
+        });
+    }
+
+    void
+    GEOSWKBReader_setFixStructure_r(GEOSContextHandle_t extHandle, WKBReader* reader, char doFix)
+    {
+        return execute(extHandle, [&]() {
+            return reader->setFixStructure(doFix);
         });
     }
 
@@ -3056,7 +3375,7 @@ extern "C" {
     char
     GEOSWKBWriter_getIncludeSRID_r(GEOSContextHandle_t extHandle, const GEOSWKBWriter* writer)
     {
-        return execute(extHandle, -1, [&]{
+        return execute(extHandle, 2, [&]{
             return writer->getIncludeSRID();
         });
     }
@@ -3179,6 +3498,15 @@ extern "C" {
     }
 
     char
+    GEOSPreparedContainsXY_r(GEOSContextHandle_t extHandle,
+                           const geos::geom::prep::PreparedGeometry* pg, double x, double y)
+    {
+        extHandle->point2d->setXY(x, y);
+
+        return GEOSPreparedContains_r(extHandle, pg, extHandle->point2d.get());
+    }
+
+    char
     GEOSPreparedContainsProperly_r(GEOSContextHandle_t extHandle,
                                    const geos::geom::prep::PreparedGeometry* pg, const Geometry* g)
     {
@@ -3230,6 +3558,15 @@ extern "C" {
         return execute(extHandle, 2, [&]() {
             return pg->intersects(g);
         });
+    }
+
+    char
+    GEOSPreparedIntersectsXY_r(GEOSContextHandle_t extHandle,
+                             const geos::geom::prep::PreparedGeometry* pg, double x, double y)
+    {
+        extHandle->point2d->setXY(x, y);
+
+        return GEOSPreparedIntersects_r(extHandle, pg, extHandle->point2d.get());
     }
 
     char
@@ -3301,6 +3638,16 @@ extern "C" {
     {
         return execute(extHandle, [&]() {
             return new GEOSSTRtree(nodeCapacity);
+        });
+    }
+
+    int
+    GEOSSTRtree_build_r(GEOSContextHandle_t extHandle,
+                        GEOSSTRtree* tree)
+    {
+        return execute(extHandle, 0, [&]() {
+            tree->build();
+            return 1;
         });
     }
 
@@ -3423,8 +3770,8 @@ extern "C" {
             if(!point) {
                 throw std::runtime_error("third argument of GEOSProject_r must be Point");
             }
-            const geos::geom::Coordinate* inputPt = p->getCoordinate();
-            return geos::linearref::LengthIndexedLine(g).project(*inputPt);
+            const geos::geom::Coordinate inputPt(*p->getCoordinate());
+            return geos::linearref::LengthIndexedLine(g).project(inputPt);
         });
     }
 
@@ -3438,9 +3785,9 @@ extern "C" {
             geos::linearref::LengthIndexedLine lil(g);
             geos::geom::Coordinate coord = lil.extractPoint(d);
             const GeometryFactory* gf = handle->geomFactory;
-            Geometry* point = gf->createPoint(coord);
+            auto point = gf->createPoint(coord);
             point->setSRID(g->getSRID());
-            return point;
+            return point.release();
         });
     }
 
@@ -3495,20 +3842,20 @@ extern "C" {
             g->apply_ro(&filter);
 
             /* 2: for each point, create a geometry and put into a vector */
-            std::vector<Geometry*>* points = new std::vector<Geometry*>();
-            points->reserve(coords.size());
+            std::vector<std::unique_ptr<Geometry>> points;
+            points.reserve(coords.size());
             const GeometryFactory* factory = g->getFactory();
             for(std::vector<const Coordinate*>::iterator it = coords.begin(),
                     itE = coords.end();
                     it != itE; ++it) {
-                Geometry* point = factory->createPoint(*(*it));
-                points->push_back(point);
+                auto point = factory->createPoint(*(*it));
+                points.push_back(std::move(point));
             }
 
             /* 3: create a multipoint */
-            Geometry* out = factory->createMultiPoint(points);
+            auto out = factory->createMultiPoint(std::move(points));
             out->setSRID(g->getSRID());
-            return out;
+            return out.release();
 
         });
     }
@@ -3516,7 +3863,6 @@ extern "C" {
     int GEOSOrientationIndex_r(GEOSContextHandle_t extHandle,
                                double Ax, double Ay, double Bx, double By, double Px, double Py)
     {
-        using geos::geom::Coordinate;
         using geos::algorithm::Orientation;
 
         return execute(extHandle, 2, [&]() {
@@ -3564,39 +3910,33 @@ extern "C" {
         const GeometryFactory* factory = g1->getFactory();
         std::size_t count;
 
-        std::unique_ptr< std::vector<Geometry*> > out1(
-            new std::vector<Geometry*>()
-        );
+        std::vector<std::unique_ptr<Geometry>> out1;
         count = forw.size();
-        out1->reserve(count);
+        out1.reserve(count);
         for(std::size_t i = 0; i < count; ++i) {
-            out1->push_back(forw[i]);
+            out1.emplace_back(forw[i]);
         }
         std::unique_ptr<Geometry> out1g(
-            factory->createMultiLineString(out1.release())
+            factory->createMultiLineString(std::move(out1))
         );
 
-        std::unique_ptr< std::vector<Geometry*> > out2(
-            new std::vector<Geometry*>()
-        );
+        std::vector<std::unique_ptr<Geometry>> out2;
         count = back.size();
-        out2->reserve(count);
+        out2.reserve(count);
         for(std::size_t i = 0; i < count; ++i) {
-            out2->push_back(back[i]);
+            out2.emplace_back(back[i]);
         }
         std::unique_ptr<Geometry> out2g(
-            factory->createMultiLineString(out2.release())
+            factory->createMultiLineString(std::move(out2))
         );
 
-        std::unique_ptr< std::vector<Geometry*> > out(
-            new std::vector<Geometry*>()
-        );
-        out->reserve(2);
-        out->push_back(out1g.release());
-        out->push_back(out2g.release());
+        std::vector<std::unique_ptr<Geometry>> out;
+        out.reserve(2);
+        out.push_back(std::move(out1g));
+        out.push_back(std::move(out2g));
 
         std::unique_ptr<Geometry> outg(
-            factory->createGeometryCollection(out.release())
+            factory->createGeometryCollection(std::move(out))
         );
 
         outg->setSRID(g1->getSRID());
@@ -3737,7 +4077,7 @@ extern "C" {
 
     Geometry*
     GEOSVoronoiDiagram_r(GEOSContextHandle_t extHandle, const Geometry* g1, const Geometry* env, double tolerance,
-                         int onlyEdges)
+                         int flags)
     {
         using geos::triangulate::VoronoiDiagramBuilder;
 
@@ -3745,19 +4085,20 @@ extern "C" {
             VoronoiDiagramBuilder builder;
             builder.setSites(*g1);
             builder.setTolerance(tolerance);
+            builder.setOrdered(flags & GEOS_VORONOI_PRESERVE_ORDER);
+            std::unique_ptr<Geometry> out;
             if(env) {
                 builder.setClipEnvelope(env->getEnvelopeInternal());
             }
-            if(onlyEdges) {
-                Geometry* out = builder.getDiagramEdges(*g1->getFactory()).release();
-                out->setSRID(g1->getSRID());
-                return out;
+            if(flags & GEOS_VORONOI_ONLY_EDGES) {
+                out = builder.getDiagramEdges(*g1->getFactory());
             }
             else {
-                Geometry* out = builder.getDiagram(*g1->getFactory()).release();
-                out->setSRID(g1->getSRID());
-                return out;
+                out = builder.getDiagram(*g1->getFactory());
             }
+
+            out->setSRID(g1->getSRID());
+            return out.release();
         });
     }
 
@@ -3783,5 +4124,83 @@ extern "C" {
         });
     }
 
-} /* extern "C" */
+    int
+    GEOSCoverageIsValid_r(GEOSContextHandle_t extHandle,
+        const Geometry* input,
+        double gapWidth,
+        Geometry** invalidEdges)
+    {
+        using geos::coverage::CoverageValidator;
 
+        return execute(extHandle, 2, [&]() {
+            const GeometryCollection* col = dynamic_cast<const GeometryCollection*>(input);
+            if (!col)
+                throw geos::util::IllegalArgumentException("input is not a collection");
+
+            // Initialize to nullptr
+            if (invalidEdges) *invalidEdges = nullptr;
+
+            std::vector<const Geometry*> coverage;
+            for (const auto& g : *col) {
+                coverage.push_back(g.get());
+            }
+
+            CoverageValidator cov(coverage);
+            cov.setGapWidth(gapWidth);
+            std::vector<std::unique_ptr<Geometry>> invalid = cov.validate();
+            bool hasInvalid = CoverageValidator::hasInvalidResult(invalid);
+
+            if (invalidEdges) {
+                const GeometryFactory* gf = input->getFactory();
+                for (auto& g : invalid) {
+                    // Replace nullptr with 'MULTILINESTRING EMPTY'
+                    if (g == nullptr) {
+                        auto empty = gf->createEmpty(1);
+                        g.reset(empty.release());
+                    }
+                }
+                auto r = gf->createGeometryCollection(std::move(invalid));
+                *invalidEdges = r.release();
+            }
+
+            return hasInvalid ? 0 : 1;
+        });
+    }
+
+    Geometry*
+    GEOSCoverageSimplifyVW_r(GEOSContextHandle_t extHandle,
+        const Geometry* input,
+        double tolerance,
+        int preserveBoundary)
+    {
+        using geos::coverage::CoverageSimplifier;
+
+        return execute(extHandle, [&]() -> Geometry* {
+            const GeometryCollection* col = dynamic_cast<const GeometryCollection*>(input);
+            if (!col)
+                return nullptr;
+
+            std::vector<const Geometry*> coverage;
+            for (const auto& g : *col) {
+                coverage.push_back(g.get());
+            }
+            CoverageSimplifier cov(coverage);
+            std::vector<std::unique_ptr<Geometry>> simple;
+            if (preserveBoundary == 1) {
+                simple = cov.simplifyInner(tolerance);
+            }
+            else if (preserveBoundary == 0) {
+                simple = cov.simplify(tolerance);
+            }
+            else return nullptr;
+
+            const GeometryFactory* gf = input->getFactory();
+            std::unique_ptr<Geometry> r = gf->createGeometryCollection(std::move(simple));
+            return r.release();
+        });
+    }
+
+
+
+
+} /* extern "C" */

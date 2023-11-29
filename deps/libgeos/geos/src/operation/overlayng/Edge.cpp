@@ -27,14 +27,14 @@ using namespace geos::geom;
 using geos::util::GEOSException;
 
 /*public*/
-Edge::Edge(CoordinateSequence* p_pts, const EdgeSourceInfo* info)
+Edge::Edge(std::unique_ptr<CoordinateSequence>&& p_pts, const EdgeSourceInfo* info)
     : aDim(OverlayLabel::DIM_UNKNOWN)
     , aDepthDelta(0)
     , aIsHole(false)
     , bDim(OverlayLabel::DIM_UNKNOWN)
     , bDepthDelta(0)
     , bIsHole(false)
-    , pts(p_pts)
+    , pts(std::move(p_pts))
 {
     copyInfo(info);
 }
@@ -119,6 +119,4 @@ bool EdgeComparator(const Edge* a, const Edge* b)
 } // namespace geos.operation
 } // namespace geos
 
-#ifndef GEOS_INLINE
-#include "geos/operation/overlayng/Edge.inl"
-#endif
+

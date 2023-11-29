@@ -29,9 +29,9 @@ namespace algorithm { // geos.algorithm
 
 /*public static*/
 double
-Distance::pointToSegment(const geom::Coordinate& p,
-                         const geom::Coordinate& A,
-                         const geom::Coordinate& B)
+Distance::pointToSegment(const geom::CoordinateXY& p,
+                         const geom::CoordinateXY& A,
+                         const geom::CoordinateXY& B)
 {
     /* if start==end, then use pt distance */
     if(A == B) {
@@ -80,8 +80,8 @@ Distance::pointToSegment(const geom::Coordinate& p,
 
 /*public static*/
 double
-Distance::pointToLinePerpendicular(const geom::Coordinate& p,
-                                   const geom::Coordinate& A, const geom::Coordinate& B)
+Distance::pointToLinePerpendicular(const geom::CoordinateXY& p,
+                                   const geom::CoordinateXY& A, const geom::CoordinateXY& B)
 {
     /*
         use comp.graphics.algorithms method
@@ -102,9 +102,9 @@ Distance::pointToLinePerpendicular(const geom::Coordinate& p,
 
 /*public static*/
 double
-Distance::segmentToSegment(const geom::Coordinate& A,
-                           const geom::Coordinate& B, const geom::Coordinate& C,
-                           const geom::Coordinate& D)
+Distance::segmentToSegment(const geom::CoordinateXY& A,
+                           const geom::CoordinateXY& B, const geom::CoordinateXY& C,
+                           const geom::CoordinateXY& D)
 {
     /* Check for zero-length segments */
     if(A == B) {
@@ -177,7 +177,7 @@ Distance::segmentToSegment(const geom::Coordinate& A,
 
 /*public static*/
 double
-Distance::pointToSegmentString(const geom::Coordinate& p,
+Distance::pointToSegmentString(const geom::CoordinateXY& p,
                                const geom::CoordinateSequence* seq)
 {
     if(seq->isEmpty()) {
@@ -198,6 +198,29 @@ Distance::pointToSegmentString(const geom::Coordinate& p,
     }
 
     return minDistance;
+}
+
+
+/*public static*/
+double
+Distance::pointToLinePerpendicularSigned(
+    const geom::CoordinateXY& p,
+    const geom::CoordinateXY& A,
+    const geom::CoordinateXY& B)
+{
+    // use comp.graphics.algorithms Frequently Asked Questions method
+    /*
+     * (2) s = (Ay-Cy)(Bx-Ax)-(Ax-Cx)(By-Ay)
+     *         -----------------------------
+     *                    L^2
+     *
+     * Then the distance from C to P = |s|*L.
+     */
+    double len2 = (B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y);
+    double s = ((A.y - p.y) * (B.x - A.x) - (A.x - p.x) * (B.y - A.y))
+        / len2;
+
+    return s * std::sqrt(len2);
 }
 
 

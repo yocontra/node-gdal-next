@@ -41,12 +41,11 @@ PreparedLineStringIntersects::isAnyTestPointInTarget(const geom::Geometry* testG
      */
     PointLocator  locator;
 
-    geom::Coordinate::ConstVect coords;
+    std::vector<const CoordinateXY*> coords;
     ComponentCoordinateExtracter::getCoordinates(*testGeom, coords);
 
-    for(std::size_t i = 0, n = coords.size(); i < n; i++) {
-        const geom::Coordinate& c = *(coords[i]);
-        if(locator.intersects(c, &(prepLine.getGeometry()))) {
+    for(const auto& c : coords) {
+        if(locator.intersects(*c, &(prepLine.getGeometry()))) {
             return true;
         }
     }
@@ -70,11 +69,6 @@ PreparedLineStringIntersects::intersects(const geom::Geometry* g) const
         return true;
     }
 
-    // For L/L case we are done
-    if(g->getDimension() == 1) {
-        return false;
-    }
-
     // For L/A case, need to check for proper inclusion of the target in the test
     if(g->getDimension() == 2
             &&	prepLine.isAnyTargetComponentInTest(g)) {
@@ -82,7 +76,7 @@ PreparedLineStringIntersects::intersects(const geom::Geometry* g) const
     }
 
     // For L/P case, need to check if any points lie on line(s)
-    if(g->getDimension() == 0) {
+    if(g->hasDimension(Dimension::P)) {
         return isAnyTestPointInTarget(g);
     }
 

@@ -13,14 +13,13 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_LOCATE_POINTONGEOMETRYLOCATOR_H
-#define GEOS_ALGORITHM_LOCATE_POINTONGEOMETRYLOCATOR_H
+#pragma once
 
 #include <geos/geom/Location.h>
 
 namespace geos {
 namespace geom {
-class Coordinate;
+class CoordinateXY;
 }
 }
 
@@ -48,11 +47,10 @@ public:
      * @param p the point to test
      * @return the location of the point in the geometry
      */
-    virtual geom::Location locate(const geom::Coordinate* /*const*/ p) = 0;
+    virtual geom::Location locate(const geom::CoordinateXY* /*const*/ p) = 0;
 };
 
 } // geos::algorithm::locate
 } // geos::algorithm
 } // geos
 
-#endif // GEOS_ALGORITHM_LOCATE_POINTONGEOMETRYLOCATOR_H

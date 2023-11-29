@@ -21,7 +21,6 @@
 
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
-#include <geos/operation/overlay/OverlayOp.h>
 #include <geos/operation/overlayng/OverlayGraph.h>
 #include <geos/operation/overlayng/OverlayEdgeRing.h>
 #include <geos/operation/overlayng/InputGeometry.h>
@@ -57,9 +56,16 @@ namespace overlayng { // geos.operation.overlayng
  * * DIFFERENCE - all points which lie in the first geometry but not the second
  * * SYMDIFFERENCE - all points which lie in one geometry but not both
  *
- * Input geometries may have different dimension.
- * Input collections must be homogeneous
- * (all elements must have the same dimension).
+ * The requirements for overlay input are:
+ * * Input collections must be homogeneous
+ *   (all elements must have the same dimension).
+ * * Inputs may be simple link GeometryCollections.
+ *   A GeometryCollection is simple if it can be flattened into a valid Multi-geometry;
+ *   i.e. it is homogeneous and does not contain any overlapping Polygons.
+ * * In general, inputs must be valid geometries.
+ *   However, polygonal inputs may contain the following two kinds of "mild" invalid topology:
+ *   (i) rings which self-touch at discrete points (sometimes called inverted shells and exverted holes).
+ *   (ii) rings which touch along line segments (i.e. topology collapse).
  *
  * The precision model used for the computation can be supplied
  * independent of the precision model of the input geometry.
@@ -82,7 +88,7 @@ namespace overlayng { // geos.operation.overlayng
  * since the intersection clipping optimization can
  * interact with the snapping to alter the result.
  *
- * TOptionally the overlay computation can process using strict mode
+ * Optionally the overlay computation can process using strict mode
  * (via setStrictMode(boolean). In strict mode result semantics are:
  *
  *  - Lines and Points resulting from topology collapses are not included
@@ -100,7 +106,6 @@ namespace overlayng { // geos.operation.overlayng
  *    lower-dimension elements
  *
  * The original JTS overlay semantics correspond to non-strict mode.
- *
  *
  * If a robustness error occurs, a TopologyException is thrown.
  * These are usually caused by numerical rounding causing the noding
@@ -164,10 +169,10 @@ public:
     */
     static constexpr bool STRICT_MODE_DEFAULT = false;
 
-    static constexpr int INTERSECTION   = overlay::OverlayOp::opINTERSECTION;
-    static constexpr int UNION          = overlay::OverlayOp::opUNION;
-    static constexpr int DIFFERENCE     = overlay::OverlayOp::opDIFFERENCE;
-    static constexpr int SYMDIFFERENCE  = overlay::OverlayOp::opSYMDIFFERENCE;
+    static constexpr int INTERSECTION   = 1;
+    static constexpr int UNION          = 2;
+    static constexpr int DIFFERENCE     = 3;
+    static constexpr int SYMDIFFERENCE  = 4;
 
     /**
     * Creates an overlay operation on the given geometries,
@@ -265,7 +270,7 @@ public:
     * the result of overlaying the geometries using
     * a given overlay operation.
     *
-    * The method handles arguments of {@link Location#NONE} correctly
+    * The method handles arguments of {@link geom::Location::NONE} correctly
     */
     static bool isResultOfOpPoint(const OverlayLabel* label, int opCode);
 
@@ -278,7 +283,7 @@ public:
     * computed during the overlay process should be
     * included in the result geometry.
     *
-    * The method handles arguments of {@link Location#NONE} correctly.
+    * The method handles arguments of {@link geom::Location::NONE} correctly.
     */
     static bool isResultOfOp(int overlayOpCode, Location loc0, Location loc1);
 
@@ -403,4 +408,3 @@ public:
 } // namespace geos.operation.overlayng
 } // namespace geos.operation
 } // namespace geos
-

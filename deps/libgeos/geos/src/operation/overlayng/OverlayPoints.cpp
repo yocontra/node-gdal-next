@@ -27,6 +27,50 @@ namespace geos {      // geos
 namespace operation { // geos.operation
 namespace overlayng { // geos.operation.overlayng
 
+struct PointExtractingFilter: public GeometryComponentFilter {
+
+    PointExtractingFilter(std::map<CoordinateXY, std::unique_ptr<Point>>& p_ptMap, const PrecisionModel* p_pm)
+        : ptMap(p_ptMap), pm(p_pm)
+    {}
+
+    void
+    filter_ro(const Geometry* geom)
+    {
+        if (geom->getGeometryTypeId() != GEOS_POINT) return;
+
+        const Point* pt = static_cast<const Point*>(geom);
+        // don't add empty points
+        if (pt->isEmpty()) return;
+
+        pt->getCoordinatesRO()->forEach([this, &pt](const auto& coord) -> void {
+            auto rounded = roundCoord(coord, pm);
+
+            /**
+            * Only add first occurrence of a point.
+            * This provides the merging semantics of overlay
+            */
+            if (ptMap.find(rounded) == ptMap.end()) {
+                std::unique_ptr<Point> newPt(pt->getFactory()->createPoint(rounded));
+                ptMap[rounded] = std::move(newPt);
+            }
+        });
+    }
+
+    template<typename CoordType>
+    static CoordType
+    roundCoord(const CoordType& p, const PrecisionModel* p_pm)
+    {
+        if (OverlayUtil::isFloating(p_pm))
+            return p;
+        CoordType p2(p);
+        p_pm->makePrecise(p2);
+        return p2;
+    }
+
+private:
+    std::map<CoordinateXY, std::unique_ptr<Point>>& ptMap;
+    const PrecisionModel* pm;
+};
 
 /*public static*/
 std::unique_ptr<Geometry>
@@ -41,8 +85,8 @@ OverlayPoints::overlay(int opCode, const Geometry* geom0, const Geometry* geom1,
 std::unique_ptr<Geometry>
 OverlayPoints::getResult()
 {
-    std::map<Coordinate, std::unique_ptr<Point>> map0 = buildPointMap(geom0);
-    std::map<Coordinate, std::unique_ptr<Point>> map1 = buildPointMap(geom1);
+    PointMap map0 = buildPointMap(geom0);
+    PointMap map1 = buildPointMap(geom1);
 
     std::vector<std::unique_ptr<Point>> rsltList;
     switch (opCode) {
@@ -72,8 +116,8 @@ OverlayPoints::getResult()
 
 /*private*/
 void
-OverlayPoints::computeIntersection(std::map<Coordinate, std::unique_ptr<Point>>& map0,
-                    std::map<Coordinate, std::unique_ptr<Point>>& map1,
+OverlayPoints::computeIntersection(PointMap& map0,
+                    PointMap& map1,
                     std::vector<std::unique_ptr<Point>>& rsltList)
 {
     // for each entry in map0
@@ -89,8 +133,8 @@ OverlayPoints::computeIntersection(std::map<Coordinate, std::unique_ptr<Point>>&
 
 /*private*/
 void
-OverlayPoints::computeDifference(std::map<Coordinate, std::unique_ptr<Point>>& map0,
-                  std::map<Coordinate, std::unique_ptr<Point>>& map1,
+OverlayPoints::computeDifference(PointMap& map0,
+                  PointMap& map1,
                   std::vector<std::unique_ptr<Point>>& rsltList)
 {
     // for each entry in map0
@@ -106,8 +150,8 @@ OverlayPoints::computeDifference(std::map<Coordinate, std::unique_ptr<Point>>& m
 
 /*private*/
 void
-OverlayPoints::computeUnion(std::map<Coordinate, std::unique_ptr<Point>>& map0,
-             std::map<Coordinate, std::unique_ptr<Point>>& map1,
+OverlayPoints::computeUnion(PointMap& map0,
+             PointMap& map1,
              std::vector<std::unique_ptr<Point>>& rsltList)
 {
     // take all map0 points
@@ -126,53 +170,15 @@ OverlayPoints::computeUnion(std::map<Coordinate, std::unique_ptr<Point>>& map0,
     }
 }
 
-
 /*private*/
-std::map<Coordinate, std::unique_ptr<Point>>
+std::map<CoordinateXY, std::unique_ptr<Point>>
 OverlayPoints::buildPointMap(const Geometry* geom)
 {
-    std::map<Coordinate, std::unique_ptr<Point>> map;
-    for (std::size_t i = 0; i < geom->getNumGeometries(); i++) {
-        const Geometry* elt = geom->getGeometryN(i);
-        if (elt->getGeometryTypeId() != GEOS_POINT) {
-            throw util::IllegalArgumentException("Non-point geometry input to point overlay");
-        }
-        // don't add empty points
-        if (elt->isEmpty()) continue;
-
-        const Point* pt = static_cast<const Point*>(elt);
-        Coordinate p = roundCoord(pt, pm);
-        /**
-        * Only add first occurrence of a point.
-        * This provides the merging semantics of overlay
-        */
-        if (map.find(p) == map.end()) {
-            std::unique_ptr<Point> newPt(pt->getFactory()->createPoint(p));
-            map[p] = std::move(newPt);
-        }
-    }
+    std::map<CoordinateXY, std::unique_ptr<Point>> map;
+    PointExtractingFilter filter(map, pm);
+    geom->apply_ro(&filter);
     return map;
 }
-
-
-/*private*/
-Coordinate
-OverlayPoints::roundCoord(const Point* pt, const PrecisionModel* p_pm) const
-{
-    const Coordinate* p = pt->getCoordinate();
-    if (OverlayUtil::isFloating(p_pm))
-        return *p;
-    Coordinate p2 = *p;
-    p_pm->makePrecise(p2);
-    return p2;
-}
-
-
-
-
-
-
-
 
 } // namespace geos.operation.overlayng
 } // namespace geos.operation

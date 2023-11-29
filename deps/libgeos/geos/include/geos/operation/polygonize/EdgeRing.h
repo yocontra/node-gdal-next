@@ -17,9 +17,7 @@
  *
  **********************************************************************/
 
-
-#ifndef GEOS_OP_POLYGONIZE_EDGERING_H
-#define GEOS_OP_POLYGONIZE_EDGERING_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/algorithm/locate/IndexedPointInAreaLocator.h>
@@ -67,13 +65,14 @@ private:
 
     // cache the following data for efficiency
     std::unique_ptr<geom::LinearRing> ring;
-    std::unique_ptr<geom::CoordinateArraySequence> ringPts;
+    std::unique_ptr<geom::CoordinateSequence> ringPts;
     std::unique_ptr<algorithm::locate::PointOnGeometryLocator> ringLocator;
 
     std::unique_ptr<std::vector<std::unique_ptr<geom::LinearRing>>> holes;
 
     EdgeRing* shell = nullptr;
     bool is_hole;
+    bool is_valid = false;
     bool is_processed = false;
     bool is_included_set = false;
     bool is_included = false;
@@ -89,7 +88,7 @@ private:
 
     static void addEdge(const geom::CoordinateSequence* coords,
                         bool isForward,
-                        geom::CoordinateArraySequence* coordList);
+                        geom::CoordinateSequence* coordList);
 
     algorithm::locate::PointOnGeometryLocator* getLocator() {
         if (ringLocator == nullptr) {
@@ -170,6 +169,10 @@ public:
     void build(PolygonizeDirectedEdge* startDE);
 
     void computeHole();
+
+    const DeList& getEdges() const {
+        return deList;
+    }
 
     /** \brief
      * Tests whether this ring is a hole.
@@ -300,7 +303,9 @@ public:
      * Tests if the LinearRing ring formed by this edge ring
      * is topologically valid.
      */
-    bool isValid();
+    bool isValid() const;
+
+    void computeValid();
 
     /** \brief
      * Gets the coordinates for this ring as a LineString.
@@ -343,4 +348,3 @@ public:
 #pragma warning(pop)
 #endif
 
-#endif // GEOS_OP_POLYGONIZE_EDGERING_H

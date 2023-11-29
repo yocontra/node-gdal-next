@@ -20,8 +20,6 @@
 
 #include <geos/export.h>
 
-#include <geos/inline.h>
-
 #include <cassert>
 #include <iostream>
 #include <vector>
@@ -55,12 +53,16 @@ namespace noding { // geos::noding
  */
 class GEOS_DLL SegmentNodeList {
 private:
-    // Since we are adding frequently to the SegmentNodeList and iterating infrequently,
-    // it is faster to store all the SegmentNodes in a vector and sort/remove duplicates
-    // before iteration, rather than storing them in a set and continuously maintaining
-    // a sorted order.
+    // Since we are adding frequently to the SegmentNodeList and
+    // iterating infrequently, it is faster to store all the
+    // SegmentNodes in a vector and sort/remove duplicates
+    // before iteration, rather than storing them in a set
+    // and continuously maintaining a sorted order.
     mutable std::vector<SegmentNode> nodeMap;
     mutable bool ready = false;
+
+    bool constructZ;
+    bool constructM;
 
     void prepare() const;
 
@@ -108,7 +110,7 @@ private:
     void addCollapsedNodes();
 
     /**
-     * Adds nodes for any collapsed edge pairs
+ /    * Adds nodes for any collapsed edge pairs
      * which are pre-existing in the vertex list.
      */
     void findCollapsesFromExistingVertices(
@@ -127,7 +129,7 @@ private:
     static bool findCollapseIndex(const SegmentNode& ei0, const SegmentNode& ei1,
                            size_t& collapsedVertexIndex);
 
-    void addEdgeCoordinates(const SegmentNode* ei0, const SegmentNode* ei1, std::vector<geom::Coordinate>& coordList) const;
+    void addEdgeCoordinates(const SegmentNode* ei0, const SegmentNode* ei1, geom::CoordinateSequence& coordList) const;
 
 public:
 
@@ -141,9 +143,12 @@ public:
     using iterator = container::iterator;
     using const_iterator = container::const_iterator;
 
-    explicit SegmentNodeList(const NodedSegmentString* newEdge): edge(*newEdge) {}
-
-    explicit SegmentNodeList(const NodedSegmentString& newEdge): edge(newEdge) {}
+    explicit SegmentNodeList(const NodedSegmentString& newEdge,
+                             bool p_constructZ,
+                             bool p_constructM)
+        : constructZ(p_constructZ)
+        , constructM(p_constructM)
+        , edge(newEdge) {}
 
     ~SegmentNodeList() = default;
 
@@ -153,22 +158,26 @@ public:
         return edge;
     }
 
+    bool getConstructZ() const {
+        return constructZ;
+    }
+
+    bool getConstructM() const {
+        return constructM;
+    }
+
     /**
      * Adds an intersection into the list, if it isn't already there.
      * The input segmentIndex is expected to be normalized.
      *
-     * @return the SegmentIntersection found or added. It will be
-     *	   destroyed at SegmentNodeList destruction time.
-     *
      * @param intPt the intersection Coordinate, will be copied
      * @param segmentIndex
      */
-    void add(const geom::Coordinate& intPt, std::size_t segmentIndex);
-
-    void
-    add(const geom::Coordinate* intPt, std::size_t segmentIndex)
-    {
-        add(*intPt, segmentIndex);
+    template<typename CoordType>
+    void add(const CoordType& intPt, std::size_t segmentIndex) {
+        // Cast edge to SegmentString to avoid circular dependency between NodedSegmentString and SegmentNodeList
+        nodeMap.emplace_back(edge, intPt, segmentIndex, reinterpret_cast<const SegmentString&>(edge).getSegmentOctant(segmentIndex));
+        ready = false;
     }
 
     /// Return the number of nodes in this list
@@ -228,7 +237,7 @@ public:
     * @return an array of Coordinates
     *
     */
-    std::vector<geom::Coordinate> getSplitCoordinates();
+    std::unique_ptr<geom::CoordinateSequence> getSplitCoordinates();
 
 
 };

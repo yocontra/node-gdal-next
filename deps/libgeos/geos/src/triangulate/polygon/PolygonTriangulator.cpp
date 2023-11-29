@@ -48,7 +48,7 @@ PolygonTriangulator::compute()
     std::vector<const Polygon*> polys;
     geom::util::PolygonExtracter::getPolygons(*inputGeom, polys);
 
-    TriList triList;
+    TriList<Tri> triList;
     for (const Polygon* poly : polys) {
         // Skip empty component polygons
         if (poly->isEmpty())
@@ -60,21 +60,11 @@ PolygonTriangulator::compute()
 
 /* private */
 void
-PolygonTriangulator::triangulatePolygon(const Polygon* poly, TriList& triList)
+PolygonTriangulator::triangulatePolygon(const Polygon* poly, TriList<Tri>& triList)
 {
-    /**
-     * Normalize to ensure that shell and holes have canonical orientation.
-     *
-     * TODO: perhaps better to just correct orientation of rings?
-     */
-    std::unique_ptr<Polygon> polyNorm = poly->clone();
-    polyNorm->normalize();
-
-    std::vector<Coordinate> polyShell = PolygonHoleJoiner::join(polyNorm.get());
-
-    PolygonEarClipper::triangulate(polyShell, triList);
+    auto polyShell = PolygonHoleJoiner::join(poly);
+    PolygonEarClipper::triangulate(*polyShell, triList);
     //Tri::validate(triList);
-
     return;
 }
 

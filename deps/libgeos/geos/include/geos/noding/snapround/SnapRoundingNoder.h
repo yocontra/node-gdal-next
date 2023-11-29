@@ -71,6 +71,11 @@ namespace snapround { // geos::noding::snapround
 class GEOS_DLL SnapRoundingNoder : public Noder {
 
 private:
+    /**
+    * The division factor used to determine
+    * nearness distance tolerance for interior intersection detection.
+    */
+    static constexpr int INTERSECTION_NEARNESS_FACTOR = 100;
 
     // Members
     const geom::PrecisionModel* pm;
@@ -103,7 +108,7 @@ private:
     * @param pts the coordinates to round
     * @return array of rounded coordinates
     */
-    std::vector<geom::Coordinate> round(const std::vector<geom::Coordinate>& pts) const;
+    std::unique_ptr<geom::CoordinateSequence> round(const geom::CoordinateSequence& pts) const;
 
     /**
     * Computes new segment strings which are rounded and contain
@@ -123,7 +128,7 @@ private:
     * @param ss the segment string to add intersections to
     * @param segIndex the index of the segment
     */
-    void snapSegment(geom::Coordinate& p0, geom::Coordinate& p1, NodedSegmentString* ss, std::size_t segIndex);
+    void snapSegment(const geom::CoordinateXY& p0, const geom::CoordinateXY& p1, NodedSegmentString* ss, std::size_t segIndex);
 
     /**
     * Add nodes for any vertices in hot pixels that were
@@ -131,7 +136,7 @@ private:
     */
     void addVertexNodeSnaps(NodedSegmentString* ss);
 
-    void snapVertexNode(const geom::Coordinate& p0, NodedSegmentString* ss, std::size_t segIndex);
+    void snapVertexNode(const geom::CoordinateXY& p0, NodedSegmentString* ss, std::size_t segIndex);
 
 public:
 

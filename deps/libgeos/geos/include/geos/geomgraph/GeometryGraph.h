@@ -19,8 +19,7 @@
  **********************************************************************/
 
 
-#ifndef GEOS_GEOMGRAPH_GEOMETRYGRAPH_H
-#define GEOS_GEOMGRAPH_GEOMETRYGRAPH_H
+#pragma once
 
 #include <geos/export.h>
 #include <map>
@@ -33,8 +32,6 @@
 #include <geos/geomgraph/PlanarGraph.h>
 #include <geos/geomgraph/index/SegmentIntersector.h>
 #include <geos/geom/LineString.h> // for LineStringLT
-
-#include <geos/inline.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -172,15 +169,20 @@ public:
     GeometryGraph(uint8_t newArgIndex, const geom::Geometry* newParentGeom,
                   const algorithm::BoundaryNodeRule& boundaryNodeRule);
 
-    ~GeometryGraph() override;
+    ~GeometryGraph() override {};
 
-
-    const geom::Geometry* getGeometry();
+    const geom::Geometry* getGeometry()
+    {
+        return parentGeom;
+    };
 
     /// Returned object is owned by this GeometryGraph
-    std::vector<Node*>* getBoundaryNodes();
+    void getBoundaryNodes(std::vector<Node*>& bdyNodes)
+    {
+        nodes->getBoundaryNodes(static_cast<uint8_t>(argIndex), bdyNodes);
+    };
 
-    void getBoundaryNodes(std::vector<Node*>& bdyNodes);
+    std::vector<Node*>* getBoundaryNodes();
 
     /// Returned object is owned by this GeometryGraph
     geom::CoordinateSequence* getBoundaryPoints();
@@ -216,25 +218,11 @@ public:
         return computeSelfNodes(*li, computeRingSelfNodes, env);
     }
 
-    std::unique_ptr<index::SegmentIntersector>
-    computeSelfNodes(
-        algorithm::LineIntersector* li,
-        bool computeRingSelfNodes,
-        bool isDoneIfProperInt,
-        const geom::Envelope* env = nullptr)
-    {
-        return computeSelfNodes(*li, computeRingSelfNodes, isDoneIfProperInt, env);
-    }
-
     // Quick inline calling the function above, the above should probably
     // be deprecated.
     std::unique_ptr<index::SegmentIntersector> computeSelfNodes(
         algorithm::LineIntersector& li,
         bool computeRingSelfNodes, const geom::Envelope* env = nullptr);
-
-    std::unique_ptr<index::SegmentIntersector> computeSelfNodes(
-        algorithm::LineIntersector& li,
-        bool computeRingSelfNodes, bool isDoneIfProperInt, const geom::Envelope* env = nullptr);
 
     std::unique_ptr<index::SegmentIntersector> computeEdgeIntersections(GeometryGraph* g,
             algorithm::LineIntersector* li, bool includeProper,
@@ -261,9 +249,3 @@ public:
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-#ifdef GEOS_INLINE
-# include "geos/geomgraph/GeometryGraph.inl"
-#endif
-
-#endif // ifndef GEOS_GEOMGRAPH_GEOMETRYGRAPH_H

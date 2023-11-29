@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_DISTANCE_DISTANCETOPOINT_H
-#define GEOS_ALGORITHM_DISTANCE_DISTANCETOPOINT_H
+#pragma once
 
 #include <geos/geom/LineSegment.h> // for composition
 
@@ -50,19 +49,19 @@ public:
     DistanceToPoint() {}
 
     static void computeDistance(const geom::Geometry& geom,
-                                const geom::Coordinate& pt,
+                                const geom::CoordinateXY& pt,
                                 PointPairDistance& ptDist);
 
     static void computeDistance(const geom::LineString& geom,
-                                const geom::Coordinate& pt,
+                                const geom::CoordinateXY& pt,
                                 PointPairDistance& ptDist);
 
     static void computeDistance(const geom::LineSegment& geom,
-                                const geom::Coordinate& pt,
+                                const geom::CoordinateXY& pt,
                                 PointPairDistance& ptDist);
 
     static void computeDistance(const geom::Polygon& geom,
-                                const geom::Coordinate& pt,
+                                const geom::CoordinateXY& pt,
                                 PointPairDistance& ptDist);
 
 };
@@ -70,6 +69,4 @@ public:
 } // geos::algorithm::distance
 } // geos::algorithm
 } // geos
-
-#endif // GEOS_ALGORITHM_DISTANCE_DISTANCETOPOINT_H
 

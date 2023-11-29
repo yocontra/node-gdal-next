@@ -27,7 +27,6 @@
 #include <geos/operation/buffer/BufferInputLineSimplifier.h>
 #include <geos/operation/buffer/BufferParameters.h>
 #include <geos/geom/Position.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/PrecisionModel.h>
@@ -64,22 +63,155 @@ OffsetCurveBuilder::getLineCurve(const CoordinateSequence* inputPts,
 
     double posDistance = std::abs(distance);
 
-    std::unique_ptr<OffsetSegmentGenerator> segGen = getSegGen(posDistance);
+    OffsetSegmentGenerator segGen(precisionModel, bufParams, posDistance);
     if(inputPts->getSize() <= 1) {
-        computePointCurve(inputPts->getAt(0), *segGen);
+        computePointCurve(inputPts->getAt(0), segGen);
     }
     else {
         if(bufParams.isSingleSided()) {
             bool isRightSide = distance < 0.0;
-            computeSingleSidedBufferCurve(*inputPts, isRightSide, *segGen);
+            computeSingleSidedBufferCurve(*inputPts, isRightSide, segGen);
         }
         else {
-            computeLineBufferCurve(*inputPts, *segGen);
+            computeLineBufferCurve(*inputPts, segGen);
         }
     }
 
-    segGen->getCoordinates(lineList);
+    segGen.getCoordinates(lineList);
 }
+
+
+/* public */
+std::unique_ptr<CoordinateSequence>
+OffsetCurveBuilder::getLineCurve(const CoordinateSequence* inputPts, double pDistance)
+{
+    distance = pDistance;
+
+    if (isLineOffsetEmpty(distance)) return nullptr;
+
+    double posDistance = std::abs(distance);
+    OffsetSegmentGenerator segGen(precisionModel, bufParams, posDistance);
+    if (inputPts->size() <= 1) {
+        computePointCurve(inputPts->getAt(0), segGen);
+    }
+    else {
+        if (bufParams.isSingleSided()) {
+            bool isRightSide = distance < 0.0;
+            computeSingleSidedBufferCurve(*inputPts, isRightSide, segGen);
+        }
+        else
+            computeLineBufferCurve(*inputPts, segGen);
+    }
+
+    return segGen.getCoordinates();
+}
+
+
+/* public */
+void
+OffsetCurveBuilder::getOffsetCurve(
+    const CoordinateSequence* inputPts,
+    double p_distance,
+    std::vector<CoordinateSequence*>& lineList)
+{
+    distance = p_distance;
+
+    // a zero width offset curve is empty
+    if (p_distance == 0.0) return;
+    bool isRightSide = p_distance < 0.0;
+
+    double posDistance = std::abs(p_distance);
+    OffsetSegmentGenerator segGen(precisionModel, bufParams, posDistance);
+    if (inputPts->size() <= 1) {
+        computePointCurve(inputPts->getAt(0), segGen);
+    }
+    else {
+        computeSingleSidedBufferCurve(*inputPts, isRightSide, segGen);
+    }
+
+    segGen.getCoordinates(lineList);
+
+    // for right side line is traversed in reverse direction, so have to reverse generated line
+    if (isRightSide) {
+        for (auto* cs: lineList) {
+            cs->reverse();
+        }
+    }
+    return;
+}
+
+
+/* public */
+std::unique_ptr<CoordinateSequence>
+OffsetCurveBuilder::getOffsetCurve(
+    const CoordinateSequence* inputPts,
+    double pDistance)
+{
+    distance = pDistance;
+
+    // a zero width offset curve is empty
+    if (distance == 0.0) return nullptr;
+
+    bool isRightSide = distance < 0.0;
+    double posDistance = std::abs(distance);
+    OffsetSegmentGenerator segGen(precisionModel, bufParams, posDistance);
+    if (inputPts->size() <= 1) {
+        computePointCurve(inputPts->getAt(0), segGen);
+    }
+    else {
+        computeOffsetCurve(inputPts, isRightSide, segGen);
+    }
+    std::unique_ptr<CoordinateSequence> curvePts = segGen.getCoordinates();
+    // for right side line is traversed in reverse direction, so have to reverse generated line
+    if (isRightSide)
+        curvePts->reverse();
+
+    return curvePts;
+}
+
+
+/* private */
+void
+OffsetCurveBuilder::computeOffsetCurve(
+    const CoordinateSequence* inputPts,
+    bool isRightSide,
+    OffsetSegmentGenerator& segGen)
+{
+    double distTol = simplifyTolerance(std::abs(distance));
+
+    if (isRightSide) {
+        //---------- compute points for right side of line
+        // Simplify the appropriate side of the line before generating
+        auto simp2 = BufferInputLineSimplifier::simplify(*inputPts, -distTol);
+        std::size_t n2 = simp2->size() - 1;
+        if (!n2)
+            throw util::IllegalArgumentException("Cannot get offset of single-vertex line");
+
+        // since we are traversing line in opposite order, offset position is still LEFT
+        segGen.initSideSegments(simp2->getAt(n2), simp2->getAt(n2-1), Position::LEFT);
+        segGen.addFirstSegment();
+        for (std::size_t i = n2 - 1; i > 0; --i) {
+            segGen.addNextSegment(simp2->getAt(i - 1), true);
+        }
+    }
+    else {
+      //--------- compute points for left side of line
+      // Simplify the appropriate side of the line before generating
+        auto simp1 = BufferInputLineSimplifier::simplify(*inputPts, distTol);
+        std::size_t n1 = simp1->size() - 1;
+        if (!n1)
+            throw util::IllegalArgumentException("Cannot get offset of single-vertex line");
+
+        segGen.initSideSegments(simp1->getAt(0), simp1->getAt(1), Position::LEFT);
+        segGen.addFirstSegment();
+        for (std::size_t i = 2; i <= n1; i++) {
+            segGen.addNextSegment(simp1->getAt(i), true);
+        }
+    }
+    segGen.addLastSegment();
+}
+
+
 
 /* private */
 void
@@ -117,7 +249,7 @@ OffsetCurveBuilder::getSingleSidedLineCurve(const CoordinateSequence* inputPts,
 
     double distTol = simplifyTolerance(p_distance);
 
-    std::unique_ptr<OffsetSegmentGenerator> segGen = getSegGen(p_distance);
+    OffsetSegmentGenerator segGen(precisionModel, bufParams, p_distance);
 
     if(leftSide) {
         //--------- compute points for left side of line
@@ -131,12 +263,12 @@ OffsetCurveBuilder::getSingleSidedLineCurve(const CoordinateSequence* inputPts,
         if(! n1) {
             throw util::IllegalArgumentException("Cannot get offset of single-vertex line");
         }
-        segGen->initSideSegments(simp1[0], simp1[1], Position::LEFT);
-        segGen->addFirstSegment();
+        segGen.initSideSegments(simp1[0], simp1[1], Position::LEFT);
+        segGen.addFirstSegment();
         for(std::size_t i = 2; i <= n1; ++i) {
-            segGen->addNextSegment(simp1[i], true);
+            segGen.addNextSegment(simp1[i], true);
         }
-        segGen->addLastSegment();
+        segGen.addLastSegment();
     }
 
     if(rightSide) {
@@ -151,15 +283,15 @@ OffsetCurveBuilder::getSingleSidedLineCurve(const CoordinateSequence* inputPts,
         if(! n2) {
             throw util::IllegalArgumentException("Cannot get offset of single-vertex line");
         }
-        segGen->initSideSegments(simp2[n2], simp2[n2 - 1], Position::LEFT);
-        segGen->addFirstSegment();
+        segGen.initSideSegments(simp2[n2], simp2[n2 - 1], Position::LEFT);
+        segGen.addFirstSegment();
         for(std::size_t i = n2 - 1; i > 0; --i) {
-            segGen->addNextSegment(simp2[i - 1], true);
+            segGen.addNextSegment(simp2[i - 1], true);
         }
-        segGen->addLastSegment();
+        segGen.addLastSegment();
     }
 
-    segGen->getCoordinates(lineList);
+    segGen.getCoordinates(lineList);
 }
 
 /*public*/
@@ -194,10 +326,29 @@ OffsetCurveBuilder::getRingCurve(const CoordinateSequence* inputPts,
         return;
     }
 
-    std::unique_ptr<OffsetSegmentGenerator> segGen = getSegGen(std::abs(distance));
-    computeRingBufferCurve(*inputPts, side, *segGen);
-    segGen->getCoordinates(lineList);
+    OffsetSegmentGenerator segGen(precisionModel, bufParams, std::abs(distance));
+    computeRingBufferCurve(*inputPts, side, segGen);
+    segGen.getCoordinates(lineList);
 }
+
+
+/* public */
+std::unique_ptr<CoordinateSequence>
+OffsetCurveBuilder::getRingCurve(const CoordinateSequence* inputPts, int side, double pDistance)
+{
+    distance = pDistance;
+    if (inputPts->size() <= 2)
+        return getLineCurve(inputPts, distance);
+
+    // optimize creating ring for for zero distance
+    if (distance == 0.0) {
+        return inputPts->clone();
+    }
+    OffsetSegmentGenerator segGen(precisionModel, bufParams, distance);
+    computeRingBufferCurve(*inputPts, side, segGen);
+    return segGen.getCoordinates();
+}
+
 
 /* private */
 double
@@ -277,7 +428,7 @@ OffsetCurveBuilder::computeSingleSidedBufferCurve(
     const CoordinateSequence& inputPts, bool isRightSide,
     OffsetSegmentGenerator& segGen)
 {
-    double distTol = simplifyTolerance(distance);
+    double distTol = simplifyTolerance(std::abs(distance));
 
     if(isRightSide) {
 
@@ -321,15 +472,6 @@ OffsetCurveBuilder::computeSingleSidedBufferCurve(
     segGen.closeRing();
 }
 
-/*private*/
-std::unique_ptr<OffsetSegmentGenerator>
-OffsetCurveBuilder::getSegGen(double dist)
-{
-    std::unique_ptr<OffsetSegmentGenerator> osg(
-        new OffsetSegmentGenerator(precisionModel, bufParams, dist)
-    );
-    return osg;
-}
 
 } // namespace geos.operation.buffer
 } // namespace geos.operation

@@ -41,7 +41,7 @@ OverlayEdgeRing::OverlayEdgeRing(OverlayEdge* start, const GeometryFactory* geom
     , locator(nullptr)
     , shell(nullptr)
 {
-    auto ringPts = detail::make_unique<CoordinateArraySequence>();
+    auto ringPts = detail::make_unique<CoordinateSequence>(0u, start->getCoordinatesRO()->hasZ(), start->getCoordinatesRO()->hasM());
     computeRingPts(start, *ringPts);
     computeRing(std::move(ringPts), geometryFactory);
 }
@@ -118,7 +118,7 @@ OverlayEdgeRing::addHole(OverlayEdgeRing* p_ring)
 }
 
 void
-OverlayEdgeRing::closeRing(CoordinateArraySequence& pts)
+OverlayEdgeRing::closeRing(CoordinateSequence& pts)
 {
     if(pts.size() > 0) {
         pts.add(pts.getAt(0), false);
@@ -127,7 +127,7 @@ OverlayEdgeRing::closeRing(CoordinateArraySequence& pts)
 
 /*private*/
 void
-OverlayEdgeRing::computeRingPts(OverlayEdge* start, CoordinateArraySequence& pts)
+OverlayEdgeRing::computeRingPts(OverlayEdge* start, CoordinateSequence& pts)
 {
     OverlayEdge* edge = start;
     do {
@@ -148,7 +148,7 @@ OverlayEdgeRing::computeRingPts(OverlayEdge* start, CoordinateArraySequence& pts
 
 /*private*/
 void
-OverlayEdgeRing::computeRing(std::unique_ptr<CoordinateArraySequence> && p_ringPts, const GeometryFactory* geometryFactory)
+OverlayEdgeRing::computeRing(std::unique_ptr<CoordinateSequence> && p_ringPts, const GeometryFactory* geometryFactory)
 {
     if (ring != nullptr) return;   // don't compute more than once
     ring = geometryFactory->createLinearRing(std::move(p_ringPts));
@@ -162,10 +162,10 @@ OverlayEdgeRing::computeRing(std::unique_ptr<CoordinateArraySequence> && p_ringP
 * @return an array of the {@link Coordinate}s in this ring
 */
 /*private*/
-const CoordinateArraySequence&
+const CoordinateSequence&
 OverlayEdgeRing::getCoordinates()
 {
-    return *(detail::down_cast<const CoordinateArraySequence*>(ring->getCoordinatesRO()));
+    return *(detail::down_cast<const CoordinateSequence*>(ring->getCoordinatesRO()));
 }
 
 /**
@@ -253,14 +253,17 @@ OverlayEdgeRing::getCoordinate()
 std::unique_ptr<Polygon>
 OverlayEdgeRing::toPolygon(const GeometryFactory* factory)
 {
-    std::vector<std::unique_ptr<LinearRing>> holeLR;
-    if (holes.size() > 0) {
+    if (holes.empty()) {
+        return factory->createPolygon(std::move(ring));
+    } else {
+        std::vector<std::unique_ptr<LinearRing>> holeLR(holes.size());
+
         for (std::size_t i = 0; i < holes.size(); i++) {
-            std::unique_ptr<LinearRing> r = holes[i]->getRing();
-            holeLR.push_back(std::move(r));
+            holeLR[i] = holes[i]->getRing();
         }
+
+        return factory->createPolygon(std::move(ring), std::move(holeLR));
     }
-    return factory->createPolygon(std::move(ring), std::move(holeLR));
 }
 
 /*public*/

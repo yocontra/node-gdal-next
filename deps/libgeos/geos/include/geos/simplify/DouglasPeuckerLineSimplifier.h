@@ -16,10 +16,10 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_SIMPLIFY_DOUBGLASPEUCKERLINESIMPLIFIER_H
-#define GEOS_SIMPLIFY_DOUBGLASPEUCKERLINESIMPLIFIER_H
+#pragma once
 
 #include <geos/export.h>
+#include <geos/geom/CoordinateSequence.h>
 #include <vector>
 #include <memory> // for unique_ptr
 
@@ -46,22 +46,16 @@ class GEOS_DLL DouglasPeuckerLineSimplifier {
 
 public:
 
-    typedef std::vector<short int> BoolVect;
-    typedef std::unique_ptr<BoolVect> BoolVectAutoPtr;
-
-    typedef std::vector<geom::Coordinate> CoordsVect;
-    typedef std::unique_ptr<CoordsVect> CoordsVectAutoPtr;
-
-
     /** \brief
      * Returns a newly allocated Coordinate vector, wrapped
      * into an unique_ptr
      */
-    static CoordsVectAutoPtr simplify(
-        const CoordsVect& nPts,
-        double distanceTolerance);
+    static std::unique_ptr<geom::CoordinateSequence> simplify(
+        const geom::CoordinateSequence& nPts,
+        double distanceTolerance,
+        bool preserveClosedEndpoint);
 
-    DouglasPeuckerLineSimplifier(const CoordsVect& nPts);
+    DouglasPeuckerLineSimplifier(const geom::CoordinateSequence& nPts);
 
     /** \brief
      * Sets the distance tolerance for the simplification.
@@ -74,16 +68,24 @@ public:
     void setDistanceTolerance(double nDistanceTolerance);
 
     /** \brief
+     * Sets whether the endpoint of a closed LineString should be preserved
+     *
+     * @param preserve `true` if the endpoint should be preserved
+     */
+    void setPreserveClosedEndpoint(bool preserve);
+
+    /** \brief
      * Returns a newly allocated Coordinate vector, wrapped
      * into an unique_ptr
      */
-    CoordsVectAutoPtr simplify();
+    std::unique_ptr<geom::CoordinateSequence> simplify();
 
 private:
 
-    const CoordsVect& pts;
-    BoolVectAutoPtr usePt;
+    const geom::CoordinateSequence& pts;
+    std::vector<bool> usePt;
     double distanceTolerance;
+    bool preserveEndpoint;
 
     void simplifySection(std::size_t i, std::size_t j);
 
@@ -99,4 +101,3 @@ private:
 #pragma warning(pop)
 #endif
 
-#endif // GEOS_SIMPLIFY_DOUBGLASPEUCKERLINESIMPLIFIER_H

@@ -12,12 +12,12 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_INDEX_STRTREE_INTERVAL_H
-#define GEOS_INDEX_STRTREE_INTERVAL_H
+#pragma once
 
 #include <geos/export.h>
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 namespace geos {
 namespace index { // geos::index
@@ -30,7 +30,7 @@ namespace strtree { // geos::index::strtree
 class GEOS_DLL Interval {
 public:
     Interval(double newMin, double newMax) : imin(newMin), imax(newMax) {
-        assert(imin <= imax);
+        assert(std::isnan(newMin) || std::isnan(newMax) || imin <= imax);
     }
 
     double getMin() const { return imin; }
@@ -58,4 +58,3 @@ private:
 } // namespace geos::index
 } // namespace geos
 
-#endif // GEOS_INDEX_STRTREE_INTERVAL_H

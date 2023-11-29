@@ -16,11 +16,11 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_OP_RELATE_EDGEENDBUILDER_H
-#define GEOS_OP_RELATE_EDGEENDBUILDER_H
+#pragma once
 
 #include <geos/export.h>
 
+#include <memory>
 #include <vector>
 
 // Forward declarations
@@ -49,18 +49,18 @@ class GEOS_DLL EdgeEndBuilder {
 public:
     EdgeEndBuilder() {}
 
-    std::vector<geomgraph::EdgeEnd*> computeEdgeEnds(std::vector<geomgraph::Edge*>* edges);
-    void computeEdgeEnds(geomgraph::Edge* edge, std::vector<geomgraph::EdgeEnd*>* l);
+    std::vector<std::unique_ptr<geomgraph::EdgeEnd>> computeEdgeEnds(std::vector<geomgraph::Edge*>* edges);
+    void computeEdgeEnds(geomgraph::Edge* edge, std::vector<std::unique_ptr<geomgraph::EdgeEnd>>& l);
 
 protected:
 
     void createEdgeEndForPrev(geomgraph::Edge* edge,
-                              std::vector<geomgraph::EdgeEnd*>* l,
+                              std::vector<std::unique_ptr<geomgraph::EdgeEnd>>& l,
                               const geomgraph::EdgeIntersection* eiCurr,
                               const geomgraph::EdgeIntersection* eiPrev);
 
     void createEdgeEndForNext(geomgraph::Edge* edge,
-                              std::vector<geomgraph::EdgeEnd*>* l,
+                              std::vector<std::unique_ptr<geomgraph::EdgeEnd>>& l,
                               const geomgraph::EdgeIntersection* eiCurr,
                               const geomgraph::EdgeIntersection* eiNext);
 };
@@ -68,5 +68,3 @@ protected:
 } // namespace geos:operation:relate
 } // namespace geos:operation
 } // namespace geos
-
-#endif // GEOS_OP_RELATE_EDGEENDBUILDER_H

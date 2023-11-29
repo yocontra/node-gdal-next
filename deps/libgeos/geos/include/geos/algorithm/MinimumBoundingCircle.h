@@ -16,8 +16,7 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_ALGORITHM_MINIMUMBOUNDINGCIRCLE_H
-#define GEOS_ALGORITHM_MINIMUMBOUNDINGCIRCLE_H
+#pragma once
 
 #include <geos/export.h>
 #include <geos/geom/Coordinate.h>
@@ -45,18 +44,18 @@ private:
 
     // member variables
     const geom::Geometry* input;
-    std::vector<geom::Coordinate> extremalPts;
-    geom::Coordinate centre;
+    std::vector<geom::CoordinateXY> extremalPts;
+    geom::CoordinateXY centre;
     double radius;
 
     void computeCentre();
     void compute();
     void computeCirclePoints();
-    geom::Coordinate lowestPoint(std::vector<geom::Coordinate>& pts);
-    geom::Coordinate pointWitMinAngleWithX(std::vector<geom::Coordinate>& pts, geom::Coordinate& P);
-    geom::Coordinate pointWithMinAngleWithSegment(std::vector<geom::Coordinate>& pts,
-            geom::Coordinate& P, geom::Coordinate& Q);
-    std::vector<geom::Coordinate> farthestPoints(std::vector<geom::Coordinate>& pts);
+    geom::CoordinateXY lowestPoint(std::vector<geom::CoordinateXY>& pts);
+    geom::CoordinateXY pointWitMinAngleWithX(std::vector<geom::CoordinateXY>& pts, geom::CoordinateXY& P);
+    geom::CoordinateXY pointWithMinAngleWithSegment(std::vector<geom::CoordinateXY>& pts,
+            geom::CoordinateXY& P, geom::CoordinateXY& Q);
+    std::vector<geom::CoordinateXY> farthestPoints(std::vector<geom::CoordinateXY>& pts);
 
 
 public:
@@ -114,7 +113,7 @@ public:
     *
     * @return the points defining the Minimum Bounding Circle
     */
-    std::vector<geom::Coordinate> getExtremalPoints();
+    std::vector<geom::CoordinateXY> getExtremalPoints();
 
     /**
     * Gets the centre point of the computed Minimum Bounding Circle.
@@ -122,7 +121,7 @@ public:
     * @return the centre point of the Minimum Bounding Circle
     * @return null if the input is empty
     */
-    geom::Coordinate getCentre();
+    geom::CoordinateXY getCentre();
 
     /**
     * Gets the radius of the computed Minimum Bounding Circle.
@@ -135,6 +134,4 @@ public:
 
 } // namespace geos::algorithm
 } // namespace geos
-
-#endif // GEOS_ALGORITHM_MINIMUMBOUNDINGCIRCLE_H
 

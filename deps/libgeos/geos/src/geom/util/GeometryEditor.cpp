@@ -110,7 +110,7 @@ GeometryEditor::editPolygon(const Polygon* polygon, GeometryEditorOperation* ope
     if(newPolygon->isEmpty()) {
         //RemoveSelectedPlugIn relies on this behaviour. [Jon Aquino]
         if(newPolygon->getFactory() != factory) {
-            std::unique_ptr<Polygon> ret(factory->createPolygon(nullptr, nullptr));
+            std::unique_ptr<Polygon> ret(factory->createPolygon(polygon->getCoordinateDimension()));
             return ret;
         }
         else {
@@ -123,10 +123,10 @@ GeometryEditor::editPolygon(const Polygon* polygon, GeometryEditorOperation* ope
 
     if(shell->isEmpty()) {
         //RemoveSelectedPlugIn relies on this behaviour. [Jon Aquino]
-        return std::unique_ptr<Polygon>(factory->createPolygon(nullptr, nullptr));
+        return std::unique_ptr<Polygon>(factory->createPolygon(polygon->getCoordinateDimension()));
     }
 
-    auto holes = detail::make_unique<std::vector<LinearRing*>>();
+    std::vector<std::unique_ptr<LinearRing>> holes;
     for(std::size_t i = 0, n = newPolygon->getNumInteriorRing(); i < n; ++i) {
 
         std::unique_ptr<LinearRing> hole(detail::down_cast<LinearRing*>(
@@ -135,10 +135,10 @@ GeometryEditor::editPolygon(const Polygon* polygon, GeometryEditorOperation* ope
         if(hole->isEmpty()) {
             continue;
         }
-        holes->push_back(hole.release());
+        holes.push_back(std::move(hole));
     }
 
-    return std::unique_ptr<Polygon>(factory->createPolygon(shell.release(), holes.release()));
+    return factory->createPolygon(std::move(shell), std::move(holes));
 }
 
 std::unique_ptr<GeometryCollection>

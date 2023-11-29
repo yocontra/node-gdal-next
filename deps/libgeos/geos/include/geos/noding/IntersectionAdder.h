@@ -16,16 +16,13 @@
  *
  **********************************************************************/
 
-#ifndef GEOS_NODING_INTERSECTIONADDER_H
-#define GEOS_NODING_INTERSECTIONADDER_H
+#pragma once
 
 #include <geos/export.h>
 
 #include <vector>
 #include <iostream>
 #include <cstdlib> // for abs()
-
-#include <geos/inline.h>
 
 #include <geos/geom/Coordinate.h>
 #include <geos/noding/SegmentIntersector.h> // for inheritance
@@ -68,7 +65,7 @@ private:
     bool hasInterior;
 
     // the proper intersection point found
-    geom::Coordinate properIntersectionPoint;
+    geom::CoordinateXYZM properIntersectionPoint;
 
     algorithm::LineIntersector& li;
     // bool isSelfIntersection;
@@ -120,7 +117,7 @@ public:
      * @return the proper intersection point, or `Coordinate::getNull()`
      *         if none was found
      */
-    const geom::Coordinate&
+    const geom::CoordinateXYZM&
     getProperIntersectionPoint()
     {
         return properIntersectionPoint;
@@ -203,4 +200,3 @@ public:
 } // namespace geos.noding
 } // namespace geos
 
-#endif // GEOS_NODING_INTERSECTIONADDER_H

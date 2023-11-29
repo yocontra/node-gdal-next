@@ -19,7 +19,6 @@
 #include <geos/operation/intersection/RectangleIntersectionBuilder.h>
 #include <geos/operation/predicate/RectangleIntersects.h>
 #include <geos/geom/GeometryFactory.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Polygon.h>
 #include <geos/geom/MultiPolygon.h>
@@ -29,6 +28,7 @@
 #include <geos/geom/LinearRing.h>
 #include <geos/geom/Location.h>
 #include <geos/util/UnsupportedOperationException.h>
+#include <geos/util.h>
 #include <list>
 #include <stdexcept>
 
@@ -117,7 +117,7 @@ RectangleIntersection::clip_point(const geom::Point* g,
                                   RectangleIntersectionBuilder& parts,
                                   const Rectangle& rect)
 {
-    if(g == nullptr) {
+    if(g == nullptr || g->isEmpty()) {
         return;
     }
 
@@ -228,12 +228,11 @@ RectangleIntersection::clip_linestring_parts(const geom::LineString* gi,
                         Rectangle::onEdge(pos) &&
                         !Rectangle::onSameEdge(prev_pos, pos)	// discard if travels along edge
                   ) {
-                    std::vector<Coordinate> coords(2);
-                    coords[0] = Coordinate(x0, y0);
-                    coords[1] = Coordinate(x, y);
-                    auto seq = _csf->create(std::move(coords));
-                    geom::LineString* line = _gf->createLineString(seq.release());
-                    parts.add(line);
+                    auto coords = detail::make_unique<geom::CoordinateSequence>(2u);
+                    coords->setAt(Coordinate(x0, y0), 0);
+                    coords->setAt(Coordinate(x, y), 1);
+                    auto line = _gf->createLineString(std::move(coords));
+                    parts.add(line.release());
                 }
 
                 // Continue main loop outside the rect
@@ -290,22 +289,21 @@ RectangleIntersection::clip_linestring_parts(const geom::LineString* gi,
                     // Output a LineString if it at least one segment long
 
                     if(start_index < i - 1 || add_start || through_box) {
-                        std::vector<Coordinate> coords;
+                        auto coords = detail::make_unique<CoordinateSequence>();
                         if(add_start) {
-                            coords.emplace_back(x0, y0);
+                            coords->add(Coordinate(x0, y0));
                             add_start = false;
                         }
                         //line->addSubLineString(&g, start_index, i-1);
-                        coords.insert(coords.end(), cs.begin() + static_cast<long>(start_index), cs.begin() +
-                                                                                                 static_cast<long>(i));
+                        coords->add(cs.begin() + static_cast<long>(start_index),
+                                    cs.begin() + static_cast<long>(i));
 
                         if(through_box) {
-                            coords.emplace_back(x, y);
+                            coords->add(Coordinate(x, y));
                         }
 
-                        auto seq = _csf->create(std::move(coords));
-                        geom::LineString* line = _gf->createLineString(seq.release());
-                        parts.add(line);
+                        auto line = _gf->createLineString(std::move(coords));
+                        parts.add(line.release());
                     }
                     // And continue main loop on the outside
                 }
@@ -314,20 +312,19 @@ RectangleIntersection::clip_linestring_parts(const geom::LineString* gi,
                     if(Rectangle::onSameEdge(prev_pos, pos)) {
                         // Nothing to output if we haven't been elsewhere
                         if(start_index < i - 1 || add_start) {
-                            std::vector<Coordinate> coords;
+                        auto coords = detail::make_unique<CoordinateSequence>();
                             //geom::LineString * line = new geom::LineString();
                             if(add_start) {
                                 //line->addPoint(x0,y0);
-                                coords.emplace_back(x0, y0);
+                                coords->add(Coordinate(x0, y0));
                                 add_start = false;
                             }
                             //line->addSubLineString(&g, start_index, i-1);
-                            coords.insert(coords.end(), cs.begin() + static_cast<long>(start_index), cs.begin() +
-                                                                                                     static_cast<long>(i));
+                            coords->add(cs.begin() + static_cast<long>(start_index),
+                                        cs.begin() + static_cast<long>(i));
 
-                            auto seq = _csf->create(std::move(coords));
-                            geom::LineString* line = _gf->createLineString(seq.release());
-                            parts.add(line);
+                            auto line = _gf->createLineString(std::move(coords));
+                            parts.add(line.release());
                         }
                         start_index = i;
                     }
@@ -348,20 +345,19 @@ RectangleIntersection::clip_linestring_parts(const geom::LineString* gi,
 
             if(!go_outside &&						// meaning data ended
                     (start_index < i - 1 || add_start)) {	// meaning something has to be generated
-                std::vector<Coordinate> coords;
+                auto coords = detail::make_unique<CoordinateSequence>();
                 //geom::LineString * line = new geom::LineString();
                 if(add_start) {
                     //line->addPoint(x0,y0);
-                    coords.emplace_back(x0, y0);
+                    coords->add(Coordinate(x0, y0));
                     add_start = false;
                 }
                 //line->addSubLineString(&g, start_index, i-1);
-                coords.insert(coords.end(), cs.begin() + static_cast<long>(start_index), cs.begin() +
-                                                                                         static_cast<long>(i));
+                coords->add(cs.begin() + static_cast<long>(start_index),
+                            cs.begin() + static_cast<long>(i));
 
-                auto seq = _csf->create(std::move(coords));
-                geom::LineString* line = _gf->createLineString(seq.release());
-                parts.add(line);
+                auto line = _gf->createLineString(std::move(coords));
+                parts.add(line.release());
             }
 
         }
@@ -424,9 +420,9 @@ RectangleIntersection::clip_polygon_to_linestrings(const geom::Polygon* g,
     for(std::size_t i = 0, n = g->getNumInteriorRing(); i < n; ++i) {
         if(clip_linestring_parts(g->getInteriorRingN(i), parts, rect)) {
             // clones
-            LinearRing* hole = new LinearRing(*(g->getInteriorRingN(i)));
+            auto hole =g->getInteriorRingN(i)->clone();
             // becomes exterior
-            Polygon* poly = _gf->createPolygon(hole, nullptr);
+            Polygon* poly = _gf->createPolygon(std::move(hole)).release();
             toParts.add(poly);
         }
         else if(!parts.empty()) {
@@ -496,8 +492,8 @@ RectangleIntersection::clip_polygon_to_polygons(const geom::Polygon* g,
         const LinearRing* hole = g->getInteriorRingN(i);
         if(clip_linestring_parts(hole, holeparts, rect)) {
             // becomes exterior
-            LinearRing* cloned = new LinearRing(*hole);
-            Polygon* poly = _gf->createPolygon(cloned, nullptr);
+            auto cloned = hole->clone();
+            Polygon* poly = _gf->createPolygon(std::move(cloned)).release();
             parts.add(poly);
         }
         else {
@@ -538,6 +534,10 @@ RectangleIntersection::clip_polygon(const geom::Polygon* g,
                                     const Rectangle& rect,
                                     bool keep_polygons)
 {
+    if(g == nullptr || g->isEmpty()) {
+        return;
+    }
+
     if(keep_polygons) {
         clip_polygon_to_polygons(g, parts, rect);
     }
@@ -700,7 +700,6 @@ RectangleIntersection::RectangleIntersection(const geom::Geometry& geom, const R
     : _geom(geom), _rect(rect),
       _gf(geom.getFactory())
 {
-    _csf = _gf->getCoordinateSequenceFactory();
 }
 
 } // namespace geos::operation::intersection

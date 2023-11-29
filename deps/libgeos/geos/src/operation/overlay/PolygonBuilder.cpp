@@ -18,17 +18,16 @@
  **********************************************************************/
 
 #include <geos/operation/overlay/PolygonBuilder.h>
-#include <geos/operation/overlay/OverlayOp.h>
 #include <geos/operation/overlay/MaximalEdgeRing.h>
 #include <geos/operation/overlay/MinimalEdgeRing.h>
 #include <geos/operation/polygonize/EdgeRing.h>
 #include <geos/geomgraph/Node.h>
 #include <geos/geomgraph/NodeMap.h>
 #include <geos/geomgraph/DirectedEdgeStar.h>
+#include <geos/geomgraph/PlanarGraph.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/LinearRing.h>
 #include <geos/geom/Polygon.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/algorithm/PointLocation.h>
 #include <geos/util/TopologyException.h>
 #include <geos/util/GEOSException.h>
@@ -42,6 +41,9 @@
 #define GEOS_DEBUG 0
 #endif
 
+#if GEOS_DEBUG
+#include <iostream>
+#endif
 
 using namespace geos::geomgraph;
 using namespace geos::algorithm;
@@ -85,12 +87,11 @@ PolygonBuilder::add(PlanarGraph* graph)
         dirEdges[i] = de;
     }
 
-    NodeMap::container& nodeMap = graph->getNodeMap()->nodeMap;
+    const auto& nodeMap = graph->getNodeMap()->nodeMap;
     std::vector<Node*> nodes;
     nodes.reserve(nodeMap.size());
-    for(NodeMap::iterator it = nodeMap.begin(), itEnd = nodeMap.end();
-            it != itEnd; ++it) {
-        Node* node = it->second;
+    for(const auto& nodeIt: nodeMap) {
+        Node* node = nodeIt.second.get();
         nodes.push_back(node);
     }
 
@@ -128,10 +129,10 @@ PolygonBuilder::add(const std::vector<DirectedEdge*>* dirEdges,
 }
 
 /*public*/
-std::vector<Geometry*>*
+std::vector<std::unique_ptr<Geometry>>
 PolygonBuilder::getPolygons()
 {
-    std::vector<Geometry*>* resultPolyList = computePolygons(shellList);
+    std::vector<std::unique_ptr<Geometry>> resultPolyList = computePolygons(shellList);
     return resultPolyList;
 }
 
@@ -290,22 +291,19 @@ PolygonBuilder::placeFreeHoles(std::vector<FastPIPRing>& newShellList,
             EdgeRing* shell = findEdgeRingContaining(hole, newShellList);
             if(shell == nullptr) {
 #if GEOS_DEBUG
-                Geometry* geom;
                 std::cerr << "CREATE TABLE shells (g geometry);" << std::endl;
                 std::cerr << "CREATE TABLE hole (g geometry);" << std::endl;
-                for(std::vector<EdgeRing*>::iterator rIt = newShellList.begin(),
+                for(std::vector<FastPIPRing>::iterator rIt = newShellList.begin(),
                         rEnd = newShellList.end(); rIt != rEnd; rIt++) {
-                    geom = (*rIt)->toPolygon(geometryFactory);
+                    std::unique_ptr<Geometry> geom = (*rIt).edgeRing->toPolygon(geometryFactory);
                     std::cerr << "INSERT INTO shells VALUES ('"
                               << *geom
                               << "');" << std::endl;
-                    delete geom;
                 }
-                geom = hole->toPolygon(geometryFactory);
+                std::unique_ptr<Geometry> geom = hole->toPolygon(geometryFactory);
                 std::cerr << "INSERT INTO hole VALUES ('"
                           << *geom
                           << "');" << std::endl;
-                delete geom;
 #endif
                 //assert(shell!=NULL); // unable to assign hole to a shell
                 throw util::TopologyException("unable to assign hole to a shell");
@@ -361,19 +359,19 @@ PolygonBuilder::findEdgeRingContaining(EdgeRing* testEr,
 }
 
 /*private*/
-std::vector<Geometry*>*
+std::vector<std::unique_ptr<Geometry>>
 PolygonBuilder::computePolygons(std::vector<EdgeRing*>& newShellList)
 {
 #if GEOS_DEBUG
     std::cerr << "PolygonBuilder::computePolygons: got " << newShellList.size() << " shells" << std::endl;
 #endif
-    std::vector<Geometry*>* resultPolyList = new std::vector<Geometry*>();
+    std::vector<std::unique_ptr<Geometry>> resultPolyList;
 
     // add Polygons for all shells
     for(std::size_t i = 0, n = newShellList.size(); i < n; i++) {
         EdgeRing* er = newShellList[i];
-        Polygon* poly = er->toPolygon(geometryFactory).release();
-        resultPolyList->push_back(poly);
+        auto poly = er->toPolygon(geometryFactory);
+        resultPolyList.push_back(std::move(poly));
     }
     return resultPolyList;
 }

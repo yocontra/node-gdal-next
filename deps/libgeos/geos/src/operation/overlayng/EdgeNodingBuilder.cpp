@@ -80,6 +80,9 @@ EdgeNodingBuilder::setClipEnvelope(const Envelope* p_clipEnv)
 std::vector<Edge*>
 EdgeNodingBuilder::build(const Geometry* geom0, const Geometry* geom1)
 {
+    inputHasZ = geom0->hasZ() || (geom1 != nullptr && geom1->hasZ());
+    inputHasM = geom0->hasM() || (geom1 != nullptr && geom1->hasM());
+
     add(geom0, 0);
     add(geom1, 1);
     std::vector<Edge*> nodedEdges = node(inputEdges.get());
@@ -226,7 +229,7 @@ EdgeNodingBuilder::addPolygonRing(const LinearRing* ring, bool isHole, uint8_t g
     if (isClippedCompletely(ring->getEnvelopeInternal()))
       return;
 
-    std::unique_ptr<geom::CoordinateArraySequence> pts = clip(ring);
+    std::unique_ptr<geom::CoordinateSequence> pts = clip(ring);
 
     /**
     * Don't add edges that collapse to a point
@@ -261,34 +264,25 @@ EdgeNodingBuilder::createEdgeSourceInfo(uint8_t index, int depthDelta, bool isHo
 
 /*private*/
 void
-EdgeNodingBuilder::addEdge(std::unique_ptr<CoordinateArraySequence>& cas, const EdgeSourceInfo* info)
+EdgeNodingBuilder::addEdge(std::unique_ptr<CoordinateSequence>& cas, const EdgeSourceInfo* info)
 {
     // TODO: manage these internally to EdgeNodingBuilder in a std::deque,
     // since they do not have a life span longer than the EdgeNodingBuilder
     // in OverlayNG::buildGraph()
-    NodedSegmentString* ss = new NodedSegmentString(cas.release(), reinterpret_cast<const void*>(info));
-    inputEdges->push_back(ss);
-}
-
-/*private*/
-void
-EdgeNodingBuilder::addEdge(std::unique_ptr<std::vector<Coordinate>> pts, const EdgeSourceInfo* info)
-{
-    CoordinateArraySequence* cas = new CoordinateArraySequence(pts.release());
-    NodedSegmentString* ss = new NodedSegmentString(cas, reinterpret_cast<const void*>(info));
+    NodedSegmentString* ss = new NodedSegmentString(cas.release(), inputHasZ, inputHasM, reinterpret_cast<const void*>(info));
     inputEdges->push_back(ss);
 }
 
 /*private*/
 bool
-EdgeNodingBuilder::isClippedCompletely(const Envelope* env)
+EdgeNodingBuilder::isClippedCompletely(const Envelope* env) const
 {
     if (clipEnv == nullptr) return false;
     return clipEnv->disjoint(env);
 }
 
 /* private */
-std::unique_ptr<geom::CoordinateArraySequence>
+std::unique_ptr<geom::CoordinateSequence>
 EdgeNodingBuilder::clip(const LinearRing* ring)
 {
     const Envelope* env = ring->getEnvelopeInternal();
@@ -305,7 +299,7 @@ EdgeNodingBuilder::clip(const LinearRing* ring)
 }
 
 /*private*/
-std::unique_ptr<CoordinateArraySequence>
+std::unique_ptr<CoordinateSequence>
 EdgeNodingBuilder::removeRepeatedPoints(const LineString* line)
 {
     const CoordinateSequence* pts = line->getCoordinatesRO();
@@ -358,20 +352,20 @@ EdgeNodingBuilder::addLine(const LineString* line, uint8_t geomIndex)
         return;
 
     if (isToBeLimited(line)) {
-        std::vector<std::unique_ptr<CoordinateArraySequence>>& sections = limit(line);
+        std::vector<std::unique_ptr<CoordinateSequence>>& sections = limit(line);
         for (auto& pts : sections) {
             addLine(pts, geomIndex);
         }
     }
     else {
-        std::unique_ptr<CoordinateArraySequence> ptsNoRepeat = removeRepeatedPoints(line);
+        std::unique_ptr<CoordinateSequence> ptsNoRepeat = removeRepeatedPoints(line);
         addLine(ptsNoRepeat, geomIndex);
     }
 }
 
 /*private*/
 void
-EdgeNodingBuilder::addLine(std::unique_ptr<CoordinateArraySequence>& pts, uint8_t geomIndex)
+EdgeNodingBuilder::addLine(std::unique_ptr<CoordinateSequence>& pts, uint8_t geomIndex)
 {
     /**
      * Don't add edges that collapse to a point
@@ -402,7 +396,7 @@ EdgeNodingBuilder::isToBeLimited(const LineString* line) const
 }
 
 /*private*/
-std::vector<std::unique_ptr<CoordinateArraySequence>>&
+std::vector<std::unique_ptr<CoordinateSequence>>&
 EdgeNodingBuilder::limit(const LineString* line)
 {
     const CoordinateSequence* pts = line->getCoordinatesRO();

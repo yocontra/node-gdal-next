@@ -22,6 +22,7 @@
 #include <geos/operation/relate/RelateNodeFactory.h>
 #include <geos/operation/relate/RelateNode.h>
 #include <geos/operation/relate/EdgeEndBuilder.h>
+#include <geos/algorithm/BoundaryNodeRule.h>
 #include <geos/algorithm/LineIntersector.h>
 #include <geos/algorithm/PointLocator.h>
 #include <geos/geom/IntersectionMatrix.h>
@@ -35,6 +36,7 @@
 #include <geos/geomgraph/Node.h>
 #include <geos/geomgraph/EdgeIntersectionList.h>
 #include <geos/geomgraph/EdgeIntersection.h>
+#include <geos/operation/BoundaryOp.h>
 
 #include <geos/util/Interrupt.h>
 #include <geos/util.h>
@@ -75,7 +77,7 @@ RelateComputer::computeIM()
     const Envelope* e1 = (*arg)[0]->getGeometry()->getEnvelopeInternal();
     const Envelope* e2 = (*arg)[1]->getGeometry()->getEnvelopeInternal();
     if(!e1->intersects(e2)) {
-        computeDisjointIM(im.get());
+        computeDisjointIM(im.get(), (*arg)[0]->getBoundaryNodeRule());
         return std::move(im);
     }
 
@@ -186,9 +188,9 @@ RelateComputer::computeIM()
      */
     // build EdgeEnds for all intersections
     EdgeEndBuilder eeBuilder;
-    std::vector<EdgeEnd*> ee0 = eeBuilder.computeEdgeEnds((*arg)[0]->getEdges());
-    insertEdgeEnds(&ee0);
-    std::vector<EdgeEnd*> ee1 = eeBuilder.computeEdgeEnds((*arg)[1]->getEdges());
+    auto&& ee0 = eeBuilder.computeEdgeEnds((*arg)[0]->getEdges());
+    insertEdgeEnds(ee0);
+    auto&& ee1 = eeBuilder.computeEdgeEnds((*arg)[1]->getEdges());
 
 #if GEOS_DEBUG
     std::cerr << "RelateComputer::computeIM: "
@@ -196,7 +198,7 @@ RelateComputer::computeIM()
               << std::endl;
 #endif
 
-    insertEdgeEnds(&ee1);
+    insertEdgeEnds(ee1);
 
 #if GEOS_DEBUG
     std::cerr << "RelateComputer::computeIM: "
@@ -232,10 +234,10 @@ RelateComputer::computeIM()
 }
 
 void
-RelateComputer::insertEdgeEnds(std::vector<EdgeEnd*>* ee)
+RelateComputer::insertEdgeEnds(std::vector<std::unique_ptr<EdgeEnd>>& ee)
 {
-    for(EdgeEnd* e: *ee) {
-        nodes.add(e);
+    for(auto& e : ee) {
+        nodes.add(std::move(e));
     }
 }
 
@@ -311,7 +313,7 @@ RelateComputer::copyNodesAndLabels(uint8_t argIndex)
 {
     const NodeMap* nm = (*arg)[argIndex]->getNodeMap();
     for(const auto& it: *nm) {
-        const Node* graphNode = it.second;
+        const Node* graphNode = it.second.get();
         Node* newNode = nodes.addNode(graphNode->getCoordinate());
         newNode->setLabel(argIndex,
                           graphNode->getLabel().getLocation(argIndex));
@@ -334,7 +336,7 @@ RelateComputer::computeIntersectionNodes(uint8_t argIndex)
     std::vector<Edge*>* edges = (*arg)[argIndex]->getEdges();
     for(Edge* e: *edges) {
         Location eLoc = e->getLabel().getLocation(argIndex);
-        EdgeIntersectionList& eiL = e->getEdgeIntersectionList();
+        const EdgeIntersectionList& eiL = e->getEdgeIntersectionList();
         for(const EdgeIntersection & ei : eiL) {
             RelateNode* n = detail::down_cast<RelateNode*>(nodes.addNode(ei.coord));
             if(eLoc == Location::BOUNDARY) {
@@ -365,7 +367,7 @@ RelateComputer::labelIntersectionNodes(uint8_t argIndex)
         EdgeIntersectionList& eiL = e->getEdgeIntersectionList();
 
         for(const EdgeIntersection& ei : eiL) {
-            RelateNode* n = (RelateNode*) nodes.find(ei.coord);
+            RelateNode* n = static_cast<RelateNode*>(nodes.find(ei.coord));
             if(n->getLabel().isNull(argIndex)) {
                 if(eLoc == Location::BOUNDARY) {
                     n->setLabelBoundary(argIndex);
@@ -380,27 +382,45 @@ RelateComputer::labelIntersectionNodes(uint8_t argIndex)
 
 /* private */
 void
-RelateComputer::computeDisjointIM(IntersectionMatrix* imX)
+RelateComputer::computeDisjointIM(IntersectionMatrix* imX, const algorithm::BoundaryNodeRule& boundaryNodeRule)
 {
     const Geometry* ga = (*arg)[0]->getGeometry();
     if(!ga->isEmpty()) {
         imX->set(Location::INTERIOR, Location::EXTERIOR, ga->getDimension());
-        imX->set(Location::BOUNDARY, Location::EXTERIOR, ga->getBoundaryDimension());
+        imX->set(Location::BOUNDARY, Location::EXTERIOR, getBoundaryDim(*ga, boundaryNodeRule));
     }
     const Geometry* gb = (*arg)[1]->getGeometry();
     if(!gb->isEmpty()) {
         imX->set(Location::EXTERIOR, Location::INTERIOR, gb->getDimension());
-        imX->set(Location::EXTERIOR, Location::BOUNDARY, gb->getBoundaryDimension());
+        imX->set(Location::EXTERIOR, Location::BOUNDARY, getBoundaryDim(*gb, boundaryNodeRule));
     }
 }
 
+int
+RelateComputer::getBoundaryDim(const Geometry& geom, const algorithm::BoundaryNodeRule& boundaryNodeRule)
+{
+    // If the geometry has a non-empty boundary
+    // the intersection is the nominal dimension.
+    if (BoundaryOp::hasBoundary(geom, boundaryNodeRule)) {
+        /**
+      * special case for lines, since Geometry.getBoundaryDimension is not aware
+      * of Boundary Node Rule.
+      */
+        if (geom.getDimension() == 1)
+            return Dimension::P;
+        return geom.getBoundaryDimension();
+    }
+
+    // Otherwise intersection is F
+    return Dimension::False;
+}
 
 void
 RelateComputer::labelNodeEdges()
 {
-    auto& nMap = nodes.nodeMap;
-    for(auto& entry : nMap) {
-        RelateNode* node = detail::down_cast<RelateNode*>(entry.second);
+    const auto& nMap = nodes.nodeMap;
+    for(const auto& entry : nMap) {
+        RelateNode* node = detail::down_cast<RelateNode*>(entry.second.get());
 #if GEOS_DEBUG
         std::cerr << "RelateComputer::labelNodeEdges: "
                   << "node edges: " << *(node->getEdges())
@@ -421,9 +441,9 @@ RelateComputer::updateIM(IntersectionMatrix& imX)
         Edge* e = *ei;
         e->GraphComponent::updateIM(imX);
     }
-    auto& nMap = nodes.nodeMap;
-    for(auto& entry : nMap) {
-        RelateNode* node = (RelateNode*) entry.second;
+    const auto& nMap = nodes.nodeMap;
+    for(const auto& entry : nMap) {
+        RelateNode* node = detail::down_cast<RelateNode*>(entry.second.get());
         node->updateIM(imX);
         node->updateIMFromEdges(imX);
     }
@@ -465,7 +485,7 @@ void
 RelateComputer::labelIsolatedNodes()
 {
     for(const auto& it: nodes) {
-        Node* n = it.second;
+        Node* n = it.second.get();
         const Label& label = n->getLabel();
         // isolated nodes should always have at least one geometry in their label
         assert(label.getGeometryCount() > 0); // node with empty label found
