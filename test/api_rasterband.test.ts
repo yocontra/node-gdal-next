@@ -1310,7 +1310,10 @@ describe('gdal.RasterBand', () => {
               let calls = 0
               let prevComplete = 0
               const zeros = new Float64Array(size * size)
-              band.pixels.write(0, 0, size, size, zeros, {
+              // Make sure to use non-aligned blocks because GDAL 3.8.0 has
+              // an optimization when writing aligned blocks in a GeoTiff
+              // that never calls the progress callback
+              band.pixels.write(1, 1, size - 3, size - 3, zeros, {
                 progress_cb: (complete): void => {
                   calls++
                   assert.isAbove(complete, prevComplete)
