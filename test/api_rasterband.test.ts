@@ -1297,17 +1297,20 @@ describe('gdal.RasterBand', () => {
                   assert.isAtMost(complete, 1)
                   prevComplete = complete
                 } })
+              assert.instanceOf(data, Uint8Array)
               assert.isAtLeast(calls, 1)
             })
             it('should call the write() progress callback when one is provided', () => {
               const file = `/vsimem/write_progress_test.${String(
                 Math.random()
               ).substring(2)}.tmp.tif`
-              ds2 = gdal.open(file, 'w', 'GTiff', ds1.rasterSize.x, ds1.rasterSize.y, 1)
+              const size = 4096
+              ds2 = gdal.open(file, 'w', 'GTiff', size, size, 1, gdal.GDT_Float64)
               const band = ds2.bands.get(1)
               let calls = 0
               let prevComplete = 0
-              band.pixels.write(0, 0, ds1.rasterSize.x, ds1.rasterSize.y, data, {
+              const zeros = new Float64Array(size * size)
+              band.pixels.write(0, 0, size, size, zeros, {
                 progress_cb: (complete): void => {
                   calls++
                   assert.isAbove(complete, prevComplete)
