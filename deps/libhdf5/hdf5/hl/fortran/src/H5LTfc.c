@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -24,14 +23,7 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -42,7 +34,7 @@ h5ltmake_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *rank, h
 {
     int      ret_value = -1;
     herr_t   ret;
-    char *   c_name = NULL;
+    char    *c_name = NULL;
     hsize_t *c_dims = NULL;
     int      i;
 
@@ -53,7 +45,7 @@ h5ltmake_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *rank, h
     if (c_name == NULL)
         goto done;
 
-    c_dims = (hsize_t *)HDmalloc(sizeof(hsize_t) * ((size_t)*rank));
+    c_dims = (hsize_t *)malloc(sizeof(hsize_t) * ((size_t)*rank));
     if (c_dims == NULL)
         goto done;
     /*
@@ -75,9 +67,9 @@ h5ltmake_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *rank, h
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_dims != NULL)
-        HDfree(c_dims);
+        free(c_dims);
     return ret_value;
 }
 
@@ -88,14 +80,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -107,7 +92,7 @@ h5ltread_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hid_t_f *type_
     herr_t ret;
     hid_t  c_loc_id;
     hid_t  c_type_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -131,7 +116,7 @@ h5ltread_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hid_t_f *type_
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -143,14 +128,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -161,8 +139,8 @@ h5ltmake_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name = NULL;
-    char * c_buf  = NULL;
+    char  *c_name = NULL;
+    char  *c_buf  = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -189,9 +167,9 @@ h5ltmake_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -203,14 +181,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -221,7 +192,7 @@ h5ltread_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, char *b
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -244,7 +215,7 @@ h5ltread_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, char *b
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -256,14 +227,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -275,9 +239,9 @@ h5ltset_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
     int    ret_value = -1;
     herr_t ret       = SUCCEED;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
-    char * c_buf      = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
+    char  *c_buf      = NULL;
     size_t c_size;
 
     /*
@@ -297,7 +261,7 @@ h5ltset_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
     c_loc_id = (hid_t)*loc_id;
     c_size   = (size_t)*size;
 
-    if (HDstrncmp(dtype, "I", 1) == 0) {
+    if (strncmp(dtype, "I", 1) == 0) {
         if ((size_t)*sizeof_val == sizeof(int))
             ret = H5LT_set_attribute_numerical(c_loc_id, c_name, c_attrname, c_size, H5T_NATIVE_INT,
                                                (const int *)buf);
@@ -312,22 +276,20 @@ h5ltset_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
         else
             goto done;
     }
-    else if (HDstrncmp(dtype, "R", 1) == 0) {
+    else if (strncmp(dtype, "R", 1) == 0) {
         if ((size_t)*sizeof_val == sizeof(float))
             ret = H5LT_set_attribute_numerical(c_loc_id, c_name, c_attrname, c_size, H5T_NATIVE_FLOAT,
                                                (const float *)buf);
         else if ((size_t)*sizeof_val == sizeof(double))
             ret = H5LT_set_attribute_numerical(c_loc_id, c_name, c_attrname, c_size, H5T_NATIVE_DOUBLE,
                                                (const double *)buf);
-#if H5_SIZEOF_LONG_DOUBLE != 0
         else if ((size_t)*sizeof_val == sizeof(long double))
             ret = H5LT_set_attribute_numerical(c_loc_id, c_name, c_attrname, c_size, H5T_NATIVE_LDOUBLE,
                                                (const long double *)buf);
-#endif
         else
             goto done;
     }
-    else if (HDstrncmp(dtype, "C", 1) == 0) {
+    else if (strncmp(dtype, "C", 1) == 0) {
 
         c_buf = (char *)HD5f2cstring((_fcd)buf, c_size);
         if (c_buf == NULL)
@@ -342,11 +304,11 @@ h5ltset_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -358,14 +320,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -377,8 +332,8 @@ h5ltget_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
     int    ret_value = -1;
     herr_t ret       = SUCCEED;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -396,7 +351,7 @@ h5ltget_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
      */
     c_loc_id = (hid_t)*loc_id;
 
-    if (HDstrncmp(dtype, "I", 1) == 0) {
+    if (strncmp(dtype, "I", 1) == 0) {
         if ((size_t)*sizeof_val == sizeof(int))
             ret = H5LTget_attribute(c_loc_id, c_name, c_attrname, H5T_NATIVE_INT, buf);
         else if ((size_t)*sizeof_val == sizeof(long))
@@ -408,15 +363,13 @@ h5ltget_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
         else
             goto done;
     }
-    else if (HDstrncmp(dtype, "R", 1) == 0) {
+    else if (strncmp(dtype, "R", 1) == 0) {
         if ((size_t)*sizeof_val == sizeof(float))
             ret = H5LTget_attribute(c_loc_id, c_name, c_attrname, H5T_NATIVE_FLOAT, buf);
         else if ((size_t)*sizeof_val == sizeof(double))
             ret = H5LTget_attribute(c_loc_id, c_name, c_attrname, H5T_NATIVE_DOUBLE, buf);
-#if H5_SIZEOF_LONG_DOUBLE != 0
         else if ((size_t)*sizeof_val == sizeof(long double))
             ret = H5LTget_attribute(c_loc_id, c_name, c_attrname, H5T_NATIVE_LDOUBLE, buf);
-#endif
         else
             goto done;
     }
@@ -428,9 +381,9 @@ h5ltget_attribute_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size_t_f 
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
 
     return ret_value;
 }
@@ -442,14 +395,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -460,9 +406,9 @@ h5ltget_attribute_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
 {
     int    ret_value = -1;
     herr_t ret;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
-    char * c_buf      = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
+    char  *c_buf      = NULL;
 
     /*
      * Convert FORTRAN name to C name
@@ -477,7 +423,7 @@ h5ltget_attribute_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
     /*
      * Allocate buffer to hold C attribute string
      */
-    if ((c_buf = (char *)HDmalloc((size_t)*buf_size + 1)) == NULL)
+    if ((c_buf = (char *)malloc((size_t)*buf_size + 1)) == NULL)
         goto done;
 
     /*
@@ -496,11 +442,11 @@ h5ltget_attribute_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -512,14 +458,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -530,7 +469,7 @@ h5ltget_dataset_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *ra
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
     int    c_rank;
 
     /*
@@ -555,7 +494,7 @@ h5ltget_dataset_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *ra
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -567,14 +506,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -583,7 +515,7 @@ int_f
 h5ltfind_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
 {
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
     herr_t ret;
 
     /*
@@ -601,7 +533,7 @@ h5ltfind_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
     ret = H5LTfind_dataset(c_loc_id, c_name);
 
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret;
 }
@@ -613,14 +545,7 @@ h5ltfind_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -632,7 +557,7 @@ h5ltget_dataset_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f 
     int         ret_value = -1;
     herr_t      ret;
     hid_t       c_loc_id;
-    char *      c_name = NULL;
+    char       *c_name = NULL;
     H5T_class_t c_classtype;
     size_t      c_type_size;
     hsize_t     c_dims[32];
@@ -674,7 +599,7 @@ h5ltget_dataset_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f 
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -686,14 +611,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -705,8 +623,8 @@ h5ltget_attribute_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, siz
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
     int    c_rank;
 
     /*
@@ -735,9 +653,9 @@ h5ltget_attribute_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, siz
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
 
     return ret_value;
 }
@@ -749,14 +667,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 09, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -768,8 +679,8 @@ h5ltget_attribute_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f
     int         ret_value = -1;
     herr_t      ret;
     hid_t       c_loc_id;
-    char *      c_name     = NULL;
-    char *      c_attrname = NULL;
+    char       *c_name     = NULL;
+    char       *c_attrname = NULL;
     H5T_class_t c_classtype;
     size_t      c_type_size;
     hsize_t     c_dims[32];
@@ -815,9 +726,9 @@ h5ltget_attribute_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_attrname != NULL)
-        HDfree(c_attrname);
+        free(c_attrname);
 
     return ret_value;
 }
@@ -829,14 +740,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: M. Scot Breitenfeld
- *
- * Date: February 18, 2012
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -844,9 +748,9 @@ done:
 int_f
 h5ltpath_valid_c(hid_t_f *loc_id, _fcd path, size_t_f *pathlen, int_f *check_object_valid_c)
 {
-    htri_t  ret    = -1;
-    char *  c_path = NULL;
-    hbool_t check_object_valid;
+    htri_t ret    = -1;
+    char  *c_path = NULL;
+    bool   check_object_valid;
 
     /*
      * convert FORTRAN name to C name
@@ -854,9 +758,9 @@ h5ltpath_valid_c(hid_t_f *loc_id, _fcd path, size_t_f *pathlen, int_f *check_obj
     if (NULL == (c_path = (char *)HD5f2cstring(path, (size_t)*pathlen)))
         goto done;
 
-    check_object_valid = FALSE;
+    check_object_valid = false;
     if (*check_object_valid_c == 1)
-        check_object_valid = TRUE;
+        check_object_valid = true;
 
     /*
      * call H5LTpath_valid function.
@@ -865,7 +769,7 @@ h5ltpath_valid_c(hid_t_f *loc_id, _fcd path, size_t_f *pathlen, int_f *check_obj
 
 done:
     if (c_path != NULL)
-        HDfree(c_path);
+        free(c_path);
 
     return (int_f)ret;
 }

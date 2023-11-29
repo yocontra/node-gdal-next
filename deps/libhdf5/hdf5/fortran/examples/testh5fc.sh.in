@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -12,10 +11,6 @@
 # help@hdfgroup.org.
 #
 # Tests for the h5fc compiler tool
-# Created: Albert Cheng, 2007/3/14
-#
-# Modification:
-#
 
 srcdir=@srcdir@
 
@@ -61,7 +56,7 @@ applib=libapp${H5TOOL}.a
 # short hands
 # Caution: if some *.h5 files must be cleaned here, list them by names.
 # Don't use the wildcard form of *.h5 as it will wipe out even *.h5 generated
-# by otehr test programs. This will cause a racing condition error when
+# by other test programs. This will cause a racing condition error when
 # parallel make (e.g., gmake -j 4) is used.
 temp_SRC="$hdf5main $appmain $prog1 $prog2"
 temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`

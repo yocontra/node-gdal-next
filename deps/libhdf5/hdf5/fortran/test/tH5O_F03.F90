@@ -10,7 +10,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -42,11 +41,6 @@ MODULE visit_cb
   !
   ! Return:      Success:        0
   !              Failure:        -1
-  !
-  ! Programmer:  M.S. Breitenfeld
-  !              July 12, 2012
-  !              Adopted from C test.
-  !
   !-------------------------------------------------------------------------
   !
   ! Object visit structs
@@ -209,7 +203,6 @@ CONTAINS
     ! Since the name is generated in C and passed to a Fortran string, it
     ! will be NULL terminated, so we need to find the end of the string.
 
-    len = 1
     DO len = 1, 180
        IF(name(len) .EQ. C_NULL_CHAR) EXIT
     ENDDO
@@ -274,6 +267,10 @@ END MODULE visit_cb
 
 MODULE TH5O_F03
 
+  USE HDF5
+  USE TH5_MISC
+  USE ISO_C_BINDING
+
 CONTAINS
 !***************************************************************
 !**
@@ -283,9 +280,6 @@ CONTAINS
 
 SUBROUTINE test_h5o_refcount(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -422,11 +416,8 @@ END SUBROUTINE test_h5o_refcount
 
 SUBROUTINE test_obj_visit(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-
   USE visit_cb
-  USE ISO_C_BINDING
+
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -442,7 +433,7 @@ SUBROUTINE test_obj_visit(total_error)
   ! Construct "interesting" file to visit
   CALL build_visit_file(fid)
 
-  ! Inialize udata for testing purposes
+  ! Initialize udata for testing purposes
   udata%info(1)%path(1:1) ="."
   udata%info(1)%type_obj = H5O_TYPE_GROUP_F
   udata%info(2)%path(1:12) = &
@@ -560,9 +551,6 @@ END SUBROUTINE test_obj_visit
 
 SUBROUTINE test_obj_info(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -704,18 +692,11 @@ END SUBROUTINE test_obj_info
 ! Function:    build_visit_file
 !
 ! Purpose:     Build an "interesting" file to use for visiting links & objects
-!
-! Programmer:  M. Scot Breitenfeld
-!              July 12, 2012
-!              NOTE: Adapted from C test.
-!
 !-------------------------------------------------------------------------
 !
 
 SUBROUTINE build_visit_file(fid)
 
-  USE HDF5
-  USE TH5_MISC
   IMPLICIT NONE
 
   INTEGER(hid_t) :: fid                   ! File ID

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -63,7 +62,11 @@ static int test_foreign_scaleattached(const char *filename);
 #define SCALE_4_NAME "scalename_4_"
 
 #define FILENAME "test_ds_"
-#define FILEEXT  ".h5"
+#ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
+#define FILEEXT "_new_ref.h5"
+#else
+#define FILEEXT ".h5"
+#endif
 
 /*-------------------------------------------------------------------------
  * the main program
@@ -75,13 +78,13 @@ main(int argc, char **argv)
     int  nerrors = 0;
     char filename[65];
 
-    if (argc < 2) {
-        HDprintf("Usage: gen_test [le | be]\n");
+    if (argc < 2 || !argv[0] || !argv[1]) {
+        printf("Usage: gen_test [le | be]\n");
         return 1;
     }
 
     if (argv[1] && (strcmp("le", argv[1]) != 0) && (strcmp("be", argv[1]) != 0)) {
-        HDprintf("Usage: gen_test [le | be]\n");
+        printf("Usage: gen_test [le | be]\n");
         return 1;
     }
 
@@ -101,11 +104,11 @@ main(int argc, char **argv)
 
     if (nerrors)
         goto error;
-    HDprintf("Dimension scales file generation passed.\n");
+    printf("Dimension scales file generation passed.\n");
     return 0;
 
 error:
-    HDprintf("***** %d DIMENSION SCALES FILE GENERATION FAILED! *****\n", nerrors);
+    printf("***** %d DIMENSION SCALES FILE GENERATION FAILED! *****\n", nerrors);
     return 1;
 }
 
@@ -189,11 +192,11 @@ test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx)
         if (H5DSis_attached(did, dsid, idx) == 0) {
             if (H5DSattach_scale(did, dsid, idx) >= 0) {
                 if (H5DSis_attached(did, dsid, idx) > 0) {
-                    /* HDprintf(" scale attached "); */
+                    /* printf(" scale attached "); */
                     ret_value = SUCCEED;
                 }
                 else if (H5DSis_attached(did, dsid, idx) == 0) {
-                    HDprintf(" scale not attached ");
+                    printf(" scale not attached ");
                 }
             }
         }
@@ -252,18 +255,18 @@ test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *scalename
     herr_t  ret_value = FAIL;
     hid_t   dsid      = -1;
     ssize_t name_len;
-    char *  name_out = NULL;
+    char   *name_out = NULL;
 
     if ((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if (H5DSis_attached(did, dsid, idx) == 1) {
             if ((name_len = H5DSget_scale_name(dsid, NULL, (size_t)0)) > 0) {
-                name_out = (char *)HDmalloc((size_t)name_len * sizeof(char));
+                name_out = (char *)malloc((size_t)name_len * sizeof(char));
                 if (name_out != NULL) {
                     if (H5DSget_scale_name(dsid, name_out, (size_t)name_len) >= 0) {
                         if (strcmp(scalename, name_out) == 0) {
                             ret_value = SUCCEED;
                         }
-                        HDfree(name_out);
+                        free(name_out);
                         name_out = NULL;
                     }
                 }
@@ -333,7 +336,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -397,7 +400,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -477,7 +480,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -558,7 +561,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -606,7 +609,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 

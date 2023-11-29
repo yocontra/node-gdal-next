@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -45,10 +44,10 @@ typedef struct particle_t {
  * a static array of particles for writing and checking reads
  *-------------------------------------------------------------------------
  */
-static particle_t testPart[NRECORDS] = {{"zero", 0, 0, 0.0f, 0.0f},    {"one", 10, 10, 1.0f, 10.0f},
-                                        {"two", 20, 20, 2.0f, 20.0f},  {"three", 30, 30, 3.0f, 30.0f},
-                                        {"four", 40, 40, 4.0f, 40.0f}, {"five", 50, 50, 5.0f, 50.0f},
-                                        {"six", 60, 60, 6.0f, 60.0f},  {"seven", 70, 70, 7.0f, 70.0f}};
+static particle_t testPart[NRECORDS] = {{"zero", 0, 0, 0.0F, 0.0},    {"one", 10, 10, 1.0F, 10.0},
+                                        {"two", 20, 20, 2.0F, 20.0},  {"three", 30, 30, 3.0F, 30.0},
+                                        {"four", 40, 40, 4.0F, 40.0}, {"five", 50, 50, 5.0F, 50.0},
+                                        {"six", 60, 60, 6.0F, 60.0},  {"seven", 70, 70, 7.0F, 70.0}};
 
 /*-------------------------------------------------------------------------
  * function that compares one particle
@@ -59,7 +58,7 @@ static particle_t testPart[NRECORDS] = {{"zero", 0, 0, 0.0f, 0.0f},    {"one", 1
 static int
 cmp_par(size_t i, size_t j, particle_t *rbuf, particle_t *wbuf)
 {
-    if ((HDstrcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
+    if ((strcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi || !H5_FLT_ABS_EQUAL(rbuf[i].pressure, wbuf[j].pressure) ||
         !H5_DBL_ABS_EQUAL(rbuf[i].temperature, wbuf[j].temperature)) {
         return FAIL;
@@ -116,7 +115,7 @@ create_hl_table(hid_t fid)
     hid_t       field_type[NFIELDS];
     hid_t       string_type;
     hsize_t     chunk_size = 10;
-    int *       fill_data  = NULL;
+    int        *fill_data  = NULL;
     int         compress   = 0;
     herr_t      status;
 
@@ -169,7 +168,7 @@ test_create_close(hid_t fid)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Create the table */
     table = H5PTcreate_fl(fid, PT_NAME, part_t, (hsize_t)100, -1);
@@ -446,7 +445,7 @@ test_big_table(hid_t fid)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Create a new table */
     table = H5PTcreate_fl(fid, "Packet Test Dataset2", part_t, (hsize_t)33, -1);
@@ -520,7 +519,7 @@ test_opaque(hid_t fid)
     if ((part_t = H5Tcreate(H5T_OPAQUE, sizeof(particle_t))) < 0)
         return FAIL;
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Tag the opaque datatype */
     if (H5Tset_tag(part_t, "Opaque Particle") < 0)
@@ -596,7 +595,7 @@ test_compress(void)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Create a new table with compression level 8 */
     table = H5PTcreate_fl(fid1, "Compressed Test Dataset", part_t, (hsize_t)80, 8);
@@ -621,7 +620,7 @@ test_compress(void)
         TEST_ERROR;
 
     /* Read particles to ensure that all of them were written correctly  */
-    HDmemset(readPart, 0, sizeof(readPart));
+    memset(readPart, 0, sizeof(readPart));
     for (c = 0; c < BIG_TABLE_SIZE; c++) {
         err = H5PTget_next(table, (size_t)1, readPart);
         if (err < 0)
@@ -983,7 +982,7 @@ main(void)
     /* create a file using default properties */
     fid = H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    HDputs("Testing packet table");
+    puts("Testing packet table");
 
     /* Test packet table with fixed length */
     if (test_packet_table(fid) < 0)

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -42,10 +41,10 @@ main(void)
     Particle dst_buf[NRECORDS + NRECORDS_ADD];
 
     /* Define an array of Particles */
-    Particle p_data[NRECORDS] = {{"zero", 0, 0, 0.0f, 0.0},    {"one", 10, 10, 1.0f, 10.0},
-                                 {"two", 20, 20, 2.0f, 20.0},  {"three", 30, 30, 3.0f, 30.0},
-                                 {"four", 40, 40, 4.0f, 40.0}, {"five", 50, 50, 5.0f, 50.0},
-                                 {"six", 60, 60, 6.0f, 60.0},  {"seven", 70, 70, 7.0f, 70.0}};
+    Particle p_data[NRECORDS] = {{"zero", 0, 0, 0.0F, 0.0},    {"one", 10, 10, 1.0F, 10.0},
+                                 {"two", 20, 20, 2.0F, 20.0},  {"three", 30, 30, 3.0F, 30.0},
+                                 {"four", 40, 40, 4.0F, 40.0}, {"five", 50, 50, 5.0F, 50.0},
+                                 {"six", 60, 60, 6.0F, 60.0},  {"seven", 70, 70, 7.0F, 70.0}};
 
     /* Calculate the size and the offsets of our struct members in memory */
     size_t dst_size            = sizeof(Particle);
@@ -61,12 +60,12 @@ main(void)
     hid_t       string_type;
     hid_t       file_id;
     hsize_t     chunk_size = 10;
-    int *       fill_data  = NULL;
+    int        *fill_data  = NULL;
     int         compress   = 0;
     int         i;
 
     /* Append particles */
-    Particle particle_in[NRECORDS_ADD] = {{"eight", 80, 80, 8.0f, 80.0}, {"nine", 90, 90, 9.0f, 90.0}};
+    Particle particle_in[NRECORDS_ADD] = {{"eight", 80, 80, 8.0F, 80.0}, {"nine", 90, 90, 9.0F, 90.0}};
 
     /* Initialize the field field_type */
     string_type = H5Tcopy(H5T_C_S1);

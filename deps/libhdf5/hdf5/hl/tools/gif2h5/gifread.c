@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -50,15 +49,15 @@ GetByte(const GIFBYTE *MemGif)
  *  Global Color Table (if any) from a GIF image file.  The information
  *  is stored in a GIFHEAD structure.
  *
- *  Returns: -1 if a FILE stream error occured during the read,
- *           otherwise 0 if no error occured.
+ *  Returns: -1 if a FILE stream error occurred during the read,
+ *           otherwise 0 if no error occurred.
  */
 int
-ReadGifHeader(GIFHEAD * GifHead, /* Pointer to GIF header structure  */
+ReadGifHeader(GIFHEAD  *GifHead, /* Pointer to GIF header structure  */
               GIFBYTE **MemGif2) /* GIF image file input FILE stream */
 {
     GIFWORD i;         /* Loop counter                                */
-    GIFWORD tableSize; /* Number of entires in the Global Color Table */
+    GIFWORD tableSize; /* Number of entries in the Global Color Table */
 
     GifHead->TableSize = 0;
     for (i = 0; i < 6; i++) {
@@ -103,7 +102,7 @@ ReadGifHeader(GIFHEAD * GifHead, /* Pointer to GIF header structure  */
         return -1;
 #endif /* 0 */
 
-    return 0; /* No FILE stream error occured */
+    return 0; /* No FILE stream error occurred */
 }
 
 /*
@@ -116,12 +115,12 @@ ReadGifHeader(GIFHEAD * GifHead, /* Pointer to GIF header structure  */
 **  Note that the ImageSeparator field value in the GIFIMAGEDESC
 **  structure is assigned by the function calling ReadGifImageDesc().
 **
-**  Returns: -1 if a FILE stream error occured during the read,
-**           otherwise 0 if no error occured.
+**  Returns: -1 if a FILE stream error occurred during the read,
+**           otherwise 0 if no error occurred.
 */
 int
 ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor structure  */
-                 GIFBYTE **    MemGif2       /* GIF image file input FILE stream           */
+                 GIFBYTE     **MemGif2       /* GIF image file input FILE stream           */
 )
 {
     GIFWORD i;               /* Loop counter                               */
@@ -196,7 +195,7 @@ ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor 
             *TempPtr++ = *(*MemGif2)++;
     } while (ch1);
 
-    return (0); /* No FILE stream error occured */
+    return (0); /* No FILE stream error occurred */
 }
 
 /*
@@ -205,12 +204,12 @@ ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor 
 **  Note that the Introducer and Label field values in the GIFGRAPHICCONTROL
 **  structure are assigned by the function calling ReadGifGraphicControl().
 **
-**  Returns: -1 if a FILE stream error occured during the read,
-**           otherwise 0 if no error occured.
+**  Returns: -1 if a FILE stream error occurred during the read,
+**           otherwise 0 if no error occurred.
 */
 int
 ReadGifGraphicControl(GIFGRAPHICCONTROL *GifGraphicControl, /* Pointer to GC Extension structure */
-                      GIFBYTE **         MemGif2            /* GIF image file input FILE stream  */
+                      GIFBYTE          **MemGif2            /* GIF image file input FILE stream  */
 )
 {
     int i;
@@ -219,7 +218,7 @@ ReadGifGraphicControl(GIFGRAPHICCONTROL *GifGraphicControl, /* Pointer to GC Ext
         GifGraphicControl->GCEDump[i] = *(*MemGif2)++;
     }
 
-    return (0); /* No FILE stream error occured */
+    return (0); /* No FILE stream error occurred */
 }
 
 /*
@@ -228,12 +227,12 @@ ReadGifGraphicControl(GIFGRAPHICCONTROL *GifGraphicControl, /* Pointer to GC Ext
 **  Note that the Introducer and Label field values in the GIFLPLAINTEXT
 **  structure are assigned by the function calling ReadGifPlainText().
 **
-**  Returns: -1 if a FILE stream error occured during the read,
-**           otherwise 0 if no error occured.
+**  Returns: -1 if a FILE stream error occurred during the read,
+**           otherwise 0 if no error occurred.
 */
 int
 ReadGifPlainText(GIFPLAINTEXT *GifPlainText, /* Pointer to Plain Text Extension structure */
-                 GIFBYTE **    MemGif2       /* GIF image file input FILE stream          */
+                 GIFBYTE     **MemGif2       /* GIF image file input FILE stream          */
 )
 {
     int i;
@@ -256,7 +255,7 @@ ReadGifPlainText(GIFPLAINTEXT *GifPlainText, /* Pointer to Plain Text Extension 
            return(-1);
     */
 
-    return (0); /* No FILE stream error occured */
+    return (0); /* No FILE stream error occurred */
 }
 
 /*
@@ -265,12 +264,12 @@ ReadGifPlainText(GIFPLAINTEXT *GifPlainText, /* Pointer to Plain Text Extension 
 **  Note that the Introducer and Label field values in the GIFAPPLICATION
 **  structure are assigned by the function calling ReadGifApplication().
 **
-**  Returns: -1 if a FILE stream error occured during the read,
-**           otherwise 0 if no error occured.
+**  Returns: -1 if a FILE stream error occurred during the read,
+**           otherwise 0 if no error occurred.
 */
 int
 ReadGifApplication(GIFAPPLICATION *GifApplication, /* Pointer to Application Extension structure */
-                   GIFBYTE **      MemGif2         /* GIF image file input FILE stream           */
+                   GIFBYTE       **MemGif2         /* GIF image file input FILE stream           */
 )
 {
     int i;
@@ -292,7 +291,7 @@ ReadGifApplication(GIFAPPLICATION *GifApplication, /* Pointer to Application Ext
            return(-1);
     */
 
-    return (0); /* No FILE stream error occured */
+    return (0); /* No FILE stream error occurred */
 }
 
 /*
@@ -301,12 +300,12 @@ ReadGifApplication(GIFAPPLICATION *GifApplication, /* Pointer to Application Ext
 **  Note that the Introducer and Label field values in the GIFCOMMENT
 **  structure are assigned by the function calling ReadGifComment().
 **
-**  Returns: -1 if a FILE stream error occured during the read,
-**           otherwise 0 if no error occured.
+**  Returns: -1 if a FILE stream error occurred during the read,
+**           otherwise 0 if no error occurred.
 */
 int
 ReadGifComment(GIFCOMMENT *GifComment, /* Pointer to GIF Comment Extension structure */
-               GIFBYTE **  MemGif2     /* GIF image file input FILE stream           */
+               GIFBYTE   **MemGif2     /* GIF image file input FILE stream           */
 )
 {
 
@@ -316,7 +315,7 @@ ReadGifComment(GIFCOMMENT *GifComment, /* Pointer to GIF Comment Extension struc
 
     GifComment->Terminator = 0;
 
-    return (0); /* No FILE stream error occured */
+    return (0); /* No FILE stream error occurred */
 }
 
 /*
@@ -326,12 +325,12 @@ ReadGifComment(GIFCOMMENT *GifComment, /* Pointer to GIF Comment Extension struc
 **  A GIF "sub-block" is a single count byte followed by 1 to 255
 **  additional data bytes.
 **
-**  Returns: A NULL pointer if a memory allocation error occured,
-**           otherwise a valid pointer if no error occured.
+**  Returns: A NULL pointer if a memory allocation error occurred,
+**           otherwise a valid pointer if no error occurred.
 */
 static GIFBYTE *
 ReadDataSubBlocks(GIFBYTE **MemGif2, /* GIF image file input FILE stream              */
-                  GIFWORD * DSize)
+                  GIFWORD  *DSize)
 {
     GIFBYTE *ptr1;     /* Pointer used to "walk the heap"               */
     GIFBYTE *ptr2;     /* Pointer used to mark the top of the heap      */
@@ -364,7 +363,7 @@ ReadDataSubBlocks(GIFBYTE **MemGif2, /* GIF image file input FILE stream        
         if ((dataSize = *(*MemGif2)++) == 0)
             break; /* Block Terminator encountered */
 
-        /* Increase the buffer size to accomodate the next sub-block */
+        /* Increase the buffer size to accommodate the next sub-block */
         if (!(ptr1 = ptr2 = (GIFBYTE *)realloc(ptr2, bufSize + dataSize + 1)))
             return ((GIFBYTE *)NULL);
 

@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -64,7 +63,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
   INTEGER :: ret_total_error
 
 ! ********************
-! test_attr equivelent
+! test_attr equivalent
 ! ********************
 
 !  WRITE(*,*) "TESTING ATTRIBUTES"
@@ -235,9 +234,9 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
   INTEGER(HID_T) :: attr        !String Attribute identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   data_dims = 0
@@ -317,7 +316,7 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
   CALL check("h5pclose_f",error,total_error)
 
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   CALL h5dopen_f(fid, DSET1_NAME, dset1, error)
   CALL check("h5dopen_f",error,total_error)
@@ -412,9 +411,9 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 
   INTEGER(HSIZE_T) :: storage_size   ! attributes storage requirements
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   LOGICAL :: equal
@@ -432,7 +431,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
   !  Create dataspace for dataset attributes
   CALL h5screate_f(H5S_SCALAR_F, sid, error)
   CALL check("h5screate_f",error,total_error)
@@ -622,7 +621,7 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
            my_dataset = dset3
            dsetname = DSET3_NAME
            !     CASE DEFAULT
-           !        CALL HDassert(0.AND."Toomanydatasets!")
+           !        CALL assert(0.AND."Toomanydatasets!")
         END SELECT
 
 
@@ -754,9 +753,9 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER(HID_T) :: attr        !String Attribute identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
   INTEGER(HSIZE_T) :: n
   LOGICAL, DIMENSION(1:2) :: use_index = (/.FALSE.,.TRUE./)
@@ -776,8 +775,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
-  INTEGER(HSIZE_T) :: htmp
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -840,10 +838,6 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
            my_dataset = dset3
         END SELECT
 
-        !  Check for query on non-existant attribute
-
-        n = 0
-
         ! -- CHECK PASSING AN INTEGER CONSTANT IN DIFFERENT FORMS --
 
         ! 1) call by passing an integer with the _hsize_t declaration
@@ -896,8 +890,8 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
            !  Verify information for new attribute
 
 !EP        CALL attr_info_by_idx_check(my_dataset, attrname, INT(j,HSIZE_T), use_index(i), total_error )
-           htmp = j
-           CALL attr_info_by_idx_check(my_dataset, attrname, htmp, use_index(i), total_error )
+           n = INT(j, HSIZE_T)
+           CALL attr_info_by_idx_check(my_dataset, attrname, n, use_index(i), total_error )
 
            !CHECK(ret, FAIL, "attr_info_by_idx_check");
         ENDDO
@@ -940,9 +934,9 @@ SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
   CHARACTER(LEN=*) :: attrname
   INTEGER(HSIZE_T) :: n
   LOGICAL :: use_index
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   INTEGER(SIZE_T) :: NAME_BUF_SIZE = 7
@@ -1111,7 +1105,7 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 
   INTEGER :: test_shared
   INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-  INTEGER     ::   arank = 1                      ! Attribure rank
+  INTEGER     ::   arank = 1                      ! Attribute rank
 
   !  Initialize "big" attribute data
 
@@ -1168,7 +1162,7 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 
      !  Re-open file
      CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error,fapl)
-     CALL check("h5open_f",error,total_error)
+     CALL check("h5fopen_f",error,total_error)
 
      !  Commit datatype to file
      IF(test_shared.EQ.2) THEN
@@ -1403,9 +1397,9 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER(HID_T) :: attr        !String Attribute identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
   LOGICAL, DIMENSION(1:2) :: use_index = (/.FALSE.,.TRUE./)
 
@@ -1427,7 +1421,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER :: u     !  Local index variable
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -1493,11 +1487,11 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
 
-              !  Check for deleting non-existant attribute
+              !  Check for deleting non-existent attribute
 !EP              CALL H5Adelete_by_idx_f(my_dataset, '.', idx_type, order, 0_HSIZE_T,error, lapl_id=H5P_DEFAULT_F)
               CALL H5Adelete_by_idx_f(my_dataset, '.', idx_type, order, hzero,error, lapl_id=H5P_DEFAULT_F)
               CALL verify("H5Adelete_by_idx_f",error,minusone,total_error)
@@ -1542,7 +1536,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
               !  Delete attributes from compact storage
@@ -1558,7 +1552,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 
 
                  !  Verify the attribute information for first attribute in appropriate order
-                 ! HDmemset(&ainfo, 0, sizeof(ainfo));
+                 ! memset(&ainfo, 0, sizeof(ainfo));
 
 !EP                 CALL h5aget_info_by_idx_f(my_dataset, ".", idx_type, order, 0_HSIZE_T, &
                  CALL h5aget_info_by_idx_f(my_dataset, ".", idx_type, order, hzero, &
@@ -1608,7 +1602,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
               !  Create more attributes, to push into dense form
@@ -1673,7 +1667,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
                  ENDIF
 
                  !  Verify the name for first attribute in appropriate order
-                 ! HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                 ! memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
 
                  size = 7 ! *CHECK* if not the correct size
                  CALL h5aget_name_by_idx_f(my_dataset, ".", idx_type, order,INT(0,hsize_t), &
@@ -1773,7 +1767,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 
   INTEGER :: test_shared
   INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-  INTEGER     ::   arank = 1                      ! Attribure rank
+  INTEGER     ::   arank = 1                      ! Attribute rank
 
   !  Output message about test being performed
 
@@ -1832,7 +1826,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 
      !  Re-open file
      CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error,fapl)
-     CALL check("h5open_f",error,total_error)
+     CALL check("h5fopen_f",error,total_error)
 
      !  Commit datatype to file
 
@@ -2053,7 +2047,7 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   !  Create dataspace for dataset
   CALL h5screate_f(H5S_SCALAR_F, sid, error)
@@ -2268,7 +2262,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
   INTEGER :: error
 
   INTEGER :: crt_order_flags
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   !  Output message about test being performed
 !  WRITE(*,*) "     - Testing Basic Code for Attributes with Creation Order Info"
@@ -2330,7 +2324,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   !  Open dataset created
   CALL h5dopen_f(fid, DSET1_NAME, dataset, error, H5P_DEFAULT_F )
@@ -2620,6 +2614,7 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
      WRITE(chr5,'(I5.5)') u
      attrname = 'attr '//chr5
      CALL H5Aexists_f( gid, attrname, exists, error)
+     CALL check("H5Aexists_f", error, total_error)
      CALL verify("H5Aexists",exists,.FALSE.,total_error )
 
      CALL H5Aexists_by_name_f(fid, GROUP1_NAME, attrname,  exists, error, lapl_id = H5P_DEFAULT_F)
@@ -2629,9 +2624,11 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
      CALL check("h5acreate_f",error,total_error)
 
      CALL H5Aexists_f(gid, attrname, exists, error)
+     CALL check("H5Aexists_f", error, total_error)
      CALL verify("H5Aexists",exists,.TRUE.,total_error )
 
      CALL H5Aexists_by_name_f(fid, GROUP1_NAME, attrname, exists, error)
+     CALL check("H5Aexists_by_name_f", error, total_error)
      CALL verify("H5Aexists_by_name_f",exists,.TRUE.,total_error )
 
      attr_data1(1) = u
@@ -2644,9 +2641,11 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
      CALL check("h5aclose_f",error,total_error)
 
      CALL H5Aexists_f(gid, attrname, exists, error)
+     CALL check("H5Aexists_f", error, total_error)
      CALL verify("H5Aexists",exists,.TRUE.,total_error )
 
      CALL H5Aexists_by_name_f(fid, GROUP1_NAME, attrname, exists, error)
+     CALL check("H5Aexists_by_name_f", error, total_error)
      CALL verify("H5Aexists_by_name_f",exists,.TRUE.,total_error )
 
   ENDDO
@@ -2672,10 +2671,6 @@ END SUBROUTINE test_attr_many
 ! *
 ! * Return:      Success:        0
 ! *              Failure:        -1
-! *
-! * Programmer:  Fortran version (M.S. Breitenfeld)
-! *              March 21, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -2691,9 +2686,9 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
   INTEGER :: u
   CHARACTER (LEN=8) :: attrname
   INTEGER :: error
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   INTEGER(HSIZE_T) :: storage_size   ! attributes storage requirements

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -67,7 +66,8 @@ typedef struct {
     iter_enum  command;       /* The type of return value */
 } iter_info;
 
-int iter_strcmp(const void *s1, const void *s2);
+static int  iter_strcmp(const void *s1, const void *s2);
+static void printelems(const Group &group, const H5std_string &dsname, const H5std_string &atname);
 
 /*-------------------------------------------------------------------------
  * Function:    iter_strcmp
@@ -75,10 +75,10 @@ int iter_strcmp(const void *s1, const void *s2);
  * Purpose      String comparison routine for qsort
  *-------------------------------------------------------------------------
  */
-int
+static int
 iter_strcmp(const void *s1, const void *s2)
 {
-    return (HDstrcmp(*(const char *const *)s1, *(const char *const *)s2));
+    return (strcmp(*reinterpret_cast<const char *const *>(s1), *reinterpret_cast<const char *const *>(s2)));
 }
 
 /*-------------------------------------------------------------------------
@@ -91,11 +91,11 @@ static herr_t
 liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link_info,
          void *op_data)
 {
-    iter_info *info   = (iter_info *)op_data;
+    iter_info *info   = static_cast<iter_info *>(op_data);
     static int count  = 0;
     static int count2 = 0;
 
-    HDstrcpy(info->name, name);
+    strcpy(info->name, name);
 
     switch (info->command) {
         case RET_ZERO:
@@ -125,18 +125,14 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, September 9, 2016
  *-------------------------------------------------------------------------
  */
 static void
 test_iter_group(FileAccPropList &fapl)
 {
-    int       i;                     /* counting variable */
     hsize_t   idx;                   /* Index in the group */
     char      name[NAMELEN];         /* temporary name buffer */
-    char *    lnames[NDATASETS + 2]; /* Names of the links created */
+    char     *lnames[NDATASETS + 2]; /* Names of the links created */
     iter_info info;                  /* Custom iteration information */
     herr_t    ret;                   /* Generic return value */
 
@@ -159,29 +155,28 @@ test_iter_group(FileAccPropList &fapl)
         // Create a scalar file space
         DataSpace filespace;
 
-        for (i = 0; i < NDATASETS; i++) {
-            sprintf(name, "Dataset %d", i);
+        for (int i = 0; i < NDATASETS; i++) {
+            snprintf(name, sizeof(name), "Dataset %d", i);
 
             // Create a dataset in the file
             DataSet dataset = file.createDataSet(name, datatype, filespace);
 
             /* Keep a copy of the dataset names */
-            lnames[i] = HDstrdup(name);
-            check_values(lnames[i], "HDstrdup returns NULL", __LINE__, __FILE__);
-
-        } /* end for */
+            lnames[i] = strdup(name);
+            check_values(lnames[i], "strdup returns NULL", __LINE__, __FILE__);
+        }
 
         /* Create a group and named datatype under root group for testing */
         Group grp(file.createGroup(GROUP1, 0));
-        lnames[NDATASETS] = HDstrdup("grp");
-        check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
+        lnames[NDATASETS] = strdup("grp");
+        check_values(lnames[NDATASETS], "strdup returns NULL", __LINE__, __FILE__);
 
         datatype.commit(file, "dtype");
-        lnames[NDATASETS + 1] = HDstrdup("dtype");
-        check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
+        lnames[NDATASETS + 1] = strdup("dtype");
+        check_values(lnames[NDATASETS], "strdup returns NULL", __LINE__, __FILE__);
 
         /* Sort the dataset names */
-        HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+        qsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
 
         /* Iterate through the datasets in the root group in various ways */
 
@@ -193,10 +188,10 @@ test_iter_group(FileAccPropList &fapl)
 
         // Get the number of object in the root group
         hsize_t nobjs = root_group.getNumObjs();
-        verify_val(nobjs, (hsize_t)(NDATASETS + 2), "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nobjs), NDATASETS + 2, "H5Gget_info", __LINE__, __FILE__);
 
         H5std_string obj_name;
-        for (i = 0; i < nobjs; i++) {
+        for (hsize_t i = 0; i < nobjs; i++) {
             // H5O_info2_t oinfo;                /* Object info */
 
             obj_name = root_group.getObjnameByIdx(i);
@@ -206,7 +201,7 @@ test_iter_group(FileAccPropList &fapl)
             // oinfo = root_group.childObjType((hsize_t)i, H5_INDEX_NAME, H5_ITER_INC,  ".");
             // ret = H5Oget_info_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
             // H5P_DEFAULT);
-        } /* end for */
+        }
 
         // Attempted to iterate with invalid index, should fail
         try {
@@ -222,7 +217,7 @@ test_iter_group(FileAccPropList &fapl)
         // Attempted to iterate with negative index, should fail
         try {
             info.command = RET_ZERO;
-            idx          = (hsize_t)-1;
+            idx          = HSIZE_UNDEF;
             obj_name     = root_group.getObjnameByIdx(idx);
 
             // Should FAIL but didn't, so throw an invalid action exception
@@ -268,8 +263,8 @@ test_iter_group(FileAccPropList &fapl)
         } // do nothing, exception expected
 
         /* Free the dataset names */
-        for (i = 0; i < (NDATASETS + 2); i++)
-            HDfree(lnames[i]);
+        for (int i = 0; i < NDATASETS + 2; i++)
+            free(lnames[i]);
 
         // Everything will be closed as they go out of scope
 
@@ -306,7 +301,7 @@ test_iter_group(FileAccPropList &fapl)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
@@ -332,7 +327,7 @@ test_iter_group(FileAccPropList &fapl)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
@@ -352,7 +347,7 @@ test_iter_group(FileAccPropList &fapl)
  * Purpose      Open an attribute and verify that it has a the correct name
  *-------------------------------------------------------------------------
  */
-const H5std_string FILE_NAME("titerate.h5");
+const H5std_string FILE_NAME("test_member_access.h5");
 const H5std_string GRP_NAME("/Group_A");
 const H5std_string FDATASET_NAME("file dset");
 const H5std_string GDATASET_NAME("group dset");
@@ -360,7 +355,7 @@ const H5std_string ATTR_NAME("Units");
 const H5std_string FATTR_NAME("F attr");
 const H5std_string GATTR_NAME("G attr");
 const int          DIM1 = 2;
-void
+static void
 printelems(const Group &group, const H5std_string &dsname, const H5std_string &atname)
 {
     try {
@@ -386,9 +381,6 @@ printelems(const Group &group, const H5std_string &dsname, const H5std_string &a
  * Function:    test_HDFFV_9920
  *
  * Purpose      Tests the fix for HDFFV-9920
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, September 9, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -396,6 +388,9 @@ test_HDFFV_9920()
 {
     int     attr_data[2] = {100, 200};
     hsize_t dims[1]      = {DIM1};
+
+    /* Output message about test being performed */
+    SUBTEST("Member access");
 
     try {
         // Create a new file and a group in it
@@ -426,6 +421,7 @@ test_HDFFV_9920()
         printelems(file, FDATASET_NAME, FATTR_NAME);
         printelems(gr1, GDATASET_NAME, GATTR_NAME);
 
+        PASSED();
     } // end of try block
 
     // Catch all failures for handling in the same way
@@ -441,9 +437,6 @@ test_HDFFV_9920()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Tuesday, September 6, 2016
  *-------------------------------------------------------------------------
  */
 extern "C" void
@@ -474,4 +467,5 @@ extern "C" void
 cleanup_iterate()
 {
     HDremove(FILE_ITERATE.c_str());
+    HDremove(FILE_NAME.c_str());
 } // cleanup_iterate

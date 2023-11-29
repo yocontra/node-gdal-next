@@ -6,10 +6,10 @@ use warnings;
 # (The max_idx parameter is the only thing that needs to be changed when adding
 #       support for a new major release.  If support for a prior major release
 #       is added (like support for 1.4, etc), the min_sup_idx parameter will
-#       need to be decremented. - QAK)
+#       need to be decremented.)
 
-# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, etc)
-$max_idx = 6;
+# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, 7 = 1.14, etc)
+$max_idx = 7;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
@@ -19,7 +19,6 @@ $indent = 2;
 
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -35,8 +34,6 @@ $indent = 2;
 # Read in the public symbol version description text file and create the
 # appropriate headers needed by the library.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2007/07/10
 
 ##############################################################################
 # Print the copyright into an open file
@@ -46,7 +43,6 @@ sub print_copyright ($) {
 
     print $fh "/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
     print $fh " * Copyright by The HDF Group.                                               *\n";
-    print $fh " * Copyright by the Board of Trustees of the University of Illinois.         *\n";
     print $fh " * All rights reserved.                                                      *\n";
     print $fh " *                                                                           *\n";
     print $fh " * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n";
@@ -511,7 +507,7 @@ for $file (@ARGV) {
     close SOURCE;
 
     # Create header files
-    print "Generating '", $prefix, "H5version.h'\n";
+    print "Generating 'H5version.h'\n";
     create_public($prefix);
 
 #for $name (sort keys %functions) {

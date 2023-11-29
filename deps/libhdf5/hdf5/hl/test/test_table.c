@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -137,8 +136,8 @@ h5file_open(const char *fname, unsigned flags)
 
     /* open */
     if ((fid = H5Fopen(data_file, flags, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "Error: Cannot open file <%s>\n", data_file);
-        HDexit(1);
+        fprintf(stderr, "Error: Cannot open file <%s>\n", data_file);
+        exit(1);
     }
 
     return fid;
@@ -151,14 +150,14 @@ h5file_open(const char *fname, unsigned flags)
 static int
 cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf)
 {
-    if ((HDstrcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
+    if ((strcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi || !H5_FLT_ABS_EQUAL(rbuf[i].pressure, wbuf[j].pressure) ||
         !H5_DBL_ABS_EQUAL(rbuf[i].temperature, wbuf[j].temperature)) {
-        HDfprintf(stderr, "read and write buffers have differences\n");
-        HDfprintf(stderr, "%s %ld %f %f %d\n", rbuf[i].name, rbuf[i].longi, (double)rbuf[i].pressure,
-                  rbuf[i].temperature, rbuf[i].lati);
-        HDfprintf(stderr, "%s %ld %f %f %d\n", wbuf[j].name, wbuf[j].longi, (double)wbuf[j].pressure,
-                  wbuf[j].temperature, wbuf[j].lati);
+        fprintf(stderr, "read and write buffers have differences\n");
+        fprintf(stderr, "%s %ld %f %f %d\n", rbuf[i].name, rbuf[i].longi, (double)rbuf[i].pressure,
+                rbuf[i].temperature, rbuf[i].lati);
+        fprintf(stderr, "%s %ld %f %f %d\n", wbuf[j].name, wbuf[j].longi, (double)wbuf[j].pressure,
+                wbuf[j].temperature, wbuf[j].lati);
         return -1;
     }
     return 0;
@@ -198,8 +197,8 @@ test_table(hid_t fid, int do_write)
     hid_t      fid2;
     hsize_t    chunk_size   = 10;
     int        compress     = 0;
-    int *      fill         = NULL;
-    particle_t fill1[1]     = {{"no data", -1, -99.0f, -99.0f, -1}};
+    int       *fill         = NULL;
+    particle_t fill1[1]     = {{"no data", -1, -99.0F, -99.0, -1}};
     int        fill1_new[1] = {-100};
     hsize_t    position;
     char       tname[20];
@@ -227,25 +226,25 @@ test_table(hid_t fid, int do_write)
     particle2_t rbuf2[NRECORDS];
     particle3_t rbuf3[NRECORDS];
     particle_t  rbufc[NRECORDS * 2];
-    particle_t  abuf[2] = {{"eight", 80, 8.0f, 80.0f, 80}, {"nine", 90, 9.0f, 90.0f, 90}};
-    particle_t  ibuf[2] = {{"zero", 0, 0.0f, 0.0f, 0}, {"zero", 0, 0.0f, 0.0f, 0}};
+    particle_t  abuf[2] = {{"eight", 80, 8.0F, 80.0, 80}, {"nine", 90, 9.0F, 90.0, 90}};
+    particle_t  ibuf[2] = {{"zero", 0, 0.0F, 0.0, 0}, {"zero", 0, 0.0F, 0.0, 0}};
     particle_t  wbufd[NRECORDS];
     particle_t  wbuf[NRECORDS] = {{
                                      "zero",
                                      0,
-                                     0.0f,
-                                     0.0f,
+                                     0.0F,
+                                     0.0,
                                      0,
                                  },
-                                 {"one", 10, 1.0f, 10.0f, 10},
-                                 {"two", 20, 2.0f, 20.0f, 20},
-                                 {"three", 30, 3.0f, 30.0f, 30},
-                                 {"four", 40, 4.0f, 40.0f, 40},
-                                 {"five", 50, 5.0f, 50.0f, 50},
-                                 {"six", 60, 6.0f, 60.0f, 60},
-                                 {"seven", 70, 7.0f, 70.0f, 70}};
+                                 {"one", 10, 1.0F, 10.0, 10},
+                                 {"two", 20, 2.0F, 20.0, 20},
+                                 {"three", 30, 3.0F, 30.0, 30},
+                                 {"four", 40, 4.0F, 40.0, 40},
+                                 {"five", 50, 5.0F, 50.0, 50},
+                                 {"six", 60, 6.0F, 60.0, 60},
+                                 {"seven", 70, 7.0F, 70.0, 70}};
     /* buffers for the field "Pressure" and "New_field" */
-    float pressure_in[NRECORDS] = {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f};
+    float pressure_in[NRECORDS] = {0.0F, 1.0F, 2.0F, 3.0F, 4.0F, 5.0F, 6.0F, 7.0F};
     float pressure_out[NRECORDS];
     int   buf_new[NRECORDS] = {0, 1, 2, 3, 4, 5, 6, 7};
     /* buffers for the fields "Latitude,Longitude"  */
@@ -254,8 +253,8 @@ test_table(hid_t fid, int do_write)
     /* buffers for the fields "Name,Pressure"  */
     namepressure_t namepre_out[NRECORDS];
     namepressure_t namepre_in[NRECORDS] = {
-        {"zero", 0.0f}, {"one", 1.0f},  {"two", 2.0f}, {"three", 3.0f},
-        {"four", 4.0f}, {"five", 5.0f}, {"six", 6.0f}, {"seven", 7.0f},
+        {"zero", 0.0F}, {"one", 1.0F},  {"two", 2.0F}, {"three", 3.0F},
+        {"four", 4.0F}, {"five", 5.0F}, {"six", 6.0F}, {"seven", 7.0F},
     };
 
     /*-------------------------------------------------------------------------
@@ -332,14 +331,14 @@ test_table(hid_t fid, int do_write)
                                       HOFFSET(particle4_t, aty),   HOFFSET(particle4_t, rro)};
 
     /* Define an array of Particles */
-    particle4_t p_data[NRECORDS] = {{12112, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12113, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12114, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12115, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12116, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12117, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12118, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12119, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}}};
+    particle4_t p_data[NRECORDS] = {{12112, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12113, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12114, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12115, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12116, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12117, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12118, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12119, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}}};
 
     /*-------------------------------------------------------------------------
      * initialize table parameters
@@ -478,9 +477,9 @@ test_table(hid_t fid, int do_write)
      *-------------------------------------------------------------------------
      */
     if (do_write)
-        HDstrcpy(tname, "table2");
+        strcpy(tname, "table2");
     else
-        HDstrcpy(tname, "table1");
+        strcpy(tname, "table1");
 
     rstart   = 0;
     rrecords = 8;
@@ -618,7 +617,7 @@ test_table(hid_t fid, int do_write)
             wbufd[i].longi       = wbuf[i].longi;
             wbufd[i].pressure    = wbuf[i].pressure;
             wbufd[i].temperature = wbuf[i].temperature;
-            HDstrcpy(wbufd[i].name, wbuf[i].name);
+            strcpy(wbufd[i].name, wbuf[i].name);
         }
 
         if (H5TBmake_table(TITLE, fid, "table3", FIELDS, RECORDS, type_size_mem, field_names, field_offset,
@@ -824,7 +823,7 @@ test_table(hid_t fid, int do_write)
         nrecords = 3;
         if (H5TBdelete_record(fid, "table", start, nrecords) < 0)
             goto out;
-        ;
+
         /* Get table info */
         if (H5TBget_table_info(fid, "table", &nfields_out, &nrecords_out) < 0)
             goto out;
@@ -1024,10 +1023,9 @@ test_table(hid_t fid, int do_write)
                     if (rbuf[i].lati != position_in[i - NRECORDS_ADD + 1].lati ||
                         rbuf[i].longi != position_in[i - NRECORDS_ADD + 1].longi ||
                         !H5_FLT_ABS_EQUAL(rbuf[i].pressure, pressure_in[i - NRECORDS_ADD + 1])) {
-                        HDfprintf(stderr, "%ld %f %d\n", rbuf[i].longi, (double)rbuf[i].pressure,
-                                  rbuf[i].lati);
-                        HDfprintf(stderr, "%ld %f %d\n", position_in[i].longi, (double)pressure_in[i],
-                                  position_in[i].lati);
+                        fprintf(stderr, "%ld %f %d\n", rbuf[i].longi, (double)rbuf[i].pressure, rbuf[i].lati);
+                        fprintf(stderr, "%ld %f %d\n", position_in[i].longi, (double)pressure_in[i],
+                                position_in[i].lati);
                         goto out;
                     }
                 }
@@ -1132,7 +1130,7 @@ test_table(hid_t fid, int do_write)
 
     /* Compare the extracted table with the initial values */
     for (i = 0; i < NRECORDS; i++) {
-        if ((HDstrcmp(namepre_out[i].name, namepre_in[i].name) != 0) ||
+        if ((strcmp(namepre_out[i].name, namepre_in[i].name) != 0) ||
             !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, namepre_in[i].pressure)) {
             goto out;
         }
@@ -1140,7 +1138,7 @@ test_table(hid_t fid, int do_write)
 
     /* reset buffer */
     for (i = 0; i < NRECORDS; i++) {
-        HDstrcpy(namepre_out[i].name, "\0");
+        strcpy(namepre_out[i].name, "\0");
         namepre_out[i].pressure = -1;
     }
 
@@ -1157,7 +1155,7 @@ test_table(hid_t fid, int do_write)
     /* Compare the extracted table with the initial values */
     for (i = 0; i < 3; i++) {
         hsize_t iistart = start;
-        if ((HDstrcmp(namepre_out[i].name, namepre_in[iistart + i].name) != 0) ||
+        if ((strcmp(namepre_out[i].name, namepre_in[iistart + i].name) != 0) ||
             !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, namepre_in[iistart + i].pressure)) {
             goto out;
         }
@@ -1320,7 +1318,7 @@ test_table(hid_t fid, int do_write)
 
     /* compare the extracted table with the initial values */
     for (i = 0; i < NRECORDS; i++) {
-        if ((HDstrcmp(namepre_out[i].name, namepre_in[i].name) != 0) ||
+        if ((strcmp(namepre_out[i].name, namepre_in[i].name) != 0) ||
             !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, namepre_in[i].pressure)) {
             goto out;
         }
@@ -1328,7 +1326,7 @@ test_table(hid_t fid, int do_write)
 
     /* reset buffer */
     for (i = 0; i < NRECORDS; i++) {
-        HDstrcpy(namepre_out[i].name, "\0");
+        strcpy(namepre_out[i].name, "\0");
         namepre_out[i].pressure = -1;
     }
 
@@ -1349,7 +1347,7 @@ test_table(hid_t fid, int do_write)
     /* compare the extracted table with the initial values */
     for (i = 0; i < 3; i++) {
         int iistart = (int)start;
-        if ((HDstrcmp(namepre_out[i].name, wbuf[iistart + (int)i].name) != 0) ||
+        if ((strcmp(namepre_out[i].name, wbuf[iistart + (int)i].name) != 0) ||
             !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, wbuf[iistart + (int)i].pressure)) {
             goto out;
         }
@@ -1385,7 +1383,7 @@ test_table(hid_t fid, int do_write)
 
         /* compare the extracted table with the original array */
         for (i = 0; i < NRECORDS; i++) {
-            if ((HDstrcmp(rbuf2[i].name, wbuf[i].name) != 0) || rbuf2[i].lati != wbuf[i].lati ||
+            if ((strcmp(rbuf2[i].name, wbuf[i].name) != 0) || rbuf2[i].lati != wbuf[i].lati ||
                 rbuf2[i].longi != wbuf[i].longi || !H5_FLT_ABS_EQUAL(rbuf2[i].pressure, wbuf[i].pressure) ||
                 !H5_DBL_ABS_EQUAL(rbuf2[i].temperature, wbuf[i].temperature) ||
                 rbuf2[i].new_field != buf_new[i]) {
@@ -1421,7 +1419,7 @@ test_table(hid_t fid, int do_write)
 
         /* compare the extracted table with the original array */
         for (i = 0; i < NRECORDS; i++) {
-            if ((HDstrcmp(rbuf3[i].name, wbuf[i].name) != 0) || rbuf3[i].lati != wbuf[i].lati ||
+            if ((strcmp(rbuf3[i].name, wbuf[i].name) != 0) || rbuf3[i].lati != wbuf[i].lati ||
                 rbuf3[i].longi != wbuf[i].longi ||
                 !H5_DBL_ABS_EQUAL(rbuf3[i].temperature, wbuf[i].temperature)) {
                 goto out;
@@ -1464,10 +1462,10 @@ test_table(hid_t fid, int do_write)
 
     HL_TESTING2("getting field info");
 
-    /* alocate */
-    names_out = (char **)HDmalloc(sizeof(char *) * (size_t)NFIELDS);
+    /* allocate */
+    names_out = (char **)malloc(sizeof(char *) * (size_t)NFIELDS);
     for (i = 0; i < NFIELDS; i++) {
-        names_out[i] = (char *)HDmalloc(sizeof(char) * 255);
+        names_out[i] = (char *)malloc(sizeof(char) * 255);
     }
 
     /* Get field info */
@@ -1475,16 +1473,16 @@ test_table(hid_t fid, int do_write)
         goto out;
 
     for (i = 0; i < NFIELDS; i++) {
-        if ((HDstrcmp(field_names[i], names_out[i]) != 0)) {
+        if ((strcmp(field_names[i], names_out[i]) != 0)) {
             goto out;
         }
     }
 
     /* release */
     for (i = 0; i < NFIELDS; i++) {
-        HDfree(names_out[i]);
+        free(names_out[i]);
     }
-    HDfree(names_out);
+    free(names_out);
 
     PASSED();
 
@@ -1517,7 +1515,7 @@ main(void)
     /* create a file using default properties */
     fid = H5Fcreate("test_table.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    HDputs("Testing table with file creation mode (read/write in native architecture):");
+    puts("Testing table with file creation mode (read/write in native architecture):");
 
     /* test, do write */
     if (test_table(fid, 1) < 0)
@@ -1530,7 +1528,7 @@ main(void)
      * test2: open a file written in test1 on a big-endian machine
      *-------------------------------------------------------------------------
      */
-    HDputs("Testing table with file open mode (read big-endian data):");
+    puts("Testing table with file open mode (read big-endian data):");
 
     fid = h5file_open(TEST_FILE_BE, flags);
 
@@ -1545,7 +1543,7 @@ main(void)
      * test3: open a file written in test1 on a little-endian machine
      *-------------------------------------------------------------------------
      */
-    HDputs("Testing table with file open mode (read little-endian data):");
+    puts("Testing table with file open mode (read little-endian data):");
 
     fid = h5file_open(TEST_FILE_LE, flags);
 
@@ -1560,7 +1558,7 @@ main(void)
      * test4: open a file written in test1 on the Cray T3 machine
      *-------------------------------------------------------------------------
      */
-    HDputs("Testing table with file open mode (read Cray data):");
+    puts("Testing table with file open mode (read Cray data):");
 
     fid = h5file_open(TEST_FILE_CRAY, flags);
 

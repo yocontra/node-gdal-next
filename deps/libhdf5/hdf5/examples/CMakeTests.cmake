@@ -30,6 +30,8 @@ set (test_ex_CLEANFILES
     group.h5
     groups.h5
     hard_link.h5
+    h5_subfiling_default_example.h5
+    h5_subfiling_custom_example.h5
     mount1.h5
     mount2.h5
     one_index_file.h5
@@ -37,6 +39,9 @@ set (test_ex_CLEANFILES
     only_huge_mesgs_file.h5
     REF_REG.h5
     refere.h5
+    refer_deprec.h5
+    refer_extern1.h5
+    refer_extern2.h5
     SDS.h5
     SDScompound.h5
     SDSextendible.h5
@@ -70,7 +75,18 @@ if (HDF5_TEST_SERIAL)
       NAME EXAMPLES-clear-objects
       COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
   )
-  set_tests_properties (EXAMPLES-clear-objects PROPERTIES FIXTURES_SETUP clear_EXAMPLES)
+  set_tests_properties (EXAMPLES-clear-objects PROPERTIES
+      FIXTURES_SETUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_test (
+      NAME EXAMPLES-clean-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
+  )
+  set_tests_properties (EXAMPLES-clean-objects PROPERTIES
+      FIXTURES_CLEANUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -83,9 +99,8 @@ if (HDF5_TEST_SERIAL)
           -D "TEST_EXPECT=0"
           -D "TEST_SKIP_COMPARE=TRUE"
           -D "TEST_OUTPUT=${example}.txt"
-          #-D "TEST_REFERENCE=${example}.out"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (EXAMPLES-${example} PROPERTIES FIXTURES_REQUIRED clear_EXAMPLES)
@@ -98,22 +113,28 @@ endif ()
 
 ### Windows pops up a modal permission dialog on this test
 if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
-  else ()
-    add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5example>;${MPIEXEC_POSTFLAGS}"
-        -D "TEST_ARGS:STRING="
-        -D "TEST_EXPECT=0"
-        -D "TEST_OUTPUT=ph5example.out"
-        -D "TEST_REFERENCE:STRING=PHDF5 tests finished with no errors"
-        -D "TEST_FILTER:STRING=PHDF5 tests finished with no errors"
-        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
-    )
-  endif ()
-  if (last_test)
-    set_tests_properties (MPI_TEST_EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "MPI_TEST_EXAMPLES-ph5example")
+  # Ensure that 24 is a multiple of the number of processes.
+  # The number 24 corresponds to SPACE1_DIM1 and SPACE1_DIM2 defined in ph5example.c
+  math(EXPR NUMPROCS "24 / ((24 + ${MPIEXEC_MAX_NUMPROCS} - 1) / ${MPIEXEC_MAX_NUMPROCS})")
+
+  foreach (parallel_example ${parallel_examples})
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${parallel_example}> ${MPIEXEC_POSTFLAGS})
+    else ()
+      add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
+          -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${parallel_example}>;${MPIEXEC_POSTFLAGS}"
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=${parallel_example}.out"
+          -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+      )
+    endif ()
+    if (last_test)
+      set_tests_properties (MPI_TEST_EXAMPLES-${parallel_example} PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "MPI_TEST_EXAMPLES-${parallel_example}")
+  endforeach ()
 endif ()

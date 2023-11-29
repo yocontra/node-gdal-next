@@ -1,6 +1,5 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -41,7 +40,7 @@
      INTEGER(HID_T) :: dt3_id      ! Memory datatype identifier (for double precision field)
      INTEGER(HID_T) :: dt4_id      ! Memory datatype identifier (for real field)
      INTEGER(HID_T) :: dt5_id      ! Memory datatype identifier
-     INTEGER(HID_T) :: plist_id    ! Dataset trasfer property
+     INTEGER(HID_T) :: plist_id    ! Dataset transfer property
      INTEGER(SIZE_T) :: typesize
 
 
@@ -111,21 +110,21 @@
      type_size = type_sizec + type_sizei + type_sized + type_sizer
      CALL h5tcreate_f(H5T_COMPOUND_F, type_size, dtype_id, error)
      !
-     ! Insert memebers
+     ! Insert members
      !
-     ! CHARACTER*2 memeber
+     ! CHARACTER*2 member
      !
      offset = 0
      CALL h5tinsert_f(dtype_id, "char_field", offset, dt5_id, error)
      !
      ! INTEGER member
      !
-     offset = offset + type_sizec ! Offset of the second memeber is 2
+     offset = offset + type_sizec ! Offset of the second member is 2
      CALL h5tinsert_f(dtype_id, "integer_field", offset, H5T_NATIVE_INTEGER, error)
      !
      ! DOUBLE PRECISION member
      !
-     offset = offset + type_sizei  ! Offset of the third memeber is 6
+     offset = offset + type_sizei  ! Offset of the third member is 6
      CALL h5tinsert_f(dtype_id, "double_field", offset, H5T_NATIVE_DOUBLE, error)
      !
      ! REAL member
@@ -198,7 +197,7 @@
      !
      CALL h5dopen_f(file_id, dsetname, dset_id, error)
      !
-     ! Create memeory datatyoe to read character member of the compound datatype.
+     ! Create memory datatype to read character member of the compound datatype.
      !
      CALL h5tcopy_f(H5T_NATIVE_CHARACTER, dt2_id, error)
      typesize = 2
@@ -208,7 +207,7 @@
      offset = 0
      CALL h5tinsert_f(dt1_id, "char_field", offset, dt2_id, error)
      !
-     ! Read part of the datatset and display it.
+     ! Read part of the dataset and display it.
      !
      CALL h5dread_f(dset_id, dt1_id, char_member_out, data_dims, error)
      write(*,*) (char_member_out(i), i=1, dimsize)

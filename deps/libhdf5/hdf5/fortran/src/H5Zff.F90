@@ -1,19 +1,21 @@
-!****h* ROBODoc/H5Z
-!
-! NAME
-!  MODULE H5Z
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5Z functions.
+!> @defgroup FH5Z Fortran Filter (H5Z) Interface
+!!
+!! @see H5Z, C-API
+!!
+!! @see @ref H5Z_UG, User Guide
+!!
+
+!> @ingroup FH5Z
+!!
+!! @brief This module contains Fortran interfaces for H5Z functions.
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!  Copyright by The HDF Group.                                                 *
-!  Copyright by the Board of Trustees of the University of Illinois.           *
-!  All rights reserved.                                                        *
-!                                                                              *
-!  This file is part of HDF5.  The full HDF5 copyright notice, including       *
-!  terms governing use, modification, and redistribution, is contained in      *
+!   Copyright by The HDF Group.                                               *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
@@ -32,46 +34,34 @@
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
-!*****
 
 MODULE H5Z
 
   USE H5GLOBAL
+  IMPLICIT NONE
 
 CONTAINS
 
-!****s* H5Z/h5zunregister_f
-!
-! NAME
-!  h5zunregister_f
-!
-! PURPOSE
-!  Unregisters specified filetr
-!
-! INPUTS
-!  filter - Filter; may have one of the following values:
-!            H5Z_FILTER_DEFLATE_F
-!            H5Z_FILTER_SZIP_F
-!            H5Z_FILTER_NBIT_F
-!            H5Z_FILTER_SCALEOFFSET_F
-!            H5Z_FILTER_SHUFFLE_F
-!            H5Z_FILTER_FLETCHER32_F
-!
-! OUTPUTS
-!  hdferr - Error code
-!            Success:  0
-!            Failure: -1
-!
-! AUTHOR
-!  Elena Pourmal
-!  March 12, 2003
-!
-! SOURCE
+!>
+!! \ingroup FH5Z
+!!
+!! \brief Unregisters specified filters.
+!!
+!! \param filter Filter; may have one of the following values:
+!!               \li H5Z_FILTER_DEFLATE_F
+!!               \li H5Z_FILTER_SZIP_F
+!!               \li H5Z_FILTER_NBIT_F
+!!               \li H5Z_FILTER_SCALEOFFSET_F
+!!               \li H5Z_FILTER_SHUFFLE_F
+!!               \li H5Z_FILTER_FLETCHER32_F
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Zunregister()
+!!
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: filter
     INTEGER, INTENT(OUT) :: hdferr
-!*****
     INTERFACE
        INTEGER FUNCTION h5zunregister_c(filter) BIND(C,NAME='h5zunregister_c')
          INTEGER, INTENT(IN) :: filter
@@ -80,39 +70,28 @@ CONTAINS
     hdferr = h5zunregister_c(filter)
   END SUBROUTINE h5zunregister_f
 
-!****s* H5Z/h5zfilter_avail_f
-! NAME
-!  h5zfilter_avail_f
-!
-! PURPOSE
-!  Queries if filter is available
-!
-! INPUTS
-!  filter 	 - Filter; may be one of the following:
-!                   H5Z_FILTER_DEFLATE_F
-!                   H5Z_FILTER_SZIP_F
-!                   H5Z_FILTER_NBIT_F
-!                   H5Z_FILTER_SCALEOFFSET_F
-!                   H5Z_FILTER_SHUFFLE_F
-!                   H5Z_FILTER_FLETCHER32_F
-! OUTPUTS
-!  status 	 - Flag; .TRUE. if filter is available,
-!                  .FALSE. otherwise
-!  hdferr:	 - Error code
-!                   Success:  0
-!                   Failure: -1
-!
-! AUTHOR
-!  Elena Pourmal
-!  March 12, 2003
-!
-! SOURCE
+!>
+!! \ingroup FH5Z
+!!
+!! \brief Queries if filter is available
+!!
+!! \param filter  Filter; may be one of the following:
+!!                \li H5Z_FILTER_DEFLATE_F
+!!                \li H5Z_FILTER_SZIP_F
+!!                \li H5Z_FILTER_NBIT_F
+!!                \li H5Z_FILTER_SCALEOFFSET_F
+!!                \li H5Z_FILTER_SHUFFLE_F
+!!                \li H5Z_FILTER_FLETCHER32_F
+!! \param status  Flag; .TRUE. if filter is available, .FALSE. otherwise.
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Zfilter_avail()
+!!
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: filter
     LOGICAL, INTENT(OUT) :: status
     INTEGER, INTENT(OUT) :: hdferr
-!*****
     INTEGER :: flag                     ! "TRUE/FALSE/ERROR from C"
 
     INTERFACE
@@ -129,43 +108,30 @@ CONTAINS
 
   END SUBROUTINE h5zfilter_avail_f
 
-!****s* H5Z/h5zget_filter_info_f
-!
-! NAME
-!  h5zget_filter_info_f
-!
-! PURPOSE
-!  Queries if filter has its encoder and/or decoder
-!  available
-!
-! INPUTS
-!  filter 	 - Filter; may be one of the following:
-!                   H5Z_FILTER_DEFLATE_F
-!                   H5Z_FILTER_SZIP_F
-!                   H5Z_FILTER_NBIT_F
-!                   H5Z_FILTER_SCALEOFFSET_F
-!                   H5Z_FILTER_SHUFFLE_F
-!                   H5Z_FILTER_FLETCHER32_Ffilter
-! OUTPUTS
-!  config_flags  - Flag, indicates if filter has its encoder
-!                  and/or decoder available, possibly containing the
-!                  following values:
-!                     H5Z_FILTER_ENCODE_ENABLED_F
-!                     H5Z_FILTER_DECODE_ENABLED_F
-!  hdferr:	 - Error code
-!                   Success:  0
-!                   Failure: -1
-!
-! AUTHOR
-!  Nat Furrer and James Laird
-!  June 16, 2004
-! SOURCE
+!>
+!! \ingroup FH5Z
+!!
+!! \brief Queries if filter has its encoder and/or decoder available.
+!!
+!! \param filter       Filter; may be one of the following:
+!!                     \li H5Z_FILTER_DEFLATE_F
+!!                     \li H5Z_FILTER_SZIP_F
+!!                     \li H5Z_FILTER_NBIT_F
+!!                     \li H5Z_FILTER_SCALEOFFSET_F
+!!                     \li H5Z_FILTER_SHUFFLE_F
+!!                     \li H5Z_FILTER_FLETCHER32_Ffilter
+!! \param config_flags Flag, indicates if filter has its encoder and/or decoder available, possible values:
+!!                     \li H5Z_FILTER_ENCODE_ENABLED_F
+!!                     \li H5Z_FILTER_DECODE_ENABLED_F
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Zget_filter_info()
+!!
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: filter
     INTEGER, INTENT(OUT) :: config_flags
     INTEGER, INTENT(OUT) :: hdferr
-!*****
 
     INTERFACE
        INTEGER FUNCTION h5zget_filter_info_c(filter, config_flags) BIND(C,NAME='h5zget_filter_info_c')

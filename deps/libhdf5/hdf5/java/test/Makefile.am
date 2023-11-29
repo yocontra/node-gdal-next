@@ -27,7 +27,7 @@ classes:
 
 pkgpath = test
 hdfjarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
-CLASSPATH_ENV=CLASSPATH=.:$(JAVAROOT):$(top_builddir)/java/src/$(hdfjarfile):$(top_srcdir)/java/lib/junit.jar:$(top_srcdir)/java/lib/hamcrest-core.jar:$(top_srcdir)/java/lib/slf4j-api-1.7.25.jar:$(top_srcdir)/java/lib/ext/slf4j-simple-1.7.25.jar:$$CLASSPATH
+CLASSPATH_ENV=CLASSPATH=.:$(JAVAROOT):$(top_builddir)/java/src/$(hdfjarfile):$(top_srcdir)/java/lib/junit.jar:$(top_srcdir)/java/lib/hamcrest-core.jar:$(top_srcdir)/java/lib/slf4j-api-2.0.6.jar:$(top_srcdir)/java/lib/ext/slf4j-simple-2.0.6.jar:$$CLASSPATH
 
 jarfile = jar$(PACKAGE_TARNAME)test.jar
 
@@ -71,6 +71,7 @@ noinst_JAVA = \
     TestH5Oparams.java \
     TestH5Obasic.java \
     TestH5Ocreate.java \
+    TestH5OcopyOld.java \
     TestH5Ocopy.java \
     TestH5PL.java \
     TestH5VL.java \
@@ -86,15 +87,11 @@ noinst_DATA = $(jarfile)
 
 .PHONY: classes
 
-# Test with just the native connector, with a single pass-through connector
-# and with a doubly-stacked pass-through.
-VOL_LIST = native "pass_through under_vol=0;under_info={}" \
-           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
-
 check_SCRIPTS = junit.sh
 TEST_SCRIPT = $(check_SCRIPTS)
 
-CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class junit.sh
+CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class junit.sh \
+    *.h5 testExport*.txt
 
 clean:
 	rm -rf $(JAVAROOT)/*

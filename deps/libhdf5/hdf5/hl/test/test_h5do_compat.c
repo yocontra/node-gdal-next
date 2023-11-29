@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -31,7 +30,7 @@
  *
  * Purpose:        Test the basic functionality of H5DOwrite_chunk
  *
- * Return:        Success:    An identifer for the dataset used in the tests
+ * Return:        Success:    An identifier for the dataset used in the tests
  *                Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -85,7 +84,7 @@ error:
         H5Sclose(sid);
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return H5I_INVALID_HID;
 
@@ -125,7 +124,7 @@ test_direct_chunk_write(hid_t did)
     offset[0] = 0;
     for (i = 0; i < NX / CHUNK_NX; i++) {
         if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, data_size, chunk_data) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         offset[0] += CHUNK_NX;
     }
 
@@ -171,9 +170,9 @@ test_direct_chunk_read(hid_t did)
 
     /* Create dataspaces for reading */
     if ((mem_sid = H5Screate_simple(1, chunk_dims, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((file_sid = H5Screate_simple(1, dims, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* For each chunk in the dataset, compare the result of H5Dread and H5DOread_chunk. */
     for (i = 0; i < NX / CHUNK_NX; i++) {
@@ -186,34 +185,34 @@ test_direct_chunk_read(hid_t did)
 
         /* Hyperslab selection equals single chunk */
         if (H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the chunk back */
         if (H5Dread(did, H5T_NATIVE_INT, mem_sid, file_sid, H5P_DEFAULT, check) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the raw chunk back */
-        HDmemset(chunk_data, 0, CHUNK_NX * sizeof(int));
+        memset(chunk_data, 0, CHUNK_NX * sizeof(int));
         filter_mask = UINT_MAX;
         offset[0]   = (hsize_t)i * CHUNK_NX;
         if (H5DOread_chunk(did, H5P_DEFAULT, offset, &filter_mask, chunk_data) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Check filter mask return value */
         if (filter_mask != 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Check that the values are correct */
         for (j = 0; j < CHUNK_NX; j++)
             if (chunk_data[i] != check[i])
-                TEST_ERROR
+                TEST_ERROR;
     }
 
     /* Close */
     if (H5Sclose(mem_sid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sclose(file_sid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -224,7 +223,7 @@ error:
         H5Sclose(mem_sid);
         H5Sclose(file_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -248,8 +247,8 @@ main(void)
 {
 #ifdef H5_NO_DEPRECATED_SYMBOLS
 
-    HDputs("Direct chunk read/write wrapper tests SKIPPED.");
-    HDputs("(Backward compatibility not configured)");
+    puts("Direct chunk read/write wrapper tests SKIPPED.");
+    puts("(Backward compatibility not configured)");
     return EXIT_SUCCESS;
 
 #else
@@ -276,11 +275,11 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All direct chunk read/write wrapper tests passed.");
+    puts("All direct chunk read/write wrapper tests passed.");
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end main() */

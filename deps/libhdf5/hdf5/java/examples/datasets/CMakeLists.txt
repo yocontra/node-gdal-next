@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDFJAVA_EXAMPLES_DATASETS Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
@@ -62,6 +62,13 @@ foreach (example ${HDF_JAVA_EXAMPLES})
 #  install_jar (${example} ${HJAVA_INSTALL_DATA_DIR}/examples examples)
   get_target_property (${example}_CLASSPATH ${example} CLASSDIR)
   add_dependencies (${example} ${HDF5_JAVA_HDF5_LIB_TARGET})
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_JAVA_${example}_SRC_FORMAT ${example}.java)
+  endif ()
 endforeach ()
 
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_JARS};${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_NOP_JAR}")
@@ -73,8 +80,9 @@ endforeach ()
 
 if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
+  set (last_test "")
   foreach (example ${HDF_JAVA_EXAMPLES})
     if (example STREQUAL "H5Ex_D_External")
       add_test (
@@ -86,8 +94,12 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     else ()
       add_test (
           NAME JAVA_datasets-${example}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+          COMMAND ${CMAKE_COMMAND} -E remove
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
       )
+    endif ()
+    if (last_test)
+      set_tests_properties (JAVA_datasets-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif ()
 
     add_test (
@@ -115,5 +127,24 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     set_tests_properties (JAVA_datasets-${example} PROPERTIES
         DEPENDS JAVA_datasets-${example}-copy-objects
     )
+
+    if (example STREQUAL "H5Ex_D_External")
+      add_test (
+          NAME JAVA_datasets-${example}-clean-objects
+          COMMAND ${CMAKE_COMMAND} -E remove
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.data
+      )
+    else ()
+      add_test (
+          NAME JAVA_datasets-${example}-clean-objects
+          COMMAND ${CMAKE_COMMAND} -E remove
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+      )
+    endif ()
+    set_tests_properties (JAVA_datasets-${example}-clean-objects PROPERTIES
+        DEPENDS JAVA_datasets-${example}
+    )
+    set (last_test "JAVA_datasets-${example}-clean-objects")
   endforeach ()
 endif ()

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -17,7 +16,7 @@
 
 GIFWORD       iWIDE, iHIGH, eWIDE, eHIGH, expand, numcols, strip, nostrip;
 unsigned long cols[256];
-char *        cmd;
+char         *cmd;
 
 FILE *fp;
 
@@ -55,8 +54,8 @@ GIFBYTE *Raster; /* The raster data stream, unblocked            */
 
 /* The hash table used by the decompressor */
 
-int *Prefix;
-int *Suffix;
+static int *Prefix;
+static int *Suffix;
 
 /* An output array used by the decompressor */
 
@@ -178,7 +177,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
     DataMask = (1 << ((GifHead->PackedField & 0x07) + 1)) - 1;
     Raster   = GifImageDesc->GIFImage;
 
-    /* Check for image seperator */
+    /* Check for image separator */
 
     /* Now read in values from the image descriptor */
     IWidth    = GifImageDesc->ImageWidth;
@@ -193,7 +192,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
      */
 
     /*
-     * Start reading the raster data. First we get the intial code size and
+     * Start reading the raster data. First we get the initial code size and
      * compute decompressor constant values, based on this code size.
      */
 

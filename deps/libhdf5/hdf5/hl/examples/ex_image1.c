@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -17,7 +16,7 @@
 #define WIDTH       400
 #define HEIGHT      200
 #define PAL_ENTRIES 9
-unsigned char buf[WIDTH * HEIGHT];
+static unsigned char buf[WIDTH * HEIGHT];
 
 int
 main(void)
@@ -56,10 +55,10 @@ main(void)
     H5IMmake_image_8bit(file_id, "image1", (hsize_t)WIDTH, (hsize_t)HEIGHT, buf);
 
     /* make a palette */
-    H5IMmake_palette(file_id, "pallete", pal_dims, pal);
+    H5IMmake_palette(file_id, "palette", pal_dims, pal);
 
     /* attach the palette to the image */
-    H5IMlink_palette(file_id, "image1", "pallete");
+    H5IMlink_palette(file_id, "image1", "palette");
 
     /* close the file. */
     H5Fclose(file_id);

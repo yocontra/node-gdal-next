@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -29,16 +28,10 @@ herr_t H5IM_get_palette(hid_t loc_id, const char *image_name, int pal_number, hi
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows the creation and writing of an 8bit image on disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -121,10 +114,6 @@ H5IMmake_image_8bitf(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows the creation and writing of an 8bit image on disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
@@ -134,8 +123,6 @@ H5IMmake_image_8bitf(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  * INTERLACE_PIXEL [height][width][pixel components]
  * INTERLACE_PLANE [pixel components][height][width]
  *
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -236,16 +223,10 @@ H5IMmake_image_24bitf(hid_t loc_id, const char *dset_name, hsize_t width, hsize_
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows reading of an 8bit image on disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -292,18 +273,12 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows writing of an 8bit palette to disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -385,18 +360,12 @@ H5IMmake_palettef(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims, i
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows reading of an 8bit palette from disk.
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -421,10 +390,6 @@ H5IMget_palettef(hid_t loc_id, const char *image_name, int pal_number, int_f *pa
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente Nunes
- *
- * Date: May 10, 2005
- *
  * Comments:
  *  This function allows reading of an 8bit palette from disk disk
  *   to memory type TID
@@ -434,8 +399,6 @@ H5IMget_palettef(hid_t loc_id, const char *image_name, int pal_number, int_f *pa
  *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -482,7 +445,7 @@ H5IM_get_palette(hid_t loc_id, const char *image_name, int pal_number, hid_t tid
 
             dim_ref = (size_t)n_refs;
 
-            refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * dim_ref);
+            refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * dim_ref);
 
             if (H5Aread(attr_id, attr_type, refbuf) < 0)
                 goto out;
@@ -502,7 +465,7 @@ H5IM_get_palette(hid_t loc_id, const char *image_name, int pal_number, hid_t tid
             if (H5Dclose(pal_id) < 0)
                 goto out;
 
-            HDfree(refbuf);
+            free(refbuf);
 
         } /* H5T_REFERENCE */
 

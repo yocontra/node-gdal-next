@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -12,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
  * Purpose:	The public header file for the mpio driver.
  */
 #ifndef H5FDmpio_H
@@ -23,7 +19,7 @@
 /* Macros */
 
 #ifdef H5_HAVE_PARALLEL
-#define H5FD_MPIO (H5FD_mpio_init())
+#define H5FD_MPIO (H5FDperform_init(H5FD_mpio_init))
 #else
 #define H5FD_MPIO (H5I_INVALID_HID)
 #endif /* H5_HAVE_PARALLEL */
@@ -168,18 +164,24 @@ H5_DLL herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*
 /**
  * \ingroup DXPL
  *
- * \brief Sets data transfer mode
+ * \brief Sets low-level data transfer mode
  *
  * \dxpl_id
  * \param[in] opt_mode Transfer mode
  * \returns \herr_t
  *
- * \details H5Pset_dxpl_mpio() sets the data transfer property list \p dxpl_id
- *          to use transfer mode xfer_mode. The property list can then be used
- *          to control the I/O transfer mode during data I/O operations.
+ * \details H5Pset_dxpl_mpio_collective_opt() sets the data transfer property
+ *          list \p dxpl_id to use transfer mode \p opt_mode when performing
+ *          I/O. This allows the application to specify collective I/O at the
+ *          HDF5 interface level (with the H5Pset_dxpl_mpio() API routine),
+ *          while controlling whether the actual I/O is performed collectively
+ *          (e.g., via MPI_File_write_at_all) or independently (e.g., via
+ *          MPI_File_write_at). If the collectivity setting at the HDF5
+ *          interface level (set via H5Pset_dxpl_mpio()) is not set to
+ *          H5FD_MPIO_COLLECTIVE, this setting will be ignored.
  *
- *          Valid transfer modes are #H5FD_MPIO_INDEPENDENT (default) and
- *          #H5FD_MPIO_COLLECTIVE.
+ *          Valid transfer modes are #H5FD_MPIO_COLLECTIVE_IO (default) and
+ *          #H5FD_MPIO_INDIVIDUAL_IO.
  *
  * \since 1.4.0
  *
@@ -223,7 +225,7 @@ H5_DLL herr_t H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collectiv
  *
  *          Use of this function is optional.
  *
- * \todo Add missing version information
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode);
@@ -247,7 +249,7 @@ H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t op
  *          otherwise, a separate I/O process will be invoked for each chunk
  *          (multi-chunk I/O).
  *
- * \todo Add missing version information
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc);
@@ -272,7 +274,7 @@ H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_p
  *          percent_proc_per_chunk, the library will do collective I/O for this
  *          chunk; otherwise, independent I/O will be done for the chunk.
  *
- * \todo Add missing version information
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_chunk);

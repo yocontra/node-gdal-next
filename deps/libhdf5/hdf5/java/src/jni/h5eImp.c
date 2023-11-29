@@ -284,7 +284,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1class_1name(JNIEnv *env, jclass clss, jlong cls_id)
 {
     jstring str = NULL;
     ssize_t buf_size;
-    char *  namePtr = NULL;
+    char   *namePtr = NULL;
 
     UNUSED(clss);
 
@@ -298,7 +298,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1class_1name(JNIEnv *env, jclass clss, jlong cls_id)
     if (!buf_size)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_class_name: no class name");
 
-    if (NULL == (namePtr = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Eget_class_name: malloc failed");
 
     if ((H5Eget_class_name((hid_t)cls_id, (char *)namePtr, (size_t)buf_size + 1)) < 0)
@@ -310,7 +310,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1class_1name(JNIEnv *env, jclass clss, jlong cls_id)
 
 done:
     if (namePtr)
-        HDfree(namePtr);
+        free(namePtr);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Eget_1class_1name */
@@ -435,8 +435,8 @@ Java_hdf_hdf5lib_H5_H5Eget_1msg(JNIEnv *env, jclass clss, jlong msg_id, jintArra
     H5E_type_t error_msg_type;
     jstring    str = NULL;
     ssize_t    buf_size;
-    jint *     theArray = NULL;
-    char *     namePtr  = NULL;
+    jint      *theArray = NULL;
+    char      *namePtr  = NULL;
 
     UNUSED(clss);
 
@@ -452,7 +452,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1msg(JNIEnv *env, jclass clss, jlong msg_id, jintArra
     if (!buf_size)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_msg: invalid message");
 
-    if (NULL == (namePtr = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Eget_msg: malloc failed");
 
     PIN_INT_ARRAY(ENVONLY, error_msg_type_list, theArray, NULL, "H5Eget_msg: error_msg_type_list not pinned");
@@ -470,7 +470,7 @@ done:
     if (theArray)
         UNPIN_INT_ARRAY(ENVONLY, error_msg_type_list, theArray, 0);
     if (namePtr)
-        HDfree(namePtr);
+        free(namePtr);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Eget_1msg */
@@ -506,9 +506,9 @@ H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data)
     jstring     str1, str2, str3;
     jobject     cb_info_t = NULL;
     jvalue      args[7];
-    JNIEnv *    cbenv = NULL;
+    JNIEnv     *cbenv = NULL;
     jclass      cbcls;
-    void *      op_data = (void *)wrapper->op_data;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = FAIL;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {

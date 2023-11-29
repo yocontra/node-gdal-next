@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -88,7 +87,7 @@
      data_dims(2) = NY
 
      !
-     !Initialize FORTRAN predifined datatypes
+     !Initialize FORTRAN predefined datatypes
      !
      CALL h5open_f(error)
           CALL check("h5open_f",error,total_error)

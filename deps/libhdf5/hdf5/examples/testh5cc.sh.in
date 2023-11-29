@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -12,14 +11,6 @@
 # help@hdfgroup.org.
 #
 # Tests for the h5cc compiler tool
-# Created: Albert Cheng, 2007/4/11
-#
-# Modification:
-#	Albert Cheng, 2008/9/27
-#	Added -shlib tests and verbose control.
-#	Albert Cheng, 2009/10/28
-#	Added version compatibility tests.
-#
 
 srcdir=@srcdir@
 
@@ -51,6 +42,7 @@ H5_USE_16_API_DEFAULT=`grep '#define H5_USE_16_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_18_API_DEFAULT=`grep '#define H5_USE_18_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_110_API_DEFAULT=`grep '#define H5_USE_110_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_112_API_DEFAULT=`grep '#define H5_USE_112_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_114_API_DEFAULT=`grep '#define H5_USE_114_API_DEFAULT ' ../src/H5pubconf.h`
 
 # setup my machine information.
 myos=`uname -s`
@@ -79,7 +71,7 @@ applib=libapp${H5TOOL}.a
 # short hands
 # Caution: if some *.h5 files must be cleaned here, list them by names.
 # Don't use the wildcard form of *.h5 as it will wipe out even *.h5 generated
-# by otehr test programs. This will cause a racing condition error when
+# by other test programs. This will cause a racing condition error when
 # parallel make (e.g., gmake -j 4) is used.
 temp_SRC="$hdf5main $v16main $v18main $v110main $v112main $appmain $prog1 $prog2"
 temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
@@ -400,7 +392,7 @@ echo "***"Version compatibility tests.
 # else if H5_USE_16_API_DEFAULT;
 #      then v16main works.
 # else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
-# as new versions with versioned functions are added, they will work with and 
+# As new versions with versioned functions are added, they will work with and 
 # should be added to H5_NO_DEPRECATED_SYMBOLS and to the else section, with and 
 # without the -DH5_USE_<N>_API_DEFAULT flag. A new H5_USE_<N>_API_DEFAULT section 
 # should also be added.
@@ -413,6 +405,8 @@ elif [ -n "$H5_USE_110_API_DEFAULT" ]; then
     echo "H5_USE_110_API_DEFAULT is defined."
 elif [ -n "$H5_USE_112_API_DEFAULT" ]; then
     echo "H5_USE_112_API_DEFAULT is defined."
+elif [ -n "$H5_USE_114_API_DEFAULT" ]; then
+    echo "H5_USE_114_API_DEFAULT is defined."
 else
     echo "No H5 API_DEFAULT is defined."
 fi
@@ -439,11 +433,18 @@ elif [ -n "$H5_USE_110_API_DEFAULT" ]; then
     TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
     TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
     TOOLTEST $v110main
-else
+elif [ -n "$H5_USE_112_API_DEFAULT" ]; then
     echo "Testing HDF5  with 112_API_DEFAULT"
     TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
     TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
     TOOLTEST -DH5_USE_110_API_DEFAULT $v110main
+    TOOLTEST $v112main
+else
+    echo "Testing HDF5  with 114_API_DEFAULT"
+    TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
+    TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
+    TOOLTEST -DH5_USE_110_API_DEFAULT $v110main
+    TOOLTEST -DH5_USE_112_API_DEFAULT $v112main
     TOOLTEST $v18main
     TOOLTEST $v110main
     TOOLTEST $v112main

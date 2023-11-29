@@ -66,8 +66,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk_1cache(JNIEnv *env, jclass clss, jlong dapl, j
 {
     jboolean isCopy;
     jdouble *w0Array          = NULL;
-    jlong *  rdcc_nslotsArray = NULL;
-    jlong *  nbytesArray      = NULL;
+    jlong   *rdcc_nslotsArray = NULL;
+    jlong   *nbytesArray      = NULL;
     herr_t   status           = FAIL;
 
     UNUSED(clss);
@@ -80,6 +80,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk_1cache(JNIEnv *env, jclass clss, jlong dapl, j
     if (NULL != rdcc_nbytes)
         PIN_LONG_ARRAY(ENVONLY, rdcc_nbytes, nbytesArray, &isCopy,
                        "H5Pget_chunk_cache: nbytesArray array not pinned");
+    if (NULL == nbytesArray)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "nbytesArray should not be NULL after pinning");
 
     {
         /* direct cast (size_t *)variable fails on 32-bit environment */
@@ -140,7 +142,7 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix(JNIEnv *env, jclass clss, jlong dapl_id)
 {
     ssize_t prefix_size = -1;
-    char *  pre         = NULL;
+    char   *pre         = NULL;
     jstring str         = NULL;
 
     UNUSED(clss);
@@ -148,7 +150,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix(JNIEnv *env, jclass clss, jlong dapl_i
     if ((prefix_size = H5Pget_efile_prefix((hid_t)dapl_id, (char *)NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (pre = (char *)HDmalloc(sizeof(char) * (size_t)prefix_size + 1)))
+    if (NULL == (pre = (char *)malloc(sizeof(char) * (size_t)prefix_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_efile_prefix: memory allocation failed");
 
     if (H5Pget_efile_prefix((hid_t)dapl_id, (char *)pre, (size_t)prefix_size + 1) < 0)
@@ -163,7 +165,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix(JNIEnv *env, jclass clss, jlong dapl_i
 
 done:
     if (pre)
-        HDfree(pre);
+        free(pre);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix */
@@ -282,8 +284,8 @@ H5D_append_cb(hid_t dataset_id, hsize_t *cur_dims, void *cb_data)
     jmethodID   mid;
     jobject     visit_callback = wrapper->visit_callback;
     jclass      cls;
-    JNIEnv *    cbenv   = NULL;
-    void *      op_data = (void *)wrapper->op_data;
+    JNIEnv     *cbenv   = NULL;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {

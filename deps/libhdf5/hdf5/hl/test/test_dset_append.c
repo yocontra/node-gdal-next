@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -40,8 +39,6 @@
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Aug 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -123,7 +120,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_notset() */
@@ -155,8 +152,6 @@ append_func(hid_t H5_ATTR_UNUSED dset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -252,7 +247,7 @@ test_dataset_append_rows_columns(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -297,7 +292,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_rows_columns() */
@@ -311,8 +306,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -388,7 +381,7 @@ test_dataset_append_rows(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -433,7 +426,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_rows() */
@@ -447,8 +440,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -525,7 +516,7 @@ test_dataset_append_columns(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -570,7 +561,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_columns() */
@@ -593,8 +584,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -688,7 +677,7 @@ test_dataset_append_BUG1(hid_t fid)
             if (buf[i][j] != rbuf[i][j])
                 TEST_ERROR;
 
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -733,7 +722,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_BUG1() */
@@ -756,8 +745,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -851,7 +838,7 @@ test_dataset_append_BUG2(hid_t fid)
             if (buf[i][j] != rbuf[i][j])
                 TEST_ERROR;
 
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -896,7 +883,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_BUG2() */
@@ -911,8 +898,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1010,7 +995,7 @@ test_dataset_append_less(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -1055,7 +1040,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_less() */
@@ -1073,8 +1058,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1167,7 +1150,7 @@ test_dataset_append_vary(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the dataset */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -1212,7 +1195,7 @@ error:
         H5Dclose(did);
         H5Pclose(ffapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_dataset_append_vary() */
@@ -1224,8 +1207,6 @@ error:
  *              along with H5DOappend().
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1266,7 +1247,7 @@ main(void)
     /*
      * The following tests illustrate the scenarios when H5DOappend does not work with extensible array
      * indexing:
-     *        - when the the dataset has 1 unlimited dimension and the other dimension is fixed but extendible
+     *        - when the dataset has 1 unlimited dimension and the other dimension is fixed but extendible
      *        - the dataset expands along 1 dimension and then expands along the other dimension
      */
     flush_ct = 0; /* Reset flush counter */

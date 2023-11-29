@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -58,9 +57,6 @@ const H5std_string DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset_in_Grou
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -87,7 +83,7 @@ test_get_objname()
         if (name_len > 4) {
             char *grp1_name = new char[5];
             name_len        = grp1.getObjName(grp1_name, 5);
-            verify_val((const char *)grp1_name, "/Top", "Group::getObjName", __LINE__, __FILE__);
+            verify_val(const_cast<const char *>(grp1_name), "/Top", "Group::getObjName", __LINE__, __FILE__);
             delete[] grp1_name;
         }
 
@@ -160,9 +156,6 @@ test_get_objname()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -243,9 +236,6 @@ test_existance()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -317,8 +307,8 @@ test_get_objname_ontypes()
         // Name this datatype
         new_int_type.commit(grp, "IntType NATIVE_INT");
         ssize_t name_len = new_int_type.getObjName(type_name); // default len
-        verify_val(name_len, (ssize_t)HDstrlen("/typetests/IntType NATIVE_INT"), "DataType::getObjName",
-                   __LINE__, __FILE__);
+        verify_val(name_len, static_cast<ssize_t>(strlen("/typetests/IntType NATIVE_INT")),
+                   "DataType::getObjName", __LINE__, __FILE__);
         verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
 
         // Close everything or they can be closed when objects go out of scope
@@ -342,9 +332,6 @@ test_get_objname_ontypes()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -366,25 +353,29 @@ test_get_objtype()
         // Get and verify object type with
         // H5O_type_t childObjType(const H5std_string& objname)
         H5O_type_t objtype = file.childObjType(DSET_IN_FILE);
-        verify_val(objtype, H5O_TYPE_DATASET, "DataSet::childObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_DATASET), "DataSet::childObjType",
+                   __LINE__, __FILE__);
 
         // Get and verify object type with
         // H5O_type_t childObjType(const char* objname)
         objtype = grp1.childObjType(GROUP1_1.c_str());
-        verify_val(objtype, H5O_TYPE_GROUP, "DataSet::childObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_GROUP), "DataSet::childObjType",
+                   __LINE__, __FILE__);
 
         // Get and verify object type with
         // H5O_type_t childObjType(hsize_t index, H5_index_t index_type,
         // H5_iter_order_t order, const char* objname=".")
-        objtype = grp1.childObjType((hsize_t)1, H5_INDEX_NAME, H5_ITER_INC);
-        verify_val(objtype, H5O_TYPE_NAMED_DATATYPE, "DataSet::childObjType", __LINE__, __FILE__);
+        objtype = grp1.childObjType(1, H5_INDEX_NAME, H5_ITER_INC);
+        verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_NAMED_DATATYPE),
+                   "DataSet::childObjType", __LINE__, __FILE__);
 
         // Get and verify object type with
         // H5O_type_t childObjType(hsize_t index,
         // H5_index_t index_type=H5_INDEX_NAME,
         // H5_iter_order_t order=H5_ITER_INC, const char* objname=".")
-        objtype = grp1.childObjType((hsize_t)2);
-        verify_val(objtype, H5O_TYPE_GROUP, "DataSet::childObjType", __LINE__, __FILE__);
+        objtype = grp1.childObjType(2);
+        verify_val(static_cast<long>(objtype), static_cast<long>(H5O_TYPE_GROUP), "DataSet::childObjType",
+                   __LINE__, __FILE__);
 
         // Everything will be closed as they go out of scope
 
@@ -403,9 +394,6 @@ test_get_objtype()
  * Purpose      Test Group::getObjId function.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              March, 2017
  *-------------------------------------------------------------------------
  */
 const H5std_string GROUPNAME("group");
@@ -455,17 +443,20 @@ test_open_object_header()
 
         // Make sure that each is the right kind of ID
         H5I_type_t id_type = IdComponent::getHDFObjType(obj_grp);
-        verify_val(id_type, H5I_GROUP, "H5Iget_type for group ID", __LINE__, __FILE__);
+        verify_val(static_cast<long>(id_type), static_cast<long>(H5I_GROUP), "H5Iget_type for group ID",
+                   __LINE__, __FILE__);
         id_type = IdComponent::getHDFObjType(obj_dtype);
-        verify_val(id_type, H5I_DATATYPE, "H5Iget_type for datatype ID", __LINE__, __FILE__);
+        verify_val(static_cast<long>(id_type), static_cast<long>(H5I_DATATYPE), "H5Iget_type for datatype ID",
+                   __LINE__, __FILE__);
         id_type = IdComponent::getHDFObjType(obj_dset);
-        verify_val(id_type, H5I_DATASET, "H5Iget_type for dataset ID", __LINE__, __FILE__);
+        verify_val(static_cast<long>(id_type), static_cast<long>(H5I_DATASET), "H5Iget_type for dataset ID",
+                   __LINE__, __FILE__);
 
         /* Do something more complex with each of the IDs to make sure */
 
         Group   grp2(obj_grp);
         hsize_t num_objs = grp2.getNumObjs();
-        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(num_objs), 1, "H5Gget_info", __LINE__, __FILE__);
         // There should be one object, the datatype
 
         // Close datatype object opened from the file
@@ -482,7 +473,8 @@ test_open_object_header()
 
         dtype.setId(obj_dtype);
         H5T_class_t type_class = dtype.getClass();
-        verify_val(type_class, H5T_INTEGER, "H5Tget_class", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_INTEGER), "H5Tget_class", __LINE__,
+                   __FILE__);
         dtype.close();
 
         // Close datatype object
@@ -493,7 +485,7 @@ test_open_object_header()
 
         // Try doing something with group, the ID should still work
         num_objs = grp2.getNumObjs();
-        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(num_objs), 1, "H5Gget_info", __LINE__, __FILE__);
 
         // Close the cloned group
         grp2.close();
@@ -544,8 +536,8 @@ test_getobjectinfo_same_file()
         Group grp2(file1.createGroup(GROUP2NAME));
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         // Query the info of two groups and verify that they have the same
         // file number
@@ -567,8 +559,8 @@ test_getobjectinfo_same_file()
         grp2 = file2.openGroup(GROUP2NAME);
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         // Query the info of two groups and verify that they have the same
         // file number
@@ -577,8 +569,8 @@ test_getobjectinfo_same_file()
         verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         file1.getObjinfo(GROUP1NAME, oinfo1);
         file1.getObjinfo(GROUP2NAME, oinfo2);
@@ -732,7 +724,7 @@ test_object()
     MESSAGE(5, ("Testing Object Functions\n"));
 
     test_get_objname();             // Test get object name from groups/datasets
-    test_existance();               // Test check for object existance
+    test_existance();               // Test check for object existence
     test_get_objname_ontypes();     // Test get object name from types
     test_get_objtype();             // Test get object type
     test_open_object_header();      // Test object header functions (H5O)
@@ -753,4 +745,7 @@ extern "C" void
 cleanup_object()
 {
     HDremove(FILE_OBJECTS.c_str());
+    HDremove(FILE_OBJHDR.c_str());
+    HDremove(FILE_OBJINFO.c_str());
+    HDremove(FILE_INTERGRPS.c_str());
 } // cleanup_objects

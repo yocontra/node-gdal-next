@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -18,20 +17,18 @@
 #ifndef H5Ppublic_H
 #define H5Ppublic_H
 
-/* System headers needed by this file */
-
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5ACpublic.h"
-#include "H5Dpublic.h"
-#include "H5Fpublic.h"
-#include "H5FDpublic.h"
-#include "H5Ipublic.h"
-#include "H5Lpublic.h"
-#include "H5Opublic.h"
-#include "H5MMpublic.h"
-#include "H5Tpublic.h"
-#include "H5Zpublic.h"
+#include "H5public.h"   /* Generic Functions                        */
+#include "H5ACpublic.h" /* Metadata Cache                           */
+#include "H5Dpublic.h"  /* Datasets                                 */
+#include "H5Fpublic.h"  /* Files                                    */
+#include "H5FDpublic.h" /* (Virtual) File Drivers                   */
+#include "H5Ipublic.h"  /* Identifiers                              */
+#include "H5Lpublic.h"  /* Links                                    */
+#include "H5MMpublic.h" /* Memory Management                        */
+#include "H5Opublic.h"  /* Object Headers                           */
+#include "H5Spublic.h"  /* Dataspaces                               */
+#include "H5Tpublic.h"  /* Datatypes                                */
+#include "H5Zpublic.h"  /* Data Filters                             */
 
 /*****************/
 /* Public Macros */
@@ -99,8 +96,10 @@
 #define H5P_CRT_ORDER_TRACKED 0x0001
 #define H5P_CRT_ORDER_INDEXED 0x0002
 
-/* Default value for all property list classes */
-#define H5P_DEFAULT (hid_t)0
+/**
+ * Default value of type \ref hid_t for all property list classes
+ */
+#define H5P_DEFAULT 0 /* (hid_t) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -112,14 +111,72 @@ extern "C" {
 
 /* Define property list class callback function pointer types */
 //! <!-- [H5P_cls_create_func_t_snip] -->
+/**
+ * \brief Callback function for H5Pcreate_class()
+ *
+ * \param[in] prop_id     The identifier of the property list class being created
+ * \param[in] create_data User pointer to any class creation data required
+ * \return \herr_t
+ *
+ * \details This function is called when a new property list of the class
+ *          with which this function was registered is being created.  The
+ *          function is called after any registered parent create function is
+ *          called for each property value.
+ *
+ *          If the create function returns a negative value, the new list is not
+ *          returned to the user and the property list creation routine returns
+ *          an error value.
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 //! <!-- [H5P_cls_create_func_t_snip] -->
 
 //! <!-- [H5P_cls_copy_func_t_snip] -->
+/**
+ * \brief Callback function for H5Pcreate_class()
+ *
+ * \param[in] new_prop_id The identifier of the property list copy
+ * \param[in] old_prop_id The identifier of the property list being copied
+ * \param[in] copy_data User pointer to any copy data required
+ * \return \herr_t
+ *
+ * \details This function is called when an existing property list of this
+ *          class is copied. The copy callback function is called after any
+ *          registered parent copy callback function is called for each property
+ *          value.
+ *
+ *          If the copy routine returns a negative value, the new list is not
+ *          returned to the user and the property list copy function returns an
+ *          error value.
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void *copy_data);
 //! <!-- [H5P_cls_copy_func_t_snip] -->
 
 //! <!-- [H5P_cls_close_func_t_snip] -->
+/**
+ * \brief Callback function for H5Pcreate_class()
+ *
+ * \param[in] prop_id    The identifier of the property list class being created
+ * \param[in] close_data User pointer to any close data required
+ * \return \herr_t
+ *
+ * \details This function is called when a property list of the class
+ *          with which this function was registered is being closed.  The
+ *          function is called after any registered parent close function is
+ *          called for each property value.
+ *
+ *          If the close function returns a negative value, the new list is not
+ *          returned to the user and the property list close routine returns
+ *          an error value.
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 //! <!-- [H5P_cls_close_func_t_snip] -->
 
@@ -133,8 +190,8 @@ typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
  * \param[in,out] value The value for the property
  * \return \herr_t
  *
- * \details The H5P_prp_cb1_t() describes the parameters used by the
- *          property create,copy and close callback functions.
+ * \details The H5P_prp_cb1_t() function describes the parameters used by the
+ *          property create, copy and close callback functions.
  */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb1_t_snip] -->
@@ -149,8 +206,8 @@ typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
  * \param[in]     value The value for the property
  * \return \herr_t
  *
- * \details The H5P_prp_cb2_t() describes the parameters used by the
- *          property set ,copy and delete callback functions.
+ * \details The H5P_prp_cb2_t() function describes the parameters used by the
+ *          property set, copy and delete callback functions.
  */
 typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb2_t_snip] -->
@@ -158,12 +215,49 @@ typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, vo
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
 typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+/**
+ * \brief Callback function for encoding property values
+ *
+ * \param[in]  value The property value to be encoded
+ * \param[out] buf   The encoded property value
+ * \param[out] size  The size of \p buf
+ * \return \herr_t
+ *
+ * \note There is currently no public API which exposes a callback of this type.
+ *
+ */
 typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size);
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+//! <!-- [H5P_prp_decode_func_t_snip] -->
+/**
+ * \brief Callback function for decoding property values
+ *
+ * \param[in]  buf   A buffer containing an encoded property value
+ * \param[out] value The decoded property value
+ * \return \herr_t
+ *
+ * \note There is currently no public API which exposes a callback of this type.
+ *
+ */
 typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
+//! <!-- [H5P_prp_decode_func_t_snip] -->
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
 
 //! <!-- [H5P_prp_compare_func_t_snip] -->
+/**
+ * \brief Callback function for comparing property values
+ *
+ * \param[in] value1 A property value
+ * \param[in] value2 A property value
+ * \param[in] size   The size of the \p value1 and \p value2 buffers
+ * \return Returns a positive value if \c value1 is greater than \c value2, a
+ *         negative value if \c value2 is greater than \c value1 and zero if
+ *         \c value1 and \c value2 are equal.
+ *
+ * \see H5Pregister(), H5Pinsert()
+ */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
 
@@ -171,6 +265,21 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
 //! <!-- [H5P_iterate_t_snip] -->
+/**
+ * \brief Callback function for H5Piterate()
+ *
+ * \param[in]     id        The identifier of a property list or property list class
+ * \param[in]     name      The name of the current property
+ * \param[in,out] iter_data The user context passed to H5Piterate()
+ * \return \herr_t_iter
+ *
+ * \details This function is called for each property encountered when
+ *          iterating over a property list or property list class
+ *          via H5Piterate().
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 //! <!-- [H5P_iterate_t_snip] -->
 
@@ -216,7 +325,6 @@ typedef enum H5D_mpio_actual_io_mode_t {
     H5D_MPIO_CHUNK_MIXED = 0x1 | 0x2,
     /**< HDF5 performed one the chunk collective optimization schemes and some
          chunks were accessed independently, some collectively. */
-    /** \internal The contiguous case is separate from the bit field. */
     H5D_MPIO_CONTIGUOUS_COLLECTIVE = 0x4
     /**< Collective I/O was performed on a contiguous dataset */
 } H5D_mpio_actual_io_mode_t;
@@ -232,23 +340,92 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_SET_INDEPENDENT = 0x01,
     /**< Collective I/O was not performed because independent I/O was requested */
     H5D_MPIO_DATATYPE_CONVERSION = 0x02,
-    /**< Collective I/O was not performed because datatype conversions were required */
+    /**< Collective I/O was not performed because datatype conversions were required and selection I/O was not
+       possible (see below) */
     H5D_MPIO_DATA_TRANSFORMS = 0x04,
     /**< Collective I/O was not performed because data transforms needed to be applied */
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
-    /**< \todo FIXME! */
+    /**< Collective I/O was disabled by environment variable (\Code{HDF5_MPI_OPT_TYPES}) */
     H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
     /**< Collective I/O was not performed because one of the dataspaces was neither simple nor scalar */
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
     /**< Collective I/O was not performed because the dataset was neither contiguous nor chunked */
     H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED = 0x40,
-    /**< \todo FIXME! */
+    /**< Collective I/O was not performed because parallel filtered writes are disabled */
     H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE = 0x80,
-    /**< \todo FIXME! */
-    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x100
+    /**< Error */
+    H5D_MPIO_NO_SELECTION_IO = 0x100,
+    /**< Collective I/O would be supported by selection or vector I/O but that feature was disabled
+       (see causes via H5Pget_no_selection_io_cause()) */
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x200
     /**< Sentinel */
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
+
+/**
+ * Causes for H5Pget_no_selection_io_cause() property
+ */
+#define H5D_SEL_IO_DISABLE_BY_API                                                                            \
+    (0x0001u) /**< Selection I/O was not performed because                                                   \
+                 the feature was disabled by the API */
+#define H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET                                                         \
+    (0x0002u) /**< Selection I/O was not performed because the                                               \
+                 dataset was neither contiguous nor chunked */
+#define H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER                                                                   \
+    (0x0004u) /**< Selection I/O was not performed because of                                                \
+                 sieve buffer for contiguous dataset */
+#define H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB                                                              \
+    (0x0008u) /**< Selection I/O was not performed because the VFD                                           \
+                 does not have vector or selection I/O callback */
+#define H5D_SEL_IO_PAGE_BUFFER                                                                               \
+    (0x0010u) /**< Selection I/O was not performed because of                                                \
+                 page buffer */
+#define H5D_SEL_IO_DATASET_FILTER                                                                            \
+    (0x0020u) /**< Selection I/O was not performed because of                                                \
+                 dataset filters */
+#define H5D_SEL_IO_CHUNK_CACHE                                                                               \
+    (0x0040u) /**< Selection I/O was not performed because of                                                \
+                 chunk cache */
+#define H5D_SEL_IO_TCONV_BUF_TOO_SMALL                                                                       \
+    (0x0080u) /**< Selection I/O was not performed because the                                               \
+                 type conversion buffer is too small */
+#define H5D_SEL_IO_BKG_BUF_TOO_SMALL                                                                         \
+    (0x0100u) /**< Selection I/O was not performed because the                                               \
+                 type conversion background buffer is too small */
+#define H5D_SEL_IO_DEFAULT_OFF                                                                               \
+    (0x0200u) /**< Selection I/O was not performed because the                                               \
+                   selection I/O mode is DEFAULT and the library                                             \
+                   chose it to be off for this case */
+
+/* Causes for H5D_MPIO_NO_SELECTION_IO */
+#define H5D_MPIO_NO_SELECTION_IO_CAUSES                                                                      \
+    (H5D_SEL_IO_DISABLE_BY_API | H5D_SEL_IO_TCONV_BUF_TOO_SMALL | H5D_SEL_IO_BKG_BUF_TOO_SMALL |             \
+     H5D_SEL_IO_DATASET_FILTER | H5D_SEL_IO_CHUNK_CACHE)
+
+//! <!--[H5D_selection_io_mode_t_snip] -->
+/**
+ * Selection I/O mode property
+ *
+ * \details The default value, #H5D_SELECTION_IO_MODE_DEFAULT,
+ *          indicates selection I/O can be ON or OFF as
+ *          determined by library internal.
+ */
+typedef enum H5D_selection_io_mode_t {
+    H5D_SELECTION_IO_MODE_DEFAULT = 0,
+    /**< Default selection I/O mode. */
+    H5D_SELECTION_IO_MODE_OFF,
+    /**< Selection I/O is off. */
+    H5D_SELECTION_IO_MODE_ON
+    /**< Selection I/O is on. */
+} H5D_selection_io_mode_t;
+//! <!--[H5D_selection_io_mode_t_snip] -->
+
+/**
+ * Causes for H5Pget_actual_selection_io_mode() property
+ */
+#define H5D_SCALAR_IO    (0x0001u) /**< Scalar (or legacy MPIO) I/O was performed */
+#define H5D_VECTOR_IO    (0x0002u) /**< Vector I/O was performed */
+#define H5D_SELECTION_IO (0x0004u) /**< Selection I/O was performed */
 
 /********************/
 /* Public Variables */
@@ -279,7 +456,7 @@ H5_DLLVAR hid_t H5P_CLS_LINK_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_CLS_VOL_INITIALIZE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_REFERENCE_ACCESS_ID_g;
 
-/* Default roperty list IDs */
+/* Default property list IDs */
 /* (Internal to library, do not use!  Use macros above) */
 H5_DLLVAR hid_t H5P_LST_FILE_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_ID_g;
@@ -308,7 +485,7 @@ H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
 /* Generic property list routines */
 
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Terminates access to a property list
  *
@@ -326,7 +503,7 @@ H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
  */
 H5_DLL herr_t H5Pclose(hid_t plist_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Closes an existing property list class
  *
@@ -343,7 +520,7 @@ H5_DLL herr_t H5Pclose(hid_t plist_id);
  */
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Copies an existing property list to create a new property list
  *
@@ -360,7 +537,7 @@ H5_DLL herr_t H5Pclose_class(hid_t plist_id);
  */
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Copies a property from one list or class to another
  *
@@ -396,7 +573,7 @@ H5_DLL hid_t H5Pcopy(hid_t plist_id);
  */
 H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Creates a new property list as an instance of a property list class
  *
@@ -520,7 +697,7 @@ H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
  */
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Creates a new property list class
  *
@@ -549,77 +726,12 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *          those existing properties, only add or remove their own class
  *          properties. Property list classes defined and supported in the
  *          HDF5 library distribution are listed and briefly described in
- *          H5Pcreate(). The \p create routine is called when a new property
- *          list of this class is being created. The #H5P_cls_create_func_t
- *          callback function is defined as follows:
+ *          H5Pcreate(). The \p create, \p copy, \p close functions are called
+ *          when a property list of the new class is created, copied, or closed,
+ *          respectively.
  *
- *          \snippet this H5P_cls_create_func_t_snip
- *
- *          The parameters to this callback function are defined as follows:
- *          <table>
- *            <tr>
- *              <td>\ref hid_t \c prop_id</td>
- *              <td>IN: The identifier of the property list being created</td>
- *            </tr>
- *            <tr>
- *              <td>\Code{void * create_data}</td>
- *              <td>IN: User pointer to any class creation data required</td>
- *            </tr>
- *          </table>
- *
- *          The \p create routine is called after any registered
- *          \p create function is called for each property value. If the
- *          \p create routine returns a negative value, the new list is not
- *          returned to the user and the property list creation routine returns
- *          an error value.
- *
- *          The \p copy routine is called when an existing property
- *          list of this class is copied. The #H5P_cls_copy_func_t callback
- *          function is defined as follows:
- *          \snippet this H5P_cls_copy_func_t_snip
- *
- *          The parameters to this callback function are defined as follows:
- *          <table>
- *            <tr>
- *              <td>\ref hid_t \c prop_id</td>
- *              <td>IN: The identifier of the property list created by copying</td>
- *            </tr>
- *            <tr>
- *              <td>\Code{void * copy_data}</td>
- *              <td>IN: User pointer to any class copy data required</td>
- *            </tr>
- *          </table>
- *
- *          The \p copy routine is called after any registered \p copy function
- *          is called for each property value. If the \p copy routine returns a
- *          negative value, the new list is not returned to the user and the
- *          property list \p copy routine returns an error value.
- *
- *           The \p close routine is called when a property list of this class
- *           is being closed. The #H5P_cls_close_func_t callback function is
- *           defined as follows:
- *           \snippet this H5P_cls_close_func_t_snip
- *
- *           The parameters to this callback function are defined as follows:
- *           <table>
- *            <tr>
- *              <td>\ref hid_t \c prop_id</td>
- *              <td>IN: The identifier of the property list being closed</td>
- *            </tr>
- *            <tr>
- *              <td>\Code{void * close_data}</td>
- *              <td>IN: User pointer to any class close data required</td>
- *            </tr>
- *          </table>
- *
- *          The \p close routine is called before any registered \p close
- *          function is called for each property value. If the \p close routine
- *          returns a negative value, the property list close routine returns
- *          an error value but the property list is still closed.
- *
- *          H5Pclose_class() can be used to release the property list class
- *          identifier returned by this function so that resources leaks will
- *          not develop.
+ *          H5Pclose_class() must be used to release the property list class
+ *          identifier returned by this function.
  *
  * \since 1.4.0
  *
@@ -628,7 +740,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func
                              H5P_cls_copy_func_t copy, void *copy_data, H5P_cls_close_func_t close,
                              void *close_data);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Decodes property list received in a binary object buffer and
  *        returns a new property list identifier
@@ -657,7 +769,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func
  */
 H5_DLL hid_t H5Pdecode(const void *buf);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Encodes the property values in a property list into a binary
  *        buffer
@@ -711,7 +823,7 @@ H5_DLL hid_t H5Pdecode(const void *buf);
  */
 H5_DLL herr_t H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Compares two property lists or classes for equality
  *
@@ -731,7 +843,7 @@ H5_DLL herr_t H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_i
  */
 H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Queries whether a property name exists in a property list or
  *       class
@@ -749,7 +861,7 @@ H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
  */
 H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Queries the value of a property
  *
@@ -781,7 +893,7 @@ H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
  */
 H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
 /**
- *\ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Returns the property list class identifier for a property list
  *
@@ -811,14 +923,14 @@ H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
  *          \code
  *          plist_class_id = H5Pget_class (dsetA_plist);
  *
- *          if H5Pequal (plist_class_id, H5P_OBJECT_CREATE) = TRUE;
+ *          if H5Pequal (plist_class_id, H5P_OBJECT_CREATE) = true;
  *              [ H5P_OBJECT_CREATE is the property list class    ]
  *              [ returned by H5Pget_class.                        ]
  *
- *          else if H5Pequal (plist_class_id, H5P_DATASET_CREATE) = TRUE;
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_CREATE) = true;
  *              [ H5P_DATASET_CREATE is the property list class.  ]
  *
- *          else if H5Pequal (plist_class_id, H5P_DATASET_XFER) = TRUE;
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_XFER) = true;
  *              [ H5P_DATASET_XFER is the property list class.    ]
  *
  *          .
@@ -844,7 +956,7 @@ H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
  */
 H5_DLL hid_t H5Pget_class(hid_t plist_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Retrieves the name of a class
  *
@@ -988,7 +1100,7 @@ H5_DLL hid_t H5Pget_class(hid_t plist_id);
  */
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Retrieves the parent class of a property class
  *
@@ -1004,7 +1116,7 @@ H5_DLL char *H5Pget_class_name(hid_t pclass_id);
  */
 H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief  Queries the number of properties in a property list or class
  *
@@ -1027,7 +1139,7 @@ H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
  */
 H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Queries the size of a property value in bytes
  *
@@ -1048,7 +1160,7 @@ H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
  */
 H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a temporary property with a property list
  *
@@ -1298,7 +1410,7 @@ H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *va
                          H5P_prp_get_func_t get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
                          H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Determines whether a property list is a member of a class
  *
@@ -1318,7 +1430,7 @@ H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *va
  */
 H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Iterates over properties in a property class or list
  *
@@ -1348,36 +1460,13 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  *          returned in this case, the iterator cannot be restarted if
  *          one of the calls to its operator returns non-zero.
  *
- *          The prototype for the #H5P_iterate_t operator is as follows:
- *          \snippet this H5P_iterate_t_snip
- *
- *          The operation receives the property list or class
+ *          The operation \p iter_func receives the property list or class
  *          identifier for the object being iterated over, \p id, the
  *          name of the current property within the object, \p name,
  *          and the pointer to the operator data passed in to H5Piterate(),
- *          \p iter_data. The valid return values from an operator are
- *          as follows:
+ *          \p iter_data.
  *
- *          <table>
- *           <tr>
- *            <td>Zero</td>
- *            <td>Causes the iterator to continue, returning zero when all
- *                properties have been processed</td>
- *           </tr>
- *           <tr>
- *            <td>Positive</td>
- *            <td>Causes the iterator to immediately return that positive
- *                value, indicating short-circuit success. The iterator
- *                can be restarted at the index of the next property</td>
- *           </tr>
- *           <tr>
- *            <td>Negative</td>
- *            <td>Causes the iterator to immediately return that value,
- *                indicating failure. The iterator can be restarted at the
- *                index of the next property</td>
- *           </tr>
- *          </table>
- *          H5Piterate() assumes that the properties in the object
+ * \warning H5Piterate() assumes that the properties in the object
  *          identified by \p id remain unchanged through the iteration.
  *          If the membership changes during the iteration, the function's
  *          behavior is undefined.
@@ -1387,7 +1476,7 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  */
 H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a permanent property with a property list class
  *
@@ -1668,7 +1757,7 @@ H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *de
                            H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
                            H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Removes a property from a property list
  *
@@ -1694,7 +1783,7 @@ H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *de
  */
 H5_DLL herr_t H5Premove(hid_t plist_id, const char *name);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Sets a property list value
  *
@@ -1726,7 +1815,7 @@ H5_DLL herr_t H5Premove(hid_t plist_id, const char *name);
  */
 H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Removes a property from a property list class
  *
@@ -1744,8 +1833,6 @@ H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
  *
  */
 H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
-
-/* Object creation property list (OCPL) routines */
 
 /**
  * \ingroup DCPL
@@ -1766,6 +1853,9 @@ H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
  *
  */
 H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
+
+/* Object creation property list (OCPL) routines */
+
 /**
  * \ingroup OCPL
  *
@@ -1848,9 +1938,6 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  * \ingroup OCPL
  *
  * \brief Returns information about a filter in a pipeline
- *
- * \todo Signature for H5Pget_filter2 is different in H5Pocpl.c than in
- *       H5Ppublic.h
  *
  * \ocpl_id{plist_id}
  * \param[in] idx    Sequence number within the filter pipeline of the filter
@@ -2001,7 +2088,7 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  *       are being recorded
  *
  * \plist_id
- * \param[out] track_times Boolean value, 1 (TRUE) or 0 (FALSE),
+ * \param[out] track_times Boolean value, 1 (true) or 0 (false),
  *             specifying whether object times are being recorded
  *
  * \return \herr_t
@@ -2210,7 +2297,7 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
@@ -2218,6 +2305,8 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \param[in] level Compression level
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_deflate() sets the deflate compression method and the
  *          compression level, \p level, for a dataset or group creation
@@ -2297,10 +2386,13 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
  *          (#H5Z_FILTER_FLETCHER32).
  *
- *          The array \p c_values contains \p cd_nelmts integers which are
- *          auxiliary data for the filter. The integer values will be
- *          stored in the dataset object header as part of the filter
- *          information.
+ *          The array \p cd_values contains \p cd_nelmts unsigned integers
+ *          which are auxiliary data for the filter. The values are typically
+ *          used as parameters to control the filter. In a filter's
+ *          \p set_local method (called from \p H5Dcreate), the values are
+ *          interpreted and possibly modified before they are used to control
+ *          the filter. These, possibly modified values, are then stored in
+ *          the dataset object header as auxiliary data for the filter.
  *
  *          The \p flags argument is a bit vector with the following
  *          fields specifying certain general properties of the filter:
@@ -2324,7 +2416,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *           <tr>
  *            <td>#H5Z_FLAG_MANDATORY</td>
  *            <td>If the filter is required, that is, set to mandatory,
- *                and the filter fails, the library’s behavior depends
+ *                and the filter fails, the library's behavior depends
  *                on whether the chunk cache is in use:
  *                \li If the chunk cache is enabled, data chunks will
  *                    be flushed to the file during H5Dclose() and the
@@ -2391,11 +2483,11 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *       property list, the group will be created with the new group file
  *       format. The filters will come into play only when dense storage
  *       is used (see H5Pset_link_phase_change()) and will be applied to
- *       the group’s fractal heap. The fractal heap will contain most of
- *       the the group’s link metadata, including link names.
+ *       the group's fractal heap. The fractal heap will contain most of
+ *       the group's link metadata, including link names.
  *
  * \note When working with group creation property lists, if you are
- *       adding a filter that is not in HDF5’s set of predefined filters,
+ *       adding a filter that is not in HDF5's set of predefined filters,
  *       i.e., a user-defined or third-party filter, you must first
  *       determine that the filter will work for a group. See the
  *       discussion of the set local and can apply callback functions
@@ -3241,7 +3333,7 @@ H5_DLL herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts, /* out */
  *       after the call to H5Pset_fapl_core(). It is an error to use this
  *       function with any other VFD.
  *
- * \note This function only applies to the backing store write operation
+ * \note This function only applies to the backing store write operation,
  *       which typically occurs when the file is flushed or closed. This
  *       function has no relationship to the increment parameter passed
  *       to H5Pset_fapl_core().
@@ -3269,102 +3361,7 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *          Valid driver identifiers distributed with HDF5 are listed and
  *          described in the following table.
  *
- *          <table>
- *           <tr>
- *            <th>Driver Name</th>
- *            <th>Driver Identifier</th>
- *            <th>Description</th>
- *            <th>Related Function</th>
- *           </tr>
- *           <tr>
- *            <td>POSIX</td>
- *            <td>#H5FD_SEC2</td>
- *            <td>This driver uses POSIX file-system functions like read and
- *                write to perform I/O to a single, permanent file on local disk
- *                with no system buffering. This driver is POSIX-compliant and
- *                is the default file driver for all systems.</td>
- *            <td>H5Pset_fapl_sec2()</td>
- *           </tr>
- *           <tr>
- *            <td>Direct</td>
- *            <td>#H5FD_DIRECT</td>
- *            <td>This is the #H5FD_SEC2 driver except data is written to or
- *                read from the file synchronously without being cached by the
- *                system.</td>
- *            <td>H5Pset_fapl_direct()</td>
- *           </tr>
- *           <tr>
- *            <td>Log</td>
- *            <td>#H5FD_LOG</td>
- *            <td>This is the #H5FD_SEC2 driver with logging capabilities.</td>
- *            <td>H5Pset_fapl_log()</td>
- *           </tr>
- *           <tr>
- *            <td>Windows</td>
- *            <td>#H5FD_WINDOWS</td>
- *            <td>This driver was modified in HDF5-1.8.8 to be a wrapper of the
- *                POSIX driver, #H5FD_SEC2. This change should not affect user
- *                applications.</td>
- *            <td>H5Pset_fapl_windows()</td>
- *           </tr>
- *           <tr>
- *            <td>STDIO</td>
- *            <td>#H5FD_STDIO</td>
- *            <td>This driver uses functions from the standard C stdio.h to
- *                perform I/O to a single, permanent file on local disk with
- *                additional system buffering.</td>
- *            <td>H5Pset_fapl_stdio()</td>
- *           </tr>
- *           <tr>
- *            <td>Memory</td>
- *            <td>#H5FD_CORE</td>
- *            <td>With this driver, an application can work with a file in
- *                memory for faster reads and writes. File contents are kept in
- *                memory until the file is closed. At closing, the memory
- *                version of the file can be written back to disk or abandoned.
- *            </td>
- *            <td>H5Pset_fapl_core()</td>
- *           </tr>
- *           <tr>
- *            <td>Family</td>
- *            <td>#H5FD_FAMILY</td>
- *            <td>With this driver, the HDF5 file’s address space is partitioned
- *                into pieces and sent to separate storage files using an
- *                underlying driver of the user’s choice. This driver is for
- *                systems that do not support files larger than 2 gigabytes.
- *            </td>
- *            <td>H5Pset_fapl_family()</td>
- *           </tr>
- *           <tr>
- *            <td>Multi</td>
- *            <td>#H5FD_MULTI</td>
- *            <td>With this driver, data can be stored in multiple files
- *                according to the type of the data. I/O might work better if
- *                data is stored in separate files based on the type of data.
- *                The Split driver is a special case of this driver.</td>
- *            <td>H5Pset_fapl_multi()</td>
- *           </tr>
- *           <tr>
- *            <td>Parallel</td>
- *            <td>#H5FD_MPIO</td>
- *            <td>This is the standard HDF5 file driver for parallel file
- *                systems. This driver uses the MPI standard for both
- *                communication and file I/O.</td>
- *            <td>H5Pset_fapl_mpio()</td>
- *           </tr>
- *           <tr>
- *            <td>Parallel POSIX</td>
- *            <td>H5FD_MPIPOSIX</td>
- *            <td>This driver is no longer available.</td>
- *            <td></td>
- *           </tr>
- *           <tr>
- *            <td>Stream</td>
- *            <td>H5FD_STREAM</td>
- *            <td>This driver is no longer available.</td>
- *            <td></td>
- *           </tr>
- *          </table>
+ *          \snippet{doc} tables/fileDriverLists.dox supported_file_driver_table
  *
  *          This list does not include custom drivers that might be
  *          defined and registered by a user.
@@ -3415,6 +3412,34 @@ H5_DLL hid_t H5Pget_driver(hid_t plist_id);
  *
  */
 H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Retrieves a string representation of the configuration for
+ *        the driver set on the given FAPL. The returned string can
+ *        be used to configure the same driver in an identical way.
+ *
+ * \fapl_id
+ * \param[out] config_buf Driver configuration string output buffer
+ * \param[in]  buf_size Size of driver configuration string output buffer
+ *
+ * \return Returns the length of the driver configuration string on
+ *         success (not including the NUL terminator). Returns negative
+ *         on failure.
+ *
+ * \details H5Pget_driver_config_str() retrieves a string representation
+ *          of the configuration for the driver set on the given FAPL. The
+ *          returned string can be used to configure the same driver in
+ *          an identical way.
+ *
+ *          If \p config_buf is NULL, the length of the driver configuration
+ *          string is simply returned. The caller can then allocate a buffer
+ *          of the appropriate size and call this routine again.
+ *
+ * \version 1.14.0 Function publicized in this release.
+ *
+ */
+H5_DLL ssize_t H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size);
 /**
  * \ingroup FAPL
  *
@@ -3532,7 +3557,7 @@ H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
  *          them when allocating and loading the buffer to return to the
  *          application (see H5Pset_file_image_callbacks()). If file image
  *          callbacks are not defined, the function will use \c malloc and \c
- *          memcpy. When \c malloc and \c memcpy are used, it is the caller’s
+ *          memcpy. When \c malloc and \c memcpy are used, it is the caller's
  *          responsibility to discard the returned buffer with a call to \c
  *          free.
  *
@@ -3854,13 +3879,13 @@ H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size);
  *
  * The second example illustrates the two cases for retrieving the
  * number of read attempts from the file access property list of a file
- * opened with SWMR acccess.
+ * opened with SWMR access.
  *
  * \include H5Pget_metadata_read_attempts.2.c
  *
  * The third example illustrates the two cases for retrieving the number
  * of read attempts from the file access property list of a file opened
- * with non-SWMR acccess.
+ * with non-SWMR access.
  *
  * \include H5Pget_metadata_read_attempts.3.c
  *
@@ -3892,7 +3917,7 @@ H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts);
  *          for more information.
  *
  *          The type of data returned in \p type will be one of those
- *          listed in the discussion of the \p type parameter in the the
+ *          listed in the discussion of the \p type parameter in the
  *          description of the function H5Pset_multi_type().
  *
  *          Use of this function is only appropriate for an HDF5 file
@@ -3965,7 +3990,7 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
  * \brief Returns maximum data sieve buffer size
  *
  * \fapl_id{fapl_id}
- * \param[in] size Maximum size, in bytes, of data sieve buffer
+ * \param[out] size Maximum size, in bytes, of data sieve buffer
  *
  * \return \herr_t
  *
@@ -4051,7 +4076,7 @@ H5_DLL herr_t H5Pget_vol_info(hid_t plist_id, void **vol_info);
  * \details H5Pset_alignment() sets the alignment properties of a
  *          file access property list so that any file object greater
  *          than or equal in size to \p threshold bytes will be aligned
- *          on an address which is a multiple of \p alignment. The
+ *          on an address that is a multiple of \p alignment. The
  *          addresses are relative to the end of the user block; the
  *          alignment is calculated by subtracting the user block size
  *          from the absolute file address and then adjusting the address
@@ -4061,7 +4086,7 @@ H5_DLL herr_t H5Pget_vol_info(hid_t plist_id, void **vol_info);
  *          implying no alignment. Generally the default values will
  *          result in the best performance for single-process access to
  *          the file. For MPI IO and other parallel systems, choose an
- *          alignment which is a multiple of the disk block size.
+ *          alignment that is a multiple of the disk block size.
  *
  *          If the file space handling strategy is set to
  *          #H5F_FSPACE_STRATEGY_PAGE, then the alignment set via this
@@ -4099,7 +4124,7 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *                        penalized when determining which chunks to flush
  *                        from cache. A value of 0 means fully read or
  *                        written chunks are treated no differently than
- *                        other chunks (the preemption is strictly LRU)
+ *                        other chunks (the preemption is strictly LRU),
  *                        while a value of 1 means fully read or written
  *                        chunks are always preempted before other chunks.
  *                        If your application only reads or writes data once,
@@ -4115,13 +4140,13 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *
  * \details H5Pset_cache() sets the number of elements, the total number of
  *          bytes, and the preemption policy value for all datasets in a file
- *          on the file’s file access property list.
+ *          on the file's file access property list.
  *
  *          The raw data chunk cache inserts chunks into the cache by first
  *          computing a hash value using the address of a chunk and then by
- *          using that hash value as the chunk’s index into the table of
+ *          using that hash value as the chunk's index into the table of
  *          cached chunks. In other words, the size of this hash table and the
- *          number of possible hash values is determined by the \p rdcc_nslots
+ *          number of possible hash values are determined by the \p rdcc_nslots
  *          parameter. If a different chunk in the cache has the same hash value,
  *          a collision will occur, which will reduce efficiency. If inserting
  *          the chunk into the cache would cause the cache to be too big, then
@@ -4147,16 +4172,13 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *
  * \note Note: Raw dataset chunk caching is not currently
  *       supported when using the MPI I/O and MPI POSIX file drivers
- *       in read/write mode; see H5Pset_fapl_mpio() and
- *       H5Pset_fapl_mpiposix(), respectively. When using one of these
- *       file drivers, all calls to H5Dread() and H5Dwrite() will access
+ *       in read/write mode; see H5Pset_fapl_mpio(). When using this
+ *       file driver, all calls to H5Dread() and H5Dwrite() will access
  *       the disk directly, and H5Pset_cache() will have no effect on
  *       performance.
  *
  * \note Raw dataset chunk caching is supported when these drivers are
  *       used in read-only mode.
- *
- * \todo Check on H5Pset_fapl_mpio() and H5Pset_fapl_mpiposix().
  *
  * \version 1.8.0 The use of the \p mdc_nelmts parameter was discontinued.
  *                Metadata cache configuration is managed with
@@ -4257,6 +4279,57 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
 /**
  * \ingroup FAPL
  *
+ * \brief Sets a file driver according to a given driver name
+ *
+ * \plist_id
+ * \param[in] driver_name   The new driver name
+ * \param[in] driver_config Optional string containing driver properties
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_driver_by_name() sets the file driver, by the name
+ *          driver_name, for a file access or data transfer property list,
+ *          \p plist_id, and supplies an optional string containing the
+ *          driver-specific properties, \p driver_config. The driver
+ *          properties string will be copied into the property list.
+ *
+ *          If the driver specified by \p driver_name is not currently
+ *          registered, an attempt will be made to load the driver as a
+ *          plugin.
+ *
+ * \version 1.14.0 Function publicized in this release.
+ *
+ */
+H5_DLL herr_t H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *driver_config);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets a file driver according to a given driver value (ID).
+ *
+ * \plist_id
+ * \param[in] driver_value  The new driver value (ID)
+ * \param[in] driver_config Optional string containing driver properties
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_driver_by_value() sets the file driver, by the value
+ *          driver_value, for a file access or data transfer property list,
+ *          \p plist_id, and supplies an optional string containing the
+ *          driver-specific properties, \p driver_config. The driver
+ *          properties string will be copied into the property list.
+ *
+ *          If the driver specified by \p driver_value is not currently
+ *          registered, an attempt will be made to load the driver as a
+ *          plugin.
+ *
+ * \version 1.14.0 Function publicized in this release.
+ *
+ */
+H5_DLL herr_t H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value,
+                                     const char *driver_config);
+/**
+ * \ingroup FAPL
+ *
  * \brief Sets the number of files that can be held open in an external
  *        link open file cache
  *
@@ -4265,7 +4338,7 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
  * The <em>external link open file cache</em> holds files open after
  * they have been accessed via an external link. This cache reduces
  * the number of times such files are opened when external links are
- * accessed repeatedly and can siginificantly improves performance in
+ * accessed repeatedly and can significantly improves performance in
  * certain heavy-use situations and when low-level file opens or closes
  * are expensive.
  *
@@ -4305,8 +4378,8 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
  *          file open.
  *
  *          Files opened through external links inherit the parent
- *          file’s file access property list by default, and therefore
- *          inherit the parent file’s external link open file cache
+ *          file's file access property list by default, and therefore
+ *          inherit the parent file's external link open file cache
  *          setting.
  *
  *          When child files contain external links of their own, the
@@ -4548,7 +4621,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *          is released from use.
  *
  *          Some file drivers allow the use of user-defined callback functions
- *          for allocating, freeing, and copying the driver’s internal buffer,
+ *          for allocating, freeing, and copying the driver's internal buffer,
  *          potentially allowing optimizations such as avoiding large \c malloc
  *          and \c memcpy operations, or to perform detailed logging.
  *
@@ -4764,9 +4837,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *          enumerated value in #H5F_libver_t, indicating that this is
  *          currently the latest format available.
  *
- *          The library supports the following five pairs of
- *          (\p low, \p high) combinations as derived from the values
- *          in #H5F_libver_t:
+ *          The library supports the following pairs of (\p low, \p high)
+ *          combinations as derived from the values in #H5F_libver_t:
  *
  *          <table>
  *           <tr>
@@ -4777,14 +4849,13 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
  *                \p high=#H5F_LIBVER_V18</td>
  *            <td>
- *              \li The library will create objects with the earliest
- *                  possible format versions.
- *              \li The library will allow objects to be created with the
- *                  latest format versions available to library release 1.8.x.
- *              \li API calls that create objects or features that are
- *                  available to versions of the library greater than 1.8.x
- *                  release will fail.
- *             </td>
+ *             \li The library will create objects with the earliest
+ *                 possible format versions.
+ *             \li The library will allow objects to be created with the
+ *                 latest format versions available to library release 1.8.x.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.8.x
+ *                 release will fail.</td>
  *           </tr>
  *           <tr>
  *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
@@ -4794,13 +4865,33 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                 format versions.
  *             \li The library will allow objects to be created with the latest
  *                 format versions available to library release 1.10.x.
- *                 Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
- *                 limit on the format versions to use.  For example, if a newer
- *                 format version is required to support a feature e.g. virtual
- *                 dataset, this setting will allow the object to be created.
- *             \li This is the library default setting and provides the greatest
- *                 format compatibility.
- *            </td>
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.10.x
+ *                 release will fail.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_V112</td>
+ *            <td>
+ *             \li The library will create objects with the earliest possible
+ *                 format versions.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.12.x.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.12.x
+ *                 release will fail.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_V114</td>
+ *            <td>
+ *             \li The library will create objects with the earliest possible
+ *                 format versions.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.14.x.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.14.x
+ *                 release will fail.</td>
  *           </tr>
  *           <tr>
  *            <td>\p low=#H5F_LIBVER_V18<br />
@@ -4808,6 +4899,11 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *            <td>
  *             \li The library will create objects with the latest format
  *                 versions available to library release 1.8.x.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.8.x.
+ *             \li The objects written with this setting may be
+ *                 accessible to a smaller range of library versions than
+ *                 would be the case if low is set to #H5F_LIBVER_EARLIEST.
  *             \li API calls that create objects or features that are available
  *                 to versions of the library greater than 1.8.x release will
  *                 fail.
@@ -4818,43 +4914,145 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *            <td>\p low=#H5F_LIBVER_V18<br />
  *                \p high=#H5F_LIBVER_V110</td>
  *            <td>
- *              \li The library will create objects with the latest format
- *                  versions available to library release 1.8.x.
- *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.10.x.
- *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use.  For example, if a
- *                  newer format version is required to support a feature e.g.
- *                  virtual dataset, this setting will allow the object to be
- *                  created.
- *              \li Earlier versions of the library may not be able to access
- *                  objects created with this setting.</td>
+ *             \li The library will create objects with the latest format
+ *                 versions available to library release 1.8.x.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.10.x.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.10.x
+ *                 release will fail.
+ *             \li Earlier versions of the library may not be able to access
+ *                 objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V18<br />
+ *                \p high=#H5F_LIBVER_V112</td>
+ *            <td>
+ *             \li The library will create objects with the latest format
+ *                 versions available to library release 1.8.x.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.12.x.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.12.x
+ *                 release will fail.
+ *             \li Earlier versions of the library may not be able to access
+ *                 objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V18<br />
+ *                \p high=#H5F_LIBVER_V114</td>
+ *            <td>
+ *             \li The library will create objects with the latest format
+ *                 versions available to library release 1.8.x.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.14.x.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.14.x
+ *                 release will fail.
+ *             \li Earlier versions of the library may not be able to access
+ *                 objects created with this setting.</td>
  *           </tr>
  *           <tr>
  *            <td>\p low=#H5F_LIBVER_V110<br />
- *                \p high=#H5F_LIBVER_V110
- *             </td>
+ *                \p high=#H5F_LIBVER_V110</td>
  *             <td>
  *              \li The library will create objects with the latest format
  *                  versions available to library release 1.10.x.
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release 1.10.x.
- *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use. For example, if a
- *                  newer format version is required to support a feature e.g.
- *                  virtual dataset, this setting will allow the object to be
- *                  created.
- *              \li This setting allows users to take advantage of the latest
- *                  features and performance enhancements in the library.
- *                  However, objects written with this setting may be
+ *              \li The objects written with this setting may be
  *                  accessible to a smaller range of library versions than
  *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.10.x release will
+ *                  fail.
  *              \li Earlier versions of the library may not be able to access
- *                  objects created with this
- * setting.
- *            </td>
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V110<br />
+ *                \p high=#H5F_LIBVER_V112</td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.10.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.12.x.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.12.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V110<br />
+ *                \p high=#H5F_LIBVER_V114</td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.10.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.14.x.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.14.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V112<br />
+ *                \p high=#H5F_LIBVER_V112</td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.12.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.12.x.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.12.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V112<br />
+ *                \p high=#H5F_LIBVER_V114</td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.12.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.14.x.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.14.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V114<br />
+ *                \p high=#H5F_LIBVER_V114</td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.14.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.14.x.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.14.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
  *           </tr>
  *          </table>
+ *
+ * \note *H5F_LIBVER_LATEST*:<br />
+ *                 Since 1.14.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                 limit on the format versions to use.  That is, if a
+ *                 newer format version is required to support a feature
+ *                 in 1.14.x series, this setting will allow the object to be
+ *                 created.
  *
  * \version 1.10.2 #H5F_LIBVER_V18 added to the enumerated defines in
  *                 #H5F_libver_t.
@@ -5206,11 +5404,39 @@ H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
  */
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 
+/**
+ * \ingroup FAPL
+ *
+ * \brief Query the capability flags for the VOL connector that will be used
+ *              with this file access property list (FAPL).
+ *
+ * \fapl_id{plist_id}
+ * \param[out]  cap_flags  Flags that indicate the VOL connector capabilities
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_vol_cap_flags() queries the current VOL connector information
+ *              for a FAPL to retrieve the capability flags for the VOL
+ *              connector stack, as will be used by a file open or create
+ *              operation that uses this FAPL.
+ *
+ * \note This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ *       variable to override the VOL connector set programmatically for the
+ *       FAPL (with H5Pset_vol).
+ *
+ * \note The H5VL_CAP_FLAG_ASYNC flag can be checked to see if asynchronous
+ *              operations are supported by the VOL connector stack.
+ *
+ * \since 1.14.0
+ *
+ */
+H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags);
+
 #ifdef H5_HAVE_PARALLEL
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
- * \brief Sets metadata I/O mode for read operations to collective or independent (default)
+ * \brief Sets metadata I/O mode for read operations to be collective or independent (default)
  *
  * \gacpl_id
  * \param[in] is_collective Boolean value indicating whether metadata reads are collective
@@ -5241,7 +5467,7 @@ H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_i
  *          identifier will be issued collectively from all ranks irrespective
  *          of the individual setting of a particular operation. If this
  *          assumption is not adhered to, corruption will be introduced in the
- *          metadata cache and HDF5’s behavior will be undefined.
+ *          metadata cache and HDF5's behavior will be undefined.
  *
  *          Alternatively, a user may wish to avoid setting this property
  *          globally on the file access property list, and individually set it
@@ -5277,7 +5503,7 @@ H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_i
  */
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
  * \brief Retrieves metadata read mode setting
  *
@@ -5299,7 +5525,7 @@ H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collectiv
 /**
  * \ingroup FAPL
  *
- * \brief Sets metadata write mode to collective or independent (default)
+ * \brief Sets metadata write mode to be collective or independent (default)
  *
  * \fapl_id{plist_id}
  * \param[out] is_collective Boolean value indicating whether metadata
@@ -5346,12 +5572,38 @@ H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
 
 /**
- * \todo Add missing documentation
+ * \ingroup FAPL
+ *
+ * \brief Get the MPI communicator and info
+ *
+ * \fapl_id
+ * \param[out] comm MPI communicator
+ * \param[out] info MPI info object
+ * \return \herr_t
+ *
+ * \details H5Pget_mpi_params() gets the MPI communicator and info stored in
+ *          the file access property list \p fapl_id.
+ *
+ * \todo When was this introduced?
+ *
  */
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
 
 /**
- * \todo Add missing documentation
+ * \ingroup FAPL
+ *
+ * \brief Set the MPI communicator and info
+ *
+ * \fapl_id
+ * \param[in] comm MPI communicator
+ * \param[in] info MPI info object
+ * \return \herr_t
+ *
+ * \details H5Pset_mpi_params() sets the MPI communicator and info stored in
+ *          the file access property list \p fapl_id.
+ *
+ * \todo When was this introduced?
+ *
  */
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
@@ -5592,7 +5844,7 @@ H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
  *          <i>no dataset attributes</i> hint setting for the dataset
  *          creation property list \p dcpl_id. This setting is used to
  *          inform the library to create minimized dataset object headers
- *          when TRUE. The setting value is returned in the boolean pointer
+ *          when true. The setting value is returned in the boolean pointer
  *          \p minimize.
  *
  * \since 1.10.5
@@ -5626,6 +5878,9 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
  *          external file name is not returned. If \p offset or \p size
  *          are null pointers then the corresponding information is not
  *          returned.
+ *
+ * \note On Windows, off_t is typically a 32-bit signed long value, which
+ *       limits the valid offset that can be returned to 2 GiB.
  *
  * \version 1.6.4 \p idx parameter type changed to unsigned.
  * \since 1.0.0
@@ -5688,7 +5943,7 @@ H5_DLL int H5Pget_external_count(hid_t plist_id);
  * \note H5Pget_fill_time() is designed to work in coordination with the
  *       dataset fill value and dataset storage allocation time properties,
  *       retrieved with the functions H5Pget_fill_value() and
- *       H5Pget_alloc_time().
+ *       H5Pget_alloc_time().type == H5FD_MEM_DRAW
  *
  * \since 1.6.0
  *
@@ -6049,12 +6304,12 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
  *          dataset creation property list \p dcpl_id.
  *
  *          The available option is detailed in the parameters section.
- *          Only chunks that are not completely filled by the dataset’s
+ *          Only chunks that are not completely filled by the dataset's
  *          dataspace are affected by this option. Such chunks are
  *          referred to as partial edge chunks.
  *
  *      \b Motivation: H5Pset_chunk_opts() is used to specify storage
- *       options for chunks on the edge of a dataset’s dataspace. This
+ *       options for chunks on the edge of a dataset's dataspace. This
  *       capability allows the user to tune performance in cases where
  *       the dataset size may not be a multiple of the chunk size and
  *       the handling of partial edge chunks can impact performance.
@@ -6078,13 +6333,13 @@ H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
  *          hint setting for the dataset creation property list \p dcpl_id.
  *          Datasets created with the dataset creation property list
  *          \p dcpl_id will have their object headers minimized if the
- *          boolean flag \p minimize is set to TRUE. By setting \p minimize
- *          to TRUE, the library expects that no attributes will be added
+ *          boolean flag \p minimize is set to true. By setting \p minimize
+ *          to true, the library expects that no attributes will be added
  *          to the dataset. Attributes can be added, but they are appended
  *          with a continuation message, which can reduce performance.
  *
  *          This setting interacts with H5Fset_dset_no_attrs_hint(): if
- *          either is set to TRUE, then the created dataset's object header
+ *          either is set to true, then the created dataset's object header
  *          will be minimized.
  *
  * \since 1.10.5
@@ -6237,6 +6492,8 @@ H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_shuffle() sets the shuffle filter, #H5Z_FILTER_SHUFFLE,
  *          in the dataset creation property list \p plist_id. The shuffle
  *          filter de-interlaces a block of data by reordering the bytes.
@@ -6308,6 +6565,8 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_nbit() sets the N-Bit filter, #H5Z_FILTER_NBIT, in the
  *          dataset creation property list \p plist_id.
  *
@@ -6330,10 +6589,10 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *            <td>byte 0</td>
  *          </tr>
  *          <tr>
- *            <td>????????</td>
- *            <td>????SPPP</td>
- *            <td>PPPPPPPP</td>
- *            <td>PPPP????</td>
+ *            <td> ???????? </td>
+ *            <td> ????SPPP </td>
+ *            <td> PPPPPPPP </td>
+ *            <td> PPPP???? </td>
  *          </tr>
  *          </table>
  *          Note: S - sign bit, P - significant bit, ? - padding bit; For
@@ -6400,6 +6659,8 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
  *                         non-negative
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_scaleoffset() sets the scale-offset filter,
  *          #H5Z_FILTER_SCALEOFFSET, for a dataset.
@@ -6510,6 +6771,8 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP,
  *          for a dataset. SZIP is a compression method designed for use with
  *          scientific data.
@@ -6531,7 +6794,7 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *          Specifically, a dataset with a datatype that is 8-, 16-, 32-, or
  *          64-bit signed or unsigned integer; char; or 32- or 64-bit float
  *          can be compressed with SZIP. See Note, below, for further
- *          discussion of the the SZIP \p bits_per_pixel setting.
+ *          discussion of the SZIP \p bits_per_pixel setting.
  *
  *          SZIP options are passed in an options mask, \p options_mask,
  *          as follows.
@@ -6593,7 +6856,7 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *             property list used to create a dataset containing a
  *             non-allowed datatype, the call to H5Dcreate() will fail; the
  *             conflict can be detected only when the property list is used.
- *           - Users should be aware that there are factors that affect one’s
+ *           - Users should be aware that there are factors that affect one's
  *             rights and ability to use SZIP compression by reviewing the
  *             SZIP copyright notice.
  *
@@ -6667,7 +6930,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  * \param[in] src_dset_name The path to the HDF5 dataset in the file specified by
  *            \p src_file_name. The dataset might not exist yet. The dataset name
  *            can be specified using a C-style \c printf statement as described below.
- * \param[in] src_space_id The source dataset’s dataspace identifier with a
+ * \param[in] src_space_id The source dataset's dataspace identifier with a
  *            selection applied, possibly an unlimited selection
  * \return \herr_t
  *
@@ -6702,7 +6965,7 @@ H5_DLL herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels
  *      </tr>
  *      </table>
  *      If the printf form is used for the source file or dataset names, the
- *      selection in the source dataset’s dataspace must be fixed-size.
+ *      selection in the source dataset's dataspace must be fixed-size.
  *
  * \par Source File Resolutions:
  *      When a source dataset residing in a different file is accessed, the
@@ -6806,7 +7069,7 @@ H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_fil
  *          the corresponding value that is set in the property list.
  *
  *          \p func is the user-defined callback function to invoke when
- *          a dataset’s appended dimension size reaches a boundary and
+ *          a dataset's appended dimension size reaches a boundary and
  *          \p udata is the user-defined input data for the callback
  *          function.
  *
@@ -6867,7 +7130,7 @@ H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots /*out*/, siz
  * \details H5Pget_efile_prefix() retrieves the file system path prefix
  *          for locating external files associated with a dataset that
  *          uses external storage. This will be the value set with
- *          H5Pset_efile_prefix() or the HDF5 library’s default.
+ *          H5Pset_efile_prefix() or the HDF5 library's default.
  *
  *          The value of \p size is the size in bytes of the prefix,
  *          including the NULL terminator. If the size is unknown, a
@@ -6955,9 +7218,6 @@ H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size);
  *
  * \dapl_id
  * \param[out] view The flag specifying the view of the virtual dataset.
- *                  Valid values are:
- *                  \li #H5D_VDS_FIRST_MISSING
- *                  \li #H5D_VDS_LAST_AVAILABLE
  *
  * \return \herr_t
  *
@@ -6974,7 +7234,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
 /**
  * \ingroup DAPL
  *
- * \brief Sets two actions to perform when the size of a dataset’s
+ * \brief Sets two actions to perform when the size of a dataset's
  *        dimension being appended reaches a specified boundary
  *
  * \dapl_id
@@ -6995,7 +7255,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *              property list
  *
  *          When a user is appending data to a dataset via H5DOappend()
- *          and the dataset’s newly extended dimension size hits a
+ *          and the dataset's newly extended dimension size hits a
  *          specified boundary, the library will perform the first action
  *          listed above. Upon return from the callback function, the
  *          library will then perform the second action listed above and
@@ -7005,7 +7265,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *          The specified boundary is indicated by the parameter
  *          \p boundary. It is a 1-dimensional array with \p ndims
  *          elements, which should be the same as the rank of the
- *          dataset’s dataspace. While appending to a dataset along a
+ *          dataset's dataspace. While appending to a dataset along a
  *          particular dimension index via H5Dappend(), the library
  *          determines a boundary is reached when the resulting dimension
  *          size is divisible by \p boundary[index]. A zero value for
@@ -7026,7 +7286,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *          create or open if the following conditions are true:
  *
  *          \li \p ndims, the number of elements for boundary, is not the
- *              same as the rank of the dataset’s dataspace.
+ *              same as the rank of the dataset's dataspace.
  *          \li A non-zero boundary value is specified for a non-extendible
  *          dimension.
  *
@@ -7038,7 +7298,7 @@ H5_DLL herr_t H5Pget_virtual_view(hid_t dapl_id, H5D_vds_view_t *view);
  *          prototype, are defined as follows:
  *
  *          \li \p dataset_id is the dataset identifier.
- *          \li \p cur_dims is the dataset’s current dimension sizes when
+ *          \li \p cur_dims is the dataset's current dimension sizes when
  *              a boundary is hit.
  *          \li \p user_data is the user-defined input data.
  *
@@ -7190,19 +7450,19 @@ H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_
  *          that uses external storage:
  *
  *          \li The default behavior of the library is to search for the
- *              dataset’s external storage raw data files in the same
+ *              dataset's external storage raw data files in the same
  *              directory as the HDF5 file which contains the dataset.
  *          \li If the prefix is set to an absolute path, the target
- *              directory will be searched for the dataset’s external
+ *              directory will be searched for the dataset's external
  *              storage raw data files.
  *          \li If the prefix is set to a relative path, the target
  *              directory, relative to the current working directory, will
- *              be searched for the dataset’s external storage raw data
+ *              be searched for the dataset's external storage raw data
  *              files.
  *          \li If the prefix is set to a relative path that begins with
  *              the special token ${ORIGIN}, that directory, relative to
  *              the HDF5 file containing the dataset, will be searched for
- *              the dataset’s external storage raw data files.
+ *              the dataset's external storage raw data files.
  *
  *           The HDF5_EXTFILE_PREFIX environment variable can be used to
  *           override the above behavior (the environment variable
@@ -7229,7 +7489,7 @@ H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_
  *       are unaware of the environment variable.
  *
  * \note On Windows, the prefix must be an ASCII string since the Windows
- *       standard C library’s I/O functions cannot handle UTF-8 file names.
+ *       standard C library's I/O functions cannot handle UTF-8 file names.
  *
  * \since 1.10.0, 1.8.17
  *
@@ -7295,7 +7555,7 @@ H5_DLL herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char *prefix);
  *              then the virtual dataset will contain the data from
  *              d-1, d-3, ..., d-N, ... .  The blocks that are mapped to
  *              d-2 and d-3 will be filled according to the virtual
- *              dataset’s fill value setting.
+ *              dataset's fill value setting.
  *
  * \see_virtual
  *
@@ -7311,11 +7571,7 @@ H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size);
  *
  * \dapl_id
  * \param[in] view Flag specifying the extent of the data to be included
- *                 in the view. Valid values are:
- *                 \li #H5D_VDS_FIRST_MISSING: View includes all data
- *                     before the first missing mapped data
- *                 \li #H5D_VDS_LAST_AVAILABLE View includes all
- *                     available mapped data
+ *                 in the view.
  *
  * \return \herr_t
  *
@@ -7326,7 +7582,7 @@ H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size);
  *          If \p view is set to #H5D_VDS_FIRST_MISSING, the view includes
  *          all data before the first missing mapped data. This setting
  *          provides a view containing only the continuous data starting
- *          with the dataset’s first data element. Any break in
+ *          with the dataset's first data element. Any break in
  *          continuity terminates the view.
  *
  *          If \p view is set to #H5D_VDS_LAST_AVAILABLE, the view
@@ -7420,10 +7676,6 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *          If an error occurs, the buffer pointed to by \p expression is
  *          unchanged, and the function returns a negative value.
  *
- * \par Example
- *      An example snippet from examples/h5_dtransform.c:
- *      \snippet h5_dtransform.c H5Pget_data_transform_snip
- *
  * \since 1.8.0
  *
  */
@@ -7487,8 +7739,11 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  * \details H5Pget_preserve() checks the status of the dataset transfer
  *          property list.
  *
+ * \since 1.0.0
+ *
  * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to
  *                better match the C API. (Fortran 90)
+ * \version 1.8.2 Deprecated.
  *
  */
 H5_DLL int H5Pget_preserve(hid_t plist_id);
@@ -7516,6 +7771,8 @@ H5_DLL int H5Pget_preserve(hid_t plist_id);
  *
  *          Please refer to the function H5Pset_type_conv_cb() for more details.
  *
+ * \since 1.8.0
+ *
  */
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data);
 /**
@@ -7526,11 +7783,11 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
  *
  * \param[in]  plist_id   Identifier for the dataset transfer property list
  * \param[out] alloc_func User's allocate routine, or NULL for system malloc
- * \param[out] alloc_info Extra parameter for user’s allocation routine.
+ * \param[out] alloc_info Extra parameter for user's allocation routine.
  *             Contents are ignored if preceding
  * parameter is NULL \param[out] free_func  User's free routine, or NULL for
  * system free \param[out] free_info
- * Extra parameter for user’s free routine. Contents are ignored if preceding
+ * Extra parameter for user's free routine. Contents are ignored if preceding
  * parameter is NULL
  *
  * \return \herr_t
@@ -7538,6 +7795,8 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
  * \details H5Pget_vlen_mem_manager() is the companion function to
  *          H5Pset_vlen_mem_manager(), returning the parameters set by
  *          that function.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
@@ -7782,8 +8041,9 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size);
  *          I/O pipeline treats the destination datapoints as completely
  *          uninitialized.
  *
- * \todo Add missing version information: introduction, deprecation, etc.
- *       Why is the declaration not in the deprecated section?
+ * \since 1.0.0
+ *
+ * \version 1.8.2 Deprecated.
  *
  */
 H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
@@ -7811,7 +8071,7 @@ H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
  *          function prototype is as follows:
  *          \snippet H5Tpublic.h H5T_conv_except_func_t_snip
  *
- * \todo Add version information.
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data);
@@ -7861,7 +8121,8 @@ H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void
  *          set to \c NULL and the \p alloc_info and \p free_info parameters are
  *          ignored.
  *
- * \todo Add version information.
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
                                       H5MM_free_t free_func, void *free_info);
@@ -7999,10 +8260,285 @@ H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode
 H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause,
                                               uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
-
-/* Link creation property list (LCPL) routines */
 /**
- * \ingroup ALCAPL
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets a hyperslab file selection for a dataset I/O operation
+ *
+ * \param[in] plist_id Property list identifier
+ * \param[in] rank     Number of dimensions of selection
+ * \param[in] op       Operation to perform on current selection
+ * \param[in] start    Offset of start of hyperslab
+ * \param[in] stride   Hyperslab stride
+ * \param[in] count    Number of blocks included in hyperslab
+ * \param[in] block    Size of block in hyperslab
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_dataset_io_hyperslab_selection() is designed to be used
+ *          in conjunction with using #H5S_PLIST for the file dataspace
+ *          ID when making a call to H5Dread() or H5Dwrite().  When used
+ *          with #H5S_PLIST, the selection created by one or more calls to
+ *          this routine is used for determining which dataset elements to
+ *          access.
+ *
+ *          \p rank is the dimensionality of the selection and determines
+ *          the size of the \p start, \p stride, \p count, and \p block arrays.
+ *          \p rank must be between 1 and #H5S_MAX_RANK, inclusive.
+ *
+ *          The \p op, \p start, \p stride, \p count, and \p block parameters
+ *          behave identically to their behavior for H5Sselect_hyperslab(),
+ *          please see the documentation for that routine for details about
+ *          their use.
+ *
+ * \since 1.14.0
+ *
+ */
+H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op,
+                                                    const hsize_t start[], const hsize_t stride[],
+                                                    const hsize_t count[], const hsize_t block[]);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets the selection I/O mode
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] selection_io_mode    The selection I/O mode to be set
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_selection_io() sets the selection I/O mode
+ *          \p selection_io_mode in the dataset transfer property
+ *          list \p plist_id.
+ *
+ *          This can be used to enable collective I/O with type conversion, or
+ *          with custom VFDs that support vector or selection I/O.
+ *
+ *          Values that can be set in \p selection_io_mode:
+ *          \snippet this H5D_selection_io_mode_t_snip
+ *          \click4more
+ *
+ * \note    The library may not perform selection I/O as it asks for if the
+ *          layout callback determines that it is not feasible to do so.  Please
+ *          refer to H5Pget_no_selection_io_cause() for details.
+ *
+ *          When used with type conversion, selection I/O requires the type
+ *          conversion buffer (and the background buffer if applicable) be large
+ *          enough to hold the entirety of the data involved in the I/O.  For
+ *          read operations, the library will use the application's read buffer
+ *          as the type conversion buffer if the memory type is not smaller than
+ *          the file type, eliminating the need for a separate type conversion
+ *          buffer (a background buffer may still be required).  For write
+ *          operations, the library will similarly use the write buffer as a
+ *          type conversion buffer, but only if H5Pset_modify_write_buf() is
+ *          used to allow the library to modify the contents of the write
+ *          buffer.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the selection I/O mode
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] selection_io_mode   The selection I/O mode
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_selection_io() queries the selection I/O mode set in
+ *          in the dataset transfer property list \p plist_id.
+ *
+ *          Values returned in \p selection_io_mode:
+ *          \snippet this H5D_selection_io_mode_t_snip
+ *          \click4more
+ *
+ * \note    The library may not perform selection I/O as it asks for if the
+ *          layout callback determines that it is not feasible to do so.  Please
+ *          refer to H5Pget_no_selection_io_cause() for details.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the cause for not performing selection or vector I/O on the
+ *        last parallel I/O call
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] no_selection_io_cause A bitwise set value indicating the relevant
+ *                                   causes that prevented selection I/O from
+ *                                   being performed
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request selection I/O to be performed via a data transfer
+ *      property list (DXPL).  This can be used to enable collective I/O with
+ *      type conversion, or with custom VFDs that support vector or selection
+ *      I/O.  However, there are conditions that can cause HDF5 to forgo
+ *      selection or vector I/O and perform legacy (scalar) I/O instead.
+ *
+ * \details H5Pget_no_selection_io_cause() can be used to determine whether
+ *          selection or vector I/O was applied for the last preceding I/O call.
+ *          If selection or vector I/O was not used, this function retrieves the
+ *          cause(s) that prevent selection or vector I/O to be performed on
+ *          that I/O call.  The properties retrieved by this function are set
+ *          before I/O takes place and are retained even when I/O fails.
+ *
+ *          If a selection I/O request falls back to vector I/O, that is not
+ *          considered "breaking" selection I/O by this function, since vector
+ *          I/O still passes all information to the file driver in a single
+ *          callback.
+ *
+ *          Valid values returned in \p no_selection_io_cause are listed
+ *          as follows. If there are multiple causes, it is a bitwise OR of
+ *          the relevant causes.
+ *
+ *          - #H5D_SEL_IO_DISABLE_BY_API
+ *          Selection I/O was not performed because the feature was disabled by the API
+ *          - #H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET
+ *          Selection I/O was not performed because the dataset was neither contiguous nor chunked
+ *          - #H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER
+ *          Selection I/O was not performed because of sieve buffer for contiguous dataset
+ *          - #H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB
+ *          Selection I/O was not performed because the VFD does not have vector or selection I/O callback
+ *          - #H5D_SEL_IO_PAGE_BUFFER
+ *          Selection I/O was not performed because of page buffer
+ *          - #H5D_SEL_IO_DATASET_FILTER
+ *          Selection I/O was not performed because of dataset filters
+ *          - #H5D_SEL_IO_CHUNK_CACHE
+ *          Selection I/O was not performed because of chunk cache
+ *          - #H5D_SEL_IO_TCONV_BUF_TOO_SMALL
+ *          Selection I/O was not performed because the type conversion buffer is too small
+ *          - #H5D_SEL_IO_BKG_BUF_TOO_SMALL
+ *          Selection I/O was not performed because the type conversion background buffer is too small
+ *          - #H5D_SEL_IO_DEFAULT_OFF
+ *          Selection I/O was not performed because the selection I/O mode is DEFAULT and the library chose it
+ * to be off for this case
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the type(s) of I/O that HDF5 actually performed on raw data
+ *        during the last I/O call
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] actual_selection_io_mode A bitwise set value indicating the
+ *                                      type(s) of I/O performed
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request selection I/O to be performed via a data transfer
+ *      property list (DXPL).  This can be used to enable collective I/O with
+ *      type conversion, or with custom VFDs that support vector or selection
+ *      I/O.  However, there are conditions that can cause HDF5 to forgo
+ *      selection or vector I/O and perform legacy (scalar) I/O instead.
+ *      This function allows the user to determine which type or types of
+ *      I/O were actually performed.
+ *
+ * \details H5Pget_actual_selection_io_mode() allows the user to determine which
+ *          type(s) of I/O were actually performed on raw data during the last
+ *          I/O operation which used \p plist_id.  This property is set after
+ *          all I/O is completed; if I/O fails, it will not be set.
+ *
+ *          H5Pget_no_selection_io_cause() can be used to determine the reason
+ *          why selection or vector I/O was not performed.
+ *
+ *          Valid bitflags returned in \p actual_selection_io_mode are listed
+ *          as follows.
+ *
+ *          - #H5D_SCALAR_IO
+ *          Scalar (or legacy MPIO) I/O was performed
+ *          - #H5D_VECTOR_IO
+ *          Vector I/O was performed
+ *          - #H5D_SELECTION_IO
+ *          Selection I/O was performed
+ *
+ *          0 or more of these can be present in \p actual_selection_io_mode in
+ *          a bitwise fashion, since a single operation can trigger multiple
+ *          instances of I/O, possibly with different types.  A value of \p 0
+ *          indicates no raw data I/O was performed during the operation.
+ *
+ *          Be aware that this function will only include raw data I/O performed
+ *          to/from disk as part of the last I/O operation.  Any metadata
+ *          I/O, including attribute and compact dataset I/O, is disregarded.
+ *          It is also possible that data was cached in the dataset chunk cache
+ *          or sieve buffer, which may prevent I/O from hitting the disk, and
+ *          thereby prevent it from being counted by this function.
+ *
+ * \since 1.14.3
+ *
+ */
+H5_DLL herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Allows the library to modify the contents of the write buffer
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] modify_write_buf   Whether the library can modify the contents of the write buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_modify_write_buf() sets whether the library is allowed to
+ *          modify the contents of write buffers passed to HDF5 API routines
+ *          that are passed the dataset transfer property list \p plist_id.  The
+ *          default value for modify_write_buf is false.
+ *
+ *          This function can be used to allow the library to perform in-place
+ *          type conversion on write operations to save memory space.  After making an
+ *          API call with this parameter set to true, the contents of the write buffer
+ *          are undefined.
+ *
+ * \note    When modify_write_buf is set to true the library may violate the
+ *          const qualifier on the API parameter for the write buffer.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the "modify write buffer" property
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] modify_write_buf   Whether the library can modify the contents of the write buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_modify_write_buf() gets the "modify write buffer" property
+ *          from the dataset transfer property list \p plist_id.  This property
+ *          determines whether the library is allowed to  modify the contents of
+ *          write buffers passed to HDF5 API routines that are passed
+ *          \p plist_id.  The default value for modify_write_buf is false.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf);
+
+/**
+ * \ingroup LCPL
  *
  * \brief Determines whether property is set to enable creating missing
  *        intermediate groups
@@ -8033,7 +8569,7 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
  */
 H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd /*out*/);
 /**
- * \ingroup ALCAPL
+ * \ingroup LCPL
  *
  * \brief Specifies in property list whether to create missing
  *        intermediate groups
@@ -8125,7 +8661,7 @@ H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_fla
  *          to require before converting a group to a dense form.
  *
  *          In the compact format, links are stored as messages in the
- *          group’s header. In the dense format, links are stored in a
+ *          group's header. In the dense format, links are stored in a
  *          fractal heap and indexed with a version 2 B-tree.
  *
  *          \p max_compact is the maximum number of links to store as
@@ -8140,7 +8676,7 @@ H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_fla
  *          converted back to the compact format.
  *
  *          In the compact format, links are stored as messages in the
- *          group’s header. In the dense format, links are stored in a
+ *          group's header. In the dense format, links are stored in a
  *          fractal heap and indexed with a version 2 B-tree.
  *
  *          See H5Pset_link_phase_change() for a discussion of
@@ -8336,7 +8872,7 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \par Motivation:
  *      In situations where backward-compatibility is required, specifically, when
  *      libraries prior to HDF5 Release 1.8.0 may be used to read the file, groups
- *      must be created and maintained in the original style. This is HDF5’s default
+ *      must be created and maintained in the original style. This is HDF5's default
  *      behavior. If backward compatibility with pre-1.8.0 libraries is not a concern,
  *      greater efficiencies can be obtained with the new-format compact and indexed
  *      groups. See <a href="https://portal.hdfgroup.org/display/HDF5/Groups">Group
@@ -8358,7 +8894,7 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  *      of that metadata (and hence, the size of the local heap) can vary wildly from group
  *      to group. To intelligently allocate space and to avoid unnecessary fragmentation of
  *      the local heap, it can be valuable to provide the library with a hint as to the local
- *      heap’s likely eventual size. This can be particularly valuable when it is known that
+ *      heap's likely eventual size. This can be particularly valuable when it is known that
  *      a group will eventually have a great many members. It can also be useful in conserving
  *      space in a file when it is known that certain groups will never have any members.
  *
@@ -8415,9 +8951,8 @@ H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size 
                                        size_t *key_alloc_size /*out*/);
 #endif /*  H5_HAVE_MAP_API */
 
-/* String creation property list (STRCPL) routines */
 /**
- * \ingroup ALCAPL
+ * \ingroup ACPL
  *
  * \brief  Retrieves the character encoding used to create a link or
  *         attribute name
@@ -8446,7 +8981,7 @@ H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size 
  */
 H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
 /**
- * \ingroup ALCAPL
+ * \ingroup ACPL
  *
  * \brief Sets the character encoding used to encode link and attribute
  *        names
@@ -8487,7 +9022,6 @@ H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
  */
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
 
-/* Link access property list (LAPL) routines */
 /**
  * \ingroup LAPL
  *
@@ -8846,7 +9380,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
 
 /* Object copy property list (OCPYPL) routines */
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Adds a path to the list of paths that will be searched in the
  *        destination file for a matching committed datatype
@@ -8884,7 +9418,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *          must be identical. Two attributes are considered identical if
  *          their datatype description, dataspace, and raw data values are
  *          the same. However, if an attribute uses a committed datatype,
- *          that committed datatype’s attributes will not be compared.
+ *          that committed datatype's attributes will not be compared.
  *
  *          If a match is found, H5Ocopy() will perform the following in
  *          the destination file:
@@ -8894,7 +9428,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *              will modify the copied dataset to use the found committed
  *              datatype as its datatype.
  *          \li For an object with an attribute of a committed datatype,
- *              the library will modify the copied object’s attribute to
+ *              the library will modify the copied object's attribute to
  *              use the found committed datatype as its datatype.
  *
  *          If no match is found, H5Ocopy() will perform the following in
@@ -8906,11 +9440,11 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *              file by a unique path.
  *          \li For a dataset that uses a committed datatype, the
  *              library will copy the datatype as an anonymous
- *              committed datatype and use that as the dataset’s
+ *              committed datatype and use that as the dataset's
  *              datatype.
  *          \li For an object with an attribute of a committed datatype,
  *              the library will copy the datatype as an anonymous
- *              committed datatype and use that as the attribute’s
+ *              committed datatype and use that as the attribute's
  *              datatype.
  *
  *      \b Motivation: H5Padd_merge_committed_dtype_path() provides a
@@ -8961,7 +9495,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  */
 H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Clears the list of paths stored in the object copy property list
  *
@@ -9012,7 +9546,7 @@ H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path
  */
 H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Retrieves the properties to be used when an object is copied
  *
@@ -9037,7 +9571,7 @@ H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
  */
 H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Retrieves the callback function from the specified object copy
  *        property list
@@ -9075,7 +9609,7 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  */
 H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Sets properties to be used when an object is copied
  *
@@ -9140,10 +9674,10 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *                    committed datatype.
  *                    If copied in a single H5Ocopy() operation, objects
  *                    that share a committed datatype in the source will
- *                    share an anonymous committed dataype in the
+ *                    share an anonymous committed datatype in the
  *                    destination copy. Subsequent H5Ocopy() operations,
  *                    however, will be unaware of prior anonymous committed
- *                    dataypes and will create new ones.
+ *                    datatypes and will create new ones.
  *
  *                    See the “See Also” section immediately below for
  *                    functions related to the use of this flag.</td>
@@ -9168,7 +9702,7 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  */
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Sets the callback function that H5Ocopy() will invoke before
  *        searching the entire destination file for a matching committed
@@ -9266,7 +9800,7 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
 
 /* Typedefs */
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a permanent property with a property list class
  *
@@ -9388,9 +9922,6 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
  *
- *
- * \cpp_c_api_note
- *
  */
 
 /* Function prototypes */
@@ -9399,7 +9930,7 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
                            H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
                            H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a temporary property with a property list
  *
@@ -9504,15 +10035,14 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
-
- * \cpp_c_api_note
+ *
  */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
                          H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
                          H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
                          H5P_prp_close_func_t prp_close);
 /**
- * \ingroup GPLO
+ * \ingroup PLCRA
  *
  * \brief Encodes the property values in a property list into a binary
  *        buffer

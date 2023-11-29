@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -37,19 +36,27 @@ PROGRAM fortranlibtest
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
 
+  WRITE(*,*) '                       ==========================                            '
+  WRITE(*,*) '                              FORTRAN tests '
+  WRITE(*,*) '                       ==========================                            '
+
+  ret_total_error = 0
+  CALL h5openclose(ret_total_error)
+  CALL write_test_status(ret_total_error, ' h5open/h5close test', total_error)
+
   CALL h5open_f(error)
+  CALL check("h5open_f",error,total_error)
 
   cleanup = .TRUE.
   CALL h5_env_nocleanup_f(status)
   IF(status) cleanup=.FALSE.
 
-  WRITE(*,*) '                       ==========================                            '
-  WRITE(*,*) '                              FORTRAN tests '
-  WRITE(*,*) '                       ==========================                            '
-  CALL h5get_libversion_f(majnum, minnum, relnum, total_error)
-  IF(total_error .EQ. 0) THEN
 
-     WRITE(*, '(" FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
+  ret_total_error = 0
+  CALL h5get_libversion_f(majnum, minnum, relnum, ret_total_error)
+  IF(ret_total_error .EQ. 0) THEN
+
+     WRITE(*, '(/," FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
      WRITE(*, '(I0)', advance="NO") majnum
      WRITE(*, '(".")', advance="NO")
      WRITE(*, '(I0)', advance="NO") minnum
@@ -74,12 +81,24 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Reopen test', total_error)
 
   ret_total_error = 0
+  CALL get_name_test(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Get name test', total_error)
+
+  ret_total_error = 0
   CALL file_close(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File open/close test', total_error)
 
   ret_total_error = 0
   CALL file_space("file_space",cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File free space test', total_error)
+
+  ret_total_error = 0
+  CALL test_file_info("file_info",cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' File information test', total_error)
+
+  ret_total_error = 0
+  CALL test_get_file_image(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing get file image ', total_error)
 
 !
 !      '========================================='
@@ -94,8 +113,19 @@ PROGRAM fortranlibtest
   CALL extenddsettest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Extendible dataset test', total_error)
 
+  ret_total_error = 0
   CALL test_userblock_offset(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset offset with user block', total_error)
+
+  ! Test filling dataspace elements
+  ret_total_error = 0
+  CALL test_dset_fill(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Filling dataspace elements', total_error)
+
+  ! Direct chunk IO
+  ret_total_error = 0
+  CALL test_direct_chunk_io(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Direct chunk IO', total_error)
 
 !
 !      '========================================='
@@ -176,7 +206,7 @@ PROGRAM fortranlibtest
 
   ret_total_error = 0
   CALL external_test(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' External dataset test', total_error)
+  CALL write_test_status(ret_total_error, ' External dataset and Selection IO test', total_error)
 
   ret_total_error = 0
   CALL multi_file_test(cleanup, ret_total_error)
@@ -187,8 +217,12 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Dataset chunk cache configuration', total_error)
 
   ret_total_error = 0
-  CALL test_misc_properties(cleanup, ret_total_error)
+  CALL test_misc_properties(ret_total_error)
   CALL write_test_status(ret_total_error, ' Miscellaneous properties', total_error)
+
+  ret_total_error = 0
+  CALL test_in_place_conversion(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Test in-place conversion', total_error)
 
 !
 !      '========================================='

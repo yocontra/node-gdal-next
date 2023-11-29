@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -142,7 +141,7 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL check("h5gclose_f",error,total_error)
 
   !
-  ! Craete references to two groups, integer dataset and shared datatype
+  ! Create references to two groups, integer dataset and shared datatype
   ! and write it to the dataset in the file
   !
   CALL h5rcreate_f(file_id, groupname1, ref(1), error)

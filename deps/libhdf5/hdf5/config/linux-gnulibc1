@@ -1,7 +1,6 @@
 #							-*- shell-script -*-
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -39,7 +38,10 @@ fi
 # Figure out CCE C compiler flags
 . $srcdir/config/cce-flags
 
-# Figure out Intel C compiler flags
+# Figure out Intel oneAPI C compiler flags
+. $srcdir/config/oneapi-flags
+
+# Figure out Intel classic C compiler flags
 . $srcdir/config/intel-flags
 
 # Figure out Clang C compiler flags
@@ -55,6 +57,10 @@ if test "X-" = "X-$FC"; then
         pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
+            ;;
+        icx*)
+            FC=ifx
+            FC_BASENAME=ifx
             ;;
         icc*)
             FC=ifort
@@ -93,7 +99,7 @@ else
             fc_version_info=`$FC -V | grep Absoft`
             ;;
          # The NAG compiler
-	 nagfor*|nagftn*)
+	 *nagfor*|*nagftn*)
             RM='rm -f'
             tmpfile=/tmp/cmpver.$$
             $FC -V >& $tmpfile
@@ -120,8 +126,14 @@ fi
 # Figure out CCE FC compiler flags
 . $srcdir/config/cce-fflags
 
-# Figure out Intel FC compiler flags
+# Figure out Intel oneAPI FC compiler flags
+. $srcdir/config/oneapi-fflags
+
+# Figure out Intel classic FC compiler flags
 . $srcdir/config/intel-fflags
+
+# Figure out Clang FC compiler flags
+. $srcdir/config/clang-fflags
 
 case $FC_BASENAME in
     #
@@ -132,8 +144,6 @@ case $FC_BASENAME in
         H5_CFLAGS="$H5_CFLAGS"
 
         F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names
-# (just in case since this should be a default EIP)
         H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
 
@@ -163,9 +173,10 @@ case $FC_BASENAME in
     nagfor)
 
         F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names
-# (just in case since this should be a default EIP)
-        H5_FCFLAGS="$H5_FCFLAGS"
+        # NOTE: The default is -ieee=stop, which will cause problems
+        #       when the H5T module performs floating-point type
+        #       introspection
+        AM_FCFLAGS="$AM_FCFLAGS -ieee=full"
         FSEARCH_DIRS=""
 
         # Production
@@ -199,7 +210,10 @@ if test -z "$CXX"; then
   CXX_BASENAME=g++
 fi
 
-# Figure out Intel CXX compiler flags
+# Figure out Intel oneAPI CXX compiler flags
+. $srcdir/config/oneapi-cxxflags
+
+# Figure out Intel classic CXX compiler flags
 # Do this ahead of GNU to avoid icpc being detected as g++
 . $srcdir/config/intel-cxxflags
 
@@ -236,6 +250,11 @@ case $CC in
         cc_version_info=`echo $cc_version_info`
         ;; 
 
+    *icx*)
+        cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
     *icc*)
         cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
             sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
@@ -270,6 +289,11 @@ case $FC in
         fc_version_info=`echo $fc_version_info`
         ;;
 
+    *ifx*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
     *ifc*|*ifort*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
             sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
@@ -297,6 +321,7 @@ case $FC in
     *pgf90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'pgf90'`
         ;;
+
     *nagfor*|*nagftn*)
         RM='rm -f'
         tmpfile=/tmp/cmpver.$$
@@ -321,12 +346,19 @@ fi
 # check if the compiler_version_info is already set
 if test -z "$cxx_version_info"; then
 case $CXX in
+    *nvc++*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'nvc++'`
+        ;;
     *pgc++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'pgc++'`
         ;;
     *g++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
+        ;;
+    *icpx*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
     *icpc*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -82,7 +81,7 @@ main(void)
     dims[1]   = 20;
     dataspace = H5Screate_simple(RANK, dims, NULL);
     dataset   = H5Dcreate2(file, "/Data/Float_Data", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT,
-                         H5P_DEFAULT);
+                           H5P_DEFAULT);
 
     /*
      *Close the second dataset and file.

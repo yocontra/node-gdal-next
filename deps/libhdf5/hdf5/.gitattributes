@@ -1,5 +1,4 @@
 * text=auto !eol
-bin/bbrelease -text
 bin/genparser -text
 bin/switch_maint_mode -text
 c++/src/H5OcreatProp.cpp -text
@@ -192,19 +191,18 @@ java/examples/testfiles/examples.intro.H5_CreateGroup.txt -text
 java/examples/testfiles/examples.intro.H5_CreateGroupAbsoluteRelative.txt -text
 java/examples/testfiles/examples.intro.H5_CreateGroupDataset.txt -text
 java/examples/testfiles/examples.intro.H5_ReadWrite.txt -text
-java/lib/ext/slf4j-nop-1.7.25.jar -text svneol=unset#application/zip
-java/lib/ext/slf4j-simple-1.7.25.jar -text svneol=unset#application/zip
+java/lib/ext/slf4j-nop-2.0.6.jar -text svneol=unset#application/zip
+java/lib/ext/slf4j-simple-2.0.6.jar -text svneol=unset#application/zip
 java/lib/hamcrest-core.jar -text svneol=unset#application/java-archive
 java/lib/junit.jar -text svneol=unset#application/java-archive
 java/lib/simplelogger.properties -text
-java/lib/slf4j-api-1.7.25.jar -text svneol=unset#application/zip
+java/lib/slf4j-api-2.0.6.jar -text svneol=unset#application/zip
 java/src/CMakeLists.txt -text
 java/src/Makefile.am -text
 java/src/hdf/CMakeLists.txt -text
 java/src/hdf/hdf5lib/CMakeLists.txt -text
 java/src/hdf/hdf5lib/H5.java -text
 java/src/hdf/hdf5lib/HDF5Constants.java -text
-java/src/hdf/hdf5lib/HDF5GroupInfo.java -text
 java/src/hdf/hdf5lib/HDFArray.java -text
 java/src/hdf/hdf5lib/HDFNativeData.java -text
 java/src/hdf/hdf5lib/callbacks/Callbacks.java -text
@@ -393,10 +391,10 @@ test/cork.c -text
 test/corrupt_stab_msg.h5 -text
 test/deflate.h5 -text
 test/dynlib4.c -text
-test/family_v16_00000.h5 -text
-test/family_v16_00001.h5 -text
-test/family_v16_00002.h5 -text
-test/family_v16_00003.h5 -text
+test/family_v16-000000.h5 -text
+test/family_v16-000001.h5 -text
+test/family_v16-000002.h5 -text
+test/family_v16-000003.h5 -text
 test/file_image_core_test.h5 -text
 test/filespace_1_6.h5 -text
 test/filespace_1_8.h5 -text

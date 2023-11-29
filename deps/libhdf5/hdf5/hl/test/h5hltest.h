@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -12,8 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, April 28, 2006
  *
  * Purpose:     Test support stuff.
  */
@@ -29,21 +26,21 @@
 
 /* Macros used in HL tests */
 #define HL_TESTING2(WHAT)                                                                                    \
-    {                                                                                                        \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
-        HDfflush(stdout);                                                                                    \
-    }
+    do {                                                                                                     \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
+    } while (0)
 #define HL_TESTING3(WHAT)                                                                                    \
-    {                                                                                                        \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
-        HDfflush(stdout);                                                                                    \
-    }
+    do {                                                                                                     \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
+    } while (0)
 
 /* Implements verbose 'assert' with 'goto error' exit  */
 #define VERIFY(condition, string)                                                                            \
     do {                                                                                                     \
         if (!(condition))                                                                                    \
-            FAIL_PUTS_ERROR(string)                                                                          \
+            FAIL_PUTS_ERROR(string);                                                                         \
     } while (0)
 
 int test_packet_table_with_varlen(void);

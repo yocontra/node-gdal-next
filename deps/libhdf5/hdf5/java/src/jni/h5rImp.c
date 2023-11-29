@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -38,7 +37,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1object(JNIEnv *env, jclass clss, jlong loc_id, js
 {
     const char *refName = NULL;
     jbyteArray  ref     = NULL;
-    jbyte *     refBuf  = NULL;
+    jbyte      *refBuf  = NULL;
     herr_t      status  = FAIL;
 
     UNUSED(clss);
@@ -48,11 +47,15 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1object(JNIEnv *env, jclass clss, jlong loc_id, js
 
     PIN_JAVA_STRING(ENVONLY, name, refName, NULL, "H5Rcreate_object: reference name not pinned");
 
-    if (NULL == (refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
+    if (NULL == (refBuf = calloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_object: failed to allocate reference buffer");
 
-    if ((status = H5Rcreate_object((hid_t)loc_id, refName, (hid_t)aid, (const H5R_ref_t *)refBuf)) < 0)
+    H5R_ref_t loc_ref;
+    if ((status = H5Rcreate_object((hid_t)loc_id, refName, (hid_t)aid, &loc_ref)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(refBuf, &loc_ref, H5R_REF_BUF_SIZE);
 
     if (NULL == (ref = ENVPTR->NewByteArray(ENVONLY, (jsize)H5R_REF_BUF_SIZE)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -64,7 +67,7 @@ done:
     if (refName)
         UNPIN_JAVA_STRING(ENVONLY, name, refName);
     if (refBuf)
-        HDfree(refBuf);
+        free(refBuf);
 
     return ref;
 } /* end Java_hdf_hdf5lib_H5_H5Rcreate_1object */
@@ -80,7 +83,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1region(JNIEnv *env, jclass clss, jlong loc_id, js
 {
     const char *refName = NULL;
     jbyteArray  ref     = NULL;
-    jbyte *     refBuf  = NULL;
+    jbyte      *refBuf  = NULL;
     herr_t      status  = FAIL;
 
     UNUSED(clss);
@@ -90,12 +93,15 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1region(JNIEnv *env, jclass clss, jlong loc_id, js
 
     PIN_JAVA_STRING(ENVONLY, name, refName, NULL, "H5Rcreate_region: reference name not pinned");
 
-    if (NULL == (refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
+    if (NULL == (refBuf = calloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_region: failed to allocate reference buffer");
 
-    if ((status = H5Rcreate_region((hid_t)loc_id, refName, space_id, (hid_t)aid, (const H5R_ref_t *)refBuf)) <
-        0)
+    H5R_ref_t loc_ref;
+    if ((status = H5Rcreate_region((hid_t)loc_id, refName, space_id, (hid_t)aid, &loc_ref)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(refBuf, &loc_ref, H5R_REF_BUF_SIZE);
 
     if (NULL == (ref = ENVPTR->NewByteArray(ENVONLY, (jsize)H5R_REF_BUF_SIZE)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -107,7 +113,7 @@ done:
     if (refName)
         UNPIN_JAVA_STRING(ENVONLY, name, refName);
     if (refBuf)
-        HDfree(refBuf);
+        free(refBuf);
 
     return ref;
 } /* end Java_hdf_hdf5lib_H5_H5Rcreate_1region */
@@ -124,7 +130,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1attr(JNIEnv *env, jclass clss, jlong loc_id, jstr
     const char *refName  = NULL;
     const char *attrName = NULL;
     jbyteArray  ref      = NULL;
-    jbyte *     refBuf   = NULL;
+    jbyte      *refBuf   = NULL;
     herr_t      status   = FAIL;
 
     UNUSED(clss);
@@ -138,12 +144,15 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1attr(JNIEnv *env, jclass clss, jlong loc_id, jstr
 
     PIN_JAVA_STRING(ENVONLY, name, refName, NULL, "H5Rcreate_attr: reference name not pinned");
 
-    if (NULL == (refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
+    if (NULL == (refBuf = calloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_attr: failed to allocate reference buffer");
 
-    if ((status = H5Rcreate_attr((hid_t)loc_id, refName, attrName, (hid_t)aid, (const H5R_ref_t *)refBuf)) <
-        0)
+    H5R_ref_t loc_ref;
+    if ((status = H5Rcreate_attr((hid_t)loc_id, refName, attrName, (hid_t)aid, &loc_ref)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(refBuf, &loc_ref, H5R_REF_BUF_SIZE);
 
     if (NULL == (ref = ENVPTR->NewByteArray(ENVONLY, (jsize)H5R_REF_BUF_SIZE)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -157,7 +166,7 @@ done:
     if (refName)
         UNPIN_JAVA_STRING(ENVONLY, name, refName);
     if (refBuf)
-        HDfree(refBuf);
+        free(refBuf);
 
     return ref;
 } /* end Java_hdf_hdf5lib_H5_H5Rcreate_1attr */
@@ -171,7 +180,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Rdestroy(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     herr_t   status = FAIL;
 
@@ -187,7 +196,12 @@ Java_hdf_hdf5lib_H5_H5Rdestroy(JNIEnv *env, jclass clss, jbyteArray ref)
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rdestroy: reference buffer not pinned");
 
-    if ((status = H5Rdestroy((const H5R_ref_t *)refBuf)) < 0)
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
+    if ((status = H5Rdestroy(&loc_ref)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -204,7 +218,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1type(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean   isCopy;
-    jbyte *    refBuf = NULL;
+    jbyte     *refBuf = NULL;
     jsize      refBufLen;
     H5R_type_t ref_type = -1;
 
@@ -220,7 +234,12 @@ Java_hdf_hdf5lib_H5_H5Rget_1type(JNIEnv *env, jclass clss, jbyteArray ref)
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_type: reference buffer not pinned");
 
-    if ((ref_type = H5Rget_type((const H5R_ref_t *)refBuf)) < 0)
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
+    if ((ref_type = H5Rget_type(&loc_ref)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -239,8 +258,8 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Requal(JNIEnv *env, jclass clss, jbyteArray ref1, jbyteArray ref2)
 {
     jboolean isCopy;
-    jbyte *  refBuf1 = NULL;
-    jbyte *  refBuf2 = NULL;
+    jbyte   *refBuf1 = NULL;
+    jbyte   *refBuf2 = NULL;
     jsize    refBufLen;
     htri_t   bval   = JNI_FALSE;
     herr_t   status = FAIL;
@@ -267,7 +286,13 @@ Java_hdf_hdf5lib_H5_H5Requal(JNIEnv *env, jclass clss, jbyteArray ref1, jbyteArr
 
     PIN_BYTE_ARRAY(ENVONLY, ref2, refBuf2, &isCopy, "H5Requal: reference2 buffer not pinned");
 
-    if ((bval = H5Requal((const H5R_ref_t *)refBuf1, (const H5R_ref_t *)refBuf2)) < 0)
+    H5R_ref_t loc_ref1, loc_ref2;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref1, refBuf1, H5R_REF_BUF_SIZE);
+    memcpy(&loc_ref2, refBuf2, H5R_REF_BUF_SIZE);
+
+    if ((bval = H5Requal(&loc_ref1, &loc_ref2)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     status = bval;
 
@@ -291,10 +316,10 @@ JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcopy(JNIEnv *env, jclass clss, jbyteArray src_ref)
 {
     jboolean   isCopy;
-    jbyte *    src_refBuf = NULL;
+    jbyte     *src_refBuf = NULL;
     jsize      refBufLen;
     jbyteArray dst_ref    = NULL;
-    jbyte *    dst_refBuf = NULL;
+    jbyte     *dst_refBuf = NULL;
     herr_t     status     = FAIL;
 
     UNUSED(clss);
@@ -309,11 +334,19 @@ Java_hdf_hdf5lib_H5_H5Rcopy(JNIEnv *env, jclass clss, jbyteArray src_ref)
 
     PIN_BYTE_ARRAY(ENVONLY, src_ref, src_refBuf, &isCopy, "H5Rcopy: src reference buffer not pinned");
 
-    if (NULL == (dst_refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
+    if (NULL == (dst_refBuf = calloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_attr: failed to allocate dst reference buffer");
 
-    if ((status = H5Rcopy((const H5R_ref_t *)src_refBuf, (const H5R_ref_t *)dst_refBuf)) < 0)
+    H5R_ref_t loc_src_ref, loc_dst_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_src_ref, src_refBuf, H5R_REF_BUF_SIZE);
+    memcpy(&loc_dst_ref, dst_refBuf, H5R_REF_BUF_SIZE);
+
+    if ((status = H5Rcopy(&loc_src_ref, &loc_dst_ref)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    memcpy(dst_refBuf, &loc_dst_ref, H5R_REF_BUF_SIZE);
 
     if (NULL == (dst_ref = ENVPTR->NewByteArray(ENVONLY, (jsize)H5R_REF_BUF_SIZE)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -325,7 +358,7 @@ done:
     if (src_refBuf)
         UNPIN_BYTE_ARRAY(ENVONLY, src_ref, src_refBuf, (status < 0) ? JNI_ABORT : 0);
     if (dst_refBuf)
-        HDfree(dst_refBuf);
+        free(dst_refBuf);
 
     return dst_ref;
 } /* end Java_hdf_hdf5lib_H5_H5Rcopy */
@@ -339,7 +372,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Ropen_1object(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -355,7 +388,12 @@ Java_hdf_hdf5lib_H5__1H5Ropen_1object(JNIEnv *env, jclass clss, jbyteArray ref, 
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Ropen_object: reference buffer not pinned");
 
-    if ((retVal = H5Ropen_object((const H5R_ref_t *)refBuf, (hid_t)rapl_id, (hid_t)oapl_id)) < 0)
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
+    if ((retVal = H5Ropen_object(&loc_ref, (hid_t)rapl_id, (hid_t)oapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -374,7 +412,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Ropen_1region(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -390,7 +428,12 @@ Java_hdf_hdf5lib_H5__1H5Ropen_1region(JNIEnv *env, jclass clss, jbyteArray ref, 
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Ropen_region: reference buffer not pinned");
 
-    if ((retVal = H5Ropen_region((const H5R_ref_t *)refBuf, (hid_t)rapl_id, (hid_t)oapl_id)) < 0)
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
+    if ((retVal = H5Ropen_region(&loc_ref, (hid_t)rapl_id, (hid_t)oapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -409,7 +452,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Ropen_1attr(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong aapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -425,7 +468,12 @@ Java_hdf_hdf5lib_H5__1H5Ropen_1attr(JNIEnv *env, jclass clss, jbyteArray ref, jl
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Ropen_attr: reference buffer not pinned");
 
-    if ((retVal = H5Ropen_attr((const H5R_ref_t *)refBuf, (hid_t)rapl_id, (hid_t)aapl_id)) < 0)
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
+    if ((retVal = H5Ropen_attr(&loc_ref, (hid_t)rapl_id, (hid_t)aapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -445,7 +493,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type3(JNIEnv *env, jclass clss, jbyteArray ref,
 {
     H5O_type_t object_info = -1;
     jboolean   isCopy;
-    jbyte *    refBuf = NULL;
+    jbyte     *refBuf = NULL;
     int        retVal = -1;
 
     UNUSED(clss);
@@ -455,7 +503,12 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type3(JNIEnv *env, jclass clss, jbyteArray ref,
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_obj_type3: reference buffer not pinned");
 
-    if ((retVal = H5Rget_obj_type3((const H5R_ref_t *)refBuf, (hid_t)rapl_id, &object_info)) < 0)
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
+    if ((retVal = H5Rget_obj_type3(&loc_ref, (hid_t)rapl_id, &object_info)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (retVal >= 0)
@@ -477,11 +530,11 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1file_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jstring  str    = NULL;
     ssize_t  buf_size;
     ssize_t  check_size = -1;
-    char *   namePtr    = NULL;
+    char    *namePtr    = NULL;
 
     UNUSED(clss);
 
@@ -490,14 +543,19 @@ Java_hdf_hdf5lib_H5_H5Rget_1file_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_file_name: reference buffer not pinned");
 
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
     /* Get the length of the name */
-    if ((buf_size = H5Rget_file_name((const H5R_ref_t *)refBuf, NULL, 0)) < 0)
+    if ((buf_size = H5Rget_file_name(&loc_ref, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_file_name: malloc failed");
 
-    if ((check_size = H5Rget_file_name((const H5R_ref_t *)refBuf, namePtr, (size_t)buf_size + 1)) < 0)
+    if ((check_size = H5Rget_file_name(&loc_ref, namePtr, (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     namePtr[buf_size] = '\0';
 
@@ -506,7 +564,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1file_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 
 done:
     if (namePtr)
-        HDfree(namePtr);
+        free(namePtr);
     if (refBuf)
         UNPIN_BYTE_ARRAY(ENVONLY, ref, refBuf, (check_size < 0) ? JNI_ABORT : 0);
 
@@ -522,11 +580,11 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1obj_1name(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jstring  str    = NULL;
     ssize_t  buf_size;
     ssize_t  check_size = -1;
-    char *   namePtr    = NULL;
+    char    *namePtr    = NULL;
 
     UNUSED(clss);
 
@@ -535,15 +593,19 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1name(JNIEnv *env, jclass clss, jbyteArray ref, 
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_obj_name: reference buffer not pinned");
 
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
     /* Get the length of the name */
-    if ((buf_size = H5Rget_obj_name((const H5R_ref_t *)refBuf, (hid_t)rapl_id, NULL, 0)) < 0)
+    if ((buf_size = H5Rget_obj_name(&loc_ref, (hid_t)rapl_id, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_obj_name: malloc failed");
 
-    if ((check_size =
-             H5Rget_obj_name((const H5R_ref_t *)refBuf, (hid_t)rapl_id, namePtr, (size_t)buf_size + 1)) < 0)
+    if ((check_size = H5Rget_obj_name(&loc_ref, (hid_t)rapl_id, namePtr, (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     namePtr[buf_size] = '\0';
 
@@ -552,7 +614,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1name(JNIEnv *env, jclass clss, jbyteArray ref, 
 
 done:
     if (namePtr)
-        HDfree(namePtr);
+        free(namePtr);
     if (refBuf)
         UNPIN_BYTE_ARRAY(ENVONLY, ref, refBuf, (check_size < 0) ? JNI_ABORT : 0);
 
@@ -568,11 +630,11 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1attr_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jstring  str    = NULL;
     ssize_t  buf_size;
     ssize_t  check_size = -1;
-    char *   namePtr    = NULL;
+    char    *namePtr    = NULL;
 
     UNUSED(clss);
 
@@ -581,14 +643,19 @@ Java_hdf_hdf5lib_H5_H5Rget_1attr_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_attr_name: reference buffer not pinned");
 
+    H5R_ref_t loc_ref;
+
+    HDcompile_assert(H5R_REF_BUF_SIZE <= sizeof(H5R_ref_t));
+    memcpy(&loc_ref, refBuf, H5R_REF_BUF_SIZE);
+
     /* Get the length of the name */
-    if ((buf_size = H5Rget_attr_name((const H5R_ref_t *)refBuf, NULL, 0)) < 0)
+    if ((buf_size = H5Rget_attr_name(&loc_ref, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_attr_name: malloc failed");
 
-    if ((check_size = H5Rget_attr_name((const H5R_ref_t *)refBuf, namePtr, (size_t)buf_size + 1)) < 0)
+    if ((check_size = H5Rget_attr_name(&loc_ref, namePtr, (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     namePtr[buf_size] = '\0';
 
@@ -597,7 +664,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1attr_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 
 done:
     if (namePtr)
-        HDfree(namePtr);
+        free(namePtr);
     if (refBuf)
         UNPIN_BYTE_ARRAY(ENVONLY, ref, refBuf, (check_size < 0) ? JNI_ABORT : 0);
 
@@ -617,7 +684,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate(JNIEnv *env, jclass clss, jbyteArray ref, jlong lo
 {
     const char *refName = NULL;
     jboolean    isCopy;
-    jbyte *     refBuf = NULL;
+    jbyte      *refBuf = NULL;
     jsize       refBufLen;
     herr_t      status = FAIL;
 
@@ -667,7 +734,7 @@ Java_hdf_hdf5lib_H5__1H5Rdereference(JNIEnv *env, jclass clss, jlong dataset, jl
                                      jint ref_type, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -711,7 +778,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Rget_1region(JNIEnv *env, jclass clss, jlong dataset, jint ref_type, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -753,7 +820,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type(JNIEnv *env, jclass clss, jlong loc_id, ji
 {
     H5O_type_t object_info;
     jboolean   isCopy;
-    jbyte *    refBuf = NULL;
+    jbyte     *refBuf = NULL;
     int        retVal = -1;
 
     UNUSED(clss);
@@ -786,8 +853,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type2(JNIEnv *env, jclass clss, jlong loc_id, j
                                        jintArray ref_obj)
 {
     jboolean isCopy, isCopy2;
-    jbyte *  refBuf   = NULL;
-    jint *   ref_objP = NULL;
+    jbyte   *refBuf   = NULL;
+    jint    *ref_objP = NULL;
     jint     status   = -1;
     int      retVal   = -1;
 
@@ -828,8 +895,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1name(JNIEnv *env, jclass clss, jlong loc_id, jint re
     jboolean isCopy;
     jstring  str;
     jsize    refBufLen;
-    jbyte *  refBuf  = NULL;
-    char *   aName   = NULL;
+    jbyte   *refBuf  = NULL;
+    char    *aName   = NULL;
     jlong    ret_val = -1;
 
     UNUSED(clss);
@@ -854,7 +921,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1name(JNIEnv *env, jclass clss, jlong loc_id, jint re
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_name: reference buffer not pinned");
 
-    if (NULL == (aName = HDmalloc(sizeof(char) * (size_t)size + 1)))
+    if (NULL == (aName = malloc(sizeof(char) * (size_t)size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_name: failed to allocate referenced object name buffer");
 
     if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName, (size_t)size + 1)) <
@@ -870,12 +937,73 @@ Java_hdf_hdf5lib_H5_H5Rget_1name(JNIEnv *env, jclass clss, jlong loc_id, jint re
 
 done:
     if (aName)
-        HDfree(aName);
+        free(aName);
     if (refBuf)
         UNPIN_BYTE_ARRAY(ENVONLY, ref, refBuf, JNI_ABORT);
 
     return ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Rget_1name */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Rget_name_string
+ * Signature: (JI[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type,
+                                         jbyteArray ref)
+{
+    jboolean isCopy;
+    jstring  str = NULL;
+    jsize    refBufLen;
+    jbyte   *refBuf   = NULL;
+    char    *aName    = NULL;
+    ssize_t  buf_size = -1;
+    jlong    ret_val  = -1;
+
+    UNUSED(clss);
+
+    if (NULL == ref)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: reference buffer is NULL");
+
+    if ((refBufLen = ENVPTR->GetArrayLength(ENVONLY, ref)) < 0) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: ref array length < 0");
+    }
+
+    if ((H5R_OBJECT == ref_type) && (refBufLen != H5R_OBJ_REF_BUF_SIZE))
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: reference input array length != H5R_OBJ_REF_BUF_SIZE");
+    else if ((H5R_DATASET_REGION == ref_type) && (refBufLen != H5R_DSET_REG_REF_BUF_SIZE))
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY, "H5Rget_name: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
+    else if ((H5R_OBJECT != ref_type) && (H5R_DATASET_REGION != ref_type))
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: unknown reference type");
+
+    PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_name: reference buffer not pinned");
+
+    /* Get the length of the name */
+    if ((buf_size = H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, NULL, 0)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (NULL == (aName = malloc(sizeof(char) * (size_t)buf_size + 1)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_name: failed to allocate referenced object name buffer");
+
+    if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName,
+                                      (size_t)buf_size + 1)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    aName[(size_t)buf_size] = '\0';
+
+    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, aName)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+done:
+    if (aName)
+        free(aName);
+    if (refBuf)
+        UNPIN_BYTE_ARRAY(ENVONLY, ref, refBuf, JNI_ABORT);
+
+    return str;
+} /* end Java_hdf_hdf5lib_H5_H5Rget_1name_1string */
 
 #ifdef __cplusplus
 } /* end extern "C" */

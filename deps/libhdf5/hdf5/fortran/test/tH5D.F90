@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -31,12 +30,15 @@
 !
 !*****
 
+#include <H5config_f.inc>
+
 !
 MODULE TH5D
 
   USE HDF5 ! This module contains all necessary modules
   USE TH5_MISC
   USE TH5_MISC_GEN
+  USE ISO_C_BINDING
 
 CONTAINS
   SUBROUTINE datasettest(cleanup, total_error)
@@ -187,7 +189,7 @@ CONTAINS
     DO i = 1, 4
        DO j = 1, 6
           IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-             WRITE(*, *) "dataset test error occured"
+             WRITE(*, *) "dataset test error occurred"
              WRITE(*,*) "data read is not the same as the data written"
           END IF
        END DO
@@ -196,7 +198,7 @@ CONTAINS
     ! Check if no change to null_dset_data
     !
     IF (null_dset_data .NE. 1) THEN
-       WRITE(*, *) "null dataset test error occured"
+       WRITE(*, *) "null dataset test error occurred"
     END IF
     !
     ! End access to the dataset and release resources used by it.
@@ -258,7 +260,7 @@ CONTAINS
     INTEGER(HID_T) :: dset_id       ! Dataset identifier
     INTEGER(HID_T) :: dataspace     ! Dataspace identifier
     INTEGER(HID_T) :: memspace      ! memory Dataspace identifier
-    INTEGER(HID_T) :: crp_list        ! dataset creatation property identifier
+    INTEGER(HID_T) :: crp_list        ! dataset creation property identifier
 
     !
     !dataset dimensions at creation time
@@ -313,7 +315,7 @@ CONTAINS
     END DO
 
     !
-    !Initialize FORTRAN predifined datatypes
+    !Initialize FORTRAN predefined datatypes
     !
 !          CALL h5init_types_f(error)
 !               CALL check("h5init_types_f",error,total_error)
@@ -332,7 +334,7 @@ CONTAINS
     !
     !Create the data space with unlimited dimensions.
     !
-    maxdims = (/H5S_UNLIMITED_F, H5S_UNLIMITED_F/)
+    maxdims(1:2) = H5S_UNLIMITED_F
 
     CALL h5screate_simple_f(RANK, dims, dataspace, error, maxdims)
     CALL check("h5screate_simple_f",error,total_error)
@@ -347,7 +349,7 @@ CONTAINS
     CALL check("h5pset_chunk_f",error,total_error)
 
     !
-    !Create a dataset with 3X3 dimensions using cparms creation propertie .
+    !Create a dataset with 3X3 dimensions using cparms creation properties.
     !
     CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, dset_id, error, crp_list )
     CALL check("h5dcreate_f",error,total_error)
@@ -426,7 +428,7 @@ CONTAINS
     CALL h5sget_simple_extent_ndims_f(dataspace, rankr, error)
     CALL check("h5sget_simple_extent_ndims_f",error,total_error)
     IF (rankr .NE. RANK) THEN
-       WRITE(*,*) "dataset rank error occured"
+       WRITE(*,*) "dataset rank error occurred"
        STOP
     END IF
 
@@ -436,7 +438,7 @@ CONTAINS
     CALL h5sget_simple_extent_dims_f(dataspace, dimsr, maxdimsr, error)
     CALL check("h5sget_simple_extent_dims_f",error,total_error)
     IF ((dimsr(1) .NE. dims1(1)) .OR. (dimsr(2) .NE. dims1(2))) THEN
-       WRITE(*,*) "dataset dimensions error occured"
+       WRITE(*,*) "dataset dimensions error occurred"
        STOP
     END IF
 
@@ -466,7 +468,7 @@ CONTAINS
     DO ih = 1, dims1(1)
        DO jh = 1, dims1(2)
           IF (data_out(ih,jh) .NE. data_in(ih, jh)) THEN
-             WRITE(*, *) "extend dataset test error occured"
+             WRITE(*, *) "extend dataset test error occurred"
              WRITE(*, *) "read value is not the same as the written values"
           END IF
        END DO
@@ -512,8 +514,6 @@ CONTAINS
 !
 
   SUBROUTINE test_userblock_offset(cleanup, total_error)
-
-    USE ISO_C_BINDING
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
@@ -627,6 +627,530 @@ CONTAINS
     CALL check("h5_cleanup_f", error, total_error)
 
   END SUBROUTINE test_userblock_offset
+
+  SUBROUTINE test_dset_fill(cleanup, total_error)
+
+    IMPLICIT NONE
+    LOGICAL, INTENT(IN) :: cleanup
+    INTEGER, INTENT(OUT) :: total_error
+
+    INTEGER, PARAMETER :: DIM0=10
+    INTEGER, PARAMETER :: int_kind_1  = SELECTED_INT_KIND(2)  !should map to INTEGER*1 on most modern processors
+    INTEGER, PARAMETER :: int_kind_4  = SELECTED_INT_KIND(4)  !should map to INTEGER*2 on most modern processors
+    INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
+    INTEGER(KIND=int_kind_1) , DIMENSION(1:DIM0), TARGET :: data_i1
+    INTEGER(KIND=int_kind_4) , DIMENSION(1:DIM0), TARGET :: data_i4
+    INTEGER(KIND=int_kind_16), DIMENSION(1:DIM0), TARGET :: data_i16
+    INTEGER(KIND=int_kind_1) , TARGET :: data0_i1 = 4
+    INTEGER(KIND=int_kind_4) , TARGET :: data0_i4 = 4
+    INTEGER(KIND=int_kind_16), TARGET :: data0_i16 = 4
+    INTEGER, DIMENSION(1:DIM0) :: data_int
+    INTEGER, TARGET :: data0_int = 4
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+    INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
+    INTEGER(KIND=int_kind_32), DIMENSION(1:DIM0), TARGET :: data_i32
+    INTEGER(KIND=int_kind_32), TARGET :: data0_i32 = 4
+#endif
+    INTEGER, PARAMETER :: real_kind_4  = C_FLOAT
+    INTEGER, PARAMETER :: real_kind_8 = C_DOUBLE
+    REAL(KIND=real_kind_4) , DIMENSION(1:DIM0), TARGET :: data_r4
+    REAL(KIND=real_kind_8), DIMENSION(1:DIM0), TARGET :: data_r8
+    REAL(KIND=real_kind_4) , TARGET :: data0_r4 = 4.0
+    REAL(KIND=real_kind_8), TARGET :: data0_r8 = 4.0
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+    INTEGER, PARAMETER :: real_kind_16 = C_LONG_DOUBLE
+    REAL(KIND=real_kind_16) , DIMENSION(1:DIM0), TARGET :: data_r16
+    REAL(KIND=real_kind_16) , TARGET :: data0_r16 = 4.0
+#endif
+
+    INTEGER :: i
+    CHARACTER       , DIMENSION(1:DIM0), TARGET :: data_chr
+    CHARACTER       , TARGET :: data0_chr = "h"
+    INTEGER(hsize_t), DIMENSION(1:1) :: dims
+    INTEGER(HID_T) :: space_id
+    INTEGER(HID_T) :: fill_type_id
+    INTEGER(HID_T) :: buf_type_id
+    INTEGER(hssize_t), DIMENSION(1:1) :: ioffset
+    INTEGER(hsize_t), DIMENSION(1:1) ::  icount
+    INTEGER :: error
+    TYPE(C_PTR) :: f_ptr1, f_ptr2
+
+    ! Initialize memory buffer
+    data_i1  = -2
+    data_i4  = -2
+    data_i16 = -2
+    data_int = -2
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+    data_i32 = -2
+#endif
+    data_r4  = -2.0_real_kind_4
+    data_r8 = -2.0_real_kind_8
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+    data_r16 = -2.0_real_kind_16
+#endif
+    data_chr = "H"
+
+    dims(1) = DIM0
+    ioffset(1) = 0
+    icount(1) = DIM0/2
+
+    CALL h5screate_simple_f(1, dims, space_id, error)
+    CALL check("h5screate_simple_f",error,total_error)
+
+    CALL h5sselect_hyperslab_f(space_id, H5S_SELECT_SET_F, ioffset, icount, error)
+    CALL check("h5sselect_hyperslab_f", error, total_error)
+
+    !*********************************************************
+    ! TEST LEGACY H5Dfill_f APIs
+    !*********************************************************
+
+    CALL h5dfill_f(data0_int, space_id, data_int, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_int, data_int(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2, data_int(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (INT)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+    CALL h5dfill_f(data0_r4, space_id, data_r4, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r4, data_r4(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_4, data_r4(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+    CALL h5dfill_f(data0_r8, space_id, data_r8, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r8, data_r8(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_8, data_r8(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+    CALL h5dfill_f(data0_chr, space_id, data_chr, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_chr, data_chr(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", "H", data_chr(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+    CALL h5dfill_f(data0_r16, space_id, data_r16, error)
+    CALL check("h5dfill_f", error, total_error)
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r16, data_r16(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_16, data_r16(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R16)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+#endif
+
+    !*********************************************************
+    ! TEST MODERN H5Dfill_f APIs
+    !*********************************************************
+
+    ! Initialize memory buffer
+    data_i1  = -2
+    data_i4  = -2
+    data_i16 = -2
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+    data_i32 = -2
+#endif
+    data_r4  = -2.0_real_kind_4
+    data_r8 = -2.0_real_kind_8
+    data_chr = "H"
+
+    ! Test spectrum of datatype types
+
+    f_ptr1 = C_LOC(data0_i1)
+    f_ptr2 = C_LOC(data_i1(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_i1), H5_INTEGER_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_i1, data_i1(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2_int_kind_1, data_i1(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I1)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+    f_ptr1 = C_LOC(data0_i4)
+    f_ptr2 = C_LOC(data_i4(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_i4), H5_INTEGER_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_i4, data_i4(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2_int_kind_4, data_i4(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+    f_ptr1 = C_LOC(data0_i16)
+    f_ptr2 = C_LOC(data_i16(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_i16), H5_INTEGER_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_i16, data_i16(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2_int_kind_16, data_i16(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I16)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+
+    f_ptr1 = C_LOC(data0_i32)
+    f_ptr2 = C_LOC(data_i32(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_i32), H5_INTEGER_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_i32, data_i32(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2_int_kind_32, data_i32(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I32)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+#endif
+
+    f_ptr1 = C_LOC(data0_r4)
+    f_ptr2 = C_LOC(data_r4(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_r4), H5_REAL_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r4, data_r4(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_4, data_r4(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+    f_ptr1 = C_LOC(data0_r8)
+    f_ptr2 = C_LOC(data_r8(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_r8), H5_REAL_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r8, data_r8(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_8, data_r8(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R8)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+    f_ptr1 = C_LOC(data0_r16)
+    f_ptr2 = C_LOC(data_r16(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_r16), H5_REAL_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r16, data_r16(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_16, data_r16(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R16)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+#endif
+
+    f_ptr1 = C_LOC(data0_chr)
+    f_ptr2 = C_LOC(data_chr(1))
+
+    fill_type_id = H5T_NATIVE_CHARACTER
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_chr, data_chr(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", "H", data_chr(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+  END SUBROUTINE test_dset_fill
+
+  SUBROUTINE test_direct_chunk_io(cleanup, total_error)
+
+    IMPLICIT NONE
+
+    LOGICAL, INTENT(IN) :: cleanup
+    INTEGER, INTENT(OUT) :: total_error
+    CHARACTER(LEN=4), PARAMETER :: filename = "doIO"
+    CHARACTER(LEN=80) :: fix_filename
+
+    CHARACTER(LEN=15), PARAMETER :: dsetname   = "dset"
+
+    INTEGER :: RANK = 2
+
+    INTEGER(HID_T) :: file_id     ! File identifier
+    INTEGER(HID_T) :: dset_id     ! Dataset identifier
+    INTEGER(HID_T) :: dataspace   ! Dataspace identifier
+    INTEGER(HID_T) :: dcpl        ! dataset creation property identifier
+
+    !
+    !dataset dimensions at creation time
+    !
+    INTEGER, PARAMETER :: DIM0 = 4
+    INTEGER, PARAMETER :: DIM1 = 32
+    INTEGER(SIZE_T), PARAMETER :: CHUNK0 = DIM0
+    INTEGER(SIZE_T), PARAMETER :: CHUNK1 = DIM1/2
+    INTEGER(HSIZE_T), DIMENSION(2) :: offset
+    INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/DIM0,DIM1/)
+    INTEGER, DIMENSION(CHUNK0,CHUNK1), TARGET :: wdata1, rdata1, wdata2, rdata2
+    INTEGER(HSIZE_T), DIMENSION(2) :: chunk = (/CHUNK0, CHUNK1/)
+    INTEGER :: i, j, n
+    INTEGER :: error
+    TYPE(C_PTR) :: f_ptr
+    INTEGER :: filters
+    INTEGER(SIZE_T) :: sizeINT
+    INTEGER(HID_T) :: dxpl
+
+    !
+    !Create a new file using default properties.
+    !
+    CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+    IF (error .NE. 0) THEN
+       WRITE(*,*) "Cannot modify filename"
+       STOP
+    ENDIF
+
+    CALL h5pcreate_f(H5P_DATASET_XFER_F, dxpl, error)
+    CALL check("h5pcreate_f",error,total_error)
+
+    CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
+    CALL check("h5fcreate_f",error,total_error)
+
+    ! Dataset Fortran
+
+    CALL h5screate_simple_f(RANK, dims, dataspace, error)
+    CALL check("h5screate_simple_f",error,total_error)
+
+    CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+    CALL check("h5pcreate_f",error,total_error)
+
+    CALL h5pset_chunk_f(dcpl, RANK, chunk, error)
+    CALL check("h5pset_chunk_f",error,total_error)
+
+    CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, dset_id, error, dcpl )
+    CALL check("h5dcreate_f",error,total_error)
+
+    CALL h5sclose_f(dataspace, error)
+    CALL check("h5sclose_f",error,total_error)
+    CALL h5pclose_f(dcpl, error)
+    CALL check("h5pclose_f",error,total_error)
+
+    n = 0
+    DO i = 1, CHUNK0
+       DO j = 1, CHUNK1
+          n = n + 1
+          wdata1(i,j) = n
+          wdata2(i,j) = n*10
+       END DO
+    END DO
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    sizeINT = storage_size(i, KIND=size_t)/storage_size(c_char_'a',c_size_t)
+#else
+    sizeINT = SIZEOF(i)
+#endif
+
+    f_ptr = C_LOC(wdata1)
+    offset(1:2) = (/0, 0/)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error)
+    CALL check("h5dwrite_f",error,total_error)
+
+    f_ptr = C_LOC(wdata2)
+    offset(1:2) = (/0, 16/)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error, dxpl)
+    CALL check("h5dwrite_f",error,total_error)
+
+    CALL h5dclose_f(dset_id, error)
+    CALL check("h5dclose_f",error,total_error)
+
+    !
+    !Close the file.
+    !
+    CALL h5fclose_f(file_id, error)
+    CALL check("h5fclose_f",error,total_error)
+
+    !
+    !read the data back
+    !
+    !Open the file.
+    !
+    CALL h5fopen_f(fix_filename, H5F_ACC_RDONLY_F, file_id, error)
+    CALL check("hfopen_f",error,total_error)
+
+    !
+    !Open the  dataset.
+    !
+    CALL h5dopen_f(file_id, dsetname, dset_id, error)
+    CALL check("h5dopen_f",error,total_error)
+
+    f_ptr = C_LOC(rdata1)
+    filters = 99
+    offset(1:2) = (/0, 0/)
+    CALL H5Dread_chunk_f(dset_id, offset, filters, f_ptr, error)
+    CALL check("H5Dread_chunk_f",error,total_error)
+
+    ! Verify that the data read was correct.
+    DO i = 1, CHUNK0
+       DO j = 1, CHUNK1
+          CALL VERIFY("H5Dread_chunk_f", rdata1(i,j), wdata1(i,j), total_error)
+          IF(total_error.NE.0) EXIT
+       ENDDO
+    ENDDO
+
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
+
+    f_ptr = C_LOC(rdata2)
+    offset(1:2) = (/0, 16/)
+    CALL H5Dread_chunk_f(dset_id, offset, filters, f_ptr, error, dxpl)
+    CALL check("H5Dread_chunk_f",error,total_error)
+
+    ! Verify that the data read was correct.
+    DO i = 1, CHUNK0
+       DO j = 1, CHUNK1
+          CALL VERIFY("H5Dread_chunk_f", rdata2(i,j), wdata2(i,j), total_error)
+          IF(total_error.NE.0) EXIT
+       ENDDO
+    ENDDO
+
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
+
+    CALL h5dclose_f(dset_id, error)
+    CALL check("h5dclose_f",error,total_error)
+
+    !
+    !Close the file.
+    !
+    CALL h5fclose_f(file_id, error)
+    CALL check("h5fclose_f",error,total_error)
+
+    CALL h5pclose_f(dxpl, error)
+    CALL check("h5pclose_f",error,total_error)
+
+    IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
+
+    RETURN
+  END SUBROUTINE test_direct_chunk_io
 
 END MODULE TH5D
 

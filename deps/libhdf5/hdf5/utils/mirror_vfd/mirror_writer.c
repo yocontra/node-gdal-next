@@ -57,7 +57,7 @@
  *      guard against commands from the wrong entity.
  *
  * xmit_count (uint32_t)
- *      Record of trasmissions received from the Driver. While the transmission
+ *      Record of transmissions received from the Driver. While the transmission
  *      protocol should be trustworthy, this serves as an additional guard.
  *      Starts a 0 and should be incremented for each one-way transmission.
  *
@@ -88,8 +88,8 @@ struct mirror_session {
     int                      sockfd;
     uint32_t                 token;
     uint32_t                 xmit_count;
-    H5FD_t *                 file;
-    loginfo_t *              loginfo;
+    H5FD_t                  *file;
+    loginfo_t               *loginfo;
     H5FD_mirror_xmit_reply_t reply;
 };
 
@@ -127,7 +127,7 @@ struct sock_comm {
     uint32_t            magic;
     int                 recd_die;
     H5FD_mirror_xmit_t *xmit_recd;
-    char *              raw;
+    char               *raw;
     size_t              raw_size;
 };
 
@@ -151,33 +151,10 @@ struct sock_comm {
  */
 struct mirror_writer_opts {
     uint32_t magic;
-    char *   logpath;
+    char    *logpath;
 };
 
-static void mybzero(void *dest, size_t size);
-
 static int do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open);
-
-/* ---------------------------------------------------------------------------
- * Function:   mybzero
- *
- * Purpose:    Introduce bzero without neededing it on the system.
- *
- * Programmer: Jacob Smith
- *             2020-03-30
- * ---------------------------------------------------------------------------
- */
-static void
-mybzero(void *dest, size_t size)
-{
-    size_t i = 0;
-    char * s = NULL;
-    HDassert(dest);
-    s = (char *)dest;
-    for (i = 0; i < size; i++) {
-        *(s + i) = 0;
-    }
-} /* end mybzero() */
 
 /* ---------------------------------------------------------------------------
  * Function:    session_init
@@ -201,7 +178,7 @@ session_init(struct mirror_writer_opts *opts)
         goto error;
     }
 
-    session = (struct mirror_session *)HDmalloc(sizeof(struct mirror_session));
+    session = (struct mirror_session *)malloc(sizeof(struct mirror_session));
     if (session == NULL) {
         mirror_log(NULL, V_ERR, "can't allocate session structure");
         goto error;
@@ -217,10 +194,9 @@ session_init(struct mirror_writer_opts *opts)
     session->reply.pub.version       = H5FD_MIRROR_XMIT_CURR_VERSION;
     session->reply.pub.op            = H5FD_MIRROR_OP_REPLY;
     session->reply.pub.session_token = 0;
-    mybzero(session->reply.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    memset(session->reply.message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
 
-    /* Options-derived population
-     */
+    /* Options-derived population */
 
     session->loginfo = mirror_log_init(opts->logpath, "W- ", MIRROR_LOG_DEFAULT_VERBOSITY);
 
@@ -228,7 +204,7 @@ session_init(struct mirror_writer_opts *opts)
 
 error:
     if (session) {
-        HDfree(session);
+        free(session);
     }
     return NULL;
 } /* end session_init() */
@@ -247,7 +223,7 @@ session_stop(struct mirror_session *session)
 {
     int ret_value = 0;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "session_stop()");
 
@@ -271,7 +247,7 @@ session_stop(struct mirror_session *session)
 
     /* Invalidate and release structure */
     session->magic++;
-    HDfree(session);
+    free(session);
 
     return ret_value;
 } /* end session_stop() */
@@ -289,27 +265,18 @@ session_stop(struct mirror_session *session)
 static struct mirror_session *
 session_start(int socketfd, const H5FD_mirror_xmit_open_t *xmit_open)
 {
-    struct mirror_session *   session = NULL;
+    struct mirror_session    *session = NULL;
     struct mirror_writer_opts opts;
-#if 0 /* TODO: behaviro option */
-    char logpath[H5FD_MIRROR_XMIT_FILEPATH_MAX] = "";
-#endif
 
     mirror_log(NULL, V_INFO, "session_start()");
 
-    if (FALSE == H5FD_mirror_xmit_is_open(xmit_open)) {
+    if (false == H5FD_mirror_xmit_is_open(xmit_open)) {
         mirror_log(NULL, V_ERR, "invalid OPEN xmit");
         return NULL;
     }
 
-    opts.magic = MW_OPTS_MAGIC;
-#if 0 /* TODO: behavior option */
-    HDsnprintf(logpath, H5FD_MIRROR_XMIT_FILEPATH_MAX, "%s.log",
-            xmit_open->filename);
-    opts.logpath = logpath;
-#else
+    opts.magic   = MW_OPTS_MAGIC;
     opts.logpath = NULL;
-#endif
 
     session = session_init(&opts);
     if (NULL == session) {
@@ -350,7 +317,7 @@ _xmit_reply(struct mirror_session *session)
     unsigned char             xmit_buf[H5FD_MIRROR_XMIT_REPLY_SIZE];
     H5FD_mirror_xmit_reply_t *reply = &(session->reply);
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_ALL, "_xmit_reply()");
 
@@ -386,12 +353,12 @@ reply_ok(struct mirror_session *session)
 {
     H5FD_mirror_xmit_reply_t *reply = &(session->reply);
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_ALL, "reply_ok()");
 
     reply->status = H5FD_MIRROR_STATUS_OK;
-    mybzero(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    memset(reply->message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
     return _xmit_reply(session);
 } /* end reply_ok() */
 
@@ -410,12 +377,12 @@ reply_error(struct mirror_session *session, const char *msg)
 {
     H5FD_mirror_xmit_reply_t *reply = &(session->reply);
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_ALL, "reply_error(%s)", msg);
 
     reply->status = H5FD_MIRROR_STATUS_ERROR;
-    HDsnprintf(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX - 1, "%s", msg);
+    snprintf(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX - 1, "%s", msg);
     return _xmit_reply(session);
 } /* end reply_error() */
 
@@ -431,7 +398,7 @@ static int
 do_close(struct mirror_session *session)
 {
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_close()");
 
@@ -471,7 +438,7 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
     size_t                  decode_ret = 0;
     H5FD_mirror_xmit_lock_t xmit_lock;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_lock()");
 
@@ -489,7 +456,7 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
     }
     mirror_log(session->loginfo, V_INFO, "lock rw: (%d)", xmit_lock.rw);
 
-    if (H5FDlock(session->file, (hbool_t)xmit_lock.rw) < 0) {
+    if (H5FDlock(session->file, (bool)xmit_lock.rw) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDlock()");
         reply_error(session, "remote H5FDlock() failure");
         return -1;
@@ -519,8 +486,8 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
     unsigned _flags   = 0;
     haddr_t  _maxaddr = HADDR_UNDEF;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
-             TRUE == H5FD_mirror_xmit_is_open(xmit_open));
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
+           true == H5FD_mirror_xmit_is_open(xmit_open));
 
     mirror_log(session->loginfo, V_INFO, "do_open()");
 
@@ -595,7 +562,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return -1;
 } /* end do_open() */
@@ -614,7 +581,7 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
     size_t                 decode_ret = 0;
     H5FD_mirror_xmit_eoa_t xmit_seoa;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_set_eoa()");
 
@@ -660,11 +627,11 @@ static int
 do_truncate(struct mirror_session *session)
 {
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_truncate()");
 
-    /* default DXPL ID (0), 0 for "FALSE" closing -- both probably unused */
+    /* default DXPL ID (0), 0 for "false" closing -- both probably unused */
     if (H5FDtruncate(session->file, 0, 0) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDtruncate()");
         reply_error(session, "remote H5FDtruncate() failure");
@@ -691,7 +658,7 @@ do_truncate(struct mirror_session *session)
 static int
 do_unlock(struct mirror_session *session)
 {
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_unlock()");
 
@@ -731,11 +698,11 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
     haddr_t                  addr              = 0;
     haddr_t                  sum_bytes_written = 0;
     H5FD_mem_t               type              = 0;
-    char *                   buf               = NULL;
+    char                    *buf               = NULL;
     ssize_t                  nbytes_in_packet  = 0;
     H5FD_mirror_xmit_write_t xmit_write;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_write()");
 
@@ -761,9 +728,9 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
     addr = (haddr_t)xmit_write.offset;
     type = (H5FD_mem_t)xmit_write.type;
 
-    /* Allocate the buffer once -- re-use between loops.
+    /* Allocate the buffer once -- reuse between loops.
      */
-    buf = (char *)HDmalloc(sizeof(char) * H5FD_MIRROR_DATA_BUFFER_MAX);
+    buf = (char *)malloc(sizeof(char) * H5FD_MIRROR_DATA_BUFFER_MAX);
     if (NULL == buf) {
         mirror_log(session->loginfo, V_ERR, "can't allocate databuffer");
         reply_error(session, "can't allocate buffer for receiving data");
@@ -788,8 +755,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
      */
     sum_bytes_written = 0;
     do {
-        nbytes_in_packet = HDread(session->sockfd, buf, H5FD_MIRROR_DATA_BUFFER_MAX);
-        if (-1 == nbytes_in_packet) {
+        if ((nbytes_in_packet = HDread(session->sockfd, buf, H5FD_MIRROR_DATA_BUFFER_MAX)) < 0) {
             mirror_log(session->loginfo, V_ERR, "can't read into databuffer");
             reply_error(session, "can't read data buffer");
             return -1;
@@ -798,7 +764,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
         mirror_log(session->loginfo, V_INFO, "received %zd bytes", nbytes_in_packet);
         if (HEXDUMP_WRITEDATA) {
             mirror_log(session->loginfo, V_ALL, "DATA:\n```");
-            mirror_log_bytes(session->loginfo, V_ALL, nbytes_in_packet, (const unsigned char *)buf);
+            mirror_log_bytes(session->loginfo, V_ALL, (size_t)nbytes_in_packet, (const unsigned char *)buf);
             mirror_log(session->loginfo, V_ALL, "```");
         }
 
@@ -816,7 +782,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
 
     } while (sum_bytes_written < xmit_write.size); /* end while ingesting */
 
-    HDfree(buf);
+    free(buf);
 
     /* signal that we're done here and a-ok */
     if (reply_ok(session) < 0) {
@@ -848,19 +814,18 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
     size_t              decode_ret;
     H5FD_mirror_xmit_t *X = comm->xmit_recd;
 
-    HDassert((session != NULL) && (session->magic == MW_SESSION_MAGIC) && (comm != NULL) &&
-             (comm->magic == MW_SOCK_COMM_MAGIC) && (comm->xmit_recd != NULL) && (comm->raw != NULL) &&
-             (comm->raw_size >= H5FD_MIRROR_XMIT_BUFFER_MAX));
+    assert((session != NULL) && (session->magic == MW_SESSION_MAGIC) && (comm != NULL) &&
+           (comm->magic == MW_SOCK_COMM_MAGIC) && (comm->xmit_recd != NULL) && (comm->raw != NULL) &&
+           (comm->raw_size >= H5FD_MIRROR_XMIT_BUFFER_MAX));
 
     mirror_log(session->loginfo, V_INFO, "receive_communique()");
 
-    mybzero(comm->raw, comm->raw_size);
+    memset(comm->raw, 0, comm->raw_size);
     comm->recd_die = 0;
 
     mirror_log(session->loginfo, V_INFO, "ready to receive"); /* TODO */
 
-    read_ret = HDread(session->sockfd, comm->raw, H5FD_MIRROR_XMIT_BUFFER_MAX);
-    if (-1 == read_ret) {
+    if ((read_ret = HDread(session->sockfd, comm->raw, H5FD_MIRROR_XMIT_BUFFER_MAX)) < 0) {
         mirror_log(session->loginfo, V_ERR, "read:%zd", read_ret);
         goto error;
     }
@@ -873,7 +838,7 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
     } /* end if hexdump transmissions received */
 
     /* old-fashioned manual kill (for debugging) */
-    if (!HDstrncmp("GOODBYE", comm->raw, 7)) {
+    if (!strncmp("GOODBYE", comm->raw, 7)) {
         mirror_log(session->loginfo, V_INFO, "received GOODBYE");
         comm->recd_die = 1;
         goto done;
@@ -931,25 +896,33 @@ static int
 process_instructions(struct mirror_session *session)
 {
     struct sock_comm   comm;
-    char               xmit_buf[H5FD_MIRROR_XMIT_BUFFER_MAX]; /* raw bytes */
-    H5FD_mirror_xmit_t xmit_recd;                             /* for decoded xmit header */
+    char              *xmit_buf = NULL; /* raw bytes */
+    size_t             buf_size;
+    H5FD_mirror_xmit_t xmit_recd; /* for decoded xmit header */
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "process_instructions()");
+
+    buf_size = H5FD_MIRROR_XMIT_BUFFER_MAX * sizeof(char);
+
+    if (NULL == (xmit_buf = malloc(buf_size))) {
+        mirror_log(session->loginfo, V_ERR, "out of memory");
+        goto error;
+    }
 
     comm.magic     = MW_SOCK_COMM_MAGIC;
     comm.recd_die  = 0; /* Flag for program to terminate */
     comm.xmit_recd = &xmit_recd;
     comm.raw       = xmit_buf;
-    comm.raw_size  = sizeof(xmit_buf);
+    comm.raw_size  = buf_size;
 
     while (1) { /* sill-listening infinite loop */
 
         /* Use convenience structure for raw/decoded info in/out */
         if (receive_communique(session, &comm) < 0) {
             mirror_log(session->loginfo, V_ERR, "problem reading socket");
-            return -1;
+            goto error;
         }
 
         if (comm.recd_die) {
@@ -959,42 +932,42 @@ process_instructions(struct mirror_session *session)
         switch (xmit_recd.op) {
             case H5FD_MIRROR_OP_CLOSE:
                 if (do_close(session) < 0) {
-                    return -1;
+                    goto error;
                 }
                 goto done;
             case H5FD_MIRROR_OP_LOCK:
                 if (do_lock(session, (const unsigned char *)xmit_buf) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_OPEN:
                 mirror_log(session->loginfo, V_ERR, "OPEN xmit during session");
                 reply_error(session, "illegal OPEN xmit during session");
-                return -1;
+                goto error;
             case H5FD_MIRROR_OP_SET_EOA:
                 if (do_set_eoa(session, (const unsigned char *)xmit_buf) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_TRUNCATE:
                 if (do_truncate(session) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_UNLOCK:
                 if (do_unlock(session) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_WRITE:
                 if (do_write(session, (const unsigned char *)xmit_buf) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             default:
                 mirror_log(session->loginfo, V_ERR, "unrecognized transmission");
                 reply_error(session, "unrecognized transmission");
-                return -1;
+                goto error;
         } /* end switch (xmit_recd.op) */
 
     } /* end while still listening */
@@ -1002,7 +975,12 @@ process_instructions(struct mirror_session *session)
 done:
     comm.magic      = 0; /* invalidate structure, on principle */
     xmit_recd.magic = 0; /* invalidate structure, on principle */
+    free(xmit_buf);
     return 0;
+
+error:
+    free(xmit_buf);
+    return -1;
 } /* end process_instructions() */
 
 /* ---------------------------------------------------------------------------

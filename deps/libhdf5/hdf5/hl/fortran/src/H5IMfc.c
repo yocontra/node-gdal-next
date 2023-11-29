@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -24,14 +23,7 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -43,7 +35,7 @@ h5immake_image_8bit_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *
     int     ret_value = -1;
     herr_t  ret;
     hid_t   c_loc_id;
-    char *  c_name = NULL;
+    char   *c_name = NULL;
     hsize_t w      = (hsize_t)*width;
     hsize_t h      = (hsize_t)*height;
 
@@ -67,7 +59,7 @@ h5immake_image_8bit_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -79,14 +71,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -96,7 +81,7 @@ h5imread_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *buf)
 {
     int    ret_value = -1;
     herr_t ret;
-    char * c_name = NULL;
+    char  *c_name = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -117,7 +102,7 @@ h5imread_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *buf)
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -129,14 +114,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -148,8 +126,8 @@ h5immake_image_24bit_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *
     int     ret_value = -1;
     herr_t  ret;
     hid_t   c_loc_id;
-    char *  c_name = NULL;
-    char *  c_il   = NULL;
+    char   *c_name = NULL;
+    char   *c_il   = NULL;
     hsize_t w      = (hsize_t)*width;
     hsize_t h      = (hsize_t)*height;
 
@@ -178,9 +156,9 @@ h5immake_image_24bit_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_il != NULL)
-        HDfree(c_il);
+        free(c_il);
 
     return ret_value;
 }
@@ -192,14 +170,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -211,12 +182,12 @@ h5imget_image_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *w
     int      ret_value = -1;
     herr_t   ret;
     hid_t    c_loc_id;
-    char *   c_name = NULL;
+    char    *c_name = NULL;
     hsize_t  c_width;
     hsize_t  c_height;
     hsize_t  c_planes;
     hssize_t c_npals;
-    char *   c_buf = NULL; /* buffer to hold C string */
+    char    *c_buf = NULL; /* buffer to hold C string */
 
     /*
      * convert FORTRAN name to C name
@@ -228,7 +199,7 @@ h5imget_image_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *w
     /*
      * allocate buffer to hold name of an attribute
      */
-    if ((c_buf = (char *)HDmalloc((size_t)*ilen + 1)) == NULL)
+    if ((c_buf = (char *)malloc((size_t)*ilen + 1)) == NULL)
         goto done;
 
     /*
@@ -255,9 +226,9 @@ h5imget_image_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *w
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -269,14 +240,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -285,7 +249,7 @@ int_f
 h5imis_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
 {
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
     herr_t ret;
 
     /*
@@ -303,7 +267,7 @@ h5imis_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
     ret = H5IMis_image(c_loc_id, c_name);
 
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret;
 }
@@ -315,14 +279,7 @@ h5imis_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -330,7 +287,7 @@ h5imis_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
 int_f
 h5immake_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *dims, void *buf)
 {
-    char *  c_name = NULL;
+    char   *c_name = NULL;
     hsize_t c_dims[H5S_MAX_RANK];
     int     i;
     int     rank      = 2;
@@ -340,7 +297,7 @@ h5immake_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *dim
      * convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < rank; i++)
         c_dims[i] = (hsize_t)dims[i];
@@ -349,11 +306,11 @@ h5immake_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *dim
      * call H5IMmake_palette function.
      */
     if (H5IMmake_palettef((hid_t)*loc_id, c_name, c_dims, (int_f *)buf) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -365,14 +322,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -383,8 +333,8 @@ h5imlink_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *ilen
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name    = NULL;
-    char * c_namepal = NULL;
+    char  *c_name    = NULL;
+    char  *c_namepal = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -411,9 +361,9 @@ h5imlink_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *ilen
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_namepal != NULL)
-        HDfree(c_namepal);
+        free(c_namepal);
 
     return ret_value;
 }
@@ -425,14 +375,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -443,8 +386,8 @@ h5imunlink_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *il
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name    = NULL;
-    char * c_namepal = NULL;
+    char  *c_name    = NULL;
+    char  *c_namepal = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -471,9 +414,9 @@ h5imunlink_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *il
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_namepal != NULL)
-        HDfree(c_namepal);
+        free(c_namepal);
 
     return ret_value;
 }
@@ -485,14 +428,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -503,7 +439,7 @@ h5imget_npalettes_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *np
     int      ret_value = -1;
     herr_t   ret;
     hid_t    c_loc_id;
-    char *   c_name = NULL;
+    char    *c_name = NULL;
     hssize_t c_npals;
 
     /*
@@ -529,7 +465,7 @@ h5imget_npalettes_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *np
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -541,14 +477,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -559,7 +488,7 @@ h5imget_palette_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *pal
     int     ret_value = -1;
     herr_t  ret;
     hid_t   c_loc_id;
-    char *  c_name = NULL;
+    char   *c_name = NULL;
     hsize_t c_dims[2];
     int     i;
 
@@ -588,7 +517,7 @@ h5imget_palette_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *pal
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -600,14 +529,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -618,7 +540,7 @@ h5imget_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *pal_numb
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -641,7 +563,7 @@ h5imget_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *pal_numb
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -653,14 +575,7 @@ done:
  *
  * Return: true, false, fail
  *
- * Programmer: Pedro Vicente
- *
- * Date: October 06, 2004
- *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -669,7 +584,7 @@ int_f
 h5imis_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
 {
     hid_t  c_loc_id;
-    char * c_name;
+    char  *c_name;
     herr_t ret;
 
     /*
@@ -687,7 +602,7 @@ h5imis_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
     ret = H5IMis_palette(c_loc_id, c_name);
 
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret;
 }

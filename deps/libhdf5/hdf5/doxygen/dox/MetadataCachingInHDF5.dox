@@ -668,7 +668,7 @@ reduction.
 With the hit rate threshold cache size decrement algorithm, the remaining fields
 in the section are ignored.
 
-\subsubsection acsr Ageout Cache Size Reduction
+\subsubsection dacsr Ageout Cache Size Reduction
 
 If \ref H5AC_cache_config_t.decr_mode "decr_mode" is #H5C_decr__age_out the
 cache size is decreased by the ageout algorithm, and the remaining fields of the
@@ -692,7 +692,7 @@ The \ref H5AC_cache_config_t.decrement "decrement" and \ref
 H5AC_cache_config_t.upper_hr_threshold "upper_hr_threshold" fields are ignored
 in this case.
 
-\subsubsection awhrtcsr Ageout With Hit Rate Threshold Cache Size Reduction
+\subsubsection dawhrtcsr Ageout With Hit Rate Threshold Cache Size Reduction
 
 If \ref H5AC_cache_config_t.decr_mode "decr_mode" is
 #H5C_decr__age_out_with_threshold, the cache size is decreased by the ageout
@@ -724,7 +724,7 @@ is allowed to write to file, and then only after entering a sync point with the
 other caches. After it writes entries to file, it sends the base addresses of
 the now clean entries to the other caches, so they can mark these entries clean
 as well, and then leaves the sync point. The other caches mark the specified
-entries as clean before they leave the synch point as well. (Observe, that since
+entries as clean before they leave the sync point as well. (Observe, that since
 all caches see the same stream of dirty metadata, they will all have the same
 set of dirty entries upon sync point entry and exit.)
 

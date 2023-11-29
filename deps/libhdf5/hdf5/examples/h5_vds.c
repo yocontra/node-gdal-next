@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -56,7 +55,7 @@ main(void)
     hsize_t vdsdims[2] = {VDSDIM0, VDSDIM1}, /* Virtual datasets dimension */
         dims[1]        = {DIM0},             /* Source datasets dimensions */
         start[2],                            /* Hyperslab parameters */
-        stride[2], count[2], block[2];
+        count[2], block[2];
     hsize_t start_out[2], stride_out[2], count_out[2], block_out[2];
     int     wdata[DIM0],         /* Write buffer for source dataset */
         rdata[VDSDIM0][VDSDIM1], /* Read buffer for virtual dataset */
@@ -65,10 +64,10 @@ main(void)
     H5D_layout_t layout;          /* Storage layout */
     size_t       num_map;         /* Number of mappings */
     ssize_t      len;             /* Length of the string; also a return value */
-    char *       filename;
-    char *       dsetname;
+    char        *filename;
+    char        *dsetname;
     hsize_t      nblocks;
-    hsize_t *    buf; /* Buffer to hold hyperslab coordinates */
+    hsize_t     *buf; /* Buffer to hold hyperslab coordinates */
 
     /*
      * Create source files and datasets. This step is optional.
@@ -169,7 +168,7 @@ main(void)
     for (i = 0; i < (int)num_map; i++) {
         printf(" Mapping %d \n", i);
         printf("         Selection in the virtual dataset ");
-        /* Get selection in the virttual  dataset */
+        /* Get selection in the virtual dataset */
         vspace = H5Pget_virtual_vspace(dcpl, (size_t)i);
 
         /* Make sure that this is a hyperslab selection and then print information. */

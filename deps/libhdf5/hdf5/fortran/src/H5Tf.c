@@ -5,7 +5,6 @@
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -35,11 +34,6 @@
  *  type_id - dataset identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -67,7 +61,7 @@ h5topen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f 
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -87,13 +81,6 @@ done:
  *  tapl_id - Datatype access property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
- *              - Added passing optional parameters for version 1.8
- *                M. Scot Breitenfeld
  * SOURCE
  */
 int_f
@@ -117,7 +104,7 @@ h5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -130,11 +117,6 @@ done:
  *  type_id - identifier of the datatype to be closed
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -162,11 +144,6 @@ h5tclose_c(hid_t_f *type_id)
  *  new_type_id - identifier of the new datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -198,11 +175,6 @@ h5tcopy_c(hid_t_f *type_id, hid_t_f *new_type_id)
  *  c_flag - flag; indicates if two datatypes are equal or not.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, February 22, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -247,11 +219,6 @@ h5tequal_c(hid_t_f *type1_id, hid_t_f *type2_id, int_f *c_flag)
  *               H5T_ARRAY_F (10)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -300,11 +267,6 @@ h5tget_class_c(hid_t_f *type_id, int_f *classtype)
  *              H5T_ORDER_VAX_F (2)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -343,11 +305,6 @@ h5tget_order_c(hid_t_f *type_id, int_f *order)
  *              H5T_ORDER_VAX_F (2)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -383,11 +340,6 @@ h5tset_order_c(hid_t_f *type_id, int_f *order)
  *  size (in bytes)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -419,11 +371,6 @@ h5tget_size_c(hid_t_f *type_id, size_t_f *size)
  *  size (in bytes)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -456,11 +403,6 @@ h5tset_size_c(hid_t_f *type_id, size_t_f *size)
  *  precision -  number of significant bits
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Tuesday, January 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -491,11 +433,6 @@ h5tget_precision_c(hid_t_f *type_id, size_t_f *precision)
  *  precision -  number of significant bits
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Tuesday, January 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -529,11 +466,6 @@ h5tset_precision_c(hid_t_f *type_id, size_t_f *precision)
  *  offset - bit offset of the first significant bit
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Tuesday, January 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -566,11 +498,6 @@ h5tget_offset_c(hid_t_f *type_id, size_t_f *offset)
  *  offset - bit offset of the first significant bit
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Tuesday, January 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -606,11 +533,6 @@ h5tset_offset_c(hid_t_f *type_id, size_t_f *offset)
  *  msbpad - padding type of the least significant bit
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -649,11 +571,6 @@ h5tget_pad_c(hid_t_f *type_id, int_f *lsbpad, int_f *msbpad)
  *  msbpad - padding type of the least significant bit
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -687,11 +604,6 @@ h5tset_pad_c(hid_t_f *type_id, int_f *lsbpad, int_f *msbpad)
  *  sign - sign type for an integer type
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -722,11 +634,6 @@ h5tget_sign_c(hid_t_f *type_id, int_f *sign)
  *  sign - sign type for an integer typ
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -764,11 +671,6 @@ h5tset_sign_c(hid_t_f *type_id, int_f *sign)
  *  msize -  size of mantissa in bits
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, January 27, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -809,11 +711,6 @@ h5tget_fields_c(hid_t_f *type_id, size_t_f *spos, size_t_f *epos, size_t_f *esiz
  *  msize -  size of mantissa in bits
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -853,11 +750,6 @@ h5tset_fields_c(hid_t_f *type_id, size_t_f *spos, size_t_f *epos, size_t_f *esiz
  *  ebias - exponent bias of a floating-point type of the datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, January 27, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -887,14 +779,9 @@ h5tget_ebias_c(hid_t_f *type_id, size_t_f *ebias)
  *  floating-point type of the datatype
  * INPUTS
  *  type_id - identifier of the dataspace
- *  ebias - exponent bias of a floating-point type of the datatyp
+ *  ebias - exponent bias of a floating-point type of the datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, January 27, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -929,11 +816,6 @@ h5tset_ebias_c(hid_t_f *type_id, size_t_f *ebias)
  *  norm - mantissa normalization of a floating-point type
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, January 27, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -966,11 +848,6 @@ h5tget_norm_c(hid_t_f *type_id, int_f *norm)
  *  norm -  mantissa normalization of a floating-point type
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, January 27, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1007,11 +884,6 @@ h5tset_norm_c(hid_t_f *type_id, int_f *norm)
  *  unused bits in floating-point datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1048,11 +920,6 @@ h5tget_inpad_c(hid_t_f *type_id, int_f *padtype)
  *  in floating-point datatypes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1088,11 +955,6 @@ h5tset_inpad_c(hid_t_f *type_id, int_f *padtype)
  *  cset - character set type of a string datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1128,11 +990,6 @@ h5tget_cset_c(hid_t_f *type_id, int_f *cset)
  *  cset -  character set type of a string datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1167,11 +1024,6 @@ h5tset_cset_c(hid_t_f *type_id, int_f *cset)
  *  strpad - string padding method for a string datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1206,11 +1058,6 @@ h5tget_strpad_c(hid_t_f *type_id, int_f *strpad)
  *  strpad - string padding method for a string datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1245,11 +1092,6 @@ h5tset_strpad_c(hid_t_f *type_id, int_f *strpad)
  *  num_members - number of fields in a compound datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1281,12 +1123,6 @@ h5tget_nmembers_c(hid_t_f *type_id, int_f *num_members)
  *  member_name - name of a field of a compound datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *  Elena Pourmal
- *  Added namelen parameter to return length of the name to Fortran user
  * SOURCE
  */
 
@@ -1297,7 +1133,7 @@ h5tget_member_name_c(hid_t_f *type_id, int_f *idx, _fcd member_name, int_f *name
     int      ret_value = -1;
     hid_t    c_type_id;
     unsigned c_index;
-    char *   c_name;
+    char    *c_name;
 
     c_type_id = *type_id;
     c_index   = (unsigned)*idx;
@@ -1325,11 +1161,6 @@ h5tget_member_name_c(hid_t_f *type_id, int_f *idx, _fcd member_name, int_f *name
  *  index - 0-based index
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, September 26, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1358,7 +1189,7 @@ h5tget_member_index_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx)
         goto DONE;
     *idx = (int_f)c_index;
 DONE:
-    HDfree(c_name);
+    free(c_name);
     ret_value = 0;
     return ret_value;
 }
@@ -1374,15 +1205,10 @@ DONE:
  *  type_id - identifier of the dataspace
  *  member_no - Number of the field whose offset is requested
  * OUTPUTS
- *  offset - byte offset of the the beginning of the field of
+ *  offset - byte offset of the beginning of the field of
  *  a compound datatype
  * RETURNS
  *  always 0
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1411,11 +1237,6 @@ h5tget_member_offset_c(hid_t_f *type_id, int_f *member_no, size_t_f *offset)
  *  dims -  dimensions(sizes of dimensions) of the array
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, November 16, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1454,11 +1275,6 @@ DONE:
  *  ndims -  number of dimensions of the array
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, November 16, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1492,11 +1308,6 @@ h5tget_array_ndims_c(hid_t_f *type_id, int_f *ndims)
  *  base_type_id - base datatype identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, November 16, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1531,11 +1342,6 @@ h5tget_super_c(hid_t_f *type_id, hid_t_f *base_type_id)
  *  datatype - identifier of a copy of the datatype of the field
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1560,14 +1366,9 @@ h5tget_member_type_c(hid_t_f *type_id, int_f *field_idx, hid_t_f *datatype)
  *  Call H5Tcreate to create a datatype
  * INPUTS
  *  cls - class type
- *  size - size of the class memeber
+ *  size - size of the class member
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, February 17, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1603,11 +1404,6 @@ h5tcreate_c(int_f *cls, size_t_f *size, hid_t_f *type_id)
  *  field_id - datatype identifier of the new member
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1616,7 +1412,7 @@ h5tinsert_c(hid_t_f *type_id, _fcd name, int_f *namelen, size_t_f *offset, hid_t
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     herr_t error;
 
     c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
@@ -1625,7 +1421,7 @@ h5tinsert_c(hid_t_f *type_id, _fcd name, int_f *namelen, size_t_f *offset, hid_t
 
     error = H5Tinsert((hid_t)*type_id, c_name, (size_t)*offset, (hid_t)*field_id);
 
-    HDfree(c_name);
+    free(c_name);
     if (error < 0)
         return ret_value;
     ret_value = 0;
@@ -1643,11 +1439,6 @@ h5tinsert_c(hid_t_f *type_id, _fcd name, int_f *namelen, size_t_f *offset, hid_t
  *  type_id - identifier of the datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1680,11 +1471,6 @@ h5tpack_c(hid_t_f *type_id)
  *  type_id - identifier of the array datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, November 16, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1724,11 +1510,6 @@ DONE:
  *  enumeration datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Tuesday, February 15, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1759,10 +1540,7 @@ h5tenum_create_c(hid_t_f *parent_id, hid_t_f *new_type_id)
  *  value   - value of the new member
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
+ *
  *  'value' is no longer cast into an int. If the user passes in an 8 byte integer then
  *  it should not be cast to an int (which might be 4 bytes). Instead the value
  *  is written as the size of an int_f.
@@ -1774,7 +1552,7 @@ h5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     herr_t error;
     int_f  c_value;
 
@@ -1785,7 +1563,7 @@ h5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
     c_value = *value;
     error   = H5Tenum_insert((hid_t)*type_id, c_name, &c_value);
 
-    HDfree(c_name);
+    free(c_name);
     if (error < 0)
         return ret_value;
 
@@ -1806,11 +1584,6 @@ h5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
  *  Output:      name  - Name of  the enumeration datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1820,17 +1593,17 @@ h5tenum_nameof_c(hid_t_f *type_id, int_f *value, _fcd name, size_t_f *namelen)
 {
     int    ret_value = -1;
     hid_t  c_type_id;
-    char * c_name;
+    char  *c_name;
     size_t c_namelen;
     herr_t error;
     int_f  c_value;
     c_value   = *value;
     c_namelen = ((size_t)*namelen) + 1;
-    c_name    = (char *)HDmalloc(sizeof(char) * c_namelen);
+    c_name    = (char *)malloc(sizeof(char) * c_namelen);
     c_type_id = (hid_t)*type_id;
     error     = H5Tenum_nameof(c_type_id, &c_value, c_name, c_namelen);
     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
-    HDfree(c_name);
+    free(c_name);
 
     if (error < 0)
         return ret_value;
@@ -1851,11 +1624,6 @@ h5tenum_nameof_c(hid_t_f *type_id, int_f *value, _fcd name, size_t_f *namelen)
  *  Output:      value  - value of the enumeration datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1864,14 +1632,14 @@ h5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     herr_t error;
     c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         return ret_value;
 
     error = H5Tenum_valueof((hid_t)*type_id, c_name, value);
-    HDfree(c_name);
+    free(c_name);
 
     if (error < 0)
         return ret_value;
@@ -1891,11 +1659,6 @@ h5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
  *  Output:      value  - value of the enumeration datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Thursday, February 3, 2000
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1930,11 +1693,6 @@ h5tget_member_value_c(hid_t_f *type_id, int_f *member_no, int_f *value)
  *  namelen - length of tag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1943,12 +1701,12 @@ h5tset_tag_c(hid_t_f *type_id, _fcd tag, int_f *namelen)
 {
     int    ret_value = -1;
     herr_t status;
-    char * c_tag;
+    char  *c_tag;
 
     c_tag = (char *)HD5f2cstring(tag, (size_t)*namelen);
 
     status = H5Tset_tag((hid_t)*type_id, c_tag);
-    HDfree(c_tag);
+    free(c_tag);
     if (status < 0)
         return ret_value;
 
@@ -1969,11 +1727,6 @@ h5tset_tag_c(hid_t_f *type_id, _fcd tag, int_f *namelen)
  *  taglen - length of tag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  XIANGYANG SU
- *  Wednesday, January 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1990,7 +1743,7 @@ h5tget_tag_c(hid_t_f *type_id, _fcd tag, size_t_f *tag_size, int_f *taglen)
         return ret_value;
 
     HD5packFstring(c_tag, _fcdtocp(tag), (size_t)*tag_size);
-    *taglen = (int_f)HDstrlen(c_tag);
+    *taglen = (int_f)strlen(c_tag);
     H5free_memory(c_tag);
     ret_value = 0;
     return ret_value;
@@ -2006,11 +1759,6 @@ h5tget_tag_c(hid_t_f *type_id, _fcd tag, size_t_f *tag_size, int_f *taglen)
  *  vltype_id - identifier of the VL datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 23, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2033,7 +1781,7 @@ h5tvlen_create_c(hid_t_f *type_id, hid_t_f *vltype_id)
  * NAME
  *  h5tis_variable_str_c
  * PURPOSE
- *  Call H5Tis_variable_str to detrmine if the datatype
+ *  Call H5Tis_variable_str to determine if the datatype
  *  is a variable string.
  * INPUTS
  *  type_id - identifier of the dataspace
@@ -2042,11 +1790,6 @@ h5tvlen_create_c(hid_t_f *type_id, hid_t_f *vltype_id)
  *  and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12 , 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2069,7 +1812,7 @@ h5tis_variable_str_c(hid_t_f *type_id, int_f *flag)
  * NAME
  *  h5tget_member_class_c
  * PURPOSE
- *  Call H5Tget_member_class to detrmine ithe class of the compound
+ *  Call H5Tget_member_class to determine ithe class of the compound
  *		datatype member
  * INPUTS
  *  type_id - identifier of the dataspace
@@ -2079,11 +1822,6 @@ h5tis_variable_str_c(hid_t_f *type_id, int_f *flag)
  *  and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, April 6, 2005
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2118,11 +1856,6 @@ h5tget_member_class_c(hid_t_f *type_id, int_f *member_no, int_f *cls)
  *  tapl_id - Datatype access property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 25, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2151,11 +1884,6 @@ done:
  *  a positive value, for TRUE, if the datatype has been committed,
  *  or 0 (zero), for FALSE, if the datatype has not been committed.
  *		Otherwise returns a negative value.
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 25, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2185,11 +1913,6 @@ h5tcommitted_c(hid_t_f *dtype_id)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 9, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2229,11 +1952,6 @@ h5tdecode_c(_fcd buf, hid_t_f *obj_id)
  *  nalloc - The size of the allocated buffer.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 9, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2264,7 +1982,7 @@ h5tencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc)
      * Allocate buffer
      */
     c_size = (size_t)*nalloc;
-    if (NULL == (c_buf = (unsigned char *)HDmalloc(c_size)))
+    if (NULL == (c_buf = (unsigned char *)malloc(c_size)))
         return ret_value;
 
     /*
@@ -2279,11 +1997,11 @@ h5tencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc)
      * with blanks.
      */
 
-    HDmemcpy(_fcdtocp(buf), (char *)c_buf, c_size);
+    memcpy(_fcdtocp(buf), (char *)c_buf, c_size);
 
     ret_value = 0;
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 
@@ -2298,11 +2016,6 @@ h5tencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc)
  *  dtpl_id           - Datatype property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 9, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 
@@ -2332,11 +2045,6 @@ h5tget_create_plist_c(hid_t_f *dtype_id, hid_t_f *dtpl_id)
  *  c_flag - flag; TRUE for compiler conversion, FALSE for library conversion
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M.Scot Breitenfeld
- *  April 9, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2367,11 +2075,6 @@ h5tcompiler_conv_c(hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
  *  native_dtype_id  - The native datatype identifier for the specified dataset datatype
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 18, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2409,10 +2112,6 @@ h5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype_
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  December 8, 2008
- *
  * SOURCE
  */
 int_f
@@ -2444,10 +2143,6 @@ h5tconvert_c(hid_t_f *src_id, hid_t_f *dst_id, size_t_f *nelmts, void *buf, void
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 6, 2015
- *
  * SOURCE
  */
 int_f
@@ -2467,7 +2162,7 @@ h5tenum_insert_ptr_c(hid_t_f *type_id, _fcd name, int_f *namelen, void *value)
 
     status = H5Tenum_insert((hid_t)*type_id, c_name, value);
 
-    HDfree(c_name);
+    free(c_name);
     if (status < 0)
         return ret_value;
 

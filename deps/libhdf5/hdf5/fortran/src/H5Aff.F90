@@ -1,18 +1,17 @@
-!****h* ROBODoc/H5A
-!
-! NAME
-!  MODULE H5A
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5A functions. It includes
-!  all the functions that are independent on whether the Fortran 2003 functions
-!  are enabled or disabled.
-!
+!> @defgroup FH5A Fortran Attribute (H5A) Interface
+!!
+!! @see H5A, C-API
+!!
+!! @see @ref H5A_UG, User Guide
+!!
+
+!> @ingroup FH5A
+!!
+!! @brief This module contains Fortran interfaces for H5A functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -66,19 +65,19 @@
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
-!*****
 
 #include <H5config_f.inc>
 
 MODULE H5A
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_NULL_CHAR, C_LOC, C_INT
-
   USE H5GLOBAL
+  IMPLICIT NONE
 
   PRIVATE h5awrite_char_scalar, h5awrite_ptr
   PRIVATE h5aread_char_scalar, h5aread_ptr
 
+
+#ifndef H5_DOXYGEN
   INTERFACE h5awrite_f
      MODULE PROCEDURE h5awrite_char_scalar
      ! This is the preferred way to call h5awrite
@@ -96,12 +95,12 @@ MODULE H5A
 !  Interface for the function used to pass the C pointer of the buffer
 !  to the C H5Awrite routine
   INTERFACE
-     INTEGER FUNCTION h5awrite_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5awrite_f_c')
+     INTEGER FUNCTION h5awrite_f_c(attr_id, memtype_id, buf) BIND(C, NAME='h5awrite_f_c')
        IMPORT :: c_ptr
        IMPORT :: HID_T
        IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: attr_id
-       INTEGER(HID_T), INTENT(IN) :: mem_type_id
+       INTEGER(HID_T), INTENT(IN) :: memtype_id
        TYPE(C_PTR), VALUE :: buf
      END FUNCTION h5awrite_f_c
   END INTERFACE
@@ -109,65 +108,60 @@ MODULE H5A
 !  Interface for the function used to pass the C pointer of the buffer
 !  to the C H5Aread routine
   INTERFACE
-     INTEGER FUNCTION h5aread_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5aread_f_c')
+     INTEGER FUNCTION h5aread_f_c(attr_id, memtype_id, buf) BIND(C, NAME='h5aread_f_c')
        IMPORT :: c_ptr
        IMPORT :: HID_T
        IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: attr_id
-       INTEGER(HID_T), INTENT(IN) :: mem_type_id
+       INTEGER(HID_T), INTENT(IN) :: memtype_id
        TYPE(C_PTR), VALUE :: buf
      END FUNCTION h5aread_f_c
   END INTERFACE
 
+  INTERFACE
+     INTEGER(HID_T) FUNCTION H5Aopen(obj_id, attr_name, aapl_id_default) &
+          BIND(C,NAME='H5Aopen')
+       IMPORT :: C_CHAR
+       IMPORT :: HID_T
+       IMPLICIT NONE
+       INTEGER(HID_T), VALUE :: obj_id
+       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+       INTEGER(HID_T), VALUE :: aapl_id_default
+     END FUNCTION H5Aopen
+  END INTERFACE
+
+#endif
+
 CONTAINS
 
-!
-!****s* H5A/h5acreate_f
-!
-! NAME
-!  h5acreate_f
-!
-! PURPOSE
-!  Creates a dataset as an attribute of a group, dataset, or named datatype
-!
-! INPUTS
-!  loc_id 	 - identifier of an object (group, dataset,
-!                  or named datatype) attribute is attached to
-!  name 	 - attribute name
-!  type_id 	 - attribute datatype identifier
-!  space_id 	 - attribute dataspace identifier
-!
-! OUTPUTS
-!  attr_id 	 - attribute identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  acpl_id 	 - Attribute creation property list identifier
-!  appl_id 	 - Attribute access property list identifier
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!
-! SOURCE
+!>
+!! \ingroup FH5A
+!!
+!! \brief Creates a dataset as an attribute of a group, dataset, or named datatype.
+!!
+!! \param loc_id   Identifier of an object (group, dataset, or named datatype) attribute is attached to
+!! \param name     Attribute name
+!! \param type_id  Attribute datatype identifier
+!! \param space_id Attribute dataspace identifier
+!! \param attr_id  Attribute identifier
+!! \param hdferr   \fortran_error
+!! \param acpl_id  Attribute creation property list identifier
+!! \param aapl_id  Attribute access property list identifier
+!!
+!! See C API: @ref H5Acreate2()
+!!
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
        hdferr, acpl_id, aapl_id )
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id   ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name   ! Attribute name
-    INTEGER(HID_T), INTENT(IN) :: type_id  ! Attribute datatype identifier
-    INTEGER(HID_T), INTENT(IN) :: space_id ! Attribute dataspace identifier
-    INTEGER(HID_T), INTENT(OUT) :: attr_id ! Attribute identifier
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code:
-                                           ! 0 on success and -1 on failure
-!*****
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: acpl_id ! Attribute creation property list identifier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: aapl_id ! Attribute access property list identifier
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T), INTENT(IN) :: type_id
+    INTEGER(HID_T), INTENT(IN) :: space_id
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: acpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
@@ -177,6 +171,7 @@ CONTAINS
             space_id, acpl_id_default, aapl_id_default) BIND(C,NAME='H5Acreate2')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(HID_T), INTENT(IN), VALUE :: type_id
@@ -186,12 +181,13 @@ CONTAINS
        END FUNCTION H5Acreate2
     END INTERFACE
 
+    c_name = TRIM(name)//C_NULL_CHAR
+
     acpl_id_default = H5P_DEFAULT_F
     aapl_id_default = H5P_DEFAULT_F
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
 
-    c_name = TRIM(name)//C_NULL_CHAR
     attr_id = h5acreate2(loc_id, c_name, type_id, space_id, &
          acpl_id_default, aapl_id_default)
 
@@ -200,52 +196,107 @@ CONTAINS
 
   END SUBROUTINE h5acreate_f
 
-!
-!****s* H5A/h5aopen_name_f
-!
-! NAME
-!  h5aopen_name_f
-!
-! PURPOSE
-!  Opens an attribute specified by name.
-!
-! INPUTS
-!  obj_id 	 - identifier of a group, dataset, or named
-!                  datatype atttribute to be attached to
-!  name 	 - attribute name
-! OUTPUTS
-!  attr_id 	 - attribute identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-! SOURCE
-  SUBROUTINE H5Aopen_name_f(obj_id, name, attr_id, hdferr)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously creates a dataset as an attribute of a group, dataset, or named datatype.
+!!
+!! \param loc_id   Identifier of an object (group, dataset, or named datatype) attribute is attached to
+!! \param name     Attribute name
+!! \param type_id  Attribute datatype identifier
+!! \param space_id Attribute dataspace identifier
+!! \param attr_id  Attribute identifier
+!! \param es_id    \fortran_es_id
+!! \param hdferr   \fortran_error
+!! \param acpl_id  Attribute creation property list identifier
+!! \param aapl_id  Attribute access property list identifier
+!! \param file     \fortran_file
+!! \param func     \fortran_func
+!! \param line     \fortran_line
+!!
+!! See C API: @ref H5Acreate_async()
+!!
+  SUBROUTINE h5acreate_async_f(loc_id, name, type_id, space_id, attr_id, es_id, &
+       hdferr, acpl_id, aapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
-    INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T), INTENT(IN) :: type_id
+    INTEGER(HID_T), INTENT(IN) :: space_id
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: acpl_id
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: aapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: acpl_id_default
+    INTEGER(HID_T) :: aapl_id_default
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
-! H5Aopen_name is deprecated
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5Aopen(obj_id, name, aapl_id) BIND(C,NAME='H5Aopen')
-         IMPORT :: C_CHAR
+       INTEGER(HID_T) FUNCTION H5Acreate_async(file, func, line, loc_id, name, type_id, &
+            space_id, acpl_id_default, aapl_id_default, es_id) BIND(C,NAME='H5Acreate_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN), VALUE :: obj_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id
-       END FUNCTION H5Aopen
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: type_id
+         INTEGER(HID_T), VALUE :: space_id
+         INTEGER(HID_T), VALUE :: acpl_id_default
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Acreate_async
     END INTERFACE
+
+    acpl_id_default = H5P_DEFAULT_F
+    aapl_id_default = H5P_DEFAULT_F
+    IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
+    IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    attr_id = h5acreate_async(file_default, func_default, line_default, &
+         loc_id, c_name, type_id, space_id, &
+         acpl_id_default, aapl_id_default, es_id)
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5acreate_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Opens an attribute specified by name.
+!!
+!! \param obj_id  Identifier of a group, dataset, or named datatype attribute to be attached to
+!! \param name    Attribute name
+!! \param attr_id Attribute identifier
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Aopen_name()
+!!
+  SUBROUTINE H5Aopen_name_f(obj_id, name, attr_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     c_name = TRIM(name)//C_NULL_CHAR
     attr_id = H5Aopen(obj_id, c_name, H5P_DEFAULT_F)
@@ -254,89 +305,62 @@ CONTAINS
     IF(attr_id.LT.0) hdferr = -1
 
   END SUBROUTINE H5Aopen_name_f
-!
-!****s* H5A/H5Aopen_idx_f
-!
-! NAME
-!  H5Aopen_idx_f
-!
-! PURPOSE
-!  Opens the attribute specified by its index.
-!
-! INPUTS
-!  obj_id 	 - identifier of a group, dataset, or named
-!                  datatype an attribute to be attached to
-!  index 	 - index of the attribute to open (zero-based)
-! OUTPUTS
-!  attr_id 	 - attribute identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-! SOURCE
-  SUBROUTINE H5Aopen_idx_f(obj_id, index, attr_id, hdferr)
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+!>
+!! \ingroup FH5A
+!!
+!! \brief Opens the attribute specified by its index.
+!!
+!! \deprecation_note{H5Aopen_by_idx_f()}
+!!
+!! \param obj_id  Identifier of a group, dataset, or named datatype an attribute to be attached to
+!! \param index   Index of the attribute to open (zero-based)
+!! \param attr_id Attribute identifier
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Aopen_idx()
+!!
+  SUBROUTINE h5aopen_idx_f(obj_id, index, attr_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier
-    INTEGER, INTENT(IN) :: index            ! Attribute index
-    INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
-!   H5Aopen_idx is deprecated in favor of the function H5Aopen_by_idx.
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER, INTENT(IN) :: index
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5Aopen_by_idx(obj_id, index) BIND(C,NAME='H5Aopen_by_idx')
+       INTEGER(HID_T) FUNCTION H5Aopen_idx(obj_id, index) BIND(C,NAME='H5Aopen_idx')
          IMPORT :: HID_T
          IMPORT :: C_INT
-         INTEGER(HID_T), INTENT(IN) :: obj_id
-         INTEGER(C_INT), INTENT(IN) :: index
-       END FUNCTION H5Aopen_by_idx
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: obj_id
+         INTEGER(C_INT), VALUE :: index
+       END FUNCTION H5Aopen_idx
     END INTERFACE
 
-    attr_id = H5Aopen_by_idx(obj_id, INT(index, C_INT))
+    attr_id = H5Aopen_idx(obj_id, INT(index, C_INT))
 
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aopen_idx_f
-!
-!****s* H5A/H5Aget_space_f
-!
-! NAME
-!  H5Aget_space_f
-!
-! PURPOSE
-!  Gets a copy of the dataspace for an attribute.
-!
-! INPUTS
-!  attr_id 	 - attribute identifier
-!
-! OUTPUTS
-!  space_id 	 - attribite dataspace identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!
-! SOURCE
-  SUBROUTINE H5Aget_space_f(attr_id, space_id, hdferr)
+  END SUBROUTINE h5aopen_idx_f
+#endif
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Gets a copy of the dataspace for an attribute.
+!!
+!! \param attr_id  Attribute identifier
+!! \param space_id Attribite dataspace identifier
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Aget_space()
+!!
+  SUBROUTINE h5aget_space_f(attr_id, space_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
-    INTEGER(HID_T), INTENT(OUT) :: space_id ! Attribute dataspace identifier
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(OUT) :: space_id
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Aget_space(attr_id) BIND(C,NAME='H5Aget_space')
          IMPORT :: HID_T
@@ -350,38 +374,23 @@ CONTAINS
     hdferr = 0
     IF(space_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_space_f
-!
-!****s* H5A/H5Aget_type_f
-!
-! NAME
-!  H5Aget_type_f
-!
-! PURPOSE
-!  Gets an attribute datatype.
-!
-! INPUTS
-!  attr_id 	 - attribute identifier
-! OUTPUTS
-!  type_id 	 - attribute datatype identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-! SOURCE
-  SUBROUTINE H5Aget_type_f(attr_id, type_id, hdferr)
+  END SUBROUTINE h5aget_space_f
+!>
+!! \ingroup FH5A
+!!
+!! \brief Gets an attribute datatype.
+!!
+!! \param attr_id Attribute identifier
+!! \param type_id Attribute datatype identifier
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Aget_type()
+!!
+  SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
-    INTEGER(HID_T), INTENT(OUT) :: type_id ! Attribute datatype identifier
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(OUT) :: type_id
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Aget_type(attr_id) BIND(C,NAME='H5Aget_type')
          IMPORT :: HID_T
@@ -395,47 +404,31 @@ CONTAINS
     hdferr = 0
     IF(type_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_type_f
-!
-!****s* H5A/H5Aget_name_f
-!
-! NAME
-!  H5Aget_name_f
-!
-! PURPOSE
-!  Gets an attribute name.
-!
-! INPUTS
-!  attr_id 	 - attribute identifier
-!  size 	 - size of a buffer to read name in
-! OUTPUTS
-!  buf 	         - buffer to read name in
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!
-! SOURCE
+  END SUBROUTINE h5aget_type_f
+!>
+!! \ingroup FH5A
+!!
+!! \brief Gets an attribute name.
+!!
+!! \param attr_id Attribute identifier
+!! \param size    Size of a buffer to read name in
+!! \param buf     Buffer to read name in
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Aget_name()
+!!
   SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
-    INTEGER(SIZE_T), INTENT(IN) :: size    ! Buffer size
-    CHARACTER(LEN=*), INTENT(INOUT) :: buf ! Buffer to hold attribute name
-    INTEGER, INTENT(OUT) :: hdferr ! Error code:
-                                   ! name length is successful, -1 if fail
-!*****
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(SIZE_T), INTENT(IN) :: size
+    CHARACTER(LEN=*), INTENT(INOUT) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5aget_name_c(attr_id, size, buf) &
             BIND(C,NAME='h5aget_name_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(SIZE_T), INTENT(IN) :: size
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
@@ -444,73 +437,46 @@ CONTAINS
 
     hdferr = h5aget_name_c(attr_id, size, buf)
   END SUBROUTINE h5aget_name_f
-!
-!****s* H5A/H5Aget_name_by_idx_f
-!
-! NAME
-!  H5Aget_name_by_idx_f
-!
-! PURPOSE
-!  Gets an attribute name, by attribute index position.
-!
-! INPUTS
-!  loc_id 	 - Location of object to which attribute is attached
-!  obj_name 	 - Name of object to which attribute is attached, relative to location
-!  idx_type 	 - Type of index; Possible values are:
-!                   H5_INDEX_UNKNOWN_F = -1  - Unknown index type
-!                   H5_INDEX_NAME_F 	     - Index on names
-!                   H5_INDEX_CRT_ORDER_F     - Index on creation order
-!                   H5_INDEX_N_F 	     - Number of indices defined
-!
-!  order 	 - Order in which to iterate over index; Possible values are:
-!                   H5_ITER_UNKNOWN_F 	 - Unknown order
-!                   H5_ITER_INC_F 	 - Increasing order
-!                   H5_ITER_DEC_F 	 - Decreasing order
-!                   H5_ITER_NATIVE_F 	 - No particular order, whatever is fastest
-!                   H5_ITER_N_F 	 - Number of iteration orders
-!  order 	 - Index traversal order
-!  n 	         - Attribute’s position in index
-!
-! OUTPUTS
-!  name 	 - Attribute name
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list
-!  size 	 - Size, in bytes, of attribute name
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
+!>
+!! \ingroup FH5A
+!!
+!! \brief Gets an attribute name, by attribute index position.
+!!
+!! \param loc_id   Location of object to which attribute is attached
+!! \param obj_name Name of object to which attribute is attached, relative to location
+!! \param idx_type Type of index; Possible values are:
+!!                 \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                 \li H5_INDEX_NAME_F          - Index on names
+!!                 \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                 \li H5_INDEX_N_F             - Number of indices defined
+!!
+!! \param order    Index traversal order in which to iterate over index; Possible values are:
+!!                 \li H5_ITER_UNKNOWN_F   - Unknown order
+!!                 \li H5_ITER_INC_F       - Increasing order
+!!                 \li H5_ITER_DEC_F       - Decreasing order
+!!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
+!!                 \li H5_ITER_N_F         - Number of iteration orders
+!! \param n        Attribute&apos;s position in index
+!! \param name     Attribute name
+!! \param hdferr   \fortran_error
+!!
+!! \param size     Size, in bytes, of attribute name
+!! \param lapl_id  Link access property list
+!!
+!! See C API: @ref H5Aget_name_by_idx()
+!!
   SUBROUTINE h5aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
        n, name, hdferr, size, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
-                                              !  from which attribute is to be removed *TEST* check NULL
-    INTEGER, INTENT(IN) :: idx_type ! Type of index; Possible values are:
-                                    !    H5_INDEX_UNKNOWN_F   - Unknown index type
-                                    !    H5_INDEX_NAME_F       - Index on names
-                                    !    H5_INDEX_CRT_ORDER_F  - Index on creation order
-                                    !    H5_INDEX_N_F 	      - Number of indices defined
-
-    INTEGER, INTENT(IN) :: order    ! Order in which to iterate over index; Possible values are:
-                                    !    H5_ITER_UNKNOWN_F   - Unknown order
-                                    !    H5_ITER_INC_F      - Increasing order
-                                    !    H5_ITER_DEC_F       - Decreasing order
-                                    !    H5_ITER_NATIVE_F    - No particular order, whatever is fastest
-                                    !    H5_ITER_N_F 	    - Number of iteration orders
-    INTEGER(HSIZE_T), INTENT(IN) :: n !  Attribute’s position in index
-    CHARACTER(LEN=*), INTENT(OUT) :: name ! Attribute name
-    INTEGER, INTENT(OUT) :: hdferr    ! Error code:
-                                      ! Returns attribute name size,
-                                      ! -1 if fail
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size  ! Indicates the size, in the number of characters,
-                                                    ! of the attribute
-!*****
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER, INTENT(IN) :: idx_type
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    CHARACTER(LEN=*), INTENT(OUT) :: name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: size
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(SIZE_T) :: obj_namelen
     INTEGER(SIZE_T) :: size_default
@@ -546,42 +512,27 @@ CONTAINS
 
 
   END SUBROUTINE h5aget_name_by_idx_f
-!
-!****s* H5A/H5Aget_num_attrs_f
-!
-! NAME
-!  H5Aget_num_attrs_f
-!
-! PURPOSE
-!  Determines the number of attributes attached to an object.
-!
-! INPUTS
-!  obj_id 	 - object (group, dataset, or named datatype)
-!  identifier
-! OUTPUTS
-!  attr_num 	 - number of attributes attached to the object
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-! SOURCE
+!>
+!! \ingroup FH5A
+!!
+!! \brief Determines the number of attributes attached to an object.
+!!
+!! \param obj_id   Object (group, dataset, or named datatype) identifier
+!! \param attr_num Number of attributes attached to the object
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Aget_num_attrs()
+!!
   SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier
-    INTEGER, INTENT(OUT) :: attr_num      ! Number of attributes of the object
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER, INTENT(OUT) :: attr_num
+    INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
        INTEGER FUNCTION h5aget_num_attrs_c(obj_id, attr_num) BIND(C,name='h5aget_num_attrs_c')
          IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER, INTENT(OUT) :: attr_num
        END FUNCTION h5aget_num_attrs_c
@@ -590,44 +541,30 @@ CONTAINS
     hdferr = h5aget_num_attrs_c(obj_id, attr_num)
   END SUBROUTINE h5aget_num_attrs_f
 
-!
-!****s* H5A/H5Adelete_f
-!
-! NAME
-!  H5Adelete_f
-!
-! PURPOSE
-!  Deletes an attribute of an object (group, dataset or
-!  named datatype)
-!
-! INPUTS
-!  obj_id 	 - object identifier
-!  name 	 - attribute name
-! OUTPUTS
-!
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-! SOURCE
-  SUBROUTINE H5Adelete_f(obj_id, name, hdferr)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Deletes an attribute of an object (group, dataset or named datatype)
+!!
+!! \param obj_id Object identifier
+!! \param name   Attribute name
+!!
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Adelete()
+!!
+  SUBROUTINE h5adelete_f(obj_id, name, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Attribute name
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER, INTENT(OUT) :: hdferr
     INTEGER(SIZE_T) :: namelen
 
     INTERFACE
        INTEGER FUNCTION H5Adelete_c(obj_id, name, namelen) BIND(C,NAME='h5adelete_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) :: namelen
@@ -636,78 +573,103 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = H5Adelete_c(obj_id, name, namelen)
-  END SUBROUTINE H5Adelete_f
+  END SUBROUTINE h5adelete_f
 
-!
-!****s* H5A/H5Aclose_f
-!
-! NAME
-!  H5Aclose_f
-!
-! PURPOSE
-!  Closes the specified attribute.
-!
-! INPUTS
-!  attr_id  - attribute identifier
-! OUTPUTS
-!
-!  hdferr   - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-! SOURCE
-
-  SUBROUTINE H5Aclose_f(attr_id, hdferr)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Closes the specified attribute.
+!!
+!! \param attr_id Attribute identifier
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Aclose()
+!!
+  SUBROUTINE h5aclose_f(attr_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
        INTEGER FUNCTION H5Aclose(attr_id) BIND(C, NAME='H5Aclose')
          IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aclose
     END INTERFACE
 
     hdferr = INT(H5Aclose(attr_id))
-  END SUBROUTINE H5Aclose_f
+  END SUBROUTINE h5aclose_f
 
-!
-!****s* H5A/H5Aget_storage_size_f
-!
-! NAME
-!  H5Aget_storage_size_f
-!
-! PURPOSE
-!  Returns the amount of storage required for an attribute.
-!
-! INPUTS
-!  attr_id 	 - attribute identifier
-! OUTPUTS
-!  size 	 - attribute storage size
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aget_storage_size_f(attr_id, size, hdferr)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously closes the specified attribute.
+!!
+!! \param attr_id Attribute identifier
+!! \param es_id  \fortran_es_id
+!! \param hdferr \fortran_error
+!! \param file   \fortran_file
+!! \param func   \fortran_func
+!! \param line   \fortran_line
+!!
+!! See C API: @ref H5Aclose_async()
+!!
+  SUBROUTINE h5aclose_async_f(attr_id, es_id, hdferr, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
-    INTEGER(HSIZE_T), INTENT(OUT) :: size  ! Attribute storage requirement
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER FUNCTION H5Aclose_async(file, func, line, attr_id, es_id) BIND(C, NAME='H5Aclose_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: attr_id
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aclose_async
+    END INTERFACE
+
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = H5Aclose_async(file_default, func_default, line_default, attr_id, es_id)
+
+  END SUBROUTINE h5aclose_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Returns the amount of storage required for an attribute.
+!!
+!! \param attr_id Attribute identifier
+!! \param size    Attribute storage size
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Aget_storage_size()
+!!
+  SUBROUTINE h5aget_storage_size_f(attr_id, size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HSIZE_T), INTENT(OUT) :: size
+    INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
        INTEGER(HSIZE_T) FUNCTION H5Aget_storage_size(attr_id) BIND(C,NAME='H5Aget_storage_size')
          IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T),  INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_storage_size
     END INTERFACE
@@ -717,38 +679,28 @@ CONTAINS
     hdferr = 0
     IF(size.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_storage_size_f
+  END SUBROUTINE h5aget_storage_size_f
 
-!
-!****s* H5A/H5Aget_create_plist_f
-!
-! NAME
-!  H5Aget_create_plist_f
-!
-! PURPOSE
-!  Gets an attribute creation property list identifier
-!
-! INPUTS
-!  attr_id 	    - Identifier of the attribute
-! OUTPUTS
-!  creation_prop_id - Identifier for the attribute’s creation property
-!  hdferr 	    - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aget_create_plist_f(attr_id, creation_prop_id, hdferr)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Gets an attribute creation property list identifier
+!!
+!! \param attr_id          Identifier of the attribute
+!! \param creation_prop_id Identifier for the attribute&apos;s creation property
+!! \param hdferr           \fortran_error
+!!
+!! See C API: @ref H5Aget_create_plist()
+!!
+  SUBROUTINE h5aget_create_plist_f(attr_id, creation_prop_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id  ! Identifier of the attribute
-    INTEGER(HID_T), INTENT(OUT) :: creation_prop_id   ! Identifier for the attribute’s creation property
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code
-                                         ! 0 on success and -1 on failure
-!*****
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(OUT) :: creation_prop_id
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Aget_create_plist(attr_id) BIND(C,NAME='H5Aget_create_plist')
          IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_create_plist
     END INTERFACE
@@ -758,202 +710,280 @@ CONTAINS
     hdferr = 0
     IF(creation_prop_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_create_plist_f
+  END SUBROUTINE h5aget_create_plist_f
 
-!
-!****s* H5A/H5Arename_by_name_f
-!
-! NAME
-!  H5Arename_by_name_f
-!
-! PURPOSE
-!  Renames an attribute
-!
-! INPUTS
-!  loc_id 	 - Location or object identifier; may be dataset or group
-!  obj_name 	 - Name of object, relative to location,
-!                  whose attribute is to be renamed
-!  old_attr_name - Prior attribute name
-!  new_attr_name - New attribute name
-!  lapl_id 	 - Link access property list identifier
-!
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
+!>
+!! \ingroup FH5A
+!!
+!! \brief Renames an attribute
+!!
+!! \param loc_id        Location or object identifier; may be dataset or group or named datatype
+!! \param obj_name      Name of object, relative to location, whose attribute is to be renamed
+!! \param old_attr_name Prior attribute name
+!! \param new_attr_name New attribute name
+!! \param hdferr        \fortran_error
+!! \param lapl_id       Link access property list identifier
+!!
+!! See C API: @ref H5Arename_by_name()
+!!
+  SUBROUTINE h5arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
         hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
-                                              !  whose attribute is to be renamed
-    CHARACTER(LEN=*), INTENT(IN) :: old_attr_name ! Prior attribute name
-    CHARACTER(LEN=*), INTENT(IN) :: new_attr_name ! New attribute name
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    CHARACTER(LEN=*), INTENT(IN) :: old_attr_name
+    CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
 
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier
-!*****
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: obj_namelen
-    INTEGER(SIZE_T) :: old_attr_namelen
-    INTEGER(SIZE_T) :: new_attr_namelen
+    CHARACTER(LEN=LEN_TRIM(obj_name) +1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(old_attr_name)+1,KIND=C_CHAR) :: c_old_attr_name
+    CHARACTER(LEN=LEN_TRIM(new_attr_name)+1,KIND=C_CHAR) :: c_new_attr_name
 
     INTERFACE
-       INTEGER FUNCTION H5Arename_by_name_c(loc_id, obj_name, obj_namelen, &
-            old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen, &
-            lapl_id_default) BIND(C,NAME='h5arename_by_name_c')
+       INTEGER FUNCTION H5Arename_by_name(loc_id, obj_name, &
+            old_attr_name, new_attr_name, lapl_id_default) &
+            BIND(C,NAME='H5Arename_by_name')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-         INTEGER(SIZE_T) :: obj_namelen
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: old_attr_name
-         INTEGER(SIZE_T) :: old_attr_namelen
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: new_attr_name
-         INTEGER(SIZE_T) :: new_attr_namelen
-         INTEGER(HID_T) :: lapl_id_default
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: old_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: new_attr_name
+         INTEGER(HID_T), VALUE :: lapl_id_default
 
-       END FUNCTION H5Arename_by_name_c
+       END FUNCTION H5Arename_by_name
     END INTERFACE
 
-    obj_namelen = LEN(obj_name)
-    old_attr_namelen = LEN(old_attr_name)
-    new_attr_namelen = LEN(new_attr_name)
+    c_obj_name      = TRIM(obj_name)//C_NULL_CHAR
+    c_old_attr_name = TRIM(old_attr_name)//C_NULL_CHAR
+    c_new_attr_name = TRIM(new_attr_name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default=lapl_id
 
-    hdferr = H5Arename_by_name_c(loc_id, obj_name, obj_namelen, &
-         old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen, &
-         lapl_id_default)
+    hdferr = 0
+    hdferr = H5Arename_by_name(loc_id, c_obj_name, c_old_attr_name, c_new_attr_name, lapl_id_default)
 
-  END SUBROUTINE H5Arename_by_name_f
-
-!
-!****s* H5A/H5Aopen_f
-!
-! NAME
-!  H5Aopen_f
-!
-! PURPOSE
-!  Opens an attribute for an object specified by object
-!  identifier and attribute name
-!
-! INPUTS
-!  obj_id 	 - Identifer for object to which attribute is attached
-!  attr_name 	 - Name of attribute to open
-! OUTPUTS
-!  attr_id 	 - attribute identifier
-
-! OPTIONAL PARAMETERS
-!  aapl_id 	 - Attribute access property list
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
+  END SUBROUTINE h5arename_by_name_f
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously renames an attribute
+!!
+!! \param loc_id        Location or object identifier; may be dataset or group or named datatype
+!! \param obj_name      Name of object, relative to location, whose attribute is to be renamed
+!! \param old_attr_name Prior attribute name
+!! \param new_attr_name New attribute name
+!! \param es_id         \fortran_es_id
+!! \param hdferr        \fortran_error
+!! \param lapl_id       Link access property list identifier
+!! \param file          \fortran_file
+!! \param func          \fortran_func
+!! \param line          \fortran_line
+!!
+!! See C API: @ref H5Arename_by_name()
+!!
+  SUBROUTINE h5arename_by_name_async_f(loc_id, obj_name, old_attr_name, new_attr_name, es_id, &
+       hdferr, lapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id      ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
-    INTEGER(HID_T), INTENT(OUT) :: attr_id    ! Attribute identifier
-    INTEGER, INTENT(OUT) :: hdferr            ! Error code
-                                              !   Success:  0
-                                              !   Failure: -1
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: aapl_id     ! Attribute access property list
-!*****
-    INTEGER(HID_T) :: aapl_id_default
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    CHARACTER(LEN=*), INTENT(IN) :: old_attr_name
+    CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
+    INTEGER(HID_T), INTENT(IN)    :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    INTEGER(SIZE_T) :: attr_namelen
+    INTEGER(HID_T) :: lapl_id_default
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    CHARACTER(LEN=LEN_TRIM(obj_name)     +1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(old_attr_name)+1,KIND=C_CHAR) :: c_old_attr_name
+    CHARACTER(LEN=LEN_TRIM(new_attr_name)+1,KIND=C_CHAR) :: c_new_attr_name
 
     INTERFACE
-       INTEGER FUNCTION H5Aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id) &
-            BIND(C,NAME='h5aopen_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
-         INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
-         INTEGER(HID_T) :: aapl_id_default
-         INTEGER(SIZE_T) :: attr_namelen
-         INTEGER(HID_T), INTENT(OUT) :: attr_id
-       END FUNCTION H5Aopen_c
+       INTEGER FUNCTION H5Arename_by_name_async(file, func, line, loc_id, obj_name, &
+            old_attr_name, new_attr_name, lapl_id_default, es_id) &
+            BIND(C,NAME='H5Arename_by_name_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: old_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: new_attr_name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Arename_by_name_async
     END INTERFACE
 
-    attr_namelen = LEN(attr_name)
+    c_obj_name      = TRIM(obj_name)//C_NULL_CHAR
+    c_old_attr_name = TRIM(old_attr_name)//C_NULL_CHAR
+    c_new_attr_name = TRIM(new_attr_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default=lapl_id
+
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = 0
+    hdferr = H5Arename_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_obj_name, c_old_attr_name, c_new_attr_name, lapl_id_default, es_id)
+
+  END SUBROUTINE h5arename_by_name_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Opens an attribute for an object specified by object
+!!       identifier and attribute name
+!!
+!! \param obj_id    Identifier for object to which attribute is attached
+!! \param attr_name Name of attribute to open
+!! \param attr_id   Attribute identifier
+!! \param hdferr    \fortran_error
+!! \param aapl_id   Attribute access property list
+!!
+!! See C API: @ref H5Aopen()
+!!
+  SUBROUTINE h5aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
+
+    INTEGER(HID_T) :: aapl_id_default
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
 
     aapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
 
-    hdferr = H5Aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id)
+    attr_id = INT(H5Aopen(obj_id, c_attr_name, aapl_id_default), HID_T)
 
-  END SUBROUTINE H5Aopen_f
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
 
-!
-!****s* H5A/H5Adelete_by_idx_f
-!
-! NAME
-!  H5Adelete_by_idx_f
-!
-! PURPOSE
-!  Deletes an attribute from an object according to index order
-!
-! INPUTS
-!  loc_id 	 - Location or object identifier; may be dataset or group
-!  obj_name 	 - Name of object, relative to location, from which attribute is to be removed
-!  idx_type 	 - Type of index; Possible values are:
-!                   H5_INDEX_UNKNOWN_F = -1  - Unknown index type
-!                   H5_INDEX_NAME_F 	     - Index on names
-!                   H5_INDEX_CRT_ORDER_F     - Index on creation order
-!                   H5_INDEX_N_F 	     - Number of indices defined
-!
-!  order 	 - Order in which to iterate over index; Possible values are:
-!                   H5_ITER_UNKNOWN_F 	 - Unknown order
-!                   H5_ITER_INC_F 	 - Increasing order
-!                   H5_ITER_DEC_F 	 - Decreasing order
-!                   H5_ITER_NATIVE_F 	 - No particular order, whatever is fastest
-!                   H5_ITER_N_F 	 - Number of iteration orders
-!
-!  n 	         - Offset within index
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
+  END SUBROUTINE h5aopen_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously opens an attribute for an object specified by object identifier and attribute name.
+!!
+!! \param obj_id    Identifier for object to which attribute is attached
+!! \param attr_name Name of attribute to open
+!! \param attr_id   Attribute identifier
+!! \param es_id     \fortran_es_id
+!! \param hdferr    \fortran_error
+!! \param aapl_id   Attribute access property list
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
+!!
+!! See C API: @ref H5Aopen_async()
+!!
+  SUBROUTINE h5aopen_async_f(obj_id, attr_name, attr_id, es_id, hdferr, aapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
-                                              !  from which attribute is to be removed
-    INTEGER, INTENT(IN) :: idx_type           ! Type of index; Possible values are:
-                                              !    H5_INDEX_UNKNOWN_F   - Unknown index type
-                                              !    H5_INDEX_NAME_F      - Index on names
-                                              !    H5_INDEX_CRT_ORDER_F - Index on creation order
-                                              !    H5_INDEX_N_F	      - Number of indices defined
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER         , INTENT(IN) , OPTIONAL :: line
 
-    INTEGER, INTENT(IN) :: order              ! Order in which to iterate over index; Possible values are:
-                                              !    H5_ITER_UNKNOWN_F  - Unknown order
-                                              !    H5_ITER_INC_F      - Increasing order
-                                              !    H5_ITER_DEC_F      - Decreasing order
-                                              !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-                                              !    H5_ITER_N_F	    - Number of iteration orders
-    INTEGER(HSIZE_T), INTENT(IN) :: n         ! Offset within index
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code:
-                                           ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
-!*****
+    INTEGER(HID_T) :: aapl_id_default
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Aopen_async(file, func, line, &
+            obj_id, attr_name, aapl_id_default, es_id) BIND(C,NAME='H5Aopen_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: obj_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aopen_async
+    END INTERFACE
+
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
+
+    aapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    attr_id = INT(H5Aopen_async(file_default, func_default, line_default, &
+         obj_id, c_attr_name, aapl_id_default, es_id), HID_T)
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5aopen_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Deletes an attribute from an object according to index order
+!!
+!! \param loc_id   Location or object identifier; may be dataset or group or named datatype
+!! \param obj_name Name of object, relative to location, from which attribute is to be removed
+!! \param idx_type Type of index; Possible values are:
+!!                 \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                 \li H5_INDEX_NAME_F          - Index on names
+!!                 \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                 \li H5_INDEX_N_F             - Number of indices defined
+!!
+!! \param order    Order in which to iterate over index; Possible values are:
+!!                 \li H5_ITER_UNKNOWN_F   - Unknown order
+!!                 \li H5_ITER_INC_F       - Increasing order
+!!                 \li H5_ITER_DEC_F       - Decreasing order
+!!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
+!!                 \li H5_ITER_N_F         - Number of iteration orders
+!!
+!! \param n        Offset within index
+!! \param hdferr   \fortran_error
+!! \param lapl_id  Link access property list
+!!
+!! See C API: @ref H5Adelete_by_idx()
+!!
+  SUBROUTINE h5adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER, INTENT(IN) :: idx_type
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(SIZE_T) :: obj_namelen
     INTEGER(HID_T) :: lapl_id_default
 
@@ -979,40 +1009,28 @@ CONTAINS
     obj_namelen = LEN(obj_name)
     hdferr = H5Adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
 
-  END SUBROUTINE H5Adelete_by_idx_f
+  END SUBROUTINE h5adelete_by_idx_f
 
-!
-!****s* H5A/H5Adelete_by_name_f
-!
-! NAME
-!  H5Adelete_by_name_f
-!
-! PURPOSE
-!  Removes an attribute from a specified location
-!
-! INPUTS
-!  loc_id 	 - Identifer for object to which attribute is attached
-!  obj_name 	 - Name of attribute to open
-!  attr_name 	 - Attribute access property list
-!  lapl_id 	 - Link access property list
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
+!>
+!! \ingroup FH5A
+!!
+!! \brief Removes an attribute from a specified location
+!!
+!! \param loc_id    Identifier for object to which attribute is attached
+!! \param obj_name  Name of attribute to open
+!! \param attr_name Attribute access property list
+!! \param lapl_id   Link access property list
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Adelete_by_name()
+!!
   SUBROUTINE H5Adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
-                                              !  from which attribute is to be removed
-    CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Name of attribute to delete
-    INTEGER, INTENT(OUT) :: hdferr            ! Error code:
-                                              ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
-!*****
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(SIZE_T) :: attr_namelen
     INTEGER(SIZE_T) :: obj_namelen
 
@@ -1023,6 +1041,7 @@ CONTAINS
             BIND(C,NAME='h5adelete_by_name_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
@@ -1040,125 +1059,201 @@ CONTAINS
 
     hdferr = H5Adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
 
-  END SUBROUTINE H5Adelete_by_name_f
+  END SUBROUTINE h5adelete_by_name_f
 
-!
-!****s* H5A/H5Aopen_by_idx_f
-!
-! NAME
-!  H5Aopen_by_idx_f
-!
-! PURPOSE
-!  Opens an existing attribute that is attached to an object specified by location and name
-!
-! INPUTS
-!  loc_id 	 - Location of object to which attribute is attached
-!  obj_name 	 - Name of object to which attribute is attached, relative to location
-!  idx_type 	 - Type of index
-!  order 	 - Index traversal order
-!  n 	         - Attribute’s position in index
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  aapl_id 	 - Attribute access property list
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Opens an existing attribute that is attached to an object specified by location and name.
+!!
+!! \param loc_id   Location of object to which attribute is attached.
+!! \param obj_name Name of object to which attribute is attached, relative to location.
+!! \param idx_type Type of index; Possible values are:
+!!                 \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                 \li H5_INDEX_NAME_F          - Index on names
+!!                 \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                 \li H5_INDEX_N_F             - Number of indices defined
+!!
+!! \param order    Order in which to iterate over index; Possible values are:
+!!                 \li H5_ITER_UNKNOWN_F   - Unknown order
+!!                 \li H5_ITER_INC_F       - Increasing order
+!!                 \li H5_ITER_DEC_F       - Decreasing order
+!!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
+!!                 \li H5_ITER_N_F         - Number of iteration orders
+!! \param n        Attribute&apos;s position in index.
+!! \param attr_id  Attribute identifier.
+!! \param hdferr   \fortran_error
+!! \param aapl_id  Attribute access property list.
+!! \param lapl_id  Link access property list.
+!!
+!! See C API: @ref H5Aopen_by_idx()
+!!
+  SUBROUTINE h5aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object to which attribute is attached
-    INTEGER, INTENT(IN) :: idx_type           ! Type of index; Possible values are:
-                                              !    H5_INDEX_UNKNOWN_F   - Unknown index type
-                                              !    H5_INDEX_NAME_F      - Index on names
-                                              !    H5_INDEX_CRT_ORDER_F - Index on creation order
-                                              !    H5_INDEX_N_F	      - Number of indices defined
-    INTEGER, INTENT(IN) :: order              ! Order in which to iterate over index; Possible values are:
-                                              !    H5_ITER_UNKNOWN_F  - Unknown order
-                                              !    H5_ITER_INC_F      - Increasing order
-                                              !    H5_ITER_DEC_F      - Decreasing order
-                                              !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER, INTENT(IN) :: idx_type
+    INTEGER, INTENT(IN) :: order
 
-    INTEGER(HSIZE_T), INTENT(IN) :: n       ! Attribute’s position in index
+    INTEGER(HSIZE_T), INTENT(IN) :: n
 
-    INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code:
-                                            ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: aapl_id  ! Attribute access property list
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
-!*****
-    INTEGER(SIZE_T) :: obj_namelen
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: aapl_id_default
     INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
 
     INTERFACE
-       INTEGER FUNCTION H5Aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
-            aapl_id_default, lapl_id_default, attr_id) BIND(C,NAME='h5aopen_by_idx_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-         INTEGER, INTENT(IN) :: idx_type
-         INTEGER, INTENT(IN) :: order
-         INTEGER(HSIZE_T), INTENT(IN) :: n
-         INTEGER(HID_T) :: aapl_id_default
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(SIZE_T) :: obj_namelen
-         INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier
-       END FUNCTION H5Aopen_by_idx_c
+       INTEGER(HID_T) FUNCTION H5Aopen_by_idx(loc_id, obj_name, idx_type, order, n, &
+            aapl_id_default, lapl_id_default) BIND(C,NAME='H5Aopen_by_idx')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Aopen_by_idx
     END INTERFACE
 
-    obj_namelen = LEN(obj_name)
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
 
     aapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = H5Aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
-         aapl_id_default, lapl_id_default, attr_id)
+    attr_id = INT(H5Aopen_by_idx(loc_id, c_obj_name, INT(idx_type, C_INT), INT(order, C_INT), n, &
+         aapl_id_default, lapl_id_default), HID_T)
 
-  END SUBROUTINE H5Aopen_by_idx_f
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+    
+  END SUBROUTINE h5aopen_by_idx_f
 
-!
-!****s* H5A/H5Aget_info_f
-!
-! NAME
-!  H5Aget_info_f
-!
-! PURPOSE
-!  Retrieves attribute information, by attribute identifier
-!
-! INPUTS
-!  attr_id 	 - attribute identifier
-!
-! OUTPUTS
-!  NOTE: In C it is defined as a structure: H5A_info_t
-!
-!  corder_valid  - indicates whether the creation order data is valid for this attribute
-!  corder 	 - is a positive integer containing the creation order of the attribute
-!  cset 	 - indicates the character set used for the attribute’s name
-!  data_size 	 - indicates the size, in the number of characters, of the attribute
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-! SOURCE
-  SUBROUTINE H5Aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously opens an existing attribute that is attached to an object specified by location and name.
+!!
+!! \param loc_id   Location of object to which attribute is attached.
+!! \param obj_name Name of object to which attribute is attached, relative to location.
+!! \param idx_type Type of index; Possible values are:
+!!                 \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                 \li H5_INDEX_NAME_F          - Index on names
+!!                 \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                 \li H5_INDEX_N_F             - Number of indices defined
+!!
+!! \param order    Order in which to iterate over index; Possible values are:
+!!                 \li H5_ITER_UNKNOWN_F   - Unknown order
+!!                 \li H5_ITER_INC_F       - Increasing order
+!!                 \li H5_ITER_DEC_F       - Decreasing order
+!!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
+!!                 \li H5_ITER_N_F         - Number of iteration orders
+!! \param n        Attribute&apos;s position in index.
+!! \param attr_id  Attribute identifier.
+!! \param es_id    \fortran_es_id
+!! \param hdferr   \fortran_error
+!! \param aapl_id  Attribute access property list.
+!! \param lapl_id  Link access property list.
+!! \param file     \fortran_file
+!! \param func     \fortran_func
+!! \param line     \fortran_line
+!!
+!! See C API: @ref H5Aopen_by_idx_async()
+!!
+  SUBROUTINE h5aopen_by_idx_async_f(loc_id, obj_name, idx_type, order, n, attr_id, es_id, hdferr, &
+       aapl_id, lapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER, INTENT(IN) :: idx_type
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER         , INTENT(IN) , OPTIONAL :: line
 
-    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
-    INTEGER, INTENT(OUT) :: corder ! Is a positive integer containing the creation order of the attribute
-    INTEGER, INTENT(OUT) :: cset   ! Indicates the character set used for the attribute’s name
-    INTEGER(HSIZE_T), INTENT(OUT) :: data_size ! Indicates the size, in the number of characters, of the attribute
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-!*****
+    INTEGER(HID_T) :: aapl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Aopen_by_idx_async(file, func, line, &
+            loc_id, obj_name, idx_type, order, n, &
+            aapl_id_default, lapl_id_default, es_id) BIND(C,NAME='H5Aopen_by_idx_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aopen_by_idx_async
+    END INTERFACE
+
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+
+    aapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    attr_id = INT(H5Aopen_by_idx_async(file_default, func_default, line_default, &
+         loc_id, c_obj_name, INT(idx_type, C_INT), INT(order, C_INT), n, &
+         aapl_id_default, lapl_id_default, es_id), HID_T)
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5aopen_by_idx_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Retrieves attribute information, by attribute identifier.
+!!
+!! \param attr_id        Attribute identifier.
+!!                       NOTE: In C it is defined as a structure: H5A_info_t.
+!! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
+!! \param corder         Is a positive integer containing the creation order of the attribute.
+!! \param cset           Indicates the character set used for the attribute&apos;s name.
+!! \param data_size      Indicates the size, in the number of characters, of the attribute.
+!! \param hdferr         \fortran_error
+!!
+!! See C API: @ref H5Aget_info()
+!!
+  SUBROUTINE h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    LOGICAL, INTENT(OUT) :: f_corder_valid
+    INTEGER, INTENT(OUT) :: corder
+    INTEGER, INTENT(OUT) :: cset
+    INTEGER(HSIZE_T), INTENT(OUT) :: data_size
+    INTEGER, INTENT(OUT) :: hdferr
     INTEGER :: corder_valid
 
     INTERFACE
@@ -1180,65 +1275,46 @@ CONTAINS
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
 
-  END SUBROUTINE H5Aget_info_f
+  END SUBROUTINE h5aget_info_f
 
-!
-!****s* H5A/H5Aget_info_by_idx_f
-!
-! NAME
-!  H5Aget_info_by_idx_f
-!
-! PURPOSE
-!  Retrieves attribute information, by attribute index position
-!
-! INPUTS
-!  loc_id 	 - Location of object to which attribute is attached
-!  obj_name 	 - Name of object to which attribute is attached, relative to location
-!  idx_type 	 - Type of index
-!  order 	 - Index traversal order
-!  n 	         - Attribute’s position in index
-!
-! OUTPUTS  NOTE: In C it is defined as a structure: H5A_info_t
-!  corder_valid  - indicates whether the creation order data is valid for this attribute
-!  corder 	 - is a positive integer containing the creation order of the attribute
-!  cset 	 - indicates the character set used for the attribute’s name
-!  data_size 	 - indicates the size, in the number of characters, of the attribute
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
+!>
+!! \ingroup FH5A
+!!
+!! \brief Retrieves attribute information by attribute index position
+!!
+!! \param loc_id         Location of object to which attribute is attached
+!! \param obj_name       Name of object to which attribute is attached, relative to location
+!! \param idx_type       Type of index
+!! \param order          Index traversal order
+!! \param n              Attribute&apos;s position in index
+!! \param f_corder_valid Indicates whether the creation order data is valid for this attribute
+!! \param corder         Is a positive integer containing the creation order of the attribute
+!! \param cset           Indicates the character set used for the attribute&apos;s name
+!! \param data_size      Indicates the size, in the number of characters, of the attribute
+!! \param hdferr         \fortran_error
+!! \param lapl_id        Link access property list
+!!
+!! See C API: @ref H5Aget_info_by_idx()
+!!
+  SUBROUTINE h5aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object to which attribute is attached
-    INTEGER, INTENT(IN) :: idx_type           ! Type of index; Possible values are:
-                                              !    H5_INDEX_UNKNOWN_F   - Unknown index type
-                                              !    H5_INDEX_NAME_F      - Index on names
-                                              !    H5_INDEX_CRT_ORDER_F - Index on creation order
-                                              !    H5_INDEX_N_F	      - Number of indices defined
-    INTEGER, INTENT(IN) :: order              ! Order in which to iterate over index; Possible values are:
-                                              !    H5_ITER_UNKNOWN_F  - Unknown order
-                                              !    H5_ITER_INC_F      - Increasing order
-                                              !    H5_ITER_DEC_F      - Decreasing order
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER, INTENT(IN) :: idx_type
+                                              !    H5_INDEX_N_F           - Number of indices defined
+    INTEGER, INTENT(IN) :: order
                                               !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
 
-    INTEGER(HSIZE_T), INTENT(IN) :: n         ! Attribute’s position in index
+    INTEGER(HSIZE_T), INTENT(IN) :: n
 
 
-    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
-    INTEGER, INTENT(OUT) :: corder ! Is a positive integer containing the creation order of the attribute
-    INTEGER, INTENT(OUT) :: cset   ! Indicates the character set used for the attribute’s name
-    INTEGER(HSIZE_T), INTENT(OUT) :: data_size ! Indicates the size, in the number of characters, of the attribute
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
-!*****
+    LOGICAL, INTENT(OUT) :: f_corder_valid
+    INTEGER, INTENT(OUT) :: corder
+    INTEGER, INTENT(OUT) :: cset
+    INTEGER(HSIZE_T), INTENT(OUT) :: data_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER :: corder_valid
     INTEGER(SIZE_T)  :: obj_namelen
     INTEGER(HID_T) :: lapl_id_default
@@ -1274,52 +1350,39 @@ CONTAINS
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
-  END SUBROUTINE H5Aget_info_by_idx_f
+  END SUBROUTINE h5aget_info_by_idx_f
 
-!
-!****s* H5A/H5Aget_info_by_name_f
-!
-! NAME
-!  H5Aget_info_by_name_f
-!
-! PURPOSE
-!  Retrieves attribute information, by attribute name
-!
-! INPUTS
-!  loc_id 	 - Location of object to which attribute is attached
-!  obj_name 	 - Name of object to which attribute is attached, relative to location
-!  attr_name 	 - Attribute name
-!
-! OUTPUTS  NOTE: In C it is defined as a structure: H5A_info_t
-!  corder_valid  - indicates whether the creation order data is valid for this attribute
-!  corder 	 - is a positive integer containing the creation order of the attribute
-!  cset 	 - indicates the character set used for the attribute’s name
-!  data_size 	 - indicates the size, in the number of characters, of the attribute
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aget_info_by_name_f(loc_id, obj_name, attr_name, &
+!>
+!! \ingroup FH5A
+!!
+!! \brief Retrieves attribute information, by attribute name
+!!
+!! \param loc_id         Location of object to which attribute is attached
+!! \param obj_name       Name of object to which attribute is attached, relative to location
+!! \param attr_name      Attribute name
+!! \param f_corder_valid Indicates whether the creation order data is valid for this attribute
+!! \param corder         Is a positive integer containing the creation order of the attribute
+!! \param cset           Indicates the character set used for the attribute&apos;s name
+!! \param data_size      Indicates the size, in the number of characters, of the attribute
+!! \param hdferr         \fortran_error
+!! \param lapl_id        Link access property list
+!!
+!! See C API: @ref H5Aget_info_by_name()
+!!
+  SUBROUTINE h5aget_info_by_name_f(loc_id, obj_name, attr_name, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Name of object to which attribute is attached
-    CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
 
 
-    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
-    INTEGER, INTENT(OUT) :: corder ! Is a positive integer containing the creation order of the attribute
-    INTEGER, INTENT(OUT) :: cset ! Indicates the character set used for the attribute’s name
-    INTEGER(HSIZE_T), INTENT(OUT) :: data_size   ! Indicates the size, in the number of characters, of the attribute
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code:
-                                           ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
-!*****
+    LOGICAL, INTENT(OUT) :: f_corder_valid
+    INTEGER, INTENT(OUT) :: corder
+    INTEGER, INTENT(OUT) :: cset
+    INTEGER(HSIZE_T), INTENT(OUT) :: data_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER :: corder_valid
     INTEGER(SIZE_T)  :: obj_namelen
     INTEGER(SIZE_T)  :: attr_namelen
@@ -1357,37 +1420,27 @@ CONTAINS
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
-  END SUBROUTINE H5Aget_info_by_name_f
+  END SUBROUTINE h5aget_info_by_name_f
 
-!
-!****s* H5A/H5Acreate_by_name_f
-!
-! NAME
-!  H5Acreate_by_name_f
-!
-! PURPOSE
-!  Creates an attribute attached to a specified object
-!
-! INPUTS
-!  loc_id 	 - Location or object identifier; may be dataset or group
-!  obj_name 	 - Name, relative to loc_id, of object that attribute is to be attached to
-!  attr_name 	 - Attribute name
-!  type_id 	 - Attribute datatype identifier
-!  space_id 	 - Attribute dataspace identifier
-!
-! OUTPUTS
-!  attr 	 - an attribute identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  acpl_id 	 - Attribute creation property list identifier (Currently not used.)
-!  aapl_id 	 - Attribute access property list identifier (Currently not used.)
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February, 2008
-! SOURCE
-  SUBROUTINE H5Acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
+!>
+!! \ingroup FH5A
+!!
+!! \brief Creates an attribute attached to a specified object
+!!
+!! \param loc_id    Location or object identifier; may be dataset or group
+!! \param obj_name  Name, relative to loc_id, of object that attribute is to be attached to
+!! \param attr_name Attribute name
+!! \param type_id   Attribute datatype identifier
+!! \param space_id  Attribute dataspace identifier
+!! \param attr      An attribute identifier
+!! \param hdferr    \fortran_error
+!! \param acpl_id   Attribute creation property list identifier (Currently not used.)
+!! \param aapl_id   Attribute access property list identifier (Currently not used.)
+!! \param lapl_id   Link access property list
+!!
+!! See C API: @ref H5Acreate_by_name()
+!!
+  SUBROUTINE h5acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
        acpl_id, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T),   INTENT(IN)  :: loc_id
@@ -1401,38 +1454,33 @@ CONTAINS
     INTEGER(HID_T),   INTENT(IN), OPTIONAL :: acpl_id
     INTEGER(HID_T),   INTENT(IN), OPTIONAL :: aapl_id
     INTEGER(HID_T),   INTENT(IN), OPTIONAL :: lapl_id
-!*****
-    INTEGER(SIZE_T)  :: obj_namelen
-    INTEGER(SIZE_T)  :: attr_namelen
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
     INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
 
     INTERFACE
-       INTEGER FUNCTION H5Acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
-            type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, attr) &
-            BIND(C,NAME='h5acreate_by_name_c')
+       INTEGER(HID_T) FUNCTION H5Acreate_by_name(loc_id, obj_name, attr_name, &
+            type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default) &
+            BIND(C,NAME='H5Acreate_by_name')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-         INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
-         INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         INTEGER(HID_T), INTENT(IN) :: space_id
-         INTEGER(HID_T) :: acpl_id_default
-         INTEGER(HID_T) :: aapl_id_default
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(HID_T), INTENT(OUT) :: attr
-
-       END FUNCTION H5Acreate_by_name_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         INTEGER(HID_T), VALUE :: type_id
+         INTEGER(HID_T), VALUE :: space_id
+         INTEGER(HID_T), VALUE :: acpl_id_default
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Acreate_by_name
     END INTERFACE
 
-    obj_namelen = LEN(obj_name)
-    attr_namelen = LEN(attr_name)
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
 
     acpl_id_default = H5P_DEFAULT_F
     aapl_id_default = H5P_DEFAULT_F
@@ -1442,356 +1490,837 @@ CONTAINS
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = H5Acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
-            type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, attr)
-  END SUBROUTINE H5Acreate_by_name_f
+    attr = INT(H5Acreate_by_name(loc_id, c_obj_name, c_attr_name, type_id, space_id, &
+         acpl_id_default, aapl_id_default, lapl_id_default), HID_T)
 
-!
-!****s* H5A/H5Aexists_f
-!
-! NAME
-!  H5Aexists_f
-!
-! PURPOSE
-!  Determines whether an attribute with a given name exists on an object
-!
-! INPUTS
-!  obj_id 	 - Object identifier
-!  attr_name 	 - Attribute name
-!
-! OUTPUTS
-!  attr_exists 	 - attribute exists status
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aexists_f(obj_id, attr_name, attr_exists, hdferr)
+    hdferr = 0
+    IF(attr.LT.0) hdferr = -1
+
+  END SUBROUTINE h5acreate_by_name_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously creates an attribute attached to a specified object
+!!
+!! \param loc_id    Location or object identifier; may be dataset or group
+!! \param obj_name  Name, relative to loc_id, of object that attribute is to be attached to
+!! \param attr_name Attribute name
+!! \param type_id   Attribute datatype identifier
+!! \param space_id  Attribute dataspace identifier
+!! \param attr      An attribute identifier
+!! \param es_id     \fortran_es_id
+!! \param hdferr    \fortran_error
+!! \param acpl_id   Attribute creation property list identifier (Currently not used.)
+!! \param aapl_id   Attribute access property list identifier (Currently not used.)
+!! \param lapl_id   Link access property list
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
+!!
+!! See C API: @ref H5Acreate_by_name_async()
+!!
+  SUBROUTINE h5acreate_by_name_async_f(loc_id, obj_name, attr_name, type_id, space_id, attr, es_id, hdferr, &
+       acpl_id, aapl_id, lapl_id, file, func, line)
+
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id      ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
-    LOGICAL, INTENT(OUT) :: attr_exists  ! .TRUE. if exists, .FALSE. otherwise
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-!*****
-    INTEGER(HID_T) :: attr_exists_c
-    INTEGER(SIZE_T) :: attr_namelen
+    INTEGER(HID_T),   INTENT(IN)  :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: obj_name
+    CHARACTER(LEN=*), INTENT(IN)  :: attr_name
+    INTEGER(HID_T),   INTENT(IN)  :: type_id
+    INTEGER(HID_T),   INTENT(IN)  :: space_id
+    INTEGER(HID_T),   INTENT(OUT) :: attr
+    INTEGER(HID_T),   INTENT(IN)  :: es_id
+    INTEGER,          INTENT(OUT) :: hdferr
+
+    INTEGER(HID_T),   INTENT(IN), OPTIONAL :: acpl_id
+    INTEGER(HID_T),   INTENT(IN), OPTIONAL :: aapl_id
+    INTEGER(HID_T),   INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: acpl_id_default
+    INTEGER(HID_T) :: aapl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION H5Aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c) BIND(C,NAME='h5aexists_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(HID_T) FUNCTION H5Acreate_by_name_async(file, func, line, loc_id, obj_name, attr_name, &
+            type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, es_id) &
+            BIND(C,NAME='H5Acreate_by_name_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
-         INTEGER(SIZE_T) :: attr_namelen
-         INTEGER(HID_T) :: attr_exists_c
-       END FUNCTION H5Aexists_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         INTEGER(HID_T), VALUE :: type_id
+         INTEGER(HID_T), VALUE :: space_id
+         INTEGER(HID_T), VALUE :: acpl_id_default
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Acreate_by_name_async
     END INTERFACE
 
-    attr_namelen = LEN(attr_name)
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
 
-    hdferr = H5Aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c)
+    acpl_id_default = H5P_DEFAULT_F
+    aapl_id_default = H5P_DEFAULT_F
+    lapl_id_default = H5P_DEFAULT_F
+
+    IF(PRESENT(acpl_id)) acpl_id_default = acpl_id
+    IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    attr = H5Acreate_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_obj_name, c_attr_name, &
+         type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, es_id)
+
+    hdferr = 0
+    IF(attr.LT.0) hdferr = -1
+
+  END SUBROUTINE h5acreate_by_name_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Determines whether an attribute with a given name exists on an object
+!!
+!! \param obj_id      Object identifier
+!! \param attr_name   Attribute name
+!! \param attr_exists Attribute exists status
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Aexists()
+!!
+  SUBROUTINE h5aexists_f(obj_id, attr_name, attr_exists, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T),   INTENT(IN) :: obj_id
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    LOGICAL, INTENT(OUT) :: attr_exists
+    INTEGER, INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+    INTEGER(C_INT) :: attr_exists_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Aexists(obj_id, attr_name) BIND(C,NAME='H5Aexists')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: obj_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+       END FUNCTION H5Aexists
+    END INTERFACE
+
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
+
+    attr_exists_c = H5Aexists(obj_id, c_attr_name)
 
     attr_exists = .FALSE.
     IF(attr_exists_c.GT.0) attr_exists = .TRUE.
 
-  END SUBROUTINE H5Aexists_f
+    hdferr = 0
+    IF(attr_exists_c.LT.0) hdferr = -1
 
-!
-!****s* H5A/H5Aexists_by_name_f
-!
-! NAME
-!  H5Aexists_by_name_f
-!
-! PURPOSE
-!  Determines whether an attribute with a given name exists on an object
-!
-! INPUTS
-!  loc_id 	 - Location identifier
-!  obj_name 	 - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
-!  attr_name 	 - Attribute name
-!
-! OUTPUTS
-!  attr_exists 	 - attribute exists status
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list identifier
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February, 2008
-!
-! SOURCE
-  SUBROUTINE H5Aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
+  END SUBROUTINE h5aexists_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously determines whether an attribute with a given name exists on an object
+!!
+!! \param obj_id      Object identifier
+!! \param attr_name   Attribute name
+!! \param attr_exists Pointer to attribute exists status. It should be declared INTEGER(C_INT) and initialized
+!!                    to zero (false) for portability. It will return one when true. LOGICAL(C_BOOL) is also
+!!                    acceptable but may encounter atypical anomalies. It should be initialized to false when used.
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Aexists_async()
+!!
+  SUBROUTINE h5aexists_async_f(obj_id, attr_name, attr_exists, es_id, hdferr, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id     ! Location identifier
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Object name either relative to loc_id,
-                                             ! absolute from the file’s root group, or '.'
-    CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
-    LOGICAL, INTENT(OUT) :: attr_exists ! .TRUE. if exists, .FALSE. otherwise
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code:
-                                        ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier
-!*****
-    INTEGER :: attr_exists_c
-    INTEGER(SIZE_T)  :: obj_namelen
-    INTEGER(SIZE_T)  :: attr_namelen
+    INTEGER(HID_T)  , INTENT(IN)  :: obj_id
+    CHARACTER(LEN=*), INTENT(IN)  :: attr_name
+    TYPE(C_PTR)     , INTENT(IN)  :: attr_exists
+    INTEGER(HID_T)  , INTENT(IN)  :: es_id
+    INTEGER         , INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION H5Aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
-            lapl_id_default, attr_exists_c) BIND(C,NAME='h5aexists_by_name_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Aexists_async(file, func, line, &
+            obj_id, attr_name, exists, es_id) BIND(C,NAME='H5Aexists_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-         INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
-         INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
-         INTEGER(HID_T), INTENT(IN) :: lapl_id_default
-         INTEGER, INTENT(OUT) :: attr_exists_c
-       END FUNCTION H5Aexists_by_name_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: obj_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         TYPE(C_PTR)   , VALUE :: exists
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aexists_async
     END INTERFACE
 
-    attr_namelen = LEN(attr_name)
-    obj_namelen = LEN(obj_name)
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Aexists_async(file_default, func_default, line_default, obj_id, c_attr_name, attr_exists, es_id))
+
+  END SUBROUTINE h5aexists_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Determines whether an attribute with a given name exists on an object
+!!
+!! \param loc_id      Location identifier
+!! \param obj_name    Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;. &apos;(a dot)
+!! \param attr_name   Attribute name
+!! \param attr_exists Attribute exists status
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list identifier
+!!
+!! See C API: @ref H5Aexists_by_name()
+!!
+  SUBROUTINE h5aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    LOGICAL, INTENT(OUT) :: attr_exists
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(C_INT) :: attr_exists_c
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Aexists_by_name(loc_id, obj_name, attr_name, lapl_id_default) &
+            BIND(C,NAME='H5Aexists_by_name')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Aexists_by_name
+    END INTERFACE
+
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = H5Aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, attr_exists_c)
+    attr_exists_c = H5Aexists_by_name(loc_id, c_obj_name, c_attr_name, lapl_id_default)
 
     attr_exists = .FALSE.
     IF(attr_exists_c.GT.0) attr_exists = .TRUE.
 
-  END SUBROUTINE H5Aexists_by_name_f
-!
-!****s* H5A/H5Aopen_by_name_f
-!
-! NAME
-!  H5Aopen_by_name_f
-!
-! PURPOSE
-!  Opens an attribute for an object by object name and attribute name.
-!
-! INPUTS
-!  loc_id 	 - Location from which to find object to which attribute is attached
-!  obj_name 	 - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
-!  attr_name 	 - Attribute name
-!
-! OUTPUTS
-!  attr_id 	 - attribute identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  aapl_id 	 - Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
-!  lapl_id 	 - Link access property list identifier
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February, 2008
-! SOURCE
-  SUBROUTINE H5Aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id    ! Location identifier
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Object name either relative to loc_id,
-                                             ! absolute from the file’s root group, or '.'
-    CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
-    INTEGER(HID_T), INTENT(OUT) :: attr_id ! Attribute identifier
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code:
-                                           ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: aapl_id ! Attribute access property list
-                                                    ! (Currently unused; should be passed in as H5P_DEFAULT_F)
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier
-!*****
-    INTEGER(HID_T) :: aapl_id_default
-    INTEGER(HID_T) :: lapl_id_default
+    hdferr = 0
+    IF(attr_exists_c.LT.0) hdferr = -1
 
-    INTEGER(SIZE_T) :: obj_namelen
-    INTEGER(SIZE_T) :: attr_namelen
+  END SUBROUTINE h5aexists_by_name_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously determines whether an attribute with a given name exists on an object
+!!
+!! \param loc_id      Location identifier
+!! \param obj_name    Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;. &apos;(a dot)
+!! \param attr_name   Attribute name
+!! \param attr_exists Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list identifier
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Aexists_by_name_async()
+!!
+  SUBROUTINE h5aexists_by_name_async_f(loc_id, obj_name, attr_name, attr_exists, es_id, hdferr, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER  (HID_T), INTENT(IN)            :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)            :: obj_name
+    CHARACTER(LEN=*), INTENT(IN)            :: attr_name
+    TYPE(C_PTR)     , INTENT(IN)            :: attr_exists
+    INTEGER  (HID_T), INTENT(IN)            :: es_id
+    INTEGER         , INTENT(OUT)           :: hdferr
+    INTEGER  (HID_T), INTENT(IN) , OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER         , INTENT(IN) , OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION H5Aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
-            aapl_id_default, lapl_id_default, attr_id) BIND(C,NAME='h5aopen_by_name_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Aexists_by_name_async(file, func, line, &
+            loc_id, obj_name, attr_name, exists, lapl_id_default, es_id) &
+            BIND(C,NAME='H5Aexists_by_name_async')
+         IMPORT :: C_CHAR, C_PTR, C_INT
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-         INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
-         INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
-         INTEGER(HID_T) :: aapl_id_default
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(HID_T), INTENT(OUT) :: attr_id
-       END FUNCTION H5Aopen_by_name_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         TYPE(C_PTR)   , VALUE :: exists
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aexists_by_name_async
     END INTERFACE
 
-    attr_namelen = LEN(attr_name)
-    obj_namelen = LEN(obj_name)
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Aexists_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_obj_name, c_attr_name, attr_exists, lapl_id_default, es_id))
+
+  END SUBROUTINE h5aexists_by_name_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Opens an attribute for an object by object name and attribute name.
+!!
+!! \param loc_id    Location from which to find object to which attribute is attached
+!! \param obj_name  Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;.&apos; (a dot)
+!! \param attr_name Attribute name
+!! \param attr_id   Attribute identifier
+!! \param hdferr    \fortran_error
+!! \param aapl_id   Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
+!! \param lapl_id   Link access property list identifier
+!!
+!! See C API: @ref H5Aopen_by_name()
+!!
+  SUBROUTINE h5aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(HID_T) :: aapl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Aopen_by_name(loc_id, obj_name, attr_name, aapl_id_default, lapl_id_default) &
+            BIND(C,NAME='H5Aopen_by_name')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Aopen_by_name
+    END INTERFACE
+
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
 
     aapl_id_default = H5P_DEFAULT_F
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = H5Aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
-         aapl_id_default, lapl_id_default, attr_id)
+    attr_id = INT(H5Aopen_by_name(loc_id, c_obj_name, c_attr_name, aapl_id_default, lapl_id_default), HID_T)
 
-  END SUBROUTINE H5Aopen_by_name_f
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
 
-!
-!****s* H5A/H5Arename_f
-!
-! NAME
-!  H5Arename_f
-!
-! PURPOSE
-!  Renames an attribute
-!
-! INPUTS
-!  loc_id 	 - Location or object identifier; may be dataset or group
-!  old_attr_name - Prior attribute name
-!  new_attr_name - New attribute name
-!
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! HISTORY
-!  N/A
-!
-!
+  END SUBROUTINE h5aopen_by_name_f
 
-! SOURCE
-  SUBROUTINE H5Arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously opens an attribute for an object by object name and attribute name.
+!!
+!! \param loc_id    Location from which to find object to which attribute is attached
+!! \param obj_name  Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;.&apos; (a dot)
+!! \param attr_name Attribute name
+!! \param attr_id   Attribute identifier
+!! \param es_id     \fortran_es_id
+!! \param hdferr    \fortran_error
+!! \param aapl_id   Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
+!! \param lapl_id   Link access property list identifier
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
+!!
+!! See C API: @ref H5Aopen_by_name_async()
+!!
+  SUBROUTINE h5aopen_by_name_async_f(loc_id, obj_name, attr_name, attr_id, es_id, hdferr, &
+       aapl_id, lapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
-    CHARACTER(LEN=*), INTENT(IN) :: old_attr_name ! Prior attribute name
-    CHARACTER(LEN=*), INTENT(IN) :: new_attr_name ! New attribute name
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-!*****
-    INTEGER(SIZE_T) :: old_attr_namelen
-    INTEGER(SIZE_T) :: new_attr_namelen
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: es_id
+
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: aapl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
 
     INTERFACE
-       INTEGER FUNCTION H5Arename_c(loc_id, &
-            old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen) BIND(C,NAME='h5arename_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(HID_T) FUNCTION H5Aopen_by_name_async(file, func, line, loc_id, obj_name, attr_name, &
+            aapl_id_default, lapl_id_default, es_id) BIND(C,NAME='H5Aopen_by_name_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: old_attr_name
-         INTEGER(SIZE_T) :: old_attr_namelen
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: new_attr_name
-         INTEGER(SIZE_T) :: new_attr_namelen
-       END FUNCTION H5Arename_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aopen_by_name_async
     END INTERFACE
 
-    old_attr_namelen = LEN(old_attr_name)
-    new_attr_namelen = LEN(new_attr_name)
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
 
-    hdferr = H5Arename_c(loc_id, &
-         old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen)
+    aapl_id_default = H5P_DEFAULT_F
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-  END SUBROUTINE H5Arename_f
+    attr_id = INT(H5Aopen_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_obj_name, c_attr_name, aapl_id_default, lapl_id_default, es_id), HID_T)
 
-  SUBROUTINE H5Awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5aopen_by_name_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Renames an attribute
+!!
+!! \param loc_id        Location or object identifier; may be dataset or group
+!! \param old_attr_name Prior attribute name
+!! \param new_attr_name New attribute name
+!! \param hdferr        \fortran_error
+!!
+!! See C API: @ref H5Arename()
+!!
+  SUBROUTINE h5arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id               ! Attribute identifier
-    INTEGER(HID_T), INTENT(IN) :: memtype_id            ! Attribute datatype
-                                                        !  identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims  ! Array to story buf dimension sizes
-    CHARACTER(LEN=*), INTENT(IN) :: buf                 ! Attribute data
-    INTEGER, INTENT(OUT) :: hdferr                      ! Error code
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: old_attr_name
+    CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
+    INTEGER, INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=LEN_TRIM(old_attr_name)+1,KIND=C_CHAR) :: c_old_attr_name
+    CHARACTER(LEN=LEN_TRIM(new_attr_name)+1,KIND=C_CHAR) :: c_new_attr_name
+
+    INTERFACE
+       INTEGER FUNCTION H5Arename(loc_id, old_attr_name, new_attr_name) &
+            BIND(C,NAME='H5Arename')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: old_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: new_attr_name
+       END FUNCTION H5Arename
+    END INTERFACE
+
+    c_old_attr_name = TRIM(old_attr_name)//C_NULL_CHAR
+    c_new_attr_name = TRIM(new_attr_name)//C_NULL_CHAR
+
+    hdferr = H5Arename(loc_id, c_old_attr_name, c_new_attr_name)
+
+  END SUBROUTINE h5arename_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously renames an attribute
+!!
+!! \param loc_id        Location or object identifier; may be dataset or group
+!! \param old_attr_name Prior attribute name
+!! \param new_attr_name New attribute name
+!! \param es_id         \fortran_es_id
+!! \param hdferr        \fortran_error
+!! \param file          \fortran_file
+!! \param func          \fortran_func
+!! \param line          \fortran_line
+!!
+!! See C API: @ref H5Arename_async()
+!!
+  SUBROUTINE h5arename_async_f(loc_id, old_attr_name, new_attr_name, es_id, hdferr, &
+       file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: old_attr_name
+    CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    CHARACTER(LEN=LEN_TRIM(old_attr_name)+1,KIND=C_CHAR) :: c_old_attr_name
+    CHARACTER(LEN=LEN_TRIM(new_attr_name)+1,KIND=C_CHAR) :: c_new_attr_name
+
+    INTERFACE
+       INTEGER FUNCTION H5Arename_async(file, func, line, loc_id, old_attr_name, new_attr_name, es_id) &
+            BIND(C,NAME='H5Arename_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: old_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: new_attr_name
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Arename_async
+    END INTERFACE
+
+    c_old_attr_name = TRIM(old_attr_name)//C_NULL_CHAR
+    c_new_attr_name = TRIM(new_attr_name)//C_NULL_CHAR
+
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = H5Arename_async(file_default, func_default, line_default, &
+         loc_id, c_old_attr_name, c_new_attr_name, es_id)
+
+  END SUBROUTINE h5arename_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously reads an attribute.
+!!
+!! \param attr_id    Identifier of an attribute to read.
+!! \param memtype_id Identifier of the attribute datatype (in memory).
+!! \param buf	     Buffer for data to be read.
+!! \param es_id      \fortran_es_id
+!! \param hdferr     \fortran_error
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Aread_async()
+!!
+
+  SUBROUTINE h5aread_async_f(attr_id, memtype_id, buf, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: attr_id
+    INTEGER(HID_T), INTENT(IN)  :: memtype_id
+    TYPE(C_PTR)   , INTENT(IN)  :: buf
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER FUNCTION H5Aread_async(file, func, line, attr_id, memtype_id, buf, es_id) &
+            BIND(C,NAME='H5Aread_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: attr_id
+         INTEGER(HID_T), VALUE :: memtype_id
+         TYPE(C_PTR)   , VALUE :: buf
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aread_async
+    END INTERFACE
+
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = H5Aread_async(file_default, func_default, line_default, attr_id, memtype_id, buf, es_id)
+
+  END SUBROUTINE h5aread_async_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Asynchronously writes an attribute.
+!!
+!! \param attr_id    Identifier of an attribute to read.
+!! \param memtype_id Identifier of the attribute datatype (in memory).
+!! \param buf	     Data to be written.
+!! \param es_id      \fortran_es_id
+!! \param hdferr     \fortran_error
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Awrite_async()
+!!
+
+  SUBROUTINE h5awrite_async_f(attr_id, memtype_id, buf, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: attr_id
+    INTEGER(HID_T), INTENT(IN)  :: memtype_id
+    TYPE(C_PTR)   , INTENT(IN)  :: buf
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER FUNCTION H5Awrite_async(file, func, line, attr_id, memtype_id, buf, es_id) &
+            BIND(C,NAME='H5Awrite_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: attr_id
+         INTEGER(HID_T), VALUE :: memtype_id
+         TYPE(C_PTR)   , VALUE :: buf
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Awrite_async
+    END INTERFACE
+
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = H5Awrite_async(file_default, func_default, line_default, attr_id, memtype_id, buf, es_id)
+
+  END SUBROUTINE h5awrite_async_f
+
+#ifdef H5_DOXYGEN
+
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Writes data to an attribute.
+!!
+!! \attention  \fortran_approved
+!!
+!! \param attr_id     Identifier of an attribute to write.
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
+!! \param buf	      Data to be written.
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Awrite()
+!!
+  SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: attr_id
+    INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
+    TYPE(C_PTR)     , INTENT(IN)  :: buf
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5awrite_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Writes data to an attribute.
+!!
+!! \attention  \fortran_obsolete
+!!
+!! \param attr_id     Identifier of an attribute to write.
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
+!! \param buf         Data buffer; may be a scalar or an array.
+!! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
+!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Awrite()
+!!
+  SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, dims, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+    TYPE(TYPE)      , INTENT(IN)               :: buf
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    INTEGER         , INTENT(OUT)              :: hdferr
+  END SUBROUTINE h5awrite_f
+!>
+!! \ingroup FH5A
+!!
+!! \brief Reads an attribute.
+!!
+!! \attention  \fortran_approved
+!!
+!! \param attr_id     Identifier of an attribute to read.
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
+!! \param buf	      Buffer for data to be read.
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Aread()
+!!
+  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, hdferr)
+    INTEGER(HID_T), INTENT(IN)  :: attr_id
+    INTEGER(HID_T), INTENT(IN)  :: memtype_id
+    TYPE(C_PTR)   , INTENT(IN)  :: buf
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5aread_f
+
+!>
+!! \ingroup FH5A
+!!
+!! \brief Reads an attribute.
+!!
+!! \attention  \fortran_obsolete
+!!
+!! \param attr_id     Identifier of an attribute to read.
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
+!! \param buf         Buffer for data to be read.
+!! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
+!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Aread()
+!!
+  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, dims, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+    TYPE(TYPE)      , INTENT(INOUT)            :: buf
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    INTEGER         , INTENT(OUT)              :: hdferr
+  END SUBROUTINE h5aread_f
+
+#else
+
+  SUBROUTINE h5awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    CHARACTER(LEN=*), INTENT(IN) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
 
     CALL H5Awrite_char_scalar_fix(attr_id, memtype_id, buf, LEN(buf), dims, hdferr)
 
-  END SUBROUTINE H5Awrite_char_scalar
+  END SUBROUTINE h5awrite_char_scalar
 
-  SUBROUTINE H5Awrite_char_scalar_fix(attr_id, memtype_id, buf, buf_len, dims, hdferr)
+  SUBROUTINE h5awrite_char_scalar_fix(attr_id, memtype_id, buf, buf_len, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id               ! Attribute identifier
-    INTEGER(HID_T), INTENT(IN) :: memtype_id            ! Attribute datatype
-                                                        !  identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims  ! Array to story buf dimension sizes
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     INTEGER, INTENT(IN)  :: buf_len
-    CHARACTER(LEN=buf_len), INTENT(IN), TARGET :: buf   ! Attribute data
-    INTEGER, INTENT(OUT) :: hdferr                      ! Error code
+    CHARACTER(LEN=buf_len), INTENT(IN), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1:1))
 
     hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
 
-  END SUBROUTINE H5Awrite_char_scalar_fix
+  END SUBROUTINE h5awrite_char_scalar_fix
 
-
-!****s* H5A (F03)/H5Awrite_f_F03
-!
-! NAME
-!  H5Awrite_f_F03
-!
-! PURPOSE
-!  Writes an attribute.
-!
-! Inputs:
-!  attr_id     - Attribute identifier
-!  memtype_id  - Attribute datatype identifier  (in memory)
-!  buf 	       - Data buffer; may be a scalar or an array
-!
-! Outputs:
-!  hdferr      - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-! NOTES
-!  This function is overloaded to write INTEGER,
-!  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
-!  up to 7 dimensions.
-!
-! Fortran2003 Interface:
-!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, hdferr)
-!!    INTEGER(HID_T)  , INTENT(IN)  :: attr_id
-!!    INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
-!!    TYPE(C_PTR)     , INTENT(IN)  :: buf
-!!    INTEGER         , INTENT(OUT) :: hdferr
-!*****
-
-  SUBROUTINE H5Awrite_ptr(attr_id, mem_type_id, buf, hdferr)
+  SUBROUTINE h5awrite_ptr(attr_id, memtype_id, buf, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id     ! Attribute identifier
-    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
     TYPE(C_PTR), INTENT(IN), TARGET :: buf
-    INTEGER, INTENT(OUT) :: hdferr            ! Error code
+    INTEGER, INTENT(OUT) :: hdferr
 
-    hdferr = H5Awrite_f_c(attr_id, mem_type_id, buf)
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, buf)
 
-  END SUBROUTINE H5Awrite_ptr
+  END SUBROUTINE h5awrite_ptr
 
-  SUBROUTINE H5Aread_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
+  SUBROUTINE h5aread_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
-                                             ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
-    CHARACTER(LEN=*), INTENT(INOUT) :: buf ! Attribute data
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    CHARACTER(LEN=*), INTENT(INOUT) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
 
     CALL H5Aread_char_scalar_fix(attr_id, memtype_id, buf, LEN(buf), hdferr)
 
@@ -1799,75 +2328,31 @@ CONTAINS
 
   SUBROUTINE H5Aread_char_scalar_fix(attr_id, memtype_id, buf, buf_len, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
-                                             ! identifier  (in memory)
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
     INTEGER, INTENT(IN)  :: buf_len
-    CHARACTER(LEN=buf_len), INTENT(INOUT), TARGET :: buf ! Attribute data
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    CHARACTER(LEN=buf_len), INTENT(INOUT), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1:1))
 
     hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
 
-  END SUBROUTINE H5Aread_char_scalar_fix
+  END SUBROUTINE h5aread_char_scalar_fix
 
-!****s* H5A (F03)/H5Aread_f_F03
-!
-! NAME
-!  H5Aread_f_F03
-!
-! PURPOSE
-!  Reads an attribute.
-!
-! Inputs:
-!  attr_id     - Attribute identifier
-!  memtype_id  - Attribute datatype identifier  (in memory)
-!
-! Outputs:
-!  buf 	       - Data buffer; may be a scalar or an array
-!  hdferr      - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!  dims parameter was added to make code portable;
-!  Aprile 4, 2001
-!
-!  Changed buf intent to INOUT to be consistant
-!  with how the C functions handles it. The pg
-!  compiler will return 0 if a buf value is not set.
-!  February, 2008
-!
-! NOTES
-!  This function is overloaded to write INTEGER,
-!  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
-!  up to 7 dimensions.
-! Fortran2003 Interface:
-!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, hdferr)
-!!    INTEGER(HID_T)  , INTENT(IN)    :: attr_id
-!!    INTEGER(HID_T)  , INTENT(IN)    :: memtype_id
-!!    TYPE(C_PTR)     , INTENT(INOUT) :: buf
-!!    INTEGER         , INTENT(OUT)   :: hdferr
-!*****
-
-  SUBROUTINE H5Aread_ptr(attr_id, mem_type_id, buf, hdferr)
+  SUBROUTINE h5aread_ptr(attr_id, memtype_id, buf, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id     ! Attribute identifier
-    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-    TYPE(C_PTR), INTENT(INOUT), TARGET :: buf
-    INTEGER, INTENT(OUT) :: hdferr            ! Error code
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
+    TYPE(C_PTR), INTENT(INOUT) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
 
-    hdferr = H5Aread_f_c(attr_id, mem_type_id, buf)
+    hdferr = H5Aread_f_c(attr_id, memtype_id, buf)
 
-  END SUBROUTINE H5Aread_ptr
+  END SUBROUTINE h5aread_ptr
+
+#endif
 
 END MODULE H5A
 

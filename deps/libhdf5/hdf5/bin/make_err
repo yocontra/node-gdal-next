@@ -5,7 +5,6 @@ use warnings;
 
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -21,8 +20,6 @@ use warnings;
 # Read in the error description text file and create the appropriate headers
 # needed by the library.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2003/08/12
 
 ##############################################################################
 # Print the copyright into an open file
@@ -32,7 +29,6 @@ sub print_copyright ($) {
 
     print $fh "/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
     print $fh " * Copyright by The HDF Group.                                               *\n";
-    print $fh " * Copyright by the Board of Trustees of the University of Illinois.         *\n";
     print $fh " * All rights reserved.                                                      *\n";
     print $fh " *                                                                           *\n";
     print $fh " * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n";
@@ -245,11 +241,11 @@ sub create_init ($) {
     print HEADER   "/* Major error codes */\n";
     print HEADER   "/*********************/\n\n";
     foreach $name (keys %major) {
-        print HEADER " "x(0*$indent),"HDassert(${name}_g==(-1));\n";
+        print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
         print HEADER " "x(0*$indent),"if((msg = H5E__create_msg(cls, H5E_MAJOR, \"${major{$name}}\"))==NULL)\n";
-        print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\")\n";
-        print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)\n";
-        print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\")\n";
+        print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\");\n";
+        print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, false))<0)\n";
+        print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\");\n";
     }
 
     # Iterate over all the minor error sections
@@ -261,11 +257,11 @@ sub create_init ($) {
 
         # Iterate over all the minor errors in each section
         for $name ( @{$section_list{$sect_name}}) {
-            print HEADER " "x(0*$indent),"HDassert(${name}_g==(-1));\n";
+            print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
             print HEADER " "x(0*$indent),"if((msg = H5E__create_msg(cls, H5E_MINOR, \"${minor{$name}}\"))==NULL)\n";
-            print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\")\n";
-            print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)\n";
-            print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\")\n";
+            print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\");\n";
+            print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, true))<0)\n";
+            print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\");\n";
         }
     }
 

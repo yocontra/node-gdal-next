@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -41,8 +40,8 @@ else
 endif
 
 # Source files for the library.
-libhdf5_fortran_la_SOURCES=H5f90global.F90 \
-          H5fortran_types.F90 H5_ff.F90 H5Aff.F90 H5Dff.F90 H5Eff.F90    \
+libhdf5_fortran_la_SOURCES=H5fortran_types.F90 H5f90global.F90 \
+	  H5_ff.F90 H5Aff.F90 H5Dff.F90 H5Eff.F90 H5ESff.F90    \
           H5Fff.F90 H5Gff.F90 H5Iff.F90 H5Lff.F90 H5Off.F90 H5Pff.F90 H5Rff.F90 H5Sff.F90    \
           H5Tff.F90 H5VLff.F90 H5Zff.F90 H5_gen.F90 H5fortkit.F90 \
           H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
@@ -72,15 +71,15 @@ clean-local:
 
 install-data-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(includedir)/. ; \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(fmoddir)/. ; \
 	fi
 	$(CP) $(top_builddir)/$(subdir)/H5f90i_gen.h $(DESTDIR)$(includedir)/.
 	$(CP) $(top_srcdir)/fortran/src/H5f90i.h $(DESTDIR)$(includedir)/.
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(DESTDIR)$(includedir)/*.$(F9XMODEXT);                 \
+	  if test -f "$(fmoddir)/hdf5.$(F9XMODEXT)" -o -f "$(fmoddir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(DESTDIR)$(fmoddir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi;								\
 	$(RM) $(DESTDIR)$(bindir)/$(H5FC_NAME)
@@ -144,10 +143,11 @@ H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
 H5_buildiface.lo:    $(srcdir)/H5_buildiface.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5Fff.lo H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
-H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo
+H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo H5_ff.lo H5Sff.lo
 H5Eff.lo:            $(srcdir)/H5Eff.F90 H5f90global.lo
+H5ESff.lo:           $(srcdir)/H5ESff.F90 H5f90global.lo
 H5Fff.lo:            $(srcdir)/H5Fff.F90 H5f90global.lo
-H5Gff.lo:            $(srcdir)/H5Gff.F90 H5f90global.lo
+H5Gff.lo:            $(srcdir)/H5Gff.F90 H5f90global.lo H5Pff.lo
 H5Iff.lo:            $(srcdir)/H5Iff.F90 H5f90global.lo
 H5Lff.lo:            $(srcdir)/H5Lff.F90 H5f90global.lo
 H5Off.lo:            $(srcdir)/H5Off.F90 H5f90global.lo
@@ -160,7 +160,7 @@ H5Zff.lo:            $(srcdir)/H5Zff.F90 H5f90global.lo
 H5_gen.lo:           H5_gen.F90 H5f90global.lo H5Aff.lo H5Dff.lo H5Pff.lo
 HDF5.lo:             $(srcdir)/HDF5.F90 H5f90global.lo H5_ff.lo H5Aff.lo  \
                      H5Dff.lo \
-                     H5Eff.lo \
+		     H5Eff.lo H5ESff.lo \
 		     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
 	             H5Off.lo H5Pff.lo H5Rff.lo \
                      H5Sff.lo H5Tff.lo H5Zff.lo H5_gen.lo

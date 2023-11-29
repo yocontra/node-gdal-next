@@ -1,6 +1,5 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -51,7 +50,7 @@ PROGRAM h5_cmprss
   !INTEGER :: szip_pixels_per_block
 
   !
-  !Initialize FORTRAN predifined datatypes
+  !Initialize FORTRAN predefined datatypes
   !
   CALL h5open_f(error)
   !

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -72,34 +71,28 @@
  *              VFD feature flags (which do not exist until the driver
  *              is instantiated).
  *
- *              See test/Makefile.am for a list of the VFD strings.
- *
  *              This function is only intended for use in the test code.
  *
- * Return:	    TRUE (1) if the VFD supports SWMR I/O or vfd_name is
+ * Return:	    true (1) if the VFD supports SWMR I/O or vfd_name is
  *              NULL or the empty string (which implies the default VFD).
  *
- *              FALSE (0) if it does not
+ *              false (0) if it does not
  *
  *              This function cannot fail at this time so there is no
  *              error return value.
- *
- * Programmer:	Dana Robinson
- *              Fall 2014
- *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5FD__supports_swmr_test(const char *vfd_name)
 {
-    hbool_t ret_value = FALSE;
+    bool ret_value = false;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (!vfd_name || !HDstrcmp(vfd_name, "") || !HDstrcmp(vfd_name, "nomatch"))
-        ret_value = TRUE;
+    if (!vfd_name || !strcmp(vfd_name, "") || !strcmp(vfd_name, "nomatch"))
+        ret_value = true;
     else
-        ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
+        ret_value = !strcmp(vfd_name, "log") || !strcmp(vfd_name, "sec2");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__supports_swmr_test() */

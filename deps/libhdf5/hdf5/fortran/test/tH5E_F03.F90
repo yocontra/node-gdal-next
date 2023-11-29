@@ -10,7 +10,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -28,6 +27,8 @@
 !  test_error
 !
 !*****
+
+#include <H5config_f.inc>
 
 ! *****************************************
 ! ***        H 5 E   T E S T S
@@ -91,16 +92,14 @@ CONTAINS
 
 END MODULE test_my_hdf5_error_handler
 
-
-
 MODULE TH5E_F03
+
+  USE ISO_C_BINDING
+  USE test_my_hdf5_error_handler
 
 CONTAINS
 
 SUBROUTINE test_error(total_error)
-
-  USE ISO_C_BINDING
-  USE test_my_hdf5_error_handler
 
   IMPLICIT NONE
 

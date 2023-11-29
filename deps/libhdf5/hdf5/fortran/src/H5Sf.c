@@ -5,7 +5,6 @@
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -35,11 +34,6 @@
  *  space_id - identifier of the created dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 4, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -63,7 +57,7 @@ h5screate_simple_c(int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *sp
 
     c_space_id = H5Screate_simple(*rank, c_dims, c_maxdims);
     if (c_space_id < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *space_id = (hid_t_f)c_space_id;
 
@@ -80,11 +74,6 @@ done:
  *  space_id - identifier of the dataspace to be closed
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 4, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -112,11 +101,6 @@ h5sclose_c(hid_t_f *space_id)
  *  space_id  - identifier of the created dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -147,11 +131,6 @@ h5screate_c(int_f *classtype, hid_t_f *space_id)
  *  new_space_id - identifier of the new datspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -177,7 +156,7 @@ h5scopy_c(hid_t_f *space_id, hid_t_f *new_space_id)
  *  h5sget_select_hyper_nblocks_c
  * PURPOSE
  *  Call H5SH5Sget_select_hyper_nblocks to
- *  get the the number of hyperslab blocks in
+ *  get the number of hyperslab blocks in
  *  the current dataspace selection if successful
  * INPUTS
  *  space_id   - identifier of the dataspace
@@ -186,11 +165,6 @@ h5scopy_c(hid_t_f *space_id, hid_t_f *new_space_id)
  *                the current dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, November 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -216,7 +190,7 @@ h5sget_select_hyper_nblocks_c(hid_t_f *space_id, hssize_t_f *num_blocks)
  *  h5sget_select_elem_npoints_c
  * PURPOSE
  *  Call H5Sget_select_elem_npoints to
- *  get the the number of element points in
+ *  get the number of element points in
  *  the current dataspace selection if successful
  * INPUTS
  *  space_id   - identifier of the dataspace
@@ -225,11 +199,6 @@ h5sget_select_hyper_nblocks_c(hid_t_f *space_id, hssize_t_f *num_blocks)
  *                the current dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Monday, November 15, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -270,13 +239,6 @@ h5sget_select_elem_npoints_c(hid_t_f *space_id, hssize_t_f *num_points)
  *  buf - List of hyperslab blocks selected
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Monday, November 15, 1999
- * HISTORY
- *
- *  Transpose dimension arrays because of C-FORTRAN storage order
- *  M. Scot Breitenfeld
  * SOURCE
  */
 
@@ -302,7 +264,7 @@ h5sget_select_hyper_blocklist_c(hid_t_f *space_id, hsize_t_f *startblock, hsize_
         return ret_value;
     c_startblock = (hsize_t)*startblock;
 
-    c_buf = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)(c_num_blocks * 2 * (hsize_t)rank));
+    c_buf = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)(c_num_blocks * 2 * (hsize_t)rank));
     if (!c_buf)
         return ret_value;
 
@@ -324,7 +286,7 @@ h5sget_select_hyper_blocklist_c(hid_t_f *space_id, hsize_t_f *startblock, hsize_
         }
     }
 
-    HDfree(c_buf);
+    free(c_buf);
     if (ret_value >= 0)
         ret_value = 0;
     return ret_value;
@@ -345,13 +307,6 @@ h5sget_select_hyper_blocklist_c(hid_t_f *space_id, hsize_t_f *startblock, hsize_
  *           i.e., the coordinates of the diagonally opposite corne
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, November 17, 1999
- * HISTORY
- *  swapped array bounds to account for C and Fortran reversed
- *  matrix notation.
- *  M. Scot Breitenfeld
  * SOURCE
  */
 
@@ -368,10 +323,10 @@ h5sget_select_bounds_c(hid_t_f *space_id, hsize_t_f *start, hsize_t_f *end)
     c_space_id = (hid_t)*space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     if (H5Sget_select_bounds(c_space_id, c_start, c_end) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < rank; i++) {
         start[i] = (hsize_t_f)(c_start[rank - i - 1] + 1);
@@ -388,7 +343,7 @@ done:
  * PURPOSE
  *  Call  H5Sget_select_elem_pointlist
  *  get a list of  element points in the
- *  current dataspace selectin.
+ *  current dataspace selection.
  *  Starting with the startpoint-th point in the
  *  list of points, numpoints points are put into the user's
  *  buffer. If the user's buffer fills up before numpoints
@@ -402,11 +357,6 @@ done:
  *  buf - List of element points selected
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, November 17, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -430,7 +380,7 @@ h5sget_select_elem_pointlist_c(hid_t_f *space_id, hsize_t_f *startpoint, hsize_t
         return ret_value;
 
     c_startpoint = (hsize_t)*startpoint;
-    c_buf        = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)(c_num_points * (hsize_t)rank));
+    c_buf        = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)(c_num_points * (hsize_t)rank));
     if (!c_buf)
         return ret_value;
     ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint, c_num_points, c_buf);
@@ -450,7 +400,7 @@ h5sget_select_elem_pointlist_c(hid_t_f *space_id, hsize_t_f *startpoint, hsize_t
     if (ret_value >= 0)
         ret_value = 0;
 
-    HDfree(c_buf);
+    free(c_buf);
 
     return ret_value;
 }
@@ -464,11 +414,6 @@ h5sget_select_elem_pointlist_c(hid_t_f *space_id, hsize_t_f *startpoint, hsize_t
  *  space_id - identifier of the dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -494,11 +439,6 @@ h5sselect_all_c(hid_t_f *space_id)
  *  space_id - identifier of the dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -528,11 +468,6 @@ h5sselect_none_c(hid_t_f *space_id)
  *             and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 10, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -564,11 +499,6 @@ h5sselect_valid_c(hid_t_f *space_id, int_f *flag)
  *  npoints  - number of points in a dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -600,11 +530,6 @@ h5sget_simple_extent_npoints_c(hid_t_f *space_id, hsize_t_f *npoints)
  *  npoints  - number of points in a dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -636,11 +561,6 @@ h5sget_select_npoints_c(hid_t_f *space_id, hssize_t_f *npoints)
  *  rank - number of dataspace dimensions
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -673,11 +593,6 @@ h5sget_simple_extent_ndims_c(hid_t_f *space_id, int_f *ndims)
  *              H5S_SCALAR_F (0), H5S_SIMPLE_F (1), H5S_NULL_F (2)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -713,11 +628,6 @@ h5sget_simple_extent_type_c(hid_t_f *space_id, int_f *classtype)
  *  offset   - offset array
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -734,7 +644,7 @@ h5soffset_simple_c(hid_t_f *space_id, hssize_t_f *offset)
     c_space_id = (hid_t)*space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Reverse dimensions due to C-FORTRAN storage order.
@@ -743,7 +653,7 @@ h5soffset_simple_c(hid_t_f *space_id, hssize_t_f *offset)
         c_offset[i] = offset[rank - i - 1];
 
     if (H5Soffset_simple(c_space_id, c_offset) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;
@@ -759,14 +669,9 @@ done:
  *  space_id     - identifier of the dataspace
  *  rank         - dataspace rank
  *  current_size - array with the new dimension sizes
- *  maximum_size - aray with maximum sizes of dimensions
+ *  maximum_size - array with maximum sizes of dimensions
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -788,7 +693,7 @@ h5sset_extent_simple_c(hid_t_f *space_id, int_f *rank, hsize_t_f *current_size, 
     } /* end for */
 
     if (H5Sset_extent_simple((hid_t)*space_id, (int)*rank, c_current_size, c_maximum_size) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;
@@ -804,14 +709,9 @@ done:
  *  space_id - identifier of the dataspace
  * OUTPUTS
  *  dims    - array with the dimension sizes
- *  maxdims - aray with maximum sizes of dimensions
+ *  maxdims - array with maximum sizes of dimensions
  * RETURNS
  *  number of dataspace dimensions (rank) on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -829,10 +729,10 @@ h5sget_simple_extent_dims_c(hid_t_f *space_id, hsize_t_f *dims, hsize_t_f *maxdi
     c_space_id = (hid_t)*space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     if (H5Sget_simple_extent_dims(c_space_id, c_dims, c_maxdims) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Reverse dimensions due to C-FORTRAN storage order.
@@ -852,7 +752,7 @@ done:
  * NAME
  *  h5sis_simple_c
  * PURPOSE
- *  Call H5Sis_simple to detrmine if the dataspace
+ *  Call H5Sis_simple to determine if the dataspace
  *  is simple.
  * INPUTS
  *  space_id - identifier of the dataspace
@@ -861,11 +761,6 @@ done:
  *             and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -895,11 +790,6 @@ h5sis_simple_c(hid_t_f *space_id, int_f *flag)
  *  source_space_id - identifier of the source dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -928,11 +818,6 @@ h5sextent_copy_c(hid_t_f *dest_space_id, hid_t_f *source_space_id)
  *  space_id - dataspace identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -967,11 +852,6 @@ h5sset_extent_none_c(hid_t_f *space_id)
  *  block    - size of block in the hyperslab
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -990,7 +870,7 @@ h5sselect_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f 
 
     rank = H5Sget_simple_extent_ndims((hid_t)*space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Reverse dimensions due to C-FORTRAN storage order.
@@ -1005,7 +885,7 @@ h5sselect_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f 
     } /* end for */
 
     if (H5Sselect_hyperslab((hid_t)*space_id, (H5S_seloper_t)*op, c_start, c_stride, c_count, c_block) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;
@@ -1027,11 +907,6 @@ done:
  *  hyper_id - identifier for the new dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1055,19 +930,19 @@ h5scombine_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f
     rank = H5Sget_simple_extent_ndims(*space_id);
     if (rank < 0)
         return ret_value;
-    c_start = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_start = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_start == NULL)
         goto DONE;
 
-    c_count = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_count = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_count == NULL)
         goto DONE;
 
-    c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_stride = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_stride == NULL)
         goto DONE;
 
-    c_block = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_block = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_block == NULL)
         goto DONE;
 
@@ -1093,13 +968,13 @@ h5scombine_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f
     ret_value = 0;
 DONE:
     if (c_start != NULL)
-        HDfree(c_start);
+        free(c_start);
     if (c_count != NULL)
-        HDfree(c_count);
+        free(c_count);
     if (c_stride != NULL)
-        HDfree(c_stride);
+        free(c_stride);
     if (c_block != NULL)
-        HDfree(c_block);
+        free(c_block);
     return ret_value;
 }
 /****if* H5Sf/h5scombine_select_c
@@ -1115,11 +990,6 @@ DONE:
  *  ds_id     - identifier for the new dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1155,11 +1025,6 @@ h5scombine_select_c(hid_t_f *space1_id, int_f *op, hid_t_f *space2_id, hid_t_f *
  *  space2_id - identifier of the second dataspace
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1193,11 +1058,6 @@ h5smodify_select_c(hid_t_f *space1_id, int_f *op, hid_t_f *space2_id)
  *  type - type of selection
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1231,11 +1091,6 @@ h5sget_select_type_c(hid_t_f *space_id, int_f *type)
  *  coord     - arrays with the elements coordinates
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 11, 1999
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1250,7 +1105,7 @@ h5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t_
     int           rank;
     size_t        i;
     int           j;
-    hsize_t *     c_coord;
+    hsize_t      *c_coord;
     size_t        c_nelements;
 
     c_op = (H5S_seloper_t)*op;
@@ -1258,7 +1113,7 @@ h5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t_
     c_space_id = *space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
 
-    c_coord = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)rank * ((size_t)*nelements));
+    c_coord = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)rank * ((size_t)*nelements));
     if (!c_coord)
         return ret_value;
     for (i = 0; i < (size_t)*nelements; i++) {
@@ -1271,7 +1126,7 @@ h5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t_
     status      = H5Sselect_elements(c_space_id, c_op, c_nelements, c_coord);
     if (status >= 0)
         ret_value = 0;
-    HDfree(c_coord);
+    free(c_coord);
     return ret_value;
 }
 
@@ -1286,11 +1141,6 @@ h5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t_
  *  obj_id  - Object_id (non-negative)
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 26, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1329,11 +1179,6 @@ h5sdecode_c(_fcd buf, hid_t_f *obj_id)
  *  nalloc - The size of the allocated buffer.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 26, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -1364,7 +1209,7 @@ h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc, hid_t_f *fapl_id)
     /*
      * Allocate buffer
      */
-    if (NULL == (c_buf = (unsigned char *)HDmalloc(c_size)))
+    if (NULL == (c_buf = (unsigned char *)malloc(c_size)))
         return ret_value;
     /*
      * Call H5Sencode function.
@@ -1379,11 +1224,11 @@ h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc, hid_t_f *fapl_id)
      * with blanks.
      */
 
-    HDmemcpy(_fcdtocp(buf), (char *)c_buf, c_size);
+    memcpy(_fcdtocp(buf), (char *)c_buf, c_size);
 
     ret_value = 0;
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 
@@ -1399,11 +1244,6 @@ h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc, hid_t_f *fapl_id)
  *  equal - TRUE if equal, FALSE if unequal.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 4, 2008
- * HISTORY
- *
  * SOURCE
  */
 

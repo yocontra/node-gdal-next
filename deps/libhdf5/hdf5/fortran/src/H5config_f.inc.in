@@ -17,6 +17,12 @@
 ! Define if we have parallel support
 #undef HAVE_PARALLEL
 
+! Define if we have subfiling support
+#undef HAVE_SUBFILING_VFD
+
+! Define if on APPLE
+#undef HAVE_DARWIN
+
 ! Define if the intrinsic function STORAGE_SIZE exists
 #undef FORTRAN_HAVE_STORAGE_SIZE
 
@@ -70,4 +76,7 @@
 
 ! Fortran compiler name
 #undef Fortran_COMPILER_ID
+
+! Define if deprecated public API symbols are disabled
+#undef NO_DEPRECATED_SYMBOLS
 

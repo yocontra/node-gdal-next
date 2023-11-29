@@ -67,9 +67,9 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
 
     try {
         if (new_format)
-            SUBTEST("Link creation (w/new group format)")
+            SUBTEST("Link creation (w/new group format)");
         else
-            SUBTEST("Link creation")
+            SUBTEST("Link creation");
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
@@ -174,9 +174,9 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
     hsize_t     dims[2];
 
     if (new_format)
-        SUBTEST("Link creation property lists (w/new group format)")
+        SUBTEST("Link creation property lists (w/new group format)");
     else
-        SUBTEST("Link creation property lists")
+        SUBTEST("Link creation property lists");
 
     try {
         FileAccPropList fapl(fapl_id);
@@ -201,7 +201,8 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/type");
-        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII),
+                   "Character encoding is not default", __LINE__, __FILE__);
 
         // Create a simple dataspace.
         dims[0] = H5L_DIM1;
@@ -214,7 +215,8 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is the default.
         linfo = file.getLinkInfo("/dataset");
-        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_ASCII),
+                   "Character encoding is not default", __LINE__, __FILE__);
 
         // Create a link creation property list with the UTF-8 character encoding.
         LinkCreatPropList lcpl;
@@ -226,7 +228,8 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Check that its character encoding is UTF-8.
         linfo = file.getLinkInfo(GROUP2NAME);
-        verify_val(linfo.cset, H5T_CSET_UTF8, "Character encoding is not UTF-8", __LINE__, __FILE__);
+        verify_val(static_cast<long>(linfo.cset), static_cast<long>(H5T_CSET_UTF8),
+                   "Character encoding is not UTF-8", __LINE__, __FILE__);
 
         PASSED();
     } // end of try block
@@ -251,9 +254,9 @@ test_move(hid_t fapl_id, hbool_t new_format)
     char filename[1024];
 
     if (new_format)
-        SUBTEST("Group::moveLink (w/new group format)")
+        SUBTEST("Group::moveLink (w/new group format)");
     else
-        SUBTEST("Group::moveLink")
+        SUBTEST("Group::moveLink");
 
     try {
         FileAccPropList fapl(fapl_id);
@@ -396,9 +399,9 @@ test_copy(hid_t fapl_id, hbool_t new_format)
     char filename[1024];
 
     if (new_format)
-        SUBTEST("Group::copyLink (w/new group format)")
+        SUBTEST("Group::copyLink (w/new group format)");
     else
-        SUBTEST("Group::copyLink")
+        SUBTEST("Group::copyLink");
 
     try {
         // Create two new files
@@ -534,9 +537,9 @@ test_num_links(hid_t fapl_id, hbool_t new_format)
     char filename[NAME_BUF_SIZE];
 
     if (new_format)
-        SUBTEST("Setting number of links (w/new group format)")
+        SUBTEST("Setting number of links (w/new group format)");
     else
-        SUBTEST("Setting number of links")
+        SUBTEST("Setting number of links");
 
     try {
         // Use the file access template id to create a file access prop. list.
@@ -580,12 +583,13 @@ const H5std_string GROUP_NAME("/Data");
 const H5std_string DSET1_NAME("/Data/Compressed_Data");
 const H5std_string DSET2_NAME("/Data/Float_Data");
 const int          RANK = 2;
-const int          DIM1 = 2;
 
 // Operator function
 static int
 visit_obj_cb(H5Object &obj, const H5std_string name, const H5O_info2_t *oinfo, void *_op_data)
 {
+    (void)obj; // Unused
+
     ovisit_ud_t *op_data = static_cast<ovisit_ud_t *>(_op_data);
 
     // Check for correct object information
@@ -618,9 +622,9 @@ test_visit(hid_t fapl_id, hbool_t new_format)
     char    filename[NAME_BUF_SIZE];
 
     if (new_format)
-        SUBTEST("H5Object::visit (w/new group format)")
+        SUBTEST("H5Object::visit (w/new group format)");
     else
-        SUBTEST("H5Object::visit")
+        SUBTEST("H5Object::visit");
 
     try {
         // Use the file access template id to create a file access prop. list
@@ -638,7 +642,7 @@ test_visit(hid_t fapl_id, hbool_t new_format)
         dims[1]                     = 2;
         cdims[0]                    = 2;
         cdims[1]                    = 2;
-        DataSpace *       dataspace = new DataSpace(RANK, dims); // create new dspace
+        DataSpace        *dataspace = new DataSpace(RANK, dims); // create new dspace
         DSetCreatPropList ds_creatplist;                         // create dataset creation prop list
         ds_creatplist.setChunk(2, cdims);                        // then modify it for compression
         ds_creatplist.setDeflate(6);

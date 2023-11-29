@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -47,8 +46,8 @@ fortranlib_test_SOURCES = tH5F.F90 tH5D.F90 tH5R.F90 tH5S.F90 tH5T.F90 tH5VL.F90
 fortranlib_test_1_8_SOURCES = tH5O.F90 tH5A_1_8.F90 tH5G_1_8.F90 tH5MISC_1_8.F90 tHDF5_1_8.F90 \
         fortranlib_test_1_8.F90
 
-fortranlib_test_F03_SOURCES = tH5E_F03.F90 tH5F_F03.F90 tH5L_F03.F90 \
-        tH5O_F03.F90 tH5P_F03.F90 tH5T_F03.F90 tHDF5_F03.F90 fortranlib_test_F03.F90
+fortranlib_test_F03_SOURCES = tH5E_F03.F90 tH5L_F03.F90 \
+	tH5O_F03.F90 tH5P_F03.F90 tH5T_F03.F90 tHDF5_F03.F90 fortranlib_test_F03.F90
 
 vol_connector_SOURCES=vol_connector.F90
 

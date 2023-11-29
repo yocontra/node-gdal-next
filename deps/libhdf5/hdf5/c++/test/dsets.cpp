@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -23,6 +22,8 @@
 
  ***************************************************************************/
 
+#include <cfloat>
+#include <cmath>
 #include <iostream>
 using std::cerr;
 using std::endl;
@@ -158,8 +159,7 @@ test_create(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
     // catch all other exceptions
@@ -167,8 +167,7 @@ test_create(H5File &file)
         issue_fail_msg("test_create", __LINE__, __FILE__);
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
 } // test_create
@@ -191,9 +190,9 @@ test_simple_io(H5File &file)
 
     SUBTEST("Simple I/O");
 
-    int points[100][200];
-    int check[100][200];
-    int i, j, n;
+    auto points = new int[100][200];
+    auto check  = new int[100][200]();
+    int  i, j, n;
 
     // Initialize the dataset
     for (i = n = 0; i < 100; i++) {
@@ -228,13 +227,16 @@ test_simple_io(H5File &file)
         // Check that the values read are the same as the values written
         for (i = 0; i < 100; i++)
             for (j = 0; j < 200; j++) {
-                int status = check_values(i, j, points[i][j], check[i][j]);
+                int status =
+                    check_values(static_cast<hsize_t>(i), static_cast<hsize_t>(j), points[i][j], check[i][j]);
                 if (status == -1)
                     throw Exception("DataSet::read");
             }
 
         // clean up and return with success
         delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         PASSED();
         return 0;
     } // end try
@@ -245,8 +247,9 @@ test_simple_io(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         return -1;
     }
 } // test_simple_io
@@ -401,16 +404,19 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Return       Success: Data chunk size
  *
  *              Failure: 0
- *
- * Programmer   Robb Matzke
- *              Tuesday, April 21, 1998
  *-------------------------------------------------------------------------
  */
 static size_t
 filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes,
              size_t *buf_size, void **buf)
-// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 {
+    // Unused
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+
     return nbytes;
 }
 
@@ -434,8 +440,8 @@ test_compression(H5File &file)
     const char *not_supported;
     not_supported = "    Deflate compression is not enabled.";
 #endif /* H5_HAVE_FILTER_DEFLATE */
-    int     points[100][200];
-    int     check[100][200];
+    auto    points = new int[100][200];
+    auto    check  = new int[100][200];
     hsize_t i, j, n;
 
     // Initialize the dataset
@@ -445,7 +451,7 @@ test_compression(H5File &file)
         }
     }
 
-    char *   tconv_buf = new char[1000];
+    char    *tconv_buf = new char[1000];
     DataSet *dataset   = NULL;
     try {
         const hsize_t size[2] = {100, 200};
@@ -670,6 +676,8 @@ test_compression(H5File &file)
          */
         delete dataset;
         delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         return 0;
     } // end try
 
@@ -679,10 +687,10 @@ test_compression(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete dataset;
+        delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
         return -1;
     }
 } // test_compression
@@ -717,6 +725,9 @@ test_nbit_compression(H5File &file)
     hsize_t       i, j;
 
     SUBTEST("N-bit compression (setup)");
+
+    memset(orig_data, 0, DIM1 * DIM2 * sizeof(s1_t));
+    memset(new_data, 0, DIM1 * DIM2 * sizeof(s1_t));
 
     try {
         // Define datatypes of members of compound datatype
@@ -865,8 +876,7 @@ test_multiopen(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (space != NULL)
-            delete space;
+        delete space;
         return -1;
     }
 } // test_multiopen
@@ -941,8 +951,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             return -1;
         }
 
@@ -973,8 +982,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             throw E; // propagate the exception
         }
 
@@ -1008,10 +1016,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 
@@ -1044,10 +1050,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 
@@ -1089,17 +1093,17 @@ test_getnativeinfo(H5File &file)
 
         // Get dataset header info
         H5O_native_info_t ninfo;
-        HDmemset(&ninfo, 0, sizeof(ninfo));
+        memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         // Open the dataset we created above and then close it.  This is one
         // way to open an existing dataset for accessing.
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
-        HDmemset(&ninfo, 0, sizeof(ninfo));
+        memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
-        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         PASSED();
@@ -1151,12 +1155,15 @@ test_chunk_cache(const FileAccPropList &fapl)
         dapl.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
         verify_val(nbytes_1, nbytes_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
-        verify_val(w0_1, w0_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
+        if (abs(w0_1 - w0_4) > DBL_EPSILON)
+            TestErrPrintf("%d: w0_1 and w0_4 different: w0_1=%f, "
+                          "w0_4=%f\n",
+                          __LINE__, w0_1, w0_4);
 
         // Set a link access property on dapl to verify property list inheritance
-        dapl.setNumLinks((size_t)134);
+        dapl.setNumLinks(134);
         size_t nlinks = dapl.getNumLinks();
-        verify_val(nlinks, (size_t)134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nlinks), 134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
 
         // Make a copy of the external fapl
         FileAccPropList fapl_local(fapl);
@@ -1191,7 +1198,7 @@ test_chunk_cache(const FileAccPropList &fapl)
 
         // Retrieve and verify the raw data chunk cache parameters
         nslots_4 = nbytes_4 = 0;
-        w0_4                = 0.0F;
+        w0_4                = 0.0;
         dapl2.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_2, nslots_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
         verify_val(nbytes_2, nbytes_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
@@ -1267,7 +1274,8 @@ test_virtual()
 
         // Get the current layout, should be default, H5D_CONTIGUOUS
         H5D_layout_t layout = dcpl.getLayout();
-        verify_val(layout, H5D_CONTIGUOUS, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_CONTIGUOUS),
+                   "DSetCreatPropList::getLayout", __LINE__, __FILE__);
 
         // Create fixed mapping
         hsize_t dims[RANK];
@@ -1289,7 +1297,8 @@ test_virtual()
 
         // Get and verify the new layout
         layout = dcpl.getLayout();
-        verify_val(layout, H5D_VIRTUAL, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_VIRTUAL), "DSetCreatPropList::getLayout",
+                   __LINE__, __FILE__);
 
         PASSED();
         return 0;
@@ -1355,6 +1364,83 @@ test_operator(H5File &file)
 } // test_operator
 
 /*-------------------------------------------------------------------------
+ * Function:    test_read_string
+ *
+ * Purpose      Tests DataSet::read(H5std_string ...)
+ *
+ * Return       Success: 0
+ *
+ *              Failure: -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_read_string(H5File &file)
+{
+    SUBTEST("DataSet::read(H5std_string)");
+    try {
+        const H5std_string  DATASET_NAME("test_read_string");
+        const unsigned long NX           = 8;
+        const char          DATA[NX]     = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
+        const H5std_string  EXPECTED_STR = H5std_string(DATA, NX);
+        H5std_string        str;
+
+        /*
+         * Write characters with internal null bytes
+         */
+
+        PredType  datatype(PredType::NATIVE_INT8);
+        hsize_t   dimsf[RANK1] = {NX};
+        DataSpace dataspace(RANK1, dimsf);
+        DataSet   dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
+        dataset.write(DATA, datatype);
+        dataset.close();
+
+        /*
+         * Read characters with internal null bytes as a string.
+         * The read std::string should NOT be truncated at the first null byte.
+         */
+
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.read(str, datatype);
+        dataset.close();
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+
+        /*
+         * Write the H5std_string back to the dataset.
+         */
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.write(str, datatype);
+        dataset.close();
+
+        /*
+         * Read characters with internal null bytes as a string, after rewrite.
+         * The read std::string should NOT be truncated at the first null byte.
+         */
+
+        dataset = file.openDataSet(DATASET_NAME);
+        dataset.read(str, datatype);
+        dataset.close();
+        verify_val(str.length(), NX, "test_read_string", __LINE__, __FILE__);
+        verify_val(str, EXPECTED_STR, "test_read_string", __LINE__, __FILE__);
+
+        /*
+         * Success
+         */
+        PASSED();
+        return 0;
+    }
+    catch (Exception &E) {
+        // H5_FAILED should probably be invoked before verify_val
+        H5_FAILED();
+        issue_fail_msg("test_read_string", __LINE__, __FILE__);
+
+        // clean up and return with failure
+        return -1;
+    }
+} // test_read_string
+
+/*-------------------------------------------------------------------------
  * Function:    test_dset
  *
  * Purpose      Tests the dataset interface (H5D)
@@ -1362,14 +1448,6 @@ test_operator(H5File &file)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Modifications:
- *        Nov 12, 01:
- *              - moved h5_cleanup to outside of try block because
- *                dataset.h5 cannot be removed until "file" is out of
- *                scope and dataset.h5 is closed.
- *        Feb 20, 05:
- *              - cleanup_dsets took care of the cleanup now.
  *
  *-------------------------------------------------------------------------
  */
@@ -1402,6 +1480,7 @@ test_dset()
         nerrors += test_virtual() < 0 ? 1 : 0;
         nerrors += test_operator(file) < 0 ? 1 : 0;
         nerrors += test_chunk_cache(fapl) < 0 ? 1 : 0;
+        nerrors += test_read_string(file) < 0 ? 1 : 0;
 
         // Close group "emit diagnostics".
         grp.close();
@@ -1425,12 +1504,11 @@ test_dset()
  * Purpose      Cleanup temporary test files
  *
  * Return       None
- *
- * Programmer   (use C version)
  *-------------------------------------------------------------------------
  */
 extern "C" void
 cleanup_dsets()
 {
     HDremove(FILE1.c_str());
+    HDremove(FILE_ACCPLIST.c_str());
 } // cleanup_dsets

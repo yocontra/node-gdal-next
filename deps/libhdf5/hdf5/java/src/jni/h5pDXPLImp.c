@@ -41,8 +41,8 @@ Java_hdf_hdf5lib_H5_H5Pset_1buffer(JNIEnv *env, jclass clss, jlong plist, jlong 
 {
 #ifdef notdef
     jboolean isCopy;
-    jbyte *  tconvP = NULL;
-    jbyte *  bkgP   = NULL;
+    jbyte   *tconvP = NULL;
+    jbyte   *bkgP   = NULL;
 #endif
     herr_t status = FAIL;
 
@@ -88,8 +88,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1buffer(JNIEnv *env, jclass clss, jlong plist, jbyteA
 {
 #ifdef notdef
     jboolean isCopy;
-    jbyte *  tconvP = NULL;
-    jbyte *  bkgP   = NULL;
+    jbyte   *tconvP = NULL;
+    jbyte   *bkgP   = NULL;
 #endif
     herr_t status = FAIL;
 
@@ -171,17 +171,17 @@ done:
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1preserve(JNIEnv *env, jclass clss, jlong plist, jboolean status)
 {
-    hbool_t st     = JNI_FALSE;
-    herr_t  retVal = FAIL;
+    bool   st     = JNI_FALSE;
+    herr_t retVal = FAIL;
 
     UNUSED(clss);
 
     if (JNI_TRUE == status)
-        st = TRUE;
+        st = true;
     else if (JNI_FALSE == status)
         st = false;
     else
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_preserve: status not TRUE or FALSE");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_preserve: status not true or false");
 
     if ((retVal = H5Pset_preserve((hid_t)plist, st)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -290,7 +290,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform(JNIEnv *env, jclass clss, jlong plis
                                             jlong size)
 {
     jstring str          = NULL;
-    char *  express      = NULL;
+    char   *express      = NULL;
     ssize_t express_size = -1;
 
     UNUSED(clss);
@@ -301,7 +301,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform(JNIEnv *env, jclass clss, jlong plis
     if ((express_size = H5Pget_data_transform((hid_t)plist_id, (char *)NULL, (size_t)size)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (express = (char *)HDmalloc(sizeof(char) * (size_t)express_size + 1)))
+    if (NULL == (express = (char *)malloc(sizeof(char) * (size_t)express_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_data_transform: memory allocation failed");
 
     if (H5Pget_data_transform((hid_t)plist_id, express, (size_t)express_size + 1) < 0)
@@ -319,7 +319,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform(JNIEnv *env, jclass clss, jlong plis
 
 done:
     if (express)
-        HDfree(express);
+        free(express);
 
     return (jlong)express_size;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1data_1transform */
@@ -361,7 +361,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1hyper_1vector_1size(JNIEnv *env, jclass clss, jlong 
 {
     jboolean isCopy;
     size_t   size;
-    jlong *  theArray = NULL;
+    jlong   *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);

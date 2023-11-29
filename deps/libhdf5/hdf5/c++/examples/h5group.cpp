@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -70,7 +69,7 @@ main(void)
         dims[1]                     = 20;
         cdims[0]                    = 20;
         cdims[1]                    = 20;
-        DataSpace *       dataspace = new DataSpace(RANK, dims); // create new dspace
+        DataSpace        *dataspace = new DataSpace(RANK, dims); // create new dspace
         DSetCreatPropList ds_creatplist;                         // create dataset creation prop list
         ds_creatplist.setChunk(2, cdims);                        // then modify it for compression
         ds_creatplist.setDeflate(6);

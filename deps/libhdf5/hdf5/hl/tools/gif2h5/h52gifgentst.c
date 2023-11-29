@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -21,10 +20,6 @@
  * Program: h52gifgentst
  *
  * Purpose: generate files for h52gif testing
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 15, 2007
  *
  *-------------------------------------------------------------------------
  */

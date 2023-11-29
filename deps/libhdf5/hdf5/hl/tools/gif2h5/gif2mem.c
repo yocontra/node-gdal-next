@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -21,8 +20,6 @@
 **  Title:       GIFHEAD.C                                                  **
 **  Purpose:     Display the data in a GIF image file.                      **
 **  Version:     1.0                                                        **
-**  Date:        March 1992                                                 **
-**  Author:      James D. Murray, Anaheim, CA, USA                          **
 **  C Compilers: Borland C++ v2.0, Microsoft C v6.00a                       **
 **                                                                          **
 **  GIFHEAD displays all real information contained within a GIF image      **
@@ -40,31 +37,31 @@ Gif2Mem(GIFBYTE *MemGif, GIFTOMEM *GifMemoryStruct)
 {
     /*
      * The gif structure outline for passing data to memory is given in gif.h.
-     * These pointers are redunant, should take them out in ver. 2
+     * These pointers are redundant, should take them out in ver. 2
      */
-    GIFHEAD *           gifHead;           /* GIF Header structure            */
-    GIFIMAGEDESC **     gifImageDesc;      /* Logical Image Descriptor struct */
-    GIFPLAINTEXT **     gifPlainText;      /* Plain Text Extension structure  */
-    GIFAPPLICATION **   gifApplication;    /* Application Extension structure */
-    GIFCOMMENT **       gifComment;        /* Comment Extension structure     */
+    GIFHEAD            *gifHead;           /* GIF Header structure            */
+    GIFIMAGEDESC      **gifImageDesc;      /* Logical Image Descriptor struct */
+    GIFPLAINTEXT      **gifPlainText;      /* Plain Text Extension structure  */
+    GIFAPPLICATION    **gifApplication;    /* Application Extension structure */
+    GIFCOMMENT        **gifComment;        /* Comment Extension structure     */
     GIFGRAPHICCONTROL **gifGraphicControl; /* Graphic Control Extension strct */
 
-    register GIFWORD i;          /* Loop counter                                 */
-    GIFBYTE          Identifier; /* Extension block identifier holder            */
-    GIFBYTE          Label;      /* Extension block label holder                 */
-    GIFBYTE          ImageCount; /* Count of the number of images in the file    */
-    GIFBYTE          ImageArray; /* Keep the size of the array to store Images   */
-    GIFBYTE          CommentCount;
-    GIFBYTE          CommentArray;
-    GIFBYTE          ApplicationCount;
-    GIFBYTE          ApplicationArray;
-    GIFBYTE          PlainTextCount;
-    GIFBYTE          PlainTextArray;
-    GIFBYTE          GCEflag;
-    GIFBYTE          aTemp;
-    GIFBYTE          j;
-    GIFBYTE          w; /* Two more variables needed only while testing */
-    GIFBYTE *        b; /* Endian Ordering                              */
+    GIFWORD  i;          /* Loop counter                                 */
+    GIFBYTE  Identifier; /* Extension block identifier holder            */
+    GIFBYTE  Label;      /* Extension block label holder                 */
+    GIFBYTE  ImageCount; /* Count of the number of images in the file    */
+    GIFBYTE  ImageArray; /* Keep the size of the array to store Images   */
+    GIFBYTE  CommentCount;
+    GIFBYTE  CommentArray;
+    GIFBYTE  ApplicationCount;
+    GIFBYTE  ApplicationArray;
+    GIFBYTE  PlainTextCount;
+    GIFBYTE  PlainTextArray;
+    GIFBYTE  GCEflag;
+    GIFBYTE  aTemp;
+    GIFBYTE  j;
+    GIFBYTE  w; /* Two more variables needed only while testing */
+    GIFBYTE *b; /* Endian Ordering                              */
 
     /* Allocate memory for the GIF structures           */
     /* Plug the structs into GifMemoryStruct at the end */

@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -81,7 +80,7 @@ PROGRAM FFLUSH2EXAMPLE
   data_dims(2) = NY
 
   !
-  !Initialize FORTRAN predifined datatypes
+  !Initialize FORTRAN predefined datatypes
   !
   CALL h5open_f(error)
   CALL check("h5open_f",error,total_error)
@@ -163,7 +162,7 @@ PROGRAM FFLUSH2EXAMPLE
   CALL check("h5fclose_f",error,total_error)
 
   !
-  !Close FORTRAN predifined datatypes
+  !Close FORTRAN predefined datatypes
   !
   CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
   CALL h5close_f(error)

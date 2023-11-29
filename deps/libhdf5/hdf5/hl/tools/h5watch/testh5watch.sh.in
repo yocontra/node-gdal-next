@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -13,10 +12,11 @@
 #
 # Tests for the h5watch tool
 #
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-./swmr_check_compat_vfd
+$utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [ $rc != 0 ] ; then
     echo
@@ -66,11 +66,7 @@ fi
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-    srcdir=.
-fi
-test -d ../testfiles || mkdir ../testfiles
+test -d ./testfiles || mkdir ./testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -101,9 +97,9 @@ TESTING() {
 # $2 -- expected return code
 # $3 and on -- arguments for h5watch
 TOOLTEST() {
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
+    expect="$srcdir/testfiles/$1"
+    actual="testfiles/`basename $1 .ddl`.out"
+    actual_err="testfiles/`basename $1 .ddl`.err"
     shift
     retvalexpect=$1
     shift
@@ -150,10 +146,10 @@ TOOLTEST() {
 # $2 -- expected return code
 # $3 and on -- arguments for h5watch
 TOOLTEST_ERR() {
-    expect="$srcdir/../testfiles/$1"
-    expect_err="$srcdir/../testfiles/`basename $1 .ddl`.err"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.out.err"
+    expect="$srcdir/testfiles/$1"
+    expect_err="$srcdir/testfiles/`basename $1 .ddl`.err"
+    actual="testfiles/`basename $1 .ddl`.out"
+    actual_err="testfiles/`basename $1 .ddl`.out.err"
     shift
     retvalexpect=$1
     shift
@@ -205,8 +201,8 @@ try=0
 while [ $try -lt $TRY_MAX ] ;
 do
     cp $WATCHFILE $TESTFILE                             # Copy the file being watched/extended to a temporary file
-    actual="../testfiles/`basename $3 .ddl`.out"        # The actual output
-    expect="$srcdir/../testfiles/$3"                    # The expected output
+    actual="testfiles/`basename $3 .ddl`.out"        # The actual output
+    expect="$srcdir/testfiles/$3"                    # The expected output
     #
     # Set up options and object to h5watch
     if test -z "$2"; then

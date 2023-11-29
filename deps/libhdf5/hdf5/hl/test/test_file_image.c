@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -53,8 +52,8 @@
 static int
 test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 {
-    hid_t * file_id, *dset_id, file_space, plist; /* HDF5 ids */
-    hsize_t dims1[RANK]    = {2, 3};              /* original dimension of datasets */
+    hid_t  *file_id = NULL, *dset_id = NULL, file_space, plist; /* HDF5 ids */
+    hsize_t dims1[RANK]    = {2, 3};                            /* original dimension of datasets */
     hsize_t max_dims[RANK] = {H5S_UNLIMITED, H5S_UNLIMITED};
     int     data1[6]       = {1, 2, 3, 4, 5, 6};    /* original contents of dataset */
     int     data2[6]       = {7, 8, 9, 10, 11, 12}; /* "wrong" contents of dataset */
@@ -63,13 +62,13 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
     hsize_t dims4[RANK] = {3, 5};                   /* extended dimensions of datasets */
     int     data4[15]   = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     /* extended contents of dataset */
-    ssize_t *       buf_size;    /* pointer to array of buffer sizes */
-    void **         buf_ptr;     /* pointer to array of pointers to image buffers */
-    char **         filename;    /* pointer to array of pointers to filenames */
-    unsigned *      input_flags; /* pointer to array of flag combinations */
+    ssize_t        *buf_size    = NULL; /* pointer to array of buffer sizes */
+    void          **buf_ptr     = NULL; /* pointer to array of pointers to image buffers */
+    char          **filename    = NULL; /* pointer to array of pointers to filenames */
+    unsigned       *input_flags = NULL; /* pointer to array of flag combinations */
     size_t          i, j, k, nrow, n_values;
     herr_t          status1;
-    void *          handle_ptr       = NULL; /* pointers to driver buffer */
+    void           *handle_ptr       = NULL; /* pointers to driver buffer */
     unsigned char **core_buf_ptr_ptr = NULL;
 
     VERIFY(open_images > 1, "The number of open images must be greater than 1");
@@ -77,27 +76,27 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
     VERIFY(nflags > 0, "The number of flag combinations  must be greater than 0");
 
     /* allocate array of flags for open images */
-    if (NULL == (input_flags = (unsigned *)HDmalloc(sizeof(unsigned) * open_images)))
+    if (NULL == (input_flags = (unsigned *)malloc(sizeof(unsigned) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array of pointers for each of the open images */
-    if (NULL == (buf_ptr = (void **)HDmalloc(sizeof(void *) * open_images)))
+    if (NULL == (buf_ptr = (void **)malloc(sizeof(void *) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array to store the name of each of the open images */
-    if (NULL == (filename = (char **)HDmalloc(sizeof(char *) * open_images)))
+    if (NULL == (filename = (char **)calloc(1, sizeof(char *) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array to store the size of each of the open images */
-    if (NULL == (buf_size = (ssize_t *)HDmalloc(sizeof(ssize_t) * open_images)))
+    if (NULL == (buf_size = (ssize_t *)malloc(sizeof(ssize_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array for each of the file identifiers */
-    if (NULL == (file_id = (hid_t *)HDmalloc(sizeof(hid_t) * open_images)))
+    if (NULL == (file_id = (hid_t *)malloc(sizeof(hid_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     /* allocate array for each of the dataset identifiers */
-    if (NULL == (dset_id = (hid_t *)HDmalloc(sizeof(hid_t) * open_images)))
+    if (NULL == (dset_id = (hid_t *)malloc(sizeof(hid_t) * open_images)))
         FAIL_PUTS_ERROR("malloc() failed");
 
     HL_TESTING2("get file images");
@@ -109,10 +108,13 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
         input_flags[i] = flags[(nflags + i) % nflags];
 
         /* allocate name buffer for image i */
-        filename[i] = (char *)HDmalloc(sizeof(char) * 32);
+        size_t filenamelength = sizeof(char) * 32;
+        filename[i]           = (char *)malloc(filenamelength);
+        if (!filename[i])
+            FAIL_PUTS_ERROR("malloc() failed");
 
         /* create file name */
-        HDsprintf(filename[i], "image_file%d.h5", (int)i);
+        snprintf(filename[i], filenamelength, "image_file%d.h5", (int)i);
 
         /* create file */
         if ((file_id[i] = H5Fcreate(filename[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -167,7 +169,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             FAIL_PUTS_ERROR("H5Fget_file_image() failed");
 
         /* allocate buffer for the file image i */
-        if (NULL == (buf_ptr[i] = (void *)HDmalloc((size_t)buf_size[i])))
+        if (NULL == (buf_ptr[i] = (void *)malloc((size_t)buf_size[i])))
             FAIL_PUTS_ERROR("malloc() failed");
 
         /* buffer for file image 2 is filled with counter data (non-valid image) */
@@ -231,25 +233,28 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
              */
             if (input_flags[i] & H5LT_FILE_IMAGE_OPEN_RW && !(input_flags[i] & H5LT_FILE_IMAGE_DONT_COPY)) {
 
-                void *tmp_ptr = HDmalloc((size_t)buf_size[i]);
+                void *tmp_ptr = malloc((size_t)buf_size[i]);
+                if (!tmp_ptr)
+                    FAIL_PUTS_ERROR("buffer allocation failed");
+
                 /* Copy vfd buffer to a temporary buffer */
-                HDmemcpy(tmp_ptr, (void *)*core_buf_ptr_ptr, (size_t)buf_size[i]);
+                memcpy(tmp_ptr, (void *)*core_buf_ptr_ptr, (size_t)buf_size[i]);
                 /* Clear status_flags in the superblock for the vfd buffer: file locking is using status_flags
                  */
-                HDmemset((uint8_t *)tmp_ptr + SUPER_STATUS_FLAGS_OFF_V0_V1, (int)0,
-                         (size_t)SUPER_STATUS_FLAGS_SIZE_V0_V1);
-                /* Does the comparision */
-                if (HDmemcmp(tmp_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
+                memset((uint8_t *)tmp_ptr + SUPER_STATUS_FLAGS_OFF_V0_V1, (int)0,
+                       (size_t)SUPER_STATUS_FLAGS_SIZE_V0_V1);
+                /* Does the comparison */
+                if (memcmp(tmp_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
                     FAIL_PUTS_ERROR("comparison of TMP vfd and user buffer failed");
                 /* Free the temporary buffer */
                 if (tmp_ptr)
-                    HDfree(tmp_ptr);
+                    free(tmp_ptr);
             }
             else {
 
                 /* test whether the contents of the user buffer and driver buffer */
                 /* are equal.                                                     */
-                if (HDmemcmp(*core_buf_ptr_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
+                if (memcmp(*core_buf_ptr_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
                     FAIL_PUTS_ERROR("comparison of vfd and user buffer failed");
             }
         } /* end else */
@@ -263,7 +268,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
     for (i = 0; i < open_images; i++) {
         /* if opening the file image failed, continue next iteration */
         if (file_id[i] < 0) {
-            HDassert(i == 2);
+            assert(i == 2);
             continue;
         } /* end if */
 
@@ -319,7 +324,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
     for (i = 0; i < open_images; i++) {
         /* if opening the file image failed, continue next iteration */
         if (file_id[i] < 0) {
-            HDassert(i == 2);
+            assert(i == 2);
             continue;
         } /* end if */
 
@@ -330,7 +335,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             {
                 status1 = H5Dwrite(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VERIFY(status1 < 0, "H5Dwrite() should have failed");
 
@@ -339,7 +344,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             {
                 status1 = H5Dset_extent(dset_id[i], dims4);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VERIFY(status1 < 0, "H5Dset_extent() should have failed");
 
@@ -348,7 +353,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
             {
                 status1 = H5Dwrite(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data4);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VERIFY(status1 < 0, "H5Dwrite() should have failed");
 
@@ -403,13 +408,13 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                         status2 = H5Fflush(file_id[i], H5F_SCOPE_GLOBAL);
 
                     VERIFY(status1 < 0 || status2 < 0, "writing and flushing attr should have failed");
-                } H5E_END_TRY;
+                } H5E_END_TRY
 
                 /* close attr and attr_space -- expect errors on close */
                 H5E_BEGIN_TRY {
                     H5Sclose(attr_space_id);
                     H5Aclose(attr_id);
-                } H5E_END_TRY;
+                } H5E_END_TRY
 #endif
                 if (H5Dclose(dset_id[i]) < 0)
                     FAIL_PUTS_ERROR("H5Dclose() failed");
@@ -503,20 +508,20 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
         if (!(input_flags[i] & H5LT_FILE_IMAGE_DONT_COPY) ||
             (input_flags[i] & H5LT_FILE_IMAGE_DONT_RELEASE)) {
             VERIFY(buf_ptr[i] != NULL, "buffer pointer must be non NULL");
-            HDfree(buf_ptr[i]);
+            free(buf_ptr[i]);
         } /* end if */
 
     } /* end for */
 
     /* release temporary working buffers */
     for (i = 0; i < open_images; i++)
-        HDfree(filename[i]);
-    HDfree(filename);
-    HDfree(file_id);
-    HDfree(dset_id);
-    HDfree(buf_ptr);
-    HDfree(buf_size);
-    HDfree(input_flags);
+        free(filename[i]);
+    free(filename);
+    free(file_id);
+    free(dset_id);
+    free(buf_ptr);
+    free(buf_size);
+    free(input_flags);
 
     PASSED();
 
@@ -525,6 +530,17 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
     return 0;
 
 error:
+    if (filename) {
+        for (i = 0; i < open_images; i++)
+            free(filename[i]);
+        free(filename);
+    }
+    free(file_id);
+    free(dset_id);
+    free(buf_ptr);
+    free(buf_size);
+    free(input_flags);
+
     H5_FAILED();
     return -1;
 }
@@ -556,10 +572,10 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("File image tests passed.\n");
+    printf("File image tests passed.\n");
     return 0;
 
 error:
-    HDprintf("***** %d IMAGE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d IMAGE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }

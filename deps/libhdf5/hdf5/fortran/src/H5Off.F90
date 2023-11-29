@@ -1,19 +1,17 @@
-!****h* ROBODoc/H5O
-!
-! NAME
-!  MODULE H5O
-!
-! FILE
-!  fortran/src/H5Off.F90
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5O functions.
-!
+!> @defgroup FH5O Fortran Object (H5O) Interface
+!!
+!! @see H5O, C-API
+!!
+!! @see @ref H5O_UG, User Guide
+!!
+
+!> @ingroup FH5O
+!!
+!!  @brief This module contains Fortran interfaces for H5O functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -36,135 +34,135 @@
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
-!*****
 
 MODULE H5O
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_LONG, C_INT, C_LOC
   USE H5GLOBAL
   IMPLICIT NONE
 
-!****t* H5O (F03)/h5o_info_t
-!
-! Fortran2003 Derived Type:
-!
+!> @brief h5o_info_t derived type. The time values are an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
   TYPE, BIND(C) :: h5o_info_t
-     INTEGER(C_LONG)     :: fileno     ! File number that object is located in
-     TYPE(H5O_TOKEN_T_F) :: token      ! Token for object in file
-     INTEGER(C_INT)      :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER             :: rc         ! Reference count of object
+     INTEGER(C_LONG)     :: fileno     !< File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token      !< Token for object in file
+     INTEGER(C_INT)      :: type       !< Basic object type (group, dataset, etc.)
+     INTEGER             :: rc         !< Reference count of object
+     !    -- NOTE --
+     ! Returns an integer array
+     ! as specified in the Fortran
+     ! intrinsic DATE_AND_TIME(VALUES)
+     INTEGER, DIMENSION(8) :: atime !<  Access time
+     INTEGER, DIMENSION(8) :: mtime !<  Modification time
+     INTEGER, DIMENSION(8) :: ctime !<  Change time
+     INTEGER, DIMENSION(8) :: btime !<  Birth time
 
-     INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
-     INTEGER, DIMENSION(8) :: mtime ! Modification time   ! Returns an integer array
-     INTEGER, DIMENSION(8) :: ctime ! Change time         ! as specified in the Fortran
-     INTEGER, DIMENSION(8) :: btime ! Birth time          ! intrinsic DATE_AND_TIME(VALUES)
-
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+     INTEGER(hsize_t) :: num_attrs  !<  Number of attributes attached to object
   END TYPE h5o_info_t
 
-! C interoperable structure for h5o_info_t. The Fortran derived type returns the time
-! values as an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
-! Whereas, this derived type does not.
+!> @brief C interoperable structure for h5o_info_t. The Fortran derived type returns the time
+!! values as an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
+!! Whereas, this derived type does not.
 
   TYPE, BIND(C) :: c_h5o_info_t
-     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
-     TYPE(H5O_TOKEN_T_F) :: token   ! Token for object in file
-     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER(C_INT)   :: rc         ! Reference count of object
+     INTEGER(C_LONG)  :: fileno     !<  File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token   !<  Token for object in file
+     INTEGER(C_INT)   :: type       !<  Basic object type (group, dataset, etc.)
+     INTEGER(C_INT)   :: rc         !<  Reference count of object
 
-     INTEGER(KIND=TIME_T) :: atime ! Access time
-     INTEGER(KIND=TIME_T) :: mtime ! Modify time
-     INTEGER(KIND=TIME_T) :: ctime ! Create time
-     INTEGER(KIND=TIME_T) :: btime ! Birth time
+     INTEGER(KIND=TIME_T) :: atime  !<  Access time
+     INTEGER(KIND=TIME_T) :: mtime  !<  Modify time
+     INTEGER(KIND=TIME_T) :: ctime  !<  Create time
+     INTEGER(KIND=TIME_T) :: btime  !<  Birth time
 
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+     INTEGER(hsize_t) :: num_attrs  !<  Number of attributes attached to object
   END TYPE c_h5o_info_t
 
-!****t* H5O (F03)/h5o_native_info_t
-!
-! Fortran2003 Derived Type:
-!
+!> @brief space_t derived type
   TYPE, BIND(C) :: space_t
-     INTEGER(hsize_t) :: total ! Total space for storing object header in file
-     INTEGER(hsize_t) :: meta  ! Space within header for object header metadata information
-     INTEGER(hsize_t) :: mesg  ! Space within header for actual message information
-     INTEGER(hsize_t) :: free  ! Free space within object header
+     INTEGER(hsize_t) :: total !<  Total space for storing object header in file
+     INTEGER(hsize_t) :: meta  !<  Space within header for object header metadata information
+     INTEGER(hsize_t) :: mesg  !<  Space within header for actual message information
+     INTEGER(hsize_t) :: free  !<  Free space within object header
   END TYPE space_t
 
+!> @brief mesg_t derived type
   TYPE, BIND(C) :: mesg_t
-     INTEGER(c_int64_t) :: present ! Flags to indicate presence of message type in header
-     INTEGER(c_int64_t) :: shared  ! Flags to indicate message type is shared in header
+     INTEGER(c_int64_t) :: present !<  Flags to indicate presence of message type in header
+     INTEGER(c_int64_t) :: shared  !<  Flags to indicate message type is shared in header
   END TYPE mesg_t
 
+!> @brief hdr_t derived type
   TYPE, BIND(C) :: hdr_t
-     INTEGER :: version ! Version number of header format in file
-     INTEGER :: nmesgs  ! Number of object header messages
-     INTEGER :: nchunks ! Number of object header chunks
-     INTEGER :: flags   ! Object header status flags
+     INTEGER :: version !<  Version number of header format in file
+     INTEGER :: nmesgs  !<  Number of object header messages
+     INTEGER :: nchunks !<  Number of object header chunks
+     INTEGER :: flags   !<  Object header status flags
      TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
+!> @brief c_hdr_t derived type
   TYPE, BIND(C) :: c_hdr_t
-     INTEGER(C_INT) :: version ! Version number of header format in file
-     INTEGER(C_INT) :: nmesgs  ! Number of object header messages
-     INTEGER(C_INT) :: nchunks ! Number of object header chunks
-     INTEGER(C_INT) :: flags   ! Object header status flags
+     INTEGER(C_INT) :: version !<  Version number of header format in file
+     INTEGER(C_INT) :: nmesgs  !<  Number of object header messages
+     INTEGER(C_INT) :: nchunks !<  Number of object header chunks
+     INTEGER(C_INT) :: flags   !<  Object header status flags
      TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE c_hdr_t
 
-  ! Extra metadata storage for obj & attributes
-  TYPE, BIND(C) :: H5_ih_info_t
-     INTEGER(hsize_t) :: index_size ! btree and/or list
-     INTEGER(hsize_t) :: heap_size
-  END TYPE H5_ih_info_t
-
+!> @brief meta_size_t derived type
   TYPE, BIND(C) :: meta_size_t
-     TYPE(H5_ih_info_t) :: obj  ! v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
-     TYPE(H5_ih_info_t) :: attr ! v2 B-tree & heap for attributes
+     TYPE(H5_ih_info_t) :: obj  !<  v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
+     TYPE(H5_ih_info_t) :: attr !<  v2 B-tree & heap for attributes
   ENDTYPE meta_size_t
 
+!> @brief h5o_native_info_t derived type
   TYPE, BIND(C) :: h5o_native_info_t
      TYPE(hdr_t) :: hdr
      TYPE(meta_size_t) :: meta_size
   END TYPE h5o_native_info_t
 
-! C interoperable structure for h5o_native_info_t.
+! @brief C interoperable structure for h5o_native_info_t.
   TYPE, BIND(C) :: c_h5o_native_info_t
      TYPE(c_hdr_t) :: hdr
      TYPE(meta_size_t) :: meta_size
   END TYPE c_h5o_native_info_t
 
-!*****
+  INTERFACE
+     INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, lapl_id_default, object_info, fields, &
+          es_id, file, func, line ) &
+          BIND(C, NAME='h5oget_info_by_name_c')
+       IMPORT :: C_CHAR, C_INT, C_PTR
+       IMPORT :: HID_T, SIZE_T
+       IMPLICIT NONE
+       INTEGER(HID_T)  :: loc_id
+       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+       INTEGER(HID_T)  :: lapl_id_default
+       TYPE(C_PTR), VALUE :: object_info
+       INTEGER         :: fields
+       INTEGER(HID_T)  :: es_id
+       TYPE(C_PTR), VALUE :: file
+       TYPE(C_PTR), VALUE :: func
+       INTEGER(C_INT)  :: line
+     END FUNCTION h5oget_info_by_name_c
+  END INTERFACE
 
 CONTAINS
 
-!****s* H5O/h5olink_f
-!
-! NAME
-!  h5olink_f
-!
-! PURPOSE
-!  Creates a hard link to an object in an HDF5 file.
-!
-! Inputs:
-!  object_id 	 - Object to be linked.
-!  new_loc_id 	 - File or group identifier specifying location at which object is to be linked.
-!  new_link_name - Name of link to be created, relative to new_loc_id.
-!
-! Outputs:
-!  hdferr        - Returns 0 if successful and -1 if fails.
-!
-! Optional parameters:
-!  lcpl_id 	 - Link creation property list identifier.
-!  lapl_id 	 - Link access property list identifier.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  April 21, 2008
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Creates a hard link to an object in an HDF5 file.
+!!
+!! \param object_id     Object to be linked.
+!! \param new_loc_id    File or group identifier specifying location at which object is to be linked.
+!! \param new_link_name Name of link to be created, relative to new_loc_id.
+!! \param hdferr        \fortran_error
+!! \param lcpl_id       Link creation property list identifier.
+!! \param lapl_id       Link access property list identifier.
+!!
+!! See C API: @ref H5Olink()
+!!
   SUBROUTINE h5olink_f(object_id, new_loc_id, new_link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: object_id
@@ -173,7 +171,6 @@ CONTAINS
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
-!*****
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(HID_T) :: lcpl_id_default
 
@@ -206,30 +203,19 @@ CONTAINS
 
   END SUBROUTINE h5olink_f
 
-!****s* H5O/h5oopen_f
-!
-! NAME
-!  h5oopen_f
-!
-! PURPOSE
-!  Opens an object in an HDF5 file by location identifier and path name.
-!
-! Inputs:
-!  loc_id  - File or group identifier.
-!  name    - Path to the object, relative to loc_id.
-!
-! Outputs:
-!  obj_id  - Object identifier for the opened object.
-!  hdferr  - Returns 0 if successful and -1 if fails.
-!
-! Optional parameters:
-!  lapl_id - Access property list identifier for the link pointing to the object.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  April 18, 2008
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Opens an object in an HDF5 file by location identifier and path name.
+!!
+!! \param loc_id  File or group identifier.
+!! \param name    Path to the object, relative to loc_id.
+!! \param obj_id  Object identifier for the opened object.
+!! \param hdferr  \fortran_error
+!! \param lapl_id Access property list identifier for the link pointing to the object.
+!!
+!! See C API: @ref H5Oopen()
+!!
   SUBROUTINE h5oopen_f(loc_id, name, obj_id, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: loc_id
@@ -237,95 +223,193 @@ CONTAINS
     INTEGER(HID_T)  , INTENT(OUT) :: obj_id
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
-!*****
+
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: namelen
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id) BIND(C,NAME='h5oopen_c')
+       INTEGER(HID_T) FUNCTION H5Oopen(loc_id, name, lapl_id_default) BIND(C,NAME='H5Oopen')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(SIZE_T) :: namelen
-         INTEGER(HID_T), INTENT(OUT) :: obj_id
-       END FUNCTION h5oopen_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Oopen
     END INTERFACE
 
-    namelen = LEN(name)
+    c_name = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id)
+    obj_id = H5Oopen(loc_id, c_name, lapl_id_default)
+    
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5oopen_f
-!
-!****s* H5O/h5oclose_f
-!
-! NAME
-!  h5oclose_f
-!
-! PURPOSE
-!  Closes an object in an HDF5 file.
-!
-! Inputs:
-!  object_id - Object identifier.
-!
-! Outputs:
-!  hdferr    - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  December 17, 2008
-!
-! Fortran90 Interface:
-  SUBROUTINE h5oclose_f(object_id, hdferr)
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously opens an object in an HDF5 file by location identifier and path name.
+!!
+!! \param loc_id  File or group identifier.
+!! \param name    Path to the object, relative to loc_id.
+!! \param obj_id  Object identifier for the opened object.
+!! \param es_id   \fortran_es_id
+!! \param hdferr  \fortran_error
+!! \param lapl_id Access property list identifier for the link pointing to the object.
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Oopen_async()
+!!
+  SUBROUTINE h5oopen_async_f(loc_id, name, obj_id, es_id, hdferr, lapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)   :: object_id
-    INTEGER       , INTENT(OUT) :: hdferr
-!*****
+    INTEGER(HID_T)  , INTENT(IN)  :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER(HID_T)  , INTENT(OUT) :: obj_id
+    INTEGER(HID_T)  , INTENT(IN)  :: es_id
+    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
     INTERFACE
-       INTEGER FUNCTION h5oclose_c(object_id) BIND(C,NAME='h5oclose_c')
+       INTEGER(HID_T) FUNCTION H5Oopen_async(file, func, line, &
+            loc_id, name, lapl_id_default, es_id) BIND(C,NAME='H5Oopen_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: object_id
-       END FUNCTION h5oclose_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Oopen_async
     END INTERFACE
 
-    hdferr = h5oclose_c(object_id)
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    obj_id = H5Oopen_async(file_default, func_default, line_default, &
+         loc_id, c_name, lapl_id_default, es_id)
+    
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5oopen_async_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Closes an object in an HDF5 file.
+!!
+!! \param object_id Object identifier.
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Oclose()
+!!
+  SUBROUTINE h5oclose_f(object_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: object_id
+    INTEGER       , INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Oclose(object_id) BIND(C,NAME='H5Oclose')
+         IMPORT :: C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: object_id
+       END FUNCTION H5Oclose
+    END INTERFACE
+
+    hdferr = INT(H5Oclose(object_id))
+
   END SUBROUTINE h5oclose_f
 
-!
-!****s* H5O/h5oopen_by_token_f
-! NAME
-!  h5oopen_by_token_f
-!
-! PURPOSE
-!  Opens an object using its token within an HDF5 file.
-!
-! Inputs:
-!  loc_id - File or group identifier.
-!  token  - Object’s token in the file.
-!
-! Outputs:
-!  obj_id - Object identifier for the opened object.
-!  hdferr - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  September 14, 2009
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously closes an object in an HDF5 file.
+!!
+!! \param object_id Object identifier
+!! \param es_id     \fortran_es_id
+!! \param hdferr    \fortran_error
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
+!!
+!! See C API: @ref H5Oclose_async()
+!!
+  SUBROUTINE h5oclose_async_f(object_id, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: object_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Oclose_async(file, func, line, object_id, es_id) BIND(C,NAME='H5Oclose_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Oclose_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Oclose_async(file_default, func_default, line_default, object_id, es_id))
+
+  END SUBROUTINE h5oclose_async_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Opens an object using its token within an HDF5 file.
+!!
+!! \param loc_id File or group identifier.
+!! \param token  Object&apos;s token in the file.
+!! \param obj_id Object identifier for the opened object.
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Oopen_by_token()
+!!
   SUBROUTINE h5oopen_by_token_f(loc_id, token, obj_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)        :: loc_id
     TYPE(H5O_TOKEN_T_F), INTENT(IN)     :: token
     INTEGER(HID_T)  , INTENT(OUT)       :: obj_id
     INTEGER         , INTENT(OUT)       :: hdferr
-!*****
     INTERFACE
        INTEGER FUNCTION h5oopen_by_token_c(loc_id, token, obj_id) BIND(C,NAME='h5oopen_by_token_c')
          IMPORT :: HID_T, H5O_TOKEN_T_F
@@ -339,32 +423,22 @@ CONTAINS
     hdferr = h5oopen_by_token_c(loc_id, token, obj_id)
 
   END SUBROUTINE h5oopen_by_token_f
-!
-!****s* H5O/h5ocopy_f
-! NAME
-!  h5ocopy_f
-!
-! PURPOSE
-!  Copies an object in an HDF5 file.
-!
-! Inputs:
-!  src_loc_id - Object identifier indicating the location of the source object to be copied.
-!  src_name   - Name of the source object to be copied.
-!  dst_loc_id - Location identifier specifying the destination.
-!  dst_name   - Name to be assigned to the new copy.
-!
-! Optional parameters:
-!  ocpypl_id  - Object copy property list.
-!  lcpl_id    - Link creation property list for the new hard link.
-!
-! Outputs:
-!  hdferr     - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  March 14, 2012
-!
-! Fortran90 Interface:
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Copies an object in an HDF5 file.
+!!
+!! \param src_loc_id Object identifier indicating the location of the source object to be copied.
+!! \param src_name   Name of the source object to be copied.
+!! \param dst_loc_id Location identifier specifying the destination.
+!! \param dst_name   Name to be assigned to the new copy.
+!! \param ocpypl_id  Object copy property list.
+!! \param lcpl_id    Link creation property list for the new hard link.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Ocopy()
+!!
   SUBROUTINE h5ocopy_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr, ocpypl_id, lcpl_id)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: src_loc_id
@@ -374,65 +448,130 @@ CONTAINS
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: ocpypl_id
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lcpl_id
-!*****
 
-    INTEGER(SIZE_T) :: src_name_len, dst_name_len
     INTEGER(HID_T)  :: ocpypl_id_default, lcpl_id_default
+    CHARACTER(LEN=LEN_TRIM(src_name)+1,KIND=C_CHAR) :: c_src_name
+    CHARACTER(LEN=LEN_TRIM(dst_name)+1,KIND=C_CHAR) :: c_dst_name
 
     INTERFACE
-       INTEGER FUNCTION h5ocopy_c(src_loc_id, src_name, src_name_len, &
-            dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default) &
-            BIND(C,NAME='h5ocopy_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Ocopy(src_loc_id, src_name, dst_loc_id, dst_name, &
+            ocpypl_id_default, lcpl_id_default) BIND(C,NAME='H5Ocopy')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN) :: src_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: src_name
-         INTEGER(HID_T)  , INTENT(IN) :: dst_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: dst_name
-         INTEGER(HID_T)  , INTENT(IN) :: ocpypl_id_default
-         INTEGER(HID_T)  , INTENT(IN) :: lcpl_id_default
-         INTEGER(SIZE_T)              :: src_name_len, dst_name_len
-
-       END FUNCTION h5ocopy_c
+         INTEGER(HID_T)  , VALUE :: src_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: src_name
+         INTEGER(HID_T)  , VALUE :: dst_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: dst_name
+         INTEGER(HID_T)  , VALUE :: ocpypl_id_default
+         INTEGER(HID_T)  , VALUE :: lcpl_id_default
+       END FUNCTION H5Ocopy
     END INTERFACE
 
-    src_name_len = LEN(src_name)
-    dst_name_len = LEN(dst_name)
+    c_src_name = TRIM(src_name)//C_NULL_CHAR
+    c_dst_name = TRIM(dst_name)//C_NULL_CHAR
 
     ocpypl_id_default = H5P_DEFAULT_F
+    lcpl_id_default   = H5P_DEFAULT_F
     IF(PRESENT(ocpypl_id)) ocpypl_id_default = ocpypl_id
-    lcpl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
 
-    hdferr = h5ocopy_c(src_loc_id, src_name, src_name_len, &
-         dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default)
+    hdferr = INT(H5Ocopy(src_loc_id, c_src_name, &
+         dst_loc_id, c_dst_name, ocpypl_id_default, lcpl_id_default))
 
   END SUBROUTINE h5ocopy_f
 
-!****s* H5O/h5odecr_refcount_f
-! NAME
-!  h5odecr_refcount_f
-!
-! PURPOSE
-!  Decrements an object reference count.
-!
-! Inputs:
-!  object_id - Object identifier.
-!
-! Outputs:
-!  hdferr    - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 11, 2012
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously copies an object in an HDF5 file.
+!!
+!! \param src_loc_id Object identifier indicating the location of the source object to be copied.
+!! \param src_name   Name of the source object to be copied.
+!! \param dst_loc_id Location identifier specifying the destination.
+!! \param dst_name   Name to be assigned to the new copy.
+!! \param ocpypl_id  Object copy property list.
+!! \param lcpl_id    Link creation property list for the new hard link.
+!! \param es_id      \fortran_es_id
+!! \param hdferr     \fortran_error
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Ocopy_async()
+!!
+  SUBROUTINE h5ocopy_async_f(src_loc_id, src_name, dst_loc_id, dst_name, es_id, hdferr, &
+       ocpypl_id, lcpl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: src_loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: src_name
+    INTEGER(HID_T)  , INTENT(IN)  :: dst_loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: dst_name
+    INTEGER(HID_T)  , INTENT(IN)  :: es_id
+    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: ocpypl_id
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lcpl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T)  :: ocpypl_id_default, lcpl_id_default
+    CHARACTER(LEN=LEN_TRIM(src_name)+1,KIND=C_CHAR) :: c_src_name
+    CHARACTER(LEN=LEN_TRIM(dst_name)+1,KIND=C_CHAR) :: c_dst_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ocopy_async(file, func, line, src_loc_id, src_name, dst_loc_id, dst_name, &
+            ocpypl_id_default, lcpl_id_default, es_id) BIND(C,NAME='H5Ocopy_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT)  , VALUE :: line
+         INTEGER(HID_T)  , VALUE :: src_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: src_name
+         INTEGER(HID_T)  , VALUE :: dst_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: dst_name
+         INTEGER(HID_T)  , VALUE :: ocpypl_id_default
+         INTEGER(HID_T)  , VALUE :: lcpl_id_default
+         INTEGER(HID_T)  , VALUE :: es_id
+       END FUNCTION H5Ocopy_async
+    END INTERFACE
+
+    c_src_name = TRIM(src_name)//C_NULL_CHAR
+    c_dst_name = TRIM(dst_name)//C_NULL_CHAR
+
+    ocpypl_id_default = H5P_DEFAULT_F
+    lcpl_id_default   = H5P_DEFAULT_F
+    IF(PRESENT(ocpypl_id)) ocpypl_id_default = ocpypl_id
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Ocopy_async(file_default, func_default, line_default, &
+         src_loc_id, c_src_name, &
+         dst_loc_id, c_dst_name, ocpypl_id_default, lcpl_id_default, es_id))
+
+  END SUBROUTINE h5ocopy_async_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Decrements an object reference count.
+!!
+!! \param object_id Object identifier.
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Odecr_refcount()
+!!
   SUBROUTINE h5odecr_refcount_f(object_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: object_id
     INTEGER       , INTENT(OUT) :: hdferr
-!*****
 
     INTERFACE
        INTEGER FUNCTION h5odecr_refcount_c(object_id) BIND(C,NAME='h5odecr_refcount_c')
@@ -446,30 +585,21 @@ CONTAINS
 
   END SUBROUTINE h5odecr_refcount_f
 
-!****s* H5O/h5oexists_by_name_f
-! NAME
-!  h5oexists_by_name_f
-!
-! PURPOSE
-!  Determines whether a link resolves to an actual object.
-!
-! Inputs:
-!  loc_id   - Identifier of the file or group to query.
-!  name     - The name of the link to check.
-!
-!
-! Optional parameters:
-!  lapl_id  - Link access property list identifier.
-!
-! Outputs:
-!  link_exists - Existing link resolves to an object.
-!  hdferr      - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 11, 2012
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Determines whether a link resolves to an actual object.
+!!
+!! \param loc_id   IdeIdentifier of the file or group to query.
+!! \param name     TheThe name of the link to check.
+!!
+!!
+!! \param lapl_id     Link access property list identifier.
+!! \param link_exists Existing link resolves to an object.
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Oexists_by_name()
+!!
   SUBROUTINE h5oexists_by_name_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: loc_id
@@ -477,7 +607,6 @@ CONTAINS
     LOGICAL         , INTENT(OUT) :: link_exists
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
-!*****
 
     INTEGER(size_t) :: namelen
     INTEGER :: status
@@ -516,35 +645,24 @@ CONTAINS
 
   END SUBROUTINE h5oexists_by_name_f
 
-!****s* H5O/h5oget_comment_f
-! NAME
-!  h5oget_comment_f
-!
-! PURPOSE
-!  Retrieves comment for specified object.
-!
-! Inputs:
-!  obj_id - Identifier for the target object.
-!
-! Optional parameters:
-!  bufsize - Size of the comment buffer.
-!
-! Outputs:
-!  comment - The comment.
-!  hdferr  - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 11, 2012
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Retrieves comment for specified object.
+!!
+!! \param obj_id  Identifier for the target object.
+!! \param bufsize Size of the comment buffer.
+!! \param comment The comment.
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Oget_comment()
+!!
   SUBROUTINE h5oget_comment_f(obj_id, comment, hdferr, bufsize)
     IMPLICIT NONE
     INTEGER(HID_T)   , INTENT(IN)            :: obj_id
     CHARACTER(LEN=*) , INTENT(OUT)           :: comment
     INTEGER          , INTENT(OUT)           :: hdferr
     INTEGER(HSSIZE_T), INTENT(OUT), OPTIONAL :: bufsize
-!*****
 
     INTEGER(SIZE_T)   :: commentsize_default
     INTEGER(HSSIZE_T) :: bufsize_default
@@ -570,30 +688,20 @@ CONTAINS
 
   END SUBROUTINE h5oget_comment_f
 
-!****s* H5O/h5oget_comment_by_name_f
-! NAME
-!  h5oget_comment_by_name_f
-!
-! PURPOSE
-!  Retrieves comment for specified object.
-!
-! Inputs:
-!  loc_id   - Identifier of a file, group, dataset, or named datatype.
-!  name     - Name of the object whose comment is to be retrieved,
-!             specified as a path relative to loc_id.
-!
-! Optional parameters:
-!  bufsize  - Size of the comment buffer.
-!
-! Outputs:
-!  comment  - The comment.
-!  hdferr   - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  July 6, 2012
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Retrieves comment for specified object.
+!!
+!! \param loc_id  Identifier of a file, group, dataset, or named datatype.
+!! \param name    Name of the object whose comment is to be retrieved, specified as a path relative to loc_id.
+!! \param comment The comment.
+!! \param hdferr  \fortran_error
+!! \param bufsize Size of the comment buffer.
+!! \param lapl_id File access property list identifier.
+!!
+!! See C API: @ref H5Oget_comment_by_name()
+!!
   SUBROUTINE h5oget_comment_by_name_f(loc_id, name, comment, hdferr, bufsize, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
@@ -602,7 +710,6 @@ CONTAINS
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(SIZE_T) , INTENT(OUT), OPTIONAL :: bufsize
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
-!*****
 
     INTEGER(SIZE_T) :: commentsize_default
     INTEGER(SIZE_T) :: name_size
@@ -637,29 +744,20 @@ CONTAINS
 
   END SUBROUTINE h5oget_comment_by_name_f
 
-!****s* H5O/h5oincr_refcount_f
-! NAME
-!  h5oincr_refcount_f
-!
-! PURPOSE
-!  Increments an object reference count.
-!
-! Inputs:
-!  obj_id  - Object identifier.
-!
-! Outputs:
-!  hdferr  - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 15, 2012
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Increments an object reference count.
+!!
+!! \param obj_id Object identifier.
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Oincr_refcount()
+!!
   SUBROUTINE h5oincr_refcount_f(obj_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: obj_id
     INTEGER       , INTENT(OUT) :: hdferr
-!*****
 
     INTERFACE
        INTEGER FUNCTION h5oincr_refcount_c(obj_id) BIND(C,NAME='h5oincr_refcount_c')
@@ -673,100 +771,159 @@ CONTAINS
 
   END SUBROUTINE h5oincr_refcount_f
 
-!****s* H5O/h5oopen_by_idx_f
-!
-! NAME
-!  h5oopen_by_idx_f
-!
-! PURPOSE
-!  Open the nth object in a group.
-!
-! Inputs:
-!  loc_id      - A file or group identifier.
-!  group_name  - Name of group, relative to loc_id, in which object is located.
-!  index_type  - Type of index by which objects are ordered.
-!  order       - Order of iteration within index, NOTE: zero-based.
-!  n           - Object to open.
-!
-! Outputs:
-!  obj_id      - An object identifier for the opened object.
-!  hdferr      - Returns 0 if successful and -1 if fails.
-!
-! Optional parameters:
-!  lapl_id     - Link access property list.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 17, 2012
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Open the nth object in a group.
+!!
+!! \param loc_id     A file or group identifier.
+!! \param group_name Name of group, relative to loc_id, in which object is located.
+!! \param index_type Type of index by which objects are ordered.
+!! \param order      Order of iteration within index, NOTE: zero-based.
+!! \param n          Object to open.
+!! \param obj_id     An object identifier for the opened object.
+!! \param hdferr     \fortran_error
+!! \param lapl_id    Link access property list.
+!!
+!! See C API: @ref H5Oopen_by_idx()
+!!
   SUBROUTINE h5oopen_by_idx_f(loc_id, group_name, index_type, order, n, obj_id, &
        hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN)            :: loc_id
-    CHARACTER(LEN=*), INTENT(IN)            :: group_name
-    INTEGER         , INTENT(IN)            :: index_type
-    INTEGER         , INTENT(IN)            :: order
-    INTEGER(HSIZE_T), INTENT(IN)            :: n
-    INTEGER(HID_T)  , INTENT(OUT)           :: obj_id
-    INTEGER         , INTENT(OUT)           :: hdferr
-    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
-!*****
-    INTEGER(SIZE_T) :: group_namelen
+    INTEGER(HID_T)  , INTENT(IN)           :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)           :: group_name
+    INTEGER         , INTENT(IN)           :: index_type
+    INTEGER         , INTENT(IN)           :: order
+    INTEGER(HSIZE_T), INTENT(IN)           :: n
+    INTEGER(HID_T)  , INTENT(OUT)          :: obj_id
+    INTEGER         , INTENT(OUT)          :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T)  :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
 
     INTERFACE
-       INTEGER FUNCTION h5oopen_by_idx_c(loc_id, group_name, group_namelen, index_type, order, n, obj_id, lapl_id_default) &
-            BIND(C,NAME='h5oopen_by_idx_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
+       INTEGER(HID_T) FUNCTION H5Oopen_by_idx(loc_id, group_name, index_type, order, n, lapl_id_default) &
+            BIND(C,NAME='H5Oopen_by_idx')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN)  :: group_name
-         INTEGER(SIZE_T) , INTENT(IN)  :: group_namelen
-         INTEGER         , INTENT(IN)  :: index_type
-         INTEGER         , INTENT(IN)  :: order
-         INTEGER(HSIZE_T), INTENT(IN)  :: n
-         INTEGER(HID_T)  , INTENT(OUT) :: obj_id
-         INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-
-       END FUNCTION h5oopen_by_idx_c
+         INTEGER(HID_T)  , VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*)  :: group_name
+         INTEGER(C_INT) , VALUE :: index_type
+         INTEGER(C_INT) , VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T)  , VALUE :: lapl_id_default
+       END FUNCTION H5Oopen_by_idx
     END INTERFACE
 
-    group_namelen = LEN(group_name)
+    c_group_name = TRIM(group_name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5oopen_by_idx_c(loc_id, group_name, group_namelen, index_type, order, n, obj_id, lapl_id_default)
+    obj_id = H5Oopen_by_idx(loc_id, c_group_name, INT(index_type, C_INT), INT(order, C_INT), n, lapl_id_default)
 
-  END SUBROUTINE H5Oopen_by_idx_f
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
 
-!****s* H5O/h5oset_comment_f
-! NAME
-!  h5oset_comment_f
-!
-! PURPOSE
-!  Sets comment for specified object.
-!
-! Inputs:
-!  obj_id    - Identifier of the target object.
-!  comment   - The new comment.
-!
-! Outputs:
-!  hdferr    - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 15, 2012
-!
-! Fortran90 Interface:
+  END SUBROUTINE H5oopen_by_idx_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously open the nth object in a group.
+!!
+!! \param loc_id     A file or group identifier.
+!! \param group_name Name of group, relative to loc_id, in which object is located.
+!! \param index_type Type of index by which objects are ordered.
+!! \param order      Order of iteration within index, NOTE: zero-based.
+!! \param n          Object to open.
+!! \param obj_id     An object identifier for the opened object.
+!! \param es_id      \fortran_es_id
+!! \param hdferr     \fortran_error
+!!
+!! \param lapl_id    Link access property list.
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Oopen_by_idx_async()
+!!
+  SUBROUTINE h5oopen_by_idx_async_f(loc_id, group_name, index_type, order, n, obj_id, es_id, &
+       hdferr, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)           :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)           :: group_name
+    INTEGER         , INTENT(IN)           :: index_type
+    INTEGER         , INTENT(IN)           :: order
+    INTEGER(HSIZE_T), INTENT(IN)           :: n
+    INTEGER(HID_T)  , INTENT(OUT)          :: obj_id
+    INTEGER(HID_T)  , INTENT(IN)           :: es_id
+    INTEGER         , INTENT(OUT)          :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T)  :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Oopen_by_idx_async(file, func, line, &
+            loc_id, group_name, index_type, order, n, lapl_id_default, es_id) &
+            BIND(C,NAME='H5Oopen_by_idx_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT)  , VALUE :: line
+         INTEGER(HID_T)  , VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*)  :: group_name
+         INTEGER(C_INT) , VALUE :: index_type
+         INTEGER(C_INT) , VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T)  , VALUE :: lapl_id_default
+         INTEGER(HID_T)  , VALUE :: es_id
+       END FUNCTION H5Oopen_by_idx_async
+    END INTERFACE
+
+    c_group_name = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    obj_id = H5Oopen_by_idx_async(file_default, func_default, line_default, &
+         loc_id, c_group_name, INT(index_type, C_INT), INT(order, C_INT), n, lapl_id_default, es_id)
+
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5oopen_by_idx_async_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Sets comment for specified object.
+!!
+!! \param obj_id  Identifier of the target object.
+!! \param comment The new comment.
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Oset_comment()
+!!
   SUBROUTINE h5oset_comment_f(obj_id, comment, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: obj_id
     CHARACTER(LEN=*), INTENT(IN)  :: comment
     INTEGER         , INTENT(OUT) :: hdferr
-!*****
     INTEGER(SIZE_T) :: commentlen
 
     INTERFACE
@@ -787,30 +944,19 @@ CONTAINS
 
   END SUBROUTINE h5oset_comment_f
 
-!****s* H5O/h5oset_comment_by_name_f
-! NAME
-!  h5oset_comment_by_name_f
-!
-! PURPOSE
-!  Sets comment for specified object.
-!
-! Inputs:
-!  loc_id   - Identifier of a file, group, dataset, or named datatype.
-!  name     - Name of the object whose comment is to be set or reset,
-!              specified as a path relative to loc_id.
-!  comment  - The new comment.
-!
-! Outputs:
-!  hdferr   - Returns 0 if successful and -1 if fails.
-!
-! Optional parameters:
-!  lapl_id  - Link access property list identifier.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 15, 2012
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Sets comment for specified object.
+!!
+!! \param loc_id  Identifier of a file, group, dataset, or named datatype.
+!! \param name    Name of the object whose comment is to be set or reset, specified as a path relative to loc_id.
+!! \param comment The new comment.
+!! \param hdferr  \fortran_error
+!! \param lapl_id Link access property list identifier.
+!!
+!! See C API: @ref H5Oset_comment_by_name()
+!!
   SUBROUTINE h5oset_comment_by_name_f(loc_id, name, comment, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: loc_id
@@ -818,7 +964,6 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN)  :: comment
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
-!*****
     INTEGER(SIZE_T) :: commentlen
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T) :: lapl_id_default
@@ -848,72 +993,62 @@ CONTAINS
 
   END SUBROUTINE h5oset_comment_by_name_f
 
-!****s* H5O (F03)/h5ovisit_f_F03
-!
-! NAME
-!  h5ovisit_f
-!
-! PURPOSE
-!  Recursively visits all objects starting from a specified object.
-!
-! Inputs:
-!  object_id  - Identifier of the object at which the recursive iteration begins.
-!  index_type - Type of index; valid values include:
-!                H5_INDEX_NAME_F
-!                H5_INDEX_CRT_ORDER_F
-!  order      - Order in which index is traversed; valid values include:
-!                H5_ITER_DEC_F
-!                H5_ITER_INC_F
-!                H5_ITER_NATIVE_F
-!  op 	      - Callback function passing data regarding the group to the calling application
-!  op_data    - User-defined pointer to data required by the application for its processing of the group
-!
-! Outputs:
-!  return_value - returns the return value of the first operator that returns a positive value, or
-!                 zero if all members were processed with no operator returning non-zero.
-!  hdferr       - Returns 0 if successful and -1 if fails
-!
-! Optional parameters:
-!  fields      - Flags specifying the fields to include in object_info.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  November 19, 2008
-!
-! Fortran2003 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Recursively visits all objects starting from a specified object.
+!!
+!! \param object_id    Identifier of the object at which the recursive iteration begins.
+!! \param index_type   Type of index; valid values include:
+!!                     \li H5_INDEX_NAME_F
+!!                     \li H5_INDEX_CRT_ORDER_F
+!! \param order        Order in which index is traversed; valid values include:
+!!                     \li H5_ITER_DEC_F
+!!                     \li H5_ITER_INC_F
+!!                     \li H5_ITER_NATIVE_F
+!! \param op           Callback function passing data regarding the group to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the group.
+!! \param return_value Returns the return value of the first operator that returns a positive value, or
+!!                     zero if all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
+!! \param fields       Flags specifying the fields to include in object_info.
+!!
+!! See C API: @ref H5Ovisit3()
+!!
   SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr, fields)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: object_id
     INTEGER, INTENT(IN) :: index_type
     INTEGER, INTENT(IN) :: order
-
-    TYPE(C_FUNPTR):: op
-    TYPE(C_PTR)   :: op_data
+    TYPE(C_FUNPTR), INTENT(IN) :: op
+    TYPE(C_PTR), INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER, INTENT(IN), OPTIONAL  :: fields
-!*****
-    INTEGER :: fields_c
+    INTEGER, INTENT(IN), OPTIONAL :: fields
+
+    INTEGER(C_INT) :: fields_c
+    INTEGER(C_INT) :: return_value_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data, fields) &
-            BIND(C, NAME='h5ovisit_c')
-         IMPORT :: C_FUNPTR, C_PTR
+       INTEGER(C_INT) FUNCTION H5Ovisit3(object_id, index_type, order, op, op_data, fields) &
+            BIND(C, NAME='H5Ovisit3')
+         IMPORT :: C_FUNPTR, C_PTR, C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: object_id
-         INTEGER, INTENT(IN) :: index_type
-         INTEGER, INTENT(IN) :: order
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(C_INT), VALUE :: index_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
-         TYPE(C_PTR), VALUE :: op_data
-         INTEGER, INTENT(IN) :: fields
-       END FUNCTION h5ovisit_c
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(C_INT), VALUE :: fields
+       END FUNCTION H5Ovisit3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F,C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields,C_INT)
 
-    return_value = h5ovisit_c(object_id, index_type, order, op, op_data, fields_c)
+    return_value_c = H5Ovisit3(object_id, INT(index_type,C_INT), INT(order, C_INT), op, op_data, fields_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -923,32 +1058,20 @@ CONTAINS
 
   END SUBROUTINE h5ovisit_f
 
-!****s* H5O (F03)/h5oget_info_by_name_f_F03
-!
-! NAME
-!  h5oget_info_by_name_f
-!
-! PURPOSE
-!  Retrieves the metadata for an object, identifying the object by location and relative name.
-!
-! Inputs:
-!  loc_id      - File or group identifier specifying location of group
-!                in which object is located.
-!  name        - Name of group, relative to loc_id.
-!
-! Outputs:
-!  object_info - Buffer in which to return object information.
-!  hdferr      - Returns 0 if successful and -1 if fails.
-!
-! Optional parameters:
-!  lapl_id     - Link access property list.
-!  fields      - Flags specifying the fields to include in object_info.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  December 1, 2008
-!
-! Fortran2003 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Retrieves the metadata for an object, identifying the object by location and relative name.
+!!
+!! \param loc_id      File or group identifier specifying location of group in which object is located.
+!! \param name        Name of group, relative to loc_id.
+!! \param object_info Buffer in which to return object information.
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list.
+!! \param fields      Flags specifying the fields to include in object_info.
+!!
+!! See C API: @ref H5Oget_info_by_name3()
+!!
   SUBROUTINE h5oget_info_by_name_f(loc_id, name, object_info, hdferr, lapl_id, fields)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
@@ -957,64 +1080,118 @@ CONTAINS
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL :: fields
-!*****
-    INTEGER(SIZE_T) :: namelen
+
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
     INTEGER :: fields_c
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
-    INTERFACE
-       INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, object_info, fields) &
-            BIND(C, NAME='h5oget_info_by_name_c')
-         IMPORT :: c_char, c_ptr
-         IMPORT :: HID_T, SIZE_T
-         IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(SIZE_T) , INTENT(IN)  :: namelen
-         INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-         TYPE(C_PTR), VALUE            :: object_info
-         INTEGER         , INTENT(IN)  :: fields
-       END FUNCTION h5oget_info_by_name_c
-    END INTERFACE
+    ! Async -- Not Used --
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    INTEGER(HID_T)      :: es_id = -1
 
     fields_c = H5O_INFO_ALL_F
     IF(PRESENT(fields)) fields_c = fields
 
-    namelen = LEN(name)
+    c_name = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
     ptr = C_LOC(object_info)
 
-    hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, ptr, fields_c)
+    hdferr = H5Oget_info_by_name_c(loc_id, c_name, lapl_id_default, ptr, fields_c, &
+         es_id, file_default, func_default, line_default)
 
   END SUBROUTINE H5Oget_info_by_name_f
 
-!****s* H5O (F03)/h5oget_info_f_F03
-!
-! NAME
-!  h5oget_info_f
-!
-! PURPOSE
-!  Retrieves the metadata for an object specified by an identifier.
-!
-! Inputs:
-!  object_id   - Identifier for target object.
-!
-! Outputs:
-!  object_info - Buffer in which to return object information.
-!  hdferr      - Returns 0 if successful and -1 if fails.
-!
-! Optional parameters:
-!  fields      - Flags specifying the fields to include in object_info.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 11, 2012
-!
-! Fortran2003 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously retrieves the metadata for an object, identifying the object by location and relative name.
+!!
+!! \param loc_id      File or group identifier specifying location of group in which object is located.
+!! \param name        Name of group, relative to loc_id.
+!! \param object_info Pointer to buffer returning object information, points to variable of datatype TYPE(C_H5O_INFO_T).
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list.
+!! \param fields      Flags specifying the fields to include in object_info.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Oget_info_by_name_async()
+!!
+  SUBROUTINE h5oget_info_by_name_async_f(loc_id, name, object_info, es_id, hdferr, &
+       lapl_id, fields, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)            :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)            :: name
+    TYPE(C_PTR)     , INTENT(IN)            :: object_info
+    INTEGER(HID_T)  , INTENT(IN)            :: es_id
+    INTEGER         , INTENT(OUT)           :: hdferr
+    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
+    INTEGER         , INTENT(IN) , OPTIONAL :: fields
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER         , INTENT(IN) , OPTIONAL :: line
+
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(HID_T)  :: lapl_id_default
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    INTEGER(C_INT) :: fields_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Oget_info_by_name_async(file, func, line, &
+            loc_id, name, object_info, fields, lapl_id_default, es_id) BIND(C,NAME='H5Oget_info_by_name_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR), VALUE :: object_info
+         INTEGER(C_INT), VALUE :: fields
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Oget_info_by_name_async
+    END INTERFACE
+
+    fields_c = INT(H5O_INFO_ALL_F, C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields, C_INT)
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    hdferr = H5Oget_info_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_name, object_info, fields_c, lapl_id_default, es_id)
+
+  END SUBROUTINE H5oget_info_by_name_async_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Retrieves the metadata for an object specified by an identifier.
+!!
+!! \param object_id   Identifier for target object.
+!! \param object_info Buffer in which to return object information.
+!! \param hdferr      \fortran_error
+!! \param fields      Flags specifying the fields to include in object_info.
+!!
+!! See C API: @ref H5Oget_info3()
+!!
   SUBROUTINE h5oget_info_f(object_id, object_info, hdferr, fields)
 
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -1023,7 +1200,6 @@ CONTAINS
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER         , INTENT(IN), OPTIONAL  :: fields
-!*****
     TYPE(C_PTR) :: ptr
     INTEGER :: fields_c
 
@@ -1047,35 +1223,24 @@ CONTAINS
 
   END SUBROUTINE H5Oget_info_f
 
-!****s* H5O (F03)/h5oget_info_by_idx_f_F03
-!
-! NAME
-!  h5oget_info_by_idx_f
-!
-! PURPOSE
-!  Retrieves the metadata for an object, identifying the object by an index position.
-!
-! Inputs:
-!  loc_id      - File or group identifier specifying location of group
-!                in which object is located.
-!  group_name  - Name of group in which object is located.
-!  index_field - Index or field that determines the order.
-!  order       - Order within field or index.
-!  n           - Object for which information is to be returned
-!
-! Outputs:
-!  object_info - Buffer in which to return object information.
-!  hdferr      - Returns 0 if successful and -1 if fails.
-!
-! Optional parameters:
-!  lapl_id     - Link access property list. (Not currently used.)
-!  fields      - Flags specifying the fields to include in object_info.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  May 11, 2012
-!
-! Fortran2003 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Retrieves the metadata for an object, identifying the object by an index position.
+!!
+!! \param loc_id      File or group identifier specifying location of group in which object is located.
+!! \param group_name  Name of group in which object is located.
+!! \param index_field Index or field that determines the order.
+!! \param order       Order within field or index.
+!! \param n           Object for which information is to be returned.
+!! \param object_info Buffer in which to return object information.
+!! \param hdferr      \fortran_error
+!!
+!! \param lapl_id     Link access property list. (Not currently used.).
+!! \param fields      Flags specifying the fields to include in object_info.
+!!
+!! See C API: @ref H5Oget_info_by_idx3()
+!!
   SUBROUTINE h5oget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        object_info, hdferr, lapl_id, fields)
 
@@ -1090,7 +1255,6 @@ CONTAINS
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL :: fields
-!*****
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
@@ -1127,41 +1291,30 @@ CONTAINS
   END SUBROUTINE H5Oget_info_by_idx_f
 
 
-!****s* H5O (F03)/h5ovisit_by_name_f_F03
-!
-! NAME
-!  h5ovisit_by_name_f
-!
-! PURPOSE
-!  Recursively visits all objects starting from a specified object.
-!
-! Inputs:
-!  loc_id      - Identifier of a file or group.
-!  object_name - Name of the object, generally relative to loc_id, that will serve as root of the iteration
-!  index_type  - Type of index; valid values include:
-!                 H5_INDEX_NAME_F
-!                 H5_INDEX_CRT_ORDER_F
-!  order       - Order in which index is traversed; valid values include:
-!                 H5_ITER_DEC_F
-!                 H5_ITER_INC_F
-!                 H5_ITER_NATIVE_F
-!  op 	       - Callback function passing data regarding the group to the calling application
-!  op_data     - User-defined pointer to data required by the application for its processing of the group
-!
-! Outputs:
-!  return_value - Returns the return value of the first operator that returns a positive value, or
-!                 zero if all members were processed with no operator returning non-zero.
-!  hdferr       - Returns 0 if successful and -1 if fails
-!
-! Optional parameters:
-!  lapl_id      - Link access property list identifier.
-!  fields       - Flags specifying the fields to include in object_info.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  November 19, 2008
-!
-! Fortran2003 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Recursively visits all objects starting from a specified object.
+!!
+!! \param loc_id       Identifier of a file or group.
+!! \param object_name  Name of the object, generally relative to loc_id, that will serve as root of the iteration.
+!! \param index_type   Type of index; valid values include:
+!!                     \li H5_INDEX_NAME_F
+!!                     \li H5_INDEX_CRT_ORDER_F
+!! \param order        Order in which index is traversed; valid values include:
+!!                     \li H5_ITER_DEC_F
+!!                     \li H5_ITER_INC_F
+!!                     \li H5_ITER_NATIVE_F
+!! \param op           Callback function passing data regarding the group to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the group.
+!! \param return_value Returns the return value of the first operator that returns a positive value, or
+!!                     zero if all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list identifier.
+!! \param fields       Flags specifying the fields to include in object_info.
+!!
+!! See C API: @ref H5Ovisit_by_name3()
+!!
   SUBROUTINE h5ovisit_by_name_f(loc_id, object_name, index_type, order, op, op_data, &
        return_value, hdferr, lapl_id, fields)
     IMPLICIT NONE
@@ -1170,46 +1323,45 @@ CONTAINS
     INTEGER         , INTENT(IN)             :: index_type
     INTEGER         , INTENT(IN)             :: order
 
-    TYPE(C_FUNPTR)                           :: op
-    TYPE(C_PTR)                              :: op_data
+    TYPE(C_FUNPTR)  , INTENT(IN)             :: op
+    TYPE(C_PTR)     , INTENT(INOUT)          :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER         , INTENT(OUT)            :: return_value
     INTEGER         , INTENT(OUT)            :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL  :: fields
-!*****
 
-    INTEGER(SIZE_T) :: namelen
-    INTEGER(HID_T)  :: lapl_id_default
-    INTEGER :: fields_c
+    INTEGER(HID_T)  :: lapl_id_c
+    INTEGER(C_INT)  :: fields_c
+    INTEGER(C_INT)  :: return_value_c
+    CHARACTER(LEN=LEN_TRIM(object_name)+1,KIND=C_CHAR) :: object_name_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-            op, op_data, lapl_id, fields) BIND(C, NAME='h5ovisit_by_name_c')
-         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Ovisit_by_name3(loc_id, object_name, index_type, order, &
+            op, op_data, fields, lapl_id) BIND(C, NAME='H5Ovisit_by_name3')
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR, C_INT
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: object_name
-         INTEGER(SIZE_T)              :: namelen
-         INTEGER         , INTENT(IN) :: index_type
-         INTEGER         , INTENT(IN) :: order
-         TYPE(C_FUNPTR)  , VALUE      :: op
-         TYPE(C_PTR)     , VALUE      :: op_data
-         INTEGER(HID_T)  , INTENT(IN) :: lapl_id
-         INTEGER         , INTENT(IN) :: fields
-       END FUNCTION h5ovisit_by_name_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: object_name
+         INTEGER(C_INT), VALUE  :: index_type
+         INTEGER(C_INT), VALUE  :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(C_INT), VALUE :: fields
+         INTEGER(HID_T), VALUE :: lapl_id
+       END FUNCTION H5Ovisit_by_name3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F, C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields, C_INT)
+    object_name_c = TRIM(object_name)//C_NULL_CHAR
 
-    namelen = LEN(object_name)
+    lapl_id_c = INT(H5P_DEFAULT_F, C_INT)
+    IF(PRESENT(lapl_id)) lapl_id_c = INT(lapl_id, C_INT)
 
-    lapl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-
-    return_value = h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-         op, op_data, lapl_id_default, fields_c)
+    return_value_c = H5Ovisit_by_name3(loc_id, object_name_c, INT(index_type, C_INT), INT(order, C_INT), &
+         op, op_data, fields_c, lapl_id_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -1219,42 +1371,33 @@ CONTAINS
 
   END SUBROUTINE h5ovisit_by_name_f
 
-!****s* H5O/h5otoken_cmp_f
-! NAME
-!  h5otoken_cmp_f
-!
-! PURPOSE
-!  Compare two tokens, which must be from the same file / containers.
-!
-! Inputs:
-!  loc_id   - Identifier of an object in the file / container.
-!  token1   - The first token to compare.
-!  token2   - The second token to compare.
-!
-! Outputs:
-!  cmp_value - Returns 0 if tokens are equal, non-zero for unequal tokens.
-!  hdferr    - Returns 0 if successful and -1 if fails.
-!
-! AUTHOR
-!  Quincey Koziol
-!  January 10, 2019
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5O
+!!
+!! \brief Compare two tokens, which must be from the same file / containers.
+!!
+!! \param loc_id    Identifier of an object in the file / container.
+!! \param token1    The first token to compare.
+!! \param token2    The second token to compare.
+!! \param cmp_value Returns 0 if tokens are equal, non-zero for unequal tokens.
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Otoken_cmp()
+!!
   SUBROUTINE h5otoken_cmp_f(loc_id, token1, token2, cmp_value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1 ! First token
-    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2 ! First token
+    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1
+    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2
     INTEGER         , INTENT(OUT) :: cmp_value
     INTEGER         , INTENT(OUT) :: hdferr
-!*****
     INTERFACE
        INTEGER FUNCTION h5otoken_cmp_c(loc_id, token1, token2, cmp_value) BIND(C,NAME='h5otoken_cmp_c')
          IMPORT :: HID_T, C_PTR, H5O_TOKEN_T_F
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN)     :: loc_id
-         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1 ! First token
-         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2 ! First token
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2
          INTEGER, INTENT(OUT)           :: cmp_value
 
        END FUNCTION h5otoken_cmp_c

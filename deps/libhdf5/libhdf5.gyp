@@ -172,7 +172,6 @@
 				"hdf5/src/H5HLint.c",
 				"hdf5/src/H5HLprfx.c",
 				"hdf5/src/H5HLdblk.c",
-				"hdf5/src/H5HP.c",
 				"hdf5/src/H5I.c",
 				"hdf5/src/H5Iint.c",
 				"hdf5/src/H5Itest.c",
@@ -185,8 +184,6 @@
 				"hdf5/src/H5MFdbg.c",
 				"hdf5/src/H5MFsection.c",
 				"hdf5/src/H5MM.c",
-				"hdf5/src/H5MP.c",
-				"hdf5/src/H5MPtest.c",
 				"hdf5/src/H5O.c",
 				"hdf5/src/H5Odeprec.c",
 				"hdf5/src/H5Oainfo.c",
@@ -340,10 +337,21 @@
 				"hdf5/hl/src/H5LTparse.c",
 				"hdf5/hl/src/H5PT.c",
 				"hdf5/hl/src/H5TB.c",
-				"hdf5/hl/src/H5LD.c"
+				"hdf5/hl/src/H5LD.c",
+        "hdf5/src/H5ESint.c",
+        "hdf5/src/H5ESevent.c",
+        "hdf5/src/H5ESlist.c",
+        "hdf5/src/H5Lint.c",
+        "hdf5/src/H5FDsplitter.c",
+        "hdf5/src/H5Cint.c",
+        "hdf5/src/H5Centry.c",
+        "hdf5/src/H5VLdyn_ops.c",
+        "hdf5/src/H5Tinit_float.c",
+        "hdf5/src/H5FDperform.c"
 			],
 			"include_dirs": [
-				"./hdf5/src"
+				"./hdf5/src",
+        "./hdf5/src/H5FDsubfiling"
 			],
 			"conditions": [
 				["OS == 'win'", {
@@ -354,8 +362,7 @@
 						"NOGDI=1"
 					],
 					"sources": [
-						"settings-win.c",
-						"numeric-types-win.c"
+						"windows-H5build_settings.c"
 					]
 				}],
 				["OS == 'linux'", {
@@ -363,8 +370,7 @@
 						"_GNU_SOURCE=1"
 					],
 					"sources": [
-						"settings-linux.c",
-						"numeric-types-linux.c"
+						"linux-H5build_settings.c"
 					]
 				}],
 				["OS == 'mac'", {
@@ -372,15 +378,15 @@
 						"DARWIN"
 					],
 					"sources": [
-						"settings-darwin.c",
-						"numeric-types-darwin.c"
+						"darwin-H5build_settings.c"
 					]
 				}]
 			],
 			"direct_dependent_settings": {
 				"include_dirs": [
 					"./hdf5/src",
-					"./hdf5/hl/src"
+					"./hdf5/hl/src",
+          "./hdf5/src/H5FDsubfiling"
 				]
 			}
 		}

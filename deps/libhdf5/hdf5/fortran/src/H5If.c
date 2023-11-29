@@ -5,7 +5,6 @@
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -32,11 +31,6 @@
  *  type - object type
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Thursday, March 24, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -70,15 +64,6 @@ h5iget_type_c(hid_t_f *obj_id, int_f *type)
  *  buf - buffer to hold the name
  * RETURNS
  *  length of the name on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
- *  Changed the size of c_buf_size to c_buf_size + 1, which
- *  fixes the problem of truncating the string by 1 if the
- *  exact size of the string (buf_size) is passed in.
- *               M. Scot Breitenfeld, April 21, 2008
  * SOURCE
  */
 int_f
@@ -89,13 +74,13 @@ h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size
     hid_t   c_obj_id;
     ssize_t c_size;
     size_t  c_buf_size;
-    char *  c_buf = NULL;
+    char   *c_buf = NULL;
 
     /*
      * Allocate buffer to hold name of an object
      */
     c_buf_size = (size_t)*buf_size + 1;
-    c_buf      = (char *)HDmalloc(c_buf_size);
+    c_buf      = (char *)malloc(c_buf_size);
     if (c_buf == NULL)
         return ret_value;
 
@@ -115,7 +100,7 @@ h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size
     ret_value  = 0;
 
 DONE:
-    HDfree(c_buf);
+    free(c_buf);
     return ret_value;
 }
 
@@ -130,9 +115,6 @@ DONE:
  *  ref_count - Reference count of ID
  * RETURNS
  *  current reference count on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Tuesday, December  9, 2003
  * SOURCE
  */
 int_f
@@ -166,9 +148,6 @@ done:
  *  ref_count - Reference count of ID
  * RETURNS
  *  current reference count on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Tuesday, December  9, 2003
  * SOURCE
  */
 int_f
@@ -202,10 +181,6 @@ done:
  *  ref_count - Reference count of ID
  * RETURNS
  *  current reference count on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Tuesday, December  9, 2003
- *
  * SOURCE
  */
 int_f
@@ -239,10 +214,6 @@ done:
  *  file_id - file identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 24, 2004
- *
  * SOURCE
  */
 int_f
@@ -272,9 +243,6 @@ done:
  *  Inputs:      obj_id - object identifier
  *  Outputs:     0 = false, 1 = true
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  Elena Pourmal
- *  Tuesday, August 24, 2004
- *  Modifications:
  *---------------------------------------------------------------------------*/
 int_f
 h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)

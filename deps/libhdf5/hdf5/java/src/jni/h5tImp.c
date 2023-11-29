@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -361,7 +360,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1pad(JNIEnv *env, jclass clss, jlong type_id, jintArray pad)
 {
     jboolean isCopy;
-    jint *   P      = NULL;
+    jint    *P      = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -448,7 +447,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1fields_1int(JNIEnv *env, jclass clss, jlong type_id,
 {
     jboolean isCopy;
     jsize    arrLen;
-    jint *   P      = NULL;
+    jint    *P      = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -485,7 +484,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1fields(JNIEnv *env, jclass clss, jlong type_id, jlongArray fields)
 {
     jboolean isCopy;
-    jlong *  fieldsArray = NULL;
+    jlong   *fieldsArray = NULL;
     jsize    arrLen;
     herr_t   status = FAIL;
 
@@ -792,7 +791,7 @@ done:
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1member_1name(JNIEnv *env, jclass clss, jlong type_id, jint field_idx)
 {
-    char *  member_name = NULL;
+    char   *member_name = NULL;
     jstring str         = NULL;
 
     UNUSED(clss);
@@ -949,7 +948,7 @@ Java_hdf_hdf5lib_H5_H5Treclaim(JNIEnv *env, jclass clss, jlong type_id, jlong sp
                                jbyteArray buf)
 {
     jboolean bufIsCopy;
-    jbyte *  pinBuf = NULL;
+    jbyte   *pinBuf = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1042,7 +1041,7 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1tag(JNIEnv *env, jclass clss, jlong type)
 {
     jstring str = NULL;
-    char *  tag = NULL;
+    char   *tag = NULL;
 
     UNUSED(clss);
 
@@ -1108,7 +1107,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int(JNIEnv *env, jclass clss, jlong type_id
 {
     const char *memberName = NULL;
     jboolean    isCopy;
-    jint *      intBuf = NULL;
+    jint       *intBuf = NULL;
     herr_t      status = FAIL;
 
     UNUSED(clss);
@@ -1144,7 +1143,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert(JNIEnv *env, jclass clss, jlong type_id, jst
 {
     const char *memberName = NULL;
     jboolean    isCopy;
-    jbyte *     memberBuf = NULL;
+    jbyte      *memberBuf = NULL;
     herr_t      status    = FAIL;
 
     UNUSED(clss);
@@ -1179,8 +1178,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int(JNIEnv *env, jclass clss, jlong type_id
 {
     jboolean isCopy;
     jstring  str;
-    jint *   intP   = NULL;
-    char *   nameP  = NULL;
+    jint    *intP   = NULL;
+    char    *nameP  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1190,7 +1189,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int(JNIEnv *env, jclass clss, jlong type_id
     if (size <= 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tenum_nameof_int: name size < 0");
 
-    if (NULL == (nameP = (char *)HDmalloc(sizeof(char) * (size_t)size)))
+    if (NULL == (nameP = (char *)malloc(sizeof(char) * (size_t)size)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tenum_nameof_int: failed to allocate name buffer");
 
     PIN_INT_ARRAY(ENVONLY, value, intP, &isCopy, "H5Tenum_nameof_int: value not pinned");
@@ -1209,7 +1208,7 @@ done:
     if (intP)
         UNPIN_INT_ARRAY(ENVONLY, value, intP, JNI_ABORT);
     if (nameP)
-        HDfree(nameP);
+        free(nameP);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int */
@@ -1224,8 +1223,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof(JNIEnv *env, jclass clss, jlong type_id, jby
 {
     jboolean isCopy;
     jstring  str    = NULL;
-    jbyte *  byteP  = NULL;
-    char *   nameP  = NULL;
+    jbyte   *byteP  = NULL;
+    char    *nameP  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1235,7 +1234,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof(JNIEnv *env, jclass clss, jlong type_id, jby
     if (NULL == value)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_nameof: value is NULL");
 
-    if (NULL == (nameP = (char *)HDmalloc(sizeof(char) * (size_t)size)))
+    if (NULL == (nameP = (char *)malloc(sizeof(char) * (size_t)size)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tenum_nameof: failed to allocate name buffer");
 
     PIN_BYTE_ARRAY(ENVONLY, value, byteP, &isCopy, "H5Tenum_nameof: value not pinned");
@@ -1251,7 +1250,7 @@ done:
     if (byteP)
         UNPIN_BYTE_ARRAY(ENVONLY, value, byteP, JNI_ABORT);
     if (nameP)
-        HDfree(nameP);
+        free(nameP);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1nameof */
@@ -1267,7 +1266,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int(JNIEnv *env, jclass clss, jlong type_i
 {
     const char *enumValue = NULL;
     jboolean    isCopy;
-    jint *      enumValueBuf = NULL;
+    jint       *enumValueBuf = NULL;
     herr_t      status       = FAIL;
 
     UNUSED(clss);
@@ -1303,7 +1302,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof(JNIEnv *env, jclass clss, jlong type_id, js
 {
     const char *enumValue = NULL;
     jboolean    isCopy;
-    jbyte *     enumValueBuf = NULL;
+    jbyte      *enumValueBuf = NULL;
     herr_t      status       = FAIL;
 
     UNUSED(clss);
@@ -1337,7 +1336,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1value_1int(JNIEnv *env, jclass clss, jlong t
                                                jintArray value)
 {
     jboolean isCopy;
-    jint *   intP   = NULL;
+    jint    *intP   = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1367,7 +1366,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1value(JNIEnv *env, jclass clss, jlong type_i
                                           jbyteArray value)
 {
     jboolean isCopy;
-    jbyte *  byteP  = NULL;
+    jbyte   *byteP  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1417,7 +1416,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id,
     hsize_t *cdims = NULL;
     size_t   i;
     jsize    dlen;
-    jint *   dimsP = NULL;
+    jint    *dimsP = NULL;
     int      ndims = -1;
 
     UNUSED(clss);
@@ -1433,7 +1432,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id,
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tget_array_dims: dims array length < 0");
     }
 
-    if (NULL == (cdims = (hsize_t *)HDmalloc((size_t)dlen * sizeof(hsize_t))))
+    if (NULL == (cdims = (hsize_t *)malloc((size_t)dlen * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tget_array_dims: failed to allocate dimension buffer");
 
     if ((ndims = H5Tget_array_dims2((hid_t)type_id, cdims)) < 0)
@@ -1445,7 +1444,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id,
 
 done:
     if (cdims)
-        HDfree(cdims);
+        free(cdims);
     if (dimsP)
         UNPIN_INT_ARRAY(ENVONLY, dims, dimsP, (ndims < 0) ? JNI_ABORT : 0);
 
@@ -1552,7 +1551,7 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id,
     jboolean isCopy;
     hsize_t *cdims = NULL;
     size_t   i;
-    jlong *  dimsP = NULL;
+    jlong   *dimsP = NULL;
     jsize    dlen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -1573,7 +1572,7 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id,
     if (dlen != rank)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tarray_create: dimension array length != array rank");
 
-    if (NULL == (cdims = (hsize_t *)HDmalloc((size_t)dlen * sizeof(hsize_t))))
+    if (NULL == (cdims = (hsize_t *)malloc((size_t)dlen * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tarray_create: failed to allocate dimension buffer");
 
     for (i = 0; i < (size_t)dlen; i++) {
@@ -1585,7 +1584,7 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id,
 
 done:
     if (cdims)
-        HDfree(cdims);
+        free(cdims);
     if (dimsP)
         UNPIN_LONG_ARRAY(ENVONLY, dims, dimsP, (retVal < 0) ? JNI_ABORT : 0);
 
@@ -1603,7 +1602,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id
     jboolean isCopy;
     hsize_t *cdims = NULL;
     size_t   i;
-    jlong *  dimsP = NULL;
+    jlong   *dimsP = NULL;
     jsize    dlen;
     int      ndims = -1;
 
@@ -1619,7 +1618,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tarray_get_dims2: dims array length < 0");
     }
 
-    if (NULL == (cdims = (hsize_t *)HDmalloc((size_t)dlen * sizeof(hsize_t))))
+    if (NULL == (cdims = (hsize_t *)malloc((size_t)dlen * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tarray_get_dims2: failed to allocate dimension buffer");
 
     if ((ndims = H5Tget_array_dims2((hid_t)type_id, (hsize_t *)cdims)) < 0)
@@ -1631,7 +1630,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id
 
 done:
     if (cdims)
-        HDfree(cdims);
+        free(cdims);
     if (dimsP)
         UNPIN_LONG_ARRAY(ENVONLY, dims, dimsP, (ndims < 0) ? JNI_ABORT : 0);
 
@@ -1648,8 +1647,8 @@ Java_hdf_hdf5lib_H5_H5Tconvert(JNIEnv *env, jclass clss, jlong src_id, jlong dst
                                jbyteArray buf, jbyteArray background, jlong plist_id)
 {
     jboolean isCopy;
-    jbyte *  bufP   = NULL;
-    jbyte *  bgP    = NULL;
+    jbyte   *bufP   = NULL;
+    jbyte   *bgP    = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1688,7 +1687,7 @@ Java_hdf_hdf5lib_H5_H5Tflush(JNIEnv *env, jclass clss, jlong loc_id)
 
 done:
     return;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Tflush */
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -1705,7 +1704,7 @@ Java_hdf_hdf5lib_H5_H5Trefresh(JNIEnv *env, jclass clss, jlong loc_id)
 
 done:
     return;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Trefresh */
 
 #ifdef __cplusplus
 } /* end extern "C" */

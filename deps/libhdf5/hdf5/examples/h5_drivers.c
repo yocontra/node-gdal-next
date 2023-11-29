@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -35,7 +34,7 @@ void
 cleanup(const char *filename)
 {
     if (cleanup_g == -1)
-        cleanup_g = getenv("HDF5_NOCLEANUP") ? 0 : 1;
+        cleanup_g = getenv(HDF5_NOCLEANUP) ? 0 : 1;
     if (cleanup_g)
         remove(filename);
 }

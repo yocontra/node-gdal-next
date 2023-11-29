@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -102,6 +101,12 @@ PROGRAM fortranlibtest
   CALL test_genprop_basic_class(ret_total_error )
   CALL write_test_status(ret_total_error, &
        ' Testing basic generic property list class creation functionality', &
+       total_error)
+
+  ret_total_error = 0
+  CALL test_freelist(ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing free list', &
        total_error)
 
   WRITE(*,*)

@@ -1,15 +1,17 @@
-!****h* ROBODoc/H5L
-!
-! NAME
-!  MODULE H5L
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5L functions.
+!> @defgroup FH5L Fortran Link (H5L) Interface
+!!
+!! @see H5L, C-API
+!!
+!! @see @ref H5L_UG, User Guide
+!!
+
+!> @ingroup FH5L
+!!
+!! @brief This module contains Fortran interfaces for H5L functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -32,86 +34,62 @@
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
-!*****
 
 MODULE H5L
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_INT
   USE H5GLOBAL
-
   IMPLICIT NONE
 
-!****t* H5L (F03)/h5l_info_t
-!
-! Fortran2003 Derived Type:
-!
   TYPE, bind(c) :: union_t
-     TYPE(H5O_TOKEN_T_F) :: token
-     INTEGER(size_t)  :: val_size
+     TYPE(H5O_TOKEN_T_F) :: token !< Type for object tokens
+     INTEGER(size_t)  :: val_size !< Size of a soft link or user-defined link value
   END TYPE union_t
 
+!
+! @brief Fortran2003 Derived Type for @ref H5L_info_t
+!
   TYPE, bind(c) :: h5l_info_t
-     INTEGER(c_int) :: type ! H5L_type_t     type
-!       LOGICAL(c_bool) :: corder_valid ! hbool_t        corder_valid
-     INTEGER(c_int64_t) :: corder ! int64_t        corder;
-     INTEGER(c_int) :: cset ! H5T_cset_t     cset;
+     INTEGER(c_int) :: type !< Specifies the link class. Valid values include the following:
+                            !< \li H5L_TYPE_HARD_F     Hard link
+                            !< \li H5L_TYPE_SOFT_F     Soft link
+                            !< \li H5L_TYPE_EXTERNAL_F External link
+                            !< \li H5L_TYPE_ERROR_F    Invalid link type id
+ !   LOGICAL(c_bool) :: corder_valid ! bool corder_valid
+     INTEGER(c_int64_t) :: corder !< Creation order
+     INTEGER(c_int)     :: cset   !< Character set of link name is encoded. Valid values include the following:
+                                  !< \li H5T_CSET_ASCII  US ASCII
+                                  !< \li H5T_CSET_UTF8   UTF-8 Unicode encoding
      TYPE(union_t) :: u
   END TYPE h5l_info_t
 
-!*****
-
-!type specifies the link class. Valid values include the following:
-!     	H5L_TYPE_HARD 	  Hard link
-!     	H5L_TYPE_SOFT 	  Soft link
-!     	H5L_TYPE_EXTERNAL External link
-!     	H5L_TYPE_ERROR 	  Error
-!cset specifies the character set in which the link name is encoded. Valid values include the following:
-!     	H5T_CSET_ASCII 	US ASCII
-!     	H5T_CSET_UTF8   UTF-8 Unicode encoding
-
 CONTAINS
 
-!
-!****s* H5L/h5lcopy_f
-!
-! NAME
-!  h5lcopy_f
-!
-! PURPOSE
-!  Copies a link from one location to another.
-!
-! INPUTS
-!  src_loc_id 	 - Location identifier of the source link
-!  src_name 	 - Name of the link to be copied
-!  dest_loc_id 	 - Location identifier specifying the destination of the copy
-!  dest_name 	 - Name to be assigned to the NEW copy
-!  loc_id 	 - Identifier of the file or group containing the object
-!  name 	 - Name of the link to delete
-!
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lcpl_id 	 - Link creation property list identifier
-!  lapl_id 	 - Link access property list identifier
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 27, 2008
-!
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Copies a link from one location to another.
+!!
+!! \param src_loc_id  Location identifier. The identifier may be that of a file, group, dataset, or named datatype.
+!! \param src_name    Name of the link to be copied.
+!! \param dest_loc_id Location identifier. The identifier may be that of a file, group, dataset, or named datatype.
+!! \param dest_name   Name to be assigned to the new copy.
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lcopy()
+!!
   SUBROUTINE h5lcopy_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, &
        lcpl_id, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: src_loc_id  ! Location identifier of the source link
-    CHARACTER(LEN=*), INTENT(IN) :: src_name   ! Name of the link to be copied
-    INTEGER(HID_T), INTENT(IN) :: dest_loc_id ! Location identifier specifying the destination of the copy
-    CHARACTER(LEN=*), INTENT(IN) :: dest_name ! Name to be assigned to the NEW copy
+    INTEGER(HID_T), INTENT(IN) :: src_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: src_name
+    INTEGER(HID_T), INTENT(IN) :: dest_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: dest_name
 
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code:
-                                          ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier
-!*****
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
 
@@ -150,251 +128,401 @@ CONTAINS
 
   END SUBROUTINE h5lcopy_f
 
-!
-!****s* H5L/h5ldelete_f
-!
-! NAME
-!  h5ldelete_f
-!
-! PURPOSE
-!  Removes a link from a group.
-!
-! INPUTS
-!  loc_id 	 - Identifier of the file or group containing the object
-!  name 	 - Name of the link to delete
-!
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list identifier
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2008
-!
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Removes a link from a group.
+!!
+!! \param loc_id  Identifier of the file or group containing the object.
+!! \param name    Name of the link to delete.
+!! \param hdferr  \fortran_error
+!! \param lapl_id Link access property list identifier.
+!!
+!! See C API: @ref H5Ldelete()
+!!
   SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id  ! Identifier of the file or group containing the object
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of the link to delete
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code:
-                                          ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier
-!*****
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: namelen
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5ldelete_c(loc_id, name, namelen, lapl_id_default) BIND(C,name='h5ldelete_c')
-         IMPORT :: c_char
+       INTEGER(C_INT) FUNCTION H5Ldelete(loc_id, name, lapl_id_default) BIND(C,name='H5Ldelete')
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(SIZE_T) :: namelen
-       END FUNCTION h5ldelete_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION h5ldelete
     END INTERFACE
 
-    namelen = LEN(name)
+    c_name  = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5ldelete_c(loc_id, name, namelen, lapl_id_default)
+    hdferr = INT(H5Ldelete(loc_id, c_name, lapl_id_default))
 
   END SUBROUTINE h5ldelete_f
 
-!
-!****s* H5L/H5Lcreate_soft_f
-!
-! NAME
-!  H5Lcreate_soft_f
-!
-! PURPOSE
-!  Creates a soft link to an object.
-!
-! INPUTS
-!  target_path 	 - Path to the target object, which is not required to exist.
-!  link_loc_id 	 - The file or group identifier for the new link.
-!  link_name 	 - The name of the new link.
-!
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lcpl_id 	 - Link creation property list identifier.
-!  lapl_id 	 - Link access property list identifier.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 20, 2008
-!
-! SOURCE
-  SUBROUTINE h5lcreate_soft_f(target_path, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously removes a link from a group.
+!!
+!! \param loc_id  Identifier of the file or group containing the object.
+!! \param name    Name of the link to delete.
+!! \param es_id   \fortran_es_id
+!! \param hdferr  \fortran_error
+!! \param lapl_id Link access property list identifier.
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Ldelete_async()
+!!
+  SUBROUTINE h5ldelete_async_f(loc_id, name, es_id, hdferr, lapl_id, file, func, line)
     IMPLICIT NONE
-    CHARACTER(LEN=*), INTENT(IN) :: target_path   ! Path to the target object, which is not required to exist.
-    INTEGER(HID_T), INTENT(IN) :: link_loc_id     ! The file or group identifier for the new link.
-    CHARACTER(LEN=*), INTENT(IN) :: link_name     ! The name of the new link.
-    INTEGER, INTENT(OUT) :: hdferr                ! Error code:
-                                                  !   0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier.
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier.
-!*****
-    INTEGER(HID_T) :: lcpl_id_default
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
+
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: target_path_len
-    INTEGER(SIZE_T) :: link_name_len
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION h5lcreate_soft_c(target_path, target_path_len, &
-            link_loc_id, &
-            link_name,link_name_len, &
-            lcpl_id_default, lapl_id_default ) BIND(C,NAME='h5lcreate_soft_c')
-         IMPORT :: c_char
+       INTEGER(C_INT) FUNCTION H5Ldelete_async(file, func, line, loc_id, name, lapl_id_default, es_id) &
+            BIND(C,name='H5Ldelete_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: target_path
-         INTEGER(SIZE_T) :: target_path_len
-         INTEGER(HID_T), INTENT(IN) ::   link_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
-         INTEGER(SIZE_T) :: link_name_len
-         INTEGER(HID_T) :: lcpl_id_default
-         INTEGER(HID_T) :: lapl_id_default
-       END FUNCTION h5lcreate_soft_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Ldelete_async
     END INTERFACE
 
-    target_path_len = LEN(target_path)
-    link_name_len = LEN(link_name)
+    c_name  = TRIM(name)//C_NULL_CHAR
 
-    lcpl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    hdferr = h5lcreate_soft_c(target_path, target_path_len,&
-         link_loc_id, &
-         link_name, link_name_len, &
-         lcpl_id_default, lapl_id_default )
+    hdferr = INT(H5Ldelete_async(file_default, func_default, line_default, &
+         loc_id, c_name, lapl_id_default, es_id))
+
+  END SUBROUTINE h5ldelete_async_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Creates a soft link to an object.
+!!
+!! \param target_path Path to the target object, which is not required to exist.
+!! \param link_loc_id The file or group identifier for the new link.
+!! \param link_name   The name of the new link.
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lcreate_soft()
+!!
+  SUBROUTINE h5lcreate_soft_f(target_path, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: target_path
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(HID_T) :: lcpl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(target_path) +1,KIND=C_CHAR) :: c_target_path
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lcreate_soft(target_path, link_loc_id, link_name, &
+            lcpl_id_default, lapl_id_default ) BIND(C,NAME='H5Lcreate_soft')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: target_path
+         INTEGER(HID_T), VALUE ::   link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Lcreate_soft
+    END INTERFACE
+
+    c_target_path  = TRIM(target_path)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
+
+    lcpl_id_default = H5P_DEFAULT_F
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    hdferr = INT(H5Lcreate_soft(c_target_path, link_loc_id, c_link_name, &
+         lcpl_id_default, lapl_id_default))
 
   END SUBROUTINE h5lcreate_soft_f
 
-!
-!****s* H5L/H5Lcreate_hard_f
-!
-! NAME
-!  H5Lcreate_hard_f
-!
-! PURPOSE
-!  Creates a hard link to an object.
-!
-! INPUTS
-!
-!  obj_loc_id 	 - The file or group identifier for the target object.
-!  obj_name 	 - Name of the target object, which must already exist.
-!  link_loc_id 	 - The file or group identifier for the new link.
-!  link_name 	 - The name of the new link.
-!
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lcpl_id 	 - Link creation property list identifier.
-!  lapl_id 	 - Link access property list identifier.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 27, 2008
-!
-! SOURCE
-  SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously creates a soft link to an object.
+!!
+!! \param target_path Path to the target object, which is not required to exist.
+!! \param link_loc_id The file or group identifier for the new link.
+!! \param link_name   The name of the new link.
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Lcreate_soft_async()
+!!
+  SUBROUTINE h5lcreate_soft_async_f(target_path, link_loc_id, link_name, es_id, hdferr,&
+       lcpl_id, lapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_loc_id  ! The file or group identifier for the target object.
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of the target object, which must already exist.
-    INTEGER(HID_T), INTENT(IN) :: link_loc_id ! The file or group identifier for the new link.
-    CHARACTER(LEN=*), INTENT(IN) :: link_name ! The name of the new link.
+    CHARACTER(LEN=*), INTENT(IN) :: target_path
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
+    INTEGER(HID_T), INTENT(IN)    :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code:
-                                          ! 0 on success and -1 on failure
-
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) ::   lcpl_id         ! Link creation property list identifier.
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) ::   lapl_id         ! Link access property list identifier.
-!*****
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
-
-    INTEGER(SIZE_T) :: obj_namelen
-    INTEGER(SIZE_T) :: link_namelen
+    CHARACTER(LEN=LEN_TRIM(target_path) +1,KIND=C_CHAR) :: c_target_path
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION h5lcreate_hard_c(obj_loc_id, obj_name, obj_namelen, &
-            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lcreate_hard_c')
-         IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Lcreate_soft_async(file, func, line, target_path, link_loc_id, link_name, &
+            lcpl_id_default, lapl_id_default, es_id) BIND(C,NAME='H5Lcreate_soft_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: obj_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-         INTEGER(HID_T), INTENT(IN) :: link_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
-         INTEGER(SIZE_T) :: obj_namelen
-         INTEGER(SIZE_T) :: link_namelen
-         INTEGER(HID_T) :: lcpl_id_default
-         INTEGER(HID_T) :: lapl_id_default
-       END FUNCTION h5lcreate_hard_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: target_path
+         INTEGER(HID_T), VALUE ::   link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Lcreate_soft_async
     END INTERFACE
-    obj_namelen = LEN(obj_name)
-    link_namelen = LEN(link_name)
+
+    c_target_path  = TRIM(target_path)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
 
     lcpl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5lcreate_hard_c(obj_loc_id, obj_name, obj_namelen, &
-            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default)
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Lcreate_soft_async(file_default, func_default, line_default,&
+         c_target_path, link_loc_id, c_link_name, lcpl_id_default, lapl_id_default, es_id))
+
+  END SUBROUTINE h5lcreate_soft_async_f
+!>
+!! \ingroup FH5L
+!!
+!! \brief Creates a hard link to an object.
+!!
+!! \param obj_loc_id  The file or group identifier for the target object.
+!! \param obj_name    Name of the target object, which must already exist.
+!! \param link_loc_id The file or group identifier for the new link.
+!! \param link_name   The name of the new link.
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lcreate_hard()
+!!
+  SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, &
+       lcpl_id, lapl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(HID_T) :: lcpl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name) +1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lcreate_hard(obj_loc_id, obj_name, &
+            link_loc_id, link_name, lcpl_id_default, lapl_id_default) BIND(C,NAME='H5Lcreate_hard')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: obj_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         INTEGER(HID_T), VALUE :: link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Lcreate_hard
+    END INTERFACE
+
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
+
+    lcpl_id_default = H5P_DEFAULT_F
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    hdferr = INT(H5Lcreate_hard(obj_loc_id, c_obj_name, &
+         link_loc_id, c_link_name, lcpl_id_default, lapl_id_default))
 
   END SUBROUTINE h5lcreate_hard_f
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously creates a hard link to an object.
+!!
+!! \param obj_loc_id  The file or group identifier for the target object.
+!! \param obj_name    Name of the target object, which must already exist.
+!! \param link_loc_id The file or group identifier for the new link.
+!! \param link_name   The name of the new link.
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Lcreate_hard_async()
+!!
+  SUBROUTINE h5lcreate_hard_async_f(obj_loc_id, obj_name, link_loc_id, link_name, es_id, hdferr, &
+       lcpl_id, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-!
-!****s* H5L/H5Lcreate_external_f
-!
-! NAME
-!  H5Lcreate_external_f
-!
-! PURPOSE
-!  Creates a soft link to an object in a different file.
-!
-! INPUTS
-!
-!  file_name 	 - Name of the file containing the target object. Neither the file nor the target object is
-!  required to exist. May be the file the link is being created in.
-!  obj_name 	 - Path within the target file to the target object.
-!  link_loc_id 	 - The file or group identifier for the new link.
-!  link_name 	 - The name of the new link.
-!
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lcpl_id 	 - Link creation property list identifier.
-!  lapl_id 	 - Link access property list identifier.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 27, 2008
-! SOURCE
+    INTEGER(HID_T) :: lcpl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name) +1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lcreate_hard_async(file, func, line, obj_loc_id, obj_name, &
+            link_loc_id, link_name, lcpl_id_default, lapl_id_default, es_id) BIND(C,NAME='H5Lcreate_hard_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: obj_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         INTEGER(HID_T), VALUE :: link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Lcreate_hard_async
+    END INTERFACE
+
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
+
+    lcpl_id_default = H5P_DEFAULT_F
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Lcreate_hard_async(file_default, func_default, line_default, obj_loc_id, c_obj_name, &
+         link_loc_id, c_link_name, lcpl_id_default, lapl_id_default, es_id))
+
+  END SUBROUTINE h5lcreate_hard_async_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Creates a soft link to an object in a different file.
+!!
+!! \param file_name   Name of the file containing the target object. Neither the file nor the target object is
+!!                    required to exist. May be the file the link is being created in.
+!! \param obj_name    Path within the target file to the target object.
+!! \param link_loc_id The file or group identifier for the new link.
+!! \param link_name   The name of the new link.
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lcreate_external()
+!!
   SUBROUTINE h5lcreate_external_f(file_name, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
-    CHARACTER(LEN=*), INTENT(IN) :: file_name ! Name of the file containing the target object. Neither
-                                              ! the file nor the target object is required to exist.
-                                              ! May be the file the link is being created in.
-    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of the target object, which must already exist.
-    INTEGER(HID_T), INTENT(IN) :: link_loc_id ! The file or group identifier for the new link.
-    CHARACTER(LEN=*), INTENT(IN) :: link_name ! The name of the new link.
+    CHARACTER(LEN=*), INTENT(IN) :: file_name
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
 
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code:
-                                          ! 0 on success and -1 on failure
+    INTEGER, INTENT(OUT) :: hdferr
 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier.
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier.
-!*****
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
 
@@ -433,221 +561,310 @@ CONTAINS
 
   END SUBROUTINE h5lcreate_external_f
 
-!
-!****s* H5L/h5ldelete_by_idx_f
-!
-! NAME
-!  h5ldelete_by_idx_f
-!
-! PURPOSE
-!  Removes the nth link in a group.
-! INPUTS
-!  loc_id 	 - File or group identifier specifying location of subject group
-!  group_name 	 - Name of subject group
-!  index_field 	 - Type of index; Possible values are:
-!                    H5_INDEX_UNKNOWN_F = -1  - Unknown index type
-!                    H5_INDEX_NAME_F 	      - Index on names
-!                    H5_INDEX_CRT_ORDER_F     - Index on creation order
-!                    H5_INDEX_N_F 	      - Number of indices defined
-!
-!  order 	 - Order within field or index; Possible values are:
-!                    H5_ITER_UNKNOWN_F 	 - Unknown order
-!                    H5_ITER_INC_F 	 - Increasing order
-!                    H5_ITER_DEC_F 	 - Decreasing order
-!                    H5_ITER_NATIVE_F 	 - No particular order, whatever is fastest
-!                    H5_ITER_N_F 	 - Number of iteration orders
-!
-!  n 	         - Link for which to retrieve information
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 29, 2008
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Removes the nth link in a group.
+!!
+!! \param loc_id      File or group identifier specifying location of subject group.
+!! \param group_name  Name of subject group.
+!! \param index_field Type of index; Possible values are:
+!!                    \li H5_INDEX_UNKNOWN_F = -1 - Unknown index type
+!!                    \li H5_INDEX_NAME_F         - Index on names
+!!                    \li H5_INDEX_CRT_ORDER_F    - Index on creation order
+!!                    \li H5_INDEX_N_F            - Number of indices defined
+!! \param order       Order within field or index; Possible values are:
+!!                    \li H5_ITER_UNKNOWN_F - Unknown order
+!!                    \li H5_ITER_INC_F     - Increasing order
+!!                    \li H5_ITER_DEC_F     - Decreasing order
+!!                    \li H5_ITER_NATIVE_F  - No particular order, whatever is fastest
+!!                    \li H5_ITER_N_F       - Number of iteration orders
+!! \param n           Link for which to retrieve information.
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list.
+!!
+!! See C API: @ref H5Ldelete_by_idx()
+!!
   SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id       ! Identifer for object to which attribute is attached
-    CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of object, relative to location,
-                                               !  from which attribute is to be removed
-    INTEGER, INTENT(IN) :: index_field         ! Type of index; Possible values are:
-                                               !    H5_INDEX_UNKNOWN_F   - Unknown index type
-                                               !    H5_INDEX_NAME_F      - Index on names
-                                               !    H5_INDEX_CRT_ORDER_F - Index on creation order
-                                               !    H5_INDEX_N_F	      - Number of indices defined
-    INTEGER, INTENT(IN) :: order               ! Order in which to iterate over index; Possible values are:
-                                               !    H5_ITER_UNKNOWN_F  - Unknown order
-                                               !    H5_ITER_INC_F      - Increasing order
-                                               !    H5_ITER_DEC_F      - Decreasing order
-                                               !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-                                               !    H5_ITER_N_F	    - Number of iteration orders
-    INTEGER(HSIZE_T), INTENT(IN) :: n      ! Offset within index
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code:
-                                           ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id     ! Link access property list
-!*****
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: group_name
+    INTEGER, INTENT(IN) :: index_field
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: group_namelen
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
 
     INTERFACE
-       INTEGER FUNCTION h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default) &
-            BIND(C,NAME='h5ldelete_by_idx_c')
-         IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
+       INTEGER(C_INT) FUNCTION H5Ldelete_by_idx(loc_id, group_name, index_field, order, n, lapl_id_default) &
+            BIND(C,NAME='H5Ldelete_by_idx')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
-         INTEGER, INTENT(IN) :: index_field
-         INTEGER, INTENT(IN) :: order
-         INTEGER(HSIZE_T), INTENT(IN) :: n
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(SIZE_T) :: group_namelen
-       END FUNCTION h5ldelete_by_idx_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
+         INTEGER(C_INT), VALUE :: index_field
+         INTEGER(C_INT), VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Ldelete_by_idx
     END INTERFACE
+
+    c_group_name  = TRIM(group_name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    group_namelen = LEN(group_name)
-    hdferr = h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default)
+    hdferr = INT(H5Ldelete_by_idx(loc_id, c_group_name, INT(index_field,C_INT), INT(order, C_INT), n, lapl_id_default))
 
   END SUBROUTINE h5ldelete_by_idx_f
 
-!
-!****s* H5L/H5Lexists_f
-!
-! NAME
-!  H5Lexists_f
-!
-! PURPOSE
-!  Check if a link with a particular name exists in a group.
-!
-! INPUTS
-!  loc_id 	 - Identifier of the file or group to query.
-!  name 	 - Link name to check
-!
-! OUTPUTS
-!  link_exists 	 - link exists status (.TRUE.,.FALSE.)
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list identifier.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 29, 2008
-!
-! SOURCE
-  SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously removes the nth link in a group.
+!!
+!! \param loc_id      File or group identifier specifying location of subject group.
+!! \param group_name  Name of subject group.
+!! \param index_field Type of index; Possible values are:
+!!                    \li H5_INDEX_UNKNOWN_F = -1 - Unknown index type
+!!                    \li H5_INDEX_NAME_F         - Index on names
+!!                    \li H5_INDEX_CRT_ORDER_F    - Index on creation order
+!!                    \li H5_INDEX_N_F            - Number of indices defined
+!! \param order       Order within field or index; Possible values are:
+!!                    \li H5_ITER_UNKNOWN_F - Unknown order
+!!                    \li H5_ITER_INC_F     - Increasing order
+!!                    \li H5_ITER_DEC_F     - Decreasing order
+!!                    \li H5_ITER_NATIVE_F  - No particular order, whatever is fastest
+!!                    \li H5_ITER_N_F       - Number of iteration orders
+!! \param n           Link for which to retrieve information.
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Ldelete_by_idx_async()
+!!
+  SUBROUTINE h5ldelete_by_idx_async_f(loc_id, group_name, index_field, order, n, es_id, hdferr, &
+       lapl_id, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id  ! Identifier of the file or group to query.
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Link name to check.
-    LOGICAL, INTENT(OUT) :: link_exists   ! .TRUE. if exists, .FALSE. otherwise
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code:
-                                          ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
-                                          ! Link access property list identifier.
-!*****
-    INTEGER :: link_exists_c
-    INTEGER(HID_T)  :: lapl_id_default
-    INTEGER(SIZE_T) :: namelen
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: group_name
+    INTEGER, INTENT(IN) :: index_field
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c) &
-            BIND(C,NAME='h5lexists_c')
-         IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Ldelete_by_idx_async(file, func, line, loc_id, group_name, index_field, order, n, &
+            lapl_id_default, es_id) BIND(C,NAME='H5Ldelete_by_idx_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(SIZE_T), INTENT(IN) :: namelen
-         INTEGER, INTENT(OUT) :: link_exists_c
-         INTEGER(HID_T) :: lapl_id_default
-
-       END FUNCTION h5lexists_c
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
+         INTEGER(C_INT), VALUE :: index_field
+         INTEGER(C_INT), VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Ldelete_by_idx_async
     END INTERFACE
 
-    namelen = LEN(name)
+    c_group_name  = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Ldelete_by_idx_async(file_default, func_default, line_default, &
+         loc_id, c_group_name, INT(index_field,C_INT), INT(order, C_INT), n, lapl_id_default, es_id))
+
+  END SUBROUTINE h5ldelete_by_idx_async_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Check if a link with a particular name exists in a group.
+!!
+!! \param loc_id      Identifier of the file or group to query.
+!! \param name        Link name to check.
+!! \param link_exists Link exists status (.TRUE.,.FALSE.).
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lexists()
+!!
+  SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    LOGICAL, INTENT(OUT) :: link_exists
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(C_INT) :: link_exists_c
+    INTEGER(HID_T)  :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lexists(loc_id, name, lapl_id_default) BIND(C,NAME='H5Lexists')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+
+       END FUNCTION H5Lexists
+    END INTERFACE
+
+    c_name = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c)
+    link_exists_c = H5Lexists(loc_id, c_name, lapl_id_default)
 
     link_exists = .FALSE.
-    IF(link_exists_c.GT.0) link_exists = .TRUE.
+    IF(link_exists_c.GT.0_C_INT) link_exists = .TRUE.
+
+    hdferr = 0
+    IF(link_exists_c.LT.0_C_INT) hdferr = -1
+
+    hdferr = 0
+    IF(link_exists_c.LT.0) hdferr = -1
 
   END SUBROUTINE h5lexists_f
 
-!
-!****s* H5L/h5lget_info_f
-!
-! NAME
-!  h5lget_info_f
-!
-! PURPOSE
-!  Returns information about a link.
-!
-! INPUTS
-!  link_loc_id 	 - File or group identifier.
-!  link_name 	 - Name of the link for which information is being sought
-!
-! OUTPUTS
-!            NOTE: In C these are contained in the structure H5L_info_t
-!
-!  cset 	 - indicates the character set used for link’s name.
-!  corder 	 - specifies the link’s creation order position.
-!  corder_valid  - indicates whether the value in corder is valid.
-!  link_type 	 - specifies the link class:
-!                    H5L_TYPE_HARD_F 	 - Hard link
-!                    H5L_TYPE_SOFT_F 	 - Soft link
-!                    H5L_TYPE_EXTERNAL_F - External link
-!                    H5L_TYPE_ERROR_ F   - Error
-!  token 	 - If the link is a hard link, token specifies the object token that the link points to
-!  val_size 	 - If the link is a symbolic link, val_size will be the length of the link value, e.g.,
-!                  the length of the name of the pointed-to object with a null terminator.
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 29, 2008
-!
-! HISTORY
-!   Changed the link_type names to match those in C (bug 1720) from,
-!   H5L_LINK_HARD_F, H5L_LINK_SOFT_F,H5L_LINK_EXTERNAL_F,H5L_LINK_ERROR_F
-!   to
-!   H5L_TYPE_HARD_F, H5L_TYPE_SOFT_F,H5L_TYPE_EXTERNAL_F,H5L_TYPE_ERROR_F
-!   MSB January 8, 2010.
-!
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously checks if a link with a particular name exists in a group.
+!!
+!! \param loc_id      Identifier of the file or group to query.
+!! \param name        Link name to check.
+!! \param link_exists Pointer to link exists status. It should be declared INTEGER(C_INT) and initialized
+!!                    to zero (false) for portability. It will return one when true. LOGICAL(C_BOOL) is also
+!!                    acceptable but may encounter atypical anomalies. It should be initialized to false when used.
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list identifier.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Lexists_async()
+!!
+  SUBROUTINE h5lexists_async_f(loc_id, name, link_exists, es_id, hdferr, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    TYPE(C_PTR)     , INTENT(IN) :: link_exists
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T)  :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lexists_async(file, func, line, &
+            loc_id, name, exists, lapl_id_default, es_id) BIND(C,NAME='H5Lexists_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR)   , VALUE :: exists
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Lexists_async
+    END INTERFACE
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Lexists_async(file_default, func_default, line_default, loc_id, c_name, &
+         link_exists, lapl_id_default, es_id))
+
+  END SUBROUTINE h5lexists_async_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Returns information about a link.
+!!
+!! \param link_loc_id File or group identifier.
+!! \param link_name   Name of the link for which information is being sought.
+!!                     NOTE: In C these are contained in the structure H5L_info_t
+!! \param cset         Indicates the character set used for link&apos;s name.
+!! \param corder       Specifies the link&apos;s creation order position.
+!! \param f_corder_valid Indicates whether the value in corder is valid.
+!! \param link_type    Specifies the link class:
+!!                     \li H5L_TYPE_HARD_F     - Hard link
+!!                     \li H5L_TYPE_SOFT_F     - Soft link
+!!                     \li H5L_TYPE_EXTERNAL_F - External link
+!!                     \li H5L_TYPE_ERROR_ F   - Error
+!! \param token        If the link is a hard link, token specifies the object token that the link points to.
+!! \param val_size     If the link is a symbolic link, val_size will be the length of the link value, e.g.,
+!!                     the length of the name of the pointed-to object with a null terminator.
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list.
+!!
+!! See C API: @ref H5Lget_info2()
+!!
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
        cset, corder, f_corder_valid, link_type, token, val_size, &
        hdferr, lapl_id)
     IMPLICIT NONE
 
-    INTEGER(HID_T), INTENT(IN) :: link_loc_id ! File or group identifier.
-    CHARACTER(LEN=*), INTENT(IN) :: link_name ! Name of the link for which information is being sought
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
 
-! OUTPUTS  NOTE: In C these are contained in the structure H5L_info_t
-    INTEGER, INTENT(OUT) :: cset ! Indicates the character set used for the link’s name.
-    INTEGER, INTENT(OUT) :: corder ! Specifies the link’s creation order position.
-    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the value in corder is valid.
-    INTEGER, INTENT(OUT) :: link_type ! Specifies the link class:
-     	                              !  H5L_TYPE_HARD_F      - Hard link
-     	                              !  H5L_TYPE_SOFT_F      - Soft link
-     	                              !  H5L_TYPE_EXTERNAL_F  - External link
-     	                              !  H5L_TYPE_ERROR _F    - Error
-    TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token ! If the link is a hard link, token specifies the object token that the link points to
-    INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value, e.g.,
-                                             ! the length of the name of the pointed-to object with a null terminator.
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
-!*****
+    INTEGER, INTENT(OUT) :: cset
+    INTEGER, INTENT(OUT) :: corder
+    LOGICAL, INTENT(OUT) :: f_corder_valid
+    INTEGER, INTENT(OUT) :: link_type
+    TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(SIZE_T) :: link_namelen
     INTEGER(HID_T) :: lapl_id_default
     INTEGER :: corder_valid
@@ -685,84 +902,63 @@ CONTAINS
 
   END SUBROUTINE h5lget_info_f
 
-!
-!****s* H5L/h5lget_info_by_idx_f
-!
-! NAME
-!  h5lget_info_by_idx_f
-!
-! PURPOSE
-!  Retrieves metadata for a link in a group, according to the order within a field or index.
-!
-! INPUTS
-!  loc_id 	 - File or group identifier specifying location of subject group
-!  group_name 	 - Name of subject group
-!  index_field 	 - Index or field which determines the order
-!  order 	 - Order within field or index
-!  n 	         - Link for which to retrieve information
-!
-! OUTPUTS
-!            NOTE: In C these are defined as a structure: H5L_info_t
-!  corder_valid  - Indicates whether the creation order data is valid for this attribute
-!  corder 	 - Is a positive integer containing the creation order of the attribute
-!  cset 	 - Indicates the character set used for the attribute’s name
-!  token         - If the link is a hard link, token specifies the object token that the link points to
-!  val_size      - If the link is a symbolic link, val_size will be the length of the link value, e.g.,
-!                  the length of the name of the pointed-to object with a null terminator.
-! hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 29, 2008
-!
-! HISTORY
-!   Changed the link_type names to match those in C (bug 1720) from,
-!   H5L_LINK_HARD_F, H5L_LINK_SOFT_F,H5L_LINK_EXTERNAL_F,H5L_LINK_ERROR_F
-!   to
-!   H5L_TYPE_HARD_F, H5L_TYPE_SOFT_F,H5L_TYPE_EXTERNAL_F,H5L_TYPE_ERROR_F
-!   MSB January 8, 2010.
-!
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Retrieves metadata for a link in a group, according to the order within a field or index.
+!!
+!! \param loc_id         File or group identifier specifying location of subject group.
+!! \param group_name     Name of subject group.
+!! \param index_field    Index or field which determines the order:
+!!                       \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                       \li H5_INDEX_NAME_F          - Index on names
+!!                       \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                       \li H5_INDEX_N_F             - Number of indices defined
+!! \param order          Order within field or index:
+!!                       \li H5_ITER_UNKNOWN_F  - Unknown order
+!!                       \li H5_ITER_INC_F      - Increasing order
+!!                       \li H5_ITER_DEC_F      - Decreasing order
+!!                       \li H5_ITER_NATIVE_F   - No particular order, whatever is fastest
+!!                       \li H5_ITER_N_F        - Number of iteration orders
+!! \param n              Link for which to retrieve information.
+!!                       NOTE: In C these are defined as a structure: H5L_info_t
+!! \param link_type      Specifies the link class:
+!!                       \li H5L_TYPE_HARD_F      - Hard link
+!!                       \li H5L_TYPE_SOFT_F      - Soft link
+!!                       \li H5L_TYPE_EXTERNAL_F  - External link
+!!                       \li H5L_TYPE_ERROR _F    - Error
+!! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
+!! \param corder         Is a positive integer containing the creation order of the attribute.
+!! \param cset           Indicates the character set used for the attribute&apos;s name.
+!! \param token          If the link is a hard link, token specifies the object token that the link points to.
+!! \param val_size       If the link is a symbolic link, val_size will be the length of the link value, e.g.,
+!!                       the length of the name of the pointed-to object with a null terminator.
+!! \param hdferr         \fortran_error
+!!
+!! \param lapl_id        Link access property list.
+!!
+!! See C API: @ref H5Lget_info_by_idx2()
+!!
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        link_type, f_corder_valid, corder, cset, token, val_size, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id       ! File or group identifier specifying location of subject group
-    CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
-    INTEGER, INTENT(IN) :: index_field  ! Index or field which determines the order
-                                        !    H5_INDEX_UNKNOWN_F   - Unknown index type
-                                        !    H5_INDEX_NAME_F      - Index on names
-                                        !    H5_INDEX_CRT_ORDER_F - Index on creation order
-                                        !    H5_INDEX_N_F	      - Number of indices defined
-    INTEGER, INTENT(IN) :: order        ! Order in which to iterate over index; Possible values are:
-                                        !    H5_ITER_UNKNOWN_F  - Unknown order
-                                        !    H5_ITER_INC_F      - Increasing order
-                                        !    H5_ITER_DEC_F      - Decreasing order
-                                        !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-    INTEGER(HSIZE_T), INTENT(IN) :: n   ! Attribute’s position in index
-    INTEGER, INTENT(OUT) :: link_type ! Specifies the link class:
-     	                              !  H5L_TYPE_HARD_F      - Hard link
-     	                              !  H5L_TYPE_SOFT_F      - Soft link
-     	                              !  H5L_TYPE_EXTERNAL_F  - External link
-     	                              !  H5L_TYPE_ERROR _F    - Error
-    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
-    INTEGER, INTENT(OUT) :: corder         ! Is a positive integer containing the creation order of the attribute
-    INTEGER, INTENT(OUT) :: cset           ! Indicates the character set used for the attribute’s name
-    TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token  ! If the link is a hard link, token specifies the object token that the link points to
-    INTEGER(SIZE_T), INTENT(OUT) :: val_size  ! If the link is a symbolic link, val_size will be the length of the link value, e.g.,
-                                              ! the length of the name of the pointed-to object with a null terminator.
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
-!*****
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: group_name
+    INTEGER, INTENT(IN) :: index_field
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    INTEGER, INTENT(OUT) :: link_type
+    LOGICAL, INTENT(OUT) :: f_corder_valid
+    INTEGER, INTENT(OUT) :: corder
+    INTEGER, INTENT(OUT) :: cset
+    TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER :: corder_valid
     INTEGER(SIZE_T)  :: group_namelen
     INTEGER(HID_T) :: lapl_id_default
 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
             link_type, corder_valid, corder, cset, token, val_size, lapl_id_default) &
@@ -799,42 +995,26 @@ CONTAINS
 
   END SUBROUTINE h5lget_info_by_idx_f
 
-!
-!****s* H5L/h5lis_registered_f
-!
-! NAME
-!  h5lis_registered_f
-!
-! PURPOSE
-!  Determines whether a class of user-defined links is registered.
-!
-! INPUTS
-!  link_cls_id 	 - User-defined link class identifier
-!
-! OUTPUTS
-!  registered 	 - .TRUE.  - if the link class has been registered
-!                  .FALSE. - if it is unregistered
-!  hdferr 	 - Error code
-!  Success:  0
-!  Failure: -1
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  February 29, 2008
-!
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Determines whether a class of user-defined links is registered.
+!!
+!! \param link_cls_id User-defined link class identifier.
+!! \param registered  .TRUE. if the link class has been registered.
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Lis_registered()
+!!
   SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr)
     IMPLICIT NONE
-    INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
-    LOGICAL, INTENT(OUT) :: registered  ! .TRUE. - if the link class has been registered and
-                                        ! .FALSE. - if it is unregistered
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code:
-                                        ! 0 on success and -1 on failure
-!*****
+    INTEGER, INTENT(IN) :: link_cls_id
+    LOGICAL, INTENT(OUT) :: registered
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5lis_registered_c(link_cls_id) BIND(C,NAME='h5lis_registered_c')
          IMPLICIT NONE
-         INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
+         INTEGER, INTENT(IN) :: link_cls_id
        END FUNCTION h5lis_registered_c
     END INTERFACE
 
@@ -848,47 +1028,30 @@ CONTAINS
 
   END SUBROUTINE h5lis_registered_f
 
-!
-!****s* H5L/h5lmove_f
-!
-! NAME
-!  h5lmove_f
-!
-! PURPOSE
-!  Renames a link within an HDF5 file.
-!
-! INPUTS
-!  src_loc_id 	 - Original file or group identifier.
-!  src_name 	 - Original link name.
-!  dest_loc_id 	 - Destination file or group identifier.
-!  dest_name 	 - NEW link name.
-!
-! OUTPUTS
-!  hdferr 	 - Error code:
-!                   0 on success and -1 on failure
-!
-! OPTIONAL PARAMETERS
-!  lcpl_id 	 - Link creation property list identifier to be associated WITH the NEW link.
-!  lapl_id 	 - Link access property list identifier to be associated WITH the NEW link.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  March 3, 2008
-!
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Renames a link within an HDF5 file.
+!!
+!! \param src_loc_id  Original file or group identifier.
+!! \param src_name    Original link name.
+!! \param dest_loc_id Destination file or group identifier.
+!! \param dest_name   NEW link name.
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier to be associated WITH the NEW link.
+!! \param lapl_id     Link access property list identifier to be associated WITH the NEW link.
+!!
+!! See C API: @ref H5Lmove()
+!!
   SUBROUTINE h5lmove_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: src_loc_id  ! Original file or group identifier.
-    CHARACTER(LEN=*), INTENT(IN) :: src_name  ! Original link name.
-    INTEGER(HID_T), INTENT(IN) :: dest_loc_id ! Destination file or group identifier.
-    CHARACTER(LEN=*), INTENT(IN) :: dest_name ! NEW link name.
-    INTEGER, INTENT(OUT) :: hdferr     ! Error code:
-                                              ! 0 on success and -1 on failure
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier
-                                                    ! to be associated WITH the NEW link.
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list identifier
-                                                    ! to be associated WITH the NEW link.
-!*****
+    INTEGER(HID_T), INTENT(IN) :: src_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: src_name
+    INTEGER(HID_T), INTENT(IN) :: dest_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: dest_name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(SIZE_T) :: src_namelen
     INTEGER(SIZE_T) :: dest_namelen
 
@@ -923,64 +1086,51 @@ CONTAINS
     src_namelen = LEN(src_name)
     dest_namelen = LEN(dest_name)
 
-    hdferr = H5Lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
+    hdferr = h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
          dest_name, dest_namelen, lcpl_id_default, lapl_id_default)
 
   END SUBROUTINE h5lmove_f
 
-!
-!****s* H5L/h5lget_name_by_idx_f
-!
-! NAME
-!  h5lget_name_by_idx_f
-!
-! PURPOSE
-!  Retrieves name of the nth link in a group, according to the order within a specified field or index.
-!
-! INPUTS
-!  loc_id 	 - File or group identifier specifying location of subject group
-!  group_name 	 - Name of subject group
-!  index_field 	 - Index or field which determines the order
-!  order 	 - Order within field or index
-!  n 	         - Link for which to retrieve information
-!
-! OUTPUTS
-!  name 	 - Buffer in which link value is returned
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! OPTIONAL PARAMETERS
-!  lapl_id 	 - List access property list identifier.
-!  size 	 - Maximum number of characters of link value to be returned.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  March 10, 2008
-!
-! SOURCE
+!>
+!! \ingroup FH5L
+!!
+!! \brief Retrieves name of the nth link in a group, according to the order within a specified field or index.
+!!
+!! \param loc_id      File or group identifier specifying location of subject group.
+!! \param group_name  Name of subject group.
+!! \param index_field Index or field which determines the order:
+!!                    \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                    \li H5_INDEX_NAME_F          - Index on names
+!!                    \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                    \li H5_INDEX_N_F             - Number of indices defined
+!! \param order       Order within field or index:
+!!                    \li H5_ITER_UNKNOWN_F  - Unknown order
+!!                    \li H5_ITER_INC_F      - Increasing order
+!!                    \li H5_ITER_DEC_F      - Decreasing order
+!!                    \li H5_ITER_NATIVE_F   - No particular order, whatever is fastest
+!!                    \li H5_ITER_N_F        - Number of iteration orders
+!! \param n           Link for which to retrieve information.
+!! \param name        Buffer in which link value is returned.
+!! \param hdferr      \fortran_error
+!! \param lapl_id     List access property list identifier.
+!! \param size        Maximum number of characters of link value to be returned.
+!!
+!! See C API: @ref H5Lget_name_by_idx()
+!!
   SUBROUTINE h5lget_name_by_idx_f(loc_id, group_name, index_field, order, n, &
         name, hdferr, size, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id       ! File or group identifier specifying location of subject group
-    CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
-    INTEGER, INTENT(IN) :: index_field  ! Index or field which determines the order
-                                        !    H5_INDEX_UNKNOWN_F   - Unknown index type
-                                        !    H5_INDEX_NAME_F      - Index on names
-                                        !    H5_INDEX_CRT_ORDER_F - Index on creation order
-                                        !    H5_INDEX_N_F	      - Number of indices defined
-    INTEGER, INTENT(IN) :: order        ! Order in which to iterate over index; Possible values are:
-                                        !    H5_ITER_UNKNOWN_F  - Unknown order
-                                        !    H5_ITER_INC_F      - Increasing order
-                                        !    H5_ITER_DEC_F      - Decreasing order
-                                        !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-    INTEGER(HSIZE_T), INTENT(IN) :: n   ! Attribute’s position in index
-    CHARACTER(LEN=*), INTENT(OUT) :: name ! Buffer in which link value is returned
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code:
-                                          ! 0 on success and -1 on failure
-!*****
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: group_name
+    INTEGER, INTENT(IN) :: index_field
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    CHARACTER(LEN=*), INTENT(OUT) :: name
+    INTEGER, INTENT(OUT) :: hdferr
     INTEGER(SIZE_T)  :: group_namelen
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size   ! Indicates the size, in the number of characters, of the link
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: size
     INTEGER(SIZE_T) :: size_default
 
     INTERFACE
@@ -1020,90 +1170,23 @@ CONTAINS
 
 !  HAS PROBLEM WITH void pointer in C
 !!$!
-!!$!****s* H5L/
-!!$!
-!!$! NAME
-!!$!		h5lget_val_by_idx_f
-!!$!
-!!$! PURPOSE
-!!$!      Returns the link value of a link, according to the order of
-!!$!               an index.  For symbolic links, this is the path to which the
-!!$!               link points, including the null terminator.  For user-defined
-!!$!               links, it is the link buffer.
-!!$! INPUTS
-!!$!   loc_id      - File or group identifier specifying location of subject group
-!!$!   group_name  - Name of subject group
-!!$!   index_field - Index or field which determines the order
-!!$!   order       - Order within field or index
-!!$!   n           - Link for which to retrieve information
-!!$!   size        - Maximum number of characters of link value to be returned.
-!!$!
-!!$! OUTPUTS  NOTE: In C these are defined as a structure: H5L_info_t
-!!$!    corder_valid   - indicates whether the creation order data is valid for this attribute
-!!$!    corder         - is a positive integer containing the creation order of the attribute
-!!$!    cset           - indicates the character set used for the attribute’s name
-!!$!    data_size      - indicates the size, in the number of characters, of the attribute
-!!$!    hdferr         - error code
-!!$!				 Success:  0
-!!$!				 Failure: -1
-!!$! OPTIONAL PARAMETERS
-!!$!    lapl_id      - List access property list identifier.
-!!$!
-!!$! AUTHOR
-!!$!	M. Scot Breitenfeld
-!!$!		March 3, 2008
-!!$!
-!!$! HISTORY  N/A
-!!$!
-!!$!
-!!$! SOURCE
+!>
 !!$  SUBROUTINE h5lget_val_by_idx_f(loc_id, group_name, index_field, order, n, &
 !!$       f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
 !!$    IMPLICIT NONE
-!!$    INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier specifying location of subject group
-!!$    CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
-!!$    INTEGER, INTENT(IN) :: index_field  ! Index or field which determines the order
-!!$                                        !    H5_INDEX_UNKNOWN_F   - Unknown index type
-!!$                                        !    H5_INDEX_NAME_F      - Index on names
-!!$                                        !    H5_INDEX_CRT_ORDER_F - Index on creation order
-!!$                                        !    H5_INDEX_N_F	      - Number of indices defined
-!!$    INTEGER, INTENT(IN) :: order        ! Order in which to iterate over index; Possible values are:
-!!$                                        !    H5_ITER_UNKNOWN_F  - Unknown order
-!!$                                        !    H5_ITER_INC_F      - Increasing order
-!!$                                        !    H5_ITER_DEC_F      - Decreasing order
+
+!!$                                        !    H5_INDEX_N_F            - Number of indices defined
+
 !!$                                        !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-!!$    INTEGER(HSIZE_T), INTENT(IN) :: n   ! Attribute’s position in index
-!!$    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
-!!$    INTEGER, INTENT(OUT) :: corder ! Is a positive integer containing the creation order of the attribute
-!!$    INTEGER, INTENT(OUT) :: cset ! Indicates the character set used for the attribute’s name
-!!$    INTEGER(HSIZE_T), INTENT(OUT) :: data_size   ! Indicates the size, in the number of characters, of the attribute
-!!$    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-!!$                                         ! 0 on success and -1 on failure
-!!$    INTEGER :: corder_valid
-!!$    INTEGER(SIZE_T)  :: group_namelen
-!!$    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
-!!$    INTEGER(HID_T) :: lapl_id_default
-!!$
-!!$    INTERFACE
+
+
 !!$       INTEGER FUNCTION h5lget_val_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
 !!$            corder_valid, corder, cset, data_size, lapl_id_default)
 !!$         USE H5GLOBAL
 !!$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
 !!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_BY_IDX_C'::h5lget_val_by_idx_c
 !!$         !DEC$ENDIF
-!!$         INTEGER(HID_T), INTENT(IN) :: loc_id
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
-!!$         INTEGER(SIZE_T)  :: group_namelen
-!!$         INTEGER, INTENT(IN) :: index_field
-!!$         INTEGER, INTENT(IN) :: order
-!!$         INTEGER(HSIZE_T), INTENT(IN) :: n
-!!$         INTEGER :: corder_valid
-!!$         INTEGER, INTENT(OUT) :: corder
-!!$         INTEGER, INTENT(OUT) :: cset
-!!$         INTEGER(HSIZE_T), INTENT(OUT) :: data_size
-!!$         INTEGER(HID_T) :: lapl_id_default
-!!$       END FUNCTION h5lget_val_by_idx_c
-!!$    END INTERFACE
+
 !!$
 !!$    group_namelen = LEN(group_name)
 !!$
@@ -1119,45 +1202,11 @@ CONTAINS
 !!$  END SUBROUTINE h5lget_val_by_idx_f
 
 !!$!
-!!$!****s* H5L/h5lget_val_f
-!!$!
-!!$! NAME
-!!$!		h5lget_val_f
-!!$!
-!!$! PURPOSE
-!!$!  	Returns the value of a symbolic link.
-!!$!
-!!$! INPUTS
-!!$!   link_loc_id  - File or group identifier.
-!!$!   link_name    - Link whose value is to be returned.
-!!$!   size         - Maximum number of characters of link value to be returned.
-!!$!
-!!$! OUTPUTS
-!!$!   linkval_buff - The buffer to hold the returned link value.
-!!$!         hdferr - error code
-!!$!				 Success:  0
-!!$!				 Failure: -1
-!!$! OPTIONAL PARAMETERS
-!!$!    lapl_id      - List access property list identifier.
-!!$!
-!!$! AUTHOR
-!!$!	M. Scot Breitenfeld
-!!$!	March 3, 2008
-!!$! SOURCE
+!>
 !!$  SUBROUTINE h5lget_val_f(link_loc_id, link_name, size, linkval_buff,   &
 !!$       hdferr, lapl_id)
 !!$    IMPLICIT NONE
-!!$    INTEGER(HID_T), INTENT(IN) :: link_loc_id  ! File or group identifier.
-!!$    CHARACTER(LEN=*), INTENT(IN) :: link_name  ! Link whose value is to be returned.
-!!$    INTEGER(SIZE_T), INTENT(IN) :: size        !  Maximum number of characters of link value to be returned.
-!!$
-!!$    CHARACTER(LEN=size), INTENT(OUT) :: linkval_buff ! The buffer to hold the returned link value.
-!!$    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-!!$    ! 0 on success and -1 on failure
-!!$    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
-!!$
-!!$    INTEGER :: link_namelen
-!!$    INTEGER(HID_T) :: lapl_id_default
+
 !!$    INTEGER :: corder_valid
 !!$
 !!$    INTEGER :: link_namelen
@@ -1172,15 +1221,7 @@ CONTAINS
 !!$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
 !!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_C'::h5lget_val_c
 !!$         !DEC$ENDIF
-!!$         INTEGER(HID_T), INTENT(IN) :: link_loc_id  ! File or group identifier.
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name  ! Link whose value is to be returned.
-!!$         INTEGER :: link_namelen
-!!$         INTEGER(SIZE_T), INTENT(IN) :: size        !  Maximum number of characters of link value to be returned.
-!!$
-!!$         CHARACTER(LEN=size), INTENT(OUT) :: linkval_buff ! The buffer to hold the returned link value.
-!!$
-!!$         INTEGER :: link_namelen
-!!$         INTEGER(HID_T) :: lapl_id_default
+
 !!$
 !!$       END FUNCTION h5lget_val_c
 !!$    END INTERFACE
@@ -1196,56 +1237,11 @@ CONTAINS
 !!$  END SUBROUTINE h5lget_val_f
 
 !!$!
-!!$!****s* H5L/H5Lregistered_f
-!!$!
-!!$! NAME
-!!$!	    H5Lregistered_f
-!!$!
-!!$! PURPOSE
-!!$!  Registers user-defined link class or changes behavior of existing class.
-!!$!
-!!$! INPUTS NOTE: In C the following represents struct H5L_class_t:
-!!$!     version      - Version number of this struct
-!!$!     class_id     - Link class identifier
-!!$!     comment      - Comment for debugging
-!!$!     create_func  - Callback during link creation
-!!$!     move_func    - Callback after moving link
-!!$!     copy_func    - Callback after copying link
-!!$!     trav_func    - The main traversal function
-!!$!     del_func     - Callback for link deletion
-!!$!     query_func   - Callback for queries
-!!$!
-!!$! OUTPUTS
-!!$!           hdferr - Error code
-!!$!		       Success:  0
-!!$!	               Failure: -1
-!!$! OPTIONAL PARAMETERS
-!!$!                      None
-!!$!
-!!$! AUTHOR
-!!$! M. Scot Breitenfeld
-!!$!	      February 29, 2008
-!!$!
-!!$! HISTORY  N/A
-!!$!
-!!$!
-!!$! SOURCE
+!>
 !!$  SUBROUTINE H5Lregistered_f(version, class_id, comment, create_func, &
 !!$       move_func, copy_func, trav_func, del_func, query_func, hdferr)
 !!$    IMPLICIT NONE
-!!$    INTEGER, INTENT(IN) :: version      ! Version number of this struct
-!!$    INTEGER, INTENT(IN) :: class_id     ! Link class identifier
-!!$    CHARACTER(LEN=*), INTENT(IN) :: comment      ! Comment for debugging
-!!$    CHARACTER(LEN=*), INTENT(IN) :: create_func  ! Callback during link creation
-!!$    CHARACTER(LEN=*), INTENT(IN) :: move_func    ! Callback after moving link
-!!$    CHARACTER(LEN=*), INTENT(IN) :: copy_func    ! Callback after copying link
-!!$    CHARACTER(LEN=*), INTENT(IN) :: trav_func    ! The main traversal function
-!!$    CHARACTER(LEN=*), INTENT(IN) :: del_func     ! Callback for link deletion
-!!$    CHARACTER(LEN=*), INTENT(IN) :: query_func   ! Callback for queries
-!!$    INTEGER, INTENT(OUT) :: hdferr      ! Error code:
-!!$                                        ! 0 on success and -1 on failure
-!!$    INTEGER :: comment_len
-!!$    INTEGER :: create_func_len
+
 !!$    INTEGER :: move_func_len
 !!$    INTEGER :: copy_func_len
 !!$    INTEGER :: trav_func_len
@@ -1264,19 +1260,7 @@ CONTAINS
 !!$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
 !!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LREGISTERED_C'::H5Lregistered_c
 !!$         !DEC$ENDIF
-!!$         INTEGER, INTENT(IN) :: version      ! Version number of this struct
-!!$         INTEGER, INTENT(IN) :: class_id     ! Link class identifier
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: comment      ! Comment for debugging
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: create_func  ! Callback during link creation
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: move_func    ! Callback after moving link
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: copy_func    ! Callback after copying link
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: trav_func    ! The main traversal function
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: del_func     ! Callback for link deletion
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: query_func   ! Callback for queries
-!!$         INTEGER, INTENT(OUT) :: hdferr   ! Error code:
-!!$                                          ! 0 on success and -1 on failure
-!!$         INTEGER :: comment_len
-!!$         INTEGER :: create_func_len
+
 !!$         INTEGER :: move_func_len
 !!$         INTEGER :: copy_func_len
 !!$         INTEGER :: trav_func_len
@@ -1304,72 +1288,59 @@ CONTAINS
 !!$
 !!$  END SUBROUTINE H5Lregistered_f
 
-!****s* H5L (F03)/h5literate_f
-!
-! NAME
-!  h5literate_f
-!
-! PURPOSE
-!  Iterates through links in a group.
-!
-! Inputs:
-!  group_id   - Identifier specifying subject group
-!  index_type - Type of index which determines the order:
-!                H5_INDEX_NAME_F      - Alpha-numeric index on name
-!                H5_INDEX_CRT_ORDER_F - Index on creation order
-!  order      - Order within index:
-!                H5_ITER_INC_F    - Increasing order
-!                H5_ITER_DEC_F    - Decreasing order
-!                H5_ITER_NATIVE_F - Fastest available order
-!  idx 	      - IN: Iteration position at which to start
-!  op 	      - Callback function passing data regarding the link to the calling application
-!  op_data    - User-defined pointer to data required by the application for its processing of the link
-!
-! Outputs:
-!  idx 	        - OUT: Position at which an interrupted iteration may be restarted
-!  return_value - Success: The return value of the first operator that
-! 			   returns non-zero, or zero if all members were
-! 			   processed with no operator returning non-zero.
-!
-! 		  Failure: Negative if something goes wrong within the
-! 			   library, or the negative value returned by one
-! 			   of the operators.
-!
-!  hdferr     - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  July 8, 2008
-!
-! Fortran2003 Interface:
-  SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
+!>
+!! \ingroup FH5L
+!!
+!! \brief Iterates through links in a group.
+!!
+!! \param group_id     Identifier specifying subject group.
+!! \param idx_type     Type of index which determines the order:
+!!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
+!!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
+!! \param order        Order within index:
+!!                      \li H5_ITER_INC_F    - Increasing order
+!!                      \li H5_ITER_DEC_F    - Decreasing order
+!!                      \li H5_ITER_NATIVE_F - Fastest available order
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
+!! \param op           Callback function passing data regarding the link to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the link.
+!! \param return_value Return context:
+!!                      \li Success: The return value of the first operator that
+!!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
+!!                      \li Failure: Negative if something goes wrong within the
+!!                               library, or the negative value returned by one of the operators.
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Literate2()
+!!
+  SUBROUTINE h5literate_f(group_id, idx_type, order, idx, op, op_data, return_value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)    :: group_id
-    INTEGER         , INTENT(IN)    :: index_type
+    INTEGER         , INTENT(IN)    :: idx_type
     INTEGER         , INTENT(IN)    :: order
     INTEGER(HSIZE_T), INTENT(INOUT) :: idx
     TYPE(C_FUNPTR)  , INTENT(IN)    :: op
     TYPE(C_PTR)     , INTENT(IN)    :: op_data
     INTEGER         , INTENT(OUT)   :: return_value
     INTEGER         , INTENT(OUT)   :: hdferr
-!*****
+
     INTERFACE
-       INTEGER FUNCTION h5literate_c(group_id, index_type, order, idx, op, op_data) &
-            BIND(C, NAME='h5literate_c')
-         IMPORT :: c_ptr, c_funptr
+       INTEGER(C_INT) FUNCTION H5Literate2(group_id, idx_type, order, idx, op, op_data) &
+            BIND(C, NAME='H5Literate2')
+         IMPORT :: C_INT, C_PTR, C_FUNPTR
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: group_id
-         INTEGER, INTENT(IN) :: index_type
-         INTEGER, INTENT(IN) :: order
-         INTEGER(HSIZE_T), INTENT(INOUT) :: idx
-         TYPE(C_FUNPTR), VALUE :: op
-         TYPE(C_PTR), VALUE :: op_data
-       END FUNCTION h5literate_c
+         INTEGER(HID_T)  , VALUE :: group_id
+         INTEGER(C_INT) , VALUE :: idx_type
+         INTEGER(C_INT) , VALUE :: order
+         INTEGER(HSIZE_T)        :: idx
+         TYPE(C_FUNPTR)  , VALUE :: op
+         TYPE(C_PTR)     , VALUE :: op_data
+       END FUNCTION H5Literate2
     END INTERFACE
 
-    return_value = h5literate_c(group_id, index_type, order, idx, op, op_data)
+    return_value = INT(H5Literate2(group_id, INT(idx_type, C_INT), INT(order, C_INT), idx, op, op_data))
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -1379,51 +1350,122 @@ CONTAINS
 
   END SUBROUTINE h5literate_f
 
-!****s* H5L (F03)/h5literate_by_name_f
-!
-! NAME
-!  h5literate_by_name_f
-!
-! PURPOSE
-!  Iterates through links in a group.
-!
-! Inputs:
-!  loc_id     - File or group identifier specifying location of subject group
-!  group_name - Name of subject group
-!  index_type - Type of index which determines the order:
-!                H5_INDEX_NAME_F      - Alpha-numeric index on name
-!                H5_INDEX_CRT_ORDER_F - Index on creation order
-!  order      - Order within index:
-!                H5_ITER_INC_F    - Increasing order
-!                H5_ITER_DEC_F    - Decreasing order
-!                H5_ITER_NATIVE_F - Fastest available order
-!  idx 	      - IN: Iteration position at which to start
-!  op 	      - Callback function passing data regarding the link to the calling application
-!  op_data    - User-defined pointer to data required by the application for its processing of the link
-!
-! Outputs:
-!  idx 	        - OUT: Position at which an interrupted iteration may be restarted
-!  return_value - Success: The return value of the first operator that
-! 			   returns non-zero, or zero if all members were
-! 			   processed with no operator returning non-zero.
-!
-! 		  Failure: Negative if something goes wrong within the
-! 			   library, or the negative value returned by one
-! 			   of the operators.
-!
-!  hdferr        - Returns 0 if successful and -1 if fails
-!
-! Optional parameters:
-!  lapl_id    - Link access property list
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  Augest 18, 2008
-!
-! Fortran2003 Interface:
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously iterates through links in a group.
+!!
+!! \param group_id    Identifier specifying subject group.
+!! \param idx_type    Type of index which determines the order:
+!!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
+!!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
+!! \param order         Order within index:
+!!                      \li H5_ITER_INC_F    - Increasing order
+!!                      \li H5_ITER_DEC_F    - Decreasing order
+!!                      \li H5_ITER_NATIVE_F - Fastest available order
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
+!! \param op           Callback function passing data regarding the link to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the link.
+!! \param return_value N/A
+!!                     
+!! \warning            The returned value of the callback routine op will not be set
+!!                     in \p return_value for H5Literate_async_f(), so \p return_value should
+!!                     not be used for determining the return state of the callback routine.
+!!
+!! \param es_id        \fortran_es_id
+!! \param hdferr       \fortran_error
+!! \param file         \fortran_file
+!! \param func         \fortran_func
+!! \param line         \fortran_line
+!!
+!! See C API: @ref H5Literate_async()
+!!
+  SUBROUTINE h5literate_async_f(group_id, idx_type, order, idx, op, op_data, return_value, es_id, hdferr, &
+       file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)    :: group_id
+    INTEGER         , INTENT(IN)    :: idx_type
+    INTEGER         , INTENT(IN)    :: order
+    INTEGER(HSIZE_T), INTENT(INOUT) :: idx
+    TYPE(C_FUNPTR)  , INTENT(IN)    :: op
+    TYPE(C_PTR)     , INTENT(IN)    :: op_data
+    INTEGER         , INTENT(OUT)   :: return_value
+    INTEGER(HID_T)  , INTENT(IN)    :: es_id
+    INTEGER         , INTENT(OUT)   :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Literate_async(file, func, line, &
+            group_id, idx_type, order, idx, op, op_data, es_id) BIND(C, NAME='H5Literate_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T)  , VALUE :: group_id
+         INTEGER(C_INT) , VALUE :: idx_type
+         INTEGER(C_INT) , VALUE :: order
+         INTEGER(HSIZE_T)        :: idx
+         TYPE(C_FUNPTR)  , VALUE :: op
+         TYPE(C_PTR)     , VALUE :: op_data
+         INTEGER(HID_T)  , VALUE :: es_id
+       END FUNCTION H5Literate_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    return_value = INT(H5Literate_async(file_default, func_default, line_default, &
+         group_id, INT(idx_type, C_INT), INT(order, C_INT), idx, op, op_data, es_id))
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
+
+  END SUBROUTINE h5literate_async_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Iterates through links in a group.
+!!
+!! \param loc_id        File or group identifier specifying location of subject group.
+!! \param group_name    Name of subject group.
+!! \param index_type    Type of index which determines the order:
+!!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
+!!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
+!! \param order        Order within index:
+!!                     \li H5_ITER_INC_F    - Increasing order
+!!                     \li H5_ITER_DEC_F    - Decreasing order
+!!                     \li H5_ITER_NATIVE_F - Fastest available order
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
+!! \param op           Callback function passing data regarding the link to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the link.
+!! \param return_value Return context:
+!!                      \li Success: The return value of the first operator that returns non-zero, or zero if
+!!                               all members were processed with no operator returning non-zero.
+!!                      \li Failure: Negative if something goes wrong within the
+!!                               library, or the negative value returned by one of the operators.
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list
+!!
+!! See C API: @ref H5Literate_by_name2()
+!!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
+
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)           :: loc_id
     CHARACTER(LEN=*), INTENT(IN)           :: group_name
@@ -1435,7 +1477,6 @@ CONTAINS
     INTEGER         , INTENT(OUT)          :: return_value
     INTEGER         , INTENT(OUT)          :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
-!*****
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(SIZE_T) :: namelen
 
@@ -1470,5 +1511,128 @@ CONTAINS
     END IF
 
   END SUBROUTINE h5literate_by_name_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Recursively visits all links starting from a specified group.
+!!
+!! \param grp_id       Group identifier
+!! \param idx_type     Index type
+!! \param order	       Iteration order
+!! \param op	       Callback function
+!! \param op_data      User-defined callback function context
+!! \param return_value The return value of the first operator that returns non-zero, or zero if
+!!                     all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Lvisit2()
+!!
+  SUBROUTINE h5lvisit_f(grp_id, idx_type, order, op, op_data, return_value, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(hid_t), INTENT(IN)    :: grp_id
+    INTEGER       , INTENT(IN)    :: idx_type
+    INTEGER       , INTENT(IN)    :: order
+    TYPE(C_FUNPTR), INTENT(IN)    :: op
+    TYPE(C_PTR)   , INTENT(INOUT) :: op_data  ! Declare INOUT to bypass gfortran 4.8.5 issue
+    INTEGER       , INTENT(OUT)   :: return_value
+    INTEGER       , INTENT(OUT)   :: hdferr
+
+    INTEGER(C_INT) :: return_value_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lvisit(grp_id, idx_type, order, op, op_data) BIND(C, NAME='H5Lvisit2')
+         IMPORT :: c_char, c_int, c_ptr, c_funptr
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: grp_id
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+       END FUNCTION H5Lvisit
+    END INTERFACE
+
+    return_value_c = INT(H5Lvisit(grp_id, INT(idx_type, C_INT), INT(order, C_INT), op, op_data))
+    return_value = INT(return_value_c)
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
+
+  END SUBROUTINE H5Lvisit_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Recursively visits all links starting from a specified group.
+!!
+!! \param loc_id       Location identifier
+!! \param group_name   Group name
+!! \param idx_type     Index type
+!! \param order	       Iteration order
+!! \param op	       Callback function
+!! \param op_data      User-defined callback function context
+!! \param return_value The return value of the first operator that returns non-zero, or zero if
+!!                     all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list
+!!
+!!
+!! See C API: @ref H5Lvisit_by_name2()
+!!
+  SUBROUTINE H5Lvisit_by_name_f(loc_id, group_name, idx_type, order, op, op_data, return_value, hdferr, lapl_id)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T)  , INTENT(IN)    :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)    :: group_name
+    INTEGER         , INTENT(IN)    :: idx_type
+    INTEGER         , INTENT(IN)    :: order
+    TYPE(C_FUNPTR)  , INTENT(IN)    :: op
+    TYPE(C_PTR)     , INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
+    INTEGER         , INTENT(OUT)   :: return_value
+    INTEGER       , INTENT(OUT)     :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(C_INT)  :: return_value_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lvisit_by_name(loc_id, group_name, idx_type, order, op, op_data, lapl_id) &
+            BIND(C, NAME='H5Lvisit_by_name2')
+         IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(HID_T), VALUE :: lapl_id
+       END FUNCTION H5Lvisit_by_name
+    END INTERFACE
+
+    c_name = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    return_value_c = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default))
+    return_value = INT(return_value_c)
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
+
+  END SUBROUTINE H5Lvisit_by_name_f
 
 END MODULE H5L

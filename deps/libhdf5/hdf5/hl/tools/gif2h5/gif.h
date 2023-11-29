@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -129,16 +128,16 @@ typedef struct _GifCommentExtension {
 **           in the HDF file.
 **           I have assumed that the ImageDescriptors and GraphicControls follow
 **           one another, ie. I have not associated them with each other. The driver
-**           must assume a 1-1 correspondance. The same discussion with plain text
+**           must assume a 1-1 correspondence. The same discussion with plain text
 **           extension.
 */
 typedef struct _GifToMem {
-    GIFHEAD *           GifHeader;
-    GIFIMAGEDESC **     GifImageDesc;
+    GIFHEAD            *GifHeader;
+    GIFIMAGEDESC      **GifImageDesc;
     GIFGRAPHICCONTROL **GifGraphicControlExtension;
-    GIFPLAINTEXT **     GifPlainTextExtension;
-    GIFAPPLICATION **   GifApplicationExtension;
-    GIFCOMMENT **       GifCommentExtension;
+    GIFPLAINTEXT      **GifPlainTextExtension;
+    GIFAPPLICATION    **GifApplicationExtension;
+    GIFCOMMENT        **GifCommentExtension;
 } GIFTOMEM;
 
 /*

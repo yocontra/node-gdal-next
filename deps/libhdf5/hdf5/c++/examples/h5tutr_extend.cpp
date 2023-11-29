@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -100,7 +99,7 @@ main(void)
         // ---------------------------------------
 
         int     rdata[10][3];
-        int     i, j, rank, rank_chunk;
+        int     i, j, rank;
         hsize_t chunk_dimsr[2], dimsr[2];
 
         // Open the file and dataset.
@@ -112,13 +111,13 @@ main(void)
         prop      = dataset->getCreatePlist();
 
         // Get information to obtain memory dataspace.
-        rank            = filespace->getSimpleExtentNdims();
-        herr_t status_n = filespace->getSimpleExtentDims(dimsr);
+        rank = filespace->getSimpleExtentNdims();
+        (void)filespace->getSimpleExtentDims(dimsr);
 
-        if (H5D_CHUNKED == prop.getLayout())
-            rank_chunk = prop.getChunk(rank, chunk_dimsr);
-        cout << "rank chunk = " << rank_chunk << endl;
-        ;
+        if (H5D_CHUNKED == prop.getLayout()) {
+            int rank_chunk = prop.getChunk(rank, chunk_dimsr);
+            cout << "rank chunk = " << rank_chunk << endl;
+        }
 
         memspace = new DataSpace(rank, dimsr, NULL);
         dataset->read(rdata, PredType::NATIVE_INT, *memspace, *filespace);

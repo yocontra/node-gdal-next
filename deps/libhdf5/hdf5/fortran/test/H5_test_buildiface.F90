@@ -14,7 +14,7 @@
 !
 ! NOTES
 !  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF
-!  depending on availablity.It generates code that makes use of
+!  depending on availability.It generates code that makes use of
 !  STORAGE_SIZE/SIZEOF in H5fortran_detect.f90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !
@@ -28,19 +28,15 @@
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !  Copyright by The HDF Group.                                                 *
-!  Copyright by the Board of Trustees of the University of Illinois.           *
 !  All rights reserved.                                                        *
 !                                                                              *
 !  This file is part of HDF5.  The full HDF5 copyright notice, including       *
 !  terms governing use, modification, and redistribution, is contained in      *
 !  the COPYING file, which can be found at the root of the source code         *
-!  distribution tree, or in https://www.hdfgroup.org/licenses.    *
+!  distribution tree, or in https://www.hdfgroup.org/licenses.                 *
 !  If you do not have access to either file, you may request a copy from       *
 !  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!
-! AUTHOR
-!  M. Scot Breitenfeld
 !
 !*****
 
@@ -134,14 +130,25 @@ PROGRAM H5_test_buildiface
      WRITE(11,'(A)') '!DEC$endif'
 
 ! Subroutine API
-     WRITE(11,'(A)') '  SUBROUTINE verify_integer_kind_'//TRIM(ADJUSTL(chr2))//'(string,value,correct_value,total_error)'
+     WRITE(11,'(A)') '  SUBROUTINE verify_integer_kind_'//TRIM(ADJUSTL(chr2))//'(string,value,correct_value,total_error,chck_eq)'
      WRITE(11,'(A)') '    IMPLICIT NONE'
      WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
      WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//') :: value, correct_value'
      WRITE(11,'(A)') '    INTEGER :: total_error'
-     WRITE(11,'(A)') '    IF (value .NE. correct_value) THEN'
-     WRITE(11,'(A)') '       total_error=total_error+1'
-     WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT INTEGER VALIDATION ", string'
+     WRITE(11,'(A)') '    LOGICAL, OPTIONAL :: chck_eq'
+     WRITE(11,'(A)') '    LOGICAL :: chck_eq_opt'
+     WRITE(11,'(A)') '    chck_eq_opt = .TRUE.'
+     WRITE(11,'(A)') '    IF(PRESENT(chck_eq)) chck_eq_opt = chck_eq'
+     WRITE(11,'(A)') '    IF(chck_eq_opt .EQV. .TRUE.)THEN'
+     WRITE(11,'(A)') '      IF (value .NE. correct_value) THEN'
+     WRITE(11,'(A)') '         total_error=total_error+1'
+     WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT INTEGER VALIDATION ", string'
+     WRITE(11,'(A)') '      ENDIF'
+     WRITE(11,'(A)') '    ELSE'
+     WRITE(11,'(A)') '      IF (value .EQ. correct_value) THEN'
+     WRITE(11,'(A)') '         total_error=total_error+1'
+     WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT INTEGER VALIDATION ", string'
+     WRITE(11,'(A)') '      ENDIF'
      WRITE(11,'(A)') '    ENDIF'
      WRITE(11,'(A)') '  END SUBROUTINE verify_integer_kind_'//TRIM(ADJUSTL(chr2))
  ENDDO
@@ -158,14 +165,25 @@ PROGRAM H5_test_buildiface
      WRITE(11,'(A)') '!DEC$endif'
 
 ! Subroutine API
-     WRITE(11,'(A)') '  SUBROUTINE verify_real_kind_'//TRIM(ADJUSTL(chr2))//'(string,value,correct_value,total_error)'
+     WRITE(11,'(A)') '  SUBROUTINE verify_real_kind_'//TRIM(ADJUSTL(chr2))//'(string,value,correct_value,total_error,chck_eq)'
      WRITE(11,'(A)') '    IMPLICIT NONE'
      WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
      WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//') :: value, correct_value'
      WRITE(11,'(A)') '    INTEGER :: total_error'
-     WRITE(11,'(A)') '    IF (.NOT.real_eq_kind_'//TRIM(ADJUSTL(chr2))//'( value, correct_value) ) THEN'
-     WRITE(11,'(A)') '       total_error=total_error+1'
-     WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string'
+     WRITE(11,'(A)') '    LOGICAL, OPTIONAL :: chck_eq'
+     WRITE(11,'(A)') '    LOGICAL :: chck_eq_opt'
+     WRITE(11,'(A)') '    chck_eq_opt = .TRUE.'
+     WRITE(11,'(A)') '    IF(PRESENT(chck_eq)) chck_eq_opt = chck_eq'
+     WRITE(11,'(A)') '    IF(chck_eq_opt .EQV. .TRUE.)THEN'
+     WRITE(11,'(A)') '      IF (.NOT.real_eq_kind_'//TRIM(ADJUSTL(chr2))//'( value, correct_value) ) THEN'
+     WRITE(11,'(A)') '         total_error=total_error+1'
+     WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string'
+     WRITE(11,'(A)') '      ENDIF'
+     WRITE(11,'(A)') '    ELSE'
+     WRITE(11,'(A)') '      IF (real_eq_kind_'//TRIM(ADJUSTL(chr2))//'( value, correct_value) ) THEN'
+     WRITE(11,'(A)') '         total_error=total_error+1'
+     WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string'
+     WRITE(11,'(A)') '      ENDIF'
      WRITE(11,'(A)') '    ENDIF'
      WRITE(11,'(A)') '  END SUBROUTINE verify_real_kind_'//TRIM(ADJUSTL(chr2))
 
@@ -229,14 +247,25 @@ PROGRAM H5_test_buildiface
   WRITE(11,'(A)') '!DEC$endif'
 
 ! Subroutine API
-  WRITE(11,'(A)') '  SUBROUTINE verify_character(string,value,correct_value,total_error)'
+  WRITE(11,'(A)') '  SUBROUTINE verify_character(string,value,correct_value,total_error,chck_eq)'
   WRITE(11,'(A)') '    IMPLICIT NONE'
   WRITE(11,'(A)') '    CHARACTER*(*) :: string'
   WRITE(11,'(A)') '    CHARACTER*(*) :: value, correct_value'
   WRITE(11,'(A)') '    INTEGER :: total_error'
-  WRITE(11,'(A)') '    IF (TRIM(value) .NE. TRIM(correct_value)) THEN'
-  WRITE(11,'(A)') '       total_error = total_error + 1'
-  WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '    LOGICAL, OPTIONAL :: chck_eq'
+  WRITE(11,'(A)') '    LOGICAL :: chck_eq_opt'
+  WRITE(11,'(A)') '    chck_eq_opt = .TRUE.'
+  WRITE(11,'(A)') '    IF(PRESENT(chck_eq)) chck_eq_opt = chck_eq'
+  WRITE(11,'(A)') '    IF(chck_eq_opt .EQV. .TRUE.)THEN'
+  WRITE(11,'(A)') '      IF (TRIM(value) .NE. TRIM(correct_value)) THEN'
+  WRITE(11,'(A)') '         total_error = total_error + 1'
+  WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '      ENDIF'
+  WRITE(11,'(A)') '    ELSE'
+  WRITE(11,'(A)') '      IF (TRIM(value) .EQ. TRIM(correct_value)) THEN'
+  WRITE(11,'(A)') '         total_error = total_error + 1'
+  WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '      ENDIF'
   WRITE(11,'(A)') '    ENDIF'
   WRITE(11,'(A)') '  END SUBROUTINE verify_character'
 
@@ -249,16 +278,26 @@ PROGRAM H5_test_buildiface
   WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_logical'
   WRITE(11,'(A)') '!DEC$endif'
 ! Subroutine API
-  WRITE(11,'(A)') '  SUBROUTINE verify_logical(string,value,correct_value,total_error)'
+  WRITE(11,'(A)') '  SUBROUTINE verify_logical(string,value,correct_value,total_error,chck_eq)'
   WRITE(11,'(A)') '    IMPLICIT NONE'
   WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
   WRITE(11,'(A)') '    LOGICAL :: value, correct_value'
   WRITE(11,'(A)') '    INTEGER :: total_error'
-  WRITE(11,'(A)') '    IF (value .NEQV. correct_value) THEN'
-  WRITE(11,'(A)') '       total_error = total_error + 1'
-  WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '    LOGICAL, OPTIONAL :: chck_eq'
+  WRITE(11,'(A)') '    LOGICAL :: chck_eq_opt'
+  WRITE(11,'(A)') '    chck_eq_opt = .TRUE.'
+  WRITE(11,'(A)') '    IF(PRESENT(chck_eq)) chck_eq_opt = chck_eq'
+  WRITE(11,'(A)') '    IF(chck_eq_opt .EQV. .TRUE.)THEN'
+  WRITE(11,'(A)') '      IF (value .NEQV. correct_value) THEN'
+  WRITE(11,'(A)') '         total_error = total_error + 1'
+  WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '      ENDIF'
+  WRITE(11,'(A)') '    ELSE'
+  WRITE(11,'(A)') '      IF (value .EQV. correct_value) THEN'
+  WRITE(11,'(A)') '         total_error = total_error + 1'
+  WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '      ENDIF'
   WRITE(11,'(A)') '    ENDIF'
-
   WRITE(11,'(A)') '  END SUBROUTINE verify_logical'
 
   WRITE(11,'(A)') "END MODULE TH5_MISC_gen"

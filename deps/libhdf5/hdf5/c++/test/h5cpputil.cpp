@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -40,9 +39,6 @@ using namespace H5;
  * Return       if any failure has occurred: 1
  *
  *              if no failure occurs: 0
- *
- * Programmer   Binh-Minh Ribler (using C code segment for reporting tests)
- *              Friday, February 6, 2001
  *-------------------------------------------------------------------------
  */
 int
@@ -68,10 +64,6 @@ test_report(int nerrors, const H5std_string &testname)
  * Purpose      Displays that a function has failed with its location.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (copied and modified macro CHECK from C)
- *              Monday, December 20, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -91,10 +83,6 @@ issue_fail_msg(const char *where, int line, const char *file_name, const char *m
  * Purpose      Displays that a function has failed with its location.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (copied and modified macro CHECK from C)
- *              Monday, December 20, 2004
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -122,9 +110,6 @@ issue_fail_msg(const char *where, int line, const char *file_name, const char *f
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C code segment for checking values)
- *              Friday, February 6, 2001
  *-------------------------------------------------------------------------
  */
 int
@@ -148,10 +133,6 @@ check_values(hsize_t i, hsize_t j, int apoint, int acheck)
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler (using C code segment for checking values)
- *              Friday, September 16, 2016
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -175,9 +156,6 @@ check_values(const char *value, const char *msg, int line, const char *file_name
  * Return       Success: 0
  *
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              May 2, 2010
  *-------------------------------------------------------------------------
  */
 void

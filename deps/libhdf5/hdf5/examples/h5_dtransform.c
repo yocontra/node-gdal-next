@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -72,7 +71,7 @@ main(void)
     hid_t       dxpl_id_f_to_c, dxpl_id_c_to_f; /* data transform handles */
     const char *f_to_c = "(5/9.0)*(x-32)";
     const char *c_to_f = "(9/5.0)*x + 32";
-    char *      transform;
+    char       *transform;
     float       windchillC[ROWS][COLS];
     int         i, j, transform_size;
 

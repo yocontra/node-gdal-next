@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -106,7 +105,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5get_1libversion(JNIEnv *env, jclass clss, jintArray libversion)
 {
     jboolean libversionArrayIsCopy;
-    int *    libversionArray = NULL;
+    int     *libversionArray = NULL;
     herr_t   status          = FAIL;
 
     UNUSED(clss);
@@ -192,7 +191,7 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5is_1library_1threadsafe(JNIEnv *env, jclass clss)
 {
-    hbool_t is_ts = false;
+    bool is_ts = false;
 
     UNUSED(clss);
 

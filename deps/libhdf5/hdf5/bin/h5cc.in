@@ -1,7 +1,6 @@
 #! /bin/sh
 ##
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -40,7 +39,7 @@ HL="@HL@"
 ##    $CLINKER $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CFLAGS $CFLAGS $LDFLAGS   ##
 ##    $LIBS $clibpath $link_objs $link_args $shared_link                  ##
 ##                                                                        ##
-## These settings can be overriden by setting HDF5_CFLAGS,                ##
+## These settings can be overridden by setting HDF5_CFLAGS,               ##
 ## HDF5_CPPFLAGS, HDF5_LDFLAGS, or HDF5_LIBS in the environment.          ##
 ##                                                                        ##
 ############################################################################
@@ -117,15 +116,15 @@ usage() {
   # A wonderfully informative "usage" message.
   echo "usage: $prog_name [OPTIONS] <compile line>"
   echo "  OPTIONS:"
-  echo "    -help        This help message."
-  echo "    -echo        Show all the shell commands executed"
-  echo "    -prefix=DIR  Prefix directory to find HDF5 lib/ and include/"
-  echo "                   subdirectories [default: $prefix]"
-  echo "    -show        Show the commands without executing them"
-  echo "    -showconfig  Show the HDF5 library configuration summary"
-  echo "    -shlib       Compile with shared HDF5 libraries [default for hdf5 built"
+  echo "    -help | --help | -h   This help message."
+  echo "    -echo                 Show all the shell commands executed"
+  echo "    -prefix=DIR           Prefix directory to find HDF5 lib/ and include/"
+  echo "                                                     subdirectories [default: $prefix]"
+  echo "    -show                 Show the commands without executing them"
+  echo "    -showconfig           Show the HDF5 library configuration summary"
+  echo "    -shlib                Compile with shared HDF5 libraries [default for hdf5 built"
   echo "                                                     without static libraries]"
-  echo "    -noshlib     Compile with static HDF5 libraries [default for hdf5 built"
+  echo "    -noshlib              Compile with static HDF5 libraries [default for hdf5 built"
   echo "                                                     with static libraries]"
   echo " "
   echo "  <compile line>  - the normal compile line options for your compiler."
@@ -144,7 +143,7 @@ usage() {
   echo "                                           shared libraries]"
   echo " "
   echo " You can also add or change paths and flags to the compile line using"
-  echo " the following environment varibles or by assigning them to their counterparts"
+  echo " the following environment variables or by assigning them to their counterparts"
   echo " in the 'Things You Can Modify to Override...'" section of $prog_name
   echo " "
   echo "  Variable              Current value to be replaced"
@@ -257,6 +256,12 @@ for arg in $@ ; do
     -help)
       usage
       ;;
+    --help)
+      usage
+      ;;
+    -h)
+      usage
+      ;;
     *\"*)
       qarg="'"$arg"'"
       allargs="$allargs $qarg"
@@ -318,7 +323,7 @@ fi
 
 if test "x$do_link" = "xyes"; then
   shared_link=""
-# conditionnaly link with the hl library
+# conditionally link with the hl library
   if test "X$HL" = "Xhl"; then
    libraries=" $libraries -lhdf5_hl -lhdf5 "
   else

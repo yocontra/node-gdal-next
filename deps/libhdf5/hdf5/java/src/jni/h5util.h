@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -31,16 +30,18 @@
 #endif
 
 typedef struct h5str_t {
-    char * s;
+    char  *s;
     size_t max; /* the allocated size of the string */
 } h5str_t;
 
 extern void   h5str_new(h5str_t *str, size_t len);
 extern void   h5str_free(h5str_t *str);
 extern void   h5str_resize(h5str_t *str, size_t new_len);
-extern char * h5str_append(h5str_t *str, const char *cstr);
+extern char  *h5str_append(h5str_t *str, const char *cstr);
+extern htri_t h5str_detect_vlen(hid_t tid);
 extern size_t h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf,
                             size_t out_buf_offset);
+extern int    h5str_sprint_old_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void *ref_buf);
 extern int    h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p);
 extern size_t h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf,
                             int expand_data);
@@ -49,6 +50,11 @@ extern int    h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int 
 extern int    h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr, int binary_order);
 
 extern htri_t H5Tdetect_variable_str(hid_t tid);
+
+extern void translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
+                           jsize count, void *raw_buf);
+extern void translate_wbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
+                           jsize count, void *raw_buf);
 
 /*
  * Symbols used to format the output of h5str_sprintf and

@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -45,7 +44,7 @@ endif
 
 # List sources to include in the HDF5 HL Fortran library.
 libhdf5hl_fortran_la_SOURCES=H5DSfc.c H5LTfc.c H5IMfc.c H5IMcc.c H5TBfc.c \
-	H5DSff.F90 H5LTff.F90 H5TBff.F90 H5IMff.F90 H5LTff_gen.F90 H5TBff_gen.F90
+	H5DSff.F90 H5LTff.F90 H5TBff.F90 H5IMff.F90 H5DOff.F90 H5LTff_gen.F90 H5TBff_gen.F90
 
 # HDF5 HL Fortran library depends on HDF5 Library.
 libhdf5hl_fortran_la_LIBADD=$(LIBH5_HL) $(LIBH5F)
@@ -78,13 +77,13 @@ clean-local:
 
 install-data-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(includedir)/. ; \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(fmoddir)/. ; \
 	fi
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(includedir)/HDF5.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
+	  if test -f "$(fmoddir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(fmoddir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(fmoddir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi
 	$(RM) $(DESTDIR)$(libdir)/libhdf5_hl_fortran*
@@ -112,6 +111,7 @@ H5DSff.lo:          $(srcdir)/H5DSff.F90
 H5LTff.lo:          $(srcdir)/H5LTff.F90
 H5IMff.lo:          $(srcdir)/H5IMff.F90
 H5TBff.lo:          $(srcdir)/H5TBff.F90
+H5DOff.lo:          $(srcdir)/H5DOff.F90
 H5LTff_gen.lo:      H5LTff.lo H5LTff_gen.F90
 H5TBff_gen.lo:      H5TBff.lo H5LTff_gen.F90 H5TBff_gen.F90
 include $(top_srcdir)/config/conclude_fc.am

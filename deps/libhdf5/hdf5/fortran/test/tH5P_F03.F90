@@ -10,7 +10,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -82,12 +81,6 @@ CONTAINS
 ! * Return:	Success:	0
 ! *
 ! *		Failure:	number of errors
-! *
-! * Programmer:	M. Scot Breitenfeld
-! *             June 24, 2008
-! *
-! * Modifications:
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -153,7 +146,6 @@ SUBROUTINE test_create(total_error)
   !  Compound datatype test
 
   f_ptr = C_LOC(fill_ctype)
-
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
@@ -161,8 +153,6 @@ SUBROUTINE test_create(total_error)
   fill_ctype%z = 'S'
   fill_ctype%a = 5555.
   fill_ctype%x = 55
-
-  f_ptr = C_LOC(fill_ctype)
 
   ! Test various fill values
   CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, 'X', error)
@@ -193,6 +183,7 @@ SUBROUTINE test_create(total_error)
   CALL VERIFY("***ERROR: Returned wrong fill value (real)", rfill, 2.0, total_error)
 
   ! For the actual compound type
+  f_ptr = C_LOC(fill_ctype)
   CALL H5Pset_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
@@ -230,6 +221,13 @@ SUBROUTINE test_create(total_error)
   CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V112_F, total_error)
   CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V112_F, total_error)
 
+  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V114_F, H5F_LIBVER_V114_F, error)
+  CALL check("h5pset_libver_bounds_f",error, total_error)
+  CALL h5pget_libver_bounds_f(fapl, low, high, error)
+  CALL check("h5pget_libver_bounds_f",error, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V114_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V114_F, total_error)
+
   CALL H5Pset_libver_bounds_f(fapl, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
   CALL check("H5Pset_libver_bounds_f",error, total_error)
   CALL h5pget_libver_bounds_f(fapl, low, high, error)
@@ -256,7 +254,6 @@ SUBROUTINE test_create(total_error)
   CALL check("H5Dget_create_plist_f", error, total_error)
 
   f_ptr = C_LOC(rd_c)
-
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f", error, total_error)
   CALL verify("***ERROR: Returned wrong fill value", rd_c%a, fill_ctype%a, total_error)
@@ -438,14 +435,10 @@ END SUBROUTINE test_genprop_class_callback
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     April 1, 2014
 !-------------------------------------------------------------------------
 
 SUBROUTINE test_h5p_file_image(total_error)
 
-  USE, INTRINSIC :: iso_c_binding
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) ::   fapl_1 = -1
@@ -510,9 +503,6 @@ END SUBROUTINE test_h5p_file_image
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     January 10, 2012
 !-------------------------------------------------------------------------
 !
 SUBROUTINE external_test_offset(cleanup,total_error)
@@ -528,6 +518,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   INTEGER(hid_t) :: dset=-1   ! dataset
   INTEGER(hid_t) :: grp=-1    ! group to emit diagnostics
   INTEGER(size_t) :: i, j     ! miscellaneous counters
+  INTEGER :: k
   CHARACTER(LEN=180) :: filename   ! file names
   INTEGER, DIMENSION(1:25) :: part
   INTEGER, DIMENSION(1:100), TARGET :: whole ! raw data buffers
@@ -560,7 +551,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   !
   ! Create the file and an initial group.
   CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
-  CALL h5fcreate_f('extren_raw.h5', H5F_ACC_TRUNC_F, file, error, access_prp=fapl)
+  CALL h5fcreate_f('extern_raw.h5', H5F_ACC_TRUNC_F, file, error, access_prp=fapl)
   CALL check("h5fcreate_f",error,total_error)
 
   CALL h5gcreate_f(file, "emit-diagnostics", grp, error)
@@ -594,8 +585,9 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   CALL h5dread_f(dset, H5T_NATIVE_INTEGER, f_ptr, error, mem_space_id=space, file_space_id=space)
   CALL check("h5dread_f", error, total_error)
 
-  DO i = 1, 100
-     IF(whole(i) .NE. i-1)THEN
+  DO k = 1, 100
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT
@@ -615,8 +607,10 @@ SUBROUTINE external_test_offset(cleanup,total_error)
 
   CALL h5sclose_f(hs_space, error)
   CALL check("h5sclose_f", error, total_error)
-  DO i = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
-     IF(whole(i) .NE. i-1)THEN
+
+  DO k = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT
@@ -639,7 +633,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
      CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
      CALL check("h5_cleanup_f", error, total_error)
   ENDDO
-  IF(cleanup) CALL h5_cleanup_f("extren_raw.h5", H5P_DEFAULT_F, error)
+  IF(cleanup) CALL h5_cleanup_f("extern_raw.h5", H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE external_test_offset
@@ -654,15 +648,10 @@ END SUBROUTINE external_test_offset
 ! RETURNS:
 !   Success:	0
 !   Failure:	number of errors
-!
-! FORTRAN Programmer:  M. Scot Breitenfeld
-!                      February 1, 2016
-!
 !-------------------------------------------------------------------------
 !
 SUBROUTINE test_vds(total_error)
 
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -1006,28 +995,28 @@ SUBROUTINE test_vds(total_error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
 
      IF(nsize.NE.LEN(SRC_FILE_LEN_EXACT))THEN
-        PRINT*,"virtual filenname size is incorrect"
+        PRINT*,"virtual filename size is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that is very small
      CALL H5Pget_virtual_filename_f(dcpl, INT(i-1, size_t), SRC_FILE_LEN_TINY, error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_TINY.NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_TINY)))THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that small by one
      CALL H5Pget_virtual_filename_f(dcpl, INT(i-1, size_t), SRC_FILE_LEN_SMALL, error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_SMALL.NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_SMALL)))THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that is exact
      CALL H5Pget_virtual_filename_f(dcpl, INT(i-1, size_t), SRC_FILE_LEN_EXACT, error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_EXACT.NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_EXACT)))THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that bigger by one
@@ -1035,7 +1024,7 @@ SUBROUTINE test_vds(total_error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_LARGE(1:LEN(SRC_FILE_LEN_EXACT)).NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_EXACT)).AND. &
          SRC_FILE_LEN_LARGE(LEN(SRC_FILE_LEN_EXACT):).NE.'')THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that is very big
@@ -1043,7 +1032,7 @@ SUBROUTINE test_vds(total_error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_HUGE(1:LEN(SRC_FILE_LEN_EXACT)).NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_EXACT)).AND. &
          SRC_FILE_LEN_HUGE(LEN(SRC_FILE_LEN_EXACT):).NE.'')THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! Get source dataset name

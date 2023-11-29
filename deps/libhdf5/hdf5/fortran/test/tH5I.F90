@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -246,7 +245,7 @@ CONTAINS
      CALL h5sclose_f(dspace_id, error)
      CALL check("h5sclose_f",error,total_error)
      !
-     ! Close the dataype.
+     ! Close the datatype.
      !
      CALL h5tclose_f(atype_id, error)
      CALL check("h5tclose_f",error,total_error)

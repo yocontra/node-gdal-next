@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -73,7 +72,7 @@ struct space4_struct {
     unsigned u;
     float    f;
     char     c2;
-} space4_data = {'v', 987123, (float)-3.14, 'g'}; /* Test data for 4th dataspace */
+} space4_data = {'v', 987123, -3.14F, 'g'}; /* Test data for 4th dataspace */
 
 /* Null dataspace */
 int space5_data = 7;
@@ -84,20 +83,6 @@ int space5_data = 7;
  * Purpose      Test basic H5S (dataspace) code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
- *     April 12, 2011: Raymond Lu
- *              Starting from the 1.8.7 release, we allow dimension
- *              size to be zero.  So I took out the test against it.
  *-------------------------------------------------------------------------
  */
 static void
@@ -118,7 +103,7 @@ test_h5s_basic()
         // Get simple extent npoints of the dataspace sid1 and verify it
         hssize_t n; // Number of dataspace elements
         n = sid1.getSimpleExtentNpoints();
-        verify_val((long)n, (long)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3),
+        verify_val(static_cast<long>(n), SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
                    "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         // Get the logical rank of dataspace sid1 and verify it
@@ -131,8 +116,8 @@ test_h5s_basic()
         hsize_t tdims[4]; // Dimension array to test with
         ndims = sid1.getSimpleExtentDims(tdims);
         verify_val(ndims, SPACE1_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(memcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__);
 
         // Create simple dataspace sid2
         hsize_t   max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
@@ -140,7 +125,7 @@ test_h5s_basic()
 
         // Get simple extent npoints of dataspace sid2 and verify it
         n = sid2.getSimpleExtentNpoints();
-        verify_val((long)n, (long)(SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4),
+        verify_val(static_cast<long>(n), SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4,
                    "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         // Get the logical rank of dataspace sid2 and verify it
@@ -150,9 +135,9 @@ test_h5s_basic()
         // Retrieves dimension size and max size of dataspace sid2 and
         // verify them
         ndims = sid2.getSimpleExtentDims(tdims, tmax);
-        verify_val(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+        verify_val(memcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__);
+        verify_val(memcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
                    __LINE__, __FILE__);
 
         // Check to be sure we can't create a simple data space that has too
@@ -200,6 +185,7 @@ test_h5s_basic()
         // CHECK_I(ret, "H5Fclose");  // leave this here, later, fake a failure
         // in the p_close see how this will handle it. - BMR
 
+        // When running in valgrind, this PASSED macro will be missed
         PASSED();
     } // end of try block
 
@@ -219,17 +205,6 @@ test_h5s_basic()
  * Purpose      Test scalar H5S (dataspace) writing code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -248,7 +223,7 @@ test_h5s_scalar_write()
         // n = H5Sget_simple_extent_npoints(sid1);
         hssize_t n; // Number of dataspace elements
         n = sid1.getSimpleExtentNpoints();
-        verify_val((long)n, 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         int rank; // Logical rank of dataspace
         rank = sid1.getSimpleExtentNdims();
@@ -263,7 +238,8 @@ test_h5s_scalar_write()
         // Verify extent type
         H5S_class_t ext_type; // Extent type
         ext_type = sid1.getSimpleExtentType();
-        verify_val(ext_type, H5S_SCALAR, "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ext_type), static_cast<long>(H5S_SCALAR),
+                   "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
 
         // Create and write a dataset
         DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT, sid1);
@@ -282,17 +258,6 @@ test_h5s_scalar_write()
  * Purpose      Test scalar H5S (dataspace) reading code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -314,7 +279,7 @@ test_h5s_scalar_read()
 
         // Get the number of dataspace elements
         hssize_t n = sid1.getSimpleExtentNpoints();
-        verify_val((long)n, 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         // Get the logical rank of the dataspace
         int ndims = sid1.getSimpleExtentNdims();
@@ -343,17 +308,6 @@ test_h5s_scalar_read()
  * Purpose      Test null H5S (dataspace) code
  *
  * Return       None
- *
- * Programmer   Raymond Lu (using C version)
- *              May 18, 2004
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -371,7 +325,7 @@ test_h5s_null()
 
         hssize_t n; // Number of dataspace elements
         n = sid1.getSimpleExtentNpoints();
-        verify_val((long)n, 0, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 0, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         // Create a dataset
         DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT, sid1);
@@ -397,17 +351,6 @@ test_h5s_null()
  *              datatypes
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -436,7 +379,7 @@ test_h5s_compound_scalar_write()
 
         // Get the number of dataspace elements
         hssize_t n = sid1.getSimpleExtentNpoints();
-        verify_val((long)n, 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         // Get the logical rank of the dataspace
         int ndims = sid1.getSimpleExtentNdims();
@@ -465,17 +408,6 @@ test_h5s_compound_scalar_write()
  *              datatypes
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -496,7 +428,7 @@ test_h5s_compound_scalar_read()
 
         // Get the number of dataspace elements
         hssize_t n = sid1.getSimpleExtentNpoints();
-        verify_val((long)n, 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n), 1, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         // Get the logical rank of the dataspace
         int ndims = sid1.getSimpleExtentNdims();
@@ -512,7 +444,7 @@ test_h5s_compound_scalar_read()
         dataset.read(&rdata, type);
 
         // Verify read data
-        if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
+        if (memcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
             cerr << "scalar data different: space4_data.c1=" << space4_data.c1
                  << ", read_data4.c1=" << rdata.c1 << endl;
             cerr << "scalar data different: space4_data.u=" << space4_data.u << ", read_data4.u=" << rdata.u
@@ -536,9 +468,6 @@ test_h5s_compound_scalar_read()
  * Purpose      Main dataspace testing routine
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
  *-------------------------------------------------------------------------
  */
 extern "C" void

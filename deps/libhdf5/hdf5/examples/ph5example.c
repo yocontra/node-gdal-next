@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -30,7 +29,7 @@
  * for parallel I/O and there is no standard pathname for parallel file
  * systems.  In some cases, the parallel file name may even needs some
  * parallel file type prefix such as: "pfs:/GF/...".  Therefore, this
- * example requires an explicite parallel file prefix.  See the usage
+ * example requires an explicit parallel file prefix.  See the usage
  * for more detail.
  */
 
@@ -47,23 +46,25 @@
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 #define MESG(x)                                                                                              \
-    if (verbose)                                                                                             \
-        printf("%s\n", x);
+    do {                                                                                                     \
+        if (verbose)                                                                                         \
+            printf("%s\n", x);                                                                               \
+    } while (0)
 
 #define MPI_BANNER(mesg)                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         printf("--------------------------------\n");                                                        \
         printf("Proc %d: ", mpi_rank);                                                                       \
         printf("*** %s\n", mesg);                                                                            \
         printf("--------------------------------\n");                                                        \
-    }
+    } while (0)
 
 #define SYNC(comm)                                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         MPI_BANNER("doing a SYNC");                                                                          \
         MPI_Barrier(comm);                                                                                   \
         MPI_BANNER("SYNC DONE");                                                                             \
-    }
+    } while (0)
 /* End of Define some handy debugging shorthands, routines, ... */
 
 /* Constants definitions */
@@ -888,6 +889,7 @@ test_split_comm_access(char filenames[][PATH_MAX])
         mrc = MPI_File_delete(filenames[color], info);
         assert(mrc == MPI_SUCCESS);
     }
+    MPI_Comm_free(&comm);
 }
 
 /*
@@ -898,7 +900,7 @@ usage(void)
 {
     printf("Usage: testphdf5 [-f <prefix>] [-r] [-w] [-v]\n");
     printf("\t-f\tfile prefix for parallel test files.\n");
-    printf("\t  \te.g. pfs:/PFS/myname\n");
+    printf("\t  \t e.g. pfs:/PFS/myname\n");
     printf("\t  \tcan be set via $" PARAPREFIX ".\n");
     printf("\t  \tDefault is current directory.\n");
     printf("\t-c\tno cleanup\n");
@@ -934,7 +936,7 @@ mkfilenames(char *prefix)
                "Need to adjust the code to accommodate the large size.\n");
     }
     for (i = 0; i < n; i++) {
-        sprintf(testfiles[i], "%s/ParaEg%d.h5", prefix, i);
+        snprintf(testfiles[i], PATH_MAX, "%s/ParaEg%d.h5", prefix, i);
     }
     return (0);
 }
@@ -1073,11 +1075,11 @@ main(int argc, char **argv)
 finish:
     if (mpi_rank == 0) { /* only process 0 reports */
         if (nerrors)
-            printf("***PHDF5 tests detected %d errors***\n", nerrors);
+            printf("***PHDF5 example detected %d errors***\n", nerrors);
         else {
-            printf("===================================\n");
-            printf("PHDF5 tests finished with no errors\n");
-            printf("===================================\n");
+            printf("=====================================\n");
+            printf("PHDF5 example finished with no errors\n");
+            printf("=====================================\n");
         }
     }
     if (docleanup)

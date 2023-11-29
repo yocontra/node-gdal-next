@@ -82,7 +82,7 @@
             H5_JNI_FATAL_ERROR(envptr, "JNI error: GetMethodID failed");                                     \
         }                                                                                                    \
         if (NULL == (ret_obj = (*envptr)->NewObjectA(envptr, cls, constructor, (args)))) {                   \
-            HDprintf("FATAL ERROR: %s: Creation failed\n", classname);                                       \
+            printf("FATAL ERROR: %s: Creation failed\n", classname);                                         \
             CHECK_JNI_EXCEPTION(envptr, JNI_FALSE);                                                          \
         }                                                                                                    \
     } while (0)
@@ -257,6 +257,23 @@
     do {                                                                                                     \
         (*envptr)->ReleaseStringUTFChars(envptr, pinnedString, stringToRelease);                             \
     } while (0)
+/*
+ * Above String macros may be incorrect, suggested code for getting a cstr from java
+ * int jstr_to_cstr(JNIEnv *jenv, jstring j_str, char *c_str, size_t cstr_len)
+ * {
+ *     int32_t j_len, c_len;
+ *
+ *     c_len = (*jenv)->GetStringUTFLength(jenv, j_str);
+ *     if (c_len > (int32_t)cstr_len)
+ *         return -ENAMETOOLONG;
+ *     j_len = (*jenv)->GetStringLength(jenv, j_str);
+ *     (*jenv)->GetStringUTFRegion(jenv, j_str, 0, j_len, c_str);
+ *     if ((*jenv)->ExceptionCheck(jenv))
+ *         return -EIO;
+ *     return 0;
+ * }
+ *
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -338,7 +355,7 @@ extern jobject get_enum_object(JNIEnv *env, const char *enum_class_name, jint en
 extern jobject create_H5G_info_t(JNIEnv *env, H5G_info_t group_info);
 
 /* implemented at h5oimp.c */
-extern jobject create_H5O_token_t(JNIEnv *env, const H5O_token_t *token, hbool_t is_critical_pinning);
+extern jobject create_H5O_token_t(JNIEnv *env, const H5O_token_t *token, bool is_critical_pinning);
 
 #ifdef __cplusplus
 } /* end extern "C" */

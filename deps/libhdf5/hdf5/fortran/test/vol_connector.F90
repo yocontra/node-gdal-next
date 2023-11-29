@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -228,7 +227,6 @@ END MODULE VOL_TMOD
 
 PROGRAM vol_connector
 
-  USE HDF5
   USE VOL_TMOD
 
   IMPLICIT NONE
@@ -236,8 +234,9 @@ PROGRAM vol_connector
   INTEGER :: error
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
-  CHARACTER(LEN=12) :: VOL_CONNECTOR_ENV
+  CHARACTER(LEN=32) :: VOL_CONNECTOR_ENV
   INTEGER :: LEN = 0
+  INTEGER :: CONN_NAME_LEN
 
   CALL h5open_f(error)
   cleanup = .TRUE.
@@ -252,8 +251,9 @@ PROGRAM vol_connector
 
   ! Check to see if the VOL connector was set with an env variable
   CALL GET_ENVIRONMENT_VARIABLE("HDF5_VOL_CONNECTOR", VOL_CONNECTOR_ENV, LEN)
+  CONN_NAME_LEN = INDEX(VOL_CONNECTOR_ENV, ' ')
   IF(LEN.NE.0)THEN
-     NATIVE_VOL_CONNECTOR_NAME = TRIM(VOL_CONNECTOR_ENV)
+     NATIVE_VOL_CONNECTOR_NAME = TRIM(VOL_CONNECTOR_ENV(1:CONN_NAME_LEN))
   ELSE
      NATIVE_VOL_CONNECTOR_NAME = "native"
   ENDIF

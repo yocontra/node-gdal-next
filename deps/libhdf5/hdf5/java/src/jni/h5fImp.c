@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -119,7 +118,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1name(JNIEnv *env, jclass clss, jlong file_id)
 {
     jstring str = NULL;
     ssize_t buf_size;
-    char *  namePtr = NULL;
+    char   *namePtr = NULL;
 
     UNUSED(clss);
 
@@ -127,7 +126,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1name(JNIEnv *env, jclass clss, jlong file_id)
     if ((buf_size = H5Fget_name((hid_t)file_id, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Fget_name: malloc failed");
 
     if ((H5Fget_name((hid_t)file_id, namePtr, (size_t)buf_size + 1)) < 0)
@@ -139,7 +138,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1name(JNIEnv *env, jclass clss, jlong file_id)
 
 done:
     if (namePtr)
-        HDfree(namePtr);
+        free(namePtr);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Fget_1name */
@@ -189,7 +188,7 @@ done:
  * Signature: (Ljava/lang/String;J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Fis_1accessible(JNIEnv *env, jclass clss, jstring name, jlong file_id)
+Java_hdf_hdf5lib_H5_H5Fis_1accessible(JNIEnv *env, jclass clss, jstring name, jlong fapl_id)
 {
     const char *fileName = NULL;
     htri_t      bval     = JNI_FALSE;
@@ -201,7 +200,7 @@ Java_hdf_hdf5lib_H5_H5Fis_1accessible(JNIEnv *env, jclass clss, jstring name, jl
 
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Fis_accessible: file name not pinned");
 
-    if ((bval = H5Fis_accessible(fileName, (hid_t)file_id)) < 0)
+    if ((bval = H5Fis_accessible(fileName, (hid_t)fapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
@@ -416,8 +415,8 @@ Java_hdf_hdf5lib_H5_H5Fget_1obj_1ids(JNIEnv *env, jclass clss, jlong file_id, ji
     ssize_t  ret_val = -1;
     size_t   i;
     jsize    rank;
-    jlong *  obj_id_listP = NULL;
-    hid_t *  id_list      = NULL;
+    jlong   *obj_id_listP = NULL;
+    hid_t   *id_list      = NULL;
 
     UNUSED(clss);
 
@@ -431,7 +430,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1obj_1ids(JNIEnv *env, jclass clss, jlong file_id, ji
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Fget_obj_ids: obj_id_list length < 0");
     }
 
-    if (NULL == (id_list = (hid_t *)HDmalloc((size_t)rank * sizeof(hid_t))))
+    if (NULL == (id_list = (hid_t *)malloc((size_t)rank * sizeof(hid_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Fget_obj_ids: malloc failed");
 
     if ((ret_val = H5Fget_obj_ids((hid_t)file_id, (unsigned int)types, (size_t)maxObjs, id_list)) < 0)
@@ -443,7 +442,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1obj_1ids(JNIEnv *env, jclass clss, jlong file_id, ji
 
 done:
     if (id_list)
-        HDfree(id_list);
+        free(id_list);
     if (obj_id_listP)
         UNPIN_LONG_ARRAY(ENVONLY, obj_id_list, obj_id_listP, (ret_val < 0) ? JNI_ABORT : 0);
 
@@ -517,7 +516,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1mdc_1size(JNIEnv *env, jclass clss, jlong file_id, j
 {
     jboolean isCopy;
     size_t   max_size = 0, min_clean_size = 0, cur_size = 0;
-    jlong *  metadata_cache_ptr = NULL;
+    jlong   *metadata_cache_ptr = NULL;
     jsize    size               = 0;
     int      cur_num_entries    = -1;
 
@@ -689,8 +688,8 @@ Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status(JNIEnv *env, jclass clss, jlong
 {
     jboolean *mdc_logging_status_ptr = NULL;
     jboolean  isCopy;
-    hbool_t   is_enabled;
-    hbool_t   is_currently_logging;
+    bool      is_enabled;
+    bool      is_currently_logging;
     jsize     size;
 
     UNUSED(clss);
@@ -730,19 +729,19 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlong file_id, jboolean minimize)
 {
-    hbool_t minimize_val;
-    herr_t  retVal = FAIL;
+    bool   minimize_val;
+    herr_t retVal = FAIL;
 
     UNUSED(clss);
 
-    minimize_val = (minimize == JNI_TRUE) ? TRUE : FALSE;
+    minimize_val = (minimize == JNI_TRUE) ? true : false;
 
-    if ((retVal = H5Fset_dset_no_attrs_hint((hid_t)file_id, (hbool_t)minimize_val)) < 0)
+    if ((retVal = H5Fset_dset_no_attrs_hint((hid_t)file_id, (bool)minimize_val)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
     return;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint */
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -753,19 +752,19 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlong file_id)
 {
     jboolean bval     = JNI_FALSE;
-    hbool_t  minimize = FALSE;
+    bool     minimize = false;
 
     UNUSED(clss);
 
-    if (H5Fget_dset_no_attrs_hint((hid_t)file_id, (hbool_t *)&minimize) < 0)
+    if (H5Fget_dset_no_attrs_hint((hid_t)file_id, (bool *)&minimize) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (minimize == TRUE)
+    if (minimize == true)
         bval = JNI_TRUE;
 
 done:
     return bval;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint */
 
 /*
  * Class:     hdf_hdf5lib_H5
