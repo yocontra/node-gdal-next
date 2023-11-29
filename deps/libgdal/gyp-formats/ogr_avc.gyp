@@ -9,6 +9,7 @@
 			"sources": [
 				"../gdal/ogr/ogrsf_frmts/avc/avc_e00read.cpp",
 				"../gdal/ogr/ogrsf_frmts/avc/ogravcdatasource.cpp",
+				"../gdal/ogr/ogrsf_frmts/avc/avc_e00write.cpp",
 				"../gdal/ogr/ogrsf_frmts/avc/avc_misc.cpp",
 				"../gdal/ogr/ogrsf_frmts/avc/avc_mbyte.cpp",
 				"../gdal/ogr/ogrsf_frmts/avc/ogravcbindriver.cpp",
@@ -21,6 +22,7 @@
 				"../gdal/ogr/ogrsf_frmts/avc/ogravcbindatasource.cpp",
 				"../gdal/ogr/ogrsf_frmts/avc/ogravce00layer.cpp",
 				"../gdal/ogr/ogrsf_frmts/avc/ogravcbinlayer.cpp",
+				"../gdal/ogr/ogrsf_frmts/avc/avc_binwr.cpp",
 				"../gdal/ogr/ogrsf_frmts/avc/avc_e00gen.cpp"
 			],
 			"include_dirs": [

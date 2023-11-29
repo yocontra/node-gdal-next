@@ -10,7 +10,8 @@
 				"../gdal/frmts/openjpeg/openjpegdataset.cpp"
 			],
 			"include_dirs": [
-				"../gdal/frmts/openjpeg"
+				"../gdal/frmts/openjpeg",
+        "../gdal/frmts/opjlike"
 			]
 		}
 	]

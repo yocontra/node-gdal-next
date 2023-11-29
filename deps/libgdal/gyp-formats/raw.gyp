@@ -18,6 +18,7 @@
 				"../gdal/frmts/raw/gscdataset.cpp",
 				"../gdal/frmts/raw/doq2dataset.cpp",
 				"../gdal/frmts/raw/lcpdataset.cpp",
+				"../gdal/frmts/raw/noaabdataset.cpp",
 				"../gdal/frmts/raw/pauxdataset.cpp",
 				"../gdal/frmts/raw/snodasdataset.cpp",
 				"../gdal/frmts/raw/dipxdataset.cpp",
@@ -34,11 +35,10 @@
 				"../gdal/frmts/raw/hkvdataset.cpp",
 				"../gdal/frmts/raw/pnmdataset.cpp",
 				"../gdal/frmts/raw/mffdataset.cpp",
+				"../gdal/frmts/raw/nsidcbindataset.cpp",
 				"../gdal/frmts/raw/btdataset.cpp",
 				"../gdal/frmts/raw/byndataset.cpp",
-				"../gdal/frmts/raw/ctable2dataset.cpp",
-        "../gdal/frmts/raw/noaabdataset.cpp",
-        "../gdal/frmts/raw/nsidcbindataset.cpp"
+				"../gdal/frmts/raw/ctable2dataset.cpp"
 			],
 			"include_dirs": [
 				"../gdal/frmts/raw"

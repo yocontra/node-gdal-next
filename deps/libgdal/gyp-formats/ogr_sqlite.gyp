@@ -19,10 +19,12 @@
 				"../gdal/ogr/ogrsf_frmts/sqlite/ogrsqlitevfs.cpp",
 				"../gdal/ogr/ogrsf_frmts/sqlite/ogrsqliteselectlayer.cpp",
 				"../gdal/ogr/ogrsf_frmts/sqlite/ogrsqlitedatasource.cpp",
+				"../gdal/ogr/ogrsf_frmts/sqlite/sqlite_rtree_bulk_load/wrapper.cpp",
 				"../gdal/ogr/ogrsf_frmts/sqlite/rasterlite2.cpp"
 			],
 			"include_dirs": [
-				"../gdal/ogr/ogrsf_frmts/sqlite"
+				"../gdal/ogr/ogrsf_frmts/sqlite",
+				"../gdal/ogr/ogrsf_frmts/sqlite/sqlite_rtree_bulk_load"
 			]
 		}
 	]

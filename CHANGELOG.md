@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # [3.8.0]
 
 ### Added
- - GDAL 3.8.0
+ - GDAL 3.8.0 with new `JSONFG`, `PMTiles` and `S102` drivers
 
 ## [3.7.3] 2023-11-28
 

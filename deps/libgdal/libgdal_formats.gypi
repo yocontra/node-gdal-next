@@ -98,7 +98,9 @@
 			"./gyp-formats/ogr_mvt.gyp:libgdal_ogr_mvt_frmt",
 			"./gyp-formats/ogr_osm.gyp:libgdal_ogr_osm_frmt",
 			"./gyp-formats/ogr_flatgeobuf.gyp:libgdal_ogr_flatgeobuf_frmt",
-			"./gyp-formats/ogr_carto.gyp:libgdal_ogr_carto_frmt"
+			"./gyp-formats/ogr_carto.gyp:libgdal_ogr_carto_frmt",
+			"./gyp-formats/ogr_jsonfg.gyp:libgdal_ogr_jsonfg_frmt",
+			"./gyp-formats/ogr_pmtiles.gyp:libgdal_ogr_pmtiles_frmt"
 		],
 		"gdal_format_defs": [
 			"GDAL_FORMATS=gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm sdts raw dted mem jdem envisat elas fit vrt usgsdem l1b nitf bmp pcidsk airsar rs2 ilwis rmf leveller sgi srtmhgt idrisi gsg ers jaxapalsar dimap gff cosar pds adrg coasp tsx terragen blx til r northwood saga xyz hf2 kmlsuperoverlay ctg zmap ngsgeoid iris map jpeg openjpeg png mbtiles wms wmts hdf5 grib netcdf wcs zlib ",
@@ -200,7 +202,9 @@
 			"MVT_ENABLED=1",
 			"OSM_ENABLED=1",
 			"FLATGEOBUF_ENABLED=1",
-			"CARTO_ENABLED=1"
+			"CARTO_ENABLED=1",
+			"JSONFG_ENABLED=1",
+			"PMTILES_ENABLED=1"
 		]
 	}
 }

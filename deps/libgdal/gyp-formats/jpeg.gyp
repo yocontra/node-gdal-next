@@ -60,6 +60,7 @@
 			],
 			"include_dirs": [
 				"../gdal/frmts/jpeg",
+				"../gdal/frmts/jpeg/libjpeg12",
 				"../gdal/frmts/jpeg/libjpeg"
 			]
 		}

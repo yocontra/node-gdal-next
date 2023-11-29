@@ -48,7 +48,8 @@ GDAL_FORMATS="gtiff hfa aigrid aaigrid ceos ceos2 iso8211 xpm
 OGR_FORMATS="shape vrt avc geojson mem mitab kml gpx
 	dxf csv edigeo geoconcept georss gml gmt gpsbabel
 	idrisi dgn openfilegdb pds pgdump s57 sdts
-	svg sxf ntf wasp sqlite gpkg mvt osm flatgeobuf carto"
+	svg sxf ntf wasp sqlite gpkg mvt osm flatgeobuf carto
+  jsonfg pmtiles"
 
 mkdir -p $dir_formats_gyp
 
@@ -104,8 +105,8 @@ function generate_formats() {
 		# check to see which .c/.cpp files are mentioned in the makefile
 		makefiles=`find ${dir_format} -name CMakeLists.txt`
 		for file in $files_src_all; do
-			base=`basename $file | cut -f 1 -d '.'`
-			if grep -q ${base}.o ${makefiles}; then
+			base=`basename $file`
+			if grep -q ${base} ${makefiles}; then
 				files_src="${files_src}"$'\n'"${file}"
 			fi
 		done

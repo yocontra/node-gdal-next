@@ -99,6 +99,7 @@
 				"./gdal/ogr/ogrsf_frmts/generic/ogrmutexeddatasource.cpp",
 				"./gdal/ogr/ogrsf_frmts/generic/ogrlayer.cpp",
 				"./gdal/ogr/ogrsf_frmts/generic/ogrlayerdecorator.cpp",
+        "./gdal/ogr/ogrsf_frmts/generic/ogrlayerarrow.cpp",
 
 				'<!@(python ../glob-files.py "./gdal/alg/*.cpp")',
 				'<!@(python ../glob-files.py "./gdal/alg/*.c")',
