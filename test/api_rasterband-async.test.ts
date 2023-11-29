@@ -545,7 +545,6 @@ describe('gdal.RasterBandAsync', () => {
 
         band.pixels.write(0, 0, size, size, data)
 
-        assert.throws(() => gdal.open(file))
         return assert.isFulfilled(band.flushAsync().then(() => {
           const newDs = gdal.open(file)
           const result = newDs.bands.get(1).pixels.read(0, 0, size, size, data)

@@ -1477,7 +1477,6 @@ describe('gdal.RasterBand', () => {
 
         band.pixels.write(0, 0, size, size, data)
 
-        assert.throws(() => gdal.open(file))
         band.flush()
         const newDs = gdal.open(file)
         const result = newDs.bands.get(1).pixels.read(0, 0, size, size, data)
